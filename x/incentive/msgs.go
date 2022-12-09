@@ -147,10 +147,7 @@ func (msg MsgGovCreateProgram) ValidateBasic() error {
 	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
 	}
-	if err := validateProposedIncentiveProgram(msg.Program); err != nil {
-		return err
-	}
-	return nil
+	return validateProposedIncentiveProgram(msg.Program)
 }
 
 // GetSignBytes implements Msg
@@ -187,10 +184,7 @@ func validateSenderAsset(sender string, asset *sdk.Coin) error {
 	if asset == nil {
 		return ErrNilAsset
 	}
-	if err := asset.Validate(); err != nil {
-		return err
-	}
-	return nil
+	return asset.Validate()
 }
 
 func validateSenderAssetTier(sender string, tier uint32, asset *sdk.Coin) error {

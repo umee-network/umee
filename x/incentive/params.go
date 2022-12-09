@@ -15,7 +15,9 @@ var (
 	defaultUnbondingDurationLong   = uint64(secondsPerDay * 14)
 	defaultTierWeightShort         = sdk.MustNewDecFromStr("0.5")
 	defaultTierWeightMiddle        = sdk.MustNewDecFromStr("0.8")
-	// TODO: default community fund address?
+
+	// TODO: default community fund address
+	defaultCommunityFundAddress = ""
 )
 
 // DefaultParams returns a default set of parameters.
@@ -27,7 +29,7 @@ func DefaultParams() Params {
 		UnbondingDurationShort:  defaultUnbondingDurationShort,
 		TierWeightMiddle:        defaultTierWeightMiddle,
 		TierWeightShort:         defaultTierWeightShort,
-		// CommunityFundAddress:    defaultCommunityFundAddress,
+		CommunityFundAddress:    defaultCommunityFundAddress,
 	}
 }
 
@@ -105,13 +107,13 @@ func validateMaxUnbondings(i interface{}) error {
 }
 
 func validateCommunityFundAddress(i interface{}) error {
+	_, ok := i.(string)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
 	// TODO: enable once defaultCommunityFundAddress is known
 	/*
-		v, ok := i.(string)
-		if !ok {
-			return fmt.Errorf("invalid parameter type: %T", i)
-		}
-
 		addr, err := sdk.AccAddressFromBech32(v)
 		if err != nil {
 			return err
