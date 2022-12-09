@@ -21,7 +21,7 @@ message GenesisState {
   ];
   repeated Bond              bonds               = 8 [(gogoproto.nullable) = false];
   repeated PendingReward     pending_rewards     = 9 [(gogoproto.nullable) = false];
-  repeated RewardTracker     reward_bases        = 10 [(gogoproto.nullable) = false];
+  repeated RewardTracker     reward_trackers     = 10 [(gogoproto.nullable) = false];
   repeated RewardAccumulator reward_accumulators = 11 [(gogoproto.nullable) = false];
   repeated Unbonding         unbondings          = 12 [(gogoproto.nullable) = false];
 }
