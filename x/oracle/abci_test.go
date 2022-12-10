@@ -16,6 +16,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v3/app"
 	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -35,6 +36,46 @@ type IntegrationTestSuite struct {
 const (
 	initialPower = int64(10000000000)
 )
+
+// clearHistoricPrices deletes all historic prices of a given denom in the store.
+func clearHistoricPrices(
+	ctx sdk.Context,
+	k keeper.Keeper,
+	denom string,
+	) {
+	stampPeriod	:= int(k.HistoricStampPeriod(ctx))
+	numStamps := int(k.MaximumPriceStamps(ctx))
+	for i := 0; i < numStamps; i++  {
+		k.DeleteHistoricPrice(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	}
+}
+
+// clearHistoricMedians deletes all historic medians of a given denom in the store.
+func clearHistoricMedians(
+	ctx sdk.Context,
+	k keeper.Keeper,
+	denom string,
+	) {
+	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+	numStamps := int(k.MaximumMedianStamps(ctx))
+	for i := 0; i < numStamps; i++ {
+		k.DeleteHistoricMedian(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	}
+}
+
+// clearHistoricMedianDeviations deletes all historic median deviations of a given
+// denom in the store.
+func clearHistoricMedianDeviations(
+	ctx sdk.Context,
+	k keeper.Keeper,
+	denom string,
+	) {
+	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+	numStamps := int(k.MaximumMedianStamps(ctx))
+	for i := 0; i < numStamps; i++  {
+		k.DeleteHistoricMedianDeviation(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	}
+}
 
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
@@ -235,10 +276,12 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 
 			maxOfHistoricMedians, err := app.OracleKeeper.MaxOfHistoricMedians(ctx, denom.SymbolDenom, 6)
 			s.Require().Equal(tc.expectedMaxOfHistoricMedians, maxOfHistoricMedians)
+
+			clearHistoricPrices(ctx, app.OracleKeeper, denom.SymbolDenom)
+			clearHistoricMedians(ctx, app.OracleKeeper, denom.SymbolDenom)
+			clearHistoricMedianDeviations(ctx, app.OracleKeeper, denom.SymbolDenom)
 		}
-		app.OracleKeeper.ClearHistoricPrices(ctx)
-		app.OracleKeeper.ClearHistoricMedians(ctx)
-		app.OracleKeeper.ClearHistoricMedianDeviations(ctx)
+
 		ctx = ctx.WithBlockHeight(0)
 	}
 }
