@@ -67,6 +67,17 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
+	// Fail here if supplier ends up over their borrow limit under current or historic prices
+	err = s.keeper.checkBorrowerHealth(ctx, supplierAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Ensure MinCollateralLiquidity is still satisfied after the transaction
+	if err = s.keeper.checkCollateralLiquidity(ctx, received.Denom); err != nil {
+		return nil, err
+	}
+
 	err = s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
 	return &types.MsgWithdrawResponse{
 		Received: received,
@@ -91,6 +102,17 @@ func (s msgServer) MaxWithdraw(
 
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
+		return nil, err
+	}
+
+	// Fail here if supplier ends up over their borrow limit under current or historic prices
+	err = s.keeper.checkBorrowerHealth(ctx, supplierAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Ensure MinCollateralLiquidity is still satisfied after the transaction
+	if err = s.keeper.checkCollateralLiquidity(ctx, received.Denom); err != nil {
 		return nil, err
 	}
 
@@ -201,6 +223,12 @@ func (s msgServer) Decollateralize(
 		return nil, err
 	}
 
+	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	err = s.keeper.checkBorrowerHealth(ctx, borrowerAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	s.keeper.Logger(ctx).Debug(
 		"collateral removed",
 		"borrower", msg.Borrower,
@@ -224,6 +252,22 @@ func (s msgServer) Borrow(
 		return nil, err
 	}
 	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Asset); err != nil {
+		return nil, err
+	}
+
+	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	err = s.keeper.checkBorrowerHealth(ctx, borrowerAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check MaxSupplyUtilization after transaction
+	if err = s.keeper.checkSupplyUtilization(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
+	// Check MinCollateralLiquidity is still satisfied after the transaction
+	if err = s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
 

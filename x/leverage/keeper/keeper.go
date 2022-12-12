@@ -125,9 +125,10 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 
 // Withdraw attempts to redeem uTokens from the leverage module in exchange for base tokens.
 // If there are not enough uTokens in balance, Withdraw will attempt to withdraw uToken collateral
-// to make up the difference (as long as borrow limit allows). If the uToken denom is invalid or
-// balances are insufficient to withdraw the full amount requested, returns an error.
-// Returns the amount of base tokens received.
+// to make up the difference. If the uToken denom is invalid or balances are insufficient to withdraw
+// the amount requested, returns an error. Returns the amount of base tokens received.
+// This function does NOT check that a borrower remains under their borrow limit or that
+// collateral liquidity remains healthy - those assertions have been moved to MsgServer.
 func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) (sdk.Coin, error) {
 	if err := validateUToken(uToken); err != nil {
 		return sdk.Coin{}, err
@@ -151,13 +152,6 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	amountFromCollateral := uToken.Amount.Sub(amountFromWallet)
 
 	if amountFromCollateral.IsPositive() {
-		// Calculate current borrowed value
-		borrowed := k.GetBorrowerBorrows(ctx, supplierAddr)
-		borrowedValue, err := k.TotalTokenValue(ctx, borrowed, false)
-		if err != nil {
-			return sdk.Coin{}, err
-		}
-
 		// Check for sufficient collateral
 		collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
 		collateralAmount := collateral.AmountOf(uToken.Denom)
@@ -165,19 +159,6 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 			return sdk.Coin{}, types.ErrInsufficientBalance.Wrapf(
 				"%s uToken balance + %s from collateral is less than %s to withdraw",
 				amountFromWallet, collateralAmount, uToken)
-		}
-
-		// Calculate what borrow limit will be AFTER this withdrawal
-		collateralToWithdraw := sdk.NewCoin(uToken.Denom, amountFromCollateral)
-		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw), false)
-		if err != nil {
-			return sdk.Coin{}, err
-		}
-
-		// Return error if borrow limit would drop below borrowed value
-		if borrowedValue.GT(newBorrowLimit) {
-			return sdk.Coin{}, types.ErrUndercollaterized.Wrapf(
-				"withdraw would decrease borrow limit to %s, below the current borrowed value %s", newBorrowLimit, borrowedValue)
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
@@ -207,17 +188,14 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		return sdk.Coin{}, err
 	}
 
-	// check MinCollateralLiquidity is still satisfied after the transaction
-	if err = k.checkCollateralLiquidity(ctx, token.Denom); err != nil {
-		return sdk.Coin{}, err
-	}
-
 	return token, nil
 }
 
 // Borrow attempts to borrow tokens from the leverage module account using
-// collateral uTokens. If asset type is invalid, collateral is insufficient,
-// or module balance is insufficient, we return an error.
+// collateral uTokens. If asset type is invalid,  or module balance is insufficient,
+// we return an error.
+// This function does NOT check that a borrower remains under their borrow limit or that
+// collateral liquidity remains healthy - those assertions have been moved to MsgServer.
 func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {
 	if err := k.validateBorrow(ctx, borrow); err != nil {
 		return err
@@ -232,27 +210,8 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 	// Determine amount of all tokens currently borrowed
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 
-	// Calculate current borrow limit
-	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral, false)
-	if err != nil {
-		return err
-	}
-
-	// Calculate borrowed value will be AFTER this borrow
-	newBorrowedValue, err := k.TotalTokenValue(ctx, borrowed.Add(borrow), false)
-	if err != nil {
-		return err
-	}
-
-	// Return error if borrowed value would exceed borrow limit
-	if newBorrowedValue.GT(borrowLimit) {
-		return types.ErrUndercollaterized.Wrapf("new borrowed value would be %s with borrow limit %s",
-			newBorrowedValue, borrowLimit)
-	}
-
-	loanTokens := sdk.NewCoins(borrow)
-	if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, borrowerAddr, loanTokens); err != nil {
+	if err := k.bankKeeper.SendCoinsFromModuleToAccount(
+		ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(borrow)); err != nil {
 		return err
 	}
 
@@ -262,18 +221,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 		return err
 	}
 
-	// Check MaxSupplyUtilization after transaction
-	token, err := k.GetTokenSettings(ctx, borrow.Denom)
-	if err != nil {
-		return err
-	}
-	utilization := k.SupplyUtilization(ctx, borrow.Denom)
-	if utilization.GT(token.MaxSupplyUtilization) {
-		return types.ErrMaxSupplyUtilization.Wrap(utilization.String())
-	}
-
-	// check MinCollateralLiquidity is still satisfied after the transaction
-	return k.checkCollateralLiquidity(ctx, borrow.Denom)
+	return nil
 }
 
 // Repay attempts to repay a borrow position. If asset type is invalid, account balance
@@ -326,6 +274,8 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 }
 
 // Decollateralize disables selected uTokens for use as collateral by a single borrower.
+// This function does NOT check that a borrower remains under their borrow limit.
+// That assertion has been moved to MsgServer.
 func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uToken sdk.Coin) error {
 	if err := validateUToken(uToken); err != nil {
 		return err
@@ -335,24 +285,6 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 	if collateral.AmountOf(uToken.Denom).LT(uToken.Amount) {
 		return types.ErrInsufficientCollateral
-	}
-
-	// Determine what borrow limit would be AFTER disabling this denom as collateral
-	newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(uToken), false)
-	if err != nil {
-		return err
-	}
-
-	// Determine currently borrowed value
-	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	borrowedValue, err := k.TotalTokenValue(ctx, borrowed, false)
-	if err != nil {
-		return err
-	}
-
-	// Return error if borrow limit would drop below borrowed value
-	if newBorrowLimit.LT(borrowedValue) {
-		return types.ErrUndercollaterized.Wrap("new borrow limit: " + newBorrowLimit.String())
 	}
 
 	// Disabling uTokens as collateral withdraws any stored collateral of the denom in question
