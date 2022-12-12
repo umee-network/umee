@@ -313,25 +313,3 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyMedianDeviation(denom, blockNum))
 }
-
-// ClearHistoricMedians iterates through all medians in the store and deletes
-// them.
-func (k Keeper) ClearHistoricMedians(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
-}
-
-// ClearHistoricMedianDeviations iterates through all median deviations in
-// the store and deletes them.
-func (k Keeper) ClearHistoricMedianDeviations(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
-}
