@@ -11,6 +11,9 @@ import (
 
 var ten = sdk.MustNewDecFromStr("10")
 
+// TODO: Parameterize and move this
+const numHistoracleStamps = uint64(10)
+
 // TokenBasePrice returns the USD value of a base token. Note, the token's denomination
 // must be the base denomination, e.g. uumee. The x/oracle module must know of
 // the base and display/symbol denominations for each exchange pair. E.g. it must
@@ -63,6 +66,32 @@ func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string) (sdk.D
 	return price, t.Exponent, nil
 }
 
+// TokenHistoraclePrice returns the USD value of a token's symbol denom, e.g. UMEE, considered
+// cautiously over a recent time period using medians. Input denom is base denomination, e.g. uumee.
+// When error is nil, price is guaranteed to be positive.  Also returns the token's exponent to
+// reduce redundant registry reads.
+func (k Keeper) TokenHistoraclePrice(ctx sdk.Context, baseDenom string) (sdk.Dec, uint32, error) {
+	t, err := k.GetTokenSettings(ctx, baseDenom)
+	if err != nil {
+		return sdk.ZeroDec(), 0, err
+	}
+
+	if t.Blacklist {
+		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
+	}
+
+	median, err := k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, numHistoracleStamps)
+	if err != nil {
+		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+	}
+
+	if median.IsNil() || !median.IsPositive() {
+		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(types.ErrInvalidOraclePrice, baseDenom)
+	}
+
+	return median, t.Exponent, nil
+}
+
 // exponent multiplies an sdk.Dec by 10^n. n can be negative.
 func exponent(input sdk.Dec, n int32) sdk.Dec {
 	if n == 0 {
@@ -87,6 +116,18 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 	return exponent(p.Mul(toDec(coin.Amount)), int32(exp)*-1), nil
 }
 
+// TokenRecentValue returns the total token value given a Coin using a median price.
+// Error if we cannot get the token's price or if it's not an accepted token.
+// Computation uses price of token's default denom to avoid rounding errors
+// for exponent >= 18 tokens.
+func (k Keeper) TokenRecentValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
+	p, exp, err := k.TokenHistoraclePrice(ctx, coin.Denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+	return exponent(p.Mul(toDec(coin.Amount)), int32(exp)*-1), nil
+}
+
 // TotalTokenValue returns the total value of all supplied tokens. It is
 // equivalent to the sum of TokenValue on each coin individually, except it
 // ignores unregistered and blacklisted tokens instead of returning an error.
@@ -97,6 +138,26 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 
 	for _, c := range accepted {
 		v, err := k.TokenValue(ctx, c)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		total = total.Add(v)
+	}
+
+	return total, nil
+}
+
+// TotalTokenRecentValue returns the total value of all supplied tokens using median
+// prices. It is equivalent to the sum of TokenRecentValue on each coin individually,
+// except it ignores unregistered and blacklisted tokens instead of returning an error.
+func (k Keeper) TotalTokenRecentValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
+	total := sdk.ZeroDec()
+
+	accepted := k.filterAcceptedCoins(ctx, coins)
+
+	for _, c := range accepted {
+		v, err := k.TokenRecentValue(ctx, c)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
