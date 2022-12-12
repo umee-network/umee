@@ -168,3 +168,109 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 		})
 	}
 }
+
+func (s *IntegrationTestSuite) TestMaxCollateralShare() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// update initial ATOM to have a limited MaxCollateralShare
+	atom, err := app.LeverageKeeper.GetTokenSettings(ctx, atomDenom)
+	require.NoError(err)
+	atom.MaxCollateralShare = sdk.MustNewDecFromStr("0.1")
+	s.registerToken(atom)
+
+	// Mock oracle prices:
+	// UMEE $4.21
+	// ATOM $39.38
+
+	// create a supplier to collateralize 100 UMEE, worth $421.00
+	umeeSupplier := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 100_000000))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100_000000))
+
+	// create an ATOM supplier
+	atomSupplier := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin(atomDenom, 100_000000))
+
+	// collateralize 1.18 ATOM, worth $46.46, with no error.
+	// total collateral value (across all denoms) will be $467.46
+	// so ATOM's collateral share ($46.46 / $467.46) is barely below 10%
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 1_180000))
+
+	// attempt to collateralize another 0.01 ATOM, which would result in too much collateral share for ATOM
+	msg := &types.MsgCollateralize{
+		Borrower: atomSupplier.String(),
+		Asset:    coin("u/"+atomDenom, 10000),
+	}
+	_, err = srv.Collateralize(ctx, msg)
+	require.ErrorIs(err, types.ErrMaxCollateralShare)
+}
+
+func (s *IntegrationTestSuite) TestMinCollateralLiquidity() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// update initial UMEE to have a limited MinCollateralLiquidity
+	umee, err := app.LeverageKeeper.GetTokenSettings(ctx, umeeDenom)
+	require.NoError(err)
+	umee.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.5")
+	s.registerToken(umee)
+
+	// create a supplier to collateralize 100 UMEE
+	umeeSupplier := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 100_000000))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100_000000))
+
+	// create an ATOM supplier and borrow 49 UMEE
+	atomSupplier := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin(atomDenom, 100_000000))
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 100_000000))
+	s.borrow(atomSupplier, coin(umeeDenom, 49_000000))
+
+	// collateral liquidity (liquidity / collateral) of UMEE is 51/100
+
+	// withdrawal would reduce collateral liquidity to 41/90
+	msg1 := &types.MsgWithdraw{
+		Supplier: umeeSupplier.String(),
+		Asset:    coin("u/"+umeeDenom, 10_000000),
+	}
+	_, err = srv.Withdraw(ctx, msg1)
+	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "withdraw")
+
+	// borrow would reduce collateral liquidity to 41/100
+	msg2 := &types.MsgBorrow{
+		Borrower: umeeSupplier.String(),
+		Asset:    coin(umeeDenom, 10_000000),
+	}
+	_, err = srv.Borrow(ctx, msg2)
+	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "borrow")
+}
+
+func (s *IntegrationTestSuite) TestMinCollateralLiquidity_Collateralize() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// update initial UMEE to have a limited MinCollateralLiquidity
+	umee, err := app.LeverageKeeper.GetTokenSettings(ctx, umeeDenom)
+	require.NoError(err)
+	umee.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.5")
+	s.registerToken(umee)
+
+	// create a supplier to supply 200 UMEE, and collateralize 100 UMEE
+	umeeSupplier := s.newAccount(coin(umeeDenom, 200))
+	s.supply(umeeSupplier, coin(umeeDenom, 200))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100))
+
+	// create an ATOM supplier and borrow 149 UMEE
+	atomSupplier := s.newAccount(coin(atomDenom, 100))
+	s.supply(atomSupplier, coin(atomDenom, 100))
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 100))
+	s.borrow(atomSupplier, coin(umeeDenom, 149))
+
+	// collateral liquidity (liquidity / collateral) of UMEE is 51/100
+
+	// collateralize would reduce collateral liquidity to 51/200
+	msg := &types.MsgCollateralize{
+		Borrower: umeeSupplier.String(),
+		Asset:    coin("u/"+umeeDenom, 100),
+	}
+	_, err = srv.Collateralize(ctx, msg)
+	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "collateralize")
+}
