@@ -10,26 +10,25 @@ import (
 )
 
 type mockOracleKeeper struct {
-	baseExchangeRates   map[string]sdk.Dec
-	symbolExchangeRates map[string]sdk.Dec
-	medianExchangeRates map[string]sdk.Dec
+	baseExchangeRates     map[string]sdk.Dec
+	symbolExchangeRates   map[string]sdk.Dec
+	historicExchangeRates map[string]sdk.Dec
 }
 
 func newMockOracleKeeper() *mockOracleKeeper {
 	m := &mockOracleKeeper{
-		baseExchangeRates:   make(map[string]sdk.Dec),
-		symbolExchangeRates: make(map[string]sdk.Dec),
-		medianExchangeRates: make(map[string]sdk.Dec),
+		baseExchangeRates:     make(map[string]sdk.Dec),
+		symbolExchangeRates:   make(map[string]sdk.Dec),
+		historicExchangeRates: make(map[string]sdk.Dec),
 	}
 	m.Reset()
 
 	return m
 }
 
-// TODO: Does this function take base denom or symbol denom?
 func (m *mockOracleKeeper) MedianOfHistoricMedians(ctx sdk.Context, denom string, numStamps uint64,
 ) (sdk.Dec, error) {
-	p, ok := m.medianExchangeRates[denom]
+	p, ok := m.historicExchangeRates[denom]
 	if !ok {
 		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
 	}
@@ -70,7 +69,7 @@ func (m *mockOracleKeeper) Reset() {
 		"udump":             sdk.MustNewDecFromStr("0.0000005"),
 		"upump":             sdk.MustNewDecFromStr("0.0000020"),
 	}
-	m.medianExchangeRates = map[string]sdk.Dec{
+	m.historicExchangeRates = map[string]sdk.Dec{
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
 		"ATOM": sdk.MustNewDecFromStr("39.38"),
 		"DAI":  sdk.MustNewDecFromStr("1.00"),
@@ -112,6 +111,45 @@ func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), p)
 	require.Equal(uint32(0), e)
+
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "upump")
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.0"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "udump")
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("0.5"), p)
+	require.Equal(uint32(6), e)
+}
+
+func (s *IntegrationTestSuite) TestOracle_HistoricTokenPrice() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	p, e, err := app.LeverageKeeper.HistoricTokenPrice(ctx, appparams.BondDenom)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("4.21"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, atomDenom)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("39.38"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, "foo")
+	require.ErrorIs(err, types.ErrNotRegisteredToken)
+	require.Equal(sdk.ZeroDec(), p)
+	require.Equal(uint32(0), e)
+
+	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, "upump")
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, "udump")
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
+	require.Equal(uint32(6), e)
 }
 
 func (s *IntegrationTestSuite) TestOracle_TokenValue() {
@@ -125,6 +163,39 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	v, err = app.LeverageKeeper.TokenValue(ctx, coin("foo", 2_400000))
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), v)
+
+	// 2.4 DUMP * $0.5
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("udump", 2_400000))
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("1.2"), v)
+
+	// 2.4 PUMP * $2.00
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("upump", 2_400000))
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("4.8"), v)
+}
+
+func (s *IntegrationTestSuite) TestOracle_HistoricTokenValue() {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	// 2.4 UMEE * $4.21
+	v, err := app.LeverageKeeper.HistoricTokenValue(ctx, coin(appparams.BondDenom, 2_400000))
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
+
+	v, err = app.LeverageKeeper.HistoricTokenValue(ctx, coin("foo", 2_400000))
+	require.ErrorIs(err, types.ErrNotRegisteredToken)
+	require.Equal(sdk.ZeroDec(), v)
+
+	// 2.4 DUMP * $1.00
+	v, err = app.LeverageKeeper.HistoricTokenValue(ctx, coin("udump", 2_400000))
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
+
+	// 2.4 PUMP * $1.00
+	v, err = app.LeverageKeeper.HistoricTokenValue(ctx, coin("upump", 2_400000))
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 }
 
 func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
