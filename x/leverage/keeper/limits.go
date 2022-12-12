@@ -35,7 +35,7 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	}
 
 	// for nonzero borrows, calculations are based on unused borrow limit
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral)
+	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral, false)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -49,7 +49,7 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
 
 	// calculate the contribution to borrow limit made by only the type of collateral being withdrawn
-	specificBorrowLimit, err := k.CalculateBorrowLimit(ctx, sdk.NewCoins(specificCollateral))
+	specificBorrowLimit, err := k.CalculateBorrowLimit(ctx, sdk.NewCoins(specificCollateral), false)
 	if err != nil {
 		return sdk.Coin{}, err
 	}

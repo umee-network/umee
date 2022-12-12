@@ -211,7 +211,7 @@ func (q Querier) AccountSummary(
 	if err != nil {
 		return nil, err
 	}
-	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
+	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, false)
 	if err != nil {
 		return nil, err
 	}

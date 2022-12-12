@@ -169,7 +169,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 
 		// Calculate what borrow limit will be AFTER this withdrawal
 		collateralToWithdraw := sdk.NewCoin(uToken.Denom, amountFromCollateral)
-		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw))
+		newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(collateralToWithdraw), false)
 		if err != nil {
 			return sdk.Coin{}, err
 		}
@@ -234,7 +234,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 
 	// Calculate current borrow limit
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
+	borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral, false)
 	if err != nil {
 		return err
 	}
@@ -338,7 +338,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 	}
 
 	// Determine what borrow limit would be AFTER disabling this denom as collateral
-	newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(uToken))
+	newBorrowLimit, err := k.CalculateBorrowLimit(ctx, collateral.Sub(uToken), false)
 	if err != nil {
 		return err
 	}
