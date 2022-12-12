@@ -36,6 +36,11 @@ func (s msgServer) Supply(
 		return nil, err
 	}
 
+	// Fail here if MaxSupply is exceeded
+	if err = s.keeper.checkMaxSupply(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
 	s.keeper.Logger(ctx).Debug(
 		"assets supplied",
 		"supplier", msg.Supplier,
@@ -187,6 +192,11 @@ func (s msgServer) SupplyCollateral(
 		return nil, err
 	}
 	if err = s.keeper.Collateralize(ctx, supplierAddr, uToken); err != nil {
+		return nil, err
+	}
+
+	// Fail here if MaxSupply is exceeded
+	if err = s.keeper.checkMaxSupply(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
 

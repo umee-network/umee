@@ -32,6 +32,10 @@ func (k Keeper) checkBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress
 
 	/*
 
+		// TODO: Only do this if stamp amount is > 0
+
+		// TODO: Parameterize different math? (min, max, median, mean)
+
 		// TODO: Comment this back in once all tests have a mock oracle which supports historic prices
 
 		// Check using historic prices

@@ -79,21 +79,6 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 		return sdk.Coin{}, err
 	}
 
-	token, err := k.GetTokenSettings(ctx, coin.Denom)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
-
-	total, err := k.GetTotalSupply(ctx, coin.Denom)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
-
-	if token.MaxSupply.IsPositive() && total.Add(coin).Amount.GTE(token.MaxSupply) {
-		return sdk.Coin{}, types.ErrMaxSupply.Wrapf("attempted: %s, current supply: %s, max supply: %s",
-			coin, total.Amount, token.MaxSupply)
-	}
-
 	// determine uToken amount to mint
 	uToken, err := k.ExchangeToken(ctx, coin)
 	if err != nil {
