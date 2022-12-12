@@ -251,6 +251,8 @@ func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.
 }
 
 // Collateralize enables selected uTokens for use as collateral by a single borrower.
+// This function does NOT check that collateral share and collateral liquidity remain healthy.
+// Those assertions have been moved to MsgServer.
 func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uToken sdk.Coin) error {
 	if err := k.validateCollateralize(ctx, uToken); err != nil {
 		return err
@@ -261,16 +263,7 @@ func (k Keeper) Collateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uTok
 		return err
 	}
 
-	err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
-	if err != nil {
-		return err
-	}
-
-	if err := k.checkCollateralLiquidity(ctx, types.ToTokenDenom(uToken.Denom)); err != nil {
-		return err
-	}
-
-	return k.checkCollateralShare(ctx, uToken.Denom)
+	return k.bankKeeper.SendCoinsFromAccountToModule(ctx, borrowerAddr, types.ModuleName, sdk.NewCoins(uToken))
 }
 
 // Decollateralize disables selected uTokens for use as collateral by a single borrower.

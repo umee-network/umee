@@ -152,6 +152,14 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
+	if err := s.keeper.checkCollateralLiquidity(ctx, types.ToTokenDenom(msg.Asset.Denom)); err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.checkCollateralShare(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
 		"borrower", msg.Borrower,
@@ -179,6 +187,15 @@ func (s msgServer) SupplyCollateral(
 		return nil, err
 	}
 	if err = s.keeper.Collateralize(ctx, supplierAddr, uToken); err != nil {
+		return nil, err
+	}
+
+	// Fail here if collateral share or liquidity restrictions are violated
+	if err := s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.checkCollateralShare(ctx, uToken.Denom); err != nil {
 		return nil, err
 	}
 
