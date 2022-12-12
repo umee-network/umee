@@ -104,7 +104,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 		// ignore blacklisted tokens
 		if !ts.Blacklist {
 			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset)
+			v, err := k.TokenValue(ctx, baseAsset, false)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
@@ -139,7 +139,7 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 		// ignore blacklisted tokens
 		if !ts.Blacklist {
 			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset)
+			v, err := k.TokenValue(ctx, baseAsset, false)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}

@@ -22,7 +22,7 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	specificCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
 
 	// calculate borrowed value for the account
-	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed)
+	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, false)
 	if err != nil {
 		return sdk.Coin{}, err
 	}

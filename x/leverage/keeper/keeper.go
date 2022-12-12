@@ -153,7 +153,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	if amountFromCollateral.IsPositive() {
 		// Calculate current borrowed value
 		borrowed := k.GetBorrowerBorrows(ctx, supplierAddr)
-		borrowedValue, err := k.TotalTokenValue(ctx, borrowed)
+		borrowedValue, err := k.TotalTokenValue(ctx, borrowed, false)
 		if err != nil {
 			return sdk.Coin{}, err
 		}
@@ -240,7 +240,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 	}
 
 	// Calculate borrowed value will be AFTER this borrow
-	newBorrowedValue, err := k.TotalTokenValue(ctx, borrowed.Add(borrow))
+	newBorrowedValue, err := k.TotalTokenValue(ctx, borrowed.Add(borrow), false)
 	if err != nil {
 		return err
 	}
@@ -345,7 +345,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 
 	// Determine currently borrowed value
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	borrowedValue, err := k.TotalTokenValue(ctx, borrowed)
+	borrowedValue, err := k.TotalTokenValue(ctx, borrowed, false)
 	if err != nil {
 		return err
 	}

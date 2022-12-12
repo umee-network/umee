@@ -135,7 +135,7 @@ func (q Querier) MarketSummary(
 	}
 
 	// Oracle price in response will be nil if it is unavailable
-	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom); oracleErr == nil {
+	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom, false); oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	}
 
@@ -199,11 +199,11 @@ func (q Querier) AccountSummary(
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied)
+	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied, false)
 	if err != nil {
 		return nil, err
 	}
-	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed)
+	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed, false)
 	if err != nil {
 		return nil, err
 	}

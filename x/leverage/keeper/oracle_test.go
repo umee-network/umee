@@ -97,56 +97,54 @@ func (s *IntegrationTestSuite) TestOracle_TokenBasePrice() {
 func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	p, e, err := app.LeverageKeeper.TokenDefaultDenomPrice(ctx, appparams.BondDenom)
+	p, e, err := app.LeverageKeeper.TokenDefaultDenomPrice(ctx, appparams.BondDenom, false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.21"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, atomDenom)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, atomDenom, false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("39.38"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "foo")
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "foo", false)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), p)
 	require.Equal(uint32(0), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "upump")
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "upump", false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.0"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "udump")
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "udump", false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.5"), p)
 	require.Equal(uint32(6), e)
-}
 
-func (s *IntegrationTestSuite) TestOracle_HistoricTokenPrice() {
-	app, ctx, require := s.app, s.ctx, s.Require()
+	// Now with historic = true
 
-	p, e, err := app.LeverageKeeper.HistoricTokenPrice(ctx, appparams.BondDenom)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, appparams.BondDenom, true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.21"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, atomDenom)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, atomDenom, true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("39.38"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, "foo")
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "foo", true)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), p)
 	require.Equal(uint32(0), e)
 
-	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, "upump")
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "upump", true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.HistoricTokenPrice(ctx, "udump")
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "udump", true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
 	require.Equal(uint32(6), e)
@@ -156,44 +154,42 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// 2.4 UMEE * $4.21
-	v, err := app.LeverageKeeper.TokenValue(ctx, coin(appparams.BondDenom, 2_400000))
+	v, err := app.LeverageKeeper.TokenValue(ctx, coin(appparams.BondDenom, 2_400000), false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin("foo", 2_400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("foo", 2_400000), false)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), v)
 
 	// 2.4 DUMP * $0.5
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin("udump", 2_400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("udump", 2_400000), false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.2"), v)
 
 	// 2.4 PUMP * $2.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin("upump", 2_400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("upump", 2_400000), false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.8"), v)
-}
 
-func (s *IntegrationTestSuite) TestOracle_HistoricTokenValue() {
-	app, ctx, require := s.app, s.ctx, s.Require()
+	// Now with historic = true
 
 	// 2.4 UMEE * $4.21
-	v, err := app.LeverageKeeper.HistoricTokenValue(ctx, coin(appparams.BondDenom, 2_400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(appparams.BondDenom, 2_400000), true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
-	v, err = app.LeverageKeeper.HistoricTokenValue(ctx, coin("foo", 2_400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("foo", 2_400000), true)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), v)
 
 	// 2.4 DUMP * $1.00
-	v, err = app.LeverageKeeper.HistoricTokenValue(ctx, coin("udump", 2_400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("udump", 2_400000), true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 
 	// 2.4 PUMP * $1.00
-	v, err = app.LeverageKeeper.HistoricTokenValue(ctx, coin("upump", 2_400000))
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin("upump", 2_400000), true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 }
@@ -208,6 +204,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 			coin(appparams.BondDenom, 2_400000),
 			coin(atomDenom, 4_700000),
 		),
+		false,
 	)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("195.19"), v)
@@ -220,32 +217,58 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 			coin(atomDenom, 4_700000),
 			coin("foo", 4_700000),
 		),
+		false,
 	)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("195.19"), v)
+
+	// complex historic case
+	v, err = app.LeverageKeeper.TotalTokenValue(
+		ctx,
+		sdk.NewCoins(
+			coin(appparams.BondDenom, 2_400000),
+			coin(atomDenom, 4_700000),
+			coin("foo", 4_700000),
+			coin("udump", 2_000000),
+		),
+		true,
+	)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("197.19"), v)
 }
 
 func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	r, err := app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, atomDenom)
+	r, err := app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, atomDenom, false)
 	require.NoError(err)
 	// $4.21 / $39.38 at same exponent
 	require.Equal(sdk.MustNewDecFromStr("0.106907059421025901"), r)
 
-	r, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, daiDenom)
+	r, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, daiDenom, false)
 	require.NoError(err)
 	// $4.21 / $1.00 at a difference of 12 exponent
 	require.Equal(sdk.MustNewDecFromStr("4210000000000"), r)
 
-	r, err = app.LeverageKeeper.PriceRatio(ctx, daiDenom, appparams.BondDenom)
+	r, err = app.LeverageKeeper.PriceRatio(ctx, daiDenom, appparams.BondDenom, false)
 	require.NoError(err)
 	// $1.00 / $4.21 at a difference of -12 exponent
 	require.Equal(sdk.MustNewDecFromStr("0.000000000000237530"), r)
 
-	_, err = app.LeverageKeeper.PriceRatio(ctx, "foo", atomDenom)
+	_, err = app.LeverageKeeper.PriceRatio(ctx, "foo", atomDenom, false)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 
-	_, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, "foo")
+	_, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, "foo", false)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
+
+	// current price of volatile assets
+	r, err = app.LeverageKeeper.PriceRatio(ctx, "upump", "udump", false)
+	require.NoError(err)
+	// $2.00 / $0.50
+	require.Equal(sdk.MustNewDecFromStr("4"), r)
+	// historic price of volatile assets
+	r, err = app.LeverageKeeper.PriceRatio(ctx, "upump", "udump", true)
+	require.NoError(err)
+	// $1.00 / $1.00
+	require.Equal(sdk.MustNewDecFromStr("1"), r)
 }
