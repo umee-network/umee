@@ -9,6 +9,9 @@ const (
 
 	// StoreKey defines the query route
 	QuerierRoute = ModuleName
+
+	// RouterKey is the message route
+	RouterKey = ModuleName
 )
 
 // KVStore key prefixes

@@ -38,6 +38,12 @@ func (msg *MsgClaim) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+// Route implements the sdk.Msg interface.
+func (msg MsgClaim) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgClaim) Type() string { return sdk.MsgTypeURL(&msg) }
+
 func NewMsgBond(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBond {
 	return &MsgBond{
 		Account: account.String(),
@@ -60,6 +66,12 @@ func (msg *MsgBond) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+// Route implements the sdk.Msg interface.
+func (msg MsgBond) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgBond) Type() string { return sdk.MsgTypeURL(&msg) }
+
 func NewMsgBeginUnbonding(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBeginUnbonding {
 	return &MsgBeginUnbonding{
 		Account: account.String(),
@@ -81,6 +93,12 @@ func (msg *MsgBeginUnbonding) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
+
+// Route implements the sdk.Msg interface.
+func (msg MsgBeginUnbonding) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgBeginUnbonding) Type() string { return sdk.MsgTypeURL(&msg) }
 
 func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32, asset sdk.Coin) *MsgSponsor {
 	return &MsgSponsor{
@@ -106,6 +124,12 @@ func (msg *MsgSponsor) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
+
+// Route implements the sdk.Msg interface.
+func (msg MsgSponsor) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgSponsor) Type() string { return sdk.MsgTypeURL(&msg) }
 
 func NewMsgGovSetParams(authority, title, description string, params Params) *MsgGovSetParams {
 	return &MsgGovSetParams{
@@ -134,6 +158,12 @@ func (msg MsgGovSetParams) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
+// Route implements the sdk.Msg interface.
+func (msg MsgGovSetParams) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgGovSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
+
 func NewMsgCreateProgram(authority, title, description string, program IncentiveProgram) *MsgGovCreateProgram {
 	return &MsgGovCreateProgram{
 		Title:       title,
@@ -160,6 +190,12 @@ func (msg MsgGovCreateProgram) GetSignBytes() []byte {
 func (msg MsgGovCreateProgram) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
+
+// Route implements the sdk.Msg interface.
+func (msg MsgGovCreateProgram) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgGovCreateProgram) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
 // to incentive programs which have not yet been funded or passed by governance
