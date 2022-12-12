@@ -7,6 +7,20 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
+// AssertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
+// under either recent (historic median) or current prices. It also returns an error if
+// relevant prices cannot be calculated.
+// This should be checked at the end of any transaction which is restricted by borrow limits,
+// i.e. Borrow, Decollateralize, Withdraw.
+func (k Keeper) AssertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+	// borrowed := k.GetBorrowerBorrows(ctx,borrowerAddr)
+	// collateral := k.GetBorrowerCollateral(ctx,borrowerAddr)
+
+	// Check using current prices
+	// Check using historic prices
+	return nil
+}
+
 // GetBorrow returns an sdk.Coin representing how much of a given denom a
 // borrower currently owes.
 func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
