@@ -12,16 +12,29 @@ import (
 type mockOracleKeeper struct {
 	baseExchangeRates   map[string]sdk.Dec
 	symbolExchangeRates map[string]sdk.Dec
+	medianExchangeRates map[string]sdk.Dec
 }
 
 func newMockOracleKeeper() *mockOracleKeeper {
 	m := &mockOracleKeeper{
 		baseExchangeRates:   make(map[string]sdk.Dec),
 		symbolExchangeRates: make(map[string]sdk.Dec),
+		medianExchangeRates: make(map[string]sdk.Dec),
 	}
 	m.Reset()
 
 	return m
+}
+
+// TODO: Does this function take base denom or symbol denom?
+func (m *mockOracleKeeper) MedianOfHistoricMedians(ctx sdk.Context, denom string, numStamps uint64,
+) (sdk.Dec, error) {
+	p, ok := m.medianExchangeRates[denom]
+	if !ok {
+		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
+	}
+
+	return p, nil
 }
 
 func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec, error) {
@@ -47,11 +60,22 @@ func (m *mockOracleKeeper) Reset() {
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
 		"ATOM": sdk.MustNewDecFromStr("39.38"),
 		"DAI":  sdk.MustNewDecFromStr("1.00"),
+		"DUMP": sdk.MustNewDecFromStr("0.50"), // A token which has recently halved in price
+		"PUMP": sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
 	}
 	m.baseExchangeRates = map[string]sdk.Dec{
 		appparams.BondDenom: sdk.MustNewDecFromStr("0.00000421"),
 		atomDenom:           sdk.MustNewDecFromStr("0.00003938"),
 		daiDenom:            sdk.MustNewDecFromStr("0.000000000000000001"),
+		"udump":             sdk.MustNewDecFromStr("0.0000005"),
+		"upump":             sdk.MustNewDecFromStr("0.0000020"),
+	}
+	m.medianExchangeRates = map[string]sdk.Dec{
+		"UMEE": sdk.MustNewDecFromStr("4.21"),
+		"ATOM": sdk.MustNewDecFromStr("39.38"),
+		"DAI":  sdk.MustNewDecFromStr("1.00"),
+		"DUMP": sdk.MustNewDecFromStr("1.00"),
+		"PUMP": sdk.MustNewDecFromStr("1.00"),
 	}
 }
 
