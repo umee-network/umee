@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -261,6 +262,10 @@ func (q querier) Medians(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if req.NumStamps > q.MaximumMedianStamps(ctx) {
+		return nil, status.Error(codes.OutOfRange, fmt.Sprintf("numStamps must be less than %d", q.MaximumMedianStamps(ctx)))
+	}
 
 	var medians sdk.DecCoins
 

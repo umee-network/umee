@@ -1,10 +1,12 @@
 package keeper_test
 
 import (
+	"fmt"
 	"math/rand"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
+	"google.golang.org/grpc/codes"
 
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/oracle/keeper"
@@ -220,6 +222,15 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 
 	s.Require().NoError(err)
 	s.Require().Equal(res.Medians, sdk.NewDecCoins(atomMedian))
+}
+
+func (s *IntegrationTestSuite) TestQuerier_MediansOutOfRange() {
+	app, ctx := s.app, s.ctx
+
+	app.OracleKeeper.SetMaximumMedianStamps(ctx, 10)
+
+	_, err := s.queryClient.Medians(ctx.Context(), &types.QueryMedians{Denom: "atom", NumStamps: 11})
+	s.Require().Errorf(err, fmt.Sprintf("%s numStamps must be less than %d", codes.OutOfRange, app.OracleKeeper.MaximumMedianStamps(ctx)))
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
