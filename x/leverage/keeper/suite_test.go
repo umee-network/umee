@@ -27,6 +27,8 @@ const (
 	umeeDenom = appparams.BondDenom
 	atomDenom = fixtures.AtomDenom
 	daiDenom  = fixtures.DaiDenom
+	pumpDenom = "upump"
+	dumpDenom = "udump"
 )
 
 type IntegrationTestSuite struct {
@@ -76,8 +78,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(daiDenom, "DAI", 18)))
 	// additional tokens for historacle testing
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken("udump", "DUMP", 6)))
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken("upump", "PUMP", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(dumpDenom, "DUMP", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pumpDenom, "PUMP", 6)))
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())

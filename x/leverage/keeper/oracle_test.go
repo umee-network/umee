@@ -66,8 +66,8 @@ func (m *mockOracleKeeper) Reset() {
 		appparams.BondDenom: sdk.MustNewDecFromStr("0.00000421"),
 		atomDenom:           sdk.MustNewDecFromStr("0.00003938"),
 		daiDenom:            sdk.MustNewDecFromStr("0.000000000000000001"),
-		"udump":             sdk.MustNewDecFromStr("0.0000005"),
-		"upump":             sdk.MustNewDecFromStr("0.0000020"),
+		dumpDenom:           sdk.MustNewDecFromStr("0.0000005"),
+		pumpDenom:           sdk.MustNewDecFromStr("0.0000020"),
 	}
 	m.historicExchangeRates = map[string]sdk.Dec{
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
@@ -112,12 +112,12 @@ func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
 	require.Equal(sdk.ZeroDec(), p)
 	require.Equal(uint32(0), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "upump", false)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, pumpDenom, false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.0"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "udump", false)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, dumpDenom, false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.5"), p)
 	require.Equal(uint32(6), e)
@@ -139,12 +139,12 @@ func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
 	require.Equal(sdk.ZeroDec(), p)
 	require.Equal(uint32(0), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "upump", true)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, pumpDenom, true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
 	require.Equal(uint32(6), e)
 
-	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, "udump", true)
+	p, e, err = app.LeverageKeeper.TokenDefaultDenomPrice(ctx, dumpDenom, true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
 	require.Equal(uint32(6), e)
@@ -163,12 +163,12 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	require.Equal(sdk.ZeroDec(), v)
 
 	// 2.4 DUMP * $0.5
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin("udump", 2_400000), false)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(dumpDenom, 2_400000), false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.2"), v)
 
 	// 2.4 PUMP * $2.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin("upump", 2_400000), false)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(pumpDenom, 2_400000), false)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.8"), v)
 
@@ -184,12 +184,12 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	require.Equal(sdk.ZeroDec(), v)
 
 	// 2.4 DUMP * $1.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin("udump", 2_400000), true)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(dumpDenom, 2_400000), true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 
 	// 2.4 PUMP * $1.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin("upump", 2_400000), true)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(pumpDenom, 2_400000), true)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 }
@@ -229,7 +229,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 			coin(appparams.BondDenom, 2_400000),
 			coin(atomDenom, 4_700000),
 			coin("foo", 4_700000),
-			coin("udump", 2_000000),
+			coin(dumpDenom, 2_000000),
 		),
 		true,
 	)
@@ -262,12 +262,12 @@ func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 
 	// current price of volatile assets
-	r, err = app.LeverageKeeper.PriceRatio(ctx, "upump", "udump", false)
+	r, err = app.LeverageKeeper.PriceRatio(ctx, pumpDenom, dumpDenom, false)
 	require.NoError(err)
 	// $2.00 / $0.50
 	require.Equal(sdk.MustNewDecFromStr("4"), r)
 	// historic price of volatile assets
-	r, err = app.LeverageKeeper.PriceRatio(ctx, "upump", "udump", true)
+	r, err = app.LeverageKeeper.PriceRatio(ctx, pumpDenom, dumpDenom, true)
 	require.NoError(err)
 	// $1.00 / $1.00
 	require.Equal(sdk.MustNewDecFromStr("1"), r)
