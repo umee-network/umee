@@ -150,8 +150,14 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 
 	m := keeper.NewMigrator(&am.keeper)
+
+	// migration for v3.1.0 -> v3.3.0
 	if err := cfg.RegisterMigration(types.ModuleName, 1, m.Migrate1to2); err != nil {
 		panic(fmt.Sprintf("failed to migrate x/oracle from version 1 to 2: %v", err))
+	}
+	// migration for v3.3.0 -> v3.4.0
+	if err := cfg.RegisterMigration(types.ModuleName, 2, m.Migrate2to3); err != nil {
+		panic(fmt.Sprintf("failed to migrate x/oracle from version 2 to 3: %v", err))
 	}
 }
 

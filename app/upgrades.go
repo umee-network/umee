@@ -32,6 +32,12 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 }
 
+// performs upgrade from v3.3 -> v3.4
+func (app *UmeeApp) registerUpgrade3_3to3_4(_ upgradetypes.Plan) {
+	const planName = "v3.3-v3.4"
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+}
+
 // performs upgrade from v3.1 -> v3.3 (including the v3.2 chanages)
 func (app *UmeeApp) registerUpgrade3_1to3_3(_ upgradetypes.Plan) {
 	const planName = "v3.1-v3.3"
