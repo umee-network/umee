@@ -281,7 +281,10 @@ func (q querier) Medians(
 		}
 	} else {
 		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
-			medians = append(medians, sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate))
+			medians = append(
+				medians,
+				sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate),
+			)
 			return false
 		})
 	}
