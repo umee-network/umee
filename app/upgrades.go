@@ -30,6 +30,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
+	app.registerUpgrade3_3to3_4(upgradeInfo)
 }
 
 // performs upgrade from v3.3 -> v3.4
