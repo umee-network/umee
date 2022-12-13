@@ -1233,54 +1233,41 @@ paths:
                     format: uint64
                   min_valid_per_window:
                     type: string
-                  stamp_period:
+                  historic_stamp_period:
                     type: string
                     format: uint64
                     description: >-
-                      Stamp Period represents the amount of blocks the
-                      historacle module
+                      Historic Stamp Period represents the amount of blocks the
+                      oracle
 
-                      waits before recording a set of prices from the oracle.
-                  prune_period:
+                      module waits before recording a new historic price.
+                  median_stamp_period:
                     type: string
                     format: uint64
                     description: >-
-                      Prune Period represents the maximum amount of blocks which
-                      we want
+                      Median Stamp Period represents the amount blocks the
+                      oracle module
 
-                      to keep a record of our set of exchange rates.
-                  median_period:
+                      waits between calculating and stamping a new median and
+                      standard
+
+                      deviation of that median.
+                  maximum_price_stamps:
                     type: string
                     format: uint64
                     description: >-
-                      Median Period represents the amount blocks we will wait
-                      between
+                      Maximum Price Stamps represents the maximum amount of
+                      historic prices
 
-                      calculating the median and standard deviation of the
-                      median of
-
-                      historic prices in the last Prune Period.
-                  historic_accept_list:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        base_denom:
-                          type: string
-                        symbol_denom:
-                          type: string
-                        exponent:
-                          type: integer
-                          format: int64
-                      title: Denom - the object to hold configurations of each denom
+                      the oracle module will store before pruning via FIFO.
+                  maximum_median_stamps:
+                    type: string
+                    format: uint64
                     description: >-
-                      Historic Asset List is a list of assets which will use the
-                      historic
+                      Maximum Median Stamps represents the maximum amount of
+                      medians the
 
-                      price stamping protection methodology (mainly
-                      manipulatable assets).
-
-                      Any assets not on this list will not be stamped.
+                      oracle module will store before pruning via FIFO.
             description: >-
               QueryParamsResponse is the response type for the Query/Params RPC
               method.
@@ -2716,42 +2703,31 @@ definitions:
         format: uint64
       min_valid_per_window:
         type: string
-      stamp_period:
+      historic_stamp_period:
         type: string
         format: uint64
         description: |-
-          Stamp Period represents the amount of blocks the historacle module
-          waits before recording a set of prices from the oracle.
-      prune_period:
+          Historic Stamp Period represents the amount of blocks the oracle
+          module waits before recording a new historic price.
+      median_stamp_period:
         type: string
         format: uint64
         description: |-
-          Prune Period represents the maximum amount of blocks which we want
-          to keep a record of our set of exchange rates.
-      median_period:
+          Median Stamp Period represents the amount blocks the oracle module
+          waits between calculating and stamping a new median and standard
+          deviation of that median.
+      maximum_price_stamps:
         type: string
         format: uint64
         description: |-
-          Median Period represents the amount blocks we will wait between
-          calculating the median and standard deviation of the median of
-          historic prices in the last Prune Period.
-      historic_accept_list:
-        type: array
-        items:
-          type: object
-          properties:
-            base_denom:
-              type: string
-            symbol_denom:
-              type: string
-            exponent:
-              type: integer
-              format: int64
-          title: Denom - the object to hold configurations of each denom
+          Maximum Price Stamps represents the maximum amount of historic prices
+          the oracle module will store before pruning via FIFO.
+      maximum_median_stamps:
+        type: string
+        format: uint64
         description: |-
-          Historic Asset List is a list of assets which will use the historic
-          price stamping protection methodology (mainly manipulatable assets).
-          Any assets not on this list will not be stamped.
+          Maximum Median Stamps represents the maximum amount of medians the
+          oracle module will store before pruning via FIFO.
     description: Params defines the parameters for the oracle module.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
@@ -3016,46 +2992,33 @@ definitions:
             format: uint64
           min_valid_per_window:
             type: string
-          stamp_period:
+          historic_stamp_period:
             type: string
             format: uint64
             description: |-
-              Stamp Period represents the amount of blocks the historacle module
-              waits before recording a set of prices from the oracle.
-          prune_period:
+              Historic Stamp Period represents the amount of blocks the oracle
+              module waits before recording a new historic price.
+          median_stamp_period:
             type: string
             format: uint64
             description: |-
-              Prune Period represents the maximum amount of blocks which we want
-              to keep a record of our set of exchange rates.
-          median_period:
+              Median Stamp Period represents the amount blocks the oracle module
+              waits between calculating and stamping a new median and standard
+              deviation of that median.
+          maximum_price_stamps:
             type: string
             format: uint64
-            description: |-
-              Median Period represents the amount blocks we will wait between
-              calculating the median and standard deviation of the median of
-              historic prices in the last Prune Period.
-          historic_accept_list:
-            type: array
-            items:
-              type: object
-              properties:
-                base_denom:
-                  type: string
-                symbol_denom:
-                  type: string
-                exponent:
-                  type: integer
-                  format: int64
-              title: Denom - the object to hold configurations of each denom
             description: >-
-              Historic Asset List is a list of assets which will use the
-              historic
+              Maximum Price Stamps represents the maximum amount of historic
+              prices
 
-              price stamping protection methodology (mainly manipulatable
-              assets).
-
-              Any assets not on this list will not be stamped.
+              the oracle module will store before pruning via FIFO.
+          maximum_median_stamps:
+            type: string
+            format: uint64
+            description: |-
+              Maximum Median Stamps represents the maximum amount of medians the
+              oracle module will store before pruning via FIFO.
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
   umee.oracle.v1.QuerySlashWindowResponse:
     type: object
