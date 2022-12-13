@@ -253,7 +253,7 @@ message QueryMedians {
   // denom defines the denomination to query for.
   string denom = 1;
   // numStamps defines the number of median stamps to query for.
-  uint64 numStamps = 2;
+  uint32 numStamps = 2;
 }
 
 // QueryMediansResponse is response type for the
