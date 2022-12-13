@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -263,21 +262,26 @@ func (q querier) Medians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if req.NumStamps > q.MaximumMedianStamps(ctx) {
-		return nil, status.Error(codes.OutOfRange, fmt.Sprintf("numStamps must be less than %d", q.MaximumMedianStamps(ctx)))
-	}
-
-	var medians sdk.DecCoins
+	medians := make([]sdk.DecCoin, 0)
 
 	if len(req.Denom) > 0 {
-		medianList := q.HistoricMedians(ctx, req.Denom, req.NumStamps)
+		if req.NumStamps == 0 {
+			return nil, status.Error(codes.InvalidArgument, "parameter NumStamps must be greater than 0")
+		}
 
-		for _, median := range medianList {
-			medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, median))
+		if req.NumStamps > uint32(q.MaximumMedianStamps(ctx)) {
+			req.NumStamps = uint32(q.MaximumMedianStamps(ctx))
+		}
+
+		medians = make(sdk.DecCoins, req.NumStamps)
+		medianList := q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))
+
+		for i, median := range medianList {
+			medians[i] = sdk.NewDecCoinFromDec(req.Denom, median)
 		}
 	} else {
 		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
-			medians = medians.Add(sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate))
+			medians = append(medians, sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate))
 			return false
 		})
 	}

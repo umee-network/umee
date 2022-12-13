@@ -1074,11 +1074,15 @@ paths:
           required: false
           type: string
         - name: numStamps
-          description: numStamps defines the number of median stamps to query for.
+          description: >-
+            numStamps defines the number of median stamps to query for.
+            numStamps
+
+            must be greater than 0.
           in: query
           required: false
-          type: string
-          format: uint64
+          type: integer
+          format: int64
       tags:
         - Query
   /umee/oracle/v1/denoms/active_exchange_rates:
