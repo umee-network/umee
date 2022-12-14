@@ -27,6 +27,8 @@ func (k Keeper) HistoricMedians(
 	return medians
 }
 
+// AvailableMedians returns the number of medians in the store for a given denom
+// when called.
 func (k Keeper) AvailableMedians(
 	ctx sdk.Context,
 	denom string,
