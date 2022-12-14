@@ -27,6 +27,15 @@ func (k Keeper) HistoricMedians(
 	return medians
 }
 
+func (k Keeper) AvailableMedians(
+	ctx sdk.Context,
+	denom string,
+) uint32 {
+	medians := k.HistoricMedians(ctx, denom, k.MaximumMedianStamps(ctx))
+
+	return uint32(len(medians))
+}
+
 // CalcAndSetHistoricMedian uses all the historic prices of a given denom to
 // calculate its median price at the current block and set it to the store.
 // It will also call setMedianDeviation with the calculated median.

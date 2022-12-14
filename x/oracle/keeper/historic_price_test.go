@@ -32,12 +32,15 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 		ctx = ctx.WithBlockHeight(ctx.BlockHeight() + 1)
 	}
 
-	// check median and median standard deviation
+	// check medians, num of available medians, and median standard deviation
 	medians := app.OracleKeeper.HistoricMedians(ctx, displayDenom, 3)
 	s.Require().Equal(len(medians), 3)
 	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.2"))
 	s.Require().Equal(medians[1], sdk.MustNewDecFromStr("1.125"))
 	s.Require().Equal(medians[2], sdk.MustNewDecFromStr("1.1"))
+
+	availableMedians := app.OracleKeeper.AvailableMedians(ctx, displayDenom)
+	s.Require().Equal(availableMedians, uint32(3))
 
 	medianDeviation, err := app.OracleKeeper.HistoricMedianDeviation(ctx, displayDenom)
 	s.Require().NoError(err)
@@ -81,6 +84,9 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	lastStampBlock := uint64(ctx.BlockHeight()) - (uint64(ctx.BlockHeight())%app.OracleKeeper.MedianStampPeriod(ctx) + 1)
 	firstStampBlock := lastStampBlock - blockPeriod
 	app.OracleKeeper.DeleteHistoricMedian(ctx, displayDenom, firstStampBlock)
+
+	availableMedians = app.OracleKeeper.AvailableMedians(ctx, displayDenom)
+	s.Require().Equal(availableMedians, uint32(2))
 
 	medians = app.OracleKeeper.HistoricMedians(ctx, displayDenom, 3)
 	s.Require().Equal(len(medians), 2)
