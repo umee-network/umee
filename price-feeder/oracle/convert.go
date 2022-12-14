@@ -6,9 +6,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/config"
-	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/config"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 // getUSDBasedProviders retrieves which providers for an asset have a USD-based pair,
