@@ -16,8 +16,8 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v3/app"
 	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -42,11 +42,11 @@ func clearHistoricPrices(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.HistoricStampPeriod(ctx))
+) {
+	stampPeriod := int(k.HistoricStampPeriod(ctx))
 	numStamps := int(k.MaximumPriceStamps(ctx))
-	for i := 0; i < numStamps; i++  {
-		k.DeleteHistoricPrice(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	for i := 0; i < numStamps; i++ {
+		k.DeleteHistoricPrice(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -55,11 +55,11 @@ func clearHistoricMedians(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+) {
+	stampPeriod := int(k.MedianStampPeriod(ctx))
 	numStamps := int(k.MaximumMedianStamps(ctx))
 	for i := 0; i < numStamps; i++ {
-		k.DeleteHistoricMedian(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+		k.DeleteHistoricMedian(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -69,11 +69,11 @@ func clearHistoricMedianDeviations(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+) {
+	stampPeriod := int(k.MedianStampPeriod(ctx))
 	numStamps := int(k.MaximumMedianStamps(ctx))
-	for i := 0; i < numStamps; i++  {
-		k.DeleteHistoricMedianDeviation(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	for i := 0; i < numStamps; i++ {
+		k.DeleteHistoricMedianDeviation(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -127,9 +127,11 @@ var historacleTestCases = []struct {
 	expectedMaxOfHistoricMedians          sdk.Dec
 }{
 	{
-		[]string{"1.0", "1.2", "1.1", "1.4", "1.1", "1.15",
+		[]string{
+			"1.0", "1.2", "1.1", "1.4", "1.1", "1.15",
 			"1.2", "1.3", "1.2", "1.12", "1.2", "1.15",
-			"1.17", "1.1", "1.0", "1.16", "1.15", "1.12"},
+			"1.17", "1.1", "1.0", "1.16", "1.15", "1.12",
+		},
 		[]sdk.Dec{
 			sdk.MustNewDecFromStr("1.155"),
 			sdk.MustNewDecFromStr("1.16"),
@@ -144,9 +146,11 @@ var historacleTestCases = []struct {
 		sdk.MustNewDecFromStr("1.2"),
 	},
 	{
-		[]string{"2.3", "2.12", "2.14", "2.24", "2.18", "2.15",
+		[]string{
+			"2.3", "2.12", "2.14", "2.24", "2.18", "2.15",
 			"2.51", "2.59", "2.67", "2.76", "2.89", "2.85",
-			"3.17", "3.15", "3.35", "3.56", "3.55", "3.49"},
+			"3.17", "3.15", "3.35", "3.56", "3.55", "3.49",
+		},
 		[]sdk.Dec{
 			sdk.MustNewDecFromStr("3.02"),
 			sdk.MustNewDecFromStr("2.715"),
@@ -161,9 +165,11 @@ var historacleTestCases = []struct {
 		sdk.MustNewDecFromStr("3.02"),
 	},
 	{
-		[]string{"5.2", "5.25", "5.31", "5.22", "5.14", "5.15",
+		[]string{
+			"5.2", "5.25", "5.31", "5.22", "5.14", "5.15",
 			"4.85", "4.72", "4.52", "4.47", "4.36", "4.22",
-			"4.11", "4.04", "3.92", "3.82", "3.85", "3.83"},
+			"4.11", "4.04", "3.92", "3.82", "3.85", "3.83",
+		},
 		[]sdk.Dec{
 			sdk.MustNewDecFromStr("4.165"),
 			sdk.MustNewDecFromStr("4.495"),
@@ -189,7 +195,7 @@ func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 	ctx = ctx.WithBlockHeight(medianPruneBlock)
 
 	// with experimental flag off median doesn't get deleted
-	oracle.EndBlocker(ctx, app.OracleKeeper, false)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
 	medians := []types.Price{}
 	app.OracleKeeper.IterateAllMedianPrices(
 		ctx,
@@ -201,7 +207,7 @@ func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
 	s.Require().Equal(1, len(medians))
 
 	// with experimental flag on median gets deleted
-	oracle.EndBlocker(ctx, app.OracleKeeper, true)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
 	experimentalMedians := []types.Price{}
 	app.OracleKeeper.IterateAllMedianPrices(
 		ctx,
@@ -240,7 +246,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 				SubmitBlock: uint64(ctx.BlockHeight()),
 			}
 			app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr, prevote)
-			oracle.EndBlocker(ctx, app.OracleKeeper, true)
+			oracle.EndBlocker(ctx, app.OracleKeeper)
 
 			ctx = ctx.WithBlockHeight(ctx.BlockHeight() + int64(app.OracleKeeper.VotePeriod(ctx)))
 			vote := types.AggregateExchangeRateVote{
@@ -248,7 +254,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 				Voter:              valAddr.String(),
 			}
 			app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr, vote)
-			oracle.EndBlocker(ctx, app.OracleKeeper, true)
+			oracle.EndBlocker(ctx, app.OracleKeeper)
 		}
 
 		for _, denom := range app.OracleKeeper.AcceptList(ctx) {

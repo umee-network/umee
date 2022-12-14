@@ -596,7 +596,7 @@ func New(
 		ibcTransferModule,
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
-		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper, Experimental),
+		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 	}
 	if Experimental {
