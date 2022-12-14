@@ -24,8 +24,8 @@ func (m Migrator) Migrate1to2(ctx sdk.Context) error {
 	return nil
 }
 
-// Migrate2to3 migrates from version 2 to 3.
-func (m Migrator) Migrate2to3(ctx sdk.Context) error {
+// HistoracleParams updates Historic Params to defaults.
+func (m Migrator) HistoracleParams(ctx sdk.Context) error {
 	m.keeper.SetHistoricStampPeriod(ctx, types.DefaultHistoricStampPeriod)
 	m.keeper.SetMedianStampPeriod(ctx, types.DefaultMedianStampPeriod)
 	m.keeper.SetMaximumPriceStamps(ctx, types.DefaultMaximumPriceStamps)
