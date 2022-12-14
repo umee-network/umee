@@ -43,7 +43,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Run latest Peggo (v1.3.0) - **updated**
-- Run latest Price Feeder (v2.0.1) - **updated**
+- Run latest Price Feeder (v2.0.2) - **updated**
 - Swap binaries.
 - Restart the chain.
 
