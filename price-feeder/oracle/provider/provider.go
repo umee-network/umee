@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (

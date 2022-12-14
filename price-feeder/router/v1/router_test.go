@@ -13,10 +13,10 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	"github.com/umee-network/umee/price-feeder/config"
-	"github.com/umee-network/umee/price-feeder/oracle"
-	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	v1 "github.com/umee-network/umee/price-feeder/router/v1"
+	"github.com/umee-network/umee/price-feeder/v2/config"
+	"github.com/umee-network/umee/price-feeder/v2/oracle"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	v1 "github.com/umee-network/umee/price-feeder/v2/router/v1"
 )
 
 var (
