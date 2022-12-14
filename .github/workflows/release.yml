@@ -25,7 +25,7 @@ jobs:
 
       # useful to test builds. However will require to add "push" rule to the "on" section
       - name: goreleaser test-build
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')
         with:
           version: latest
@@ -33,7 +33,7 @@ jobs:
         env:
           TM_VERSION: ${{ env.TM_VERSION }}
       - name: Release
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
