@@ -46,6 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+## [v2.0.2](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.2) 2022-12-14
+
+### Bugs
+
+- Fix module version
+
 ## [v2.0.1](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.1) 2022-12-01
 
 ### Bugs
