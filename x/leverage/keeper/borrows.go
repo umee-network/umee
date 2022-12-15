@@ -8,8 +8,9 @@ import (
 )
 
 // checkBorrowerHealth returns an error if a borrower is currently above their borrow limit,
-// under either recent (historic median) or current prices. It also returns an error if
-// relevant prices cannot be calculated.
+// under either recent (historic median) or current prices. It returns an error if current
+// prices cannot be calculated, but will use current prices (without returning an error)
+// for any token whose historic prices cannot be calculated.
 // This should be checked at the end of any transaction which is restricted by borrow limits,
 // i.e. Borrow, Decollateralize, Withdraw.
 func (k Keeper) checkBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
@@ -30,29 +31,20 @@ func (k Keeper) checkBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress
 			"borrowed: %s, limit: %s (current prices)", currentValue, currentLimit)
 	}
 
-	/*
+	// Check using historic prices
+	historicValue, err := k.TotalTokenValue(ctx, borrowed, true)
+	if err != nil {
+		return err
+	}
+	historicLimit, err := k.CalculateBorrowLimit(ctx, collateral, true)
+	if err != nil {
+		return err
+	}
+	if historicValue.GT(historicLimit) {
+		return types.ErrUndercollaterized.Wrapf(
+			"borrowed: %s, limit: %s (historic prices)", historicValue, historicLimit)
+	}
 
-		// TODO: Only do this if stamp amount is > 0
-
-		// TODO: Parameterize different math? (min, max, median, mean)
-
-		// TODO: Comment this back in once all tests have a mock oracle which supports historic prices
-
-		// Check using historic prices
-		historicValue, err := k.TotalTokenValue(ctx, borrowed, true)
-		if err != nil {
-			return err
-		}
-		historicLimit, err := k.CalculateBorrowLimit(ctx, collateral, true)
-		if err != nil {
-			return err
-		}
-		if historicValue.GT(historicLimit) {
-			return types.ErrUndercollaterized.Wrapf(
-				"borrowed: %s, limit: %s (historic prices)", historicValue, historicLimit)
-		}
-
-	*/
 	return nil
 }
 

@@ -56,9 +56,17 @@ func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string, histor
 	}
 
 	var price sdk.Dec
+
 	if historic {
-		price, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, numHistoracleStamps)
+		// historic price
+		var numStamps uint32
+		price, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, numHistoracleStamps)
+		if err == nil && numStamps == 0 {
+			// if no price medians were available, current price is used as the historic price
+			price, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
+		}
 	} else {
+		// current price
 		price, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
 	}
 	if err != nil {

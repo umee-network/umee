@@ -27,13 +27,13 @@ func newMockOracleKeeper() *mockOracleKeeper {
 }
 
 func (m *mockOracleKeeper) MedianOfHistoricMedians(ctx sdk.Context, denom string, numStamps uint64,
-) (sdk.Dec, error) {
+) (sdk.Dec, uint32, error) {
 	p, ok := m.historicExchangeRates[denom]
 	if !ok {
-		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
+		return sdk.ZeroDec(), 0, fmt.Errorf("invalid denom: %s", denom)
 	}
 
-	return p, nil
+	return p, 24, nil
 }
 
 func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec, error) {
