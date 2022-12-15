@@ -262,19 +262,29 @@ func (q querier) Medians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var medians sdk.DecCoins
+	medians := make([]sdk.DecCoin, 0)
 
 	if len(req.Denom) > 0 {
-		// TODO: Add numStamps param to request to enable responding with a variable amount
-		// of last medians rather than just returning the most recent stamp
-		medianList := q.HistoricMedians(ctx, req.Denom, 1)
+		if req.NumStamps == 0 {
+			return nil, status.Error(codes.InvalidArgument, "parameter NumStamps must be greater than 0")
+		}
 
-		if len(medianList) != 0 {
-			medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, medianList[0]))
+		if req.NumStamps > uint32(q.MaximumMedianStamps(ctx)) {
+			req.NumStamps = uint32(q.MaximumMedianStamps(ctx))
+		}
+
+		medians = make(sdk.DecCoins, req.NumStamps)
+		medianList := q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))
+
+		for i, median := range medianList {
+			medians[i] = sdk.NewDecCoinFromDec(req.Denom, median)
 		}
 	} else {
 		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
-			medians = medians.Add(sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate))
+			medians = append(
+				medians,
+				sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate),
+			)
 			return false
 		})
 	}

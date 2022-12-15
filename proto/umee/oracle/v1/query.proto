@@ -252,6 +252,9 @@ message QueryMedians {
   option (gogoproto.goproto_getters) = false;
   // denom defines the denomination to query for.
   string denom = 1;
+  // numStamps defines the number of median stamps to query for. numStamps
+  // must be greater than 0.
+  uint32 numStamps = 2;
 }
 
 // QueryMediansResponse is response type for the
