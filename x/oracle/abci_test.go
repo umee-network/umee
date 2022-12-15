@@ -16,8 +16,8 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v3/app"
 	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -42,11 +42,11 @@ func clearHistoricPrices(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.HistoricStampPeriod(ctx))
+) {
+	stampPeriod := int(k.HistoricStampPeriod(ctx))
 	numStamps := int(k.MaximumPriceStamps(ctx))
-	for i := 0; i < numStamps; i++  {
-		k.DeleteHistoricPrice(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	for i := 0; i < numStamps; i++ {
+		k.DeleteHistoricPrice(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -55,11 +55,11 @@ func clearHistoricMedians(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+) {
+	stampPeriod := int(k.MedianStampPeriod(ctx))
 	numStamps := int(k.MaximumMedianStamps(ctx))
 	for i := 0; i < numStamps; i++ {
-		k.DeleteHistoricMedian(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+		k.DeleteHistoricMedian(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -69,11 +69,11 @@ func clearHistoricMedianDeviations(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+) {
+	stampPeriod := int(k.MedianStampPeriod(ctx))
 	numStamps := int(k.MaximumMedianStamps(ctx))
-	for i := 0; i < numStamps; i++  {
-		k.DeleteHistoricMedianDeviation(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	for i := 0; i < numStamps; i++ {
+		k.DeleteHistoricMedianDeviation(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
