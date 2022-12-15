@@ -135,6 +135,7 @@ func (k Keeper) SetHistoricMedianDeviation(
 
 // MedianOfHistoricMedians calculates and returns the median of the last stampNum
 // historic medians as well as the amount of medians used to calculate that median.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) MedianOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
@@ -154,6 +155,7 @@ func (k Keeper) MedianOfHistoricMedians(
 
 // AverageOfHistoricMedians calculates and returns the average of the last stampNum
 // historic medians as well as the amount of medians used to calculate that average.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) AverageOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
@@ -173,6 +175,7 @@ func (k Keeper) AverageOfHistoricMedians(
 
 // MaxOfHistoricMedian calculates and returns the maximum value of the last stampNum
 // historic medians as well as the amount of medians used to calculate that maximum.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) MaxOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
@@ -192,6 +195,7 @@ func (k Keeper) MaxOfHistoricMedians(
 
 // MinOfHistoricMedians calculates and returns the minimum value of the last stampNum
 // historic medians as well as the amount of medians used to calculate that minimum.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) MinOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
