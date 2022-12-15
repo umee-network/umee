@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/price-feeder/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 )
 
 // Response constants
