@@ -27,17 +27,6 @@ func (k Keeper) HistoricMedians(
 	return medians
 }
 
-// AvailableMedians returns the number of medians in the store for a given denom
-// when called.
-func (k Keeper) AvailableMedians(
-	ctx sdk.Context,
-	denom string,
-) uint32 {
-	medians := k.HistoricMedians(ctx, denom, k.MaximumMedianStamps(ctx))
-
-	return uint32(len(medians))
-}
-
 // CalcAndSetHistoricMedian uses all the historic prices of a given denom to
 // calculate its median price at the current block and set it to the store.
 // It will also call setMedianDeviation with the calculated median.
@@ -152,10 +141,14 @@ func (k Keeper) MedianOfHistoricMedians(
 	numStamps uint64,
 ) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	median, err := decmath.Median(medians)
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
+
 	return median, uint32(len(medians)), nil
 }
 
@@ -167,10 +160,14 @@ func (k Keeper) AverageOfHistoricMedians(
 	numStamps uint64,
 ) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	average, err := decmath.Average(medians)
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
+
 	return average, uint32(len(medians)), nil
 }
 
@@ -182,10 +179,14 @@ func (k Keeper) MaxOfHistoricMedians(
 	numStamps uint64,
 ) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	max, err := decmath.Max(medians)
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
+
 	return max, uint32(len(medians)), nil
 }
 
@@ -197,10 +198,14 @@ func (k Keeper) MinOfHistoricMedians(
 	numStamps uint64,
 ) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	min, err := decmath.Min(medians)
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
+
 	return min, uint32(len(medians)), nil
 }
 

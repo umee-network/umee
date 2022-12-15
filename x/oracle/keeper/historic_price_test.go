@@ -16,9 +16,6 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	// similar prefixes
 	displayDenomVariation := displayDenom + "test"
 
-	availableMedians := app.OracleKeeper.AvailableMedians(ctx, displayDenom)
-	s.Require().Equal(availableMedians, uint32(0))
-
 	// add multiple historic prices to store
 	exchangeRates := []string{"1.0", "1.2", "1.1", "1.4", "1.1", "1.15", "1.2", "1.3", "1.2"}
 	for i, exchangeRate := range exchangeRates {
@@ -41,9 +38,6 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.2"))
 	s.Require().Equal(medians[1], sdk.MustNewDecFromStr("1.125"))
 	s.Require().Equal(medians[2], sdk.MustNewDecFromStr("1.1"))
-
-	availableMedians = app.OracleKeeper.AvailableMedians(ctx, displayDenom)
-	s.Require().Equal(availableMedians, uint32(3))
 
 	medianDeviation, err := app.OracleKeeper.HistoricMedianDeviation(ctx, displayDenom)
 	s.Require().NoError(err)
@@ -95,9 +89,6 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	lastStampBlock := uint64(ctx.BlockHeight()) - (uint64(ctx.BlockHeight())%app.OracleKeeper.MedianStampPeriod(ctx) + 1)
 	firstStampBlock := lastStampBlock - blockPeriod
 	app.OracleKeeper.DeleteHistoricMedian(ctx, displayDenom, firstStampBlock)
-
-	availableMedians = app.OracleKeeper.AvailableMedians(ctx, displayDenom)
-	s.Require().Equal(availableMedians, uint32(2))
 
 	medians = app.OracleKeeper.HistoricMedians(ctx, displayDenom, 3)
 	s.Require().Equal(len(medians), 2)
