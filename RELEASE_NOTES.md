@@ -17,6 +17,7 @@ v3.2.0 was not released on mainnet due to a bug in x/leverage gov messages migra
 Additional highlights:
 
 - Added `QueryMaxWithdraw` and `MsgMaxWithdraw` to allow user easily withdraw previously supplied tokens from the module back to the user balance.
+- Updated Cosmos SDK to v0.46.7
 
 Please see the [CHANGELOG](https://github.com/umee-network/umee/blob/v3.3.0/CHANGELOG.md) for an exhaustive list of changes.
 
