@@ -33,7 +33,7 @@ func Median(ds []sdk.Dec) (sdk.Dec, error) {
 
 // MedianDeviation returns the standard deviation around the
 // median of a list of sdk.Dec. Returns error if ds is empty list.
-// MedianDeviation = ∑((d - median)^2 / len(ds))
+// MedianDeviation = sqrt(∑((d - median)^2 / len(ds)))
 func MedianDeviation(median sdk.Dec, ds []sdk.Dec) (sdk.Dec, error) {
 	if len(ds) == 0 {
 		return sdk.ZeroDec(), ErrEmptyList
