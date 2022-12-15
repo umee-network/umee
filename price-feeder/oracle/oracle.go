@@ -18,11 +18,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	"github.com/umee-network/umee/price-feeder/config"
-	"github.com/umee-network/umee/price-feeder/oracle/client"
-	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
-	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+	"github.com/umee-network/umee/price-feeder/v2/config"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/client"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
+	pfsync "github.com/umee-network/umee/price-feeder/v2/pkg/sync"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 

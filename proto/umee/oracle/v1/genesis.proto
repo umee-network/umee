@@ -22,9 +22,9 @@ message GenesisState {
       [(gogoproto.nullable) = false];
   repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
       [(gogoproto.nullable) = false];
-  repeated HistoricPrice               historic_prices  = 8 [(gogoproto.nullable) = false];
-  repeated ExchangeRateTuple medians          = 7 [(gogoproto.nullable) = false];
-  repeated ExchangeRateTuple medianDeviations = 9 [(gogoproto.nullable) = false];
+  repeated Price medians          = 7 [(gogoproto.nullable) = false];
+  repeated Price historic_prices  = 8 [(gogoproto.nullable) = false];
+  repeated Price medianDeviations = 9 [(gogoproto.nullable) = false];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are
@@ -42,10 +42,10 @@ message MissCounter {
   uint64 miss_counter      = 2;
 }
 
-// HistoricPrice is an instance of a price "stamp"
-message HistoricPrice {
+// Price is an instance of a price "stamp"
+message Price {
   ExchangeRateTuple exchange_rate_tuple = 1 [
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable) = false
   ];
   uint64 block_num = 2;
 }

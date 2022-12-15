@@ -194,20 +194,20 @@ The following approach is proposed:
 - Additionally, each nonzero `TotalLocked(denom,tier) = Amount` is kept up to date in state. These track the sum of uTokens locked across all addresses.
 - For each `(denom,tier)` that has ever been incentivized, any nonzero `RewardAccumulator(denom,tier)` is stored in state. This `sdk.DecCoins` represents the total rewards a single locked `uToken` would have accumulated if locked into a given tier at genesis.
 - For each user, any nonzero `PendingReward` is stored as `sdk.DecCoins`.
-- For each nonzero `Locked(address,denom,tier)`, a value `RewardBasis(address,denom,tier)` is stored which tracks the value of `RewardAccumulator(denom,tier)` at the most recent time rewards were added to `PendingReward` by the given (address,denom,tier).
+- For each nonzero `Locked(address,denom,tier)`, a value `RewardTracker(address,denom,tier)` is stored which tracks the value of `RewardAccumulator(denom,tier)` at the most recent time rewards were added to `PendingReward` by the given (address,denom,tier).
 - At any given `EndBlock`, each active incentive program performs some computations:
   - Calculates the total `RewardDenom` rewards that will be given by the program in the current block `X = program.TotalRewards * (secondsElapsed / program.Duration)`
   - Each lock tier receives a `weightedValue(program,denom,tier) = TotalLocked(denom,tier) * tierWeight(program,tier)`.
   - The amount `X` for each program is then split between the tiers by `weightedValue` into three `X(tier)` values (X1,X2,X3)
   - For each tier, `RewardAccumulator(denom,tier)` is increased by `X(tier) / TotalLocked(denom,tier)`.
-- When a user's `Locked(address,denom,tier) = Amount` is updated for any reason, `RewardBasis(address,denom,tier)` is set to the current `RewardAccumulator(denom,tier)` and `PendingRewards(addr)` is increased by the difference of the two, times the user's locked amount. (This uses the locked amount _before_ it is updated.)
+- When a user's `Locked(address,denom,tier) = Amount` is updated for any reason, `RewardTracker(address,denom,tier)` is set to the current `RewardAccumulator(denom,tier)` and `PendingRewards(addr)` is increased by the difference of the two, times the user's locked amount. (This uses the locked amount _before_ it is updated.)
 - When a user claims rewards, they receive `PendingRewards(addr)` and set it to zero (which clears it from state).
 
-The algorithm above uses an approach similar to [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/) in that it uses an exchange rate (in our case, HistoricalReward) to track each denom's hypothetical rewards since genesis, and determines actual reward amounts by recording the previous exchange rate (RewardBasis) at which each user made their previous claim.
+The algorithm above uses an approach similar to [F1 Fee Distribution](https://drops.dagstuhl.de/opus/volltexte/2020/11974/) in that it uses an exchange rate (in our case, HistoricalReward) to track each denom's hypothetical rewards since genesis, and determines actual reward amounts by recording the previous exchange rate (RewardTracker) at which each user made their previous claim.
 
 The F1 algorithm only works if users are forced to claim rewards every time their locked amount increases or decreases (thus, locked amount is known to have stayed constant between any two claims).
 Our implementation is less complex than F1 because there is no equivalent to slashing in `x/incentive`, and we move rewards to the `PendingRewards` instead of claiming them directly.
-The same mathematical effect is achieved, where `Locked(addr,denom,tier)` remains constant in the time `RewardAccumulator(denom,tier)` has increased to its current value from `RewardBasis(denom,tier)`, allowing reward calculation on demand using only those three values.
+The same mathematical effect is achieved, where `Locked(addr,denom,tier)` remains constant in the time `RewardAccumulator(denom,tier)` has increased to its current value from `RewardTracker(denom,tier)`, allowing reward calculation on demand using only those three values.
 
 ### Claiming Rewards
 
@@ -219,7 +219,7 @@ type MsgClaim struct {
 }
 ```
 
-This message type gathers `PendingRewards` by updating `RewardBasis` for each nonzero `Locked(addr,denom,tier)` associated with the user's address, then claims all pending rewards.
+This message type gathers `PendingRewards` by updating `RewardTracker` for each nonzero `Locked(addr,denom,tier)` associated with the user's address, then claims all pending rewards.
 
 ### Funding Programs
 

@@ -1,8 +1,6 @@
 package types
 
 import (
-	"encoding/binary"
-	"math"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -109,38 +107,32 @@ func TestKeyAggregateExchangeRateVote(t *testing.T) {
 	}
 }
 
-func TestUintWithNullPrefix(t *testing.T) {
-	expected := []byte{0}
-	num := make([]byte, 8)
-	binary.LittleEndian.PutUint64(num, math.MaxUint64)
-	expected = append(expected, num...)
-
-	out := uintWithNullPrefix(math.MaxUint64)
-	require.Equal(t, expected, out)
-}
-
-func TestParseBlockFromHistoricPriceKey(t *testing.T) {
+func TestParseDenomAndBlockFromHistoricPriceKey(t *testing.T) {
 	denom := "umee"
 	blockNum := uint64(4567)
 	key := KeyHistoricPrice(denom, blockNum)
 
-	parsedBlockNum := ParseBlockFromHistoricPriceKey(key)
+	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixHistoricPrice)
+	require.Equal(t, denom, parsedDenom)
 	require.Equal(t, blockNum, parsedBlockNum)
 }
 
-func TestParseDenomFromHistoricPriceKey(t *testing.T) {
+func TestParseDenomAndBlockFromMedianKey(t *testing.T) {
 	denom := "umee"
 	blockNum := uint64(4567)
-	key := KeyHistoricPrice(denom, blockNum)
+	key := KeyMedian(denom, blockNum)
 
-	parsedDenom := ParseDenomFromHistoricPriceKey(key)
+	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixMedian)
 	require.Equal(t, denom, parsedDenom)
+	require.Equal(t, blockNum, parsedBlockNum)
 }
 
-func TestParseDenomFromMedianKey(t *testing.T) {
+func TestParseDenomAndBlockFromMedianDeviationKey(t *testing.T) {
 	denom := "umee"
-	key := KeyMedian(denom)
+	blockNum := uint64(4567)
+	key := KeyMedianDeviation(denom, blockNum)
 
-	parsedDenom := ParseDenomFromMedianKey(key)
+	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixMedianDeviation)
 	require.Equal(t, denom, parsedDenom)
+	require.Equal(t, blockNum, parsedBlockNum)
 }

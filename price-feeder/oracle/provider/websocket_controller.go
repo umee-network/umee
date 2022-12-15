@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
@@ -263,7 +263,7 @@ func (wsc *WebsocketController) reconnect() {
 
 // pingHandler is called by the websocket library whenever a ping message is received
 // and responds with a pong message to the server
-func (wsc *WebsocketController) pingHandler(appData string) error {
+func (wsc *WebsocketController) pingHandler(string) error {
 	if err := wsc.client.WriteMessage(websocket.PongMessage, []byte("pong")); err != nil {
 		wsc.logger.Error().Err(err).Msg("error sending pong")
 	}

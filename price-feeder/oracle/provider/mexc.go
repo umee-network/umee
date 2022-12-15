@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 
 	"github.com/umee-network/umee/v3/util/coin"
 )
@@ -226,7 +226,7 @@ func (p *MexcProvider) getCandlePrices(key string) ([]types.CandlePrice, error) 
 	return candleList, nil
 }
 
-func (p *MexcProvider) messageReceived(messageType int, bz []byte) {
+func (p *MexcProvider) messageReceived(_ int, bz []byte) {
 	var (
 		tickerResp MexcTickerResponse
 		tickerErr  error

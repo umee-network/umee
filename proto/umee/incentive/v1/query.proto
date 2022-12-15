@@ -1,0 +1,179 @@
+syntax = "proto3";
+package umeenetwork.umee.incentive.v1;
+
+import "cosmos/base/query/v1beta1/pagination.proto";
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "umee/incentive/v1/incentive.proto";
+import "umee/incentive/v1/genesis.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/umee-network/umee/v3/x/incentive";
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params queries the parameters of the x/incentive module.
+  rpc Params(QueryParams) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/params";
+  }
+
+  // PendingRewards queries unclaimed incentive rewards associated with an account.
+  rpc PendingRewards(QueryPendingRewards)
+      returns (QueryPendingRewardsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/pending_rewards/{address}";
+  }
+
+  // Bonded queries all bonded collateral uTokens associated with an account.
+  rpc Bonded(QueryBonded)
+      returns (QueryBondedResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/bonded/{address}";
+  }
+
+  // Unbondings queries all current uToken unbondings associated with an account.
+  rpc Unbondings(QueryUnbondings)
+      returns (QueryUnbondingsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/unbondings/{address}";
+  }
+
+  // TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
+  rpc TotalBonded(QueryTotalBonded)
+      returns (QueryTotalBondedResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/total_bonded";
+  }
+
+  // CompletedIncentivePrograms queries for all incentives programs that have been passed
+  // by governance, and either run to completion or expired immediately due to not being funded.
+  rpc CompletedIncentivePrograms(QueryCompletedIncentivePrograms)
+      returns (QueryCompletedIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs/completed";
+  }
+
+  // OngoingIncentivePrograms queries for all incentives programs that have been passed
+  // by governance, funded, and started but not yet completed.
+  rpc OngoingIncentivePrograms(QueryOngoingIncentivePrograms)
+      returns (QueryOngoingIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs/ongoing";
+  }
+
+  // UpcomingIncentivePrograms queries for all incentives programs that have been passed
+  // by governance, but not yet started. They may or may not have been funded.
+  rpc UpcomingIncentivePrograms(QueryUpcomingIncentivePrograms)
+      returns (QueryUpcomingIncentiveProgramsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_programs/upcoming";
+  }
+
+  // IncentiveProgram queries a single incentive program by ID.
+  rpc IncentiveProgram(QueryIncentiveProgram)
+      returns (QueryIncentiveProgramResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/incentive_program/{id}";
+  }
+}
+
+// TotalBond tracks the amount of coins of one uToken denomination bonded to a
+// given reward tier without specifying an account.
+message TotalBond {
+  uint32                   tier   = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+}
+
+// QueryParams defines the request structure for the Params gRPC service
+// handler.
+message QueryParams {}
+
+// QueryParamsResponse defines the response structure for the Params gRPC
+// service handler.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryPendingRewards defines the request structure for the PendingRewards gRPC service handler.
+message QueryPendingRewards {
+  string address = 1;
+}
+
+// QueryPendingRewardsResponse defines the response structure for the PendingRewards gRPC service handler.
+message QueryPendingRewardsResponse {
+  repeated cosmos.base.v1beta1.Coin rewards = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// QueryBonded defines the request structure for the Bonded gRPC service handler.
+message QueryBonded {
+  string address = 1;
+}
+
+// QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
+message QueryBondedResponse {
+  repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryUnbondings defines the request structure for the Unbondings gRPC service handler.
+message QueryUnbondings {
+  string address = 1;
+}
+
+// QueryUnbondingsResponse defines the response structure for the Unbondings gRPC service handler.
+message QueryUnbondingsResponse {
+  repeated Unbonding unbondings = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryTotalBonded defines the request structure for the TotalBonded gRPC service handler.
+message QueryTotalBonded {
+}
+
+// QueryTotalBondedResponse defines the response structure for the TotalBonded gRPC service handler.
+message QueryTotalBondedResponse {
+  repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryUpcomingIncentivePrograms defines the request structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryUpcomingIncentivePrograms {
+}
+
+// QueryUpcomingIncentiveProgramsResponse defines the response structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryUpcomingIncentiveProgramsResponse {
+  repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryOngoingIncentivePrograms defines the request structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryOngoingIncentivePrograms {
+}
+
+// QueryOngoingIncentiveProgramsResponse defines the response structure for the
+// OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service handlers.
+message QueryOngoingIncentiveProgramsResponse {
+  repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryCompletedIncentivePrograms defines the request structure for the
+// CompletedIncentivePrograms gRPC service handler.
+message QueryCompletedIncentivePrograms {
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryCompletedIncentiveProgramsResponse defines the response structure for the
+// CompletedIncentivePrograms gRPC service handler.
+message QueryCompletedIncentiveProgramsResponse {
+  repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 2;
+}
+
+// QueryIncentiveProgram defines the request structure for the IncentiveProgram
+// gRPC service handler.
+message QueryIncentiveProgram {
+  // ID specifies which program to query for
+  uint32 id = 1;
+}
+
+// QueryIncentivePrograResponse defines the response structure for the
+// IncentiveProgram gRPC service handler.
+message QueryIncentiveProgramResponse {
+  IncentiveProgram program = 1 [(gogoproto.nullable) = false];
+}

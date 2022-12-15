@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 	"github.com/umee-network/umee/v3/util/coin"
 )
 
@@ -73,7 +73,7 @@ func NewOsmosisProvider(endpoint Endpoint) *OsmosisProvider {
 }
 
 // SubscribeCurrencyPairs performs a no-op since osmosis does not use websockets
-func (p OsmosisProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
+func (OsmosisProvider) SubscribeCurrencyPairs(...types.CurrencyPair) error {
 	return nil
 }
 
