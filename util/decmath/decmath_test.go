@@ -37,7 +37,7 @@ func TestMedianDeviation(t *testing.T) {
 
 	medianDeviation, err := MedianDeviation(median, prices)
 	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("0.002325"), medianDeviation)
+	require.Equal(sdk.MustNewDecFromStr("0.048218253804964775"), medianDeviation)
 
 	// test empty prices list
 	medianDeviation, err = MedianDeviation(median, []sdk.Dec{})
