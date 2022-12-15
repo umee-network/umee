@@ -22,7 +22,6 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: umee-network/price-feeder
-          tags: type=semver,pattern=v{{version}}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
