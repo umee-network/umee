@@ -134,63 +134,83 @@ func (k Keeper) SetHistoricMedianDeviation(
 }
 
 // MedianOfHistoricMedians calculates and returns the median of the last stampNum
-// historic medians.
+// historic medians as well as the amount of medians used to calculate that median.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) MedianOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, error) {
+) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	median, err := decmath.Median(medians)
 	if err != nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
-	return median, nil
+
+	return median, uint32(len(medians)), nil
 }
 
 // AverageOfHistoricMedians calculates and returns the average of the last stampNum
-// historic medians.
+// historic medians as well as the amount of medians used to calculate that average.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) AverageOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, error) {
+) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	average, err := decmath.Average(medians)
 	if err != nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
-	return average, nil
+
+	return average, uint32(len(medians)), nil
 }
 
 // MaxOfHistoricMedian calculates and returns the maximum value of the last stampNum
-// historic medians.
+// historic medians as well as the amount of medians used to calculate that maximum.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) MaxOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, error) {
+) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	max, err := decmath.Max(medians)
 	if err != nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
-	return max, nil
+
+	return max, uint32(len(medians)), nil
 }
 
 // MinOfHistoricMedians calculates and returns the minimum value of the last stampNum
-// historic medians.
+// historic medians as well as the amount of medians used to calculate that minimum.
+// If no medians are available, all returns are zero and error is nil.
 func (k Keeper) MinOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, error) {
+) (sdk.Dec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
+	if len(medians) == 0 {
+		return sdk.ZeroDec(), 0, nil
+	}
 	min, err := decmath.Min(medians)
 	if err != nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
-	return min, nil
+
+	return min, uint32(len(medians)), nil
 }
 
 // historicPrices returns all the historic prices of a given denom.
@@ -312,26 +332,4 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 ) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyMedianDeviation(denom, blockNum))
-}
-
-// ClearHistoricMedians iterates through all medians in the store and deletes
-// them.
-func (k Keeper) ClearHistoricMedians(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
-}
-
-// ClearHistoricMedianDeviations iterates through all median deviations in
-// the store and deletes them.
-func (k Keeper) ClearHistoricMedianDeviations(ctx sdk.Context) {
-	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
 }

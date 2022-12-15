@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 func TestSuccessFilterCandleDeviations(t *testing.T) {
