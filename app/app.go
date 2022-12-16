@@ -448,7 +448,6 @@ func New(
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
 	if err != nil {

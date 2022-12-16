@@ -5,15 +5,20 @@ import (
 	"fmt"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
+var govModuleAddr = authtypes.NewModuleAddress(govtypes.ModuleName).String()
+
 // ValidateProposal checks the format of the title, description, and authority of a gov message.
 func ValidateProposal(title, description, authority string) error {
-	_, err := sdk.AccAddressFromBech32(authority)
-	if err != nil {
-		return err
+	if authority != govModuleAddr {
+		govtypes.ErrInvalidSigner.Wrapf(
+			"invalid authority: expected %s, got %s",
+			govModuleAddr, authority,
+		)
 	}
 
 	if len(strings.TrimSpace(title)) == 0 {
