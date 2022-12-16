@@ -1,6 +1,8 @@
 package keeper_test
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -91,6 +93,7 @@ func (s *IntegrationTestSuite) TestSupply() {
 	}
 
 	for _, tc := range tcs {
+		fmt.Print("\n>>> TEST  ", tc, "\n\n")
 		if tc.err != nil {
 			_, err := app.LeverageKeeper.Supply(ctx, tc.addr, tc.coin)
 			require.ErrorIs(err, tc.err, tc.msg)
