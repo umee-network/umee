@@ -15,7 +15,7 @@ var govModuleAddr = authtypes.NewModuleAddress(govtypes.ModuleName).String()
 // ValidateProposal checks the format of the title, description, and authority of a gov message.
 func ValidateProposal(title, description, authority string) error {
 	if authority != govModuleAddr {
-		govtypes.ErrInvalidSigner.Wrapf(
+		return govtypes.ErrInvalidSigner.Wrapf(
 			"invalid authority: expected %s, got %s",
 			govModuleAddr, authority,
 		)
