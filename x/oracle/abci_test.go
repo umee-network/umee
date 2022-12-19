@@ -271,16 +271,20 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			s.Require().NoError(err)
 			s.Require().Equal(tc.expectedWithinHistoricMedianDeviation, withinHistoricMedianDeviation)
 
-			medianOfHistoricMedians, err := app.OracleKeeper.MedianOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			medianOfHistoricMedians, numMedians, err := app.OracleKeeper.MedianOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedMedianOfHistoricMedians, medianOfHistoricMedians)
 
-			averageOfHistoricMedians, err := app.OracleKeeper.AverageOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			averageOfHistoricMedians, numMedians, err := app.OracleKeeper.AverageOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedAverageOfHistoricMedians, averageOfHistoricMedians)
 
-			minOfHistoricMedians, err := app.OracleKeeper.MinOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			minOfHistoricMedians, numMedians, err := app.OracleKeeper.MinOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedMinOfHistoricMedians, minOfHistoricMedians)
 
-			maxOfHistoricMedians, err := app.OracleKeeper.MaxOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			maxOfHistoricMedians, numMedians, err := app.OracleKeeper.MaxOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedMaxOfHistoricMedians, maxOfHistoricMedians)
 
 			clearHistoricPrices(ctx, app.OracleKeeper, denom.SymbolDenom)
