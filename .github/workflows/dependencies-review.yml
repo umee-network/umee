@@ -4,6 +4,10 @@ on: [pull_request]
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   dependency-review:
     runs-on: ubuntu-latest

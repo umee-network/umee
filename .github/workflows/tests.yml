@@ -6,6 +6,10 @@ on:
       - main
       - release/**
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   install-tparse:
     runs-on: ubuntu-latest

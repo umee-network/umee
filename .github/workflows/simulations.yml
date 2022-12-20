@@ -6,6 +6,10 @@ on:
       - main
       - release/**
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   install-dependencies:
     runs-on: ubuntu-latest
