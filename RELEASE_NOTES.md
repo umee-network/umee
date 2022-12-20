@@ -48,6 +48,14 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 - Swap binaries.
 - Restart the chain.
 
+There is a new option available in `app.toml` (in Base Configuration). Set `iavl-disable-fastnode` to `true` if you want to disable fastnode cache and reduce RAM usage (default is `false`).
+
+```
+# IAVLDisableFastNode enables or disables the fast node feature of IAVL.
+# Default is false.
+iavl-disable-fastnode = false
+```
+
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
 - If you use Cosmovisor, and you didn't build binary from source in the validator machine, you have to download the respective `libwasmvm` into your machine.
