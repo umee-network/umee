@@ -267,8 +267,8 @@ github.com/cosmos/gorocksdb v1.2.0 h1:d0l3jJG8M4hBouIZq0mDUHZ+zjOx044J3nGRskwTb4
 github.com/cosmos/gorocksdb v1.2.0/go.mod h1:aaKvKItm514hKfNJpUJXnnOWeBnk2GL4+Qw9NHizILw=
 github.com/cosmos/iavl v0.19.4 h1:t82sN+Y0WeqxDLJRSpNd8YFX5URIrT+p8n6oJbJ2Dok=
 github.com/cosmos/iavl v0.19.4/go.mod h1:X9PKD3J0iFxdmgNLa7b2LYWdsGd90ToV5cAONApkEPw=
-github.com/cosmos/ibc-go/v5 v5.1.0 h1:m1NHXFkwwvNeJegZqtyox1WLinh+PMy4ivU/Cs9KjeA=
-github.com/cosmos/ibc-go/v5 v5.1.0/go.mod h1:H6sV0/CkNRDtvSrhbsIgiog1WnSwhguGfg8x34MOVEk=
+github.com/cosmos/ibc-go/v5 v5.2.0 h1:LxwttRQqdUJpQ3/Gc3XPg5lkRo3pcbzx65dxFIY6ONE=
+github.com/cosmos/ibc-go/v5 v5.2.0/go.mod h1:MhDUMDVSboK5JW2pEWHNcw0wJHaHqKV/vwwP7awGhzI=
 github.com/cosmos/interchain-accounts v0.3.2 h1:7S5rSndahpjkzUvG00kKZrTZsEuVHuVC9a7p0qDVcF8=
 github.com/cosmos/ledger-cosmos-go v0.12.1 h1:sMBxza5p/rNK/06nBSNmsI/WDqI0pVJFVNihy1Y984w=
 github.com/cosmos/ledger-cosmos-go v0.12.1/go.mod h1:dhO6kj+Y+AHIOgAe4L9HL/6NDdyyth4q238I9yFpD2g=
@@ -1221,8 +1221,8 @@ github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4 h1:6uF05P2w+ueKvBNqA
 github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4/go.mod h1:qf/p/AIVfuGzBg2bYx1yg4PbHhazGfdqnm6j1BKZ62M=
 github.com/umee-network/bech32-ibc v0.3.2 h1:T2QgfMVktA9iAYLYmhmcukJr5qoaEJgRLDoUtHK8CzE=
 github.com/umee-network/bech32-ibc v0.3.2/go.mod h1:kbT1K+mxxzDkvmcsHtBXgM2meNv6AXroxPdSeWAcZE0=
-github.com/umee-network/cosmos-sdk v0.46.7-umee h1:6/JO17fjm1kxiFVjfblbNIRbilZcHV2WsC87iD63+kI=
-github.com/umee-network/cosmos-sdk v0.46.7-umee/go.mod h1:fqKqz39U5IlEFb4nbQ72951myztsDzFKKDtffYJ63nk=
+github.com/umee-network/cosmos-sdk v0.46.7-umee2 h1:YwupW+py/LU/wFURsc9+3//ypqz50Z2ZiaqGEVM/qX0=
+github.com/umee-network/cosmos-sdk v0.46.7-umee2/go.mod h1:fqKqz39U5IlEFb4nbQ72951myztsDzFKKDtffYJ63nk=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
 github.com/urfave/cli v1.22.1/go.mod h1:Gos4lmkARVdJ6EkW0WaNv/tZAAMe9V7XWyB60NtXRu0=
 github.com/urfave/cli/v2 v2.3.0/go.mod h1:LJmUH05zAU44vOAcrfzZQKsZbVcdbOG8rtL3/XcUArI=
