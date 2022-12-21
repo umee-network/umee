@@ -481,9 +481,11 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	s.borrow(borrower, coin(atomDenom, 10_000000))
 	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 40_000000))
 
-	// create an additional UMEE supplier
+	// create an additional UMEE supplier with a small borrow
 	other := s.newAccount(coin(umeeDenom, 100_000000))
 	s.supply(other, coin(umeeDenom, 100_000000))
+	s.collateralize(other, coin("u/"+umeeDenom, 100_000000))
+	s.borrow(other, coin(umeeDenom, 10_000000))
 
 	tcs := []testCase{
 		{
@@ -523,12 +525,12 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			types.ErrMaxWithdrawZero,
 		},
 		{
-			"max withdraw atom",
-			supplier,
-			atomDenom,
-			coin("u/"+atomDenom, 50_000000),
-			coin("u/"+atomDenom, 0),
-			coin(atomDenom, 60_000000),
+			"max withdraw with borrow",
+			other,
+			umeeDenom,
+			coin("u/"+umeeDenom, 60_000000),
+			coin("u/"+umeeDenom, 60_000000),
+			coin(umeeDenom, 60_000000),
 			nil,
 		},
 	}
