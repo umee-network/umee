@@ -22,10 +22,6 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: ${{ github.repository_owner }}/price-feeder
-          tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=semver,pattern={{version}}
-            type=semver,pattern=latest-{{major}}.{{minor}}
           flavor: |
             latest=false
 
