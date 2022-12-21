@@ -105,6 +105,10 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
+	if uToken.IsZero() {
+		return nil, types.ErrMaxWithdrawZero
+	}
+
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
 		return nil, err

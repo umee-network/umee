@@ -454,6 +454,134 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 	}
 }
 
+func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
+	type testCase struct {
+		msg                  string
+		addr                 sdk.AccAddress
+		denom                string
+		expectedWithdraw     sdk.Coin
+		expectFromCollateral sdk.Coin
+		expectedTokens       sdk.Coin
+		err                  error
+	}
+
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// create and fund a supplier with 100 UMEE and 100 ATOM, then supply 100 UMEE and 50 ATOM
+	// also collateralize 75 of supplied UMEE
+	supplier := s.newAccount(coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
+	s.supply(supplier, coin(umeeDenom, 100_000000))
+	s.collateralize(supplier, coin("u/"+umeeDenom, 75_000000))
+	s.supply(supplier, coin(atomDenom, 50_000000))
+
+	// create and modify a borrower to force the uToken exchange rate of ATOM from 1 to 1.2
+	borrower := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(borrower, coin(atomDenom, 100_000000))
+	s.collateralize(borrower, coin("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin(atomDenom, 10_000000))
+	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 40_000000))
+
+	// create an additional UMEE supplier
+	other := s.newAccount(coin(umeeDenom, 100_000000))
+	s.supply(other, coin(umeeDenom, 100_000000))
+
+	tcs := []testCase{
+		{
+			"unregistered base token",
+			supplier,
+			"abcd",
+			sdk.Coin{},
+			sdk.Coin{},
+			sdk.Coin{},
+			types.ErrMaxWithdrawZero,
+		},
+		{
+			"uToken",
+			supplier,
+			"u/" + umeeDenom,
+			sdk.Coin{},
+			sdk.Coin{},
+			sdk.Coin{},
+			types.ErrUToken,
+		},
+		{
+			"max withdraw umee",
+			supplier,
+			umeeDenom,
+			coin("u/"+umeeDenom, 100_000000),
+			coin("u/"+umeeDenom, 75_000000),
+			coin(umeeDenom, 100_000000),
+			nil,
+		},
+		{
+			"duplicate max withdraw umee",
+			supplier,
+			umeeDenom,
+			sdk.Coin{},
+			sdk.Coin{},
+			sdk.Coin{},
+			types.ErrMaxWithdrawZero,
+		},
+		{
+			"max withdraw atom",
+			supplier,
+			atomDenom,
+			coin("u/"+atomDenom, 50_000000),
+			coin("u/"+atomDenom, 0),
+			coin(atomDenom, 60_000000),
+			nil,
+		},
+	}
+
+	for _, tc := range tcs {
+		msg := &types.MsgMaxWithdraw{
+			Supplier: tc.addr.String(),
+			Denom:    tc.denom,
+		}
+		if tc.err != nil {
+			_, err := srv.MaxWithdraw(ctx, msg)
+			require.ErrorIs(err, tc.err, tc.msg)
+		} else {
+			expectFromBalance := tc.expectedWithdraw.Sub(tc.expectFromCollateral)
+
+			// initial state
+			iBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			iCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.denom)
+			iBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify the outputs of withdraw function
+			resp, err := srv.MaxWithdraw(ctx, msg)
+			require.NoError(err, tc.msg)
+			require.Equal(tc.expectedWithdraw, resp.Withdrawn, tc.msg)
+			require.Equal(tc.expectedTokens, resp.Received, tc.msg)
+
+			// final state
+			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			fCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.denom)
+			fBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify token balance increased by the expected amount
+			require.Equal(iBalance.Add(tc.expectedTokens).Sub(expectFromBalance),
+				fBalance, tc.msg, "token balance")
+			// verify uToken collateral decreased by the expected amount
+			s.requireEqualCoins(iCollateral.Sub(tc.expectFromCollateral), fCollateral, tc.msg, "uToken collateral")
+			// verify uToken supply decreased by the expected amount
+			require.Equal(iUTokenSupply.Sub(tc.expectedWithdraw), fUTokenSupply, tc.msg, "uToken supply")
+			// verify uToken exchange rate is unchanged
+			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
+			// verify borrowed coins are unchanged
+			require.Equal(iBorrowed, fBorrowed, tc.msg, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
+		}
+	}
+}
+
 func (s *IntegrationTestSuite) TestMsgCollateralize() {
 	type testCase struct {
 		msg    string
@@ -654,6 +782,136 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			require.Equal(iCollateral.Sub(tc.uToken), fCollateral, tc.msg, "uToken collateral")
 			// verify uToken supply is unchanged
 			require.Equal(iUTokenSupply, fUTokenSupply, tc.msg, "uToken supply")
+			// verify uToken exchange rate is unchanged
+			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
+			// verify borrowed coins are unchanged
+			require.Equal(iBorrowed, fBorrowed, tc.msg, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
+		}
+	}
+}
+
+func (s *IntegrationTestSuite) TestMsgSupplyCollateral() {
+	type testCase struct {
+		msg             string
+		addr            sdk.AccAddress
+		coin            sdk.Coin
+		expectedUTokens sdk.Coin
+		err             error
+	}
+
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// create and fund a supplier with 100 UMEE and 100 ATOM
+	supplier := s.newAccount(coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
+
+	// create and modify a borrower to force the uToken exchange rate of ATOM from 1 to 1.5
+	borrower := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(borrower, coin(atomDenom, 100_000000))
+	s.collateralize(borrower, coin("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin(atomDenom, 10_000000))
+	s.tk.SetBorrow(ctx, borrower, coin(atomDenom, 60_000000))
+
+	// create a supplier that will exceed token's default MaxSupply
+	whale := s.newAccount(coin(umeeDenom, 1_000_000_000000))
+
+	tcs := []testCase{
+		{
+			"unregistered denom",
+			supplier,
+			coin("abcd", 80_000000),
+			sdk.Coin{},
+			types.ErrNotRegisteredToken,
+		},
+		{
+			"uToken",
+			supplier,
+			coin("u/"+umeeDenom, 80_000000),
+			sdk.Coin{},
+			types.ErrUToken,
+		},
+		{
+			"no balance",
+			borrower,
+			coin(umeeDenom, 20_000000),
+			sdk.Coin{},
+			sdkerrors.ErrInsufficientFunds,
+		},
+		{
+			"insufficient balance",
+			supplier,
+			coin(umeeDenom, 120_000000),
+			sdk.Coin{},
+			sdkerrors.ErrInsufficientFunds,
+		},
+		{
+			"valid supply",
+			supplier,
+			coin(umeeDenom, 80_000000),
+			coin("u/"+umeeDenom, 80_000000),
+			nil,
+		},
+		{
+			"additional supply",
+			supplier,
+			coin(umeeDenom, 20_000000),
+			coin("u/"+umeeDenom, 20_000000),
+			nil,
+		},
+		{
+			"high exchange rate",
+			supplier,
+			coin(atomDenom, 60_000000),
+			coin("u/"+atomDenom, 40_000000),
+			nil,
+		},
+		{
+			"max supply",
+			whale,
+			coin(umeeDenom, 1_000_000_000000),
+			sdk.Coin{},
+			types.ErrMaxSupply,
+		},
+	}
+
+	for _, tc := range tcs {
+		msg := &types.MsgSupplyCollateral{
+			Supplier: tc.addr.String(),
+			Asset:    tc.coin,
+		}
+		if tc.err != nil {
+			_, err := srv.SupplyCollateral(ctx, msg)
+			require.ErrorIs(err, tc.err, tc.msg)
+		} else {
+			denom := tc.coin.Denom
+
+			// initial state
+			iBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			iCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
+			iBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify the outputs of supply collateral function
+			resp, err := srv.SupplyCollateral(ctx, msg)
+			require.NoError(err, tc.msg)
+			require.Equal(tc.expectedUTokens, resp.Collateralized, tc.msg)
+
+			// final state
+			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			fCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, denom)
+			fBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify token balance decreased and uToken balance unchanged
+			require.Equal(iBalance.Sub(tc.coin), fBalance, tc.msg, "token balance")
+			// verify uToken collateral increaaed
+			require.Equal(iCollateral.Add(tc.expectedUTokens), fCollateral, tc.msg, "uToken collateral")
+			// verify uToken supply increased by the expected amount
+			require.Equal(iUTokenSupply.Add(tc.expectedUTokens), fUTokenSupply, tc.msg, "uToken supply")
 			// verify uToken exchange rate is unchanged
 			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 			// verify borrowed coins are unchanged
