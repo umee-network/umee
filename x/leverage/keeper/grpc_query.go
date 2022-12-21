@@ -288,10 +288,19 @@ func (q Querier) MaxWithdraw(
 		return nil, err
 	}
 
-	uToken, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom)
+	maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, false)
 	if err != nil {
 		return nil, err
 	}
+	maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, true)
+	if err != nil {
+		return nil, err
+	}
+
+	uToken := sdk.NewCoin(
+		maxCurrentWithdraw.Denom,
+		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
+	)
 
 	token, err := q.Keeper.ExchangeUToken(ctx, uToken)
 	if err != nil {

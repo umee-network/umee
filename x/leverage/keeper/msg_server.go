@@ -100,10 +100,19 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
-	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
+	maxCurrentWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, false)
 	if err != nil {
 		return nil, err
 	}
+	maxHistoricWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, true)
+	if err != nil {
+		return nil, err
+	}
+
+	uToken := sdk.NewCoin(
+		maxCurrentWithdraw.Denom,
+		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
+	)
 
 	if uToken.IsZero() {
 		return nil, types.ErrMaxWithdrawZero
