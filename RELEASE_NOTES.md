@@ -31,7 +31,11 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 
 If you build on system different than Linux amd64, then you need to download appropriate version of libwasmvm (eg from [CosmWasm/wasmvm Relases](https://github.com/CosmWasm/wasmvm/releases)) or build it from source (you will need Rust toolchain).
 
-Please check [Supported Platforms](https://github.com/CosmWasm/wasmvm/tree/v1.1.1/#supported-platforms) for `libwasmvm`
+Otherwise you have to download `libwasmvm`. Please check [Supported Platforms](https://github.com/CosmWasm/wasmvm/tree/main/#supported-platforms). Example:
+
+```bash
+wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -P /lib/
+```
 
 ### Update instructions
 
@@ -43,7 +47,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 ```
 
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
-- Run latest Peggo (v1.3.0) - **updated**
+- Run latest Peggo (v1.4.0) - **updated**
 - Run latest Price Feeder (v2.0.2) - **updated**
 - Swap binaries.
 - Restart the chain.
@@ -58,10 +62,6 @@ iavl-disable-fastnode = false
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
-- If you use Cosmovisor, and you didn't build binary from source in the validator machine, you have to download the respective `libwasmvm` into your machine.
+- If you use Cosmovisor, and you didn't build binary from source in the validator machine, you have to download the respective `libwasmvm` into your machine. See the previous section for more details.
 
-```bash
-$ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
-```
-
-NOTE: As described in the previous section, you need to have `libwasmvm.x86_64.so` correctly linked to the binary. BEFORE the upgrade, make sure the binary is working. You can test it by running `./umeed-v3.2.0 --version`.
+NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v3.3.0 --version`.
