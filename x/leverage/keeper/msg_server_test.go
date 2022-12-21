@@ -787,7 +787,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
-	// create and fund a supplier which supplies UMEE and ATOM
+	// create and fund a supplier which supplies 100 UMEE and 100 ATOM
 	supplier := s.newAccount(coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
 	s.supply(supplier, coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
 
@@ -848,7 +848,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 		{
 			"zero collateral",
 			supplier,
-			coin(atomDenom, 100_000000),
+			coin(atomDenom, 1_000000),
 			types.ErrUndercollaterized,
 		},
 	}
