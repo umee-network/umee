@@ -11,8 +11,8 @@ import (
 // under either recent (historic median) or current prices. It returns an error if current
 // prices cannot be calculated, but will use current prices (without returning an error)
 // for any token whose historic prices cannot be calculated.
-// This should be checked at the end of any transaction which is restricted by borrow limits,
-// i.e. Borrow, Decollateralize, Withdraw.
+// This should be checked in msg_server.go at the end of any transaction which is restricted
+// by borrow limits, i.e. Borrow, Decollateralize, Withdraw.
 func (k Keeper) checkBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
