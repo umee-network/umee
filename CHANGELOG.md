@@ -46,12 +46,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-07
+## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 
 ### Features
 
 - [1642](https://github.com/umee-network/umee/pull/1642) Added QueryMaxWithdraw and MsgMaxWithdraw
 - [1633](https://github.com/umee-network/umee/pull/1633) MarketSummary query now displays symbol price instead of base price for readability.
+
+### Improvements
+
+- [1659](https://github.com/umee-network/umee/pull/1659) Update to Cosmos SDK 0.46.7 and related dependencies (#1659)
 
 ### Fixes
 
@@ -59,6 +63,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1650](https://github.com/umee-network/umee/pull/1650) Fixes bug with reserves in ExportGenesis
 - [1642](https://github.com/umee-network/umee/pull/1642) Added missing CLI for QueryBadDebts
 - [1633](https://github.com/umee-network/umee/pull/1633) Increases price calculation precision for high exponent assets.
+- [1645](https://github.com/umee-network/umee/pull/1645) Fix: docker build & release
 
 ## [v3.2.0](https://github.com/umee-network/umee/releases/tag/v3.2.0) - 2022-11-25
 
