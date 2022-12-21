@@ -16,8 +16,8 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v3/app"
 	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle"
+	"github.com/umee-network/umee/v3/x/oracle/keeper"
 	"github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -42,11 +42,11 @@ func clearHistoricPrices(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.HistoricStampPeriod(ctx))
+) {
+	stampPeriod := int(k.HistoricStampPeriod(ctx))
 	numStamps := int(k.MaximumPriceStamps(ctx))
-	for i := 0; i < numStamps; i++  {
-		k.DeleteHistoricPrice(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	for i := 0; i < numStamps; i++ {
+		k.DeleteHistoricPrice(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -55,11 +55,11 @@ func clearHistoricMedians(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+) {
+	stampPeriod := int(k.MedianStampPeriod(ctx))
 	numStamps := int(k.MaximumMedianStamps(ctx))
 	for i := 0; i < numStamps; i++ {
-		k.DeleteHistoricMedian(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+		k.DeleteHistoricMedian(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -69,11 +69,11 @@ func clearHistoricMedianDeviations(
 	ctx sdk.Context,
 	k keeper.Keeper,
 	denom string,
-	) {
-	stampPeriod	:= int(k.MedianStampPeriod(ctx))
+) {
+	stampPeriod := int(k.MedianStampPeriod(ctx))
 	numStamps := int(k.MaximumMedianStamps(ctx))
-	for i := 0; i < numStamps; i++  {
-		k.DeleteHistoricMedianDeviation(ctx, denom, uint64(ctx.BlockHeight()) - uint64(i*stampPeriod))
+	for i := 0; i < numStamps; i++ {
+		k.DeleteHistoricMedianDeviation(ctx, denom, uint64(ctx.BlockHeight())-uint64(i*stampPeriod))
 	}
 }
 
@@ -136,8 +136,8 @@ var historacleTestCases = []struct {
 			sdk.MustNewDecFromStr("1.175"),
 			sdk.MustNewDecFromStr("1.2"),
 		},
-		sdk.MustNewDecFromStr("0.009724999999999997"),
-		false,
+		sdk.MustNewDecFromStr("0.098615414616580085"),
+		true,
 		sdk.MustNewDecFromStr("1.1675"),
 		sdk.MustNewDecFromStr("1.1725"),
 		sdk.MustNewDecFromStr("1.155"),
@@ -153,7 +153,7 @@ var historacleTestCases = []struct {
 			sdk.MustNewDecFromStr("2.405"),
 			sdk.MustNewDecFromStr("2.24"),
 		},
-		sdk.MustNewDecFromStr("0.145091666666666664"),
+		sdk.MustNewDecFromStr("0.380909000506245145"),
 		false,
 		sdk.MustNewDecFromStr("2.56"),
 		sdk.MustNewDecFromStr("2.595"),
@@ -170,8 +170,8 @@ var historacleTestCases = []struct {
 			sdk.MustNewDecFromStr("4.995"),
 			sdk.MustNewDecFromStr("5.15"),
 		},
-		sdk.MustNewDecFromStr("0.194024999999999997"),
-		false,
+		sdk.MustNewDecFromStr("0.440482689784740573"),
+		true,
 		sdk.MustNewDecFromStr("4.745"),
 		sdk.MustNewDecFromStr("4.70125"),
 		sdk.MustNewDecFromStr("4.165"),
@@ -265,16 +265,20 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			s.Require().NoError(err)
 			s.Require().Equal(tc.expectedWithinHistoricMedianDeviation, withinHistoricMedianDeviation)
 
-			medianOfHistoricMedians, err := app.OracleKeeper.MedianOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			medianOfHistoricMedians, numMedians, err := app.OracleKeeper.MedianOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedMedianOfHistoricMedians, medianOfHistoricMedians)
 
-			averageOfHistoricMedians, err := app.OracleKeeper.AverageOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			averageOfHistoricMedians, numMedians, err := app.OracleKeeper.AverageOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedAverageOfHistoricMedians, averageOfHistoricMedians)
 
-			minOfHistoricMedians, err := app.OracleKeeper.MinOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			minOfHistoricMedians, numMedians, err := app.OracleKeeper.MinOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedMinOfHistoricMedians, minOfHistoricMedians)
 
-			maxOfHistoricMedians, err := app.OracleKeeper.MaxOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			maxOfHistoricMedians, numMedians, err := app.OracleKeeper.MaxOfHistoricMedians(ctx, denom.SymbolDenom, 6)
+			s.Require().Equal(uint32(4), numMedians)
 			s.Require().Equal(tc.expectedMaxOfHistoricMedians, maxOfHistoricMedians)
 
 			clearHistoricPrices(ctx, app.OracleKeeper, denom.SymbolDenom)
