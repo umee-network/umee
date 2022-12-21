@@ -29,8 +29,8 @@ archives:
         format: zip
     name_template: '{{ replace .Version "price-feeder/" "price-feeder-" }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
     files:
-      - README.md
-      - ../LICENSE
+      - price-feeder/README.md
+      - LICENSE
 
 release:
   disable: false
