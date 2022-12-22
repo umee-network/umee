@@ -32,6 +32,7 @@ import (
 	ibchost "github.com/cosmos/ibc-go/v5/modules/core/24-host"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
+	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -379,10 +380,6 @@ func TestAppImportExport(t *testing.T) {
 	)
 	require.Equal(t, appparams.Name, newApp.Name())
 
-	var genesisState GenesisState
-	err = json.Unmarshal(exported.AppState, &genesisState)
-	require.NoError(t, err)
-
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Sprintf("%v", r)
@@ -396,7 +393,11 @@ func TestAppImportExport(t *testing.T) {
 
 	ctxA := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
 	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
-	newApp.ModuleManager.InitGenesis(ctxB, app.AppCodec(), genesisState)
+
+	newApp.InitChainer(ctxB, abci.RequestInitChain{
+		AppStateBytes:   exported.AppState,
+		ConsensusParams: exported.ConsensusParams,
+	})
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
 	fmt.Printf("comparing stores...\n")
@@ -539,14 +540,6 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	)
 	require.Equal(t, appparams.Name, newApp.Name())
 
-	var genesisState GenesisState
-	err = json.Unmarshal(exported.AppState, &genesisState)
-	require.NoError(t, err)
-
-	// newApp.InitChain(abci.RequestInitChain{
-	// 	AppStateBytes: exported.AppState,
-	// })
-
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Sprintf("%v", r)
@@ -559,16 +552,19 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
-	newApp.ModuleManager.InitGenesis(ctxB, newApp.AppCodec(), genesisState)
+	newApp.InitChainer(ctxB, abci.RequestInitChain{
+		AppStateBytes:   exported.AppState,
+		ConsensusParams: exported.ConsensusParams,
+	})
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
 	_, _, err = simulation.SimulateFromSeed(
 		t,
 		os.Stdout,
 		newApp.BaseApp,
-		appStateFn(app.AppCodec(), app.StateSimulationManager),
+		appStateFn(newApp.AppCodec(), newApp.StateSimulationManager),
 		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
-		simapp.SimulationOperations(newApp, app.AppCodec(), config),
+		simapp.SimulationOperations(newApp, newApp.AppCodec(), config),
 		newApp.ModuleAccountAddrs(),
 		config,
 		newApp.AppCodec(),

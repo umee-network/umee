@@ -248,7 +248,7 @@ type UmeeApp struct {
 	ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
 
 	// the module manager
-	ModuleManager *module.Manager
+	mm *module.Manager
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -604,7 +604,7 @@ func New(
 			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper))
 	}
 
-	app.ModuleManager = module.NewManager(appModules...)
+	app.mm = module.NewManager(appModules...)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
 	// there is nothing left over in the validator fee pool, so as to keep the
@@ -682,18 +682,18 @@ func New(
 		orderMigrations = append(orderMigrations, wasm.ModuleName)
 	}
 
-	app.ModuleManager.SetOrderBeginBlockers(beginBlockers...)
-	app.ModuleManager.SetOrderEndBlockers(endBlockers...)
-	app.ModuleManager.SetOrderInitGenesis(initGenesis...)
-	app.ModuleManager.SetOrderMigrations(orderMigrations...)
+	app.mm.SetOrderBeginBlockers(beginBlockers...)
+	app.mm.SetOrderEndBlockers(endBlockers...)
+	app.mm.SetOrderInitGenesis(initGenesis...)
+	app.mm.SetOrderMigrations(orderMigrations...)
 
-	app.ModuleManager.RegisterInvariants(&app.CrisisKeeper)
-	app.ModuleManager.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
+	app.mm.RegisterInvariants(&app.CrisisKeeper)
+	app.mm.RegisterRoutes(app.Router(), app.QueryRouter(), encodingConfig.Amino)
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
-	app.ModuleManager.RegisterServices(app.configurator)
+	app.mm.RegisterServices(app.configurator)
 
 	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
-	// Make sure it's called after `app.ModuleManager` and `app.configurator` are set.
+	// Make sure it's called after `app.mm` and `app.configurator` are set.
 	app.RegisterUpgradeHandlers(Experimental)
 
 	// add test gRPC service for testing gRPC queries in isolation
@@ -704,7 +704,7 @@ func New(
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 	}
 
-	simStateModules := genmap.Pick(app.ModuleManager.Modules,
+	simStateModules := genmap.Pick(app.mm.Modules,
 		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
 	// TODO: Ensure x/leverage implements simulator and add it here:
 	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
@@ -790,12 +790,12 @@ func (app *UmeeApp) Name() string { return app.BaseApp.Name() }
 
 // BeginBlocker implements Umee's BeginBlock ABCI method.
 func (app *UmeeApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
-	return app.ModuleManager.BeginBlock(ctx, req)
+	return app.mm.BeginBlock(ctx, req)
 }
 
 // EndBlocker implements Umee's EndBlock ABCI method.
 func (app *UmeeApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
-	return app.ModuleManager.EndBlock(ctx, req)
+	return app.mm.EndBlock(ctx, req)
 }
 
 // InitChainer implements Umee's InitChain ABCI method.
@@ -804,8 +804,8 @@ func (app *UmeeApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci
 	if err := json.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(fmt.Sprintf("failed to unmarshal genesis state: %v", err))
 	}
-	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap())
-	return app.ModuleManager.InitGenesis(ctx, app.appCodec, genesisState)
+	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
+	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
 // LoadHeight loads a particular height via Umee's BaseApp.
