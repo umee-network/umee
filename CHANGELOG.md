@@ -51,7 +51,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1548](https://github.com/umee-network/umee/pull/1548) Historacle prices and medians keeper proof of concept.
 - [1580](https://github.com/umee-network/umee/pull/1580), [1632](https://github.com/umee-network/umee/pull/1632), [1657](https://github.com/umee-network/umee/pull/1657) Median tracking for historacle pricing.
 - [1630](https://github.com/umee-network/umee/pull/1630) Incentive module proto.
-- [1588](https://github.com/umee-network/umee/pull/1588), Historacle proto.
+- [1588](https://github.com/umee-network/umee/pull/1588) Historacle proto.
 - [1653](https://github.com/umee-network/umee/pull/1653) Incentive Msg Server interface implementation.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
