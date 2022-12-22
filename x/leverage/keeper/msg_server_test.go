@@ -39,11 +39,11 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				Title:       "test",
 				Description: "test",
 				AddTokens: []types.Token{
-					registeredUmee,
+					newTokens,
 				},
 			},
 			true,
-			"expected gov account as only signer for proposal message",
+			"invalid authority",
 		},
 		{
 			"already registered token",
@@ -75,10 +75,12 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 
 	for _, tc := range testCases {
 		s.Run(tc.name, func() {
-			_, err := s.msgSrvr.GovUpdateRegistry(s.ctx, tc.req)
+			err := tc.req.ValidateBasic()
+			if err == nil {
+				_, err = s.msgSrvr.GovUpdateRegistry(s.ctx, tc.req)
+			}
 			if tc.expectErr {
-				s.Require().Error(err)
-				s.Require().Contains(err.Error(), tc.errMsg)
+				s.Require().ErrorContains(err, tc.errMsg)
 			} else {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
@@ -128,7 +130,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				},
 			},
 			true,
-			"expected gov account as only signer for proposal message",
+			"invalid authority",
 		},
 		{
 			"valid authority and valid update token registry",
@@ -147,10 +149,12 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 
 	for _, tc := range testCases {
 		s.Run(tc.name, func() {
-			_, err := s.msgSrvr.GovUpdateRegistry(s.ctx, tc.req)
+			err := tc.req.ValidateBasic()
+			if err == nil {
+				_, err = s.msgSrvr.GovUpdateRegistry(s.ctx, tc.req)
+			}
 			if tc.expectErr {
-				s.Require().Error(err)
-				s.Require().Contains(err.Error(), tc.errMsg)
+				s.Require().ErrorContains(err, tc.errMsg)
 			} else {
 				s.Require().NoError(err)
 				// no tokens should have been deleted

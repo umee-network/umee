@@ -79,7 +79,7 @@ require (
 	github.com/cosmos/gogoproto v1.4.2 // indirect
 	github.com/cosmos/gorocksdb v1.2.0 // indirect
 	github.com/cosmos/iavl v0.19.4 // indirect
-	github.com/cosmos/ibc-go/v5 v5.1.0 // indirect
+	github.com/cosmos/ibc-go/v5 v5.2.0 // indirect
 	github.com/cosmos/ledger-cosmos-go v0.12.1 // indirect
 	github.com/creachadair/taskgroup v0.3.2 // indirect
 	github.com/curioswitch/go-reassign v0.2.0 // indirect
@@ -306,7 +306,7 @@ require (
 replace (
 	github.com/CosmWasm/wasmd => github.com/notional-labs/wasmd v0.29.0-sdk46
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4
-	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.7-umee
+	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.7-umee2
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
