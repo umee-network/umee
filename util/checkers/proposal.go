@@ -16,7 +16,7 @@ var govModuleAddr string
 // SetGovModuleAddr sets pacakge private variable for verifying Proposal authority
 // We can't set it upfront when the package is loaded, because the String() function
 // of an address requires bech32 config, which is set when initializing an app.
-// Setting a gov module address here simplifiy the flow and assures it's constant overall in
+// Setting a gov module address here simplify the flow and assures it's constant overall in
 // the app. In unit tests, you have to set it to some variable.
 func SetGovModuleAddr(addr string) {
 	if govModuleAddr != "" {
