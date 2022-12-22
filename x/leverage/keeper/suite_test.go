@@ -8,8 +8,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
@@ -62,7 +60,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 		app.GetSubspace(types.ModuleName),
 		app.BankKeeper,
 		newMockOracleKeeper(),
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		true,
 	)
 
