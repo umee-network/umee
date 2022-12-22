@@ -117,7 +117,6 @@ import (
 	customante "github.com/umee-network/umee/v3/ante"
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/swagger"
-	"github.com/umee-network/umee/v3/util/checkers"
 	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
@@ -312,15 +311,13 @@ func New(
 	keys := sdk.NewKVStoreKeys(storeKeys...)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
+	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
 
 	// configure state listening capabilities using AppOptions
 	// we are doing nothing with the returned streamingServices and waitGroup in this case
 	// if _, _, err := streaming.LoadStreamingServices(bApp, appOpts, appCodec, keys); err != nil {
 	// 	tmos.Exit(err.Error())
 	// }
-
-	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
-	checkers.SetGovModuleAddr(govModuleAddr)
 
 	app := &UmeeApp{
 		BaseApp:           bApp,

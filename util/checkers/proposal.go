@@ -10,7 +10,8 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 
-	// imported to assure params are set before loading this package
+	// imported to assure params are set before loading this package and we can correctly
+	// initialize govModuleAddr
 	_ "github.com/umee-network/umee/v3/app/params"
 )
 
@@ -19,18 +20,6 @@ var govModuleAddr string
 
 func init() {
 	govModuleAddr = authtypes.NewModuleAddress(govtypes.ModuleName).String()
-}
-
-// SetGovModuleAddr sets pacakge private variable for verifying Proposal authority
-// We can't set it upfront when the package is loaded, because the String() function
-// of an address requires bech32 config, which is set when initializing an app.
-// Setting a gov module address here simplify the flow and assures it's constant overall in
-// the app. In unit tests, you have to set it to some variable.
-func SetGovModuleAddr(addr string) {
-	// if govModuleAddr != "" {
-	// 	panic("gov module address already set in the checkers package")
-	// }
-	govModuleAddr = addr
 }
 
 const minProposalTitleLen = 3
