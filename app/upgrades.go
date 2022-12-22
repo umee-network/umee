@@ -44,7 +44,7 @@ func (app *UmeeApp) registerUpgrade3_3to3_4(_ upgradetypes.Plan) {
 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
 			err := upgrader.HistoracleParams3x4(ctx)
 			if err != nil {
-				ctx.Logger().Error("Unable to run v3.4 Migration!")
+				ctx.Logger().Error("Unable to run v3.4 Migration!", "err", err)
 				return fromVM, err
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
