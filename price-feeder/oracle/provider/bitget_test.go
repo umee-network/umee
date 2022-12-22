@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 func TestBitgetProvider_GetTickerPrices(t *testing.T) {
@@ -22,17 +22,17 @@ func TestBitgetProvider_GetTickerPrices(t *testing.T) {
 	t.Run("valid_request_single_ticker", func(t *testing.T) {
 		lastPrice := "34.69000000"
 		volume := "2396974.02000000"
-		instId := "ATOMUSDT"
+		instID := "ATOMUSDT"
 
 		tickerMap := map[string]BitgetTicker{}
-		tickerMap[instId] = BitgetTicker{
+		tickerMap[instID] = BitgetTicker{
 			Arg: BitgetSubscriptionArg{
 				Channel: "tickers",
-				InstID:  instId,
+				InstID:  instID,
 			},
 			Data: []BitgetTickerData{
 				{
-					InstID: instId,
+					InstID: instID,
 					Price:  lastPrice,
 					Volume: volume,
 				},
@@ -141,21 +141,6 @@ func TestBitgetProvider_GetCandlePrices(t *testing.T) {
 		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.EqualError(t, err, "failed to get candles price for FOOBAR")
 		require.Nil(t, prices)
-	})
-}
-
-func TestBitgetProvider_SubscribeCurrencyPairs(t *testing.T) {
-	p, err := NewBitgetProvider(
-		context.TODO(),
-		zerolog.Nop(),
-		Endpoint{},
-		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
-	)
-	require.NoError(t, err)
-
-	t.Run("invalid_subscribe_channels_empty", func(t *testing.T) {
-		err = p.SubscribeCurrencyPairs([]types.CurrencyPair{}...)
-		require.ErrorContains(t, err, "currency pairs is empty")
 	})
 }
 

@@ -311,10 +311,8 @@ paths:
               oracle_price:
                 type: string
                 description: >-
-                  Oracle Price is the current USD value of a base token.
-                  Exponent must be applied to reach the price from symbol_denom.
-                  For example, a price of $0.000001 for 1 uumee is equivalent to
-                  $1.00 for 1 UMEE. Oracle price is nil when the oracle is down.
+                  Oracle Price is the current USD value of a token. Oracle price
+                  is nil when the oracle is down.
               uToken_exchange_rate:
                 type: string
                 description: >-
@@ -468,6 +466,91 @@ paths:
                       format: byte
       parameters:
         - name: denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/leverage/v1/max_withdraw:
+    get:
+      summary: >-
+        MaxWithdraw queries the maximum amount of a given token an address can
+        withdraw.
+      operationId: MaxWithdraw
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              uTokens:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+                title: uTokens is the maximum amount of uTokens that can be withdrawn
+              tokens:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+                title: >-
+                  Tokens is the equivalent of max uTokens converted to base
+                  tokens
+            description: >-
+              QueryMaxWithdrawResponse defines the response structure for the
+              MaxWithdraw gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          in: query
+          required: false
+          type: string
+        - name: denom
+          description: >-
+            denom is the base token denom associated with the uToken to
+            withdraw.
           in: query
           required: false
           type: string
@@ -878,6 +961,146 @@ paths:
                       format: byte
       tags:
         - Query
+  /umee/historacle/v1/denoms/median_deviations:
+    get:
+      summary: |-
+        MedianDeviations returns median deviations of all denoms,
+        or, if specified, returns a single median deviation
+      operationId: MedianDeviations
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              medianDeviations:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: >-
+                  medians defines a list of the median deviations for all
+                  stamped denoms.
+            description: |-
+              QueryMedianDeviationsResponse is response type for the
+              Query/MedianDeviations RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: denom defines the denomination to query for.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/historacle/v1/denoms/medians:
+    get:
+      summary: |-
+        Medians returns medians of all denoms,
+        or, if specified, returns a single median
+      operationId: Medians
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              medians:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: medians defines a list of the medians for all stamped denoms.
+            description: |-
+              QueryMediansResponse is response type for the
+              Query/Medians RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: denom defines the denomination to query for.
+          in: query
+          required: false
+          type: string
+        - name: numStamps
+          description: >-
+            numStamps defines the number of median stamps to query for.
+            numStamps
+
+            must be greater than 0.
+          in: query
+          required: false
+          type: integer
+          format: int64
+      tags:
+        - Query
   /umee/oracle/v1/denoms/active_exchange_rates:
     get:
       summary: ActiveExchangeRates returns all active denoms
@@ -1036,6 +1259,41 @@ paths:
                     format: uint64
                   min_valid_per_window:
                     type: string
+                  historic_stamp_period:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Historic Stamp Period represents the amount of blocks the
+                      oracle
+
+                      module waits before recording a new historic price.
+                  median_stamp_period:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Median Stamp Period represents the amount blocks the
+                      oracle module
+
+                      waits between calculating and stamping a new median and
+                      standard
+
+                      deviation of that median.
+                  maximum_price_stamps:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Maximum Price Stamps represents the maximum amount of
+                      historic prices
+
+                      the oracle module will store before pruning via FIFO.
+                  maximum_median_stamps:
+                    type: string
+                    format: uint64
+                    description: >-
+                      Maximum Median Stamps represents the maximum amount of
+                      medians the
+
+                      oracle module will store before pruning via FIFO.
             description: >-
               QueryParamsResponse is the response type for the Query/Params RPC
               method.
@@ -1750,10 +2008,8 @@ definitions:
       oracle_price:
         type: string
         description: >-
-          Oracle Price is the current USD value of a base token. Exponent must
-          be applied to reach the price from symbol_denom. For example, a price
-          of $0.000001 for 1 uumee is equivalent to $1.00 for 1 UMEE. Oracle
-          price is nil when the oracle is down.
+          Oracle Price is the current USD value of a token. Oracle price is nil
+          when the oracle is down.
       uToken_exchange_rate:
         type: string
         description: >-
@@ -1877,6 +2133,38 @@ definitions:
     description: >-
       QueryMarketSummaryResponse defines the response structure for the
       MarketSummary gRPC service handler.
+  umee.leverage.v1.QueryMaxWithdrawResponse:
+    type: object
+    properties:
+      uTokens:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+        title: uTokens is the maximum amount of uTokens that can be withdrawn
+      tokens:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+        title: Tokens is the equivalent of max uTokens converted to base tokens
+    description: >-
+      QueryMaxWithdrawResponse defines the response structure for the
+      MaxWithdraw gRPC service handler.
   umee.leverage.v1.QueryParamsResponse:
     type: object
     properties:
@@ -2471,6 +2759,31 @@ definitions:
         format: uint64
       min_valid_per_window:
         type: string
+      historic_stamp_period:
+        type: string
+        format: uint64
+        description: |-
+          Historic Stamp Period represents the amount of blocks the oracle
+          module waits before recording a new historic price.
+      median_stamp_period:
+        type: string
+        format: uint64
+        description: |-
+          Median Stamp Period represents the amount blocks the oracle module
+          waits between calculating and stamping a new median and standard
+          deviation of that median.
+      maximum_price_stamps:
+        type: string
+        format: uint64
+        description: |-
+          Maximum Price Stamps represents the maximum amount of historic prices
+          the oracle module will store before pruning via FIFO.
+      maximum_median_stamps:
+        type: string
+        format: uint64
+        description: |-
+          Maximum Median Stamps represents the maximum amount of medians the
+          oracle module will store before pruning via FIFO.
     description: Params defines the parameters for the oracle module.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
@@ -2644,6 +2957,50 @@ definitions:
     description: |-
       QueryFeederDelegationResponse is response type for the
       Query/FeederDelegation RPC method.
+  umee.oracle.v1.QueryMedianDeviationsResponse:
+    type: object
+    properties:
+      medianDeviations:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+        description: >-
+          medians defines a list of the median deviations for all stamped
+          denoms.
+    description: |-
+      QueryMedianDeviationsResponse is response type for the
+      Query/MedianDeviations RPC method.
+  umee.oracle.v1.QueryMediansResponse:
+    type: object
+    properties:
+      medians:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+        description: medians defines a list of the medians for all stamped denoms.
+    description: |-
+      QueryMediansResponse is response type for the
+      Query/Medians RPC method.
   umee.oracle.v1.QueryMissCounterResponse:
     type: object
     properties:
@@ -2691,6 +3048,33 @@ definitions:
             format: uint64
           min_valid_per_window:
             type: string
+          historic_stamp_period:
+            type: string
+            format: uint64
+            description: |-
+              Historic Stamp Period represents the amount of blocks the oracle
+              module waits before recording a new historic price.
+          median_stamp_period:
+            type: string
+            format: uint64
+            description: |-
+              Median Stamp Period represents the amount blocks the oracle module
+              waits between calculating and stamping a new median and standard
+              deviation of that median.
+          maximum_price_stamps:
+            type: string
+            format: uint64
+            description: >-
+              Maximum Price Stamps represents the maximum amount of historic
+              prices
+
+              the oracle module will store before pruning via FIFO.
+          maximum_median_stamps:
+            type: string
+            format: uint64
+            description: |-
+              Maximum Median Stamps represents the maximum amount of medians the
+              oracle module will store before pruning via FIFO.
     description: QueryParamsResponse is the response type for the Query/Params RPC method.
   umee.oracle.v1.QuerySlashWindowResponse:
     type: object

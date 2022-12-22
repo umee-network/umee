@@ -33,10 +33,7 @@ func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow s
 	newAdjustedAmount := toDec(borrow.Amount).Quo(k.getInterestScalar(ctx, borrow.Denom))
 
 	// Set new borrow value
-	if err := k.setAdjustedBorrow(ctx, borrowerAddr, sdk.NewDecCoinFromDec(borrow.Denom, newAdjustedAmount)); err != nil {
-		return err
-	}
-	return nil
+	return k.setAdjustedBorrow(ctx, borrowerAddr, sdk.NewDecCoinFromDec(borrow.Denom, newAdjustedAmount))
 }
 
 // GetTotalBorrowed returns the total borrowed in a given denom.

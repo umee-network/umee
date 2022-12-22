@@ -31,13 +31,13 @@ type SimTestSuite struct {
 // SetupTest creates a new umee base app
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
-	app := umeeapp.Setup(s.T(), checkTx, 1)
+	app := umeeapp.Setup(s.T())
 	ctx := app.NewContext(checkTx, tmproto.Header{})
 
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	// Use default umee token for sim tests
-	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, fixtures.Token("uumee", "UMEE")))
+	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, fixtures.Token("uumee", "UMEE", 6)))
 	app.OracleKeeper.SetExchangeRate(ctx, "UMEE", sdk.MustNewDecFromStr("100.0"))
 
 	s.app = app
@@ -190,7 +190,7 @@ func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 
 	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
 
-	op := simulation.SimulateMsgCollateralize(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	op := simulation.SimulateMsgCollateralize(s.app.AccountKeeper, s.app.BankKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
 	s.Require().NoError(err)
 

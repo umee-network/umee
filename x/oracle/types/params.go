@@ -18,6 +18,10 @@ var (
 	KeySlashFraction            = []byte("SlashFraction")
 	KeySlashWindow              = []byte("SlashWindow")
 	KeyMinValidPerWindow        = []byte("MinValidPerWindow")
+	KeyHistoricStampPeriod      = []byte("HistoricStampPeriod")
+	KeyMedianStampPeriod        = []byte("MedianStampPeriod")
+	KeyMaximumPriceStamps       = []byte("MaximumPriceStamps")
+	KeyMaximumMedianStamps      = []byte("MedianStampAmount")
 )
 
 // Default parameter values
@@ -25,6 +29,10 @@ const (
 	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
 	DefaultSlashWindow              = BlocksPerWeek       // window for a week
 	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
+	DefaultHistoricStampPeriod      = BlocksPerHour / 2   // window for 30 minutes
+	DefaultMedianStampPeriod        = BlocksPerHour * 6   // window for 6 hours
+	DefaultMaximumPriceStamps       = 12                  // pruning window of 6 hours
+	DefaultMaximumMedianStamps      = 28                  // pruning window of 1 week
 )
 
 // Default parameter values
@@ -60,6 +68,10 @@ func DefaultParams() Params {
 		SlashFraction:            DefaultSlashFraction,
 		SlashWindow:              DefaultSlashWindow,
 		MinValidPerWindow:        DefaultMinValidPerWindow,
+		HistoricStampPeriod:      DefaultHistoricStampPeriod,
+		MedianStampPeriod:        DefaultMedianStampPeriod,
+		MaximumPriceStamps:       DefaultMaximumPriceStamps,
+		MaximumMedianStamps:      DefaultMaximumMedianStamps,
 	}
 }
 
@@ -112,6 +124,26 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			&p.MinValidPerWindow,
 			validateMinValidPerWindow,
 		),
+		paramstypes.NewParamSetPair(
+			KeyHistoricStampPeriod,
+			&p.HistoricStampPeriod,
+			validateHistoricStampPeriod,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMedianStampPeriod,
+			&p.MedianStampPeriod,
+			validateMedianStampPeriod,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMaximumPriceStamps,
+			&p.MaximumPriceStamps,
+			validateMaximumPriceStamps,
+		),
+		paramstypes.NewParamSetPair(
+			KeyMaximumMedianStamps,
+			&p.MaximumMedianStamps,
+			validateMaximumMedianStamps,
+		),
 	}
 }
 
@@ -150,6 +182,14 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
+	if p.HistoricStampPeriod > p.MedianStampPeriod {
+		return fmt.Errorf("oracle parameter MedianStampPeriod must be greater than or equal with HistoricStampPeriod")
+	}
+
+	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
+		return fmt.Errorf("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeiod")
+	}
+
 	for _, denom := range p.AcceptList {
 		if len(denom.BaseDenom) == 0 {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have BaseDenom")
@@ -158,6 +198,7 @@ func (p Params) Validate() error {
 			return fmt.Errorf("oracle parameter AcceptList Denom must have SymbolDenom")
 		}
 	}
+
 	return nil
 }
 
@@ -281,6 +322,58 @@ func validateMinValidPerWindow(i interface{}) error {
 
 	if v.GT(sdk.OneDec()) {
 		return fmt.Errorf("min valid per window is too large: %s", v)
+	}
+
+	return nil
+}
+
+func validateHistoricStampPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("historic stamp period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMedianStampPeriod(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("median stamp period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMaximumPriceStamps(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("maximum price stamps must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateMaximumMedianStamps(i interface{}) error {
+	v, ok := i.(uint64)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("maximum median stamps must be positive: %d", v)
 	}
 
 	return nil

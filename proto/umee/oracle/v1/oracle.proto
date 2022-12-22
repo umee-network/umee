@@ -41,12 +41,19 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  // Stamp Period represents the amount of blocks the historacle module
-  // waits before recording a set of prices from the oracle.
-  uint64 stamp_period                 = 9;
-  // Prune Period represents the maximum amount of blocks which we want
-  // to keep a record of our set of exchange rates.
-  uint64 prune_period                 = 10;
+  // Historic Stamp Period represents the amount of blocks the oracle
+  // module waits before recording a new historic price.
+  uint64 historic_stamp_period = 9;
+  // Median Stamp Period represents the amount blocks the oracle module
+  // waits between calculating and stamping a new median and standard
+  // deviation of that median.
+  uint64 median_stamp_period = 10;
+  // Maximum Price Stamps represents the maximum amount of historic prices
+  // the oracle module will store before pruning via FIFO.
+  uint64 maximum_price_stamps = 11;
+  // Maximum Median Stamps represents the maximum amount of medians the
+  // oracle module will store before pruning via FIFO.
+  uint64 maximum_median_stamps = 12;
 }
 
 // Denom - the object to hold configurations of each denom
@@ -103,13 +110,4 @@ message ExchangeRateTuple {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-}
-
-// HistoricPrice is an instance of a price "stamp"
-message HistoricPrice {
-  ExchangeRateTuple exchange_rates = 1 [
-        (gogoproto.castrepeated) = "ExchangeRateTuples",
-        (gogoproto.nullable)     = false
-      ];
-  uint64 block_num = 2;
 }

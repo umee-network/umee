@@ -18,11 +18,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	"github.com/umee-network/umee/price-feeder/config"
-	"github.com/umee-network/umee/price-feeder/oracle/client"
-	"github.com/umee-network/umee/price-feeder/oracle/provider"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
-	pfsync "github.com/umee-network/umee/price-feeder/pkg/sync"
+	"github.com/umee-network/umee/price-feeder/v2/config"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/client"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
+	pfsync "github.com/umee-network/umee/price-feeder/v2/pkg/sync"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
@@ -265,12 +265,9 @@ func (o *Oracle) SetPrices(ctx context.Context) error {
 		return err
 	}
 
-	if len(computedPrices) != len(requiredRates) {
-		return fmt.Errorf("unable to get prices for all exchange candles")
-	}
 	for base := range requiredRates {
 		if _, ok := computedPrices[base]; !ok {
-			return fmt.Errorf("reported prices were not equal to required rates, missed: %s", base)
+			o.logger.Warn().Str("asset", base).Msg("unable to report price for expected asset")
 		}
 	}
 
@@ -290,7 +287,6 @@ func (o *Oracle) GetComputedPrices(
 	providerPairs map[provider.Name][]types.CurrencyPair,
 	deviations map[string]sdk.Dec,
 ) (prices map[string]sdk.Dec, err error) {
-
 	// convert any non-USD denominated candles into USD
 	convertedCandles, err := ConvertCandlesToUSD(
 		o.logger,
@@ -462,7 +458,10 @@ func NewProvider(
 ) (provider.Provider, error) {
 	switch providerName {
 	case provider.ProviderBinance:
-		return provider.NewBinanceProvider(ctx, logger, endpoint, providerPairs...)
+		return provider.NewBinanceProvider(ctx, logger, endpoint, false, providerPairs...)
+
+	case provider.ProviderBinanceUS:
+		return provider.NewBinanceProvider(ctx, logger, endpoint, true, providerPairs...)
 
 	case provider.ProviderKraken:
 		return provider.NewKrakenProvider(ctx, logger, endpoint, providerPairs...)
@@ -484,9 +483,6 @@ func NewProvider(
 
 	case provider.ProviderGate:
 		return provider.NewGateProvider(ctx, logger, endpoint, providerPairs...)
-
-	case provider.ProviderFTX:
-		return provider.NewFTXProvider(ctx, logger, endpoint, providerPairs...), nil
 
 	case provider.ProviderBitget:
 		return provider.NewBitgetProvider(ctx, logger, endpoint, providerPairs...)

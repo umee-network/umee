@@ -250,10 +250,78 @@ func (q querier) AggregateVotes(
 	}, nil
 }
 
-// Medians currently performs a no-op.
+// Medians queries medians of all denoms, or, if specified, returns
+// a single median.
 func (q querier) Medians(
 	goCtx context.Context,
 	req *types.QueryMedians,
 ) (*types.QueryMediansResponse, error) {
-	return nil, types.ErrNotImplemented
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	medians := make([]sdk.DecCoin, 0)
+
+	if len(req.Denom) > 0 {
+		if req.NumStamps == 0 {
+			return nil, status.Error(codes.InvalidArgument, "parameter NumStamps must be greater than 0")
+		}
+
+		if req.NumStamps > uint32(q.MaximumMedianStamps(ctx)) {
+			req.NumStamps = uint32(q.MaximumMedianStamps(ctx))
+		}
+
+		medians = make(sdk.DecCoins, req.NumStamps)
+		medianList := q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))
+
+		for i, median := range medianList {
+			medians[i] = sdk.NewDecCoinFromDec(req.Denom, median)
+		}
+	} else {
+		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
+			medians = append(
+				medians,
+				sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate),
+			)
+			return false
+		})
+	}
+
+	return &types.QueryMediansResponse{Medians: medians}, nil
+}
+
+// MedianDeviations queries median deviations of all denoms, or, if specified, returns
+// a single median deviation.
+func (q querier) MedianDeviations(
+	goCtx context.Context,
+	req *types.QueryMedianDeviations,
+) (*types.QueryMedianDeviationsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var medians sdk.DecCoins
+
+	if len(req.Denom) > 0 {
+		exchangeRate, err := q.HistoricMedianDeviation(ctx, req.Denom)
+		if err != nil {
+			return nil, err
+		}
+
+		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+	} else {
+		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.Price) (stop bool) {
+			medians = medians.Add(sdk.NewDecCoinFromDec(
+				medianDeviation.ExchangeRateTuple.Denom,
+				medianDeviation.ExchangeRateTuple.ExchangeRate,
+			))
+			return false
+		})
+	}
+
+	return &types.QueryMedianDeviationsResponse{MedianDeviations: medians}, nil
 }

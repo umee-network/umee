@@ -46,7 +46,44 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.0.0) - 2022-10-22
+## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
+
+### Features
+
+- [1642](https://github.com/umee-network/umee/pull/1642) Added QueryMaxWithdraw and MsgMaxWithdraw
+- [1633](https://github.com/umee-network/umee/pull/1633) MarketSummary query now displays symbol price instead of base price for readability.
+
+### Improvements
+
+- [1659](https://github.com/umee-network/umee/pull/1659) Update to Cosmos SDK 0.46.7 and related dependencies (#1659)
+
+### Fixes
+
+- [1640](https://github.com/umee-network/umee/pull/1640) Migrate legacy x/leverage gov handler proposals to the new `MsgGovUpdateRegistry` messages.
+- [1650](https://github.com/umee-network/umee/pull/1650) Fixes bug with reserves in ExportGenesis
+- [1642](https://github.com/umee-network/umee/pull/1642) Added missing CLI for QueryBadDebts
+- [1633](https://github.com/umee-network/umee/pull/1633) Increases price calculation precision for high exponent assets.
+- [1645](https://github.com/umee-network/umee/pull/1645) Fix: docker build & release
+
+## [v3.2.0](https://github.com/umee-network/umee/releases/tag/v3.2.0) - 2022-11-25
+
+Since `umeed v3.2` there is a new runtime dependency: `libwasmvm.x86_64.so v1.1.1` is required.
+Building from source will automatically link the `libwasmvm.x86_64.so` created as a part of the build process (you must build on same host as you run the binary, or copy the `libwasmvm.x86_64.so` your lib directory).
+
+### Features
+
+- [1555](https://github.com/umee-network/umee/pull/1555) Updates IBC to v5.1.0 that adds adds optional memo field to `FungibleTokenPacketData` and `MsgTransfer`.
+- [1577](https://github.com/umee-network/umee/pull/1577) Removes LIQUIDATOR build flag and adds `--enable-liquidator-query` or `-l` runtime flag to `umeed start`. See [README.md](README.md) file for more details.
+
+### State Machine Breaking
+
+- [1555](https://github.com/umee-network/umee/pull/1555) Enable GB Slashing.
+
+### API Breaking
+
+- [1578](https://github.com/umee-network/umee/pull/1578) Reorganize key constructors in x/leverage/types and x/oracle/types.
+
+## [v3.1.0](https://github.com/umee-network/umee/releases/tag/v3.1.0) - 2022-10-22
 
 ### Features
 
@@ -68,13 +105,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1511](https://github.com/umee-network/umee/pull/1511) Cosmos SDK patch release for Umee v3.0.3.
 
-## [v3.0.2](https://github.com/umee-network/umee/releases/tag/v3.0.2) - 2022-09-29
+## [v3.0.2] - 2022-09-29
 
 ### Fixes
 
 - [1460](https://github.com/umee-network/umee/pull/1460) Bump Gravity Bridge.
 
-## [v3.0.1](https://github.com/umee-network/umee/releases/tag/v3.0.1) - 2022-09-28
+## [v3.0.1] - 2022-09-28
 
 ### Fixes
 

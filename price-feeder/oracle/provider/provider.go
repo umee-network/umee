@@ -5,26 +5,22 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
-	defaultTimeout           = 10 * time.Second
-	defaultReadNewWSMessage  = 50 * time.Millisecond
-	defaultMaxConnectionTime = time.Hour * 23 // should be < 24h
-	defaultReconnectTime     = 2 * time.Minute
-	defaultPingDuration      = 15 * time.Second
-	providerCandlePeriod     = 10 * time.Minute
+	defaultTimeout       = 10 * time.Second
+	providerCandlePeriod = 10 * time.Minute
 
 	ProviderKraken    Name = "kraken"
 	ProviderBinance   Name = "binance"
+	ProviderBinanceUS Name = "binanceus"
 	ProviderOsmosis   Name = "osmosis"
 	ProviderOsmosisV2 Name = "osmosisv2"
 	ProviderHuobi     Name = "huobi"
 	ProviderOkx       Name = "okx"
 	ProviderGate      Name = "gate"
 	ProviderCoinbase  Name = "coinbase"
-	ProviderFTX       Name = "ftx"
 	ProviderBitget    Name = "bitget"
 	ProviderMexc      Name = "mexc"
 	ProviderCrypto    Name = "crypto"
@@ -42,10 +38,11 @@ type (
 		// GetCandlePrices returns the candlePrices based on the provided pairs.
 		GetCandlePrices(...types.CurrencyPair) (map[string][]types.CandlePrice, error)
 
-		// GetAvailablePairs return all available pairs symbol to susbscribe.
+		// GetAvailablePairs return all available pairs symbol to subscribe.
 		GetAvailablePairs() (map[string]struct{}, error)
 
-		// SubscribeCurrencyPairs subscribe to ticker and candle channels for all pairs.
+		// SubscribeCurrencyPairs sends subscription messages for the new currency
+		// pairs and adds them to the providers subscribed pairs
 		SubscribeCurrencyPairs(...types.CurrencyPair) error
 	}
 
@@ -83,7 +80,7 @@ func (n Name) String() string {
 
 // preventRedirect avoid any redirect in the http.Client the request call
 // will not return an error, but a valid response with redirect response code.
-func preventRedirect(_ *http.Request, _ []*http.Request) error {
+func preventRedirect(*http.Request, []*http.Request) error {
 	return http.ErrUseLastResponse
 }
 

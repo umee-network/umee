@@ -2,11 +2,11 @@
 project_name: umee
 
 env:
-  - GO111MODULE=on
+  - CGO_ENABLED=1
 
 before:
   hooks:
-    - go mod tidy -compat=1.19
+    - go mod download
 
 builds:
   - main: ./cmd/umeed
@@ -16,41 +16,38 @@ builds:
     flags:
       - -tags=badgerdb ledger netgo
       - -trimpath
-    env:
-      - CGO_ENABLED=0
     ldflags:
       - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/cosmos/cosmos-sdk/version.Name=umee -X github.com/cosmos/cosmos-sdk/version.AppName=umeed -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }} -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }} -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger -X github.com/tendermint/tendermint/version.TMCoreSemVer={{ .Env.TM_VERSION }}
     goos:
-      - darwin
       - linux
     goarch:
       - amd64
-      - arm64
+#      - arm64  # github only supports linux @ amd64
 
 archives:
   - id: bins
     format: binary
     name_template: "{{ .Binary }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
 
-  - id: tarball
-    format: tar.gz
-    name_template: "{{ .Binary }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-    files:
-      - LICENSE
-      - README.md
+  # - id: tarball
+  #   format: tar.gz
+  #   wrap_in_directory: false # must not wrap into directory to support cosmwasm
+  #   name_template: "{{ .Binary }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+  #   files:
+  #     - LICENSE
+  #     - README.md
 
 release:
   github:
     owner: umee-network
     name: umee
-  name_template: "v{{.Version}}"
+
+snapshot:
+  name_template: SNAPSHOT-{{ .Commit }}
 
 checksum:
   name_template: SHA256SUMS-v{{.Version}}.txt
   algorithm: sha256
-
-snapshot:
-  name_template: SNAPSHOT-{{ .Commit }}
 
 changelog:
   skip: false

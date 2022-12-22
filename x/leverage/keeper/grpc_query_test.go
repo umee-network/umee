@@ -6,7 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v3/x/leverage/fixtures"
-	"github.com/umee-network/umee/v3/x/leverage/keeper"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
@@ -15,7 +14,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 
 	resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &types.QueryRegisteredTokens{})
 	require.NoError(err)
-	require.Len(resp.Registry, 2, "token registry length")
+	require.Len(resp.Registry, 3, "token registry length")
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {
@@ -37,12 +36,12 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 	resp, err := s.queryClient.MarketSummary(context.Background(), req)
 	require.NoError(err)
 
-	oraclePrice := sdk.MustNewDecFromStr("0.00000421")
+	oracleSymbolPrice := sdk.MustNewDecFromStr("4.21")
 
 	expected := types.QueryMarketSummaryResponse{
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
-		OraclePrice:            &oraclePrice,
+		OraclePrice:            &oracleSymbolPrice,
 		UTokenExchangeRate:     sdk.OneDec(),
 		Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
 		Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
@@ -120,13 +119,6 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
 	ctx, require := s.ctx, s.Require()
 
-	keeper.EnableLiquidator = "false"
-
-	_, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
-	require.ErrorIs(err, types.ErrNotLiquidatorNode)
-
-	keeper.EnableLiquidator = "true"
-
 	resp, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
 	require.NoError(err)
 
@@ -134,5 +126,54 @@ func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
 		Targets: nil,
 	}
 
+	require.Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_BadDebts() {
+	ctx, require := s.ctx, s.Require()
+
+	resp, err := s.queryClient.BadDebts(ctx.Context(), &types.QueryBadDebts{})
+	require.NoError(err)
+
+	expected := types.QueryBadDebtsResponse{
+		Targets: nil,
+	}
+
+	require.Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
+	ctx, require := s.ctx, s.Require()
+
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+
+	resp, err := s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+		Address: addr.String(),
+		Denom:   umeeDenom,
+	})
+	require.NoError(err)
+
+	expected := types.QueryMaxWithdrawResponse{
+		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000)),
+		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000)),
+	}
+	require.Equal(expected, *resp)
+
+	// borrow 100 UMEE for non-trivial query
+	s.borrow(addr, coin(umeeDenom, 100_000000))
+
+	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+		Address: addr.String(),
+		Denom:   umeeDenom,
+	})
+	require.NoError(err)
+
+	expected = types.QueryMaxWithdrawResponse{
+		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000)),
+		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000)),
+	}
 	require.Equal(expected, *resp)
 }

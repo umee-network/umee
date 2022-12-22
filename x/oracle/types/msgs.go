@@ -3,15 +3,16 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	"github.com/tendermint/tendermint/crypto/tmhash"
 
 	"github.com/umee-network/umee/v3/util/checkers"
 )
 
 var (
-	_ sdk.Msg = &MsgDelegateFeedConsent{}
-	_ sdk.Msg = &MsgAggregateExchangeRatePrevote{}
-	_ sdk.Msg = &MsgAggregateExchangeRateVote{}
+	_ legacytx.LegacyMsg = &MsgDelegateFeedConsent{}
+	_ legacytx.LegacyMsg = &MsgAggregateExchangeRatePrevote{}
+	_ legacytx.LegacyMsg = &MsgAggregateExchangeRateVote{}
 )
 
 func NewMsgAggregateExchangeRatePrevote(
@@ -25,6 +26,9 @@ func NewMsgAggregateExchangeRatePrevote(
 		Validator: validator.String(),
 	}
 }
+
+// Route implements LegacyMsg interface
+func (msg MsgAggregateExchangeRatePrevote) Route() string { return RouterKey }
 
 // Type implements LegacyMsg interface
 func (msg MsgAggregateExchangeRatePrevote) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -41,7 +45,7 @@ func (msg MsgAggregateExchangeRatePrevote) GetSigners() []sdk.AccAddress {
 
 // ValidateBasic Implements sdk.Msg
 func (msg MsgAggregateExchangeRatePrevote) ValidateBasic() error {
-	_, err := AggregateVoteHashFromHexString(msg.Hash)
+	_, err := AggregateVoteHashFromHex(msg.Hash)
 	if err != nil {
 		return sdkerrors.Wrapf(ErrInvalidHash, "invalid vote hash (%s)", err)
 	}
@@ -77,6 +81,9 @@ func NewMsgAggregateExchangeRateVote(
 		Validator:     validator.String(),
 	}
 }
+
+// Route implements LegacyMsg interface
+func (msg MsgAggregateExchangeRateVote) Route() string { return RouterKey }
 
 // Type implements LegacyMsg interface
 func (msg MsgAggregateExchangeRateVote) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -124,7 +131,7 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 	if len(msg.Salt) != 64 {
 		return ErrInvalidSaltLength
 	}
-	_, err = AggregateVoteHashFromHexString(msg.Salt)
+	_, err = AggregateVoteHashFromHex(msg.Salt)
 	if err != nil {
 		return sdkerrors.Wrap(ErrInvalidSaltFormat, "salt must be a valid hex string")
 	}
@@ -139,6 +146,9 @@ func NewMsgDelegateFeedConsent(operatorAddress sdk.ValAddress, feederAddress sdk
 		Delegate: feederAddress.String(),
 	}
 }
+
+// Route implements LegacyMsg interface
+func (msg MsgDelegateFeedConsent) Route() string { return RouterKey }
 
 // Type implements LegacyMsg interface
 func (msg MsgDelegateFeedConsent) Type() string { return sdk.MsgTypeURL(&msg) }

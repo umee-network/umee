@@ -8,7 +8,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
@@ -38,6 +38,11 @@ func NewMockProvider() *MockProvider {
 			// because it gets prices from a google spreadsheet, which redirects
 		},
 	}
+}
+
+// SubscribeCurrencyPairs performs a no-op since mock does not use websockets
+func (p MockProvider) SubscribeCurrencyPairs(...types.CurrencyPair) error {
+	return nil
 }
 
 func (p MockProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
@@ -112,11 +117,6 @@ func (p MockProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][
 		}
 	}
 	return candles, nil
-}
-
-// SubscribeCurrencyPairs performs a no-op since mock does not use websockets
-func (p MockProvider) SubscribeCurrencyPairs(pairs ...types.CurrencyPair) error {
-	return nil
 }
 
 // GetAvailablePairs return all available pairs symbol to susbscribe.

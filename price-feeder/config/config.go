@@ -12,7 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
-	"github.com/umee-network/umee/price-feeder/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 )
 
 const (
@@ -35,13 +35,13 @@ var (
 	SupportedProviders = map[provider.Name]struct{}{
 		provider.ProviderKraken:    {},
 		provider.ProviderBinance:   {},
+		provider.ProviderBinanceUS: {},
 		provider.ProviderOsmosis:   {},
 		provider.ProviderOsmosisV2: {},
 		provider.ProviderOkx:       {},
 		provider.ProviderHuobi:     {},
 		provider.ProviderGate:      {},
 		provider.ProviderCoinbase:  {},
-		provider.ProviderFTX:       {},
 		provider.ProviderBitget:    {},
 		provider.ProviderMexc:      {},
 		provider.ProviderCrypto:    {},
@@ -265,7 +265,6 @@ func CheckProviderMins(ctx context.Context, logger zerolog.Logger, cfg Config) e
 			pairs[cp.Base] = make(map[provider.Name]struct{})
 		}
 		for _, provider := range cp.Providers {
-
 			pairs[cp.Base][provider] = struct{}{}
 		}
 	}

@@ -121,6 +121,50 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	require.Nil(t, err)
 }
 
+func TestValidateHistoricStampPeriod(t *testing.T) {
+	err := validateHistoricStampPeriod("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateHistoricStampPeriod(uint64(0))
+	require.ErrorContains(t, err, "historic stamp period must be positive: 0")
+
+	err = validateHistoricStampPeriod(uint64(10))
+	require.Nil(t, err)
+}
+
+func TestValidateMedianStampPeriod(t *testing.T) {
+	err := validateMedianStampPeriod("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateMedianStampPeriod(uint64(0))
+	require.ErrorContains(t, err, "median stamp period must be positive: 0")
+
+	err = validateMedianStampPeriod(uint64(10))
+	require.Nil(t, err)
+}
+
+func TestValidateMaximumPriceStamps(t *testing.T) {
+	err := validateMaximumPriceStamps("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateMaximumPriceStamps(uint64(0))
+	require.ErrorContains(t, err, "maximum price stamps must be positive: 0")
+
+	err = validateMaximumPriceStamps(uint64(10))
+	require.Nil(t, err)
+}
+
+func TestValidateMaximumMedianStamps(t *testing.T) {
+	err := validateMaximumMedianStamps("invalidUint64")
+	require.ErrorContains(t, err, "invalid parameter type: string")
+
+	err = validateMaximumMedianStamps(uint64(0))
+	require.ErrorContains(t, err, "maximum median stamps must be positive: 0")
+
+	err = validateMaximumMedianStamps(uint64(10))
+	require.Nil(t, err)
+}
+
 func TestParamsEqual(t *testing.T) {
 	p1 := DefaultParams()
 	err := p1.Validate()
@@ -167,21 +211,38 @@ func TestParamsEqual(t *testing.T) {
 	err = p7.Validate()
 	require.Error(t, err)
 
-	// empty name
+	// HistoricStampPeriod < MedianStampPeriod
+	p8 := DefaultParams()
+	p8.HistoricStampPeriod = 10
+	p8.MedianStampPeriod = 1
+	err = p8.Validate()
+	require.Error(t, err)
+
+	// HistoricStampPeriod and MedianStampPeriod are multiples of VotePeriod
 	p9 := DefaultParams()
-	p9.AcceptList[0].BaseDenom = ""
-	p9.AcceptList[0].SymbolDenom = "ATOM"
+	p9.HistoricStampPeriod = 10
+	p9.VotePeriod = 3
+	err = p9.Validate()
+	require.Error(t, err)
+	p9.MedianStampPeriod = 10
 	err = p9.Validate()
 	require.Error(t, err)
 
-	// empty
+	// empty name
 	p10 := DefaultParams()
-	p10.AcceptList[0].BaseDenom = "uatom"
-	p10.AcceptList[0].SymbolDenom = ""
+	p10.AcceptList[0].BaseDenom = ""
+	p10.AcceptList[0].SymbolDenom = "ATOM"
 	err = p10.Validate()
 	require.Error(t, err)
 
+	// empty
 	p11 := DefaultParams()
-	require.NotNil(t, p11.ParamSetPairs())
-	require.NotNil(t, p11.String())
+	p11.AcceptList[0].BaseDenom = "uatom"
+	p11.AcceptList[0].SymbolDenom = ""
+	err = p11.Validate()
+	require.Error(t, err)
+
+	p13 := DefaultParams()
+	require.NotNil(t, p13.ParamSetPairs())
+	require.NotNil(t, p13.String())
 }

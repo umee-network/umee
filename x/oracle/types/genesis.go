@@ -14,6 +14,9 @@ func NewGenesisState(
 	missCounters []MissCounter,
 	aggregateExchangeRatePrevotes []AggregateExchangeRatePrevote,
 	aggregateExchangeRateVotes []AggregateExchangeRateVote,
+	historicPrices []Price,
+	medianPrices []Price,
+	medianDeviationPrices []Price,
 ) *GenesisState {
 	return &GenesisState{
 		Params:                        params,
@@ -22,10 +25,13 @@ func NewGenesisState(
 		MissCounters:                  missCounters,
 		AggregateExchangeRatePrevotes: aggregateExchangeRatePrevotes,
 		AggregateExchangeRateVotes:    aggregateExchangeRateVotes,
+		HistoricPrices:                historicPrices,
+		Medians:                       medianPrices,
+		MedianDeviations:              medianDeviationPrices,
 	}
 }
 
-// DefaultGenesisState returns the default genesesis state for the x/oracle
+// DefaultGenesisState returns the default genesis state for the x/oracle
 // module.
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
@@ -35,6 +41,9 @@ func DefaultGenesisState() *GenesisState {
 		MissCounters:                  []MissCounter{},
 		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},
 		AggregateExchangeRateVotes:    []AggregateExchangeRateVote{},
+		HistoricPrices:                []Price{},
+		Medians:                       []Price{},
+		MedianDeviations:              []Price{},
 	}
 }
 

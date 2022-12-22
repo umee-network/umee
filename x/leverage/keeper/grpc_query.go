@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -10,9 +9,6 @@ import (
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
-
-// EnableLiquidator must be set to "true" at compile time to enable QueryLiquidationTargets
-var EnableLiquidator = ""
 
 var _ types.QueryServer = Querier{}
 
@@ -139,7 +135,7 @@ func (q Querier) MarketSummary(
 	}
 
 	// Oracle price in response will be nil if it is unavailable
-	if oraclePrice, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom); oracleErr == nil {
+	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom); oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	}
 
@@ -241,7 +237,7 @@ func (q Querier) LiquidationTargets(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	if strings.ToLower(EnableLiquidator) != "true" {
+	if !q.Keeper.liquidatorQueryEnabled {
 		return nil, types.ErrNotLiquidatorNode
 	}
 
@@ -272,4 +268,38 @@ func (q Querier) BadDebts(
 	targets := q.Keeper.getAllBadDebts(ctx)
 
 	return &types.QueryBadDebtsResponse{Targets: targets}, nil
+}
+
+func (q Querier) MaxWithdraw(
+	goCtx context.Context,
+	req *types.QueryMaxWithdraw,
+) (*types.QueryMaxWithdrawResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	uToken, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom)
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := q.Keeper.ExchangeUToken(ctx, uToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.QueryMaxWithdrawResponse{
+		Tokens:  token,
+		UTokens: uToken,
+	}, nil
 }

@@ -10,7 +10,6 @@ TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.
 DOCKER         := $(shell which docker)
 PROJECT_NAME   := umee
 HTTPS_GIT      := https://github.com/umee-network/umee.git
-LIQUIDATOR     := $(if $(LIQUIDATOR),true,false)
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -29,6 +28,11 @@ endif
 ###############################################################################
 
 build_tags = netgo
+
+#  experimental feature 
+ifeq ($(EXPERIMENTAL),true)
+	build_tags += experimental
+endif
 
 ifeq ($(LEDGER_ENABLED),true)
   ifeq ($(OS),Windows_NT)
@@ -56,6 +60,8 @@ endif
 whitespace :=
 whitespace += $(whitespace)
 comma := ,
+
+build_tags += $(BUILD_TAGS)
 build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
@@ -63,8 +69,11 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION) \
-		  -X github.com/umee-network/umee/v3/x/leverage/keeper.EnableLiquidator=$(LIQUIDATOR)
+		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
+
+ifeq ($(LINK_STATICALLY),true)
+	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
+endif
 
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
@@ -75,15 +84,16 @@ build: go.sum
 	@echo "--> Building..."
 	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
 
+build-experimental: go.sum
+	@echo "--> Building Experimental version..."
+	EXPERIMENTAL=true $(MAKE) build
+
 build-no_cgo:
 	@echo "--> Building static binary with no CGO nor GLIBC dynamic linking..."
 	CGO_ENABLED=0 CGO_LDFLAGS="-static" $(MAKE) build
 
 build-linux: go.sum
 	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
-
-build-liquidator:
-	LIQUIDATOR=true $(MAKE) build
 
 install: go.sum
 	@echo "--> Installing..."
@@ -111,7 +121,7 @@ clean:
 ###############################################################################
 
 docker-build:
-	@docker build -t umeenet/umeed-e2e -f umee.e2e.Dockerfile .
+	@docker build -t umeenet/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
@@ -131,13 +141,23 @@ TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
 TEST_COVERAGE_PROFILE=coverage.txt
 
-test-unit: ARGS=-timeout=10m -tags='norace'
+UNIT_TEST_TAGS = norace 
+TEST_RACE_TAGS = ""
+TEST_E2E_TAGS = ""
+
+ifeq ($(EXPERIMENTAL),true)
+	UNIT_TEST_TAGS	+= experimental
+	TEST_RACE_TAGS 	+= experimental
+	TEST_E2E_TAGS 	+= experimental
+endif
+
+test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
 test-unit: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-unit-cover: ARGS=-timeout=10m -tags='norace' -coverprofile=$(TEST_COVERAGE_PROFILE) -covermode=atomic
+test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TEST_COVERAGE_PROFILE) -covermode=atomic
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-race: ARGS=-timeout=10m -race
+test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v
+test-e2e: ARGS=-timeout=25m -v --tags='$(TEST_E2E_TAGS)'
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 

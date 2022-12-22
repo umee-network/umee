@@ -16,7 +16,7 @@ func isPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 }
 
 // EndBlocker is called at the end of every block
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
+func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
@@ -47,7 +47,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 		for _, ballotDenom := range ballotDenomSlice {
 			// Get weighted median of exchange rates
-			exchangeRate, err := Tally(ctx, ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
+			exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
 			if err != nil {
 				return err
 			}
@@ -56,6 +56,19 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
 				return err
 			}
+
+			if experimental {
+				if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+					k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
+				}
+
+				// Calculate and stamp median/median deviation if median stamp period has passed
+				if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+					if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
+						return err
+					}
+				}
+			}
 		}
 
 		// update miss counting & slashing
@@ -63,12 +76,13 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
 		for _, claim := range claimSlice {
 			// Skip valid voters
-			if int(claim.WinCount) == voteTargetsLen {
+			// in MsgAggregateExchangeRateVote we filter tokens from the AcceptList.
+			if int(claim.TokensVoted) == voteTargetsLen {
 				continue
 			}
 
 			// Increase miss counter
-			k.SetMissCounter(ctx, claim.Recipient, k.GetMissCounter(ctx, claim.Recipient)+1)
+			k.SetMissCounter(ctx, claim.Validator, k.GetMissCounter(ctx, claim.Validator)+1)
 		}
 
 		// Distribute rewards to ballot winners
@@ -81,13 +95,25 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		)
 
 		// Clear the ballot
-		k.ClearBallots(ctx, params.VotePeriod)
+		k.ClearVotes(ctx, params.VotePeriod)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and
 	// reset miss counters of all validators at the last block of slash window
 	if isPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
+	}
+
+	// Prune historic prices and medians outside pruning period determined by
+	// the stamp period multiplied by the max stamps.
+	if experimental && isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
+		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
+		for _, v := range params.AcceptList {
+			k.DeleteHistoricPrice(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
+			k.DeleteHistoricMedian(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+		}
 	}
 
 	return nil
@@ -97,7 +123,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 // rewarded, i.e. voted within a reasonable spread from the weighted median to
 // the store. Note, the ballot is sorted by ExchangeRate.
 func Tally(
-	ctx sdk.Context,
 	ballot types.ExchangeRateBallot,
 	rewardBand sdk.Dec,
 	validatorClaimMap map[string]types.Claim,
@@ -126,7 +151,7 @@ func Tally(
 			claim := validatorClaimMap[key]
 
 			claim.Weight += tallyVote.Power
-			claim.WinCount++
+			claim.TokensVoted++
 			validatorClaimMap[key] = claim
 		}
 	}

@@ -28,7 +28,6 @@ Umee will allow a multitude of decentralized debt products.
   - [Release Compatibility Matrix](#release-compatibility-matrix)
 - [Active Networks](#active-networks)
   - [Public](#public)
-  - [Private](#private)
 - [Install](#install)
   - [Swagger](#swagger)
 
@@ -36,26 +35,27 @@ Umee will allow a multitude of decentralized debt products.
 
 See [Release procedure](CONTRIBUTING.md#release-procedure) for more information about the release model.
 
+Since `umeed v3.2` there is a new runtime dependency: `libwasmvm.x86_64.so v1.1.1` is required.
+Building from source will automatically link the `libwasmvm.x86_64.so` created as a part of the build process (you must build on same host as you run the binary, or copy the `libwasmvm.x86_64.so` your lib directory).
+
 ### Release Compatibility Matrix
 
-| Umee Version | Mainnet | Experimental | Cosmos SDK |  IBC   | Peggo   | Price Feeder |       Gravity Bridge       |
+| Umee Version | Mainnet | Experimental | Cosmos SDK |  IBC   |  Peggo  | Price Feeder |       Gravity Bridge       |
 | :----------: | :-----: | :----------: | :--------: | :----: | :-----: | :----------: | :------------------------: |
 |    v0.8.x    |    ✗    |      ✓       |  v0.45.x   | v2.0.x | v0.2.x  |    v0.1.x    |                            |
 |    v1.x.x    |    ✓    |      ✗       |  v0.45.x   | v2.0.x | v0.2.x  |     N/A      | umee/v1 module/v1.4.x-umee |
 |    v2.x.x    |    ✗    |      ✓       |  v0.45.x   | v2.3.x | v0.2.x  |    v0.2.x    |   umee/v2 module/v1.4.x    |
-|    v3.x.x    |    ✓    |      ✗       |  v0.46.x   | v5.0.x | v1.3.x+ |    v1.0.x    | umee/v3 module/v1.5.x-umee |
+|   v3.0-1.x   |    ✓    |      ✗       |  v0.46.x   | v5.0.x | v1.3.x+ |    v1.0.x    | umee/v3 module/v1.5.x-umee |
+|  v3.1.0-cw1  |    ✗    |      ✓       |  v0.46.x   | v5.0.x | v1.3.x+ |    v2.0.x    | umee/v3 module/v1.5.x-umee |
+|    v3.2.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.x    |   umee/v3 v1.5.3-umee-3    |
+|    v3.3.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |   v2.0.1+    |   umee/v3 v1.5.3-umee-3    |
 
 ## Active Networks
 
 ### Public
 
-- [umee-1](networks/umee-1)
-- [umeemania-1](networks/umeemania-1)
-
-### Private
-
-- [umee-betanet-1](networks/umee-betanet-1)
-- [umee-betanet-2](networks/umee-betanet-2)
+- [umee-1](networks/umee-1) (mainnet)
+- [canon-2](networks/canon-2) (testnet)
 
 ## Install
 
@@ -70,3 +70,35 @@ $ make install
 - To enable it, modify the node config at `$UMEE_HOME/config/app.toml` to `api.swagger` `true`
 - Run the node normally `umeed start`
 - Enter the swagger docs `http://localhost:1317/swagger/`
+
+### Cosmovisor
+
+> [Docs](https://github.com/cosmos/cosmos-sdk/tree/main/tools/cosmovisor)
+> Note: `cosmovisor` only works for upgrades in the `umeed`, for off-chain processes updates like `peggo` or `price-feeder`, manual steps are required.
+
+- `cosmovisor` is a small process manager for Cosmos SDK application binaries that monitors the governance module for incoming chain upgrade proposals. If it sees a proposal that gets approved, `cosmovisor` can automatically download
+  the new binary, stop the current binary, switch from the old binary to the new one, and finally restart the node with the new binary.
+
+- Install it with go
+
+```shell
+go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
+```
+
+- For the usual use of `cosmovisor`, we recomend setting theses env variables
+
+```shell
+export DAEMON_NAME=umeed
+export DAEMON_HOME={NODE_HOME}
+export DAEMON_RESTART_AFTER_UPGRADE=true
+export DAEMON_ALLOW_DOWNLOAD_BINARIES=true
+export DAEMON_PREUPGRADE_MAX_RETRIES=3
+```
+
+- If you didn't build binary from source in the machine, you have to download the respective `libwasmvm` into your machine.
+
+```bash
+$ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
+```
+
+- To use `cosmovisor` for starting `umeed` process, instead of calling `umeed start`, use `cosmovisor run start [umeed flags]`

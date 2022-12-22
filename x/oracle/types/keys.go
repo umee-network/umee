@@ -1,8 +1,11 @@
 package types
 
 import (
+	"encoding/binary"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
+	"github.com/umee-network/umee/v3/util"
 )
 
 const (
@@ -11,6 +14,9 @@ const (
 
 	// StoreKey is the string store representation
 	StoreKey = ModuleName
+
+	// RouterKey is the message route for oracle module
+	RouterKey = ModuleName
 
 	// QuerierRoute is the query router key for the oracle module
 	QuerierRoute = ModuleName
@@ -23,35 +29,54 @@ var (
 	KeyPrefixMissCounter                  = []byte{0x03} // prefix for each key to a miss counter
 	KeyPrefixAggregateExchangeRatePrevote = []byte{0x04} // prefix for each key to a aggregate prevote
 	KeyPrefixAggregateExchangeRateVote    = []byte{0x05} // prefix for each key to a aggregate vote
+	KeyPrefixMedian                       = []byte{0x06} // prefix for each key to a price median
+	KeyPrefixMedianDeviation              = []byte{0x07} // prefix for each key to a price median standard deviation
+	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
 )
 
-// GetExchangeRateKey - stored by *denom*
-func GetExchangeRateKey(denom string) (key []byte) {
-	key = append(key, KeyPrefixExchangeRate...)
-	key = append(key, []byte(denom)...)
-	return append(key, 0) // append 0 for null-termination
+// KeyExchangeRate - stored by *denom*
+func KeyExchangeRate(denom string) []byte {
+	// append 0 for null-termination
+	return util.ConcatBytes(1, KeyPrefixExchangeRate, []byte(denom))
 }
 
-// GetFeederDelegationKey - stored by *Validator* address
-func GetFeederDelegationKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixFeederDelegation...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyFeederDelegation - stored by *Validator* address
+func KeyFeederDelegation(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixFeederDelegation, address.MustLengthPrefix(v))
 }
 
-// GetMissCounterKey - stored by *Validator* address
-func GetMissCounterKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixMissCounter...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyMissCounter - stored by *Validator* address
+func KeyMissCounter(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixMissCounter, address.MustLengthPrefix(v))
 }
 
-// GetAggregateExchangeRatePrevoteKey - stored by *Validator* address
-func GetAggregateExchangeRatePrevoteKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRatePrevote...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyAggregateExchangeRatePrevote - stored by *Validator* address
+func KeyAggregateExchangeRatePrevote(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRatePrevote, address.MustLengthPrefix(v))
 }
 
-// GetAggregateExchangeRateVoteKey - stored by *Validator* address
-func GetAggregateExchangeRateVoteKey(v sdk.ValAddress) (key []byte) {
-	key = append(key, KeyPrefixAggregateExchangeRateVote...)
-	return append(key, address.MustLengthPrefix(v)...)
+// KeyAggregateExchangeRateVote - stored by *Validator* address
+func KeyAggregateExchangeRateVote(v sdk.ValAddress) []byte {
+	return util.ConcatBytes(0, KeyPrefixAggregateExchangeRateVote, address.MustLengthPrefix(v))
+}
+
+// KeyMedian - stored by *denom*
+func KeyMedian(denom string, blockNum uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMedian, []byte(denom), util.UintWithNullPrefix(blockNum))
+}
+
+// KeyMedianDeviation - stored by *denom*
+func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixMedianDeviation, []byte(denom), util.UintWithNullPrefix(blockNum))
+}
+
+// KeyHistoricPrice - stored by *denom* and *block*
+func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), util.UintWithNullPrefix(blockNum))
+}
+
+// ParseDenomAndBlockFromKey returns the denom and block contained in the *key*
+// that has a uint64 at the end with a null prefix (length 9).
+func ParseDenomAndBlockFromKey(key []byte, prefix []byte) (string, uint64) {
+	return string(key[len(prefix) : len(key)-9]), binary.LittleEndian.Uint64(key[len(key)-8:])
 }

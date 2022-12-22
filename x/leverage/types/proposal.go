@@ -1,61 +1,28 @@
 package types
 
 import (
-	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	"gopkg.in/yaml.v3"
+	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
-const (
-	// ProposalTypeUpdateRegistryProposal defines the type for a UpdateRegistryProposal
-	// proposal type.
-	ProposalTypeUpdateRegistryProposal = "UpdateRegistryProposal"
+var (
+	proposalTypeMsgGovUpdateRegistry = MsgGovUpdateRegistry{}.Type()
 )
 
 func init() {
-	gov1b1.RegisterProposalType(ProposalTypeUpdateRegistryProposal)
+	gov.RegisterProposalType(proposalTypeMsgGovUpdateRegistry)
 }
 
-// Assert UpdateRegistryProposal implements govtypes.Content at compile-time
-var _ gov1b1.Content = &UpdateRegistryProposal{}
+// Implements Proposal Interface
+var _ gov.Content = &MsgGovUpdateRegistry{}
 
-func NewUpdateRegistryProposal(title, description string, tokens []Token) *UpdateRegistryProposal {
-	return &UpdateRegistryProposal{
-		Title:       title,
-		Description: description,
-		Registry:    tokens,
-	}
-}
+// GetTitle returns the title of a community pool spend proposal.
+func (msg *MsgGovUpdateRegistry) GetTitle() string { return msg.Title }
 
-// String implements the Stringer interface.
-func (p UpdateRegistryProposal) String() string {
-	out, _ := yaml.Marshal(p)
-	return string(out)
-}
+// GetDescription returns the description of a community pool spend proposal.
+func (msg *MsgGovUpdateRegistry) GetDescription() string { return msg.Description }
 
-// GetTitle returns the title of the proposal.
-func (p *UpdateRegistryProposal) GetTitle() string { return p.Title }
+// GetDescription returns the routing key of a community pool spend proposal.
+func (msg *MsgGovUpdateRegistry) ProposalRoute() string { return RouterKey }
 
-// GetDescription returns the description of the proposal.
-func (p *UpdateRegistryProposal) GetDescription() string { return p.Description }
-
-// ProposalRoute returns the x/gov routing key of the proposal.
-func (p *UpdateRegistryProposal) ProposalRoute() string { return RouterKey }
-
-// ProposalType returns the x/gov type of the proposal.
-func (p *UpdateRegistryProposal) ProposalType() string { return ProposalTypeUpdateRegistryProposal }
-
-// ValidateBasic validates the proposal returning an error if invalid.
-func (p *UpdateRegistryProposal) ValidateBasic() error {
-	err := gov1b1.ValidateAbstract(p)
-	if err != nil {
-		return err
-	}
-
-	for _, token := range p.Registry {
-		if err := token.Validate(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
+// ProposalType returns the type of a community pool spend proposal.
+func (msg *MsgGovUpdateRegistry) ProposalType() string { return proposalTypeMsgGovUpdateRegistry }

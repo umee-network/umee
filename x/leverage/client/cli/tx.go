@@ -8,7 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/spf13/cobra"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
@@ -27,6 +26,7 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdSupply(),
 		GetCmdWithdraw(),
+		GetCmdMaxWithdraw(),
 		GetCmdCollateralize(),
 		GetCmdDecollateralize(),
 		GetCmdBorrow(),
@@ -86,6 +86,32 @@ func GetCmdWithdraw() *cobra.Command {
 			}
 
 			msg := types.NewMsgWithdraw(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdMaxWithdraw creates a Cobra command to generate or broadcast a
+// transaction with a MsgMaxWithdraw message.
+func GetCmdMaxWithdraw() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "withdraw-max [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Withdraw the maximum valid amount of a supplied asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			denom := args[0]
+
+			msg := types.NewMsgMaxWithdraw(clientCtx.GetFromAddress(), denom)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -290,79 +316,6 @@ func GetCmdSupplyCollateral() *cobra.Command {
 	}
 
 	flags.AddTxFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// NewCmdSubmitUpdateRegistryProposal creates a Cobra command to generate
-// or broadcast a transaction with a governance proposal message containing a
-// UpdateRegistryProposal.
-func NewCmdSubmitUpdateRegistryProposal() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "update-registry [proposal-file] [deposit]",
-		Args:  cobra.ExactArgs(2),
-		Short: "Submit a update leverage registry governance proposal",
-		Long: strings.TrimSpace(
-			`Submit a leverage registry governance proposal along with an initial deposit.
-The proposal details must be supplied via a JSON file. Please see the UpdateRegistryProposal
-type for a complete description of the expected input.
-
-Example:
-$ umeed tx gov submit-proposal update-registry </path/to/proposal.json> <deposit> [flags...]
-
-Where proposal.json contains:
-
-{
-  "title": "Update the Leverage Token Registry",
-  "description": "Update the uumee token in the leverage registry.",
-  "registry": [
-    {
-      "base_denom": "uumee",
-      "reserve_factor": "0.1",
-      "collateral_weight": "0.05",
-      "liquidation_threshold": "0.05",
-      "base_borrow_rate": "0.02",
-      "kink_borrow_rate": "0.2",
-      "max_borrow_rate": "1.5",
-      "kink_utilization": "0.2",
-      "liquidation_incentive": "0.1",
-      "symbol_denom": "UMEE",
-      "exponent": 6,
-      "enable_msg_supply": true,
-      "enable_msg_borrow": true,
-      "blacklist": false
-    },
-    // ...
-  ]
-}
-`,
-		),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			proposal, err := ParseUpdateRegistryProposal(clientCtx.Codec, args[0])
-			if err != nil {
-				return err
-			}
-
-			deposit, err := sdk.ParseCoinsNormalized(args[1])
-			if err != nil {
-				return err
-			}
-
-			content := types.NewUpdateRegistryProposal(proposal.Title, proposal.Description, proposal.Registry)
-
-			msg, err := gov1b1.NewMsgSubmitProposal(content, deposit, clientCtx.GetFromAddress())
-			if err != nil {
-				return err
-			}
-
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
-		},
-	}
 
 	return cmd
 }

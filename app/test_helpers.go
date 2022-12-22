@@ -1,11 +1,14 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -20,6 +23,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -29,6 +33,7 @@ import (
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
@@ -54,9 +59,9 @@ var DefaultConsensusParams = &abci.ConsensusParams{
 
 type EmptyAppOptions struct{}
 
-func (EmptyAppOptions) Get(o string) interface{} { return nil }
+func (EmptyAppOptions) Get(string) interface{} { return nil }
 
-func Setup(t *testing.T, isCheckTx bool, invCheckPeriod uint) *UmeeApp {
+func Setup(t *testing.T) *UmeeApp {
 	t.Helper()
 
 	privVal := mock.NewPV()
@@ -218,6 +223,8 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		invCheckPeriod,
 		encCdc,
 		EmptyAppOptions{},
+		GetWasmEnabledProposals(),
+		EmptyWasmOpts,
 	)
 	if withGenesis {
 		return app, NewDefaultGenesisState(encCdc.Codec)
@@ -242,27 +249,9 @@ func IntegrationTestNetworkConfig() network.Config {
 		panic(err)
 	}
 	leverageGenState.Registry = []leveragetypes.Token{
-		{
-			BaseDenom:              params.BondDenom,
-			SymbolDenom:            params.DisplayDenom,
-			Exponent:               6,
-			ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
-			CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
-			LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
-			BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-			KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
-			MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
-			KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
-			LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
-			EnableMsgSupply:        true,
-			EnableMsgBorrow:        true,
-			Blacklist:              false,
-			MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-			MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-			MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-			MaxSupply:              sdk.NewInt(100000000000),
-		},
+		fixtures.Token(params.BondDenom, params.DisplayDenom, 6),
 	}
+
 	bz, err := cdc.MarshalJSON(&leverageGenState)
 	if err != nil {
 		panic(err)
@@ -320,10 +309,90 @@ func IntegrationTestNetworkConfig() network.Config {
 			0,
 			encCfg,
 			EmptyAppOptions{},
+			GetWasmEnabledProposals(),
+			EmptyWasmOpts,
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
 			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
 		)
 	}
 
 	return cfg
+}
+
+type GenerateAccountStrategy func(int) []sdk.AccAddress
+
+// AddTestAddrsIncremental constructs and returns accNum amount of accounts with an
+// initial balance of accAmt in random order
+func AddTestAddrsIncremental(app *UmeeApp, ctx sdk.Context, accNum int, accAmt math.Int) []sdk.AccAddress {
+	return addTestAddrs(app, ctx, accNum, accAmt, createIncrementalAccounts)
+}
+
+func addTestAddrs(
+	app *UmeeApp, ctx sdk.Context, accNum int,
+	accAmt math.Int, strategy GenerateAccountStrategy,
+) []sdk.AccAddress {
+	testAddrs := strategy(accNum)
+
+	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakingKeeper.BondDenom(ctx), accAmt))
+
+	for _, addr := range testAddrs {
+		initAccountWithCoins(app, ctx, addr, initCoins)
+	}
+
+	return testAddrs
+}
+
+func TestAddr(addr string, bech string) (sdk.AccAddress, error) {
+	res, err := sdk.AccAddressFromHexUnsafe(addr)
+	if err != nil {
+		return nil, err
+	}
+	bechexpected := res.String()
+	if bech != bechexpected {
+		return nil, fmt.Errorf("bech encoding doesn't match reference")
+	}
+
+	bechres, err := sdk.AccAddressFromBech32(bech)
+	if err != nil {
+		return nil, err
+	}
+	if !bytes.Equal(bechres, res) {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// createIncrementalAccounts is a strategy used by addTestAddrs() in order to generated addresses in ascending order.
+func createIncrementalAccounts(accNum int) []sdk.AccAddress {
+	var addresses []sdk.AccAddress
+	var buffer bytes.Buffer
+
+	// start at 100 so we can make up to 999 test addresses with valid test addresses
+	for i := 100; i < (accNum + 100); i++ {
+		numString := strconv.Itoa(i)
+		buffer.WriteString("A58856F0FD53BF058B4909A21AEC019107BA6") // base address string
+
+		buffer.WriteString(numString) // adding on final two digits to make addresses unique
+		res, _ := sdk.AccAddressFromHexUnsafe(buffer.String())
+		bech := res.String()
+		addr, _ := TestAddr(buffer.String(), bech)
+
+		addresses = append(addresses, addr)
+		buffer.Reset()
+	}
+
+	return addresses
+}
+
+func initAccountWithCoins(app *UmeeApp, ctx sdk.Context, addr sdk.AccAddress, coins sdk.Coins) {
+	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, coins)
+	if err != nil {
+		panic(err)
+	}
+
+	err = app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, coins)
+	if err != nil {
+		panic(err)
+	}
 }

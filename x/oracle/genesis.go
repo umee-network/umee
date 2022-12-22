@@ -57,6 +57,23 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 		keeper.SetAggregateExchangeRateVote(ctx, valAddr, av)
 	}
 
+	for _, hp := range genState.HistoricPrices {
+		keeper.SetHistoricPrice(ctx, hp.ExchangeRateTuple.Denom, hp.BlockNum, hp.ExchangeRateTuple.ExchangeRate)
+	}
+
+	for _, median := range genState.Medians {
+		keeper.SetHistoricMedian(ctx, median.ExchangeRateTuple.Denom, median.BlockNum, median.ExchangeRateTuple.ExchangeRate)
+	}
+
+	for _, medianDeviation := range genState.MedianDeviations {
+		keeper.SetHistoricMedianDeviation(
+			ctx,
+			medianDeviation.ExchangeRateTuple.Denom,
+			medianDeviation.BlockNum,
+			medianDeviation.ExchangeRateTuple.ExchangeRate,
+		)
+	}
+
 	keeper.SetParams(ctx, genState.Params)
 
 	// check if the module account exists
@@ -118,6 +135,33 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		},
 	)
 
+	historicPrices := []types.Price{}
+	keeper.IterateAllHistoricPrices(
+		ctx,
+		func(historicPrice types.Price) bool {
+			historicPrices = append(historicPrices, historicPrice)
+			return false
+		},
+	)
+
+	medianPrices := []types.Price{}
+	keeper.IterateAllMedianPrices(
+		ctx,
+		func(medianPrice types.Price) bool {
+			medianPrices = append(medianPrices, medianPrice)
+			return false
+		},
+	)
+
+	medianDeviationPrices := []types.Price{}
+	keeper.IterateAllMedianDeviationPrices(
+		ctx,
+		func(medianDeviationPrice types.Price) bool {
+			medianDeviationPrices = append(medianDeviationPrices, medianDeviationPrice)
+			return false
+		},
+	)
+
 	return types.NewGenesisState(
 		params,
 		exchangeRates,
@@ -125,5 +169,8 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		missCounters,
 		aggregateExchangeRatePrevotes,
 		aggregateExchangeRateVotes,
+		historicPrices,
+		medianPrices,
+		medianDeviationPrices,
 	)
 }

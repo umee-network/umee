@@ -5,6 +5,7 @@ import (
 
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage/client/cli"
+	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
@@ -40,6 +41,17 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 			nil,
 		},
+		{
+			"query max withdraw - invalid address",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				"xyz",
+				"uumee",
+			},
+			true,
+			nil,
+			nil,
+		},
 	}
 
 	// These queries do not require any borrower setup because they contain invalid arguments
@@ -49,7 +61,7 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 func (s *IntegrationTestSuite) TestLeverageScenario() {
 	val := s.network.Validators[0]
 
-	oraclePrice := sdk.MustNewDecFromStr("0.00003421")
+	oracleSymbolPrice := sdk.MustNewDecFromStr("34.21")
 
 	initialQueries := []testQuery{
 		{
@@ -70,27 +82,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryRegisteredTokensResponse{},
 			&types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
-					{
-						// must match app/test_helpers.go/IntegrationTestNetworkConfig
-						BaseDenom:              appparams.BondDenom,
-						SymbolDenom:            appparams.DisplayDenom,
-						Exponent:               6,
-						ReserveFactor:          sdk.MustNewDecFromStr("0.1"),
-						CollateralWeight:       sdk.MustNewDecFromStr("0.05"),
-						LiquidationThreshold:   sdk.MustNewDecFromStr("0.05"),
-						BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-						KinkBorrowRate:         sdk.MustNewDecFromStr("0.2"),
-						MaxBorrowRate:          sdk.MustNewDecFromStr("1.5"),
-						KinkUtilization:        sdk.MustNewDecFromStr("0.2"),
-						LiquidationIncentive:   sdk.MustNewDecFromStr("0.18"),
-						EnableMsgSupply:        true,
-						EnableMsgBorrow:        true,
-						Blacklist:              false,
-						MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-						MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-						MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-						MaxSupply:              sdk.NewInt(100000000000),
-					},
+					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
 			},
 		},
@@ -105,15 +97,15 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryMarketSummaryResponse{
 				SymbolDenom:        "UMEE",
 				Exponent:           6,
-				OraclePrice:        &oraclePrice,
+				OraclePrice:        &oracleSymbolPrice,
 				UTokenExchangeRate: sdk.OneDec(),
-				// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
-				// 1.50 * (1 - 0.10 - 0.01) = 0.89 * 1.5 = 1.335
-				Supply_APY: sdk.MustNewDecFromStr("1.335"),
+				// Borrow rate * (1.52 - ReserveFactor - OracleRewardFactor)
+				// 1.52 * (1 - 0.2 - 0.01) = 1.2008
+				Supply_APY: sdk.MustNewDecFromStr("1.2008"),
 				// This is an edge case technically - when effective supply, meaning
 				// module balance + total borrows, is zero, utilization (0/0) is
-				// interpreted as 100% so max borrow rate (150% APY) is used.
-				Borrow_APY:             sdk.MustNewDecFromStr("1.50"),
+				// interpreted as 100% so max borrow rate (152% APY) is used.
+				Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
 				Supplied:               sdk.ZeroInt(),
 				Reserved:               sdk.ZeroInt(),
 				Collateral:             sdk.ZeroInt(),
@@ -126,6 +118,30 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				AvailableBorrow:        sdk.ZeroInt(),
 				AvailableWithdraw:      sdk.ZeroInt(),
 				AvailableCollateralize: sdk.ZeroInt(),
+			},
+		},
+		{
+			"query bad debts",
+			cli.GetCmdQueryBadDebts(),
+			[]string{},
+			false,
+			&types.QueryBadDebtsResponse{},
+			&types.QueryBadDebtsResponse{
+				Targets: []types.BadDebt{},
+			},
+		},
+		{
+			"query max withdraw (zero)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
+				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
 			},
 		},
 	}
@@ -161,7 +177,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"borrow",
 		cli.GetCmdBorrow(),
 		[]string{
-			"50uumee",
+			"249uumee", // produces a borrowed amount of 250 due to rounding
 		},
 		nil,
 	}
@@ -181,7 +197,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			"50uumee", // repays only the remaining borrowed balance, reduced automatically from 50
+			"250uumee", // repays only the remaining borrowed balance, reduced automatically from 250
 		},
 		nil,
 	}
@@ -204,6 +220,15 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		nil,
 	}
 
+	withdrawMax := testTransaction{
+		"withdraw max",
+		cli.GetCmdMaxWithdraw(),
+		[]string{
+			"uumee",
+		},
+		nil,
+	}
+
 	nonzeroQueries := []testQuery{
 		{
 			"query account balances",
@@ -221,7 +246,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(appparams.BondDenom, 51),
+					sdk.NewInt64Coin(appparams.BondDenom, 250),
 				),
 			},
 		},
@@ -241,12 +266,26 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
 				// (1000 / 1000000) * 34.21 = 0.03421
 				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
-				// (51 / 1000000) * 34.21 = 0.00174471
-				BorrowedValue: sdk.MustNewDecFromStr("0.00174471"),
-				// (1000 / 1000000) * 34.21 * 0.05 = 0.0017105
-				BorrowLimit: sdk.MustNewDecFromStr("0.0017105"),
-				// (1000 / 1000000) * 0.05 * 34.21 = 0.0017105
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.0017105"),
+				// (250 / 1000000) * 34.21 = 0.0085525
+				BorrowedValue: sdk.MustNewDecFromStr("0.0085525"),
+				// (1000 / 1000000) * 34.21 * 0.25 = 0.0085525
+				BorrowLimit: sdk.MustNewDecFromStr("0.0085525"),
+				// (1000 / 1000000) * 0.25 * 34.21 = 0.0085525
+				LiquidationThreshold: sdk.MustNewDecFromStr("0.0085525"),
+			},
+		},
+		{
+			"query max withdraw (borrow limit reached)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
+				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
 			},
 		},
 	}
@@ -268,6 +307,52 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 100),
 				),
 				Borrowed: sdk.NewCoins(),
+			},
+		},
+		{
+			"query max withdraw (after repay)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.NewInt(201)),
+				UTokens: sdk.NewCoin("u/uumee", sdk.NewInt(200)),
+			},
+		},
+	}
+
+	lastQueries := []testQuery{
+		{
+			"query account balances (empty after withdraw max)",
+			cli.GetCmdQueryAccountBalances(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryAccountBalancesResponse{},
+			&types.QueryAccountBalancesResponse{
+				Supplied:   sdk.NewCoins(),
+				Collateral: sdk.NewCoins(),
+				Borrowed:   sdk.NewCoins(),
+			},
+		},
+
+		{
+			"query max withdraw (after withdraw max)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
+				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
 			},
 		},
 	}
@@ -294,6 +379,14 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		withdraw,
 	)
 
-	// Confirm cleanup transaction effects
+	// Confirm additional transaction effects
 	s.runTestQueries(postQueries...)
+
+	// This transaction will run last
+	s.runTestTransactions(
+		withdrawMax,
+	)
+
+	// Confirm withdraw max transaction effects
+	s.runTestQueries(lastQueries...)
 }

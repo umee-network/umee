@@ -104,10 +104,7 @@ func (p Params) Validate() error {
 	if err := validateSmallLiquidationSize(p.SmallLiquidationSize); err != nil {
 		return err
 	}
-	if err := validateDirectLiquidationFee(p.DirectLiquidationFee); err != nil {
-		return err
-	}
-	return nil
+	return validateDirectLiquidationFee(p.DirectLiquidationFee)
 }
 
 func validateLiquidationThreshold(i interface{}) error {

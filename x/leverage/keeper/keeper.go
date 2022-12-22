@@ -15,12 +15,14 @@ import (
 )
 
 type Keeper struct {
-	cdc          codec.Codec
-	storeKey     storetypes.StoreKey
-	paramSpace   paramtypes.Subspace
-	hooks        types.Hooks
-	bankKeeper   types.BankKeeper
-	oracleKeeper types.OracleKeeper
+	cdc                    codec.Codec
+	storeKey               storetypes.StoreKey
+	paramSpace             paramtypes.Subspace
+	hooks                  types.Hooks
+	bankKeeper             types.BankKeeper
+	oracleKeeper           types.OracleKeeper
+	authority              string // the gov module account
+	liquidatorQueryEnabled bool
 }
 
 func NewKeeper(
@@ -29,6 +31,8 @@ func NewKeeper(
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
+	authority string,
+	enableLiquidatorQuery bool,
 ) (Keeper, error) {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
@@ -36,11 +40,13 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:          cdc,
-		storeKey:     storeKey,
-		paramSpace:   paramSpace,
-		bankKeeper:   bk,
-		oracleKeeper: ok,
+		cdc:                    cdc,
+		storeKey:               storeKey,
+		paramSpace:             paramSpace,
+		bankKeeper:             bk,
+		oracleKeeper:           ok,
+		authority:              authority,
+		liquidatorQueryEnabled: enableLiquidatorQuery,
 	}, nil
 }
 
@@ -366,9 +372,9 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 // Because partial liquidation is possible and exchange rates vary, Liquidate returns the actual amount of
 // tokens repaid, collateral liquidated, and base tokens or uTokens rewarded.
 func (k Keeper) Liquidate(
-	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, maxRepay sdk.Coin, rewardDenom string,
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, requestedRepay sdk.Coin, rewardDenom string,
 ) (repaid sdk.Coin, liquidated sdk.Coin, reward sdk.Coin, err error) {
-	if err := k.validateAcceptedAsset(ctx, maxRepay); err != nil {
+	if err := k.validateAcceptedAsset(ctx, requestedRepay); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
@@ -387,7 +393,7 @@ func (k Keeper) Liquidate(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
-		maxRepay,
+		requestedRepay,
 		rewardDenom,
 		directLiquidation,
 	)

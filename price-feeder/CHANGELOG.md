@@ -44,7 +44,31 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [Unreleased]
+## Unreleased
+
+## [v2.0.2](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.2) 2022-12-14
+
+### Bugs
+
+- [1660](https://github.com/umee-network/umee/pull/1660) Fix module version
+
+## [v2.0.1](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.1) 2022-12-01
+
+### Bugs
+
+- [1615](https://github.com/umee-network/umee/pull/1615) Parse multiple candles from OsmosisV2 response
+- [1635](https://github.com/umee-network/umee/pull/1635) Vote on exchange rates even if one is missing.
+- [1634](https://github.com/umee-network/umee/pull/1634) Add minimum candle volume for low-trading assets.
+
+### Improvements
+
+- [1602](https://github.com/umee-network/umee/pull/1602) Remove FTX provider.
+
+## [v2.0.0](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.0) 2022-11-15
+
+v2.0.0 of the price feeder contains numerous fixes for low-market-cap assets and API changes. It's highly recommended to switch to v2.0.0, especially as it removes the need to use the `ftx` provider for certain assets.
+
+This was released as a part of [Umee Prop 27.](https://www.mintscan.io/umee/proposals/27)
 
 ### Bugs
 
@@ -56,6 +80,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1496](https://github.com/umee-network/umee/pull/1496) Dynamic provider minimum enforcement with CoinGecko API.
 - [1510](https://github.com/umee-network/umee/pull/1510) Integrate osmosis-api provider into price-feeder.
 - [1534](https://github.com/umee-network/umee/pull/1534) Query osmosis-api REST server for available asset pairs supported by it.
+- [1554](https://github.com/umee-network/umee/pull/1554) Convert remaining providers to the Websocket Controller.
+- [1589](https://github.com/umee-network/umee/pull/1589) Add Binance US provider.
 
 ### Improvements
 

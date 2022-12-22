@@ -8,6 +8,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
@@ -24,6 +26,7 @@ import (
 const (
 	umeeDenom = appparams.BondDenom
 	atomDenom = fixtures.AtomDenom
+	daiDenom  = fixtures.DaiDenom
 )
 
 type IntegrationTestSuite struct {
@@ -34,6 +37,8 @@ type IntegrationTestSuite struct {
 	tk                  keeper.TestKeeper
 	queryClient         types.QueryClient
 	setupAccountCounter sdkmath.Int
+	addrs               []sdk.AccAddress
+	msgSrvr             types.MsgServer
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -42,15 +47,12 @@ func TestKeeperTestSuite(t *testing.T) {
 
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
-	app := umeeapp.Setup(s.T(), false, 1)
+	app := umeeapp.Setup(s.T())
 	ctx := app.BaseApp.NewContext(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
 		Time:    time.Unix(0, 0),
 	})
-
-	// Enable liquidation queries for testing
-	keeper.EnableLiquidator = "true"
 
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
@@ -60,6 +62,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		app.GetSubspace(types.ModuleName),
 		app.BankKeeper,
 		newMockOracleKeeper(),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		true,
 	)
 
 	s.tk = tk
@@ -68,8 +72,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	// override DefaultGenesis token registry with fixtures.Token
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE")))
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM")))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(daiDenom, "DAI", 18)))
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())
@@ -81,6 +86,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.ctx = ctx
 	s.setupAccountCounter = sdkmath.ZeroInt()
 	s.queryClient = types.NewQueryClient(queryHelper)
+	s.addrs = umeeapp.AddTestAddrsIncremental(app, s.ctx, 1, sdk.NewInt(3000000))
+	s.msgSrvr = keeper.NewMsgServerImpl(s.app.LeverageKeeper)
 }
 
 // requireEqualCoins compares two sdk.Coins in such a way that sdk.Coins(nil) == sdk.Coins([]sdk.Coin{})
@@ -93,8 +100,8 @@ func (s *IntegrationTestSuite) requireEqualCoins(coinsA, coinsB sdk.Coins, msgAn
 }
 
 // newToken creates a test token with reasonable initial parameters
-func newToken(base, symbol string) types.Token {
-	return fixtures.Token(base, symbol)
+func newToken(base, symbol string, exponent uint32) types.Token {
+	return fixtures.Token(base, symbol, exponent)
 }
 
 // coin creates a coin with a given base denom and amount

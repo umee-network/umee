@@ -75,7 +75,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
 	store := ctx.KVStore(k.storeKey)
 	symbol = strings.ToUpper(symbol)
-	b := store.Get(types.GetExchangeRateKey(symbol))
+	b := store.Get(types.KeyExchangeRate(symbol))
 	if b == nil {
 		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrUnknownDenom, symbol)
 	}
@@ -119,7 +119,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
 	denom = strings.ToUpper(denom)
-	store.Set(types.GetExchangeRateKey(denom), bz)
+	store.Set(types.KeyExchangeRate(denom), bz)
 }
 
 // SetExchangeRateWithEvent sets an consensus
@@ -130,7 +130,7 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchange
 		Denom: denom, Rate: exchangeRate})
 }
 
-// IterateExchangeRates iterates over USD rates in the store.
+// IterateExchangeRates iterates over all USD rates in the store.
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
 	store := ctx.KVStore(k.storeKey)
 
@@ -139,7 +139,7 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
-		denom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-1])
+		denom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-1]) // -1 to remove the null suffix
 		dp := sdk.DecProto{}
 
 		k.cdc.MustUnmarshal(iter.Value(), &dp)
@@ -167,7 +167,7 @@ func (k Keeper) GetFeederDelegation(ctx sdk.Context, vAddr sdk.ValAddress) (sdk.
 	}
 
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(types.GetFeederDelegationKey(vAddr))
+	bz := store.Get(types.KeyFeederDelegation(vAddr))
 	if bz == nil {
 		// no delegation, so validator itself must provide price feed
 		return sdk.AccAddress(vAddr), nil
@@ -179,7 +179,7 @@ func (k Keeper) GetFeederDelegation(ctx sdk.Context, vAddr sdk.ValAddress) (sdk.
 // delegated oracle vote rights.
 func (k Keeper) SetFeederDelegation(ctx sdk.Context, operator sdk.ValAddress, delegatedFeeder sdk.AccAddress) {
 	store := ctx.KVStore(k.storeKey)
-	store.Set(types.GetFeederDelegationKey(operator), delegatedFeeder.Bytes())
+	store.Set(types.KeyFeederDelegation(operator), delegatedFeeder.Bytes())
 }
 
 type IterateFeederDelegationHandler func(delegator sdk.ValAddress, delegate sdk.AccAddress) (stop bool)
@@ -207,7 +207,7 @@ func (k Keeper) IterateFeederDelegations(ctx sdk.Context, handler IterateFeederD
 func (k Keeper) GetMissCounter(ctx sdk.Context, operator sdk.ValAddress) uint64 {
 	store := ctx.KVStore(k.storeKey)
 
-	bz := store.Get(types.GetMissCounterKey(operator))
+	bz := store.Get(types.KeyMissCounter(operator))
 	if bz == nil {
 		// by default the counter is zero
 		return 0
@@ -224,13 +224,13 @@ func (k Keeper) GetMissCounter(ctx sdk.Context, operator sdk.ValAddress) uint64 
 func (k Keeper) SetMissCounter(ctx sdk.Context, operator sdk.ValAddress, missCounter uint64) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&gogotypes.UInt64Value{Value: missCounter})
-	store.Set(types.GetMissCounterKey(operator), bz)
+	store.Set(types.KeyMissCounter(operator), bz)
 }
 
 // DeleteMissCounter removes miss counter for the validator.
 func (k Keeper) DeleteMissCounter(ctx sdk.Context, operator sdk.ValAddress) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.GetMissCounterKey(operator))
+	store.Delete(types.KeyMissCounter(operator))
 }
 
 // IterateMissCounters iterates over the miss counters and performs a callback
@@ -260,7 +260,7 @@ func (k Keeper) GetAggregateExchangeRatePrevote(
 ) (types.AggregateExchangeRatePrevote, error) {
 	store := ctx.KVStore(k.storeKey)
 
-	bz := store.Get(types.GetAggregateExchangeRatePrevoteKey(voter))
+	bz := store.Get(types.KeyAggregateExchangeRatePrevote(voter))
 	if bz == nil {
 		return types.AggregateExchangeRatePrevote{}, sdkerrors.Wrap(types.ErrNoAggregatePrevote, voter.String())
 	}
@@ -277,7 +277,7 @@ func (k Keeper) HasAggregateExchangeRatePrevote(
 	voter sdk.ValAddress,
 ) bool {
 	store := ctx.KVStore(k.storeKey)
-	return store.Has(types.GetAggregateExchangeRatePrevoteKey(voter))
+	return store.Has(types.KeyAggregateExchangeRatePrevote(voter))
 }
 
 // SetAggregateExchangeRatePrevote set an oracle aggregate prevote to the store.
@@ -289,13 +289,13 @@ func (k Keeper) SetAggregateExchangeRatePrevote(
 	store := ctx.KVStore(k.storeKey)
 
 	bz := k.cdc.MustMarshal(&prevote)
-	store.Set(types.GetAggregateExchangeRatePrevoteKey(voter), bz)
+	store.Set(types.KeyAggregateExchangeRatePrevote(voter), bz)
 }
 
 // DeleteAggregateExchangeRatePrevote deletes an oracle prevote from the store.
 func (k Keeper) DeleteAggregateExchangeRatePrevote(ctx sdk.Context, voter sdk.ValAddress) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.GetAggregateExchangeRatePrevoteKey(voter))
+	store.Delete(types.KeyAggregateExchangeRatePrevote(voter))
 }
 
 // IterateAggregateExchangeRatePrevotes iterates rate over prevotes in the store
@@ -327,7 +327,7 @@ func (k Keeper) GetAggregateExchangeRateVote(
 ) (types.AggregateExchangeRateVote, error) {
 	store := ctx.KVStore(k.storeKey)
 
-	bz := store.Get(types.GetAggregateExchangeRateVoteKey(voter))
+	bz := store.Get(types.KeyAggregateExchangeRateVote(voter))
 	if bz == nil {
 		return types.AggregateExchangeRateVote{}, sdkerrors.Wrap(types.ErrNoAggregateVote, voter.String())
 	}
@@ -347,13 +347,13 @@ func (k Keeper) SetAggregateExchangeRateVote(
 	store := ctx.KVStore(k.storeKey)
 
 	bz := k.cdc.MustMarshal(&vote)
-	store.Set(types.GetAggregateExchangeRateVoteKey(voter), bz)
+	store.Set(types.KeyAggregateExchangeRateVote(voter), bz)
 }
 
 // DeleteAggregateExchangeRateVote deletes an oracle prevote from the store.
 func (k Keeper) DeleteAggregateExchangeRateVote(ctx sdk.Context, voter sdk.ValAddress) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.GetAggregateExchangeRateVoteKey(voter))
+	store.Delete(types.KeyAggregateExchangeRateVote(voter))
 }
 
 type IterateExchangeRateVote = func(

@@ -6,7 +6,7 @@ import (
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
-	gov1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
 var (
@@ -30,12 +30,12 @@ func init() {
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgSupply{}, "umee/leverage/MsgSupply", nil)
 	cdc.RegisterConcrete(&MsgWithdraw{}, "umee/leverage/MsgWithdraw", nil)
-	cdc.RegisterConcrete(&UpdateRegistryProposal{}, "umee/leverage/UpdateRegistryProposal", nil)
 	cdc.RegisterConcrete(&MsgCollateralize{}, "umee/leverage/MsgCollateralize", nil)
 	cdc.RegisterConcrete(&MsgDecollateralize{}, "umee/leverage/MsgDecollateralize", nil)
 	cdc.RegisterConcrete(&MsgBorrow{}, "umee/leverage/MsgBorrow", nil)
 	cdc.RegisterConcrete(&MsgRepay{}, "umee/leverage/MsgRepay", nil)
 	cdc.RegisterConcrete(&MsgLiquidate{}, "umee/leverage/MsgLiquidate", nil)
+	cdc.RegisterConcrete(&MsgGovUpdateRegistry{}, "umee/leverage/MsgGovUpdateRegistry", nil)
 	cdc.RegisterConcrete(&MsgSupplyCollateral{}, "umee/leverage/MsgSupplyCollateral", nil)
 }
 
@@ -49,12 +49,13 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgBorrow{},
 		&MsgRepay{},
 		&MsgLiquidate{},
+		&MsgGovUpdateRegistry{},
 		&MsgSupplyCollateral{},
 	)
 
 	registry.RegisterImplementations(
-		(*gov1b1.Content)(nil),
-		&UpdateRegistryProposal{},
+		(*govtypes.Content)(nil),
+		&MsgGovUpdateRegistry{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

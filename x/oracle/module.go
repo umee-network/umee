@@ -50,9 +50,7 @@ func (AppModuleBasic) Name() string {
 	return types.ModuleName
 }
 
-func (AppModuleBasic) ConsensusVersion() uint64 {
-	return 1
-}
+func (AppModuleBasic) ConsensusVersion() uint64 { return 2 }
 
 // RegisterInterfaces registers the x/oracle module's interface types.
 func (AppModuleBasic) RegisterInterfaces(reg cdctypes.InterfaceRegistry) {
@@ -67,7 +65,7 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 // ValidateGenesis performs genesis state validation for the x/oracle module.
 func (AppModuleBasic) ValidateGenesis(
 	cdc codec.JSONCodec,
-	config client.TxEncodingConfig,
+	_ client.TxEncodingConfig,
 	bz json.RawMessage,
 ) error {
 	var genState types.GenesisState
@@ -80,7 +78,7 @@ func (AppModuleBasic) ValidateGenesis(
 
 // Deprecated: RegisterRESTRoutes performs a no-op. Querying is delegated to the
 // gRPC service.
-func (AppModuleBasic) RegisterRESTRoutes(clientCtx client.Context, rtr *mux.Router) {}
+func (AppModuleBasic) RegisterRESTRoutes(client.Context, *mux.Router) {}
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/oracle
 // module.
@@ -97,7 +95,7 @@ func (AppModuleBasic) GetTxCmd() *cobra.Command {
 
 // GetQueryCmd returns the x/oracle module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd(types.StoreKey)
+	return cli.GetQueryCmd()
 }
 
 // AppModule implements the AppModule interface for the x/oracle module.
@@ -107,6 +105,7 @@ type AppModule struct {
 	keeper        keeper.Keeper
 	accountKeeper types.AccountKeeper
 	bankKeeper    bankkeeper.Keeper
+	experimental  bool
 }
 
 func NewAppModule(
@@ -114,12 +113,14 @@ func NewAppModule(
 	keeper keeper.Keeper,
 	accountKeeper types.AccountKeeper,
 	bankKeeper bankkeeper.Keeper,
+	experimental bool,
 ) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		keeper:         keeper,
 		accountKeeper:  accountKeeper,
 		bankKeeper:     bankKeeper,
+		experimental:   experimental,
 	}
 }
 
@@ -137,7 +138,7 @@ func (am AppModule) Route() sdk.Route {
 func (AppModule) QuerierRoute() string { return types.QuerierRoute }
 
 // LegacyQuerierHandler returns a no-op legacy querier.
-func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sdk.Querier {
+func (am AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier {
 	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
 		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
 	}
@@ -147,10 +148,15 @@ func (am AppModule) LegacyQuerierHandler(legacyQuerierCdc *codec.LegacyAmino) sd
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
+
+	m := keeper.NewMigrator(&am.keeper)
+	if err := cfg.RegisterMigration(types.ModuleName, 1, m.Migrate1to2); err != nil {
+		panic(fmt.Sprintf("failed to migrate x/oracle from version 1 to 2: %v", err))
+	}
 }
 
 // RegisterInvariants registers the x/oracle module's invariants.
-func (am AppModule) RegisterInvariants(_ sdk.InvariantRegistry) {}
+func (am AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
 // InitGenesis performs the x/oracle module's genesis initialization. It returns
 // no validator updates.
@@ -171,12 +177,12 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/oracle module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	if err := EndBlocker(ctx, am.keeper); err != nil {
+	if err := EndBlocker(ctx, am.keeper, am.experimental); err != nil {
 		panic(err)
 	}
 
@@ -202,8 +208,8 @@ func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.Weight
 }
 
 // RandomizedParams creates randomized oracle param changes for the simulator.
-func (AppModule) RandomizedParams(r *rand.Rand) []simtypes.ParamChange {
-	return simulation.ParamChanges(r)
+func (AppModule) RandomizedParams(*rand.Rand) []simtypes.ParamChange {
+	return simulation.ParamChanges()
 }
 
 // RegisterStoreDecoder registers a decoder for oracle module's types
