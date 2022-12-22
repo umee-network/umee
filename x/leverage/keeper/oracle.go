@@ -41,7 +41,7 @@ func (k Keeper) TokenBasePrice(ctx sdk.Context, baseDenom string) (sdk.Dec, erro
 	return price, nil
 }
 
-// TokenDefaultDenomPrice returns the USD value of a token's symbol denom, e.g. UMEE. Note, the input
+// TokenDefaultDenomPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`). Note, the input
 // denom must still be the base denomination, e.g. uumee. When error is nil, price is guaranteed
 // to be positive. Also returns the token's exponent to reduce redundant registry reads.
 // If the historic parameter is true, uses a median of recent prices instead of current price.
