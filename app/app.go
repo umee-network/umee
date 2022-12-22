@@ -117,6 +117,7 @@ import (
 	customante "github.com/umee-network/umee/v3/ante"
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/swagger"
+	"github.com/umee-network/umee/v3/util/checkers"
 	"github.com/umee-network/umee/v3/util/genmap"
 	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
 	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/keeper"
@@ -318,6 +319,9 @@ func New(
 	// 	tmos.Exit(err.Error())
 	// }
 
+	govModuleAddr := authtypes.NewModuleAddress(govtypes.ModuleName).String()
+	checkers.SetGovModuleAddr(govModuleAddr)
+
 	app := &UmeeApp{
 		BaseApp:           bApp,
 		legacyAmino:       legacyAmino,
@@ -416,7 +420,7 @@ func New(
 		appCodec,
 		homePath,
 		app.BaseApp,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+		govModuleAddr,
 	)
 
 	// ibc keeper
