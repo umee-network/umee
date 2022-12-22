@@ -214,9 +214,13 @@ test-app-non-determinism:
 	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -Enabled=true \
 		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
 
-test-app-multi-seed-short:
+test-app-multi-seed-short: runsim
 	@echo "Running short multi-seed application simulations. This may take a while!"
 	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
+
+test-sim-multi-seed-long: runsim
+	@echo "Running long multi-seed application simulation. This may take awhile!"
+	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 500 50 TestFullAppSimulation
 
 test-app-import-export: runsim
 	@echo "Running application import/export simulation. This may take several minutes..."
@@ -234,6 +238,8 @@ test-app-benchmark-invariants:
 .PHONY: \
 test-app-non-determinism \
 test-app-multi-seed-short \
+test-app-import-export \
+test-app-after-import \
 test-app-benchmark-invariants
 
 ###############################################################################

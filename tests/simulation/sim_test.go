@@ -32,7 +32,6 @@ import (
 	ibchost "github.com/cosmos/ibc-go/v5/modules/core/24-host"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
-	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -353,7 +352,6 @@ func TestAppImportExport(t *testing.T) {
 
 	fmt.Printf("importing genesis...\n")
 
-	// newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
 	config, newDB, newDir, _, skip, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
 	if skip {
 		t.Skip("skipping application simulation")
@@ -517,7 +515,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 
 	fmt.Printf("importing genesis...\n")
 
-	_, newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
+	config, newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
 	require.NoError(t, err, "simulation setup failed")
 
 	defer func() {
@@ -541,9 +539,28 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	)
 	require.Equal(t, appparams.Name, newApp.Name())
 
-	newApp.InitChain(abci.RequestInitChain{
-		AppStateBytes: exported.AppState,
-	})
+	var genesisState GenesisState
+	err = json.Unmarshal(exported.AppState, &genesisState)
+	require.NoError(t, err)
+
+	// newApp.InitChain(abci.RequestInitChain{
+	// 	AppStateBytes: exported.AppState,
+	// })
+
+	defer func() {
+		if r := recover(); r != nil {
+			err := fmt.Sprintf("%v", r)
+			if !strings.Contains(err, "1") {
+				panic(r)
+			}
+			logger.Info("Skipping simulation as all validators have been unbonded")
+			logger.Info("err", err, "stacktrace", string(debug.Stack()))
+		}
+	}()
+
+	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
+	newApp.ModuleManager.InitGenesis(ctxB, newApp.AppCodec(), genesisState)
+	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
 	_, _, err = simulation.SimulateFromSeed(
 		t,
@@ -552,9 +569,9 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		appStateFn(app.AppCodec(), app.StateSimulationManager),
 		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
 		simapp.SimulationOperations(newApp, app.AppCodec(), config),
-		app.ModuleAccountAddrs(),
+		newApp.ModuleAccountAddrs(),
 		config,
-		app.AppCodec(),
+		newApp.AppCodec(),
 	)
 	require.NoError(t, err)
 }
