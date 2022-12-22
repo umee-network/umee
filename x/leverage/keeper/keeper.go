@@ -21,7 +21,6 @@ type Keeper struct {
 	hooks                  types.Hooks
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
-	authority              string // the gov module account
 	liquidatorQueryEnabled bool
 }
 
@@ -31,7 +30,6 @@ func NewKeeper(
 	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
-	authority string,
 	enableLiquidatorQuery bool,
 ) (Keeper, error) {
 	// set KeyTable if it has not already been set
@@ -45,7 +43,6 @@ func NewKeeper(
 		paramSpace:             paramSpace,
 		bankKeeper:             bk,
 		oracleKeeper:           ok,
-		authority:              authority,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
 	}, nil
 }
