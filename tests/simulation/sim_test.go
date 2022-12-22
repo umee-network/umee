@@ -68,7 +68,7 @@ func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
 
 // TestFullAppSimulation tests application fuzzing given a random seed as input.
 func TestFullAppSimulation(t *testing.T) {
-	config, db, dir, _, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -79,17 +79,6 @@ func TestFullAppSimulation(t *testing.T) {
 		db.Close()
 		require.NoError(t, os.RemoveAll(dir))
 	}()
-
-	var logger log.Logger
-	if simapp.FlagVerboseValue {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
-		}
-	} else {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.Nop(),
-		}
-	}
 
 	app := umeeapp.New(
 		logger,
@@ -218,7 +207,7 @@ func TestAppStateDeterminism(t *testing.T) {
 }
 
 func BenchmarkFullAppSimulation(b *testing.B) {
-	config, db, dir, _, skip, err := simapp.SetupSimulation("leveldb-app-bench-sim", "Simulation")
+	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-bench-sim", "Simulation")
 	if skip {
 		b.Skip("skipping application simulation")
 	}
@@ -229,17 +218,6 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		db.Close()
 		require.NoError(b, os.RemoveAll(dir))
 	}()
-
-	var logger log.Logger
-	if simapp.FlagVerboseValue {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
-		}
-	} else {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.Nop(),
-		}
-	}
 
 	app := umeeapp.New(
 		logger,
@@ -280,7 +258,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 }
 
 func TestAppImportExport(t *testing.T) {
-	config, db, dir, _, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -291,17 +269,6 @@ func TestAppImportExport(t *testing.T) {
 		db.Close()
 		require.NoError(t, os.RemoveAll(dir))
 	}()
-
-	var logger log.Logger
-	if simapp.FlagVerboseValue {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
-		}
-	} else {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.Nop(),
-		}
-	}
 
 	app := umeeapp.New(
 		logger,
@@ -443,7 +410,7 @@ func TestAppImportExport(t *testing.T) {
 }
 
 func TestAppSimulationAfterImport(t *testing.T) {
-	config, db, dir, _, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -454,17 +421,6 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		db.Close()
 		require.NoError(t, os.RemoveAll(dir))
 	}()
-
-	var logger log.Logger
-	if simapp.FlagVerboseValue {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
-		}
-	} else {
-		logger = server.ZeroLogWrapper{
-			Logger: zerolog.Nop(),
-		}
-	}
 
 	app := umeeapp.New(
 		logger,
