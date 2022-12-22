@@ -50,7 +50,7 @@ func (app *UmeeApp) registerUpgrade3_1to3_3(_ upgradetypes.Plan) {
 				return fromVM, err
 			}
 			ctx.Logger().Info("Run module migrations")
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+			return app.ModuleManager.RunMigrations(ctx, app.configurator, fromVM)
 		})
 }
 
@@ -67,7 +67,7 @@ func (app *UmeeApp) registerUpgrade3_2to3_3(_ upgradetypes.Plan) {
 				return fromVM, err
 			}
 			ctx.Logger().Info("Run module migrations")
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+			return app.ModuleManager.RunMigrations(ctx, app.configurator, fromVM)
 		})
 }
 
@@ -92,7 +92,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 			}
 
 			ctx.Logger().Info("Running module migrations")
-			vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
+			vm, err := app.ModuleManager.RunMigrations(ctx, app.configurator, fromVM)
 			if err != nil {
 				return vm, err
 			}
@@ -134,7 +134,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		ctx.Logger().Info("Upgrade handler execution", "name", planName)
-		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		return app.ModuleManager.RunMigrations(ctx, app.configurator, fromVM)
 	}
 }
 

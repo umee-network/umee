@@ -203,24 +203,38 @@ lint-fix:
 
 SIMAPP = ./tests/simulation
 
-test-sim-non-determinism:
+# Install the runsim binary
+runsim: $(RUNSIM)
+$(RUNSIM):
+	@echo "Installing runsim..."
+	@go install github.com/cosmos/tools/cmd/runsim@v1.0.0
+
+test-app-non-determinism:
 	@echo "Running non-determinism application simulations..."
 	@go test -mod=readonly $(SIMAPP) -run TestAppStateDeterminism -Enabled=true \
 		-NumBlocks=100 -BlockSize=200 -Commit=true -Period=0 -v -timeout 24h
 
-test-sim-multi-seed-short:
+test-app-multi-seed-short:
 	@echo "Running short multi-seed application simulations. This may take a while!"
 	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
 
-test-sim-benchmark-invariants:
+test-app-import-export: runsim
+	@echo "Running application import/export simulation. This may take several minutes..."
+	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestAppImportExport
+
+test-app-after-import: runsim
+	@echo "Running application simulation-after-import. This may take several minutes..."
+	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 5 TestAppSimulationAfterImport
+
+test-app-benchmark-invariants:
 	@echo "Running simulation invariant benchmarks..."
 	@go test -mod=readonly $(SIMAPP) -benchmem -bench=BenchmarkFullAppSimulation -run=NOOP \
 	-Enabled=true -NumBlocks=1000 -BlockSize=200 -Period=1 -Commit=true -Seed=57 -v -timeout 24h
 
 .PHONY: \
-test-sim-non-determinism \
-test-sim-multi-seed-short \
-test-sim-benchmark-invariants
+test-app-non-determinism \
+test-app-multi-seed-short \
+test-app-benchmark-invariants
 
 ###############################################################################
 ##                                 Protobuf                                  ##
