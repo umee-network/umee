@@ -15,7 +15,7 @@ import (
 	"github.com/rs/zerolog"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
@@ -307,7 +307,7 @@ func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
 	return trades, nil
 }
 
-func (p *CoinbaseProvider) messageReceived(messageType int, bz []byte) {
+func (p *CoinbaseProvider) messageReceived(_ int, bz []byte) {
 	var coinbaseTrade CoinbaseTradeResponse
 	if err := json.Unmarshal(bz, &coinbaseTrade); err != nil {
 		p.logger.Error().Err(err).Msg("unable to unmarshal response")

@@ -203,33 +203,55 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Medians() {
-	atomMedian := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("49.99")}
-	umeeMedian := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6541.48")}
+	app, ctx := s.app, s.ctx
 
-	s.app.OracleKeeper.SetMedian(s.ctx, atomMedian.Denom, atomMedian.Amount)
-	s.app.OracleKeeper.SetMedian(s.ctx, umeeMedian.Denom, umeeMedian.Amount)
+	atomMedian0 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("49.99")}
+	umeeMedian0 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6541.48")}
+	atomMedian1 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("51.09")}
+	umeeMedian1 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6540.23")}
 
-	res, err := s.queryClient.Medians(s.ctx.Context(), &types.QueryMedians{})
+	app.OracleKeeper.SetHistoricMedian(ctx, atomMedian0.Denom, uint64(ctx.BlockHeight()-4), atomMedian0.Amount)
+	app.OracleKeeper.SetHistoricMedian(ctx, umeeMedian0.Denom, uint64(ctx.BlockHeight()-4), umeeMedian0.Amount)
+
+	res, err := s.queryClient.Medians(ctx.Context(), &types.QueryMedians{})
 	s.Require().NoError(err)
-	s.Require().Equal(res.Medians, sdk.NewDecCoins(atomMedian, umeeMedian))
+	s.Require().Equal(res.Medians, sdk.NewDecCoins(atomMedian0, umeeMedian0))
 
-	res, err = s.queryClient.Medians(s.ctx.Context(), &types.QueryMedians{Denom: atomMedian.Denom})
+	res, err = s.queryClient.Medians(ctx.Context(), &types.QueryMedians{Denom: atomMedian0.Denom, NumStamps: 1})
 	s.Require().NoError(err)
-	s.Require().Equal(res.Medians, sdk.NewDecCoins(atomMedian))
+	s.Require().Equal(res.Medians, sdk.NewDecCoins(atomMedian0))
+
+	app.OracleKeeper.SetHistoricMedian(ctx, atomMedian1.Denom, uint64(ctx.BlockHeight()-2), atomMedian1.Amount)
+	app.OracleKeeper.SetHistoricMedian(ctx, umeeMedian1.Denom, uint64(ctx.BlockHeight()-2), umeeMedian1.Amount)
+
+	res, err = s.queryClient.Medians(ctx.Context(), &types.QueryMedians{})
+	s.Require().NoError(err)
+	s.Require().Equal(res.Medians, sdk.DecCoins{atomMedian0, atomMedian1, umeeMedian0, umeeMedian1})
+
+	res, err = s.queryClient.Medians(ctx.Context(), &types.QueryMedians{Denom: atomMedian1.Denom, NumStamps: 2})
+	s.Require().NoError(err)
+	s.Require().Equal(res.Medians, sdk.DecCoins{atomMedian1, atomMedian0})
+
+	res, err = s.queryClient.Medians(ctx.Context(), &types.QueryMedians{Denom: atomMedian1.Denom, NumStamps: 0})
+	s.Require().ErrorContains(err, "parameter NumStamps must be greater than 0")
+	s.Require().Nil(res)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
+	app, ctx := s.app, s.ctx
+
 	atomMedianDeviation := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("39.99")}
 	umeeMedianDeviation := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("9541.48")}
 
-	s.app.OracleKeeper.SetMedianDeviation(s.ctx, atomMedianDeviation.Denom, atomMedianDeviation.Amount)
-	s.app.OracleKeeper.SetMedianDeviation(s.ctx, umeeMedianDeviation.Denom, umeeMedianDeviation.Amount)
+	app.OracleKeeper.SetMedianStampPeriod(ctx, 1)
+	app.OracleKeeper.SetHistoricMedianDeviation(ctx, atomMedianDeviation.Denom, uint64(ctx.BlockHeight()-1), atomMedianDeviation.Amount)
+	app.OracleKeeper.SetHistoricMedianDeviation(ctx, umeeMedianDeviation.Denom, uint64(ctx.BlockHeight()-1), umeeMedianDeviation.Amount)
 
-	res, err := s.queryClient.MedianDeviations(s.ctx.Context(), &types.QueryMedianDeviations{})
+	res, err := s.queryClient.MedianDeviations(ctx.Context(), &types.QueryMedianDeviations{})
 	s.Require().NoError(err)
 	s.Require().Equal(res.MedianDeviations, sdk.NewDecCoins(atomMedianDeviation, umeeMedianDeviation))
 
-	res, err = s.queryClient.MedianDeviations(s.ctx.Context(), &types.QueryMedianDeviations{Denom: atomMedianDeviation.Denom})
+	res, err = s.queryClient.MedianDeviations(ctx.Context(), &types.QueryMedianDeviations{Denom: atomMedianDeviation.Denom})
 	s.Require().NoError(err)
 	s.Require().Equal(res.MedianDeviations, sdk.NewDecCoins(atomMedianDeviation))
 }

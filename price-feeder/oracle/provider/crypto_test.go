@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 func TestCryptoProvider_GetTickerPrices(t *testing.T) {

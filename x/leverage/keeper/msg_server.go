@@ -4,7 +4,6 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
@@ -67,20 +66,53 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
-	s.keeper.Logger(ctx).Debug(
-		"supplied assets withdrawn",
-		"supplier", msg.Supplier,
-		"redeemed", msg.Asset.String(),
-		"received", received.String(),
-	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
-		Supplier: msg.Supplier,
-		Utoken:   msg.Asset,
-		Asset:    received,
-	})
+	err = s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
 	return &types.MsgWithdrawResponse{
 		Received: received,
 	}, err
+}
+
+func (s msgServer) MaxWithdraw(
+	goCtx context.Context,
+	msg *types.MsgMaxWithdraw,
+) (*types.MsgMaxWithdrawResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
+	if err != nil {
+		return nil, err
+	}
+
+	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
+	if err != nil {
+		return nil, err
+	}
+
+	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.logWithdrawal(ctx, msg.Supplier, uToken, received, "maximum supplied assets withdrawn")
+	return &types.MsgMaxWithdrawResponse{
+		Withdrawn: uToken,
+		Received:  received,
+	}, err
+}
+
+func (s msgServer) logWithdrawal(ctx sdk.Context, supplier string, redeemed, received sdk.Coin, desc string) error {
+	s.keeper.Logger(ctx).Debug(
+		desc,
+		"supplier", supplier,
+		"redeemed", redeemed.String(),
+		"received", received.String(),
+	)
+	err := ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
+		Supplier: supplier,
+		Utoken:   redeemed,
+		Asset:    received,
+	})
+	return err
 }
 
 func (s msgServer) Collateralize(
@@ -284,15 +316,6 @@ func (s msgServer) GovUpdateRegistry(
 ) (*types.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// checking req msg authority is the gov module address
-	if s.keeper.authority != msg.Authority {
-		return &types.MsgGovUpdateRegistryResponse{},
-			govtypes.ErrInvalidSigner.Wrapf(
-				"invalid authority: expected %s, got %s",
-				s.keeper.authority, msg.Authority,
-			)
-	}
-
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
 	registeredTokenDenoms := make(map[string]bool)
 
@@ -301,13 +324,13 @@ func (s msgServer) GovUpdateRegistry(
 	}
 
 	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.UpdateTokens, registeredTokenDenoms, true)
+	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, registeredTokenDenoms, true)
 	if err != nil {
 		return &types.MsgGovUpdateRegistryResponse{}, err
 	}
 
 	// adds  the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.Authority, msg.AddTokens, registeredTokenDenoms, false)
+	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, registeredTokenDenoms, false)
 	if err != nil {
 		return &types.MsgGovUpdateRegistryResponse{}, err
 	}

@@ -8,6 +8,10 @@ on:
       - "v[0-9]+\\.[0-9]+\\.[0-9]+" # Official release version tags e.g. v2.0.5
       - "v[0-9]+\\.[0-9]+\\.[0-9]+-rc[0-9]+" # Release candidate tags e.g. v1.0.3-rc4
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -25,7 +29,7 @@ jobs:
 
       # useful to test builds. However will require to add "push" rule to the "on" section
       - name: goreleaser test-build
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')
         with:
           version: latest
@@ -33,7 +37,7 @@ jobs:
         env:
           TM_VERSION: ${{ env.TM_VERSION }}
       - name: Release
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest

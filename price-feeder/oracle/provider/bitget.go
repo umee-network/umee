@@ -12,7 +12,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/price-feeder/oracle/types"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
@@ -213,7 +213,7 @@ func (p *BitgetProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[strin
 }
 
 // messageReceived handles the received data from the Bitget websocket.
-func (p *BitgetProvider) messageReceived(messageType int, bz []byte) {
+func (p *BitgetProvider) messageReceived(_ int, bz []byte) {
 	var (
 		tickerResp           BitgetTicker
 		tickerErr            error

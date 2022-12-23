@@ -262,18 +262,29 @@ func (q querier) Medians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var medians sdk.DecCoins
+	medians := make([]sdk.DecCoin, 0)
 
 	if len(req.Denom) > 0 {
-		exchangeRate, err := q.GetMedian(ctx, req.Denom)
-		if err != nil {
-			return nil, err
+		if req.NumStamps == 0 {
+			return nil, status.Error(codes.InvalidArgument, "parameter NumStamps must be greater than 0")
 		}
 
-		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+		if req.NumStamps > uint32(q.MaximumMedianStamps(ctx)) {
+			req.NumStamps = uint32(q.MaximumMedianStamps(ctx))
+		}
+
+		medians = make(sdk.DecCoins, req.NumStamps)
+		medianList := q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))
+
+		for i, median := range medianList {
+			medians[i] = sdk.NewDecCoinFromDec(req.Denom, median)
+		}
 	} else {
-		q.IterateAllMedianPrices(ctx, func(exchangeRateTuple types.ExchangeRateTuple) (stop bool) {
-			medians = medians.Add(sdk.NewDecCoinFromDec(exchangeRateTuple.Denom, exchangeRateTuple.ExchangeRate))
+		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
+			medians = append(
+				medians,
+				sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate),
+			)
 			return false
 		})
 	}
@@ -296,15 +307,18 @@ func (q querier) MedianDeviations(
 	var medians sdk.DecCoins
 
 	if len(req.Denom) > 0 {
-		exchangeRate, err := q.GetMedianDeviation(ctx, req.Denom)
+		exchangeRate, err := q.HistoricMedianDeviation(ctx, req.Denom)
 		if err != nil {
 			return nil, err
 		}
 
 		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
-		q.IterateAllMedianDeviationPrices(ctx, func(exchangeRateTuple types.ExchangeRateTuple) (stop bool) {
-			medians = medians.Add(sdk.NewDecCoinFromDec(exchangeRateTuple.Denom, exchangeRateTuple.ExchangeRate))
+		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.Price) (stop bool) {
+			medians = medians.Add(sdk.NewDecCoinFromDec(
+				medianDeviation.ExchangeRateTuple.Denom,
+				medianDeviation.ExchangeRateTuple.ExchangeRate,
+			))
 			return false
 		})
 	}

@@ -14,7 +14,7 @@ import (
 )
 
 // GetQueryCmd returns the CLI query commands for the x/oracle module.
-func GetQueryCmd(queryRoute string) *cobra.Command {
+func GetQueryCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        types.ModuleName,
 		Short:                      fmt.Sprintf("Querying commands for the %s module", types.ModuleName),

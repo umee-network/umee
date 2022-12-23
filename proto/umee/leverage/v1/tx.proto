@@ -22,6 +22,10 @@ service Msg {
   // exchange for burning uTokens.
   rpc Withdraw(MsgWithdraw) returns (MsgWithdrawResponse);
 
+  // MaxWithdraw moves previously supplied tokens from the module back to the user balance in
+  // exchange for burning uTokens. It automatically calculates the maximum valid amount to withdraw.
+  rpc MaxWithdraw(MsgMaxWithdraw) returns (MsgMaxWithdrawResponse);
+
   // Collateralize enables selected uTokens as collateral, which moves them to the module.
   rpc Collateralize(MsgCollateralize) returns (MsgCollateralizeResponse);
 
@@ -60,6 +64,14 @@ message MsgWithdraw {
   // Supplier is the account address withdrawing assets and the signer of the message.
   string                   supplier = 1;
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgMaxWithdraw represents a user's request to withdraw the maximum valid amount of supplied assets.
+message MsgMaxWithdraw {
+  // Supplier is the account address withdrawing assets and the signer of the message.
+  string supplier = 1;
+  // Denom is base token denom to withdraw
+  string denom = 2;
 }
 
 // MsgCollateralize represents a user's request to enable selected
@@ -131,6 +143,14 @@ message MsgSupplyResponse {
 message MsgWithdrawResponse {
   // Received is the amount of base tokens received.
   cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
+}
+
+// MsgMaxWithdrawResponse defines the Msg/MaxWithdraw response type.
+message MsgMaxWithdrawResponse {
+  // Withdrawn is the amount of uTokens withdrawn.
+  cosmos.base.v1beta1.Coin withdrawn = 1 [(gogoproto.nullable) = false];
+  // Received is the amount of base tokens received.
+  cosmos.base.v1beta1.Coin received = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgCollateralizeResponse defines the Msg/Collateralize response type.
