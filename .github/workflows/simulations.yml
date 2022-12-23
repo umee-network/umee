@@ -25,7 +25,7 @@ jobs:
           path: ~/go/bin
           key: ${{ runner.os }}-go-runsim-binary
 
-  test-sim-non-determinism:
+  test-app-non-determinism:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -43,9 +43,63 @@ jobs:
       - name: Test application non-determinism
         if: env.GIT_DIFF
         run: |
-          make test-sim-non-determinism
+          make test-app-non-determinism
 
-  test-sim-multi-seed-short:
+  test-app-import-export:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
+      - uses: actions/cache@v3
+        if: env.GIT_DIFF
+        with:
+          path: ~/go/bin
+          key: ${{ runner.os }}-go-runsim-binary
+      - name: test-app-import-export
+        if: env.GIT_DIFF
+        run: |
+          make test-app-import-export
+
+  test-app-after-import:
+    runs-on: ubuntu-latest
+    needs: install-dependencies
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
+      - uses: actions/cache@v3
+        if: env.GIT_DIFF
+        with:
+          path: ~/go/bin
+          key: ${{ runner.os }}-go-runsim-binary
+      - name: test-app-after-import
+        if: env.GIT_DIFF
+        run: |
+          make test-app-after-import
+
+  test-app-multi-seed-short:
     runs-on: ubuntu-latest
     needs: install-dependencies
     steps:
@@ -66,10 +120,7 @@ jobs:
         with:
           path: ~/go/bin
           key: ${{ runner.os }}-go-runsim-binary
-      - name: test-sim-multi-seed-short
+      - name: test-app-multi-seed-short
+        if: env.GIT_DIFF
         run: |
-          make test-sim-multi-seed-short
-        # TODO: We disable multi-seed simulations due to the gravity bridge.
-        # Ref: https://github.com/umee-network/umee/issues/389
-        if: ${{ false }}
-        # if: env.GIT_DIFF
+          make test-app-multi-seed-short
