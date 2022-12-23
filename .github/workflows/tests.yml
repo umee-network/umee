@@ -19,15 +19,15 @@ jobs:
           go-version: 1.19
       - name: Display Go Version
         run: go version
-      - uses: actions/cache@v3
-        id: cache-go-tparse
-        with:
-          path: ~/go/bin
-          key: ${{ runner.os }}-go-tparse-binary
-      - name: Install tparse
-        if: steps.cache-go-tparse.outputs.cache-hit != 'true'
-        run: |
-          go install github.com/mfridman/tparse@v0.11.1
+      # - uses: actions/cache@v3
+      #   id: cache-go-tparse
+      #   with:
+      #     path: ~/go/bin
+      #     key: ${{ runner.os }}-go-tparse-binary
+      # - name: Install tparse
+      #   if: steps.cache-go-tparse.outputs.cache-hit != 'true'
+      #   run: |
+      #     go install github.com/mfridman/tparse@v0.11.1
 
   test-unit-cover:
     runs-on: ubuntu-latest
