@@ -8,7 +8,7 @@ on:
       - release/**
 
 concurrency:
-  group: ci-${{ github.ref }}-Build #${{ github.workflow }}
+  group: ci-${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 
 # This workflow makes amd64 and arm64 binaries for macOS and Linux.
