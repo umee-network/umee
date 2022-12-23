@@ -7,6 +7,10 @@ on:
     tags:
       - "price-feeder/v*.*.*"
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
