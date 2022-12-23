@@ -1,4 +1,4 @@
-name: Lint
+name: Lint-Title
 on:
   pull_request_target:
     types:
@@ -6,9 +6,13 @@ on:
       - edited
       - synchronize
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   main:
-    name: Run PR Title Linter
+    name: PR Title Linter
     runs-on: ubuntu-latest
     steps:
       - uses: amannn/action-semantic-pull-request@v5
