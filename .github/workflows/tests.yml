@@ -33,7 +33,7 @@ jobs:
       matrix:
         arch: [amd64, arm64]
         targetos: [darwin, linux]
-    name: umee ${{ matrix.arch }} for ${{ matrix.targetos }}
+    name: umeed ${{ matrix.targetos }}-${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v3
       - name: Cache binaries
