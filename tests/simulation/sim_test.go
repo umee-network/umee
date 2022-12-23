@@ -331,10 +331,8 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	}()
 
 	defer func() {
-		defer func() {
-			db.Close()
-			require.NoError(t, os.RemoveAll(dir))
-		}()
+		db.Close()
+		require.NoError(t, os.RemoveAll(dir))
 	}()
 
 	defer func() {

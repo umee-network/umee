@@ -218,7 +218,7 @@ test-app-multi-seed-short: runsim
 	@echo "Running short multi-seed application simulations. This may take a while!"
 	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 50 10 TestFullAppSimulation
 
-test-sim-multi-seed-long: runsim
+test-app-multi-seed-long: runsim
 	@echo "Running long multi-seed application simulation. This may take awhile!"
 	@runsim -Jobs=4 -SimAppPkg=$(SIMAPP) -ExitOnFail 500 50 TestFullAppSimulation
 

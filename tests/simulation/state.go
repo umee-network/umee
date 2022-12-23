@@ -386,11 +386,6 @@ func appExportAndImport(t *testing.T) (
 		simapp.PrintStats(db)
 	}
 
-	// if stopEarly {
-	// 	fmt.Println("can't export or import a zero-validator genesis, exiting test...")
-	// 	return
-	// }
-
 	fmt.Printf("exporting genesis...\n")
 
 	exported, err := app.ExportAppStateAndValidators(false, []string{})
