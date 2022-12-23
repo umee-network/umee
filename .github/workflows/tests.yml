@@ -32,8 +32,8 @@ jobs:
   print-name:
     runs-on: ubuntu-latest
     steps:
-      - name print
-      - run: echo ci-${{ github.ref }}-${{ github.workflow }}
+      - name: print
+        run: echo ci-${{ github.ref }}-${{ github.workflow }}
 
   test-unit-cover:
     runs-on: ubuntu-latest
