@@ -17,8 +17,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: 1.19
-      - name: Display Go Version
-        run: go version
       - uses: actions/cache@v3
         id: cache-go-tparse
         with:
@@ -28,6 +26,42 @@ jobs:
         if: steps.cache-go-tparse.outputs.cache-hit != 'true'
         run: |
           go install github.com/mfridman/tparse@v0.11.1
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+        targetos: [darwin, linux]
+    name: umeed ${{ matrix.targetos }}-${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Cache binaries
+        id: cache-binaries
+        uses: actions/cache@v3
+        with:
+          path: ./cmd/umeed/umeed
+          key: umeed-${{ matrix.targetos }}-${{ matrix.arch }}
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - name: Setup go
+        if: steps.cache-binaries.outputs.cache-hit != 'true' && env.GIT_DIFF
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+          cache: true
+        env:
+          GOOS: ${{ matrix.targetos }}
+          GOARCH: ${{ matrix.arch }}
+      - name: Compile
+        if: steps.cache-binaries.outputs.cache-hit != 'true' && env.GIT_DIFF
+        run: |
+          go mod download
+          make build
 
   test-unit-cover:
     runs-on: ubuntu-latest
@@ -113,9 +147,6 @@ jobs:
         if: env.GIT_DIFF
         run: |
           cd price-feeder && make test-unit
-
-  # build-umeed:
-  #   uses: ./.github/workflows/build.yml
 
   liveness-test:
     needs: install-tparse

@@ -1,7 +1,5 @@
 package app
 
-// todo: trigger tests
-
 import (
 	"encoding/json"
 	"fmt"
