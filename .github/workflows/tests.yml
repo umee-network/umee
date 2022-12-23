@@ -37,7 +37,7 @@ jobs:
 
   test-unit-cover:
     runs-on: ubuntu-latest
-    needs: install-tpares
+    needs: install-tparse
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.2
@@ -63,7 +63,7 @@ jobs:
 
   test-e2e:
     runs-on: ubuntu-latest
-    needs: install-tpares
+    needs: install-tparse
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v3
@@ -100,7 +100,7 @@ jobs:
 
   price-feeder:
     runs-on: ubuntu-latest
-    needs: install-tpares
+    needs: install-tparse
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.2
@@ -124,7 +124,7 @@ jobs:
   #   uses: ./.github/workflows/build.yml
 
   liveness-test:
-    needs: install-tpares
+    needs: install-tparse
     # needs: build-umeed
     runs-on: ubuntu-latest
     timeout-minutes: 10
