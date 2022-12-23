@@ -6,6 +6,10 @@ on:
       - edited
       - synchronize
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   main:
     name: Run PR Title Linter

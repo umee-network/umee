@@ -6,6 +6,10 @@ on:
       - main
       - release/**
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   install-tparse:
     runs-on: ubuntu-latest
@@ -27,6 +31,7 @@ jobs:
 
   test-unit-cover:
     runs-on: ubuntu-latest
+    needs: install-tparse
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.2
@@ -52,6 +57,7 @@ jobs:
 
   test-e2e:
     runs-on: ubuntu-latest
+    needs: install-tparse
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v3
@@ -88,6 +94,7 @@ jobs:
 
   price-feeder:
     runs-on: ubuntu-latest
+    needs: install-tparse
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.2
@@ -107,11 +114,12 @@ jobs:
         run: |
           cd price-feeder && make test-unit
 
-  build-umeed:
-    uses: ./.github/workflows/build.yml
+  # build-umeed:
+  #   uses: ./.github/workflows/build.yml
 
   liveness-test:
-    needs: build-umeed
+    needs: install-tparse
+    # needs: build-umeed
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
