@@ -11,13 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
-    if: "!contains(github.event.head_commit.message, 'skip-sims')"
-  
   install-dependencies:
     runs-on: ubuntu-latest
-    needs: build
     steps:
       - uses: actions/setup-go@v3
         with:
@@ -52,7 +47,7 @@ jobs:
 
   test-app-import-export:
     runs-on: ubuntu-latest
-    needs: [build, install-dependencies]
+    needs: install-dependencies
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
@@ -79,7 +74,7 @@ jobs:
 
   test-app-after-import:
     runs-on: ubuntu-latest
-    needs: [build, install-dependencies]
+    needs: install-dependencies
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v3
@@ -106,7 +101,7 @@ jobs:
 
   test-app-multi-seed-short:
     runs-on: ubuntu-latest
-    needs: [build, install-dependencies]
+    needs: install-dependencies
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.2
