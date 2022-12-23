@@ -6,24 +6,36 @@ import (
 	"io"
 	"io/ioutil"
 	"math/rand"
+	"os"
+
+	"testing"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	"github.com/cosmos/cosmos-sdk/store"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/cosmos/cosmos-sdk/x/simulation"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/stretchr/testify/require"
 	tmjson "github.com/tendermint/tendermint/libs/json"
+	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
+	dbm "github.com/tendermint/tm-db"
 
 	umeeapp "github.com/umee-network/umee/v3/app"
+	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/tests/util"
 )
 
@@ -35,6 +47,24 @@ import (
 // the ModuleBasicManager which populates json from each BasicModule
 // object provided to it during init.
 type GenesisState map[string]json.RawMessage
+
+type StoreKeysPrefixes struct {
+	A        storetypes.StoreKey
+	B        storetypes.StoreKey
+	Prefixes [][]byte
+}
+
+// interBlockCacheOpt returns a BaseApp option function that sets the persistent
+// inter-block write-through cache.
+func interBlockCacheOpt() func(*baseapp.BaseApp) {
+	return baseapp.SetInterBlockCache(store.NewCommitKVStoreCacheManager())
+}
+
+// fauxMerkleModeOpt returns a BaseApp option to use a dbStoreAdapter instead of
+// an IAVLStore for faster simulation speed.
+func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
+	bapp.SetFauxMerkleMode()
+}
 
 // appStateFn returns the initial application state using a genesis file or
 // simulation parameters. It panics if the user provides files for both of them.
@@ -305,4 +335,87 @@ func appStateFromGenesisFileFn(
 	}
 
 	return genesis, newAccs
+}
+
+func appExportAndImport(t *testing.T) (
+	dbm.DB, string, *umeeapp.UmeeApp, log.Logger, servertypes.ExportedApp, dbm.DB, string, *umeeapp.UmeeApp,
+	simtypes.Config,
+) {
+	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	if skip {
+		t.Skip("skipping application simulation")
+	}
+
+	require.NoError(t, err, "simulation setup failed")
+
+	app := umeeapp.New(
+		logger,
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		dir,
+		simapp.FlagPeriodValue,
+		umeeapp.MakeEncodingConfig(),
+		umeeapp.EmptyAppOptions{},
+		umeeapp.GetWasmEnabledProposals(),
+		umeeapp.EmptyWasmOpts,
+		fauxMerkleModeOpt,
+	)
+	require.Equal(t, appparams.Name, app.Name())
+
+	// run randomized simulation
+	_, simParams, simErr := simulation.SimulateFromSeed(
+		t,
+		os.Stdout,
+		app.BaseApp,
+		appStateFn(app.AppCodec(), app.StateSimulationManager),
+		simtypes.RandomAccounts,
+		simapp.SimulationOperations(app, app.AppCodec(), config),
+		app.ModuleAccountAddrs(),
+		config,
+		app.AppCodec(),
+	)
+
+	// export state and simParams before the simulation error is checked
+	err = simapp.CheckExportSimulation(app, config, simParams)
+	require.NoError(t, err)
+	require.NoError(t, simErr)
+
+	if config.Commit {
+		simapp.PrintStats(db)
+	}
+
+	// if stopEarly {
+	// 	fmt.Println("can't export or import a zero-validator genesis, exiting test...")
+	// 	return
+	// }
+
+	fmt.Printf("exporting genesis...\n")
+
+	exported, err := app.ExportAppStateAndValidators(false, []string{})
+	require.NoError(t, err)
+
+	fmt.Printf("importing genesis...\n")
+
+	config, newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
+	require.NoError(t, err, "simulation setup failed")
+
+	newApp := umeeapp.New(
+		logger,
+		newDB,
+		nil,
+		true,
+		map[int64]bool{},
+		newDir,
+		simapp.FlagPeriodValue,
+		umeeapp.MakeEncodingConfig(),
+		umeeapp.EmptyAppOptions{},
+		umeeapp.GetWasmEnabledProposals(),
+		umeeapp.EmptyWasmOpts,
+		fauxMerkleModeOpt,
+	)
+	require.Equal(t, appparams.Name, newApp.Name())
+
+	return db, dir, app, logger, exported, newDB, newDir, newApp, config
 }

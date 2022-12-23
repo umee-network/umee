@@ -9,11 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/simapp"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -46,24 +43,6 @@ import (
 
 func init() {
 	simapp.GetSimulatorFlags()
-}
-
-type StoreKeysPrefixes struct {
-	A        storetypes.StoreKey
-	B        storetypes.StoreKey
-	Prefixes [][]byte
-}
-
-// interBlockCacheOpt returns a BaseApp option function that sets the persistent
-// inter-block write-through cache.
-func interBlockCacheOpt() func(*baseapp.BaseApp) {
-	return baseapp.SetInterBlockCache(store.NewCommitKVStoreCacheManager())
-}
-
-// fauxMerkleModeOpt returns a BaseApp option to use a dbStoreAdapter instead of
-// an IAVLStore for faster simulation speed.
-func fauxMerkleModeOpt(bapp *baseapp.BaseApp) {
-	bapp.SetFauxMerkleMode()
 }
 
 // TestFullAppSimulation tests application fuzzing given a random seed as input.
@@ -258,104 +237,28 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 }
 
 func TestAppImportExport(t *testing.T) {
-	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
-	if skip {
-		t.Skip("skipping application simulation")
-	}
-
-	require.NoError(t, err, "simulation setup failed")
-
-	defer func() {
-		db.Close()
-		require.NoError(t, os.RemoveAll(dir))
-	}()
-
-	app := umeeapp.New(
-		logger,
-		db,
-		nil,
-		true,
-		map[int64]bool{},
-		dir,
-		simapp.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
-		umeeapp.EmptyAppOptions{},
-		umeeapp.GetWasmEnabledProposals(),
-		umeeapp.EmptyWasmOpts,
-		fauxMerkleModeOpt,
-	)
-	require.Equal(t, appparams.Name, app.Name())
-
-	// run randomized simulation
-	stopEarly, simParams, simErr := simulation.SimulateFromSeed(
-		t,
-		os.Stdout,
-		app.BaseApp,
-		appStateFn(app.AppCodec(), app.StateSimulationManager),
-		simtypes.RandomAccounts,
-		simapp.SimulationOperations(app, app.AppCodec(), config),
-		app.ModuleAccountAddrs(),
-		config,
-		app.AppCodec(),
-	)
-
-	// export state and simParams before the simulation error is checked
-	err = simapp.CheckExportSimulation(app, config, simParams)
-	require.NoError(t, err)
-	require.NoError(t, simErr)
-
-	if config.Commit {
-		simapp.PrintStats(db)
-	}
-
-	if stopEarly {
-		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
-		return
-	}
-
-	fmt.Printf("exporting genesis...\n")
-
-	exported, err := app.ExportAppStateAndValidators(false, []string{})
-	require.NoError(t, err)
-
-	fmt.Printf("importing genesis...\n")
-
-	config, newDB, newDir, _, skip, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
-	if skip {
-		t.Skip("skipping application simulation")
-	}
-	require.NoError(t, err, "simulation setup failed")
-
-	defer func() {
-		require.NoError(t, newDB.Close())
-		require.NoError(t, os.RemoveAll(newDir))
-	}()
-
-	newApp := umeeapp.New(
-		logger,
-		newDB,
-		nil,
-		true,
-		map[int64]bool{},
-		newDir,
-		simapp.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
-		umeeapp.EmptyAppOptions{},
-		umeeapp.GetWasmEnabledProposals(),
-		umeeapp.EmptyWasmOpts,
-		fauxMerkleModeOpt,
-	)
-	require.Equal(t, appparams.Name, newApp.Name())
-
+	db, dir, app, logger, exported, newDB, newDir, newApp, _ := appExportAndImport(t)
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Sprintf("%v", r)
-			if !strings.Contains(err, "validator set is empty after InitGenesis") {
+			if !strings.Contains(err, "1") {
 				panic(r)
 			}
 			logger.Info("Skipping simulation as all validators have been unbonded")
 			logger.Info("err", err, "stacktrace", string(debug.Stack()))
 		}
+	}()
+
+	defer func() {
+		defer func() {
+			db.Close()
+			require.NoError(t, os.RemoveAll(dir))
+		}()
+	}()
+
+	defer func() {
+		require.NoError(t, newDB.Close())
+		require.NoError(t, os.RemoveAll(newDir))
 	}()
 
 	ctxA := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
@@ -410,92 +313,7 @@ func TestAppImportExport(t *testing.T) {
 }
 
 func TestAppSimulationAfterImport(t *testing.T) {
-	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
-	if skip {
-		t.Skip("skipping application simulation")
-	}
-
-	require.NoError(t, err, "simulation setup failed")
-
-	defer func() {
-		db.Close()
-		require.NoError(t, os.RemoveAll(dir))
-	}()
-
-	app := umeeapp.New(
-		logger,
-		db,
-		nil,
-		true,
-		map[int64]bool{},
-		dir,
-		simapp.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
-		umeeapp.EmptyAppOptions{},
-		umeeapp.GetWasmEnabledProposals(),
-		umeeapp.EmptyWasmOpts,
-		fauxMerkleModeOpt,
-	)
-	require.Equal(t, appparams.Name, app.Name())
-
-	// run randomized simulation
-	stopEarly, simParams, simErr := simulation.SimulateFromSeed(
-		t,
-		os.Stdout,
-		app.BaseApp,
-		appStateFn(app.AppCodec(), app.StateSimulationManager),
-		simtypes.RandomAccounts,
-		simapp.SimulationOperations(app, app.AppCodec(), config),
-		app.ModuleAccountAddrs(),
-		config,
-		app.AppCodec(),
-	)
-
-	// export state and simParams before the simulation error is checked
-	err = simapp.CheckExportSimulation(app, config, simParams)
-	require.NoError(t, err)
-	require.NoError(t, simErr)
-
-	if config.Commit {
-		simapp.PrintStats(db)
-	}
-
-	if stopEarly {
-		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
-		return
-	}
-
-	fmt.Printf("exporting genesis...\n")
-
-	exported, err := app.ExportAppStateAndValidators(false, []string{})
-	require.NoError(t, err)
-
-	fmt.Printf("importing genesis...\n")
-
-	config, newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
-	require.NoError(t, err, "simulation setup failed")
-
-	defer func() {
-		require.NoError(t, newDB.Close())
-		require.NoError(t, os.RemoveAll(newDir))
-	}()
-
-	newApp := umeeapp.New(
-		logger,
-		newDB,
-		nil,
-		true,
-		map[int64]bool{},
-		newDir,
-		simapp.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
-		umeeapp.EmptyAppOptions{},
-		umeeapp.GetWasmEnabledProposals(),
-		umeeapp.EmptyWasmOpts,
-		fauxMerkleModeOpt,
-	)
-	require.Equal(t, appparams.Name, newApp.Name())
-
+	db, dir, app, logger, exported, newDB, newDir, newApp, config := appExportAndImport(t)
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Sprintf("%v", r)
@@ -507,6 +325,19 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		}
 	}()
 
+	defer func() {
+		defer func() {
+			db.Close()
+			require.NoError(t, os.RemoveAll(dir))
+		}()
+	}()
+
+	defer func() {
+		require.NoError(t, newDB.Close())
+		require.NoError(t, os.RemoveAll(newDir))
+	}()
+
+	// importing the old app genesis into new app
 	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
 	newApp.InitChainer(ctxB, abci.RequestInitChain{
 		AppStateBytes:   exported.AppState,
@@ -514,7 +345,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 	})
 	newApp.StoreConsensusParams(ctxB, exported.ConsensusParams)
 
-	_, _, err = simulation.SimulateFromSeed(
+	_, _, err := simulation.SimulateFromSeed(
 		t,
 		os.Stdout,
 		newApp.BaseApp,
