@@ -14,7 +14,7 @@ jobs:
   golangci:
     name: Run golangci-lint
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 8
     steps:
       - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.2
@@ -27,6 +27,7 @@ jobs:
           go-version: 1.19
           cache: true
       - name: revive lint
+        if: env.GIT_DIFF
         uses: morphy2k/revive-action@v2
         with:
           config: .revive.toml
