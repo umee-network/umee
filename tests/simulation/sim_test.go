@@ -237,11 +237,11 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 }
 
 func TestAppImportExport(t *testing.T) {
-	db, dir, app, logger, exported, newDB, newDir, newApp, _ := appExportAndImport(t)
+	db, dir, app, logger, exported, stopEarly, newDB, newDir, newApp, _ := appExportAndImport(t)
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Sprintf("%v", r)
-			if !strings.Contains(err, "1") {
+			if !strings.Contains(err, "validator set is empty after InitGenesis") {
 				panic(r)
 			}
 			logger.Info("Skipping simulation as all validators have been unbonded")
@@ -260,6 +260,11 @@ func TestAppImportExport(t *testing.T) {
 		require.NoError(t, newDB.Close())
 		require.NoError(t, os.RemoveAll(newDir))
 	}()
+
+	if stopEarly {
+		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
+		return
+	}
 
 	ctxA := app.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
 	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})
@@ -313,11 +318,11 @@ func TestAppImportExport(t *testing.T) {
 }
 
 func TestAppSimulationAfterImport(t *testing.T) {
-	db, dir, app, logger, exported, newDB, newDir, newApp, config := appExportAndImport(t)
+	db, dir, app, logger, exported, stopEarly, newDB, newDir, newApp, config := appExportAndImport(t)
 	defer func() {
 		if r := recover(); r != nil {
 			err := fmt.Sprintf("%v", r)
-			if !strings.Contains(err, "1") {
+			if !strings.Contains(err, "validator set is empty after InitGenesis") {
 				panic(r)
 			}
 			logger.Info("Skipping simulation as all validators have been unbonded")
@@ -336,6 +341,11 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		require.NoError(t, newDB.Close())
 		require.NoError(t, os.RemoveAll(newDir))
 	}()
+
+	if stopEarly {
+		fmt.Println("can't export or import a zero-validator genesis, exiting test...")
+		return
+	}
 
 	// importing the old app genesis into new app
 	ctxB := newApp.NewContext(true, tmproto.Header{Height: app.LastBlockHeight()})

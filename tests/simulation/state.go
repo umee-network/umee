@@ -338,7 +338,7 @@ func appStateFromGenesisFileFn(
 }
 
 func appExportAndImport(t *testing.T) (
-	dbm.DB, string, *umeeapp.UmeeApp, log.Logger, servertypes.ExportedApp, dbm.DB, string, *umeeapp.UmeeApp,
+	dbm.DB, string, *umeeapp.UmeeApp, log.Logger, servertypes.ExportedApp, bool, dbm.DB, string, *umeeapp.UmeeApp,
 	simtypes.Config,
 ) {
 	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
@@ -365,7 +365,7 @@ func appExportAndImport(t *testing.T) (
 	require.Equal(t, appparams.Name, app.Name())
 
 	// run randomized simulation
-	_, simParams, simErr := simulation.SimulateFromSeed(
+	stopEarly, simParams, simErr := simulation.SimulateFromSeed(
 		t,
 		os.Stdout,
 		app.BaseApp,
@@ -417,5 +417,5 @@ func appExportAndImport(t *testing.T) (
 	)
 	require.Equal(t, appparams.Name, newApp.Name())
 
-	return db, dir, app, logger, exported, newDB, newDir, newApp, config
+	return db, dir, app, logger, exported, stopEarly, newDB, newDir, newApp, config
 }
