@@ -5,6 +5,10 @@ on:
   pull_request:
     paths: ["**.proto"]
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   breakage:
     runs-on: ubuntu-latest
