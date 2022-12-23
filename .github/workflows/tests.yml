@@ -29,6 +29,11 @@ jobs:
         run: |
           go install github.com/mfridman/tparse@v0.11.1
 
+  print-name:
+    steps:
+      - name print
+      - run: echo ci-${{ github.ref }}-${{ github.workflow }}
+
   test-unit-cover:
     runs-on: ubuntu-latest
     steps:
