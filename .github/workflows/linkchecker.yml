@@ -8,6 +8,10 @@ on:
       - release/**
     paths: ["**.md"]
 
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   markdown-link-check:
     runs-on: ubuntu-latest
