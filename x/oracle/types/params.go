@@ -29,10 +29,10 @@ const (
 	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
 	DefaultSlashWindow              = BlocksPerWeek       // window for a week
 	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
-	DefaultHistoricStampPeriod      = BlocksPerHour / 2   // window for 30 minutes
-	DefaultMedianStampPeriod        = BlocksPerHour * 6   // window for 6 hours
-	DefaultMaximumPriceStamps       = 12                  // pruning window of 6 hours
-	DefaultMaximumMedianStamps      = 28                  // pruning window of 1 week
+	DefaultHistoricStampPeriod      = BlocksPerMinute * 5 // window for 5 minutes
+	DefaultMaximumPriceStamps       = 36                  // retain for 3 hours
+	DefaultMedianStampPeriod        = BlocksPerHour * 3   // window for 3 hours
+	DefaultMaximumMedianStamps      = 24                  // retain for 3 days
 )
 
 // Default parameter values
@@ -187,7 +187,7 @@ func (p Params) Validate() error {
 	}
 
 	if p.HistoricStampPeriod%p.VotePeriod != 0 || p.MedianStampPeriod%p.VotePeriod != 0 {
-		return fmt.Errorf("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeiod")
+		return fmt.Errorf("oracle parameters HistoricStampPeriod and MedianStampPeriod must be exact multiples of VotePeriod")
 	}
 
 	for _, denom := range p.AcceptList {
