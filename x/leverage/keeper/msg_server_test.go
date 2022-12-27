@@ -549,6 +549,32 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	s.collateralize(other, coin("u/"+umeeDenom, 100_000000))
 	s.borrow(other, coin(umeeDenom, 10_000000))
 
+	// create an additional supplier (UMEE, DUMP, PUMP tokens)
+	surplus := s.newAccount(coin(umeeDenom, 100_000000), coin(dumpDenom, 100_000000), coin(pumpDenom, 100_000000))
+	s.supply(surplus, coin(umeeDenom, 100_000000))
+	s.supply(surplus, coin(pumpDenom, 100_000000))
+	s.supply(surplus, coin(dumpDenom, 100_000000))
+
+	// create a DUMP (historic price 1.00, current price 0.50) borrower
+	// using PUMP (historic price 1.00, current price 2.00) collateral
+	dumpborrower := s.newAccount(coin(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin("u/"+pumpDenom, 100_000000))
+	s.borrow(dumpborrower, coin(dumpDenom, 20_000000))
+	// collateral value is $200 (current) or $100 (historic)
+	// borrowed value is $10 (current) or $20 (historic)
+	// collateral weights are always 0.25 in testing
+
+	// create a PUMP (historic price 1.00, current price 2.00) borrower
+	// using DUMP (historic price 1.00, current price 0.50) collateral
+	pumpborrower := s.newAccount(coin(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin("u/"+dumpDenom, 100_000000))
+	s.borrow(pumpborrower, coin(pumpDenom, 5_000000))
+	// collateral value is $50 (current) or $100 (historic)
+	// borrowed value is $10 (current) or $5 (historic)
+	// collateral weights are always 0.25 in testing
+
 	tcs := []testCase{
 		{
 			"unregistered base token",
@@ -593,6 +619,24 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin("u/"+umeeDenom, 60_000000),
 			coin("u/"+umeeDenom, 60_000000),
 			coin(umeeDenom, 60_000000),
+			nil,
+		},
+		{
+			"max withdrawal (dump borrower)",
+			dumpborrower,
+			pumpDenom,
+			coin("u/"+pumpDenom, 20_000000),
+			coin("u/"+pumpDenom, 20_000000),
+			coin(pumpDenom, 20_000000),
+			nil,
+		},
+		{
+			"max withdrawal (pump borrower)",
+			pumpborrower,
+			dumpDenom,
+			coin("u/"+dumpDenom, 20_000000),
+			coin("u/"+dumpDenom, 20_000000),
+			coin(dumpDenom, 20_000000),
 			nil,
 		},
 	}
