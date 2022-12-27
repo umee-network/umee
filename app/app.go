@@ -648,6 +648,7 @@ func New(
 		appModules = append(appModules,
 			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper))
 	}
+
 	app.mm = module.NewManager(appModules...)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
