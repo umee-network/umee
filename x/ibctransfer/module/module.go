@@ -55,7 +55,9 @@ func (AppModuleBasic) Name() string {
 
 // RegisterGRPCGatewayRoutes implements module.AppModuleBasic
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	if err := ibctransfer.RegisterQueryHandlerClient(context.Background(), mux, ibctransfer.NewQueryClient(clientCtx)); err != nil {
+	if err := ibctransfer.RegisterQueryHandlerClient(
+		context.Background(), mux, ibctransfer.NewQueryClient(clientCtx),
+	); err != nil {
 		panic(err)
 	}
 }
@@ -114,7 +116,8 @@ func (AppModule) ConsensusVersion() uint64 {
 }
 
 // LegacyQuerierHandler implements module.AppModule
-func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) func(_ sdk.Context, _ []string, _ abci.RequestQuery) ([]byte, error) {
+func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) func(_ sdk.Context, _ []string,
+	_ abci.RequestQuery) ([]byte, error) {
 	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
 		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
 	}

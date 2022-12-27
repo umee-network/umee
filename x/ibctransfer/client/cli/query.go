@@ -66,7 +66,9 @@ func GetRateLimitsForIBCDenoms() *cobra.Command {
 
 			queryClient := ibctransfer.NewQueryClient(clientCtx)
 			if len(args) > 0 {
-				resp, err := queryClient.RateLimitsOfIBCDenoms(cmd.Context(), &ibctransfer.QueryRateLimitsOfIBCDenoms{IbcDenom: args[0]})
+				resp, err := queryClient.RateLimitsOfIBCDenoms(
+					cmd.Context(), &ibctransfer.QueryRateLimitsOfIBCDenoms{IbcDenom: args[0]},
+				)
 				return cli.PrintOrErr(resp, err, clientCtx)
 			}
 

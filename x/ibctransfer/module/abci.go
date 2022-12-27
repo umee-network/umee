@@ -19,17 +19,15 @@ func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 		if rateLimitOfIBCDenom.ExpiredTime == nil {
 			expiredTime := ctx.BlockTime().Add(params.QuotaDuration)
 			rateLimitOfIBCDenom.ExpiredTime = &expiredTime
-		} else {
-			if rateLimitOfIBCDenom.ExpiredTime.Before(ctx.BlockTime()) {
-				// reset the expire time
-				expiredTime := ctx.BlockTime().Add(params.QuotaDuration)
-				rateLimitOfIBCDenom.ExpiredTime = &expiredTime
-				// reset the outflow limit to 0
-				rateLimitOfIBCDenom.OutflowSum = sdk.NewDec(0)
-			}
+		} else if rateLimitOfIBCDenom.ExpiredTime.Before(ctx.BlockTime()) {
+			// reset the expire time
+			expiredTime := ctx.BlockTime().Add(params.QuotaDuration)
+			rateLimitOfIBCDenom.ExpiredTime = &expiredTime
+			// reset the outflow limit to 0
+			rateLimitOfIBCDenom.OutflowSum = sdk.NewDec(0)
 		}
 		// storing the rate limits to store
-		if err := keeper.SetRateLimitsOfIBCDenom(ctx, &rateLimitOfIBCDenom); err != nil {
+		if err := keeper.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom); err != nil {
 			panic(err)
 		}
 	}

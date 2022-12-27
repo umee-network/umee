@@ -65,7 +65,7 @@ func (k Keeper) getRateLimitsOfIBCDenom(ctx sdk.Context, ibcDenom string) (*ibct
 // SetRateLimitsOfIBCDenoms save the rate limits of ibc denoms into store.
 func (k Keeper) SetRateLimitsOfIBCDenoms(ctx sdk.Context, rateLimits []ibctransfer.RateLimit) error {
 	for _, rateLimitOfIBCDenom := range rateLimits {
-		if err := k.SetRateLimitsOfIBCDenom(ctx, &rateLimitOfIBCDenom); err != nil {
+		if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom); err != nil {
 			return err
 		}
 	}
@@ -74,11 +74,11 @@ func (k Keeper) SetRateLimitsOfIBCDenoms(ctx sdk.Context, rateLimits []ibctransf
 }
 
 // SetRateLimitsOfIBCDenom save the rate limits of ibc denom into store.
-func (k Keeper) SetRateLimitsOfIBCDenom(ctx sdk.Context, rateLimitOfIBCDenom *ibctransfer.RateLimit) error {
+func (k Keeper) SetRateLimitsOfIBCDenom(ctx sdk.Context, rateLimitOfIBCDenom ibctransfer.RateLimit) error {
 	store := ctx.KVStore(k.storeKey)
 	key := ibctransfer.CreateKeyForRateLimitOfIBCDenom(rateLimitOfIBCDenom.IbcDenom)
 
-	bz, err := k.cdc.Marshal(rateLimitOfIBCDenom)
+	bz, err := k.cdc.Marshal(&rateLimitOfIBCDenom)
 	if err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 
 	// update the per token outflow sum
 	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Add(amountInUSD)
-	if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom); err != nil {
+	if err := k.SetRateLimitsOfIBCDenom(ctx, *rateLimitOfIBCDenom); err != nil {
 		return err
 	}
 
@@ -194,7 +194,7 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 	amountInUSD := exchangeRate.Mul(sendingAmount)
 	// reset the outflow limit of per token
 	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Sub(amountInUSD)
-	if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom); err != nil {
+	if err := k.SetRateLimitsOfIBCDenom(ctx, *rateLimitOfIBCDenom); err != nil {
 		return err
 	}
 
@@ -239,7 +239,7 @@ func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit *ibctransfer.RateL
 	rateLimit.ExpiredTime = &expiredTime
 	rateLimit.OutflowSum = sdk.NewDec(0)
 
-	if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimit); err != nil {
+	if err := k.SetRateLimitsOfIBCDenom(ctx, *rateLimit); err != nil {
 		return nil, err
 	}
 

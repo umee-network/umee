@@ -28,7 +28,10 @@ func NewIBCMiddleware(app porttypes.IBCModule, k keeper.Keeper) IBCMiddleware {
 }
 
 // OnChanOpenInit implements types.Middleware
-func (im IBCMiddleware) OnChanOpenInit(ctx sdk.Context, order channeltypes.Order, connectionHops []string, portID string, channelID string, channelCap *capabilitytypes.Capability, counterparty channeltypes.Counterparty, version string) (string, error) {
+func (im IBCMiddleware) OnChanOpenInit(ctx sdk.Context, order channeltypes.Order, connectionHops []string,
+	portID string, channelID string, channelCap *capabilitytypes.Capability, counterparty channeltypes.Counterparty,
+	version string,
+) (string, error) {
 	return im.app.OnChanOpenInit(
 		ctx,
 		order,
@@ -49,11 +52,16 @@ func (im IBCMiddleware) OnChanOpenTry(
 	portID string, channelID string,
 	channelCap *capabilitytypes.Capability, counterparty channeltypes.Counterparty,
 	counterpartyVersion string) (version string, err error) {
-	return im.app.OnChanOpenTry(ctx, order, connectionHops, portID, channelID, channelCap, counterparty, counterpartyVersion)
+	return im.app.OnChanOpenTry(
+		ctx, order, connectionHops, portID, channelID, channelCap,
+		counterparty, counterpartyVersion,
+	)
 }
 
 // OnChanOpenAck implements types.Middleware
-func (im IBCMiddleware) OnChanOpenAck(ctx sdk.Context, portID string, channelID string, counterpartyChannelID string, counterpartyVersion string) error {
+func (im IBCMiddleware) OnChanOpenAck(ctx sdk.Context, portID string, channelID string, counterpartyChannelID string,
+	counterpartyVersion string,
+) error {
 	return im.app.OnChanOpenAck(ctx, portID, channelID, counterpartyChannelID, counterpartyVersion)
 }
 
@@ -73,16 +81,19 @@ func (im IBCMiddleware) OnChanCloseConfirm(ctx sdk.Context, portID string, chann
 }
 
 // OnRecvPacket implements types.Middleware
-func (im IBCMiddleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) exported.Acknowledgement {
+func (im IBCMiddleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
+) exported.Acknowledgement {
 	// if this returns an Acknowledgement that isn't successful, all state changes are discarded
 	return im.app.OnRecvPacket(ctx, packet, relayer)
 }
 
 // OnAcknowledgementPacket implements types.Middleware
-func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte, relayer sdk.AccAddress) error {
+func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
+	relayer sdk.AccAddress,
+) error {
 	var ack channeltypes.Acknowledgement
 	if err := json.Unmarshal(acknowledgement, &ack); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet acknowledgement: %v", err)
+		return sdkerrors.ErrUnknownRequest.Wrapf("cannot unmarshal ICS-20 transfer packet acknowledgement: %v", err)
 	}
 
 	if isAckError(acknowledgement) {

@@ -37,7 +37,7 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctrans
 	}
 
 	// save the new ibc rate limits
-	var rateLimitsOfIBCDenoms []ibctransfer.RateLimit
+	rateLimitsOfIBCDenoms := make([]ibctransfer.RateLimit, 0, len(msg.NewIbcDenomsRateLimits))
 	for _, rateLimitOfIBCDenom := range msg.NewIbcDenomsRateLimits {
 		rateLimitsOfIBCDenoms = append(rateLimitsOfIBCDenoms, ibctransfer.RateLimit{
 			IbcDenom:   rateLimitOfIBCDenom.IbcDenom,
@@ -56,7 +56,7 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctrans
 	}
 
 	// update the rate limits of the ibc denoms
-	var updateRateLimitsForIBCDenoms []ibctransfer.RateLimit
+	updateRateLimitsForIBCDenoms := make([]ibctransfer.RateLimit, 0, len(msg.UpdateIbcDenomsRateLimits))
 	for _, rateLimitOfIBCDenom := range msg.UpdateIbcDenomsRateLimits {
 		updateRateLimitsForIBCDenoms = append(updateRateLimitsForIBCDenoms, ibctransfer.RateLimit{
 			IbcDenom:   rateLimitOfIBCDenom.IbcDenom,
