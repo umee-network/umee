@@ -64,3 +64,7 @@ You can use Cosmovisor → see [instructions](https://github.com/umee-network/um
 - If you use Cosmovisor, and you didn't build binary from source in the validator machine, you have to download the respective `libwasmvm` into your machine. See the previous section for more details.
 
 NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v3.3.0 --version`.
+
+#### Docker
+
+Docker images: https://github.com/umee-network/umee/pkgs/container/umeed
