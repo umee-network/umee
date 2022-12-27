@@ -11,4 +11,8 @@ var (
 	ErrContractError           = sdkerrors.Register(ModuleName, 4, "contract error")
 	ErrBadPacket               = sdkerrors.Register(ModuleName, 5, "bad packet")
 	ErrNoRateLimitsForIBCDenom = sdkerrors.Register(ModuleName, 6, "no rate limits for ibc denom")
+
+	// msg rate limit errors
+	ErrInvalidIBCDenom     = sdkerrors.Register(ModuleName, 10, "invalid ibc denom")
+	ErrInvalidOutflowLimit = sdkerrors.Register(ModuleName, 11, "invalid outflow limit")
 )

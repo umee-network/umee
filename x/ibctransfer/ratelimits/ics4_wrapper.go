@@ -12,11 +12,15 @@ func (im IBCMiddleware) GetAppVersion(ctx sdk.Context, portID string, channelID 
 }
 
 // SendPacket implements types.Middleware
-func (im IBCMiddleware) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet exported.PacketI) error {
+func (im IBCMiddleware) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability,
+	packet exported.PacketI,
+) error {
 	return im.keeper.SendPacket(ctx, chanCap, packet)
 }
 
 // WriteAcknowledgement implements types.Middleware
-func (im IBCMiddleware) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet exported.PacketI, ack exported.Acknowledgement) error {
+func (im IBCMiddleware) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
+	packet exported.PacketI, ack exported.Acknowledgement,
+) error {
 	return im.keeper.WriteAcknowledgement(ctx, chanCap, packet, ack)
 }

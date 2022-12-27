@@ -29,11 +29,13 @@ func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 			}
 		}
 		// storing the rate limits to store
-		keeper.SetRateLimitsOfIBCDenom(ctx, &rateLimitOfIBCDenom)
+		if err := keeper.SetRateLimitsOfIBCDenom(ctx, &rateLimitOfIBCDenom); err != nil {
+			panic(err)
+		}
 	}
 }
 
 // EndBlocker implements EndBlock for the x/leverage module.
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
+func EndBlocker(_ sdk.Context, _ keeper.Keeper) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
 }

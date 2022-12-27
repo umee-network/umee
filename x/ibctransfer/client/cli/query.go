@@ -11,7 +11,7 @@ import (
 )
 
 // GetQueryCmd returns the CLI query commands for the x/ibc-rate-limit module.
-func GetQueryCmd(queryRoute string) *cobra.Command {
+func GetQueryCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        ibctransfer.ModuleName,
 		Short:                      fmt.Sprintf("Querying commands for the %s module", ibctransfer.ModuleName),

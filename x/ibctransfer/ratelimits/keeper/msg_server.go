@@ -22,7 +22,9 @@ func NewMsgServerImpl(keeper Keeper) ibctransfer.MsgServer {
 }
 
 // AddIBCDenomRateLimit implements types.MsgServer
-func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctransfer.MsgUpdateIBCDenomsRateLimit) (*ibctransfer.MsgUpdateIBCDenomsRateLimitResponse, error) {
+func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctransfer.MsgUpdateIBCDenomsRateLimit) (
+	*ibctransfer.MsgUpdateIBCDenomsRateLimitResponse, error,
+) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// checking req msg authority is the gov module address
@@ -76,7 +78,9 @@ func (m msgServer) UpdateIBCDenomsRateLimit(goCtx context.Context, msg *ibctrans
 }
 
 // UpdateIBCTransferPauseStatus implements types.MsgServer
-func (m msgServer) UpdateIBCTransferPauseStatus(goCtx context.Context, msg *ibctransfer.MsgUpdateIBCTransferPauseStatus) (*ibctransfer.MsgUpdateIBCTransferPauseStatusResponse, error) {
+func (m msgServer) UpdateIBCTransferPauseStatus(
+	goCtx context.Context, msg *ibctransfer.MsgUpdateIBCTransferPauseStatus,
+) (*ibctransfer.MsgUpdateIBCTransferPauseStatusResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	// checking req msg authority is the gov module address

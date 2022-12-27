@@ -61,11 +61,7 @@ func (msg *MsgUpdateIBCDenomsRateLimit) ValidateBasic() error {
 		return err
 	}
 
-	if err := validateRateLimitsOfIBCDenom(msg.UpdateIbcDenomsRateLimits); err != nil {
-		return err
-	}
-
-	return nil
+	return validateRateLimitsOfIBCDenom(msg.UpdateIbcDenomsRateLimits)
 }
 
 // GetSignBytes implements Msg
@@ -81,18 +77,18 @@ func (msg *MsgUpdateIBCDenomsRateLimit) GetSigners() []sdk.AccAddress {
 
 func validateAbstract(title, description string) error {
 	if len(strings.TrimSpace(title)) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal title cannot be blank")
+		return types.ErrInvalidProposalContent.Wrap("proposal title cannot be blank")
 	}
 	if len(title) > gov1b1.MaxTitleLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal title is longer than max length of %d",
+		return types.ErrInvalidProposalContent.Wrapf("proposal title is longer than max length of %d",
 			gov1b1.MaxTitleLength)
 	}
 
 	if len(description) == 0 {
-		return sdkerrors.Wrap(types.ErrInvalidProposalContent, "proposal description cannot be blank")
+		return types.ErrInvalidProposalContent.Wrap("proposal description cannot be blank")
 	}
 	if len(description) > gov1b1.MaxDescriptionLength {
-		return sdkerrors.Wrapf(types.ErrInvalidProposalContent, "proposal description is longer than max length of %d",
+		return types.ErrInvalidProposalContent.Wrapf("proposal description is longer than max length of %d",
 			gov1b1.MaxDescriptionLength)
 	}
 
@@ -100,6 +96,20 @@ func validateAbstract(title, description string) error {
 }
 
 func validateRateLimitsOfIBCDenom(rateLimits []MsgRateLimit) error {
+	for _, rateLimit := range rateLimits {
+		if rateLimit.OutflowLimit.IsNil() {
+			return ErrInvalidIBCDenom.Wrap("outflow limit shouldn't empty")
+		}
+
+		if rateLimit.OutflowLimit.IsNegative() {
+			return ErrInvalidIBCDenom.Wrapf("outflow limit shouldn't be negative %s", rateLimit.OutflowLimit.String())
+		}
+
+		if len(rateLimit.IbcDenom) == 0 {
+			return ErrInvalidIBCDenom.Wrap("ibc denom shouldn't empty")
+		}
+	}
+
 	return nil
 }
 
@@ -138,11 +148,7 @@ func (msg *MsgUpdateIBCTransferPauseStatus) ValidateBasic() error {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
 
-	if err := validateAbstract(msg.Title, msg.Description); err != nil {
-		return err
-	}
-
-	return nil
+	return validateAbstract(msg.Title, msg.Description)
 }
 
 // GetSignBytes implements Msg

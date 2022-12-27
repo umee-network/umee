@@ -135,18 +135,16 @@ func (im IBCMiddleware) RevertSentPacket(
 ) error {
 	var data transfertypes.FungibleTokenPacketData
 	if err := json.Unmarshal(packet.GetData(), &data); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal ICS-20 transfer packet data: %s", err.Error())
+		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest,
+			"cannot unmarshal ICS-20 transfer packet data: %s", err.Error(),
+		)
 	}
 
-	if err := im.keeper.UndoSendRateLimit(
+	return im.keeper.UndoSendRateLimit(
 		ctx,
 		data.Denom,
 		data.Amount,
-	); err != nil {
-		return err
-	}
-
-	return nil
+	)
 }
 
 func ValidateReceiverAddress(packet channeltypes.Packet) error {
@@ -155,7 +153,9 @@ func ValidateReceiverAddress(packet channeltypes.Packet) error {
 		return err
 	}
 	if len(packetData.Receiver) >= 4096 {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "IBC Receiver address too long. Max supported length is %d", 4096)
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress,
+			"IBC Receiver address too long. Max supported length is %d", 4096,
+		)
 	}
 	return nil
 }

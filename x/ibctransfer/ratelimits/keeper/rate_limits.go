@@ -119,7 +119,7 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 		return err
 	}
 
-	// get the registerd token settings from leverage
+	// get the registered token settings from leverage
 	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return nil
@@ -154,12 +154,12 @@ func (k Keeper) CheckAndUpdateRateLimits(ctx sdk.Context, denom string, sendAmou
 
 	// update the per token outflow sum
 	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Add(amountInUSD)
-	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
+	if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom); err != nil {
+		return err
+	}
 
 	// updating the total outflow sum
-	k.SetTotalOutflowSum(ctx, totalOutflowSum.Add(amountInUSD).String())
-
-	return nil
+	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Add(amountInUSD).String())
 }
 
 // UndoSendRateLimit
@@ -173,7 +173,7 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 		return nil
 	}
 
-	// get the registerd token settings from leverage
+	// get the registered token settings from leverage
 	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return nil
@@ -194,13 +194,13 @@ func (k Keeper) UndoSendRateLimit(ctx sdk.Context, denom, sendAmount string) err
 	amountInUSD := exchangeRate.Mul(sendingAmount)
 	// reset the outflow limit of per token
 	rateLimitOfIBCDenom.OutflowSum = rateLimitOfIBCDenom.OutflowSum.Sub(amountInUSD)
-	k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom)
+	if err := k.SetRateLimitsOfIBCDenom(ctx, rateLimitOfIBCDenom); err != nil {
+		return err
+	}
 
 	// reset the total outflow sum
 	totalOutflowSum := k.GetTotalOutflowSum(ctx)
-	k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(amountInUSD).String())
-
-	return nil
+	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(amountInUSD).String())
 }
 
 // GetFundsFromPacket
@@ -225,13 +225,15 @@ func (k Keeper) GetLocalDenom(denom string) string {
 	if strings.HasPrefix(denom, "transfer/") {
 		denomTrace := transfertypes.ParseDenomTrace(denom)
 		return denomTrace.IBCDenom()
-	} else {
-		return denom
 	}
+
+	return denom
 }
 
 // ResetRateLimitsSum reset the expire time and outflow sum of rate limit.
-func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit *ibctransfer.RateLimit, quotaDuration time.Duration) (*ibctransfer.RateLimit, error) {
+func (k Keeper) ResetRateLimitsSum(ctx sdk.Context, rateLimit *ibctransfer.RateLimit, quotaDuration time.Duration) (
+	*ibctransfer.RateLimit, error,
+) {
 	expiredTime := ctx.BlockTime().Add(quotaDuration)
 
 	rateLimit.ExpiredTime = &expiredTime

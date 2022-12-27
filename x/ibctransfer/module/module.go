@@ -40,7 +40,7 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 
 // GetQueryCmd implements module.AppModuleBasic
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return cli.GetQueryCmd(ibctransfer.StoreKey)
+	return cli.GetQueryCmd()
 }
 
 // GetTxCmd implements module.AppModuleBasic
@@ -71,7 +71,7 @@ func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 }
 
 // ValidateGenesis implements module.AppModuleBasic
-func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
+func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
 	var gs ibctransfer.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &gs); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", ibctransfer.ModuleName, err)
@@ -114,7 +114,7 @@ func (AppModule) ConsensusVersion() uint64 {
 }
 
 // LegacyQuerierHandler implements module.AppModule
-func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) func(ctx sdk.Context, path []string, req abci.RequestQuery) ([]byte, error) {
+func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) func(_ sdk.Context, _ []string, _ abci.RequestQuery) ([]byte, error) {
 	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
 		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
 	}
