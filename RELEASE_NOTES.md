@@ -67,4 +67,4 @@ NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in yo
 
 #### Docker
 
-Docker images: https://github.com/umee-network/umee/pkgs/container/umeed
+Docker images are available in [ghcr.io umee-network](https://github.com/umee-network/umee/pkgs/container/umeed) repository.
