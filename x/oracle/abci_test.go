@@ -185,40 +185,6 @@ var historacleTestCases = []struct {
 	},
 }
 
-func (s *IntegrationTestSuite) TestEndblockerExperimentalFlag() {
-	app, ctx := s.app, s.ctx
-
-	// add historic price and calcSet median stats
-	app.OracleKeeper.AddHistoricPrice(s.ctx, displayDenom, sdk.MustNewDecFromStr("1.0"))
-	app.OracleKeeper.CalcAndSetHistoricMedian(s.ctx, displayDenom)
-	medianPruneBlock := ctx.BlockHeight() + int64(types.DefaultMaximumMedianStamps*types.DefaultMedianStampPeriod)
-	ctx = ctx.WithBlockHeight(medianPruneBlock)
-
-	// with experimental flag off median doesn't get deleted
-	oracle.EndBlocker(ctx, app.OracleKeeper)
-	medians := []types.Price{}
-	app.OracleKeeper.IterateAllMedianPrices(
-		ctx,
-		func(median types.Price) bool {
-			medians = append(medians, median)
-			return false
-		},
-	)
-	s.Require().Equal(1, len(medians))
-
-	// with experimental flag on median gets deleted
-	oracle.EndBlocker(ctx, app.OracleKeeper)
-	experimentalMedians := []types.Price{}
-	app.OracleKeeper.IterateAllMedianPrices(
-		ctx,
-		func(median types.Price) bool {
-			medians = append(experimentalMedians, median)
-			return false
-		},
-	)
-	s.Require().Equal(0, len(experimentalMedians))
-}
-
 func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	app, ctx := s.app, s.ctx
 
