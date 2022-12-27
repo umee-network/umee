@@ -12,13 +12,15 @@ var _ paramtypes.ParamSet = &Params{}
 
 const (
 	DefaultIBCPause = false
-	// 2 hours
-	DefaultQuotaDurationPerDenom = time.Second * time.Duration(7200)
+	// 24 hours time interval for ibc-transfer quota limit
+	DefaultQuotaDurationPerDenom = time.Minute * 60 * 24
 )
 
 var (
-	DefaultTotalQuota       = sdk.MustNewDecFromStr("10000")
-	DefaultQuotaPerIBCDenom = sdk.MustNewDecFromStr("2000")
+	// 1M USD daily limit for all denoms
+	DefaultTotalQuota = sdk.MustNewDecFromStr("1000000")
+	// 600K USD dail limit for each denom
+	DefaultQuotaPerIBCDenom = sdk.MustNewDecFromStr("600000")
 
 	KeyIBCPause              = []byte("IBCPause")
 	KeyTotalQuota            = []byte("KeyTotalQuota")
