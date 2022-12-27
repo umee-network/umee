@@ -26,7 +26,7 @@ WORKDIR /src
 RUN git clone https://github.com/umee-network/peggo.git && cd peggo && \
     # git checkout v1.4.0 && \
     go mod download
-RUN BUILD_TAGS=muslc LDFLAGS='-linkmode=external -extldflags "-Wl,-z,muldefs -static"' make build
+RUN cd /src/peggo; BUILD_TAGS=muslc LDFLAGS='-linkmode=external -extldflags "-Wl,-z,muldefs -static"' make build
 
 
 ## Prepare the final clear binary
