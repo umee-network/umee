@@ -815,6 +815,32 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 	s.collateralize(borrower, coin("u/"+atomDenom, 100_000000))
 	s.borrow(borrower, coin(atomDenom, 10_000000))
 
+	// create an additional supplier (UMEE, DUMP, PUMP tokens)
+	surplus := s.newAccount(coin(umeeDenom, 100_000000), coin(dumpDenom, 100_000000), coin(pumpDenom, 100_000000))
+	s.supply(surplus, coin(umeeDenom, 100_000000))
+	s.supply(surplus, coin(pumpDenom, 100_000000))
+	s.supply(surplus, coin(dumpDenom, 100_000000))
+
+	// create a DUMP (historic price 1.00, current price 0.50) borrower
+	// using PUMP (historic price 1.00, current price 2.00) collateral
+	dumpborrower := s.newAccount(coin(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin("u/"+pumpDenom, 100_000000))
+	s.borrow(dumpborrower, coin(dumpDenom, 20_000000))
+	// collateral value is $200 (current) or $100 (historic)
+	// borrowed value is $10 (current) or $20 (historic)
+	// collateral weights are always 0.25 in testing
+
+	// create a PUMP (historic price 1.00, current price 2.00) borrower
+	// using DUMP (historic price 1.00, current price 0.50) collateral
+	pumpborrower := s.newAccount(coin(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin("u/"+dumpDenom, 100_000000))
+	s.borrow(pumpborrower, coin(pumpDenom, 5_000000))
+	// collateral value is $50 (current) or $100 (historic)
+	// borrowed value is $10 (current) or $5 (historic)
+	// collateral weights are always 0.25 in testing
+
 	tcs := []testCase{
 		{
 			"base token",
@@ -850,6 +876,31 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			"borrow limit",
 			borrower,
 			coin("u/"+atomDenom, 100_000000),
+			types.ErrUndercollaterized,
+		},
+
+		{
+			"acceptable decollateralize (dump borrower)",
+			dumpborrower,
+			coin("u/"+pumpDenom, 20_000000),
+			nil,
+		},
+		{
+			"borrow limit (undercollateralized under historic prices but ok with current prices)",
+			dumpborrower,
+			coin("u/"+pumpDenom, 20_000000),
+			types.ErrUndercollaterized,
+		},
+		{
+			"acceptable decollateralize (pump borrower)",
+			pumpborrower,
+			coin("u/"+dumpDenom, 20_000000),
+			nil,
+		},
+		{
+			"borrow limit (undercollateralized under current prices but ok with historic prices)",
+			pumpborrower,
+			coin("u/"+dumpDenom, 20_000000),
 			types.ErrUndercollaterized,
 		},
 	}
