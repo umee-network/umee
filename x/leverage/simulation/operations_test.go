@@ -39,6 +39,7 @@ func (s *SimTestSuite) SetupTest() {
 	// Use default umee token for sim tests
 	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, fixtures.Token("uumee", "UMEE", 6)))
 	app.OracleKeeper.SetExchangeRate(ctx, "UMEE", sdk.MustNewDecFromStr("100.0"))
+	// TODO: set historic prices (24 medians) to fix tests
 
 	s.app = app
 	s.ctx = ctx
