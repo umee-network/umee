@@ -72,7 +72,7 @@ func (s msgServer) Withdraw(
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
-	err = s.keeper.checkBorrowerHealth(ctx, supplierAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
-	err = s.keeper.checkBorrowerHealth(ctx, supplierAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -263,7 +263,7 @@ func (s msgServer) Decollateralize(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
-	err = s.keeper.checkBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -295,7 +295,7 @@ func (s msgServer) Borrow(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
-	err = s.keeper.checkBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
 	}

@@ -7,44 +7,45 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
-// checkBorrowerHealth returns an error if a borrower is currently above their borrow limit,
+// assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
 // under either recent (historic median) or current prices. It returns an error if current
 // prices cannot be calculated, but will use current prices (without returning an error)
 // for any token whose historic prices cannot be calculated.
 // This should be checked in msg_server.go at the end of any transaction which is restricted
-// by borrow limits, i.e. Borrow, Decollateralize, Withdraw.
-func (k Keeper) checkBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+// by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
+func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 
 	// Check using current prices
-	currentValue, err := k.TotalTokenValue(ctx, borrowed, false)
+	err := k.checkPositionHealth(ctx, borrowed, collateral, false)
 	if err != nil {
 		return err
-	}
-	currentLimit, err := k.CalculateBorrowLimit(ctx, collateral, false)
-	if err != nil {
-		return err
-	}
-	if currentValue.GT(currentLimit) {
-		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s (current prices)", currentValue, currentLimit)
 	}
 
 	// Check using historic prices
-	historicValue, err := k.TotalTokenValue(ctx, borrowed, true)
-	if err != nil {
-		return err
-	}
-	historicLimit, err := k.CalculateBorrowLimit(ctx, collateral, true)
-	if err != nil {
-		return err
-	}
-	if historicValue.GT(historicLimit) {
-		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s (historic prices)", historicValue, historicLimit)
-	}
+	return k.checkPositionHealth(ctx, borrowed, collateral, true)
+}
 
+// checkPositionHealth returns an error if a borrow + collateral position is not healthy. uses either
+// current or historic prices.
+func (k Keeper) checkPositionHealth(ctx sdk.Context, borrowed, collateral sdk.Coins, historic bool) error {
+	value, err := k.TotalTokenValue(ctx, borrowed, historic)
+	if err != nil {
+		return err
+	}
+	limit, err := k.CalculateBorrowLimit(ctx, collateral, historic)
+	if err != nil {
+		return err
+	}
+	if value.GT(limit) {
+		desc := "current"
+		if historic {
+			desc = "historic"
+		}
+		return types.ErrUndercollaterized.Wrapf(
+			"borrowed: %s, limit: %s (%s prices)", value, limit, desc)
+	}
 	return nil
 }
 
