@@ -873,7 +873,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			types.ErrInsufficientCollateral,
 		},
 		{
-			"borrow limit",
+			"above borrow limit",
 			borrower,
 			coin("u/"+atomDenom, 100_000000),
 			types.ErrUndercollaterized,
