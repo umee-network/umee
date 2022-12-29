@@ -18,7 +18,7 @@ service Msg {
   rpc GovUpdateQuota(MsgGovUpdateQuota) returns (MsgGovUpdateQuotaResponse);
 
   // GovUpdateTransferStatus update the status of ibc-transfer
-  rpc GovUpdateTransferStatus(MsgGovUpdateTransferStatus) returns (MsgGovUpdateTransferStatusResonse);
+  rpc GovUpdateTransferStatus(MsgGovUpdateTransferStatus) returns (MsgGovUpdateTransferStatusResponse);
 }
 
 // MsgGovUpdateQuota defines the Msg/GovUpdateQuota request type.
@@ -68,5 +68,5 @@ message MsgGovUpdateTransferStatus {
   bool ibc_pause_status = 4;
 }
 
-// MsgGovUpdateTransferStatusResonse definesresponse type for Msg/MsgGovUpdateTransferStatus for with x/gov proposals.
-message MsgGovUpdateTransferStatusResonse {}
+// MsgGovUpdateTransferStatusResponse definesresponse type for Msg/MsgGovUpdateTransferStatus for with x/gov proposals.
+message MsgGovUpdateTransferStatusResponse {}

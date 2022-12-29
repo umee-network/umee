@@ -511,7 +511,7 @@ func New(
 	if Experimental {
 		app.uibcQuotaKeeper = uibcquotakeeper.NewKeeper(
 			appCodec,
-			keys[uibc.StoreKey], app.GetSubspace(uibc.ModuleName),
+			keys[uibc.StoreKey],
 			app.IBCKeeper.ChannelKeeper, app.OracleKeeper, app.LeverageKeeper,
 		)
 		ics4Wrapper = app.uibcQuotaKeeper
@@ -1031,7 +1031,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	if Experimental {
 		paramsKeeper.Subspace(wasm.ModuleName)
-		paramsKeeper.Subspace(uibc.ModuleName)
 	}
 
 	return paramsKeeper

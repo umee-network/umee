@@ -34,12 +34,12 @@ func (m msgServer) GovUpdateQuota(goCtx context.Context, msg *uibc.MsgGovUpdateQ
 // GovUpdateTransferStatus implements types.MsgServer
 func (m msgServer) GovUpdateTransferStatus(
 	goCtx context.Context, msg *uibc.MsgGovUpdateTransferStatus,
-) (*uibc.MsgGovUpdateTransferStatusResonse, error) {
+) (*uibc.MsgGovUpdateTransferStatusResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if err := m.keeper.UpdateTansferStatus(ctx, msg.IbcPauseStatus); err != nil {
-		return &uibc.MsgGovUpdateTransferStatusResonse{}, err
+		return &uibc.MsgGovUpdateTransferStatusResponse{}, err
 	}
 
-	return &uibc.MsgGovUpdateTransferStatusResonse{}, nil
+	return &uibc.MsgGovUpdateTransferStatusResponse{}, nil
 }

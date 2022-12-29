@@ -6,7 +6,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
 
 	"github.com/umee-network/umee/v3/x/uibc"
@@ -15,25 +14,19 @@ import (
 type Keeper struct {
 	storeKey       storetypes.StoreKey
 	cdc            codec.BinaryCodec
-	paramSpace     paramtypes.Subspace
 	oracleKeeper   uibc.OracleKeeper
 	leverageKeeper uibc.LeverageKeeper
 	ics4Wrapper    uibc.ICS4Wrapper
 }
 
 func NewKeeper(
-	cdc codec.BinaryCodec, key storetypes.StoreKey, paramSpace paramtypes.Subspace, ics4Wrapper types.ICS4Wrapper,
+	cdc codec.BinaryCodec, key storetypes.StoreKey, ics4Wrapper types.ICS4Wrapper,
 	oracleKeeper uibc.OracleKeeper, leverageKeeper uibc.LeverageKeeper,
 ) Keeper {
-	// set KeyTable if it has not already been set
-	if !paramSpace.HasKeyTable() {
-		paramSpace = paramSpace.WithKeyTable(uibc.ParamKeyTable())
-	}
 
 	return Keeper{
 		cdc:            cdc,
 		storeKey:       key,
-		paramSpace:     paramSpace,
 		ics4Wrapper:    ics4Wrapper,
 		oracleKeeper:   oracleKeeper,
 		leverageKeeper: leverageKeeper,

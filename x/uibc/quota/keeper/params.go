@@ -7,7 +7,6 @@ import (
 
 // SetParams sets the x/uibc module's parameters.
 func (k Keeper) SetParams(ctx sdk.Context, params uibc.Params) error {
-	k.paramSpace.SetParamSet(ctx, &params)
 	store := ctx.KVStore(k.storeKey)
 	bz, err := k.cdc.Marshal(&params)
 	if err != nil {
