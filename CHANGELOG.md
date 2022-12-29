@@ -48,7 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Add amino support for MsgMaxWithdraw.
+- [1680](https://github.com/umee-network/umee/pull/1680) Add amino support for MsgMaxWithdraw.
 
 ### Features
 
