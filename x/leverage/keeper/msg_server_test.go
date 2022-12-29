@@ -368,7 +368,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			types.ErrNotUToken,
 		},
 		{
-			"base token",
+			"only uToken can be withdrawn",
 			supplier,
 			coin(umeeDenom, 80_000000),
 			nil,
