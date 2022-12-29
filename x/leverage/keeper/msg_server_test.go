@@ -586,7 +586,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			types.ErrMaxWithdrawZero,
 		},
 		{
-			"uToken",
+			"can't borrow uToken",
 			supplier,
 			"u/" + umeeDenom,
 			sdk.Coin{},
