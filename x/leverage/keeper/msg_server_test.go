@@ -898,7 +898,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			nil,
 		},
 		{
-			"borrow limit (undercollateralized under current prices but ok with historic prices)",
+			"above borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
 			coin("u/"+dumpDenom, 20_000000),
 			types.ErrUndercollaterized,
