@@ -126,12 +126,13 @@ import (
 	oraclekeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 
-	uibctransfer "github.com/umee-network/umee/v3/x/ibctransfer"
-	uics20transfer "github.com/umee-network/umee/v3/x/ibctransfer/ics20"
-	uibctransferkeeper "github.com/umee-network/umee/v3/x/ibctransfer/ics20/keeper"
-	uibctransfermodule "github.com/umee-network/umee/v3/x/ibctransfer/module"
-	ibcratelimit "github.com/umee-network/umee/v3/x/ibctransfer/ratelimits"
-	ibcratelimitkeeper "github.com/umee-network/umee/v3/x/ibctransfer/ratelimits/keeper"
+	// umee ibc-transfer and quota for ibc-transfer
+	"github.com/umee-network/umee/v3/x/uibc"
+	uics20transfer "github.com/umee-network/umee/v3/x/uibc/ics20"
+	uibctransferkeeper "github.com/umee-network/umee/v3/x/uibc/ics20/keeper"
+	uibcmodule "github.com/umee-network/umee/v3/x/uibc/module"
+	uibcquota "github.com/umee-network/umee/v3/x/uibc/quota"
+	uibcquotakeeper "github.com/umee-network/umee/v3/x/uibc/quota/keeper"
 )
 
 var (
@@ -177,11 +178,10 @@ func init() {
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
-		uibctransfermodule.AppModuleBasic{},
 	}
 
 	if Experimental {
-		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
+		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{}, uibcmodule.AppModuleBasic{})
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -199,11 +199,11 @@ func init() {
 		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:      nil,
-		uibctransfer.ModuleName:     nil,
 	}
 
 	if Experimental {
 		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
+		maccPerms[uibc.ModuleName] = nil
 	}
 }
 
@@ -249,7 +249,7 @@ type UmeeApp struct {
 	LeverageKeeper     leveragekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
-	ibcRateLimitKeeper ibcratelimitkeeper.Keeper
+	uibcQuotaKeeper    uibcquotakeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -309,12 +309,11 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
-		ibchost.StoreKey, ibctransfertypes.StoreKey,
-		gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey, uibctransfer.StoreKey,
+		ibchost.StoreKey, ibctransfertypes.StoreKey, gravitytypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
 	}
 	if Experimental {
-		storeKeys = append(storeKeys, wasm.StoreKey)
+		storeKeys = append(storeKeys, wasm.StoreKey, uibc.StoreKey)
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -451,8 +450,7 @@ func New(
 		app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
-	var err error
-	app.LeverageKeeper, err = leveragekeeper.NewKeeper(
+	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
@@ -460,9 +458,6 @@ func New(
 		app.OracleKeeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
-	if err != nil {
-		panic(err)
-	}
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
 		leveragetypes.NewMultiHooks(
 			app.OracleKeeper.Hooks(),
@@ -512,25 +507,26 @@ func New(
 		app.ScopedIBCKeeper,
 	)
 
-	app.ibcRateLimitKeeper = ibcratelimitkeeper.NewKeeper(
-		appCodec,
-		keys[uibctransfer.StoreKey], app.GetSubspace(uibctransfer.ModuleName),
-		app.IBCKeeper.ChannelKeeper, app.OracleKeeper, app.LeverageKeeper,
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-	)
-	// Create IBC Router
-	// create static IBC router, add transfer route, then set and seal it
-	ibcRouter := ibcporttypes.NewRouter()
+	var ics4Wrapper ibcporttypes.ICS4Wrapper
+	if Experimental {
+		app.uibcQuotaKeeper = uibcquotakeeper.NewKeeper(
+			appCodec,
+			keys[uibc.StoreKey], app.GetSubspace(uibc.ModuleName),
+			app.IBCKeeper.ChannelKeeper, app.OracleKeeper, app.LeverageKeeper,
+		)
+		ics4Wrapper = app.uibcQuotaKeeper
+	} else {
+		ics4Wrapper = app.IBCKeeper.ChannelKeeper
+	}
 
 	// Middleware Stacks
-
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
 	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
 	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.ibcRateLimitKeeper, // ISC4 Wrapper: IBC Rate Limit middleware
+		ics4Wrapper, // ISC4 Wrapper: IBC Rate Limit middleware
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
 		app.AccountKeeper,
@@ -542,10 +538,10 @@ func New(
 
 	// Create Transfer Stack
 	// SendPacket, since it is originating from the application to core IBC:
-	// transferKeeper.SendPacket -> ibcratelimit.SendPacket -> channel.SendPacket
+	// transferKeeper.SendPacket -> uibcquota.SendPacket -> channel.SendPacket
 
 	// RecvPacket, message that originates from core IBC and goes down to app, the flow is the other way
-	// channel.RecvPacket -> ibcratelimit.OnRecvPacket -> transfer.OnRecvPacket
+	// channel.RecvPacket -> uibcquota.OnRecvPacket -> transfer.OnRecvPacket
 
 	// transfer stack contains (from top to bottom):
 	// - Umee IBC Transfer
@@ -557,11 +553,16 @@ func New(
 		ibctransfer.NewIBCModule(ibcTransferKeeper),
 		app.UIBCTransferKeeper,
 	)
-	transferStack = ibcratelimit.NewIBCMiddleware(transferStack, app.ibcRateLimitKeeper)
 
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
+	if Experimental {
+		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.uibcQuotaKeeper)
+	}
+
+	// Create IBC Router
+	// create static IBC router, add transfer route, then set and seal it
+	ibcRouter := ibcporttypes.NewRouter()
 	// Add transfer stack to IBC Router
-
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
 	ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -642,11 +643,13 @@ func New(
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper, Experimental),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
-		uibctransfermodule.NewAppModule(appCodec, app.ibcRateLimitKeeper),
 	}
 	if Experimental {
-		appModules = append(appModules,
-			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper))
+		appModules = append(
+			appModules,
+			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
+			uibcmodule.NewAppModule(appCodec, app.uibcQuotaKeeper),
+		)
 	}
 
 	app.mm = module.NewManager(appModules...)
@@ -670,8 +673,8 @@ func New(
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		uibctransfer.ModuleName,
 	}
+
 	endBlockers := []string{
 		crisistypes.ModuleName,
 		oracletypes.ModuleName, // must be before gov and staking
@@ -686,7 +689,6 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		uibctransfer.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -707,8 +709,8 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		uibctransfer.ModuleName,
 	}
+
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
@@ -721,13 +723,13 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
-		uibctransfer.ModuleName}
+	}
 
 	if Experimental {
-		beginBlockers = append(beginBlockers, wasm.ModuleName)
-		endBlockers = append(endBlockers, wasm.ModuleName)
-		initGenesis = append(initGenesis, wasm.ModuleName)
-		orderMigrations = append(orderMigrations, wasm.ModuleName)
+		beginBlockers = append(beginBlockers, wasm.ModuleName, uibc.ModuleName)
+		endBlockers = append(endBlockers, wasm.ModuleName, uibc.ModuleName)
+		initGenesis = append(initGenesis, wasm.ModuleName, uibc.ModuleName)
+		orderMigrations = append(orderMigrations, wasm.ModuleName, uibc.ModuleName)
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
@@ -752,8 +754,10 @@ func New(
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 	}
 
-	simStateModules := genmap.Pick(app.mm.Modules,
-		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
+	simStateModules := genmap.Pick(
+		app.mm.Modules,
+		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName},
+	)
 	// TODO: Ensure x/leverage implements simulator and add it here:
 	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
 
@@ -1022,12 +1026,12 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	// paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	// paramsKeeper.Subspace(icahosttypes.SubModuleName)
-	paramsKeeper.Subspace(uibctransfer.ModuleName)
 	paramsKeeper.Subspace(gravitytypes.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	if Experimental {
 		paramsKeeper.Subspace(wasm.ModuleName)
+		paramsKeeper.Subspace(uibc.ModuleName)
 	}
 
 	return paramsKeeper

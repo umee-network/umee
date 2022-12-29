@@ -1,0 +1,29 @@
+syntax = "proto3";
+package umee.uibc.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "umee/uibc/v1/quota.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package                      = "github.com/umee-network/umee/v3/x/uibc";
+option (gogoproto.goproto_getters_all) = false;
+
+// GenesisState defines the uibc module's genesis state.
+message GenesisState {
+  Params         params = 1 [(gogoproto.nullable) = false];
+  repeated Quota quotas = 2 [(gogoproto.nullable) = false];
+  // total_outflow_sum defines the total outflow sum of ibc-transfer in USD
+  string total_outflow_sum = 3 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // quota_expires defines quota expires for  ibc-transfer denom in seconds
+  google.protobuf.Timestamp quota_expires = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime)  = true,
+    (gogoproto.jsontag)  = "quota_duration,omitempty",
+    (gogoproto.moretags) = "yaml:\"quota_expires\""
+  ];
+}
