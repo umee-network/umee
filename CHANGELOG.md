@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Fixes
+
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Add amino support for MsgMaxWithdraw.
+
 ### Features
 
 - [1548](https://github.com/umee-network/umee/pull/1548) Historacle prices and medians keeper proof of concept.
