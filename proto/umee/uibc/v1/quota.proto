@@ -12,12 +12,6 @@ option go_package = "github.com/umee-network/umee/v3/x/uibc";
 message Quota {
   // ibc_denom defines the ibc denom
   string ibc_denom = 1;
-  // expires defines rate limit expires time based on quota_duration
-  google.protobuf.Timestamp expires = 2 [
-    (gogoproto.stdtime)  = true,
-    (gogoproto.nullable) = true,
-    (gogoproto.moretags) = "yaml:\"expires\""
-  ];
   // outflow_sum defines the sum of USD value of outflow tokens through ibc-transfer
   string outflow_sum = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
@@ -53,12 +47,12 @@ message Params {
 
 // IBCTransferStatus status of ibc-transfer
 enum IBCTransferStatus {
-  // UNSPECIFIED  defines a no-op status option.
-  UNSPECIFIED = 0;
+  // UNSPECIFIED  defines a no-op status.
+  IBC_TRANSFER_STATUS_UNSPECIFIED = 0;
   // DISABLED defines the quota checking diabled for ibc-transfer.
-  DISABLED = 1;
+  IBC_TRANSFER_STATUS_DISABLED = 1;
   // ENABLED defines the enable quota checking for ibc-transfer.
-  ENABLED = 2;
+  IBC_TRANSFER_STATUS_ENABLED = 2;
   // PAUSED defines pause the ibc-transfer from app.
-  PAUSED = 3;
+  IBC_TRANSFER_STATUS_PAUSED = 3;
 }

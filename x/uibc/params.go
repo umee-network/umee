@@ -9,7 +9,7 @@ import (
 
 const (
 	// Default ibc-transfer quota is disabled
-	DefaultIBCPause = IBCTransferStatus_DISABLED
+	DefaultIBCPause = IBCTransferStatus_IBC_TRANSFER_STATUS_DISABLED
 	// 24 hours time interval for ibc-transfer quota limit
 	DefaultQuotaDurationPerDenom = time.Minute * 60 * 24
 )
@@ -19,11 +19,6 @@ var (
 	DefaultTotalQuota = sdk.MustNewDecFromStr("1000000")
 	// 600K USD dail limit for each denom
 	DefaultQuotaPerIBCDenom = sdk.MustNewDecFromStr("600000")
-
-	KeyIBCPause              = []byte("IBCPause")
-	KeyTotalQuota            = []byte("KeyTotalQuota")
-	KeyQuotaPerIBCDenom      = []byte("KeyQuotaPerIBCDenom")
-	KeyQuotaDurationPerDenom = []byte("KeyQuotaDurationPerDenom")
 )
 
 func NewParams(ibcPause IBCTransferStatus, totalQuota, quotaPerDenom sdk.Dec, quotaDurationPerDenom int64) Params {
@@ -70,7 +65,9 @@ func (p Params) Validate() error {
 }
 
 func validateIBCTransferStatus(status IBCTransferStatus) error {
-	if status == IBCTransferStatus_DISABLED || status == IBCTransferStatus_ENABLED || status == IBCTransferStatus_PAUSED {
+	if status == IBCTransferStatus_IBC_TRANSFER_STATUS_DISABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_PAUSED {
 		return nil
 	}
 

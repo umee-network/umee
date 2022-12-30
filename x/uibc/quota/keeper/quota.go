@@ -48,12 +48,11 @@ func (k Keeper) GetQuotaOfIBCDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quot
 func (k Keeper) getQuotaOfIBCDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.CreateKeyForQuotaOfIBCDenom(ibcDenom))
-	var quotaOfIBCDenom uibc.Quota
-
 	if bz == nil {
 		return nil, uibc.ErrNoQuotaForIBCDenom
 	}
 
+	var quotaOfIBCDenom uibc.Quota
 	if err := k.cdc.Unmarshal(bz, &quotaOfIBCDenom); err != nil {
 		return nil, err
 	}
@@ -87,22 +86,24 @@ func (k Keeper) SetQuotaOfIBCDenom(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) 
 	return nil
 }
 
+// GetTotalOutflowSum returns the total outflow of ibc-transfer amount.
 func (k Keeper) GetTotalOutflowSum(ctx sdk.Context) sdk.Dec {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.KeyTotalOutflowSum)
 	return sdk.MustNewDecFromStr(string(bz))
 }
 
-// GetQuotaExpires returns ibc-transfer quota expire time.
-func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount string) error {
+// SetTotalOutflowSum save the total outflow of ibc-transfer amount.
+func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount sdk.Dec) error {
 	store := ctx.KVStore(k.storeKey)
-	key := uibc.KeyTotalOutflowSum
-	store.Set(key, []byte(amount))
+
+	store.Set(uibc.KeyTotalOutflowSum, []byte(amount.String()))
+
 	return nil
 }
 
-// SetQuotaExpires save the quota expires time of ibc denom into store.
-func (k Keeper) SetQuotaExpires(ctx sdk.Context, expires time.Time) error {
+// SetExpire save the quota expires time of ibc denom into store.
+func (k Keeper) SetExpire(ctx sdk.Context, expires time.Time) error {
 	store := ctx.KVStore(k.storeKey)
 	bz, err := expires.MarshalBinary()
 	if err != nil {
@@ -114,8 +115,8 @@ func (k Keeper) SetQuotaExpires(ctx sdk.Context, expires time.Time) error {
 	return nil
 }
 
-// GetQuotaExpires returns ibc-transfer quota expires time.
-func (k Keeper) GetQuotaExpires(ctx sdk.Context) (*time.Time, error) {
+// GetExpire returns ibc-transfer quota expires time.
+func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.QuotaExpiresKey)
 	if bz == nil {
@@ -180,7 +181,7 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 	}
 
 	// updating the total outflow sum
-	return k.SetTotalOutflowSum(ctx, totalOutflowSum.String())
+	return k.SetTotalOutflowSum(ctx, totalOutflowSum)
 }
 
 // UndoUpdateQuota undo the quota of ibc denom
@@ -221,7 +222,7 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error
 
 	// reset the total outflow sum
 	totalOutflowSum := k.GetTotalOutflowSum(ctx)
-	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(amountInUSD).String())
+	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(amountInUSD))
 }
 
 // GetFundsFromPacket

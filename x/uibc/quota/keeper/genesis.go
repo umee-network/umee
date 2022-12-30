@@ -16,11 +16,11 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 		panic(err)
 	}
 
-	if err := k.SetTotalOutflowSum(ctx, genState.TotalOutflowSum.String()); err != nil {
+	if err := k.SetTotalOutflowSum(ctx, genState.TotalOutflowSum); err != nil {
 		panic(err)
 	}
 
-	if err := k.SetQuotaExpires(ctx, genState.QuotaExpires); err != nil {
+	if err := k.SetExpire(ctx, genState.QuotaExpires); err != nil {
 		panic(err)
 	}
 }
@@ -32,7 +32,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 		panic(err)
 	}
 
-	quotaExpires, err := k.GetQuotaExpires(ctx)
+	quotaExpires, err := k.GetExpire(ctx)
 	if err != nil {
 		panic(err)
 	}

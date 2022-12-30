@@ -13,7 +13,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/umee-network/umee/v3/x/oracle/types"
 	ibctransfer "github.com/umee-network/umee/v3/x/uibc"
 	"github.com/umee-network/umee/v3/x/uibc/client/cli"
 	"github.com/umee-network/umee/v3/x/uibc/quota/keeper"
@@ -116,17 +115,12 @@ func (AppModule) ConsensusVersion() uint64 {
 }
 
 // LegacyQuerierHandler implements module.AppModule
-func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) func(_ sdk.Context, _ []string,
-	_ abci.RequestQuery) ([]byte, error) {
-	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
-		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
-	}
+func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier {
+	return nil
 }
 
 // QuerierRoute implements module.AppModule
-func (AppModule) QuerierRoute() string {
-	return ibctransfer.QuerierRoute
-}
+func (AppModule) QuerierRoute() string { return "" }
 
 // RegisterInvariants implements module.AppModule
 func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
