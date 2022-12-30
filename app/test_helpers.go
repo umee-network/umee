@@ -270,12 +270,17 @@ func IntegrationTestNetworkConfig() network.Config {
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
 		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
 	))
-	// Set mock historic prices
-	//
-	//	TODO (to fix leverage tests now that historic is fail-safe) set 24 medians
-	//
-	// historicPrices := oracletypes.New...
-	// oracleGenState.HistoricPrices = append(oracleGenState.HistoricPrices, historicPrices)
+	// Set mock historic medians to satisfy leverage module's 24 median requirement
+	for i := 1; i <= 24; i++ {
+		median := oracletypes.Price{
+			ExchangeRateTuple: oracletypes.NewExchangeRateTuple(
+				params.DisplayDenom,
+				sdk.MustNewDecFromStr("34.21"),
+			),
+			BlockNum: uint64(i),
+		}
+		oracleGenState.Medians = append(oracleGenState.Medians, median)
+	}
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
 	if err != nil {
