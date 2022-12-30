@@ -39,7 +39,11 @@ func (s *SimTestSuite) SetupTest() {
 	// Use default umee token for sim tests
 	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, fixtures.Token("uumee", "UMEE", 6)))
 	app.OracleKeeper.SetExchangeRate(ctx, "UMEE", sdk.MustNewDecFromStr("100.0"))
-	// TODO: set historic prices (24 medians) to fix tests
+	for i := 1; i <= 24; i++ {
+		// set historic medians for UMEE on blocks 1-24 (without actually advancing block height)
+		// this is to accomodate leverage module's default 24 historic median requirement
+		app.OracleKeeper.SetHistoricMedian(ctx, "UMEE", uint64(i), sdk.MustNewDecFromStr("100.0"))
+	}
 
 	s.app = app
 	s.ctx = ctx
