@@ -3,7 +3,6 @@ package umee.uibc.v1;
 
 import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
-import "google/protobuf/timestamp.proto";
 import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v3/x/uibc";
