@@ -12,9 +12,8 @@ import (
 var (
 	amino = codec.NewLegacyAmino()
 
-	// ModuleCdc references the global x/leverage module codec. Note, the codec
-	// should ONLY be used in certain instances of tests and for JSON encoding as
-	// Amino is still used for that purpose.
+	// ModuleCdc references the global x/leverage module codec. Note, Amino
+	// is required for ledger signing of messages, and Kepler signing.
 	ModuleCdc = codec.NewAminoCodec(amino)
 )
 
@@ -37,6 +36,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgLiquidate{}, "umee/leverage/MsgLiquidate", nil)
 	cdc.RegisterConcrete(&MsgGovUpdateRegistry{}, "umee/leverage/MsgGovUpdateRegistry", nil)
 	cdc.RegisterConcrete(&MsgSupplyCollateral{}, "umee/leverage/MsgSupplyCollateral", nil)
+	cdc.RegisterConcrete(&MsgMaxWithdraw{}, "umee/leverage/MsgMaxWithdraw", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -51,6 +51,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgLiquidate{},
 		&MsgGovUpdateRegistry{},
 		&MsgSupplyCollateral{},
+		&MsgMaxWithdraw{},
 	)
 
 	registry.RegisterImplementations(
