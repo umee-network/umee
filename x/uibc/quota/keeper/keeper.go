@@ -45,11 +45,11 @@ func (k Keeper) UpdateQuota(ctx sdk.Context, totalQuota, quotaPerDenom sdk.Dec, 
 }
 
 // UpdateTansferStatus update the ibc pause status in module params.
-func (k Keeper) UpdateTansferStatus(ctx sdk.Context, ibcStatus bool) error {
+func (k Keeper) UpdateTansferStatus(ctx sdk.Context, ibcStatus uibc.IBCTransferStatus) error {
 	params := k.GetParams(ctx)
 
 	if params.IbcPause == ibcStatus {
-		return uibc.ErrIBCPauseStatus
+		return uibc.ErrIBCPauseStatus.Wrapf("ibc-transfer status already have same status %s", ibcStatus.String())
 	}
 
 	params.IbcPause = ibcStatus

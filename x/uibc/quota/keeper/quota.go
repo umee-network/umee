@@ -147,13 +147,14 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 	}
 
 	// get the registered token settings from leverage
+	// denom => ibc/XXXX
 	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return nil
 	}
 
-	// get the exchange rate of denom in USD
-	exchangeRate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
+	// get the exchange rate of denom (ibc/XXXX)in USD from base denom
+	exchangeRate, err := k.oracleKeeper.GetExchangeRateBase(ctx, denom)
 	if err != nil {
 		return err
 	}
@@ -161,32 +162,25 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(10).Power(uint64(tokenSettings.Exponent)))
 	amountInUSD := exchangeRate.Mul(sendingAmount)
 
-	if quotaOfIBCDenom.Expires.Before(ctx.BlockTime()) {
-		quotaOfIBCDenom, err = k.ResetQuota(ctx, quotaOfIBCDenom, params.QuotaDuration)
-		if err != nil {
-			return err
-		}
-	}
-
 	// checking token quota
-	if quotaOfIBCDenom.OutflowSum.Add(amountInUSD).GT(params.TokenQuota) {
+	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Add(amountInUSD)
+	if quotaOfIBCDenom.OutflowSum.GT(params.TokenQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
 	// checking total outflow quota
-	totalOutflowSum := k.GetTotalOutflowSum(ctx)
-	if totalOutflowSum.Add(amountInUSD).GT(params.TotalQuota) {
+	totalOutflowSum := k.GetTotalOutflowSum(ctx).Add(amountInUSD)
+	if totalOutflowSum.GT(params.TotalQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
 	// update the per token outflow sum
-	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Add(amountInUSD)
 	if err := k.SetQuotaOfIBCDenom(ctx, *quotaOfIBCDenom); err != nil {
 		return err
 	}
 
 	// updating the total outflow sum
-	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Add(amountInUSD).String())
+	return k.SetTotalOutflowSum(ctx, totalOutflowSum.String())
 }
 
 // UndoUpdateQuota undo the quota of ibc denom
@@ -211,8 +205,8 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error
 		return err
 	}
 
-	// get the exchange rate of denom in USD
-	exchangeRate, err := k.oracleKeeper.GetExchangeRate(ctx, denom)
+	// get the exchange rate of denom (ibc/XXXX)in USD from base denom
+	exchangeRate, err := k.oracleKeeper.GetExchangeRateBase(ctx, denom)
 	if err != nil {
 		return err
 	}
@@ -240,35 +234,19 @@ func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (string, string, err
 	return packetData.Amount, k.GetLocalDenom(packetData.Denom), nil
 }
 
-// GetLocalDenom
+// GetLocalDenom retruns ibc denom
+// Expected denoms in the following cases:
+//
+// send non-native: transfer/channel-0/denom -> ibc/xxx
+// send native: denom -> denom
+// recv (B)non-native: denom
+// recv (B)native: transfer/channel-0/denom
 func (k Keeper) GetLocalDenom(denom string) string {
-	// Expected denoms in the following cases:
-	//
-	// send non-native: transfer/channel-0/denom -> ibc/xxx
-	// send native: denom -> denom
-	// recv (B)non-native: denom
-	// recv (B)native: transfer/channel-0/denom
-	//
+
 	if strings.HasPrefix(denom, "transfer/") {
 		denomTrace := transfertypes.ParseDenomTrace(denom)
 		return denomTrace.IBCDenom()
 	}
 
 	return denom
-}
-
-// ResetQuota reset the expire time and outflow sum of quota.
-func (k Keeper) ResetQuota(ctx sdk.Context, quotaOfIBCDenom *uibc.Quota, quotaDuration time.Duration) (
-	*uibc.Quota, error,
-) {
-	expiredTime := ctx.BlockTime().Add(quotaDuration)
-
-	quotaOfIBCDenom.Expires = &expiredTime
-	quotaOfIBCDenom.OutflowSum = sdk.NewDec(0)
-
-	if err := k.SetQuotaOfIBCDenom(ctx, *quotaOfIBCDenom); err != nil {
-		return nil, err
-	}
-
-	return quotaOfIBCDenom, nil
 }

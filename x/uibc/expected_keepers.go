@@ -26,7 +26,7 @@ type ICS4Wrapper interface {
 }
 
 type OracleKeeper interface {
-	GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error)
+	GetExchangeRateBase(ctx sdk.Context, symbol string) (sdk.Dec, error)
 }
 
 type LeverageKeeper interface {

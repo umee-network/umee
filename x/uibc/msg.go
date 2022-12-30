@@ -68,7 +68,7 @@ func (msg *MsgGovUpdateQuota) GetSigners() []sdk.AccAddress {
 }
 
 func NewUpdateIBCTransferPauseStatus(authority, title, description string,
-	ibcPauseStatus bool,
+	ibcPauseStatus IBCTransferStatus,
 ) *MsgGovUpdateTransferStatus {
 	return &MsgGovUpdateTransferStatus{
 		Title:          title,
@@ -85,7 +85,7 @@ func (msg *MsgGovUpdateTransferStatus) GetTitle() string { return msg.Title }
 func (msg *MsgGovUpdateTransferStatus) GetDescription() string { return msg.Description }
 
 // Route implements Msg
-func (msg MsgGovUpdateTransferStatus) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovUpdateTransferStatus) Route() string { return RouterKey }
 
 // Type implements Msg
 func (msg MsgGovUpdateTransferStatus) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -100,6 +100,10 @@ func (msg *MsgGovUpdateTransferStatus) String() string {
 func (msg *MsgGovUpdateTransferStatus) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
+	}
+
+	if err := validateIBCTransferStatus(msg.IbcPauseStatus); err != nil {
+		return err
 	}
 
 	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)

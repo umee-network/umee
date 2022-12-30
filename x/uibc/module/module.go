@@ -129,9 +129,7 @@ func (AppModule) QuerierRoute() string {
 }
 
 // RegisterInvariants implements module.AppModule
-func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {
-
-}
+func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
 // RegisterServices implements module.AppModule
 func (am AppModule) RegisterServices(cfg module.Configurator) {

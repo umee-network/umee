@@ -5,13 +5,11 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 )
 
-var _ paramtypes.ParamSet = &Params{}
-
 const (
-	DefaultIBCPause = false
+	// Default ibc-transfer quota is disabled
+	DefaultIBCPause = IBCTransferStatus_DISABLED
 	// 24 hours time interval for ibc-transfer quota limit
 	DefaultQuotaDurationPerDenom = time.Minute * 60 * 24
 )
@@ -28,18 +26,13 @@ var (
 	KeyQuotaDurationPerDenom = []byte("KeyQuotaDurationPerDenom")
 )
 
-func NewParams(ibcPause bool, totalQuota, quotaPerDenom sdk.Dec, quotaDurationPerDenom int64) Params {
+func NewParams(ibcPause IBCTransferStatus, totalQuota, quotaPerDenom sdk.Dec, quotaDurationPerDenom int64) Params {
 	return Params{
 		IbcPause:      ibcPause,
 		TotalQuota:    totalQuota,
 		TokenQuota:    quotaPerDenom,
 		QuotaDuration: time.Second * time.Duration(quotaDurationPerDenom),
 	}
-}
-
-// ParamKeyTable type declaration for parameters
-func ParamKeyTable() paramtypes.KeyTable {
-	return paramtypes.NewKeyTable().RegisterParamSet(&Params{})
 }
 
 // DefaultParams returns default genesis params
@@ -53,7 +46,7 @@ func DefaultParams() Params {
 }
 
 func (p Params) Validate() error {
-	if err := validateBoolean(p.IbcPause); err != nil {
+	if err := validateIBCTransferStatus(p.IbcPause); err != nil {
 		return err
 	}
 
@@ -70,29 +63,18 @@ func (p Params) Validate() error {
 	}
 
 	if p.TotalQuota.LT(p.TokenQuota) {
-		return fmt.Errorf("token_quota shouldn't be less than token_quota")
+		return fmt.Errorf("token quota shouldn't be less than quota per denom")
 	}
 
 	return nil
 }
 
-// ParamSetPairs implements params.ParamSet
-func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
-	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(KeyIBCPause, &p.IbcPause, validateBoolean),
-		paramtypes.NewParamSetPair(KeyTotalQuota, &p.TotalQuota, validateTotalQuota),
-		paramtypes.NewParamSetPair(KeyQuotaPerIBCDenom, &p.TokenQuota, validateQuotaPerToken),
-		paramtypes.NewParamSetPair(KeyQuotaDurationPerDenom, &p.QuotaDuration, validateQuotaDuration),
-	}
-}
-
-func validateBoolean(i interface{}) error {
-	_, ok := i.(bool)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
+func validateIBCTransferStatus(status IBCTransferStatus) error {
+	if status == IBCTransferStatus_DISABLED || status == IBCTransferStatus_ENABLED || status == IBCTransferStatus_PAUSED {
+		return nil
 	}
 
-	return nil
+	return fmt.Errorf("invalid ibc-transfer status : %s", status.String())
 }
 
 func validateQuotaDuration(i interface{}) error {

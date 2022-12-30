@@ -28,8 +28,8 @@ message Quota {
 
 // Params of x/uibc module
 message Params {
-  // ibc_status defines the wethever ibc-transfer allow or not
-  bool ibc_pause = 1;
+  // ibc_status defines the wethever ibc-transfer enabled, disbaled or paused
+  IBCTransferStatus ibc_pause = 1;
   // total_quota defines the total outflow limit of ibc-transfer in USD
   string total_quota = 2 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
@@ -49,4 +49,16 @@ message Params {
     (gogoproto.jsontag)     = "quota_duration,omitempty",
     (gogoproto.moretags)    = "yaml:\"quota_duration\""
   ];
+}
+
+// IBCTransferStatus status of ibc-transfer
+enum IBCTransferStatus {
+  // UNSPECIFIED  defines a no-op status option.
+  UNSPECIFIED = 0;
+  // DISABLED defines the quota checking diabled for ibc-transfer.
+  DISABLED = 1;
+  // ENABLED defines the enable quota checking for ibc-transfer.
+  ENABLED = 2;
+  // PAUSED defines pause the ibc-transfer from app.
+  PAUSED = 3;
 }
