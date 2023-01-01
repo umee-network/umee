@@ -66,7 +66,7 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 		}
 
 		// get USD value of base assets
-		v, err := k.TokenValue(ctx, baseAsset)
+		v, err := k.TokenValue(ctx, baseAsset, false)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}

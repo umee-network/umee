@@ -28,7 +28,7 @@ func (k Keeper) getLiquidationAmounts(
 	repayDenomBorrowed := sdk.NewCoin(repayDenom, totalBorrowed.AmountOf(repayDenom))
 
 	// calculate borrower health in USD values
-	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed)
+	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, false)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
@@ -44,7 +44,7 @@ func (k Keeper) getLiquidationAmounts(
 		// borrower is healthy and cannot be liquidated
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible
 	}
-	repayDenomBorrowedValue, err := k.TokenValue(ctx, repayDenomBorrowed)
+	repayDenomBorrowedValue, err := k.TokenValue(ctx, repayDenomBorrowed, false)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
@@ -75,7 +75,7 @@ func (k Keeper) getLiquidationAmounts(
 	}
 
 	// get precise (less rounding at high exponent) price ratio
-	priceRatio, err := k.PriceRatio(ctx, repayDenom, rewardDenom)
+	priceRatio, err := k.PriceRatio(ctx, repayDenom, rewardDenom, false)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}

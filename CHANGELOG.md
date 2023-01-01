@@ -57,6 +57,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1630](https://github.com/umee-network/umee/pull/1630) Incentive module proto.
 - [1588](https://github.com/umee-network/umee/pull/1588) Historacle proto.
 - [1653](https://github.com/umee-network/umee/pull/1653) Incentive Msg Server interface implementation.
+- [1654](https://github.com/umee-network/umee/pull/1654) Leverage historacle integration.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 
