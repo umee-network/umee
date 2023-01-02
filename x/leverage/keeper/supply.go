@@ -52,3 +52,24 @@ func (k Keeper) GetTotalSupply(ctx sdk.Context, denom string) (sdk.Coin, error) 
 	uTokenDenom := types.ToUTokenDenom(denom)
 	return k.ExchangeUToken(ctx, k.GetUTokenSupply(ctx, uTokenDenom))
 }
+
+// checkMaxSupply returns the appropriate error if a token denom's
+// supply has exceeded MaxSupply
+func (k Keeper) checkMaxSupply(ctx sdk.Context, denom string) error {
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	total, err := k.GetTotalSupply(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	if token.MaxSupply.IsPositive() && total.Amount.GTE(token.MaxSupply) {
+		return types.ErrMaxSupply.Wrapf("current supply: %s, max supply: %s",
+			total.Amount, token.MaxSupply)
+	}
+
+	return nil
+}

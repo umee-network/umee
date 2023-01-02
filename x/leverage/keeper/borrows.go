@@ -7,6 +7,48 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
+// assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
+// under either recent (historic median) or current prices. It returns an error if current
+// prices cannot be calculated, but will use current prices (without returning an error)
+// for any token whose historic prices cannot be calculated.
+// This should be checked in msg_server.go at the end of any transaction which is restricted
+// by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
+func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+
+	// Check using current prices
+	err := k.checkPositionHealth(ctx, borrowed, collateral, false)
+	if err != nil {
+		return err
+	}
+
+	// Check using historic prices
+	return k.checkPositionHealth(ctx, borrowed, collateral, true)
+}
+
+// checkPositionHealth returns an error if a borrow + collateral position is not healthy. uses either
+// current or historic prices.
+func (k Keeper) checkPositionHealth(ctx sdk.Context, borrowed, collateral sdk.Coins, historic bool) error {
+	value, err := k.TotalTokenValue(ctx, borrowed, historic)
+	if err != nil {
+		return err
+	}
+	limit, err := k.CalculateBorrowLimit(ctx, collateral, historic)
+	if err != nil {
+		return err
+	}
+	if value.GT(limit) {
+		desc := "current"
+		if historic {
+			desc = "historic"
+		}
+		return types.ErrUndercollaterized.Wrapf(
+			"borrowed: %s, limit: %s (%s prices)", value, limit, desc)
+	}
+	return nil
+}
+
 // GetBorrow returns an sdk.Coin representing how much of a given denom a
 // borrower currently owes.
 func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin {
@@ -72,7 +114,8 @@ func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
 // collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
-func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
+// If the historic parameter is true, uses medians of recent prices instead of current prices.
+func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins, historic bool) (sdk.Dec, error) {
 	limit := sdk.ZeroDec()
 
 	for _, coin := range collateral {
@@ -90,7 +133,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 		// ignore blacklisted tokens
 		if !ts.Blacklist {
 			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset)
+			v, err := k.TokenValue(ctx, baseAsset, historic)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
@@ -125,7 +168,7 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 		// ignore blacklisted tokens
 		if !ts.Blacklist {
 			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset)
+			v, err := k.TokenValue(ctx, baseAsset, false)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
@@ -136,4 +179,19 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 	}
 
 	return totalThreshold, nil
+}
+
+// checkSupplyUtilization returns the appropriate error if a token denom's
+// supply utilization has exceeded MaxSupplyUtilization
+func (k Keeper) checkSupplyUtilization(ctx sdk.Context, denom string) error {
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return err
+	}
+
+	utilization := k.SupplyUtilization(ctx, denom)
+	if utilization.GT(token.MaxSupplyUtilization) {
+		return types.ErrMaxSupplyUtilization.Wrap(utilization.String())
+	}
+	return nil
 }

@@ -33,4 +33,5 @@ type BankKeeper interface {
 type OracleKeeper interface {
 	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
 	GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error)
+	MedianOfHistoricMedians(ctx sdk.Context, denom string, numStamps uint64) (sdk.Dec, uint32, error)
 }

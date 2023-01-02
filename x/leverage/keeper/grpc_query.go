@@ -135,7 +135,7 @@ func (q Querier) MarketSummary(
 	}
 
 	// Oracle price in response will be nil if it is unavailable
-	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom); oracleErr == nil {
+	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom, false); oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	}
 
@@ -199,11 +199,11 @@ func (q Querier) AccountSummary(
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied)
+	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied, false)
 	if err != nil {
 		return nil, err
 	}
-	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed)
+	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed, false)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +211,7 @@ func (q Querier) AccountSummary(
 	if err != nil {
 		return nil, err
 	}
-	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
+	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, false)
 	if err != nil {
 		return nil, err
 	}
@@ -288,10 +288,19 @@ func (q Querier) MaxWithdraw(
 		return nil, err
 	}
 
-	uToken, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom)
+	maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, false)
 	if err != nil {
 		return nil, err
 	}
+	maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, true)
+	if err != nil {
+		return nil, err
+	}
+
+	uToken := sdk.NewCoin(
+		maxCurrentWithdraw.Denom,
+		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
+	)
 
 	token, err := q.Keeper.ExchangeUToken(ctx, uToken)
 	if err != nil {

@@ -11,6 +11,11 @@ import (
 
 var ten = sdk.MustNewDecFromStr("10")
 
+// TODO: Parameterize and move this
+const (
+	minHistoracleStamps = uint64(24)
+)
+
 // TokenBasePrice returns the USD value of a base token. Note, the token's denomination
 // must be the base denomination, e.g. uumee. The x/oracle module must know of
 // the base and display/symbol denominations for each exchange pair. E.g. it must
@@ -38,10 +43,11 @@ func (k Keeper) TokenBasePrice(ctx sdk.Context, baseDenom string) (sdk.Dec, erro
 	return price, nil
 }
 
-// TokenDefaultDenomPrice returns the USD value of a token's symbol denom, e.g. UMEE. Note, the input
-// denom must still be the base denomination, e.g. uumee. When error is nil, price is guaranteed
-// to be positive. Also returns the token's exponent to reduce redundant registry reads.
-func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string) (sdk.Dec, uint32, error) {
+// TokenDefaultDenomPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`).
+// Note, the input denom must still be the base denomination, e.g. uumee. When error is nil, price is
+// guaranteed to be positive. Also returns the token's exponent to reduce redundant registry reads.
+// If the historic parameter is true, uses a median of recent prices instead of current price.
+func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string, historic bool) (sdk.Dec, uint32, error) {
 	t, err := k.GetTokenSettings(ctx, baseDenom)
 	if err != nil {
 		return sdk.ZeroDec(), 0, err
@@ -51,7 +57,23 @@ func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string) (sdk.D
 		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
 	}
 
-	price, err := k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
+	var price sdk.Dec
+
+	if historic && minHistoracleStamps > 0 {
+		// historic price
+		var numStamps uint32
+		price, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, minHistoracleStamps)
+		if err == nil && numStamps < uint32(minHistoracleStamps) {
+			return sdk.ZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
+				"requested %d, got %d",
+				minHistoracleStamps,
+				numStamps,
+			)
+		}
+	} else {
+		// current price
+		price, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
+	}
 	if err != nil {
 		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
 	}
@@ -79,8 +101,9 @@ func exponent(input sdk.Dec, n int32) sdk.Dec {
 // returned if we cannot get the token's price or if it's not an accepted token.
 // Computation uses price of token's default denom to avoid rounding errors
 // for exponent >= 18 tokens.
-func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
-	p, exp, err := k.TokenDefaultDenomPrice(ctx, coin.Denom)
+// If the historic parameter is true, uses medians of recent prices instead of current prices.
+func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin, historic bool) (sdk.Dec, error) {
+	p, exp, err := k.TokenDefaultDenomPrice(ctx, coin.Denom, historic)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
@@ -90,13 +113,14 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin) (sdk.Dec, error) {
 // TotalTokenValue returns the total value of all supplied tokens. It is
 // equivalent to the sum of TokenValue on each coin individually, except it
 // ignores unregistered and blacklisted tokens instead of returning an error.
-func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, error) {
+// If the historic parameter is true, uses medians of recent prices instead of current prices.
+func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, historic bool) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
 	accepted := k.filterAcceptedCoins(ctx, coins)
 
 	for _, c := range accepted {
-		v, err := k.TokenValue(ctx, c)
+		v, err := k.TokenValue(ctx, c, historic)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -107,16 +131,17 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins) (sdk.Dec, erro
 	return total, nil
 }
 
-// PriceRatio computed the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).
+// PriceRatio computes the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).
 // Will return an error if either token price is not positive, and guarantees a positive output.
 // Computation uses price of token's default denom to avoid rounding errors for exponent >= 18 tokens,
 // but returns in terms of base tokens.
-func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string) (sdk.Dec, error) {
-	p1, e1, err := k.TokenDefaultDenomPrice(ctx, fromDenom)
+// If the historic parameter is true, uses medians of recent prices instead of current prices.
+func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, historic bool) (sdk.Dec, error) {
+	p1, e1, err := k.TokenDefaultDenomPrice(ctx, fromDenom, historic)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	p2, e2, err := k.TokenDefaultDenomPrice(ctx, toDenom)
+	p2, e2, err := k.TokenDefaultDenomPrice(ctx, toDenom, historic)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}

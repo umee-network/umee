@@ -24,6 +24,8 @@ import (
 	appparams "github.com/umee-network/umee/v3/app/params"
 )
 
+// Cosmos SDK module wrappers
+
 // BankModule defines a custom wrapper around the x/bank module's AppModuleBasic
 // implementation to provide custom default genesis state.
 type BankModule struct {

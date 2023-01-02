@@ -25,6 +25,8 @@ const (
 	umeeDenom = appparams.BondDenom
 	atomDenom = fixtures.AtomDenom
 	daiDenom  = fixtures.DaiDenom
+	pumpDenom = "upump"
+	dumpDenom = "udump"
 )
 
 type IntegrationTestSuite struct {
@@ -72,6 +74,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(daiDenom, "DAI", 18)))
+	// additional tokens for historacle testing
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(dumpDenom, "DUMP", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pumpDenom, "PUMP", 6)))
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())
@@ -143,50 +148,70 @@ func (s *IntegrationTestSuite) fundAccount(addr sdk.AccAddress, funds ...sdk.Coi
 
 // supply tokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) supply(addr sdk.AccAddress, coins ...sdk.Coin) {
-	app, ctx, require := s.app, s.ctx, s.Require()
+	srv, ctx, require := s.msgSrvr, s.ctx, s.Require()
 
 	for _, coin := range coins {
-		_, err := app.LeverageKeeper.Supply(ctx, addr, coin)
+		msg := &types.MsgSupply{
+			Supplier: addr.String(),
+			Asset:    coin,
+		}
+		_, err := srv.Supply(ctx, msg)
 		require.NoError(err, "supply")
 	}
 }
 
 // withdraw utokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) withdraw(addr sdk.AccAddress, coins ...sdk.Coin) {
-	app, ctx, require := s.app, s.ctx, s.Require()
+	srv, ctx, require := s.msgSrvr, s.ctx, s.Require()
 
 	for _, coin := range coins {
-		_, err := app.LeverageKeeper.Withdraw(ctx, addr, coin)
+		msg := &types.MsgWithdraw{
+			Supplier: addr.String(),
+			Asset:    coin,
+		}
+		_, err := srv.Withdraw(ctx, msg)
 		require.NoError(err, "withdraw")
 	}
 }
 
 // collateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) collateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
-	app, ctx, require := s.app, s.ctx, s.Require()
+	srv, ctx, require := s.msgSrvr, s.ctx, s.Require()
 
 	for _, coin := range uTokens {
-		err := app.LeverageKeeper.Collateralize(ctx, addr, coin)
+		msg := &types.MsgCollateralize{
+			Borrower: addr.String(),
+			Asset:    coin,
+		}
+		_, err := srv.Collateralize(ctx, msg)
 		require.NoError(err, "collateralize")
 	}
 }
 
 // decollateralize uTokens from an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) decollateralize(addr sdk.AccAddress, uTokens ...sdk.Coin) {
-	app, ctx, require := s.app, s.ctx, s.Require()
+	srv, ctx, require := s.msgSrvr, s.ctx, s.Require()
 
 	for _, coin := range uTokens {
-		err := app.LeverageKeeper.Decollateralize(ctx, addr, coin)
+		msg := &types.MsgDecollateralize{
+			Borrower: addr.String(),
+			Asset:    coin,
+		}
+		_, err := srv.Decollateralize(ctx, msg)
 		require.NoError(err, "decollateralize")
 	}
 }
 
 // borrow tokens as an account and require no errors. Use when setting up leverage scenarios.
 func (s *IntegrationTestSuite) borrow(addr sdk.AccAddress, coins ...sdk.Coin) {
-	app, ctx, require := s.app, s.ctx, s.Require()
+	srv, ctx, require := s.msgSrvr, s.ctx, s.Require()
 
 	for _, coin := range coins {
-		err := app.LeverageKeeper.Borrow(ctx, addr, coin)
+		msg := &types.MsgBorrow{
+			Borrower: addr.String(),
+			Asset:    coin,
+		}
+		_, err := srv.Borrow(ctx, msg)
 		require.NoError(err, "borrow")
 	}
 }
@@ -197,13 +222,9 @@ func (s *IntegrationTestSuite) forceBorrow(addr sdk.AccAddress, coins ...sdk.Coi
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	for _, coin := range coins {
-		borrowed := s.tk.GetBorrow(ctx, addr, coin.Denom)
-		err := s.tk.SetBorrow(ctx, addr, borrowed.Add(coin))
-		require.NoError(err, "forceBorrow")
+		err := app.LeverageKeeper.Borrow(ctx, addr, coin)
+		require.NoError(err, "borrow")
 	}
-
-	err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, addr, coins)
-	require.NoError(err, "forceBorroww")
 }
 
 // setReserves artificially sets reserves of one or more tokens to given values
