@@ -16,7 +16,7 @@ func isPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 }
 
 // EndBlocker is called at the end of every block
-func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
+func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
@@ -57,16 +57,14 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 				return err
 			}
 
-			if experimental {
-				if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-					k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
-				}
+			if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+				k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
+			}
 
-				// Calculate and stamp median/median deviation if median stamp period has passed
-				if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
-					if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
-						return err
-					}
+			// Calculate and stamp median/median deviation if median stamp period has passed
+			if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+				if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
+					return err
 				}
 			}
 		}
@@ -106,7 +104,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper, experimental bool) error {
 
 	// Prune historic prices and medians outside pruning period determined by
 	// the stamp period multiplied by the max stamps.
-	if experimental && isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+	if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
 		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
 		for _, v := range params.AcceptList {

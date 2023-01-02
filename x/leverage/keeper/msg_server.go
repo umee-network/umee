@@ -35,6 +35,11 @@ func (s msgServer) Supply(
 		return nil, err
 	}
 
+	// Fail here if MaxSupply is exceeded
+	if err = s.keeper.checkMaxSupply(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
 	s.keeper.Logger(ctx).Debug(
 		"assets supplied",
 		"supplier", msg.Supplier,
@@ -66,6 +71,17 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
+	// Fail here if supplier ends up over their borrow limit under current or historic prices
+	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Ensure MinCollateralLiquidity is still satisfied after the transaction
+	if err = s.keeper.checkCollateralLiquidity(ctx, received.Denom); err != nil {
+		return nil, err
+	}
+
 	err = s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
 	return &types.MsgWithdrawResponse{
 		Received: received,
@@ -83,13 +99,37 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
-	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
+	maxCurrentWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, false)
+	if err != nil {
+		return nil, err
+	}
+	maxHistoricWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, true)
 	if err != nil {
 		return nil, err
 	}
 
+	uToken := sdk.NewCoin(
+		maxCurrentWithdraw.Denom,
+		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
+	)
+
+	if uToken.IsZero() {
+		return nil, types.ErrMaxWithdrawZero
+	}
+
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
+		return nil, err
+	}
+
+	// Fail here if supplier ends up over their borrow limit under current or historic prices
+	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Ensure MinCollateralLiquidity is still satisfied after the transaction
+	if err = s.keeper.checkCollateralLiquidity(ctx, received.Denom); err != nil {
 		return nil, err
 	}
 
@@ -129,6 +169,14 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
+	if err := s.keeper.checkCollateralLiquidity(ctx, types.ToTokenDenom(msg.Asset.Denom)); err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.checkCollateralShare(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
 		"borrower", msg.Borrower,
@@ -156,6 +204,20 @@ func (s msgServer) SupplyCollateral(
 		return nil, err
 	}
 	if err = s.keeper.Collateralize(ctx, supplierAddr, uToken); err != nil {
+		return nil, err
+	}
+
+	// Fail here if MaxSupply is exceeded
+	if err = s.keeper.checkMaxSupply(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
+	// Fail here if collateral share or liquidity restrictions are violated
+	if err := s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
+	if err := s.keeper.checkCollateralShare(ctx, uToken.Denom); err != nil {
 		return nil, err
 	}
 
@@ -200,6 +262,12 @@ func (s msgServer) Decollateralize(
 		return nil, err
 	}
 
+	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	if err != nil {
+		return nil, err
+	}
+
 	s.keeper.Logger(ctx).Debug(
 		"collateral removed",
 		"borrower", msg.Borrower,
@@ -223,6 +291,22 @@ func (s msgServer) Borrow(
 		return nil, err
 	}
 	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Asset); err != nil {
+		return nil, err
+	}
+
+	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check MaxSupplyUtilization after transaction
+	if err = s.keeper.checkSupplyUtilization(ctx, msg.Asset.Denom); err != nil {
+		return nil, err
+	}
+
+	// Check MinCollateralLiquidity is still satisfied after the transaction
+	if err = s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
 

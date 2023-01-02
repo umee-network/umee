@@ -7,8 +7,11 @@ import (
 )
 
 // maxWithdraw calculates the maximum amount of uTokens an account can currently withdraw.
-// input should be a base token.
-func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
+// input denom should be a base token. Uses either real or historic prices.
+func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string, historic bool) (sdk.Coin, error) {
+	if types.HasUTokenPrefix(denom) {
+		return sdk.Coin{}, types.ErrUToken
+	}
 	uDenom := types.ToUTokenDenom(denom)
 
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
@@ -22,7 +25,7 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	specificCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
 
 	// calculate borrowed value for the account
-	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed)
+	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, historic)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -35,7 +38,7 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	}
 
 	// for nonzero borrows, calculations are based on unused borrow limit
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral)
+	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral, historic)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -49,7 +52,7 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
 
 	// calculate the contribution to borrow limit made by only the type of collateral being withdrawn
-	specificBorrowLimit, err := k.CalculateBorrowLimit(ctx, sdk.NewCoins(specificCollateral))
+	specificBorrowLimit, err := k.CalculateBorrowLimit(ctx, sdk.NewCoins(specificCollateral), historic)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
