@@ -35,6 +35,9 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryLiquidationTargets(),
 		GetCmdQueryBadDebts(),
 		GetCmdQueryMaxWithdraw(),
+		GetCmdQueryAllMaxWithdraw(),
+		GetCmdQueryMaxBorrow(),
+		GetCmdQueryAllMaxBorrow(),
 	)
 
 	return cmd
