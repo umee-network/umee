@@ -349,13 +349,14 @@ func (q Querier) AllMaxWithdraw(
 			maxCurrentWithdraw.Denom,
 			sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
 		)
-		token, err := q.Keeper.ExchangeUToken(ctx, uToken)
-		if err != nil {
-			return nil, err
+		if uToken.IsPositive() {
+			token, err := q.Keeper.ExchangeUToken(ctx, uToken)
+			if err != nil {
+				return nil, err
+			}
+			maxUTokens = maxUTokens.Add(uToken)
+			maxTokens = maxTokens.Add(token)
 		}
-
-		maxUTokens = maxUTokens.Add(uToken)
-		maxTokens = maxTokens.Add(token)
 	}
 
 	return &types.QueryAllMaxWithdrawResponse{
@@ -433,8 +434,10 @@ func (q Querier) AllMaxBorrow(
 			currentMaxBorrow.Denom,
 			sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
 		)
+		if maxBorrow.IsPositive() {
+			maxTokens = maxTokens.Add(maxBorrow)
+		}
 
-		maxTokens = maxTokens.Add(maxBorrow)
 	}
 
 	return &types.QueryAllMaxBorrowResponse{
