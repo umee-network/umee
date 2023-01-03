@@ -404,5 +404,40 @@ func (q Querier) AllMaxBorrow(
 	goCtx context.Context,
 	req *types.QueryAllMaxBorrow,
 ) (*types.QueryAllMaxBorrowResponse, error) {
-	return nil, types.ErrNotImplemented
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	registry := q.Keeper.GetAllRegisteredTokens(ctx)
+	maxTokens := sdk.NewCoins()
+	for _, t := range registry {
+		currentMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, t.BaseDenom, false)
+		if err != nil {
+			return nil, err
+		}
+		historicMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, t.BaseDenom, true)
+		if err != nil {
+			return nil, err
+		}
+		maxBorrow := sdk.NewCoin(
+			currentMaxBorrow.Denom,
+			sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
+		)
+
+		maxTokens = maxTokens.Add(maxBorrow)
+	}
+
+	return &types.QueryAllMaxBorrowResponse{
+		Tokens: maxTokens,
+	}, nil
 }
