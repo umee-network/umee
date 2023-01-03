@@ -246,3 +246,85 @@ func GetCmdQueryMaxWithdraw() *cobra.Command {
 
 	return cmd
 }
+
+// GetCmdQueryAllMaxWithdraw creates a Cobra command to query for
+// the maximum amount of all tokens an address can withdraw.
+func GetCmdQueryAllMaxWithdraw() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "all-max-withdraw [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the maximum amount of each base token an address can withdraw",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryAllMaxWithdraw{
+				Address: args[0],
+			}
+			resp, err := queryClient.AllMaxWithdraw(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryMaxBorrow creates a Cobra command to query for
+// the maximum amount of a given token an address can borrow.
+func GetCmdQueryMaxBorrow() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "max-borrow [addr] [denom]",
+		Args:  cobra.ExactArgs(2),
+		Short: "Query for the maximum amount of a given base token an address can borrow",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryMaxBorrow{
+				Address: args[0],
+				Denom:   args[1],
+			}
+			resp, err := queryClient.MaxBorrow(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryAllMaxBorrow creates a Cobra command to query for
+// the maximum amount of all tokens an address can borrow.
+func GetCmdQueryAllMaxBorrow() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "all-max-borrow [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Query for the maximum amount of each base token an address can borrow",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryAllMaxBorrow{
+				Address: args[0],
+			}
+			resp, err := queryClient.AllMaxBorrow(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
