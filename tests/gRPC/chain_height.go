@@ -27,6 +27,7 @@ type ChainHeight struct {
 	mtx               sync.RWMutex
 	errGetChainHeight error
 	lastChainHeight   int64
+	heightChanged     chan (int64)
 }
 
 // NewChainHeight returns a new ChainHeight struct that
@@ -58,6 +59,7 @@ func NewChainHeight(
 		errGetChainHeight: nil,
 		lastChainHeight:   initialHeight,
 	}
+	chainHeight.heightChanged = make(chan int64)
 
 	go chainHeight.subscribe(ctx, rpcClient, newBlockHeaderSubscription)
 
@@ -69,6 +71,12 @@ func (chainHeight *ChainHeight) updateChainHeight(blockHeight int64, err error) 
 	chainHeight.mtx.Lock()
 	defer chainHeight.mtx.Unlock()
 
+	if chainHeight.lastChainHeight != blockHeight {
+		select {
+		case chainHeight.heightChanged <- blockHeight:
+		default:
+		}
+	}
 	chainHeight.lastChainHeight = blockHeight
 	chainHeight.errGetChainHeight = err
 }

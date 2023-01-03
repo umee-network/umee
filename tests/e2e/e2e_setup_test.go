@@ -36,6 +36,7 @@ import (
 	appparams "github.com/umee-network/umee/v3/app/params"
 	"github.com/umee-network/umee/v3/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 const (
@@ -230,6 +231,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
+	// Gravity Bridge
 	var gravityGenState gravitytypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 
@@ -242,12 +244,14 @@ func (s *IntegrationTestSuite) initGenesis() {
 	var bech32GenState bech32ibctypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
 
+	// bech32
 	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
 
 	bz, err = cdc.MarshalJSON(&bech32GenState)
 	s.Require().NoError(err)
 	appGenState[bech32ibctypes.ModuleName] = bz
 
+	// Leverage
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
@@ -259,6 +263,19 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(err)
 	appGenState[leveragetypes.ModuleName] = bz
 
+	// Oracle
+	var oracleGenState oracletypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
+
+	oracleGenState.Params.HistoricStampPeriod = 5
+	oracleGenState.Params.MaximumPriceStamps = 4
+	oracleGenState.Params.MedianStampPeriod = 20
+
+	bz, err = cdc.MarshalJSON(&oracleGenState)
+	s.Require().NoError(err)
+	appGenState[oracletypes.ModuleName] = bz
+
+	// Bank
 	var bankGenState banktypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
 

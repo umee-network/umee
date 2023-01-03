@@ -17,11 +17,14 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
+	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 const (
 	GAS_ADJUSTMENT = 1
+	QUERY_TIMEOUT  = 15 * time.Second
 )
 
 // UmeeClient is a helper for initializing a keychain, a cosmos-sdk client context,
@@ -68,8 +71,19 @@ func NewUmeeClient(
 	return &uc, nil
 }
 
-func (uc *UmeeClient) createClientContext() {
+func (uc *UmeeClient) createClientContext() error {
 	encoding := umeeapp.MakeEncodingConfig()
+	fromAddress, _ := uc.keyringRecord.GetAddress()
+
+	tmHttpClient, err := tmjsonclient.DefaultHTTPClient(uc.TMRPCEndpoint)
+	if err != nil {
+		return err
+	}
+
+	tmRpcClient, err := rpchttp.NewWithClient(uc.TMRPCEndpoint, "/websocket", tmHttpClient)
+	if err != nil {
+		return err
+	}
 
 	uc.clientContext = &client.Context{
 		ChainID:           uc.ChainID,
@@ -82,18 +96,19 @@ func (uc *UmeeClient) createClientContext() {
 		LegacyAmino:       encoding.Amino,
 		Input:             os.Stdin,
 		NodeURI:           uc.TMRPCEndpoint,
-		//Client:  tmRPC,
-		Keyring: uc.keyringKeyring,
-		//FromAddress:       oc.OracleAddr,
-		FromName:     uc.keyringRecord.Name,
-		From:         uc.keyringRecord.Name,
-		OutputFormat: "json",
-		UseLedger:    false,
-		Simulate:     false,
-		GenerateOnly: false,
-		Offline:      false,
-		SkipConfirm:  true,
+		Client:            tmRpcClient,
+		Keyring:           uc.keyringKeyring,
+		FromAddress:       fromAddress,
+		FromName:          uc.keyringRecord.Name,
+		From:              uc.keyringRecord.Name,
+		OutputFormat:      "json",
+		UseLedger:         false,
+		Simulate:          false,
+		GenerateOnly:      false,
+		Offline:           false,
+		SkipConfirm:       true,
 	}
+	return nil
 }
 
 // CreateTxFactory creates an SDK Factory instance used for transaction
@@ -123,8 +138,19 @@ func (uc *UmeeClient) createQueryClient() error {
 	return nil
 }
 
+func (uc *UmeeClient) QueryParams() (oracletypes.Params, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), QUERY_TIMEOUT)
+	defer cancel()
+
+	queryResponse, err := uc.QueryClient.Params(ctx, &oracletypes.QueryParams{})
+	if err != nil {
+		return oracletypes.Params{}, err
+	}
+	return queryResponse.Params, nil
+}
+
 func (uc *UmeeClient) QueryExchangeRates() ([]sdk.DecCoin, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), QUERY_TIMEOUT)
 	defer cancel()
 
 	queryResponse, err := uc.QueryClient.ExchangeRates(ctx, &oracletypes.QueryExchangeRates{})
@@ -135,7 +161,7 @@ func (uc *UmeeClient) QueryExchangeRates() ([]sdk.DecCoin, error) {
 }
 
 func (uc *UmeeClient) QueryMedians() ([]sdk.DecCoin, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), QUERY_TIMEOUT)
 	defer cancel()
 
 	queryResponse, err := uc.QueryClient.Medians(ctx, &oracletypes.QueryMedians{})
