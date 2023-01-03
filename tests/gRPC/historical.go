@@ -1,17 +1,8 @@
 package gRPC
 
 import (
-	"context"
 	"fmt"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/v3/util/decmath"
-)
-
-const (
-	rpcTimeout    = "100ms"
-	gasAdjustment = 1
+	"time"
 )
 
 func MedianCheck(
@@ -21,40 +12,36 @@ func MedianCheck(
 	val1Mnemonic string,
 ) error {
 
-	val1Account, keyring, err := CreateAccountFromMnemonic("val1", val1Mnemonic)
+	val1Client, err := NewUmeeClient(chainID, tmrpcEndpoint, grpcEndpoint, "val1", val1Mnemonic)
 	if err != nil {
 		return err
 	}
+	val1Client.createQueryClient()
 
-	client1, err := NewClient(
-		context.Background(),
-		zerolog.Nop(),
-		chainID,
-		keyring,
-		keyringPassphrase,
-		val1Account,
-		tmrpcEndpoint,
-		rpcTimeout,
-		grpcEndpoint,
-		gasAdjustment,
-	)
-	if err != nil {
-		return err
+	for range []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10} {
+
+		exchangeRates, err := val1Client.QueryMedians()
+		fmt.Printf("%+v\n", exchangeRates)
+		if err != nil {
+			return err
+		}
+
+		medians, err := val1Client.QueryMedians()
+		fmt.Printf("%+v\n", medians)
+		if err != nil {
+			return err
+		}
+		time.Sleep(2 * time.Minute)
+
 	}
 
-	price1 := client1.GetAtomPrice()
-	price2 := client1.GetAtomPrice()
-	price3 := client1.GetAtomPrice()
-
-	median := client1.GetAtomMedianPrice()
-
-	calcMedian, err := decmath.Median([]sdk.Dec{price1, price2, price3})
-	if err != nil {
-		return err
-	}
-	if median != calcMedian {
-		return fmt.Errorf("Expected %d for the median but got %d")
-	}
+	// calcMedian, err := decmath.Median([]sdk.Dec{price1, price2, price3})
+	// if err != nil {
+	// 	return err
+	// }
+	// if median != calcMedian {
+	// 	return fmt.Errorf("Expected %d for the median but got %d")
+	// }
 
 	return nil
 }

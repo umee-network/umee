@@ -1,31 +1,66 @@
 package gRPC
 
 import (
+	"context"
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	umeeapp "github.com/umee-network/umee/v3/app"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
+const (
+	GAS_ADJUSTMENT = 1
+)
+
+// UmeeClient is a helper for initializing a keychain, a cosmos-sdk client context,
+// and sending transactions/queries to a specific Umee node
+// It also starts up a websocket connection to track the current block height and
+// uses the block height to ensure transactions happen within a certain window.
 type UmeeClient struct {
-	clientContext  *client.Context
+	ChainID       string
+	AccountName   string
+	GRPCEndpoint  string
+	TMRPCEndpoint string
+	GasPrices     string
+
 	keyringKeyring keyring.Keyring
 	keyringRecord  *keyring.Record
+
+	clientContext *client.Context
+	txFactory     tx.Factory
+	ChainHeight   *ChainHeight
+	QueryClient   oracletypes.QueryClient
 }
 
 func NewUmeeClient(
 	chainID string,
 	tmrpcEndpoint string,
 	grpcEndpoint string,
+	accountName string,
 	accountMnemonic string,
 ) (*UmeeClient, error) {
 	var err error
 
-	uc := UmeeClient{}
+	uc := UmeeClient{
+		ChainID:       chainID,
+		AccountName:   accountName,
+		GRPCEndpoint:  grpcEndpoint,
+		TMRPCEndpoint: tmrpcEndpoint,
+	}
 
-	uc.keyringRecord, uc.keyringKeyring, err = CreateAccountFromMnemonic("val1", accountMnemonic)
+	uc.keyringRecord, uc.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic)
 	if err != nil {
 		return nil, err
 	}
@@ -33,30 +68,79 @@ func NewUmeeClient(
 	return &uc, nil
 }
 
-func (uc UmeeClient) createClientContext() {
-	clientCtx := client.Context{
-		ChainID:           oc.ChainID,
-		InterfaceRegistry: oc.Encoding.InterfaceRegistry,
+func (uc *UmeeClient) createClientContext() {
+	encoding := umeeapp.MakeEncodingConfig()
+
+	uc.clientContext = &client.Context{
+		ChainID:           uc.ChainID,
+		InterfaceRegistry: encoding.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastSync,
-		TxConfig:          oc.Encoding.TxConfig,
+		TxConfig:          encoding.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		Codec:             oc.Encoding.Codec,
-		LegacyAmino:       oc.Encoding.Amino,
+		Codec:             encoding.Codec,
+		LegacyAmino:       encoding.Amino,
 		Input:             os.Stdin,
-		NodeURI:           oc.TMRPC,
-		Client:            tmRPC,
-		Keyring:           kr,
-		FromAddress:       oc.OracleAddr,
-		FromName:          keyInfo.Name,
-		From:              keyInfo.Name,
-		OutputFormat:      "json",
-		UseLedger:         false,
-		Simulate:          false,
-		GenerateOnly:      false,
-		Offline:           false,
-		SkipConfirm:       true,
+		NodeURI:           uc.TMRPCEndpoint,
+		//Client:  tmRPC,
+		Keyring: uc.keyringKeyring,
+		//FromAddress:       oc.OracleAddr,
+		FromName:     uc.keyringRecord.Name,
+		From:         uc.keyringRecord.Name,
+		OutputFormat: "json",
+		UseLedger:    false,
+		Simulate:     false,
+		GenerateOnly: false,
+		Offline:      false,
+		SkipConfirm:  true,
 	}
+}
 
-	return clientCtx, nil
+// CreateTxFactory creates an SDK Factory instance used for transaction
+// generation, signing and broadcasting.
+func (uc *UmeeClient) createTxFactory() {
+	uc.txFactory = tx.Factory{}.
+		WithAccountRetriever(uc.clientContext.AccountRetriever).
+		WithChainID(uc.ChainID).
+		WithTxConfig(uc.clientContext.TxConfig).
+		WithGasAdjustment(GAS_ADJUSTMENT).
+		WithGasPrices(uc.GasPrices).
+		WithKeybase(uc.clientContext.Keyring).
+		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
+		WithSimulateAndExecute(true)
+}
+
+func (uc *UmeeClient) createQueryClient() error {
+	grpcConn, err := grpc.Dial(
+		uc.GRPCEndpoint,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithContextDialer(dialerFunc),
+	)
+	if err != nil {
+		return fmt.Errorf("failed to dial Umee gRPC service: %w", err)
+	}
+	uc.QueryClient = oracletypes.NewQueryClient(grpcConn)
+	return nil
+}
+
+func (uc *UmeeClient) QueryExchangeRates() ([]sdk.DecCoin, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	queryResponse, err := uc.QueryClient.ExchangeRates(ctx, &oracletypes.QueryExchangeRates{})
+	if err != nil {
+		return nil, err
+	}
+	return queryResponse.ExchangeRates, nil
+}
+
+func (uc *UmeeClient) QueryMedians() ([]sdk.DecCoin, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	queryResponse, err := uc.QueryClient.Medians(ctx, &oracletypes.QueryMedians{})
+	if err != nil {
+		return nil, err
+	}
+	return queryResponse.Medians, nil
 }
