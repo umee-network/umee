@@ -312,3 +312,68 @@ func (q Querier) MaxWithdraw(
 		UTokens: uToken,
 	}, nil
 }
+
+func (q Querier) AllMaxWithdraw(
+	goCtx context.Context,
+	req *types.QueryAllMaxWithdraw,
+) (*types.QueryAllMaxWithdrawResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	registry := q.Keeper.GetAllRegisteredTokens(ctx)
+	maxUTokens := sdk.NewCoins()
+	maxTokens := sdk.NewCoins()
+
+	for _, t := range registry {
+		maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, t.BaseDenom, false)
+		if err != nil {
+			return nil, err
+		}
+		maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, t.BaseDenom, true)
+		if err != nil {
+			return nil, err
+		}
+
+		uToken := sdk.NewCoin(
+			maxCurrentWithdraw.Denom,
+			sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
+		)
+		token, err := q.Keeper.ExchangeUToken(ctx, uToken)
+		if err != nil {
+			return nil, err
+		}
+
+		maxUTokens = maxUTokens.Add(uToken)
+		maxTokens = maxTokens.Add(token)
+	}
+
+	return &types.QueryAllMaxWithdrawResponse{
+		Tokens:  maxTokens,
+		UTokens: maxUTokens,
+	}, nil
+}
+
+func (q Querier) MaxBorrow(
+	goCtx context.Context,
+	req *types.QueryMaxBorrow,
+) (*types.QueryMaxBorrowResponse, error) {
+	return nil, types.ErrNotImplemented
+}
+
+func (q Querier) AllMaxBorrow(
+	goCtx context.Context,
+	req *types.QueryAllMaxBorrow,
+) (*types.QueryAllMaxBorrowResponse, error) {
+	return nil, types.ErrNotImplemented
+}
