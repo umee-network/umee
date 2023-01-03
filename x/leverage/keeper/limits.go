@@ -77,7 +77,7 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string,
 }
 
 // maxBorrow calculates the maximum amount of a given token an account can currently borrow.
-// input denom should be a base token. Uses either real or historic prices.
+// input denom should be a base token. Uses either current or historic prices.
 func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string, historic bool) (sdk.Coin, error) {
 	if types.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
@@ -106,25 +106,16 @@ func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string, h
 	// determine the USD amount of borrow limit that is currently unused
 	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
 
-	// determine max borrow using current prices
-	currentMaxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, false)
+	// determine max borrow using current or historic prices
+	maxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, historic)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
-
-	// determine max borrow using historic prices
-	historictMaxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, true)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
-
-	// use the lowest of the two max borrows
-	maxBorrowAmount := sdk.MinInt(currentMaxBorrow.Amount, historictMaxBorrow.Amount)
 
 	// also cap borrow amount at available liquidity
-	maxBorrowAmount = sdk.MinInt(maxBorrowAmount, availableTokens)
+	maxBorrow.Amount = sdk.MinInt(maxBorrow.Amount, availableTokens)
 
-	return sdk.NewCoin(denom, maxBorrowAmount), nil
+	return maxBorrow, nil
 }
 
 // maxCollateralFromShare calculates the maximum amount of collateral a utoken denom

@@ -368,7 +368,36 @@ func (q Querier) MaxBorrow(
 	goCtx context.Context,
 	req *types.QueryMaxBorrow,
 ) (*types.QueryMaxBorrowResponse, error) {
-	return nil, types.ErrNotImplemented
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	currentMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, req.Denom, false)
+	if err != nil {
+		return nil, err
+	}
+	historicMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, req.Denom, true)
+	if err != nil {
+		return nil, err
+	}
+	maxBorrow := sdk.NewCoin(
+		currentMaxBorrow.Denom,
+		sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
+	)
+
+	return &types.QueryMaxBorrowResponse{
+		Tokens: maxBorrow,
+	}, nil
 }
 
 func (q Querier) AllMaxBorrow(
