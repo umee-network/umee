@@ -27,60 +27,50 @@ func MedianCheck(
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	chainHeight, err := NewChainHeight(
-		ctx,
-		val1Client.clientContext.Client,
-		zerolog.Nop(),
-		2, // why pass in the initial block height?
-	)
-	if err != nil {
-		cancel()
-		return err
-	}
+	priceStore := &PriceStore{}
 
-	for {
-		height := <-chainHeight.heightChanged
-		fmt.Printf("height: %d\n", height)
-		if err != nil {
-			cancel()
-			return err
-		}
-		if height > 60 {
-			break
-		}
-	}
+	listenForPrices(ctx, val1Client, priceStore)
 
-	params, err := val1Client.QueryParams()
-	fmt.Printf("%+v\n", params)
-	if err != nil {
-		cancel()
-		return err
-	}
-
-	// votePeriod := params.VotePeriod
-
-	exchangeRates, err := val1Client.QueryMedians()
-	fmt.Printf("%+v\n", exchangeRates)
-	if err != nil {
-		cancel()
-		return err
-	}
-
-	medians, err := val1Client.QueryMedians()
-	fmt.Printf("%+v\n", medians)
-	if err != nil {
-		cancel()
-		return err
-	}
-
-	// calcMedian, err := decmath.Median([]sdk.Dec{price1, price2, price3})
-	// if err != nil {
-	// 	return err
-	// }
-	// if median != calcMedian {
-	// 	return fmt.Errorf("Expected %d for the median but got %d")
-	// }
+	fmt.Printf("%+v\n", priceStore)
 
 	cancel()
 	return nil
+}
+
+func listenForPrices(
+	ctx context.Context,
+	umeeClient *UmeeClient,
+	priceStore *PriceStore,
+) {
+	chainHeight, _ := NewChainHeight(
+		ctx,
+		umeeClient.clientContext.Client,
+		zerolog.Nop(),
+	)
+
+	params, _ := umeeClient.QueryParams()
+
+	for i := 1; i <= int(params.MedianStampPeriod*2); i++ {
+		select {
+		case <-ctx.Done():
+			return
+		case height := <-chainHeight.HeightChanged:
+			if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
+				exchangeRates, _ := umeeClient.QueryExchangeRates()
+				for _, rate := range exchangeRates {
+					priceStore.SetHistoricStamp(height, rate.Denom, rate.Amount)
+				}
+			}
+			if isPeriodFirstBlock(height, params.MedianStampPeriod) {
+				medians, _ := umeeClient.QueryMedians()
+				for _, median := range medians {
+					priceStore.SetMedian(height, median.Denom, median.Amount)
+				}
+			}
+		}
+	}
+}
+
+func isPeriodFirstBlock(height int64, blocksPerPeriod uint64) bool {
+	return uint64(height)%blocksPerPeriod == 0
 }

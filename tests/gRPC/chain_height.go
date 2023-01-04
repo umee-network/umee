@@ -3,7 +3,6 @@ package gRPC
 import (
 	"context"
 	"errors"
-	"fmt"
 	"sync"
 
 	"github.com/rs/zerolog"
@@ -27,7 +26,7 @@ type ChainHeight struct {
 	mtx               sync.RWMutex
 	errGetChainHeight error
 	lastChainHeight   int64
-	heightChanged     chan (int64)
+	HeightChanged     chan (int64)
 }
 
 // NewChainHeight returns a new ChainHeight struct that
@@ -36,12 +35,7 @@ func NewChainHeight(
 	ctx context.Context,
 	rpcClient tmrpcclient.Client,
 	logger zerolog.Logger,
-	initialHeight int64,
 ) (*ChainHeight, error) {
-	if initialHeight < 1 {
-		return nil, fmt.Errorf("expected positive initial block height")
-	}
-
 	if !rpcClient.IsRunning() {
 		if err := rpcClient.Start(); err != nil {
 			return nil, err
@@ -55,11 +49,9 @@ func NewChainHeight(
 	}
 
 	chainHeight := &ChainHeight{
-		Logger:            logger.With().Str("oracle_client", "chain_height").Logger(),
-		errGetChainHeight: nil,
-		lastChainHeight:   initialHeight,
+		Logger: logger.With().Str("oracle_client", "chain_height").Logger(),
 	}
-	chainHeight.heightChanged = make(chan int64)
+	chainHeight.HeightChanged = make(chan int64)
 
 	go chainHeight.subscribe(ctx, rpcClient, newBlockHeaderSubscription)
 
@@ -73,7 +65,7 @@ func (chainHeight *ChainHeight) updateChainHeight(blockHeight int64, err error) 
 
 	if chainHeight.lastChainHeight != blockHeight {
 		select {
-		case chainHeight.heightChanged <- blockHeight:
+		case chainHeight.HeightChanged <- blockHeight:
 		default:
 		}
 	}
