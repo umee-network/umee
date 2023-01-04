@@ -288,59 +288,26 @@ func (q Querier) MaxWithdraw(
 		return nil, err
 	}
 
-	maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, false)
-	if err != nil {
-		return nil, err
-	}
-	maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, true)
-	if err != nil {
-		return nil, err
-	}
-
-	uToken := sdk.NewCoin(
-		maxCurrentWithdraw.Denom,
-		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
-	)
-
-	token, err := q.Keeper.ExchangeUToken(ctx, uToken)
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.QueryMaxWithdrawResponse{
-		Tokens:  token,
-		UTokens: uToken,
-	}, nil
-}
-
-func (q Querier) AllMaxWithdraw(
-	goCtx context.Context,
-	req *types.QueryAllMaxWithdraw,
-) (*types.QueryAllMaxWithdrawResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "empty address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	addr, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	registry := q.Keeper.GetAllRegisteredTokens(ctx)
+	denoms := []string{}
 	maxUTokens := sdk.NewCoins()
 	maxTokens := sdk.NewCoins()
 
-	for _, t := range registry {
-		maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, t.BaseDenom, false)
+	if req.GetDenom() != "" {
+		// Denom specified
+		denoms = []string{req.GetDenom()}
+	} else {
+		// Denom not specified
+		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
+			denoms = append(denoms, t.BaseDenom)
+		}
+	}
+
+	for _, denom := range denoms {
+		maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, denom, false)
 		if err != nil {
 			return nil, err
 		}
-		maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, t.BaseDenom, true)
+		maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, denom, true)
 		if err != nil {
 			return nil, err
 		}
@@ -359,7 +326,7 @@ func (q Querier) AllMaxWithdraw(
 		}
 	}
 
-	return &types.QueryAllMaxWithdrawResponse{
+	return &types.QueryMaxWithdrawResponse{
 		Tokens:  maxTokens,
 		UTokens: maxUTokens,
 	}, nil
@@ -383,50 +350,25 @@ func (q Querier) MaxBorrow(
 		return nil, err
 	}
 
-	currentMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, req.Denom, false)
-	if err != nil {
-		return nil, err
-	}
-	historicMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, req.Denom, true)
-	if err != nil {
-		return nil, err
-	}
-	maxBorrow := sdk.NewCoin(
-		currentMaxBorrow.Denom,
-		sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
-	)
-
-	return &types.QueryMaxBorrowResponse{
-		Tokens: maxBorrow,
-	}, nil
-}
-
-func (q Querier) AllMaxBorrow(
-	goCtx context.Context,
-	req *types.QueryAllMaxBorrow,
-) (*types.QueryAllMaxBorrowResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "empty address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	addr, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	registry := q.Keeper.GetAllRegisteredTokens(ctx)
+	denoms := []string{}
 	maxTokens := sdk.NewCoins()
-	for _, t := range registry {
-		currentMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, t.BaseDenom, false)
+
+	if req.GetDenom() != "" {
+		// Denom specified
+		denoms = []string{req.GetDenom()}
+	} else {
+		// Denom not specified
+		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
+			denoms = append(denoms, t.BaseDenom)
+		}
+	}
+
+	for _, denom := range denoms {
+		currentMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom, false)
 		if err != nil {
 			return nil, err
 		}
-		historicMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, t.BaseDenom, true)
+		historicMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom, true)
 		if err != nil {
 			return nil, err
 		}
@@ -440,7 +382,7 @@ func (q Querier) AllMaxBorrow(
 
 	}
 
-	return &types.QueryAllMaxBorrowResponse{
+	return &types.QueryMaxBorrowResponse{
 		Tokens: maxTokens,
 	}, nil
 }

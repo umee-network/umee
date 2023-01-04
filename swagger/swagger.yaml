@@ -184,150 +184,6 @@ paths:
           type: string
       tags:
         - Query
-  /umee/leverage/v1/all_max_borrow:
-    get:
-      summary: >-
-        AllMaxBorrow queries the maximum amount of all tokens an address can
-        borrow.
-      operationId: AllMaxBorrow
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              tokens:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    denom:
-                      type: string
-                    amount:
-                      type: string
-                  description: >-
-                    Coin defines a token with a denomination and an amount.
-
-
-                    NOTE: The amount field is an Int which implements the custom
-                    method
-
-                    signatures required by gogoproto.
-                title: Tokens is the maximum amount of tokens that can be borrowed
-            description: >-
-              QueryAllMaxBorrowResponse defines the response structure for the
-              AllMaxBorrow gRPC service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
-      tags:
-        - Query
-  /umee/leverage/v1/all_max_withdraw:
-    get:
-      summary: >-
-        AllMaxWithdraw queries the maximum amount of all tokens an address can
-        withdraw.
-      operationId: AllMaxWithdraw
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              uTokens:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    denom:
-                      type: string
-                    amount:
-                      type: string
-                  description: >-
-                    Coin defines a token with a denomination and an amount.
-
-
-                    NOTE: The amount field is an Int which implements the custom
-                    method
-
-                    signatures required by gogoproto.
-                title: uTokens is the maximum amount of uTokens that can be withdrawn
-              tokens:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    denom:
-                      type: string
-                    amount:
-                      type: string
-                  description: >-
-                    Coin defines a token with a denomination and an amount.
-
-
-                    NOTE: The amount field is an Int which implements the custom
-                    method
-
-                    signatures required by gogoproto.
-                title: >-
-                  Tokens is the equivalent of max uTokens converted to base
-                  tokens
-            description: >-
-              QueryAllMaxWithdrawResponse defines the response structure for the
-              MaxAllWithdraw gRPC service handler.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: address
-          in: query
-          required: false
-          type: string
-      tags:
-        - Query
   /umee/leverage/v1/bad_debts:
     get:
       summary: >-
@@ -628,20 +484,22 @@ paths:
             type: object
             properties:
               tokens:
-                type: object
-                properties:
-                  denom:
-                    type: string
-                  amount:
-                    type: string
-                description: >-
-                  Coin defines a token with a denomination and an amount.
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
 
 
-                  NOTE: The amount field is an Int which implements the custom
-                  method
+                    NOTE: The amount field is an Int which implements the custom
+                    method
 
-                  signatures required by gogoproto.
+                    signatures required by gogoproto.
                 title: Tokens is the maximum amount of tokens that can be borrowed
             description: >-
               QueryMaxBorrowResponse defines the response structure for the
@@ -674,7 +532,9 @@ paths:
           required: false
           type: string
         - name: denom
-          description: denom is the base token denom to borrow.
+          description: |-
+            denom is the base token denom to borrow.
+            empty denom will query all registered tokens.
           in: query
           required: false
           type: string
@@ -693,36 +553,40 @@ paths:
             type: object
             properties:
               uTokens:
-                type: object
-                properties:
-                  denom:
-                    type: string
-                  amount:
-                    type: string
-                description: >-
-                  Coin defines a token with a denomination and an amount.
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
 
 
-                  NOTE: The amount field is an Int which implements the custom
-                  method
+                    NOTE: The amount field is an Int which implements the custom
+                    method
 
-                  signatures required by gogoproto.
+                    signatures required by gogoproto.
                 title: uTokens is the maximum amount of uTokens that can be withdrawn
               tokens:
-                type: object
-                properties:
-                  denom:
-                    type: string
-                  amount:
-                    type: string
-                description: >-
-                  Coin defines a token with a denomination and an amount.
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
 
 
-                  NOTE: The amount field is an Int which implements the custom
-                  method
+                    NOTE: The amount field is an Int which implements the custom
+                    method
 
-                  signatures required by gogoproto.
+                    signatures required by gogoproto.
                 title: >-
                   Tokens is the equivalent of max uTokens converted to base
                   tokens
@@ -760,6 +624,8 @@ paths:
           description: >-
             denom is the base token denom associated with the uToken to
             withdraw.
+
+            empty denom will query all registered tokens.
           in: query
           required: false
           type: string
@@ -2137,63 +2003,6 @@ definitions:
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
-  umee.leverage.v1.QueryAllMaxBorrowResponse:
-    type: object
-    properties:
-      tokens:
-        type: array
-        items:
-          type: object
-          properties:
-            denom:
-              type: string
-            amount:
-              type: string
-          description: |-
-            Coin defines a token with a denomination and an amount.
-
-            NOTE: The amount field is an Int which implements the custom method
-            signatures required by gogoproto.
-        title: Tokens is the maximum amount of tokens that can be borrowed
-    description: >-
-      QueryAllMaxBorrowResponse defines the response structure for the
-      AllMaxBorrow gRPC service handler.
-  umee.leverage.v1.QueryAllMaxWithdrawResponse:
-    type: object
-    properties:
-      uTokens:
-        type: array
-        items:
-          type: object
-          properties:
-            denom:
-              type: string
-            amount:
-              type: string
-          description: |-
-            Coin defines a token with a denomination and an amount.
-
-            NOTE: The amount field is an Int which implements the custom method
-            signatures required by gogoproto.
-        title: uTokens is the maximum amount of uTokens that can be withdrawn
-      tokens:
-        type: array
-        items:
-          type: object
-          properties:
-            denom:
-              type: string
-            amount:
-              type: string
-          description: |-
-            Coin defines a token with a denomination and an amount.
-
-            NOTE: The amount field is an Int which implements the custom method
-            signatures required by gogoproto.
-        title: Tokens is the equivalent of max uTokens converted to base tokens
-    description: >-
-      QueryAllMaxWithdrawResponse defines the response structure for the
-      MaxAllWithdraw gRPC service handler.
   umee.leverage.v1.QueryBadDebtsResponse:
     type: object
     properties:
@@ -2372,17 +2181,19 @@ definitions:
     type: object
     properties:
       tokens:
-        type: object
-        properties:
-          denom:
-            type: string
-          amount:
-            type: string
-        description: |-
-          Coin defines a token with a denomination and an amount.
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
 
-          NOTE: The amount field is an Int which implements the custom method
-          signatures required by gogoproto.
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
         title: Tokens is the maximum amount of tokens that can be borrowed
     description: >-
       QueryMaxBorrowResponse defines the response structure for the MaxBorrow
@@ -2391,30 +2202,34 @@ definitions:
     type: object
     properties:
       uTokens:
-        type: object
-        properties:
-          denom:
-            type: string
-          amount:
-            type: string
-        description: |-
-          Coin defines a token with a denomination and an amount.
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
 
-          NOTE: The amount field is an Int which implements the custom method
-          signatures required by gogoproto.
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
         title: uTokens is the maximum amount of uTokens that can be withdrawn
       tokens:
-        type: object
-        properties:
-          denom:
-            type: string
-          amount:
-            type: string
-        description: |-
-          Coin defines a token with a denomination and an amount.
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
 
-          NOTE: The amount field is an Int which implements the custom method
-          signatures required by gogoproto.
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
         title: Tokens is the equivalent of max uTokens converted to base tokens
     description: >-
       QueryMaxWithdrawResponse defines the response structure for the

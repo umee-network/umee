@@ -65,18 +65,6 @@ service Query {
       returns (QueryMaxBorrowResponse) {
     option (google.api.http).get = "/umee/leverage/v1/max_borrow";
   }
-
-  // AllMaxWithdraw queries the maximum amount of all tokens an address can withdraw.
-  rpc AllMaxWithdraw(QueryAllMaxWithdraw)
-      returns (QueryAllMaxWithdrawResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/all_max_withdraw";
-  }
-
-  // AllMaxBorrow queries the maximum amount of all tokens an address can borrow.
-  rpc AllMaxBorrow(QueryAllMaxBorrow)
-      returns (QueryAllMaxBorrowResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/all_max_borrow";
-  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -278,38 +266,13 @@ message QueryBadDebtsResponse {
 // QueryMaxWithdraw defines the request structure for the MaxWithdraw gRPC service handler.
 message QueryMaxWithdraw {
   string address = 1;
-  // denom is the base token denom associated with the uToken to withdraw
-  string denom = 2;
+  // denom is the base token denom associated with the uToken to withdraw.
+  // empty denom will query all registered tokens.
+  optional string denom = 2;
 }
 
 // QueryMaxWithdrawResponse defines the response structure for the MaxWithdraw gRPC service handler.
 message QueryMaxWithdrawResponse {
-  // uTokens is the maximum amount of uTokens that can be withdrawn
-  cosmos.base.v1beta1.Coin uTokens = 1 [(gogoproto.nullable) = false];
-  // Tokens is the equivalent of max uTokens converted to base tokens
-  cosmos.base.v1beta1.Coin tokens = 2 [(gogoproto.nullable) = false];
-}
-
-// QueryMaxBorrow defines the request structure for the MaxBorrow gRPC service handler.
-message QueryMaxBorrow {
-  string address = 1;
-  // denom is the base token denom to borrow
-  string denom = 2;
-}
-
-// QueryMaxBorrowResponse defines the response structure for the MaxBorrow gRPC service handler.
-message QueryMaxBorrowResponse {
-  // Tokens is the maximum amount of tokens that can be borrowed
-  cosmos.base.v1beta1.Coin tokens = 1 [(gogoproto.nullable) = false];
-}
-
-// QueryAllMaxWithdraw defines the request structure for the AllMaxWithdraw gRPC service handler.
-message QueryAllMaxWithdraw {
-  string address = 1;
-}
-
-// QueryAllMaxWithdrawResponse defines the response structure for the MaxAllWithdraw gRPC service handler.
-message QueryAllMaxWithdrawResponse {
   // uTokens is the maximum amount of uTokens that can be withdrawn
   repeated cosmos.base.v1beta1.Coin uTokens = 1 [
     (gogoproto.nullable)     = false,
@@ -322,13 +285,16 @@ message QueryAllMaxWithdrawResponse {
   ];
 }
 
-// QueryAllMaxBorrow defines the request structure for the AllMaxBorrow gRPC service handler.
-message QueryAllMaxBorrow {
+// QueryMaxBorrow defines the request structure for the MaxBorrow gRPC service handler.
+message QueryMaxBorrow {
   string address = 1;
+  // denom is the base token denom to borrow.
+  // empty denom will query all registered tokens.
+  optional string denom = 2;
 }
 
-// QueryAllMaxBorrowResponse defines the response structure for the AllMaxBorrow gRPC service handler.
-message QueryAllMaxBorrowResponse {
+// QueryMaxBorrowResponse defines the response structure for the MaxBorrow gRPC service handler.
+message QueryMaxBorrowResponse {
   // Tokens is the maximum amount of tokens that can be borrowed
   repeated cosmos.base.v1beta1.Coin tokens = 1 [
     (gogoproto.nullable)     = false,

@@ -152,13 +152,13 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 
 	resp, err := s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
-		Denom:   umeeDenom,
+		XDenom:  &types.QueryMaxWithdraw_Denom{Denom: umeeDenom},
 	})
 	require.NoError(err)
 
 	expected := types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000)),
-		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000)),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -167,13 +167,13 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 
 	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
-		Denom:   umeeDenom,
+		XDenom:  &types.QueryMaxWithdraw_Denom{Denom: umeeDenom},
 	})
 	require.NoError(err)
 
 	expected = types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000)),
-		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000)),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000))),
 	}
 	require.Equal(expected, *resp)
 }
