@@ -294,7 +294,7 @@ func (q Querier) MaxWithdraw(
 
 	if req.Denom != "" {
 		// Denom specified
-		denoms = []string{req.GetDenom()}
+		denoms = []string{req.Denom}
 	} else {
 		// Denom not specified
 		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
@@ -355,7 +355,7 @@ func (q Querier) MaxBorrow(
 
 	if req.Denom != "" {
 		// Denom specified
-		denoms = []string{req.GetDenom()}
+		denoms = []string{req.Denom}
 	} else {
 		// Denom not specified
 		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {

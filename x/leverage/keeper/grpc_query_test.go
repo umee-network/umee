@@ -212,7 +212,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 
 	resp, err := s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
 		Address: addr.String(),
-		XDenom:  &types.QueryMaxBorrow_Denom{Denom: umeeDenom},
+		Denom:   umeeDenom,
 	})
 	require.NoError(err)
 
@@ -237,7 +237,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 
 	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
 		Address: addr.String(),
-		XDenom:  &types.QueryMaxBorrow_Denom{Denom: umeeDenom},
+		Denom:   umeeDenom,
 	})
 	require.NoError(err)
 
