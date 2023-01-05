@@ -17,7 +17,7 @@ func (ps *PriceStore) checkMedian() error {
 	if err != nil {
 		return err
 	}
-	if ps.median != calcMedian {
+	if ps.median.Equal(calcMedian) {
 		return fmt.Errorf("expected %d for the median but got %d", ps.median, calcMedian)
 	}
 	return nil

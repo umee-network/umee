@@ -3,8 +3,10 @@ package gRPC
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/rs/zerolog"
+	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
 )
 
 func MedianCheck(
@@ -28,19 +30,32 @@ func MedianCheck(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	priceStore := &PriceStore{}
+	params, _ := val1Client.QueryParams()
+	fmt.Printf("%+v\n", params)
 
-	err = listenForPrices(ctx, val1Client, "umee", priceStore)
-	if err != nil {
-		return err
+	denomAcceptList := []string{}
+	for _, acceptItem := range params.AcceptList {
+		denomAcceptList = append(denomAcceptList, strings.ToUpper(acceptItem.SymbolDenom))
 	}
 
-	return priceStore.checkMedian()
+	for _, denom := range denomAcceptList {
+		priceStore := &PriceStore{}
+		err = listenForPrices(ctx, val1Client, params, denom, priceStore)
+		if err != nil {
+			return err
+		}
+		err = priceStore.checkMedian()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func listenForPrices(
 	ctx context.Context,
 	umeeClient *UmeeClient,
+	params oracletypes.Params,
 	denom string,
 	priceStore *PriceStore,
 ) error {
@@ -49,8 +64,10 @@ func listenForPrices(
 		return err
 	}
 
-	params, _ := umeeClient.QueryParams() // TODO error handling
-	fmt.Printf("%+v\n", params)
+	// Wait 10 blocks for prices
+	for i := 0; i < 20; i++ {
+		<-chainHeight.HeightChanged
+	}
 
 	// Wait until the end of a median period
 	var beginningHeight int64
@@ -70,6 +87,7 @@ func listenForPrices(
 			fmt.Printf("%d: ", height)
 			fmt.Println("historic stamp period first block")
 			exchangeRates, err := umeeClient.QueryExchangeRates()
+			fmt.Println(exchangeRates)
 			if err != nil {
 				return nil
 			}
