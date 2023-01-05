@@ -674,7 +674,9 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
 	gaiaVal := s.chain.gaiaValidators[0]
-	umeeVal := s.chain.validators[0]
+	// umeeVal for the relayer needs to be a different account
+	// than what we use for runPriceFeeder.
+	umeeVal := s.chain.validators[1]
 	hermesCfgPath := path.Join(tmpDir, "hermes")
 
 	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0o755))
@@ -702,7 +704,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.gaiaResource.Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[1].Container.Name[1:]),
 			},
 			Entrypoint: []string{
 				"sh",
