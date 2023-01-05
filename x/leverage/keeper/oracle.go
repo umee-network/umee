@@ -11,11 +11,6 @@ import (
 
 var ten = sdk.MustNewDecFromStr("10")
 
-// TODO: Parameterize and move this
-const (
-	minHistoracleStamps = uint64(24)
-)
-
 // TokenBasePrice returns the USD value of a base token. Note, the token's denomination
 // must be the base denomination, e.g. uumee. The x/oracle module must know of
 // the base and display/symbol denominations for each exchange pair. E.g. it must
@@ -59,14 +54,14 @@ func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string, histor
 
 	var price sdk.Dec
 
-	if historic && minHistoracleStamps > 0 {
+	if historic && t.HistoricMedians > 0 {
 		// historic price
 		var numStamps uint32
-		price, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, minHistoracleStamps)
-		if err == nil && numStamps < uint32(minHistoracleStamps) {
+		price, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, uint64(t.HistoricMedians))
+		if err == nil && numStamps < t.HistoricMedians {
 			return sdk.ZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
 				"requested %d, got %d",
-				minHistoracleStamps,
+				t.HistoricMedians,
 				numStamps,
 			)
 		}
