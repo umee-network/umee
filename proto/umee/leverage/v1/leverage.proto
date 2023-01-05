@@ -237,5 +237,7 @@ message Token {
   // borrow positions under both current and historic prices. The default value of
   // zero for this field causes current price to be used in those calculations
   // for the affected Token.
-  uint32 historic_medians = 19;
+  uint32 historic_medians = 19 [
+    (gogoproto.moretags) = "yaml:\"historic_medians\""
+  ];
 }
