@@ -56,4 +56,5 @@ var (
 
 	// 7XX = Disabled Functionality
 	ErrNotLiquidatorNode = sdkerrors.Register(ModuleName, 700, "node has disabled liquidator queries")
+	ErrNotImplemented    = sdkerrors.Register(ModuleName, 701, "not implemented")
 )

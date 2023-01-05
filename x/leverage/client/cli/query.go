@@ -35,6 +35,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryLiquidationTargets(),
 		GetCmdQueryBadDebts(),
 		GetCmdQueryMaxWithdraw(),
+		GetCmdQueryMaxBorrow(),
 	)
 
 	return cmd
@@ -224,7 +225,7 @@ func GetCmdQueryBadDebts() *cobra.Command {
 func GetCmdQueryMaxWithdraw() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "max-withdraw [addr] [denom]",
-		Args:  cobra.ExactArgs(2),
+		Args:  cobra.RangeArgs(1, 2),
 		Short: "Query for the maximum amount of a given base token an address can withdraw",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -235,9 +236,41 @@ func GetCmdQueryMaxWithdraw() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryMaxWithdraw{
 				Address: args[0],
-				Denom:   args[1],
+			}
+			if len(args) > 1 {
+				req.Denom = args[1]
 			}
 			resp, err := queryClient.MaxWithdraw(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryMaxBorrow creates a Cobra command to query for
+// the maximum amount of a given token an address can borrow.
+func GetCmdQueryMaxBorrow() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "max-borrow [addr] [denom]",
+		Args:  cobra.RangeArgs(1, 2),
+		Short: "Query for the maximum amount of a given base token an address can borrow",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryMaxBorrow{
+				Address: args[0],
+			}
+			if len(args) > 1 {
+				req.Denom = args[1]
+			}
+			resp, err := queryClient.MaxBorrow(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

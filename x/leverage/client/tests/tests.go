@@ -140,8 +140,21 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryMaxWithdrawResponse{},
 			&types.QueryMaxWithdrawResponse{
-				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
-				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
+				Tokens:  sdk.NewCoins(),
+				UTokens: sdk.NewCoins(),
+			},
+		},
+		{
+			"query max borrow (zero)",
+			cli.GetCmdQueryMaxBorrow(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxBorrowResponse{},
+			&types.QueryMaxBorrowResponse{
+				Tokens: sdk.NewCoins(),
 			},
 		},
 	}
@@ -284,8 +297,21 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryMaxWithdrawResponse{},
 			&types.QueryMaxWithdrawResponse{
-				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
-				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
+				Tokens:  sdk.NewCoins(),
+				UTokens: sdk.NewCoins(),
+			},
+		},
+		{
+			"query max borrow (borrow limit reached)",
+			cli.GetCmdQueryMaxBorrow(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxBorrowResponse{},
+			&types.QueryMaxBorrowResponse{
+				Tokens: sdk.NewCoins(),
 			},
 		},
 	}
@@ -319,8 +345,58 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryMaxWithdrawResponse{},
 			&types.QueryMaxWithdrawResponse{
-				Tokens:  sdk.NewCoin("uumee", sdk.NewInt(201)),
-				UTokens: sdk.NewCoin("u/uumee", sdk.NewInt(200)),
+				Tokens: sdk.NewCoins(
+					sdk.NewCoin("uumee", sdk.NewInt(201)),
+				),
+				UTokens: sdk.NewCoins(
+					sdk.NewCoin("u/uumee", sdk.NewInt(200)),
+				),
+			},
+		},
+		{
+			"query max borrow (after repay)",
+			cli.GetCmdQueryMaxBorrow(),
+			[]string{
+				val.Address.String(),
+				"uumee",
+			},
+			false,
+			&types.QueryMaxBorrowResponse{},
+			&types.QueryMaxBorrowResponse{
+				Tokens: sdk.NewCoins(
+					sdk.NewCoin("uumee", sdk.NewInt(25)),
+				),
+			},
+		},
+		{
+			"query all max withdraw (after repay)",
+			cli.GetCmdQueryMaxWithdraw(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryMaxWithdrawResponse{},
+			&types.QueryMaxWithdrawResponse{
+				Tokens: sdk.NewCoins(
+					sdk.NewCoin("uumee", sdk.NewInt(201)),
+				),
+				UTokens: sdk.NewCoins(
+					sdk.NewCoin("u/uumee", sdk.NewInt(200)),
+				),
+			},
+		},
+		{
+			"query all max borrow (after repay)",
+			cli.GetCmdQueryMaxBorrow(),
+			[]string{
+				val.Address.String(),
+			},
+			false,
+			&types.QueryMaxBorrowResponse{},
+			&types.QueryMaxBorrowResponse{
+				Tokens: sdk.NewCoins(
+					sdk.NewCoin("uumee", sdk.NewInt(25)),
+				),
 			},
 		},
 	}
@@ -351,8 +427,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryMaxWithdrawResponse{},
 			&types.QueryMaxWithdrawResponse{
-				Tokens:  sdk.NewCoin("uumee", sdk.ZeroInt()),
-				UTokens: sdk.NewCoin("u/uumee", sdk.ZeroInt()),
+				Tokens:  sdk.NewCoins(),
+				UTokens: sdk.NewCoins(),
 			},
 		},
 	}
