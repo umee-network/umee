@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### API Breaking
+
+- [1683](https://github.com/umee-network/umee/pull/1683) MaxWithdraw query now returns `sdk.Coins`, not `sdk.Coin` and will be empty (not zero coin) when returning a zero amount. Denom field in query is now optional.
+
 ### Fixes
 
 - [1680](https://github.com/umee-network/umee/pull/1680) Add amino support for MsgMaxWithdraw.
@@ -58,6 +62,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1588](https://github.com/umee-network/umee/pull/1588) Historacle proto.
 - [1653](https://github.com/umee-network/umee/pull/1653) Incentive Msg Server interface implementation.
 - [1654](https://github.com/umee-network/umee/pull/1654) Leverage historacle integration.
+- [1683](https://github.com/umee-network/umee/pull/1683) Add MaxBorrow query and allow returning all denoms from MaxWithdraw.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 

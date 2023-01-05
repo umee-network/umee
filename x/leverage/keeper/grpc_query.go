@@ -288,27 +288,101 @@ func (q Querier) MaxWithdraw(
 		return nil, err
 	}
 
-	maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, false)
-	if err != nil {
-		return nil, err
-	}
-	maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, req.Denom, true)
-	if err != nil {
-		return nil, err
+	denoms := []string{}
+	maxUTokens := sdk.NewCoins()
+	maxTokens := sdk.NewCoins()
+
+	if req.Denom != "" {
+		// Denom specified
+		denoms = []string{req.Denom}
+	} else {
+		// Denom not specified
+		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
+			denoms = append(denoms, t.BaseDenom)
+		}
 	}
 
-	uToken := sdk.NewCoin(
-		maxCurrentWithdraw.Denom,
-		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
-	)
+	for _, denom := range denoms {
+		maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, denom, false)
+		if err != nil {
+			return nil, err
+		}
+		maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, denom, true)
+		if err != nil {
+			return nil, err
+		}
 
-	token, err := q.Keeper.ExchangeUToken(ctx, uToken)
-	if err != nil {
-		return nil, err
+		uToken := sdk.NewCoin(
+			maxCurrentWithdraw.Denom,
+			sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
+		)
+		if uToken.IsPositive() {
+			token, err := q.Keeper.ExchangeUToken(ctx, uToken)
+			if err != nil {
+				return nil, err
+			}
+			maxUTokens = maxUTokens.Add(uToken)
+			maxTokens = maxTokens.Add(token)
+		}
 	}
 
 	return &types.QueryMaxWithdrawResponse{
-		Tokens:  token,
-		UTokens: uToken,
+		Tokens:  maxTokens,
+		UTokens: maxUTokens,
+	}, nil
+}
+
+func (q Querier) MaxBorrow(
+	goCtx context.Context,
+	req *types.QueryMaxBorrow,
+) (*types.QueryMaxBorrowResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty address")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	denoms := []string{}
+	maxTokens := sdk.NewCoins()
+
+	if req.Denom != "" {
+		// Denom specified
+		denoms = []string{req.Denom}
+	} else {
+		// Denom not specified
+		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
+			denoms = append(denoms, t.BaseDenom)
+		}
+	}
+
+	for _, denom := range denoms {
+		currentMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom, false)
+		if err != nil {
+			return nil, err
+		}
+		historicMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom, true)
+		if err != nil {
+			return nil, err
+		}
+		maxBorrow := sdk.NewCoin(
+			currentMaxBorrow.Denom,
+			sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
+		)
+		if maxBorrow.IsPositive() {
+			maxTokens = maxTokens.Add(maxBorrow)
+		}
+
+	}
+
+	return &types.QueryMaxBorrowResponse{
+		Tokens: maxTokens,
 	}, nil
 }
