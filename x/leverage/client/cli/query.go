@@ -238,7 +238,7 @@ func GetCmdQueryMaxWithdraw() *cobra.Command {
 				Address: args[0],
 			}
 			if len(args) > 1 {
-				req.XDenom = &types.QueryMaxWithdraw_Denom{Denom: args[1]}
+				req.Denom = args[1]
 			}
 			resp, err := queryClient.MaxWithdraw(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
@@ -268,7 +268,7 @@ func GetCmdQueryMaxBorrow() *cobra.Command {
 				Address: args[0],
 			}
 			if len(args) > 1 {
-				req.XDenom = &types.QueryMaxBorrow_Denom{Denom: args[1]}
+				req.Denom = args[1]
 			}
 			resp, err := queryClient.MaxBorrow(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)

@@ -268,7 +268,7 @@ message QueryMaxWithdraw {
   string address = 1;
   // denom is the base token denom associated with the uToken to withdraw.
   // empty denom will query all registered tokens.
-  optional string denom = 2;
+  string denom = 2;
 }
 
 // QueryMaxWithdrawResponse defines the response structure for the MaxWithdraw gRPC service handler.
@@ -290,7 +290,7 @@ message QueryMaxBorrow {
   string address = 1;
   // denom is the base token denom to borrow.
   // empty denom will query all registered tokens.
-  optional string denom = 2;
+  string denom = 2;
 }
 
 // QueryMaxBorrowResponse defines the response structure for the MaxBorrow gRPC service handler.

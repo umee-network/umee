@@ -292,7 +292,7 @@ func (q Querier) MaxWithdraw(
 	maxUTokens := sdk.NewCoins()
 	maxTokens := sdk.NewCoins()
 
-	if req.GetDenom() != "" {
+	if req.Denom != "" {
 		// Denom specified
 		denoms = []string{req.GetDenom()}
 	} else {
@@ -353,7 +353,7 @@ func (q Querier) MaxBorrow(
 	denoms := []string{}
 	maxTokens := sdk.NewCoins()
 
-	if req.GetDenom() != "" {
+	if req.Denom != "" {
 		// Denom specified
 		denoms = []string{req.GetDenom()}
 	} else {

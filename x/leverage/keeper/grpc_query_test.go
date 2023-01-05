@@ -152,7 +152,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 
 	resp, err := s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
-		XDenom:  &types.QueryMaxWithdraw_Denom{Denom: umeeDenom},
+		Denom:   umeeDenom,
 	})
 	require.NoError(err)
 
@@ -179,7 +179,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 
 	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
-		XDenom:  &types.QueryMaxWithdraw_Denom{Denom: umeeDenom},
+		Denom:   umeeDenom,
 	})
 	require.NoError(err)
 
