@@ -988,7 +988,7 @@ paths:
                         Historic Medians is the number of median historic prices
                         to request from
 
-                        the orace module when evaluating new borrow positions
+                        the oracle module when evaluating new borrow positions
                         containing this token.
 
                         All MsgBorrow, MsgWithdraw, and MsgDecollateralize must
@@ -2544,8 +2544,8 @@ definitions:
                 Historic Medians is the number of median historic prices to
                 request from
 
-                the orace module when evaluating new borrow positions containing
-                this token.
+                the oracle module when evaluating new borrow positions
+                containing this token.
 
                 All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result
                 in healthy
@@ -2749,7 +2749,7 @@ definitions:
           Historic Medians is the number of median historic prices to request
           from
 
-          the orace module when evaluating new borrow positions containing this
+          the oracle module when evaluating new borrow positions containing this
           token.
 
           All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result in

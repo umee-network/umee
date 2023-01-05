@@ -190,7 +190,7 @@ type Token struct {
 	// To mark a token as not valid for supply, `msg_supply` must be set to false.
 	MaxSupply github_com_cosmos_cosmos_sdk_types.Int `protobuf:"bytes,18,opt,name=max_supply,json=maxSupply,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Int" json:"max_supply" yaml:"max_supply"`
 	// Historic Medians is the number of median historic prices to request from
-	// the orace module when evaluating new borrow positions containing this token.
+	// the oracle module when evaluating new borrow positions containing this token.
 	// All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result in healthy
 	// borrow positions under both current and historic prices. The default value of
 	// zero for this field causes current price to be used in those calculations

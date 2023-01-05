@@ -232,7 +232,7 @@ message Token {
   ];
 
   // Historic Medians is the number of median historic prices to request from
-  // the orace module when evaluating new borrow positions containing this token.
+  // the oracle module when evaluating new borrow positions containing this token.
   // All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result in healthy
   // borrow positions under both current and historic prices. The default value of
   // zero for this field causes current price to be used in those calculations
