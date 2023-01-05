@@ -6,6 +6,20 @@ import (
 	"github.com/umee-network/umee/v3/x/leverage/types"
 )
 
+// SetOldToken is TEST-ONLY - do not merge.
+func (k Keeper) SetOldToken(ctx sdk.Context, token types.OldToken) error {
+	store := ctx.KVStore(k.storeKey)
+	tokenKey := types.KeyRegisteredToken(token.BaseDenom)
+
+	bz, err := k.cdc.Marshal(&token)
+	if err != nil {
+		return err
+	}
+
+	store.Set(tokenKey, bz)
+	return nil
+}
+
 // SetTokenSettings stores a Token into the x/leverage module's KVStore.
 func (k Keeper) SetTokenSettings(ctx sdk.Context, token types.Token) error {
 	if err := token.Validate(); err != nil {
