@@ -126,6 +126,20 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, historic bool)
 	return total, nil
 }
 
+// TokenWithValue creates a token of a given denom with an given USD value, using either current
+// or historic prices. Returns an error on invalid price or denom.
+func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, historic bool) (sdk.Coin, error) {
+	// get token price (guaranteed positive if nil error) and exponent
+	price, exp, err := k.TokenDefaultDenomPrice(ctx, denom, historic)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// amount = USD value * 10^exponent / symbol price
+	amount := exponent(value, int32(exp)).Quo(price)
+	return sdk.NewCoin(denom, amount.TruncateInt()), nil
+}
+
 // PriceRatio computes the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).
 // Will return an error if either token price is not positive, and guarantees a positive output.
 // Computation uses price of token's default denom to avoid rounding errors for exponent >= 18 tokens,
