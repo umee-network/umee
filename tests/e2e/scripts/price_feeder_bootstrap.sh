@@ -17,33 +17,119 @@ read_timeout = "20s"
 verbose_cors = true
 write_timeout = "20s"
 
+[[deviation_thresholds]]
+base = "USDT"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "UMEE"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "ATOM"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "USDC"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "CRO"
+threshold = "1.5"
+
+[[deviation_thresholds]]
+base = "DAI"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "ETH"
+threshold = "2"
+
+[[deviation_thresholds]]
+base = "WBTC"
+threshold = "1.5"
+
 [[currency_pairs]]
 base = "UMEE"
 providers = [
-  "mock",
+  "okx",
+  "gate",
+  "mexc",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "USDT"
+providers = [
+  "kraken",
+  "coinbase",
+  "binanceus",
+]
+quote = "USD"
+
+[[currency_pairs]]
+base = "ATOM"
+providers = [
+  "okx",
+  "bitget",
 ]
 quote = "USDT"
 
 [[currency_pairs]]
 base = "ATOM"
 providers = [
-  "mock",
+  "kraken",
 ]
-quote = "USDC"
+quote = "USD"
 
 [[currency_pairs]]
 base = "USDC"
 providers = [
-  "mock",
+  "okx",
+  "bitget",
+  "kraken",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "DAI"
+providers = [
+  "okx",
+  "bitget",
+  "huobi",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "DAI"
+providers = [
+  "kraken",
 ]
 quote = "USD"
 
 [[currency_pairs]]
-base = "USDT"
+base = "ETH"
 providers = [
-  "mock",
+  "okx",
+  "bitget",
+]
+quote = "USDT"
+
+[[currency_pairs]]
+base = "ETH"
+providers = [
+  "kraken",
 ]
 quote = "USD"
+
+[[currency_pairs]]
+base = "WBTC"
+providers = [
+  "okx",
+  "bitget",
+  "crypto",
+]
+quote = "USDT"
 
 [account]
 address = '$UMEE_E2E_PRICE_FEEDER_ADDRESS'
