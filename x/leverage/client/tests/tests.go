@@ -190,7 +190,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"borrow",
 		cli.GetCmdBorrow(),
 		[]string{
-			"249uumee", // produces a borrowed amount of 250 due to rounding
+			"150uumee",
+		},
+		nil,
+	}
+
+	maxborrow := testTransaction{
+		"max-borrow",
+		cli.GetCmdMaxBorrow(),
+		[]string{
+			"uumee", // should borrow up to the max of 250 uumee, which will become 251 due to rounding
 		},
 		nil,
 	}
@@ -253,13 +262,13 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			&types.QueryAccountBalancesResponse{},
 			&types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(appparams.BondDenom, 1000),
+					sdk.NewInt64Coin(appparams.BondDenom, 1001),
 				),
 				Collateral: sdk.NewCoins(
 					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(appparams.BondDenom, 250),
+					sdk.NewInt64Coin(appparams.BondDenom, 251),
 				),
 			},
 		},
@@ -275,16 +284,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				// This result is umee's oracle exchange rate from
 				// app/test_helpers.go/IntegrationTestNetworkConfig
 				// times the amount of umee, and then times params
-				// (1000 / 1000000) * 34.21 = 0.03421
-				SuppliedValue: sdk.MustNewDecFromStr("0.03421"),
-				// (1000 / 1000000) * 34.21 = 0.03421
-				CollateralValue: sdk.MustNewDecFromStr("0.03421"),
-				// (250 / 1000000) * 34.21 = 0.0085525
-				BorrowedValue: sdk.MustNewDecFromStr("0.0085525"),
-				// (1000 / 1000000) * 34.21 * 0.25 = 0.0085525
-				BorrowLimit: sdk.MustNewDecFromStr("0.0085525"),
-				// (1000 / 1000000) * 0.25 * 34.21 = 0.0085525
-				LiquidationThreshold: sdk.MustNewDecFromStr("0.0085525"),
+				// (1001 / 1000000) * 34.21 = 0.03424421
+				SuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
+				// (1001 / 1000000) * 34.21 = 0.03424421
+				CollateralValue: sdk.MustNewDecFromStr("0.03424421"),
+				// (251 / 1000000) * 34.21 = 0.00858671
+				BorrowedValue: sdk.MustNewDecFromStr("0.00858671"),
+				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
+				BorrowLimit: sdk.MustNewDecFromStr("0.0085610525"),
+				// (1001 / 1000000) * 0.25 * 34.21 = 0.0085610525
+				LiquidationThreshold: sdk.MustNewDecFromStr("0.0085610525"),
 			},
 		},
 		{
@@ -442,6 +451,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		addCollateral,
 		supplyCollateral,
 		borrow,
+		maxborrow,
 	)
 
 	// These queries run while the supplying and borrowing is active to produce nonzero output
