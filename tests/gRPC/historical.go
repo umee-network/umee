@@ -26,51 +26,81 @@ func MedianCheck(
 	val1Client.createQueryClient()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	priceStore := &PriceStore{}
 
-	listenForPrices(ctx, val1Client, priceStore)
+	err = listenForPrices(ctx, val1Client, "umee", priceStore)
+	if err != nil {
+		return err
+	}
 
-	fmt.Printf("%+v\n", priceStore)
-
-	cancel()
-	return nil
+	return priceStore.checkMedian()
 }
 
 func listenForPrices(
 	ctx context.Context,
 	umeeClient *UmeeClient,
+	denom string,
 	priceStore *PriceStore,
-) {
-	chainHeight, _ := NewChainHeight(
-		ctx,
-		umeeClient.clientContext.Client,
-		zerolog.Nop(),
-	)
+) error {
+	chainHeight, err := NewChainHeight(ctx, umeeClient.clientContext.Client, zerolog.Nop())
+	if err != nil {
+		return err
+	}
 
-	params, _ := umeeClient.QueryParams()
+	params, _ := umeeClient.QueryParams() // TODO error handling
+	fmt.Printf("%+v\n", params)
 
-	for i := 1; i <= int(params.MedianStampPeriod*2); i++ {
-		select {
-		case <-ctx.Done():
-			return
-		case height := <-chainHeight.HeightChanged:
-			if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
-				exchangeRates, _ := umeeClient.QueryExchangeRates()
-				for _, rate := range exchangeRates {
-					priceStore.SetHistoricStamp(height, rate.Denom, rate.Amount)
-				}
+	// Wait until the end of a median period
+	var beginningHeight int64
+	for {
+		beginningHeight = <-chainHeight.HeightChanged
+		if isPeriodLastBlock(beginningHeight, params.MedianStampPeriod) {
+			fmt.Printf("%d: ", beginningHeight)
+			fmt.Println("median stamp period last block")
+			break
+		}
+	}
+
+	// Record each historic stamp when the chain should be recording them
+	for i := 0; i < int(params.MedianStampPeriod); i++ {
+		height := <-chainHeight.HeightChanged
+		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
+			fmt.Printf("%d: ", height)
+			fmt.Println("historic stamp period first block")
+			exchangeRates, err := umeeClient.QueryExchangeRates()
+			if err != nil {
+				return nil
 			}
-			if isPeriodFirstBlock(height, params.MedianStampPeriod) {
-				medians, _ := umeeClient.QueryMedians()
-				for _, median := range medians {
-					priceStore.SetMedian(height, median.Denom, median.Amount)
+			for _, rate := range exchangeRates {
+				if rate.Denom == denom {
+					priceStore.historicStamps = append(priceStore.historicStamps, rate.Amount)
 				}
 			}
 		}
 	}
+
+	// Wait one more block for the median
+	height := <-chainHeight.HeightChanged
+	fmt.Printf("%d: ", height)
+	fmt.Println("reading final median")
+	medians, err := umeeClient.QueryMedians()
+	if err != nil {
+		return err
+	}
+	for _, median := range medians {
+		if median.Denom == denom {
+			priceStore.median = median.Amount
+		}
+	}
+	return nil
 }
 
 func isPeriodFirstBlock(height int64, blocksPerPeriod uint64) bool {
 	return uint64(height)%blocksPerPeriod == 0
+}
+
+func isPeriodLastBlock(height int64, blocksPerPeriod uint64) bool {
+	return uint64(height+1)%blocksPerPeriod == 0
 }
