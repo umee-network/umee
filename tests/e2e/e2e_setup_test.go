@@ -959,6 +959,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeValAddr),
 				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_CHAIN_ID=%s", s.chain.id),
 			},
 			Entrypoint: []string{
 				"sh",

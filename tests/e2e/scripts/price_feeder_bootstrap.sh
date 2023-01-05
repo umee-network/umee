@@ -47,7 +47,7 @@ quote = "USD"
 
 [account]
 address = '$UMEE_E2E_PRICE_FEEDER_ADDRESS'
-chain_id = "umee-local-testnet"
+chain_id = '$UMEE_E2E_CHAIN_ID'
 validator = '$UMEE_E2E_PRICE_FEEDER_VALIDATOR'
 
 [keyring]
