@@ -906,6 +906,26 @@ paths:
 
                         To mark a token as not valid for supply, `msg_supply`
                         must be set to false.
+                    historic_medians:
+                      type: integer
+                      format: int64
+                      description: >-
+                        Historic Medians is the number of median historic prices
+                        to request from
+
+                        the orace module when evaluating new borrow positions
+                        containing this token.
+
+                        All MsgBorrow, MsgWithdraw, and MsgDecollateralize must
+                        result in healthy
+
+                        borrow positions under both current and historic prices.
+                        The default value of
+
+                        zero for this field causes current price to be used in
+                        those calculations
+
+                        for the affected Token.
                   description: >-
                     Token defines a token, along with its metadata and
                     parameters, in the Umee
@@ -2417,6 +2437,26 @@ definitions:
 
                 To mark a token as not valid for supply, `msg_supply` must be
                 set to false.
+            historic_medians:
+              type: integer
+              format: int64
+              description: >-
+                Historic Medians is the number of median historic prices to
+                request from
+
+                the orace module when evaluating new borrow positions containing
+                this token.
+
+                All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result
+                in healthy
+
+                borrow positions under both current and historic prices. The
+                default value of
+
+                zero for this field causes current price to be used in those
+                calculations
+
+                for the affected Token.
           description: >-
             Token defines a token, along with its metadata and parameters, in
             the Umee
@@ -2602,6 +2642,26 @@ definitions:
 
           To mark a token as not valid for supply, `msg_supply` must be set to
           false.
+      historic_medians:
+        type: integer
+        format: int64
+        description: >-
+          Historic Medians is the number of median historic prices to request
+          from
+
+          the orace module when evaluating new borrow positions containing this
+          token.
+
+          All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result in
+          healthy
+
+          borrow positions under both current and historic prices. The default
+          value of
+
+          zero for this field causes current price to be used in those
+          calculations
+
+          for the affected Token.
     description: >-
       Token defines a token, along with its metadata and parameters, in the Umee
 
