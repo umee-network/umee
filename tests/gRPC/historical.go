@@ -30,7 +30,10 @@ func MedianCheck(
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	params, _ := val1Client.QueryParams()
+	params, err := val1Client.QueryParams()
+	if err != nil {
+		return err
+	}
 
 	denomAcceptList := []string{}
 	for _, acceptItem := range params.AcceptList {
