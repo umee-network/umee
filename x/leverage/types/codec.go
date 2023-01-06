@@ -37,6 +37,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgGovUpdateRegistry{}, "umee/leverage/MsgGovUpdateRegistry", nil)
 	cdc.RegisterConcrete(&MsgSupplyCollateral{}, "umee/leverage/MsgSupplyCollateral", nil)
 	cdc.RegisterConcrete(&MsgMaxWithdraw{}, "umee/leverage/MsgMaxWithdraw", nil)
+	cdc.RegisterConcrete(&MsgMaxBorrow{}, "umee/leverage/MsgMaxBorrow", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -52,6 +53,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgGovUpdateRegistry{},
 		&MsgSupplyCollateral{},
 		&MsgMaxWithdraw{},
+		&MsgMaxBorrow{},
 	)
 
 	registry.RegisterImplementations(

@@ -13,7 +13,7 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/v3/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
@@ -127,7 +127,8 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) error {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
 	return ctx.EventManager().EmitTypedEvent(&types.EventSetFxRate{
-		Denom: denom, Rate: exchangeRate})
+		Denom: denom, Rate: exchangeRate,
+	})
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.

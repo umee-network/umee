@@ -1,8 +1,8 @@
 package keeper_test
 
 import (
-	appparams "github.com/umee-network/umee/v3/app/params"
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
