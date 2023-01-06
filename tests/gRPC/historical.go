@@ -31,16 +31,25 @@ func MedianCheck(
 	defer cancel()
 
 	params, _ := val1Client.QueryParams()
-	fmt.Printf("%+v\n", params)
 
 	denomAcceptList := []string{}
 	for _, acceptItem := range params.AcceptList {
 		denomAcceptList = append(denomAcceptList, strings.ToUpper(acceptItem.SymbolDenom))
 	}
 
+	chainHeight, err := NewChainHeight(ctx, val1Client.clientContext.Client, zerolog.Nop())
+	if err != nil {
+		return err
+	}
+
+	// Wait 10 blocks for price feeder prices
+	for i := 0; i < 20; i++ {
+		<-chainHeight.HeightChanged
+	}
+
 	for _, denom := range denomAcceptList {
 		priceStore := &PriceStore{}
-		err = listenForPrices(ctx, val1Client, params, denom, priceStore)
+		err = listenForPrices(val1Client, params, denom, priceStore, chainHeight)
 		if err != nil {
 			return err
 		}
@@ -53,29 +62,17 @@ func MedianCheck(
 }
 
 func listenForPrices(
-	ctx context.Context,
 	umeeClient *UmeeClient,
 	params oracletypes.Params,
 	denom string,
 	priceStore *PriceStore,
+	chainHeight *ChainHeight,
 ) error {
-	chainHeight, err := NewChainHeight(ctx, umeeClient.clientContext.Client, zerolog.Nop())
-	if err != nil {
-		return err
-	}
-
-	// Wait 10 blocks for prices
-	for i := 0; i < 20; i++ {
-		<-chainHeight.HeightChanged
-	}
-
 	// Wait until the end of a median period
 	var beginningHeight int64
 	for {
 		beginningHeight = <-chainHeight.HeightChanged
 		if isPeriodLastBlock(beginningHeight, params.MedianStampPeriod) {
-			fmt.Printf("%d: ", beginningHeight)
-			fmt.Println("median stamp period last block")
 			break
 		}
 	}
@@ -84,8 +81,6 @@ func listenForPrices(
 	for i := 0; i < int(params.MedianStampPeriod); i++ {
 		height := <-chainHeight.HeightChanged
 		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
-			fmt.Printf("%d: ", height)
-			fmt.Println("historic stamp period first block")
 			exchangeRates, err := umeeClient.QueryExchangeRates()
 			fmt.Println(exchangeRates)
 			if err != nil {
@@ -100,9 +95,7 @@ func listenForPrices(
 	}
 
 	// Wait one more block for the median
-	height := <-chainHeight.HeightChanged
-	fmt.Printf("%d: ", height)
-	fmt.Println("reading final median")
+	<-chainHeight.HeightChanged
 	medians, err := umeeClient.QueryMedians()
 	if err != nil {
 		return err

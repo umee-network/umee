@@ -142,7 +142,6 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestHistorical() {
-	// TODO - don't hard code the RPC endpoints
 	err := gRPC.MedianCheck(
 		s.chain.id,
 		"tcp://localhost:26657",

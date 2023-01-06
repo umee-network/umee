@@ -23,8 +23,8 @@ import (
 )
 
 const (
-	GAS_ADJUSTMENT = 1
-	QUERY_TIMEOUT  = 15 * time.Second
+	gasAdjustment = 1
+	queryTimeout  = 15 * time.Second
 )
 
 // UmeeClient is a helper for initializing a keychain, a cosmos-sdk client context,
@@ -75,12 +75,12 @@ func (uc *UmeeClient) createClientContext() error {
 	encoding := umeeapp.MakeEncodingConfig()
 	fromAddress, _ := uc.keyringRecord.GetAddress()
 
-	tmHttpClient, err := tmjsonclient.DefaultHTTPClient(uc.TMRPCEndpoint)
+	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(uc.TMRPCEndpoint)
 	if err != nil {
 		return err
 	}
 
-	tmRpcClient, err := rpchttp.NewWithClient(uc.TMRPCEndpoint, "/websocket", tmHttpClient)
+	tmRPCClient, err := rpchttp.NewWithClient(uc.TMRPCEndpoint, "/websocket", tmHTTPClient)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (uc *UmeeClient) createClientContext() error {
 		LegacyAmino:       encoding.Amino,
 		Input:             os.Stdin,
 		NodeURI:           uc.TMRPCEndpoint,
-		Client:            tmRpcClient,
+		Client:            tmRPCClient,
 		Keyring:           uc.keyringKeyring,
 		FromAddress:       fromAddress,
 		FromName:          uc.keyringRecord.Name,
@@ -118,7 +118,7 @@ func (uc *UmeeClient) createTxFactory() {
 		WithAccountRetriever(uc.clientContext.AccountRetriever).
 		WithChainID(uc.ChainID).
 		WithTxConfig(uc.clientContext.TxConfig).
-		WithGasAdjustment(GAS_ADJUSTMENT).
+		WithGasAdjustment(gasAdjustment).
 		WithGasPrices(uc.GasPrices).
 		WithKeybase(uc.clientContext.Keyring).
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
@@ -139,7 +139,7 @@ func (uc *UmeeClient) createQueryClient() error {
 }
 
 func (uc *UmeeClient) QueryParams() (oracletypes.Params, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), QUERY_TIMEOUT)
+	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
 	queryResponse, err := uc.QueryClient.Params(ctx, &oracletypes.QueryParams{})
@@ -150,7 +150,7 @@ func (uc *UmeeClient) QueryParams() (oracletypes.Params, error) {
 }
 
 func (uc *UmeeClient) QueryExchangeRates() ([]sdk.DecCoin, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), QUERY_TIMEOUT)
+	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
 	queryResponse, err := uc.QueryClient.ExchangeRates(ctx, &oracletypes.QueryExchangeRates{})
@@ -161,7 +161,7 @@ func (uc *UmeeClient) QueryExchangeRates() ([]sdk.DecCoin, error) {
 }
 
 func (uc *UmeeClient) QueryMedians() ([]sdk.DecCoin, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), QUERY_TIMEOUT)
+	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
 	queryResponse, err := uc.QueryClient.Medians(ctx, &oracletypes.QueryMedians{})
