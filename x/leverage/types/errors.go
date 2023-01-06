@@ -37,7 +37,6 @@ var (
 	ErrLiquidationIneligible = sdkerrors.Register(ModuleName, 403, "borrower not eligible for liquidation")
 	ErrMaxWithdrawZero       = sdkerrors.Register(ModuleName, 404, "max withdraw amount was zero")
 	ErrNoHistoricMedians     = sdkerrors.Register(ModuleName, 405, "insufficient historic medians available")
-	ErrMaxBorrowZero         = sdkerrors.Register(ModuleName, 406, "max borrow amount was zero")
 
 	// 5XX = Market Conditions
 	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 500, "lending pool insufficient")

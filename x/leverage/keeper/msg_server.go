@@ -347,7 +347,7 @@ func (s msgServer) MaxBorrow(
 		sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
 	)
 	if maxBorrow.IsZero() {
-		return nil, types.ErrMaxBorrowZero
+		return &types.MsgMaxBorrowResponse{Borrowed: sdk.NewInt64Coin(msg.Denom, 0)}, nil
 	}
 
 	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {

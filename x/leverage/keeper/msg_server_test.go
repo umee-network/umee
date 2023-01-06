@@ -1249,13 +1249,6 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 }
 
 func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
-	type testCase struct {
-		msg  string
-		addr sdk.AccAddress
-		coin sdk.Coin
-		err  error
-	}
-
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a supplier which supplies 100 UMEE and 100 ATOM
@@ -1288,7 +1281,12 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 	// collateral value is $50 (current) or $100 (historic)
 	// collateral weights are always 0.25 in testing
 
-	tcs := []testCase{
+	tcs := []struct {
+		msg  string
+		addr sdk.AccAddress
+		coin sdk.Coin
+		err  error
+	}{
 		{
 			"uToken",
 			borrower,
@@ -1302,10 +1300,10 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 			types.ErrNotRegisteredToken,
 		},
 		{
-			"zero collateral",
+			"zero collateral - should return zero",
 			supplier,
 			coin(atomDenom, 0),
-			types.ErrMaxBorrowZero,
+			nil,
 		},
 		{
 			"atom borrow",
@@ -1314,10 +1312,10 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 			nil,
 		},
 		{
-			"already borrowed max",
+			"already borrowed max - should return zero",
 			borrower,
 			coin(atomDenom, 0),
-			types.ErrMaxBorrowZero,
+			nil,
 		},
 		{
 			"dump borrower",
