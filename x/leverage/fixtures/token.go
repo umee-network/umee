@@ -34,5 +34,6 @@ func Token(base, symbol string, exponent uint32) types.Token {
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
 		MaxSupply:              sdk.NewInt(100_000_000000),
+		HistoricMedians:        24,
 	}
 }
