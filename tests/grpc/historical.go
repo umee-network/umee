@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func MedianCheck(

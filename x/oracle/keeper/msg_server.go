@@ -7,7 +7,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"github.com/umee-network/umee/v3/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 type msgServer struct {
@@ -134,7 +134,8 @@ func (ms msgServer) DelegateFeedConsent(
 
 	ms.SetFeederDelegation(ctx, operatorAddr, delegateAddr)
 	err = ctx.EventManager().EmitTypedEvent(&types.EventDelegateFeedConsent{
-		Operator: msg.Operator, Delegate: msg.Delegate})
+		Operator: msg.Operator, Delegate: msg.Delegate,
+	})
 
 	return &types.MsgDelegateFeedConsentResponse{}, err
 }

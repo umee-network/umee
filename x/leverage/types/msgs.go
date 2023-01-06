@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v3/util/checkers"
+	"github.com/umee-network/umee/v4/util/checkers"
 	"gopkg.in/yaml.v3"
 )
 

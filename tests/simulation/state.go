@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
-
 	"testing"
 	"time"
 
@@ -34,9 +33,9 @@ import (
 	tmtypes "github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
-	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/tests/util"
+	umeeapp "github.com/umee-network/umee/v4/app"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/util"
 )
 
 // GenesisState of the blockchain is represented here as a map of raw json

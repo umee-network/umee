@@ -35,10 +35,10 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
-	appparams "github.com/umee-network/umee/v3/app/params"
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v4/app"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func init() {

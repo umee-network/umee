@@ -5,7 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gogotypes "github.com/gogo/protobuf/types"
 
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // getStoredDec retrieves an sdk.Dec from the KVStore, or zero if no value is stored.

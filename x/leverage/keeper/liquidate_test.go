@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v3/x/leverage/keeper"
+	"github.com/umee-network/umee/v4/x/leverage/keeper"
 )
 
 func TestComputeLiquidation(t *testing.T) {

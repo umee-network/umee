@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/umee-network/umee/v3/x/leverage/fixtures"
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/fixtures"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {

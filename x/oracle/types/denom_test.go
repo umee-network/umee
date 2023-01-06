@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/v3/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func TestDenomString(t *testing.T) {

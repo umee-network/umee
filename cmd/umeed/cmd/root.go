@@ -23,9 +23,9 @@ import (
 	tmcfg "github.com/tendermint/tendermint/config"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
-	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/leverage"
+	umeeapp "github.com/umee-network/umee/v4/app"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/x/leverage"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.

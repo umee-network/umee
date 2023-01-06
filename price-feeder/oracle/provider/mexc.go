@@ -13,7 +13,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 
-	"github.com/umee-network/umee/v3/util/coin"
+	"github.com/umee-network/umee/v4/util/coin"
 )
 
 const (
