@@ -1181,6 +1181,7 @@ type MsgClient interface {
 	// Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
 	Borrow(ctx context.Context, in *MsgBorrow, opts ...grpc.CallOption) (*MsgBorrowResponse, error)
 	// MaxBorrow allows a user to borrow the maximum amount of tokens their collateral will allow.
+	// Zero is returned if there is no more tokens to borrow.
 	MaxBorrow(ctx context.Context, in *MsgMaxBorrow, opts ...grpc.CallOption) (*MsgMaxBorrowResponse, error)
 	// Repay allows a user to repay previously borrowed tokens and interest.
 	Repay(ctx context.Context, in *MsgRepay, opts ...grpc.CallOption) (*MsgRepayResponse, error)
@@ -1320,6 +1321,7 @@ type MsgServer interface {
 	// Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
 	Borrow(context.Context, *MsgBorrow) (*MsgBorrowResponse, error)
 	// MaxBorrow allows a user to borrow the maximum amount of tokens their collateral will allow.
+	// Zero is returned if there is no more tokens to borrow.
 	MaxBorrow(context.Context, *MsgMaxBorrow) (*MsgMaxBorrowResponse, error)
 	// Repay allows a user to repay previously borrowed tokens and interest.
 	Repay(context.Context, *MsgRepay) (*MsgRepayResponse, error)

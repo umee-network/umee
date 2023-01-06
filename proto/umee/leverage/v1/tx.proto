@@ -37,6 +37,7 @@ service Msg {
   rpc Borrow(MsgBorrow) returns (MsgBorrowResponse);
 
   // MaxBorrow allows a user to borrow the maximum amount of tokens their collateral will allow.
+  // Zero is returned if there is no more tokens to borrow.
   rpc MaxBorrow(MsgMaxBorrow) returns (MsgMaxBorrowResponse);
 
   // Repay allows a user to repay previously borrowed tokens and interest.
