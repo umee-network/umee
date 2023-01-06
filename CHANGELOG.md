@@ -64,6 +64,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1654](https://github.com/umee-network/umee/pull/1654) Leverage historacle integration.
 - [1685](https://github.com/umee-network/umee/pull/1685) Add medians param to Token registry.
 - [1683](https://github.com/umee-network/umee/pull/1683) Add MaxBorrow query and allow returning all denoms from MaxWithdraw.
+- [1690](https://github.com/umee-network/umee/pull/1690) Add MaxBorrow message type.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 

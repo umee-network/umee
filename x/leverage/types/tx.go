@@ -174,6 +174,30 @@ func (msg *MsgBorrow) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func NewMsgMaxBorrow(borrower sdk.AccAddress, denom string) *MsgMaxBorrow {
+	return &MsgMaxBorrow{
+		Borrower: borrower.String(),
+		Denom:    denom,
+	}
+}
+
+func (msg MsgMaxBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgMaxBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
+
+func (msg *MsgMaxBorrow) ValidateBasic() error {
+	return validateSenderAndDenom(msg.Borrower, msg.Denom)
+}
+
+func (msg *MsgMaxBorrow) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Borrower)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgMaxBorrow) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
 func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
 	return &MsgRepay{
 		Borrower: borrower.String(),

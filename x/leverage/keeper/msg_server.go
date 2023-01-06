@@ -322,6 +322,68 @@ func (s msgServer) Borrow(
 	return &types.MsgBorrowResponse{}, err
 }
 
+func (s msgServer) MaxBorrow(
+	goCtx context.Context,
+	msg *types.MsgMaxBorrow,
+) (*types.MsgMaxBorrowResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	currentMaxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom, false)
+	if err != nil {
+		return nil, err
+	}
+	historicMaxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom, true)
+	if err != nil {
+		return nil, err
+	}
+
+	maxBorrow := sdk.NewCoin(
+		msg.Denom,
+		sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
+	)
+	if maxBorrow.IsZero() {
+		return nil, types.ErrMaxBorrowZero
+	}
+
+	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
+		return nil, err
+	}
+
+	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check MaxSupplyUtilization after transaction
+	if err = s.keeper.checkSupplyUtilization(ctx, maxBorrow.Denom); err != nil {
+		return nil, err
+	}
+
+	// Check MinCollateralLiquidity is still satisfied after the transaction
+	if err = s.keeper.checkCollateralLiquidity(ctx, maxBorrow.Denom); err != nil {
+		return nil, err
+	}
+
+	s.keeper.Logger(ctx).Debug(
+		"assets borrowed",
+		"borrower", msg.Borrower,
+		"amount", maxBorrow.String(),
+	)
+	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
+		Borrower: msg.Borrower,
+		Asset:    maxBorrow,
+	})
+	return &types.MsgMaxBorrowResponse{
+		Borrowed: maxBorrow,
+	}, err
+}
+
 func (s msgServer) Repay(
 	goCtx context.Context,
 	msg *types.MsgRepay,
