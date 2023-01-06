@@ -11,11 +11,11 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
-	"github.com/umee-network/umee/v3/app/upgradev3"
-	"github.com/umee-network/umee/v3/app/upgradev3x3"
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
-	oraclekeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	"github.com/umee-network/umee/v4/app/upgradev3"
+	"github.com/umee-network/umee/v4/app/upgradev3x3"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.

@@ -7,8 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v3/util/cli"
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/util/cli"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // Flag constants

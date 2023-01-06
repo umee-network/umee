@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func TestAddressFromKey(t *testing.T) {

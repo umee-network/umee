@@ -8,7 +8,7 @@ import (
 	evidence "github.com/cosmos/cosmos-sdk/x/evidence/types"
 	"github.com/stretchr/testify/assert"
 
-	leverage "github.com/umee-network/umee/v3/x/leverage/types"
+	leverage "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func TestPriority(t *testing.T) {

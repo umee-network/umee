@@ -17,8 +17,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
-	"github.com/umee-network/umee/v3/tests/util"
+	umeeapp "github.com/umee-network/umee/v4/app"
+	"github.com/umee-network/umee/v4/tests/util"
 )
 
 func TestKeeperTestSuite(t *testing.T) {

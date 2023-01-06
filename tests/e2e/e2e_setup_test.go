@@ -33,10 +33,10 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
-	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/x/leverage/fixtures"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 const (

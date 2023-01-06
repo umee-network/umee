@@ -10,14 +10,14 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	umeeapp "github.com/umee-network/umee/v3/app"
+	umeeapp "github.com/umee-network/umee/v4/app"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 const (

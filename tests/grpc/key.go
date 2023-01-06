@@ -5,7 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v3/app"
+	umeeapp "github.com/umee-network/umee/v4/app"
 )
 
 const (

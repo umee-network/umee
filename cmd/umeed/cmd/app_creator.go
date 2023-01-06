@@ -23,9 +23,9 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 	dbm "github.com/tendermint/tm-db"
 
-	"github.com/umee-network/umee/v3/ante"
-	umeeapp "github.com/umee-network/umee/v3/app"
-	appparams "github.com/umee-network/umee/v3/app/params"
+	"github.com/umee-network/umee/v4/ante"
+	umeeapp "github.com/umee-network/umee/v4/app"
+	appparams "github.com/umee-network/umee/v4/app/params"
 )
 
 type appCreator struct {
