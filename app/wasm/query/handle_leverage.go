@@ -5,7 +5,7 @@ import (
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	lvtypes "github.com/umee-network/umee/v3/x/leverage/types"
+	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // HandleLeverageParams handles the get the x/leverage module's parameters.

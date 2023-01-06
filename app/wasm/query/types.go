@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
-	lvtypes "github.com/umee-network/umee/v3/x/leverage/types"
-	octypes "github.com/umee-network/umee/v3/x/oracle/types"
+	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
+	octypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 // AssignedQuery defines the query to be called.

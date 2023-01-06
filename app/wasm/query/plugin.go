@@ -7,10 +7,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	lvkeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
-	lvtypes "github.com/umee-network/umee/v3/x/leverage/types"
-	ockeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
-	ocpes "github.com/umee-network/umee/v3/x/oracle/types"
+	lvkeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
+	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
+	ockeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
+	ocpes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 // Plugin wraps the query plugin with queriers.

@@ -16,7 +16,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 
-	umeewasm "github.com/umee-network/umee/v3/app/wasm"
+	umeewasm "github.com/umee-network/umee/v4/app/wasm"
 )
 
 const (

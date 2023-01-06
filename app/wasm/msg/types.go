@@ -1,7 +1,7 @@
 package msg
 
 import (
-	lvtypes "github.com/umee-network/umee/v3/x/leverage/types"
+	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // AssignedMsg defines the msg to be called.
