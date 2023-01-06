@@ -14,7 +14,8 @@ func (q UmeeQuery) HandleFeederDelegation(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.FeederDelegation(sdk.WrapSDKContext(ctx), q.FeederDelegation)
+	req := &octypes.QueryFeederDelegation{ValidatorAddr: q.FeederDelegation.ValidatorAddr}
+	resp, err := qs.FeederDelegation(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Feeder Delegation", err)}
 	}
@@ -27,7 +28,8 @@ func (q UmeeQuery) HandleMissCounter(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.MissCounter(sdk.WrapSDKContext(ctx), q.MissCounter)
+	req := &octypes.QueryMissCounter{ValidatorAddr: q.MissCounter.ValidatorAddr}
+	resp, err := qs.MissCounter(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Miss Counter", err)}
 	}
@@ -40,7 +42,7 @@ func (q UmeeQuery) HandleSlashWindow(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.SlashWindow(sdk.WrapSDKContext(ctx), q.SlashWindow)
+	resp, err := qs.SlashWindow(sdk.WrapSDKContext(ctx), &octypes.QuerySlashWindow{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Slash Window", err)}
 	}
@@ -53,7 +55,8 @@ func (q UmeeQuery) HandleAggregatePrevote(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.AggregatePrevote(sdk.WrapSDKContext(ctx), q.AggregatePrevote)
+	req := &octypes.QueryAggregatePrevote{ValidatorAddr: q.AggregatePrevote.ValidatorAddr}
+	resp, err := qs.AggregatePrevote(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Prevote", err)}
 	}
@@ -66,7 +69,7 @@ func (q UmeeQuery) HandleAggregatePrevotes(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.AggregatePrevotes(sdk.WrapSDKContext(ctx), q.AggregatePrevotes)
+	resp, err := qs.AggregatePrevotes(sdk.WrapSDKContext(ctx), &octypes.QueryAggregatePrevotes{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Prevote", err)}
 	}
@@ -79,7 +82,8 @@ func (q UmeeQuery) HandleAggregateVote(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.AggregateVote(sdk.WrapSDKContext(ctx), q.AggregateVote)
+	req := &octypes.QueryAggregateVote{ValidatorAddr: q.AggregateVote.ValidatorAddr}
+	resp, err := qs.AggregateVote(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Vote", err)}
 	}
@@ -92,7 +96,7 @@ func (q UmeeQuery) HandleAggregateVotes(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.AggregateVotes(sdk.WrapSDKContext(ctx), q.AggregateVotes)
+	resp, err := qs.AggregateVotes(sdk.WrapSDKContext(ctx), &octypes.QueryAggregateVotes{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Aggregate Votes", err)}
 	}
@@ -105,7 +109,7 @@ func (q UmeeQuery) HandleOracleParams(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.Params(sdk.WrapSDKContext(ctx), q.OracleParams)
+	resp, err := qs.Params(sdk.WrapSDKContext(ctx), &octypes.QueryParams{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Oracle Parameters", err)}
 	}
@@ -118,7 +122,7 @@ func (q UmeeQuery) HandleExchangeRates(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.ExchangeRates(sdk.WrapSDKContext(ctx), q.ExchangeRates)
+	resp, err := qs.ExchangeRates(sdk.WrapSDKContext(ctx), &octypes.QueryExchangeRates{Denom: q.ExchangeRates.Denom})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Exchange Rates", err)}
 	}
@@ -131,7 +135,7 @@ func (q UmeeQuery) HandleActiveExchangeRates(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.ActiveExchangeRates(sdk.WrapSDKContext(ctx), q.ActiveExchangeRates)
+	resp, err := qs.ActiveExchangeRates(sdk.WrapSDKContext(ctx), &octypes.QueryActiveExchangeRates{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{
 			Kind: fmt.Sprintf("error %+v to assigned query Active Exchange Rates", err),
@@ -146,7 +150,8 @@ func (q UmeeQuery) HandleMedians(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.Medians(sdk.WrapSDKContext(ctx), q.Medians)
+	req := &octypes.QueryMedians{Denom: q.Medians.Denom, NumStamps: q.Medians.NumStamps}
+	resp, err := qs.Medians(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Medians", err)}
 	}
@@ -159,7 +164,8 @@ func (q UmeeQuery) HandleMedianDeviations(
 	ctx sdk.Context,
 	qs octypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.MedianDeviations(sdk.WrapSDKContext(ctx), q.MedianDeviations)
+	req := &octypes.QueryMedianDeviations{Denom: q.MedianDeviations.Denom}
+	resp, err := qs.MedianDeviations(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Median Deviations", err)}
 	}

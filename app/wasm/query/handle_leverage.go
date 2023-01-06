@@ -39,7 +39,8 @@ func (q UmeeQuery) HandleMarketSummary(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.MarketSummary(sdk.WrapSDKContext(ctx), q.MarketSummary)
+	req := &lvtypes.QueryMarketSummary{Denom: q.MarketSummary.Denom}
+	resp, err := qs.MarketSummary(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Market Summary", err)}
 	}
@@ -52,7 +53,8 @@ func (q UmeeQuery) HandleAccountBalances(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.AccountBalances(sdk.WrapSDKContext(ctx), q.AccountBalances)
+	req := &lvtypes.QueryAccountBalances{Address: q.AccountBalances.Address}
+	resp, err := qs.AccountBalances(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Account Balances", err)}
 	}
@@ -66,7 +68,8 @@ func (q UmeeQuery) HandleAccountSummary(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.AccountSummary(sdk.WrapSDKContext(ctx), q.AccountSummary)
+	req := &lvtypes.QueryAccountSummary{Address: q.AccountSummary.Address}
+	resp, err := qs.AccountSummary(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Account Summary", err)}
 	}
@@ -79,7 +82,7 @@ func (q UmeeQuery) HandleLiquidationTargets(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.LiquidationTargets(sdk.WrapSDKContext(ctx), q.LiquidationTargets)
+	resp, err := qs.LiquidationTargets(sdk.WrapSDKContext(ctx), &lvtypes.QueryLiquidationTargets{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Liquidation Targets", err)}
 	}
@@ -92,7 +95,7 @@ func (q UmeeQuery) HandleBadDebts(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.BadDebts(sdk.WrapSDKContext(ctx), q.BadDebts)
+	resp, err := qs.BadDebts(sdk.WrapSDKContext(ctx), &lvtypes.QueryBadDebts{})
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Bad Debts", err)}
 	}
@@ -105,7 +108,8 @@ func (q UmeeQuery) HandleMaxWithdraw(
 	ctx sdk.Context,
 	qs lvtypes.QueryServer,
 ) ([]byte, error) {
-	resp, err := qs.MaxWithdraw(sdk.WrapSDKContext(ctx), q.MaxWithdraw)
+	req := &lvtypes.QueryMaxWithdraw{Address: q.MaxWithdraw.Address, Denom: q.MaxWithdraw.Denom}
+	resp, err := qs.MaxWithdraw(sdk.WrapSDKContext(ctx), req)
 	if err != nil {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned query Max Withdraw", err)}
 	}
