@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/tests/gRPC"
+	"github.com/umee-network/umee/v3/tests/grpc"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -142,7 +142,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestHistorical() {
-	err := gRPC.MedianCheck(
+	err := grpc.MedianCheck(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",

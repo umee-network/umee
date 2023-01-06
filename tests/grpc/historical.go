@@ -1,4 +1,4 @@
-package gRPC
+package grpc
 
 import (
 	"context"
@@ -25,7 +25,10 @@ func MedianCheck(
 		return err
 	}
 
-	val1Client.createQueryClient()
+	err = val1Client.createQueryClient()
+	if err != nil {
+		return err
+	}
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

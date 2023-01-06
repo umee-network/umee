@@ -1,4 +1,4 @@
-package gRPC
+package grpc
 
 import (
 	"context"
@@ -8,9 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	umeeapp "github.com/umee-network/umee/v3/app"
 	"google.golang.org/grpc"
@@ -42,7 +40,6 @@ type UmeeClient struct {
 	keyringRecord  *keyring.Record
 
 	clientContext *client.Context
-	txFactory     tx.Factory
 	ChainHeight   *ChainHeight
 	QueryClient   oracletypes.QueryClient
 }
@@ -111,6 +108,7 @@ func (uc *UmeeClient) createClientContext() error {
 	return nil
 }
 
+/*
 // CreateTxFactory creates an SDK Factory instance used for transaction
 // generation, signing and broadcasting.
 func (uc *UmeeClient) createTxFactory() {
@@ -124,6 +122,7 @@ func (uc *UmeeClient) createTxFactory() {
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
 		WithSimulateAndExecute(true)
 }
+*/
 
 func (uc *UmeeClient) createQueryClient() error {
 	grpcConn, err := grpc.Dial(
