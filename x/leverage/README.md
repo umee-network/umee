@@ -80,6 +80,8 @@ Users have the following actions available to them:
 
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#borrow-apy).
 
+- `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed.
+
 - `MsgRepay` assets of a borrowed type, directly reducing the amount owed.
 
   Repayments that exceed a borrower's amount owed in the selected denomination succeed at paying the reduced amount rather than failing outright.

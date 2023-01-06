@@ -30,6 +30,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdCollateralize(),
 		GetCmdDecollateralize(),
 		GetCmdBorrow(),
+		GetCmdMaxBorrow(),
 		GetCmdRepay(),
 		GetCmdLiquidate(),
 		GetCmdSupplyCollateral(),
@@ -203,6 +204,30 @@ func GetCmdBorrow() *cobra.Command {
 			}
 
 			msg := types.NewMsgBorrow(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdMaxBorrow creates a Cobra command to generate or broadcast a
+// transaction with a MsgBorrow message.
+func GetCmdMaxBorrow() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "max-borrow [denom]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Borrow the maximum acceptable amount of a supported asset",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			msg := types.NewMsgMaxBorrow(clientCtx.GetFromAddress(), args[0])
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
