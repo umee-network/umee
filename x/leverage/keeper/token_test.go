@@ -24,4 +24,6 @@ func (s *IntegrationTestSuite) TestGetToken() {
 	require.NoError(t.AssertBorrowEnabled())
 	require.NoError(t.AssertSupplyEnabled())
 	require.NoError(t.AssertNotBlacklisted())
+
+	require.Equal(uint32(24), t.HistoricMedians)
 }
