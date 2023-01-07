@@ -8,8 +8,9 @@ import (
 )
 
 type PriceStore struct {
-	historicStamps []sdk.Dec
-	median         sdk.Dec
+	historicStamps  []sdk.Dec
+	median          sdk.Dec
+	medianDeviation sdk.Dec
 }
 
 func (ps *PriceStore) checkMedian() error {
@@ -17,8 +18,19 @@ func (ps *PriceStore) checkMedian() error {
 	if err != nil {
 		return err
 	}
-	if ps.median.Equal(calcMedian) {
+	if !ps.median.Equal(calcMedian) {
 		return fmt.Errorf("expected %d for the median but got %d", ps.median, calcMedian)
+	}
+	return nil
+}
+
+func (ps *PriceStore) checkMedianDeviation() error {
+	calcMedianDeviation, err := decmath.MedianDeviation(ps.median, ps.historicStamps)
+	if err != nil {
+		return err
+	}
+	if !ps.medianDeviation.Equal(calcMedianDeviation) {
+		return fmt.Errorf("expected %d for the median deviation but got %d", ps.medianDeviation, calcMedianDeviation)
 	}
 	return nil
 }

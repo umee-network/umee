@@ -63,6 +63,10 @@ func MedianCheck(
 		if err != nil {
 			return err
 		}
+		err = priceStore.checkMedianDeviation()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -111,6 +115,17 @@ func listenForPrices(
 			priceStore.median = median.Amount
 		}
 	}
+
+	medianDeviations, err := umeeClient.QueryMedianDeviations()
+	if err != nil {
+		return err
+	}
+	for _, medianDeviation := range medianDeviations {
+		if medianDeviation.Denom == denom {
+			priceStore.median = medianDeviation.Amount
+		}
+	}
+
 	return nil
 }
 
