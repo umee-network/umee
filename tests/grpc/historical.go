@@ -122,7 +122,7 @@ func listenForPrices(
 	}
 	for _, medianDeviation := range medianDeviations {
 		if medianDeviation.Denom == denom {
-			priceStore.median = medianDeviation.Amount
+			priceStore.medianDeviation = medianDeviation.Amount
 		}
 	}
 
