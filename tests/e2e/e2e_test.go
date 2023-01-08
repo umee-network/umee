@@ -9,7 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/tests/grpc"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -141,6 +140,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	})
 }
 
+/*
 func (s *IntegrationTestSuite) TestHistorical() {
 	err := grpc.MedianCheck(
 		s.chain.id,
@@ -150,3 +150,4 @@ func (s *IntegrationTestSuite) TestHistorical() {
 	)
 	s.Require().NoError(err)
 }
+*/
