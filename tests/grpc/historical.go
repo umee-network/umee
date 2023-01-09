@@ -78,7 +78,7 @@ func listenForPrices(
 	var beginningHeight int64
 	for {
 		beginningHeight = <-chainHeight.HeightChanged
-		if isPeriodLastBlock(beginningHeight, params.MedianStampPeriod) {
+		if isPeriodFirstBlock(beginningHeight, params.MedianStampPeriod) {
 			break
 		}
 	}
