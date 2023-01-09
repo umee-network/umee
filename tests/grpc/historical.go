@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func MedianCheck(
@@ -37,6 +36,7 @@ func MedianCheck(
 	if err != nil {
 		return err
 	}
+	fmt.Printf("%+v\n", params)
 
 	denomAcceptList := []string{}
 	for _, acceptItem := range params.AcceptList {
@@ -48,9 +48,12 @@ func MedianCheck(
 		return err
 	}
 
-	// Wait 10 blocks for price feeder prices
 	for i := 0; i < 20; i++ {
 		<-chainHeight.HeightChanged
+		exchangeRates, err := val1Client.QueryExchangeRates()
+		if err == nil && len(exchangeRates) > 0 {
+			break
+		}
 	}
 
 	for _, denom := range denomAcceptList {
@@ -63,76 +66,10 @@ func MedianCheck(
 		if err != nil {
 			return err
 		}
-		err = priceStore.checkMedianDeviation()
-		if err != nil {
-			return err
-		}
+		// err = priceStore.checkMedianDeviation()
+		// if err != nil {
+		// 	return err
+		// }
 	}
 	return nil
-}
-
-func listenForPrices(
-	umeeClient *UmeeClient,
-	params oracletypes.Params,
-	denom string,
-	priceStore *PriceStore,
-	chainHeight *ChainHeight,
-) error {
-	// Wait until the end of a median period
-	var beginningHeight int64
-	for {
-		beginningHeight = <-chainHeight.HeightChanged
-		if isPeriodLastBlock(beginningHeight, params.MedianStampPeriod) {
-			break
-		}
-	}
-
-	// Record each historic stamp when the chain should be recording them
-	for i := 0; i < int(params.MedianStampPeriod); i++ {
-		height := <-chainHeight.HeightChanged
-		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
-			exchangeRates, err := umeeClient.QueryExchangeRates()
-			fmt.Println(exchangeRates)
-			if err != nil {
-				return nil
-			}
-			for _, rate := range exchangeRates {
-				if rate.Denom == denom {
-					priceStore.historicStamps = append(priceStore.historicStamps, rate.Amount)
-				}
-			}
-		}
-	}
-
-	// Wait one more block for the median
-	<-chainHeight.HeightChanged
-	medians, err := umeeClient.QueryMedians()
-	if err != nil {
-		return err
-	}
-	for _, median := range medians {
-		if median.Denom == denom {
-			priceStore.median = median.Amount
-		}
-	}
-
-	medianDeviations, err := umeeClient.QueryMedianDeviations()
-	if err != nil {
-		return err
-	}
-	for _, medianDeviation := range medianDeviations {
-		if medianDeviation.Denom == denom {
-			priceStore.medianDeviation = medianDeviation.Amount
-		}
-	}
-
-	return nil
-}
-
-func isPeriodFirstBlock(height int64, blocksPerPeriod uint64) bool {
-	return uint64(height)%blocksPerPeriod == 0
-}
-
-func isPeriodLastBlock(height int64, blocksPerPeriod uint64) bool {
-	return uint64(height+1)%blocksPerPeriod == 0
 }
