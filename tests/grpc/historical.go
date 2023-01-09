@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -48,7 +47,7 @@ func MedianCheck(
 		return err
 	}
 
-	fmt.Println("waiting for exchange rates")
+	// Wait for oracle exchange rates
 	for i := 0; i < 20; i++ {
 		<-chainHeight.HeightChanged
 		exchangeRates, err := val1Client.QueryExchangeRates()
@@ -89,7 +88,6 @@ func listenForPrices(
 		height := <-chainHeight.HeightChanged
 		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
 			exchangeRates, err := umeeClient.QueryExchangeRates()
-			fmt.Printf("rates at block %d: %+v\n", height, exchangeRates)
 			if err != nil {
 				return nil, err
 			}
