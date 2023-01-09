@@ -163,9 +163,20 @@ func (uc *UmeeClient) QueryMedians() ([]sdk.DecCoin, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
-	queryResponse, err := uc.QueryClient.Medians(ctx, &oracletypes.QueryMedians{})
+	queryResponse, err := uc.QueryClient.Medians(ctx, &oracletypes.QueryMedians{NumStamps: 1})
 	if err != nil {
 		return nil, err
 	}
 	return queryResponse.Medians, nil
+}
+
+func (uc *UmeeClient) QueryMedianDeviations() ([]sdk.DecCoin, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
+	defer cancel()
+
+	queryResponse, err := uc.QueryClient.MedianDeviations(ctx, &oracletypes.QueryMedianDeviations{})
+	if err != nil {
+		return nil, err
+	}
+	return queryResponse.MedianDeviations, nil
 }
