@@ -117,7 +117,3 @@ func listenForPrices(
 func isPeriodFirstBlock(height int64, blocksPerPeriod uint64) bool {
 	return uint64(height)%blocksPerPeriod == 0
 }
-
-func isPeriodLastBlock(height int64, blocksPerPeriod uint64) bool {
-	return uint64(height+1)%blocksPerPeriod == 0
-}
