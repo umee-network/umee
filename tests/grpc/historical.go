@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
@@ -58,11 +57,7 @@ func MedianCheck(
 		}
 	}
 
-	priceStore := &PriceStore{
-		historicStamps: map[string][]sdk.Dec{},
-		medians:        map[string]sdk.Dec{},
-	}
-	err = listenForPrices(val1Client, params, priceStore, chainHeight)
+	priceStore, err := listenForPrices(val1Client, params, chainHeight)
 	if err != nil {
 		return err
 	}
@@ -77,9 +72,9 @@ func MedianCheck(
 func listenForPrices(
 	umeeClient *UmeeClient,
 	params oracletypes.Params,
-	priceStore *PriceStore,
 	chainHeight *ChainHeight,
-) error {
+) (*PriceStore, error) {
+	priceStore := NewPriceStore()
 	// Wait until the beginning of a median period
 	var beginningHeight int64
 	for {
@@ -96,7 +91,7 @@ func listenForPrices(
 			exchangeRates, err := umeeClient.QueryExchangeRates()
 			fmt.Printf("rates at block %d: %+v\n", height, exchangeRates)
 			if err != nil {
-				return nil
+				return nil, err
 			}
 			for _, rate := range exchangeRates {
 				priceStore.addStamp(rate.Denom, rate.Amount)
@@ -106,12 +101,12 @@ func listenForPrices(
 
 	medians, err := umeeClient.QueryMedians()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, median := range medians {
 		priceStore.medians[median.Denom] = median.Amount
 	}
-	return nil
+	return priceStore, nil
 }
 
 func isPeriodFirstBlock(height int64, blocksPerPeriod uint64) bool {

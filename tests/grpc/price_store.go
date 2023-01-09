@@ -12,6 +12,13 @@ type PriceStore struct {
 	medians        map[string]sdk.Dec
 }
 
+func NewPriceStore() *PriceStore {
+	return &PriceStore{
+		historicStamps: map[string][]sdk.Dec{},
+		medians:        map[string]sdk.Dec{},
+	}
+}
+
 func (ps *PriceStore) addStamp(denom string, stamp sdk.Dec) {
 	if _, ok := ps.historicStamps[denom]; !ok {
 		ps.historicStamps[denom] = []sdk.Dec{}
