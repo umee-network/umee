@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
@@ -48,33 +49,38 @@ func MedianCheck(
 		return err
 	}
 
-	// Wait 10 blocks for price feeder prices
+	fmt.Println("waiting for exchange rates")
 	for i := 0; i < 20; i++ {
 		<-chainHeight.HeightChanged
+		exchangeRates, err := val1Client.QueryExchangeRates()
+		if err == nil && len(exchangeRates) == len(denomAcceptList) {
+			break
+		}
 	}
 
-	for _, denom := range denomAcceptList {
-		priceStore := &PriceStore{}
-		err = listenForPrices(val1Client, params, denom, priceStore, chainHeight)
-		if err != nil {
-			return err
-		}
-		err = priceStore.checkMedian()
-		if err != nil {
-			return err
-		}
+	priceStore := &PriceStore{
+		historicStamps: map[string][]sdk.Dec{},
+		medians:        map[string]sdk.Dec{},
 	}
+	err = listenForPrices(val1Client, params, priceStore, chainHeight)
+	if err != nil {
+		return err
+	}
+	err = priceStore.checkMedians()
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func listenForPrices(
 	umeeClient *UmeeClient,
 	params oracletypes.Params,
-	denom string,
 	priceStore *PriceStore,
 	chainHeight *ChainHeight,
 ) error {
-	// Wait until the end of a median period
+	// Wait until the beginning of a median period
 	var beginningHeight int64
 	for {
 		beginningHeight = <-chainHeight.HeightChanged
@@ -88,28 +94,22 @@ func listenForPrices(
 		height := <-chainHeight.HeightChanged
 		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
 			exchangeRates, err := umeeClient.QueryExchangeRates()
-			fmt.Println(exchangeRates)
+			fmt.Printf("rates at block %d: %+v\n", height, exchangeRates)
 			if err != nil {
 				return nil
 			}
 			for _, rate := range exchangeRates {
-				if rate.Denom == denom {
-					priceStore.historicStamps = append(priceStore.historicStamps, rate.Amount)
-				}
+				priceStore.addStamp(rate.Denom, rate.Amount)
 			}
 		}
 	}
 
-	// Wait one more block for the median
-	<-chainHeight.HeightChanged
 	medians, err := umeeClient.QueryMedians()
 	if err != nil {
 		return err
 	}
 	for _, median := range medians {
-		if median.Denom == denom {
-			priceStore.median = median.Amount
-		}
+		priceStore.medians[median.Denom] = median.Amount
 	}
 	return nil
 }
