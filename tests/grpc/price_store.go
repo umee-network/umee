@@ -35,7 +35,12 @@ func (ps *PriceStore) checkMedians() error {
 			return err
 		}
 		if !ps.medians[denom].Equal(calcMedian) {
-			return fmt.Errorf("expected %d for the %s median but got %d", ps.medians[denom], denom, calcMedian)
+			return fmt.Errorf(
+				"expected %d for the %s median but got %d",
+				ps.medians[denom],
+				denom,
+				calcMedian,
+			)
 		}
 	}
 	return nil
@@ -48,7 +53,12 @@ func (ps *PriceStore) checkMedianDeviations() error {
 			return err
 		}
 		if !ps.medianDeviations[denom].Equal(calcMedianDeviation) {
-			return fmt.Errorf("expected %d for the %s median deviation but got %d", ps.medianDeviations[denom], denom, calcMedianDeviation)
+			return fmt.Errorf(
+				"expected %d for the %s median deviation but got %d",
+				ps.medianDeviations[denom],
+				denom,
+				calcMedianDeviation,
+			)
 		}
 	}
 	return nil
