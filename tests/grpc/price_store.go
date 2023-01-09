@@ -8,17 +8,33 @@ import (
 )
 
 type PriceStore struct {
-	historicStamps []sdk.Dec
-	median         sdk.Dec
+	historicStamps map[string][]sdk.Dec
+	medians        map[string]sdk.Dec
 }
 
-func (ps *PriceStore) checkMedian() error {
-	calcMedian, err := decmath.Median(ps.historicStamps)
-	if err != nil {
-		return err
+func NewPriceStore() *PriceStore {
+	return &PriceStore{
+		historicStamps: map[string][]sdk.Dec{},
+		medians:        map[string]sdk.Dec{},
 	}
-	if ps.median.Equal(calcMedian) {
-		return fmt.Errorf("expected %d for the median but got %d", ps.median, calcMedian)
+}
+
+func (ps *PriceStore) addStamp(denom string, stamp sdk.Dec) {
+	if _, ok := ps.historicStamps[denom]; !ok {
+		ps.historicStamps[denom] = []sdk.Dec{}
+	}
+	ps.historicStamps[denom] = append(ps.historicStamps[denom], stamp)
+}
+
+func (ps *PriceStore) checkMedians() error {
+	for denom, stamps := range ps.historicStamps {
+		calcMedian, err := decmath.Median(stamps)
+		if err != nil {
+			return err
+		}
+		if !ps.medians[denom].Equal(calcMedian) {
+			return fmt.Errorf("expected %d for the %s median but got %d", ps.medians[denom], denom, calcMedian)
+		}
 	}
 	return nil
 }
