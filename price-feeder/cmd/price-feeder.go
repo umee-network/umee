@@ -198,7 +198,7 @@ func getKeyringPassword() (string, error) {
 	pass := os.Getenv(envVariablePass)
 	if pass == "" {
 		fmt.Print("Enter keyring password: ")
-		bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+		bytePassword, err := term.ReadPassword(syscall.Stdin)
 		if err != nil {
 			return "", err
 		}
