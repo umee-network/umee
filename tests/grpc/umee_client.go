@@ -65,6 +65,16 @@ func NewUmeeClient(
 		return nil, err
 	}
 
+	err = uc.createClientContext()
+	if err != nil {
+		return nil, err
+	}
+
+	err = uc.createQueryClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return &uc, nil
 }
 
