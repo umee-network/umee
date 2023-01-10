@@ -6,8 +6,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
-	"github.com/umee-network/umee/v3/util/cli"
-	"github.com/umee-network/umee/v3/x/uibc"
+	"github.com/umee-network/umee/v4/util/cli"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 // GetQueryCmd returns the CLI query commands for the x/uibc module.

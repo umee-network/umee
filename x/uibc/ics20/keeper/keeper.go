@@ -11,7 +11,7 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 
-	ibctransfer "github.com/umee-network/umee/v3/x/uibc"
+	ibctransfer "github.com/umee-network/umee/v4/x/uibc"
 )
 
 // Keeper embeds the ICS-20 transfer keeper where we only override specific

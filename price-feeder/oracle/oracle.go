@@ -23,7 +23,7 @@ import (
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 	pfsync "github.com/umee-network/umee/price-feeder/v2/pkg/sync"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 // We define tickerSleep as the minimum timeout between each oracle loop. We

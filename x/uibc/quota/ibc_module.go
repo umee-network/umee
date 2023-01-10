@@ -11,8 +11,8 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	"github.com/umee-network/umee/v3/x/uibc"
-	"github.com/umee-network/umee/v3/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
 
 type IBCMiddleware struct {

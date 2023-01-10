@@ -8,7 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
 
-	"github.com/umee-network/umee/v3/x/uibc"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 type Keeper struct {

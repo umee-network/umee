@@ -33,9 +33,10 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
-	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/x/leverage/fixtures"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 const (
@@ -230,6 +231,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
+	// Gravity Bridge
 	var gravityGenState gravitytypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 
@@ -242,12 +244,14 @@ func (s *IntegrationTestSuite) initGenesis() {
 	var bech32GenState bech32ibctypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
 
+	// bech32
 	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
 
 	bz, err = cdc.MarshalJSON(&bech32GenState)
 	s.Require().NoError(err)
 	appGenState[bech32ibctypes.ModuleName] = bz
 
+	// Leverage
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
@@ -259,6 +263,19 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(err)
 	appGenState[leveragetypes.ModuleName] = bz
 
+	// Oracle
+	var oracleGenState oracletypes.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
+
+	oracleGenState.Params.HistoricStampPeriod = 5
+	oracleGenState.Params.MaximumPriceStamps = 4
+	oracleGenState.Params.MedianStampPeriod = 20
+
+	bz, err = cdc.MarshalJSON(&oracleGenState)
+	s.Require().NoError(err)
+	appGenState[oracletypes.ModuleName] = bz
+
+	// Bank
 	var bankGenState banktypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
 
@@ -521,7 +538,7 @@ func (s *IntegrationTestSuite) runValidators() {
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.umee", val.configDir()),
 			},
-			Repository: "umeenet/umeed-e2e",
+			Repository: "umee-network/umeed-e2e",
 		}
 
 		// expose the first validator for debugging and communication
@@ -657,7 +674,9 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
 	gaiaVal := s.chain.gaiaValidators[0]
-	umeeVal := s.chain.validators[0]
+	// umeeVal for the relayer needs to be a different account
+	// than what we use for runPriceFeeder.
+	umeeVal := s.chain.validators[1]
 	hermesCfgPath := path.Join(tmpDir, "hermes")
 
 	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0o755))
@@ -685,7 +704,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.gaiaResource.Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[1].Container.Name[1:]),
 			},
 			Entrypoint: []string{
 				"sh",
@@ -740,7 +759,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 		&dockertest.RunOptions{
 			Name:       "gravity-contract-deployer",
 			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umeenet/umeed-e2e",
+			Repository: "umee-network/umeed-e2e",
 			// NOTE: container names are prefixed with '/'
 			Env: []string{"PEGGO_ETH_PK=" + ethMinerPK},
 			Entrypoint: []string{
@@ -833,7 +852,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 			&dockertest.RunOptions{
 				Name:       s.chain.orchestrators[i].instanceName(),
 				NetworkID:  s.dkrNet.Network.ID,
-				Repository: "umeenet/umeed-e2e",
+				Repository: "umee-network/umeed-e2e",
 				Env:        []string{"PEGGO_ETH_PK=" + orch.ethereumKey.privateKey},
 				// NOTE: container names are prefixed with '/'
 				Entrypoint: []string{
@@ -928,7 +947,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 		&dockertest.RunOptions{
 			Name:       "umee-price-feeder",
 			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umeenet/umeed-e2e",
+			Repository: "umee-network/umeed-e2e",
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/price-feeder", priceFeederCfgPath),
 				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
@@ -942,6 +961,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeValAddr),
 				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_CHAIN_ID=%s", s.chain.id),
 			},
 			Entrypoint: []string{
 				"sh",

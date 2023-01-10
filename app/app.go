@@ -114,25 +114,24 @@ import (
 	wasmclient "github.com/CosmWasm/wasmd/x/wasm/client"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
-	customante "github.com/umee-network/umee/v3/ante"
-	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/swagger"
-	"github.com/umee-network/umee/v3/util/genmap"
-
-	"github.com/umee-network/umee/v3/x/leverage"
-	leveragekeeper "github.com/umee-network/umee/v3/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
-	"github.com/umee-network/umee/v3/x/oracle"
-	oraclekeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	customante "github.com/umee-network/umee/v4/ante"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/swagger"
+	"github.com/umee-network/umee/v4/util/genmap"
+	"github.com/umee-network/umee/v4/x/leverage"
+	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 
 	// umee ibc-transfer and quota for ibc-transfer
-	"github.com/umee-network/umee/v3/x/uibc"
-	uics20transfer "github.com/umee-network/umee/v3/x/uibc/ics20"
-	uibctransferkeeper "github.com/umee-network/umee/v3/x/uibc/ics20/keeper"
-	uibcmodule "github.com/umee-network/umee/v3/x/uibc/module"
-	uibcquota "github.com/umee-network/umee/v3/x/uibc/quota"
-	uibcquotakeeper "github.com/umee-network/umee/v3/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v4/x/uibc"
+	uics20transfer "github.com/umee-network/umee/v4/x/uibc/ics20"
+	uibctransferkeeper "github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
+	uibcmodule "github.com/umee-network/umee/v4/x/uibc/module"
+	uibcquota "github.com/umee-network/umee/v4/x/uibc/quota"
+	uibcquotakeeper "github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
 
 var (

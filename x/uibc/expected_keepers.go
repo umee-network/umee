@@ -6,7 +6,7 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // BankKeeper defines the expected x/bank keeper interface.

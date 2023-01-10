@@ -4,7 +4,7 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v3/x/uibc"
+	"github.com/umee-network/umee/v4/x/uibc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

@@ -13,9 +13,9 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
-	ibctransfer "github.com/umee-network/umee/v3/x/uibc"
-	"github.com/umee-network/umee/v3/x/uibc/client/cli"
-	"github.com/umee-network/umee/v3/x/uibc/quota/keeper"
+	ibctransfer "github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v4/x/uibc/client/cli"
+	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
 
 var (

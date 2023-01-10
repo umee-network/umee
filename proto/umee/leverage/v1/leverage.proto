@@ -3,7 +3,7 @@ package umee.leverage.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v3/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
@@ -229,5 +229,15 @@ message Token {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"max_supply\""
+  ];
+
+  // Historic Medians is the number of median historic prices to request from
+  // the oracle module when evaluating new borrow positions containing this token.
+  // All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result in healthy
+  // borrow positions under both current and historic prices. The default value of
+  // zero for this field causes current price to be used in those calculations
+  // for the affected Token.
+  uint32 historic_medians = 19 [
+    (gogoproto.moretags) = "yaml:\"historic_medians\""
   ];
 }

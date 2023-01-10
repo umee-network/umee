@@ -21,8 +21,10 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	appparams "github.com/umee-network/umee/v3/app/params"
+	appparams "github.com/umee-network/umee/v4/app/params"
 )
+
+// Cosmos SDK module wrappers
 
 // BankModule defines a custom wrapper around the x/bank module's AppModuleBasic
 // implementation to provide custom default genesis state.

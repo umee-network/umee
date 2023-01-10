@@ -12,7 +12,7 @@ import (
 
 	// imported to assure params are set before loading this package and we can correctly
 	// initialize govModuleAddr
-	_ "github.com/umee-network/umee/v3/app/params"
+	_ "github.com/umee-network/umee/v4/app/params"
 )
 
 // govModuleAddr is set during the first call of ValidateProposal

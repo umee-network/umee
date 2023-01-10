@@ -3,7 +3,7 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // maxWithdraw calculates the maximum amount of uTokens an account can currently withdraw.
@@ -74,6 +74,48 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string,
 	withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
 
 	return sdk.NewCoin(uDenom, withdrawAmount), nil
+}
+
+// maxBorrow calculates the maximum amount of a given token an account can currently borrow.
+// input denom should be a base token. Uses either current or historic prices.
+func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string, historic bool) (sdk.Coin, error) {
+	if types.HasUTokenPrefix(denom) {
+		return sdk.Coin{}, types.ErrUToken
+	}
+	availableTokens := k.AvailableLiquidity(ctx, denom)
+
+	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
+	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
+
+	// calculate borrowed value for the account
+	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, historic)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// calculate borrow limit for the account
+	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral, historic)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	// borrowers above their borrow limit cannot borrow
+	if borrowLimit.LTE(borrowedValue) {
+		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
+	}
+
+	// determine the USD amount of borrow limit that is currently unused
+	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
+
+	// determine max borrow using current or historic prices
+	maxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, historic)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// also cap borrow amount at available liquidity
+	maxBorrow.Amount = sdk.MinInt(maxBorrow.Amount, availableTokens)
+
+	return maxBorrow, nil
 }
 
 // maxCollateralFromShare calculates the maximum amount of collateral a utoken denom

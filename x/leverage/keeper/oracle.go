@@ -4,17 +4,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
-
-// TODO: Parameterize and move this
-const (
-	minHistoracleStamps = uint64(24)
-)
 
 // TokenBasePrice returns the USD value of a base token. Note, the token's denomination
 // must be the base denomination, e.g. uumee. The x/oracle module must know of
@@ -59,14 +54,14 @@ func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string, histor
 
 	var price sdk.Dec
 
-	if historic && minHistoracleStamps > 0 {
+	if historic && t.HistoricMedians > 0 {
 		// historic price
 		var numStamps uint32
-		price, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, minHistoracleStamps)
-		if err == nil && numStamps < uint32(minHistoracleStamps) {
+		price, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, uint64(t.HistoricMedians))
+		if err == nil && numStamps < t.HistoricMedians {
 			return sdk.ZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
 				"requested %d, got %d",
-				minHistoracleStamps,
+				t.HistoricMedians,
 				numStamps,
 			)
 		}
@@ -129,6 +124,20 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, historic bool)
 	}
 
 	return total, nil
+}
+
+// TokenWithValue creates a token of a given denom with an given USD value, using either current
+// or historic prices. Returns an error on invalid price or denom.
+func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, historic bool) (sdk.Coin, error) {
+	// get token price (guaranteed positive if nil error) and exponent
+	price, exp, err := k.TokenDefaultDenomPrice(ctx, denom, historic)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// amount = USD value * 10^exponent / symbol price
+	amount := exponent(value, int32(exp)).Quo(price)
+	return sdk.NewCoin(denom, amount.TruncateInt()), nil
 }
 
 // PriceRatio computes the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).

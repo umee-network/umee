@@ -1,6 +1,6 @@
 package uibc
 
-import "github.com/umee-network/umee/v3/util"
+import "github.com/umee-network/umee/v4/util"
 
 const (
 	// ModuleName defines the module name
