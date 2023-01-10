@@ -9,7 +9,7 @@ type AssignedMsg uint16
 
 const (
 	// AssignedMsgSupply represents the call to supply coins to the capital facility.
-	AssignedMsgSupply AssignedMsg = iota + 1
+	AssignedMsgSupply AssignedMsg = iota + 0
 	// AssignedMsgWithdraw represents the call to withdraw previously loaned coins
 	// from the capital facility.
 	AssignedMsgWithdraw
@@ -31,6 +31,7 @@ const (
 	AssignedMsgLiquidate
 	// AssignedMsgSupplyCollateralize represents the call to supply and collateralize their assets.
 	AssignedMsgSupplyCollateralize
+	AssignedMsgMaxWithdraw
 )
 
 // UmeeMsg wraps all the messages availables for cosmwasm smartcontracts.
@@ -54,4 +55,6 @@ type UmeeMsg struct {
 	Liquidate *lvtypes.MsgLiquidate `json:"liquidate,omitempty"`
 	// Used to do supply and collateralize their assets.
 	SupplyCollateralize *lvtypes.MsgSupplyCollateral `json:"supply_collateralize,omitempty"`
+	// Used to do withdraw maximum assets by supplier.
+	AssignedMsgMaxWithdraw *lvtypes.MsgMaxWithdraw `json:"max_withdraw,omitempty"`
 }

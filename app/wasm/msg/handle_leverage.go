@@ -1,115 +1,88 @@
 package msg
 
 import (
-	"fmt"
+	"context"
 
-	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gogo/protobuf/proto"
+
 	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // HandleSupply handles the Supply value of an address.
 func (m UmeeMsg) HandleSupply(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.Supply(sdk.WrapSDKContext(ctx), m.Supply)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Supply", err)}
-	}
-
-	return nil
+) (proto.Message, error) {
+	req := &lvtypes.MsgSupply{Supplier: m.Supply.Supplier, Asset: m.Supply.Asset}
+	return s.Supply(ctx, req)
 }
 
 // HandleWithdraw handles the Withdraw value of an address.
 func (m UmeeMsg) HandleWithdraw(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.Withdraw(sdk.WrapSDKContext(ctx), m.Withdraw)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Withdraw", err)}
-	}
-
-	return nil
+) (proto.Message, error) {
+	req := &lvtypes.MsgWithdraw{Supplier: m.Withdraw.Supplier, Asset: m.Withdraw.Asset}
+	return s.Withdraw(ctx, req)
 }
 
 // HandleCollateralize handles the enable selected uTokens as collateral.
 func (m UmeeMsg) HandleCollateralize(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.Collateralize(sdk.WrapSDKContext(ctx), m.Collateralize)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Collateralize", err)}
-	}
-
-	return nil
+) (proto.Message, error) {
+	req := &lvtypes.MsgCollateralize{Borrower: m.Collateralize.Borrower, Asset: m.Collateralize.Asset}
+	return s.Collateralize(ctx, req)
 }
 
 // HandleDecollateralize handles the disable amount of an selected uTokens
 // as collateral.
 func (m UmeeMsg) HandleDecollateralize(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.Decollateralize(sdk.WrapSDKContext(ctx), m.Decollateralize)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Decollateralize", err)}
-	}
-
-	return nil
+) (proto.Message, error) {
+	req := &lvtypes.MsgDecollateralize{Borrower: m.Decollateralize.Borrower, Asset: m.Decollateralize.Asset}
+	return s.Decollateralize(ctx, req)
 }
 
 // HandleBorrow handles the borrowing coins from the capital facility.
 func (m UmeeMsg) HandleBorrow(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.Borrow(sdk.WrapSDKContext(ctx), m.Borrow)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Borrow", err)}
-	}
-
-	return nil
+) (proto.Message, error) {
+	req := &lvtypes.MsgBorrow{Borrower: m.Borrow.Borrower, Asset: m.Borrow.Asset}
+	return s.Borrow(ctx, req)
 }
 
 // HandleRepay handles repaying borrowed coins to the capital facility.
 func (m UmeeMsg) HandleRepay(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.Repay(sdk.WrapSDKContext(ctx), m.Repay)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Repay", err)}
-	}
-
-	return nil
+) (proto.Message, error) {
+	req := &lvtypes.MsgRepay{Borrower: m.Repay.Borrower, Asset: m.Repay.Asset}
+	return s.Repay(ctx, req)
 }
 
 // HandleLiquidate handles the repaying a different user's borrowed coins
 // to the capital facility in exchange for some of their collateral.
 func (m UmeeMsg) HandleLiquidate(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.Liquidate(sdk.WrapSDKContext(ctx), m.Liquidate)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg Liquidate", err)}
+) (proto.Message, error) {
+	req := &lvtypes.MsgLiquidate{
+		Liquidator:  m.Liquidate.Liquidator,
+		Borrower:    m.Liquidate.Borrower,
+		Repayment:   m.Liquidate.Repayment,
+		RewardDenom: m.Liquidate.RewardDenom,
 	}
-
-	return nil
+	return s.Liquidate(ctx, req)
 }
 
 // HandleSupplyCollateralize handles the supply the assets and collateral their assets.
 func (m UmeeMsg) HandleSupplyCollateralize(
-	ctx sdk.Context,
+	ctx context.Context,
 	s lvtypes.MsgServer,
-) error {
-	_, err := s.SupplyCollateral(sdk.WrapSDKContext(ctx), m.SupplyCollateralize)
-	if err != nil {
-		return wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v to assigned msg SupplyCollateralize", err)}
-	}
-
-	return nil
+) (proto.Message, error) {
+	req := &lvtypes.MsgSupplyCollateral{Supplier: m.SupplyCollateralize.Supplier, Asset: m.Supply.Asset}
+	return s.SupplyCollateral(ctx, req)
 }

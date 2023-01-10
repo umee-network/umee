@@ -31,27 +31,32 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 		return sdkerrors.Wrap(err, "umee custom msg")
 	}
 
+	var err error
+	sdkCtx := sdk.WrapSDKContext(ctx)
+
 	switch smartcontractMessage.AssignedMsg {
 	case AssignedMsgSupply:
-		return smartcontractMessage.HandleSupply(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleSupply(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgWithdraw:
-		return smartcontractMessage.HandleWithdraw(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleWithdraw(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgCollateralize:
-		return smartcontractMessage.HandleCollateralize(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleCollateralize(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgDecollateralize:
-		return smartcontractMessage.HandleDecollateralize(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleDecollateralize(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgBorrow:
-		return smartcontractMessage.HandleBorrow(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleBorrow(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgRepay:
-		return smartcontractMessage.HandleRepay(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleRepay(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgLiquidate:
-		return smartcontractMessage.HandleLiquidate(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgSupplyCollateralize:
-		return smartcontractMessage.HandleSupply(ctx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleSupplyCollateralize(sdkCtx, plugin.lvMsgServer)
 
 	default:
-		return wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
+		err = wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
 	}
+
+	return err
 }
 
 // DispatchMsg encodes the wasmVM message and dispatches it.

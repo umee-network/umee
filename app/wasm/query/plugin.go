@@ -2,10 +2,12 @@ package query
 
 import (
 	"encoding/json"
+	"fmt"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/gogo/protobuf/proto"
 
 	lvkeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
 	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -38,51 +40,60 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			return nil, sdkerrors.Wrap(err, "umee query")
 		}
 
+		var resp proto.Message
+		var err error
+
 		switch smartcontractQuery.AssignedQuery {
 		case AssignedQueryLeverageParams:
-			return smartcontractQuery.HandleLeverageParams(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleLeverageParams(ctx, plugin.lvQueryServer)
 		case AssignedQueryRegisteredTokens:
-			return smartcontractQuery.HandleRegisteredTokens(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleRegisteredTokens(ctx, plugin.lvQueryServer)
 		case AssignedQueryMarketSummary:
-			return smartcontractQuery.HandleMarketSummary(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleMarketSummary(ctx, plugin.lvQueryServer)
 		case AssignedQueryAccountBalances:
-			return smartcontractQuery.HandleAccountBalances(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleAccountBalances(ctx, plugin.lvQueryServer)
 		case AssignedQueryAccountSummary:
-			return smartcontractQuery.HandleAccountSummary(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleAccountSummary(ctx, plugin.lvQueryServer)
 		case AssignedQueryLiquidationTargets:
-			return smartcontractQuery.HandleLiquidationTargets(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleLiquidationTargets(ctx, plugin.lvQueryServer)
 		case AssignedQueryBadDebts:
-			return smartcontractQuery.HandleBadDebts(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleBadDebts(ctx, plugin.lvQueryServer)
 		case AssignedQueryMaxWithdraw:
-			return smartcontractQuery.HandleMaxWithdraw(ctx, plugin.lvQueryServer)
+			resp, err = smartcontractQuery.HandleMaxWithdraw(ctx, plugin.lvQueryServer)
 
 		case AssignedQueryFeederDelegation:
-			return smartcontractQuery.HandleFeederDelegation(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleFeederDelegation(ctx, plugin.ocQueryServer)
 		case AssignedQueryMissCounter:
-			return smartcontractQuery.HandleMissCounter(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleMissCounter(ctx, plugin.ocQueryServer)
 		case AssignedQuerySlashWindow:
-			return smartcontractQuery.HandleSlashWindow(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleSlashWindow(ctx, plugin.ocQueryServer)
 		case AssignedQueryAggregatePrevote:
-			return smartcontractQuery.HandleAggregatePrevote(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleAggregatePrevote(ctx, plugin.ocQueryServer)
 		case AssignedQueryAggregatePrevotes:
-			return smartcontractQuery.HandleAggregatePrevotes(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleAggregatePrevotes(ctx, plugin.ocQueryServer)
 		case AssignedQueryAggregateVote:
-			return smartcontractQuery.HandleAggregateVote(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleAggregateVote(ctx, plugin.ocQueryServer)
 		case AssignedQueryAggregateVotes:
-			return smartcontractQuery.HandleAggregateVotes(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleAggregateVotes(ctx, plugin.ocQueryServer)
 		case AssignedQueryOracleParams:
-			return smartcontractQuery.HandleOracleParams(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleOracleParams(ctx, plugin.ocQueryServer)
 		case AssignedQueryExchangeRates:
-			return smartcontractQuery.HandleExchangeRates(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleExchangeRates(ctx, plugin.ocQueryServer)
 		case AssignedQueryActiveExchangeRates:
-			return smartcontractQuery.HandleActiveExchangeRates(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleActiveExchangeRates(ctx, plugin.ocQueryServer)
 		case AssignedQueryMedians:
-			return smartcontractQuery.HandleMedians(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleMedians(ctx, plugin.ocQueryServer)
 		case AssignedQueryMedianDeviations:
-			return smartcontractQuery.HandleMedianDeviations(ctx, plugin.ocQueryServer)
+			resp, err = smartcontractQuery.HandleMedianDeviations(ctx, plugin.ocQueryServer)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
 		}
+
+		if err != nil {
+			return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("error %+v while query the assigned query ", err)}
+		}
+
+		return MarshalResponse(resp)
 	}
 }
