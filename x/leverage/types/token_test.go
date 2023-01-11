@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func TestToTokenDenom(t *testing.T) {
@@ -59,6 +59,7 @@ func validToken() types.Token {
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
 		MaxSupply:              sdk.NewInt(1000),
+		HistoricMedians:        24,
 	}
 }
 
@@ -93,6 +94,7 @@ addtokens:
       max_supply_utilization: "1.000000000000000000"
       min_collateral_liquidity: "1.000000000000000000"
       max_supply: "1000"
+      historic_medians: 24
 updatetokens: []
 `
 	require.Equal(t, expected, p.String())

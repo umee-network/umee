@@ -9,15 +9,14 @@ import (
 	banktestutil "github.com/cosmos/cosmos-sdk/x/bank/testutil"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	appparams "github.com/umee-network/umee/v3/app/params"
-	"github.com/umee-network/umee/v3/util/coin"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/util/coin"
 )
 
 // GenAndDeliverTxWithRandFees generates a transaction with a random fee and delivers it.
 // If gasLimit==0 then appparams default gas limit is used.
 func GenAndDeliver(bk bankkeeper.Keeper, o simulation.OperationInput, gasLimit sdk.Gas,
 ) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-
 	if gasLimit == 0 {
 		gasLimit = appparams.DefaultGasLimit
 	}

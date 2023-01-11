@@ -17,10 +17,10 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/v3/x/leverage/client/cli"
-	"github.com/umee-network/umee/v3/x/leverage/keeper"
-	"github.com/umee-network/umee/v3/x/leverage/simulation"
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/client/cli"
+	"github.com/umee-network/umee/v4/x/leverage/keeper"
+	"github.com/umee-network/umee/v4/x/leverage/simulation"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 var (

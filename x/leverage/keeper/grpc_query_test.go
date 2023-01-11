@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v3/x/leverage/fixtures"
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/fixtures"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
@@ -157,8 +157,20 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.NoError(err)
 
 	expected := types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000)),
-		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000)),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000))),
+	}
+	require.Equal(expected, *resp)
+
+	// Also test all-denoms
+	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+		Address: addr.String(),
+	})
+	require.NoError(err)
+
+	expected = types.QueryMaxWithdrawResponse{
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -172,8 +184,76 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.NoError(err)
 
 	expected = types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000)),
-		UTokens: sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000)),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000))),
+	}
+	require.Equal(expected, *resp)
+
+	// Also test all-denoms
+	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+		Address: addr.String(),
+	})
+	require.NoError(err)
+
+	expected = types.QueryMaxWithdrawResponse{
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000))),
+	}
+	require.Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
+	ctx, require := s.ctx, s.Require()
+
+	// creates account which has supplied and collateralized 1000 UMEE
+	addr := s.newAccount(coin(umeeDenom, 1000_000000))
+	s.supply(addr, coin(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+
+	resp, err := s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+		Address: addr.String(),
+		Denom:   umeeDenom,
+	})
+	require.NoError(err)
+
+	expected := types.QueryMaxBorrowResponse{
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(250_000000))),
+	}
+	require.Equal(expected, *resp)
+
+	// Also test all-denoms
+	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+		Address: addr.String(),
+	})
+	require.NoError(err)
+
+	expected = types.QueryMaxBorrowResponse{
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(250_000000))),
+	}
+	require.Equal(expected, *resp)
+
+	// borrow 100 UMEE for non-trivial query
+	s.borrow(addr, coin(umeeDenom, 100_000000))
+
+	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+		Address: addr.String(),
+		Denom:   umeeDenom,
+	})
+	require.NoError(err)
+
+	expected = types.QueryMaxBorrowResponse{
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(150_000000))),
+	}
+	require.Equal(expected, *resp)
+
+	// Also test all-denoms
+	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+		Address: addr.String(),
+	})
+	require.NoError(err)
+
+	expected = types.QueryMaxBorrowResponse{
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(150_000000))),
 	}
 	require.Equal(expected, *resp)
 }

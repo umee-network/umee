@@ -8,7 +8,8 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v3/app/params"
+	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/grpc"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -138,4 +139,18 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 
 		s.sendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, umeeERC20Addr, appparams.BondDenom, amount)
 	})
+}
+
+func (s *IntegrationTestSuite) TestHistorical() {
+	umeeClient, err := grpc.NewUmeeClient(
+		s.chain.id,
+		"tcp://localhost:26657",
+		"tcp://localhost:9090",
+		"val1",
+		s.chain.validators[0].mnemonic,
+	)
+	s.Require().NoError(err)
+
+	err = grpc.MedianCheck(umeeClient)
+	s.Require().NoError(err)
 }

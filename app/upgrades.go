@@ -11,11 +11,11 @@ import (
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
-	"github.com/umee-network/umee/v3/app/upgradev3"
-	"github.com/umee-network/umee/v3/app/upgradev3x3"
-	leveragetypes "github.com/umee-network/umee/v3/x/leverage/types"
-	oraclekeeper "github.com/umee-network/umee/v3/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v3/x/oracle/types"
+	"github.com/umee-network/umee/v4/app/upgradev3"
+	"github.com/umee-network/umee/v4/app/upgradev3x3"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
@@ -31,20 +31,20 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
-	app.registerUpgrade3_3to3_4(upgradeInfo)
+	app.registerUpgrade3_3to4_0(upgradeInfo)
 }
 
-// performs upgrade from v3.3 -> v3.4
-func (app *UmeeApp) registerUpgrade3_3to3_4(_ upgradetypes.Plan) {
-	const planName = "v3.4"
+// performs upgrade from v3.3 -> v4
+func (app *UmeeApp) registerUpgrade3_3to4_0(_ upgradetypes.Plan) {
+	const planName = "v4.0"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			ctx.Logger().Info("Run v3.4 migration")
+			ctx.Logger().Info("Run v4.0 migration")
 			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
 			err := upgrader.HistoracleParams3x4(ctx)
 			if err != nil {
-				ctx.Logger().Error("Unable to run v3.4 Migration!", "err", err)
+				ctx.Logger().Error("Unable to run v4.0 Migration!", "err", err)
 				return fromVM, err
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)

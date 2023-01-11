@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/umee-network/umee/v3/x/leverage/fixtures"
-	"github.com/umee-network/umee/v3/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/leverage/fixtures"
+	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
@@ -1223,6 +1223,138 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			resp, err := srv.Borrow(ctx, msg)
 			require.NoError(err, tc.msg)
 			require.Equal(&types.MsgBorrowResponse{}, resp, tc.msg)
+
+			// final state
+			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			fCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			fExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.coin.Denom)
+			fBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify token balance is increased by expected amount
+			require.Equal(iBalance.Add(tc.coin), fBalance, tc.msg, "balances")
+			// verify uToken collateral unchanged
+			require.Equal(iCollateral, fCollateral, tc.msg, "collateral")
+			// verify uToken supply is unchanged
+			require.Equal(iUTokenSupply, fUTokenSupply, tc.msg, "uToken supply")
+			// verify uToken exchange rate is unchanged
+			require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
+			// verify borrowed coins increased by expected amount
+			require.Equal(iBorrowed.Add(tc.coin), fBorrowed, "borrowed coins")
+
+			// check all available invariants
+			s.checkInvariants(tc.msg)
+		}
+	}
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
+	type testCase struct {
+		msg  string
+		addr sdk.AccAddress
+		coin sdk.Coin
+		err  error
+	}
+
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// create and fund a supplier which supplies 100 UMEE and 100 ATOM
+	supplier := s.newAccount(coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
+	s.supply(supplier, coin(umeeDenom, 100_000000), coin(atomDenom, 100_000000))
+
+	// create a borrower which supplies and collateralizes 100 ATOM
+	borrower := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(borrower, coin(atomDenom, 100_000000))
+	s.collateralize(borrower, coin("u/"+atomDenom, 100_000000))
+
+	// create an additional supplier (DUMP, PUMP tokens)
+	surplus := s.newAccount(coin(dumpDenom, 100_000000), coin(pumpDenom, 100_000000))
+	s.supply(surplus, coin(pumpDenom, 100_000000))
+	s.supply(surplus, coin(dumpDenom, 100_000000))
+
+	// this will be a DUMP (historic price 1.00, current price 0.50) borrower
+	// using PUMP (historic price 1.00, current price 2.00) collateral
+	dumpborrower := s.newAccount(coin(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin("u/"+pumpDenom, 100_000000))
+	// collateral value is $200 (current) or $100 (historic)
+	// collateral weights are always 0.25 in testing
+
+	// this will be a PUMP (historic price 1.00, current price 2.00) borrower
+	// using DUMP (historic price 1.00, current price 0.50) collateral
+	pumpborrower := s.newAccount(coin(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin("u/"+dumpDenom, 100_000000))
+	// collateral value is $50 (current) or $100 (historic)
+	// collateral weights are always 0.25 in testing
+
+	tcs := []testCase{
+		{
+			"uToken",
+			borrower,
+			coin("u/"+umeeDenom, 0),
+			types.ErrUToken,
+		},
+		{
+			"unregistered token",
+			borrower,
+			coin("abcd", 0),
+			types.ErrNotRegisteredToken,
+		},
+		{
+			"zero collateral",
+			supplier,
+			coin(atomDenom, 0),
+			types.ErrMaxBorrowZero,
+		},
+		{
+			"atom borrow",
+			borrower,
+			coin(atomDenom, 25_000000),
+			nil,
+		},
+		{
+			"already borrowed max",
+			borrower,
+			coin(atomDenom, 0),
+			types.ErrMaxBorrowZero,
+		},
+		{
+			"dump borrower",
+			dumpborrower,
+			coin(dumpDenom, 25_000000),
+			nil,
+		},
+		{
+			"pump borrower",
+			pumpborrower,
+			coin(pumpDenom, 6_250000),
+			nil,
+		},
+	}
+
+	for _, tc := range tcs {
+		msg := &types.MsgMaxBorrow{
+			Borrower: tc.addr.String(),
+			Denom:    tc.coin.Denom,
+		}
+		if tc.err != nil {
+			_, err := srv.MaxBorrow(ctx, msg)
+			require.ErrorIs(err, tc.err, tc.msg)
+		} else {
+			// initial state
+			iBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
+			iCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.addr)
+			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
+			iExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.coin.Denom)
+			iBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.addr)
+
+			// verify the output of borrow function
+			resp, err := srv.MaxBorrow(ctx, msg)
+			require.NoError(err, tc.msg)
+			require.Equal(&types.MsgMaxBorrowResponse{
+				Borrowed: tc.coin,
+			}, resp, tc.msg)
 
 			// final state
 			fBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)

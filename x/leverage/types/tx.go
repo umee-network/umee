@@ -3,7 +3,7 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v3/util/checkers"
+	"github.com/umee-network/umee/v4/util/checkers"
 )
 
 func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
@@ -170,6 +170,30 @@ func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes get the bytes for the message signer to sign on
 func (msg *MsgBorrow) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+func NewMsgMaxBorrow(borrower sdk.AccAddress, denom string) *MsgMaxBorrow {
+	return &MsgMaxBorrow{
+		Borrower: borrower.String(),
+		Denom:    denom,
+	}
+}
+
+func (msg MsgMaxBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgMaxBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
+
+func (msg *MsgMaxBorrow) ValidateBasic() error {
+	return validateSenderAndDenom(msg.Borrower, msg.Denom)
+}
+
+func (msg *MsgMaxBorrow) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Borrower)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgMaxBorrow) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
