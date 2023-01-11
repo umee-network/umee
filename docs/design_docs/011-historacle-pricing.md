@@ -15,7 +15,8 @@ Accepted
 
 ## Abstract
 
-In order to support small-volume assets in a safe manner, we need to be able to calculate the weighted medians of our prices over the past X amount of time (eg: 6 days). This will allow the leverage module to make decisions around when to allow additional borrowing activity if an asset price is considered abnormal. Moreover we also support average prices to support other measures, like IBC outflow quota.
+In order to support small-volume assets in a safe manner, we need to be able to calculate the weighted medians of our prices over the past X amount of time (eg: 6 days).
+This will allow the leverage module to make decisions around when to allow additional borrowing activity if an asset price is considered abnormal. Moreover we also support average prices to support other measures, like IBC outflow quota.
 
 ## Context
 
@@ -80,7 +81,7 @@ type AvgCounter struct {
 Each record will store a sum of prices over a moving window. Each such counter will be a rolling sum over the `Avg Period` window. The `AvgCounter.Starts` will determine if we should reset and roll over for a new period.
 We will have `AvgPeriod / AvgShift` counters per denom. This is how this can work:
 
-```
+```text
      AvgCounter_1        AvgCounter_1        AvgCounter_1
 |-------------------|-------------------|-------------------|---
          AvgCounter_2        AvgCounter_2        AvgCounter_2
