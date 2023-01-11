@@ -50,7 +50,7 @@ We define epoch periods, during which additional computation will be performed:
 Hardcoded parameters:
 
 - `AvgPeriod`: will determine the length of the window where we average prices.
-- `AvgShift`: will determine the time difference between average
+- `AvgShift`: will determine the time difference between averages
 
 We define two _Maximum_ values, which correspond to the most we will store of a measurement at a given time. This can be multiplied by their respective Epochs to find which length of time information is kept.
 
