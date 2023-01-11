@@ -142,11 +142,15 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestHistorical() {
-	err := grpc.MedianCheck(
+	umeeClient, err := grpc.NewUmeeClient(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
+		"val1",
 		s.chain.validators[0].mnemonic,
 	)
+	s.Require().NoError(err)
+
+	err = grpc.MedianCheck(umeeClient)
 	s.Require().NoError(err)
 }
