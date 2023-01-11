@@ -34,10 +34,10 @@ RUN cd /src/peggo; BUILD_TAGS=muslc LDFLAGS='-linkmode=external -extldflags "-Wl
 
 ## Prepare the final clear binary
 FROM alpine:latest
+EXPOSE 26656 26657 1317 9090 7171
+ENTRYPOINT ["umeed", "start"]
+
 # no need to copy libwasmvm_muslc.a because we created static
 COPY --from=builder /go/bin/* /usr/local/bin/
 COPY --from=builder /src/peggo/build/peggo /usr/local/bin/
 RUN apk add ca-certificates
-
-EXPOSE 26656 26657 1317 9090 7171
-ENTRYPOINT ["umeed", "start"]

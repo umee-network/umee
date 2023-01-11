@@ -23,10 +23,10 @@ RUN wget https://github.com/umee-network/peggo/releases/download/v1.4.0/peggo-v1
 
 ## Prepare the final clear binary
 FROM ubuntu:rolling
+EXPOSE 26656 26657 1317 9090 7171
+ENTRYPOINT ["umeed", "start"]
+
 COPY --from=builder /go/pkg/mod/github.com/\!cosm\!wasm/wasmvm\@v*/internal/api/libwasmvm.*.so /usr/lib/
 COPY --from=builder /go/bin/* /usr/local/bin/
 COPY --from=builder /src/peggo-v*/peggo /usr/local/bin/
 RUN apt-get update && apt-get install ca-certificates -y
-
-EXPOSE 26656 26657 1317 9090 7171
-ENTRYPOINT ["umeed", "start"]
