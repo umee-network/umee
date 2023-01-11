@@ -3,7 +3,7 @@
 # umeed, price-feeder, peggo
 
 FROM golang:1.19-alpine AS builder
-ENV PACKAGES make git gcc linux-headers ca-certificates build-base curl
+ENV PACKAGES make git gcc linux-headers build-base curl
 RUN apk add --no-cache $PACKAGES
 
 ## Build umeed
@@ -37,6 +37,7 @@ FROM alpine:latest
 # no need to copy libwasmvm_muslc.a because we created static
 COPY --from=builder /go/bin/* /usr/local/bin/
 COPY --from=builder /src/peggo/build/peggo /usr/local/bin/
+RUN apk add ca-certificates
 
 EXPOSE 26656 26657 1317 9090 7171
 ENTRYPOINT ["umeed", "start"]
