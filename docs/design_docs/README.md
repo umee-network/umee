@@ -38,8 +38,9 @@ Meanwhile the _spec_ folder of each module should be a living document that is k
 - [006: Oracle](./006-oracle.md)
 - [007: Bad debt](./007-bad-debt.md)
 - [008: Borrow tracking](./008-borrow-tracking.md)
+- [010: Market health parameters](./010-market-params.md)
+- [011: Historacle Pricing](./011-historacle-pricing.md)
 
 ### Accepted
 
 - [009: Liquidity Mining](./009-liquidity-mining.md)
-- [010: Market health parameters](./010-market-params.md)
