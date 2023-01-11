@@ -25,10 +25,7 @@ type ICS4Wrapper interface {
 	GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool)
 }
 
-type OracleKeeper interface {
-	GetExchangeRateBase(ctx sdk.Context, symbol string) (sdk.Dec, error)
-}
-
 type LeverageKeeper interface {
 	GetTokenSettings(ctx sdk.Context, baseDenom string) (leveragetypes.Token, error)
+	TokenValue(ctx sdk.Context, coin sdk.Coin, historic bool) (sdk.Dec, error)
 }

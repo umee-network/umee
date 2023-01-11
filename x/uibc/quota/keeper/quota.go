@@ -2,13 +2,16 @@ package keeper
 
 import (
 	"encoding/json"
-	"strconv"
 	"strings"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
+
+	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
@@ -142,35 +145,31 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 		return nil
 	}
 
-	amount, err := strconv.ParseInt(sendAmount, 10, 64)
+	amount, ok := sdkmath.NewIntFromString(sendAmount)
+	if !ok {
+		return uibc.ErrInvalidIBCDenom.Wrap("invalid amount")
+	}
+	transferCoin := sdk.NewCoin(denom, amount)
+
+	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
+	exchangePrice, err := k.leverageKeeper.TokenValue(ctx, transferCoin, false)
 	if err != nil {
-		return err
+		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
+		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
+			return nil
+		} else if err != nil {
+			return err
+		}
 	}
 
-	// get the registered token settings from leverage
-	// denom => ibc/XXXX
-	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
-	if err != nil {
-		return nil
-	}
-
-	// get the exchange rate of denom (ibc/XXXX)in USD from base denom
-	exchangeRate, err := k.oracleKeeper.GetExchangeRateBase(ctx, denom)
-	if err != nil {
-		return err
-	}
-
-	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(10).Power(uint64(tokenSettings.Exponent)))
-	amountInUSD := exchangeRate.Mul(sendingAmount)
-
-	// checking token quota
-	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Add(amountInUSD)
+	// checking ibc-transfer token quota
+	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Add(exchangePrice)
 	if quotaOfIBCDenom.OutflowSum.GT(params.TokenQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
 	// checking total outflow quota
-	totalOutflowSum := k.GetTotalOutflowSum(ctx).Add(amountInUSD)
+	totalOutflowSum := k.GetTotalOutflowSum(ctx).Add(exchangePrice)
 	if totalOutflowSum.GT(params.TotalQuota) {
 		return uibc.ErrQuotaExceeded
 	}
@@ -195,34 +194,32 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error
 		return nil
 	}
 
-	// get the registered token settings from leverage
-	tokenSettings, err := k.leverageKeeper.GetTokenSettings(ctx, denom)
+	amount, ok := sdkmath.NewIntFromString(sendAmount)
+	if !ok {
+		return uibc.ErrInvalidIBCDenom.Wrap("invalid amount")
+	}
+	transferCoin := sdk.NewCoin(denom, amount)
+
+	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
+	exchangePrice, err := k.leverageKeeper.TokenValue(ctx, transferCoin, false)
 	if err != nil {
-		return nil
+		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
+		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
+			return nil
+		} else if err != nil {
+			return err
+		}
 	}
 
-	amount, err := strconv.ParseInt(sendAmount, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	// get the exchange rate of denom (ibc/XXXX)in USD from base denom
-	exchangeRate, err := k.oracleKeeper.GetExchangeRateBase(ctx, denom)
-	if err != nil {
-		return err
-	}
-
-	sendingAmount := sdk.NewDec(amount).Quo(sdk.NewDec(10).Power(uint64(tokenSettings.Exponent)))
-	amountInUSD := exchangeRate.Mul(sendingAmount)
-	// reset the outflow limit of per token
-	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Sub(amountInUSD)
+	// reset the outflow limit of token
+	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Sub(exchangePrice)
 	if err := k.SetQuotaOfIBCDenom(ctx, *quotaOfIBCDenom); err != nil {
 		return err
 	}
 
 	// reset the total outflow sum
 	totalOutflowSum := k.GetTotalOutflowSum(ctx)
-	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(amountInUSD))
+	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
 }
 
 // GetFundsFromPacket

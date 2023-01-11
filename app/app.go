@@ -511,7 +511,7 @@ func New(
 		app.uibcQuotaKeeper = uibcquotakeeper.NewKeeper(
 			appCodec,
 			keys[uibc.StoreKey],
-			app.IBCKeeper.ChannelKeeper, app.OracleKeeper, app.LeverageKeeper,
+			app.IBCKeeper.ChannelKeeper, app.LeverageKeeper,
 		)
 		ics4Wrapper = app.uibcQuotaKeeper
 	} else {
