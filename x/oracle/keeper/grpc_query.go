@@ -304,7 +304,7 @@ func (q querier) MedianDeviations(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	var medians sdk.DecCoins
+	medianDeviations := make([]sdk.DecCoin, 0)
 
 	if len(req.Denom) > 0 {
 		exchangeRate, err := q.HistoricMedianDeviation(ctx, req.Denom)
@@ -312,16 +312,18 @@ func (q querier) MedianDeviations(
 			return nil, err
 		}
 
-		medians = medians.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+		medianDeviations = append(medianDeviations, sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
 	} else {
 		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.Price) (stop bool) {
-			medians = medians.Add(sdk.NewDecCoinFromDec(
-				medianDeviation.ExchangeRateTuple.Denom,
-				medianDeviation.ExchangeRateTuple.ExchangeRate,
-			))
+			medianDeviations = append(
+				medianDeviations,
+				sdk.NewDecCoinFromDec(
+					medianDeviation.ExchangeRateTuple.Denom,
+					medianDeviation.ExchangeRateTuple.ExchangeRate,
+				))
 			return false
 		})
 	}
 
-	return &types.QueryMedianDeviationsResponse{MedianDeviations: medians}, nil
+	return &types.QueryMedianDeviationsResponse{MedianDeviations: medianDeviations}, nil
 }
