@@ -65,6 +65,16 @@ func NewUmeeClient(
 		return nil, err
 	}
 
+	err = uc.createClientContext()
+	if err != nil {
+		return nil, err
+	}
+
+	err = uc.createQueryClient()
+	if err != nil {
+		return nil, err
+	}
+
 	return &uc, nil
 }
 
@@ -168,4 +178,15 @@ func (uc *UmeeClient) QueryMedians() ([]sdk.DecCoin, error) {
 		return nil, err
 	}
 	return queryResponse.Medians, nil
+}
+
+func (uc *UmeeClient) QueryMedianDeviations() ([]sdk.DecCoin, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
+	defer cancel()
+
+	queryResponse, err := uc.QueryClient.MedianDeviations(ctx, &oracletypes.QueryMedianDeviations{})
+	if err != nil {
+		return nil, err
+	}
+	return queryResponse.MedianDeviations, nil
 }
