@@ -104,7 +104,7 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 				sdk.NewEvent(
 					uibc.EventBadRevert,
 					sdk.NewAttribute(sdk.AttributeKeyModule, uibc.ModuleName),
-					sdk.NewAttribute(uibc.AttributeKeyFailureType, "timeout"),
+					sdk.NewAttribute(uibc.AttributeKeyFailureType, "acknowledgment"),
 					sdk.NewAttribute(uibc.AttributeKeyPacket, string(packet.GetData())),
 				),
 			)

@@ -28,4 +28,5 @@ type ICS4Wrapper interface {
 type LeverageKeeper interface {
 	GetTokenSettings(ctx sdk.Context, baseDenom string) (leveragetypes.Token, error)
 	TokenValue(ctx sdk.Context, coin sdk.Coin, historic bool) (sdk.Dec, error)
+	ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
 }

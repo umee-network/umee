@@ -151,6 +151,14 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 	}
 	transferCoin := sdk.NewCoin(denom, amount)
 
+	// convert to base asset if it is `uToken`
+	if ltypes.HasUTokenPrefix(denom) {
+		transferCoin, err = k.leverageKeeper.ExchangeUToken(ctx, transferCoin)
+		if err != nil {
+			return err
+		}
+	}
+
 	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
 	exchangePrice, err := k.leverageKeeper.TokenValue(ctx, transferCoin, false)
 	if err != nil {
@@ -199,6 +207,14 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error
 		return uibc.ErrInvalidIBCDenom.Wrap("invalid amount")
 	}
 	transferCoin := sdk.NewCoin(denom, amount)
+
+	// convert to base asset if it is `uToken`
+	if ltypes.HasUTokenPrefix(denom) {
+		transferCoin, err = k.leverageKeeper.ExchangeUToken(ctx, transferCoin)
+		if err != nil {
+			return err
+		}
+	}
 
 	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
 	exchangePrice, err := k.leverageKeeper.TokenValue(ctx, transferCoin, false)
