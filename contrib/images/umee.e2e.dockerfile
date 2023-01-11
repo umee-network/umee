@@ -7,8 +7,11 @@ FROM golang:1.19-bullseye AS builder
 
 ## Build umeed
 WORKDIR /src/umee
-COPY . .
+# optimization: if go.sum didn't change, docker will use cached image
+COPY go.mod go.sum ./
 RUN go mod download
+
+COPY . .
 RUN make install && \
     cd price-feeder && make install
 
@@ -23,7 +26,6 @@ FROM ubuntu:rolling
 COPY --from=builder /go/pkg/mod/github.com/\!cosm\!wasm/wasmvm\@v*/internal/api/libwasmvm.*.so /usr/lib/
 COPY --from=builder /go/bin/* /usr/local/bin/
 COPY --from=builder /src/peggo-v*/peggo /usr/local/bin/
-RUN apt-get update && apt-get install ca-certificates -y
 
 EXPOSE 26656 26657 1317 9090 7171
 ENTRYPOINT ["umeed", "start"]

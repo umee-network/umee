@@ -4,8 +4,11 @@
 FROM golang:1.19-bullseye AS builder
 
 WORKDIR /src/
-COPY . .
+# optimization: if go.sum didn't change, docker will use cached image
+COPY go.mod go.sum ./
+RUN go mod download
 
+COPY . .
 RUN LEDGER_ENABLED=false BUILD_TAGS=badgerdb make install
 
 

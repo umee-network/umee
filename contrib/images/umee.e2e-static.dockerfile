@@ -8,8 +8,11 @@ RUN apk add --no-cache $PACKAGES
 
 ## Build umeed
 WORKDIR /src/umee
-COPY . .
+# optimization: if go.sum didn't change, docker will use cached image
+COPY go.mod go.sum ./
 RUN go mod download
+
+COPY . .
 # Cosmwasm - Download correct libwasmvm version
 RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) && \
     wget https://github.com/CosmWasm/wasmvm/releases/download/$WASMVM_VERSION/libwasmvm_muslc.$(uname -m).a -O /lib/libwasmvm_muslc.a && \
