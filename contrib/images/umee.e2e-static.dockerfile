@@ -3,13 +3,16 @@
 # umeed, price-feeder, peggo
 
 FROM golang:1.19-alpine AS builder
-ENV PACKAGES make git gcc linux-headers ca-certificates build-base curl
+ENV PACKAGES make git gcc linux-headers build-base curl
 RUN apk add --no-cache $PACKAGES
 
 ## Build umeed
 WORKDIR /src/umee
-COPY . .
+# optimization: if go.sum didn't change, docker will use cached image
+COPY go.mod go.sum ./
 RUN go mod download
+
+COPY . .
 # Cosmwasm - Download correct libwasmvm version
 RUN WASMVM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2) && \
     wget https://github.com/CosmWasm/wasmvm/releases/download/$WASMVM_VERSION/libwasmvm_muslc.$(uname -m).a -O /lib/libwasmvm_muslc.a && \
@@ -31,9 +34,10 @@ RUN cd /src/peggo; BUILD_TAGS=muslc LDFLAGS='-linkmode=external -extldflags "-Wl
 
 ## Prepare the final clear binary
 FROM alpine:latest
+EXPOSE 26656 26657 1317 9090 7171
+ENTRYPOINT ["umeed", "start"]
+
 # no need to copy libwasmvm_muslc.a because we created static
 COPY --from=builder /go/bin/* /usr/local/bin/
 COPY --from=builder /src/peggo/build/peggo /usr/local/bin/
-
-EXPOSE 26656 26657 1317 9090 7171
-ENTRYPOINT ["umeed", "start"]
+RUN apk add ca-certificates
