@@ -286,7 +286,11 @@ var _ sdk.Msg = &MsgAdminMintTokens{}
 func (msg MsgAdminMintTokens) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Admin)
 	if err != nil {
-		return err
+		return fmt.Errorf("malformed admin: %w", err)
+	}
+	_, err = sdk.AccAddressFromBech32(msg.Recipient)
+	if err != nil {
+		return fmt.Errorf("malformed recipient: %w", err)
 	}
 
 	for i, c := range msg.Coins {

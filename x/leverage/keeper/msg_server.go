@@ -487,11 +487,11 @@ func (s msgServer) GovUpdateRegistry(
 
 func (s msgServer) AdminMintTokens(goCtx context.Context, msg *types.MsgAdminMintTokens) (*emptypb.Empty, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	err := s.keeper.bankKeeper.MintCoins(ctx, types.ModuleName, msg.Coins)
-	if err != nil {
+	k := s.keeper.bankKeeper
+	if err := k.MintCoins(ctx, types.ModuleName, msg.Coins); err != nil {
 		return nil, err
 	}
-	recipient, _ := sdk.AccAddressFromBech32(msg.Admin)
-	err = s.keeper.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, recipient, msg.Coins)
-	return &emptypb.Empty{}, err
+	recipient, _ := sdk.AccAddressFromBech32(msg.Recipient)
+	return &emptypb.Empty{},
+		k.SendCoinsFromModuleToAccount(ctx, types.ModuleName, recipient, msg.Coins)
 }
