@@ -1,0 +1,17 @@
+syntax = "proto3";
+package umee.uibc.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package                      = "github.com/umee-network/umee/v4/x/uibc";
+option (gogoproto.goproto_getters_all) = false;
+
+// EventBadRevert is emitted on failure of ibc-transfer quota.
+message EventBadRevert {
+  // module name
+  string module = 1;
+  // failure event type
+  string failure_type = 2;
+  // ibc packet data
+  string packet = 3;
+}

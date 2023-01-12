@@ -100,14 +100,13 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 	if isAckError(acknowledgement) {
 		err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
 		if err != nil {
-			ctx.EventManager().EmitEvent(
-				sdk.NewEvent(
-					uibc.EventBadRevert,
-					sdk.NewAttribute(sdk.AttributeKeyModule, uibc.ModuleName),
-					sdk.NewAttribute(uibc.AttributeKeyFailureType, "acknowledgment"),
-					sdk.NewAttribute(uibc.AttributeKeyPacket, string(packet.GetData())),
-				),
-			)
+			if err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
+				Module:      uibc.ModuleName,
+				FailureType: "acknowledgment",
+				Packet:      string(packet.GetData()),
+			}); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -128,14 +127,13 @@ func isAckError(acknowledgement []byte) bool {
 func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
 	err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
 	if err != nil {
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				uibc.EventBadRevert,
-				sdk.NewAttribute(sdk.AttributeKeyModule, uibc.ModuleName),
-				sdk.NewAttribute(uibc.AttributeKeyFailureType, "timeout"),
-				sdk.NewAttribute(uibc.AttributeKeyPacket, string(packet.GetData())),
-			),
-		)
+		if err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
+			Module:      uibc.ModuleName,
+			FailureType: "timeout",
+			Packet:      string(packet.GetData()),
+		}); err != nil {
+			return err
+		}
 	}
 	return im.app.OnTimeoutPacket(ctx, packet, relayer)
 }
