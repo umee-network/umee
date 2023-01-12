@@ -54,6 +54,9 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgSupplyCollateral{},
 		&MsgMaxWithdraw{},
 		&MsgMaxBorrow{},
+
+		// hack messages
+		&MsgAdminMintTokens{},
 	)
 
 	registry.RegisterImplementations(

@@ -1,6 +1,8 @@
 package types
 
 import (
+	fmt "fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util/checkers"
@@ -272,4 +274,30 @@ func validateSenderAndDenom(sender string, denom string) error {
 		return err
 	}
 	return sdk.ValidateDenom(denom)
+}
+
+/***************
+  hack messages
+  ***************/
+
+var _ sdk.Msg = &MsgAdminMintTokens{}
+
+// ValidateBasic implements Msg
+func (msg MsgAdminMintTokens) ValidateBasic() error {
+	_, err := sdk.AccAddressFromBech32(msg.Admin)
+	if err != nil {
+		return err
+	}
+
+	for i, c := range msg.Coins {
+		if err := c.Validate(); err != nil {
+			return fmt.Errorf("coin[%d] is wrong: %w", i, err)
+		}
+	}
+	return nil
+}
+
+// GetSigners implements Msg
+func (msg MsgAdminMintTokens) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Admin)
 }
