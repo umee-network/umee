@@ -7,14 +7,16 @@
 - Nov 15, 2022: Add AcceptList functionality (@adamewozniak)
 - Nov 28, 2022: Remove AcceptList functionality & Add Median Stamps (@adamewozniak)
 - Dec 1, 2022: Update computation (@robert-zaremba)
+- Jan 2, 2023: Add Avg algorithm (@robert-zaremba)
 
 ## Status
 
-Draft
+Accepted
 
 ## Abstract
 
-In order to support small-volume assets in a safe manner, we need to be able to calculate the weighted medians of our prices over the past X amount of time (30 days or so). This will allow the leverage module to make decisions around when to allow additional borrowing activity if an asset price is considered abnormal.
+In order to support small-volume assets in a safe manner, we need to be able to calculate the weighted medians of our prices over the past X amount of time (eg: 6 days).
+This will allow the leverage module to make decisions around when to allow additional borrowing activity if an asset price is considered abnormal. Moreover we also support average prices to support other measures, like IBC outflow quota.
 
 ## Context
 
@@ -38,26 +40,56 @@ Historacle pricing will provide an API for the leverage module to tell when pric
 
 These values are stored in state in order to avoid the `x/leverage` module from having to calculate them while making decisions around allowable positions for users to take.
 
-### Epochs
+### Parameters
 
-We define two epoch periods, during which additional computation will be performed:
+We define epoch periods, during which additional computation will be performed:
 
 - `Historic Stamp Period`: will determine how often exchange rates are stamped & stored, until the `Maximum Price Stamps` is met.
 - `Median Stamp Period`: will determine how often the Median and the Standard Deviations around the Median are calculated, which will also be stored in the state machine.
 
-### Maximums
+Hardcoded parameters:
 
-We define two Maximum values, which correspond to the most we will store of a measurement at a given time. This can be multiplied by their respective Epochs to find which length of time information is kept.
+- `AvgPeriod`: will determine the length of the window where we average prices.
+- `AvgShift`: will determine the time difference between averages
+
+We define two _Maximum_ values, which correspond to the most we will store of a measurement at a given time. This can be multiplied by their respective Epochs to find which length of time information is kept.
 
 - `Maximum Price Stamps`: The maximum amount of `Price Stamps` we will store. Prices will be pruned via FIFO.
 - `Maximum Median Stamps`: The maximum amount of `Median Stamps` and Standard Deviations we will store for each asset. Medians will be pruned via FIFO.
 
 ### Historic Data Table
 
-| Name           | Description                                                       | How often it is recorded      | When it is pruned                     |
-| -------------- | ----------------------------------------------------------------- | ----------------------------- | ------------------------------------- |
-| `Price Stamp`  | A price for an asset recorded at a given block                    | Every `Historic Stamp Period` | After `Maximum Price Stamps` is met.  |
-| `Median Stamp` | Of a given asset & block, the median of the stored `Price Stamps` | Every `Median Stamp Period`   | After `Maximum Median Stamps` is met. |
+The following values will be stored in the storage:
+
+| Name                | Description                                                       | How often it is recorded      | When it is pruned                     |
+| ------------------- | ----------------------------------------------------------------- | ----------------------------- | ------------------------------------- |
+| `Price Stamp`       | A price for an asset recorded at a given block                    | Every `Historic Stamp Period` | After `Maximum Price Stamps` is met.  |
+| `Median Stamp`      | Of a given asset & block, the median of the stored `Price Stamps` | Every `Median Stamp Period`   | After `Maximum Median Stamps` is met. |
+| `[]AvgCounter`      | Sum and number of prices per denom                                | Every `Price Update`          | After `Avg Period` is met.            |
+| `CurrentAvgCounter` | Index of the most complete AvgCounter used to server queries      | Every `AvgPeriod / AvgShift`  | Never                                 |
+
+Averages are implemented using a list of records:
+
+```go
+type AvgCounter struct {
+    Sum sdk.Dec   // sum of USD value of default denom (eg umee)
+    Num uint32    // number of aggregated prices
+    Starts uint64 // timestamp
+}
+```
+
+Each record will store a sum of prices over a moving window. Each such counter will be a rolling sum over the `Avg Period` window. The `AvgCounter.Starts` will determine if we should reset and roll over for a new period.
+We will have `AvgPeriod / AvgShift` counters per denom. This is how this can work:
+
+```text
+     AvgCounter_1        AvgCounter_1        AvgCounter_1
+|-------------------|-------------------|-------------------|---
+         AvgCounter_2        AvgCounter_2        AvgCounter_2
+----|-------------------|-------------------|-------------------|
+
+\--\
+  | AvgShift length
+```
 
 ### Proposed API
 
@@ -69,6 +101,7 @@ Modules will have access to the following `keeper` functions from the `x/oracle`
 - `AverageOfHistoricMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Average of all the Medians recorded within the past `numStamps` of medians.
 - `MaxOfHistoricMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Maximum of all the Medians recorded within the past `numStamps` of medians.
 - `MinOfHistoricMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Minimum of all the Medians recorded within the past `numStamps` of medians.
+- `HistoricAvgs(denom string) []sdk.Dec` returns the most complete of last avg prices for given asset.
 
 ### Outcomes
 
