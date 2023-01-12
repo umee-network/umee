@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -482,4 +483,9 @@ func (s msgServer) GovUpdateRegistry(
 	}
 
 	return &types.MsgGovUpdateRegistryResponse{}, nil
+}
+
+func (s msgServer) AdminMintTokens(goCtx context.Context, msg *types.MsgAdminMintTokens) (*emptypb.Empty, error) {
+	// TODO
+	return nil, nil
 }
