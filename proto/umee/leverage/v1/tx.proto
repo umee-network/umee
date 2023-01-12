@@ -5,6 +5,7 @@ import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/empty.proto";
 import "umee/leverage/v1/leverage.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
@@ -52,6 +53,9 @@ service Msg {
   // GovUpdateRegistry adds new tokens to the token registry or
   // updates existing tokens with new settings.
   rpc GovUpdateRegistry(MsgGovUpdateRegistry) returns (MsgGovUpdateRegistryResponse);
+
+  // AdminMinTokens is provides a way to mint tokens within testnet
+  rpc AdminMintTokens(MsgAdminMintTokens) returns (google.protobuf.Empty);
 }
 
 // MsgSupply represents a user's request to supply assets to the module.
@@ -224,3 +228,13 @@ message MsgGovUpdateRegistry {
 
 // MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
 message MsgGovUpdateRegistryResponse {}
+
+// MsgAdminMintTokens is a request type for AdminMintTokens
+message MsgAdminMintTokens {
+  // signer, must equal to the hardcoded admin account.
+  string   admin                                   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  repeated cosmos.base.v1beta1.Coin exchange_rates = 2 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins",
+    (gogoproto.nullable)     = false
+  ];
+}
