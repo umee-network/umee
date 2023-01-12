@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
@@ -487,6 +488,10 @@ func (s msgServer) GovUpdateRegistry(
 
 func (s msgServer) AdminMintTokens(goCtx context.Context, msg *types.MsgAdminMintTokens) (*emptypb.Empty, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	const supportedNetwork = "canon-2"
+	if cid := ctx.ChainID(); cid != supportedNetwork {
+		return nil, errors.New("operation is only supported in " + supportedNetwork + ", not in " + cid)
+	}
 	k := s.keeper.bankKeeper
 	if err := k.MintCoins(ctx, types.ModuleName, msg.Coins); err != nil {
 		return nil, err

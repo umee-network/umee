@@ -1,6 +1,7 @@
 package types
 
 import (
+	"errors"
 	fmt "fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -284,11 +285,11 @@ var _ sdk.Msg = &MsgAdminMintTokens{}
 
 // ValidateBasic implements Msg
 func (msg MsgAdminMintTokens) ValidateBasic() error {
-	_, err := sdk.AccAddressFromBech32(msg.Admin)
-	if err != nil {
-		return fmt.Errorf("malformed admin: %w", err)
+	const rubyAdmin = "umee1ppktjcp0rsrcx6dxy8kwnr39wq0e54yv0rflzu" // admin in ruby node
+	if msg.Admin != rubyAdmin {
+		return errors.New("admin must be " + rubyAdmin)
 	}
-	_, err = sdk.AccAddressFromBech32(msg.Recipient)
+	_, err := sdk.AccAddressFromBech32(msg.Recipient)
 	if err != nil {
 		return fmt.Errorf("malformed recipient: %w", err)
 	}
