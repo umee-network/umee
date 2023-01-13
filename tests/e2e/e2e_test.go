@@ -10,6 +10,7 @@ import (
 
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/tests/grpc"
+	"github.com/umee-network/umee/v4/tests/grpc/client"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -142,7 +143,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestHistorical() {
-	umeeClient, err := grpc.NewUmeeClient(
+	umeeClient, err := client.NewUmeeClient(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
@@ -153,4 +154,31 @@ func (s *IntegrationTestSuite) TestHistorical() {
 
 	err = grpc.MedianCheck(umeeClient)
 	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) TestBalanceTransfer() {
+	umeeClient, err := client.NewUmeeClient(
+		s.chain.id,
+		"tcp://localhost:26657",
+		"tcp://localhost:9090",
+		"val1",
+		s.chain.validators[0].mnemonic,
+	)
+	s.Require().NoError(err)
+
+	addr1, err := s.chain.validators[0].keyInfo.GetAddress()
+	s.Require().NoError(err)
+
+	umeeClient.QueryClient.PrintBalances(addr1.String())
+
+	addr2, err := s.chain.validators[1].keyInfo.GetAddress()
+	s.Require().NoError(err)
+
+	umeeClient.QueryClient.PrintBalances(addr2.String())
+
+	umeeClient.TxClient.Send(addr1.String(), addr2.String(), sdk.NewCoins(sdk.Coin{Denom: "uumee", Amount: sdk.NewInt(10000)}))
+
+	umeeClient.QueryClient.PrintBalances(addr1.String())
+
+	umeeClient.QueryClient.PrintBalances(addr2.String())
 }

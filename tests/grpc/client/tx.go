@@ -1,4 +1,4 @@
-package grpc
+package client
 
 import (
 	"github.com/cosmos/cosmos-sdk/client"
