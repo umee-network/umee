@@ -21,7 +21,7 @@ func NewMsgUpdateRegistry(authority, title, description string, updateTokens, ad
 	}
 }
 
-// Type implements Msg
+// Type implements Msg interface
 func (msg MsgGovUpdateRegistry) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // String implements the Stringer interface.
