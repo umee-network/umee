@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -21,16 +20,4 @@ func (qc *QueryClient) QueryAllBalances(address string) (sdk.Coins, error) {
 		return nil, err
 	}
 	return queryResponse.Balances, nil
-}
-
-func (bq *QueryClient) PrintBalances(address string) error {
-	fmt.Printf("Balances for address %s\n", address)
-
-	balances, err := bq.QueryAllBalances(address)
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("%+v\n", balances)
-	return nil
 }

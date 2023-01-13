@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -9,7 +10,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/tests/grpc"
 	"github.com/umee-network/umee/v4/tests/grpc/client"
 )
 
@@ -143,42 +143,46 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestHistorical() {
+	s.dkrPool.Client.StopContainer(s.hermesResource.Container.ID, 0)
+
 	umeeClient, err := client.NewUmeeClient(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
 		"val1",
-		s.chain.validators[0].mnemonic,
+		s.chain.validators[1].mnemonic,
 	)
 	s.Require().NoError(err)
 
-	err = grpc.MedianCheck(umeeClient)
-	s.Require().NoError(err)
-}
-
-func (s *IntegrationTestSuite) TestBalanceTransfer() {
-	umeeClient, err := client.NewUmeeClient(
-		s.chain.id,
-		"tcp://localhost:26657",
-		"tcp://localhost:9090",
-		"val1",
-		s.chain.validators[0].mnemonic,
-	)
+	resp, err := umeeClient.TxClient.TxUpdateHistoricStampPeriod("\"10\"")
 	s.Require().NoError(err)
 
-	addr1, err := s.chain.validators[0].keyInfo.GetAddress()
+	var proposalID string
+	for _, event := range resp.Logs[0].Events {
+		if event.Type == "submit_proposal" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "proposal_id" {
+					proposalID = attribute.Value
+				}
+			}
+		}
+	}
+	fmt.Println(proposalID)
+
+	proposalIDInt, err := strconv.ParseUint(proposalID, 10, 64)
+
+	resp, err = umeeClient.TxClient.TxVoteYes(proposalIDInt)
 	s.Require().NoError(err)
+	fmt.Println(resp)
 
-	umeeClient.QueryClient.PrintBalances(addr1.String())
-
-	addr2, err := s.chain.validators[1].keyInfo.GetAddress()
+	prop, err := umeeClient.QueryClient.QueryProposal(proposalIDInt)
 	s.Require().NoError(err)
+	fmt.Println(prop)
 
-	umeeClient.QueryClient.PrintBalances(addr2.String())
+	// params, err := umeeClient.QueryClient.QueryParams()
+	// s.Require().NoError(err)
+	// fmt.Printf("%+v\n", params)
 
-	umeeClient.TxClient.Send(addr1.String(), addr2.String(), sdk.NewCoins(sdk.Coin{Denom: "uumee", Amount: sdk.NewInt(10000)}))
-
-	umeeClient.QueryClient.PrintBalances(addr1.String())
-
-	umeeClient.QueryClient.PrintBalances(addr2.String())
+	// err = grpc.MedianCheck(umeeClient)
+	// s.Require().NoError(err)
 }

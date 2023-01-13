@@ -7,10 +7,6 @@ import (
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
-type OracleQuery struct {
-	OracleQueryClient oracletypes.QueryClient
-}
-
 func (qc *QueryClient) OracleQueryClient() oracletypes.QueryClient {
 	return oracletypes.NewQueryClient(qc.grpcConn)
 }
