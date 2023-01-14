@@ -158,7 +158,7 @@ func (s *IntegrationTestSuite) TestHistorical() {
 	err = grpc.MedianCheck(umeeClient)
 	s.Require().NoError(err)
 
-	resp, err := umeeClient.TxClient.TxUpdateHistoricStampPeriod(10)
+	resp, err := umeeClient.TxClient.TxUpdateOracleParams(10, 2, 20)
 	s.Require().NoError(err)
 
 	var proposalID string
@@ -171,13 +171,12 @@ func (s *IntegrationTestSuite) TestHistorical() {
 			}
 		}
 	}
-	fmt.Println(proposalID)
 
 	proposalIDInt, err := strconv.ParseUint(proposalID, 10, 64)
-
-	resp, err = umeeClient.TxClient.TxVoteYes(proposalIDInt)
 	s.Require().NoError(err)
-	fmt.Println(resp)
+
+	_, err = umeeClient.TxClient.TxVoteYes(proposalIDInt)
+	s.Require().NoError(err)
 
 	time.Sleep(5 * time.Second)
 
