@@ -110,7 +110,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		BorrowedValue: sdk.ZeroDec(),
 		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
-		// (1000) * 4.21 * 0.25 = 1052.5
+		// Nothing borrowed
 		HistoricBorrowedValue: sdk.ZeroDec(),
 		// (1000) * 4.21 * 0.25 = 1052.5
 		HistoricBorrowLimit: sdk.MustNewDecFromStr("1052.5"),
