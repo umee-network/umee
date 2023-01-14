@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 )
 
 func (qc *QueryClient) GovQueryClient() govtypes.QueryClient {
@@ -18,5 +18,5 @@ func (qc *QueryClient) QueryProposal(proposalID uint64) (*govtypes.Proposal, err
 	if err != nil {
 		return nil, err
 	}
-	return &queryResponse.Proposal, nil
+	return queryResponse.Proposal, nil
 }

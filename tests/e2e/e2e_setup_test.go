@@ -33,6 +33,8 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -274,6 +276,17 @@ func (s *IntegrationTestSuite) initGenesis() {
 	bz, err = cdc.MarshalJSON(&oracleGenState)
 	s.Require().NoError(err)
 	appGenState[oracletypes.ModuleName] = bz
+
+	// Gov
+	var govGenState govtypesv1.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
+
+	var votingPeroid time.Duration = 5 * time.Second
+	govGenState.VotingParams.VotingPeriod = &votingPeroid
+
+	bz, err = cdc.MarshalJSON(&govGenState)
+	s.Require().NoError(err)
+	appGenState[govtypes.ModuleName] = bz
 
 	// Bank
 	var bankGenState banktypes.GenesisState

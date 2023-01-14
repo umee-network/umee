@@ -1,6 +1,8 @@
 package client
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
@@ -12,7 +14,7 @@ func (tc *TxClient) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 		return nil, err
 	}
 
-	voteType, err := govtypes.VoteOptionFromString("yes")
+	voteType, err := govtypes.VoteOptionFromString("VOTE_OPTION_YES")
 	if err != nil {
 		return nil, err
 	}
@@ -25,13 +27,13 @@ func (tc *TxClient) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 	return tc.BroadcastTx(msg)
 }
 
-func (tc *TxClient) TxUpdateHistoricStampPeriod(value string) (*sdk.TxResponse, error) {
+func (tc *TxClient) TxUpdateHistoricStampPeriod(value uint64) (*sdk.TxResponse, error) {
 
 	changes := []proposal.ParamChange{
 		{
 			Subspace: "oracle",
 			Key:      "HistoricStampPeriod",
-			Value:    value,
+			Value:    fmt.Sprintf("\"%d\"", value),
 		},
 	}
 

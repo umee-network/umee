@@ -10,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/grpc"
 	"github.com/umee-network/umee/v4/tests/grpc/client"
 )
 
@@ -154,7 +155,10 @@ func (s *IntegrationTestSuite) TestHistorical() {
 	)
 	s.Require().NoError(err)
 
-	resp, err := umeeClient.TxClient.TxUpdateHistoricStampPeriod("\"10\"")
+	err = grpc.MedianCheck(umeeClient)
+	s.Require().NoError(err)
+
+	resp, err := umeeClient.TxClient.TxUpdateHistoricStampPeriod(10)
 	s.Require().NoError(err)
 
 	var proposalID string
@@ -175,14 +179,14 @@ func (s *IntegrationTestSuite) TestHistorical() {
 	s.Require().NoError(err)
 	fmt.Println(resp)
 
+	time.Sleep(5 * time.Second)
+
 	prop, err := umeeClient.QueryClient.QueryProposal(proposalIDInt)
 	s.Require().NoError(err)
-	fmt.Println(prop)
+	fmt.Println(prop.VotingEndTime)
 
-	// params, err := umeeClient.QueryClient.QueryParams()
-	// s.Require().NoError(err)
-	// fmt.Printf("%+v\n", params)
+	fmt.Println(prop.Status.String())
 
-	// err = grpc.MedianCheck(umeeClient)
-	// s.Require().NoError(err)
+	err = grpc.MedianCheck(umeeClient)
+	s.Require().NoError(err)
 }
