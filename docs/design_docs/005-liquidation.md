@@ -152,7 +152,7 @@ Examining one existing liquidation scheme ([Compound](https://zengo.com/understa
 
 - Liquidation Incentive (10%)
 - Close Factor (50%)
-  When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 5% of their borrowed value in a single liquidation event.
+  When a borrower is even 0.0001% over their borrow limit, they stand to lose value equal to 50% of their borrowed value in a single liquidation event.
   That is, the liquidator liquidates 50% of the borrowed value and receives 5% extra in collateral.
 
 It should be possible to improve upon this aspect of the system by scaling one of the two parameters shown above, based on how far a borrower is over their borrow limit.
