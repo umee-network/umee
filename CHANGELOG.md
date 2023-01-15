@@ -53,6 +53,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1680](https://github.com/umee-network/umee/pull/1680) Add amino support for MsgMaxWithdraw.
+- [1710](https://github.com/umee-network/umee/pull/1710) Skip blacklisted tokens in MaxBorrow and MaxWithdraw queries.
 
 ### Features
 
