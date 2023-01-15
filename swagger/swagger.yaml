@@ -152,6 +152,20 @@ paths:
                 description: >-
                   Liquidation Threshold is the Borrowed Value at which the
                   account becomes eligible for liquidation.
+              historic_borrowed_value:
+                type: string
+                description: >-
+                  Historic Borrowed Value is the sum of the USD value of all
+                  tokens the account has borrowed,
+
+                  including interest owed, using historic prices.
+              historic_borrow_limit:
+                type: string
+                description: >-
+                  Historic Borrow Limit is the maximum Borrowed Value the
+                  account is allowed to reach through direct borrowing,
+
+                  using historic prices.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -439,6 +453,16 @@ paths:
                   applied to convert to symbol denom. A negative availability
                   means safety limits have been exceeded and additional
                   collateral cannot be created until more liquidity is present.
+              oracle_historic_price:
+                type: string
+                description: >-
+                  Oracle Historic Price is the historic USD value of a token.
+                  Historic price is defined as the median of the last N historic
+                  median prices from the oracle module, with N being this
+                  token's HistoricMedians in the leverage registry. Current
+                  price is used if required medians is zero. Price is nil when
+                  the oracle is down or insufficient historic medians are
+                  available.
             description: >-
               QueryMarketSummaryResponse defines the response structure for the
               MarketSummary gRPC service handler.
@@ -2020,6 +2044,20 @@ definitions:
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
+      historic_borrowed_value:
+        type: string
+        description: >-
+          Historic Borrowed Value is the sum of the USD value of all tokens the
+          account has borrowed,
+
+          including interest owed, using historic prices.
+      historic_borrow_limit:
+        type: string
+        description: >-
+          Historic Borrow Limit is the maximum Borrowed Value the account is
+          allowed to reach through direct borrowing,
+
+          using historic prices.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
@@ -2194,6 +2232,15 @@ definitions:
           negative availability means safety limits have been exceeded and
           additional collateral cannot be created until more liquidity is
           present.
+      oracle_historic_price:
+        type: string
+        description: >-
+          Oracle Historic Price is the historic USD value of a token. Historic
+          price is defined as the median of the last N historic median prices
+          from the oracle module, with N being this token's HistoricMedians in
+          the leverage registry. Current price is used if required medians is
+          zero. Price is nil when the oracle is down or insufficient historic
+          medians are available.
     description: >-
       QueryMarketSummaryResponse defines the response structure for the
       MarketSummary gRPC service handler.

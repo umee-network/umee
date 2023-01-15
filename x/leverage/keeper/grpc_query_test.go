@@ -42,6 +42,7 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
 		OraclePrice:            &oracleSymbolPrice,
+		OracleHistoricPrice:    &oracleSymbolPrice,
 		UTokenExchangeRate:     sdk.OneDec(),
 		Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
 		Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
@@ -109,6 +110,10 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		BorrowedValue: sdk.ZeroDec(),
 		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
+		// Nothing borrowed
+		HistoricBorrowedValue: sdk.ZeroDec(),
+		// (1000) * 4.21 * 0.25 = 1052.5
+		HistoricBorrowLimit: sdk.MustNewDecFromStr("1052.5"),
 		// (1000) * 4.21 * 0.25 = 1052.5
 		LiquidationThreshold: sdk.MustNewDecFromStr("1052.5"),
 	}
