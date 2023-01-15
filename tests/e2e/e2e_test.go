@@ -2,7 +2,6 @@ package e2e
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -144,6 +143,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestHistorical() {
+	// TODO - fix this workaround
 	s.dkrPool.Client.StopContainer(s.hermesResource.Container.ID, 0)
 
 	umeeClient, err := client.NewUmeeClient(
@@ -158,33 +158,8 @@ func (s *IntegrationTestSuite) TestHistorical() {
 	err = grpc.MedianCheck(umeeClient)
 	s.Require().NoError(err)
 
-	resp, err := umeeClient.TxClient.TxUpdateOracleParams(10, 2, 20)
+	err = grpc.SubmitAndPassProposal(umeeClient)
 	s.Require().NoError(err)
-
-	var proposalID string
-	for _, event := range resp.Logs[0].Events {
-		if event.Type == "submit_proposal" {
-			for _, attribute := range event.Attributes {
-				if attribute.Key == "proposal_id" {
-					proposalID = attribute.Value
-				}
-			}
-		}
-	}
-
-	proposalIDInt, err := strconv.ParseUint(proposalID, 10, 64)
-	s.Require().NoError(err)
-
-	_, err = umeeClient.TxClient.TxVoteYes(proposalIDInt)
-	s.Require().NoError(err)
-
-	time.Sleep(5 * time.Second)
-
-	prop, err := umeeClient.QueryClient.QueryProposal(proposalIDInt)
-	s.Require().NoError(err)
-	fmt.Println(prop.VotingEndTime)
-
-	fmt.Println(prop.Status.String())
 
 	err = grpc.MedianCheck(umeeClient)
 	s.Require().NoError(err)
