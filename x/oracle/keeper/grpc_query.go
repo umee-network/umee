@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -326,4 +327,37 @@ func (q querier) MedianDeviations(
 	}
 
 	return &types.QueryMedianDeviationsResponse{MedianDeviations: medianDeviations}, nil
+}
+
+func (q querier) PriceHistory(goCtx context.Context, req *types.QueryHistoricPricesRequest) (*types.QueryHistoricPricesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	resp := types.QueryHistoricPricesResponse{}
+
+	if len(req.Denom) > 0 {
+		prices := q.HistoricPrices(ctx, req.Denom, uint64(req.NumStamps))
+		if len(prices) < 1 {
+			return nil, fmt.Errorf("price history does not exist for this asset")
+		}
+		for _, v := range prices {
+			resp.Prices = append(resp.Prices, sdk.NewDecCoinFromDec(req.Denom, v))
+		}
+	} else {
+		acceptList := q.AcceptList(ctx)
+		for _, v := range acceptList {
+			prices := q.HistoricPrices(ctx, v.SymbolDenom, uint64(req.NumStamps))
+			for _, v := range prices {
+				resp.Prices = append(resp.Prices, sdk.NewDecCoinFromDec(req.Denom, v))
+			}
+		}
+	}
+
+	if len(resp.Prices) < 1 {
+		return nil, fmt.Errorf("price history unavailable")
+	}
+	return &resp, nil
 }

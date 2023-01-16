@@ -34,7 +34,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 	ctx sdk.Context,
 	denom string,
 ) error {
-	historicPrices := k.historicPrices(ctx, denom, k.MaximumPriceStamps(ctx))
+	historicPrices := k.HistoricPrices(ctx, denom, k.MaximumPriceStamps(ctx))
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
 		return sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
@@ -90,7 +90,7 @@ func (k Keeper) WithinHistoricMedianDeviation(
 	median := medians[0]
 
 	// get latest historic price
-	prices := k.historicPrices(ctx, denom, 1)
+	prices := k.HistoricPrices(ctx, denom, 1)
 	if len(prices) == 0 {
 		return false, sdkerrors.Wrap(types.ErrNoHistoricPrice, fmt.Sprintf("denom: %s", denom))
 	}
@@ -214,7 +214,7 @@ func (k Keeper) MinOfHistoricMedians(
 }
 
 // historicPrices returns all the historic prices of a given denom.
-func (k Keeper) historicPrices(
+func (k Keeper) HistoricPrices(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,

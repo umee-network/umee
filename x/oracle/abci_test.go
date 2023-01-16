@@ -166,8 +166,7 @@ var historacleTestCases = []struct {
 	},
 	{
 		[]string{
-			"5.2", "5.25", "5.31", "5.22", "5.14", "5.15",
-			"4.85", "4.72", "4.52", "4.47", "4.36", "4.22",
+			"4.72", "4.52", "4.47", "4.36", "4.22",
 			"4.11", "4.04", "3.92", "3.82", "3.85", "3.83",
 		},
 		[]sdk.Dec{
@@ -224,6 +223,9 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 		}
 
 		for _, denom := range app.OracleKeeper.AcceptList(ctx) {
+
+			prices := app.OracleKeeper.HistoricPrices(ctx, denom.SymbolDenom, app.OracleKeeper.MaximumPriceStamps(ctx))
+			fmt.Println(prices)
 			// query for past 6 medians (should only get 4 back since max median stamps is set to 4)
 			medians := app.OracleKeeper.HistoricMedians(ctx, denom.SymbolDenom, 6)
 			s.Require().Equal(4, len(medians))
