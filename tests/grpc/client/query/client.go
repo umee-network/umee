@@ -12,12 +12,12 @@ const (
 )
 
 type Client struct {
-	GRPCEndpoint string
+	grpcEndpoint string
 	grpcConn     *grpc.ClientConn
 }
 
-func NewQueryClient(GRPCEndpoint string) (*Client, error) {
-	qc := &Client{GRPCEndpoint: GRPCEndpoint}
+func NewQueryClient(grpcEndpoint string) (*Client, error) {
+	qc := &Client{grpcEndpoint: grpcEndpoint}
 	err := qc.dialGrpcConn()
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func NewQueryClient(GRPCEndpoint string) (*Client, error) {
 
 func (c *Client) dialGrpcConn() (err error) {
 	c.grpcConn, err = grpc.Dial(
-		c.GRPCEndpoint,
+		c.grpcEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),
 	)
