@@ -142,6 +142,10 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	})
 }
 
+// TestHistorical queries for the oracle params, collects historical
+// prices based on those params, checks that the stored medians and
+// medians deviations are correct, updates the oracle params with
+// a gov prop, then checks the medians and median deviations again.
 func (s *IntegrationTestSuite) TestHistorical() {
 	umeeClient, err := client.NewUmeeClient(
 		s.chain.id,
