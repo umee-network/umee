@@ -214,7 +214,7 @@ func (q Querier) AccountSummary(
 	if err != nil {
 		return nil, err
 	}
-	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, false)
+	spotBorrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, false)
 	if err != nil {
 		return nil, err
 	}
@@ -223,9 +223,15 @@ func (q Querier) AccountSummary(
 		return nil, err
 	}
 
+	// borrow limit is the minimum of either spot or historic borrow limit
+	historicBorrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, true)
+	if err != nil {
+		return nil, err
+	}
+	borrowLimit := sdk.MinDec(historicBorrowLimit, spotBorrowLimit)
+
 	// must still return current values if historic prices are down - they will display as zero
 	historicBorrowedValue, _ := q.Keeper.TotalTokenValue(ctx, borrowed, true)
-	historicBorrowLimit, _ := q.Keeper.CalculateBorrowLimit(ctx, collateral, true)
 
 	return &types.QueryAccountSummaryResponse{
 		SuppliedValue:         suppliedValue,
@@ -235,6 +241,7 @@ func (q Querier) AccountSummary(
 		LiquidationThreshold:  liquidationThreshold,
 		HistoricBorrowedValue: historicBorrowedValue,
 		HistoricBorrowLimit:   historicBorrowLimit,
+		SpotBorrowLimit:       spotBorrowLimit,
 	}, nil
 }
 

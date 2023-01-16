@@ -142,11 +142,16 @@ paths:
                 description: >-
                   Borrowed Value is the sum of the USD value of all tokens the
                   account has borrowed, including interest owed.
+
+                  It always uses spot prices.
               borrow_limit:
                 type: string
                 description: >-
                   Borrow Limit is the maximum Borrowed Value the account is
                   allowed to reach through direct borrowing.
+
+                  It uses the higher of two borrow limits: spot_borrow_limit and
+                  historic_borrow_limit.
               liquidation_threshold:
                 type: string
                 description: >-
@@ -166,6 +171,13 @@ paths:
                   account is allowed to reach through direct borrowing,
 
                   using historic prices.
+              spot_borrow_limit:
+                type: string
+                description: >-
+                  Spot Borrow Limit is the maximum Borrowed Value the account is
+                  allowed to reach through direct borrowing,
+
+                  using spot prices.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -2034,11 +2046,16 @@ definitions:
         description: >-
           Borrowed Value is the sum of the USD value of all tokens the account
           has borrowed, including interest owed.
+
+          It always uses spot prices.
       borrow_limit:
         type: string
         description: >-
           Borrow Limit is the maximum Borrowed Value the account is allowed to
           reach through direct borrowing.
+
+          It uses the higher of two borrow limits: spot_borrow_limit and
+          historic_borrow_limit.
       liquidation_threshold:
         type: string
         description: >-
@@ -2058,6 +2075,13 @@ definitions:
           allowed to reach through direct borrowing,
 
           using historic prices.
+      spot_borrow_limit:
+        type: string
+        description: >-
+          Spot Borrow Limit is the maximum Borrowed Value the account is allowed
+          to reach through direct borrowing,
+
+          using spot prices.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
