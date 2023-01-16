@@ -10,8 +10,8 @@ import (
 // It also starts up a websocket connection to track the current block height and
 // uses the block height to ensure transactions happen within a certain window.
 type UmeeClient struct {
-	QueryClient *query.QueryClient
-	TxClient    *tx.TxClient
+	QueryClient *query.Client
+	TxClient    *tx.Client
 }
 
 func NewUmeeClient(
@@ -22,7 +22,10 @@ func NewUmeeClient(
 	accountMnemonic string,
 ) (uc *UmeeClient, err error) {
 	uc = &UmeeClient{}
-	uc.QueryClient = query.NewQueryClient(grpcEndpoint)
+	uc.QueryClient, err = query.NewQueryClient(grpcEndpoint)
+	if err != nil {
+		return nil, err
+	}
 	uc.TxClient, err = tx.NewTxClient(chainID, tmrpcEndpoint, accountName, accountMnemonic)
 	return uc, err
 }

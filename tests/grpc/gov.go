@@ -27,7 +27,7 @@ func SubmitAndPassProposal(umeeClient *client.UmeeClient, changes []proposal.Par
 	}
 
 	if proposalID == "" {
-		return fmt.Errorf("Failed to parse proposalID from %s", resp)
+		return fmt.Errorf("failed to parse proposalID from %s", resp)
 	}
 
 	proposalIDInt, err := strconv.ParseUint(proposalID, 10, 64)
@@ -57,7 +57,7 @@ func SubmitAndPassProposal(umeeClient *client.UmeeClient, changes []proposal.Par
 
 	propStatus := prop.Status.String()
 	if propStatus != "PROPOSAL_STATUS_PASSED" {
-		return fmt.Errorf("Proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
+		return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
 	}
 	return nil
 }

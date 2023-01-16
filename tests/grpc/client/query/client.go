@@ -11,18 +11,21 @@ const (
 	queryTimeout = 15 * time.Second
 )
 
-type QueryClient struct {
+type Client struct {
 	GRPCEndpoint string
 	grpcConn     *grpc.ClientConn
 }
 
-func NewQueryClient(GRPCEndpoint string) *QueryClient {
-	qc := &QueryClient{GRPCEndpoint: GRPCEndpoint}
-	qc.dialGrpcConn()
-	return qc
+func NewQueryClient(GRPCEndpoint string) (*Client, error) {
+	qc := &Client{GRPCEndpoint: GRPCEndpoint}
+	err := qc.dialGrpcConn()
+	if err != nil {
+		return nil, err
+	}
+	return qc, nil
 }
 
-func (qc *QueryClient) dialGrpcConn() (err error) {
+func (qc *Client) dialGrpcConn() (err error) {
 	qc.grpcConn, err = grpc.Dial(
 		qc.GRPCEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
