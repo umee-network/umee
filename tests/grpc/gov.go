@@ -9,9 +9,8 @@ import (
 	"github.com/umee-network/umee/v4/tests/grpc/client"
 )
 
-func SubmitAndPassProposal(umeeClient *client.UmeeClient) error {
-	oracleParamChanges := OracleParamChanges(10, 2, 20)
-	resp, err := umeeClient.TxClient.TxSubmitProposal(oracleParamChanges)
+func SubmitAndPassProposal(umeeClient *client.UmeeClient, changes []proposal.ParamChange) error {
+	resp, err := umeeClient.TxClient.TxSubmitProposal(changes)
 	if err != nil {
 		return err
 	}

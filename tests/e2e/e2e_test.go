@@ -155,7 +155,10 @@ func (s *IntegrationTestSuite) TestHistorical() {
 	err = grpc.MedianCheck(umeeClient)
 	s.Require().NoError(err)
 
-	err = grpc.SubmitAndPassProposal(umeeClient)
+	err = grpc.SubmitAndPassProposal(
+		umeeClient,
+		grpc.OracleParamChanges(10, 2, 20),
+	)
 	s.Require().NoError(err)
 
 	err = grpc.MedianCheck(umeeClient)
