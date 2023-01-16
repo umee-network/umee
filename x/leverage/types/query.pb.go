@@ -427,7 +427,7 @@ type QueryAccountSummaryResponse struct {
 	// It always uses spot prices.
 	BorrowedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=borrowed_value,json=borrowedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrowed_value"`
 	// Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
-	// It uses the higher of two borrow limits: spot_borrow_limit and historic_borrow_limit.
+	// It uses the lower of two borrow limits: spot_borrow_limit and historic_borrow_limit.
 	BorrowLimit github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=borrow_limit,json=borrowLimit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_limit"`
 	// Liquidation Threshold is the Borrowed Value at which the account becomes eligible for liquidation.
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold"`

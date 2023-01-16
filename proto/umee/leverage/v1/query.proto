@@ -237,7 +237,7 @@ message QueryAccountSummaryResponse {
     (gogoproto.nullable)   = false
   ];
   // Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
-  // It uses the higher of two borrow limits: spot_borrow_limit and historic_borrow_limit.
+  // It uses the lower of two borrow limits: spot_borrow_limit and historic_borrow_limit.
   string borrow_limit = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false

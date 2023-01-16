@@ -150,7 +150,7 @@ paths:
                   Borrow Limit is the maximum Borrowed Value the account is
                   allowed to reach through direct borrowing.
 
-                  It uses the higher of two borrow limits: spot_borrow_limit and
+                  It uses the lower of two borrow limits: spot_borrow_limit and
                   historic_borrow_limit.
               liquidation_threshold:
                 type: string
@@ -2054,7 +2054,7 @@ definitions:
           Borrow Limit is the maximum Borrowed Value the account is allowed to
           reach through direct borrowing.
 
-          It uses the higher of two borrow limits: spot_borrow_limit and
+          It uses the lower of two borrow limits: spot_borrow_limit and
           historic_borrow_limit.
       liquidation_threshold:
         type: string
