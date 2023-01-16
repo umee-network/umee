@@ -143,15 +143,12 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 }
 
 func (s *IntegrationTestSuite) TestHistorical() {
-	// TODO - fix this workaround
-	s.dkrPool.Client.StopContainer(s.hermesResource.Container.ID, 0)
-
 	umeeClient, err := client.NewUmeeClient(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
 		"val1",
-		s.chain.validators[1].mnemonic,
+		s.chain.validators[2].mnemonic,
 	)
 	s.Require().NoError(err)
 

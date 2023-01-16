@@ -47,7 +47,7 @@ func SubmitAndPassProposal(umeeClient *client.UmeeClient) error {
 	}
 
 	now := time.Now()
-	sleepDuration := prop.VotingEndTime.Sub(now) + 2*time.Second
+	sleepDuration := prop.VotingEndTime.Sub(now) + 3*time.Second
 	fmt.Printf("sleeping %s until end of voting period + 1 block\n", sleepDuration)
 	time.Sleep(sleepDuration)
 
