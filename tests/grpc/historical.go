@@ -44,7 +44,7 @@ func MedianCheck(val1Client *UmeeClient) error {
 	if err != nil {
 		return err
 	}
-	if len(exchangeRates) == len(denomAcceptList) {
+	if len(exchangeRates) != len(denomAcceptList) {
 		return errors.New("couldn't fetch exchange rates matching denom accept list")
 	}
 
