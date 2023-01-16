@@ -2,8 +2,10 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	"strings"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
 )
 
@@ -30,12 +32,20 @@ func MedianCheck(val1Client *UmeeClient) error {
 		return err
 	}
 
+	var exchangeRates sdk.DecCoins
 	for i := 0; i < 20; i++ {
-		exchangeRates, err := val1Client.QueryExchangeRates()
+		exchangeRates, err = val1Client.QueryExchangeRates()
 		if err == nil && len(exchangeRates) == len(denomAcceptList) {
 			break
 		}
 		<-chainHeight.HeightChanged
+	}
+	// error if the loop above didn't succeed
+	if err != nil {
+		return err
+	}
+	if len(exchangeRates) != len(denomAcceptList) {
+		return errors.New("couldn't fetch exchange rates matching denom accept list")
 	}
 
 	priceStore, err := listenForPrices(val1Client, params, chainHeight)
