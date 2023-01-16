@@ -333,6 +333,9 @@ func (q querier) PriceHistory(goCtx context.Context, req *types.QueryHistoricPri
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
+	if req.NumStamps < 1 {
+		return nil, status.Error(codes.InvalidArgument, "num stamps must be non-negative")
+	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
