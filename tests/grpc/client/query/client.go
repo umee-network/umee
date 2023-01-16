@@ -25,9 +25,9 @@ func NewQueryClient(GRPCEndpoint string) (*Client, error) {
 	return qc, nil
 }
 
-func (qc *Client) dialGrpcConn() (err error) {
-	qc.grpcConn, err = grpc.Dial(
-		qc.GRPCEndpoint,
+func (c *Client) dialGrpcConn() (err error) {
+	c.grpcConn, err = grpc.Dial(
+		c.GRPCEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),
 	)
