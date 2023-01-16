@@ -17,8 +17,9 @@ service Query {
   }
 
   // Quota queries the rate limits of ibc denoms.
+  // If denom is empty, returns quota for all tokens.
   rpc Quota(QueryQuota) returns (QueryQuotaResponse) {
-    option (google.api.http).get = "/umee/uibc/v1/quota/{ibc_denom}";
+    option (google.api.http).get = "/umee/uibc/v1/quota/{denom}";
   }
 }
 
@@ -32,9 +33,9 @@ message QueryParamsResponse {
   Params params = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryQuota defines request type for query the quota of ibc denoms
+// QueryQuota defines request type for query the quota of denoms
 message QueryQuota {
-  string ibc_denom = 1;
+  string denom = 1;
 }
 
 // QueryQuotaResponse defines response type of Query/Quota

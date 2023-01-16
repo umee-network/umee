@@ -12,7 +12,7 @@ func (k Keeper) SetParams(ctx sdk.Context, params uibc.Params) error {
 	if err != nil {
 		return err
 	}
-	store.Set(uibc.ParamsKey, bz)
+	store.Set(uibc.KeyPrefixParams, bz)
 
 	return nil
 }
@@ -20,7 +20,7 @@ func (k Keeper) SetParams(ctx sdk.Context, params uibc.Params) error {
 // GetParams gets the x/uibc module's parameters.
 func (k Keeper) GetParams(ctx sdk.Context) (params uibc.Params) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(uibc.ParamsKey)
+	bz := store.Get(uibc.KeyPrefixParams)
 	if bz == nil {
 		return params
 	}

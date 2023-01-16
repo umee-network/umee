@@ -14,15 +14,15 @@ const (
 )
 
 var (
-	KeyPrefixForIBCDenom = []byte{0x01}
-	KeyTotalOutflowSum   = []byte{0x02}
-	// ParamsKey is the key to query all gov params
-	ParamsKey = []byte{0x03}
-	// QuotaExpiresKey is the key to store the next expire time of ibc-transfer quota
-	QuotaExpiresKey = []byte{0x04}
+	KeyPrefixDenomQuota    = []byte{0x01}
+	KeyPrefixTotalOutflows = []byte{0x02}
+	// KeyPrefixParams is the key to query all gov params
+	KeyPrefixParams = []byte{0x03}
+	// KeyPrefixQuotaExpires is the key to store the next expire time of ibc-transfer quota
+	KeyPrefixQuotaExpires = []byte{0x04}
 )
 
-func CreateKeyForQuotaOfIBCDenom(ibcDenom string) []byte {
-	//  keyPrefixForIBCDenom| denom | 0x00
-	return util.ConcatBytes(0, KeyPrefixForIBCDenom, []byte(ibcDenom))
+func KeyTotalOutflows(ibcDenom string) []byte {
+	//  KeyPrefixDenomQuota| denom | 0x00
+	return util.ConcatBytes(0, KeyPrefixDenomQuota, []byte(ibcDenom))
 }

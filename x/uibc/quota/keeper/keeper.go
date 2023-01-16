@@ -7,6 +7,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
+	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 
 	"github.com/umee-network/umee/v4/x/uibc"
 )
@@ -15,7 +16,7 @@ type Keeper struct {
 	storeKey       storetypes.StoreKey
 	cdc            codec.BinaryCodec
 	leverageKeeper uibc.LeverageKeeper
-	ics4Wrapper    uibc.ICS4Wrapper
+	ics4Wrapper    porttypes.ICS4Wrapper
 }
 
 func NewKeeper(

@@ -44,7 +44,7 @@ func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if len(req.IbcDenom) == 0 {
+	if len(req.Denom) == 0 {
 		quotaOfIBCDenoms, err := q.Keeper.GetQuotaOfIBCDenoms(ctx)
 		if err != nil {
 			return &uibc.QueryQuotaResponse{}, err
@@ -52,7 +52,7 @@ func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
 		return &uibc.QueryQuotaResponse{Quota: quotaOfIBCDenoms}, nil
 	}
 
-	quotaOfIBCDenom, err := q.Keeper.GetQuotaOfIBCDenom(ctx, req.IbcDenom)
+	quotaOfIBCDenom, err := q.Keeper.GetQuotaOfIBCDenom(ctx, req.Denom)
 	if err != nil {
 		return &uibc.QueryQuotaResponse{}, err
 	}

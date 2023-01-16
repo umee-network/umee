@@ -38,19 +38,11 @@ func (msg *MsgGovUpdateQuota) ValidateBasic() error {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
 
-	if msg.Total.IsNil() {
-		return ErrInvalidQuota.Wrap("total quota shouldn't empty")
-	}
-
-	if !msg.Total.IsPositive() {
+	if msg.Total.IsNil() || !msg.Total.IsPositive() {
 		return ErrInvalidQuota.Wrap("total quota must be positive")
 	}
 
-	if msg.PerDenom.IsNil() {
-		return ErrInvalidQuota.Wrap("quota per denom shouldn't empty")
-	}
-
-	if !msg.PerDenom.IsPositive() {
+	if msg.PerDenom.IsNil() || !msg.PerDenom.IsPositive() {
 		return ErrInvalidQuota.Wrap("quota per denom must be positive")
 	}
 
@@ -125,11 +117,7 @@ func (q *Quota) Validate() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("ibc denom shouldn't be empty")
 	}
 
-	if q.OutflowSum.IsNil() {
-		return ErrInvalidQuota.Wrap("ibc denom quota expires shouldn't be empty")
-	}
-
-	if q.OutflowSum.IsNegative() {
+	if q.OutflowSum.IsNil() || q.OutflowSum.IsNegative() {
 		return ErrInvalidQuota.Wrap("ibc denom quota expires shouldn't be empty")
 	}
 

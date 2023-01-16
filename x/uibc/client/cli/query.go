@@ -55,9 +55,9 @@ func GetCmdQueryParams() *cobra.Command {
 // GetQuota returns cmd to get the quota of ibc denoms.
 func GetQuota() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "quota [ibc-denom]",
+		Use:   "quota [denom]",
 		Args:  cobra.MaximumNArgs(1),
-		Short: "Get the quota for ibc denoms",
+		Short: "Get the quota for ibc and native denoms",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -67,7 +67,7 @@ func GetQuota() *cobra.Command {
 			queryClient := uibc.NewQueryClient(clientCtx)
 			queryReq := uibc.QueryQuota{}
 			if len(args) > 0 {
-				queryReq.IbcDenom = args[0]
+				queryReq.Denom = args[0]
 			}
 			resp, err := queryClient.Quota(cmd.Context(), &queryReq)
 			return cli.PrintOrErr(resp, err, clientCtx)

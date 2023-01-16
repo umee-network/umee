@@ -8,10 +8,6 @@ import (
 
 // BeginBlock implements BeginBlock for the x/uibc module.
 func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
-	quotaOfIBCDenoms, err := keeper.GetQuotaOfIBCDenoms(ctx)
-	if err != nil {
-		panic(err)
-	}
 
 	params := keeper.GetParams(ctx)
 	quotaExpires, err := keeper.GetExpire(ctx)
@@ -19,12 +15,18 @@ func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 		panic(err)
 	}
 
-	expires := ctx.BlockTime().Add(params.QuotaDuration)
+	// reset quotas
 	if quotaExpires == nil || quotaExpires.Before(ctx.BlockTime()) {
-		if err := keeper.SetExpire(ctx, expires); err != nil {
+		newExpires := ctx.BlockTime().Add(params.QuotaDuration)
+		if err := keeper.SetExpire(ctx, newExpires); err != nil {
 			panic(err)
 		}
 		if err := keeper.SetTotalOutflowSum(ctx, sdk.NewDec(0)); err != nil {
+			panic(err)
+		}
+
+		quotaOfIBCDenoms, err := keeper.GetQuotaOfIBCDenoms(ctx)
+		if err != nil {
 			panic(err)
 		}
 
