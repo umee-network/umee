@@ -33,7 +33,7 @@ func (c *Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
 	return queryResponse.ExchangeRates, nil
 }
 
-func (c *Client) QueryMedians() ([]sdk.DecCoin, error) {
+func (c *Client) QueryMedians() (oracletypes.Prices, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
@@ -44,7 +44,7 @@ func (c *Client) QueryMedians() ([]sdk.DecCoin, error) {
 	return queryResponse.Medians, nil
 }
 
-func (c *Client) QueryMedianDeviations() ([]sdk.DecCoin, error) {
+func (c *Client) QueryMedianDeviations() (oracletypes.Prices, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), queryTimeout)
 	defer cancel()
 
