@@ -275,6 +275,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	oracleGenState.Params.HistoricStampPeriod = 5
 	oracleGenState.Params.MaximumPriceStamps = 4
 	oracleGenState.Params.MedianStampPeriod = 20
+	oracleGenState.Params.MaximumMedianStamps = 2
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
 	s.Require().NoError(err)

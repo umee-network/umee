@@ -1,6 +1,7 @@
 package oracle
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
@@ -46,6 +47,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 		for _, ballotDenom := range ballotDenomSlice {
+			denom := strings.ToUpper(ballotDenom.Denom)
 			// Get weighted median of exchange rates
 			exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
 			if err != nil {
@@ -53,17 +55,17 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 			}
 
 			// Set the exchange rate, emit ABCI event
-			if err = k.SetExchangeRateWithEvent(ctx, ballotDenom.Denom, exchangeRate); err != nil {
+			if err = k.SetExchangeRateWithEvent(ctx, denom, exchangeRate); err != nil {
 				return err
 			}
 
 			if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-				k.AddHistoricPrice(ctx, ballotDenom.Denom, exchangeRate)
+				k.AddHistoricPrice(ctx, denom, exchangeRate)
 			}
 
 			// Calculate and stamp median/median deviation if median stamp period has passed
 			if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
-				if err = k.CalcAndSetHistoricMedian(ctx, ballotDenom.Denom); err != nil {
+				if err = k.CalcAndSetHistoricMedian(ctx, denom); err != nil {
 					return err
 				}
 			}
@@ -105,13 +107,12 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	// Prune historic prices and medians outside pruning period determined by
 	// the stamp period multiplied by the max stamps.
 	if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
-		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
-		for _, v := range params.AcceptList {
-			k.DeleteHistoricPrice(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
-			k.DeleteHistoricMedian(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-		}
+		pruneHistoricPeriod := params.HistoricStampPeriod * params.MaximumPriceStamps
+		pruneMedianPeriod := params.MedianStampPeriod * params.MaximumMedianStamps
+
+		k.PruneHistoricPricesBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
+		k.PruneMediansBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+		k.PruneMedianDeviationsBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
 	}
 
 	return nil
