@@ -231,11 +231,13 @@ message QueryAccountSummaryResponse {
     (gogoproto.nullable)   = false
   ];
   // Borrowed Value is the sum of the USD value of all tokens the account has borrowed, including interest owed.
+  // It always uses spot prices.
   string borrowed_value = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
   // Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
+  // It uses the lower of two borrow limits: spot_borrow_limit and historic_borrow_limit.
   string borrow_limit = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
@@ -254,6 +256,12 @@ message QueryAccountSummaryResponse {
   // Historic Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing,
   // using historic prices.
   string historic_borrow_limit = 7 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Spot Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing,
+  // using spot prices.
+  string spot_borrow_limit = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
