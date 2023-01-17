@@ -10,6 +10,7 @@ import (
 
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/tests/grpc"
+	"github.com/umee-network/umee/v4/tests/grpc/client"
 )
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
@@ -141,13 +142,26 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 	})
 }
 
+// TestHistorical queries for the oracle params, collects historical
+// prices based on those params, checks that the stored medians and
+// medians deviations are correct, updates the oracle params with
+// a gov prop, then checks the medians and median deviations again.
 func (s *IntegrationTestSuite) TestHistorical() {
-	umeeClient, err := grpc.NewUmeeClient(
+	umeeClient, err := client.NewUmeeClient(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
 		"val1",
-		s.chain.validators[0].mnemonic,
+		s.chain.validators[2].mnemonic,
+	)
+	s.Require().NoError(err)
+
+	err = grpc.MedianCheck(umeeClient)
+	s.Require().NoError(err)
+
+	err = grpc.SubmitAndPassProposal(
+		umeeClient,
+		grpc.OracleParamChanges(10, 2, 20),
 	)
 	s.Require().NoError(err)
 
