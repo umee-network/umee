@@ -34,7 +34,7 @@ func (q Querier) Params(goCtx context.Context, req *uibc.QueryParams) (
 	return &uibc.QueryParamsResponse{Params: params}, nil
 }
 
-// Quota returns quota of ibc denoms.
+// Quota returns quotas of denoms.
 func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
 	*uibc.QueryQuotaResponse, error,
 ) {
@@ -52,7 +52,7 @@ func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
 		return &uibc.QueryQuotaResponse{Quota: quotaOfIBCDenoms}, nil
 	}
 
-	quotaOfIBCDenom, err := q.Keeper.GetQuotaOfIBCDenom(ctx, req.Denom)
+	quotaOfIBCDenom, err := q.Keeper.GetQuotaByDenom(ctx, req.Denom)
 	if err != nil {
 		return &uibc.QueryQuotaResponse{}, err
 	}

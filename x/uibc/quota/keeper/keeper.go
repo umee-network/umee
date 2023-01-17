@@ -31,8 +31,9 @@ func NewKeeper(
 	}
 }
 
-// UpdateQuota update the quota for ibc denoms
-func (k Keeper) UpdateQuota(ctx sdk.Context, totalQuota, quotaPerDenom sdk.Dec, quotaDuration time.Duration) error {
+// UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
+func (k Keeper) UpdateQuotaParams(ctx sdk.Context, totalQuota, quotaPerDenom sdk.Dec, quotaDuration time.Duration,
+) error {
 	params := k.GetParams(ctx)
 
 	params.TokenQuota = totalQuota
@@ -42,8 +43,8 @@ func (k Keeper) UpdateQuota(ctx sdk.Context, totalQuota, quotaPerDenom sdk.Dec, 
 	return k.SetParams(ctx, params)
 }
 
-// UpdateTansferStatus update the ibc pause status in module params.
-func (k Keeper) UpdateTansferStatus(ctx sdk.Context, ibcStatus uibc.IBCTransferStatus) error {
+// SetIBCPause update the ibc pause status in module params.
+func (k Keeper) SetIBCPause(ctx sdk.Context, ibcStatus uibc.IBCTransferStatus) error {
 	params := k.GetParams(ctx)
 	if params.IbcPause == ibcStatus {
 		return uibc.ErrIBCPauseStatus.Wrapf("ibc-transfer status already have same status %s", ibcStatus.String())

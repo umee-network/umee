@@ -24,22 +24,22 @@ func (m msgServer) GovUpdateQuota(goCtx context.Context, msg *uibc.MsgGovUpdateQ
 	*uibc.MsgGovUpdateQuotaResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := m.keeper.UpdateQuota(ctx, msg.Total, msg.PerDenom, msg.QuotaDuration); err != nil {
+	if err := m.keeper.UpdateQuotaParams(ctx, msg.Total, msg.PerDenom, msg.QuotaDuration); err != nil {
 		return nil, err
 	}
 	// save the new ibc rate limits
 	return &uibc.MsgGovUpdateQuotaResponse{}, nil
 }
 
-// GovUpdateTransferStatus implements types.MsgServer
-func (m msgServer) GovUpdateTransferStatus(
-	goCtx context.Context, msg *uibc.MsgGovUpdateTransferStatus,
-) (*uibc.MsgGovUpdateTransferStatusResponse, error) {
+// GovSetIBCPause implements types.MsgServer
+func (m msgServer) GovSetIBCPause(
+	goCtx context.Context, msg *uibc.MsgGovSetIBCPause,
+) (*uibc.MsgGovSetIBCPauseResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if err := m.keeper.UpdateTansferStatus(ctx, msg.IbcPauseStatus); err != nil {
-		return &uibc.MsgGovUpdateTransferStatusResponse{}, err
+	if err := m.keeper.SetIBCPause(ctx, msg.IbcPauseStatus); err != nil {
+		return &uibc.MsgGovSetIBCPauseResponse{}, err
 	}
 
-	return &uibc.MsgGovUpdateTransferStatusResponse{}, nil
+	return &uibc.MsgGovSetIBCPauseResponse{}, nil
 }

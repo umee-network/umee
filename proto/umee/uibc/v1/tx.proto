@@ -18,8 +18,8 @@ service Msg {
   // updates the quota for existed ibc denoms.
   rpc GovUpdateQuota(MsgGovUpdateQuota) returns (MsgGovUpdateQuotaResponse);
 
-  // GovUpdateTransferStatus update the status of ibc-transfer
-  rpc GovUpdateTransferStatus(MsgGovUpdateTransferStatus) returns (MsgGovUpdateTransferStatusResponse);
+  // GovSetIBCPause update the status of ibc-transfer
+  rpc GovSetIBCPause(MsgGovSetIBCPause) returns (MsgGovSetIBCPauseResponse);
 }
 
 // MsgGovUpdateQuota defines the Msg/GovUpdateQuota request type.
@@ -56,8 +56,8 @@ message MsgGovUpdateQuota {
 // MsgGovUpdateQuotaResponse defines response type for the Msg/GovUpdateQuota for with x/gov proposals.
 message MsgGovUpdateQuotaResponse {};
 
-// MsgGovUpdateTransferStatus defines request type for UpdateIBCTransferStatus
-message MsgGovUpdateTransferStatus {
+// MsgGovSetIBCPause defines request type for UpdateIBCTransferStatus
+message MsgGovSetIBCPause {
   option (gogoproto.goproto_getters)  = false;
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
@@ -69,5 +69,5 @@ message MsgGovUpdateTransferStatus {
   IBCTransferStatus ibc_pause_status = 4;
 }
 
-// MsgGovUpdateTransferStatusResponse definesresponse type for Msg/MsgGovUpdateTransferStatus for with x/gov proposals.
-message MsgGovUpdateTransferStatusResponse {}
+// MsgGovSetIBCPauseResponse definesresponse type for Msg/MsgGovSetIBCPause for with x/gov proposals.
+message MsgGovSetIBCPauseResponse {}

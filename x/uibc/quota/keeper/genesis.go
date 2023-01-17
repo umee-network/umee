@@ -12,7 +12,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 		panic(err)
 	}
 
-	if err := k.SetQuotaOfIBCDenoms(ctx, genState.Quotas); err != nil {
+	if err := k.SetDenomQuotas(ctx, genState.Quotas); err != nil {
 		panic(err)
 	}
 
@@ -25,7 +25,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 	}
 }
 
-// ExportGenesis returns the x/leverage module's exported genesis state.
+// ExportGenesis returns the x/uibc module's exported genesis state.
 func (k Keeper) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 	quotas, err := k.GetQuotaOfIBCDenoms(ctx)
 	if err != nil {

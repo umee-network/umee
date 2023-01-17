@@ -11,7 +11,7 @@ import (
 
 var (
 	_ sdk.Msg = &MsgGovUpdateQuota{}
-	_ sdk.Msg = &MsgGovUpdateTransferStatus{}
+	_ sdk.Msg = &MsgGovSetIBCPause{}
 )
 
 // GetTitle returns the title of the proposal.
@@ -61,8 +61,8 @@ func (msg *MsgGovUpdateQuota) GetSigners() []sdk.AccAddress {
 
 func NewUpdateIBCTransferPauseStatus(authority, title, description string,
 	ibcPauseStatus IBCTransferStatus,
-) *MsgGovUpdateTransferStatus {
-	return &MsgGovUpdateTransferStatus{
+) *MsgGovSetIBCPause {
+	return &MsgGovSetIBCPause{
 		Title:          title,
 		Description:    description,
 		Authority:      authority,
@@ -71,25 +71,25 @@ func NewUpdateIBCTransferPauseStatus(authority, title, description string,
 }
 
 // GetTitle returns the title of the proposal.
-func (msg *MsgGovUpdateTransferStatus) GetTitle() string { return msg.Title }
+func (msg *MsgGovSetIBCPause) GetTitle() string { return msg.Title }
 
 // GetDescription returns the description of the proposal.
-func (msg *MsgGovUpdateTransferStatus) GetDescription() string { return msg.Description }
+func (msg *MsgGovSetIBCPause) GetDescription() string { return msg.Description }
 
 // Route implements Msg
-func (msg MsgGovUpdateTransferStatus) Route() string { return RouterKey }
+func (msg MsgGovSetIBCPause) Route() string { return RouterKey }
 
 // Type implements Msg
-func (msg MsgGovUpdateTransferStatus) Type() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovSetIBCPause) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // String implements the Stringer interface.
-func (msg *MsgGovUpdateTransferStatus) String() string {
+func (msg *MsgGovSetIBCPause) String() string {
 	out, _ := json.Marshal(msg)
 	return string(out)
 }
 
 // ValidateBasic implements Msg
-func (msg *MsgGovUpdateTransferStatus) ValidateBasic() error {
+func (msg *MsgGovSetIBCPause) ValidateBasic() error {
 	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
 		return sdkerrors.Wrap(err, "invalid authority address")
 	}
@@ -102,13 +102,13 @@ func (msg *MsgGovUpdateTransferStatus) ValidateBasic() error {
 }
 
 // GetSignBytes implements Msg
-func (msg *MsgGovUpdateTransferStatus) GetSignBytes() []byte {
+func (msg *MsgGovSetIBCPause) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
-func (msg *MsgGovUpdateTransferStatus) GetSigners() []sdk.AccAddress {
+func (msg *MsgGovSetIBCPause) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 

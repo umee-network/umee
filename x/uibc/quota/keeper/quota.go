@@ -15,7 +15,7 @@ import (
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
-// GetQuotaOfIBCDenoms returns quota of all registered ibc denoms.
+// GetQuotaOfIBCDenoms returns quota of all tokens.
 func (k Keeper) GetQuotaOfIBCDenoms(ctx sdk.Context) ([]uibc.Quota, error) {
 	var quotaOfIBCDenoms []uibc.Quota
 
@@ -37,18 +37,13 @@ func (k Keeper) GetQuotaOfIBCDenoms(ctx sdk.Context) ([]uibc.Quota, error) {
 	return quotaOfIBCDenoms, nil
 }
 
-// GetQuotaOfIBCDenom retunes the rate limits of ibc denom.
-func (k Keeper) GetQuotaOfIBCDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
-	rate, err := k.getQuotaOfIBCDenom(ctx, ibcDenom)
-	if err != nil {
-		return nil, err
-	}
-
-	return rate, nil
+// GetQuotaByDenom retunes the rate limits of ibc denom.
+func (k Keeper) GetQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
+	return k.getQuotaByDenom(ctx, ibcDenom)
 }
 
-// getQuotaOfIBCDenom retunes the quota of ibc denom.
-func (k Keeper) getQuotaOfIBCDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
+// getQuotaByDenom retunes the quota of ibc denom.
+func (k Keeper) getQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.KeyTotalOutflows(ibcDenom))
 	if bz == nil {
@@ -63,10 +58,10 @@ func (k Keeper) getQuotaOfIBCDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quot
 	return &quotaOfIBCDenom, nil
 }
 
-// SetQuotaOfIBCDenoms save the rate limits of ibc denoms into store.
-func (k Keeper) SetQuotaOfIBCDenoms(ctx sdk.Context, quotaOfIBCDenoms []uibc.Quota) error {
-	for _, quotaOfIBCDenom := range quotaOfIBCDenoms {
-		if err := k.SetQuotaOfIBCDenom(ctx, quotaOfIBCDenom); err != nil {
+// SetDenomQuotas save the updated token quota.
+func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas []uibc.Quota) error {
+	for _, quotaOfIBCDenom := range quotas {
+		if err := k.SetDenomQuota(ctx, quotaOfIBCDenom); err != nil {
 			return err
 		}
 	}
@@ -74,8 +69,8 @@ func (k Keeper) SetQuotaOfIBCDenoms(ctx sdk.Context, quotaOfIBCDenoms []uibc.Quo
 	return nil
 }
 
-// SetQuotaOfIBCDenom save the quota of ibc denom into store.
-func (k Keeper) SetQuotaOfIBCDenom(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) error {
+// SetDenomQuota save the quota of denom into store.
+func (k Keeper) SetDenomQuota(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) error {
 	store := ctx.KVStore(k.storeKey)
 	key := uibc.KeyTotalOutflows(quotaOfIBCDenom.IbcDenom)
 
@@ -133,10 +128,10 @@ func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 }
 
 // CheckAndUpdateQuota checks the quota of ibc-transfer of denom
-func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount string) error {
+func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.Int) error {
 	params := k.GetParams(ctx)
 
-	quotaOfIBCDenom, err := k.getQuotaOfIBCDenom(ctx, denom)
+	quotaOfIBCDenom, err := k.GetQuotaByDenom(ctx, denom)
 	if err != nil {
 		return err
 	}
@@ -145,22 +140,7 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 		return nil
 	}
 
-	amount, ok := sdkmath.NewIntFromString(sendAmount)
-	if !ok {
-		return uibc.ErrInvalidIBCDenom.Wrap("invalid amount")
-	}
-	transferCoin := sdk.NewCoin(denom, amount)
-
-	// convert to base asset if it is `uToken`
-	if ltypes.HasUTokenPrefix(denom) {
-		transferCoin, err = k.leverageKeeper.ExchangeUToken(ctx, transferCoin)
-		if err != nil {
-			return err
-		}
-	}
-
-	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
-	exchangePrice, err := k.leverageKeeper.TokenValue(ctx, transferCoin, false)
+	exchangePrice, err := k.getExchangePrice(ctx, denom, amount)
 	if err != nil {
 		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
 		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
@@ -183,7 +163,7 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 	}
 
 	// update the per token outflow sum
-	if err := k.SetQuotaOfIBCDenom(ctx, *quotaOfIBCDenom); err != nil {
+	if err := k.SetDenomQuota(ctx, *quotaOfIBCDenom); err != nil {
 		return err
 	}
 
@@ -191,9 +171,26 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, sendAmount st
 	return k.SetTotalOutflowSum(ctx, totalOutflowSum)
 }
 
+// getExchangePrice
+func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.Int) (sdk.Dec, error) {
+	transferCoin := sdk.NewCoin(denom, amount)
+	var err error
+
+	// convert to base asset if it is `uToken`
+	if ltypes.HasUTokenPrefix(denom) {
+		transferCoin, err = k.leverageKeeper.ExchangeUToken(ctx, transferCoin)
+		if err != nil {
+			return sdk.Dec{}, err
+		}
+	}
+
+	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
+	return k.leverageKeeper.TokenValue(ctx, transferCoin, false)
+}
+
 // UndoUpdateQuota undo the quota of ibc denom
-func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error {
-	quotaOfIBCDenom, err := k.getQuotaOfIBCDenom(ctx, denom)
+func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.Int) error {
+	quotaOfIBCDenom, err := k.GetQuotaByDenom(ctx, denom)
 	if err != nil {
 		return err
 	}
@@ -202,22 +199,7 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error
 		return nil
 	}
 
-	amount, ok := sdkmath.NewIntFromString(sendAmount)
-	if !ok {
-		return uibc.ErrInvalidIBCDenom.Wrap("invalid amount")
-	}
-	transferCoin := sdk.NewCoin(denom, amount)
-
-	// convert to base asset if it is `uToken`
-	if ltypes.HasUTokenPrefix(denom) {
-		transferCoin, err = k.leverageKeeper.ExchangeUToken(ctx, transferCoin)
-		if err != nil {
-			return err
-		}
-	}
-
-	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
-	exchangePrice, err := k.leverageKeeper.TokenValue(ctx, transferCoin, false)
+	exchangePrice, err := k.getExchangePrice(ctx, denom, amount)
 	if err != nil {
 		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
 		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
@@ -229,7 +211,7 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error
 
 	// reset the outflow limit of token
 	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Sub(exchangePrice)
-	if err := k.SetQuotaOfIBCDenom(ctx, *quotaOfIBCDenom); err != nil {
+	if err := k.SetDenomQuota(ctx, *quotaOfIBCDenom); err != nil {
 		return err
 	}
 
@@ -238,7 +220,7 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom, sendAmount string) error
 	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
 }
 
-// GetFundsFromPacket
+// GetFundsFromPacket returns transfer amount and denom
 func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (string, string, error) {
 	var packetData transfertypes.FungibleTokenPacketData
 	err := json.Unmarshal(packet.GetData(), &packetData)
@@ -256,7 +238,6 @@ func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (string, string, err
 // recv (B)non-native: denom
 // recv (B)native: transfer/channel-0/denom
 func (k Keeper) GetLocalDenom(denom string) string {
-
 	if strings.HasPrefix(denom, "transfer/") {
 		denomTrace := transfertypes.ParseDenomTrace(denom)
 		return denomTrace.IBCDenom()

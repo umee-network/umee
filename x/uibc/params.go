@@ -11,7 +11,7 @@ const (
 	// Default ibc-transfer quota is disabled
 	DefaultIBCPause = IBCTransferStatus_IBC_TRANSFER_STATUS_DISABLED
 	// 24 hours time interval for ibc-transfer quota limit
-	DefaultQuotaDurationPerDenom = time.Minute * 60 * 24
+	DefaultQuotaDurationPerDenom = 60 * 60 * 24
 )
 
 var (
@@ -32,12 +32,12 @@ func NewParams(ibcPause IBCTransferStatus, totalQuota, quotaPerDenom sdk.Dec, qu
 
 // DefaultParams returns default genesis params
 func DefaultParams() Params {
-	return Params{
-		IbcPause:      DefaultIBCPause,
-		TotalQuota:    DefaultTotalQuota,
-		TokenQuota:    DefaultQuotaPerIBCDenom,
-		QuotaDuration: DefaultQuotaDurationPerDenom,
-	}
+	return NewParams(
+		DefaultIBCPause,
+		DefaultTotalQuota,
+		DefaultQuotaPerIBCDenom,
+		DefaultQuotaDurationPerDenom,
+	)
 }
 
 func (p Params) Validate() error {
@@ -49,11 +49,11 @@ func (p Params) Validate() error {
 		return err
 	}
 
-	if err := validateTotalQuota(p.TotalQuota); err != nil {
+	if err := validateQuota(p.TotalQuota, "total quota"); err != nil {
 		return err
 	}
 
-	if err := validateQuotaPerToken(p.TotalQuota); err != nil {
+	if err := validateQuota(p.TokenQuota, "quota per token"); err != nil {
 		return err
 	}
 
@@ -74,47 +74,17 @@ func validateIBCTransferStatus(status IBCTransferStatus) error {
 	return fmt.Errorf("invalid ibc-transfer status : %s", status.String())
 }
 
-func validateQuotaDuration(i interface{}) error {
-	v, ok := i.(time.Duration)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
-	if v <= 0 {
-		return fmt.Errorf("quota duration time must be positive: %d", v)
+func validateQuotaDuration(d time.Duration) error {
+	if d <= 0 {
+		return fmt.Errorf("quota duration time must be positive: %d", d)
 	}
 
 	return nil
 }
 
-func validateTotalQuota(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
+func validateQuota(q sdk.Dec, typ string) error {
+	if q.IsNil() || q.IsNegative() {
+		return fmt.Errorf("%s must be not negative: %s", typ, q)
 	}
-
-	if v.IsNil() {
-		return fmt.Errorf("total quota cannot be nil: %s", v)
-	}
-	if v.IsNegative() {
-		return fmt.Errorf("total quota cannot be negative: %s", v)
-	}
-
-	return nil
-}
-
-func validateQuotaPerToken(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
-	if v.IsNil() {
-		return fmt.Errorf("quota per token cannot be nil: %s", v)
-	}
-	if v.IsNegative() {
-		return fmt.Errorf("quota per token cannot be negative: %s", v)
-	}
-
 	return nil
 }

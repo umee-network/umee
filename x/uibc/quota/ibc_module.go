@@ -3,6 +3,7 @@ package quota
 import (
 	"encoding/json"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
@@ -150,10 +151,15 @@ func (im IBCMiddleware) RevertSentPacket(
 		)
 	}
 
+	amount, ok := sdkmath.NewIntFromString(data.Amount)
+	if !ok {
+		return uibc.ErrInvalidIBCDenom.Wrap("invalid transfer amount")
+	}
+
 	return im.keeper.UndoUpdateQuota(
 		ctx,
 		data.Denom,
-		data.Amount,
+		amount,
 	)
 }
 

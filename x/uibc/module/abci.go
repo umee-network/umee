@@ -34,7 +34,7 @@ func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 			// reset the outflow sum to 0
 			quotaOfIBCDenom.OutflowSum = sdk.NewDec(0)
 			// storing the rate limits to store
-			if err := keeper.SetQuotaOfIBCDenom(ctx, quotaOfIBCDenom); err != nil {
+			if err := keeper.SetDenomQuota(ctx, quotaOfIBCDenom); err != nil {
 				panic(err)
 			}
 		}
