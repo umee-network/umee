@@ -43,7 +43,7 @@ func listenForPrices(
 	}
 	// Saves the last median for each denom
 	for _, median := range medians {
-		priceStore.medians[median.Denom] = median.Amount
+		priceStore.medians[median.ExchangeRateTuple.Denom] = median.ExchangeRateTuple.ExchangeRate
 	}
 
 	medianDeviations, err := umeeClient.QueryClient.QueryMedianDeviations()
@@ -52,7 +52,7 @@ func listenForPrices(
 	}
 	// Saves the last median deviation for each denom
 	for _, medianDeviation := range medianDeviations {
-		priceStore.medianDeviations[medianDeviation.Denom] = medianDeviation.Amount
+		priceStore.medianDeviations[medianDeviation.ExchangeRateTuple.Denom] = medianDeviation.ExchangeRateTuple.ExchangeRate
 	}
 
 	return priceStore, nil
