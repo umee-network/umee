@@ -1093,19 +1093,20 @@ paths:
                 items:
                   type: object
                   properties:
-                    denom:
+                    exchange_rate_tuple:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        exchange_rate:
+                          type: string
+                      title: >-
+                        ExchangeRateTuple - struct to store interpreted exchange
+                        rates data to store
+                    block_num:
                       type: string
-                    amount:
-                      type: string
-                  description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                      format: uint64
+                  title: Price is an instance of a price "stamp"
                 description: >-
                   medians defines a list of the median deviations for all
                   stamped denoms.
@@ -1159,19 +1160,20 @@ paths:
                 items:
                   type: object
                   properties:
-                    denom:
+                    exchange_rate_tuple:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        exchange_rate:
+                          type: string
+                      title: >-
+                        ExchangeRateTuple - struct to store interpreted exchange
+                        rates data to store
+                    block_num:
                       type: string
-                    amount:
-                      type: string
-                  description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                      format: uint64
+                  title: Price is an instance of a price "stamp"
                 description: medians defines a list of the medians for all stamped denoms.
             description: |-
               QueryMediansResponse is response type for the
@@ -2970,6 +2972,23 @@ definitions:
           Maximum Median Stamps represents the maximum amount of medians the
           oracle module will store before pruning via FIFO.
     description: Params defines the parameters for the oracle module.
+  umee.oracle.v1.Price:
+    type: object
+    properties:
+      exchange_rate_tuple:
+        type: object
+        properties:
+          denom:
+            type: string
+          exchange_rate:
+            type: string
+        title: >-
+          ExchangeRateTuple - struct to store interpreted exchange rates data to
+          store
+      block_num:
+        type: string
+        format: uint64
+    title: Price is an instance of a price "stamp"
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
     properties:
@@ -3150,15 +3169,20 @@ definitions:
         items:
           type: object
           properties:
-            denom:
+            exchange_rate_tuple:
+              type: object
+              properties:
+                denom:
+                  type: string
+                exchange_rate:
+                  type: string
+              title: >-
+                ExchangeRateTuple - struct to store interpreted exchange rates
+                data to store
+            block_num:
               type: string
-            amount:
-              type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+              format: uint64
+          title: Price is an instance of a price "stamp"
         description: >-
           medians defines a list of the median deviations for all stamped
           denoms.
@@ -3173,15 +3197,20 @@ definitions:
         items:
           type: object
           properties:
-            denom:
+            exchange_rate_tuple:
+              type: object
+              properties:
+                denom:
+                  type: string
+                exchange_rate:
+                  type: string
+              title: >-
+                ExchangeRateTuple - struct to store interpreted exchange rates
+                data to store
+            block_num:
               type: string
-            amount:
-              type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+              format: uint64
+          title: Price is an instance of a price "stamp"
         description: medians defines a list of the medians for all stamped denoms.
     description: |-
       QueryMediansResponse is response type for the
