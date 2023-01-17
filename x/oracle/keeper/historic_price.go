@@ -19,7 +19,7 @@ func (k Keeper) HistoricMedians(
 ) []sdk.Dec {
 	medians := []sdk.Dec{}
 
-	k.IterateHistoricMedians(ctx, denom, uint(numStamps), func(median sdk.Dec) bool {
+	k.IterateHistoricMedians(ctx, denom, uint(numStamps), func(median sdk.Dec, _ []byte) bool {
 		medians = append(medians, median)
 		return false
 	})
@@ -222,7 +222,7 @@ func (k Keeper) historicPrices(
 	// calculate start block to iterate from
 	historicPrices := []sdk.Dec{}
 
-	k.IterateHistoricPrices(ctx, denom, uint(numStamps), func(exchangeRate sdk.Dec) bool {
+	k.IterateHistoricPrices(ctx, denom, uint(numStamps), func(exchangeRate sdk.Dec, _ []byte) bool {
 		historicPrices = append(historicPrices, exchangeRate)
 		return false
 	})
@@ -237,7 +237,7 @@ func (k Keeper) IterateHistoricPrices(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint,
-	handler func(sdk.Dec) bool,
+	handler func(sdk.Dec, []byte) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 
@@ -249,7 +249,7 @@ func (k Keeper) IterateHistoricPrices(
 	for ; iter.Valid(); iter.Next() {
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		if handler(decProto.Dec) {
+		if handler(decProto.Dec, iter.Key()) {
 			break
 		}
 	}
@@ -262,7 +262,7 @@ func (k Keeper) IterateHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint,
-	handler func(sdk.Dec) bool,
+	handler func(sdk.Dec, []byte) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 
@@ -274,7 +274,32 @@ func (k Keeper) IterateHistoricMedians(
 	for ; iter.Valid(); iter.Next() {
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		if handler(decProto.Dec) {
+		if handler(decProto.Dec, iter.Key()) {
+			break
+		}
+	}
+}
+
+// IterateHistoricMediansSinceBlock iterates over median deviations of a given
+// denom in the store in reverse.
+// Iterator stops when exhausting the source, or when the handler returns `true`.
+func (k Keeper) IterateMedianDeviations(
+	ctx sdk.Context,
+	denom string,
+	numStamps uint,
+	handler func(sdk.Dec, []byte) bool,
+) {
+	store := ctx.KVStore(k.storeKey)
+
+	// make sure we have one zero byte to correctly separate denoms
+	prefix := util.ConcatBytes(1, types.KeyPrefixMedianDeviation, []byte(denom))
+	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		decProto := sdk.DecProto{}
+		k.cdc.MustUnmarshal(iter.Value(), &decProto)
+		if handler(decProto.Dec, iter.Key()) {
 			break
 		}
 	}

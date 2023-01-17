@@ -6,6 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/oracle/keeper"
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
@@ -108,9 +109,39 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
 		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
 		for _, v := range params.AcceptList {
-			k.DeleteHistoricPrice(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
-			k.DeleteHistoricMedian(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+			// prune historic prices
+			historicPricePrefix := util.ConcatBytes(1, types.KeyPrefixHistoricPrice, []byte(v.SymbolDenom))
+			k.IterateHistoricPrices(ctx, v.SymbolDenom, uint(k.MaximumPriceStamps(ctx)),
+				func(_ sdk.Dec, key []byte) bool {
+					_, block := types.ParseDenomAndBlockFromKey(key, historicPricePrefix)
+					if block < pruneHistoricPeriod {
+						k.DeleteHistoricPrice(ctx, v.SymbolDenom, block)
+					}
+					return false
+				},
+			)
+			// prune medians
+			medianPrefix := util.ConcatBytes(1, types.KeyPrefixMedian, []byte(v.SymbolDenom))
+			k.IterateHistoricMedians(ctx, v.SymbolDenom, uint(k.MaximumPriceStamps(ctx)),
+				func(_ sdk.Dec, key []byte) bool {
+					_, block := types.ParseDenomAndBlockFromKey(key, medianPrefix)
+					if block < pruneMedianPeriod {
+						k.DeleteHistoricMedian(ctx, v.SymbolDenom, block)
+					}
+					return false
+				},
+			)
+			// prune median deviations
+			medianDevPrefix := util.ConcatBytes(1, types.KeyPrefixMedianDeviation, []byte(v.SymbolDenom))
+			k.IterateMedianDeviations(ctx, v.SymbolDenom, uint(k.MaximumPriceStamps(ctx)),
+				func(_ sdk.Dec, key []byte) bool {
+					_, block := types.ParseDenomAndBlockFromKey(key, medianDevPrefix)
+					if block < pruneMedianPeriod {
+						k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, block)
+					}
+					return false
+				},
+			)
 		}
 	}
 
