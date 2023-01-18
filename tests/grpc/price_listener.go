@@ -41,6 +41,12 @@ func listenForPrices(
 	if err != nil {
 		return nil, err
 	}
+
+	expectedNumMedians := int(params.MaximumMedianStamps) * len(params.AcceptList)
+	if len(medians) != expectedNumMedians {
+		return nil, fmt.Errorf("amount of medians %d does not match the expected amount %d", len(medians), expectedNumMedians)
+	}
+
 	// Saves the last median for each denom
 	for _, median := range medians {
 		priceStore.medians[median.ExchangeRateTuple.Denom] = median.ExchangeRateTuple.ExchangeRate
@@ -50,6 +56,7 @@ func listenForPrices(
 	if err != nil {
 		return nil, err
 	}
+
 	// Saves the last median deviation for each denom
 	for _, medianDeviation := range medianDeviations {
 		priceStore.medianDeviations[medianDeviation.ExchangeRateTuple.Denom] = medianDeviation.ExchangeRateTuple.ExchangeRate
