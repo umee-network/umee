@@ -337,3 +337,30 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyMedianDeviation(denom, blockNum))
 }
+
+func (k Keeper) PruneHistoricPricesBeforeBlock(ctx sdk.Context, blockNum uint64) {
+	k.IterateAllHistoricPrices(ctx, func(price types.Price) (stop bool) {
+		if price.BlockNum <= blockNum {
+			k.DeleteHistoricPrice(ctx, price.ExchangeRateTuple.Denom, price.BlockNum)
+		}
+		return false
+	})
+}
+
+func (k Keeper) PruneMediansBeforeBlock(ctx sdk.Context, blockNum uint64) {
+	k.IterateAllMedianPrices(ctx, func(price types.Price) (stop bool) {
+		if price.BlockNum <= blockNum {
+			k.DeleteHistoricMedian(ctx, price.ExchangeRateTuple.Denom, price.BlockNum)
+		}
+		return false
+	})
+}
+
+func (k Keeper) PruneMedianDeviationsBeforeBlock(ctx sdk.Context, blockNum uint64) {
+	k.IterateAllMedianDeviationPrices(ctx, func(price types.Price) (stop bool) {
+		if price.BlockNum <= blockNum {
+			k.DeleteHistoricMedianDeviation(ctx, price.ExchangeRateTuple.Denom, price.BlockNum)
+		}
+		return false
+	})
+}
