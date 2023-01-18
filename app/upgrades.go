@@ -35,7 +35,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade4_0to4_0rc3(upgradeInfo)
 }
 
-// performs upgrade from v4.0-rc2 -> v4.0-rc3
+// performs upgrade from v4.0-rc2 (or rc1) -> v4.0-rc3
 func (app UmeeApp) registerUpgrade4_0to4_0rc3(_ upgradetypes.Plan) {
 	const planName = "v4.0-rc3"
 	app.UpgradeKeeper.SetUpgradeHandler(
