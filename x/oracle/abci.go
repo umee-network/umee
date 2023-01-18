@@ -108,11 +108,17 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	// the stamp period multiplied by the max stamps.
 	if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 		pruneHistoricPeriod := params.HistoricStampPeriod * params.MaximumPriceStamps
-		pruneMedianPeriod := params.MedianStampPeriod * params.MaximumMedianStamps
+		if pruneHistoricPeriod < uint64(ctx.BlockHeight()) {
+			k.PruneHistoricPricesBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
+		}
 
-		k.PruneHistoricPricesBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
-		k.PruneMediansBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-		k.PruneMedianDeviationsBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+		if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+			pruneMedianPeriod := params.MedianStampPeriod * params.MaximumMedianStamps
+			if pruneMedianPeriod < uint64(ctx.BlockHeight()) {
+				k.PruneMediansBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+				k.PruneMedianDeviationsBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+			}
+		}
 	}
 
 	return nil
