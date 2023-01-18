@@ -227,11 +227,12 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			// query for past 6 medians (should only get 4 back since max median stamps is set to 4)
 			medians := app.OracleKeeper.HistoricMedians(ctx, denom.SymbolDenom, 6)
 			s.Require().Equal(4, len(medians))
-			s.Require().Equal(tc.expectedHistoricMedians, medians)
+
+			s.Require().Equal(tc.expectedHistoricMedians, medians.Decs())
 
 			medianHistoricDeviation, err := app.OracleKeeper.HistoricMedianDeviation(ctx, denom.SymbolDenom)
 			s.Require().NoError(err)
-			s.Require().Equal(tc.expectedHistoricMedianDeviation, medianHistoricDeviation)
+			s.Require().Equal(tc.expectedHistoricMedianDeviation, medianHistoricDeviation.ExchangeRateTuple.ExchangeRate)
 
 			withinHistoricMedianDeviation, err := app.OracleKeeper.WithinHistoricMedianDeviation(ctx, denom.SymbolDenom)
 			s.Require().NoError(err)

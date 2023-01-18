@@ -111,6 +111,8 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
 		// (1000) * 4.21 * 0.25 = 1052.5
+		SpotBorrowLimit: sdk.MustNewDecFromStr("1052.5"),
+		// (1000) * 4.21 * 0.25 = 1052.5
 		LiquidationThreshold: sdk.MustNewDecFromStr("1052.5"),
 	}
 
