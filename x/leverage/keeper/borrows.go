@@ -17,34 +17,17 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 
-	// Check using current prices
-	err := k.checkPositionHealth(ctx, borrowed, collateral, false)
+	value, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeHigh)
 	if err != nil {
 		return err
 	}
-
-	// Check using historic prices
-	return k.checkPositionHealth(ctx, borrowed, collateral, true)
-}
-
-// checkPositionHealth returns an error if a borrow + collateral position is not healthy. uses either
-// current or historic prices.
-func (k Keeper) checkPositionHealth(ctx sdk.Context, borrowed, collateral sdk.Coins, historic bool) error {
-	value, err := k.TotalTokenValue(ctx, borrowed, historic)
-	if err != nil {
-		return err
-	}
-	limit, err := k.CalculateBorrowLimit(ctx, collateral, historic)
+	limit, err := k.CalculateBorrowLimit(ctx, collateral, types.PriceModeLow)
 	if err != nil {
 		return err
 	}
 	if value.GT(limit) {
-		desc := "current"
-		if historic {
-			desc = "historic"
-		}
 		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s (%s prices)", value, limit, desc)
+			"borrowed: %s, limit: %s", value, limit)
 	}
 	return nil
 }
@@ -114,8 +97,7 @@ func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
 // collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
-// If the historic parameter is true, uses medians of recent prices instead of current prices.
-func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins, historic bool) (sdk.Dec, error) {
+func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
 	limit := sdk.ZeroDec()
 
 	for _, coin := range collateral {
@@ -132,8 +114,8 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins, hist
 
 		// ignore blacklisted tokens
 		if !ts.Blacklist {
-			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset, historic)
+			// get USD value of base assets using the chosen price mode
+			v, err := k.TokenValue(ctx, baseAsset, mode)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
@@ -149,7 +131,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins, hist
 // borrower with given collateral could reach before being eligible for liquidation, using
 // each token's oracle price, uToken exchange rate, and liquidation threshold.
 // An error is returned if any input coins are not uTokens or if value
-// calculation fails.
+// calculation fails. Always uses spot prices.
 func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
 	totalThreshold := sdk.ZeroDec()
 
@@ -168,7 +150,7 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 		// ignore blacklisted tokens
 		if !ts.Blacklist {
 			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset, false)
+			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}

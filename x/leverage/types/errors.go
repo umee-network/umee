@@ -8,10 +8,11 @@ import (
 
 var (
 	// 1XX = General Validation
-	ErrEmptyAddress = sdkerrors.Register(ModuleName, 100, "empty address")
-	ErrNilAsset     = sdkerrors.Register(ModuleName, 101, "nil asset")
-	ErrGetAmount    = sdkerrors.Register(ModuleName, 102, "retrieved invalid amount")
-	ErrSetAmount    = sdkerrors.Register(ModuleName, 103, "cannot set invalid amount")
+	ErrEmptyAddress     = sdkerrors.Register(ModuleName, 100, "empty address")
+	ErrNilAsset         = sdkerrors.Register(ModuleName, 101, "nil asset")
+	ErrGetAmount        = sdkerrors.Register(ModuleName, 102, "retrieved invalid amount")
+	ErrSetAmount        = sdkerrors.Register(ModuleName, 103, "cannot set invalid amount")
+	ErrInvalidPriceMode = sdkerrors.Register(ModuleName, 104, "invalid price mode")
 
 	// 2XX = Token Registry
 	ErrNotRegisteredToken   = sdkerrors.Register(ModuleName, 200, "not a registered Token")

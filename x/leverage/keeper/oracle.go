@@ -11,53 +11,35 @@ import (
 
 var ten = sdk.MustNewDecFromStr("10")
 
-// TokenBasePrice returns the USD value of a base token. Note, the token's denomination
-// must be the base denomination, e.g. uumee. The x/oracle module must know of
-// the base and display/symbol denominations for each exchange pair. E.g. it must
-// know about the UMEE/USD exchange rate along with the uumee base denomination
-// and the exponent. When error is nil, price is guaranteed to be positive.
-func (k Keeper) TokenBasePrice(ctx sdk.Context, baseDenom string) (sdk.Dec, error) {
-	t, err := k.GetTokenSettings(ctx, baseDenom)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-
-	if t.Blacklist {
-		return sdk.ZeroDec(), types.ErrBlacklisted
-	}
-
-	price, err := k.oracleKeeper.GetExchangeRateBase(ctx, baseDenom)
-	if err != nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(err, "oracle")
-	}
-
-	if price.IsNil() || !price.IsPositive() {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrInvalidOraclePrice, baseDenom)
-	}
-
-	return price, nil
-}
-
-// TokenDefaultDenomPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`).
+// TokenPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`).
 // Note, the input denom must still be the base denomination, e.g. uumee. When error is nil, price is
 // guaranteed to be positive. Also returns the token's exponent to reduce redundant registry reads.
-// If the historic parameter is true, uses a median of recent prices instead of current price.
-func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string, historic bool) (sdk.Dec, uint32, error) {
+func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMode) (sdk.Dec, uint32, error) {
 	t, err := k.GetTokenSettings(ctx, baseDenom)
 	if err != nil {
 		return sdk.ZeroDec(), 0, err
 	}
-
 	if t.Blacklist {
 		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
 	}
 
-	var price sdk.Dec
+	// if a token is exempt from historic pricing, all price modes return Spot price
+	if t.HistoricMedians == 0 {
+		mode = types.PriceModeSpot
+	}
 
-	if historic && t.HistoricMedians > 0 {
-		// historic price
+	var price, spotPrice, historicPrice sdk.Dec
+	if mode != types.PriceModeHistoric {
+		// spot price is required for modes other than historic
+		spotPrice, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
+		if err != nil {
+			return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+		}
+	}
+	if mode != types.PriceModeSpot {
+		// historic price is required for modes other than spot
 		var numStamps uint32
-		price, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, uint64(t.HistoricMedians))
+		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(ctx, t.SymbolDenom, uint64(t.HistoricMedians))
 		if err == nil && numStamps < t.HistoricMedians {
 			return sdk.ZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
 				"requested %d, got %d",
@@ -65,12 +47,22 @@ func (k Keeper) TokenDefaultDenomPrice(ctx sdk.Context, baseDenom string, histor
 				numStamps,
 			)
 		}
-	} else {
-		// current price
-		price, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
+		if err != nil {
+			return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+		}
 	}
-	if err != nil {
-		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+
+	switch mode {
+	case types.PriceModeSpot:
+		price = spotPrice
+	case types.PriceModeHistoric:
+		price = historicPrice
+	case types.PriceModeHigh:
+		price = sdk.MaxDec(spotPrice, historicPrice)
+	case types.PriceModeLow:
+		price = sdk.MinDec(spotPrice, historicPrice)
+	default:
+		return sdk.ZeroDec(), t.Exponent, types.ErrInvalidPriceMode.Wrapf("%d", mode)
 	}
 
 	if price.IsNil() || !price.IsPositive() {
@@ -96,9 +88,8 @@ func exponent(input sdk.Dec, n int32) sdk.Dec {
 // returned if we cannot get the token's price or if it's not an accepted token.
 // Computation uses price of token's default denom to avoid rounding errors
 // for exponent >= 18 tokens.
-// If the historic parameter is true, uses medians of recent prices instead of current prices.
-func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin, historic bool) (sdk.Dec, error) {
-	p, exp, err := k.TokenDefaultDenomPrice(ctx, coin.Denom, historic)
+func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin, mode types.PriceMode) (sdk.Dec, error) {
+	p, exp, err := k.TokenPrice(ctx, coin.Denom, mode)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
@@ -108,14 +99,13 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin, historic bool) (sdk.D
 // TotalTokenValue returns the total value of all supplied tokens. It is
 // equivalent to the sum of TokenValue on each coin individually, except it
 // ignores unregistered and blacklisted tokens instead of returning an error.
-// If the historic parameter is true, uses medians of recent prices instead of current prices.
-func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, historic bool) (sdk.Dec, error) {
+func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
 	accepted := k.filterAcceptedCoins(ctx, coins)
 
 	for _, c := range accepted {
-		v, err := k.TokenValue(ctx, c, historic)
+		v, err := k.TokenValue(ctx, c, mode)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -126,11 +116,12 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, historic bool)
 	return total, nil
 }
 
-// TokenWithValue creates a token of a given denom with an given USD value, using either current
-// or historic prices. Returns an error on invalid price or denom.
-func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, historic bool) (sdk.Coin, error) {
+// TokenWithValue creates a token of a given denom with an given USD value.
+// Returns an error on invalid price or denom. Rounds down, i.e. the
+// value of the token returned may be slightly less than the requested value.
+func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mode types.PriceMode) (sdk.Coin, error) {
 	// get token price (guaranteed positive if nil error) and exponent
-	price, exp, err := k.TokenDefaultDenomPrice(ctx, denom, historic)
+	price, exp, err := k.TokenPrice(ctx, denom, mode)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -140,17 +131,36 @@ func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, his
 	return sdk.NewCoin(denom, amount.TruncateInt()), nil
 }
 
+// UTokenWithValue creates a uToken of a given denom with an given USD value.
+// Returns an error on invalid price or non-uToken denom. Rounds down, i.e. the
+// value of the uToken returned may be slightly less than the requested value.
+func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mode types.PriceMode) (sdk.Coin, error) {
+	base := types.ToTokenDenom(denom)
+	if base == "" {
+		return sdk.Coin{}, types.ErrNotUToken.Wrap(denom)
+	}
+
+	token, err := k.TokenWithValue(ctx, base, value, mode)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	uTokenExchangeRate := k.DeriveExchangeRate(ctx, base)
+	uTokenAmount := sdk.NewDecFromInt(token.Amount).Quo(uTokenExchangeRate).TruncateInt()
+
+	return sdk.NewCoin(denom, uTokenAmount), nil
+}
+
 // PriceRatio computes the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).
 // Will return an error if either token price is not positive, and guarantees a positive output.
-// Computation uses price of token's default denom to avoid rounding errors for exponent >= 18 tokens,
-// but returns in terms of base tokens.
-// If the historic parameter is true, uses medians of recent prices instead of current prices.
-func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, historic bool) (sdk.Dec, error) {
-	p1, e1, err := k.TokenDefaultDenomPrice(ctx, fromDenom, historic)
+// Computation uses price of token's symbol denom to avoid rounding errors for exponent >= 18 tokens,
+// but returns in terms of base tokens. Uses the same price mode for both token denoms involved.
+func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode types.PriceMode) (sdk.Dec, error) {
+	p1, e1, err := k.TokenPrice(ctx, fromDenom, mode)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-	p2, e2, err := k.TokenDefaultDenomPrice(ctx, toDenom, historic)
+	p2, e2, err := k.TokenPrice(ctx, toDenom, mode)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}

@@ -202,13 +202,13 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// Empty coins
-	borrowLimit, err := app.LeverageKeeper.CalculateBorrowLimit(ctx, sdk.NewCoins(), false)
+	borrowLimit, err := app.LeverageKeeper.CalculateBorrowLimit(ctx, sdk.NewCoins(), types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(sdk.ZeroDec(), borrowLimit)
 
 	// Unregistered asset
 	invalidCoins := sdk.NewCoins(coin("abcd", 1000))
-	_, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, invalidCoins, false)
+	_, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, invalidCoins, types.PriceModeSpot)
 	require.ErrorIs(err, types.ErrNotUToken)
 
 	// Create collateral uTokens (1k u/umee)
@@ -222,7 +222,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 		Mul(sdk.MustNewDecFromStr("0.25"))
 
 	// Check borrow limit vs. manually computed value
-	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, umeeCollateral, false)
+	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, umeeCollateral, types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(expectedUmeeLimit, borrowLimit)
 
@@ -237,7 +237,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 		Mul(sdk.MustNewDecFromStr("0.25"))
 
 	// Check borrow limit vs. manually computed value
-	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, atomCollateral, false)
+	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, atomCollateral, types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(expectedAtomLimit, borrowLimit)
 
@@ -246,7 +246,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	combinedCollateral := umeeCollateral.Add(atomCollateral...)
 
 	// Check borrow limit vs. manually computed value
-	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, combinedCollateral, false)
+	borrowLimit, err = app.LeverageKeeper.CalculateBorrowLimit(ctx, combinedCollateral, types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(expectedCombinedLimit, borrowLimit)
 }
