@@ -78,7 +78,7 @@ func (m *mockOracleKeeper) Reset() {
 	}
 }
 
-func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
+func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	p, e, err := app.LeverageKeeper.TokenPrice(ctx, appparams.BondDenom, types.PriceModeSpot)
@@ -132,6 +132,28 @@ func (s *IntegrationTestSuite) TestOracle_TokenSymbolPrice() {
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
 	require.Equal(uint32(6), e)
+
+	// Additional high/low cases
+
+	p, e, err = app.LeverageKeeper.TokenPrice(ctx, pumpDenom, types.PriceModeHigh)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.00"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.TokenPrice(ctx, dumpDenom, types.PriceModeHigh)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.TokenPrice(ctx, pumpDenom, types.PriceModeLow)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("1.00"), p)
+	require.Equal(uint32(6), e)
+
+	p, e, err = app.LeverageKeeper.TokenPrice(ctx, dumpDenom, types.PriceModeLow)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("0.50"), p)
+	require.Equal(uint32(6), e)
 }
 
 func (s *IntegrationTestSuite) TestOracle_TokenValue() {
@@ -174,6 +196,28 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 
 	// 2.4 PUMP * $1.00
 	v, err = app.LeverageKeeper.TokenValue(ctx, coin(pumpDenom, 2_400000), types.PriceModeHistoric)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
+
+	// Additional high/low cases
+
+	// 2.4 DUMP * $1.00
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(dumpDenom, 2_400000), types.PriceModeHigh)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
+
+	// 2.4 PUMP * $2.00
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(pumpDenom, 2_400000), types.PriceModeHigh)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("4.8"), v)
+
+	// 2.4 DUMP * $0.50
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(dumpDenom, 2_400000), types.PriceModeLow)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("1.2"), v)
+
+	// 2.4 PUMP * $1.00
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin(pumpDenom, 2_400000), types.PriceModeLow)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 }
@@ -219,6 +263,30 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("197.19"), v)
+
+	// uses the higher price for each token
+	v, err = app.LeverageKeeper.TotalTokenValue(
+		ctx,
+		sdk.NewCoins(
+			coin(pumpDenom, 1_000000),
+			coin(dumpDenom, 1_000000),
+		),
+		types.PriceModeHigh,
+	)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("3.00"), v)
+
+	// uses the lower price for each token
+	v, err = app.LeverageKeeper.TotalTokenValue(
+		ctx,
+		sdk.NewCoins(
+			coin(pumpDenom, 1_000000),
+			coin(dumpDenom, 1_000000),
+		),
+		types.PriceModeLow,
+	)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("1.50"), v)
 }
 
 func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
