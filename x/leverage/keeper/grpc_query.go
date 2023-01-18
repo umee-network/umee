@@ -221,7 +221,7 @@ func (q Querier) AccountSummary(
 	}
 	// borrow limit shown here as it is used in leverage logic:
 	// using the lower of spot or historic prices for each collateral token
-	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, types.PriceModeLow)
+	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}

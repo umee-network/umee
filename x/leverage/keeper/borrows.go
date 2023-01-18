@@ -8,9 +8,8 @@ import (
 )
 
 // assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
-// under either recent (historic median) or current prices. It returns an error if current
-// prices cannot be calculated, but will use current prices (without returning an error)
-// for any token whose historic prices cannot be calculated.
+// under either recent (historic median) or current prices. It returns an error if
+// prices cannot be calculated.
 // This should be checked in msg_server.go at the end of any transaction which is restricted
 // by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
 func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
@@ -21,7 +20,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	if err != nil {
 		return err
 	}
-	limit, err := k.CalculateBorrowLimit(ctx, collateral, types.PriceModeLow)
+	limit, err := k.CalculateBorrowLimit(ctx, collateral)
 	if err != nil {
 		return err
 	}
@@ -96,8 +95,9 @@ func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
 // collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
+// The lower of spot price or historic price is used for each collateral token.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
-func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
 	limit := sdk.ZeroDec()
 
 	for _, coin := range collateral {
@@ -115,7 +115,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins, mode
 		// ignore blacklisted tokens
 		if !ts.Blacklist {
 			// get USD value of base assets using the chosen price mode
-			v, err := k.TokenValue(ctx, baseAsset, mode)
+			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeLow)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
