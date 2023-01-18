@@ -32,6 +32,18 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 	app.registerUpgrade3_3to4_0(upgradeInfo)
+	app.registerUpgrade4_0to4_0rc3(upgradeInfo)
+}
+
+// performs upgrade from v4.0-rc2 -> v4.0-rc3
+func (app UmeeApp) registerUpgrade4_0to4_0rc3(_ upgradetypes.Plan) {
+	const planName = "v4.0-rc3"
+	app.UpgradeKeeper.SetUpgradeHandler(
+		planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			return fromVM, nil
+		})
 }
 
 // performs upgrade from v3.3 -> v4
