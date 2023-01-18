@@ -140,7 +140,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			medians := app.OracleKeeper.AllMedianPrices(ctx)
 			medians = *medians.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
 			actualMedian := medians[0].ExchangeRateTuple.ExchangeRate
-			s.Require().Equal(actualMedian, expectedMedian)
+			s.Require().Equal(expectedMedian, actualMedian)
 
 			// check median deviation
 			expectedMedianDeviation, err := decmath.MedianDeviation(actualMedian, denomRates)
@@ -149,17 +149,37 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			medianDeviations := app.OracleKeeper.AllMedianDeviationPrices(ctx)
 			medianDeviations = *medianDeviations.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
 			actualMedianDeviation := medianDeviations[0].ExchangeRateTuple.ExchangeRate
-			s.Require().Equal(actualMedianDeviation, expectedMedianDeviation)
+			s.Require().Equal(expectedMedianDeviation, actualMedianDeviation)
 		}
 	}
+	numberOfAssets := int64(len(exchangeRates))
+
 	historicPrices := app.OracleKeeper.AllHistoricPrices(ctx)
-	s.Require().Equal(int64(len(historicPrices)), maximumPriceStamps*2)
+	s.Require().Equal(maximumPriceStamps*numberOfAssets, int64(len(historicPrices)))
+
+	for i := int64(0); i < maximumPriceStamps; i++ {
+		expectedBlockNum := blockHeight - (historicStampPeriod * (maximumPriceStamps - int64(i+1)))
+		actualBlockNum := historicPrices[i].BlockNum
+		s.Require().Equal(expectedBlockNum, int64(actualBlockNum))
+	}
 
 	medians := app.OracleKeeper.AllMedianPrices(ctx)
-	s.Require().Equal(int64(len(medians)), maximumMedianStamps*2)
+	s.Require().Equal(maximumMedianStamps*numberOfAssets, int64(len(medians)))
+
+	for i := int64(0); i < maximumMedianStamps; i++ {
+		expectedBlockNum := blockHeight - (medianStampPeriod * (maximumMedianStamps - int64(i+1)))
+		actualBlockNum := medians[i].BlockNum
+		s.Require().Equal(expectedBlockNum, int64(actualBlockNum))
+	}
 
 	medianDeviations := app.OracleKeeper.AllMedianPrices(ctx)
-	s.Require().Equal(int64(len(medianDeviations)), maximumMedianStamps*2)
+	s.Require().Equal(maximumMedianStamps*numberOfAssets, int64(len(medianDeviations)))
+
+	for i := int64(0); i < maximumMedianStamps; i++ {
+		expectedBlockNum := blockHeight - (medianStampPeriod * (maximumMedianStamps - int64(i+1)))
+		actualBlockNum := medianDeviations[i].BlockNum
+		s.Require().Equal(expectedBlockNum, int64(actualBlockNum))
+	}
 }
 
 func TestOracleTestSuite(t *testing.T) {
