@@ -132,7 +132,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			oracle.EndBlocker(ctx, app.OracleKeeper)
 		}
 
-		for denom, _ := range exchangeRates {
+		for denom := range exchangeRates {
 			// check median
 			expectedMedian, err := decmath.Median(exchangeRates[denom])
 			s.Require().NoError(err)
