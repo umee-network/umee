@@ -66,9 +66,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1685](https://github.com/umee-network/umee/pull/1685) Add medians param to Token registry.
 - [1683](https://github.com/umee-network/umee/pull/1683) Add MaxBorrow query and allow returning all denoms from MaxWithdraw.
 - [1690](https://github.com/umee-network/umee/pull/1690) Add MaxBorrow message type.
-- [1711](https://github.com/umee-network/umee/pull/1711) Add historic pricing information to leverage MarketSummary ~~and AccountSummary~~ queries. Note: Reverted before release by 17XX
-- [1715](https://github.com/umee-network/umee/pull/1715) ~~Add spot borrow limit to AccountSummary query, and switch returned borrow limit to the minimum of spot and historic borrow limits.~~ Note: Reverted before release by 17XX
-- [17XX](https://github.com/umee-network/umee/pull/17XX) Compute borrow limits using the lower of either spot or historic price for each collateral token, and the higher of said prices for borrowed tokens. Remove extra spot/historic only fields in account summary.
+- [1711](https://github.com/umee-network/umee/pull/1711) Add historic pricing information to leverage MarketSummary query
+- [1715](https://github.com/umee-network/umee/pull/1715) Reverted.
+- [1723](https://github.com/umee-network/umee/pull/1723) Compute borrow limits using the lower of either spot or historic price for each collateral token, and the higher of said prices for borrowed tokens. Remove extra spot/historic only fields in account summary.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 
