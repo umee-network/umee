@@ -142,11 +142,16 @@ paths:
                 description: >-
                   Borrowed Value is the sum of the USD value of all tokens the
                   account has borrowed, including interest owed.
+
+                  It always uses spot prices.
               borrow_limit:
                 type: string
                 description: >-
                   Borrow Limit is the maximum Borrowed Value the account is
                   allowed to reach through direct borrowing.
+
+                  It uses the lower of two borrow limits: spot_borrow_limit and
+                  historic_borrow_limit.
               liquidation_threshold:
                 type: string
                 description: >-
@@ -166,6 +171,13 @@ paths:
                   account is allowed to reach through direct borrowing,
 
                   using historic prices.
+              spot_borrow_limit:
+                type: string
+                description: >-
+                  Spot Borrow Limit is the maximum Borrowed Value the account is
+                  allowed to reach through direct borrowing,
+
+                  using spot prices.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -1081,19 +1093,20 @@ paths:
                 items:
                   type: object
                   properties:
-                    denom:
+                    exchange_rate_tuple:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        exchange_rate:
+                          type: string
+                      title: >-
+                        ExchangeRateTuple - struct to store interpreted exchange
+                        rates data to store
+                    block_num:
                       type: string
-                    amount:
-                      type: string
-                  description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                      format: uint64
+                  title: Price is an instance of a price "stamp"
                 description: >-
                   medians defines a list of the median deviations for all
                   stamped denoms.
@@ -1147,19 +1160,20 @@ paths:
                 items:
                   type: object
                   properties:
-                    denom:
+                    exchange_rate_tuple:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        exchange_rate:
+                          type: string
+                      title: >-
+                        ExchangeRateTuple - struct to store interpreted exchange
+                        rates data to store
+                    block_num:
                       type: string
-                    amount:
-                      type: string
-                  description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                      format: uint64
+                  title: Price is an instance of a price "stamp"
                 description: medians defines a list of the medians for all stamped denoms.
             description: |-
               QueryMediansResponse is response type for the
@@ -2034,11 +2048,16 @@ definitions:
         description: >-
           Borrowed Value is the sum of the USD value of all tokens the account
           has borrowed, including interest owed.
+
+          It always uses spot prices.
       borrow_limit:
         type: string
         description: >-
           Borrow Limit is the maximum Borrowed Value the account is allowed to
           reach through direct borrowing.
+
+          It uses the lower of two borrow limits: spot_borrow_limit and
+          historic_borrow_limit.
       liquidation_threshold:
         type: string
         description: >-
@@ -2058,6 +2077,13 @@ definitions:
           allowed to reach through direct borrowing,
 
           using historic prices.
+      spot_borrow_limit:
+        type: string
+        description: >-
+          Spot Borrow Limit is the maximum Borrowed Value the account is allowed
+          to reach through direct borrowing,
+
+          using spot prices.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
@@ -2946,6 +2972,23 @@ definitions:
           Maximum Median Stamps represents the maximum amount of medians the
           oracle module will store before pruning via FIFO.
     description: Params defines the parameters for the oracle module.
+  umee.oracle.v1.Price:
+    type: object
+    properties:
+      exchange_rate_tuple:
+        type: object
+        properties:
+          denom:
+            type: string
+          exchange_rate:
+            type: string
+        title: >-
+          ExchangeRateTuple - struct to store interpreted exchange rates data to
+          store
+      block_num:
+        type: string
+        format: uint64
+    title: Price is an instance of a price "stamp"
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
     properties:
@@ -3126,15 +3169,20 @@ definitions:
         items:
           type: object
           properties:
-            denom:
+            exchange_rate_tuple:
+              type: object
+              properties:
+                denom:
+                  type: string
+                exchange_rate:
+                  type: string
+              title: >-
+                ExchangeRateTuple - struct to store interpreted exchange rates
+                data to store
+            block_num:
               type: string
-            amount:
-              type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+              format: uint64
+          title: Price is an instance of a price "stamp"
         description: >-
           medians defines a list of the median deviations for all stamped
           denoms.
@@ -3149,15 +3197,20 @@ definitions:
         items:
           type: object
           properties:
-            denom:
+            exchange_rate_tuple:
+              type: object
+              properties:
+                denom:
+                  type: string
+                exchange_rate:
+                  type: string
+              title: >-
+                ExchangeRateTuple - struct to store interpreted exchange rates
+                data to store
+            block_num:
               type: string
-            amount:
-              type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+              format: uint64
+          title: Price is an instance of a price "stamp"
         description: medians defines a list of the medians for all stamped denoms.
     description: |-
       QueryMediansResponse is response type for the
