@@ -151,7 +151,7 @@ paths:
                   allowed to reach through direct borrowing.
 
                   The lower of spot or historic price for each collateral token
-                  is used then calculating borrow limits.
+                  is used when calculating borrow limits.
               liquidation_threshold:
                 type: string
                 description: >-
@@ -2036,7 +2036,7 @@ definitions:
           reach through direct borrowing.
 
           The lower of spot or historic price for each collateral token is used
-          then calculating borrow limits.
+          when calculating borrow limits.
       liquidation_threshold:
         type: string
         description: >-
