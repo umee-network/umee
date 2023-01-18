@@ -29,6 +29,17 @@ func (k Keeper) IterateAllHistoricPrices(
 	}
 }
 
+// AllHistoricPrices is a helper function that collects and returns all
+// median prices using the IterateAllHistoricPrices iterator
+func (k Keeper) AllHistoricPrices(ctx sdk.Context) types.Prices {
+	prices := types.Prices{}
+	k.IterateAllHistoricPrices(ctx, func(median types.Price) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
+}
+
 // IterateAllMedianPrices iterates over all median prices.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllMedianPrices(
@@ -54,6 +65,17 @@ func (k Keeper) IterateAllMedianPrices(
 	}
 }
 
+// AllMedianPrices is a helper function that collects and returns all
+// median prices using the IterateAllMedianPrices iterator
+func (k Keeper) AllMedianPrices(ctx sdk.Context) types.Prices {
+	prices := types.Prices{}
+	k.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
+}
+
 // IterateAllMedianDeviationPrices iterates over all median deviation prices.
 // Iterator stops when exhausting the source, or when the handler returns `true`.
 func (k Keeper) IterateAllMedianDeviationPrices(
@@ -77,4 +99,15 @@ func (k Keeper) IterateAllMedianDeviationPrices(
 			break
 		}
 	}
+}
+
+// AllMedianDeviationPrices is a helper function that collects and returns
+// all median prices using the IterateAllMedianDeviationPrices iterator
+func (k Keeper) AllMedianDeviationPrices(ctx sdk.Context) types.Prices {
+	prices := types.Prices{}
+	k.IterateAllMedianDeviationPrices(ctx, func(median types.Price) (stop bool) {
+		prices = append(prices, median)
+		return false
+	})
+	return prices
 }

@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	var historicStampPeriod int64 = 5
 	var medianStampPeriod int64 = 20
 	var maximumPriceStamps int64 = 4
-	var maximumMedianStamps int64 = 5
+	var maximumMedianStamps int64 = 3
 
 	app.OracleKeeper.SetHistoricStampPeriod(ctx, uint64(historicStampPeriod))
 	app.OracleKeeper.SetMedianStampPeriod(ctx, uint64(medianStampPeriod))
@@ -133,14 +133,33 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 		}
 
 		for denom, _ := range exchangeRates {
-			// check medians
+			// check median
 			expectedMedian, err := decmath.Median(exchangeRates[denom])
-			medians := app.OracleKeeper.HistoricMedians(ctx, denom, uint64(maximumPriceStamps))
 			s.Require().NoError(err)
-			actualMedian := (*medians.AtBlock(uint64(blockHeight)))[0].ExchangeRateTuple.ExchangeRate
+
+			medians := app.OracleKeeper.AllMedianPrices(ctx)
+			medians = *medians.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
+			actualMedian := medians[0].ExchangeRateTuple.ExchangeRate
 			s.Require().Equal(actualMedian, expectedMedian)
+
+			// check median deviation
+			expectedMedianDeviation, err := decmath.MedianDeviation(actualMedian, exchangeRates[denom])
+			s.Require().NoError(err)
+
+			medianDeviations := app.OracleKeeper.AllMedianDeviationPrices(ctx)
+			medianDeviations = *medianDeviations.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
+			actualMedianDeviation := medianDeviations[0].ExchangeRateTuple.ExchangeRate
+			s.Require().Equal(actualMedianDeviation, expectedMedianDeviation)
 		}
 	}
+	historicPrices := app.OracleKeeper.AllHistoricPrices(ctx)
+	s.Require().Equal(int64(len(historicPrices)), maximumPriceStamps*2)
+
+	medians := app.OracleKeeper.AllMedianPrices(ctx)
+	s.Require().Equal(int64(len(medians)), maximumMedianStamps*2)
+
+	medianDeviations := app.OracleKeeper.AllMedianPrices(ctx)
+	s.Require().Equal(int64(len(medianDeviations)), maximumMedianStamps*2)
 }
 
 func TestOracleTestSuite(t *testing.T) {
