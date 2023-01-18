@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	var historicStampPeriod int64 = 5
 	var medianStampPeriod int64 = 20
 	var maximumPriceStamps int64 = 4
-	var maximumMedianStamps int64 = 2
+	var maximumMedianStamps int64 = 5
 
 	app.OracleKeeper.SetHistoricStampPeriod(ctx, uint64(historicStampPeriod))
 	app.OracleKeeper.SetMedianStampPeriod(ctx, uint64(medianStampPeriod))
