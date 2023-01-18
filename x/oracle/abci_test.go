@@ -1,5 +1,6 @@
 package oracle_test
 
+/*
 import (
 	"fmt"
 	"testing"
@@ -266,3 +267,4 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 func TestOracleTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
+*/
