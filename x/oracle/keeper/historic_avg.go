@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,11 +20,15 @@ type AvgKeeper struct {
 
 func (k AvgKeeper) newCounters(start time.Time) []types.AvgCounter {
 	num := int64(k.period) / int64(k.shift)
+	fmt.Println("num ", num)
 	acs := make([]types.AvgCounter, num)
-	for i := int64(1); i < num; i++ {
-		acs[i].Start = start
+	for i := int64(0); i < num; i++ {
+		acs[i] = types.AvgCounter{
+			Start: start,
+		}
 		start = start.Add(k.shift)
 	}
+	fmt.Println(acs)
 	return acs
 }
 
@@ -79,18 +84,17 @@ func (k AvgKeeper) updateAvgCounter(
 
 func (k AvgKeeper) getLatestIdx(denom string) (byte, error) {
 	bz := k.store.Get(types.KeyLatestAvgCounter)
-	// TODO: use errors
 	if len(bz) == 0 {
-		panic("latest price not defined")
+		return 0, types.ErrNoLatestAvgPrice
 	}
 	if len(bz) != 1 {
-		panic("malformed latest price, expecting one byte")
+		return 0, types.ErrMalformedLatestAvgPrice
 	}
 	return bz[0], nil
 }
 
 func (k AvgKeeper) setLatestIdx(denom string, idx byte) {
-	k.store.Set(types.KeyLatestAvgCounter, []byte{idx})
+	k.store.Set(k.latestIdxKey(denom), []byte{idx})
 }
 
 func (k AvgKeeper) latestIdxKey(denom string) []byte {
@@ -98,11 +102,15 @@ func (k AvgKeeper) latestIdxKey(denom string) []byte {
 }
 
 func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
+	avs := make([]types.AvgCounter, 0)
 	prefix := util.ConcatBytes(0, types.KeyPrefixAvgCounter, []byte(denom))
+	if !k.store.Has(prefix) {
+		return avs
+	}
+
 	iter := sdk.KVStorePrefixIterator(k.store, prefix)
 	defer iter.Close()
 
-	avs := []types.AvgCounter{}
 	for ; iter.Valid(); iter.Next() {
 		var av types.AvgCounter
 		k.cdc.MustUnmarshal(iter.Value(), &av)
@@ -124,6 +132,20 @@ func (k AvgKeeper) setAvgCounters(denom string, acs []types.AvgCounter) {
 	}
 }
 
-func (k AvgKeeper) GetCurrentAvg(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	return sdk.Dec{}, nil
+func (k AvgKeeper) GetCurrentAvg(denom string) (sdk.Dec, error) {
+	latestIdx, err := k.getLatestIdx(denom)
+	if err != nil {
+		return sdk.Dec{}, err
+	}
+
+	key := types.KeyAvgCounter(denom, latestIdx)
+	var av types.AvgCounter
+	bz := k.store.Get(key)
+	if len(bz) == 0 {
+		return sdk.Dec{}, types.ErrNoLatestAvgPrice
+	} else {
+		k.cdc.MustUnmarshal(bz, &av)
+	}
+
+	return av.Sum.Quo(sdk.NewDec(int64(av.Num))), nil
 }

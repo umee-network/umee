@@ -294,7 +294,7 @@ func (k Keeper) AddHistoricPrice(
 ) {
 	block := uint64(ctx.BlockHeight())
 	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
-	ak := AvgKeeper{store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
+	ak := AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
 	ak.updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
 }
 
