@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -20,15 +19,11 @@ type AvgKeeper struct {
 
 func (k AvgKeeper) newCounters(start time.Time) []types.AvgCounter {
 	num := int64(k.period) / int64(k.shift)
-	fmt.Println("num ", num)
 	acs := make([]types.AvgCounter, num)
 	for i := int64(0); i < num; i++ {
-		acs[i] = types.AvgCounter{
-			Start: start,
-		}
+		acs[i].Start = start
 		start = start.Add(k.shift)
 	}
-	fmt.Println(acs)
 	return acs
 }
 
