@@ -542,6 +542,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	// collateral weights are always 0.25 in testing
 
 	zeroUmee := sdkutil.ZeroCoin(umeeDenom)
+	zeroUUmee := coin("u/"+umeeDenom, 0)
 	tcs := []struct {
 		msg                  string
 		addr                 sdk.AccAddress
@@ -579,8 +580,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			"duplicate max withdraw umee",
 			supplier,
 			umeeDenom,
-			zeroUmee,
-			zeroUmee,
+			zeroUUmee,
+			zeroUUmee,
 			zeroUmee,
 			nil,
 		}, {
@@ -620,7 +621,6 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			require.ErrorIs(err, tc.err, tc.msg)
 			continue
 		}
-		fmt.Println(">>> test ", tc.msg, tc.expectedWithdraw.IsZero())
 		expectFromBalance := tc.expectedWithdraw.Sub(tc.expectFromCollateral)
 
 		// initial state

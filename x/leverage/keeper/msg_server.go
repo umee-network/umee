@@ -113,7 +113,7 @@ func (s msgServer) MaxWithdraw(
 
 	if uToken.IsZero() {
 		zeroCoin := sdkutil.ZeroCoin(msg.Denom)
-		return &types.MsgMaxWithdrawResponse{Withdrawn: zeroCoin, Received: zeroCoin}, nil
+		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
