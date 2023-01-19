@@ -33,12 +33,17 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	// Prune historic prices and medians outside pruning period determined by
 	// the stamp period multiplied by the max stamps.
 	if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-		pruneHistoricPeriod := params.HistoricStampPeriod*(params.MaximumPriceStamps) - params.VotePeriod
-		pruneMedianPeriod := params.MedianStampPeriod*(params.MaximumMedianStamps) - params.VotePeriod
-		for _, v := range params.AcceptList {
-			k.DeleteHistoricPrice(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
-			k.DeleteHistoricMedian(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-			k.DeleteHistoricMedianDeviation(ctx, v.SymbolDenom, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+		pruneHistoricPeriod := params.HistoricStampPeriod * params.MaximumPriceStamps
+		if pruneHistoricPeriod < uint64(ctx.BlockHeight()) {
+			k.PruneHistoricPricesBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
+		}
+
+		if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+			pruneMedianPeriod := params.MedianStampPeriod * params.MaximumMedianStamps
+			if pruneMedianPeriod < uint64(ctx.BlockHeight()) {
+				k.PruneMediansBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+				k.PruneMedianDeviationsBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
+			}
 		}
 	}
 

@@ -262,7 +262,7 @@ func (q querier) Medians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	medians := make([]types.Price, 0)
+	medians := types.Prices{}
 
 	if len(req.Denom) > 0 {
 		if req.NumStamps == 0 {
@@ -281,7 +281,7 @@ func (q querier) Medians(
 		})
 	}
 
-	return &types.QueryMediansResponse{Medians: medians}, nil
+	return &types.QueryMediansResponse{Medians: *medians.Sort()}, nil
 }
 
 // MedianDeviations queries median deviations of all denoms, or, if specified, returns
@@ -312,5 +312,5 @@ func (q querier) MedianDeviations(
 		})
 	}
 
-	return &types.QueryMedianDeviationsResponse{MedianDeviations: medianDeviations}, nil
+	return &types.QueryMedianDeviationsResponse{MedianDeviations: *medianDeviations.Sort()}, nil
 }
