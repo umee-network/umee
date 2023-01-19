@@ -240,6 +240,9 @@ func GetCmdQueryMaxWithdraw() *cobra.Command {
 			if len(args) > 1 {
 				req.Denom = args[1]
 			}
+			if err := req.ValidateBasic(); err != nil {
+				return err
+			}
 			resp, err := queryClient.MaxWithdraw(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},

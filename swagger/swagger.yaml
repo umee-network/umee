@@ -1016,6 +1016,9 @@ paths:
                         those calculations
 
                         for the affected Token.
+
+                        The time span covered by the historic median will be:
+                            oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
                   description: >-
                     Token defines a token, along with its metadata and
                     parameters, in the Umee
@@ -2588,6 +2591,9 @@ definitions:
                 calculations
 
                 for the affected Token.
+
+                The time span covered by the historic median will be:
+                    oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
           description: >-
             Token defines a token, along with its metadata and parameters, in
             the Umee
@@ -2793,6 +2799,9 @@ definitions:
           calculations
 
           for the affected Token.
+
+          The time span covered by the historic median will be:
+              oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
     description: >-
       Token defines a token, along with its metadata and parameters, in the Umee
 
