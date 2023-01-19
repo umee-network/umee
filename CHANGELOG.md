@@ -68,6 +68,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1690](https://github.com/umee-network/umee/pull/1690) Add MaxBorrow message type.
 - [1711](https://github.com/umee-network/umee/pull/1711) Add historic pricing information to leverage MarketSummary and AccountSummary queries.
 - [1715](https://github.com/umee-network/umee/pull/1715) Add spot borrow limit to AccountSummary query, and switch returned borrow limit to the minimum of spot and historic borrow limits.
+- [1694](https://github.com/umee-network/umee/pull/1694) Add new sdkutil package to enhance common Cosmos SDK functionality. Here, the `ZeroCoin` helper function.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 

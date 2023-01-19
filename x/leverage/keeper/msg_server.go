@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -114,7 +115,8 @@ func (s msgServer) MaxWithdraw(
 	)
 
 	if uToken.IsZero() {
-		return nil, types.ErrMaxWithdrawZero
+		zeroCoin := sdkutil.ZeroCoin(msg.Denom)
+		return &types.MsgMaxWithdrawResponse{Withdrawn: zeroCoin, Received: zeroCoin}, nil
 	}
 
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
@@ -347,7 +349,7 @@ func (s msgServer) MaxBorrow(
 		sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
 	)
 	if maxBorrow.IsZero() {
-		return &types.MsgMaxBorrowResponse{Borrowed: sdk.NewInt64Coin(msg.Denom, 0)}, nil
+		return &types.MsgMaxBorrowResponse{Borrowed: sdkutil.ZeroCoin(msg.Denom)}, nil
 	}
 
 	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
