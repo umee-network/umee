@@ -99,6 +99,12 @@ func (s msgServer) MaxWithdraw(
 	if err != nil {
 		return nil, err
 	}
+	if types.HasUTokenPrefix(msg.Denom) {
+		return nil, types.ErrUToken
+	}
+	if _, err = s.keeper.GetTokenSettings(ctx, msg.Denom); err != nil {
+		return nil, err
+	}
 
 	maxCurrentWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, false)
 	if err != nil {
