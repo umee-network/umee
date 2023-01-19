@@ -1172,6 +1172,7 @@ type MsgClient interface {
 	Withdraw(ctx context.Context, in *MsgWithdraw, opts ...grpc.CallOption) (*MsgWithdrawResponse, error)
 	// MaxWithdraw moves previously supplied tokens from the module back to the user balance in
 	// exchange for burning uTokens. It automatically calculates the maximum valid amount to withdraw.
+	// Zero is returned if there is no more tokens to borrow.
 	MaxWithdraw(ctx context.Context, in *MsgMaxWithdraw, opts ...grpc.CallOption) (*MsgMaxWithdrawResponse, error)
 	// Collateralize enables selected uTokens as collateral, which moves them to the module.
 	Collateralize(ctx context.Context, in *MsgCollateralize, opts ...grpc.CallOption) (*MsgCollateralizeResponse, error)
@@ -1312,6 +1313,7 @@ type MsgServer interface {
 	Withdraw(context.Context, *MsgWithdraw) (*MsgWithdrawResponse, error)
 	// MaxWithdraw moves previously supplied tokens from the module back to the user balance in
 	// exchange for burning uTokens. It automatically calculates the maximum valid amount to withdraw.
+	// Zero is returned if there is no more tokens to borrow.
 	MaxWithdraw(context.Context, *MsgMaxWithdraw) (*MsgMaxWithdrawResponse, error)
 	// Collateralize enables selected uTokens as collateral, which moves them to the module.
 	Collateralize(context.Context, *MsgCollateralize) (*MsgCollateralizeResponse, error)
