@@ -22,7 +22,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 	params := k.GetParams(ctx)
 	if isPeriodLastBlock(ctx, params.VotePeriod) {
-		CalcPrices(ctx, params, k)
+		if err := CalcPrices(ctx, params, k); err != nil {
+			return err
+		}
 	}
 
 	// Slash oracle providers who missed voting over the threshold and
@@ -60,11 +62,9 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, 0, addr)
 	}
 
-	var (
-		// voteTargets defines the symbol (ticker) denoms that we require votes on
-		voteTargets      []string
-		voteTargetDenoms []string
-	)
+	// voteTargets defines the symbol (ticker) denoms that we require votes on
+	voteTargets := make([]string, 0)
+	voteTargetDenoms := make([]string, 0)
 	for _, v := range params.AcceptList {
 		voteTargets = append(voteTargets, v.SymbolDenom)
 		voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)

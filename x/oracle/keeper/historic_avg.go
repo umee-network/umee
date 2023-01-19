@@ -38,7 +38,7 @@ func (k AvgKeeper) updateAvgCounter(
 	denom string,
 	exchangeRate sdk.Dec,
 	now time.Time,
-) error {
+) {
 	acs := k.getAllAvgCounters(denom)
 	// if there are no counters registered, we need to initialize them
 	if len(acs) == 0 {
@@ -79,11 +79,10 @@ func (k AvgKeeper) updateAvgCounter(
 	if currentCounter >= 0 {
 		k.setLatestIdx(denom, byte(currentCounter))
 	}
-	return nil
 }
 
 func (k AvgKeeper) getLatestIdx(denom string) (byte, error) {
-	bz := k.store.Get(types.KeyLatestAvgCounter)
+	bz := k.store.Get(k.latestIdxKey(denom))
 	if len(bz) == 0 {
 		return 0, types.ErrNoLatestAvgPrice
 	}
@@ -143,9 +142,8 @@ func (k AvgKeeper) GetCurrentAvg(denom string) (sdk.Dec, error) {
 	bz := k.store.Get(key)
 	if len(bz) == 0 {
 		return sdk.Dec{}, types.ErrNoLatestAvgPrice
-	} else {
-		k.cdc.MustUnmarshal(bz, &av)
 	}
+	k.cdc.MustUnmarshal(bz, &av)
 
 	return av.Sum.Quo(sdk.NewDec(int64(av.Num))), nil
 }
