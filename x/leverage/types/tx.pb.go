@@ -1172,7 +1172,7 @@ type MsgClient interface {
 	Withdraw(ctx context.Context, in *MsgWithdraw, opts ...grpc.CallOption) (*MsgWithdrawResponse, error)
 	// MaxWithdraw moves previously supplied tokens from the module back to the user balance in
 	// exchange for burning uTokens. It automatically calculates the maximum valid amount to withdraw.
-	// Zero is returned if there is no more tokens to borrow.
+	// Zero is returned if there is no more tokens can be withdrawn.
 	MaxWithdraw(ctx context.Context, in *MsgMaxWithdraw, opts ...grpc.CallOption) (*MsgMaxWithdrawResponse, error)
 	// Collateralize enables selected uTokens as collateral, which moves them to the module.
 	Collateralize(ctx context.Context, in *MsgCollateralize, opts ...grpc.CallOption) (*MsgCollateralizeResponse, error)
@@ -1182,7 +1182,7 @@ type MsgClient interface {
 	// Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
 	Borrow(ctx context.Context, in *MsgBorrow, opts ...grpc.CallOption) (*MsgBorrowResponse, error)
 	// MaxBorrow allows a user to borrow the maximum amount of tokens their collateral will allow.
-	// Zero is returned if there is no more tokens to borrow.
+	// Zero is returned if there is no more can be borrowed.
 	MaxBorrow(ctx context.Context, in *MsgMaxBorrow, opts ...grpc.CallOption) (*MsgMaxBorrowResponse, error)
 	// Repay allows a user to repay previously borrowed tokens and interest.
 	Repay(ctx context.Context, in *MsgRepay, opts ...grpc.CallOption) (*MsgRepayResponse, error)
@@ -1313,7 +1313,7 @@ type MsgServer interface {
 	Withdraw(context.Context, *MsgWithdraw) (*MsgWithdrawResponse, error)
 	// MaxWithdraw moves previously supplied tokens from the module back to the user balance in
 	// exchange for burning uTokens. It automatically calculates the maximum valid amount to withdraw.
-	// Zero is returned if there is no more tokens to borrow.
+	// Zero is returned if there is no more tokens can be withdrawn.
 	MaxWithdraw(context.Context, *MsgMaxWithdraw) (*MsgMaxWithdrawResponse, error)
 	// Collateralize enables selected uTokens as collateral, which moves them to the module.
 	Collateralize(context.Context, *MsgCollateralize) (*MsgCollateralizeResponse, error)
@@ -1323,7 +1323,7 @@ type MsgServer interface {
 	// Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
 	Borrow(context.Context, *MsgBorrow) (*MsgBorrowResponse, error)
 	// MaxBorrow allows a user to borrow the maximum amount of tokens their collateral will allow.
-	// Zero is returned if there is no more tokens to borrow.
+	// Zero is returned if there is no more can be borrowed.
 	MaxBorrow(context.Context, *MsgMaxBorrow) (*MsgMaxBorrowResponse, error)
 	// Repay allows a user to repay previously borrowed tokens and interest.
 	Repay(context.Context, *MsgRepay) (*MsgRepayResponse, error)
