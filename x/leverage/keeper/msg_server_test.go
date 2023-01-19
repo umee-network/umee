@@ -33,8 +33,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			},
 			true,
 			"invalid denom",
-		},
-		{
+		}, {
 			"unauthorized authority address",
 			&types.MsgGovUpdateRegistry{
 				Authority:   s.addrs[0].String(),
@@ -46,8 +45,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			},
 			true,
 			"invalid authority",
-		},
-		{
+		}, {
 			"already registered token",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
@@ -59,8 +57,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			},
 			true,
 			fmt.Sprintf("token %s is already registered", registeredUmee.BaseDenom),
-		},
-		{
+		}, {
 			"valid authority and valid token for registry",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
@@ -120,8 +117,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			},
 			true,
 			"invalid denom",
-		},
-		{
+		}, {
 			"unauthorized authority address",
 			&types.MsgGovUpdateRegistry{
 				Authority:   s.addrs[0].String(),
@@ -133,8 +129,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			},
 			true,
 			"invalid authority",
-		},
-		{
+		}, {
 			"valid authority and valid update token registry",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
@@ -206,50 +201,43 @@ func (s *IntegrationTestSuite) TestMsgSupply() {
 			coin("abcd", 80_000000),
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
-		},
-		{
+		}, {
 			"uToken",
 			supplier,
 			coin("u/"+umeeDenom, 80_000000),
 			sdk.Coin{},
 			types.ErrUToken,
-		},
-		{
+		}, {
 			"no balance",
 			borrower,
 			coin(umeeDenom, 20_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
-		},
-		{
+		}, {
 			"insufficient balance",
 			supplier,
 			coin(umeeDenom, 120_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
-		},
-		{
+		}, {
 			"valid supply",
 			supplier,
 			coin(umeeDenom, 80_000000),
 			coin("u/"+umeeDenom, 80_000000),
 			nil,
-		},
-		{
+		}, {
 			"additional supply",
 			supplier,
 			coin(umeeDenom, 20_000000),
 			coin("u/"+umeeDenom, 20_000000),
 			nil,
-		},
-		{
+		}, {
 			"high exchange rate",
 			supplier,
 			coin(atomDenom, 60_000000),
 			coin("u/"+atomDenom, 40_000000),
 			nil,
-		},
-		{
+		}, {
 			"max supply",
 			whale,
 			coin(umeeDenom, 1_000_000_000000),
@@ -697,32 +685,27 @@ func (s *IntegrationTestSuite) TestMsgCollateralize() {
 			supplier,
 			coin(umeeDenom, 80_000000),
 			types.ErrNotUToken,
-		},
-		{
+		}, {
 			"unregistered uToken",
 			supplier,
 			coin("u/abcd", 80_000000),
 			types.ErrNotRegisteredToken,
-		},
-		{
+		}, {
 			"wrong balance",
 			supplier,
 			coin("u/"+atomDenom, 10_000000),
 			sdkerrors.ErrInsufficientFunds,
-		},
-		{
+		}, {
 			"valid collateralize",
 			supplier,
 			coin("u/"+umeeDenom, 80_000000),
 			nil,
-		},
-		{
+		}, {
 			"additional collateralize",
 			supplier,
 			coin("u/"+umeeDenom, 10_000000),
 			nil,
-		},
-		{
+		}, {
 			"insufficient balance",
 			supplier,
 			coin("u/"+umeeDenom, 40_000000),
@@ -830,32 +813,27 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			supplier,
 			coin(umeeDenom, 80_000000),
 			types.ErrNotUToken,
-		},
-		{
+		}, {
 			"no collateral",
 			supplier,
 			coin("u/"+atomDenom, 40_000000),
 			types.ErrInsufficientCollateral,
-		},
-		{
+		}, {
 			"valid decollateralize",
 			supplier,
 			coin("u/"+umeeDenom, 80_000000),
 			nil,
-		},
-		{
+		}, {
 			"additional decollateralize",
 			supplier,
 			coin("u/"+umeeDenom, 10_000000),
 			nil,
-		},
-		{
+		}, {
 			"insufficient collateral",
 			supplier,
 			coin("u/"+umeeDenom, 40_000000),
 			types.ErrInsufficientCollateral,
-		},
-		{
+		}, {
 			"above borrow limit",
 			borrower,
 			coin("u/"+atomDenom, 100_000000),
@@ -867,20 +845,17 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			dumpborrower,
 			coin("u/"+pumpDenom, 20_000000),
 			nil,
-		},
-		{
+		}, {
 			"above borrow limit (undercollateralized under historic prices but ok with current prices)",
 			dumpborrower,
 			coin("u/"+pumpDenom, 20_000000),
 			types.ErrUndercollaterized,
-		},
-		{
+		}, {
 			"acceptable decollateralize (pump borrower)",
 			pumpborrower,
 			coin("u/"+dumpDenom, 20_000000),
 			nil,
-		},
-		{
+		}, {
 			"above borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
 			coin("u/"+dumpDenom, 20_000000),
@@ -966,50 +941,43 @@ func (s *IntegrationTestSuite) TestMsgSupplyCollateral() {
 			coin("abcd", 80_000000),
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
-		},
-		{
+		}, {
 			"uToken",
 			supplier,
 			coin("u/"+umeeDenom, 80_000000),
 			sdk.Coin{},
 			types.ErrUToken,
-		},
-		{
+		}, {
 			"no balance",
 			borrower,
 			coin(umeeDenom, 20_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
-		},
-		{
+		}, {
 			"insufficient balance",
 			supplier,
 			coin(umeeDenom, 120_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
-		},
-		{
+		}, {
 			"valid supply",
 			supplier,
 			coin(umeeDenom, 80_000000),
 			coin("u/"+umeeDenom, 80_000000),
 			nil,
-		},
-		{
+		}, {
 			"additional supply",
 			supplier,
 			coin(umeeDenom, 20_000000),
 			coin("u/"+umeeDenom, 20_000000),
 			nil,
-		},
-		{
+		}, {
 			"high exchange rate",
 			supplier,
 			coin(atomDenom, 60_000000),
 			coin("u/"+atomDenom, 40_000000),
 			nil,
-		},
-		{
+		}, {
 			"max supply",
 			whale,
 			coin(umeeDenom, 1_000_000_000000),
@@ -1111,74 +1079,62 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			borrower,
 			coin("u/"+umeeDenom, 100_000000),
 			types.ErrUToken,
-		},
-		{
+		}, {
 			"unregistered token",
 			borrower,
 			coin("abcd", 100_000000),
 			types.ErrNotRegisteredToken,
-		},
-		{
+		}, {
 			"lending pool insufficient",
 			borrower,
 			coin(umeeDenom, 200_000000),
 			types.ErrLendingPoolInsufficient,
-		},
-		{
+		}, {
 			"valid borrow",
 			borrower,
 			coin(umeeDenom, 70_000000),
 			nil,
-		},
-		{
+		}, {
 			"additional borrow",
 			borrower,
 			coin(umeeDenom, 20_000000),
 			nil,
-		},
-		{
+		}, {
 			"max supply utilization",
 			borrower,
 			coin(umeeDenom, 10_000000),
 			types.ErrMaxSupplyUtilization,
-		},
-		{
+		}, {
 			"atom borrow",
 			borrower,
 			coin(atomDenom, 1_000000),
 			nil,
-		},
-		{
+		}, {
 			"borrow limit",
 			borrower,
 			coin(atomDenom, 100_000000),
 			types.ErrUndercollaterized,
-		},
-		{
+		}, {
 			"zero collateral",
 			supplier,
 			coin(atomDenom, 1_000000),
 			types.ErrUndercollaterized,
-		},
-		{
+		}, {
 			"dump borrower (acceptable)",
 			dumpborrower,
 			coin(dumpDenom, 20_000000),
 			nil,
-		},
-		{
+		}, {
 			"dump borrower (borrow limit)",
 			dumpborrower,
 			coin(dumpDenom, 10_000000),
 			types.ErrUndercollaterized,
-		},
-		{
+		}, {
 			"pump borrower (acceptable)",
 			pumpborrower,
 			coin(pumpDenom, 5_000000),
 			nil,
-		},
-		{
+		}, {
 			"pump borrower (borrow limit)",
 			pumpborrower,
 			coin(pumpDenom, 2_000000),
@@ -1275,38 +1231,32 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 			borrower,
 			coin("u/"+umeeDenom, 0),
 			types.ErrUToken,
-		},
-		{
+		}, {
 			"unregistered token",
 			borrower,
 			coin("abcd", 0),
 			types.ErrNotRegisteredToken,
-		},
-		{
+		}, {
 			"zero collateral - should return zero",
 			supplier,
 			coin(atomDenom, 0),
 			nil,
-		},
-		{
+		}, {
 			"atom borrow",
 			borrower,
 			coin(atomDenom, 25_000000),
 			nil,
-		},
-		{
+		}, {
 			"already borrowed max - should return zero",
 			borrower,
 			coin(atomDenom, 0),
 			nil,
-		},
-		{
+		}, {
 			"dump borrower",
 			dumpborrower,
 			coin(dumpDenom, 25_000000),
 			nil,
-		},
-		{
+		}, {
 			"pump borrower",
 			pumpborrower,
 			coin(pumpDenom, 6_250000),
@@ -1361,14 +1311,6 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 }
 
 func (s *IntegrationTestSuite) TestMsgRepay() {
-	type testCase struct {
-		msg           string
-		addr          sdk.AccAddress
-		coin          sdk.Coin
-		expectedRepay sdk.Coin
-		err           error
-	}
-
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a borrower which supplies and collateralizes UMEE, then borrows 10 UMEE
@@ -1384,50 +1326,50 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 	s.borrow(looper, coin(umeeDenom, 5_000000))
 	s.supply(looper, coin(umeeDenom, 5_000000))
 
-	tcs := []testCase{
+	tcs := []struct {
+		msg           string
+		addr          sdk.AccAddress
+		coin          sdk.Coin
+		expectedRepay sdk.Coin
+		err           error
+	}{
 		{
 			"uToken",
 			borrower,
 			coin("u/"+umeeDenom, 100_000000),
 			sdk.Coin{},
 			types.ErrUToken,
-		},
-		{
+		}, {
 			"unregistered token",
 			borrower,
 			coin("abcd", 100_000000),
 			sdk.Coin{},
 			types.ErrDenomNotBorrowed,
-		},
-		{
+		}, {
 			"not borrowed",
 			borrower,
 			coin(atomDenom, 100_000000),
 			sdk.Coin{},
 			types.ErrDenomNotBorrowed,
-		},
-		{
+		}, {
 			"valid repay",
 			borrower,
 			coin(umeeDenom, 1_000000),
 			coin(umeeDenom, 1_000000),
 			nil,
-		},
-		{
+		}, {
 			"additional repay",
 			borrower,
 			coin(umeeDenom, 3_000000),
 			coin(umeeDenom, 3_000000),
 			nil,
-		},
-		{
+		}, {
 			"overpay",
 			borrower,
 			coin(umeeDenom, 30_000000),
 			coin(umeeDenom, 6_000000),
 			nil,
-		},
-		{
+		}, {
 			"insufficient balance",
 			looper,
 			coin(umeeDenom, 1_000000),
@@ -1548,8 +1490,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationIneligible,
-		},
-		{
+		}, {
 			"not borrowed denom",
 			liquidator,
 			umeeBorrower,
@@ -1559,8 +1500,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationRepayZero,
-		},
-		{
+		}, {
 			"direct atom liquidation",
 			liquidator,
 			atomBorrower,
@@ -1570,8 +1510,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			coin("u/"+atomDenom, 109_000000),
 			coin(atomDenom, 109_000000),
 			nil,
-		},
-		{
+		}, {
 			"u/atom liquidation",
 			liquidator,
 			atomBorrower,
@@ -1581,8 +1520,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			coin("u/"+atomDenom, 110_000000),
 			coin("u/"+atomDenom, 110_000000),
 			nil,
-		},
-		{
+		}, {
 			"complete u/atom liquidation",
 			liquidator,
 			atomBorrower,
@@ -1592,8 +1530,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			coin("u/"+atomDenom, 330_000000),
 			coin("u/"+atomDenom, 330_000000),
 			nil,
-		},
-		{
+		}, {
 			"bad debt u/umee liquidation",
 			liquidator,
 			umeeBorrower,
@@ -1603,8 +1540,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			coin("u/"+umeeDenom, 110_000000),
 			coin("u/"+umeeDenom, 110_000000),
 			nil,
-		},
-		{
+		}, {
 			"complex borrower",
 			liquidator,
 			complexBorrower,
@@ -1614,8 +1550,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			coin("u/"+atomDenom, 3_527932),
 			coin("u/"+atomDenom, 3_527932),
 			nil,
-		},
-		{
+		}, {
 			"close factor < 1",
 			liquidator,
 			closeBorrower,
