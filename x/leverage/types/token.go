@@ -28,6 +28,17 @@ func ToUTokenDenom(denom string) string {
 	return UTokenPrefix + denom
 }
 
+// ValidateBaseDenom validates a denom and ensures it is not a uToken.
+func ValidateBaseDenom(denom string) error {
+	if err := sdk.ValidateDenom(denom); err != nil {
+		return err
+	}
+	if HasUTokenPrefix(denom) {
+		return ErrUToken.Wrap(denom)
+	}
+	return nil
+}
+
 // ToTokenDenom strips the uToken prefix from a denom, or returns an empty
 // string if it was not present. Also returns an empty string if the prefix
 // was repeated multiple times.

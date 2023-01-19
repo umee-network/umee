@@ -288,12 +288,10 @@ func (q Querier) MaxWithdraw(
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "empty address")
+	if err := req.ValidateBasic(); err != nil {
+		return nil, err
 	}
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err

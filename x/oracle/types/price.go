@@ -26,10 +26,20 @@ func (p *Prices) Decs() []sdk.Dec {
 	return decs
 }
 
-func (p *Prices) AtBlock(blockNum uint64) *Prices {
+func (p *Prices) FilterByBlock(blockNum uint64) *Prices {
 	prices := Prices{}
 	for _, price := range *p {
 		if price.BlockNum == blockNum {
+			prices = append(prices, price)
+		}
+	}
+	return &prices
+}
+
+func (p *Prices) FilterByDenom(denom string) *Prices {
+	prices := Prices{}
+	for _, price := range *p {
+		if price.ExchangeRateTuple.Denom == denom {
 			prices = append(prices, price)
 		}
 	}

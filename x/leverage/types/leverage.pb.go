@@ -195,6 +195,8 @@ type Token struct {
 	// borrow positions under both current and historic prices. The default value of
 	// zero for this field causes current price to be used in those calculations
 	// for the affected Token.
+	// The time span covered by the historic median will be:
+	//     oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
 	HistoricMedians uint32 `protobuf:"varint,19,opt,name=historic_medians,json=historicMedians,proto3" json:"historic_medians,omitempty" yaml:"historic_medians"`
 }
 

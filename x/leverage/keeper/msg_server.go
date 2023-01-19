@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -98,6 +99,12 @@ func (s msgServer) MaxWithdraw(
 	if err != nil {
 		return nil, err
 	}
+	if types.HasUTokenPrefix(msg.Denom) {
+		return nil, types.ErrUToken
+	}
+	if _, err = s.keeper.GetTokenSettings(ctx, msg.Denom); err != nil {
+		return nil, err
+	}
 
 	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
 	if err != nil {
@@ -105,7 +112,8 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	if uToken.IsZero() {
-		return nil, types.ErrMaxWithdrawZero
+		zeroCoin := sdkutil.ZeroCoin(msg.Denom)
+		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
@@ -329,7 +337,7 @@ func (s msgServer) MaxBorrow(
 		return nil, err
 	}
 	if maxBorrow.IsZero() {
-		return nil, types.ErrMaxBorrowZero
+		return &types.MsgMaxBorrowResponse{Borrowed: sdkutil.ZeroCoin(msg.Denom)}, nil
 	}
 
 	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
@@ -371,7 +379,6 @@ func (s msgServer) Repay(
 	msg *types.MsgRepay,
 ) (*types.MsgRepayResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err

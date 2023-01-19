@@ -9,11 +9,7 @@ import (
 // maxWithdraw calculates the maximum amount of uTokens an account can currently withdraw.
 // input denom should be a base token.
 func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
-	if types.HasUTokenPrefix(denom) {
-		return sdk.Coin{}, types.ErrUToken
-	}
 	uDenom := types.ToUTokenDenom(denom)
-
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
 	availableUTokens, err := k.ExchangeToken(ctx, availableTokens)
 	if err != nil {
