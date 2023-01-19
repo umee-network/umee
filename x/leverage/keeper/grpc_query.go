@@ -134,9 +134,12 @@ func (q Querier) MarketSummary(
 		AvailableCollateralize: availableCollateralize,
 	}
 
-	// Oracle price in response will be nil if it is unavailable
+	// Oracle prices in response will be nil if it is unavailable
 	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom, false); oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
+	}
+	if historicPrice, _, historicErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom, true); historicErr == nil {
+		resp.OracleHistoricPrice = &historicPrice
 	}
 
 	return &resp, nil
@@ -211,7 +214,7 @@ func (q Querier) AccountSummary(
 	if err != nil {
 		return nil, err
 	}
-	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, false)
+	spotBorrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, false)
 	if err != nil {
 		return nil, err
 	}
@@ -220,12 +223,22 @@ func (q Querier) AccountSummary(
 		return nil, err
 	}
 
+	// must still return current values if historic prices are down - they will display as zero
+	historicBorrowedValue, _ := q.Keeper.TotalTokenValue(ctx, borrowed, true)
+	historicBorrowLimit, _ := q.Keeper.CalculateBorrowLimit(ctx, collateral, true)
+
+	// borrow limit is the minimum of either spot or historic borrow limit - zero if historic prices are down
+	borrowLimit := sdk.MinDec(historicBorrowLimit, spotBorrowLimit)
+
 	return &types.QueryAccountSummaryResponse{
-		SuppliedValue:        suppliedValue,
-		CollateralValue:      collateralValue,
-		BorrowedValue:        borrowedValue,
-		BorrowLimit:          borrowLimit,
-		LiquidationThreshold: liquidationThreshold,
+		SuppliedValue:         suppliedValue,
+		CollateralValue:       collateralValue,
+		BorrowedValue:         borrowedValue,
+		BorrowLimit:           borrowLimit,
+		LiquidationThreshold:  liquidationThreshold,
+		HistoricBorrowedValue: historicBorrowedValue,
+		HistoricBorrowLimit:   historicBorrowLimit,
+		SpotBorrowLimit:       spotBorrowLimit,
 	}, nil
 }
 
@@ -298,7 +311,9 @@ func (q Querier) MaxWithdraw(
 	} else {
 		// Denom not specified
 		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
-			denoms = append(denoms, t.BaseDenom)
+			if !t.Blacklist {
+				denoms = append(denoms, t.BaseDenom)
+			}
 		}
 	}
 
@@ -359,7 +374,9 @@ func (q Querier) MaxBorrow(
 	} else {
 		// Denom not specified
 		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
-			denoms = append(denoms, t.BaseDenom)
+			if !t.Blacklist {
+				denoms = append(denoms, t.BaseDenom)
+			}
 		}
 	}
 

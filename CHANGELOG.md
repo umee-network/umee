@@ -53,6 +53,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1680](https://github.com/umee-network/umee/pull/1680) Add amino support for MsgMaxWithdraw.
+- [1710](https://github.com/umee-network/umee/pull/1710) Skip blacklisted tokens in MaxBorrow and MaxWithdraw queries.
 
 ### Features
 
@@ -65,6 +66,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1685](https://github.com/umee-network/umee/pull/1685) Add medians param to Token registry.
 - [1683](https://github.com/umee-network/umee/pull/1683) Add MaxBorrow query and allow returning all denoms from MaxWithdraw.
 - [1690](https://github.com/umee-network/umee/pull/1690) Add MaxBorrow message type.
+- [1711](https://github.com/umee-network/umee/pull/1711) Add historic pricing information to leverage MarketSummary and AccountSummary queries.
+- [1715](https://github.com/umee-network/umee/pull/1715) Add spot borrow limit to AccountSummary query, and switch returned borrow limit to the minimum of spot and historic borrow limits.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 
