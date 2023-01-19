@@ -68,7 +68,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1683](https://github.com/umee-network/umee/pull/1683) Add MaxBorrow query and allow returning all denoms from MaxWithdraw.
 - [1690](https://github.com/umee-network/umee/pull/1690) Add MaxBorrow message type.
 - [1711](https://github.com/umee-network/umee/pull/1711) Add historic pricing information to leverage MarketSummary query.
-- [1723](https://github.com/umee-network/umee/pull/1723) Compute borrow limits using the lower of either spot or historic price for each collateral token, and the higher of said prices for borrowed tokens. Remove extra spot/historic only fields in account summum.
+- [1723](https://github.com/umee-network/umee/pull/1723) Compute borrow limits using the lower of either spot or historic price for each collateral token, and the higher of said prices for borrowed tokens. Remove extra spot/historic only fields in account summary.
 - [1694](https://github.com/umee-network/umee/pull/1694) Add new sdkutil package to enhance common Cosmos SDK functionality. Here, the `ZeroCoin` helper function.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
