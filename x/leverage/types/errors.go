@@ -28,7 +28,6 @@ var (
 	// 3XX = User Positions
 	ErrInsufficientBalance    = sdkerrors.Register(ModuleName, 300, "insufficient balance")
 	ErrInsufficientCollateral = sdkerrors.Register(ModuleName, 301, "insufficient collateral")
-	ErrDenomNotBorrowed       = sdkerrors.Register(ModuleName, 302, "denom not borrowed")
 	ErrLiquidationRepayZero   = sdkerrors.Register(ModuleName, 303, "liquidation would repay zero tokens")
 
 	// 4XX = Price Sensitive

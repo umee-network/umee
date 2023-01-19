@@ -379,7 +379,6 @@ func (s msgServer) Repay(
 	msg *types.MsgRepay,
 ) (*types.MsgRepayResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err

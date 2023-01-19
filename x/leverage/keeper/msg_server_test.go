@@ -1334,7 +1334,7 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 		err           error
 	}{
 		{
-			"uToken",
+			"should not accept uToken repay",
 			borrower,
 			coin("u/"+umeeDenom, 100_000000),
 			sdk.Coin{},
@@ -1343,14 +1343,14 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 			"unregistered token",
 			borrower,
 			coin("abcd", 100_000000),
-			sdk.Coin{},
-			types.ErrDenomNotBorrowed,
+			sdkutil.ZeroCoin("abcd"),
+			nil,
 		}, {
 			"not borrowed",
 			borrower,
 			coin(atomDenom, 100_000000),
-			sdk.Coin{},
-			types.ErrDenomNotBorrowed,
+			sdkutil.ZeroCoin(atomDenom),
+			nil,
 		}, {
 			"valid repay",
 			borrower,
