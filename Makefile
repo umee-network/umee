@@ -186,6 +186,12 @@ lint:
 	@echo "--> Running linter with revive"
 	@go install github.com/mgechev/revive
 	@revive -config .revive.toml -formatter friendly ./...
+# note: on new OSX, might require brew install diffutils
+	@echo "--> Running regular linter"
+	@go install mvdan.cc/gofumpt
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	@$(golangci_lint_cmd) run
+	@cd price-feeder && $(golangci_lint_cmd) run
 
 lint-fix:
 	@echo "--> Running linter to fix the lint issues"
