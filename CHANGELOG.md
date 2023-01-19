@@ -49,7 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### API Breaking
 
 - [1683](https://github.com/umee-network/umee/pull/1683) MaxWithdraw query now returns `sdk.Coins`, not `sdk.Coin` and will be empty (not zero coin) when returning a zero amount. Denom field in query is now optional.
-- [1694](https://github.com/umee-network/umee/pull/1694) `MsgMaxWithdraw`, `MsgMaxBorrow` and `MsgRepay` won't return errors if there is nothing to withdraw, borrow or repay respectively.
+- [1694](https://github.com/umee-network/umee/pull/1694) `MsgMaxWithdraw`, `MsgMaxBorrow` and `MsgRepay` won't return errors if there is nothing to withdraw, borrow or repay respectively. Leverage `ErrMaxWithdrawZero` and `ErrMaxBorrowZero` has been removed.
 
 ### Fixes
 
