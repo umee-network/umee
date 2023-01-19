@@ -89,14 +89,3 @@ func validateUToken(coin sdk.Coin) error {
 	}
 	return nil
 }
-
-// validateBaseDenom validates a denom and ensures it is not a uToken.
-func validateBaseDenom(denom string) error {
-	if err := sdk.ValidateDenom(denom); err != nil {
-		return err
-	}
-	if types.HasUTokenPrefix(denom) {
-		return types.ErrUToken.Wrap(denom)
-	}
-	return nil
-}
