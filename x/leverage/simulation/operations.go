@@ -409,7 +409,7 @@ func randomLiquidateFields(
 	if err != nil {
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
-	borrowedValue, err := lk.TotalTokenValue(ctx, borrowed, false)
+	borrowedValue, err := lk.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
 	if err != nil {
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}

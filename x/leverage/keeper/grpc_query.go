@@ -135,10 +135,10 @@ func (q Querier) MarketSummary(
 	}
 
 	// Oracle prices in response will be nil if it is unavailable
-	if oraclePrice, _, oracleErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom, false); oracleErr == nil {
+	if oraclePrice, _, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeSpot); oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	}
-	if historicPrice, _, historicErr := q.Keeper.TokenDefaultDenomPrice(ctx, req.Denom, true); historicErr == nil {
+	if historicPrice, _, historicErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeHistoric); historicErr == nil {
 		resp.OracleHistoricPrice = &historicPrice
 	}
 
@@ -202,43 +202,41 @@ func (q Querier) AccountSummary(
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied, false)
+	// supplied value always uses spot prices
+	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied, types.PriceModeSpot)
 	if err != nil {
 		return nil, err
 	}
-	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed, false)
+	// borrowed value here is shown using spot prices, but leverage logic instead uses
+	// the higher of spot or historic prices for each borrowed token when comparing it
+	// to borrow limit.
+	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
 	if err != nil {
 		return nil, err
 	}
+	// collateral value always uses spot prices
 	collateralValue, err := q.Keeper.CalculateCollateralValue(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}
-	spotBorrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral, false)
+	// borrow limit shown here as it is used in leverage logic:
+	// using the lower of spot or historic prices for each collateral token
+	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}
+	// liquidation always uses spot prices
 	liquidationThreshold, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
 	if err != nil {
 		return nil, err
 	}
 
-	// must still return current values if historic prices are down - they will display as zero
-	historicBorrowedValue, _ := q.Keeper.TotalTokenValue(ctx, borrowed, true)
-	historicBorrowLimit, _ := q.Keeper.CalculateBorrowLimit(ctx, collateral, true)
-
-	// borrow limit is the minimum of either spot or historic borrow limit - zero if historic prices are down
-	borrowLimit := sdk.MinDec(historicBorrowLimit, spotBorrowLimit)
-
 	return &types.QueryAccountSummaryResponse{
-		SuppliedValue:         suppliedValue,
-		CollateralValue:       collateralValue,
-		BorrowedValue:         borrowedValue,
-		BorrowLimit:           borrowLimit,
-		LiquidationThreshold:  liquidationThreshold,
-		HistoricBorrowedValue: historicBorrowedValue,
-		HistoricBorrowLimit:   historicBorrowLimit,
-		SpotBorrowLimit:       spotBorrowLimit,
+		SuppliedValue:        suppliedValue,
+		CollateralValue:      collateralValue,
+		BorrowedValue:        borrowedValue,
+		BorrowLimit:          borrowLimit,
+		LiquidationThreshold: liquidationThreshold,
 	}, nil
 }
 
@@ -318,19 +316,10 @@ func (q Querier) MaxWithdraw(
 	}
 
 	for _, denom := range denoms {
-		maxCurrentWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, denom, false)
+		uToken, err := q.Keeper.maxWithdraw(ctx, addr, denom)
 		if err != nil {
 			return nil, err
 		}
-		maxHistoricWithdraw, err := q.Keeper.maxWithdraw(ctx, addr, denom, true)
-		if err != nil {
-			return nil, err
-		}
-
-		uToken := sdk.NewCoin(
-			maxCurrentWithdraw.Denom,
-			sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
-		)
 		if uToken.IsPositive() {
 			token, err := q.Keeper.ExchangeUToken(ctx, uToken)
 			if err != nil {
@@ -381,18 +370,10 @@ func (q Querier) MaxBorrow(
 	}
 
 	for _, denom := range denoms {
-		currentMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom, false)
+		maxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom)
 		if err != nil {
 			return nil, err
 		}
-		historicMaxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom, true)
-		if err != nil {
-			return nil, err
-		}
-		maxBorrow := sdk.NewCoin(
-			currentMaxBorrow.Denom,
-			sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
-		)
 		if maxBorrow.IsPositive() {
 			maxTokens = maxTokens.Add(maxBorrow)
 		}

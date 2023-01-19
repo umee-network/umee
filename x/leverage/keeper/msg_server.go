@@ -106,19 +106,10 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
-	maxCurrentWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, false)
+	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
-	maxHistoricWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, true)
-	if err != nil {
-		return nil, err
-	}
-
-	uToken := sdk.NewCoin(
-		maxCurrentWithdraw.Denom,
-		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
-	)
 
 	if uToken.IsZero() {
 		zeroCoin := sdkutil.ZeroCoin(msg.Denom)
@@ -341,19 +332,10 @@ func (s msgServer) MaxBorrow(
 		return nil, err
 	}
 
-	currentMaxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom, false)
+	maxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
-	historicMaxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom, true)
-	if err != nil {
-		return nil, err
-	}
-
-	maxBorrow := sdk.NewCoin(
-		msg.Denom,
-		sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
-	)
 	if maxBorrow.IsZero() {
 		return &types.MsgMaxBorrowResponse{Borrowed: sdkutil.ZeroCoin(msg.Denom)}, nil
 	}
