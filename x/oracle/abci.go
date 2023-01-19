@@ -11,17 +11,12 @@ import (
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
-// isPeriodLastBlock returns true if we are at the last block of the period
-func isPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
-	return (uint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
-}
-
 // EndBlocker is called at the end of every block
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
-	if isPeriodLastBlock(ctx, params.VotePeriod) {
+	if k.IsPeriodLastBlock(ctx, params.VotePeriod) {
 		// Build claim map over all validators in active set
 		validatorClaimMap := make(map[string]types.Claim)
 		powerReduction := k.StakingKeeper.PowerReduction(ctx)
@@ -59,12 +54,12 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 				return err
 			}
 
-			if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+			if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 				k.AddHistoricPrice(ctx, denom, exchangeRate)
 			}
 
 			// Calculate and stamp median/median deviation if median stamp period has passed
-			if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+			if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
 				if err = k.CalcAndSetHistoricMedian(ctx, denom); err != nil {
 					return err
 				}
@@ -100,26 +95,11 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 	// Slash oracle providers who missed voting over the threshold and
 	// reset miss counters of all validators at the last block of slash window
-	if isPeriodLastBlock(ctx, params.SlashWindow) {
+	if k.IsPeriodLastBlock(ctx, params.SlashWindow) {
 		k.SlashAndResetMissCounters(ctx)
 	}
 
-	// Prune historic prices and medians outside pruning period determined by
-	// the stamp period multiplied by the max stamps.
-	if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-		pruneHistoricPeriod := params.HistoricStampPeriod * params.MaximumPriceStamps
-		if pruneHistoricPeriod < uint64(ctx.BlockHeight()) {
-			k.PruneHistoricPricesBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneHistoricPeriod)
-		}
-
-		if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
-			pruneMedianPeriod := params.MedianStampPeriod * params.MaximumMedianStamps
-			if pruneMedianPeriod < uint64(ctx.BlockHeight()) {
-				k.PruneMediansBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-				k.PruneMedianDeviationsBeforeBlock(ctx, uint64(ctx.BlockHeight())-pruneMedianPeriod)
-			}
-		}
-	}
+	k.PruneAllPrices(ctx)
 
 	return nil
 }
