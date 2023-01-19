@@ -12,6 +12,7 @@ import (
 )
 
 // HistoricMedians returns a list of a given denom's last numStamps medians.
+
 func (k Keeper) HistoricMedians(
 	ctx sdk.Context,
 	denom string,
@@ -293,6 +294,8 @@ func (k Keeper) AddHistoricPrice(
 ) {
 	block := uint64(ctx.BlockHeight())
 	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
+	ak := AvgKeeper{store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
+	ak.updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
 }
 
 func (k Keeper) SetHistoricPrice(
