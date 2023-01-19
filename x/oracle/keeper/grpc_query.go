@@ -275,10 +275,7 @@ func (q querier) Medians(
 
 		medians = q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))
 	} else {
-		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
-			medians = append(medians, median)
-			return false
-		})
+		medians = q.AllMedianPrices(ctx)
 	}
 
 	return &types.QueryMediansResponse{Medians: *medians.Sort()}, nil
@@ -303,13 +300,9 @@ func (q querier) MedianDeviations(
 		if err != nil {
 			return nil, err
 		}
-
 		medianDeviations = append(medianDeviations, *price)
 	} else {
-		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.Price) (stop bool) {
-			medianDeviations = append(medianDeviations, medianDeviation)
-			return false
-		})
+		medianDeviations = q.AllMedianDeviationPrices(ctx)
 	}
 
 	return &types.QueryMedianDeviationsResponse{MedianDeviations: *medianDeviations.Sort()}, nil

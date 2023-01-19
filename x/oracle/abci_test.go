@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 	var historicStampPeriod int64 = 5
 	var medianStampPeriod int64 = 20
 	var maximumPriceStamps int64 = 4
-	var maximumMedianStamps int64 = 5
+	var maximumMedianStamps int64 = 3
 
 	app.OracleKeeper.SetHistoricStampPeriod(ctx, uint64(historicStampPeriod))
 	app.OracleKeeper.SetMedianStampPeriod(ctx, uint64(medianStampPeriod))
@@ -132,14 +132,53 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			oracle.EndBlocker(ctx, app.OracleKeeper)
 		}
 
-		for denom, _ := range exchangeRates {
-			// check medians
-			expectedMedian, err := decmath.Median(exchangeRates[denom])
-			medians := app.OracleKeeper.HistoricMedians(ctx, denom, uint64(maximumPriceStamps))
+		for denom, denomRates := range exchangeRates {
+			// check median
+			expectedMedian, err := decmath.Median(denomRates)
 			s.Require().NoError(err)
-			actualMedian := (*medians.AtBlock(uint64(blockHeight)))[0].ExchangeRateTuple.ExchangeRate
-			s.Require().Equal(actualMedian, expectedMedian)
+
+			medians := app.OracleKeeper.AllMedianPrices(ctx)
+			medians = *medians.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
+			actualMedian := medians[0].ExchangeRateTuple.ExchangeRate
+			s.Require().Equal(expectedMedian, actualMedian)
+
+			// check median deviation
+			expectedMedianDeviation, err := decmath.MedianDeviation(actualMedian, denomRates)
+			s.Require().NoError(err)
+
+			medianDeviations := app.OracleKeeper.AllMedianDeviationPrices(ctx)
+			medianDeviations = *medianDeviations.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
+			actualMedianDeviation := medianDeviations[0].ExchangeRateTuple.ExchangeRate
+			s.Require().Equal(expectedMedianDeviation, actualMedianDeviation)
 		}
+	}
+	numberOfAssets := int64(len(exchangeRates))
+
+	historicPrices := app.OracleKeeper.AllHistoricPrices(ctx)
+	s.Require().Equal(maximumPriceStamps*numberOfAssets, int64(len(historicPrices)))
+
+	for i := int64(0); i < maximumPriceStamps; i++ {
+		expectedBlockNum := blockHeight - (historicStampPeriod * (maximumPriceStamps - int64(i+1)))
+		actualBlockNum := historicPrices[i].BlockNum
+		s.Require().Equal(expectedBlockNum, int64(actualBlockNum))
+	}
+
+	medians := app.OracleKeeper.AllMedianPrices(ctx)
+	s.Require().Equal(maximumMedianStamps*numberOfAssets, int64(len(medians)))
+
+	for i := int64(0); i < maximumMedianStamps; i++ {
+		expectedBlockNum := blockHeight - (medianStampPeriod * (maximumMedianStamps - int64(i+1)))
+		actualBlockNum := medians[i].BlockNum
+		s.Require().Equal(expectedBlockNum, int64(actualBlockNum))
+	}
+
+	medianDeviations := app.OracleKeeper.AllMedianPrices(ctx)
+	s.Require().Equal(maximumMedianStamps*numberOfAssets, int64(len(medianDeviations)))
+
+	for i := int64(0); i < maximumMedianStamps; i++ {
+		expectedBlockNum := blockHeight - (medianStampPeriod * (maximumMedianStamps - int64(i+1)))
+		actualBlockNum := medianDeviations[i].BlockNum
+		s.Require().Equal(expectedBlockNum, int64(actualBlockNum))
 	}
 }
 
