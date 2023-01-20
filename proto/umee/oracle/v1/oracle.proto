@@ -113,6 +113,8 @@ message ExchangeRateTuple {
   ];
 }
 
+// AvgCounter is holds information about the active avg aggreator windows, used
+// to quickly compute average price of an asset.
 message AvgCounter {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;

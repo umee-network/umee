@@ -244,6 +244,8 @@ func (m *ExchangeRateTuple) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_ExchangeRateTuple proto.InternalMessageInfo
 
+// AvgCounter is holds information about the active avg aggreator windows, used
+// to quickly compute average price of an asset.
 type AvgCounter struct {
 	Sum   github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=sum,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"sum"`
 	Num   uint32                                 `protobuf:"varint,2,opt,name=num,proto3" json:"num,omitempty"`
