@@ -16,7 +16,7 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyEndBlocker)
 
 	params := k.GetParams(ctx)
-	if isPeriodLastBlock(ctx, params.VotePeriod) {
+	if k.IsPeriodLastBlock(ctx, params.VotePeriod) {
 		if err := CalcPrices(ctx, params, k); err != nil {
 			return err
 		}
@@ -69,12 +69,12 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 			return err
 		}
 
-		if isPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 			k.AddHistoricPrice(ctx, denom, exchangeRate)
 		}
 
 		// Calculate and stamp median/median deviation if median stamp period has passed
-		if isPeriodLastBlock(ctx, params.MedianStampPeriod) {
+		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
 			if err = k.CalcAndSetHistoricMedian(ctx, denom); err != nil {
 				return err
 			}
