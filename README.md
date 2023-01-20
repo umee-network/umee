@@ -30,6 +30,7 @@ Umee will allow a multitude of decentralized debt products.
   - [Public](#public)
 - [Install](#install)
   - [Swagger](#swagger)
+  - [Cosmovisor](#cosmovisor)
 
 ## Releases
 
@@ -48,7 +49,8 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 |   v3.0-1.x   |    ✓    |      ✗       |  v0.46.x   | v5.0.x | v1.3.x+ |    v1.0.x    | umee/v3 module/v1.5.x-umee |
 |  v3.1.0-cw1  |    ✗    |      ✓       |  v0.46.x   | v5.0.x | v1.3.x+ |    v2.0.x    | umee/v3 module/v1.5.x-umee |
 |    v3.2.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.x    |   umee/v3 v1.5.3-umee-3    |
-|    v3.3.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |   v2.0.1+    |   umee/v3 v1.5.3-umee-3    |
+|    v3.3.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |   v2.0.2+    |   umee/v3 v1.5.3-umee-3    |
+|    v4.0.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.3    |   umee/v3 v1.5.3-umee-3    |
 
 ## Active Networks
 
