@@ -10,8 +10,8 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 This release contains the Historacle Upgrade, a pricing update which improves the way we treat quickly-changing prices in the leverage module.
 
-> See the [Historacle Design Doc](/docs/design_docs/011-historacle-pricing.md) for a description of how these prices are calculated.
-> See the [Leverage Module Spec](/x/leverage/README.md#historic-borrow-limit-value) for a description of how these prices are treated by the leverage protocol.
+* See the [Historacle Design Doc](/docs/design_docs/011-historacle-pricing.md) for a description of how these prices are calculated.
+* See the [Leverage Module Spec](/x/leverage/README.md#historic-borrow-limit-value) for a description of how these prices are treated by the leverage protocol.
 
 **Please Note** This upgrade requires the use of [Price Feeder V2.0.3](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv2.0.3) **AFTER** the Umee v4.0 Upgrade. Prior to this upgrade, you should stay on [Price Feeder V2.0.2](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv2.0.2).
 
