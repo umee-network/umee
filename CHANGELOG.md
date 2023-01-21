@@ -46,6 +46,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v4.0.0](https://github.com/umee-network/umee/releases/tag/v4.0.0) - 2023-01-20
+
 ### API Breaking
 
 - [1683](https://github.com/umee-network/umee/pull/1683) MaxWithdraw query now returns `sdk.Coins`, not `sdk.Coin` and will be empty (not zero coin) when returning a zero amount. Denom field in query is now optional.
