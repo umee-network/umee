@@ -9,18 +9,17 @@ WORKDIR /src
 RUN wget https://github.com/umee-network/peggo/releases/download/v1.4.0/peggo-v1.4.0-linux-amd64.tar.gz && \
     tar -xvf peggo-v*
 
-## Download go module dependencies for umeed and price-feeder
-WORKDIR /src/umee
-# optimization: if go.sum didn't change, docker will use cached image
-COPY go.mod go.sum ./
-RUN go mod download
-
+## Download go module dependnecies for price-feeder
 WORKDIR /src/umee/price-feeder
 COPY price-feeder/go.mod price-feeder/go.sum ./
 RUN go mod download
 
-## Build umeed and price-feeder
+## Download go module dependencies for umeed
 WORKDIR /src/umee
+COPY go.mod go.sum ./
+RUN go mod download
+
+## Build umeed and price-feeder
 COPY . .
 RUN make install && \
     cd price-feeder && make install
