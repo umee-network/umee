@@ -28,7 +28,6 @@ var (
 	// 3XX = User Positions
 	ErrInsufficientBalance    = sdkerrors.Register(ModuleName, 300, "insufficient balance")
 	ErrInsufficientCollateral = sdkerrors.Register(ModuleName, 301, "insufficient collateral")
-	ErrDenomNotBorrowed       = sdkerrors.Register(ModuleName, 302, "denom not borrowed")
 	ErrLiquidationRepayZero   = sdkerrors.Register(ModuleName, 303, "liquidation would repay zero tokens")
 
 	// 4XX = Price Sensitive
@@ -36,9 +35,7 @@ var (
 	ErrInvalidOraclePrice    = sdkerrors.Register(ModuleName, 401, "invalid oracle price")
 	ErrUndercollaterized     = sdkerrors.Register(ModuleName, 402, "borrow positions are undercollaterized")
 	ErrLiquidationIneligible = sdkerrors.Register(ModuleName, 403, "borrower not eligible for liquidation")
-	ErrMaxWithdrawZero       = sdkerrors.Register(ModuleName, 404, "max withdraw amount was zero")
 	ErrNoHistoricMedians     = sdkerrors.Register(ModuleName, 405, "insufficient historic medians available")
-	ErrMaxBorrowZero         = sdkerrors.Register(ModuleName, 406, "max borrow amount was zero")
 
 	// 5XX = Market Conditions
 	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 500, "lending pool insufficient")

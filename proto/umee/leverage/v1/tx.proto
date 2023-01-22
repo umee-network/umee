@@ -24,6 +24,7 @@ service Msg {
 
   // MaxWithdraw moves previously supplied tokens from the module back to the user balance in
   // exchange for burning uTokens. It automatically calculates the maximum valid amount to withdraw.
+  // Zero is returned if no more tokens can be withdrawn.
   rpc MaxWithdraw(MsgMaxWithdraw) returns (MsgMaxWithdrawResponse);
 
   // Collateralize enables selected uTokens as collateral, which moves them to the module.
@@ -37,6 +38,7 @@ service Msg {
   rpc Borrow(MsgBorrow) returns (MsgBorrowResponse);
 
   // MaxBorrow allows a user to borrow the maximum amount of tokens their collateral will allow.
+  // Zero is returned if no more can be borrowed.
   rpc MaxBorrow(MsgMaxBorrow) returns (MsgMaxBorrowResponse);
 
   // Repay allows a user to repay previously borrowed tokens and interest.
