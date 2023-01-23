@@ -8,7 +8,7 @@ import (
 )
 
 // EndBlocker implements EndBlock for the x/incentive module.
-func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
+func EndBlocker(_ sdk.Context, _ keeper.Keeper) []abci.ValidatorUpdate {
 	// TODO: Programs change in status, and reward distribution amounts are updated
 	return []abci.ValidatorUpdate{}
 }

@@ -47,7 +47,7 @@ func DefaultGenesisState() *GenesisState {
 }
 
 // ValidateGenesis checks a genesis state for basic issues
-func ValidateGenesis(gs GenesisState) error {
+func ValidateGenesis(_ GenesisState) error {
 	// TODO
 	return nil
 }
@@ -78,6 +78,7 @@ func NewIncentiveProgram(
 		Id:               id,
 		StartTime:        startTime,
 		Duration:         duration,
+		Denom:            bondDenom,
 		TotalRewards:     totalRewards,
 		FundedRewards:    fundedRewards,
 		RemainingRewards: remainingRewards,
@@ -104,7 +105,7 @@ func NewRewardTracker(addr, denom string, tier uint32, coins sdk.DecCoins) Rewar
 }
 
 // NewRewardAccumulator creates the RewardAccumulator struct used in GenesisState
-func NewRewardAccumulator(addr, denom string, tier uint32, coins sdk.DecCoins) RewardAccumulator {
+func NewRewardAccumulator(denom string, tier uint32, coins sdk.DecCoins) RewardAccumulator {
 	return RewardAccumulator{
 		Denom:         denom,
 		Tier:          tier,
