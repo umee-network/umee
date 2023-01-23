@@ -48,7 +48,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
+<<<<<<< HEAD
 - [1800](https://github.com/umee-network/umee/pull/1800) Handle non-capitalized assets when calling the historacle data.
+=======
+- [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
+>>>>>>> b1454c1 (fix: oracle accept list no longer automatically adds blacklisted tokens (#1736))
 
 ## [v4.0.0](https://github.com/umee-network/umee/releases/tag/v4.0.0) - 2023-01-20
 
