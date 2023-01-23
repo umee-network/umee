@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Fixes
+
+- [1XXX](https://github.com/umee-network/umee/pull/1XXX) Blacklisted tokens no longer add themselves back to the oracle accept list.
+
 ## [v4.0.0](https://github.com/umee-network/umee/releases/tag/v4.0.0) - 2023-01-20
 
 ### API Breaking

@@ -26,6 +26,11 @@ func (k Keeper) Hooks() Hooks {
 func (h Hooks) AfterTokenRegistered(ctx sdk.Context, token leveragetypes.Token) {
 	acceptList := h.k.AcceptList(ctx)
 
+	if token.Blacklist {
+		// Blacklisted tokens should not trigger updates to the oracle accept list
+		return
+	}
+
 	var tokenExists bool
 	for _, t := range acceptList {
 		if t.BaseDenom == token.BaseDenom {
