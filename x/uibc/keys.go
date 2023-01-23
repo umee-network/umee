@@ -23,6 +23,6 @@ var (
 )
 
 func KeyTotalOutflows(ibcDenom string) []byte {
-	//  KeyPrefixDenomQuota| denom | 0x00
+	//  KeyPrefixDenomQuota| denom
 	return util.ConcatBytes(0, KeyPrefixDenomQuota, []byte(ibcDenom))
 }

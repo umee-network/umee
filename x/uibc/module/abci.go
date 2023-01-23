@@ -8,7 +8,6 @@ import (
 
 // BeginBlock implements BeginBlock for the x/uibc module.
 func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
-
 	params := keeper.GetParams(ctx)
 	quotaExpires, err := keeper.GetExpire(ctx)
 	if err != nil {

@@ -19,7 +19,7 @@ func (k Keeper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability,
 
 	amount, ok := sdkmath.NewIntFromString(funds)
 	if !ok {
-		return uibc.ErrInvalidIBCDenom.Wrap("invalid transfer amount")
+		return uibc.ErrInvalidAmount.Wrapf("amount %s", funds)
 	}
 
 	if err := k.CheckAndUpdateQuota(ctx, denom, amount); err != nil {

@@ -153,7 +153,7 @@ func (im IBCMiddleware) RevertSentPacket(
 
 	amount, ok := sdkmath.NewIntFromString(data.Amount)
 	if !ok {
-		return uibc.ErrInvalidIBCDenom.Wrap("invalid transfer amount")
+		return uibc.ErrInvalidAmount.Wrapf("amount %s", data.Amount)
 	}
 
 	return im.keeper.UndoUpdateQuota(
