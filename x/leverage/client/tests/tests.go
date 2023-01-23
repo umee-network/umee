@@ -293,12 +293,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				BorrowedValue: sdk.MustNewDecFromStr("0.00858671"),
 				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
 				BorrowLimit: sdk.MustNewDecFromStr("0.0085610525"),
-				// (251 / 1000000) * 34.21 = 0.00858671
-				HistoricBorrowedValue: sdk.MustNewDecFromStr("0.00858671"),
-				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
-				HistoricBorrowLimit: sdk.MustNewDecFromStr("0.0085610525"),
-				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
-				SpotBorrowLimit: sdk.MustNewDecFromStr("0.0085610525"),
 				// (1001 / 1000000) * 0.25 * 34.21 = 0.0085610525
 				LiquidationThreshold: sdk.MustNewDecFromStr("0.0085610525"),
 			},

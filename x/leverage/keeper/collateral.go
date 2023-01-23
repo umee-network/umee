@@ -53,7 +53,7 @@ func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
 }
 
 // CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by
-// collateral sdk.Coins, using each token's uToken exchange rate.
+// collateral sdk.Coins, using each token's uToken exchange rate. Always uses spot price.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
 func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
@@ -66,7 +66,7 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 		}
 
 		// get USD value of base assets
-		v, err := k.TokenValue(ctx, baseAsset, false)
+		v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}

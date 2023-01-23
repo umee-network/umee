@@ -165,18 +165,17 @@ A user's borrow limit is the sum of the contributions from each denomination of 
   }
 ```
 
+For tokens with hith historic prices enabled (indicated by a `HistoricMedians` parameter greater than zero), each collateral `TokenValue` is computed with `PriceModeLow`, i.e. the lower of either spot price or historic price is used.
+
 #### Historic Borrow Limit, Value
 
 The leverage module also makes use of the oracle's historic prices to enforce an additional restriction on borrowing.
 
 The logic is:
 - For any `MsgBorrow`, `MsgMaxBorrow`, `MsgDecollateralize`, `MsgWithdraw`, or `MsgMaxWithdraw`
-- The borrower’s borrowed value must be less than their borrow limit (both computed using current prices) after the transaction
-- AND the borrower’s borrowed_value must be less than their borrow_limit (both computed using historic prices) after the transaction
+- The borrower’s borrowed value must be less than their borrow limit, with borrowed value being computed using `PriceModeHigh`, i.e. the higher of either spot price or historic price is used.
 - Where historic prices are defined as the Median of the last `N` historic medians from the `oracle` module with `N = Token.HistoricMedians` in the leverage registry
 - Else the transaction fails
-
-Historic borrow limit and historic borrowed value are computed identically to their non-historic counterparts, except using the historic price described above in place of current price.
 
 #### Liquidation Threshold
 

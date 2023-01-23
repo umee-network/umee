@@ -240,8 +240,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 
 	expected = []types.Price{
 		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
-		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
 		*types.NewPrice(umeeMedian0.Amount, "umee", blockHeight0),
+		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
 		*types.NewPrice(umeeMedian1.Amount, "umee", blockHeight1),
 	}
 	s.Require().Equal(res.Medians, expected)
@@ -250,8 +250,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
 		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
+		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
 	}
 	s.Require().Equal(res.Medians, expected)
 

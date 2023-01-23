@@ -103,7 +103,7 @@ func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context, denom string) sdk.Dec 
 // functions set actual borrowed amount using setBorrow. Also updates AdjustedTotalBorrowed by the
 // resulting change in borrowed amount. Value must always be non-negative.
 func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, adjustedBorrow sdk.DecCoin) error {
-	if err := validateBaseDenom(adjustedBorrow.Denom); err != nil {
+	if err := types.ValidateBaseDenom(adjustedBorrow.Denom); err != nil {
 		return err
 	}
 	if addr.Empty() {
@@ -207,7 +207,7 @@ func (k *Keeper) setLastInterestTime(ctx sdk.Context, interestTime int64) error 
 
 // setBadDebtAddress sets or deletes an address in a denom's list of addresses with unpaid bad debt.
 func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom string, hasDebt bool) error {
-	if err := validateBaseDenom(denom); err != nil {
+	if err := types.ValidateBaseDenom(denom); err != nil {
 		return err
 	}
 	if addr.Empty() {
@@ -234,7 +234,7 @@ func (k Keeper) getInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
 
 // setInterestScalar sets the interest scalar for a given base token denom.
 func (k Keeper) setInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec) error {
-	if err := validateBaseDenom(denom); err != nil {
+	if err := types.ValidateBaseDenom(denom); err != nil {
 		return err
 	}
 	key := types.KeyInterestScalar(denom)

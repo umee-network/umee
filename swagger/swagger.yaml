@@ -150,34 +150,13 @@ paths:
                   Borrow Limit is the maximum Borrowed Value the account is
                   allowed to reach through direct borrowing.
 
-                  It uses the lower of two borrow limits: spot_borrow_limit and
-                  historic_borrow_limit.
+                  The lower of spot or historic price for each collateral token
+                  is used when calculating borrow limits.
               liquidation_threshold:
                 type: string
                 description: >-
                   Liquidation Threshold is the Borrowed Value at which the
                   account becomes eligible for liquidation.
-              historic_borrowed_value:
-                type: string
-                description: >-
-                  Historic Borrowed Value is the sum of the USD value of all
-                  tokens the account has borrowed,
-
-                  including interest owed, using historic prices.
-              historic_borrow_limit:
-                type: string
-                description: >-
-                  Historic Borrow Limit is the maximum Borrowed Value the
-                  account is allowed to reach through direct borrowing,
-
-                  using historic prices.
-              spot_borrow_limit:
-                type: string
-                description: >-
-                  Spot Borrow Limit is the maximum Borrowed Value the account is
-                  allowed to reach through direct borrowing,
-
-                  using spot prices.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -1037,6 +1016,9 @@ paths:
                         those calculations
 
                         for the affected Token.
+
+                        The time span covered by the historic median will be:
+                            oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
                   description: >-
                     Token defines a token, along with its metadata and
                     parameters, in the Umee
@@ -2056,34 +2038,13 @@ definitions:
           Borrow Limit is the maximum Borrowed Value the account is allowed to
           reach through direct borrowing.
 
-          It uses the lower of two borrow limits: spot_borrow_limit and
-          historic_borrow_limit.
+          The lower of spot or historic price for each collateral token is used
+          when calculating borrow limits.
       liquidation_threshold:
         type: string
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
-      historic_borrowed_value:
-        type: string
-        description: >-
-          Historic Borrowed Value is the sum of the USD value of all tokens the
-          account has borrowed,
-
-          including interest owed, using historic prices.
-      historic_borrow_limit:
-        type: string
-        description: >-
-          Historic Borrow Limit is the maximum Borrowed Value the account is
-          allowed to reach through direct borrowing,
-
-          using historic prices.
-      spot_borrow_limit:
-        type: string
-        description: >-
-          Spot Borrow Limit is the maximum Borrowed Value the account is allowed
-          to reach through direct borrowing,
-
-          using spot prices.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
@@ -2630,6 +2591,9 @@ definitions:
                 calculations
 
                 for the affected Token.
+
+                The time span covered by the historic median will be:
+                    oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
           description: >-
             Token defines a token, along with its metadata and parameters, in
             the Umee
@@ -2835,6 +2799,9 @@ definitions:
           calculations
 
           for the affected Token.
+
+          The time span covered by the historic median will be:
+              oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
     description: >-
       Token defines a token, along with its metadata and parameters, in the Umee
 

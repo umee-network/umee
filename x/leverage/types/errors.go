@@ -8,10 +8,11 @@ import (
 
 var (
 	// 1XX = General Validation
-	ErrEmptyAddress = sdkerrors.Register(ModuleName, 100, "empty address")
-	ErrNilAsset     = sdkerrors.Register(ModuleName, 101, "nil asset")
-	ErrGetAmount    = sdkerrors.Register(ModuleName, 102, "retrieved invalid amount")
-	ErrSetAmount    = sdkerrors.Register(ModuleName, 103, "cannot set invalid amount")
+	ErrEmptyAddress     = sdkerrors.Register(ModuleName, 100, "empty address")
+	ErrNilAsset         = sdkerrors.Register(ModuleName, 101, "nil asset")
+	ErrGetAmount        = sdkerrors.Register(ModuleName, 102, "retrieved invalid amount")
+	ErrSetAmount        = sdkerrors.Register(ModuleName, 103, "cannot set invalid amount")
+	ErrInvalidPriceMode = sdkerrors.Register(ModuleName, 104, "invalid price mode")
 
 	// 2XX = Token Registry
 	ErrNotRegisteredToken   = sdkerrors.Register(ModuleName, 200, "not a registered Token")
@@ -27,7 +28,6 @@ var (
 	// 3XX = User Positions
 	ErrInsufficientBalance    = sdkerrors.Register(ModuleName, 300, "insufficient balance")
 	ErrInsufficientCollateral = sdkerrors.Register(ModuleName, 301, "insufficient collateral")
-	ErrDenomNotBorrowed       = sdkerrors.Register(ModuleName, 302, "denom not borrowed")
 	ErrLiquidationRepayZero   = sdkerrors.Register(ModuleName, 303, "liquidation would repay zero tokens")
 
 	// 4XX = Price Sensitive
@@ -35,9 +35,7 @@ var (
 	ErrInvalidOraclePrice    = sdkerrors.Register(ModuleName, 401, "invalid oracle price")
 	ErrUndercollaterized     = sdkerrors.Register(ModuleName, 402, "borrow positions are undercollaterized")
 	ErrLiquidationIneligible = sdkerrors.Register(ModuleName, 403, "borrower not eligible for liquidation")
-	ErrMaxWithdrawZero       = sdkerrors.Register(ModuleName, 404, "max withdraw amount was zero")
 	ErrNoHistoricMedians     = sdkerrors.Register(ModuleName, 405, "insufficient historic medians available")
-	ErrMaxBorrowZero         = sdkerrors.Register(ModuleName, 406, "max borrow amount was zero")
 
 	// 5XX = Market Conditions
 	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 500, "lending pool insufficient")
