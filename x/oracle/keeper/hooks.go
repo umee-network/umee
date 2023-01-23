@@ -24,6 +24,11 @@ func (k Keeper) Hooks() Hooks {
 // it checks if the provided Token should be added to the existing accepted list
 // of assets for the x/oracle module.
 func (h Hooks) AfterTokenRegistered(ctx sdk.Context, token leveragetypes.Token) {
+	if token.Blacklist {
+		// Blacklisted tokens should not trigger updates to the oracle accept list
+		return
+	}
+
 	acceptList := h.k.AcceptList(ctx)
 
 	var tokenExists bool
