@@ -157,7 +157,7 @@ test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TES
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v --tags='$(TEST_E2E_TAGS)'
+test-e2e: ARGS=-timeout=25m -v -tags='$(TEST_E2E_TAGS)'
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
