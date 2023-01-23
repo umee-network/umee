@@ -6,25 +6,17 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v3.3.0
+## v4.0.0
 
-- For the mainnet, this release includes update from v3.1.x → v3.3.x. Please also look at the [`v3.2` Release Notes](https://github.com/umee-network/umee/blob/v3.2.0/RELEASE_NOTES.md), notably the **Gravity Bridge Slashing**.
-- For the Canon-2 testnet, this release includes update from v3.2.x → v3.3.x
+This release contains the Historacle Upgrade, a pricing update which improves the way we treat quickly-changing prices in the leverage module.
 
-v3.2.0 was not released on mainnet due to a bug in x/leverage gov messages migration to the new format which utilizes x/gov/v1 authorization system. The bug caused legacy token registry updates to break x/gov proposal queries. In v3.3 we fix that bug.
+* See the [Historacle Design Doc](/docs/design_docs/011-historacle-pricing.md) for a description of how these prices are calculated.
+* See the [Leverage Module Spec](/x/leverage/README.md#historic-borrow-limit-value) for a description of how these prices are treated by the leverage protocol.
 
-Additional highlights:
+**Please Note:**
 
-- Added `QueryMaxWithdraw` and `MsgMaxWithdraw` to allow user easily withdraw previously supplied tokens from the module back to the user balance.
-- Updated Cosmos SDK to v0.46.7
-
-Please see the [CHANGELOG](https://github.com/umee-network/umee/blob/v3.3.0/CHANGELOG.md) for an exhaustive list of changes.
-
-### Github Release
-
-Sinice `v3.2.0` new experimental features (disabled by default) are part of the linked binary. That changed the build process. Umeed officially doesn't support static CGO build (with `CGO_ENABLED=1`) any more. Github Actions only support build using Linux on amd64 -- we can not make a cross platform build using Github Actions (possible solution is to do it through Qemu emulator). So our Github release only contains source code archive and amd64 Linux binary.
-
-To run the provided binary, you **have to have `libwasmvm.x86_64.so v1.1.1`** in your system lib directory.
+* This upgrade requires the use of [Price Feeder V2.0.3](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv2.0.3) **AFTER** the Umee v4.0 Upgrade. Prior to this upgrade, you should stay on [Price Feeder V2.0.2](https://github.com/umee-network/umee/releases/tag/price-feeder%2Fv2.0.2).
+* To run the provided binary, you **have to have `libwasmvm.x86_64.so v1.1.1`** in your system lib directory.
 
 Building from source will automatically link the `libwasmvm.x86_64.so` created as a part of the build process (you must build on the same host as you run the binary, or copy the `libwasmvm.x86_64.so` your lib directory).
 
@@ -36,6 +28,12 @@ Otherwise you have to download `libwasmvm`. Please check [Supported Platforms](h
 wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -P /lib/
 ```
 
+Additional highlights:
+
+- [1694](https://github.com/umee-network/umee/pull/1694) `MsgMaxWithdraw`, `MsgMaxBorrow` and `MsgRepay` won't return errors if there is nothing to withdraw, borrow or repay respectively. Leverage `ErrMaxWithdrawZero` and `ErrMaxBorrowZero` has been removed.
+
+Please see the [CHANGELOG](/CHANGELOG.md#v4.0.0) for an exhaustive list of changes.
+
 ### Update instructions
 
 - Note: Skip this step if you build binary from source and are able to properly link libwasmvm.
@@ -46,24 +44,13 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 ```
 
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
-- Run latest Peggo (v1.4.0) - **updated**
-- Run latest Price Feeder (v2.0.2) - **updated**
+- Run latest Price Feeder (v2.0.3) - **updated**
 - Swap binaries.
 - Restart the chain.
 
-There is a new option available in `app.toml` (in Base Configuration). Set `iavl-disable-fastnode` to `true` if you want to disable fastnode cache and reduce RAM usage (default is `false`).
-
-```
-# IAVLDisableFastNode enables or disables the fast node feature of IAVL.
-# Default is false.
-iavl-disable-fastnode = false
-```
-
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
-- If you use Cosmovisor, and you didn't build binary from source in the validator machine, you have to download the respective `libwasmvm` into your machine. See the previous section for more details.
-
-NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v3.3.0 --version`.
+NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.0.0 --version`.
 
 #### Docker
 
