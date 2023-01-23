@@ -42,6 +42,7 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
 		OraclePrice:            &oracleSymbolPrice,
+		OracleHistoricPrice:    &oracleSymbolPrice,
 		UTokenExchangeRate:     sdk.OneDec(),
 		Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
 		Borrow_APY:             sdk.MustNewDecFromStr("1.52"),

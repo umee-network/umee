@@ -237,6 +237,8 @@ message Token {
   // borrow positions under both current and historic prices. The default value of
   // zero for this field causes current price to be used in those calculations
   // for the affected Token.
+  // The time span covered by the historic median will be:
+  //     oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
   uint32 historic_medians = 19 [
     (gogoproto.moretags) = "yaml:\"historic_medians\""
   ];

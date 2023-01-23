@@ -33,7 +33,10 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/grpc/client"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -41,7 +44,7 @@ import (
 
 const (
 	photonDenom    = "photon"
-	initBalanceStr = "110000000000" + appparams.BondDenom + ",100000000000" + photonDenom
+	initBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + photonDenom
 	gaiaChainID    = "test-gaia-chain"
 
 	ethChainID uint = 15
@@ -52,6 +55,9 @@ var (
 	minGasPrice     = appparams.ProtocolMinGasPrice.String()
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
 	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
+
+	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
+	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
 
 type IntegrationTestSuite struct {
@@ -70,6 +76,7 @@ type IntegrationTestSuite struct {
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
+	umeeClient          *client.UmeeClient
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -124,6 +131,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.runIBCRelayer()
 	// s.runContractDeployment()
 	// s.runOrchestrators()
+	s.initUmeeClient()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -160,8 +168,8 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 }
 
 func (s *IntegrationTestSuite) initNodes() {
-	s.Require().NoError(s.chain.createAndInitValidators(2))
-	s.Require().NoError(s.chain.createAndInitOrchestrators(2))
+	s.Require().NoError(s.chain.createAndInitValidators(3))
+	s.Require().NoError(s.chain.createAndInitOrchestrators(3))
 	s.Require().NoError(s.chain.createAndInitGaiaValidator())
 
 	// initialize a genesis file for the first validator
@@ -270,10 +278,22 @@ func (s *IntegrationTestSuite) initGenesis() {
 	oracleGenState.Params.HistoricStampPeriod = 5
 	oracleGenState.Params.MaximumPriceStamps = 4
 	oracleGenState.Params.MedianStampPeriod = 20
+	oracleGenState.Params.MaximumMedianStamps = 2
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
 	s.Require().NoError(err)
 	appGenState[oracletypes.ModuleName] = bz
+
+	// Gov
+	var govGenState govtypesv1.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
+
+	var votingPeroid = 5 * time.Second
+	govGenState.VotingParams.VotingPeriod = &votingPeroid
+
+	bz, err = cdc.MarshalJSON(&govGenState)
+	s.Require().NoError(err)
+	appGenState[govtypes.ModuleName] = bz
 
 	// Bank
 	var bankGenState banktypes.GenesisState
@@ -303,7 +323,12 @@ func (s *IntegrationTestSuite) initGenesis() {
 	// generate genesis txs
 	genTxs := make([]json.RawMessage, len(s.chain.validators))
 	for i, val := range s.chain.validators {
-		createValmsg, err := val.buildCreateValidatorMsg(stakeAmountCoin)
+		var createValmsg sdk.Msg
+		if i == 2 {
+			createValmsg, err = val.buildCreateValidatorMsg(stakeAmountCoin2)
+		} else {
+			createValmsg, err = val.buildCreateValidatorMsg(stakeAmountCoin)
+		}
 		s.Require().NoError(err)
 
 		orchAddr, err := s.chain.orchestrators[i].keyInfo.GetAddress()
@@ -1010,6 +1035,18 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
+}
+
+func (s *IntegrationTestSuite) initUmeeClient() {
+	var err error
+	s.umeeClient, err = client.NewUmeeClient(
+		s.chain.id,
+		"tcp://localhost:26657",
+		"tcp://localhost:9090",
+		"val1",
+		s.chain.validators[2].mnemonic,
+	)
+	s.Require().NoError(err)
 }
 
 func noRestart(config *docker.HostConfig) {

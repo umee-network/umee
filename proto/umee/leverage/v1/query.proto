@@ -182,6 +182,11 @@ message QueryMarketSummaryResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable)   = false
   ];
+  // Oracle Historic Price is the historic USD value of a token. Historic price is defined as the median of the last N historic median prices from the oracle module, with N being this token's HistoricMedians in the leverage registry. Current price is used if required medians is zero. Price is nil when the oracle is down or insufficient historic medians are available.
+  string oracle_historic_price = 19 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = true
+  ];
 }
 
 // QueryAccountBalances defines the request structure for the AccountBalances gRPC service handler.
@@ -226,11 +231,13 @@ message QueryAccountSummaryResponse {
     (gogoproto.nullable)   = false
   ];
   // Borrowed Value is the sum of the USD value of all tokens the account has borrowed, including interest owed.
+  // It always uses spot prices.
   string borrowed_value = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
   // Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
+  // The lower of spot or historic price for each collateral token is used when calculating borrow limits.
   string borrow_limit = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false

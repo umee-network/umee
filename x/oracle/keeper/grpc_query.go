@@ -262,7 +262,7 @@ func (q querier) Medians(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	medians := make([]sdk.DecCoin, 0)
+	medians := types.Prices{}
 
 	if len(req.Denom) > 0 {
 		if req.NumStamps == 0 {
@@ -273,23 +273,12 @@ func (q querier) Medians(
 			req.NumStamps = uint32(q.MaximumMedianStamps(ctx))
 		}
 
-		medians = make(sdk.DecCoins, req.NumStamps)
-		medianList := q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))
-
-		for i, median := range medianList {
-			medians[i] = sdk.NewDecCoinFromDec(req.Denom, median)
-		}
+		medians = q.HistoricMedians(ctx, req.Denom, uint64(req.NumStamps))
 	} else {
-		q.IterateAllMedianPrices(ctx, func(median types.Price) (stop bool) {
-			medians = append(
-				medians,
-				sdk.NewDecCoinFromDec(median.ExchangeRateTuple.Denom, median.ExchangeRateTuple.ExchangeRate),
-			)
-			return false
-		})
+		medians = q.AllMedianPrices(ctx)
 	}
 
-	return &types.QueryMediansResponse{Medians: medians}, nil
+	return &types.QueryMediansResponse{Medians: *medians.Sort()}, nil
 }
 
 // MedianDeviations queries median deviations of all denoms, or, if specified, returns
@@ -304,26 +293,17 @@ func (q querier) MedianDeviations(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	medianDeviations := make([]sdk.DecCoin, 0)
+	medianDeviations := types.Prices{}
 
 	if len(req.Denom) > 0 {
-		exchangeRate, err := q.HistoricMedianDeviation(ctx, req.Denom)
+		price, err := q.HistoricMedianDeviation(ctx, req.Denom)
 		if err != nil {
 			return nil, err
 		}
-
-		medianDeviations = append(medianDeviations, sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+		medianDeviations = append(medianDeviations, *price)
 	} else {
-		q.IterateAllMedianDeviationPrices(ctx, func(medianDeviation types.Price) (stop bool) {
-			medianDeviations = append(
-				medianDeviations,
-				sdk.NewDecCoinFromDec(
-					medianDeviation.ExchangeRateTuple.Denom,
-					medianDeviation.ExchangeRateTuple.ExchangeRate,
-				))
-			return false
-		})
+		medianDeviations = q.AllMedianDeviationPrices(ctx)
 	}
 
-	return &types.QueryMedianDeviationsResponse{MedianDeviations: medianDeviations}, nil
+	return &types.QueryMedianDeviationsResponse{MedianDeviations: *medianDeviations.Sort()}, nil
 }
