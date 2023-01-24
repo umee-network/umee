@@ -19,7 +19,7 @@ func NewQuerier(k Keeper) Querier {
 }
 
 // Params returns params of the x/uibc module.
-func (q Querier) Params(goCtx context.Context, req *uibc.QueryParams) (
+func (q Querier) Params(goCtx context.Context, _ *uibc.QueryParams) (
 	*uibc.QueryParamsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
