@@ -32,6 +32,8 @@ var (
 	KeyPrefixMedian                       = []byte{0x06} // prefix for each key to a price median
 	KeyPrefixMedianDeviation              = []byte{0x07} // prefix for each key to a price median standard deviation
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
+	KeyPrefixAvgCounter                   = []byte{0x09} // prefix for each key to a historic avg price counter
+	KeyLatestAvgCounter                   = []byte{0x10} // key where we store the latest avg price counter
 )
 
 // KeyExchangeRate - stored by *denom*
@@ -73,6 +75,11 @@ func KeyMedianDeviation(denom string, blockNum uint64) (key []byte) {
 // KeyHistoricPrice - stored by *denom* and *block*
 func KeyHistoricPrice(denom string, blockNum uint64) (key []byte) {
 	return util.ConcatBytes(0, KeyPrefixHistoricPrice, []byte(denom), util.UintWithNullPrefix(blockNum))
+}
+
+// KeyHistoricPrice - stored by *denom* and *block*
+func KeyAvgCounter(denom string, counterID byte) (key []byte) {
+	return util.ConcatBytes(0, KeyPrefixAvgCounter, []byte(denom), []byte{counterID})
 }
 
 // ParseDenomAndBlockFromKey returns the denom and block contained in the *key*
