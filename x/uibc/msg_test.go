@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package uibc
 
 import (
@@ -9,7 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/assert"
 )
 
 func TestMsgGovUpdateQuota(t *testing.T) {
@@ -50,9 +47,9 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 			m := NewMsgGovUpdateQuota(tc.authority, tc.title, tc.description, tc.total, tc.perDenom, tc.quotaDuration)
 			err := m.ValidateBasic()
 			if tc.errExpected {
-				assert.Error(t, err)
+				assert.ErrorContains(t, err, "invalid authority")
 			} else {
-				assert.NoError(t, err)
+				assert.NilError(t, err)
 			}
 		})
 	}
@@ -90,9 +87,9 @@ func TestMsgGovSetIBCPause(t *testing.T) {
 			m := NewMsgGovSetIBCPause(tc.authority, tc.title, tc.description, tc.IbcPauseStatus)
 			err := m.ValidateBasic()
 			if tc.errExpected {
-				assert.Error(t, err)
+				assert.ErrorContains(t, err, "invalid authority")
 			} else {
-				assert.NoError(t, err)
+				assert.NilError(t, err)
 			}
 		})
 	}

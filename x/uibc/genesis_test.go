@@ -7,17 +7,17 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/assert"
 )
 
 func TestGenesisValidation(t *testing.T) {
 	gs := DefaultGenesisState()
 	err := gs.Validate()
-	require.NoError(t, err)
+	assert.NilError(t, err)
 
 	gs.TotalOutflowSum = sdk.NewDec(-123123)
 	err = gs.Validate()
-	require.Error(t, err)
+	assert.ErrorContains(t, err, "total outflow sum shouldn't be negative")
 
 	gs.Quotas = []Quota{
 		{
@@ -26,5 +26,5 @@ func TestGenesisValidation(t *testing.T) {
 		},
 	}
 	err = gs.Validate()
-	require.Error(t, err)
+	assert.ErrorContains(t, err, "ibc denom quota expires shouldn't be empty")
 }
