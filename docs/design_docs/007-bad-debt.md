@@ -3,7 +3,7 @@
 ## Changelog
 
 - December 10, 2021: Initial Draft (@toteki)
-- December 19, 2021: Updated with simplified implemenation (@toteki)
+- December 19, 2021: Updated with simplified implementation (@toteki)
 
 ## Status
 
@@ -77,7 +77,7 @@ An additional event `ReservesExhausted` will be created to monitor for that spec
 
 There are two edge cases that would allow bad debt to slip past detection or automatic repayment:
 
-- Nonzero collateral: If liquidators do not reduce borrower collateral to zero, even leaving a miniscule amount, bad debt will not be detected at the end of `LiquidateBorrow`.
+- Nonzero collateral: If liquidators do not reduce borrower collateral to zero, even leaving a minuscule amount, bad debt will not be detected at the end of `LiquidateBorrow`.
 
 This could be solved by any Liquidator - but if undercollateralized borrowers are being left for long periods without being completely liquidated, then a bot could be set up to finish them, even if that bot is controlled by Umee.
 

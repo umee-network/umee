@@ -206,7 +206,7 @@ When utilization is between two of the above values, borrow APY is determined by
 
 The interest accrued on borrows, after some of it is set aside for reserves, is distributed to all suppliers (i.e. uToken holders) of that denomination by virtue of the uToken exchange rate increasing.
 
-While Supplying APY is never explicity used in the leverage module due to its indirect nature, it is available for querying and can be calculated:
+While Supplying APY is never explicitly used in the leverage module due to its indirect nature, it is available for querying and can be calculated:
 
 `SupplyAPY(token) = BorrowAPY(token) * SupplyUtilization(token) * [1.0 - ReserveFactor(token)]`
 
@@ -392,7 +392,7 @@ Every block, the leverage module runs the following steps in order:
 Borrowers whose entire balance of collateral has been liquidated but still owe debt are marked by their final liquidation transaction. This periodic routine sweeps up all marked `address | denom` bad debt entries in the keeper, performing the following steps for each:
 
 - Determine the about of [Reserves](#reserves) in the borrowed denomination available to repay the debt
-- Repay the full amount owed using reserves, or the maxmimum amount available if reserves are insufficient
+- Repay the full amount owed using reserves, or the maximum amount available if reserves are insufficient
 - Emit a "Bad Debt Repaid" event indicating amount repaid, if nonzero
 - Emit a "Reserves Exhausted" event with the borrow amount remaining, if nonzero
 
