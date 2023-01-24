@@ -46,13 +46,21 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Fixes
+
+- [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
+
+## [v4.0.0](https://github.com/umee-network/umee/releases/tag/v4.0.0) - 2023-01-20
+
 ### API Breaking
 
 - [1683](https://github.com/umee-network/umee/pull/1683) MaxWithdraw query now returns `sdk.Coins`, not `sdk.Coin` and will be empty (not zero coin) when returning a zero amount. Denom field in query is now optional.
+- [1694](https://github.com/umee-network/umee/pull/1694) `MsgMaxWithdraw`, `MsgMaxBorrow` and `MsgRepay` won't return errors if there is nothing to withdraw, borrow or repay respectively. Leverage `ErrMaxWithdrawZero` and `ErrMaxBorrowZero` has been removed.
 
 ### Fixes
 
 - [1680](https://github.com/umee-network/umee/pull/1680) Add amino support for MsgMaxWithdraw.
+- [1710](https://github.com/umee-network/umee/pull/1710) Skip blacklisted tokens in MaxBorrow and MaxWithdraw queries.
 
 ### Features
 
@@ -65,6 +73,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1685](https://github.com/umee-network/umee/pull/1685) Add medians param to Token registry.
 - [1683](https://github.com/umee-network/umee/pull/1683) Add MaxBorrow query and allow returning all denoms from MaxWithdraw.
 - [1690](https://github.com/umee-network/umee/pull/1690) Add MaxBorrow message type.
+- [1711](https://github.com/umee-network/umee/pull/1711) Add historic pricing information to leverage MarketSummary query.
+- [1723](https://github.com/umee-network/umee/pull/1723) Compute borrow limits using the lower of either spot or historic price for each collateral token, and the higher of said prices for borrowed tokens. Remove extra spot/historic only fields in account summary.
+- [1694](https://github.com/umee-network/umee/pull/1694) Add new sdkutil package to enhance common Cosmos SDK functionality. Here, the `ZeroCoin` helper function.
 
 ## [v3.3.0](https://github.com/umee-network/umee/releases/tag/v3.3.0) - 2022-12-20
 

@@ -24,4 +24,13 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 		Exponent:    6,
 	})
 	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 3)
+
+	// require a blacklisted token does not update the accept list
+	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
+		BaseDenom:   "unope",
+		SymbolDenom: "NOPE",
+		Exponent:    6,
+		Blacklist:   true,
+	})
+	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 3)
 }

@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
@@ -35,13 +36,14 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	// check medians, num of available medians, and median standard deviation
 	medians := app.OracleKeeper.HistoricMedians(ctx, displayDenom, 3)
 	s.Require().Equal(len(medians), 3)
-	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.2"))
-	s.Require().Equal(medians[1], sdk.MustNewDecFromStr("1.125"))
-	s.Require().Equal(medians[2], sdk.MustNewDecFromStr("1.1"))
+	s.Require().Equal(medians[0], *types.NewPrice(sdk.MustNewDecFromStr("1.2"), displayDenom, 17))
+	s.Require().Equal(medians[1], *types.NewPrice(sdk.MustNewDecFromStr("1.125"), displayDenom, 14))
+	s.Require().Equal(medians[2], *types.NewPrice(sdk.MustNewDecFromStr("1.1"), displayDenom, 11))
 
 	medianDeviation, err := app.OracleKeeper.HistoricMedianDeviation(ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(medianDeviation, sdk.MustNewDecFromStr("0.111803398874989476"))
+
+	s.Require().Equal(medianDeviation, types.NewPrice(sdk.MustNewDecFromStr("0.111803398874989476"), displayDenom, 17))
 
 	// check current price is within the median deviation
 	result, err := app.OracleKeeper.WithinHistoricMedianDeviation(ctx, displayDenom)
@@ -92,6 +94,6 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 
 	medians = app.OracleKeeper.HistoricMedians(ctx, displayDenom, 3)
 	s.Require().Equal(len(medians), 2)
-	s.Require().Equal(medians[0], sdk.MustNewDecFromStr("1.2"))
-	s.Require().Equal(medians[1], sdk.MustNewDecFromStr("1.125"))
+	s.Require().Equal(medians[0], *types.NewPrice(sdk.MustNewDecFromStr("1.2"), displayDenom, 17))
+	s.Require().Equal(medians[1], *types.NewPrice(sdk.MustNewDecFromStr("1.125"), displayDenom, 14))
 }

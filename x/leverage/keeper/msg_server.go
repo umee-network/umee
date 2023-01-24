@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -98,23 +99,21 @@ func (s msgServer) MaxWithdraw(
 	if err != nil {
 		return nil, err
 	}
-
-	maxCurrentWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, false)
-	if err != nil {
-		return nil, err
+	if types.HasUTokenPrefix(msg.Denom) {
+		return nil, types.ErrUToken
 	}
-	maxHistoricWithdraw, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom, true)
-	if err != nil {
+	if _, err = s.keeper.GetTokenSettings(ctx, msg.Denom); err != nil {
 		return nil, err
 	}
 
-	uToken := sdk.NewCoin(
-		maxCurrentWithdraw.Denom,
-		sdk.MinInt(maxCurrentWithdraw.Amount, maxHistoricWithdraw.Amount),
-	)
+	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
+	if err != nil {
+		return nil, err
+	}
 
 	if uToken.IsZero() {
-		return nil, types.ErrMaxWithdrawZero
+		zeroCoin := sdkutil.ZeroCoin(msg.Denom)
+		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
 	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
@@ -333,21 +332,12 @@ func (s msgServer) MaxBorrow(
 		return nil, err
 	}
 
-	currentMaxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom, false)
+	maxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
-	historicMaxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom, true)
-	if err != nil {
-		return nil, err
-	}
-
-	maxBorrow := sdk.NewCoin(
-		msg.Denom,
-		sdk.MinInt(currentMaxBorrow.Amount, historicMaxBorrow.Amount),
-	)
 	if maxBorrow.IsZero() {
-		return nil, types.ErrMaxBorrowZero
+		return &types.MsgMaxBorrowResponse{Borrowed: sdkutil.ZeroCoin(msg.Denom)}, nil
 	}
 
 	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
@@ -389,7 +379,6 @@ func (s msgServer) Repay(
 	msg *types.MsgRepay,
 ) (*types.MsgRepayResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {
 		return nil, err

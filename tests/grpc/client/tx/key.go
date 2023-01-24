@@ -1,4 +1,4 @@
-package grpc
+package tx
 
 import (
 	"github.com/cosmos/cosmos-sdk/crypto/hd"

@@ -182,7 +182,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		collateral := k.GetBorrowerCollateral(ctx, addr)
 
 		// use oracle helper functions to find total borrowed value in USD
-		borrowValue, err := k.TotalTokenValue(ctx, borrowed, false)
+		borrowValue, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
 		if err != nil {
 			return err
 		}
