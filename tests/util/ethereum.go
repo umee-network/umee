@@ -10,12 +10,12 @@ import (
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 )
 
-// GenerateRandomEthKey generates a random Ethereum keypair.
+// GenerateRandomEthKey generates a random Ethereum key pair.
 func GenerateRandomEthKey() (*ecdsa.PrivateKey, *ecdsa.PublicKey, ethcmn.Address, error) {
 	return GenerateRandomEthKeyFromRand(crand.Reader)
 }
 
-// GenerateRandomEthKeyFromRand generates a random Ethereum keypair from a
+// GenerateRandomEthKeyFromRand generates a random Ethereum key pair from a
 // reader.
 func GenerateRandomEthKeyFromRand(r io.Reader) (*ecdsa.PrivateKey, *ecdsa.PublicKey, ethcmn.Address, error) {
 	privKey, err := ecdsa.GenerateKey(ethcrypto.S256(), r)
