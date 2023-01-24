@@ -4,7 +4,7 @@
 
 - October 14, 2021: Initial Draft (@toteki)
 - November 5, 2021: Updates to reflect implementation (@toteki)
-- May, 2022: Max supply utilization and epoch based calcualtions removal (@robert-zaremba)
+- May, 2022: Max supply utilization and epoch based calculations removal (@robert-zaremba)
 
 ## Status
 
@@ -144,7 +144,7 @@ Existing functionality will be modified:
 
 Example scenario:
 
-> The global `ReserveFactor` paramater is 0.05
+> The global `ReserveFactor` parameter is 0.05
 >
 > The derived interest rate for `atom` is assumed to be 0.0001% (10^-6) per block.
 >

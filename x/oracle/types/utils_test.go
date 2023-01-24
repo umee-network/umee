@@ -94,7 +94,7 @@ func GenerateRandomTestCase() (valValAddrs []sdk.ValAddress, stakingKeeper MockS
 	return
 }
 
-// MockStakingKeeper imlements the StakingKeeper interface.
+// MockStakingKeeper implements the StakingKeeper interface.
 type MockStakingKeeper struct {
 	validators []MockValidator
 }

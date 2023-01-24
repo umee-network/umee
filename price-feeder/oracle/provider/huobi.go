@@ -213,7 +213,7 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 
 	bz, err := decompressGzip(bz)
 	if err != nil {
-		p.logger.Err(err).Msg("failed to decompress gziped message")
+		p.logger.Err(err).Msg("failed to decompress gzipped message")
 		return
 	}
 

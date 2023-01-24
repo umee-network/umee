@@ -9,7 +9,7 @@ mainnet (1.0 -> 1.1 -> 3.0) however the v3.0 update introduced consensus bug and
 
 ## Syncing
 
-If you start from scratch, start with umeed v3.0.2 and follow the mainnet upgrades outlined in the [Compatibilty Matrix](https://github.com/umee-network/umee#release-compatibility-matrix).
+If you start from scratch, start with umeed v3.0.2 and follow the mainnet upgrades outlined in the [Compatibility Matrix](https://github.com/umee-network/umee#release-compatibility-matrix).
 
 ### Our validator + archive nodes
 
