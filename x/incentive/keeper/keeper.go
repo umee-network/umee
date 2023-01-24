@@ -35,7 +35,7 @@ func NewKeeper(
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", fmt.Sprintf("x/%s", incentive.ModuleName))
+	return ctx.Logger().With("module", "x/" + incentive.ModuleName)
 }
 
 // ModuleBalance returns the amount of a given token held in the x/incentive module account
