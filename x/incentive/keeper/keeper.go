@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -35,7 +33,7 @@ func NewKeeper(
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", "x/" + incentive.ModuleName)
+	return ctx.Logger().With("module", "x/"+incentive.ModuleName)
 }
 
 // ModuleBalance returns the amount of a given token held in the x/incentive module account
