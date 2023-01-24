@@ -5,6 +5,7 @@ package tests
 
 import (
 	"fmt"
+	"testing"
 
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
@@ -25,7 +26,6 @@ func (s *IntegrationTestSuite) TestQueryParams() {
 
 	var res uibc.QueryParamsResponse
 	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-
 	s.Require().NotEmpty(res.Params)
 }
 
@@ -33,14 +33,41 @@ func (s *IntegrationTestSuite) TestGetQuota() {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 
-	args := []string{
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+	tests := []struct {
+		name        string
+		args        []string
+		errExpected bool
+		noOfRecords int
+	}{
+		{
+			name: "Get ibc-transfer quota of all denoms",
+			args: []string{
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			},
+			errExpected: false,
+			noOfRecords: 0,
+		},
+		{
+			name: "Get ibc-transfer quota of denom umee",
+			args: []string{
+				"uumee",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			},
+			errExpected: true,
+			noOfRecords: 0,
+		},
 	}
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetQuota(), args)
-	s.Require().NoError(err)
 
-	var res uibc.QueryQuotaResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-
-	s.Require().Equal(len(res.Quota), 0)
+	for _, tc := range tests {
+		s.T().Run(tc.name, func(t *testing.T) {
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetQuota(), tc.args)
+			if tc.errExpected {
+				s.Require().Error(err)
+			} else {
+				var res uibc.QueryQuotaResponse
+				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
+				s.Require().Equal(len(res.Quota), tc.noOfRecords)
+			}
+		})
+	}
 }

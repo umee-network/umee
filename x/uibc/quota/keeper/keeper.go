@@ -36,7 +36,7 @@ func (k Keeper) UpdateQuotaParams(ctx sdk.Context, totalQuota, quotaPerDenom sdk
 ) error {
 	params := k.GetParams(ctx)
 
-	params.TokenQuota = totalQuota
+	params.TotalQuota = totalQuota
 	params.QuotaDuration = quotaDuration
 	params.TokenQuota = quotaPerDenom
 
