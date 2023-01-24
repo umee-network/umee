@@ -187,7 +187,7 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 - [1094](https://github.com/umee-network/umee/pull/1094) Added TotalCollateral query.
 - [1099](https://github.com/umee-network/umee/pull/1099) Added TotalBorrowed query.
 - [1157](https://github.com/umee-network/umee/pull/1157) Added `PrintOrErr` util function optimizing the CLI code flow.
-- [1118](https://github.com/umee-network/umee/pull/1118) MsgLiquidate rewards base assets instead of requiring an addtional MsgWithdraw
+- [1118](https://github.com/umee-network/umee/pull/1118) MsgLiquidate rewards base assets instead of requiring an additional MsgWithdraw
 - [1159](https://github.com/umee-network/umee/pull/1159) Add `max_supply_utilization` and `min_collateral_liquidity` to the x/leverage token registry.
 - [1188](https://github.com/umee-network/umee/pull/1188) Add `liquidity`, `maximum_borrow`, `maximum_collateral`, `minimum_liquidity`, `available_withdraw`, `available_collateralize`, and `utoken_supply` fields to market summary.
 - [1203](https://github.com/umee-network/umee/pull/1203) Add Swagger docs.
@@ -221,7 +221,7 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 - [1300](https://github.com/umee-network/umee/pull/1300) Improve leverage test suite and error specificity.
 - [1322](https://github.com/umee-network/umee/pull/1322) Improve complete liquidation threshold and close factor.
 - [1332](https://github.com/umee-network/umee/pull/1332) Improve reserve exhaustion event and log message.
-- [1362](https://github.com/umee-network/umee/pull/1362) Remove inefficent BorrowAmounts and CollateralAmounts leverage invariants.
+- [1362](https://github.com/umee-network/umee/pull/1362) Remove inefficient BorrowAmounts and CollateralAmounts leverage invariants.
 - [1363](https://github.com/umee-network/umee/pull/1332) Standardize leverage KVStore access andincrease validation.
 - [1385](https://github.com/umee-network/umee/pull/1385) Update v1.1-v3.0 upgrade plan name
 

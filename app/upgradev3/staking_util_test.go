@@ -11,7 +11,7 @@ import (
 
 var _ StakingKeeper = &MockStakingKeeper{}
 
-// MockStakingKeeper imlements the StakingKeeper interface.
+// MockStakingKeeper implements the StakingKeeper interface.
 type MockStakingKeeper struct {
 	validators []types.Validator
 	params     types.Params
