@@ -103,7 +103,7 @@ collateralSettingPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = 0x01
 // and the amount of collateral deposited for each uToken:
 collateralAmountPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
 
-// max token collateral utilization setings
+// max token collateral utilization settings
 maxCollateralUtilizationPrefix | token = bigEndian(uint32)
 ```
 
