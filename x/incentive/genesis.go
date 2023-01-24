@@ -70,9 +70,7 @@ func NewIncentiveProgram(
 	startTime uint64,
 	duration uint64,
 	bondDenom string,
-	totalRewards sdk.Coin,
-	fundedRewards sdk.Coin,
-	remainingRewards sdk.Coin,
+	totalRewards, fundedRewards, remainingRewards sdk.Coin,
 ) IncentiveProgram {
 	return IncentiveProgram{
 		Id:               id,
