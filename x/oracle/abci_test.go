@@ -46,7 +46,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T())
 	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-		Height:  6,
 	})
 
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
@@ -89,6 +88,8 @@ var (
 
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
+	originalBlockHeight := ctx.BlockHeight()
+	ctx = ctx.WithBlockHeight(6)
 
 	var (
 		val1Tuples   types.ExchangeRateTuples
@@ -204,6 +205,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, "atom"))
 	s.Require().Equal(sdk.ZeroDec(), rate)
+
+	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
 var exchangeRates = map[string][]sdk.Dec{
