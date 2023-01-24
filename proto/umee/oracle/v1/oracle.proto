@@ -119,10 +119,13 @@ message AvgCounter {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
+  // sum of prices in the counter
   string sum = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  uint32                    num   = 2;
-  google.protobuf.Timestamp Start = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  // number of aggregated prices in the counter
+  uint32 num = 2;
+  // Unix timestamp when the first price was aggregated in the counter
+  google.protobuf.Timestamp start = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
