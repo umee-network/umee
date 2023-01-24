@@ -87,7 +87,7 @@ $ make install
 go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
 ```
 
-- For the usual use of `cosmovisor`, we recomend setting theses env variables
+- For the usual use of `cosmovisor`, we recommend setting theses env variables
 
 ```shell
 export DAEMON_NAME=umeed

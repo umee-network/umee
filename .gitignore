@@ -40,3 +40,7 @@ dist/
 
 # e2e test keychain folder
 tests/e2e/keyring-test
+
+
+# private files
+private*

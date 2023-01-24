@@ -17,80 +17,9 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 	params := k.GetParams(ctx)
 	if k.IsPeriodLastBlock(ctx, params.VotePeriod) {
-		// Build claim map over all validators in active set
-		validatorClaimMap := make(map[string]types.Claim)
-		powerReduction := k.StakingKeeper.PowerReduction(ctx)
-		for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
-			addr := v.GetOperator()
-			validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, 0, addr)
+		if err := CalcPrices(ctx, params, k); err != nil {
+			return err
 		}
-
-		var (
-			// voteTargets defines the symbol (ticker) denoms that we require votes on
-			voteTargets      []string
-			voteTargetDenoms []string
-		)
-		for _, v := range params.AcceptList {
-			voteTargets = append(voteTargets, v.SymbolDenom)
-			voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
-		}
-
-		k.ClearExchangeRates(ctx)
-
-		// NOTE: it filters out inactive or jailed validators
-		ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
-
-		// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
-		for _, ballotDenom := range ballotDenomSlice {
-			denom := strings.ToUpper(ballotDenom.Denom)
-			// Get weighted median of exchange rates
-			exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
-			if err != nil {
-				return err
-			}
-
-			// Set the exchange rate, emit ABCI event
-			if err = k.SetExchangeRateWithEvent(ctx, denom, exchangeRate); err != nil {
-				return err
-			}
-
-			if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-				k.AddHistoricPrice(ctx, denom, exchangeRate)
-			}
-
-			// Calculate and stamp median/median deviation if median stamp period has passed
-			if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
-				if err = k.CalcAndSetHistoricMedian(ctx, denom); err != nil {
-					return err
-				}
-			}
-		}
-
-		// update miss counting & slashing
-		voteTargetsLen := len(voteTargets)
-		claimSlice := types.ClaimMapToSlice(validatorClaimMap)
-		for _, claim := range claimSlice {
-			// Skip valid voters
-			// in MsgAggregateExchangeRateVote we filter tokens from the AcceptList.
-			if int(claim.TokensVoted) == voteTargetsLen {
-				continue
-			}
-
-			// Increase miss counter
-			k.SetMissCounter(ctx, claim.Validator, k.GetMissCounter(ctx, claim.Validator)+1)
-		}
-
-		// Distribute rewards to ballot winners
-		k.RewardBallotWinners(
-			ctx,
-			int64(params.VotePeriod),
-			int64(params.RewardDistributionWindow),
-			voteTargetDenoms,
-			claimSlice,
-		)
-
-		// Clear the ballot
-		k.ClearVotes(ctx, params.VotePeriod)
 	}
 
 	// Slash oracle providers who missed voting over the threshold and
@@ -101,6 +30,82 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 
 	k.PruneAllPrices(ctx)
 
+	return nil
+}
+
+func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
+	// Build claim map over all validators in active set
+	validatorClaimMap := make(map[string]types.Claim)
+	powerReduction := k.StakingKeeper.PowerReduction(ctx)
+	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+		addr := v.GetOperator()
+		validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, 0, addr)
+	}
+
+	// voteTargets defines the symbol (ticker) denoms that we require votes on
+	voteTargets := make([]string, 0)
+	voteTargetDenoms := make([]string, 0)
+	for _, v := range params.AcceptList {
+		voteTargets = append(voteTargets, v.SymbolDenom)
+		voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
+	}
+
+	k.ClearExchangeRates(ctx)
+
+	// NOTE: it filters out inactive or jailed validators
+	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
+
+	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
+	for _, ballotDenom := range ballotDenomSlice {
+		denom := strings.ToUpper(ballotDenom.Denom)
+		// Get weighted median of exchange rates
+		exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
+		if err != nil {
+			return err
+		}
+
+		// Set the exchange rate, emit ABCI event
+		if err = k.SetExchangeRateWithEvent(ctx, denom, exchangeRate); err != nil {
+			return err
+		}
+
+		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+			k.AddHistoricPrice(ctx, denom, exchangeRate)
+		}
+
+		// Calculate and stamp median/median deviation if median stamp period has passed
+		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
+			if err = k.CalcAndSetHistoricMedian(ctx, denom); err != nil {
+				return err
+			}
+		}
+	}
+
+	// update miss counting & slashing
+	voteTargetsLen := len(voteTargets)
+	claimSlice := types.ClaimMapToSlice(validatorClaimMap)
+	for _, claim := range claimSlice {
+		// Skip valid voters
+		// in MsgAggregateExchangeRateVote we filter tokens from the AcceptList.
+		if int(claim.TokensVoted) == voteTargetsLen {
+			continue
+		}
+
+		// Increase miss counter
+		k.SetMissCounter(ctx, claim.Validator, k.GetMissCounter(ctx, claim.Validator)+1)
+	}
+
+	// Distribute rewards to ballot winners
+	k.RewardBallotWinners(
+		ctx,
+		int64(params.VotePeriod),
+		int64(params.RewardDistributionWindow),
+		voteTargetDenoms,
+		claimSlice,
+	)
+
+	// Clear the ballot
+	k.ClearVotes(ctx, params.VotePeriod)
 	return nil
 }
 
