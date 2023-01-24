@@ -12,7 +12,7 @@ import (
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
-// Experimental is a flag which determines expermiental features.
+// Experimental is a flag which determines experimental features.
 // It's set via build flag.
 const Experimental = false
 

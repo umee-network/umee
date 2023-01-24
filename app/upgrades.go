@@ -76,7 +76,7 @@ func (app *UmeeApp) registerUpgrade3_3to4_0(_ upgradetypes.Plan) {
 	)
 }
 
-// performs upgrade from v3.1 -> v3.3 (including the v3.2 chanages)
+// performs upgrade from v3.1 -> v3.3 (including the v3.2 changes)
 func (app *UmeeApp) registerUpgrade3_1to3_3(_ upgradetypes.Plan) {
 	const planName = "v3.1-v3.3"
 	app.UpgradeKeeper.SetUpgradeHandler(

@@ -105,7 +105,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 	s.Require().NoError(err)
 	// }
 
-	// The boostrapping phase is as follows:
+	// The bootstrapping phase is as follows:
 	//
 	// 1. Initialize Umee validator nodes.
 	// 2. Launch an Ethereum container that mines.
