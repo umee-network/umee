@@ -5,7 +5,7 @@ package keeper_test
 
 import "github.com/umee-network/umee/v4/x/uibc"
 
-func (s *IntegrationTestSuite) TestInitGenesis() {
+func (s *KeeperTestSuite) TestInitGenesis() {
 	app, ctx := s.app, s.ctx
 
 	defaultGs := uibc.DefaultGenesisState()
@@ -15,7 +15,7 @@ func (s *IntegrationTestSuite) TestInitGenesis() {
 	s.Require().Equal(params.IbcPause, defaultGs.Params.IbcPause)
 }
 
-func (s *IntegrationTestSuite) TestExportGenesis() {
+func (s *KeeperTestSuite) TestExportGenesis() {
 	app, ctx := s.app, s.ctx
 
 	defaultGs := uibc.DefaultGenesisState()

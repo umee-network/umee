@@ -4,7 +4,6 @@
 package keeper_test
 
 import (
-	"testing"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,7 +12,7 @@ import (
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
-func (s *IntegrationTestSuite) TestMsgServer_GovUpdateQuota() {
+func (s *KeeperTestSuite) TestMsgServer_GovUpdateQuota() {
 	ctx := s.ctx
 
 	tests := []struct {
@@ -57,7 +56,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovUpdateQuota() {
 	}
 
 	for _, tc := range tests {
-		s.T().Run(tc.name, func(t *testing.T) {
+		s.Run(tc.name, func() {
 			_, err := s.msgServer.GovUpdateQuota(ctx, &tc.msg)
 			if tc.errExpected {
 				s.Require().Error(err)
@@ -74,7 +73,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovUpdateQuota() {
 	}
 }
 
-func (s *IntegrationTestSuite) TestMsgServer_GovSetIBCPause() {
+func (s *KeeperTestSuite) TestMsgServer_GovSetIBCPause() {
 	ctx := s.ctx
 
 	tests := []struct {
@@ -125,7 +124,7 @@ func (s *IntegrationTestSuite) TestMsgServer_GovSetIBCPause() {
 	}
 
 	for _, tc := range tests {
-		s.T().Run(tc.name, func(t *testing.T) {
+		s.Run(tc.name, func() {
 			_, err := s.msgServer.GovSetIBCPause(ctx, &tc.msg)
 			if tc.errExpected {
 				s.Require().Error(err)

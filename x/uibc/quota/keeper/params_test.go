@@ -7,7 +7,7 @@ import (
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
-func (s *IntegrationTestSuite) TestParams() {
+func (s *KeeperTestSuite) TestParams() {
 	app, ctx := s.app, s.ctx
 
 	params := app.UIbcQuotaKeeper.GetParams(ctx)

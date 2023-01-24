@@ -48,7 +48,7 @@ var (
 	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
 )
 
-type IntegrationTestSuite struct {
+type KeeperTestSuite struct {
 	suite.Suite
 
 	ctx         sdk.Context
@@ -57,7 +57,7 @@ type IntegrationTestSuite struct {
 	msgServer   uibc.MsgServer
 }
 
-func (s *IntegrationTestSuite) SetupTest() {
+func (s *KeeperTestSuite) SetupTest() {
 	require := s.Require()
 	isCheckTx := false
 	app := umeeapp.Setup(s.T())
@@ -91,5 +91,5 @@ func (s *IntegrationTestSuite) SetupTest() {
 }
 
 func TestKeeperTestSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
+	suite.Run(t, new(KeeperTestSuite))
 }
