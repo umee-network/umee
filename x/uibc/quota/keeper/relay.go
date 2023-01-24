@@ -6,8 +6,6 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
-
-	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
@@ -19,7 +17,7 @@ func (k Keeper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability,
 
 	amount, ok := sdkmath.NewIntFromString(funds)
 	if !ok {
-		return uibc.ErrInvalidAmount.Wrapf("amount %s", funds)
+		return sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", funds)
 	}
 
 	if err := k.CheckAndUpdateQuota(ctx, denom, amount); err != nil {
