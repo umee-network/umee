@@ -5,8 +5,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/x/uibc"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 var _ uibc.QueryServer = Querier{}
@@ -24,10 +22,6 @@ func NewQuerier(k Keeper) Querier {
 func (q Querier) Params(goCtx context.Context, req *uibc.QueryParams) (
 	*uibc.QueryParamsResponse, error,
 ) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	params := q.Keeper.GetParams(ctx)
 
@@ -38,10 +32,6 @@ func (q Querier) Params(goCtx context.Context, req *uibc.QueryParams) (
 func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
 	*uibc.QueryQuotaResponse, error,
 ) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if len(req.Denom) == 0 {

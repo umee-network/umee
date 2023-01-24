@@ -127,6 +127,35 @@ func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 	return &quotaExpires, nil
 }
 
+// ResetQuota will reset the ibc-transfer quotas
+func (k Keeper) ResetQuota(ctx sdk.Context) error {
+	qd := k.GetParams(ctx).QuotaDuration
+	newExpires := ctx.BlockTime().Add(qd)
+	if err := k.SetExpire(ctx, newExpires); err != nil {
+		return err
+	}
+
+	if err := k.SetTotalOutflowSum(ctx, sdk.NewDec(0)); err != nil {
+		return err
+	}
+
+	quotaOfIBCDenoms, err := k.GetQuotaOfIBCDenoms(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, quotaOfIBCDenom := range quotaOfIBCDenoms {
+		// reset the outflow sum to 0
+		quotaOfIBCDenom.OutflowSum = sdk.NewDec(0)
+		// storing the rate limits to store
+		if err := k.SetDenomQuota(ctx, quotaOfIBCDenom); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // CheckAndUpdateQuota checks the quota of ibc-transfer of denom
 func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.Int) error {
 	params := k.GetParams(ctx)

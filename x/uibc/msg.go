@@ -14,10 +14,10 @@ var (
 	_ sdk.Msg = &MsgGovSetIBCPause{}
 )
 
-// GetTitle returns the title of the proposal.
+// GetTitle implements govv1b1.Content interface.
 func (msg *MsgGovUpdateQuota) GetTitle() string { return msg.Title }
 
-// GetDescription returns the description of the proposal.
+// GetDescription implements govv1b1.Content interface.
 func (msg *MsgGovUpdateQuota) GetDescription() string { return msg.Description }
 
 // Route implements Msg
@@ -39,11 +39,11 @@ func (msg *MsgGovUpdateQuota) ValidateBasic() error {
 	}
 
 	if msg.Total.IsNil() || !msg.Total.IsPositive() {
-		return ErrInvalidQuota.Wrap("total quota must be positive")
+		return sdkerrors.ErrInvalidRequest.Wrap("total quota must be positive")
 	}
 
 	if msg.PerDenom.IsNil() || !msg.PerDenom.IsPositive() {
-		return ErrInvalidQuota.Wrap("quota per denom must be positive")
+		return sdkerrors.ErrInvalidRequest.Wrap("quota per denom must be positive")
 	}
 
 	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
@@ -70,10 +70,10 @@ func NewUpdateIBCTransferPauseStatus(authority, title, description string,
 	}
 }
 
-// GetTitle returns the title of the proposal.
+// GetTitle implements govv1b1.Content interface.
 func (msg *MsgGovSetIBCPause) GetTitle() string { return msg.Title }
 
-// GetDescription returns the description of the proposal.
+// GetDescription implements govv1b1.Content interface.
 func (msg *MsgGovSetIBCPause) GetDescription() string { return msg.Description }
 
 // Route implements Msg
@@ -118,7 +118,7 @@ func (q *Quota) Validate() error {
 	}
 
 	if q.OutflowSum.IsNil() || q.OutflowSum.IsNegative() {
-		return ErrInvalidQuota.Wrap("ibc denom quota expires shouldn't be empty")
+		return sdkerrors.ErrInvalidRequest.Wrap("ibc denom quota expires shouldn't be empty")
 	}
 
 	return nil
