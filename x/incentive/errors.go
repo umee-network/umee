@@ -23,4 +23,5 @@ var (
 	// 3XX = Gov Proposal
 	ErrNonzeroRemainingRewards = sdkerrors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
 	ErrNonzeroFundedRewards    = sdkerrors.Register(ModuleName, 301, "funded rewards must be zero in proposal")
+	ErrEmptyProposal           = sdkerrors.Register(ModuleName, 302, "proposal contains no incentive programs")
 )
