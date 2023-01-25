@@ -16,7 +16,7 @@ var (
 	defaultTierWeightShort         = sdk.MustNewDecFromStr("0.5")
 	defaultTierWeightMiddle        = sdk.MustNewDecFromStr("0.8")
 
-	// TODO: default community fund address
+	// TODO #1749: default community fund address
 	defaultCommunityFundAddress = ""
 )
 
@@ -112,7 +112,7 @@ func validateCommunityFundAddress(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	// TODO: enable once defaultCommunityFundAddress is known
+	// TODO #1749: enable once defaultCommunityFundAddress is known
 	/*
 		addr, err := sdk.AccAddressFromBech32(v)
 		if err != nil {
