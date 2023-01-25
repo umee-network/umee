@@ -47,7 +47,7 @@ Simulations are very high level App integration tests, where:
 
 - we only run App in it's expected setup (without the normally expected processes, like price-feeder)
 - App is producing blocks on the chain until a specified height is reached.
-  at each block the sim test runner sequentially ask each module to generate random transactions (represented as operations) and execute them directly in the app transaction runner.
+  At each block the sim test runner ([SimulateFromSeed](https://pkg.go.dev/github.com/cosmos/cosmos-sdk/x/simulation#SimulateFromSeed)) sequentially ask each module to generate random transactions (represented as operations) and execute them directly in the app transaction runner.
 - during the sim runner, we don't execute any user defined assertions. Instead we expect the chain to function correctly (don't return errors nor panics). Hence, when creating a new operation (random sim transaction), we need to check conditions to satisfy that a transaction won't be rejected (like checking bank balance etc...).
 
 Simulation tests are defined in each module `simulations` package.
@@ -60,7 +60,7 @@ These tests execute high level flow by broadcasting transactions to a node port 
 
 E2E tests live in `tests/e2e` package.
 
-E2E tests that run for a long time should be skipped in the CI that runs every PR and automatically ran every time a release is tagged, or every night.
+As noted in the general guidelines, E2E tests that run for a long time should be skipped in the CI that runs every PR and automatically ran every time a release is tagged, or every night.
 
 ## QA tests
 
