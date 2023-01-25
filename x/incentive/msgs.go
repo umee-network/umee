@@ -252,7 +252,7 @@ func (ip IncentiveProgram) Validate() error {
 		return sdkerrors.Wrap(leveragetypes.ErrNotUToken, ip.Denom)
 	}
 
-	// TODO: Finish validate logic
+	// TODO #1749: Finish validate logic
 
 	return nil
 }

@@ -48,7 +48,7 @@ func DefaultGenesisState() *GenesisState {
 
 // ValidateGenesis checks a genesis state for basic issues
 func ValidateGenesis(_ GenesisState) error {
-	// TODO
+	// TODO #1749
 	return nil
 }
 

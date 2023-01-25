@@ -9,6 +9,6 @@ import (
 
 // EndBlocker implements EndBlock for the x/incentive module.
 func EndBlocker(_ sdk.Context, _ keeper.Keeper) []abci.ValidatorUpdate {
-	// TODO: Programs change in status, and reward distribution amounts are updated
+	// TODO #1749: Programs change in status, and reward distribution amounts are updated
 	return []abci.ValidatorUpdate{}
 }
