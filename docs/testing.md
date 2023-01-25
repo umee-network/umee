@@ -60,9 +60,11 @@ These tests execute high level flow by broadcasting transactions to a node port 
 
 E2E tests live in `tests/e2e` package.
 
+E2E tests that run for a long time should be skipped in the CI that runs every PR and automatically ran every time a release is tagged, or every night.
+
 ## QA tests
 
-For production grade releases we need to have a testable backstage environment with some reliable testing data, accounts and tooling. At the same time we would like to easy functional tests and blockchain interaction with whole team: both for examples presentation, as well as quick and easy data load by a developer to play and smoke test the blockchain.
+For production grade releases we need to have a testable backstage environment with some reliable testing data, accounts and tooling. At the same time we would like programmatic functional tests that run queries and transactions against the backstage environment that can be used for examples presentation, load tests, and smoke tests.
 
 Finally we need to be able to measure the system behavior:
 
