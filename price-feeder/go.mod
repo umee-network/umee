@@ -20,7 +20,7 @@ require (
 	github.com/umee-network/umee/v4 v4.0.0
 	golang.org/x/sync v0.1.0
 	golang.org/x/term v0.4.0
-	google.golang.org/grpc v1.52.1
+	google.golang.org/grpc v1.52.3
 	gopkg.in/yaml.v3 v3.0.1
 )
 
