@@ -10,6 +10,7 @@ TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.
 DOCKER         := $(shell which docker)
 PROJECT_NAME   := umee
 HTTPS_GIT      := https://github.com/umee-network/umee.git
+MOCKS_DIR = $(CURDIR)/tests/mocks
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -175,6 +176,14 @@ cover-html: test-unit-cover
 	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
+
+
+$(MOCKS_DIR):
+	mkdir -p $(MOCKS_DIR)
+mocks: $(MOCKS_DIR)
+	@go install github.com/golang/mock/mockgen@v1.6.0
+	sh ./scripts/mockgen.sh
+.PHONY: mocks
 
 ###############################################################################
 ###                                Linting                                  ###

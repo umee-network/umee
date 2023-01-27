@@ -498,36 +498,36 @@ func (m *MsgGovSetParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgGovSetParamsResponse proto.InternalMessageInfo
 
-// MsgGovCreateProgram is used by governance to create an incentive program. There are two
-// funding scenarios, depending on from_community_fund.
-// If it is true,the program's total rewards will be automatically withdrawn from
+// MsgGovCreatePrograms is used by governance to create one or more incentive programs.
+// There are two funding scenarios, depending on from_community_fund.
+// If it is true,the programs' total rewards will be automatically withdrawn from
 // the (parameter) community_fund_address to the incentive module account when this
 // message is passed. (Insufficient funds cause the parameter to be treated as false.)
-// If it is false, a MsgSponsor fundign the program's full amount must be submitted
+// If it is false, a MsgSponsor funding each program's full amount must be submitted
 // after this message passes, but before the program's start_time, or the program
 // will be cancelled when it would otherwise start.
-type MsgGovCreateProgram struct {
+type MsgGovCreatePrograms struct {
 	// authority must be the address of the governance account.
-	Authority   string           `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	Title       string           `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description string           `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	Program     IncentiveProgram `protobuf:"bytes,4,opt,name=program,proto3" json:"program"`
-	// from_community_fund defines the source of funds for a proposed incentive program.
+	Authority   string             `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	Title       string             `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Description string             `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Programs    []IncentiveProgram `protobuf:"bytes,4,rep,name=programs,proto3" json:"programs"`
+	// from_community_fund defines the source of funds for proposed incentive programs.
 	FromCommunityFund bool `protobuf:"varint,5,opt,name=from_community_fund,json=fromCommunityFund,proto3" json:"from_community_fund,omitempty"`
 }
 
-func (m *MsgGovCreateProgram) Reset()         { *m = MsgGovCreateProgram{} }
-func (m *MsgGovCreateProgram) String() string { return proto.CompactTextString(m) }
-func (*MsgGovCreateProgram) ProtoMessage()    {}
-func (*MsgGovCreateProgram) Descriptor() ([]byte, []int) {
+func (m *MsgGovCreatePrograms) Reset()         { *m = MsgGovCreatePrograms{} }
+func (m *MsgGovCreatePrograms) String() string { return proto.CompactTextString(m) }
+func (*MsgGovCreatePrograms) ProtoMessage()    {}
+func (*MsgGovCreatePrograms) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d04c68bb9e1f6306, []int{10}
 }
-func (m *MsgGovCreateProgram) XXX_Unmarshal(b []byte) error {
+func (m *MsgGovCreatePrograms) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgGovCreateProgram) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgGovCreatePrograms) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgGovCreateProgram.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgGovCreatePrograms.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -537,34 +537,34 @@ func (m *MsgGovCreateProgram) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return b[:n], nil
 	}
 }
-func (m *MsgGovCreateProgram) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgGovCreateProgram.Merge(m, src)
+func (m *MsgGovCreatePrograms) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovCreatePrograms.Merge(m, src)
 }
-func (m *MsgGovCreateProgram) XXX_Size() int {
+func (m *MsgGovCreatePrograms) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgGovCreateProgram) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgGovCreateProgram.DiscardUnknown(m)
+func (m *MsgGovCreatePrograms) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovCreatePrograms.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgGovCreateProgram proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovCreatePrograms proto.InternalMessageInfo
 
-// MsgGovCreateProgramResponse defines the Msg/CreateProgram response type.
-type MsgGovCreateProgramResponse struct {
+// MsgGovCreateProgramsResponse defines the Msg/CreatePrograms response type.
+type MsgGovCreateProgramsResponse struct {
 }
 
-func (m *MsgGovCreateProgramResponse) Reset()         { *m = MsgGovCreateProgramResponse{} }
-func (m *MsgGovCreateProgramResponse) String() string { return proto.CompactTextString(m) }
-func (*MsgGovCreateProgramResponse) ProtoMessage()    {}
-func (*MsgGovCreateProgramResponse) Descriptor() ([]byte, []int) {
+func (m *MsgGovCreateProgramsResponse) Reset()         { *m = MsgGovCreateProgramsResponse{} }
+func (m *MsgGovCreateProgramsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgGovCreateProgramsResponse) ProtoMessage()    {}
+func (*MsgGovCreateProgramsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d04c68bb9e1f6306, []int{11}
 }
-func (m *MsgGovCreateProgramResponse) XXX_Unmarshal(b []byte) error {
+func (m *MsgGovCreateProgramsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgGovCreateProgramResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgGovCreateProgramsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgGovCreateProgramResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgGovCreateProgramsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -574,17 +574,17 @@ func (m *MsgGovCreateProgramResponse) XXX_Marshal(b []byte, deterministic bool) 
 		return b[:n], nil
 	}
 }
-func (m *MsgGovCreateProgramResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgGovCreateProgramResponse.Merge(m, src)
+func (m *MsgGovCreateProgramsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovCreateProgramsResponse.Merge(m, src)
 }
-func (m *MsgGovCreateProgramResponse) XXX_Size() int {
+func (m *MsgGovCreateProgramsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgGovCreateProgramResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgGovCreateProgramResponse.DiscardUnknown(m)
+func (m *MsgGovCreateProgramsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovCreateProgramsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgGovCreateProgramResponse proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovCreateProgramsResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*MsgClaim)(nil), "umeenetwork.umee.incentive.v1.MsgClaim")
@@ -597,61 +597,61 @@ func init() {
 	proto.RegisterType((*MsgSponsorResponse)(nil), "umeenetwork.umee.incentive.v1.MsgSponsorResponse")
 	proto.RegisterType((*MsgGovSetParams)(nil), "umeenetwork.umee.incentive.v1.MsgGovSetParams")
 	proto.RegisterType((*MsgGovSetParamsResponse)(nil), "umeenetwork.umee.incentive.v1.MsgGovSetParamsResponse")
-	proto.RegisterType((*MsgGovCreateProgram)(nil), "umeenetwork.umee.incentive.v1.MsgGovCreateProgram")
-	proto.RegisterType((*MsgGovCreateProgramResponse)(nil), "umeenetwork.umee.incentive.v1.MsgGovCreateProgramResponse")
+	proto.RegisterType((*MsgGovCreatePrograms)(nil), "umeenetwork.umee.incentive.v1.MsgGovCreatePrograms")
+	proto.RegisterType((*MsgGovCreateProgramsResponse)(nil), "umeenetwork.umee.incentive.v1.MsgGovCreateProgramsResponse")
 }
 
 func init() { proto.RegisterFile("umee/incentive/v1/tx.proto", fileDescriptor_d04c68bb9e1f6306) }
 
 var fileDescriptor_d04c68bb9e1f6306 = []byte{
-	// 740 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x95, 0x4d, 0x4f, 0xdb, 0x4c,
-	0x10, 0xc7, 0x63, 0x48, 0x80, 0x0c, 0xcf, 0x0b, 0x98, 0xe8, 0x21, 0x31, 0x22, 0xc9, 0x13, 0xf5,
-	0x25, 0x6d, 0x85, 0x4d, 0x68, 0x8b, 0x2a, 0x6e, 0x4d, 0xd4, 0x56, 0x3d, 0x44, 0x45, 0x46, 0xbd,
-	0xf4, 0x50, 0xe4, 0xd8, 0x8b, 0x59, 0x81, 0x77, 0x23, 0xef, 0x3a, 0x80, 0xd4, 0x13, 0xa7, 0x1e,
-	0xfb, 0x09, 0x2a, 0xce, 0x55, 0x0f, 0x3d, 0xf4, 0x43, 0x70, 0x44, 0x3d, 0xf5, 0x44, 0x2b, 0x38,
-	0xb4, 0x1f, 0xa3, 0x5a, 0x7b, 0x6d, 0xf3, 0x52, 0x48, 0xe8, 0x81, 0x13, 0x3b, 0x9e, 0xff, 0xcc,
-	0xfc, 0x66, 0xc8, 0xce, 0x82, 0x16, 0x78, 0x08, 0x19, 0x98, 0xd8, 0x88, 0x70, 0xdc, 0x43, 0x46,
-	0xaf, 0x61, 0xf0, 0x6d, 0xbd, 0xeb, 0x53, 0x4e, 0xd5, 0x59, 0xe1, 0x23, 0x88, 0x6f, 0x51, 0x7f,
-	0x43, 0x17, 0x67, 0x3d, 0xd1, 0xe9, 0xbd, 0x86, 0x56, 0xb6, 0x29, 0xf3, 0x28, 0x33, 0x3a, 0x16,
-	0x13, 0x71, 0x1d, 0xc4, 0xad, 0x86, 0x61, 0x53, 0x4c, 0xa2, 0x70, 0xad, 0x14, 0xf9, 0x57, 0x43,
-	0xcb, 0x88, 0x0c, 0xe9, 0x9a, 0x96, 0xa1, 0x1e, 0x73, 0x45, 0x45, 0x8f, 0xb9, 0xd2, 0x51, 0x70,
-	0xa9, 0x4b, 0xa3, 0x00, 0x71, 0x92, 0x5f, 0xff, 0x3f, 0x0f, 0x99, 0x92, 0x84, 0x92, 0xda, 0x0d,
-	0x18, 0x6b, 0x33, 0xb7, 0xb5, 0x69, 0x61, 0x4f, 0x2d, 0xc2, 0xa8, 0x65, 0xdb, 0x34, 0x20, 0xbc,
-	0xa8, 0x54, 0x95, 0x7a, 0xde, 0x8c, 0xcd, 0xda, 0x16, 0x4c, 0xc4, 0x2a, 0x13, 0xb1, 0x2e, 0x25,
-	0x0c, 0xa9, 0x36, 0x8c, 0x58, 0x9e, 0x14, 0x0f, 0xd7, 0xc7, 0x17, 0x4a, 0xba, 0x44, 0x15, 0x7d,
-	0xe9, 0xb2, 0x2f, 0xbd, 0x45, 0x31, 0x69, 0xce, 0xef, 0x1f, 0x56, 0x32, 0x1f, 0xbe, 0x55, 0xea,
-	0x2e, 0xe6, 0xeb, 0x41, 0x47, 0xb7, 0xa9, 0x27, 0xfb, 0x92, 0x7f, 0xe6, 0x98, 0xb3, 0x61, 0xf0,
-	0x9d, 0x2e, 0x62, 0x61, 0x00, 0x33, 0x65, 0xea, 0x1a, 0x81, 0xd1, 0x36, 0x73, 0x9b, 0x94, 0x38,
-	0x17, 0xd3, 0xa9, 0x2a, 0x64, 0x39, 0x46, 0x7e, 0x71, 0xa8, 0xaa, 0xd4, 0xff, 0x36, 0xc3, 0xb3,
-	0xfa, 0x10, 0x72, 0x16, 0x63, 0x88, 0x17, 0x87, 0xab, 0xca, 0xe5, 0x70, 0x59, 0x01, 0x67, 0x46,
-	0xea, 0xda, 0x24, 0xfc, 0x2b, 0xeb, 0xc5, 0x7d, 0xd6, 0xb6, 0x61, 0x52, 0x7c, 0x42, 0x2e, 0x26,
-	0x2f, 0x49, 0x87, 0x12, 0x07, 0x13, 0xf7, 0x7a, 0x60, 0x66, 0xa0, 0x74, 0xae, 0x72, 0x82, 0xb5,
-	0x05, 0xd0, 0x66, 0xee, 0x8a, 0x30, 0xa8, 0x2f, 0x78, 0x58, 0x74, 0x8c, 0x79, 0x58, 0xea, 0xe9,
-	0xfa, 0xd4, 0xf5, 0x2d, 0x4f, 0x22, 0xc5, 0xe6, 0x9f, 0x52, 0x15, 0x40, 0x4d, 0x0b, 0x27, 0x38,
-	0x87, 0x4a, 0x38, 0xb9, 0x67, 0xb4, 0xb7, 0x82, 0xf8, 0xb2, 0xe5, 0x5b, 0x1e, 0x53, 0x17, 0x21,
-	0x6f, 0x05, 0x7c, 0x9d, 0xfa, 0x98, 0xef, 0x44, 0x58, 0xcd, 0xe2, 0x97, 0xcf, 0x73, 0x05, 0x59,
-	0xe7, 0xb1, 0xe3, 0xf8, 0x88, 0xb1, 0x15, 0xee, 0x8b, 0xbe, 0x52, 0xa9, 0x5a, 0x80, 0x1c, 0xc7,
-	0x7c, 0x13, 0x85, 0xc0, 0x79, 0x33, 0x32, 0xd4, 0x2a, 0x8c, 0x3b, 0x88, 0xd9, 0x3e, 0xee, 0x72,
-	0x4c, 0x49, 0x08, 0x9d, 0x37, 0x4f, 0x7e, 0x52, 0x5b, 0x30, 0xd2, 0x0d, 0x2b, 0x17, 0xb3, 0x61,
-	0x47, 0x37, 0xf5, 0x4b, 0x2f, 0xa2, 0x1e, 0x61, 0xca, 0xee, 0x64, 0xe8, 0xd2, 0x7f, 0x6f, 0xf7,
-	0x2a, 0x99, 0x9f, 0x7b, 0x15, 0x65, 0xf7, 0xc7, 0xa7, 0xbb, 0x29, 0x54, 0xad, 0x04, 0xd3, 0x67,
-	0xfa, 0x4b, 0x7a, 0x7f, 0x3f, 0x04, 0x53, 0x91, 0xaf, 0xe5, 0x23, 0x8b, 0xa3, 0x65, 0x39, 0xe0,
-	0xeb, 0xee, 0xff, 0x45, 0xfa, 0xaf, 0x8e, 0x06, 0x60, 0xf4, 0x19, 0xc0, 0xf3, 0xd8, 0x90, 0xc4,
-	0x72, 0x14, 0xc9, 0x2f, 0x44, 0x87, 0xa9, 0x35, 0x9f, 0x7a, 0xab, 0x36, 0xf5, 0xbc, 0x80, 0x60,
-	0xbe, 0xb3, 0xba, 0x16, 0x10, 0xa7, 0x98, 0xab, 0x2a, 0xf5, 0x31, 0x73, 0x52, 0xb8, 0x5a, 0xb1,
-	0xe7, 0x69, 0x40, 0x9c, 0x0b, 0x67, 0x37, 0x0b, 0x33, 0xbf, 0x99, 0x4f, 0x3c, 0xbf, 0x85, 0x8f,
-	0x39, 0x18, 0x6e, 0x33, 0x57, 0xb5, 0x20, 0x17, 0x2d, 0xa2, 0xdb, 0x7d, 0xb8, 0xe3, 0x5d, 0xa4,
-	0x19, 0x03, 0x0a, 0x93, 0xa5, 0xf5, 0x1a, 0xb2, 0xe1, 0x32, 0xb9, 0xd5, 0x3f, 0x50, 0xe8, 0x34,
-	0x7d, 0x30, 0x5d, 0x92, 0xff, 0x0d, 0xfc, 0x73, 0x66, 0x53, 0xcc, 0x0f, 0x90, 0xe1, 0x54, 0x84,
-	0xf6, 0xe8, 0xaa, 0x11, 0x49, 0x75, 0x17, 0x46, 0xe3, 0x85, 0x70, 0xa7, 0x7f, 0x12, 0x29, 0xd5,
-	0x1a, 0x03, 0x4b, 0x93, 0x42, 0x3d, 0xf8, 0xeb, 0xd4, 0x4d, 0x1f, 0x60, 0x4c, 0x27, 0xf5, 0xda,
-	0xe2, 0xd5, 0xf4, 0x49, 0xdd, 0x5d, 0x05, 0x26, 0xce, 0x5d, 0xb3, 0x85, 0x81, 0x92, 0x9d, 0x8a,
-	0xd1, 0x96, 0xae, 0x1e, 0x13, 0x43, 0x34, 0x9f, 0xec, 0x1f, 0x95, 0x95, 0x83, 0xa3, 0xb2, 0xf2,
-	0xfd, 0xa8, 0xac, 0xbc, 0x3b, 0x2e, 0x67, 0x0e, 0x8e, 0xcb, 0x99, 0xaf, 0xc7, 0xe5, 0xcc, 0xab,
-	0x7b, 0x27, 0xde, 0x37, 0x91, 0x73, 0x4e, 0x16, 0x08, 0x0d, 0xa3, 0xf7, 0xc0, 0xd8, 0x4e, 0xdf,
-	0xdf, 0xce, 0x48, 0xf8, 0x00, 0xdf, 0xff, 0x15, 0x00, 0x00, 0xff, 0xff, 0x9a, 0x50, 0x5b, 0xb5,
-	0x4a, 0x08, 0x00, 0x00,
+	// 742 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x95, 0xcd, 0x6e, 0xd3, 0x40,
+	0x10, 0xc7, 0xe3, 0x36, 0x69, 0x9b, 0x29, 0x5f, 0x31, 0x11, 0x4d, 0x0c, 0x38, 0x21, 0xe2, 0x23,
+	0x80, 0x6a, 0x37, 0x2d, 0x54, 0x08, 0x4e, 0x24, 0x02, 0xc4, 0x21, 0x52, 0x71, 0xc5, 0x85, 0x03,
+	0x95, 0x63, 0x6f, 0xdd, 0x55, 0xeb, 0xdd, 0xc8, 0xbb, 0x49, 0x5b, 0x89, 0x13, 0x12, 0x12, 0x47,
+	0x1e, 0xa1, 0x5c, 0xb9, 0xc0, 0x81, 0x87, 0xe8, 0xb1, 0xe2, 0xc4, 0xa9, 0xa0, 0xf6, 0x00, 0x8f,
+	0x81, 0xd6, 0x5e, 0x3b, 0xfd, 0xa0, 0x4d, 0xda, 0x43, 0x4f, 0xd9, 0xf1, 0xfc, 0x67, 0xe6, 0x37,
+	0x13, 0xed, 0x2c, 0x68, 0x1d, 0x1f, 0x21, 0x13, 0x13, 0x07, 0x11, 0x8e, 0xbb, 0xc8, 0xec, 0xd6,
+	0x4c, 0xbe, 0x66, 0xb4, 0x03, 0xca, 0xa9, 0x7a, 0x5d, 0xf8, 0x08, 0xe2, 0xab, 0x34, 0x58, 0x36,
+	0xc4, 0xd9, 0x48, 0x74, 0x46, 0xb7, 0xa6, 0xe9, 0x0e, 0x65, 0x3e, 0x65, 0x66, 0xcb, 0x66, 0x22,
+	0xae, 0x85, 0xb8, 0x5d, 0x33, 0x1d, 0x8a, 0x49, 0x14, 0xae, 0x15, 0x23, 0xff, 0x42, 0x68, 0x99,
+	0x91, 0x21, 0x5d, 0x13, 0x32, 0xd4, 0x67, 0x9e, 0xa8, 0xe8, 0x33, 0x4f, 0x3a, 0xf2, 0x1e, 0xf5,
+	0x68, 0x14, 0x20, 0x4e, 0xf2, 0xeb, 0x8d, 0xc3, 0x90, 0x3d, 0x92, 0x50, 0x52, 0xb9, 0x09, 0x63,
+	0x4d, 0xe6, 0x35, 0x56, 0x6c, 0xec, 0xab, 0x05, 0x18, 0xb5, 0x1d, 0x87, 0x76, 0x08, 0x2f, 0x28,
+	0x65, 0xa5, 0x9a, 0xb5, 0x62, 0xb3, 0xb2, 0x0a, 0x97, 0x62, 0x95, 0x85, 0x58, 0x9b, 0x12, 0x86,
+	0x54, 0x07, 0x46, 0x6c, 0x5f, 0x8a, 0x87, 0xab, 0xe3, 0xd3, 0x45, 0x43, 0xa2, 0x8a, 0xbe, 0x0c,
+	0xd9, 0x97, 0xd1, 0xa0, 0x98, 0xd4, 0xa7, 0x36, 0xb7, 0x4b, 0xa9, 0x2f, 0xbf, 0x4a, 0x55, 0x0f,
+	0xf3, 0xa5, 0x4e, 0xcb, 0x70, 0xa8, 0x2f, 0xfb, 0x92, 0x3f, 0x93, 0xcc, 0x5d, 0x36, 0xf9, 0x7a,
+	0x1b, 0xb1, 0x30, 0x80, 0x59, 0x32, 0x75, 0x85, 0xc0, 0x68, 0x93, 0x79, 0x75, 0x4a, 0xdc, 0xa3,
+	0xe9, 0x54, 0x15, 0xd2, 0x1c, 0xa3, 0xa0, 0x30, 0x54, 0x56, 0xaa, 0xe7, 0xad, 0xf0, 0xac, 0x3e,
+	0x84, 0x8c, 0xcd, 0x18, 0xe2, 0x85, 0xe1, 0xb2, 0x72, 0x3c, 0x5c, 0x5a, 0xc0, 0x59, 0x91, 0xba,
+	0x92, 0x83, 0x8b, 0xb2, 0x5e, 0xdc, 0x67, 0x65, 0x0d, 0x72, 0xe2, 0x13, 0xf2, 0x30, 0x79, 0x4d,
+	0x5a, 0x94, 0xb8, 0x98, 0x78, 0x67, 0x03, 0x73, 0x15, 0x8a, 0x87, 0x2a, 0x27, 0x58, 0xab, 0x00,
+	0x4d, 0xe6, 0xcd, 0x0b, 0x83, 0x06, 0x82, 0x87, 0x45, 0xc7, 0x98, 0x87, 0xf5, 0x3c, 0xed, 0x80,
+	0x7a, 0x81, 0xed, 0x4b, 0xa4, 0xd8, 0x3c, 0x2d, 0x55, 0x1e, 0xd4, 0x5e, 0xe1, 0x04, 0x67, 0x5b,
+	0x09, 0x27, 0xf7, 0x82, 0x76, 0xe7, 0x11, 0x9f, 0xb3, 0x03, 0xdb, 0x67, 0xea, 0x2c, 0x64, 0xed,
+	0x0e, 0x5f, 0xa2, 0x01, 0xe6, 0xeb, 0x11, 0x56, 0xbd, 0xf0, 0xe3, 0xfb, 0x64, 0x5e, 0xd6, 0x79,
+	0xea, 0xba, 0x01, 0x62, 0x6c, 0x9e, 0x07, 0xa2, 0xaf, 0x9e, 0x54, 0xcd, 0x43, 0x86, 0x63, 0xbe,
+	0x82, 0x42, 0xe0, 0xac, 0x15, 0x19, 0x6a, 0x19, 0xc6, 0x5d, 0xc4, 0x9c, 0x00, 0xb7, 0x39, 0xa6,
+	0x24, 0x84, 0xce, 0x5a, 0x7b, 0x3f, 0xa9, 0x0d, 0x18, 0x69, 0x87, 0x95, 0x0b, 0xe9, 0xb0, 0xa3,
+	0x5b, 0xc6, 0xb1, 0x17, 0xd1, 0x88, 0x30, 0x65, 0x77, 0x32, 0xf4, 0xf1, 0x95, 0x8f, 0x1b, 0xa5,
+	0xd4, 0xdf, 0x8d, 0x92, 0xf2, 0xfe, 0xcf, 0xb7, 0x7b, 0x3d, 0xa8, 0x4a, 0x11, 0x26, 0x0e, 0xf4,
+	0x97, 0xf4, 0xfe, 0x79, 0x08, 0xf2, 0x91, 0xaf, 0x11, 0x20, 0x9b, 0xa3, 0xb9, 0x68, 0xc0, 0x67,
+	0x3f, 0x80, 0x57, 0x30, 0x26, 0xff, 0x5c, 0x31, 0x02, 0x71, 0x29, 0xcd, 0x3e, 0x23, 0x78, 0x19,
+	0x1b, 0x92, 0x59, 0x0e, 0x23, 0x49, 0xa3, 0x1a, 0x70, 0x79, 0x31, 0xa0, 0xfe, 0x82, 0x43, 0x7d,
+	0xbf, 0x43, 0x30, 0x5f, 0x5f, 0x58, 0xec, 0x10, 0xb7, 0x90, 0x29, 0x2b, 0xd5, 0x31, 0x2b, 0x27,
+	0x5c, 0x8d, 0xd8, 0xf3, 0xbc, 0x43, 0xdc, 0x23, 0xc7, 0xa7, 0xc3, 0xb5, 0xff, 0x8d, 0x28, 0x9e,
+	0xe1, 0xf4, 0xd7, 0x0c, 0x0c, 0x37, 0x99, 0xa7, 0xda, 0x90, 0x89, 0x96, 0xd1, 0x9d, 0x3e, 0xe4,
+	0xf1, 0x3e, 0xd2, 0xcc, 0x01, 0x85, 0xc9, 0xe2, 0x7a, 0x0b, 0xe9, 0x70, 0xa1, 0xdc, 0xee, 0x1f,
+	0x28, 0x74, 0x9a, 0x31, 0x98, 0x2e, 0xc9, 0xff, 0x0e, 0x2e, 0x1c, 0xd8, 0x16, 0x53, 0x03, 0x64,
+	0xd8, 0x17, 0xa1, 0x3d, 0x3a, 0x69, 0x44, 0x52, 0xdd, 0x83, 0xd1, 0x78, 0x29, 0xdc, 0xed, 0x9f,
+	0x44, 0x4a, 0xb5, 0xda, 0xc0, 0xd2, 0xa4, 0x50, 0x17, 0xce, 0xed, 0xbb, 0xed, 0x03, 0x8c, 0x69,
+	0xaf, 0x5e, 0x9b, 0x3d, 0x99, 0x3e, 0xa9, 0xfb, 0x41, 0x81, 0xdc, 0xe1, 0xab, 0x36, 0x33, 0x50,
+	0xb6, 0xfd, 0x41, 0xda, 0x93, 0x53, 0x04, 0xc5, 0x1c, 0xf5, 0x67, 0x9b, 0x3b, 0xba, 0xb2, 0xb5,
+	0xa3, 0x2b, 0xbf, 0x77, 0x74, 0xe5, 0xd3, 0xae, 0x9e, 0xda, 0xda, 0xd5, 0x53, 0x3f, 0x77, 0xf5,
+	0xd4, 0x9b, 0xfb, 0x7b, 0x9e, 0x39, 0x91, 0x74, 0x52, 0x56, 0x08, 0x0d, 0xb3, 0xfb, 0xc0, 0x5c,
+	0xeb, 0x3d, 0xc3, 0xad, 0x91, 0xf0, 0x1d, 0x9e, 0xf9, 0x17, 0x00, 0x00, 0xff, 0xff, 0x86, 0xa6,
+	0x35, 0xbf, 0x51, 0x08, 0x00, 0x00,
 }
 
 func (this *MsgGovSetParams) Equal(that interface{}) bool {
@@ -687,14 +687,14 @@ func (this *MsgGovSetParams) Equal(that interface{}) bool {
 	}
 	return true
 }
-func (this *MsgGovCreateProgram) Equal(that interface{}) bool {
+func (this *MsgGovCreatePrograms) Equal(that interface{}) bool {
 	if that == nil {
 		return this == nil
 	}
 
-	that1, ok := that.(*MsgGovCreateProgram)
+	that1, ok := that.(*MsgGovCreatePrograms)
 	if !ok {
-		that2, ok := that.(MsgGovCreateProgram)
+		that2, ok := that.(MsgGovCreatePrograms)
 		if ok {
 			that1 = &that2
 		} else {
@@ -715,8 +715,13 @@ func (this *MsgGovCreateProgram) Equal(that interface{}) bool {
 	if this.Description != that1.Description {
 		return false
 	}
-	if !this.Program.Equal(&that1.Program) {
+	if len(this.Programs) != len(that1.Programs) {
 		return false
+	}
+	for i := range this.Programs {
+		if !this.Programs[i].Equal(&that1.Programs[i]) {
+			return false
+		}
 	}
 	if this.FromCommunityFund != that1.FromCommunityFund {
 		return false
@@ -743,12 +748,12 @@ type MsgClient interface {
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
-	// In the current implementation, the sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
+	// The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
 	Sponsor(ctx context.Context, in *MsgSponsor, opts ...grpc.CallOption) (*MsgSponsorResponse, error)
 	// GovSetParams is used by governance proposals to update parameters.
 	GovSetParams(ctx context.Context, in *MsgGovSetParams, opts ...grpc.CallOption) (*MsgGovSetParamsResponse, error)
-	// GovCreateProgram is used by governance proposals to create (but not fund) an incentive program.
-	GovCreateProgram(ctx context.Context, in *MsgGovCreateProgram, opts ...grpc.CallOption) (*MsgGovCreateProgramResponse, error)
+	// GovCreatePrograms is used by governance proposals to create and optionally fund incentive programs.
+	GovCreatePrograms(ctx context.Context, in *MsgGovCreatePrograms, opts ...grpc.CallOption) (*MsgGovCreateProgramsResponse, error)
 }
 
 type msgClient struct {
@@ -804,9 +809,9 @@ func (c *msgClient) GovSetParams(ctx context.Context, in *MsgGovSetParams, opts 
 	return out, nil
 }
 
-func (c *msgClient) GovCreateProgram(ctx context.Context, in *MsgGovCreateProgram, opts ...grpc.CallOption) (*MsgGovCreateProgramResponse, error) {
-	out := new(MsgGovCreateProgramResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/GovCreateProgram", in, out, opts...)
+func (c *msgClient) GovCreatePrograms(ctx context.Context, in *MsgGovCreatePrograms, opts ...grpc.CallOption) (*MsgGovCreateProgramsResponse, error) {
+	out := new(MsgGovCreateProgramsResponse)
+	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/GovCreatePrograms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -822,12 +827,12 @@ type MsgServer interface {
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(context.Context, *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
-	// In the current implementation, the sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
+	// The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
 	Sponsor(context.Context, *MsgSponsor) (*MsgSponsorResponse, error)
 	// GovSetParams is used by governance proposals to update parameters.
 	GovSetParams(context.Context, *MsgGovSetParams) (*MsgGovSetParamsResponse, error)
-	// GovCreateProgram is used by governance proposals to create (but not fund) an incentive program.
-	GovCreateProgram(context.Context, *MsgGovCreateProgram) (*MsgGovCreateProgramResponse, error)
+	// GovCreatePrograms is used by governance proposals to create and optionally fund incentive programs.
+	GovCreatePrograms(context.Context, *MsgGovCreatePrograms) (*MsgGovCreateProgramsResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -849,8 +854,8 @@ func (*UnimplementedMsgServer) Sponsor(ctx context.Context, req *MsgSponsor) (*M
 func (*UnimplementedMsgServer) GovSetParams(ctx context.Context, req *MsgGovSetParams) (*MsgGovSetParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GovSetParams not implemented")
 }
-func (*UnimplementedMsgServer) GovCreateProgram(ctx context.Context, req *MsgGovCreateProgram) (*MsgGovCreateProgramResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GovCreateProgram not implemented")
+func (*UnimplementedMsgServer) GovCreatePrograms(ctx context.Context, req *MsgGovCreatePrograms) (*MsgGovCreateProgramsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovCreatePrograms not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -947,20 +952,20 @@ func _Msg_GovSetParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_GovCreateProgram_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgGovCreateProgram)
+func _Msg_GovCreatePrograms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovCreatePrograms)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).GovCreateProgram(ctx, in)
+		return srv.(MsgServer).GovCreatePrograms(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/GovCreateProgram",
+		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/GovCreatePrograms",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).GovCreateProgram(ctx, req.(*MsgGovCreateProgram))
+		return srv.(MsgServer).GovCreatePrograms(ctx, req.(*MsgGovCreatePrograms))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -990,8 +995,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_GovSetParams_Handler,
 		},
 		{
-			MethodName: "GovCreateProgram",
-			Handler:    _Msg_GovCreateProgram_Handler,
+			MethodName: "GovCreatePrograms",
+			Handler:    _Msg_GovCreatePrograms_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1346,7 +1351,7 @@ func (m *MsgGovSetParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgGovCreateProgram) Marshal() (dAtA []byte, err error) {
+func (m *MsgGovCreatePrograms) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1356,12 +1361,12 @@ func (m *MsgGovCreateProgram) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgGovCreateProgram) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgGovCreatePrograms) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgGovCreateProgram) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgGovCreatePrograms) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1376,16 +1381,20 @@ func (m *MsgGovCreateProgram) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x28
 	}
-	{
-		size, err := m.Program.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
+	if len(m.Programs) > 0 {
+		for iNdEx := len(m.Programs) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Programs[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTx(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x22
 		}
-		i -= size
-		i = encodeVarintTx(dAtA, i, uint64(size))
 	}
-	i--
-	dAtA[i] = 0x22
 	if len(m.Description) > 0 {
 		i -= len(m.Description)
 		copy(dAtA[i:], m.Description)
@@ -1410,7 +1419,7 @@ func (m *MsgGovCreateProgram) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgGovCreateProgramResponse) Marshal() (dAtA []byte, err error) {
+func (m *MsgGovCreateProgramsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1420,12 +1429,12 @@ func (m *MsgGovCreateProgramResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgGovCreateProgramResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgGovCreateProgramsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgGovCreateProgramResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgGovCreateProgramsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1585,7 +1594,7 @@ func (m *MsgGovSetParamsResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgGovCreateProgram) Size() (n int) {
+func (m *MsgGovCreatePrograms) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1603,15 +1612,19 @@ func (m *MsgGovCreateProgram) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.Program.Size()
-	n += 1 + l + sovTx(uint64(l))
+	if len(m.Programs) > 0 {
+		for _, e := range m.Programs {
+			l = e.Size()
+			n += 1 + l + sovTx(uint64(l))
+		}
+	}
 	if m.FromCommunityFund {
 		n += 2
 	}
 	return n
 }
 
-func (m *MsgGovCreateProgramResponse) Size() (n int) {
+func (m *MsgGovCreateProgramsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2573,7 +2586,7 @@ func (m *MsgGovSetParamsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgGovCreateProgram) Unmarshal(dAtA []byte) error {
+func (m *MsgGovCreatePrograms) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2596,10 +2609,10 @@ func (m *MsgGovCreateProgram) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgGovCreateProgram: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgGovCreatePrograms: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgGovCreateProgram: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgGovCreatePrograms: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2700,7 +2713,7 @@ func (m *MsgGovCreateProgram) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Program", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Programs", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2727,7 +2740,8 @@ func (m *MsgGovCreateProgram) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Program.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Programs = append(m.Programs, IncentiveProgram{})
+			if err := m.Programs[len(m.Programs)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2772,7 +2786,7 @@ func (m *MsgGovCreateProgram) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgGovCreateProgramResponse) Unmarshal(dAtA []byte) error {
+func (m *MsgGovCreateProgramsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2795,10 +2809,10 @@ func (m *MsgGovCreateProgramResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgGovCreateProgramResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgGovCreateProgramsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgGovCreateProgramResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgGovCreateProgramsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

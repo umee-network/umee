@@ -27,7 +27,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgBond{}, "umee/incentive/MsgBond", nil)
 	cdc.RegisterConcrete(&MsgBeginUnbonding{}, "umee/incentive/MsgBeginUnbonding", nil)
 	cdc.RegisterConcrete(&MsgSponsor{}, "umee/incentive/MsgSponsor", nil)
-	cdc.RegisterConcrete(&MsgGovCreateProgram{}, "umee/incentive/MsgGovCreateProgram", nil)
+	cdc.RegisterConcrete(&MsgGovCreatePrograms{}, "umee/incentive/MsgGovCreatePrograms", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -37,7 +37,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgBond{},
 		&MsgBeginUnbonding{},
 		&MsgSponsor{},
-		&MsgGovCreateProgram{},
+		&MsgGovCreatePrograms{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

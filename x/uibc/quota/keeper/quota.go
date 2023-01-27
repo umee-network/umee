@@ -39,11 +39,6 @@ func (k Keeper) GetQuotaOfIBCDenoms(ctx sdk.Context) ([]uibc.Quota, error) {
 
 // GetQuotaByDenom retunes the rate limits of ibc denom.
 func (k Keeper) GetQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
-	return k.getQuotaByDenom(ctx, ibcDenom)
-}
-
-// getQuotaByDenom retunes the quota of ibc denom.
-func (k Keeper) getQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.KeyTotalOutflows(ibcDenom))
 	if bz == nil {
@@ -73,12 +68,10 @@ func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas []uibc.Quota) error {
 func (k Keeper) SetDenomQuota(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) error {
 	store := ctx.KVStore(k.storeKey)
 	key := uibc.KeyTotalOutflows(quotaOfIBCDenom.IbcDenom)
-
 	bz, err := k.cdc.Marshal(&quotaOfIBCDenom)
 	if err != nil {
 		return err
 	}
-
 	store.Set(key, bz)
 
 	return nil
@@ -94,9 +87,7 @@ func (k Keeper) GetTotalOutflowSum(ctx sdk.Context) sdk.Dec {
 // SetTotalOutflowSum save the total outflow of ibc-transfer amount.
 func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount sdk.Dec) error {
 	store := ctx.KVStore(k.storeKey)
-
 	store.Set(uibc.KeyPrefixTotalOutflows, []byte(amount.String()))
-
 	return nil
 }
 
