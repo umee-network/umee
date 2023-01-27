@@ -21,23 +21,14 @@ var (
 	DefaultQuotaPerIBCDenom = sdk.MustNewDecFromStr("600000")
 )
 
-func NewParams(ibcPause IBCTransferStatus, totalQuota, quotaPerDenom sdk.Dec, quotaDurationPerDenom int64) Params {
-	return Params{
-		IbcPause:      ibcPause,
-		TotalQuota:    totalQuota,
-		TokenQuota:    quotaPerDenom,
-		QuotaDuration: time.Second * time.Duration(quotaDurationPerDenom),
-	}
-}
-
 // DefaultParams returns default genesis params
 func DefaultParams() Params {
-	return NewParams(
-		DefaultIBCPause,
-		DefaultTotalQuota,
-		DefaultQuotaPerIBCDenom,
-		DefaultQuotaDurationPerDenom,
-	)
+	return Params{
+		IbcPause:      DefaultIBCPause,
+		TotalQuota:    DefaultTotalQuota,
+		TokenQuota:    DefaultQuotaPerIBCDenom,
+		QuotaDuration: DefaultQuotaDurationPerDenom,
+	}
 }
 
 func (p Params) Validate() error {
