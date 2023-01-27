@@ -153,7 +153,7 @@ var xxx_messageInfo_QueryActiveExchangeRates proto.InternalMessageInfo
 // QueryActiveExchangeRatesResponse is response type for the
 // Query/ActiveExchangeRates RPC method.
 type QueryActiveExchangeRatesResponse struct {
-	// activeRates defines a list of the denomination which oracle prices aggreed
+	// activeRates defines a list of the denomination which oracle prices agreed
 	// upon.
 	ActiveRates []string `protobuf:"bytes,1,rep,name=active_rates,json=activeRates,proto3" json:"active_rates,omitempty"`
 }
