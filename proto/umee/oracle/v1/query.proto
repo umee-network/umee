@@ -124,7 +124,7 @@ message QueryActiveExchangeRates {}
 // QueryActiveExchangeRatesResponse is response type for the
 // Query/ActiveExchangeRates RPC method.
 message QueryActiveExchangeRatesResponse {
-  // activeRates defines a list of the denomination which oracle prices aggreed
+  // activeRates defines a list of the denomination which oracle prices agreed
   // upon.
   repeated string active_rates = 1;
 }

@@ -21,14 +21,14 @@ service Msg {
   rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
 
   // Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
-  // In the current implementation, the sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
+  // The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
   rpc Sponsor(MsgSponsor) returns (MsgSponsorResponse);
 
   // GovSetParams is used by governance proposals to update parameters.
   rpc GovSetParams(MsgGovSetParams) returns (MsgGovSetParamsResponse);
 
-  // GovCreateProgram is used by governance proposals to create (but not fund) an incentive program.
-  rpc GovCreateProgram(MsgGovCreateProgram) returns (MsgGovCreateProgramResponse);
+  // GovCreatePrograms is used by governance proposals to create and optionally fund incentive programs.
+  rpc GovCreatePrograms(MsgGovCreatePrograms) returns (MsgGovCreateProgramsResponse);
 }
 
 // MsgClaim represents a account's request to claim pending rewards.
@@ -93,28 +93,28 @@ message MsgGovSetParams {
 // MsgGovSetParamsResponse defines the Msg/SetParams response type.
 message MsgGovSetParamsResponse {}
 
-// MsgGovCreateProgram is used by governance to create an incentive program. There are two
-// funding scenarios, depending on from_community_fund.
-// If it is true,the program's total rewards will be automatically withdrawn from
+// MsgGovCreatePrograms is used by governance to create one or more incentive programs.
+// There are two funding scenarios, depending on from_community_fund.
+// If it is true,the programs' total rewards will be automatically withdrawn from
 // the (parameter) community_fund_address to the incentive module account when this
 // message is passed. (Insufficient funds cause the parameter to be treated as false.)
-// If it is false, a MsgSponsor fundign the program's full amount must be submitted
+// If it is false, a MsgSponsor funding each program's full amount must be submitted
 // after this message passes, but before the program's start_time, or the program
 // will be cancelled when it would otherwise start.
-message MsgGovCreateProgram {
+message MsgGovCreatePrograms {
   option (gogoproto.equal)           = true;
   option (gogoproto.goproto_getters) = false;
   option (cosmos.msg.v1.signer)      = "authority";
 
   // authority must be the address of the governance account.
-  string           authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string           title       = 2;
-  string           description = 3;
-  IncentiveProgram program     = 4 [(gogoproto.nullable) = false];
+  string                    authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string                    title       = 2;
+  string                    description = 3;
+  repeated IncentiveProgram programs    = 4 [(gogoproto.nullable) = false];
 
-  // from_community_fund defines the source of funds for a proposed incentive program.
+  // from_community_fund defines the source of funds for proposed incentive programs.
   bool from_community_fund = 5;
 }
 
-// MsgGovCreateProgramResponse defines the Msg/CreateProgram response type.
-message MsgGovCreateProgramResponse {}
+// MsgGovCreateProgramsResponse defines the Msg/CreatePrograms response type.
+message MsgGovCreateProgramsResponse {}
