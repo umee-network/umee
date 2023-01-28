@@ -153,7 +153,7 @@ For reference, the repayment looks like:
 ```
 
 The liquidator account has returned to its initial state, except:
-- An extra `0.04 ATOM` in its balance on Umee (profit)
+- An extra `0.004 ATOM` in its balance on Umee (profit)
 - Paid some `ATOM`, `OSMO`, `AXL`, `UMEE` in gas on their respective chains
 
 Note that most of the effort of liquidation comes from IBC transferring the reward and repayment tokens around.
