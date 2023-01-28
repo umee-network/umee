@@ -14,7 +14,7 @@ This document contains notes on how to do these manually - a more sophisticated 
 Any wallet you control can be used as a liquidator, as long as it has a pool of assets and tokens for gas on the relevant chains.
 
 Here is an example setup:
-- `100 AXL-USDC` from axelar collateralized on [app.umee.cc](app.umee.cc) with no active borrows
+- `100 AXL-USDC` from axelar collateralized on [app.umee.cc](https://app.umee.cc/) with no active borrows
 - `1 UMEE` on Umee
 - `1 ATOM` on Cosmos Hub
 - `1 AXL` on Axelar
