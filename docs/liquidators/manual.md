@@ -122,7 +122,7 @@ Another option would have been to buy `ATOM` on an exchange, or have an initial 
 In a liquidation transaction, you need to specify three things:
 - target address (`umee1l2jv...`)
 - repayment coin (`84000ibc/C4CFF...`, which is `0.084 ATOM`)
-- reward token (`ibc/49788...`, which is USDC)
+- reward token (`ibc/49788...`, which is `USDC`)
 
 ```sh
 % umeed tx leverage liquidate umee1l2jv2mym7xd442cmeqka9yvd7vxelsplnn2qn8 84000ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9 ibc/49788C29CD84E08D25CA7BE960BC1F61E88FEFC6333F58557D236D693398466A --from my-key --chain-id umee-1 --gas auto --gas-adjustment 10.0 --gas-prices 0.1uumee -y --broadcast-mode block
