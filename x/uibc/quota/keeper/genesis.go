@@ -12,13 +12,9 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 		panic(err)
 	}
 
-	if err := k.SetDenomQuotas(ctx, genState.Quotas); err != nil {
-		panic(err)
-	}
+	k.SetDenomQuotas(ctx, genState.Quotas)
 
-	if err := k.SetTotalOutflowSum(ctx, genState.TotalOutflowSum); err != nil {
-		panic(err)
-	}
+	k.SetTotalOutflowSum(ctx, genState.TotalOutflowSum)
 
 	if err := k.SetExpire(ctx, genState.QuotaExpires); err != nil {
 		panic(err)

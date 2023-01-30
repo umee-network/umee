@@ -1,6 +1,10 @@
 package uibc
 
-import "github.com/umee-network/umee/v4/util"
+import (
+	"encoding/hex"
+
+	"github.com/umee-network/umee/v4/util"
+)
 
 const (
 	// ModuleName defines the module name
@@ -25,4 +29,8 @@ var (
 func KeyTotalOutflows(ibcDenom string) []byte {
 	//  KeyPrefixDenomQuota| denom
 	return util.ConcatBytes(0, KeyPrefixDenomQuota, []byte(ibcDenom))
+}
+
+func DenomFromKeyTotalOutflows(key []byte) string {
+	return hex.EncodeToString(key[2:])
 }
