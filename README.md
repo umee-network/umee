@@ -108,4 +108,4 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 
 ## Liquidators
 
-A guide to running liquidations on Umee can be found [here](./docs/liquidators/manual.md)
+A guide to running liquidations on Umee can be found [here](./x/leverage/LIQUIDATION.md)

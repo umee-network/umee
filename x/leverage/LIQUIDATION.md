@@ -20,7 +20,7 @@ Here is an example setup:
 - `1 AXL` on Axelar
 - `1 OSMO` on Osmosis
 
-The main collateral will allow you to borrow any tokens required during liquidation, and the other tokens are for gas on their native chains.
+The main collateral will allow you to borrow any tokens required during liquidation, and the other tokens are for gas on their native chains. (Gas tokens will vary based on which chains and exchanges are being used.)
 
 ## Querying for Eligible Liquidation Targets
 
@@ -132,6 +132,12 @@ In this case (from `umeed q leverage registered-tokens`) USDC has `"liquidation_
 
 Repaying `$0.98` worth of borrowed ATOM rewarded us `$1.03` in USDC, out of the borrower's `$1.07` in collateral.
 
+### Partial Liquidation
+
+If the module determines that only part of a borrower's position can be liquidated, then the repayment amount will be automatically reduced as if the liquidator had set a lower maximum repay amount in the transaction. No computations are required on the liquidator's side.
+
+Information on the parameters that determine partial liquidation can be found [here](./README.md#CloseFactor)
+
 ## Selling Liquidation Rewards for a Profit
 
 To lock in our profits, we should trade the liquidation rewards we received back into the token denom we repaid.
@@ -155,6 +161,6 @@ The liquidator account has returned to its initial state, except:
 - Paid some `ATOM`, `OSMO`, `AXL`, `UMEE` in gas on their respective chains
 
 Note that most of the effort of liquidation comes from IBC transferring the reward and repayment tokens around.
-Each token (`ATOM` and `USDC` in this case) must be sent to its original chain before being transferred to its real destination.
+Each token (`ATOM` and `USDC` in this case) must be sent to its original chain before being transferred to its exchange or back to Umee.
 
 The primary obstacle for automation is to manage those IBC transfers, and keep a wallet on each relevant chain supplied with gas.

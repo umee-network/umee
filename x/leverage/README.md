@@ -234,6 +234,8 @@ if portionOverLimit > params.CompleteLiquidationThreshold {
 }
 ```
 
+Note that close factor is always `1.0` if borrowed value is below the module parameter `SmallLiquidationSize`.
+
 #### Total Supplied
 
 The `TotalSupplied` of a token denom is the sum of all tokens supplied to the asset facility, including those that have been borrowed out and any interest accrued, minus reserves.
