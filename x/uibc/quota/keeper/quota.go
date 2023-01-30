@@ -191,7 +191,6 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmat
 	return k.SetTotalOutflowSum(ctx, totalOutflowSum)
 }
 
-// getExchangePrice
 func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.Int) (sdk.Dec, error) {
 	transferCoin := sdk.NewCoin(denom, amount)
 	var err error
@@ -241,13 +240,19 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 }
 
 // GetFundsFromPacket returns transfer amount and denom
-func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (string, string, error) {
+func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (sdkmath.Int, string, error) {
 	var packetData transfertypes.FungibleTokenPacketData
 	err := json.Unmarshal(packet.GetData(), &packetData)
 	if err != nil {
-		return "", "", err
+		return sdkmath.Int{}, "", err
 	}
-	return packetData.Amount, k.GetLocalDenom(packetData.Denom), nil
+
+	amount, ok := sdkmath.NewIntFromString(packetData.Amount)
+	if !ok {
+		return sdkmath.Int{}, "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
+	}
+
+	return amount, k.GetLocalDenom(packetData.Denom), nil
 }
 
 // GetLocalDenom retruns ibc denom

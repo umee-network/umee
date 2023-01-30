@@ -101,13 +101,11 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 	if isAckError(acknowledgement) {
 		err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
 		if err != nil {
-			if err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
+			_ = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
 				Module:      uibc.ModuleName,
 				FailureType: "acknowledgment",
 				Packet:      string(packet.GetData()),
-			}); err != nil {
-				return err
-			}
+			})
 		}
 	}
 
