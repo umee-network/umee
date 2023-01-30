@@ -54,27 +54,17 @@ func (k Keeper) GetQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, 
 }
 
 // SetDenomQuotas save the updated token quota.
-func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas []uibc.Quota) error {
+func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas []uibc.Quota) {
 	for _, quotaOfIBCDenom := range quotas {
-		if err := k.SetDenomQuota(ctx, quotaOfIBCDenom); err != nil {
-			return err
-		}
+		k.SetDenomQuota(ctx, quotaOfIBCDenom)
 	}
-
-	return nil
 }
 
 // SetDenomQuota save the quota of denom into store.
-func (k Keeper) SetDenomQuota(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) error {
+func (k Keeper) SetDenomQuota(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) {
 	store := ctx.KVStore(k.storeKey)
 	key := uibc.KeyTotalOutflows(quotaOfIBCDenom.IbcDenom)
-	bz, err := k.cdc.Marshal(&quotaOfIBCDenom)
-	if err != nil {
-		return err
-	}
-	store.Set(key, bz)
-
-	return nil
+	store.Set(key, k.cdc.MustMarshal(&quotaOfIBCDenom))
 }
 
 // GetTotalOutflowSum returns the total outflow of ibc-transfer amount.
@@ -85,10 +75,9 @@ func (k Keeper) GetTotalOutflowSum(ctx sdk.Context) sdk.Dec {
 }
 
 // SetTotalOutflowSum save the total outflow of ibc-transfer amount.
-func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount sdk.Dec) error {
+func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount sdk.Dec) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(uibc.KeyPrefixTotalOutflows, []byte(amount.String()))
-	return nil
 }
 
 // SetExpire save the quota expires time of ibc denom into store.
@@ -98,7 +87,6 @@ func (k Keeper) SetExpire(ctx sdk.Context, expires time.Time) error {
 	if err != nil {
 		return err
 	}
-
 	store.Set(uibc.KeyPrefixQuotaExpires, bz)
 
 	return nil
@@ -121,29 +109,21 @@ func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 // ResetQuota will reset the ibc-transfer quotas
 func (k Keeper) ResetQuota(ctx sdk.Context) error {
 	qd := k.GetParams(ctx).QuotaDuration
+	zero := sdk.NewDec(0)
 	newExpires := ctx.BlockTime().Add(qd)
 	if err := k.SetExpire(ctx, newExpires); err != nil {
 		return err
 	}
+	k.SetTotalOutflowSum(ctx, zero)
 
-	if err := k.SetTotalOutflowSum(ctx, sdk.NewDec(0)); err != nil {
-		return err
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, uibc.KeyPrefixDenomQuota)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		ibcDenom := uibc.DenomFromKeyTotalOutflows(iter.Key())
+		q := uibc.Quota{IbcDenom: ibcDenom, OutflowSum: zero}
+		store.Set(uibc.KeyTotalOutflows(ibcDenom), k.cdc.MustMarshal(&q))
 	}
-
-	quotaOfIBCDenoms, err := k.GetQuotaOfIBCDenoms(ctx)
-	if err != nil {
-		return err
-	}
-
-	for _, quotaOfIBCDenom := range quotaOfIBCDenoms {
-		// reset the outflow sum to 0
-		quotaOfIBCDenom.OutflowSum = sdk.NewDec(0)
-		// storing the rate limits to store
-		if err := k.SetDenomQuota(ctx, quotaOfIBCDenom); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
@@ -183,12 +163,10 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmat
 	}
 
 	// update the per token outflow sum
-	if err := k.SetDenomQuota(ctx, *quotaOfIBCDenom); err != nil {
-		return err
-	}
-
+	k.SetDenomQuota(ctx, *quotaOfIBCDenom)
 	// updating the total outflow sum
-	return k.SetTotalOutflowSum(ctx, totalOutflowSum)
+	k.SetTotalOutflowSum(ctx, totalOutflowSum)
+	return nil
 }
 
 func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.Int) (sdk.Dec, error) {
@@ -230,13 +208,12 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 
 	// reset the outflow limit of token
 	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Sub(exchangePrice)
-	if err := k.SetDenomQuota(ctx, *quotaOfIBCDenom); err != nil {
-		return err
-	}
+	k.SetDenomQuota(ctx, *quotaOfIBCDenom)
 
 	// reset the total outflow sum
 	totalOutflowSum := k.GetTotalOutflowSum(ctx)
-	return k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
+	k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
+	return nil
 }
 
 // GetFundsFromPacket returns transfer amount and denom
@@ -244,12 +221,12 @@ func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (sdkmath.Int, string
 	var packetData transfertypes.FungibleTokenPacketData
 	err := json.Unmarshal(packet.GetData(), &packetData)
 	if err != nil {
-		return sdkmath.ZeroInt(), "", err
+		return sdkmath.Int{}, "", err
 	}
 
 	amount, ok := sdkmath.NewIntFromString(packetData.Amount)
 	if !ok {
-		return sdkmath.ZeroInt(), "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
+		return sdkmath.Int{}, "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
 	}
 
 	return amount, k.GetLocalDenom(packetData.Denom), nil
