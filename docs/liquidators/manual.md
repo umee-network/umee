@@ -40,7 +40,7 @@ To enable the liquidation targets query on a node you control, start the node wi
 
 `umeed start -l`
 
-All future examples were obtained using the CLI against a local umee node with the query enabled.
+The following examples were obtained using the CLI against a local umee node with the query enabled.
 
 ### Using the Query
 
