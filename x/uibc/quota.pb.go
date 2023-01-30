@@ -69,7 +69,7 @@ func (IBCTransferStatus) EnumDescriptor() ([]byte, []int) {
 type Quota struct {
 	// ibc_denom defines the ibc denom
 	IbcDenom string `protobuf:"bytes,1,opt,name=ibc_denom,json=ibcDenom,proto3" json:"ibc_denom,omitempty"`
-	// outflow_sum defines the sum of USD value of outflow tokens through ibc-transfer
+	// outflow_sum defines the sum of price (USD) value of outflow tokens through ibc-transfer
 	OutflowSum github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=outflow_sum,json=outflowSum,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"outflow_sum"`
 }
 
