@@ -4,6 +4,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -12,58 +13,35 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	k.SetParams(ctx, genState.Params)
 
 	for _, token := range genState.Registry {
-		if err := k.SetTokenSettings(ctx, token); err != nil {
-			panic(err)
-		}
+		util.Panic(k.SetTokenSettings(ctx, token))
 	}
 
 	for _, borrow := range genState.AdjustedBorrows {
 		borrower, err := sdk.AccAddressFromBech32(borrow.Address)
-		if err != nil {
-			panic(err)
-		}
-
-		if err = k.setAdjustedBorrow(ctx, borrower, borrow.Amount); err != nil {
-			panic(err)
-		}
+		util.Panic(err)
+		util.Panic(k.setAdjustedBorrow(ctx, borrower, borrow.Amount))
 	}
 
 	for _, collateral := range genState.Collateral {
 		borrower, err := sdk.AccAddressFromBech32(collateral.Address)
-		if err != nil {
-			panic(err)
-		}
-
-		if err = k.setCollateral(ctx, borrower, collateral.Amount); err != nil {
-			panic(err)
-		}
+		util.Panic(err)
+		util.Panic(k.setCollateral(ctx, borrower, collateral.Amount))
 	}
 
 	for _, reserve := range genState.Reserves {
-		if err := k.setReserves(ctx, reserve); err != nil {
-			panic(err)
-		}
+		util.Panic(k.setReserves(ctx, reserve))
 	}
 
-	if err := k.setLastInterestTime(ctx, genState.LastInterestTime); err != nil {
-		panic(err)
-	}
+	util.Panic(k.setLastInterestTime(ctx, genState.LastInterestTime))
 
 	for _, badDebt := range genState.BadDebts {
 		borrower, err := sdk.AccAddressFromBech32(badDebt.Address)
-		if err != nil {
-			panic(err)
-		}
-
-		if err := k.setBadDebtAddress(ctx, borrower, badDebt.Denom, true); err != nil {
-			panic(err)
-		}
+		util.Panic(err)
+		util.Panic(k.setBadDebtAddress(ctx, borrower, badDebt.Denom, true))
 	}
 
 	for _, rate := range genState.InterestScalars {
-		if err := k.setInterestScalar(ctx, rate.Denom, rate.Scalar); err != nil {
-			panic(err)
-		}
+		util.Panic(k.setInterestScalar(ctx, rate.Denom, rate.Scalar))
 	}
 }
 
@@ -102,10 +80,7 @@ func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return borrows
 }
@@ -130,10 +105,7 @@ func (k Keeper) getAllCollateral(ctx sdk.Context) []types.Collateral {
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return collateral
 }
@@ -157,10 +129,7 @@ func (k Keeper) getAllInterestScalars(ctx sdk.Context) []types.InterestScalar {
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return interestScalars
 }
