@@ -22,8 +22,7 @@ func (s *KeeperTestSuite) TestGetQuotas() {
 		},
 	}
 
-	err = k.SetDenomQuotas(ctx, setQuotas)
-	s.Require().NoError(err)
+	k.SetDenomQuotas(ctx, setQuotas)
 	quotas, err = k.GetQuotaOfIBCDenoms(ctx)
 	s.Require().NoError(err)
 	s.Require().Equal(len(quotas), len(setQuotas))

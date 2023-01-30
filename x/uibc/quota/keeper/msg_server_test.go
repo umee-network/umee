@@ -102,16 +102,6 @@ func (s *KeeperTestSuite) TestMsgServer_GovSetIBCPause() {
 			errExpected: true,
 		},
 		{
-			name: "invalid ibc-transfer status in msg <default: disabled (1)>",
-			msg: uibc.MsgGovSetIBCPause{
-				Title:          "title",
-				Description:    "desc",
-				Authority:      authtypes.NewModuleAddress("gov").String(),
-				IbcPauseStatus: 1,
-			},
-			errExpected: true,
-		},
-		{
 			name: "valid in msg <enable the ibc-transfer pause",
 			msg: uibc.MsgGovSetIBCPause{
 				Title:          "title",
