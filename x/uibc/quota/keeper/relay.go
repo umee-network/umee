@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
@@ -15,12 +14,7 @@ func (k Keeper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability,
 		return sdkerrors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
-	amount, ok := sdkmath.NewIntFromString(funds)
-	if !ok {
-		return sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", funds)
-	}
-
-	if err := k.CheckAndUpdateQuota(ctx, denom, amount); err != nil {
+	if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
 		return sdkerrors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
