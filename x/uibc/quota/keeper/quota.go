@@ -65,16 +65,10 @@ func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas []uibc.Quota) error {
 }
 
 // SetDenomQuota save the quota of denom into store.
-func (k Keeper) SetDenomQuota(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) error {
+func (k Keeper) SetDenomQuota(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) {
 	store := ctx.KVStore(k.storeKey)
 	key := uibc.KeyTotalOutflows(quotaOfIBCDenom.IbcDenom)
-	bz, err := k.cdc.Marshal(&quotaOfIBCDenom)
-	if err != nil {
-		return err
-	}
-	store.Set(key, bz)
-
-	return nil
+	store.Set(key, k.cdc.MustMarshal(&quotaOfIBCDenom))
 }
 
 // GetTotalOutflowSum returns the total outflow of ibc-transfer amount.
@@ -85,10 +79,9 @@ func (k Keeper) GetTotalOutflowSum(ctx sdk.Context) sdk.Dec {
 }
 
 // SetTotalOutflowSum save the total outflow of ibc-transfer amount.
-func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount sdk.Dec) error {
+func (k Keeper) SetTotalOutflowSum(ctx sdk.Context, amount sdk.Dec) {
 	store := ctx.KVStore(k.storeKey)
 	store.Set(uibc.KeyPrefixTotalOutflows, []byte(amount.String()))
-	return nil
 }
 
 // SetExpire save the quota expires time of ibc denom into store.
@@ -98,7 +91,6 @@ func (k Keeper) SetExpire(ctx sdk.Context, expires time.Time) error {
 	if err != nil {
 		return err
 	}
-
 	store.Set(uibc.KeyPrefixQuotaExpires, bz)
 
 	return nil
@@ -125,25 +117,21 @@ func (k Keeper) ResetQuota(ctx sdk.Context) error {
 	if err := k.SetExpire(ctx, newExpires); err != nil {
 		return err
 	}
+	k.SetTotalOutflowSum(ctx, sdk.NewDec(0))
 
-	if err := k.SetTotalOutflowSum(ctx, sdk.NewDec(0)); err != nil {
-		return err
+	zero := sdk.NewDec(0)
+	prefix := uibc.KeyPrefixDenomQuota
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, prefix)
+	// or:
+	// store = store.NewPrefixStore(store, uibc.KeyPrefixDenomQuota)
+	// iter := sdk.KVStorePrefixIterator(store, nil)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		// TODO: please check if iter.Key() is denom or something else
+		q := uibc.Quota{IbcDenom: string(iter.Key()), OutflowSum: zero}
+		store.Set(iter.Key(), k.cdc.MustMarshal(&q))
 	}
-
-	quotaOfIBCDenoms, err := k.GetQuotaOfIBCDenoms(ctx)
-	if err != nil {
-		return err
-	}
-
-	for _, quotaOfIBCDenom := range quotaOfIBCDenoms {
-		// reset the outflow sum to 0
-		quotaOfIBCDenom.OutflowSum = sdk.NewDec(0)
-		// storing the rate limits to store
-		if err := k.SetDenomQuota(ctx, quotaOfIBCDenom); err != nil {
-			return err
-		}
-	}
-
 	return nil
 }
 
