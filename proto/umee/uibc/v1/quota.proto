@@ -11,7 +11,7 @@ option go_package = "github.com/umee-network/umee/v4/x/uibc";
 message Quota {
   // ibc_denom defines the ibc denom
   string ibc_denom = 1;
-  // outflow_sum defines the sum of USD value of outflow tokens through ibc-transfer
+  // outflow_sum defines the sum of price (USD) value of outflow tokens through ibc-transfer
   string outflow_sum = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
