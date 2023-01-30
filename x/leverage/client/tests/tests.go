@@ -95,10 +95,11 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			false,
 			&types.QueryMarketSummaryResponse{},
 			&types.QueryMarketSummaryResponse{
-				SymbolDenom:        "UMEE",
-				Exponent:           6,
-				OraclePrice:        &oracleSymbolPrice,
-				UTokenExchangeRate: sdk.OneDec(),
+				SymbolDenom:         "UMEE",
+				Exponent:            6,
+				OraclePrice:         &oracleSymbolPrice,
+				OracleHistoricPrice: &oracleSymbolPrice,
+				UTokenExchangeRate:  sdk.OneDec(),
 				// Borrow rate * (1.52 - ReserveFactor - OracleRewardFactor)
 				// 1.52 * (1 - 0.2 - 0.01) = 1.2008
 				Supply_APY: sdk.MustNewDecFromStr("1.2008"),

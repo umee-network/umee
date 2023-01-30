@@ -10,6 +10,7 @@ TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.
 DOCKER         := $(shell which docker)
 PROJECT_NAME   := umee
 HTTPS_GIT      := https://github.com/umee-network/umee.git
+MOCKS_DIR = $(CURDIR)/tests/mocks
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -176,6 +177,14 @@ cover-html: test-unit-cover
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
 
+
+$(MOCKS_DIR):
+	mkdir -p $(MOCKS_DIR)
+mocks: $(MOCKS_DIR)
+	@go install github.com/golang/mock/mockgen@v1.6.0
+	sh ./scripts/mockgen.sh
+.PHONY: mocks
+
 ###############################################################################
 ###                                Linting                                  ###
 ###############################################################################
@@ -186,6 +195,12 @@ lint:
 	@echo "--> Running linter with revive"
 	@go install github.com/mgechev/revive
 	@revive -config .revive.toml -formatter friendly ./...
+# note: on new OSX, might require brew install diffutils
+	@echo "--> Running regular linter"
+	@go install mvdan.cc/gofumpt
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
+	@$(golangci_lint_cmd) run
+	@cd price-feeder && $(golangci_lint_cmd) run
 
 lint-fix:
 	@echo "--> Running linter to fix the lint issues"

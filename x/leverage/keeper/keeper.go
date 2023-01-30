@@ -11,6 +11,7 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -31,7 +32,7 @@ func NewKeeper(
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 	enableLiquidatorQuery bool,
-) (Keeper, error) {
+) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
@@ -44,7 +45,7 @@ func NewKeeper(
 		bankKeeper:             bk,
 		oracleKeeper:           ok,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
-	}, nil
+	}
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
@@ -215,7 +216,8 @@ func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.
 	// determine amount of selected denom currently owed
 	owed := k.GetBorrow(ctx, borrowerAddr, payment.Denom)
 	if owed.IsZero() {
-		return sdk.Coin{}, types.ErrDenomNotBorrowed.Wrap(payment.Denom)
+		// no need to repay - everything is all right
+		return sdkutil.ZeroCoin(payment.Denom), nil
 	}
 
 	// prevent overpaying

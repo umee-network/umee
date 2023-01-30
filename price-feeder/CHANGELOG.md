@@ -121,7 +121,7 @@ This was released as a part of [Umee Prop 27.](https://www.mintscan.io/umee/prop
 - [#1255](https://github.com/umee-network/umee/pull/1255) Move TickerPrice and CandlePrice to types package
 - [#1374](https://github.com/umee-network/umee/pull/1374) Add standard for telemetry metrics.
 - [#1431](https://github.com/umee-network/umee/pull/1431) Convert floats to sdk decimal using helper functions in all providers.
-- [#1442](https://github.com/umee-network/umee/pull/1442) Remove unnecessary method in recconection logic.
+- [#1442](https://github.com/umee-network/umee/pull/1442) Remove unnecessary method in reconnection logic.
 
 ### Features
 

@@ -1,0 +1,57 @@
+syntax = "proto3";
+package umee.uibc.v1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package = "github.com/umee-network/umee/v4/x/uibc";
+
+// Quota stores current sum of IBC outflow transfers of IBC Denom.
+message Quota {
+  // ibc_denom defines the ibc denom
+  string ibc_denom = 1;
+  // outflow_sum defines the sum of price (USD) value of outflow tokens through ibc-transfer
+  string outflow_sum = 3 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// Params of x/uibc module
+message Params {
+  // ibc_status defines the wethever ibc-transfer enabled, disbaled or paused
+  IBCTransferStatus ibc_pause = 1;
+  // total_quota defines the total outflow limit of ibc-transfer in USD
+  string total_quota = 2 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // token_quota defines the outflow limit per token in USD
+  string token_quota = 3 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // quota_duration defines quota expires for each ibc-transfer denom in seconds
+  google.protobuf.Duration quota_duration = 4 [
+    (gogoproto.nullable)    = false,
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag)     = "quota_duration,omitempty",
+    (gogoproto.moretags)    = "yaml:\"quota_duration\""
+  ];
+}
+
+// IBCTransferStatus status of ibc-transfer
+enum IBCTransferStatus {
+  // UNSPECIFIED  defines a no-op status.
+  IBC_TRANSFER_STATUS_UNSPECIFIED = 0;
+  // DISABLED defines the quota checking diabled for ibc-transfer.
+  IBC_TRANSFER_STATUS_DISABLED = 1;
+  // ENABLED defines the enable quota checking for ibc-transfer.
+  IBC_TRANSFER_STATUS_ENABLED = 2;
+  // PAUSED defines pause the ibc-transfer from app.
+  IBC_TRANSFER_STATUS_PAUSED = 3;
+}

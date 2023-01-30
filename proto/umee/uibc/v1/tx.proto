@@ -1,0 +1,73 @@
+syntax = "proto3";
+package umee.uibc.v1;
+
+import "gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "umee/uibc/v1/quota.proto";
+
+option go_package = "github.com/umee-network/umee/v4/x/uibc";
+
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.messagename_all)     = true;
+
+// Msg defines the x/uibc module's Msg service.
+service Msg {
+  // GovUpdateQuota adds new quota for ibc denoms or
+  // updates the quota for existed ibc denoms.
+  rpc GovUpdateQuota(MsgGovUpdateQuota) returns (MsgGovUpdateQuotaResponse);
+
+  // GovSetIBCPause update the status of ibc-transfer
+  rpc GovSetIBCPause(MsgGovSetIBCPause) returns (MsgGovSetIBCPauseResponse);
+}
+
+// MsgGovUpdateQuota defines the Msg/GovUpdateQuota request type.
+message MsgGovUpdateQuota {
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account.
+  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string title       = 2;
+  string description = 3;
+  // total quota defines the total outflow of ibc-transfer in USD
+  string total = 4 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // per_denom quota for outflows per denom. All denoms have the same quota size.
+  string per_denom = 5 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // quota_duration defines quota expires per denom, All denoms have the same expire time.
+  google.protobuf.Duration quota_duration = 6 [
+    (gogoproto.nullable)    = false,
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag)     = "quota_duration,omitempty",
+    (gogoproto.moretags)    = "yaml:\"quota_duration\""
+  ];
+}
+
+// MsgGovUpdateQuotaResponse defines response type for the Msg/GovUpdateQuota for with x/gov proposals.
+message MsgGovUpdateQuotaResponse {};
+
+// MsgGovSetIBCPause defines request type for UpdateIBCTransferStatus
+message MsgGovSetIBCPause {
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+  // authority is the address of the governance account.
+  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string title       = 2;
+  string description = 3;
+  // ibc_pause_status defines ibc transfer pause status
+  IBCTransferStatus ibc_pause_status = 4;
+}
+
+// MsgGovSetIBCPauseResponse definesresponse type for Msg/MsgGovSetIBCPause for with x/gov proposals.
+message MsgGovSetIBCPauseResponse {}

@@ -131,7 +131,7 @@ paths:
                 type: string
                 description: >-
                   Supplied Value is the sum of the USD value of all tokens the
-                  account has supplied, includng interest earned.
+                  account has supplied, including interest earned.
               collateral_value:
                 type: string
                 description: >-
@@ -142,11 +142,16 @@ paths:
                 description: >-
                   Borrowed Value is the sum of the USD value of all tokens the
                   account has borrowed, including interest owed.
+
+                  It always uses spot prices.
               borrow_limit:
                 type: string
                 description: >-
                   Borrow Limit is the maximum Borrowed Value the account is
                   allowed to reach through direct borrowing.
+
+                  The lower of spot or historic price for each collateral token
+                  is used when calculating borrow limits.
               liquidation_threshold:
                 type: string
                 description: >-
@@ -356,7 +361,7 @@ paths:
                   all borrowers. Collateral is denominated in uTokenso, so both
                   uToken exchange rate and exponent must also be applied to
                   convert to symbol denom. For example, if collateral is 4000000
-                  u/uumee and uToken exhange rate is 1.2, then 5 UMEE have been
+                  u/uumee and uToken exchange rate is 1.2, then 5 UMEE have been
                   collateralized.
               borrowed:
                 type: string
@@ -389,13 +394,14 @@ paths:
                   This amount is less than total supply due to safety limits. It
                   is denominated in uTokens, so both uToken exchange rate and
                   exponent must be applied to convert to symbol denom. For
-                  example, if collateral is 4000000 u/uumee, uToken exhange rate
-                  is 1.2, and maximum borrow is 7000000 uumee, then a maximum of
-                  2 additional UMEE is permitted to be collateralized.
+                  example, if collateral is 4000000 u/uumee, uToken exchange
+                  rate is 1.2, and maximum borrow is 7000000 uumee, then a
+                  maximum of 2 additional UMEE is permitted to be
+                  collateralized.
               minimum_liquidity:
                 type: string
                 description: >-
-                  Mimimum Liquidity is the minimum amount of liquidity in the
+                  Minimum Liquidity is the minimum amount of liquidity in the
                   module required by safety limits, based on the current
                   collateral. It is denominated in base tokens, so exponent must
                   be applied to convert to symbol denom. For example, if
@@ -439,6 +445,16 @@ paths:
                   applied to convert to symbol denom. A negative availability
                   means safety limits have been exceeded and additional
                   collateral cannot be created until more liquidity is present.
+              oracle_historic_price:
+                type: string
+                description: >-
+                  Oracle Historic Price is the historic USD value of a token.
+                  Historic price is defined as the median of the last N historic
+                  median prices from the oracle module, with N being this
+                  token's HistoricMedians in the leverage registry. Current
+                  price is used if required medians is zero. Price is nil when
+                  the oracle is down or insufficient historic medians are
+                  available.
             description: >-
               QueryMarketSummaryResponse defines the response structure for the
               MarketSummary gRPC service handler.
@@ -1001,6 +1017,9 @@ paths:
                         those calculations
 
                         for the affected Token.
+
+                        The time span covered by the historic median will be:
+                            oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
                   description: >-
                     Token defines a token, along with its metadata and
                     parameters, in the Umee
@@ -1057,19 +1076,20 @@ paths:
                 items:
                   type: object
                   properties:
-                    denom:
+                    exchange_rate_tuple:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        exchange_rate:
+                          type: string
+                      title: >-
+                        ExchangeRateTuple - struct to store interpreted exchange
+                        rates data to store
+                    block_num:
                       type: string
-                    amount:
-                      type: string
-                  description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                      format: uint64
+                  title: Price is an instance of a price "stamp"
                 description: >-
                   medians defines a list of the median deviations for all
                   stamped denoms.
@@ -1123,19 +1143,20 @@ paths:
                 items:
                   type: object
                   properties:
-                    denom:
+                    exchange_rate_tuple:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        exchange_rate:
+                          type: string
+                      title: >-
+                        ExchangeRateTuple - struct to store interpreted exchange
+                        rates data to store
+                    block_num:
                       type: string
-                    amount:
-                      type: string
-                  description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                      format: uint64
+                  title: Price is an instance of a price "stamp"
                 description: medians defines a list of the medians for all stamped denoms.
             description: |-
               QueryMediansResponse is response type for the
@@ -1196,7 +1217,7 @@ paths:
                   type: string
                 description: >-
                   activeRates defines a list of the denomination which oracle
-                  prices aggreed
+                  prices agreed
 
                   upon.
             description: |-
@@ -1999,7 +2020,7 @@ definitions:
         type: string
         description: >-
           Supplied Value is the sum of the USD value of all tokens the account
-          has supplied, includng interest earned.
+          has supplied, including interest earned.
       collateral_value:
         type: string
         description: >-
@@ -2010,11 +2031,16 @@ definitions:
         description: >-
           Borrowed Value is the sum of the USD value of all tokens the account
           has borrowed, including interest owed.
+
+          It always uses spot prices.
       borrow_limit:
         type: string
         description: >-
           Borrow Limit is the maximum Borrowed Value the account is allowed to
           reach through direct borrowing.
+
+          The lower of spot or historic price for each collateral token is used
+          when calculating borrow limits.
       liquidation_threshold:
         type: string
         description: >-
@@ -2116,7 +2142,7 @@ definitions:
           borrowers. Collateral is denominated in uTokenso, so both uToken
           exchange rate and exponent must also be applied to convert to symbol
           denom. For example, if collateral is 4000000 u/uumee and uToken
-          exhange rate is 1.2, then 5 UMEE have been collateralized.
+          exchange rate is 1.2, then 5 UMEE have been collateralized.
       borrowed:
         type: string
         description: >-
@@ -2147,13 +2173,13 @@ definitions:
           amount is less than total supply due to safety limits. It is
           denominated in uTokens, so both uToken exchange rate and exponent must
           be applied to convert to symbol denom. For example, if collateral is
-          4000000 u/uumee, uToken exhange rate is 1.2, and maximum borrow is
+          4000000 u/uumee, uToken exchange rate is 1.2, and maximum borrow is
           7000000 uumee, then a maximum of 2 additional UMEE is permitted to be
           collateralized.
       minimum_liquidity:
         type: string
         description: >-
-          Mimimum Liquidity is the minimum amount of liquidity in the module
+          Minimum Liquidity is the minimum amount of liquidity in the module
           required by safety limits, based on the current collateral. It is
           denominated in base tokens, so exponent must be applied to convert to
           symbol denom. For example, if liquidity is 9000000 uumee and minimum
@@ -2194,6 +2220,15 @@ definitions:
           negative availability means safety limits have been exceeded and
           additional collateral cannot be created until more liquidity is
           present.
+      oracle_historic_price:
+        type: string
+        description: >-
+          Oracle Historic Price is the historic USD value of a token. Historic
+          price is defined as the median of the last N historic median prices
+          from the oracle module, with N being this token's HistoricMedians in
+          the leverage registry. Current price is used if required medians is
+          zero. Price is nil when the oracle is down or insufficient historic
+          medians are available.
     description: >-
       QueryMarketSummaryResponse defines the response structure for the
       MarketSummary gRPC service handler.
@@ -2557,6 +2592,9 @@ definitions:
                 calculations
 
                 for the affected Token.
+
+                The time span covered by the historic median will be:
+                    oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
           description: >-
             Token defines a token, along with its metadata and parameters, in
             the Umee
@@ -2762,6 +2800,9 @@ definitions:
           calculations
 
           for the affected Token.
+
+          The time span covered by the historic median will be:
+              oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
     description: >-
       Token defines a token, along with its metadata and parameters, in the Umee
 
@@ -2899,6 +2940,23 @@ definitions:
           Maximum Median Stamps represents the maximum amount of medians the
           oracle module will store before pruning via FIFO.
     description: Params defines the parameters for the oracle module.
+  umee.oracle.v1.Price:
+    type: object
+    properties:
+      exchange_rate_tuple:
+        type: object
+        properties:
+          denom:
+            type: string
+          exchange_rate:
+            type: string
+        title: >-
+          ExchangeRateTuple - struct to store interpreted exchange rates data to
+          store
+      block_num:
+        type: string
+        format: uint64
+    title: Price is an instance of a price "stamp"
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
     properties:
@@ -2908,7 +2966,7 @@ definitions:
           type: string
         description: >-
           activeRates defines a list of the denomination which oracle prices
-          aggreed
+          agreed
 
           upon.
     description: |-
@@ -3079,15 +3137,20 @@ definitions:
         items:
           type: object
           properties:
-            denom:
+            exchange_rate_tuple:
+              type: object
+              properties:
+                denom:
+                  type: string
+                exchange_rate:
+                  type: string
+              title: >-
+                ExchangeRateTuple - struct to store interpreted exchange rates
+                data to store
+            block_num:
               type: string
-            amount:
-              type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+              format: uint64
+          title: Price is an instance of a price "stamp"
         description: >-
           medians defines a list of the median deviations for all stamped
           denoms.
@@ -3102,15 +3165,20 @@ definitions:
         items:
           type: object
           properties:
-            denom:
+            exchange_rate_tuple:
+              type: object
+              properties:
+                denom:
+                  type: string
+                exchange_rate:
+                  type: string
+              title: >-
+                ExchangeRateTuple - struct to store interpreted exchange rates
+                data to store
+            block_num:
               type: string
-            amount:
-              type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+              format: uint64
+          title: Price is an instance of a price "stamp"
         description: medians defines a list of the medians for all stamped denoms.
     description: |-
       QueryMediansResponse is response type for the

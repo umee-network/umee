@@ -22,7 +22,7 @@ import (
 )
 
 func TestKeeperTestSuite(t *testing.T) {
-	t.Skip("ibctransfer integration tests require futher investigation, currently it breaks on connection handshake")
+	t.Skip("ibctransfer integration tests require further investigation, currently it breaks on connection handshake")
 	suite.Run(t, new(KeeperTestSuite))
 }
 
@@ -214,7 +214,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 		denomTrace := ibctransfertypes.ParseDenomTrace(data.Denom)
 		ibcDenom := denomTrace.IBCDenom()
 
-		registerDenom := func() {
+		registeredenom := func() {
 			denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 			traceHash := denomTrace.Hash()
 			if !s.GetUmeeApp(s.chainB).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
@@ -222,7 +222,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 			}
 		}
 
-		registerDenom()
+		registeredenom()
 
 		amount, err := strconv.Atoi(data.Amount)
 		s.Require().NoError(err)

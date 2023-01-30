@@ -44,3 +44,12 @@ pull_request_rules:
       backport:
         branches:
           - release/price-feeder/v2.x.x
+
+  - name: Backport patches to the release/v4.0.x branch
+    conditions:
+      - base=main
+      - label=S:backport/v4.0.x
+    actions:
+      backport:
+        branches:
+          - release/v4.0.x

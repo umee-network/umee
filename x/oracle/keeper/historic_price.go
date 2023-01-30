@@ -12,14 +12,15 @@ import (
 )
 
 // HistoricMedians returns a list of a given denom's last numStamps medians.
+
 func (k Keeper) HistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) []sdk.Dec {
-	medians := []sdk.Dec{}
+) types.Prices {
+	medians := types.Prices{}
 
-	k.IterateHistoricMedians(ctx, denom, uint(numStamps), func(median sdk.Dec) bool {
+	k.IterateHistoricMedians(ctx, denom, uint(numStamps), func(median types.Price) bool {
 		medians = append(medians, median)
 		return false
 	})
@@ -61,18 +62,20 @@ func (k Keeper) SetHistoricMedian(
 func (k Keeper) HistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
-) (sdk.Dec, error) {
+) (*types.Price, error) {
 	store := ctx.KVStore(k.storeKey)
 	blockDiff := uint64(ctx.BlockHeight())%k.MedianStampPeriod(ctx) + 1
-	bz := store.Get(types.KeyMedianDeviation(denom, uint64(ctx.BlockHeight())-blockDiff))
+	blockNum := uint64(ctx.BlockHeight()) - blockDiff
+	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
 	if bz == nil {
-		return sdk.ZeroDec(), sdkerrors.Wrap(types.ErrNoMedianDeviation, fmt.Sprintf("denom: %s", denom))
+		return &types.Price{}, sdkerrors.Wrap(types.ErrNoMedianDeviation, fmt.Sprintf("denom: %s", denom))
 	}
 
 	decProto := sdk.DecProto{}
 	k.cdc.MustUnmarshal(bz, &decProto)
+	price := types.NewPrice(decProto.Dec, denom, blockNum)
 
-	return decProto.Dec, nil
+	return price, nil
 }
 
 // WithinHistoricMedianDeviation returns whether or not the current price of a
@@ -87,7 +90,7 @@ func (k Keeper) WithinHistoricMedianDeviation(
 	if len(medians) == 0 {
 		return false, sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s", denom))
 	}
-	median := medians[0]
+	median := medians[0].ExchangeRateTuple.ExchangeRate
 
 	// get latest historic price
 	prices := k.historicPrices(ctx, denom, 1)
@@ -101,7 +104,7 @@ func (k Keeper) WithinHistoricMedianDeviation(
 		return false, err
 	}
 
-	return price.Sub(median).Abs().LTE(medianDeviation), nil
+	return price.Sub(median).Abs().LTE(medianDeviation.ExchangeRateTuple.ExchangeRate), nil
 }
 
 // calcAndSetHistoricMedianDeviation calculates and sets a given denom's standard
@@ -145,7 +148,7 @@ func (k Keeper) MedianOfHistoricMedians(
 	if len(medians) == 0 {
 		return sdk.ZeroDec(), 0, nil
 	}
-	median, err := decmath.Median(medians)
+	median, err := decmath.Median(medians.Decs())
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -165,7 +168,7 @@ func (k Keeper) AverageOfHistoricMedians(
 	if len(medians) == 0 {
 		return sdk.ZeroDec(), 0, nil
 	}
-	average, err := decmath.Average(medians)
+	average, err := decmath.Average(medians.Decs())
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -185,7 +188,7 @@ func (k Keeper) MaxOfHistoricMedians(
 	if len(medians) == 0 {
 		return sdk.ZeroDec(), 0, nil
 	}
-	max, err := decmath.Max(medians)
+	max, err := decmath.Max(medians.Decs())
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -205,7 +208,7 @@ func (k Keeper) MinOfHistoricMedians(
 	if len(medians) == 0 {
 		return sdk.ZeroDec(), 0, nil
 	}
-	min, err := decmath.Min(medians)
+	min, err := decmath.Min(medians.Decs())
 	if err != nil {
 		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
 	}
@@ -262,7 +265,7 @@ func (k Keeper) IterateHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint,
-	handler func(sdk.Dec) bool,
+	handler func(types.Price) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 
@@ -272,9 +275,11 @@ func (k Keeper) IterateHistoricMedians(
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
+		denom, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		if handler(decProto.Dec) {
+		price := types.NewPrice(decProto.Dec, denom, block)
+		if handler(*price) {
 			break
 		}
 	}
@@ -289,6 +294,8 @@ func (k Keeper) AddHistoricPrice(
 ) {
 	block := uint64(ctx.BlockHeight())
 	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
+	ak := AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
+	ak.updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
 }
 
 func (k Keeper) SetHistoricPrice(
@@ -332,4 +339,31 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 ) {
 	store := ctx.KVStore(k.storeKey)
 	store.Delete(types.KeyMedianDeviation(denom, blockNum))
+}
+
+func (k Keeper) PruneHistoricPricesBeforeBlock(ctx sdk.Context, blockNum uint64) {
+	k.IterateAllHistoricPrices(ctx, func(price types.Price) (stop bool) {
+		if price.BlockNum <= blockNum {
+			k.DeleteHistoricPrice(ctx, price.ExchangeRateTuple.Denom, price.BlockNum)
+		}
+		return false
+	})
+}
+
+func (k Keeper) PruneMediansBeforeBlock(ctx sdk.Context, blockNum uint64) {
+	k.IterateAllMedianPrices(ctx, func(price types.Price) (stop bool) {
+		if price.BlockNum <= blockNum {
+			k.DeleteHistoricMedian(ctx, price.ExchangeRateTuple.Denom, price.BlockNum)
+		}
+		return false
+	})
+}
+
+func (k Keeper) PruneMedianDeviationsBeforeBlock(ctx sdk.Context, blockNum uint64) {
+	k.IterateAllMedianDeviationPrices(ctx, func(price types.Price) (stop bool) {
+		if price.BlockNum <= blockNum {
+			k.DeleteHistoricMedianDeviation(ctx, price.ExchangeRateTuple.Denom, price.BlockNum)
+		}
+		return false
+	})
 }

@@ -88,7 +88,7 @@ func (m migrator) migrate(ctx sdk.Context) error {
 		var err error
 		p.Messages[0], err = cdctypes.NewAnyWithValue(&newMsg)
 		if err != nil {
-			logger.Error("Cant pack ANY", err)
+			logger.Error("Can't pack ANY", err)
 		}
 		logger.Info("\n\nMIGRATING proposal:\n" + newMsg.String())
 		m.gov.SetProposal(ctx, *p)

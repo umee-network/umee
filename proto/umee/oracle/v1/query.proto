@@ -4,6 +4,7 @@ package umee.oracle.v1;
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "umee/oracle/v1/oracle.proto";
+import "umee/oracle/v1/genesis.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/oracle/types";
@@ -123,7 +124,7 @@ message QueryActiveExchangeRates {}
 // QueryActiveExchangeRatesResponse is response type for the
 // Query/ActiveExchangeRates RPC method.
 message QueryActiveExchangeRatesResponse {
-  // activeRates defines a list of the denomination which oracle prices aggreed
+  // activeRates defines a list of the denomination which oracle prices agreed
   // upon.
   repeated string active_rates = 1;
 }
@@ -261,10 +262,7 @@ message QueryMedians {
 // Query/Medians RPC method.
 message QueryMediansResponse {
   // medians defines a list of the medians for all stamped denoms.
-  repeated cosmos.base.v1beta1.DecCoin medians = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable)     = false
-  ];
+  repeated Price medians = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryMedianDeviations is the request type for the Query/MedianDeviations RPC Response.
@@ -279,8 +277,5 @@ message QueryMedianDeviations {
 // Query/MedianDeviations RPC method.
 message QueryMedianDeviationsResponse {
   // medians defines a list of the median deviations for all stamped denoms.
-  repeated cosmos.base.v1beta1.DecCoin medianDeviations = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable)     = false
-  ];
+  repeated Price medianDeviations = 1 [(gogoproto.nullable) = false];
 }
