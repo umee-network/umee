@@ -214,7 +214,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 		denomTrace := ibctransfertypes.ParseDenomTrace(data.Denom)
 		ibcDenom := denomTrace.IBCDenom()
 
-		registerDenom := func() {
+		registeredenom := func() {
 			denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 			traceHash := denomTrace.Hash()
 			if !s.GetUmeeApp(s.chainB).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
@@ -222,7 +222,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 			}
 		}
 
-		registerDenom()
+		registeredenom()
 
 		amount, err := strconv.Atoi(data.Amount)
 		s.Require().NoError(err)
