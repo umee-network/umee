@@ -126,15 +126,25 @@ func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) er
 func (p *OsmosisV2Provider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
+	tickerErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToOsmosisV2Pair(cp)
 		price, err := p.getTickerPrice(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
 		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
@@ -142,15 +152,25 @@ func (p *OsmosisV2Provider) GetTickerPrices(pairs ...types.CurrencyPair) (map[st
 func (p *OsmosisV2Provider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
+	candleErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToOsmosisV2Pair(cp)
 		prices, err := p.getCandlePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
 		candlePrices[cp.String()] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -162,7 +182,7 @@ func (p *OsmosisV2Provider) getTickerPrice(key string) (types.TickerPrice, error
 	if !ok {
 		return types.TickerPrice{}, fmt.Errorf(
 			types.ErrTickerNotFound.Error(),
-			ProviderOsmosisV2,
+			p.endpoints.Name,
 			key,
 		)
 	}
@@ -178,7 +198,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	if !ok {
 		return []types.CandlePrice{}, fmt.Errorf(
 			types.ErrCandleNotFound.Error(),
-			ProviderOsmosisV2,
+			p.endpoints.Name,
 			key,
 		)
 	}
