@@ -13,6 +13,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/umee-network/umee/v4/util"
 	ibctransfer "github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/client/cli"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
@@ -54,11 +55,9 @@ func (AppModuleBasic) Name() string {
 
 // RegisterGRPCGatewayRoutes implements module.AppModuleBasic
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	if err := ibctransfer.RegisterQueryHandlerClient(
-		context.Background(), mux, ibctransfer.NewQueryClient(clientCtx),
-	); err != nil {
-		panic(err)
-	}
+	err := ibctransfer.RegisterQueryHandlerClient(
+		context.Background(), mux, ibctransfer.NewQueryClient(clientCtx))
+	util.Panic(err)
 }
 
 // RegisterInterfaces implements module.AppModuleBasic

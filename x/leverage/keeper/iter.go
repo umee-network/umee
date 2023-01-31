@@ -4,6 +4,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -40,10 +41,7 @@ func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return badDebts
 }
@@ -64,10 +62,7 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 		return nil
 	}
 
-	err := k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator))
 
 	return tokens
 }
@@ -90,10 +85,7 @@ func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return reserves
 }
@@ -123,10 +115,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return totalBorrowed
 }
@@ -151,10 +140,7 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return totalCollateral
 }
@@ -262,10 +248,7 @@ func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
 		return nil
 	}
 
-	err := k.iterate(ctx, prefix, iterator)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(k.iterate(ctx, prefix, iterator))
 
 	return supplies
 }
