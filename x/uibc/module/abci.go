@@ -3,21 +3,18 @@ package uibc
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
 
 // BeginBlock implements BeginBlock for the x/uibc module.
 func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 	quotaExpires, err := keeper.GetExpire(ctx)
-	if err != nil {
-		panic(err)
-	}
+	util.Panic(err)
 
 	// reset quotas
 	if quotaExpires == nil || quotaExpires.Before(ctx.BlockTime()) {
-		if err := keeper.ResetQuota(ctx); err != nil {
-			panic(err)
-		}
+		util.Panic(keeper.ResetQuota(ctx))
 	}
 }
 

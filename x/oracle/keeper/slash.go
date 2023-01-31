@@ -11,19 +11,15 @@ import (
 // If the valid vote rate is below the minValidPerWindow, the validator will be
 // slashed and jailed.
 func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
-	height := ctx.BlockHeight()
-	distributionHeight := height - sdk.ValidatorUpdateDelay - 1
-
 	var (
+		height               = ctx.BlockHeight()
+		distributionHeight   = height - sdk.ValidatorUpdateDelay - 1
 		slashWindow          = int64(k.SlashWindow(ctx))
 		votePeriod           = int64(k.VotePeriod(ctx))
 		votePeriodsPerWindow = sdk.NewDec(slashWindow).QuoInt64(votePeriod).TruncateInt64()
-	)
-
-	var (
-		minValidPerWindow = k.MinValidPerWindow(ctx)
-		slashFraction     = k.SlashFraction(ctx)
-		powerReduction    = k.StakingKeeper.PowerReduction(ctx)
+		minValidPerWindow    = k.MinValidPerWindow(ctx)
+		slashFraction        = k.SlashFraction(ctx)
+		powerReduction       = k.StakingKeeper.PowerReduction(ctx)
 	)
 
 	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {

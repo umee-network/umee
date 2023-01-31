@@ -18,6 +18,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/oracle/client/cli"
 	"github.com/umee-network/umee/v4/x/oracle/keeper"
 	simulation "github.com/umee-network/umee/v4/x/oracle/simulations"
@@ -83,9 +84,8 @@ func (AppModuleBasic) RegisterRESTRoutes(client.Context, *mux.Router) {}
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/oracle
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
-		panic(err)
-	}
+	err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx))
+	util.Panic(err)
 }
 
 // GetTxCmd returns the x/oracle module's root tx command.
@@ -180,9 +180,8 @@ func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {}
 // EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	if err := EndBlocker(ctx, am.keeper); err != nil {
-		panic(err)
-	}
+	err := EndBlocker(ctx, am.keeper)
+	util.Panic(err)
 
 	return []abci.ValidatorUpdate{}
 }
