@@ -3,19 +3,26 @@
 
 package keeper_test
 
-import "github.com/umee-network/umee/v4/x/uibc"
+import (
+	"testing"
 
-func (s *KeeperTestSuite) TestInitGenesis() {
+	"github.com/umee-network/umee/v4/x/uibc"
+	"gotest.tools/v3/assert"
+)
+
+func TestInitGenesis(t *testing.T) {
+	s := initKeeperTestSuite(t)
 	app, ctx := s.app, s.ctx
 
 	defaultGs := uibc.DefaultGenesisState()
 
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)
 	params := app.UIbcQuotaKeeper.GetParams(ctx)
-	s.Require().Equal(params.IbcPause, defaultGs.Params.IbcPause)
+	assert.Equal(t, params.IbcPause, defaultGs.Params.IbcPause)
 }
 
-func (s *KeeperTestSuite) TestExportGenesis() {
+func TestExportGenesis(t *testing.T) {
+	s := initKeeperTestSuite(t)
 	app, ctx := s.app, s.ctx
 
 	defaultGs := uibc.DefaultGenesisState()
@@ -23,12 +30,12 @@ func (s *KeeperTestSuite) TestExportGenesis() {
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)
 
 	eGs := app.UIbcQuotaKeeper.ExportGenesis(ctx)
-	s.Require().Equal(eGs, defaultGs)
+	assert.DeepEqual(t, eGs, defaultGs)
 
 	// update params in genesis state
 	defaultGs.Params.IbcPause = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)
 
 	eGs = app.UIbcQuotaKeeper.ExportGenesis(ctx)
-	s.Require().Equal(eGs.Params.IbcPause, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED)
+	assert.Equal(t, eGs.Params.IbcPause, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED)
 }

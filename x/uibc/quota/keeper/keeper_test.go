@@ -13,10 +13,10 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/staking/teststaking"
-	"github.com/stretchr/testify/suite"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
@@ -49,18 +49,16 @@ var (
 )
 
 type KeeperTestSuite struct {
-	suite.Suite
-
 	ctx         sdk.Context
 	app         *umeeapp.UmeeApp
 	queryClient uibc.QueryClient
 	msgServer   uibc.MsgServer
 }
 
-func (s *KeeperTestSuite) SetupTest() {
-	require := s.Require()
+func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+	s := &KeeperTestSuite{}
 	isCheckTx := false
-	app := umeeapp.Setup(s.T())
+	app := umeeapp.Setup(t)
 	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  9,
@@ -69,15 +67,15 @@ func (s *KeeperTestSuite) SetupTest() {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	uibc.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.UIbcQuotaKeeper))
 
-	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
+	sh := teststaking.NewHelper(t, ctx, *app.StakingKeeper)
 	sh.Denom = bondDenom
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
 	// mint and send coins to validators
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
-	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
+	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
+	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
@@ -88,8 +86,6 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.ctx = ctx
 	s.queryClient = uibc.NewQueryClient(queryHelper)
 	s.msgServer = keeper.NewMsgServerImpl(app.UIbcQuotaKeeper)
-}
 
-func TestKeeperTestSuite(t *testing.T) {
-	suite.Run(t, new(KeeperTestSuite))
+	return s
 }

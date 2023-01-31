@@ -3,59 +3,70 @@
 
 package keeper_test
 
-import "github.com/umee-network/umee/v4/x/uibc"
+import (
+	"testing"
 
-func (suite *KeeperTestSuite) TestGRPCQueryParams() {
-	ctx, client := suite.ctx, suite.queryClient
+	"github.com/umee-network/umee/v4/x/uibc"
+	"gotest.tools/v3/assert"
+)
+
+func TestGRPCQueryParams(t *testing.T) {
+	s := initKeeperTestSuite(t)
+	ctx, client := s.ctx, s.queryClient
 	tests := []struct {
 		name        string
 		req         uibc.QueryParams
 		errExpected bool
+		errMsg      string
 	}{
 		{
 			name:        "valid",
 			req:         uibc.QueryParams{},
 			errExpected: false,
+			errMsg:      "",
 		},
 	}
 
 	for _, tc := range tests {
-		paramsResp, err := client.Params(ctx, &tc.req)
+		_, err := client.Params(ctx, &tc.req)
 		if tc.errExpected {
-			suite.Require().Error(err)
+			assert.Error(t, err, tc.errMsg)
 		} else {
-			suite.Require().NoError(err)
-			suite.Require().NotNil(paramsResp.Params)
+			assert.NilError(t, err)
 		}
 	}
 }
 
-func (suite *KeeperTestSuite) TestGRPCGetQuota() {
+func TestGRPCGetQuota(t *testing.T) {
+	suite := initKeeperTestSuite(t)
 	ctx, client := suite.ctx, suite.queryClient
 	tests := []struct {
 		name        string
 		req         uibc.QueryQuota
 		errExpected bool
+		errMsg      string
 	}{
 		{
 			name:        "valid",
 			req:         uibc.QueryQuota{},
 			errExpected: false,
+			errMsg:      "",
 		},
 		{
 			name:        "valid req <error expected due to ibc-transfer not hapeen>",
 			req:         uibc.QueryQuota{Denom: "umee"},
 			errExpected: true,
+			errMsg:      "no quota for ibc denom",
 		},
 	}
 
 	for _, tc := range tests {
-		suite.Run(tc.name, func() {
+		t.Run(tc.name, func(t *testing.T) {
 			_, err := client.Quota(ctx, &tc.req)
 			if tc.errExpected {
-				suite.Require().Error(err)
+				assert.Error(t, err, tc.errMsg)
 			} else {
-				suite.Require().NoError(err)
+				assert.NilError(t, err)
 			}
 		})
 	}

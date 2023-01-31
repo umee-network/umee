@@ -4,21 +4,24 @@
 package keeper_test
 
 import (
+	"testing"
+
 	"github.com/umee-network/umee/v4/x/uibc"
+	"gotest.tools/v3/assert"
 )
 
-func (s *KeeperTestSuite) TestParams() {
+func TestParams(t *testing.T) {
+	s := initKeeperTestSuite(t)
 	app, ctx := s.app, s.ctx
-
 	params := app.UIbcQuotaKeeper.GetParams(ctx)
 	defaultParams := uibc.DefaultParams()
-	s.Require().Equal(params, defaultParams)
+	assert.DeepEqual(t, params, defaultParams)
 
 	// update params
 	params.IbcPause = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED
 	err := app.UIbcQuotaKeeper.SetParams(ctx, params)
-	s.Require().NoError(err)
+	assert.NilError(t, err)
 	// check the update param
 	params = app.UIbcQuotaKeeper.GetParams(ctx)
-	s.Require().Equal(params.IbcPause, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED)
+	assert.Equal(t, params.IbcPause, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED)
 }
