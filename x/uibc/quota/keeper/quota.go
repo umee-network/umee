@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	prefixsore "github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
@@ -115,14 +116,14 @@ func (k Keeper) ResetQuota(ctx sdk.Context) error {
 		return err
 	}
 	k.SetTotalOutflowSum(ctx, zero)
-
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, uibc.KeyPrefixDenomQuota)
+	store = prefixsore.NewStore(store, uibc.KeyPrefixDenomQuota)
+	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		ibcDenom := uibc.DenomFromKeyTotalOutflows(iter.Key())
-		q := uibc.Quota{IbcDenom: ibcDenom, OutflowSum: zero}
-		store.Set(uibc.KeyTotalOutflows(ibcDenom), k.cdc.MustMarshal(&q))
+		ibcDenom := iter.Key()
+		q := uibc.Quota{IbcDenom: string(ibcDenom), OutflowSum: zero}
+		store.Set(ibcDenom, k.cdc.MustMarshal(&q))
 	}
 	return nil
 }
