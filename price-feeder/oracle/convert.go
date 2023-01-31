@@ -49,7 +49,7 @@ func ConvertCandlesToUSD(
 	}
 
 	conversionRates := make(map[string]sdk.Dec)
-	requiredConversions := make(map[provider.Name]types.CurrencyPair)
+	requiredConversions := make(map[provider.Name][]types.CurrencyPair)
 
 	for pairProviderName, pairs := range providerPairs {
 		for _, pair := range pairs {
@@ -103,23 +103,25 @@ func ConvertCandlesToUSD(
 				}
 
 				conversionRates[pair.Quote] = cvRate
-				requiredConversions[pairProviderName] = pair
+				requiredConversions[pairProviderName] = append(requiredConversions[pairProviderName], pair)
 			}
 		}
 	}
 
 	// Convert assets to USD.
 	for provider, assetMap := range candles {
-		conversionRate, ok := conversionRates[requiredConversions[provider].Quote]
-		if !ok {
-			continue
-		}
-		for asset, assetCandles := range assetMap {
-			if requiredConversions[provider].Base == asset {
-				for i := range assetCandles {
-					assetCandles[i].Price = assetCandles[i].Price.Mul(
-						conversionRate,
-					)
+		for _, requiredConversion := range requiredConversions[provider] {
+			conversionRate, ok := conversionRates[requiredConversion.Quote]
+			if !ok {
+				continue
+			}
+			for asset, assetCandles := range assetMap {
+				if requiredConversion.Base == asset {
+					for i := range assetCandles {
+						assetCandles[i].Price = assetCandles[i].Price.Mul(
+							conversionRate,
+						)
+					}
 				}
 			}
 		}
