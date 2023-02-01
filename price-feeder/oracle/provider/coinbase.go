@@ -35,7 +35,7 @@ type (
 	//
 	// REF: https://www.coinbase.io/docs/websocket/index.html
 	CoinbaseProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex

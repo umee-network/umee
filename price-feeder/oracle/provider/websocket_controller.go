@@ -25,9 +25,14 @@ const (
 type (
 	MessageHandler func(int, []byte)
 
-	// WebsocketController defines a provider agnostic websocket handler
+	WebsocketController interface {
+		AddSubscriptionMsgs([]interface{}) error
+		Start()
+	}
+
+	// SingleSocket defines a provider agnostic websocket handler
 	// that manages reconnecting, subscribing, and receiving messages
-	WebsocketController struct {
+	SingleSocket struct {
 		parentCtx           context.Context
 		websocketCtx        context.Context
 		websocketCancelFunc context.CancelFunc
@@ -45,7 +50,7 @@ type (
 	}
 )
 
-// NewWebsocketController does nothing except initialize a new WebsocketController
+// NewWebsocketController does nothing except initialize a new SingleSocket
 // and provider a reminder for what fields need to be passed in.
 func NewWebsocketController(
 	ctx context.Context,
@@ -56,8 +61,8 @@ func NewWebsocketController(
 	pingDuration time.Duration,
 	pingMessageType uint,
 	logger zerolog.Logger,
-) *WebsocketController {
-	return &WebsocketController{
+) *SingleSocket {
+	return &SingleSocket{
 		parentCtx:        ctx,
 		providerName:     providerName,
 		websocketURL:     websocketURL,
@@ -73,7 +78,7 @@ func NewWebsocketController(
 // until a successful connection is made. It then starts the ping
 // service and read listener in new go routines and sends subscription
 // messages  using the passed in subscription messages
-func (wsc *WebsocketController) Start() {
+func (wsc *SingleSocket) Start() {
 	connectTicker := time.NewTicker(time.Millisecond)
 	defer connectTicker.Stop()
 
@@ -102,7 +107,7 @@ func (wsc *WebsocketController) Start() {
 }
 
 // connect dials the websocket and sets the client to the established connection
-func (wsc *WebsocketController) connect() error {
+func (wsc *SingleSocket) connect() error {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
 
@@ -119,7 +124,7 @@ func (wsc *WebsocketController) connect() error {
 	return nil
 }
 
-func (wsc *WebsocketController) iterateRetryCounter() time.Duration {
+func (wsc *SingleSocket) iterateRetryCounter() time.Duration {
 	if wsc.reconnectCounter < 25 {
 		wsc.reconnectCounter++
 	}
@@ -127,8 +132,8 @@ func (wsc *WebsocketController) iterateRetryCounter() time.Duration {
 	return startingReconnectDuration * time.Duration(multiplier)
 }
 
-// subscribe sends the WebsocketControllers subscription messages to the websocket
-func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
+// subscribe sends the SingleSockets subscription messages to the websocket
+func (wsc *SingleSocket) subscribe(msgs []interface{}) error {
 	telemetryWebsocketSubscribeCurrencyPairs(wsc.providerName, len(wsc.subscriptionMsgs))
 	for _, jsonMessage := range msgs {
 		if err := wsc.SendJSON(jsonMessage); err != nil {
@@ -141,7 +146,7 @@ func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
 
 // AddSubscriptionMsgs immediately sends the new subscription messages and
 // adds them to the subscriptionMsgs array if successful
-func (wsc *WebsocketController) AddSubscriptionMsgs(msgs []interface{}) error {
+func (wsc *SingleSocket) AddSubscriptionMsgs(msgs []interface{}) error {
 	err := wsc.subscribe(msgs)
 	if err != nil {
 		return err
@@ -152,7 +157,7 @@ func (wsc *WebsocketController) AddSubscriptionMsgs(msgs []interface{}) error {
 
 // SendJSON sends a json message to the websocket connection using the Websocket
 // Controller mutex to ensure multiple writes do not happen at once
-func (wsc *WebsocketController) SendJSON(msg interface{}) error {
+func (wsc *SingleSocket) SendJSON(msg interface{}) error {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
 
@@ -167,7 +172,7 @@ func (wsc *WebsocketController) SendJSON(msg interface{}) error {
 }
 
 // ping sends a ping to the server every defaultPingDuration
-func (wsc *WebsocketController) pingLoop() {
+func (wsc *SingleSocket) pingLoop() {
 	if wsc.pingDuration == disabledPingDuration {
 		return // disable ping loop if disabledPingDuration
 	}
@@ -188,7 +193,7 @@ func (wsc *WebsocketController) pingLoop() {
 	}
 }
 
-func (wsc *WebsocketController) ping() error {
+func (wsc *SingleSocket) ping() error {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
 
@@ -207,7 +212,7 @@ func (wsc *WebsocketController) ping() error {
 // terminates and starts the reconnect process.
 // Some providers (Binance) will only allow a valid connection for 24 hours
 // so we manually disconnect and reconnect every 23 hours (defaultMaxConnectionTime)
-func (wsc *WebsocketController) readWebSocket() {
+func (wsc *SingleSocket) readWebSocket() {
 	reconnectTicker := time.NewTicker(defaultMaxConnectionTime)
 	defer reconnectTicker.Stop()
 
@@ -231,7 +236,7 @@ func (wsc *WebsocketController) readWebSocket() {
 	}
 }
 
-func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
+func (wsc *SingleSocket) readSuccess(messageType int, bz []byte) {
 	if len(bz) == 0 {
 		return
 	}
@@ -243,7 +248,7 @@ func (wsc *WebsocketController) readSuccess(messageType int, bz []byte) {
 }
 
 // close sends a close message to the websocket and sets the client to nil
-func (wsc *WebsocketController) close() {
+func (wsc *SingleSocket) close() {
 	wsc.mtx.Lock()
 	defer wsc.mtx.Unlock()
 
@@ -256,7 +261,7 @@ func (wsc *WebsocketController) close() {
 }
 
 // reconnect closes the current websocket and starts a new connection process
-func (wsc *WebsocketController) reconnect() {
+func (wsc *SingleSocket) reconnect() {
 	wsc.close()
 	go wsc.Start()
 	telemetryWebsocketReconnect(wsc.providerName)
@@ -264,7 +269,7 @@ func (wsc *WebsocketController) reconnect() {
 
 // pingHandler is called by the websocket library whenever a ping message is received
 // and responds with a pong message to the server
-func (wsc *WebsocketController) pingHandler(string) error {
+func (wsc *SingleSocket) pingHandler(string) error {
 	if err := wsc.client.WriteMessage(websocket.PongMessage, []byte("pong")); err != nil {
 		wsc.logger.Error().Err(err).Msg("error sending pong")
 	}

@@ -32,7 +32,7 @@ type (
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#individual-symbol-mini-ticker-stream
 	// REF: https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-streams
 	BinanceProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint

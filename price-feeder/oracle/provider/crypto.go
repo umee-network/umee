@@ -37,7 +37,7 @@ type (
 	//
 	// REF: https://exchange-docs.crypto.com/spot/index.html#introduction
 	CryptoProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint

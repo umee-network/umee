@@ -36,7 +36,7 @@ type (
 	// REF: https://huobiapi.github.io/docs/spot/v1/en/#market-ticker
 	// REF: https://huobiapi.github.io/docs/spot/v1/en/#get-klines-candles
 	HuobiProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint

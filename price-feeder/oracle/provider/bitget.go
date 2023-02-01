@@ -35,7 +35,7 @@ type (
 	// REF: https://bitgetlimited.github.io/apidoc/en/spot/#tickers-channel
 	// REF: https://bitgetlimited.github.io/apidoc/en/spot/#candlesticks-channel
 	BitgetProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint

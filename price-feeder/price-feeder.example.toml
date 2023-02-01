@@ -160,6 +160,7 @@ quote = "USD"
 base = "JUNO"
 providers = [
   "bitget",
+  "mexc",
 ]
 quote = "USDT"
 

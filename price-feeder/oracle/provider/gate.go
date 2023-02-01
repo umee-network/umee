@@ -32,7 +32,7 @@ type (
 	//
 	// REF: https://www.gate.io/docs/websocket/index.html
 	GateProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		reconnectTimer  *time.Ticker
 		mtx             sync.RWMutex

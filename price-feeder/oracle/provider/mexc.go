@@ -33,7 +33,7 @@ type (
 	// REF: https://mxcdevelop.github.io/apidocs/spot_v2_en/#k-line
 	// REF: https://mxcdevelop.github.io/apidocs/spot_v2_en/#overview
 	MexcProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint
@@ -113,7 +113,7 @@ func NewMexcProvider(
 
 	provider.setSubscribedPairs(pairs...)
 
-	provider.wsc = NewWebsocketController(
+	provider.wsc = NewMultiSocket(
 		ctx,
 		ProviderMexc,
 		wsURL,
@@ -123,8 +123,6 @@ func NewMexcProvider(
 		websocket.PingMessage,
 		mexcLogger,
 	)
-	go provider.wsc.Start()
-
 	return provider, nil
 }
 
