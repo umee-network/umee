@@ -134,6 +134,7 @@ func (wsc *WebsocketController) subscribe(msgs []interface{}) error {
 		if err := wsc.SendJSON(jsonMessage); err != nil {
 			return fmt.Errorf(types.ErrWebsocketSend.Error(), wsc.providerName, err)
 		}
+		time.Sleep(1 * time.Second) // avoid hitting provider send limit
 	}
 	return nil
 }
