@@ -373,5 +373,5 @@ func (p *OsmosisV2Provider) GetAvailablePairs() (map[string]struct{}, error) {
 // currencyPairToOsmosisV2Pair receives a currency pair and return osmosisv2
 // ticker symbol atomusdt@ticker.
 func currencyPairToOsmosisV2Pair(cp types.CurrencyPair) string {
-	return strings.ToUpper(cp.Base + "/" + cp.Quote)
+	return cp.Base + "/" + cp.Quote
 }
