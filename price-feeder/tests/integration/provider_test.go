@@ -2,6 +2,7 @@ package integration
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/umee-network/umee/price-feeder/v2/config"
 	"github.com/umee-network/umee/price-feeder/v2/oracle"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
@@ -35,6 +37,13 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 	}
 
 	testCases := ProviderAndCurrencyPairsFixture
+	// parse config file for providers
+
+	cfg, err := config.ParseConfig("../../price-feeder.example.toml")
+	require.NoError(s.T(), err)
+
+	fmt.Printf("%+v\n", cfg)
+
 	for _, testCase := range testCases {
 		tc := testCase
 		s.T().Run(string(tc.provider), func(t *testing.T) {
