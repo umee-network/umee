@@ -32,7 +32,7 @@ func NewKeeper(
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 	enableLiquidatorQuery bool,
-) (Keeper, error) {
+) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
 		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
@@ -45,7 +45,7 @@ func NewKeeper(
 		bankKeeper:             bk,
 		oracleKeeper:           ok,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
-	}, nil
+	}
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {

@@ -28,7 +28,7 @@ func NewTestKeeper(
 	ok types.OracleKeeper,
 	enableLiquidatorQuery bool,
 ) (Keeper, TestKeeper) {
-	k, err := NewKeeper(
+	k := NewKeeper(
 		cdc,
 		storeKey,
 		paramSpace,
@@ -36,7 +36,6 @@ func NewTestKeeper(
 		ok,
 		enableLiquidatorQuery,
 	)
-	require.NoError(err)
 	return k, TestKeeper{&k}
 }
 
