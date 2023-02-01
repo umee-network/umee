@@ -164,7 +164,7 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 	oracle := oracle.New(
 		logger,
 		oracleClient,
-		cfg.CurrencyPairs,
+		cfg.ProviderPairs(),
 		providerTimeout,
 		deviations,
 		endpoints,
