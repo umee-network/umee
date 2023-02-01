@@ -16,7 +16,6 @@ func TestParams(t *testing.T) {
 	params := app.UIbcQuotaKeeper.GetParams(ctx)
 	defaultParams := uibc.DefaultParams()
 	assert.DeepEqual(t, params, defaultParams)
-
 	// update params
 	params.IbcPause = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED
 	err := app.UIbcQuotaKeeper.SetParams(ctx, params)

@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestGenesisValidation(t *testing.T) {

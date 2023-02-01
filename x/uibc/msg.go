@@ -2,7 +2,6 @@ package uibc
 
 import (
 	"encoding/json"
-	time "time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -14,18 +13,6 @@ var (
 	_ sdk.Msg = &MsgGovUpdateQuota{}
 	_ sdk.Msg = &MsgGovSetIBCPause{}
 )
-
-func NewMsgGovUpdateQuota(authority, title, description string, total, perDenom sdk.Dec, qd time.Duration,
-) *MsgGovUpdateQuota {
-	return &MsgGovUpdateQuota{
-		Title:         title,
-		Description:   description,
-		Authority:     authority,
-		Total:         total,
-		PerDenom:      perDenom,
-		QuotaDuration: qd,
-	}
-}
 
 // GetTitle returns the title of the proposal.
 func (msg *MsgGovUpdateQuota) GetTitle() string { return msg.Title }

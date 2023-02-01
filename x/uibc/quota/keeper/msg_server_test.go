@@ -15,17 +15,17 @@ import (
 )
 
 func TestMsgServer_GovUpdateQuota(t *testing.T) {
+	t.Parallel()
 	s := initKeeperTestSuite(t)
 	ctx := s.ctx
 
 	tests := []struct {
-		name        string
-		msg         uibc.MsgGovUpdateQuota
-		errExpected bool
-		errMsg      string
+		name   string
+		msg    uibc.MsgGovUpdateQuota
+		errMsg string
 	}{
 		{
-			name: "invlaid authority address in msg",
+			name: "invalid authority address in msg",
 			msg: uibc.MsgGovUpdateQuota{
 				Title:       "title",
 				Description: "desc",
@@ -33,10 +33,8 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 				Total:       sdk.NewDec(10),
 				PerDenom:    sdk.NewDec(1),
 			},
-			errExpected: true,
-			errMsg:      "expected gov account as only signer for proposal message",
-		},
-		{
+			errMsg: "expected gov account as only signer for proposal message",
+		}, {
 			name: "invalid quota in msg",
 			msg: uibc.MsgGovUpdateQuota{
 				Title:         "title",
@@ -46,11 +44,9 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 				PerDenom:      sdk.NewDec(1000),
 				Total:         sdk.NewDec(100),
 			},
-			errExpected: true,
-			errMsg:      "total quota must be greater than or equal to per_denom quota",
-		},
-		{
-			name: "valid in msg",
+			errMsg: "total quota must be greater than or equal to per_denom quota",
+		}, {
+			name: "valid msg",
 			msg: uibc.MsgGovUpdateQuota{
 				Title:         "title",
 				Description:   "desc",
@@ -59,50 +55,60 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 				PerDenom:      sdk.NewDec(1000),
 				Total:         sdk.NewDec(10000),
 			},
-			errExpected: false,
+			errMsg: "",
+		},
+		{
+			name: "valid msg with new update <update the new params again>",
+			msg: uibc.MsgGovUpdateQuota{
+				Title:         "override new params",
+				Description:   "desc",
+				Authority:     authtypes.NewModuleAddress("gov").String(),
+				QuotaDuration: time.Duration(time.Minute * 1000),
+				PerDenom:      sdk.NewDec(10000),
+				Total:         sdk.NewDec(100000),
+			},
+			errMsg: "",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := s.msgServer.GovUpdateQuota(ctx, &tc.msg)
-			if tc.errExpected {
-				assert.ErrorContains(t, err, tc.errMsg)
-			} else {
+			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				// check the update quota params
 				paramsRes, err := s.queryClient.Params(ctx, &uibc.QueryParams{})
 				assert.NilError(t, err)
 				assert.Equal(t, paramsRes.Params.QuotaDuration, tc.msg.QuotaDuration)
-				assert.Equal(t, true, paramsRes.Params.TokenQuota.Equal(tc.msg.PerDenom))
-				assert.Equal(t, true, paramsRes.Params.TotalQuota.Equal(tc.msg.Total))
+				assert.DeepEqual(t, paramsRes.Params.TokenQuota, tc.msg.PerDenom)
+				assert.DeepEqual(t, paramsRes.Params.TotalQuota, tc.msg.Total)
+			} else {
+				assert.ErrorContains(t, err, tc.errMsg)
 			}
 		})
 	}
 }
 
 func TestMsgServer_GovSetIBCPause(t *testing.T) {
+	t.Parallel()
 	s := initKeeperTestSuite(t)
 	ctx := s.ctx
 
 	tests := []struct {
-		name        string
-		msg         uibc.MsgGovSetIBCPause
-		errExpected bool
-		errMsg      string
+		name   string
+		msg    uibc.MsgGovSetIBCPause
+		errMsg string
 	}{
 		{
-			name: "invlaid authority address in msg",
+			name: "invalid authority address in msg",
 			msg: uibc.MsgGovSetIBCPause{
 				Title:          "title",
 				Description:    "desc",
 				Authority:      authtypes.NewModuleAddress("govv").String(),
 				IbcPauseStatus: 1,
 			},
-			errExpected: true,
-			errMsg:      "expected gov account as only signer for proposal message",
-		},
-		{
+			errMsg: "expected gov account as only signer for proposal message",
+		}, {
 			name: "invalid ibc-transfer status in msg",
 			msg: uibc.MsgGovSetIBCPause{
 				Title:          "title",
@@ -110,10 +116,8 @@ func TestMsgServer_GovSetIBCPause(t *testing.T) {
 				Authority:      authtypes.NewModuleAddress("gov").String(),
 				IbcPauseStatus: 5,
 			},
-			errExpected: true,
-			errMsg:      "invalid ibc-transfer status",
-		},
-		{
+			errMsg: "invalid ibc-transfer status",
+		}, {
 			name: "valid in msg <enable the ibc-transfer pause",
 			msg: uibc.MsgGovSetIBCPause{
 				Title:          "title",
@@ -121,21 +125,21 @@ func TestMsgServer_GovSetIBCPause(t *testing.T) {
 				Authority:      authtypes.NewModuleAddress("gov").String(),
 				IbcPauseStatus: 2,
 			},
-			errExpected: false,
+			errMsg: "",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			_, err := s.msgServer.GovSetIBCPause(ctx, &tc.msg)
-			if tc.errExpected {
-				assert.ErrorContains(t, err, tc.errMsg)
-			} else {
+			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				// check the update ibc-transfer pause status
 				params, err := s.queryClient.Params(ctx, &uibc.QueryParams{})
 				assert.NilError(t, err)
 				assert.Equal(t, params.Params.IbcPause, tc.msg.IbcPauseStatus)
+			} else {
+				assert.ErrorContains(t, err, tc.errMsg)
 			}
 		})
 	}

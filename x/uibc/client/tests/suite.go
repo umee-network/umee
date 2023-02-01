@@ -1,38 +1,28 @@
-//go:build experimental
-// +build experimental
-
 package tests
 
 import (
+	"testing"
+
 	"github.com/cosmos/cosmos-sdk/testutil/network"
-	"github.com/stretchr/testify/suite"
+	"gotest.tools/v3/assert"
 )
 
 type IntegrationTestSuite struct {
-	suite.Suite
-
 	cfg     network.Config
 	network *network.Network
 }
 
-func NewIntegrationTestSuite(cfg network.Config) *IntegrationTestSuite {
-	return &IntegrationTestSuite{cfg: cfg}
-}
-
-func (s *IntegrationTestSuite) SetupSuite() {
-	t := s.T()
-	t.Log("setting up integration test suite")
-
+func initIntegrationTestSuite(cfg network.Config, t *testing.T) *IntegrationTestSuite {
 	var err error
-	s.network, err = network.New(t, t.TempDir(), s.cfg)
-	s.Require().NoError(err)
-
-	_, err = s.network.WaitForHeight(1)
-	s.Require().NoError(err)
+	t.Log("setting up integration test suite")
+	network, err := network.New(t, t.TempDir(), cfg)
+	assert.NilError(t, err)
+	_, err = network.WaitForHeight(1)
+	assert.NilError(t, err)
+	return &IntegrationTestSuite{cfg: cfg, network: network}
 }
 
-func (s *IntegrationTestSuite) TearDownSuite() {
-	s.T().Log("tearing down integration test suite")
-
+func tearDownSuite(s *IntegrationTestSuite, t *testing.T) {
+	t.Log("tearing down integration test suite")
 	s.network.Cleanup()
 }

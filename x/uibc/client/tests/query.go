@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package tests
 
 import (
@@ -9,12 +6,13 @@ import (
 
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/client/cli"
 )
 
-func (s *IntegrationTestSuite) TestQueryParams() {
+func (s *IntegrationTestSuite) TestQueryParams(t *testing.T) {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 
@@ -22,21 +20,21 @@ func (s *IntegrationTestSuite) TestQueryParams() {
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
 	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), args)
-	s.Require().NoError(err)
+	assert.NilError(t, err)
 
 	var res uibc.QueryParamsResponse
-	s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-	s.Require().NotEmpty(res.Params)
+	assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
+	assert.DeepEqual(t, res.Params, uibc.DefaultParams())
 }
 
-func (s *IntegrationTestSuite) TestGetQuota() {
+func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 	val := s.network.Validators[0]
 	clientCtx := val.ClientCtx
 
 	tests := []struct {
 		name        string
 		args        []string
-		errExpected bool
+		errMsg      string
 		noOfRecords int
 	}{
 		{
@@ -44,8 +42,8 @@ func (s *IntegrationTestSuite) TestGetQuota() {
 			args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			errExpected: false,
-			noOfRecords: 0,
+			errMsg:      "",
+			noOfRecords: 1,
 		},
 		{
 			name: "Get ibc-transfer quota of denom umee",
@@ -53,20 +51,29 @@ func (s *IntegrationTestSuite) TestGetQuota() {
 				"uumee",
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			errExpected: true,
+			errMsg:      "",
+			noOfRecords: 1,
+		},
+		{
+			name: "Get ibc-transfer quota of dummy denom ",
+			args: []string{
+				"dummy",
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			},
+			errMsg:      "no quota for ibc denom",
 			noOfRecords: 0,
 		},
 	}
 
 	for _, tc := range tests {
-		s.T().Run(tc.name, func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetQuota(), tc.args)
-			if tc.errExpected {
-				s.Require().Error(err)
-			} else {
+			if tc.errMsg == "" {
 				var res uibc.QueryQuotaResponse
-				s.Require().NoError(clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-				s.Require().Equal(len(res.Quota), tc.noOfRecords)
+				assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
+				assert.Equal(t, len(res.Quota), tc.noOfRecords)
+			} else {
+				assert.ErrorContains(t, err, tc.errMsg)
 			}
 		})
 	}

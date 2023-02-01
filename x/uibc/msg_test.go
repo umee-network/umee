@@ -2,54 +2,50 @@ package uibc
 
 import (
 	"testing"
-	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 func TestMsgGovUpdateQuota(t *testing.T) {
 	tests := []struct {
-		name          string
-		title         string
-		authority     string
-		description   string
-		total         sdk.Dec
-		perDenom      sdk.Dec
-		quotaDuration time.Duration
-		errExpected   bool
+		name   string
+		msg    MsgGovUpdateQuota
+		errMsg string
 	}{
 		{
-			name:          "valid msg",
-			title:         "update quota",
-			authority:     authtypes.NewModuleAddress("gov").String(),
-			description:   "desc",
-			total:         sdk.MustNewDecFromStr("1000"),
-			perDenom:      sdk.MustNewDecFromStr("1000"),
-			quotaDuration: 100,
-			errExpected:   false,
-		},
-		{
-			name:          "invalid authority address in msg",
-			title:         "update quota",
-			authority:     authtypes.NewModuleAddress("govv").String(),
-			description:   "desc",
-			total:         sdk.MustNewDecFromStr("1000"),
-			perDenom:      sdk.MustNewDecFromStr("1000"),
-			quotaDuration: 100,
-			errExpected:   true,
+			name: "valid msg",
+			msg: MsgGovUpdateQuota{
+				Title:         "update quota",
+				Authority:     authtypes.NewModuleAddress("gov").String(),
+				Description:   "desc",
+				Total:         sdk.MustNewDecFromStr("1000"),
+				PerDenom:      sdk.MustNewDecFromStr("1000"),
+				QuotaDuration: 100,
+			},
+			errMsg: "",
+		}, {
+			name: "invalid authority address in msg",
+			msg: MsgGovUpdateQuota{
+				Title:         "update quota",
+				Authority:     authtypes.NewModuleAddress("govv").String(),
+				Description:   "desc",
+				Total:         sdk.MustNewDecFromStr("1000"),
+				PerDenom:      sdk.MustNewDecFromStr("1000"),
+				QuotaDuration: 100,
+			},
+			errMsg: "invalid authority",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			m := NewMsgGovUpdateQuota(tc.authority, tc.title, tc.description, tc.total, tc.perDenom, tc.quotaDuration)
-			err := m.ValidateBasic()
-			if tc.errExpected {
-				assert.ErrorContains(t, err, "invalid authority")
-			} else {
+			err := tc.msg.ValidateBasic()
+			if tc.errMsg == "" {
 				assert.NilError(t, err)
+			} else {
+				assert.ErrorContains(t, err, tc.errMsg)
 			}
 		})
 	}
@@ -57,39 +53,38 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 
 func TestMsgGovSetIBCPause(t *testing.T) {
 	tests := []struct {
-		name           string
-		title          string
-		authority      string
-		description    string
-		IbcPauseStatus IBCTransferStatus
-		errExpected    bool
+		msg    MsgGovSetIBCPause
+		name   string
+		errMsg string
 	}{
 		{
-			name:           "valid msg",
-			title:          "title",
-			authority:      authtypes.NewModuleAddress("gov").String(),
-			description:    "desc",
-			IbcPauseStatus: 1,
-			errExpected:    false,
-		},
-		{
-			name:           "invalid authority address in msg",
-			title:          "title",
-			authority:      authtypes.NewModuleAddress("govv").String(),
-			description:    "desc",
-			IbcPauseStatus: 1,
-			errExpected:    true,
+			msg: MsgGovSetIBCPause{
+				Title:          "title",
+				Authority:      authtypes.NewModuleAddress("gov").String(),
+				Description:    "desc",
+				IbcPauseStatus: 1,
+			},
+			name:   "valid msg",
+			errMsg: "",
+		}, {
+			name: "invalid authority address in msg",
+			msg: MsgGovSetIBCPause{
+				Title:          "title",
+				Authority:      authtypes.NewModuleAddress("govv").String(),
+				Description:    "desc",
+				IbcPauseStatus: 1,
+			},
+			errMsg: "invalid authority",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			m := NewMsgGovSetIBCPause(tc.authority, tc.title, tc.description, tc.IbcPauseStatus)
-			err := m.ValidateBasic()
-			if tc.errExpected {
-				assert.ErrorContains(t, err, "invalid authority")
-			} else {
+			err := tc.msg.ValidateBasic()
+			if tc.errMsg == "" {
 				assert.NilError(t, err)
+			} else {
+				assert.ErrorContains(t, err, tc.errMsg)
 			}
 		})
 	}
