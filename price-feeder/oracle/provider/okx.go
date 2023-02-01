@@ -31,7 +31,7 @@ type (
 	//
 	// REF: https://www.okx.com/docs-v5/en/#websocket-api-public-channel-tickers-channel
 	OkxProvider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		logger          zerolog.Logger
 		mtx             sync.RWMutex
 		endpoints       Endpoint

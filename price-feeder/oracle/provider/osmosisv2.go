@@ -30,7 +30,7 @@ type (
 	//
 	// REF: https://github.com/umee-network/osmosis-api
 	OsmosisV2Provider struct {
-		wsc             *WebsocketController
+		wsc             WebsocketController
 		wsURL           url.URL
 		logger          zerolog.Logger
 		mtx             sync.RWMutex

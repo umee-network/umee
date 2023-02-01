@@ -68,3 +68,8 @@ func (ms *MultiSocket) AddSubscriptionMsgs(msgs []interface{}) error {
 func (ms *MultiSocket) Start() {
 	// not needed for multi-socket because they are auto started
 }
+
+func (ms *MultiSocket) SendJSON(interface{}) error {
+	// currently incompatible with multi-socket connections
+	return nil
+}

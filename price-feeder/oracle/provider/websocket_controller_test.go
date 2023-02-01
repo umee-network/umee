@@ -46,7 +46,7 @@ func TestWebsocketController_readSuccess(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			provider := TestProvider{}
 			mockClient := new(websocket.Conn)
-			c := &WebsocketController{
+			c := &SingleSocket{
 				providerName:   ProviderMock,
 				messageHandler: provider.messageHandler,
 				client:         mockClient,

@@ -28,6 +28,7 @@ type (
 	WebsocketController interface {
 		AddSubscriptionMsgs([]interface{}) error
 		Start()
+		SendJSON(interface{}) error
 	}
 
 	// SingleSocket defines a provider agnostic websocket handler
