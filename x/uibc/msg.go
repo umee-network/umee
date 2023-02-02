@@ -14,7 +14,7 @@ var (
 	_ sdk.Msg = &MsgGovSetIBCPause{}
 )
 
-// GetTitle implements govv1b1.Content interface.
+// GetTitle returns the title of the proposal.
 func (msg *MsgGovUpdateQuota) GetTitle() string { return msg.Title }
 
 // GetDescription implements govv1b1.Content interface.
@@ -44,6 +44,10 @@ func (msg *MsgGovUpdateQuota) ValidateBasic() error {
 
 	if msg.PerDenom.IsNil() || !msg.PerDenom.IsPositive() {
 		return sdkerrors.ErrInvalidRequest.Wrap("quota per denom must be positive")
+	}
+
+	if msg.Total.LT(msg.PerDenom) {
+		return sdkerrors.ErrInvalidRequest.Wrap("total quota must be greater than or equal to per_denom quota")
 	}
 
 	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)

@@ -28,6 +28,25 @@ import (
 const (
 	displayDenom string = appparams.DisplayDenom
 	bondDenom    string = appparams.BondDenom
+	initialPower        = int64(10000000000)
+)
+
+// Test addresses
+var (
+	valPubKeys = simapp.CreateTestPubKeys(2)
+
+	valPubKey = valPubKeys[0]
+	pubKey    = secp256k1.GenPrivKey().PubKey()
+	addr      = sdk.AccAddress(pubKey.Address())
+	valAddr   = sdk.ValAddress(pubKey.Address())
+
+	valPubKey2 = valPubKeys[1]
+	pubKey2    = secp256k1.GenPrivKey().PubKey()
+	addr2      = sdk.AccAddress(pubKey2.Address())
+	valAddr2   = sdk.ValAddress(pubKey2.Address())
+
+	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
+	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
 )
 
 type IntegrationTestSuite struct {
@@ -38,10 +57,6 @@ type IntegrationTestSuite struct {
 	queryClient types.QueryClient
 	msgServer   types.MsgServer
 }
-
-const (
-	initialPower = int64(10000000000)
-)
 
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
@@ -75,24 +90,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.queryClient = types.NewQueryClient(queryHelper)
 	s.msgServer = keeper.NewMsgServerImpl(app.OracleKeeper)
 }
-
-// Test addresses
-var (
-	valPubKeys = simapp.CreateTestPubKeys(2)
-
-	valPubKey = valPubKeys[0]
-	pubKey    = secp256k1.GenPrivKey().PubKey()
-	addr      = sdk.AccAddress(pubKey.Address())
-	valAddr   = sdk.ValAddress(pubKey.Address())
-
-	valPubKey2 = valPubKeys[1]
-	pubKey2    = secp256k1.GenPrivKey().PubKey()
-	addr2      = sdk.AccAddress(pubKey2.Address())
-	valAddr2   = sdk.ValAddress(pubKey2.Address())
-
-	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
-)
 
 // NewTestMsgCreateValidator test msg creator
 func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey, amt sdk.Int) *stakingtypes.MsgCreateValidator {
