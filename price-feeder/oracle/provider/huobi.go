@@ -130,7 +130,7 @@ func NewHuobiProvider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderHuobi,
+		endpoints.Name,
 		wsURL,
 		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
@@ -138,7 +138,7 @@ func NewHuobiProvider(
 		websocket.PingMessage,
 		huobiLogger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
@@ -154,7 +154,7 @@ func (p *HuobiProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interfa
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -166,11 +166,13 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error 
 	}
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
-	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
-		return err
-	}
+	p.wsc.AddWebsocketConnection(
+		newSubscriptionMsgs,
+		p.messageReceived,
+		disabledPingDuration,
+		websocket.PingMessage,
+	)
 	p.setSubscribedPairs(newPairs...)
-	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -274,10 +276,12 @@ func (p *HuobiProvider) pong(bz []byte) {
 		return
 	}
 
-	if err := p.wsc.SendJSON(struct {
-		Pong uint64 `json:"pong"`
-	}{Pong: heartbeat.Ping}); err != nil {
-		p.logger.Err(err).Msg("could not send pong message back")
+	for _, conn := range p.wsc.connections {
+		if err := conn.SendJSON(struct {
+			Pong uint64 `json:"pong"`
+		}{Pong: heartbeat.Ping}); err != nil {
+			p.logger.Err(err).Msg("could not send pong message back")
+		}
 	}
 }
 

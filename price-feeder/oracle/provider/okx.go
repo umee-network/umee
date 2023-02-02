@@ -131,7 +131,7 @@ func NewOkxProvider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderOkx,
+		endpoints.Name,
 		wsURL,
 		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
@@ -139,7 +139,7 @@ func NewOkxProvider(
 		websocket.PingMessage,
 		okxLogger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
@@ -159,7 +159,7 @@ func (p *OkxProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -171,11 +171,13 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	}
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
-	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
-		return err
-	}
+	p.wsc.AddWebsocketConnection(
+		newSubscriptionMsgs,
+		p.messageReceived,
+		defaultPingDuration,
+		websocket.PingMessage,
+	)
 	p.setSubscribedPairs(newPairs...)
-	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.

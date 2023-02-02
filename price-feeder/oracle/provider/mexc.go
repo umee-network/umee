@@ -115,7 +115,7 @@ func NewMexcProvider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderMexc,
+		endpoints.Name,
 		wsURL,
 		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
@@ -123,7 +123,7 @@ func NewMexcProvider(
 		websocket.PingMessage,
 		mexcLogger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
@@ -140,7 +140,7 @@ func (p *MexcProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interfac
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *MexcProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *MexcProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -152,11 +152,13 @@ func (p *MexcProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	}
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
-	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
-		return err
-	}
+	p.wsc.AddWebsocketConnection(
+		newSubscriptionMsgs,
+		p.messageReceived,
+		defaultPingDuration,
+		websocket.PingMessage,
+	)
 	p.setSubscribedPairs(newPairs...)
-	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the provided pairs.
