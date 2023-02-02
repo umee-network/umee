@@ -63,7 +63,7 @@ func NewWebsocketController(
 	pingMessageType uint,
 	logger zerolog.Logger,
 ) *WebsocketController {
-	var connections []*WebsocketConnection
+	connections := make([]*WebsocketConnection, 0)
 
 	for _, subMsg := range subscriptionMsgs {
 		connection := &WebsocketConnection{
