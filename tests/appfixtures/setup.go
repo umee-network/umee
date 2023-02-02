@@ -1,4 +1,4 @@
-package app
+package appfixtures
 
 import (
 	"bytes"
@@ -31,8 +31,11 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
+	"gotest.tools/v3/assert"
 
+	uapp "github.com/umee-network/umee/v4/app"
 	"github.com/umee-network/umee/v4/app/params"
+	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -61,7 +64,7 @@ type EmptyAppOptions struct{}
 
 func (EmptyAppOptions) Get(string) interface{} { return nil }
 
-func Setup(t *testing.T) *UmeeApp {
+func Setup(t *testing.T) *uapp.UmeeApp {
 	t.Helper()
 
 	privVal := mock.NewPV()
@@ -80,8 +83,7 @@ func Setup(t *testing.T) *UmeeApp {
 		Coins:   sdk.NewCoins(sdk.NewCoin(params.BondDenom, sdk.NewInt(10000000000000000))),
 	}
 
-	app := SetupWithGenesisValSet(t, valSet, []authtypes.GenesisAccount{acc}, balance)
-	return app
+	return SetupWithGenesisValSet(t, valSet, []authtypes.GenesisAccount{acc}, balance)
 }
 
 // SetupWithGenesisValSet initializes a new app with a validator set and genesis accounts
@@ -93,7 +95,7 @@ func SetupWithGenesisValSet(
 	valSet *tmtypes.ValidatorSet,
 	genAccs []authtypes.GenesisAccount,
 	balances ...banktypes.Balance,
-) *UmeeApp {
+) *uapp.UmeeApp {
 	t.Helper()
 
 	app, genesisState := setup(true, 5)
@@ -210,38 +212,38 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 	return genesisState, nil
 }
 
-func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
+func setup(withGenesis bool, invCheckPeriod uint) (*uapp.UmeeApp, uapp.GenesisState) {
 	db := dbm.NewMemDB()
-	encCdc := MakeEncodingConfig()
-	app := New(
+	encCdc := uapp.MakeEncodingConfig()
+	app := uapp.New(
 		log.NewNopLogger(),
 		db,
 		nil,
 		true,
 		map[int64]bool{},
-		DefaultNodeHome,
+		uapp.DefaultNodeHome,
 		invCheckPeriod,
 		encCdc,
 		EmptyAppOptions{},
-		GetWasmEnabledProposals(),
-		EmptyWasmOpts,
+		uapp.GetWasmEnabledProposals(),
+		uapp.EmptyWasmOpts,
 	)
 	if withGenesis {
-		return app, NewDefaultGenesisState(encCdc.Codec)
+		return app, uapp.NewDefaultGenesisState(encCdc.Codec)
 	}
 
-	return app, GenesisState{}
+	return app, uapp.GenesisState{}
 }
 
 // IntegrationTestNetworkConfig returns a networking configuration used for
 // integration tests using the SDK's in-process network test suite.
 func IntegrationTestNetworkConfig() network.Config {
 	cfg := network.DefaultConfig()
-	encCfg := MakeEncodingConfig()
+	encCfg := uapp.MakeEncodingConfig()
 	cdc := encCfg.Codec
 
 	// Start with the default genesis state
-	appGenState := ModuleBasics.DefaultGenesis(encCfg.Codec)
+	appGenState := uapp.ModuleBasics.DefaultGenesis(encCfg.Codec)
 
 	// Override default leverage registry with one more suitable for testing
 	var leverageGenState leveragetypes.GenesisState
@@ -310,7 +312,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.BondDenom = params.BondDenom
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
-		return New(
+		return uapp.New(
 			val.Ctx.Logger,
 			dbm.NewMemDB(),
 			nil,
@@ -320,8 +322,8 @@ func IntegrationTestNetworkConfig() network.Config {
 			0,
 			encCfg,
 			EmptyAppOptions{},
-			GetWasmEnabledProposals(),
-			EmptyWasmOpts,
+			uapp.GetWasmEnabledProposals(),
+			uapp.EmptyWasmOpts,
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
 			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
 		)
@@ -332,28 +334,28 @@ func IntegrationTestNetworkConfig() network.Config {
 
 type GenerateAccountStrategy func(int) []sdk.AccAddress
 
-// AddTestAddrsIncremental constructs and returns accNum amount of accounts with an
-// initial balance of accAmt in random order
-func AddTestAddrsIncremental(app *UmeeApp, ctx sdk.Context, accNum int, accAmt math.Int) []sdk.AccAddress {
+// AddTestAddrsIncremental constructs and returns accNum amount of new accounts with an
+// initial balance of accAmt uumee in random order
+func AddTestAddrsIncremental(app *uapp.UmeeApp, ctx sdk.Context, accNum int, accAmt math.Int) []sdk.AccAddress {
 	return addTestAddrs(app, ctx, accNum, accAmt, createIncrementalAccounts)
 }
 
 func addTestAddrs(
-	app *UmeeApp, ctx sdk.Context, accNum int,
+	t *testing.T,
+	app *uapp.UmeeApp, ctx sdk.Context, accNum int,
 	accAmt math.Int, strategy GenerateAccountStrategy,
 ) []sdk.AccAddress {
 	testAddrs := strategy(accNum)
-
-	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakingKeeper.BondDenom(ctx), accAmt))
+	coin := sdk.NewCoin(app.StakingKeeper.BondDenom(ctx), accAmt)
 
 	for _, addr := range testAddrs {
-		initAccountWithCoins(app, ctx, addr, initCoins)
+		MintCoins(t, ctx, app, addr, coin)
 	}
 
 	return testAddrs
 }
 
-func TestAddr(addr string, bech string) (sdk.AccAddress, error) {
+func TestAddr(addr, bech string) (sdk.AccAddress, error) {
 	res, err := sdk.AccAddressFromHexUnsafe(addr)
 	if err != nil {
 		return nil, err
@@ -381,10 +383,8 @@ func createIncrementalAccounts(accNum int) []sdk.AccAddress {
 
 	// start at 100 so we can make up to 999 test addresses with valid test addresses
 	for i := 100; i < (accNum + 100); i++ {
-		numString := strconv.Itoa(i)
-		buffer.WriteString("A58856F0FD53BF058B4909A21AEC019107BA6") // base address string
-
-		buffer.WriteString(numString) // adding on final two digits to make addresses unique
+		buffer.WriteString("A58856F0FD53BF058B4909A21AEC019107BA6")
+		buffer.WriteString(strconv.Itoa(i)) // adding on final digits to make addresses unique
 		res, _ := sdk.AccAddressFromHexUnsafe(buffer.String())
 		bech := res.String()
 		addr, _ := TestAddr(buffer.String(), bech)
@@ -396,14 +396,17 @@ func createIncrementalAccounts(accNum int) []sdk.AccAddress {
 	return addresses
 }
 
-func initAccountWithCoins(app *UmeeApp, ctx sdk.Context, addr sdk.AccAddress, coins sdk.Coins) {
-	err := app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, coins)
-	if err != nil {
-		panic(err)
-	}
+// MintUmee creates new uumee from mint moudle and sends it to a given account.
+func MintUmee(t *testing.T, ctx sdk.Context, app *uapp.UmeeApp, recipient sdk.AccAddress, amount int64) {
+	c := sdk.NewInt64Coin(appparams.BondDenom, amount)
+	MintCoins(t, ctx, app, recipient, c)
+}
 
-	err = app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, coins)
-	if err != nil {
-		panic(err)
-	}
+// MintCoins creates new coins from mint moudle and sends it to a given account.
+// Uses internal Context.
+func MintCoins(t *testing.T, ctx sdk.Context, app *uapp.UmeeApp, recipient sdk.AccAddress, coins ...sdk.Coin) {
+	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, coins))
+	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(
+		ctx, minttypes.ModuleName, recipient, coins))
+
 }

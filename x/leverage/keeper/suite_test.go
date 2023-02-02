@@ -15,6 +15,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/appfixtures"
 	"github.com/umee-network/umee/v4/x/leverage"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	"github.com/umee-network/umee/v4/x/leverage/keeper"
@@ -88,7 +89,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.ctx = ctx
 	s.setupAccountCounter = sdkmath.ZeroInt()
 	s.queryClient = types.NewQueryClient(queryHelper)
-	s.addrs = umeeapp.AddTestAddrsIncremental(app, s.ctx, 1, sdk.NewInt(3000000))
+	s.addrs = appfixtures.AddTestAddrsIncremental(s.T(), app, s.ctx, 1, sdk.NewInt(3000000))
 	s.msgSrvr = keeper.NewMsgServerImpl(s.app.LeverageKeeper)
 }
 
