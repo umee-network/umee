@@ -21,7 +21,7 @@ import (
 	"github.com/umee-network/umee/v4/tests/util"
 )
 
-type KeeperTestSuite struct {
+type IntegrationSuite struct {
 	coordinator *ibctesting.Coordinator
 	chainA      *ibctesting.TestChain
 	chainB      *ibctesting.TestChain
@@ -29,8 +29,8 @@ type KeeperTestSuite struct {
 	queryClient ibctransfertypes.QueryClient
 }
 
-func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
-	s := &KeeperTestSuite{}
+func initIntegrationSuite(t *testing.T) *IntegrationSuite {
+	s := &IntegrationSuite{}
 	s.coordinator = ibctesting.NewCoordinator(t, 0)
 
 	chains := make(map[string]*ibctesting.TestChain)
@@ -108,7 +108,7 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	return s
 }
 
-func (k *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain, t *testing.T) *umeeapp.UmeeApp {
+func (k *IntegrationSuite) GetUmeeApp(c *ibctesting.TestChain, t *testing.T) *umeeapp.UmeeApp {
 	umeeApp, ok := c.App.(*umeeapp.UmeeApp)
 	assert.Equal(t, true, ok)
 
@@ -117,7 +117,7 @@ func (k *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain, t *testing.T) *ume
 
 func TestTrackMetadata(t *testing.T) {
 	t.Skip("ibctransfer integration tests require further investigation, currently it breaks on connection handshake")
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	pathAtoB := NewTransferPath(s.chainA, s.chainB)
 	s.coordinator.Setup(pathAtoB)
 

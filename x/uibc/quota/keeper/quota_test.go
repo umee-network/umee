@@ -12,7 +12,7 @@ import (
 )
 
 func TestGetQuotas(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	ctx, k := s.ctx, s.app.UIbcQuotaKeeper
 
 	quotas, err := k.GetQuotaOfIBCDenoms(ctx)
@@ -38,14 +38,14 @@ func TestGetQuotas(t *testing.T) {
 }
 
 func TestGetLocalDenom(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	k := s.app.UIbcQuotaKeeper
 	out := k.GetLocalDenom("umee")
 	assert.Equal(t, "umee", out)
 }
 
 func TestResetQuota(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	ctx, k := s.ctx, s.app.UIbcQuotaKeeper
 
 	umeeQuota := uibc.Quota{IbcDenom: "uumee", OutflowSum: sdk.NewDec(1000)}

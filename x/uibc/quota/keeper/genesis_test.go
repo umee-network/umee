@@ -11,7 +11,7 @@ import (
 )
 
 func TestInitGenesis(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	app, ctx := s.app, s.ctx
 
 	defaultGs := uibc.DefaultGenesisState()
@@ -22,7 +22,7 @@ func TestInitGenesis(t *testing.T) {
 }
 
 func TestExportGenesis(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	app, ctx := s.app, s.ctx
 	defaultGs := uibc.DefaultGenesisState()
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)

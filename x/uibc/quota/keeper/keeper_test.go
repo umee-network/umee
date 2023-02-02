@@ -48,15 +48,15 @@ var (
 	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
 )
 
-type KeeperTestSuite struct {
+type IntegrationSuite struct {
 	ctx         sdk.Context
 	app         *umeeapp.UmeeApp
 	queryClient uibc.QueryClient
 	msgServer   uibc.MsgServer
 }
 
-func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
-	s := &KeeperTestSuite{}
+func initIntegrationSuite(t *testing.T) *IntegrationSuite {
+	s := &IntegrationSuite{}
 	isCheckTx := false
 	app := umeeapp.Setup(t)
 	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{

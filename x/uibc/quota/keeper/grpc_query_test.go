@@ -11,7 +11,7 @@ import (
 )
 
 func TestGRPCQueryParams(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	ctx, client := s.ctx, s.queryClient
 	tests := []struct {
 		name        string
@@ -37,7 +37,7 @@ func TestGRPCQueryParams(t *testing.T) {
 
 func TestGRPCGetQuota(t *testing.T) {
 	t.Parallel()
-	suite := initKeeperTestSuite(t)
+	suite := initIntegrationSuite(t)
 	ctx, client := suite.ctx, suite.queryClient
 	tests := []struct {
 		name   string

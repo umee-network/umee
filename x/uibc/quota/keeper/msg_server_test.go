@@ -16,7 +16,7 @@ import (
 
 func TestMsgServer_GovUpdateQuota(t *testing.T) {
 	t.Parallel()
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	ctx := s.ctx
 
 	tests := []struct {
@@ -91,7 +91,7 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 
 func TestMsgServer_GovSetIBCPause(t *testing.T) {
 	t.Parallel()
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	ctx := s.ctx
 
 	tests := []struct {

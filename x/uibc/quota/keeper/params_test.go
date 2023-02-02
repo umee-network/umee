@@ -11,7 +11,7 @@ import (
 )
 
 func TestParams(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initIntegrationSuite(t)
 	app, ctx := s.app, s.ctx
 	params := app.UIbcQuotaKeeper.GetParams(ctx)
 	defaultParams := uibc.DefaultParams()
