@@ -96,7 +96,6 @@ quote = "USDT"
 base = "ATOM"
 providers = [
   "kraken",
-  "binanceus",
 ]
 quote = "USD"
 
