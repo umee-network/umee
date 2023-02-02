@@ -14,21 +14,14 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	ibctesting "github.com/cosmos/ibc-go/v5/testing"
-	"github.com/stretchr/testify/suite"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	"github.com/umee-network/umee/v4/tests/util"
 )
 
-func TestKeeperTestSuite(t *testing.T) {
-	t.Skip("ibctransfer integration tests require further investigation, currently it breaks on connection handshake")
-	suite.Run(t, new(KeeperTestSuite))
-}
-
 type KeeperTestSuite struct {
-	suite.Suite
-
 	coordinator *ibctesting.Coordinator
 	chainA      *ibctesting.TestChain
 	chainB      *ibctesting.TestChain
@@ -36,8 +29,9 @@ type KeeperTestSuite struct {
 	queryClient ibctransfertypes.QueryClient
 }
 
-func (s *KeeperTestSuite) SetupTest() {
-	s.coordinator = ibctesting.NewCoordinator(s.T(), 0)
+func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+	s := &KeeperTestSuite{}
+	s.coordinator = ibctesting.NewCoordinator(t, 0)
 
 	chains := make(map[string]*ibctesting.TestChain)
 	for i := 0; i < 2; i++ {
@@ -45,7 +39,7 @@ func (s *KeeperTestSuite) SetupTest() {
 
 		// create a chain with the temporary coordinator that we'll later override
 		chainID := ibctesting.GetChainID(i)
-		chain := ibctesting.NewTestChain(s.T(), ibctesting.NewCoordinator(s.T(), 0), chainID)
+		chain := ibctesting.NewTestChain(t, ibctesting.NewCoordinator(t, 0), chainID)
 
 		balance := banktypes.Balance{
 			Address: chain.SenderAccount.GetAddress().String(),
@@ -54,7 +48,7 @@ func (s *KeeperTestSuite) SetupTest() {
 
 		// create application and override files in the IBC test chain
 		app := ibctesting.SetupWithGenesisValSet(
-			s.T(),
+			t,
 			chain.Vals,
 			[]authtypes.GenesisAccount{
 				chain.SenderAccount.(authtypes.GenesisAccount),
@@ -78,10 +72,10 @@ func (s *KeeperTestSuite) SetupTest() {
 		umeApp := app.(*umeeapp.UmeeApp)
 		for _, val := range chain.Vals.Validators {
 			_, _, ethAddr, err := util.GenerateRandomEthKey()
-			s.Require().NoError(err)
+			assert.NilError(t, err)
 
 			gravityEthAddr, err := gravitytypes.NewEthAddress(ethAddr.Hex())
-			s.Require().NoError(err)
+			assert.NilError(t, err)
 
 			umeApp.GravityKeeper.SetOrchestratorValidator(
 				chain.GetContext(),
@@ -105,25 +99,29 @@ func (s *KeeperTestSuite) SetupTest() {
 	s.chainA = s.coordinator.GetChain(ibctesting.GetChainID(0))
 	s.chainB = s.coordinator.GetChain(ibctesting.GetChainID(1))
 
-	umeeApp := s.GetUmeeApp(s.chainA)
+	umeeApp := s.GetUmeeApp(s.chainA, t)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(s.chainA.GetContext(), umeeApp.InterfaceRegistry())
 	ibctransfertypes.RegisterQueryServer(queryHelper, umeeApp.UIBCTransferKeeper)
 	s.queryClient = ibctransfertypes.NewQueryClient(queryHelper)
+
+	return s
 }
 
-func (s *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain) *umeeapp.UmeeApp {
+func (k *KeeperTestSuite) GetUmeeApp(c *ibctesting.TestChain, t *testing.T) *umeeapp.UmeeApp {
 	umeeApp, ok := c.App.(*umeeapp.UmeeApp)
-	s.Require().True(ok)
+	assert.Equal(t, true, ok)
 
 	return umeeApp
 }
 
-func (s *KeeperTestSuite) TestTrackMetadata() {
+func TestTrackMetadata(t *testing.T) {
+	t.Skip("ibctransfer integration tests require further investigation, currently it breaks on connection handshake")
+	s := initKeeperTestSuite(t)
 	pathAtoB := NewTransferPath(s.chainA, s.chainB)
 	s.coordinator.Setup(pathAtoB)
 
-	s.Run("OnRecvPacketA", func() {
+	t.Run("OnRecvPacketA", func(t *testing.T) {
 		denom := strings.Join([]string{
 			s.chainB.ChainID,
 			s.chainA.ChainID,
@@ -148,11 +146,11 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 			0,
 		)
 
-		err := s.GetUmeeApp(s.chainA).UIBCTransferKeeper.OnRecvPacket(s.chainA.GetContext(), packet, data)
-		s.Require().NoError(err)
+		err := s.GetUmeeApp(s.chainA, t).UIBCTransferKeeper.OnRecvPacket(s.chainA.GetContext(), packet, data)
+		assert.NilError(t, err)
 	})
 
-	s.Run("OnRecvPacketB", func() {
+	t.Run("OnRecvPacketB", func(t *testing.T) {
 		denom := strings.Join([]string{
 			s.chainA.ChainID,
 			s.chainB.ChainID,
@@ -177,11 +175,11 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 			0,
 		)
 
-		err := s.GetUmeeApp(s.chainB).UIBCTransferKeeper.OnRecvPacket(s.chainB.GetContext(), packet, data)
-		s.Require().NoError(err)
+		err := s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.OnRecvPacket(s.chainB.GetContext(), packet, data)
+		assert.NilError(t, err)
 	})
 
-	s.Run("SendTransfer", func() {
+	t.Run("SendTransfer", func(t *testing.T) {
 		denom := strings.Join([]string{
 			pathAtoB.EndpointA.ChannelConfig.PortID,
 			pathAtoB.EndpointA.ChannelID,
@@ -209,7 +207,7 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 		)
 
 		sender, err := sdk.AccAddressFromBech32(data.Sender)
-		s.Require().NoError(err)
+		assert.NilError(t, err)
 
 		denomTrace := ibctransfertypes.ParseDenomTrace(data.Denom)
 		ibcDenom := denomTrace.IBCDenom()
@@ -217,17 +215,17 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 		registeredenom := func() {
 			denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 			traceHash := denomTrace.Hash()
-			if !s.GetUmeeApp(s.chainB).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
-				s.GetUmeeApp(s.chainB).UIBCTransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
+			if !s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
+				s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
 			}
 		}
 
 		registeredenom()
 
 		amount, err := strconv.Atoi(data.Amount)
-		s.Require().NoError(err)
+		assert.NilError(t, err)
 
-		err = s.GetUmeeApp(s.chainB).UIBCTransferKeeper.SendTransfer(
+		err = s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SendTransfer(
 			s.chainB.GetContext(),
 			packet.SourcePort,
 			packet.SourceChannel,
@@ -237,14 +235,14 @@ func (s *KeeperTestSuite) TestTrackMetadata() {
 			clienttypes.NewHeight(0, 110),
 			0,
 		)
-		s.Require().NoError(err)
+		assert.NilError(t, err)
 	})
 
 	s.coordinator.CommitBlock(s.chainA, s.chainB)
 
-	_, ok := s.GetUmeeApp(s.chainA).BankKeeper.GetDenomMetaData(s.chainA.GetContext(), "ibc/DB6D78EC2E51C8B6AAF6DA64E660911491DC1A67C64DA69ED6945FE6DB552A5C")
-	s.Require().True(ok)
+	_, ok := s.GetUmeeApp(s.chainA, t).BankKeeper.GetDenomMetaData(s.chainA.GetContext(), "ibc/DB6D78EC2E51C8B6AAF6DA64E660911491DC1A67C64DA69ED6945FE6DB552A5C")
+	assert.Equal(t, true, ok)
 
-	_, ok = s.GetUmeeApp(s.chainB).BankKeeper.GetDenomMetaData(s.chainB.GetContext(), "ibc/10180B5BF0701A3E34A5F818607D7E57ECD35CD9D673ABCCD174F157DFC06C0F")
-	s.Require().True(ok)
+	_, ok = s.GetUmeeApp(s.chainB, t).BankKeeper.GetDenomMetaData(s.chainB.GetContext(), "ibc/10180B5BF0701A3E34A5F818607D7E57ECD35CD9D673ABCCD174F157DFC06C0F")
+	assert.Equal(t, true, ok)
 }
