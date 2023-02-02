@@ -63,15 +63,6 @@ func (msg *MsgGovUpdateQuota) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-func NewMsgGovSetIBCPause(authority, title, description string, status IBCTransferStatus) MsgGovSetIBCPause {
-	return MsgGovSetIBCPause{
-		Title:          title,
-		Description:    description,
-		Authority:      authority,
-		IbcPauseStatus: status,
-	}
-}
-
 // GetTitle implements govv1b1.Content interface.
 func (msg *MsgGovSetIBCPause) GetTitle() string { return msg.Title }
 
