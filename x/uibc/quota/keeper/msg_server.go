@@ -24,10 +24,15 @@ func (m msgServer) GovUpdateQuota(goCtx context.Context, msg *uibc.MsgGovUpdateQ
 	*uibc.MsgGovUpdateQuotaResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// validate the msg
+	if err := msg.ValidateBasic(); err != nil {
+		return nil, err
+	}
+
 	if err := m.keeper.UpdateQuotaParams(ctx, msg.Total, msg.PerDenom, msg.QuotaDuration); err != nil {
 		return nil, err
 	}
-	// save the new ibc rate limits
 	return &uibc.MsgGovUpdateQuotaResponse{}, nil
 }
 
@@ -36,6 +41,11 @@ func (m msgServer) GovSetIBCPause(
 	goCtx context.Context, msg *uibc.MsgGovSetIBCPause,
 ) (*uibc.MsgGovSetIBCPauseResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// validate the msg
+	if err := msg.ValidateBasic(); err != nil {
+		return nil, err
+	}
 
 	if err := m.keeper.SetIBCPause(ctx, msg.IbcPauseStatus); err != nil {
 		return &uibc.MsgGovSetIBCPauseResponse{}, err
