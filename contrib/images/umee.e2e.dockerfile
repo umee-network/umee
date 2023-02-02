@@ -3,6 +3,7 @@
 # umeed and release version of peggo
 
 FROM golang:1.19-bullseye AS builder
+ARG experimental=false
 
 ## Download Peggo
 WORKDIR /src
@@ -22,8 +23,8 @@ RUN go mod download
 ## Build umeed and price-feeder
 WORKDIR /src/umee
 COPY . .
-RUN make install && \
-    cd price-feeder && make install
+RUN if [ "$experimental" = "true" ] ; then echo "Installing experimental build"; EXPERIMENTAL=true make install;else echo "Installing stable build"; make install;fi 
+RUN cd price-feeder && make install
 
 ## Prepare the final clear binary
 FROM ubuntu:rolling
