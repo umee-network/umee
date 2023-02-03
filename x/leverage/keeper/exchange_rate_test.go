@@ -10,16 +10,16 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 uumee
-	addr := s.newAccount(coin(umeeDenom, 1000))
-	s.supply(addr, coin(umeeDenom, 1000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
+	addr := s.newAccount(mkCoin(umeeDenom, 1000))
+	s.supply(addr, mkCoin(umeeDenom, 1000))
+	s.collateralize(addr, mkCoin("u/"+umeeDenom, 1000))
 
 	// artificially increase total borrows (by affecting a single address)
-	err := s.tk.SetBorrow(ctx, addr, coin(umeeDenom, 2000))
+	err := s.tk.SetBorrow(ctx, addr, mkCoin(umeeDenom, 2000))
 	require.NoError(err)
 
 	// artificially set reserves
-	s.setReserves(coin(umeeDenom, 300))
+	s.setReserves(mkCoin(umeeDenom, 300))
 
 	// expected token:uToken exchange rate
 	//    = (total borrows + module balance - reserves) / utoken supply

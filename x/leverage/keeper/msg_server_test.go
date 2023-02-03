@@ -541,7 +541,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
 
-	zeroUmee := mkCoin.ZeroCoin(umeeDenom)
+	zeroUmee := coin.ZeroCoin(umeeDenom)
 	zeroUUmee := mkCoin("u/"+umeeDenom, 0)
 	tcs := []struct {
 		msg                  string
@@ -1303,7 +1303,7 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 		require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 
 		// verify borrowed coins increased by expected amount
-		require.Equal(mkCoin.NormalizeCoins(iBorrowed.Add(tc.coin)), fBorrowed, tc.msg, "borrowed coins")
+		require.Equal(coin.NormalizeCoins(iBorrowed.Add(tc.coin)), fBorrowed, tc.msg, "borrowed coins")
 
 		// check all available invariants
 		s.checkInvariants(tc.msg)
@@ -1343,13 +1343,13 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 			"unregistered token",
 			borrower,
 			mkCoin("abcd", 100_000000),
-			mkCoin.ZeroCoin("abcd"),
+			coin.ZeroCoin("abcd"),
 			nil,
 		}, {
 			"not borrowed",
 			borrower,
 			mkCoin(atomDenom, 100_000000),
-			mkCoin.ZeroCoin(atomDenom),
+			coin.ZeroCoin(atomDenom),
 			nil,
 		}, {
 			"valid repay",

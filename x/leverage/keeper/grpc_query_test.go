@@ -66,19 +66,19 @@ func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 uumee
-	addr := s.newAccount(coin(umeeDenom, 1000))
-	s.supply(addr, coin(umeeDenom, 1000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
+	addr := s.newAccount(mkCoin(umeeDenom, 1000))
+	s.supply(addr, mkCoin(umeeDenom, 1000))
+	s.collateralize(addr, mkCoin("u/"+umeeDenom, 1000))
 
 	resp, err := s.queryClient.AccountBalances(ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
 	require.NoError(err)
 
 	expected := types.QueryAccountBalancesResponse{
 		Supplied: sdk.NewCoins(
-			coin(umeeDenom, 1000),
+			mkCoin(umeeDenom, 1000),
 		),
 		Collateral: sdk.NewCoins(
-			coin("u/"+umeeDenom, 1000),
+			mkCoin("u/"+umeeDenom, 1000),
 		),
 		Borrowed: nil,
 	}
@@ -90,9 +90,9 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 UMEE
-	addr := s.newAccount(coin(umeeDenom, 1000_000000))
-	s.supply(addr, coin(umeeDenom, 1000_000000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+	addr := s.newAccount(mkCoin(umeeDenom, 1000_000000))
+	s.supply(addr, mkCoin(umeeDenom, 1000_000000))
+	s.collateralize(addr, mkCoin("u/"+umeeDenom, 1000_000000))
 
 	resp, err := s.queryClient.AccountSummary(ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
 	require.NoError(err)
@@ -147,9 +147,9 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 UMEE
-	addr := s.newAccount(coin(umeeDenom, 1000_000000))
-	s.supply(addr, coin(umeeDenom, 1000_000000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+	addr := s.newAccount(mkCoin(umeeDenom, 1000_000000))
+	s.supply(addr, mkCoin(umeeDenom, 1000_000000))
+	s.collateralize(addr, mkCoin("u/"+umeeDenom, 1000_000000))
 
 	resp, err := s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
@@ -176,7 +176,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.Equal(expected, *resp)
 
 	// borrow 100 UMEE for non-trivial query
-	s.borrow(addr, coin(umeeDenom, 100_000000))
+	s.borrow(addr, mkCoin(umeeDenom, 100_000000))
 
 	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
@@ -207,9 +207,9 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 UMEE
-	addr := s.newAccount(coin(umeeDenom, 1000_000000))
-	s.supply(addr, coin(umeeDenom, 1000_000000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+	addr := s.newAccount(mkCoin(umeeDenom, 1000_000000))
+	s.supply(addr, mkCoin(umeeDenom, 1000_000000))
+	s.collateralize(addr, mkCoin("u/"+umeeDenom, 1000_000000))
 
 	resp, err := s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
 		Address: addr.String(),
@@ -234,7 +234,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.Equal(expected, *resp)
 
 	// borrow 100 UMEE for non-trivial query
-	s.borrow(addr, coin(umeeDenom, 100_000000))
+	s.borrow(addr, mkCoin(umeeDenom, 100_000000))
 
 	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
 		Address: addr.String(),
