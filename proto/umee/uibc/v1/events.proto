@@ -8,10 +8,13 @@ option (gogoproto.goproto_getters_all) = false;
 
 // EventBadRevert is emitted on failure of ibc-transfer quota.
 message EventBadRevert {
-  // module name
-  string module = 1;
   // failure event type
   string failure_type = 2;
   // ibc packet data
   string packet = 3;
+}
+
+// EventPause is emitted on quota tracking pause status change.
+message EventPause {
+  bool paused = 1;
 }
