@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 
 	"github.com/umee-network/umee/v4/x/leverage/types"
@@ -192,9 +193,7 @@ func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 		"funded oracle",
 		"amount", rewards,
 	)
-	if err := ctx.EventManager().EmitTypedEvent(&types.EventFundOracle{Assets: rewards}); err != nil {
-		return err
-	}
+	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: rewards})
 
 	// Send rewards
 	if !rewards.IsZero() {
