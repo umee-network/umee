@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	"github.com/umee-network/umee/v4/x/leverage/types"
@@ -541,7 +542,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
 
-	zeroUmee := sdkutil.ZeroCoin(umeeDenom)
+	zeroUmee := coin.ZeroCoin(umeeDenom)
 	zeroUUmee := coin("u/"+umeeDenom, 0)
 	tcs := []struct {
 		msg                  string
@@ -1303,7 +1304,7 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 		require.Equal(iExchangeRate, fExchangeRate, tc.msg, "uToken exchange rate")
 
 		// verify borrowed coins increased by expected amount
-		require.Equal(sdkutil.NormalizeCoins(iBorrowed.Add(tc.coin)), fBorrowed, tc.msg, "borrowed coins")
+		require.Equal(coin.NormalizeCoins(iBorrowed.Add(tc.coin)), fBorrowed, tc.msg, "borrowed coins")
 
 		// check all available invariants
 		s.checkInvariants(tc.msg)
@@ -1343,13 +1344,13 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 			"unregistered token",
 			borrower,
 			coin("abcd", 100_000000),
-			sdkutil.ZeroCoin("abcd"),
+			coin.ZeroCoin("abcd"),
 			nil,
 		}, {
 			"not borrowed",
 			borrower,
 			coin(atomDenom, 100_000000),
-			sdkutil.ZeroCoin(atomDenom),
+			coin.ZeroCoin(atomDenom),
 			nil,
 		}, {
 			"valid repay",

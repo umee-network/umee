@@ -1,4 +1,4 @@
-package sdkutil
+package coin
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
