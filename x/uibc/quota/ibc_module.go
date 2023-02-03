@@ -11,6 +11,7 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
@@ -40,7 +41,7 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
 		err := im.RevertQuotaUpdate(ctx, packet.Data)
-		emitOnRevertQuota(ctx, "acknowledgement", packet.Data, err)
+		emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
 	}
 
 	return im.IBCModule.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
@@ -49,7 +50,7 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 // OnTimeoutPacket implements types.Middleware
 func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
 	err := im.RevertQuotaUpdate(ctx, packet.Data)
-	emitOnRevertQuota(ctx, "timeout", packet.Data, err)
+	emitOnRevertQuota(&ctx, "timeout", packet.Data, err)
 
 	return im.IBCModule.OnTimeoutPacket(ctx, packet, relayer)
 }
@@ -88,17 +89,14 @@ func ValidateReceiverAddress(packet channeltypes.Packet) error {
 
 // emitOnRevertQuota emits events related to quota update revert.
 // packetData is ICS 20 packet data bytes.
-func emitOnRevertQuota(ctx sdk.Context, failureType string, packetData []byte, err error) {
+func emitOnRevertQuota(ctx *sdk.Context, failureType string, packetData []byte, err error) {
 	if err == nil {
 		return
 	}
-	logger := ctx.Logger()
-	logger.Error("revert quota update error", "err", err)
-	if err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
+	ctx.Logger().Error("revert quota update error", "err", err)
+	sdkutil.Emit(ctx, &uibc.EventBadRevert{
 		Module:      uibc.ModuleName,
 		FailureType: failureType,
 		Packet:      string(packetData),
-	}); err != nil {
-		logger.Error("emit event error", "err", err)
-	}
+	})
 }
