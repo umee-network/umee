@@ -16,7 +16,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 		context.TODO(),
 		zerolog.Nop(),
 		Endpoint{},
-		false,
+		true,
 		types.CurrencyPair{Base: "ATOM", Quote: "USDT"},
 	)
 	require.NoError(t, err)
@@ -74,7 +74,7 @@ func TestBinanceProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.EqualError(t, err, "binance failed to get ticker price for FOOBAR")
+		require.EqualError(t, err, "binanceus has no ticker data for requested pairs: [FOOBAR]")
 		require.Nil(t, prices)
 	})
 }
