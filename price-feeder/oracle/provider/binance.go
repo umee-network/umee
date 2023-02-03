@@ -179,15 +179,25 @@ func (p *BinanceProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) erro
 func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
+	tickerErrs := 0
 	for _, cp := range pairs {
 		key := cp.String()
 		price, err := p.getTickerPrice(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
 		tickerPrices[key] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
@@ -195,15 +205,25 @@ func (p *BinanceProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[stri
 func (p *BinanceProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
+	candleErrs := 0
 	for _, cp := range pairs {
 		key := cp.String()
 		prices, err := p.getCandlePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
 		candlePrices[key] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -213,7 +233,11 @@ func (p *BinanceProvider) getTickerPrice(key string) (types.TickerPrice, error) 
 
 	ticker, ok := p.tickers[key]
 	if !ok {
-		return types.TickerPrice{}, fmt.Errorf("binance failed to get ticker price for %s", key)
+		return types.TickerPrice{}, fmt.Errorf(
+			types.ErrTickerNotFound.Error(),
+			p.endpoints.Name,
+			key,
+		)
 	}
 
 	return ticker.toTickerPrice()
@@ -225,7 +249,11 @@ func (p *BinanceProvider) getCandlePrices(key string) ([]types.CandlePrice, erro
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("binance failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			p.endpoints.Name,
+			key,
+		)
 	}
 
 	candleList := []types.CandlePrice{}

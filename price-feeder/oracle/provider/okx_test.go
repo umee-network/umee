@@ -79,7 +79,7 @@ func TestOkxProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.EqualError(t, err, "okx failed to get ticker price for FOO-BAR")
+		require.EqualError(t, err, "okx has no ticker data for requested pairs: [FOOBAR]")
 		require.Nil(t, prices)
 	})
 }

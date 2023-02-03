@@ -185,35 +185,55 @@ func (p *CryptoProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 	return nil
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *CryptoProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
+	tickerErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToCryptoPair(cp)
 		price, err := p.getTickerPrice(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
 		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
-// GetCandlePrices returns the candlePrices based on the saved map
+// GetCandlePrices returns the candlePrices based on the provided pairs.
 func (p *CryptoProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
+	candleErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToCryptoPair(cp)
 		prices, err := p.getCandlePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
 		candlePrices[cp.String()] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -225,7 +245,7 @@ func (p *CryptoProvider) getTickerPrice(key string) (types.TickerPrice, error) {
 	if !ok {
 		return types.TickerPrice{}, fmt.Errorf(
 			types.ErrTickerNotFound.Error(),
-			ProviderCrypto,
+			p.endpoints.Name,
 			key,
 		)
 	}
@@ -241,7 +261,7 @@ func (p *CryptoProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 	if !ok {
 		return []types.CandlePrice{}, fmt.Errorf(
 			types.ErrCandleNotFound.Error(),
-			ProviderCrypto,
+			p.endpoints.Name,
 			key,
 		)
 	}

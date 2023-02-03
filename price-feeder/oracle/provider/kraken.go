@@ -170,38 +170,59 @@ func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 	return nil
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
+	tickerErrs := 0
 	for _, cp := range pairs {
 		key := cp.String()
-		tickerPrice, ok := p.tickers[key]
+		price, ok := p.tickers[key]
 		if !ok {
-			return nil, fmt.Errorf("kraken failed to get ticker price for %s", key)
+			p.logger.Warn().Err(fmt.Errorf(
+				types.ErrTickerNotFound.Error(),
+				p.endpoints.Name,
+				key,
+			))
+			tickerErrs++
+			continue
 		}
-		tickerPrices[key] = tickerPrice
+		tickerPrices[key] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
-// GetCandlePrices returns the candlePrices based on the saved map.
+// GetCandlePrices returns the candlePrices based on the provided pairs.
 func (p *KrakenProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
+	candleErrs := 0
 	for _, cp := range pairs {
 		key := cp.String()
-		candlePrice, err := p.getCandlePrices(key)
+		prices, err := p.getCandlePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
-		candlePrices[key] = candlePrice
+		candlePrices[key] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -221,7 +242,11 @@ func (p *KrakenProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("kraken failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			p.endpoints.Name,
+			key,
+		)
 	}
 
 	candleList := []types.CandlePrice{}
