@@ -38,8 +38,7 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
 		return sdkerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
-	switch ack.Response.(type) {
-	case *channeltypes.Acknowledgement_Error:
+	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
 		err := im.RevertQuotaUpdate(ctx, packet.Data)
 		emitOnRevertQuota(ctx, "acknowledgement", packet.Data, err)
 	}
