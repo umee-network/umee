@@ -11,7 +11,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
-	"github.com/umee-network/umee/price-feeder/v2/config"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/client"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
@@ -74,31 +73,36 @@ func (ots *OracleTestSuite) SetupSuite() {
 	ots.oracle = New(
 		zerolog.Nop(),
 		client.OracleClient{},
-		[]config.CurrencyPair{
-			{
-				Base:      "UMEE",
-				Quote:     "USDT",
-				Providers: []provider.Name{provider.ProviderBinance},
+		map[provider.Name][]types.CurrencyPair{
+			provider.ProviderBinance: {
+				{
+					Base:  "UMEE",
+					Quote: "USDT",
+				},
 			},
-			{
-				Base:      "UMEE",
-				Quote:     "USDC",
-				Providers: []provider.Name{provider.ProviderKraken},
+			provider.ProviderKraken: {
+				{
+					Base:  "UMEE",
+					Quote: "USDC",
+				},
 			},
-			{
-				Base:      "XBT",
-				Quote:     "USDT",
-				Providers: []provider.Name{provider.ProviderOsmosis},
+			provider.ProviderOsmosis: {
+				{
+					Base:  "XBT",
+					Quote: "USDT",
+				},
 			},
-			{
-				Base:      "USDC",
-				Quote:     "USD",
-				Providers: []provider.Name{provider.ProviderHuobi},
+			provider.ProviderHuobi: {
+				{
+					Base:  "USDC",
+					Quote: "USD",
+				},
 			},
-			{
-				Base:      "USDT",
-				Quote:     "USD",
-				Providers: []provider.Name{provider.ProviderCoinbase},
+			provider.ProviderCoinbase: {
+				{
+					Base:  "USDT",
+					Quote: "USD",
+				},
 			},
 		},
 		time.Millisecond*100,

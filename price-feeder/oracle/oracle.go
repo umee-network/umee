@@ -18,7 +18,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
-	"github.com/umee-network/umee/price-feeder/v2/config"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/client"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
@@ -78,22 +77,11 @@ type Oracle struct {
 func New(
 	logger zerolog.Logger,
 	oc client.OracleClient,
-	currencyPairs []config.CurrencyPair,
+	providerPairs map[provider.Name][]types.CurrencyPair,
 	providerTimeout time.Duration,
 	deviations map[string]sdk.Dec,
 	endpoints map[provider.Name]provider.Endpoint,
 ) *Oracle {
-	providerPairs := make(map[provider.Name][]types.CurrencyPair)
-
-	for _, pair := range currencyPairs {
-		for _, provider := range pair.Providers {
-			providerPairs[provider] = append(providerPairs[provider], types.CurrencyPair{
-				Base:  pair.Base,
-				Quote: pair.Quote,
-			})
-		}
-	}
-
 	return &Oracle{
 		logger:          logger.With().Str("module", "oracle").Logger(),
 		closer:          pfsync.NewCloser(),
