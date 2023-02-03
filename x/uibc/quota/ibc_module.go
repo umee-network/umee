@@ -95,7 +95,6 @@ func emitOnRevertQuota(ctx *sdk.Context, failureType string, packetData []byte, 
 	}
 	ctx.Logger().Error("revert quota update error", "err", err)
 	sdkutil.Emit(ctx, &uibc.EventBadRevert{
-		Module:      uibc.ModuleName,
 		FailureType: failureType,
 		Packet:      string(packetData),
 	})

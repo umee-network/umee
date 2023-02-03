@@ -14,7 +14,7 @@ message EventBadRevert {
   string packet = 3;
 }
 
-// EventPause is emitted on quota tracking pause status change.
-message EventPause {
+// EventQuotaPause is emitted on quota tracking pause status change.
+message EventQuotaPause {
   bool paused = 1;
 }
