@@ -554,7 +554,7 @@ func New(
 	)
 
 	if Experimental {
-		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper)
+		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
 	}
 
 	// Create IBC Router
