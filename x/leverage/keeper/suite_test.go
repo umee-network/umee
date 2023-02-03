@@ -106,8 +106,8 @@ func newToken(base, symbol string, exponent uint32) types.Token {
 	return fixtures.Token(base, symbol, exponent)
 }
 
-// coin creates a coin with a given base denom and amount
-func coin(denom string, amount int64) sdk.Coin {
+// mkCoin creates a mkCoin with a given base denom and amount
+func mkCoin(denom string, amount int64) sdk.Coin {
 	return sdk.NewInt64Coin(denom, amount)
 }
 
