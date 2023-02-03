@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
@@ -154,6 +155,20 @@ func (c Config) Validate() error {
 	validate.RegisterStructValidation(telemetryValidation, telemetry.Config{})
 	validate.RegisterStructValidation(endpointValidation, provider.Endpoint{})
 	return validate.Struct(c)
+}
+
+func (c Config) ProviderPairs() map[provider.Name][]types.CurrencyPair {
+	providerPairs := make(map[provider.Name][]types.CurrencyPair)
+
+	for _, pair := range c.CurrencyPairs {
+		for _, provider := range pair.Providers {
+			providerPairs[provider] = append(providerPairs[provider], types.CurrencyPair{
+				Base:  pair.Base,
+				Quote: pair.Quote,
+			})
+		}
+	}
+	return providerPairs
 }
 
 // ParseConfig attempts to read and parse configuration from the given file path.
