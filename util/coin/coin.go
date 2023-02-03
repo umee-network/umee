@@ -16,3 +16,8 @@ func Normalize(cs sdk.Coins) sdk.Coins {
 	}
 	return cs
 }
+
+// New creates a mkCoin with a given base denom and amount
+func New(denom string, amount int64) sdk.Coin {
+	return sdk.NewInt64Coin(denom, amount)
+}

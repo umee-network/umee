@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -160,64 +161,64 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// 2.4 UMEE * $4.21
-	v, err := app.LeverageKeeper.TokenValue(ctx, mkCoin(appparams.BondDenom, 2_400000), types.PriceModeSpot)
+	v, err := app.LeverageKeeper.TokenValue(ctx, coin.New(appparams.BondDenom, 2_400000), types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin("foo", 2_400000), types.PriceModeSpot)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New("foo", 2_400000), types.PriceModeSpot)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), v)
 
 	// 2.4 DUMP * $0.5
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(dumpDenom, 2_400000), types.PriceModeSpot)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(dumpDenom, 2_400000), types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.2"), v)
 
 	// 2.4 PUMP * $2.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(pumpDenom, 2_400000), types.PriceModeSpot)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(pumpDenom, 2_400000), types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.8"), v)
 
 	// Now with historic = true
 
 	// 2.4 UMEE * $4.21
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(appparams.BondDenom, 2_400000), types.PriceModeHistoric)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(appparams.BondDenom, 2_400000), types.PriceModeHistoric)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin("foo", 2_400000), types.PriceModeHistoric)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New("foo", 2_400000), types.PriceModeHistoric)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 	require.Equal(sdk.ZeroDec(), v)
 
 	// 2.4 DUMP * $1.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(dumpDenom, 2_400000), types.PriceModeHistoric)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(dumpDenom, 2_400000), types.PriceModeHistoric)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 
 	// 2.4 PUMP * $1.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(pumpDenom, 2_400000), types.PriceModeHistoric)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(pumpDenom, 2_400000), types.PriceModeHistoric)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 
 	// Additional high/low cases
 
 	// 2.4 DUMP * $1.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(dumpDenom, 2_400000), types.PriceModeHigh)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(dumpDenom, 2_400000), types.PriceModeHigh)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 
 	// 2.4 PUMP * $2.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(pumpDenom, 2_400000), types.PriceModeHigh)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(pumpDenom, 2_400000), types.PriceModeHigh)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.8"), v)
 
 	// 2.4 DUMP * $0.50
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(dumpDenom, 2_400000), types.PriceModeLow)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(dumpDenom, 2_400000), types.PriceModeLow)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("1.2"), v)
 
 	// 2.4 PUMP * $1.00
-	v, err = app.LeverageKeeper.TokenValue(ctx, mkCoin(pumpDenom, 2_400000), types.PriceModeLow)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(pumpDenom, 2_400000), types.PriceModeLow)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 }
@@ -229,8 +230,8 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err := app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			mkCoin(appparams.BondDenom, 2_400000),
-			mkCoin(atomDenom, 4_700000),
+			coin.New(appparams.BondDenom, 2_400000),
+			coin.New(atomDenom, 4_700000),
 		),
 		types.PriceModeSpot,
 	)
@@ -241,9 +242,9 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			mkCoin(appparams.BondDenom, 2_400000),
-			mkCoin(atomDenom, 4_700000),
-			mkCoin("foo", 4_700000),
+			coin.New(appparams.BondDenom, 2_400000),
+			coin.New(atomDenom, 4_700000),
+			coin.New("foo", 4_700000),
 		),
 		types.PriceModeSpot,
 	)
@@ -254,10 +255,10 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			mkCoin(appparams.BondDenom, 2_400000),
-			mkCoin(atomDenom, 4_700000),
-			mkCoin("foo", 4_700000),
-			mkCoin(dumpDenom, 2_000000),
+			coin.New(appparams.BondDenom, 2_400000),
+			coin.New(atomDenom, 4_700000),
+			coin.New("foo", 4_700000),
+			coin.New(dumpDenom, 2_000000),
 		),
 		types.PriceModeHistoric,
 	)
@@ -268,8 +269,8 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			mkCoin(pumpDenom, 1_000000),
-			mkCoin(dumpDenom, 1_000000),
+			coin.New(pumpDenom, 1_000000),
+			coin.New(dumpDenom, 1_000000),
 		),
 		types.PriceModeHigh,
 	)
@@ -280,8 +281,8 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			mkCoin(pumpDenom, 1_000000),
-			mkCoin(dumpDenom, 1_000000),
+			coin.New(pumpDenom, 1_000000),
+			coin.New(dumpDenom, 1_000000),
 		),
 		types.PriceModeLow,
 	)

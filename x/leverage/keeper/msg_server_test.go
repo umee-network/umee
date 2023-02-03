@@ -182,65 +182,65 @@ func (s *IntegrationTestSuite) TestMsgSupply() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a supplier with 100 UMEE and 100 ATOM
-	supplier := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
 
 	// create and modify a borrower to force the uToken exchange rate of ATOM from 1 to 1.5
-	borrower := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(borrower, mkCoin(atomDenom, 100_000000))
-	s.collateralize(borrower, mkCoin("u/"+atomDenom, 100_000000))
-	s.borrow(borrower, mkCoin(atomDenom, 10_000000))
-	s.tk.SetBorrow(ctx, borrower, mkCoin(atomDenom, 60_000000))
+	borrower := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(borrower, coin.New(atomDenom, 100_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin.New(atomDenom, 10_000000))
+	s.tk.SetBorrow(ctx, borrower, coin.New(atomDenom, 60_000000))
 
 	// create a supplier that will exceed token's default MaxSupply
-	whale := s.newAccount(mkCoin(umeeDenom, 1_000_000_000000))
+	whale := s.newAccount(coin.New(umeeDenom, 1_000_000_000000))
 
 	tcs := []testCase{
 		{
 			"unregistered denom",
 			supplier,
-			mkCoin("abcd", 80_000000),
+			coin.New("abcd", 80_000000),
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
 		}, {
 			"uToken",
 			supplier,
-			mkCoin("u/"+umeeDenom, 80_000000),
+			coin.New("u/"+umeeDenom, 80_000000),
 			sdk.Coin{},
 			types.ErrUToken,
 		}, {
 			"no balance",
 			borrower,
-			mkCoin(umeeDenom, 20_000000),
+			coin.New(umeeDenom, 20_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
 		}, {
 			"insufficient balance",
 			supplier,
-			mkCoin(umeeDenom, 120_000000),
+			coin.New(umeeDenom, 120_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
 		}, {
 			"valid supply",
 			supplier,
-			mkCoin(umeeDenom, 80_000000),
-			mkCoin("u/"+umeeDenom, 80_000000),
+			coin.New(umeeDenom, 80_000000),
+			coin.New("u/"+umeeDenom, 80_000000),
 			nil,
 		}, {
 			"additional supply",
 			supplier,
-			mkCoin(umeeDenom, 20_000000),
-			mkCoin("u/"+umeeDenom, 20_000000),
+			coin.New(umeeDenom, 20_000000),
+			coin.New("u/"+umeeDenom, 20_000000),
 			nil,
 		}, {
 			"high exchange rate",
 			supplier,
-			mkCoin(atomDenom, 60_000000),
-			mkCoin("u/"+atomDenom, 40_000000),
+			coin.New(atomDenom, 60_000000),
+			coin.New("u/"+atomDenom, 40_000000),
 			nil,
 		}, {
 			"max supply",
 			whale,
-			mkCoin(umeeDenom, 1_000_000_000000),
+			coin.New(umeeDenom, 1_000_000_000000),
 			sdk.Coin{},
 			types.ErrMaxSupply,
 		},
@@ -298,40 +298,40 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 
 	// create and fund a supplier with 100 UMEE and 100 ATOM, then supply 100 UMEE and 50 ATOM
 	// also collateralize 75 of supplied UMEE
-	supplier := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
-	s.supply(supplier, mkCoin(umeeDenom, 100_000000))
-	s.collateralize(supplier, mkCoin("u/"+umeeDenom, 75_000000))
-	s.supply(supplier, mkCoin(atomDenom, 50_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.supply(supplier, coin.New(umeeDenom, 100_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 75_000000))
+	s.supply(supplier, coin.New(atomDenom, 50_000000))
 
 	// create and modify a borrower to force the uToken exchange rate of ATOM from 1 to 1.2
-	borrower := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(borrower, mkCoin(atomDenom, 100_000000))
-	s.collateralize(borrower, mkCoin("u/"+atomDenom, 100_000000))
-	s.borrow(borrower, mkCoin(atomDenom, 10_000000))
-	s.tk.SetBorrow(ctx, borrower, mkCoin(atomDenom, 40_000000))
+	borrower := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(borrower, coin.New(atomDenom, 100_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin.New(atomDenom, 10_000000))
+	s.tk.SetBorrow(ctx, borrower, coin.New(atomDenom, 40_000000))
 
 	// create an additional supplier (UMEE, DUMP, PUMP tokens)
-	other := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(dumpDenom, 100_000000), mkCoin(pumpDenom, 100_000000))
-	s.supply(other, mkCoin(umeeDenom, 100_000000))
-	s.supply(other, mkCoin(pumpDenom, 100_000000))
-	s.supply(other, mkCoin(dumpDenom, 100_000000))
+	other := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(dumpDenom, 100_000000), coin.New(pumpDenom, 100_000000))
+	s.supply(other, coin.New(umeeDenom, 100_000000))
+	s.supply(other, coin.New(pumpDenom, 100_000000))
+	s.supply(other, coin.New(dumpDenom, 100_000000))
 
 	// create a DUMP (historic price 1.00, current price 0.50) borrower
 	// using PUMP (historic price 1.00, current price 2.00) collateral
-	dumpborrower := s.newAccount(mkCoin(pumpDenom, 100_000000))
-	s.supply(dumpborrower, mkCoin(pumpDenom, 100_000000))
-	s.collateralize(dumpborrower, mkCoin("u/"+pumpDenom, 100_000000))
-	s.borrow(dumpborrower, mkCoin(dumpDenom, 20_000000))
+	dumpborrower := s.newAccount(coin.New(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin.New(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin.New("u/"+pumpDenom, 100_000000))
+	s.borrow(dumpborrower, coin.New(dumpDenom, 20_000000))
 	// collateral value is $200 (current) or $100 (historic)
 	// borrowed value is $10 (current) or $20 (historic)
 	// collateral weights are always 0.25 in testing
 
 	// create a PUMP (historic price 1.00, current price 2.00) borrower
 	// using DUMP (historic price 1.00, current price 0.50) collateral
-	pumpborrower := s.newAccount(mkCoin(dumpDenom, 100_000000))
-	s.supply(pumpborrower, mkCoin(dumpDenom, 100_000000))
-	s.collateralize(pumpborrower, mkCoin("u/"+dumpDenom, 100_000000))
-	s.borrow(pumpborrower, mkCoin(pumpDenom, 5_000000))
+	pumpborrower := s.newAccount(coin.New(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin.New(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin.New("u/"+dumpDenom, 100_000000))
+	s.borrow(pumpborrower, coin.New(pumpDenom, 5_000000))
 	// collateral value is $50 (current) or $100 (historic)
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
@@ -348,7 +348,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 		{
 			"unregistered base token",
 			supplier,
-			mkCoin("abcd", 80_000000),
+			coin.New("abcd", 80_000000),
 			nil,
 			nil,
 			sdk.Coin{},
@@ -356,7 +356,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 		}, {
 			"only uToken can be withdrawn",
 			supplier,
-			mkCoin(umeeDenom, 80_000000),
+			coin.New(umeeDenom, 80_000000),
 			nil,
 			nil,
 			sdk.Coin{},
@@ -364,7 +364,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 		}, {
 			"insufficient uTokens",
 			supplier,
-			mkCoin("u/"+umeeDenom, 120_000000),
+			coin.New("u/"+umeeDenom, 120_000000),
 			nil,
 			nil,
 			sdk.Coin{},
@@ -372,39 +372,39 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 		}, {
 			"withdraw from balance",
 			supplier,
-			mkCoin("u/"+umeeDenom, 10_000000),
-			sdk.NewCoins(mkCoin("u/"+umeeDenom, 10_000000)),
+			coin.New("u/"+umeeDenom, 10_000000),
+			sdk.NewCoins(coin.New("u/"+umeeDenom, 10_000000)),
 			nil,
-			mkCoin(umeeDenom, 10_000000),
+			coin.New(umeeDenom, 10_000000),
 			nil,
 		}, {
 			"some from collateral",
 			supplier,
-			mkCoin("u/"+umeeDenom, 80_000000),
-			sdk.NewCoins(mkCoin("u/"+umeeDenom, 15_000000)),
-			sdk.NewCoins(mkCoin("u/"+umeeDenom, 65_000000)),
-			mkCoin(umeeDenom, 80_000000),
+			coin.New("u/"+umeeDenom, 80_000000),
+			sdk.NewCoins(coin.New("u/"+umeeDenom, 15_000000)),
+			sdk.NewCoins(coin.New("u/"+umeeDenom, 65_000000)),
+			coin.New(umeeDenom, 80_000000),
 			nil,
 		}, {
 			"only from collateral",
 			supplier,
-			mkCoin("u/"+umeeDenom, 10_000000),
+			coin.New("u/"+umeeDenom, 10_000000),
 			nil,
-			sdk.NewCoins(mkCoin("u/"+umeeDenom, 10_000000)),
-			mkCoin(umeeDenom, 10_000000),
+			sdk.NewCoins(coin.New("u/"+umeeDenom, 10_000000)),
+			coin.New(umeeDenom, 10_000000),
 			nil,
 		}, {
 			"high exchange rate",
 			supplier,
-			mkCoin("u/"+atomDenom, 50_000000),
-			sdk.NewCoins(mkCoin("u/"+atomDenom, 50_000000)),
+			coin.New("u/"+atomDenom, 50_000000),
+			sdk.NewCoins(coin.New("u/"+atomDenom, 50_000000)),
 			nil,
-			mkCoin(atomDenom, 60_000000),
+			coin.New(atomDenom, 60_000000),
 			nil,
 		}, {
 			"borrow limit",
 			borrower,
-			mkCoin("u/"+atomDenom, 50_000000),
+			coin.New("u/"+atomDenom, 50_000000),
 			nil,
 			nil,
 			sdk.Coin{},
@@ -412,15 +412,15 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 		}, {
 			"acceptable withdrawal (dump borrower)",
 			dumpborrower,
-			mkCoin("u/"+pumpDenom, 20_000000),
+			coin.New("u/"+pumpDenom, 20_000000),
 			nil,
-			sdk.NewCoins(mkCoin("u/"+pumpDenom, 20_000000)),
-			mkCoin(pumpDenom, 20_000000),
+			sdk.NewCoins(coin.New("u/"+pumpDenom, 20_000000)),
+			coin.New(pumpDenom, 20_000000),
 			nil,
 		}, {
 			"borrow limit (undercollateralized under historic prices but ok with current prices)",
 			dumpborrower,
-			mkCoin("u/"+pumpDenom, 20_000000),
+			coin.New("u/"+pumpDenom, 20_000000),
 			nil,
 			nil,
 			sdk.Coin{},
@@ -428,15 +428,15 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 		}, {
 			"acceptable withdrawal (pump borrower)",
 			pumpborrower,
-			mkCoin("u/"+dumpDenom, 20_000000),
+			coin.New("u/"+dumpDenom, 20_000000),
 			nil,
-			sdk.NewCoins(mkCoin("u/"+dumpDenom, 20_000000)),
-			mkCoin(dumpDenom, 20_000000),
+			sdk.NewCoins(coin.New("u/"+dumpDenom, 20_000000)),
+			coin.New(dumpDenom, 20_000000),
 			nil,
 		}, {
 			"borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
-			mkCoin("u/"+dumpDenom, 20_000000),
+			coin.New("u/"+dumpDenom, 20_000000),
 			nil,
 			nil,
 			sdk.Coin{},
@@ -497,52 +497,52 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 
 	// create and fund a supplier with 100 UMEE and 100 ATOM, then supply 100 UMEE and 50 ATOM
 	// also collateralize 75 of supplied UMEE
-	supplier := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
-	s.supply(supplier, mkCoin(umeeDenom, 100_000000))
-	s.collateralize(supplier, mkCoin("u/"+umeeDenom, 75_000000))
-	s.supply(supplier, mkCoin(atomDenom, 50_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.supply(supplier, coin.New(umeeDenom, 100_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 75_000000))
+	s.supply(supplier, coin.New(atomDenom, 50_000000))
 
 	// create and modify a borrower to force the uToken exchange rate of ATOM from 1 to 1.2
-	borrower := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(borrower, mkCoin(atomDenom, 100_000000))
-	s.collateralize(borrower, mkCoin("u/"+atomDenom, 100_000000))
-	s.borrow(borrower, mkCoin(atomDenom, 10_000000))
-	s.tk.SetBorrow(ctx, borrower, mkCoin(atomDenom, 40_000000))
+	borrower := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(borrower, coin.New(atomDenom, 100_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin.New(atomDenom, 10_000000))
+	s.tk.SetBorrow(ctx, borrower, coin.New(atomDenom, 40_000000))
 
 	// create an additional UMEE supplier with a small borrow
-	other := s.newAccount(mkCoin(umeeDenom, 100_000000))
-	s.supply(other, mkCoin(umeeDenom, 100_000000))
-	s.collateralize(other, mkCoin("u/"+umeeDenom, 100_000000))
-	s.borrow(other, mkCoin(umeeDenom, 10_000000))
+	other := s.newAccount(coin.New(umeeDenom, 100_000000))
+	s.supply(other, coin.New(umeeDenom, 100_000000))
+	s.collateralize(other, coin.New("u/"+umeeDenom, 100_000000))
+	s.borrow(other, coin.New(umeeDenom, 10_000000))
 
 	// create an additional supplier (UMEE, DUMP, PUMP tokens)
-	surplus := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(dumpDenom, 100_000000), mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(umeeDenom, 100_000000))
-	s.supply(surplus, mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(dumpDenom, 100_000000))
+	surplus := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(dumpDenom, 100_000000), coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(umeeDenom, 100_000000))
+	s.supply(surplus, coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(dumpDenom, 100_000000))
 
 	// create a DUMP (historic price 1.00, current price 0.50) borrower
 	// using PUMP (historic price 1.00, current price 2.00) collateral
-	dumpborrower := s.newAccount(mkCoin(pumpDenom, 100_000000))
-	s.supply(dumpborrower, mkCoin(pumpDenom, 100_000000))
-	s.collateralize(dumpborrower, mkCoin("u/"+pumpDenom, 100_000000))
-	s.borrow(dumpborrower, mkCoin(dumpDenom, 20_000000))
+	dumpborrower := s.newAccount(coin.New(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin.New(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin.New("u/"+pumpDenom, 100_000000))
+	s.borrow(dumpborrower, coin.New(dumpDenom, 20_000000))
 	// collateral value is $200 (current) or $100 (historic)
 	// borrowed value is $10 (current) or $20 (historic)
 	// collateral weights are always 0.25 in testing
 
 	// create a PUMP (historic price 1.00, current price 2.00) borrower
 	// using DUMP (historic price 1.00, current price 0.50) collateral
-	pumpborrower := s.newAccount(mkCoin(dumpDenom, 100_000000))
-	s.supply(pumpborrower, mkCoin(dumpDenom, 100_000000))
-	s.collateralize(pumpborrower, mkCoin("u/"+dumpDenom, 100_000000))
-	s.borrow(pumpborrower, mkCoin(pumpDenom, 5_000000))
+	pumpborrower := s.newAccount(coin.New(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin.New(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin.New("u/"+dumpDenom, 100_000000))
+	s.borrow(pumpborrower, coin.New(pumpDenom, 5_000000))
 	// collateral value is $50 (current) or $100 (historic)
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
 
 	zeroUmee := coin.Zero(umeeDenom)
-	zeroUUmee := mkCoin("u/"+umeeDenom, 0)
+	zeroUUmee := coin.New("u/"+umeeDenom, 0)
 	tcs := []struct {
 		msg                  string
 		addr                 sdk.AccAddress
@@ -572,9 +572,9 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			"max withdraw umee",
 			supplier,
 			umeeDenom,
-			mkCoin("u/"+umeeDenom, 100_000000),
-			mkCoin("u/"+umeeDenom, 75_000000),
-			mkCoin(umeeDenom, 100_000000),
+			coin.New("u/"+umeeDenom, 100_000000),
+			coin.New("u/"+umeeDenom, 75_000000),
+			coin.New(umeeDenom, 100_000000),
 			nil,
 		}, {
 			"duplicate max withdraw umee",
@@ -588,25 +588,25 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			"max withdraw with borrow",
 			other,
 			umeeDenom,
-			mkCoin("u/"+umeeDenom, 60_000000),
-			mkCoin("u/"+umeeDenom, 60_000000),
-			mkCoin(umeeDenom, 60_000000),
+			coin.New("u/"+umeeDenom, 60_000000),
+			coin.New("u/"+umeeDenom, 60_000000),
+			coin.New(umeeDenom, 60_000000),
 			nil,
 		}, {
 			"max withdrawal (dump borrower)",
 			dumpborrower,
 			pumpDenom,
-			mkCoin("u/"+pumpDenom, 20_000000),
-			mkCoin("u/"+pumpDenom, 20_000000),
-			mkCoin(pumpDenom, 20_000000),
+			coin.New("u/"+pumpDenom, 20_000000),
+			coin.New("u/"+pumpDenom, 20_000000),
+			coin.New(pumpDenom, 20_000000),
 			nil,
 		}, {
 			"max withdrawal (pump borrower)",
 			pumpborrower,
 			dumpDenom,
-			mkCoin("u/"+dumpDenom, 20_000000),
-			mkCoin("u/"+dumpDenom, 20_000000),
-			mkCoin(dumpDenom, 20_000000),
+			coin.New("u/"+dumpDenom, 20_000000),
+			coin.New("u/"+dumpDenom, 20_000000),
+			coin.New(dumpDenom, 20_000000),
 			nil,
 		},
 	}
@@ -672,43 +672,43 @@ func (s *IntegrationTestSuite) TestMsgCollateralize() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a supplier with 200 UMEE, then supply 100 UMEE
-	supplier := s.newAccount(mkCoin(umeeDenom, 200_000000))
-	s.supply(supplier, mkCoin(umeeDenom, 100_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(supplier, coin.New(umeeDenom, 100_000000))
 
 	// create and fund another supplier
-	otherSupplier := s.newAccount(mkCoin(umeeDenom, 200_000000), mkCoin(atomDenom, 200_000000))
-	s.supply(otherSupplier, mkCoin(umeeDenom, 200_000000), mkCoin(atomDenom, 200_000000))
+	otherSupplier := s.newAccount(coin.New(umeeDenom, 200_000000), coin.New(atomDenom, 200_000000))
+	s.supply(otherSupplier, coin.New(umeeDenom, 200_000000), coin.New(atomDenom, 200_000000))
 
 	tcs := []testCase{
 		{
 			"base token",
 			supplier,
-			mkCoin(umeeDenom, 80_000000),
+			coin.New(umeeDenom, 80_000000),
 			types.ErrNotUToken,
 		}, {
 			"unregistered uToken",
 			supplier,
-			mkCoin("u/abcd", 80_000000),
+			coin.New("u/abcd", 80_000000),
 			types.ErrNotRegisteredToken,
 		}, {
 			"wrong balance",
 			supplier,
-			mkCoin("u/"+atomDenom, 10_000000),
+			coin.New("u/"+atomDenom, 10_000000),
 			sdkerrors.ErrInsufficientFunds,
 		}, {
 			"valid collateralize",
 			supplier,
-			mkCoin("u/"+umeeDenom, 80_000000),
+			coin.New("u/"+umeeDenom, 80_000000),
 			nil,
 		}, {
 			"additional collateralize",
 			supplier,
-			mkCoin("u/"+umeeDenom, 10_000000),
+			coin.New("u/"+umeeDenom, 10_000000),
 			nil,
 		}, {
 			"insufficient balance",
 			supplier,
-			mkCoin("u/"+umeeDenom, 40_000000),
+			coin.New("u/"+umeeDenom, 40_000000),
 			sdkerrors.ErrInsufficientFunds,
 		},
 	}
@@ -771,38 +771,38 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a supplier with 200 UMEE, then supply and collateralize 100 UMEE
-	supplier := s.newAccount(mkCoin(umeeDenom, 200_000000))
-	s.supply(supplier, mkCoin(umeeDenom, 100_000000))
-	s.collateralize(supplier, mkCoin("u/"+umeeDenom, 100_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(supplier, coin.New(umeeDenom, 100_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 100_000000))
 
 	// create a borrower which supplies, collateralizes, then borrows ATOM
-	borrower := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(borrower, mkCoin(atomDenom, 100_000000))
-	s.collateralize(borrower, mkCoin("u/"+atomDenom, 100_000000))
-	s.borrow(borrower, mkCoin(atomDenom, 10_000000))
+	borrower := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(borrower, coin.New(atomDenom, 100_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin.New(atomDenom, 10_000000))
 
 	// create an additional supplier (UMEE, DUMP, PUMP tokens)
-	surplus := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(dumpDenom, 100_000000), mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(umeeDenom, 100_000000))
-	s.supply(surplus, mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(dumpDenom, 100_000000))
+	surplus := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(dumpDenom, 100_000000), coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(umeeDenom, 100_000000))
+	s.supply(surplus, coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(dumpDenom, 100_000000))
 
 	// create a DUMP (historic price 1.00, current price 0.50) borrower
 	// using PUMP (historic price 1.00, current price 2.00) collateral
-	dumpborrower := s.newAccount(mkCoin(pumpDenom, 100_000000))
-	s.supply(dumpborrower, mkCoin(pumpDenom, 100_000000))
-	s.collateralize(dumpborrower, mkCoin("u/"+pumpDenom, 100_000000))
-	s.borrow(dumpborrower, mkCoin(dumpDenom, 20_000000))
+	dumpborrower := s.newAccount(coin.New(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin.New(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin.New("u/"+pumpDenom, 100_000000))
+	s.borrow(dumpborrower, coin.New(dumpDenom, 20_000000))
 	// collateral value is $200 (current) or $100 (historic)
 	// borrowed value is $10 (current) or $20 (historic)
 	// collateral weights are always 0.25 in testing
 
 	// create a PUMP (historic price 1.00, current price 2.00) borrower
 	// using DUMP (historic price 1.00, current price 0.50) collateral
-	pumpborrower := s.newAccount(mkCoin(dumpDenom, 100_000000))
-	s.supply(pumpborrower, mkCoin(dumpDenom, 100_000000))
-	s.collateralize(pumpborrower, mkCoin("u/"+dumpDenom, 100_000000))
-	s.borrow(pumpborrower, mkCoin(pumpDenom, 5_000000))
+	pumpborrower := s.newAccount(coin.New(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin.New(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin.New("u/"+dumpDenom, 100_000000))
+	s.borrow(pumpborrower, coin.New(pumpDenom, 5_000000))
 	// collateral value is $50 (current) or $100 (historic)
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
@@ -811,54 +811,54 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 		{
 			"base token",
 			supplier,
-			mkCoin(umeeDenom, 80_000000),
+			coin.New(umeeDenom, 80_000000),
 			types.ErrNotUToken,
 		}, {
 			"no collateral",
 			supplier,
-			mkCoin("u/"+atomDenom, 40_000000),
+			coin.New("u/"+atomDenom, 40_000000),
 			types.ErrInsufficientCollateral,
 		}, {
 			"valid decollateralize",
 			supplier,
-			mkCoin("u/"+umeeDenom, 80_000000),
+			coin.New("u/"+umeeDenom, 80_000000),
 			nil,
 		}, {
 			"additional decollateralize",
 			supplier,
-			mkCoin("u/"+umeeDenom, 10_000000),
+			coin.New("u/"+umeeDenom, 10_000000),
 			nil,
 		}, {
 			"insufficient collateral",
 			supplier,
-			mkCoin("u/"+umeeDenom, 40_000000),
+			coin.New("u/"+umeeDenom, 40_000000),
 			types.ErrInsufficientCollateral,
 		}, {
 			"above borrow limit",
 			borrower,
-			mkCoin("u/"+atomDenom, 100_000000),
+			coin.New("u/"+atomDenom, 100_000000),
 			types.ErrUndercollaterized,
 		},
 
 		{
 			"acceptable decollateralize (dump borrower)",
 			dumpborrower,
-			mkCoin("u/"+pumpDenom, 20_000000),
+			coin.New("u/"+pumpDenom, 20_000000),
 			nil,
 		}, {
 			"above borrow limit (undercollateralized under historic prices but ok with current prices)",
 			dumpborrower,
-			mkCoin("u/"+pumpDenom, 20_000000),
+			coin.New("u/"+pumpDenom, 20_000000),
 			types.ErrUndercollaterized,
 		}, {
 			"acceptable decollateralize (pump borrower)",
 			pumpborrower,
-			mkCoin("u/"+dumpDenom, 20_000000),
+			coin.New("u/"+dumpDenom, 20_000000),
 			nil,
 		}, {
 			"above borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
-			mkCoin("u/"+dumpDenom, 20_000000),
+			coin.New("u/"+dumpDenom, 20_000000),
 			types.ErrUndercollaterized,
 		},
 	}
@@ -922,65 +922,65 @@ func (s *IntegrationTestSuite) TestMsgSupplyCollateral() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a supplier with 100 UMEE and 100 ATOM
-	supplier := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
 
 	// create and modify a borrower to force the uToken exchange rate of ATOM from 1 to 1.5
-	borrower := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(borrower, mkCoin(atomDenom, 100_000000))
-	s.collateralize(borrower, mkCoin("u/"+atomDenom, 100_000000))
-	s.borrow(borrower, mkCoin(atomDenom, 10_000000))
-	s.tk.SetBorrow(ctx, borrower, mkCoin(atomDenom, 60_000000))
+	borrower := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(borrower, coin.New(atomDenom, 100_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 100_000000))
+	s.borrow(borrower, coin.New(atomDenom, 10_000000))
+	s.tk.SetBorrow(ctx, borrower, coin.New(atomDenom, 60_000000))
 
 	// create a supplier that will exceed token's default MaxSupply
-	whale := s.newAccount(mkCoin(umeeDenom, 1_000_000_000000))
+	whale := s.newAccount(coin.New(umeeDenom, 1_000_000_000000))
 
 	tcs := []testCase{
 		{
 			"unregistered denom",
 			supplier,
-			mkCoin("abcd", 80_000000),
+			coin.New("abcd", 80_000000),
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
 		}, {
 			"uToken",
 			supplier,
-			mkCoin("u/"+umeeDenom, 80_000000),
+			coin.New("u/"+umeeDenom, 80_000000),
 			sdk.Coin{},
 			types.ErrUToken,
 		}, {
 			"no balance",
 			borrower,
-			mkCoin(umeeDenom, 20_000000),
+			coin.New(umeeDenom, 20_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
 		}, {
 			"insufficient balance",
 			supplier,
-			mkCoin(umeeDenom, 120_000000),
+			coin.New(umeeDenom, 120_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
 		}, {
 			"valid supply",
 			supplier,
-			mkCoin(umeeDenom, 80_000000),
-			mkCoin("u/"+umeeDenom, 80_000000),
+			coin.New(umeeDenom, 80_000000),
+			coin.New("u/"+umeeDenom, 80_000000),
 			nil,
 		}, {
 			"additional supply",
 			supplier,
-			mkCoin(umeeDenom, 20_000000),
-			mkCoin("u/"+umeeDenom, 20_000000),
+			coin.New(umeeDenom, 20_000000),
+			coin.New("u/"+umeeDenom, 20_000000),
 			nil,
 		}, {
 			"high exchange rate",
 			supplier,
-			mkCoin(atomDenom, 60_000000),
-			mkCoin("u/"+atomDenom, 40_000000),
+			coin.New(atomDenom, 60_000000),
+			coin.New("u/"+atomDenom, 40_000000),
 			nil,
 		}, {
 			"max supply",
 			whale,
-			mkCoin(umeeDenom, 1_000_000_000000),
+			coin.New(umeeDenom, 1_000_000_000000),
 			sdk.Coin{},
 			types.ErrMaxSupply,
 		},
@@ -1044,32 +1044,32 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a supplier which supplies 100 UMEE and 100 ATOM
-	supplier := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
-	s.supply(supplier, mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.supply(supplier, coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
 
 	// create a borrower which supplies and collateralizes 100 ATOM
-	borrower := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(borrower, mkCoin(atomDenom, 100_000000))
-	s.collateralize(borrower, mkCoin("u/"+atomDenom, 100_000000))
+	borrower := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(borrower, coin.New(atomDenom, 100_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 100_000000))
 
 	// create an additional supplier (DUMP, PUMP tokens)
-	surplus := s.newAccount(mkCoin(dumpDenom, 100_000000), mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(dumpDenom, 100_000000))
+	surplus := s.newAccount(coin.New(dumpDenom, 100_000000), coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(dumpDenom, 100_000000))
 
 	// this will be a DUMP (historic price 1.00, current price 0.50) borrower
 	// using PUMP (historic price 1.00, current price 2.00) collateral
-	dumpborrower := s.newAccount(mkCoin(pumpDenom, 100_000000))
-	s.supply(dumpborrower, mkCoin(pumpDenom, 100_000000))
-	s.collateralize(dumpborrower, mkCoin("u/"+pumpDenom, 100_000000))
+	dumpborrower := s.newAccount(coin.New(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin.New(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin.New("u/"+pumpDenom, 100_000000))
 	// collateral value is $200 (current) or $100 (historic)
 	// collateral weights are always 0.25 in testing
 
 	// this will be a PUMP (historic price 1.00, current price 2.00) borrower
 	// using DUMP (historic price 1.00, current price 0.50) collateral
-	pumpborrower := s.newAccount(mkCoin(dumpDenom, 100_000000))
-	s.supply(pumpborrower, mkCoin(dumpDenom, 100_000000))
-	s.collateralize(pumpborrower, mkCoin("u/"+dumpDenom, 100_000000))
+	pumpborrower := s.newAccount(coin.New(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin.New(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin.New("u/"+dumpDenom, 100_000000))
 	// collateral value is $50 (current) or $100 (historic)
 	// collateral weights are always 0.25 in testing
 
@@ -1077,67 +1077,67 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 		{
 			"uToken",
 			borrower,
-			mkCoin("u/"+umeeDenom, 100_000000),
+			coin.New("u/"+umeeDenom, 100_000000),
 			types.ErrUToken,
 		}, {
 			"unregistered token",
 			borrower,
-			mkCoin("abcd", 100_000000),
+			coin.New("abcd", 100_000000),
 			types.ErrNotRegisteredToken,
 		}, {
 			"lending pool insufficient",
 			borrower,
-			mkCoin(umeeDenom, 200_000000),
+			coin.New(umeeDenom, 200_000000),
 			types.ErrLendingPoolInsufficient,
 		}, {
 			"valid borrow",
 			borrower,
-			mkCoin(umeeDenom, 70_000000),
+			coin.New(umeeDenom, 70_000000),
 			nil,
 		}, {
 			"additional borrow",
 			borrower,
-			mkCoin(umeeDenom, 20_000000),
+			coin.New(umeeDenom, 20_000000),
 			nil,
 		}, {
 			"max supply utilization",
 			borrower,
-			mkCoin(umeeDenom, 10_000000),
+			coin.New(umeeDenom, 10_000000),
 			types.ErrMaxSupplyUtilization,
 		}, {
 			"atom borrow",
 			borrower,
-			mkCoin(atomDenom, 1_000000),
+			coin.New(atomDenom, 1_000000),
 			nil,
 		}, {
 			"borrow limit",
 			borrower,
-			mkCoin(atomDenom, 100_000000),
+			coin.New(atomDenom, 100_000000),
 			types.ErrUndercollaterized,
 		}, {
 			"zero collateral",
 			supplier,
-			mkCoin(atomDenom, 1_000000),
+			coin.New(atomDenom, 1_000000),
 			types.ErrUndercollaterized,
 		}, {
 			"dump borrower (acceptable)",
 			dumpborrower,
-			mkCoin(dumpDenom, 20_000000),
+			coin.New(dumpDenom, 20_000000),
 			nil,
 		}, {
 			"dump borrower (borrow limit)",
 			dumpborrower,
-			mkCoin(dumpDenom, 10_000000),
+			coin.New(dumpDenom, 10_000000),
 			types.ErrUndercollaterized,
 		}, {
 			"pump borrower (acceptable)",
 			pumpborrower,
-			mkCoin(pumpDenom, 5_000000),
+			coin.New(pumpDenom, 5_000000),
 			nil,
 		}, {
 			"pump borrower (borrow limit)",
 			pumpborrower,
-			mkCoin(pumpDenom, 2_000000),
+			coin.New(pumpDenom, 2_000000),
 			types.ErrUndercollaterized,
 		},
 	}
@@ -1191,32 +1191,32 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a supplier which supplies 100 UMEE and 100 ATOM
-	supplier := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
-	s.supply(supplier, mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.supply(supplier, coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
 
 	// create a borrower which supplies and collateralizes 100 ATOM
-	borrower := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(borrower, mkCoin(atomDenom, 100_000000))
-	s.collateralize(borrower, mkCoin("u/"+atomDenom, 100_000000))
+	borrower := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(borrower, coin.New(atomDenom, 100_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 100_000000))
 
 	// create an additional supplier (DUMP, PUMP tokens)
-	surplus := s.newAccount(mkCoin(dumpDenom, 100_000000), mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(pumpDenom, 100_000000))
-	s.supply(surplus, mkCoin(dumpDenom, 100_000000))
+	surplus := s.newAccount(coin.New(dumpDenom, 100_000000), coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(pumpDenom, 100_000000))
+	s.supply(surplus, coin.New(dumpDenom, 100_000000))
 
 	// this will be a DUMP (historic price 1.00, current price 0.50) borrower
 	// using PUMP (historic price 1.00, current price 2.00) collateral
-	dumpborrower := s.newAccount(mkCoin(pumpDenom, 100_000000))
-	s.supply(dumpborrower, mkCoin(pumpDenom, 100_000000))
-	s.collateralize(dumpborrower, mkCoin("u/"+pumpDenom, 100_000000))
+	dumpborrower := s.newAccount(coin.New(pumpDenom, 100_000000))
+	s.supply(dumpborrower, coin.New(pumpDenom, 100_000000))
+	s.collateralize(dumpborrower, coin.New("u/"+pumpDenom, 100_000000))
 	// collateral value is $200 (current) or $100 (historic)
 	// collateral weights are always 0.25 in testing
 
 	// this will be a PUMP (historic price 1.00, current price 2.00) borrower
 	// using DUMP (historic price 1.00, current price 0.50) collateral
-	pumpborrower := s.newAccount(mkCoin(dumpDenom, 100_000000))
-	s.supply(pumpborrower, mkCoin(dumpDenom, 100_000000))
-	s.collateralize(pumpborrower, mkCoin("u/"+dumpDenom, 100_000000))
+	pumpborrower := s.newAccount(coin.New(dumpDenom, 100_000000))
+	s.supply(pumpborrower, coin.New(dumpDenom, 100_000000))
+	s.collateralize(pumpborrower, coin.New("u/"+dumpDenom, 100_000000))
 	// collateral value is $50 (current) or $100 (historic)
 	// collateral weights are always 0.25 in testing
 
@@ -1229,37 +1229,37 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 		{
 			"uToken",
 			borrower,
-			mkCoin("u/"+umeeDenom, 0),
+			coin.New("u/"+umeeDenom, 0),
 			types.ErrUToken,
 		}, {
 			"unregistered token",
 			borrower,
-			mkCoin("abcd", 0),
+			coin.New("abcd", 0),
 			types.ErrNotRegisteredToken,
 		}, {
 			"zero collateral - should return zero",
 			supplier,
-			mkCoin(atomDenom, 0),
+			coin.New(atomDenom, 0),
 			nil,
 		}, {
 			"atom borrow",
 			borrower,
-			mkCoin(atomDenom, 25_000000),
+			coin.New(atomDenom, 25_000000),
 			nil,
 		}, {
 			"already borrowed max - should return zero",
 			borrower,
-			mkCoin(atomDenom, 0),
+			coin.New(atomDenom, 0),
 			nil,
 		}, {
 			"dump borrower",
 			dumpborrower,
-			mkCoin(dumpDenom, 25_000000),
+			coin.New(dumpDenom, 25_000000),
 			nil,
 		}, {
 			"pump borrower",
 			pumpborrower,
-			mkCoin(pumpDenom, 6_250000),
+			coin.New(pumpDenom, 6_250000),
 			nil,
 		},
 	}
@@ -1314,17 +1314,17 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a borrower which supplies and collateralizes UMEE, then borrows 10 UMEE
-	borrower := s.newAccount(mkCoin(umeeDenom, 200_000000))
-	s.supply(borrower, mkCoin(umeeDenom, 150_000000))
-	s.collateralize(borrower, mkCoin("u/"+umeeDenom, 120_000000))
-	s.borrow(borrower, mkCoin(umeeDenom, 10_000000))
+	borrower := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(borrower, coin.New(umeeDenom, 150_000000))
+	s.collateralize(borrower, coin.New("u/"+umeeDenom, 120_000000))
+	s.borrow(borrower, coin.New(umeeDenom, 10_000000))
 
 	// create and fund a borrower which engages in a supply->borrow->supply loop
-	looper := s.newAccount(mkCoin(umeeDenom, 50_000000))
-	s.supply(looper, mkCoin(umeeDenom, 50_000000))
-	s.collateralize(looper, mkCoin("u/"+umeeDenom, 50_000000))
-	s.borrow(looper, mkCoin(umeeDenom, 5_000000))
-	s.supply(looper, mkCoin(umeeDenom, 5_000000))
+	looper := s.newAccount(coin.New(umeeDenom, 50_000000))
+	s.supply(looper, coin.New(umeeDenom, 50_000000))
+	s.collateralize(looper, coin.New("u/"+umeeDenom, 50_000000))
+	s.borrow(looper, coin.New(umeeDenom, 5_000000))
+	s.supply(looper, coin.New(umeeDenom, 5_000000))
 
 	tcs := []struct {
 		msg           string
@@ -1336,43 +1336,43 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 		{
 			"should not accept uToken repay",
 			borrower,
-			mkCoin("u/"+umeeDenom, 100_000000),
+			coin.New("u/"+umeeDenom, 100_000000),
 			sdk.Coin{},
 			types.ErrUToken,
 		}, {
 			"unregistered token",
 			borrower,
-			mkCoin("abcd", 100_000000),
+			coin.New("abcd", 100_000000),
 			coin.Zero("abcd"),
 			nil,
 		}, {
 			"not borrowed",
 			borrower,
-			mkCoin(atomDenom, 100_000000),
+			coin.New(atomDenom, 100_000000),
 			coin.Zero(atomDenom),
 			nil,
 		}, {
 			"valid repay",
 			borrower,
-			mkCoin(umeeDenom, 1_000000),
-			mkCoin(umeeDenom, 1_000000),
+			coin.New(umeeDenom, 1_000000),
+			coin.New(umeeDenom, 1_000000),
 			nil,
 		}, {
 			"additional repay",
 			borrower,
-			mkCoin(umeeDenom, 3_000000),
-			mkCoin(umeeDenom, 3_000000),
+			coin.New(umeeDenom, 3_000000),
+			coin.New(umeeDenom, 3_000000),
 			nil,
 		}, {
 			"overpay",
 			borrower,
-			mkCoin(umeeDenom, 30_000000),
-			mkCoin(umeeDenom, 6_000000),
+			coin.New(umeeDenom, 30_000000),
+			coin.New(umeeDenom, 6_000000),
 			nil,
 		}, {
 			"insufficient balance",
 			looper,
-			mkCoin(umeeDenom, 1_000000),
+			coin.New(umeeDenom, 1_000000),
 			sdk.Coin{},
 			sdkerrors.ErrInsufficientFunds,
 		},
@@ -1439,52 +1439,52 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a liquidator which supplies plenty of UMEE and ATOM to the module
-	supplier := s.newAccount(mkCoin(umeeDenom, 1000_000000), mkCoin(atomDenom, 1000_000000))
-	s.supply(supplier, mkCoin(umeeDenom, 1000_000000), mkCoin(atomDenom, 1000_000000))
+	supplier := s.newAccount(coin.New(umeeDenom, 1000_000000), coin.New(atomDenom, 1000_000000))
+	s.supply(supplier, coin.New(umeeDenom, 1000_000000), coin.New(atomDenom, 1000_000000))
 
 	// create and fund a liquidator which has 1000 UMEE and 1000 ATOM
-	liquidator := s.newAccount(mkCoin(umeeDenom, 1000_000000), mkCoin(atomDenom, 1000_000000))
+	liquidator := s.newAccount(coin.New(umeeDenom, 1000_000000), coin.New(atomDenom, 1000_000000))
 
 	// create a healthy borrower
-	healthyBorrower := s.newAccount(mkCoin(umeeDenom, 100_000000))
-	s.supply(healthyBorrower, mkCoin(umeeDenom, 100_000000))
-	s.collateralize(healthyBorrower, mkCoin("u/"+umeeDenom, 100_000000))
-	s.borrow(healthyBorrower, mkCoin(umeeDenom, 10_000000))
+	healthyBorrower := s.newAccount(coin.New(umeeDenom, 100_000000))
+	s.supply(healthyBorrower, coin.New(umeeDenom, 100_000000))
+	s.collateralize(healthyBorrower, coin.New("u/"+umeeDenom, 100_000000))
+	s.borrow(healthyBorrower, coin.New(umeeDenom, 10_000000))
 
 	// create a borrower which supplies and collateralizes 1000 ATOM
-	atomBorrower := s.newAccount(mkCoin(atomDenom, 1000_000000))
-	s.supply(atomBorrower, mkCoin(atomDenom, 1000_000000))
-	s.collateralize(atomBorrower, mkCoin("u/"+atomDenom, 1000_000000))
+	atomBorrower := s.newAccount(coin.New(atomDenom, 1000_000000))
+	s.supply(atomBorrower, coin.New(atomDenom, 1000_000000))
+	s.collateralize(atomBorrower, coin.New("u/"+atomDenom, 1000_000000))
 	// artificially borrow 500 ATOM - this can be liquidated without bad debt
-	s.forceBorrow(atomBorrower, mkCoin(atomDenom, 500_000000))
+	s.forceBorrow(atomBorrower, coin.New(atomDenom, 500_000000))
 
 	// create a borrower which collateralizes 110 UMEE
-	umeeBorrower := s.newAccount(mkCoin(umeeDenom, 300_000000))
-	s.supply(umeeBorrower, mkCoin(umeeDenom, 200_000000))
-	s.collateralize(umeeBorrower, mkCoin("u/"+umeeDenom, 110_000000))
+	umeeBorrower := s.newAccount(coin.New(umeeDenom, 300_000000))
+	s.supply(umeeBorrower, coin.New(umeeDenom, 200_000000))
+	s.collateralize(umeeBorrower, coin.New("u/"+umeeDenom, 110_000000))
 	// artificially borrow 200 UMEE - this will create a bad debt when liquidated
-	s.forceBorrow(umeeBorrower, mkCoin(umeeDenom, 200_000000))
+	s.forceBorrow(umeeBorrower, coin.New(umeeDenom, 200_000000))
 
 	// creates a complex borrower with multiple denoms active
-	complexBorrower := s.newAccount(mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
-	s.supply(complexBorrower, mkCoin(umeeDenom, 100_000000), mkCoin(atomDenom, 100_000000))
-	s.collateralize(complexBorrower, mkCoin("u/"+umeeDenom, 100_000000), mkCoin("u/"+atomDenom, 100_000000))
+	complexBorrower := s.newAccount(coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.supply(complexBorrower, coin.New(umeeDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.collateralize(complexBorrower, coin.New("u/"+umeeDenom, 100_000000), coin.New("u/"+atomDenom, 100_000000))
 	// artificially borrow multiple denoms
-	s.forceBorrow(complexBorrower, mkCoin(atomDenom, 30_000000), mkCoin(umeeDenom, 30_000000))
+	s.forceBorrow(complexBorrower, coin.New(atomDenom, 30_000000), coin.New(umeeDenom, 30_000000))
 
 	// creates a realistic borrower with 400 UMEE collateral which will have a close factor < 1
-	closeBorrower := s.newAccount(mkCoin(umeeDenom, 400_000000))
-	s.supply(closeBorrower, mkCoin(umeeDenom, 400_000000))
-	s.collateralize(closeBorrower, mkCoin("u/"+umeeDenom, 400_000000))
+	closeBorrower := s.newAccount(coin.New(umeeDenom, 400_000000))
+	s.supply(closeBorrower, coin.New(umeeDenom, 400_000000))
+	s.collateralize(closeBorrower, coin.New("u/"+umeeDenom, 400_000000))
 	// artificially borrow just barely above liquidation threshold to simulate interest accruing
-	s.forceBorrow(closeBorrower, mkCoin(umeeDenom, 102_000000))
+	s.forceBorrow(closeBorrower, coin.New(umeeDenom, 102_000000))
 
 	tcs := []testCase{
 		{
 			"healthy borrower",
 			liquidator,
 			healthyBorrower,
-			mkCoin(atomDenom, 1_000000),
+			coin.New(atomDenom, 1_000000),
 			atomDenom,
 			sdk.Coin{},
 			sdk.Coin{},
@@ -1494,7 +1494,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			"not borrowed denom",
 			liquidator,
 			umeeBorrower,
-			mkCoin(atomDenom, 1_000000),
+			coin.New(atomDenom, 1_000000),
 			atomDenom,
 			sdk.Coin{},
 			sdk.Coin{},
@@ -1504,61 +1504,61 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			"direct atom liquidation",
 			liquidator,
 			atomBorrower,
-			mkCoin(atomDenom, 100_000000),
+			coin.New(atomDenom, 100_000000),
 			atomDenom,
-			mkCoin(atomDenom, 100_000000),
-			mkCoin("u/"+atomDenom, 109_000000),
-			mkCoin(atomDenom, 109_000000),
+			coin.New(atomDenom, 100_000000),
+			coin.New("u/"+atomDenom, 109_000000),
+			coin.New(atomDenom, 109_000000),
 			nil,
 		}, {
 			"u/atom liquidation",
 			liquidator,
 			atomBorrower,
-			mkCoin(atomDenom, 100_000000),
+			coin.New(atomDenom, 100_000000),
 			"u/" + atomDenom,
-			mkCoin(atomDenom, 100_000000),
-			mkCoin("u/"+atomDenom, 110_000000),
-			mkCoin("u/"+atomDenom, 110_000000),
+			coin.New(atomDenom, 100_000000),
+			coin.New("u/"+atomDenom, 110_000000),
+			coin.New("u/"+atomDenom, 110_000000),
 			nil,
 		}, {
 			"complete u/atom liquidation",
 			liquidator,
 			atomBorrower,
-			mkCoin(atomDenom, 500_000000),
+			coin.New(atomDenom, 500_000000),
 			"u/" + atomDenom,
-			mkCoin(atomDenom, 300_000000),
-			mkCoin("u/"+atomDenom, 330_000000),
-			mkCoin("u/"+atomDenom, 330_000000),
+			coin.New(atomDenom, 300_000000),
+			coin.New("u/"+atomDenom, 330_000000),
+			coin.New("u/"+atomDenom, 330_000000),
 			nil,
 		}, {
 			"bad debt u/umee liquidation",
 			liquidator,
 			umeeBorrower,
-			mkCoin(umeeDenom, 200_000000),
+			coin.New(umeeDenom, 200_000000),
 			"u/" + umeeDenom,
-			mkCoin(umeeDenom, 100_000000),
-			mkCoin("u/"+umeeDenom, 110_000000),
-			mkCoin("u/"+umeeDenom, 110_000000),
+			coin.New(umeeDenom, 100_000000),
+			coin.New("u/"+umeeDenom, 110_000000),
+			coin.New("u/"+umeeDenom, 110_000000),
 			nil,
 		}, {
 			"complex borrower",
 			liquidator,
 			complexBorrower,
-			mkCoin(umeeDenom, 200_000000),
+			coin.New(umeeDenom, 200_000000),
 			"u/" + atomDenom,
-			mkCoin(umeeDenom, 30_000000),
-			mkCoin("u/"+atomDenom, 3_527932),
-			mkCoin("u/"+atomDenom, 3_527932),
+			coin.New(umeeDenom, 30_000000),
+			coin.New("u/"+atomDenom, 3_527932),
+			coin.New("u/"+atomDenom, 3_527932),
 			nil,
 		}, {
 			"close factor < 1",
 			liquidator,
 			closeBorrower,
-			mkCoin(umeeDenom, 200_000000),
+			coin.New(umeeDenom, 200_000000),
 			"u/" + umeeDenom,
-			mkCoin(umeeDenom, 7_752000),
-			mkCoin("u/"+umeeDenom, 8_527200),
-			mkCoin("u/"+umeeDenom, 8_527200),
+			coin.New(umeeDenom, 7_752000),
+			coin.New("u/"+umeeDenom, 8_527200),
+			coin.New("u/"+umeeDenom, 8_527200),
 			nil,
 		},
 	}
@@ -1671,23 +1671,23 @@ func (s *IntegrationTestSuite) TestMaxCollateralShare() {
 	// ATOM $39.38
 
 	// create a supplier to collateralize 100 UMEE, worth $421.00
-	umeeSupplier := s.newAccount(mkCoin(umeeDenom, 100_000000))
-	s.supply(umeeSupplier, mkCoin(umeeDenom, 100_000000))
-	s.collateralize(umeeSupplier, mkCoin("u/"+umeeDenom, 100_000000))
+	umeeSupplier := s.newAccount(coin.New(umeeDenom, 100_000000))
+	s.supply(umeeSupplier, coin.New(umeeDenom, 100_000000))
+	s.collateralize(umeeSupplier, coin.New("u/"+umeeDenom, 100_000000))
 
 	// create an ATOM supplier
-	atomSupplier := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(atomSupplier, mkCoin(atomDenom, 100_000000))
+	atomSupplier := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin.New(atomDenom, 100_000000))
 
 	// collateralize 1.18 ATOM, worth $46.46, with no error.
 	// total collateral value (across all denoms) will be $467.46
 	// so ATOM's collateral share ($46.46 / $467.46) is barely below 10%
-	s.collateralize(atomSupplier, mkCoin("u/"+atomDenom, 1_180000))
+	s.collateralize(atomSupplier, coin.New("u/"+atomDenom, 1_180000))
 
 	// attempt to collateralize another 0.01 ATOM, which would result in too much collateral share for ATOM
 	msg := &types.MsgCollateralize{
 		Borrower: atomSupplier.String(),
-		Asset:    mkCoin("u/"+atomDenom, 10000),
+		Asset:    coin.New("u/"+atomDenom, 10000),
 	}
 	_, err = srv.Collateralize(ctx, msg)
 	require.ErrorIs(err, types.ErrMaxCollateralShare)
@@ -1703,22 +1703,22 @@ func (s *IntegrationTestSuite) TestMinCollateralLiquidity() {
 	s.registerToken(umee)
 
 	// create a supplier to collateralize 100 UMEE
-	umeeSupplier := s.newAccount(mkCoin(umeeDenom, 100_000000))
-	s.supply(umeeSupplier, mkCoin(umeeDenom, 100_000000))
-	s.collateralize(umeeSupplier, mkCoin("u/"+umeeDenom, 100_000000))
+	umeeSupplier := s.newAccount(coin.New(umeeDenom, 100_000000))
+	s.supply(umeeSupplier, coin.New(umeeDenom, 100_000000))
+	s.collateralize(umeeSupplier, coin.New("u/"+umeeDenom, 100_000000))
 
 	// create an ATOM supplier and borrow 49 UMEE
-	atomSupplier := s.newAccount(mkCoin(atomDenom, 100_000000))
-	s.supply(atomSupplier, mkCoin(atomDenom, 100_000000))
-	s.collateralize(atomSupplier, mkCoin("u/"+atomDenom, 100_000000))
-	s.borrow(atomSupplier, mkCoin(umeeDenom, 49_000000))
+	atomSupplier := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin.New(atomDenom, 100_000000))
+	s.collateralize(atomSupplier, coin.New("u/"+atomDenom, 100_000000))
+	s.borrow(atomSupplier, coin.New(umeeDenom, 49_000000))
 
 	// collateral liquidity (liquidity / collateral) of UMEE is 51/100
 
 	// withdrawal would reduce collateral liquidity to 41/90
 	msg1 := &types.MsgWithdraw{
 		Supplier: umeeSupplier.String(),
-		Asset:    mkCoin("u/"+umeeDenom, 10_000000),
+		Asset:    coin.New("u/"+umeeDenom, 10_000000),
 	}
 	_, err = srv.Withdraw(ctx, msg1)
 	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "withdraw")
@@ -1726,7 +1726,7 @@ func (s *IntegrationTestSuite) TestMinCollateralLiquidity() {
 	// borrow would reduce collateral liquidity to 41/100
 	msg2 := &types.MsgBorrow{
 		Borrower: umeeSupplier.String(),
-		Asset:    mkCoin(umeeDenom, 10_000000),
+		Asset:    coin.New(umeeDenom, 10_000000),
 	}
 	_, err = srv.Borrow(ctx, msg2)
 	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "borrow")
@@ -1742,22 +1742,22 @@ func (s *IntegrationTestSuite) TestMinCollateralLiquidity_Collateralize() {
 	s.registerToken(umee)
 
 	// create a supplier to supply 200 UMEE, and collateralize 100 UMEE
-	umeeSupplier := s.newAccount(mkCoin(umeeDenom, 200))
-	s.supply(umeeSupplier, mkCoin(umeeDenom, 200))
-	s.collateralize(umeeSupplier, mkCoin("u/"+umeeDenom, 100))
+	umeeSupplier := s.newAccount(coin.New(umeeDenom, 200))
+	s.supply(umeeSupplier, coin.New(umeeDenom, 200))
+	s.collateralize(umeeSupplier, coin.New("u/"+umeeDenom, 100))
 
 	// create an ATOM supplier and borrow 149 UMEE
-	atomSupplier := s.newAccount(mkCoin(atomDenom, 100))
-	s.supply(atomSupplier, mkCoin(atomDenom, 100))
-	s.collateralize(atomSupplier, mkCoin("u/"+atomDenom, 100))
-	s.borrow(atomSupplier, mkCoin(umeeDenom, 149))
+	atomSupplier := s.newAccount(coin.New(atomDenom, 100))
+	s.supply(atomSupplier, coin.New(atomDenom, 100))
+	s.collateralize(atomSupplier, coin.New("u/"+atomDenom, 100))
+	s.borrow(atomSupplier, coin.New(umeeDenom, 149))
 
 	// collateral liquidity (liquidity / collateral) of UMEE is 51/100
 
 	// collateralize would reduce collateral liquidity to 51/200
 	msg := &types.MsgCollateralize{
 		Borrower: umeeSupplier.String(),
-		Asset:    mkCoin("u/"+umeeDenom, 100),
+		Asset:    coin.New("u/"+umeeDenom, 100),
 	}
 	_, err = srv.Collateralize(ctx, msg)
 	require.ErrorIs(err, types.ErrMinCollateralLiquidity, "collateralize")
