@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -172,10 +173,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		"interest", totalInterest.String(),
 		"reserved", newReserves.String(),
 	)
-	return ctx.EventManager().EmitTypedEvent(&types.EventInterestAccrual{
+	sdkutil.Emit(&ctx, &types.EventInterestAccrual{
 		BlockHeight:   uint64(ctx.BlockHeight()),
 		Timestamp:     uint64(currentTime),
 		TotalInterest: totalInterest,
 		Reserved:      newReserves,
 	})
+	return nil
 }

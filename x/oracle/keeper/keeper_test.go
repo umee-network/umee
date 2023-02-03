@@ -206,8 +206,7 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
 
 func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
 	app, ctx := s.app, s.ctx
-	err := app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, sdk.OneDec())
-	s.Require().NoError(err)
+	app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, sdk.OneDec())
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, sdk.OneDec())
