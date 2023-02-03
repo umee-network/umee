@@ -228,7 +228,7 @@ func (p *MexcProvider) getCandlePrices(key string) ([]types.CandlePrice, error) 
 	return candleList, nil
 }
 
-func (p *MexcProvider) messageReceived(_ int, bz []byte) {
+func (p *MexcProvider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	var (
 		tickerResp MexcTickerResponse
 		tickerErr  error

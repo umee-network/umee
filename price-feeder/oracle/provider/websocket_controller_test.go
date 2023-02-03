@@ -11,7 +11,7 @@ type TestProvider struct {
 	handlerCalled bool
 }
 
-func (mp *TestProvider) messageHandler(int, []byte) {
+func (mp *TestProvider) messageHandler(int, *WebsocketConnection, []byte) {
 	mp.handlerCalled = true
 }
 

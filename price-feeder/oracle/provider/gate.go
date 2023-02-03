@@ -250,7 +250,7 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice,
 	return types.TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
 }
 
-func (p *GateProvider) messageReceived(_ int, bz []byte) {
+func (p *GateProvider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	var (
 		gateEvent GateEvent
 		gateErr   error

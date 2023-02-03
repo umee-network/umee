@@ -208,7 +208,7 @@ func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string
 // messageReceived handles the received data from the Huobi websocket. All return
 // data of websocket Market APIs are compressed with GZIP so they need to be
 // decompressed.
-func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
+func (p *HuobiProvider) messageReceived(messageType int, conn *WebsocketConnection, bz []byte) {
 	if messageType != websocket.BinaryMessage {
 		return
 	}
@@ -219,11 +219,6 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 		return
 	}
 
-	if bytes.Contains(bz, ping) {
-		p.pong(bz)
-		return
-	}
-
 	var (
 		tickerResp    HuobiTicker
 		tickerErr     error
@@ -231,6 +226,11 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 		candleErr     error
 		subscribeResp HuobiSubscriptionResp
 	)
+
+	if bytes.Contains(bz, ping) {
+		p.pong(conn, bz)
+		return
+	}
 
 	// sometimes the message received is not a ticker or a candle response.
 	tickerErr = json.Unmarshal(bz, &tickerResp)
@@ -260,13 +260,13 @@ func (p *HuobiProvider) messageReceived(messageType int, bz []byte) {
 		Msg("Error on receive message")
 }
 
-// pong return a heartbeat message when a "ping" is received and reset the
+// pongReceived return a heartbeat message when a "ping" is received and reset the
 // reconnect ticker because the connection is alive. After connected to Huobi's
 // Websocket server, the server will send heartbeat periodically (5s interval).
 // When client receives an heartbeat message, it should respond with a matching
 // "pong" message which has the same integer in it, e.g. {"ping": 1492420473027}
 // and then the return pong message should be {"pong": 1492420473027}.
-func (p *HuobiProvider) pong(bz []byte) {
+func (p *HuobiProvider) pong(conn *WebsocketConnection, bz []byte) {
 	var heartbeat struct {
 		Ping uint64 `json:"ping"`
 	}
@@ -276,12 +276,10 @@ func (p *HuobiProvider) pong(bz []byte) {
 		return
 	}
 
-	for _, conn := range p.wsc.connections {
-		if err := conn.SendJSON(struct {
-			Pong uint64 `json:"pong"`
-		}{Pong: heartbeat.Ping}); err != nil {
-			p.logger.Err(err).Msg("could not send pong message back")
-		}
+	if err := conn.SendJSON(struct {
+		Pong uint64 `json:"pong"`
+	}{Pong: heartbeat.Ping}); err != nil {
+		p.logger.Err(err).Msg("could not send pong message back")
 	}
 }
 

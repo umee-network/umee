@@ -238,7 +238,7 @@ func (p *KrakenProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 }
 
 // messageReceived handles any message sent by the provider.
-func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
+func (p *KrakenProvider) messageReceived(messageType int, _ *WebsocketConnection, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
 	}

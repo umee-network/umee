@@ -246,7 +246,7 @@ func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePric
 	return candleList, nil
 }
 
-func (p *OkxProvider) messageReceived(_ int, bz []byte) {
+func (p *OkxProvider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	var (
 		tickerResp OkxTickerResponse
 		tickerErr  error

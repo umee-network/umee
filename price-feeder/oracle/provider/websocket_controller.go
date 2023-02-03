@@ -23,7 +23,7 @@ const (
 )
 
 type (
-	MessageHandler func(int, []byte)
+	MessageHandler func(int, *WebsocketConnection, []byte)
 
 	// WebsocketController defines a provider agnostic websocket handler
 	// that manages reconnecting, subscribing, and receiving messages
@@ -274,7 +274,8 @@ func (conn *WebsocketConnection) readSuccess(messageType int, bz []byte) {
 	if string(bz) == "pong" {
 		return
 	}
-	conn.messageHandler(messageType, bz)
+
+	conn.messageHandler(messageType, conn, bz)
 }
 
 // close sends a close message to the websocket and sets the client to nil
