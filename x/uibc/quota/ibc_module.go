@@ -4,150 +4,66 @@ import (
 	"encoding/json"
 
 	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
-	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
 
 type IBCMiddleware struct {
-	app    porttypes.IBCModule
+	porttypes.IBCModule
 	keeper keeper.Keeper
+	cdc    codec.JSONCodec
 }
 
 // NewIBCMiddleware creates a new IBCMiddlware given the keeper and underlying application
-func NewIBCMiddleware(app porttypes.IBCModule, k keeper.Keeper) IBCMiddleware {
+func NewIBCMiddleware(app porttypes.IBCModule, k keeper.Keeper, cdc codec.JSONCodec) IBCMiddleware {
 	return IBCMiddleware{
-		app:    app,
-		keeper: k,
+		IBCModule: app,
+		keeper:    k,
+		cdc:       cdc,
 	}
-}
-
-// OnChanOpenInit implements types.Middleware
-func (im IBCMiddleware) OnChanOpenInit(ctx sdk.Context, order channeltypes.Order, connectionHops []string,
-	portID string, channelID string, channelCap *capabilitytypes.Capability, counterparty channeltypes.Counterparty,
-	version string,
-) (string, error) {
-	return im.app.OnChanOpenInit(
-		ctx,
-		order,
-		connectionHops,
-		portID,
-		channelID,
-		channelCap,
-		counterparty,
-		version,
-	)
-}
-
-// OnChanOpenTry implements types.Middleware
-func (im IBCMiddleware) OnChanOpenTry(
-	ctx sdk.Context,
-	order channeltypes.Order,
-	connectionHops []string,
-	portID string, channelID string,
-	channelCap *capabilitytypes.Capability, counterparty channeltypes.Counterparty,
-	counterpartyVersion string) (version string, err error) {
-	return im.app.OnChanOpenTry(
-		ctx, order, connectionHops, portID, channelID, channelCap,
-		counterparty, counterpartyVersion,
-	)
-}
-
-// OnChanOpenAck implements types.Middleware
-func (im IBCMiddleware) OnChanOpenAck(ctx sdk.Context, portID string, channelID string, counterpartyChannelID string,
-	counterpartyVersion string,
-) error {
-	return im.app.OnChanOpenAck(ctx, portID, channelID, counterpartyChannelID, counterpartyVersion)
-}
-
-// OnChanOpenConfirm implements types.Middleware
-func (im IBCMiddleware) OnChanOpenConfirm(ctx sdk.Context, portID string, channelID string) error {
-	return im.app.OnChanOpenConfirm(ctx, portID, channelID)
-}
-
-// OnChanCloseInit implements types.Middleware
-func (im IBCMiddleware) OnChanCloseInit(ctx sdk.Context, portID string, channelID string) error {
-	return im.app.OnChanCloseInit(ctx, portID, channelID)
-}
-
-// OnChanCloseConfirm implements types.Middleware
-func (im IBCMiddleware) OnChanCloseConfirm(ctx sdk.Context, portID string, channelID string) error {
-	return im.app.OnChanCloseConfirm(ctx, portID, channelID)
-}
-
-// OnRecvPacket implements types.Middleware
-func (im IBCMiddleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
-) exported.Acknowledgement {
-	// if this returns an Acknowledgement that isn't successful, all state changes are discarded
-	return im.app.OnRecvPacket(ctx, packet, relayer)
 }
 
 // OnAcknowledgementPacket implements types.Middleware
 func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
 	relayer sdk.AccAddress,
 ) error {
-	// TODO: recheck the ibc acknowledgement error handling
 	var ack channeltypes.Acknowledgement
-	if err := json.Unmarshal(acknowledgement, &ack); err != nil {
-		return sdkerrors.ErrUnknownRequest.Wrapf("cannot unmarshal ICS-20 transfer packet acknowledgement: %v", err)
+	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
+		return sdkerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
+	}
+	switch ack.Response.(type) {
+	case *channeltypes.Acknowledgement_Error:
+		err := im.RevertQuotaUpdate(ctx, packet.Data)
+		emitOnRevertQuota(ctx, "acknowledgement", packet.Data, err)
 	}
 
-	if isAckError(acknowledgement) {
-		err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
-		if err != nil {
-			_ = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
-				Module:      uibc.ModuleName,
-				FailureType: "acknowledgment",
-				Packet:      string(packet.GetData()),
-			})
-		}
-	}
-
-	return im.app.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
-}
-
-// IsAckError checks an IBC acknowledgement to see if it's an error.
-// This is a replacement for ack.Success() which is currently not working on some circumstances
-func isAckError(acknowledgement []byte) bool {
-	var ackErr channeltypes.Acknowledgement_Error
-	if err := json.Unmarshal(acknowledgement, &ackErr); err == nil && len(ackErr.Error) > 0 {
-		return true
-	}
-	return false
+	return im.IBCModule.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
 }
 
 // OnTimeoutPacket implements types.Middleware
 func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
-	err := im.RevertSentPacket(ctx, packet) // If there is an error here we should still handle the timeout
-	if err != nil {
-		if err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
-			Module:      uibc.ModuleName,
-			FailureType: "timeout",
-			Packet:      string(packet.GetData()),
-		}); err != nil {
-			return err
-		}
-	}
-	return im.app.OnTimeoutPacket(ctx, packet, relayer)
+	err := im.RevertQuotaUpdate(ctx, packet.Data)
+	emitOnRevertQuota(ctx, "timeout", packet.Data, err)
+
+	return im.IBCModule.OnTimeoutPacket(ctx, packet, relayer)
 }
 
-// RevertSentPacket Notifies the contract that a sent packet wasn't properly received
-func (im IBCMiddleware) RevertSentPacket(
+// RevertQuotaUpdate Notifies the contract that a sent packet wasn't properly received
+func (im IBCMiddleware) RevertQuotaUpdate(
 	ctx sdk.Context,
-	packet channeltypes.Packet,
+	packetData []byte,
 ) error {
 	var data transfertypes.FungibleTokenPacketData
-	if err := json.Unmarshal(packet.GetData(), &data); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest,
-			"cannot unmarshal ICS-20 transfer packet data: %s", err.Error(),
-		)
+	if err := im.cdc.UnmarshalJSON(packetData, &data); err != nil {
+		return sdkerrors.Wrap(err,
+			"cannot unmarshal ICS-20 transfer packet data")
 	}
 
 	amount, ok := sdkmath.NewIntFromString(data.Amount)
@@ -155,11 +71,7 @@ func (im IBCMiddleware) RevertSentPacket(
 		return sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", data.Amount)
 	}
 
-	return im.keeper.UndoUpdateQuota(
-		ctx,
-		data.Denom,
-		amount,
-	)
+	return im.keeper.UndoUpdateQuota(ctx, data.Denom, amount)
 }
 
 func ValidateReceiverAddress(packet channeltypes.Packet) error {
@@ -173,4 +85,20 @@ func ValidateReceiverAddress(packet channeltypes.Packet) error {
 		)
 	}
 	return nil
+}
+
+// emitOnRevertQuota emits events related to quota update revert.
+// packetData is ICS 20 packet data bytes.
+func emitOnRevertQuota(ctx sdk.Context, failureType string, packetData []byte, err error) {
+	if err == nil {
+		return
+	}
+	logger := ctx.Logger()
+	logger.Error("revert quota update error", "err", err)
+	err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
+		Module:      uibc.ModuleName,
+		FailureType: failureType,
+		Packet:      string(packetData),
+	})
+	logger.Error("emit evenet error", "err", err)
 }
