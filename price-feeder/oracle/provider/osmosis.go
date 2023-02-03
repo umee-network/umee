@@ -73,9 +73,7 @@ func NewOsmosisProvider(endpoint Endpoint) *OsmosisProvider {
 }
 
 // SubscribeCurrencyPairs performs a no-op since osmosis does not use websockets
-func (OsmosisProvider) SubscribeCurrencyPairs(...types.CurrencyPair) error {
-	return nil
-}
+func (OsmosisProvider) SubscribeCurrencyPairs(...types.CurrencyPair) {}
 
 func (p OsmosisProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	path := fmt.Sprintf("%s%s/all", p.baseURL, osmosisTokenEndpoint)

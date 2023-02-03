@@ -99,7 +99,7 @@ func NewOsmosisV2Provider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderOsmosisV2,
+		endpoints.Name,
 		wsURL,
 		[]interface{}{""},
 		provider.messageReceived,
@@ -107,19 +107,18 @@ func NewOsmosisV2Provider(
 		websocket.PingMessage,
 		osmosisV2Logger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
 	p.setSubscribedPairs(cps...)
-	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
@@ -209,7 +208,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	return candleList, nil
 }
 
-func (p *OsmosisV2Provider) messageReceived(_ int, bz []byte) {
+func (p *OsmosisV2Provider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	// check if message is an ack first
 	if string(bz) == "ack" {
 		return

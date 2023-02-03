@@ -92,6 +92,7 @@ quote = "USDT"
 base = "ATOM"
 providers = [
   "kraken",
+  "binanceus",
 ]
 quote = "USD"
 
@@ -155,6 +156,7 @@ quote = "USD"
 base = "JUNO"
 providers = [
   "bitget",
+  "mexc",
 ]
 quote = "USDT"
 
@@ -194,6 +196,7 @@ quote = "ATOM"
 base = "OSMO"
 providers = [
   "bitget",
+  "gate",
 ]
 quote = "USDT"
 
