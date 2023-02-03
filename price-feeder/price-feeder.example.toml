@@ -51,10 +51,6 @@ base = "OSMO"
 threshold = "2"
 
 [[deviation_thresholds]]
-base = "BTC"
-threshold = "1.5"
-
-[[deviation_thresholds]]
 base = "stATOM"
 threshold = "2"
 
@@ -209,21 +205,6 @@ providers = [
 quote = "USD"
 
 [[currency_pairs]]
-base = "BTC"
-providers = [
-  "coinbase",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "huobi",
-  "kraken",
-]
-quote = "USDT"
-
-[[currency_pairs]]
 base = "stATOM"
 providers = [
   "osmosisv2",
@@ -245,13 +226,13 @@ providers = [
 quote = "OSMO"
 
 [account]
-address = "umee15nejfgcaanqpw25ru4arvfd0fwy6j8clccvwx4"
+address = "umee1zypqa76je7pxsdwkfah6mu9a583sju6xjavygg"
 chain_id = "umee-local-testnet"
-validator = "umeevaloper12tysz6mzrawenca2t3t7ltym4hfjj8a5upsn2k"
+validator = "umeevaloper1zypqa76je7pxsdwkfah6mu9a583sju6xjettez"
 
 [keyring]
 backend = "test"
-dir = "/Users/username/.umee"
+dir = "/Users/ryanbajollari/.umee"
 
 [rpc]
 grpc_endpoint = "localhost:9090"
