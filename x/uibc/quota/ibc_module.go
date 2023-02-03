@@ -95,10 +95,11 @@ func emitOnRevertQuota(ctx sdk.Context, failureType string, packetData []byte, e
 	}
 	logger := ctx.Logger()
 	logger.Error("revert quota update error", "err", err)
-	err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
+	if err = ctx.EventManager().EmitTypedEvent(&uibc.EventBadRevert{
 		Module:      uibc.ModuleName,
 		FailureType: failureType,
 		Packet:      string(packetData),
-	})
-	logger.Error("emit evenet error", "err", err)
+	}); err != nil {
+		logger.Error("emit event error", "err", err)
+	}
 }
