@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/umee-network/umee/price-feeder/v2/config"
 	"github.com/umee-network/umee/price-feeder/v2/oracle"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
@@ -34,15 +35,18 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 		s.T().Skip("skipping integration test in short mode")
 	}
 
-	testCases := ProviderAndCurrencyPairsFixture
-	for _, testCase := range testCases {
-		tc := testCase
-		s.T().Run(string(tc.provider), func(t *testing.T) {
+	cfg, err := config.ParseConfig("../../price-feeder.example.toml")
+	require.NoError(s.T(), err)
+
+	for key, pairs := range cfg.ProviderPairs() {
+		providerName := key
+		currencyPairs := pairs
+		s.T().Run(string(providerName), func(t *testing.T) {
 			t.Parallel()
 			ctx, cancel := context.WithCancel(context.Background())
-			pvd, _ := oracle.NewProvider(ctx, tc.provider, getLogger(), provider.Endpoint{}, tc.currencyPairs...)
+			pvd, _ := oracle.NewProvider(ctx, providerName, getLogger(), provider.Endpoint{}, currencyPairs...)
 			time.Sleep(30 * time.Second) // wait for provider to connect and receive some prices
-			checkForPrices(t, pvd, tc.currencyPairs)
+			checkForPrices(t, pvd, currencyPairs)
 			cancel()
 		})
 	}
