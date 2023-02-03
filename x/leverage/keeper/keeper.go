@@ -217,7 +217,7 @@ func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.
 	owed := k.GetBorrow(ctx, borrowerAddr, payment.Denom)
 	if owed.IsZero() {
 		// no need to repay - everything is all right
-		return coin.ZeroCoin(payment.Denom), nil
+		return coin.Zero(payment.Denom), nil
 	}
 
 	// prevent overpaying
