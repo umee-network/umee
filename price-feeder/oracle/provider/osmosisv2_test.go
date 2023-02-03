@@ -70,7 +70,7 @@ func TestOsmosisV2Provider_GetTickerPrices(t *testing.T) {
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
 		require.Error(t, err)
-		require.Equal(t, "osmosisv2 failed to get ticker price for FOO/BAR", err.Error())
+		require.EqualError(t, err, "osmosisv2 has no ticker data for requested pairs: [FOOBAR]")
 		require.Nil(t, prices)
 	})
 }
@@ -107,7 +107,7 @@ func TestOsmosisV2Provider_GetCandlePrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_candle", func(t *testing.T) {
 		prices, err := p.GetCandlePrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.EqualError(t, err, "osmosisv2 failed to get candle price for FOO/BAR")
+		require.EqualError(t, err, "osmosisv2 has no candle data for requested pairs: [FOOBAR]")
 		require.Nil(t, prices)
 	})
 }

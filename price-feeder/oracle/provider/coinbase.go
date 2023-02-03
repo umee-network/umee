@@ -174,19 +174,28 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.setSubscribedPairs(newPairs...)
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		price, err := p.getTickerPrice(currencyPair)
+	tickerErrs := 0
+	for _, cp := range pairs {
+		price, err := p.getTickerPrice(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
-
-		tickerPrices[currencyPair.String()] = price
+		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
@@ -195,16 +204,23 @@ func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[str
 func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	tradeMap := make(map[string][]CoinbaseTrade, len(pairs))
 
+	tradeErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToCoinbasePair(cp)
 		tradeSet, err := p.getTradePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tradeErrs++
+			continue
 		}
 		tradeMap[key] = tradeSet
 	}
-	if len(tradeMap) == 0 {
-		return nil, fmt.Errorf("no trades have been received")
+	if tradeErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
 	}
 
 	candles := make(map[string][]types.CandlePrice)
@@ -294,7 +310,11 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPr
 		return tickerPair.toTickerPrice()
 	}
 
-	return types.TickerPrice{}, fmt.Errorf("coinbase failed to get ticker price for %s", gp)
+	return types.TickerPrice{}, fmt.Errorf(
+		types.ErrTickerNotFound.Error(),
+		p.endpoints.Name,
+		gp,
+	)
 }
 
 func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {

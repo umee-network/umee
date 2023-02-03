@@ -175,33 +175,53 @@ func (p *HuobiProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.setSubscribedPairs(newPairs...)
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *HuobiProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
+	tickerErrs := 0
 	for _, cp := range pairs {
 		price, err := p.getTickerPrice(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
 		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetCandlePrices returns the candlePrices based on the provided pairs.
 func (p *HuobiProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
+	candleErrs := 0
 	for _, cp := range pairs {
-		price, err := p.getCandlePrices(cp)
+		prices, err := p.getCandlePrices(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
-		candlePrices[cp.String()] = price
+		candlePrices[cp.String()] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -312,7 +332,11 @@ func (p *HuobiProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice
 
 	ticker, ok := p.tickers[currencyPairToHuobiTickerPair(cp)]
 	if !ok {
-		return types.TickerPrice{}, fmt.Errorf("huobi failed to get ticker price for %s", cp.String())
+		return types.TickerPrice{}, fmt.Errorf(
+			types.ErrTickerNotFound.Error(),
+			p.endpoints.Name,
+			cp.String(),
+		)
 	}
 
 	return ticker.toTickerPrice()
@@ -324,7 +348,11 @@ func (p *HuobiProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePr
 
 	candles, ok := p.candles[currencyPairToHuobiCandlePair(cp)]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("failed to get candles price for %s", cp.String())
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			p.endpoints.Name,
+			cp.String(),
+		)
 	}
 
 	candleList := []types.CandlePrice{}

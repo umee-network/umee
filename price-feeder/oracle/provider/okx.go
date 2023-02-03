@@ -184,15 +184,24 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		price, err := p.getTickerPrice(currencyPair)
+	tickerErrs := 0
+	for _, cp := range pairs {
+		price, err := p.getTickerPrice(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
-
-		tickerPrices[currencyPair.String()] = price
+		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
@@ -200,15 +209,24 @@ func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]t
 func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		candles, err := p.getCandlePrices(currencyPair)
+	candleErrs := 0
+	for _, cp := range pairs {
+		prices, err := p.getCandlePrices(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
-
-		candlePrices[currencyPair.String()] = candles
+		candlePrices[cp.String()] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -219,7 +237,11 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, 
 	instrumentID := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentID]
 	if !ok {
-		return types.TickerPrice{}, fmt.Errorf("okx failed to get ticker price for %s", instrumentID)
+		return types.TickerPrice{}, fmt.Errorf(
+			types.ErrTickerNotFound.Error(),
+			p.endpoints.Name,
+			instrumentID,
+		)
 	}
 
 	return tickerPair.toTickerPrice()
@@ -232,7 +254,11 @@ func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePric
 	instrumentID := currencyPairToOkxPair(cp)
 	candles, ok := p.candles[instrumentID]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("okx failed to get candle prices for %s", instrumentID)
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			p.endpoints.Name,
+			instrumentID,
+		)
 	}
 	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
