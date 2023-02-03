@@ -50,11 +50,10 @@ func (m msgServer) GovSetIBCPause(
 	if err := m.keeper.SetIBCPause(ctx, msg.IbcPauseStatus); err != nil {
 		return &uibc.MsgGovSetIBCPauseResponse{}, err
 	}
-	if err = ctx.EventManager().EmitTypedEvent(&uibc.EventPause{
-		FailureType: failureType,
-		Packet:      string(packetData),
+	if err := ctx.EventManager().EmitTypedEvent(&uibc.EventQuotaPause{
+		Status: msg.IbcPauseStatus,
 	}); err != nil {
-		logger.Error("emit event error", "err", err)
+		ctx.Logger().Error("emit event error", "err", err)
 	}
 
 	return &uibc.MsgGovSetIBCPauseResponse{}, nil

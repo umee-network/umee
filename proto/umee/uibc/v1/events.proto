@@ -2,6 +2,7 @@ syntax = "proto3";
 package umee.uibc.v1;
 
 import "gogoproto/gogo.proto";
+import "umee/uibc/v1/quota.proto";
 
 option go_package                      = "github.com/umee-network/umee/v4/x/uibc";
 option (gogoproto.goproto_getters_all) = false;
@@ -16,5 +17,5 @@ message EventBadRevert {
 
 // EventQuotaPause is emitted on quota tracking pause status change.
 message EventQuotaPause {
-  bool paused = 1;
+  IBCTransferStatus status = 1;
 }
