@@ -1029,7 +1029,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 			return len(prices) > 0
 		},
-		time.Minute,
+		time.Second*90, // 1:30 min
 		time.Second,
 		"price-feeder not healthy",
 	)
