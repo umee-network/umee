@@ -70,7 +70,7 @@ func TestKrakenProvider_GetTickerPrices(t *testing.T) {
 
 	t.Run("invalid_request_invalid_ticker", func(t *testing.T) {
 		prices, err := p.GetTickerPrices(types.CurrencyPair{Base: "FOO", Quote: "BAR"})
-		require.EqualError(t, err, "kraken failed to get ticker price for FOOBAR")
+		require.EqualError(t, err, "kraken has no ticker data for requested pairs: [FOOBAR]")
 		require.Nil(t, prices)
 	})
 }

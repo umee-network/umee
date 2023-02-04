@@ -106,11 +106,6 @@ func newToken(base, symbol string, exponent uint32) types.Token {
 	return fixtures.Token(base, symbol, exponent)
 }
 
-// coin creates a coin with a given base denom and amount
-func coin(denom string, amount int64) sdk.Coin {
-	return sdk.NewInt64Coin(denom, amount)
-}
-
 // registerToken adds or updates a token in the token registry and requires no error.
 func (s *IntegrationTestSuite) registerToken(token types.Token) {
 	s.Require().NoError(s.app.LeverageKeeper.SetTokenSettings(s.ctx, token))

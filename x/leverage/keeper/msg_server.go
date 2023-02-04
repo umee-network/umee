@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -47,14 +48,14 @@ func (s msgServer) Supply(
 		"supplied", msg.Asset.String(),
 		"received", received.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
+	sdkutil.Emit(&ctx, &types.EventSupply{
 		Supplier: msg.Supplier,
 		Asset:    msg.Asset,
 		Utoken:   received,
 	})
 	return &types.MsgSupplyResponse{
 		Received: received,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Withdraw(
@@ -83,10 +84,10 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
-	err = s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
+	s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
 	return &types.MsgWithdrawResponse{
 		Received: received,
-	}, err
+	}, nil
 }
 
 func (s msgServer) MaxWithdraw(
@@ -112,7 +113,7 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	if uToken.IsZero() {
-		zeroCoin := sdkutil.ZeroCoin(msg.Denom)
+		zeroCoin := coin.Zero(msg.Denom)
 		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
@@ -132,26 +133,25 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
-	err = s.logWithdrawal(ctx, msg.Supplier, uToken, received, "maximum supplied assets withdrawn")
+	s.logWithdrawal(ctx, msg.Supplier, uToken, received, "maximum supplied assets withdrawn")
 	return &types.MsgMaxWithdrawResponse{
 		Withdrawn: uToken,
 		Received:  received,
-	}, err
+	}, nil
 }
 
-func (s msgServer) logWithdrawal(ctx sdk.Context, supplier string, redeemed, received sdk.Coin, desc string) error {
+func (s msgServer) logWithdrawal(ctx sdk.Context, supplier string, redeemed, received sdk.Coin, desc string) {
 	s.keeper.Logger(ctx).Debug(
 		desc,
 		"supplier", supplier,
 		"redeemed", redeemed.String(),
 		"received", received.String(),
 	)
-	err := ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
+	sdkutil.Emit(&ctx, &types.EventWithdraw{
 		Supplier: supplier,
 		Utoken:   redeemed,
 		Asset:    received,
 	})
-	return err
 }
 
 func (s msgServer) Collateralize(
@@ -181,11 +181,11 @@ func (s msgServer) Collateralize(
 		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
+	sdkutil.Emit(&ctx, &types.EventCollaterize{
 		Borrower: msg.Borrower,
 		Utoken:   msg.Asset,
 	})
-	return &types.MsgCollateralizeResponse{}, err
+	return &types.MsgCollateralizeResponse{}, nil
 }
 
 func (s msgServer) SupplyCollateral(
@@ -226,25 +226,23 @@ func (s msgServer) SupplyCollateral(
 		"supplied", msg.Asset.String(),
 		"received", uToken.String(),
 	)
-	if err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
-		Supplier: msg.Supplier,
-		Asset:    msg.Asset,
-		Utoken:   uToken,
-	}); err != nil {
-		return nil, err
-	}
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
 		"borrower", msg.Supplier,
 		"amount", uToken.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
+	sdkutil.Emit(&ctx, &types.EventSupply{
+		Supplier: msg.Supplier,
+		Asset:    msg.Asset,
+		Utoken:   uToken,
+	})
+	sdkutil.Emit(&ctx, &types.EventCollaterize{
 		Borrower: msg.Supplier,
 		Utoken:   uToken,
 	})
 	return &types.MsgSupplyCollateralResponse{
 		Collateralized: uToken,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Decollateralize(
@@ -272,11 +270,11 @@ func (s msgServer) Decollateralize(
 		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventDecollaterize{
+	sdkutil.Emit(&ctx, &types.EventDecollaterize{
 		Borrower: msg.Borrower,
 		Utoken:   msg.Asset,
 	})
-	return &types.MsgDecollateralizeResponse{}, err
+	return &types.MsgDecollateralizeResponse{}, nil
 }
 
 func (s msgServer) Borrow(
@@ -314,11 +312,11 @@ func (s msgServer) Borrow(
 		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
+	sdkutil.Emit(&ctx, &types.EventBorrow{
 		Borrower: msg.Borrower,
 		Asset:    msg.Asset,
 	})
-	return &types.MsgBorrowResponse{}, err
+	return &types.MsgBorrowResponse{}, nil
 }
 
 func (s msgServer) MaxBorrow(
@@ -337,7 +335,7 @@ func (s msgServer) MaxBorrow(
 		return nil, err
 	}
 	if maxBorrow.IsZero() {
-		return &types.MsgMaxBorrowResponse{Borrowed: sdkutil.ZeroCoin(msg.Denom)}, nil
+		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
 	}
 
 	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
@@ -365,13 +363,13 @@ func (s msgServer) MaxBorrow(
 		"borrower", msg.Borrower,
 		"amount", maxBorrow.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
+	sdkutil.Emit(&ctx, &types.EventBorrow{
 		Borrower: msg.Borrower,
 		Asset:    maxBorrow,
 	})
 	return &types.MsgMaxBorrowResponse{
 		Borrowed: maxBorrow,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Repay(
@@ -394,13 +392,13 @@ func (s msgServer) Repay(
 		"attempted", msg.Asset.String(),
 		"repaid", repaid.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventRepay{
+	sdkutil.Emit(&ctx, &types.EventRepay{
 		Borrower: msg.Borrower,
 		Repaid:   repaid,
 	})
 	return &types.MsgRepayResponse{
 		Repaid: repaid,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Liquidate(
@@ -431,7 +429,7 @@ func (s msgServer) Liquidate(
 		"liquidated", liquidated.String(),
 		"reward", reward.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventLiquidate{
+	sdkutil.Emit(&ctx, &types.EventLiquidate{
 		Liquidator: msg.Liquidator,
 		Borrower:   msg.Borrower,
 		Liquidated: liquidated,
@@ -440,7 +438,7 @@ func (s msgServer) Liquidate(
 		Repaid:     repaid,
 		Collateral: liquidated,
 		Reward:     reward,
-	}, err
+	}, nil
 }
 
 // GovUpdateRegistry updates existing tokens with new settings

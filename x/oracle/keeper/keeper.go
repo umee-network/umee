@@ -13,6 +13,7 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
@@ -124,9 +125,9 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 
 // SetExchangeRateWithEvent sets an consensus
 // exchange rate to the store with ABCI event
-func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) error {
+func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
-	return ctx.EventManager().EmitTypedEvent(&types.EventSetFxRate{
+	sdkutil.Emit(&ctx, &types.EventSetFxRate{
 		Denom: denom, Rate: exchangeRate,
 	})
 }
