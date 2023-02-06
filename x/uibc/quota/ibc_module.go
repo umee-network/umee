@@ -3,6 +3,7 @@ package quota
 import (
 	"encoding/json"
 
+	"cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -37,7 +38,7 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 ) error {
 	var ack channeltypes.Acknowledgement
 	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
-		return sdkerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
+		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
 		err := im.RevertQuotaUpdate(ctx, packet.Data)
@@ -62,7 +63,7 @@ func (im IBCMiddleware) RevertQuotaUpdate(
 ) error {
 	var data transfertypes.FungibleTokenPacketData
 	if err := im.cdc.UnmarshalJSON(packetData, &data); err != nil {
-		return sdkerrors.Wrap(err,
+		return errors.Wrap(err,
 			"cannot unmarshal ICS-20 transfer packet data")
 	}
 
@@ -80,7 +81,7 @@ func ValidateReceiverAddress(packet channeltypes.Packet) error {
 		return err
 	}
 	if len(packetData.Receiver) >= 4096 {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress,
+		return sdkerrors.ErrInvalidAddress.Wrapf(
 			"IBC Receiver address too long. Max supported length is %d", 4096,
 		)
 	}
