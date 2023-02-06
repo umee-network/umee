@@ -1,10 +1,11 @@
 package ante_test
 
 import (
+	sdkerrors "cosmossdk.io/errors"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	errtypes "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v4/ante"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -70,5 +71,5 @@ func (ok dummyOracleKeeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAd
 		return nil
 	}
 
-	return sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "feeder is not authorized")
+	return sdkerrors.Wrap(errtypes.ErrUnauthorized, "feeder is not authorized")
 }
