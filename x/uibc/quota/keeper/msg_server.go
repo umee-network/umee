@@ -4,6 +4,7 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
@@ -42,7 +43,6 @@ func (m msgServer) GovSetIBCPause(
 ) (*uibc.MsgGovSetIBCPauseResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// validate the msg
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
 	}
@@ -50,11 +50,9 @@ func (m msgServer) GovSetIBCPause(
 	if err := m.keeper.SetIBCPause(ctx, msg.IbcPauseStatus); err != nil {
 		return &uibc.MsgGovSetIBCPauseResponse{}, err
 	}
-	if err := ctx.EventManager().EmitTypedEvent(&uibc.EventQuotaPause{
+	sdkutil.Emit(&ctx, &uibc.EventQuotaPause{
 		Status: msg.IbcPauseStatus,
-	}); err != nil {
-		ctx.Logger().Error("emit event error", "err", err)
-	}
+	})
 
 	return &uibc.MsgGovSetIBCPauseResponse{}, nil
 }
