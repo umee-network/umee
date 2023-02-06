@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gogotypes "github.com/gogo/protobuf/types"
 
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -14,9 +15,7 @@ import (
 func (k Keeper) getStoredDec(ctx sdk.Context, key []byte, minimum sdk.Dec, desc string) sdk.Dec {
 	if bz := ctx.KVStore(k.storeKey).Get(key); bz != nil {
 		val := sdk.ZeroDec()
-		if err := val.Unmarshal(bz); err != nil {
-			panic(err)
-		}
+		util.Panic(val.Unmarshal(bz))
 		if val.LTE(minimum) {
 			panic(types.ErrGetAmount.Wrapf("%s is not above the minimum %s of %s", val, desc, minimum))
 		}
@@ -52,9 +51,7 @@ func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val, minimum sdk.Dec, 
 func (k Keeper) getStoredInt(ctx sdk.Context, key []byte, desc string) sdkmath.Int {
 	if bz := ctx.KVStore(k.storeKey).Get(key); bz != nil {
 		val := sdk.ZeroInt()
-		if err := val.Unmarshal(bz); err != nil {
-			panic(err)
-		}
+		util.Panic(val.Unmarshal(bz))
 		if val.LTE(sdk.ZeroInt()) {
 			panic(types.ErrGetAmount.Wrapf("%s is not above the minimum %s of zero", val, desc))
 		}
@@ -176,9 +173,7 @@ func (k Keeper) getLastInterestTime(ctx sdk.Context) int64 {
 	}
 
 	val := gogotypes.Int64Value{}
-	if err := k.cdc.Unmarshal(bz, &val); err != nil {
-		panic(err)
-	}
+	k.cdc.MustUnmarshal(bz, &val)
 	if val.Value < 0 {
 		panic(types.ErrGetAmount.Wrapf("%d is below the minimum LastInterestTime of zero", val.Value))
 	}

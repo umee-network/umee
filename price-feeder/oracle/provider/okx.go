@@ -131,7 +131,7 @@ func NewOkxProvider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderOkx,
+		endpoints.Name,
 		wsURL,
 		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
@@ -139,7 +139,7 @@ func NewOkxProvider(
 		websocket.PingMessage,
 		okxLogger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
@@ -159,7 +159,7 @@ func (p *OkxProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interface
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -171,26 +171,37 @@ func (p *OkxProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	}
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
-	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
-		return err
-	}
+	p.wsc.AddWebsocketConnection(
+		newSubscriptionMsgs,
+		p.messageReceived,
+		defaultPingDuration,
+		websocket.PingMessage,
+	)
 	p.setSubscribedPairs(newPairs...)
-	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
 func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		price, err := p.getTickerPrice(currencyPair)
+	tickerErrs := 0
+	for _, cp := range pairs {
+		price, err := p.getTickerPrice(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
-
-		tickerPrices[currencyPair.String()] = price
+		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
@@ -198,15 +209,24 @@ func (p *OkxProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]t
 func (p *OkxProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		candles, err := p.getCandlePrices(currencyPair)
+	candleErrs := 0
+	for _, cp := range pairs {
+		prices, err := p.getCandlePrices(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
-
-		candlePrices[currencyPair.String()] = candles
+		candlePrices[cp.String()] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -217,7 +237,11 @@ func (p *OkxProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice, 
 	instrumentID := currencyPairToOkxPair(cp)
 	tickerPair, ok := p.tickers[instrumentID]
 	if !ok {
-		return types.TickerPrice{}, fmt.Errorf("okx failed to get ticker price for %s", instrumentID)
+		return types.TickerPrice{}, fmt.Errorf(
+			types.ErrTickerNotFound.Error(),
+			p.endpoints.Name,
+			instrumentID,
+		)
 	}
 
 	return tickerPair.toTickerPrice()
@@ -230,7 +254,11 @@ func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePric
 	instrumentID := currencyPairToOkxPair(cp)
 	candles, ok := p.candles[instrumentID]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("okx failed to get candle prices for %s", instrumentID)
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			p.endpoints.Name,
+			instrumentID,
+		)
 	}
 	candleList := []types.CandlePrice{}
 	for _, candle := range candles {
@@ -244,7 +272,7 @@ func (p *OkxProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePric
 	return candleList, nil
 }
 
-func (p *OkxProvider) messageReceived(_ int, bz []byte) {
+func (p *OkxProvider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	var (
 		tickerResp OkxTickerResponse
 		tickerErr  error
