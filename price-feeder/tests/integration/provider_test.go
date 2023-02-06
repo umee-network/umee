@@ -38,13 +38,16 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 	cfg, err := config.ParseConfig("../../price-feeder.example.toml")
 	require.NoError(s.T(), err)
 
+	endpoints := cfg.ProviderEndpointsMap()
+
 	for key, pairs := range cfg.ProviderPairs() {
 		providerName := key
 		currencyPairs := pairs
+		endpoint := endpoints[providerName]
 		s.T().Run(string(providerName), func(t *testing.T) {
 			t.Parallel()
 			ctx, cancel := context.WithCancel(context.Background())
-			pvd, _ := oracle.NewProvider(ctx, providerName, getLogger(), provider.Endpoint{}, currencyPairs...)
+			pvd, _ := oracle.NewProvider(ctx, providerName, getLogger(), endpoint, currencyPairs...)
 			time.Sleep(30 * time.Second) // wait for provider to connect and receive some prices
 			checkForPrices(t, pvd, currencyPairs)
 			cancel()
