@@ -41,3 +41,8 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Coin {
 	amount := k.bankKeeper.SpendableCoins(ctx, authtypes.NewModuleAddress(incentive.ModuleName)).AmountOf(denom)
 	return sdk.NewCoin(denom, amount)
 }
+
+// KVStore returns the module's KVStore
+func (k Keeper) KVStore(ctx sdk.Context) sdk.KVStore {
+	return ctx.KVStore(k.storeKey)
+}

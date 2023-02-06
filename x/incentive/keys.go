@@ -23,6 +23,7 @@ var (
 	KeyPrefixParamUnbondingDurationShort  = []byte{0x01, 0x04}
 	KeyPrefixParamTierWeightShort         = []byte{0x01, 0x05}
 	KeyPrefixParamTierWeightMiddle        = []byte{0x01, 0x06}
+	KeyPrefixParamCommunityFundAddress    = []byte{0x01, 0x07}
 
 	// Regular state
 	KeyPrefixUpcomingIncentiveProgram  = []byte{0x02}
