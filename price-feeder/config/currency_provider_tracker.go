@@ -33,7 +33,6 @@ type (
 		logger              zerolog.Logger
 		pairs               []CurrencyPair
 		coinIDSymbolMap     map[string]string   // ex: map["ATOM"] = "cosmos"
-		osmosisAPIPairs     map[string]string   // ex: map["BASE"] = "QUOTE"
 		CurrencyProviders   map[string][]string // map of price feeder currencies and what exchanges support them
 		CurrencyProviderMin map[string]int      // map of price feeder currencies and min required providers for them
 	}
@@ -82,11 +81,12 @@ func NewCurrencyProviderTracker(
 		return nil, err
 	}
 
-	if err := currencyProviderTracker.setOsmosisAPIPairs(); err != nil {
+	osmosisAPIPairs, err := currencyProviderTracker.getOsmosisAPIPairs()
+	if err != nil {
 		return nil, err
 	}
 
-	if err := currencyProviderTracker.setCurrencyProviders(); err != nil {
+	if err := currencyProviderTracker.setCurrencyProviders(osmosisAPIPairs); err != nil {
 		return nil, err
 	}
 
@@ -125,42 +125,40 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 	return nil
 }
 
-// setOsmosisV2CurrencyProviders queries the osmosis-api assetpairs endpoint to get
-func (t *CurrencyProviderTracker) setOsmosisAPIPairs() error {
+// getOsmosisAPIPairs queries the osmosis-api assetpairs endpoint to get the asset pairs
+// supported by it.
+func (t *CurrencyProviderTracker) getOsmosisAPIPairs() (map[string]string, error) {
 	client := &http.Client{
 		Timeout: requestTimeout,
 	}
-	t.osmosisAPIPairs = make(map[string]string)
+	osmosisAPIPairs := make(map[string]string)
 
 	osmosisResp, err := client.Get(fmt.Sprintf("%s/%s", osmosisV2RestURL, osmosisV2AssetPairsEndpoint))
 	if err != nil {
-		t.logger.Error().Err(err).Msg("Failed to query osmosis api assetpairs endpoint")
-	} else {
-		defer osmosisResp.Body.Close()
-		var assetPairsResponse []assetPair
-		if err = json.NewDecoder(osmosisResp.Body).Decode(&assetPairsResponse); err != nil {
-			return err
-		}
-
-		for _, assetPair := range assetPairsResponse {
-			t.osmosisAPIPairs[assetPair.Base] = assetPair.Quote
-		}
+		return nil, err
+	}
+	defer osmosisResp.Body.Close()
+	var assetPairsResponse []assetPair
+	if err = json.NewDecoder(osmosisResp.Body).Decode(&assetPairsResponse); err != nil {
+		return nil, err
 	}
 
-	return nil
+	for _, assetPair := range assetPairsResponse {
+		osmosisAPIPairs[assetPair.Base] = assetPair.Quote
+	}
+
+	return osmosisAPIPairs, nil
 }
 
 // setCurrencyProviders queries CoinGecko's tickers endpoint to get all the exchanges
 // that support each price feeder currency pair and store it in the CurrencyProviders map.
-func (t *CurrencyProviderTracker) setCurrencyProviders() error {
+func (t *CurrencyProviderTracker) setCurrencyProviders(osmosisAPIPairs map[string]string) error {
 	client := &http.Client{
 		Timeout: requestTimeout,
 	}
 	for _, pair := range t.pairs {
-		t.CurrencyProviders[pair.Base] = []string{}
-
 		// check if its a pair supported by the osmosis api
-		if t.osmosisAPIPairs[strings.ToUpper(pair.Base)] == strings.ToUpper(pair.Quote) {
+		if osmosisAPIPairs[strings.ToUpper(pair.Base)] == strings.ToUpper(pair.Quote) {
 			t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], "osmosisv2")
 		}
 
@@ -180,6 +178,10 @@ func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 				if ticker.Target == pair.Quote {
 					t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], ticker.Market.Name)
 				}
+			}
+
+			if len(t.CurrencyProviders[pair.Base]) == 0 {
+				t.logger.Warn().Msg(fmt.Sprintf("Coin gecko found 0 providers for %s", pair.Base))
 			}
 		}
 	}
@@ -210,7 +212,11 @@ func (t *CurrencyProviderTracker) trackCurrencyProviders(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-time.After(trackingPeriod):
-			if err := t.setCurrencyProviders(); err != nil {
+			osmosisAPIPairs, err := t.getOsmosisAPIPairs()
+			if err != nil {
+				t.logger.Error().Err(err).Msg("failed to query osmosis-api for available asset pairs")
+			}
+			if err := t.setCurrencyProviders(osmosisAPIPairs); err != nil {
 				t.logger.Error().Err(err).Msg("failed to set available providers for currencies")
 			}
 
