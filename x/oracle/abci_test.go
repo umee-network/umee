@@ -23,10 +23,8 @@ import (
 )
 
 const (
-	displayDenom     string = appparams.DisplayDenom
-	bondDenom        string = appparams.BondDenom
-	preVoteBlockDiff int64  = 2
-	voteBlockDiff    int64  = 3
+	displayDenom string = appparams.DisplayDenom
+	bondDenom    string = appparams.BondDenom
 )
 
 type IntegrationTestSuite struct {
@@ -89,7 +87,9 @@ var (
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
 	originalBlockHeight := ctx.BlockHeight()
-	ctx = ctx.WithBlockHeight(6)
+	ctx = ctx.WithBlockHeight(1)
+	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
+	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
 	var (
 		val1Tuples   types.ExchangeRateTuples

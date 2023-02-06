@@ -59,12 +59,11 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	for _, ballotDenom := range ballotDenomSlice {
 		// Convert ballot power to a percentage to compare with VoteThreshold param
 		if sdk.NewDecWithPrec(ballotDenom.Ballot.Power(), 2).LTE(k.VoteThreshold(ctx)) {
-			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot for", ballotDenom)
+			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
 			continue
 		}
 
 		denom := strings.ToUpper(ballotDenom.Denom)
-
 		// Get weighted median of exchange rates
 		exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
 		if err != nil {
