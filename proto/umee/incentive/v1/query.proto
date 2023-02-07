@@ -69,13 +69,6 @@ service Query {
   }
 }
 
-// TotalBond tracks the amount of coins of one uToken denomination bonded to a
-// given reward tier without specifying an account.
-message TotalBond {
-  uint32                   tier   = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
-}
-
 // QueryParams defines the request structure for the Params gRPC service
 // handler.
 message QueryParams {}

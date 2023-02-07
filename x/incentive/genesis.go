@@ -15,7 +15,7 @@ func NewGenesisState(
 	upcomingPrograms []IncentiveProgram,
 	nextProgramID uint32,
 	lastRewardTime uint64,
-	totalBonded sdk.Coins,
+	totalBonded []TotalBond,
 	bonds []Bond,
 	rewardTrackers []RewardTracker,
 	rewardAccumulators []RewardAccumulator,
@@ -42,7 +42,6 @@ func DefaultGenesisState() *GenesisState {
 		Params:          DefaultParams(),
 		NextProgramId:   1,
 		LastRewardsTime: 0,
-		TotalBonded:     sdk.NewCoins(),
 	}
 }
 
@@ -89,6 +88,14 @@ func NewBond(addr string, tier uint32, coin sdk.Coin) Bond {
 		Account: addr,
 		Tier:    tier,
 		Amount:  coin,
+	}
+}
+
+// NewTotalBond creates the TotalBond struct used in GenesisState
+func NewTotalBond(tier uint32, coin sdk.Coin) Bond {
+	return Bond{
+		Tier:   tier,
+		Amount: coin,
 	}
 }
 
