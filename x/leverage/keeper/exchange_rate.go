@@ -2,7 +2,6 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -16,7 +15,7 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 
 	uTokenDenom := types.ToUTokenDenom(token.Denom)
 	if uTokenDenom == "" {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrUToken, token.Denom)
+		return sdk.Coin{}, types.ErrUToken.Wrap(token.Denom)
 	}
 
 	exchangeRate := k.DeriveExchangeRate(ctx, token.Denom)
@@ -34,7 +33,7 @@ func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, erro
 
 	tokenDenom := types.ToTokenDenom(uToken.Denom)
 	if tokenDenom == "" {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrNotUToken, uToken.Denom)
+		return sdk.Coin{}, types.ErrNotUToken.Wrap(uToken.Denom)
 	}
 
 	exchangeRate := k.DeriveExchangeRate(ctx, tokenDenom)
