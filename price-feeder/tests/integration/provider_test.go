@@ -48,8 +48,8 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 			t.Parallel()
 			ctx, cancel := context.WithCancel(context.Background())
 			pvd, _ := oracle.NewProvider(ctx, providerName, getLogger(), endpoint, currencyPairs...)
-			time.Sleep(45 * time.Second) // wait for provider to connect and receive some prices
-			checkForPrices(t, pvd, currencyPairs)
+			time.Sleep(60 * time.Second) // wait for provider to connect and receive some prices
+			checkForPrices(t, pvd, currencyPairs, providerName.String())
 			cancel()
 		})
 	}
@@ -72,12 +72,12 @@ func (s *IntegrationTestSuite) TestSubscribeCurrencyPairs() {
 
 	time.Sleep(25 * time.Second) // wait for provider to connect and receive some prices
 
-	checkForPrices(s.T(), pvd, currencyPairs)
+	checkForPrices(s.T(), pvd, currencyPairs, "Okx")
 
 	cancel()
 }
 
-func checkForPrices(t *testing.T, pvd provider.Provider, currencyPairs []types.CurrencyPair) {
+func checkForPrices(t *testing.T, pvd provider.Provider, currencyPairs []types.CurrencyPair, providerName string) {
 	tickerPrices, err := pvd.GetTickerPrices(currencyPairs...)
 	require.NoError(t, err)
 
@@ -87,13 +87,33 @@ func checkForPrices(t *testing.T, pvd provider.Provider, currencyPairs []types.C
 	for _, cp := range currencyPairs {
 		currencyPairKey := cp.String()
 
-		require.False(t, tickerPrices[currencyPairKey].Price.IsNil(), "no ticker price for pair %s", currencyPairKey)
+		require.False(t,
+			tickerPrices[currencyPairKey].Price.IsNil(),
+			"no ticker price for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
 
-		require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)), "ticker price is zero for pair %s", currencyPairKey)
+		require.True(t,
+			tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)),
+			"ticker price is zero for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
 
-		require.NotEmpty(t, candlePrices[currencyPairKey], "no candle prices for pair %s", currencyPairKey)
+		require.NotEmpty(t,
+			candlePrices[currencyPairKey],
+			"no candle prices for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
 
-		require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)), "candle price iss zero for pair %s", currencyPairKey)
+		require.True(t,
+			candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)),
+			"candle price iss zero for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
 	}
 }
 
