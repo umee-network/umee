@@ -3,7 +3,11 @@ package keeper
 import (
 	"encoding/binary"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/address"
+
 	"github.com/umee-network/umee/v4/util"
+	"github.com/umee-network/umee/v4/x/incentive"
 )
 
 // KVStore key prefixes
@@ -60,11 +64,16 @@ func keyTotalBonded(denom string) []byte {
 	return util.ConcatBytes(1, keyPrefixTotalBonded, []byte(denom))
 }
 
-/*
-// keyBondAmount returns a KVStore key for getting and setting bonded amounts for a uToken on a single account.
-func keyBondAmount(addr sdk.AccAddress, uTokenDenom string) []byte {
-	// bondPrefix | lengthprefixed(addr) | denom | 0x00 for null-termination
-	return util.ConcatBytes(1, keyBondAmountAmountNoDenom(addr), []byte(uTokenDenom))
+// keyBondAmount returns a KVStore key for getting and setting bonded amounts for a uToken denom, account, and tier.
+func keyBondAmount(addr sdk.AccAddress, denom string, tier incentive.BondTier) []byte {
+	// bondPrefix | lengthprefixed(addr) | denom | 0x00 | tier
+	return util.ConcatBytes(0, keyBondAmountAmountNoTier(addr, denom), []byte{byte(tier)})
+}
+
+// keyBondAmountAmountNoTier returns the common prefix used by all uTokens bonded to a given account and denom.
+func keyBondAmountAmountNoTier(addr sdk.AccAddress, denom string) []byte {
+	// bondPrefix | lengthprefixed(addr) | denom | 0x00
+	return util.ConcatBytes(1, keyBondAmountAmountNoDenom(addr), []byte(denom))
 }
 
 // keyBondAmountAmountNoDenom returns the common prefix used by all uTokens bonded to a given account.
@@ -72,4 +81,3 @@ func keyBondAmountAmountNoDenom(addr sdk.AccAddress) []byte {
 	// bondPrefix | lengthprefixed(addr)
 	return util.ConcatBytes(0, keyPrefixBondAmount, address.MustLengthPrefix(addr))
 }
-*/

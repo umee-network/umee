@@ -158,9 +158,17 @@ func (k Keeper) setTotalBonded(ctx sdk.Context, uTokens sdk.Coin) error {
 	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, sdk.ZeroInt(), "total bonded "+uTokens.Denom)
 }
 
-// GetBonded retrieves the amount of uTokens of a given denom which are bonded by a single account
-func (k Keeper) GetBonded(ctx sdk.Context, denom string) sdk.Coin {
-	key := keyTotalBonded(denom)
+// GetBonded retrieves the amount of uTokens of a given denom which are bonded to a single tier by an account
+func (k Keeper) GetBonded(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier) sdk.Coin {
+	key := keyBondAmount(addr, denom, tier)
 	amount := store.GetInt(k.KVStore(ctx), key, sdk.ZeroInt(), "bonded amount")
 	return sdk.NewCoin(denom, amount)
+}
+
+// setBonded sets the amount of uTokens of a given denom which are bonded to a single tier by an account
+func (k Keeper) setBonded(ctx sdk.Context,
+	addr sdk.AccAddress, uToken sdk.Coin, denom string, tier incentive.BondTier,
+) error {
+	key := keyBondAmount(addr, uToken.Denom, tier)
+	return store.SetInt(k.KVStore(ctx), key, uToken.Amount, sdk.ZeroInt(), "bonded amount")
 }

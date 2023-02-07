@@ -13,3 +13,11 @@ const (
 	// RouterKey is the message route
 	RouterKey = ModuleName
 )
+
+type BondTier uint8
+
+const (
+	BondTierLong BondTier = iota
+	BondTierMiddle
+	BondTierShort
+)
