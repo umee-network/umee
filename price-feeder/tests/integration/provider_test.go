@@ -48,7 +48,7 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 			t.Parallel()
 			ctx, cancel := context.WithCancel(context.Background())
 			pvd, _ := oracle.NewProvider(ctx, providerName, getLogger(), endpoint, currencyPairs...)
-			time.Sleep(30 * time.Second) // wait for provider to connect and receive some prices
+			time.Sleep(45 * time.Second) // wait for provider to connect and receive some prices
 			checkForPrices(t, pvd, currencyPairs)
 			cancel()
 		})
@@ -87,11 +87,13 @@ func checkForPrices(t *testing.T, pvd provider.Provider, currencyPairs []types.C
 	for _, cp := range currencyPairs {
 		currencyPairKey := cp.String()
 
-		// verify ticker price for currency pair is above zero
-		require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)))
+		require.False(t, tickerPrices[currencyPairKey].Price.IsNil(), "no ticker price for pair %s", currencyPairKey)
 
-		// verify candle price for currency pair is above zero
-		require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)))
+		require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)), "ticker price is zero for pair %s", currencyPairKey)
+
+		require.NotEmpty(t, candlePrices[currencyPairKey], "no candle prices for pair %s", currencyPairKey)
+
+		require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)), "candle price iss zero for pair %s", currencyPairKey)
 	}
 }
 
