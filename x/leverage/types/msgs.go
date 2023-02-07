@@ -1,8 +1,8 @@
 package types
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v4/util/checkers"
 	"gopkg.in/yaml.v3"
@@ -42,7 +42,7 @@ func (msg MsgGovUpdateRegistry) ValidateBasic() error {
 
 	for _, token := range msg.AddTokens {
 		if err := token.Validate(); err != nil {
-			return sdkerrors.Wrap(err, "token")
+			return errors.Wrap(err, "token")
 		}
 	}
 
@@ -52,7 +52,7 @@ func (msg MsgGovUpdateRegistry) ValidateBasic() error {
 
 	for _, token := range msg.UpdateTokens {
 		if err := token.Validate(); err != nil {
-			return sdkerrors.Wrap(err, "token")
+			return errors.Wrap(err, "token")
 		}
 	}
 
@@ -75,7 +75,7 @@ func validateRegistryTokenDenoms(tokens []Token) error {
 	tokenDenoms := map[string]bool{}
 	for _, token := range tokens {
 		if _, ok := tokenDenoms[token.BaseDenom]; ok {
-			return sdkerrors.Wrapf(ErrDuplicateToken, "duplicate token with baseDenom %s", token.BaseDenom)
+			return ErrDuplicateToken.Wrapf("duplicate token with baseDenom %s", token.BaseDenom)
 		}
 		tokenDenoms[token.BaseDenom] = true
 	}
