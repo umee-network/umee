@@ -237,7 +237,7 @@ func (p *GateProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePri
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	candles, ok := p.candles[cp.String()]
+	candles, ok := p.candles[currencyPairToGatePair(cp)]
 	if !ok {
 		return []types.CandlePrice{}, fmt.Errorf(
 			types.ErrCandleNotFound.Error(),
