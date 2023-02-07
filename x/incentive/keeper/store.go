@@ -80,3 +80,5 @@ func (k Keeper) SetParams(ctx sdk.Context, params incentive.Params) error {
 	}
 	return nil
 }
+
+// GetIncentiveProgram gets an incentive program by ID

@@ -1,5 +1,14 @@
 package incentive
 
+import (
+	"encoding/binary"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/address"
+
+	"github.com/umee-network/umee/v4/util"
+)
+
 const (
 	// ModuleName defines the module name
 	ModuleName = "incentive"
@@ -33,8 +42,49 @@ var (
 	KeyPrefixLastRewardsTime           = []byte{0x06}
 	KeyPrefixTotalBonded               = []byte{0x07}
 	KeyPrefixBondAmount                = []byte{0x08}
-	KeyPrefixPendingReward             = []byte{0x09}
-	KeyPrefixRewardBasis               = []byte{0x0A}
-	KeyPrefixRewardAccumulator         = []byte{0x0B}
-	KeyPrefixUnbonding                 = []byte{0x0C}
+	KeyPrefixRewardBasis               = []byte{0x09}
+	KeyPrefixRewardAccumulator         = []byte{0x0A}
+	KeyPrefixUnbonding                 = []byte{0x0B}
 )
+
+// KeyUpcomingIncentiveProgram returns a KVStore key for getting and setting an incentive program.
+func KeyUpcomingIncentiveProgram(id uint32) []byte {
+	// programPrefix | id
+	bz := make([]byte, 4)
+	binary.LittleEndian.PutUint32(bz, id)
+	return util.ConcatBytes(0, KeyPrefixUpcomingIncentiveProgram, bz)
+}
+
+// KeyOngoingIncentiveProgram returns a KVStore key for getting and setting an incentive program.
+func KeyOngoingIncentiveProgram(id uint32) []byte {
+	// programPrefix | id
+	bz := make([]byte, 4)
+	binary.LittleEndian.PutUint32(bz, id)
+	return util.ConcatBytes(0, KeyPrefixOngoingIncentiveProgram, bz)
+}
+
+// KeyCompletedIncentiveProgram returns a KVStore key for getting and setting an incentive program.
+func KeyCompletedIncentiveProgram(id uint32) []byte {
+	// programPrefix | id
+	bz := make([]byte, 4)
+	binary.LittleEndian.PutUint32(bz, id)
+	return util.ConcatBytes(0, KeyPrefixCompletedIncentiveProgram, bz)
+}
+
+// KeyTotalBonded returns a KVStore key for getting and setting total bonded amounts for a uToken.
+func KeyTotalBonded(denom string) []byte {
+	// totalBondedPrefix | denom | 0x00 for null-termination
+	return util.ConcatBytes(1, KeyPrefixCompletedIncentiveProgram, []byte(denom))
+}
+
+// KeyBondAmount returns a KVStore key for getting and setting bonded amounts for a uToken on a single account.
+func KeyBondAmount(addr sdk.AccAddress, uTokenDenom string) []byte {
+	// bondPrefix | lengthprefixed(addr) | denom | 0x00 for null-termination
+	return util.ConcatBytes(1, KeyBondAmountAmountNoDenom(addr), []byte(uTokenDenom))
+}
+
+// KeyBondAmountAmountNoDenom returns the common prefix used by all uTokens bonded to a given account.
+func KeyBondAmountAmountNoDenom(addr sdk.AccAddress) []byte {
+	// bondPrefix | lengthprefixed(addr)
+	return util.ConcatBytes(0, KeyPrefixBondAmount, address.MustLengthPrefix(addr))
+}
