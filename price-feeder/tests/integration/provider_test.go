@@ -72,7 +72,7 @@ func (s *IntegrationTestSuite) TestSubscribeCurrencyPairs() {
 
 	time.Sleep(25 * time.Second) // wait for provider to connect and receive some prices
 
-	checkForPrices(s.T(), pvd, currencyPairs, "Okx")
+	checkForPrices(s.T(), pvd, currencyPairs, "OKX")
 
 	cancel()
 }
