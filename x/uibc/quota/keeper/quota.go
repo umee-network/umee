@@ -144,7 +144,8 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmat
 	exchangePrice, err := k.getExchangePrice(ctx, denom, amount)
 	if err != nil {
 		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
-		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
+		// TODO: write test case for this
+		if ltypes.ErrNotRegisteredToken.Is(err) {
 			return nil
 		} else if err != nil {
 			return err
@@ -200,7 +201,7 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 	exchangePrice, err := k.getExchangePrice(ctx, denom, amount)
 	if err != nil {
 		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
-		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
+		if ltypes.ErrNotRegisteredToken.Is(err) {
 			return nil
 		} else if err != nil {
 			return err
