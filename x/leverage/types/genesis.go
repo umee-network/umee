@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/json"
 
-	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -95,7 +94,7 @@ func (gs GenesisState) Validate() error {
 		}
 
 		if rate.Scalar.LT(sdk.OneDec()) {
-			return sdkerrors.Wrap(ErrInvalidExchangeRate, rate.String())
+			return ErrInvalidExchangeRate.Wrap(rate.String())
 		}
 	}
 

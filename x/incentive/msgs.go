@@ -1,7 +1,7 @@
 package incentive
 
 import (
-	sdkerrors "cosmossdk.io/errors"
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util/checkers"
@@ -249,7 +249,7 @@ func (ip IncentiveProgram) Validate() error {
 	}
 	if !leveragetypes.HasUTokenPrefix(ip.Denom) {
 		// only allow uToken denoms
-		return sdkerrors.Wrap(leveragetypes.ErrNotUToken, ip.Denom)
+		return errors.Wrap(leveragetypes.ErrNotUToken, ip.Denom)
 	}
 
 	// TODO #1749: Finish validate logic

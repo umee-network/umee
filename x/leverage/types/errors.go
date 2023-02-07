@@ -3,57 +3,57 @@ package types
 // DONTCOVER
 
 import (
-	sdkerrors "cosmossdk.io/errors"
+	"cosmossdk.io/errors"
 )
 
 var (
 	// 1XX = General Validation
-	ErrEmptyAddress     = sdkerrors.Register(ModuleName, 100, "empty address")
-	ErrNilAsset         = sdkerrors.Register(ModuleName, 101, "nil asset")
-	ErrGetAmount        = sdkerrors.Register(ModuleName, 102, "retrieved invalid amount")
-	ErrSetAmount        = sdkerrors.Register(ModuleName, 103, "cannot set invalid amount")
-	ErrInvalidPriceMode = sdkerrors.Register(ModuleName, 104, "invalid price mode")
+	ErrEmptyAddress     = errors.Register(ModuleName, 100, "empty address")
+	ErrNilAsset         = errors.Register(ModuleName, 101, "nil asset")
+	ErrGetAmount        = errors.Register(ModuleName, 102, "retrieved invalid amount")
+	ErrSetAmount        = errors.Register(ModuleName, 103, "cannot set invalid amount")
+	ErrInvalidPriceMode = errors.Register(ModuleName, 104, "invalid price mode")
 
 	// 2XX = Token Registry
-	ErrNotRegisteredToken   = sdkerrors.Register(ModuleName, 200, "not a registered Token")
-	ErrUToken               = sdkerrors.Register(ModuleName, 201, "denom should not be a uToken")
-	ErrNotUToken            = sdkerrors.Register(ModuleName, 202, "denom should be a uToken")
-	ErrSupplyNotAllowed     = sdkerrors.Register(ModuleName, 203, "supplying of Token disabled")
-	ErrBorrowNotAllowed     = sdkerrors.Register(ModuleName, 204, "borrowing of Token disabled")
-	ErrBlacklisted          = sdkerrors.Register(ModuleName, 205, "blacklisted Token")
-	ErrDuplicateToken       = sdkerrors.Register(ModuleName, 207, "duplicate token")
-	ErrCollateralWeightZero = sdkerrors.Register(ModuleName, 206,
+	ErrNotRegisteredToken   = errors.Register(ModuleName, 200, "not a registered Token")
+	ErrUToken               = errors.Register(ModuleName, 201, "denom should not be a uToken")
+	ErrNotUToken            = errors.Register(ModuleName, 202, "denom should be a uToken")
+	ErrSupplyNotAllowed     = errors.Register(ModuleName, 203, "supplying of Token disabled")
+	ErrBorrowNotAllowed     = errors.Register(ModuleName, 204, "borrowing of Token disabled")
+	ErrBlacklisted          = errors.Register(ModuleName, 205, "blacklisted Token")
+	ErrDuplicateToken       = errors.Register(ModuleName, 207, "duplicate token")
+	ErrCollateralWeightZero = errors.Register(ModuleName, 206,
 		"collateral weight of Token is zero: can't be used as a collateral")
 
 	// 3XX = User Positions
-	ErrInsufficientBalance    = sdkerrors.Register(ModuleName, 300, "insufficient balance")
-	ErrInsufficientCollateral = sdkerrors.Register(ModuleName, 301, "insufficient collateral")
-	ErrLiquidationRepayZero   = sdkerrors.Register(ModuleName, 303, "liquidation would repay zero tokens")
+	ErrInsufficientBalance    = errors.Register(ModuleName, 300, "insufficient balance")
+	ErrInsufficientCollateral = errors.Register(ModuleName, 301, "insufficient collateral")
+	ErrLiquidationRepayZero   = errors.Register(ModuleName, 303, "liquidation would repay zero tokens")
 
 	// 4XX = Price Sensitive
-	ErrBadValue              = sdkerrors.Register(ModuleName, 400, "bad USD value")
-	ErrInvalidOraclePrice    = sdkerrors.Register(ModuleName, 401, "invalid oracle price")
-	ErrUndercollaterized     = sdkerrors.Register(ModuleName, 402, "borrow positions are undercollaterized")
-	ErrLiquidationIneligible = sdkerrors.Register(ModuleName, 403, "borrower not eligible for liquidation")
-	ErrNoHistoricMedians     = sdkerrors.Register(ModuleName, 405, "insufficient historic medians available")
+	ErrBadValue              = errors.Register(ModuleName, 400, "bad USD value")
+	ErrInvalidOraclePrice    = errors.Register(ModuleName, 401, "invalid oracle price")
+	ErrUndercollaterized     = errors.Register(ModuleName, 402, "borrow positions are undercollaterized")
+	ErrLiquidationIneligible = errors.Register(ModuleName, 403, "borrower not eligible for liquidation")
+	ErrNoHistoricMedians     = errors.Register(ModuleName, 405, "insufficient historic medians available")
 
 	// 5XX = Market Conditions
-	ErrLendingPoolInsufficient = sdkerrors.Register(ModuleName, 500, "lending pool insufficient")
-	ErrMaxSupplyUtilization    = sdkerrors.Register(ModuleName, 501, "market would exceed MaxSupplyUtilization")
-	ErrMinCollateralLiquidity  = sdkerrors.Register(ModuleName, 502, "market would fall below MinCollateralLiquidity")
-	ErrMaxCollateralShare      = sdkerrors.Register(ModuleName, 503, "market would exceed MaxCollateralShare")
-	ErrMaxSupply               = sdkerrors.Register(ModuleName, 504, "market would exceed MaxSupply")
+	ErrLendingPoolInsufficient = errors.Register(ModuleName, 500, "lending pool insufficient")
+	ErrMaxSupplyUtilization    = errors.Register(ModuleName, 501, "market would exceed MaxSupplyUtilization")
+	ErrMinCollateralLiquidity  = errors.Register(ModuleName, 502, "market would fall below MinCollateralLiquidity")
+	ErrMaxCollateralShare      = errors.Register(ModuleName, 503, "market would exceed MaxCollateralShare")
+	ErrMaxSupply               = errors.Register(ModuleName, 504, "market would exceed MaxSupply")
 
 	// 6XX = Internal Failsafes
-	ErrInvalidUtilization      = sdkerrors.Register(ModuleName, 600, "invalid token utilization")
-	ErrNegativeTotalBorrowed   = sdkerrors.Register(ModuleName, 601, "total borrowed was negative")
-	ErrNegativeAPY             = sdkerrors.Register(ModuleName, 602, "negative APY")
-	ErrNegativeTimeElapsed     = sdkerrors.Register(ModuleName, 603, "negative time elapsed since last interest time")
-	ErrInvalidExchangeRate     = sdkerrors.Register(ModuleName, 604, "exchange rate less than one")
-	ErrInconsistentTotalBorrow = sdkerrors.Register(ModuleName, 605, "total adjusted borrow inconsistency")
-	ErrExcessiveTimeElapsed    = sdkerrors.Register(ModuleName, 606, "excessive time elapsed since last interest time")
+	ErrInvalidUtilization      = errors.Register(ModuleName, 600, "invalid token utilization")
+	ErrNegativeTotalBorrowed   = errors.Register(ModuleName, 601, "total borrowed was negative")
+	ErrNegativeAPY             = errors.Register(ModuleName, 602, "negative APY")
+	ErrNegativeTimeElapsed     = errors.Register(ModuleName, 603, "negative time elapsed since last interest time")
+	ErrInvalidExchangeRate     = errors.Register(ModuleName, 604, "exchange rate less than one")
+	ErrInconsistentTotalBorrow = errors.Register(ModuleName, 605, "total adjusted borrow inconsistency")
+	ErrExcessiveTimeElapsed    = errors.Register(ModuleName, 606, "excessive time elapsed since last interest time")
 
 	// 7XX = Disabled Functionality
-	ErrNotLiquidatorNode = sdkerrors.Register(ModuleName, 700, "node has disabled liquidator queries")
-	ErrNotImplemented    = sdkerrors.Register(ModuleName, 701, "not implemented")
+	ErrNotLiquidatorNode = errors.Register(ModuleName, 700, "node has disabled liquidator queries")
+	ErrNotImplemented    = errors.Register(ModuleName, 701, "not implemented")
 )

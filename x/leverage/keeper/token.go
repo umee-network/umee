@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -33,7 +32,7 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 	token := types.Token{}
 	bz := store.Get(tokenKey)
 	if len(bz) == 0 {
-		return token, sdkerrors.Wrap(types.ErrNotRegisteredToken, denom)
+		return token, types.ErrNotRegisteredToken.Wrap(denom)
 	}
 
 	err := k.cdc.Unmarshal(bz, &token)

@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	sdkerrors "cosmossdk.io/errors"
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
@@ -11,11 +11,11 @@ import (
 func (k Keeper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet ibcexported.PacketI) error {
 	funds, denom, err := k.GetFundsFromPacket(packet)
 	if err != nil {
-		return sdkerrors.Wrap(err, "bad packet in rate limit's SendPacket")
+		return errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
 	if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
-		return sdkerrors.Wrap(err, "bad packet in rate limit's SendPacket")
+		return errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
 	return k.ics4Wrapper.SendPacket(ctx, chanCap, packet)
