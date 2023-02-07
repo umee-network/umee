@@ -172,3 +172,38 @@ func (k Keeper) setBonded(ctx sdk.Context,
 	key := keyBondAmount(addr, uToken.Denom, tier)
 	return store.SetInt(k.KVStore(ctx), key, uToken.Amount, sdk.ZeroInt(), "bonded amount")
 }
+
+// GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken and tier -
+// for example, how much UMEE (reward) would have been earned by 1 ATOM bonded to the middle tier since genesis.
+func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string, tier incentive.BondTier) sdk.DecCoin {
+	key := keyRewardAccumulator(bondDenom, rewardDenom, tier)
+	amount := store.GetDec(k.KVStore(ctx), key, sdk.ZeroDec(), "reward accumulator")
+	return sdk.NewDecCoinFromDec(rewardDenom, amount)
+}
+
+// setRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier.
+func (k Keeper) setRewardAccumulator(ctx sdk.Context,
+	bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
+) error {
+	key := keyRewardAccumulator(bondDenom, reward.Denom, tier)
+	return store.SetDec(k.KVStore(ctx), key, reward.Amount, sdk.ZeroDec(), "reward accumulator")
+}
+
+// GetRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken and tier on one account -
+// this is the value of the reward accumulator for those specific denoms and tier the last time this account performed
+// and action that requires a reward tracker update (i.e. Bond, Claim, BeginUnbonding, or being Liquidated).
+func (k Keeper) GetRewardTracker(ctx sdk.Context,
+	addr sdk.AccAddress, bondDenom, rewardDenom string, tier incentive.BondTier,
+) sdk.DecCoin {
+	key := keyRewardTracker(addr, bondDenom, rewardDenom, tier)
+	amount := store.GetDec(k.KVStore(ctx), key, sdk.ZeroDec(), "reward tracker")
+	return sdk.NewDecCoinFromDec(rewardDenom, amount)
+}
+
+// setRewardTracker sets the reward tracker of a reward token for a single bonded uToken and tier for an address.
+func (k Keeper) setRewardTracker(ctx sdk.Context,
+	addr sdk.AccAddress, bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
+) error {
+	key := keyRewardTracker(addr, bondDenom, reward.Denom, tier)
+	return store.SetDec(k.KVStore(ctx), key, reward.Amount, sdk.ZeroDec(), "reward tracker")
+}
