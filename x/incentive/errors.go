@@ -24,4 +24,11 @@ var (
 	ErrNonzeroRemainingRewards = sdkerrors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
 	ErrNonzeroFundedRewards    = sdkerrors.Register(ModuleName, 301, "funded rewards must be zero in proposal")
 	ErrEmptyProposal           = sdkerrors.Register(ModuleName, 302, "proposal contains no incentive programs")
+
+	// 4XX = Programs
+	ErrNoProgramWithID = sdkerrors.Register(ModuleName, 400, "no incentive program with specified ID")
+
+	// 5XX = Misc
+	ErrDecreaseNextProgramID  = sdkerrors.Register(ModuleName, 500, "cannot decrease NextProgramID")
+	ErrDecreaseLastRewardTime = sdkerrors.Register(ModuleName, 501, "cannot decrease LastRewardTime")
 )
