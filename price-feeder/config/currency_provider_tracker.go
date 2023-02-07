@@ -194,7 +194,9 @@ func (t *CurrencyProviderTracker) setCurrencyProviders(osmosisAPIPairs map[strin
 // set to 3 providers.
 func (t *CurrencyProviderTracker) setCurrencyProviderMin() {
 	for base, exchanges := range t.CurrencyProviders {
-		if len(exchanges) < 3 && len(exchanges) > 0 { // can be 0 if request errored
+		// If CoinGecko returns 0 or 3 and above providers for a given pair, the
+		// minimum providers enforced will default to 3.
+		if len(exchanges) < 3 && len(exchanges) > 0 {
 			t.CurrencyProviderMin[base] = len(exchanges)
 		} else {
 			t.CurrencyProviderMin[base] = 3
