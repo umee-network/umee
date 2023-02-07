@@ -146,16 +146,16 @@ func (k Keeper) setLastRewardsTime(ctx sdk.Context, time uint64) error {
 }
 
 // GetTotalBonded retrieves the total amount of uTokens of a given denom which are bonded to the incentive module
-func (k Keeper) GetTotalBonded(ctx sdk.Context, denom string) sdk.Coin {
-	key := keyTotalBonded(denom)
-	amount := store.GetInt(k.KVStore(ctx), key, sdk.ZeroInt(), "total bonded "+denom)
+func (k Keeper) GetTotalBonded(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
+	key := keyTotalBonded(denom, tier)
+	amount := store.GetInt(k.KVStore(ctx), key, sdk.ZeroInt(), "total bonded")
 	return sdk.NewCoin(denom, amount)
 }
 
 // setTotalBonded records the total amount of uTokens of a given denom which are bonded to the incentive module
-func (k Keeper) setTotalBonded(ctx sdk.Context, uTokens sdk.Coin) error {
-	key := keyTotalBonded(uTokens.Denom)
-	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, sdk.ZeroInt(), "total bonded "+uTokens.Denom)
+func (k Keeper) setTotalBonded(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
+	key := keyTotalBonded(uTokens.Denom, tier)
+	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, sdk.ZeroInt(), "total bonded")
 }
 
 // GetBonded retrieves the amount of uTokens of a given denom which are bonded to a single tier by an account

@@ -34,7 +34,7 @@ var (
 	keyPrefixUnbonding                 = []byte{0x0B}
 )
 
-// keyUpcomingIncentiveProgram returns a KVStore key for getting and setting an incentive program.
+// keyUpcomingIncentiveProgram returns a KVStore key for an incentive program.
 func keyUpcomingIncentiveProgram(id uint32) []byte {
 	// programPrefix | id
 	bz := make([]byte, 4)
@@ -42,7 +42,7 @@ func keyUpcomingIncentiveProgram(id uint32) []byte {
 	return util.ConcatBytes(0, keyPrefixUpcomingIncentiveProgram, bz)
 }
 
-// keyOngoingIncentiveProgram returns a KVStore key for getting and setting an incentive program.
+// keyOngoingIncentiveProgram returns a KVStore key for an incentive program.
 func keyOngoingIncentiveProgram(id uint32) []byte {
 	// programPrefix | id
 	bz := make([]byte, 4)
@@ -50,7 +50,7 @@ func keyOngoingIncentiveProgram(id uint32) []byte {
 	return util.ConcatBytes(0, keyPrefixOngoingIncentiveProgram, bz)
 }
 
-// keyCompletedIncentiveProgram returns a KVStore key for getting and setting an incentive program.
+// keyCompletedIncentiveProgram returns a KVStore key for an incentive program.
 func keyCompletedIncentiveProgram(id uint32) []byte {
 	// programPrefix | id
 	bz := make([]byte, 4)
@@ -58,13 +58,19 @@ func keyCompletedIncentiveProgram(id uint32) []byte {
 	return util.ConcatBytes(0, keyPrefixCompletedIncentiveProgram, bz)
 }
 
-// keyTotalBonded returns a KVStore key for getting and setting total bonded amounts for a uToken.
-func keyTotalBonded(denom string) []byte {
-	// totalBondedPrefix | denom | 0x00 for null-termination
+// keyTotalBonded returns a KVStore key for total bonded uTokens for a single tier.
+func keyTotalBonded(denom string, tier incentive.BondTier) []byte {
+	// totalBondedPrefix | denom | 0x00 | tier
+	return util.ConcatBytes(0, keyTotalBondedNoTier(denom), []byte{byte(tier)})
+}
+
+// keyTotalBondedNoTier returns the common prefix used by all TotalBonds for a uToken denom.
+func keyTotalBondedNoTier(denom string) []byte {
+	// totalBondedPrefix | denom | 0x00
 	return util.ConcatBytes(1, keyPrefixTotalBonded, []byte(denom))
 }
 
-// keyBondAmount returns a KVStore key for getting and setting bonded amounts for a uToken denom, account, and tier.
+// keyBondAmount returns a KVStore key for bonded amounts for a uToken denom, account, and tier.
 func keyBondAmount(addr sdk.AccAddress, denom string, tier incentive.BondTier) []byte {
 	// bondPrefix | lengthprefixed(addr) | denom | 0x00 | tier
 	return util.ConcatBytes(0, keyBondAmountAmountNoTier(addr, denom), []byte{byte(tier)})
