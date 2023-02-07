@@ -3,9 +3,6 @@ package keeper
 import (
 	"encoding/binary"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/address"
-
 	"github.com/umee-network/umee/v4/util"
 )
 
@@ -60,9 +57,10 @@ func keyCompletedIncentiveProgram(id uint32) []byte {
 // keyTotalBonded returns a KVStore key for getting and setting total bonded amounts for a uToken.
 func keyTotalBonded(denom string) []byte {
 	// totalBondedPrefix | denom | 0x00 for null-termination
-	return util.ConcatBytes(1, keyPrefixCompletedIncentiveProgram, []byte(denom))
+	return util.ConcatBytes(1, keyPrefixTotalBonded, []byte(denom))
 }
 
+/*
 // keyBondAmount returns a KVStore key for getting and setting bonded amounts for a uToken on a single account.
 func keyBondAmount(addr sdk.AccAddress, uTokenDenom string) []byte {
 	// bondPrefix | lengthprefixed(addr) | denom | 0x00 for null-termination
@@ -74,3 +72,4 @@ func keyBondAmountAmountNoDenom(addr sdk.AccAddress) []byte {
 	// bondPrefix | lengthprefixed(addr)
 	return util.ConcatBytes(0, keyPrefixBondAmount, address.MustLengthPrefix(addr))
 }
+*/
