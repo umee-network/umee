@@ -6,7 +6,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
@@ -126,7 +125,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	// Ensure module account has sufficient unreserved tokens to withdraw
 	availableAmount := k.AvailableLiquidity(ctx, token.Denom)
 	if token.Amount.GT(availableAmount) {
-		return sdk.Coin{}, sdkerrors.Wrap(types.ErrLendingPoolInsufficient, token.String())
+		return sdk.Coin{}, types.ErrLendingPoolInsufficient.Wrap(token.String())
 	}
 
 	// Withdraw will first attempt to use any uTokens in the supplier's wallet
