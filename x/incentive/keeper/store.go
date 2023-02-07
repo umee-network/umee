@@ -207,3 +207,10 @@ func (k Keeper) setRewardTracker(ctx sdk.Context,
 	key := keyRewardTracker(addr, bondDenom, reward.Denom, tier)
 	return store.SetDec(k.KVStore(ctx), key, reward.Amount, sdk.ZeroDec(), "reward tracker")
 }
+
+// GetUnbondings gets all unbondings currently associated with an account.
+func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.Unbonding {
+	// key := keyUnbondings(addr)
+	unbondings := []incentive.Unbonding{}
+	return unbondings
+}

@@ -19,7 +19,7 @@ message GenesisState {
   repeated Bond              bonds               = 8 [(gogoproto.nullable) = false];
   repeated RewardTracker     reward_trackers     = 9 [(gogoproto.nullable) = false];
   repeated RewardAccumulator reward_accumulators = 10 [(gogoproto.nullable) = false];
-  repeated Unbonding         unbondings          = 11 [(gogoproto.nullable) = false];
+  repeated AccountUnbondings account_unbondings  = 11 [(gogoproto.nullable) = false];
 }
 
 // TotalBond tracks the amount of coins of one uToken denomination bonded to a
@@ -66,8 +66,13 @@ message RewardAccumulator {
 
 // Unbonding is a structure that tracks an in-progress token unbonding.
 message Unbonding {
-  string                   account = 1;
-  uint32                   tier    = 2;
-  uint64                   end     = 3;
-  cosmos.base.v1beta1.Coin amount  = 4 [(gogoproto.nullable) = false];
+  uint32                   tier   = 1;
+  uint64                   end    = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+}
+
+// AccountUnbondings is a structure that is used to store all of an account's unbondings.
+message AccountUnbondings {
+  string             account    = 1;
+  repeated Unbonding unbondings = 2 [(gogoproto.nullable) = false];
 }
