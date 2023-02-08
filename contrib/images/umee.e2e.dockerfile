@@ -2,12 +2,11 @@
 # Creates dynamic binaries, by building from the latest version of:
 # umeed and release version of peggo
 
-FROM golang:1.19-bullseye AS builder
+FROM ghcr.io/umee-network/peggo:latest-1.4 as peggo
 
-## Download Peggo
-WORKDIR /src
-RUN wget https://github.com/umee-network/peggo/releases/download/v1.4.0/peggo-v1.4.0-linux-amd64.tar.gz && \
-    tar -xvf peggo-v*
+FROM golang:1.19-bullseye AS builder
+ARG EXPERIMENTAL=false
+ENV EXPERIMENTAL $EXPERIMENTAL
 
 ## Download go module dependencies for umeed
 WORKDIR /src/umee
@@ -22,8 +21,9 @@ RUN go mod download
 ## Build umeed and price-feeder
 WORKDIR /src/umee
 COPY . .
-RUN make install && \
-    cd price-feeder && make install
+RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
+RUN make install 
+RUN cd price-feeder && make install
 
 ## Prepare the final clear binary
 FROM ubuntu:rolling
@@ -32,5 +32,5 @@ ENTRYPOINT ["umeed", "start"]
 
 COPY --from=builder /go/pkg/mod/github.com/\!cosm\!wasm/wasmvm\@v*/internal/api/libwasmvm.*.so /usr/lib/
 COPY --from=builder /go/bin/* /usr/local/bin/
-COPY --from=builder /src/peggo-v*/peggo /usr/local/bin/
+COPY --from=peggo /usr/local/bin/peggo /usr/local/bin/peggo
 RUN apt-get update && apt-get install ca-certificates -y
