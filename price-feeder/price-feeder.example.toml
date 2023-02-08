@@ -51,10 +51,6 @@ base = "OSMO"
 threshold = "2"
 
 [[deviation_thresholds]]
-base = "BTC"
-threshold = "1.5"
-
-[[deviation_thresholds]]
 base = "stATOM"
 threshold = "2"
 
@@ -210,21 +206,6 @@ providers = [
   "crypto",
 ]
 quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "coinbase",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "huobi",
-  "kraken",
-]
-quote = "USDT"
 
 [[currency_pairs]]
 base = "stATOM"
