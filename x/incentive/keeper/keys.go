@@ -34,28 +34,23 @@ var (
 	keyPrefixUnbonding                 = []byte{0x0B}
 )
 
-// keyUpcomingIncentiveProgram returns a KVStore key for an incentive program.
-func keyUpcomingIncentiveProgram(id uint32) []byte {
-	// programPrefix | id
+// keyIncentiveProgram returns a KVStore key for an incentive program.
+func keyIncentiveProgram(id uint32, status incentive.ProgramStatus) []byte {
+	// programPrefix (one of three) | id
 	bz := make([]byte, 4)
 	binary.LittleEndian.PutUint32(bz, id)
-	return util.ConcatBytes(0, keyPrefixUpcomingIncentiveProgram, bz)
-}
-
-// keyOngoingIncentiveProgram returns a KVStore key for an incentive program.
-func keyOngoingIncentiveProgram(id uint32) []byte {
-	// programPrefix | id
-	bz := make([]byte, 4)
-	binary.LittleEndian.PutUint32(bz, id)
-	return util.ConcatBytes(0, keyPrefixOngoingIncentiveProgram, bz)
-}
-
-// keyCompletedIncentiveProgram returns a KVStore key for an incentive program.
-func keyCompletedIncentiveProgram(id uint32) []byte {
-	// programPrefix | id
-	bz := make([]byte, 4)
-	binary.LittleEndian.PutUint32(bz, id)
-	return util.ConcatBytes(0, keyPrefixCompletedIncentiveProgram, bz)
+	var prefix []byte
+	switch status {
+	case incentive.ProgramStatusUpcoming:
+		prefix = keyPrefixUpcomingIncentiveProgram
+	case incentive.ProgramStatusOngoing:
+		prefix = keyPrefixOngoingIncentiveProgram
+	case incentive.ProgramStatusCompleted:
+		prefix = keyPrefixCompletedIncentiveProgram
+	default:
+		panic("invalid incentive program status in key")
+	}
+	return util.ConcatBytes(0, prefix, bz)
 }
 
 // keyTotalBonded returns a KVStore key for total bonded uTokens for a single tier.

@@ -14,10 +14,19 @@ const (
 	RouterKey = ModuleName
 )
 
-type BondTier uint8
+type (
+	BondTier      uint8
+	ProgramStatus uint8
+)
 
 const (
 	BondTierLong BondTier = iota
 	BondTierMiddle
 	BondTierShort
+)
+
+const (
+	ProgramStatusUpcoming ProgramStatus = iota
+	ProgramStatusOngoing
+	ProgramStatusCompleted
 )

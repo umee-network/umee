@@ -95,26 +95,55 @@ func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
 }
 
 // GetIncentiveProgram gets an incentive program by ID, regardless of the program's status.
-func (k Keeper) GetIncentiveProgram(ctx sdk.Context, id uint32) (incentive.IncentiveProgram, error) {
-	keys := [][]byte{
-		keyUpcomingIncentiveProgram(id),
-		keyOngoingIncentiveProgram(id),
-		keyCompletedIncentiveProgram(id),
+// Returns the program's status if found, or an error if it does not exist.
+func (k Keeper) GetIncentiveProgram(ctx sdk.Context, id uint32) (
+	incentive.IncentiveProgram, incentive.ProgramStatus, error,
+) {
+	statuses := []incentive.ProgramStatus{
+		incentive.ProgramStatusUpcoming,
+		incentive.ProgramStatusOngoing,
+		incentive.ProgramStatusCompleted,
 	}
 
-	store := ctx.KVStore(k.storeKey)
+	kvStore := ctx.KVStore(k.storeKey)
 
 	// Looks for an incentive program with the specified ID in upcoming, ongoing, then completed program lists.
-	for _, key := range keys {
+	for _, status := range statuses {
 		program := incentive.IncentiveProgram{}
-		bz := store.Get(key)
+		bz := kvStore.Get(keyIncentiveProgram(id, status))
 		if len(bz) != 0 {
 			err := k.cdc.Unmarshal(bz, &program)
-			return program, err
+			return program, status, err
 		}
 	}
 
-	return incentive.IncentiveProgram{}, incentive.ErrNoProgramWithID
+	return incentive.IncentiveProgram{}, 0, incentive.ErrNoProgramWithID
+}
+
+// setIncentiveProgram stores an incentive program in either the upcoming, ongoing, or completed program lists.
+// does not validate the incentive program struct or the validity of its status change (e.g. upcoming -> complete)
+func (k Keeper) setIncentiveProgram(ctx sdk.Context,
+	program incentive.IncentiveProgram, status incentive.ProgramStatus,
+) error {
+	keys := [][]byte{
+		keyIncentiveProgram(program.Id, incentive.ProgramStatusUpcoming),
+		keyIncentiveProgram(program.Id, incentive.ProgramStatusOngoing),
+		keyIncentiveProgram(program.Id, incentive.ProgramStatusCompleted),
+	}
+
+	kvStore := ctx.KVStore(k.storeKey)
+	for _, key := range keys {
+		// always clear the program from the status it was prevously stored under
+		kvStore.Delete(key)
+	}
+
+	key := keyIncentiveProgram(program.Id, status)
+	bz, err := k.cdc.Marshal(&program)
+	if err != nil {
+		return err
+	}
+	kvStore.Set(key, bz)
+	return nil
 }
 
 // GetNextProgramID gets the ID that will be assigned to the next incentive program passed by governance.
@@ -211,10 +240,10 @@ func (k Keeper) setRewardTracker(ctx sdk.Context,
 // GetUnbondings gets all unbondings currently associated with an account.
 func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.Unbonding {
 	key := keyUnbondings(addr)
-	store := ctx.KVStore(k.storeKey)
+	kvStore := ctx.KVStore(k.storeKey)
 
 	accUnbondings := incentive.AccountUnbondings{}
-	bz := store.Get(key)
+	bz := kvStore.Get(key)
 	if len(bz) == 0 {
 		return []incentive.Unbonding{}
 	}
@@ -225,7 +254,7 @@ func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.
 
 // setUnbondings stores the full list of unbondings currently associated with an account.
 func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
-	store := ctx.KVStore(k.storeKey)
+	kvStore := ctx.KVStore(k.storeKey)
 	addr, err := sdk.AccAddressFromBech32(unbondings.Account)
 	if err != nil {
 		// catches invalid and empty addresses
@@ -234,12 +263,12 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 	key := keyUnbondings(addr)
 	if len(unbondings.Unbondings) == 0 {
 		// clear store on no unbondings remaining
-		store.Delete(key)
+		kvStore.Delete(key)
 	}
 	bz, err := k.cdc.Marshal(&unbondings)
 	if err != nil {
 		return err
 	}
-	store.Set(key, bz)
+	kvStore.Set(key, bz)
 	return nil
 }
