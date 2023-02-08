@@ -210,7 +210,36 @@ func (k Keeper) setRewardTracker(ctx sdk.Context,
 
 // GetUnbondings gets all unbondings currently associated with an account.
 func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.Unbonding {
-	// key := keyUnbondings(addr)
-	unbondings := []incentive.Unbonding{}
-	return unbondings
+	key := keyUnbondings(addr)
+	store := ctx.KVStore(k.storeKey)
+
+	accUnbondings := incentive.AccountUnbondings{}
+	bz := store.Get(key)
+	if len(bz) == 0 {
+		return []incentive.Unbonding{}
+	}
+
+	k.cdc.MustUnmarshal(bz, &accUnbondings)
+	return accUnbondings.Unbondings
+}
+
+// setUnbondings stores the full list of unbondings currently associated with an account.
+func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
+	store := ctx.KVStore(k.storeKey)
+	addr, err := sdk.AccAddressFromBech32(unbondings.Account)
+	if err != nil {
+		// catches invalid and empty addresses
+		return err
+	}
+	key := keyUnbondings(addr)
+	if len(unbondings.Unbondings) == 0 {
+		// clear store on no unbondings remaining
+		store.Delete(key)
+	}
+	bz, err := k.cdc.Marshal(&unbondings)
+	if err != nil {
+		return err
+	}
+	store.Set(key, bz)
+	return nil
 }
