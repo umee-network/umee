@@ -171,6 +171,16 @@ func (c Config) ProviderPairs() map[provider.Name][]types.CurrencyPair {
 	return providerPairs
 }
 
+// ProviderEndpointsMap converts the provider_endpoints from the config
+// file into a map of provider.Endpoint where the key is the provider name
+func (c Config) ProviderEndpointsMap() map[provider.Name]provider.Endpoint {
+	endpoints := make(map[provider.Name]provider.Endpoint, len(c.ProviderEndpoints))
+	for _, endpoint := range c.ProviderEndpoints {
+		endpoints[endpoint.Name] = endpoint
+	}
+	return endpoints
+}
+
 // ParseConfig attempts to read and parse configuration from the given file path.
 // An error is returned if reading or parsing the config fails.
 func ParseConfig(configPath string) (Config, error) {

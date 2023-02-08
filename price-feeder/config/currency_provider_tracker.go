@@ -17,6 +17,7 @@ const (
 	coinGeckoTickersEndpoint    = "tickers"
 	osmosisV2RestURL            = "https://api.osmo-api.network.umee.cc"
 	osmosisV2AssetPairsEndpoint = "assetpairs"
+	requestTimeout              = time.Second * 2
 	trackingPeriod              = time.Hour * 24
 )
 
@@ -80,7 +81,12 @@ func NewCurrencyProviderTracker(
 		return nil, err
 	}
 
-	if err := currencyProviderTracker.setCurrencyProviders(); err != nil {
+	osmosisAPIPairs, err := currencyProviderTracker.getOsmosisAPIPairs()
+	if err != nil {
+		return nil, err
+	}
+
+	if err := currencyProviderTracker.setCurrencyProviders(osmosisAPIPairs); err != nil {
 		return nil, err
 	}
 
@@ -111,51 +117,71 @@ func (t *CurrencyProviderTracker) setCoinIDSymbolMap() error {
 	}
 
 	for _, coin := range listResponse {
-		t.coinIDSymbolMap[coin.Symbol] = coin.ID
+		if _, ok := t.coinIDSymbolMap[coin.Symbol]; !ok {
+			t.coinIDSymbolMap[coin.Symbol] = coin.ID
+		}
 	}
 
 	return nil
 }
 
-// setCurrencyProviders queries CoinGecko's tickers endpoint and the osmosis-api assetpairs
-// endpoint to get all the exchanges that support each price feeder currency pair and store
-// it in the CurrencyProviders map.
-func (t *CurrencyProviderTracker) setCurrencyProviders() error {
+// getOsmosisAPIPairs queries the osmosis-api assetpairs endpoint to get the asset pairs
+// supported by it.
+func (t *CurrencyProviderTracker) getOsmosisAPIPairs() (map[string]string, error) {
+	client := &http.Client{
+		Timeout: requestTimeout,
+	}
+	osmosisAPIPairs := make(map[string]string)
+
+	osmosisResp, err := client.Get(fmt.Sprintf("%s/%s", osmosisV2RestURL, osmosisV2AssetPairsEndpoint))
+	if err != nil {
+		return nil, err
+	}
+	defer osmosisResp.Body.Close()
+	var assetPairsResponse []assetPair
+	if err = json.NewDecoder(osmosisResp.Body).Decode(&assetPairsResponse); err != nil {
+		return nil, err
+	}
+
+	for _, assetPair := range assetPairsResponse {
+		osmosisAPIPairs[assetPair.Base] = assetPair.Quote
+	}
+
+	return osmosisAPIPairs, nil
+}
+
+// setCurrencyProviders queries CoinGecko's tickers endpoint to get all the exchanges
+// that support each price feeder currency pair and store it in the CurrencyProviders map.
+func (t *CurrencyProviderTracker) setCurrencyProviders(osmosisAPIPairs map[string]string) error {
+	client := &http.Client{
+		Timeout: requestTimeout,
+	}
 	for _, pair := range t.pairs {
+		// check if its a pair supported by the osmosis api
+		if osmosisAPIPairs[strings.ToUpper(pair.Base)] == strings.ToUpper(pair.Quote) {
+			t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], "osmosisv2")
+		}
+
 		// check if CoinGecko API supports pair
 		pairBaseID := t.coinIDSymbolMap[strings.ToLower(pair.Base)]
-		coinGeckoResp, err := http.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestURL, pairBaseID, coinGeckoTickersEndpoint))
+		coinGeckoResp, err := client.Get(fmt.Sprintf("%s/%s/%s", coinGeckoRestURL, pairBaseID, coinGeckoTickersEndpoint))
 		if err != nil {
-			return err
-		}
-		defer coinGeckoResp.Body.Close()
-
-		var tickerResponse coinTickerResponse
-		if err = json.NewDecoder(coinGeckoResp.Body).Decode(&tickerResponse); err != nil {
-			return err
-		}
-
-		for _, ticker := range tickerResponse.Tickers {
-			if ticker.Target == pair.Quote {
-				t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], ticker.Market.Name)
+			t.logger.Error().Err(err).Msg(fmt.Sprintf("Failed to query coin gecko api tickers endpoint for %s", pair.Base))
+		} else {
+			defer coinGeckoResp.Body.Close()
+			var tickerResponse coinTickerResponse
+			if err = json.NewDecoder(coinGeckoResp.Body).Decode(&tickerResponse); err != nil {
+				return err
 			}
-		}
 
-		// check if osmosis-api supports pair
-		osmosisResp, err := http.Get(fmt.Sprintf("%s/%s", osmosisV2RestURL, osmosisV2AssetPairsEndpoint))
-		if err != nil {
-			return err
-		}
-		defer osmosisResp.Body.Close()
+			for _, ticker := range tickerResponse.Tickers {
+				if ticker.Target == pair.Quote {
+					t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], ticker.Market.Name)
+				}
+			}
 
-		var assetPairsResponse []assetPair
-		if err = json.NewDecoder(osmosisResp.Body).Decode(&assetPairsResponse); err != nil {
-			return err
-		}
-
-		for _, assetPair := range assetPairsResponse {
-			if pair.Base == assetPair.Base && pair.Quote == assetPair.Quote {
-				t.CurrencyProviders[pair.Base] = append(t.CurrencyProviders[pair.Base], "osmosisv2")
+			if len(t.CurrencyProviders[pair.Base]) == 0 {
+				t.logger.Warn().Msg(fmt.Sprintf("Coin gecko found 0 providers for %s", pair.Base))
 			}
 		}
 	}
@@ -168,7 +194,9 @@ func (t *CurrencyProviderTracker) setCurrencyProviders() error {
 // set to 3 providers.
 func (t *CurrencyProviderTracker) setCurrencyProviderMin() {
 	for base, exchanges := range t.CurrencyProviders {
-		if len(exchanges) < 3 {
+		// If CoinGecko returns 0 or 3 and above providers for a given pair, the
+		// minimum providers enforced will default to 3.
+		if len(exchanges) < 3 && len(exchanges) > 0 {
 			t.CurrencyProviderMin[base] = len(exchanges)
 		} else {
 			t.CurrencyProviderMin[base] = 3
@@ -186,7 +214,11 @@ func (t *CurrencyProviderTracker) trackCurrencyProviders(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-time.After(trackingPeriod):
-			if err := t.setCurrencyProviders(); err != nil {
+			osmosisAPIPairs, err := t.getOsmosisAPIPairs()
+			if err != nil {
+				t.logger.Error().Err(err).Msg("failed to query osmosis-api for available asset pairs")
+			}
+			if err := t.setCurrencyProviders(osmosisAPIPairs); err != nil {
 				t.logger.Error().Err(err).Msg("failed to set available providers for currencies")
 			}
 
