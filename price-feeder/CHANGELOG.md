@@ -60,7 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ## [v2.0.4](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.4) 2023-01-31
 
 ### Improvements
-- [1768](https://github.com/umee-network/umee/pull/1768) New example config with new oracle assets in it.
+- [1768](https://github.com/umee-network/umee/pull/1768) New example config with new oracle assets in it, and enable "OSMO" as a quotable asset.
 
 ## [v2.0.3](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.3) 2023-01-05
 
