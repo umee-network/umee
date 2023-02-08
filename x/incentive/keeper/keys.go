@@ -101,7 +101,7 @@ func keyRewardAccumulatorNoReward(bondedDenom string) []byte {
 // denom and tier.
 func keyRewardTracker(addr sdk.AccAddress, bondedDenom, rewardDenom string, tier incentive.BondTier) []byte {
 	// rewardTrackerPrefix | lengthprefixed(addr) | bondedDenom | 0x00 | tier | rewardDenom | 0x00
-	return util.ConcatBytes(1, keyRewardAccumulatorNoReward(bondedDenom), []byte{byte(tier)}, []byte(rewardDenom))
+	return util.ConcatBytes(1, keyRewardTrackerNoReward(addr, bondedDenom), []byte{byte(tier)}, []byte(rewardDenom))
 }
 
 // keyRewardTrackerNoReward returns the common prefix used by all reward trackers for an account and bonded uToken
