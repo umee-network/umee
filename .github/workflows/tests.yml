@@ -207,3 +207,40 @@ jobs:
         if: env.GIT_DIFF
         run: |
           EXPERIMENTAL=true make test-unit
+  
+  experimental-test-e2e:
+    runs-on: ubuntu-latest
+    needs: install-tparse
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v3
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - uses: actions/setup-go@v3
+        if: env.GIT_DIFF
+        with:
+          go-version: 1.19
+          cache: true
+
+      # In this step, this action saves a list of existing images,
+      # the cache is created without them in the post run.
+      # It also restores the cache if it exists.
+      - name: cache docker layer
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        if: env.GIT_DIFF
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
+      - name: Build Docker Image with experimental features
+        if: env.GIT_DIFF
+        run: |
+          DOCKER_BUILDKIT=1 make docker-build-experimental
+
+      - name: Test E2E with experimental features
+        if: env.GIT_DIFF
+        run: |
+          EXPERIMENTAL=true make test-e2e

@@ -179,6 +179,7 @@ func (conn *WebsocketConnection) iterateRetryCounter() time.Duration {
 // subscribe sends the WebsocketControllers subscription messages to the websocket
 func (conn *WebsocketConnection) subscribe(msg interface{}) error {
 	telemetryWebsocketSubscribeCurrencyPairs(conn.providerName, 1)
+	conn.logger.Debug().Interface("msg", msg).Msg("sending subscription message")
 	if err := conn.SendJSON(msg); err != nil {
 		return fmt.Errorf(types.ErrWebsocketSend.Error(), conn.providerName, err)
 	}
@@ -194,7 +195,6 @@ func (conn *WebsocketConnection) SendJSON(msg interface{}) error {
 	if conn.client == nil {
 		return fmt.Errorf("unable to send JSON on a closed connection")
 	}
-	conn.logger.Debug().Interface("msg", msg).Msg("sending websocket message")
 	if err := conn.client.WriteJSON(msg); err != nil {
 		return fmt.Errorf(types.ErrWebsocketSend.Error(), conn.providerName, err)
 	}
@@ -285,6 +285,9 @@ func (conn *WebsocketConnection) close() {
 
 	conn.logger.Debug().Msg("closing websocket")
 	conn.websocketCancelFunc()
+	if conn.client == nil {
+		return
+	}
 	if err := conn.client.Close(); err != nil {
 		conn.logger.Err(fmt.Errorf(types.ErrWebsocketClose.Error(), conn.providerName, err)).Send()
 	}
