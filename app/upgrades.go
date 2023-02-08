@@ -39,13 +39,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 // performs upgrade from v4.0 to v4.1
 func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
 	const planName = "v4.1"
-	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			ctx.Logger().Info("Run v4.1 migration")
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		},
-	)
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 		Added: []string{
