@@ -46,6 +46,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+- [1781](https://github.com/umee-network/umee/pull/1781) BTC was removed from example config since WBTC is used by the `Oracle` module instead.
+
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.2) 2022-12-14
 
 ### Bugs

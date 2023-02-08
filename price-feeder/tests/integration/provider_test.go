@@ -38,15 +38,18 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 	cfg, err := config.ParseConfig("../../price-feeder.example.toml")
 	require.NoError(s.T(), err)
 
+	endpoints := cfg.ProviderEndpointsMap()
+
 	for key, pairs := range cfg.ProviderPairs() {
 		providerName := key
 		currencyPairs := pairs
+		endpoint := endpoints[providerName]
 		s.T().Run(string(providerName), func(t *testing.T) {
 			t.Parallel()
 			ctx, cancel := context.WithCancel(context.Background())
-			pvd, _ := oracle.NewProvider(ctx, providerName, getLogger(), provider.Endpoint{}, currencyPairs...)
-			time.Sleep(30 * time.Second) // wait for provider to connect and receive some prices
-			checkForPrices(t, pvd, currencyPairs)
+			pvd, _ := oracle.NewProvider(ctx, providerName, getLogger(), endpoint, currencyPairs...)
+			time.Sleep(60 * time.Second) // wait for provider to connect and receive some prices
+			checkForPrices(t, pvd, currencyPairs, providerName.String())
 			cancel()
 		})
 	}
@@ -69,12 +72,12 @@ func (s *IntegrationTestSuite) TestSubscribeCurrencyPairs() {
 
 	time.Sleep(25 * time.Second) // wait for provider to connect and receive some prices
 
-	checkForPrices(s.T(), pvd, currencyPairs)
+	checkForPrices(s.T(), pvd, currencyPairs, "OKX")
 
 	cancel()
 }
 
-func checkForPrices(t *testing.T, pvd provider.Provider, currencyPairs []types.CurrencyPair) {
+func checkForPrices(t *testing.T, pvd provider.Provider, currencyPairs []types.CurrencyPair, providerName string) {
 	tickerPrices, err := pvd.GetTickerPrices(currencyPairs...)
 	require.NoError(t, err)
 
@@ -84,11 +87,33 @@ func checkForPrices(t *testing.T, pvd provider.Provider, currencyPairs []types.C
 	for _, cp := range currencyPairs {
 		currencyPairKey := cp.String()
 
-		// verify ticker price for currency pair is above zero
-		require.True(t, tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)))
+		require.False(t,
+			tickerPrices[currencyPairKey].Price.IsNil(),
+			"no ticker price for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
 
-		// verify candle price for currency pair is above zero
-		require.True(t, candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)))
+		require.True(t,
+			tickerPrices[currencyPairKey].Price.GT(sdk.NewDec(0)),
+			"ticker price is zero for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
+
+		require.NotEmpty(t,
+			candlePrices[currencyPairKey],
+			"no candle prices for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
+
+		require.True(t,
+			candlePrices[currencyPairKey][0].Price.GT(sdk.NewDec(0)),
+			"candle price iss zero for %s pair %s",
+			providerName,
+			currencyPairKey,
+		)
 	}
 }
 
