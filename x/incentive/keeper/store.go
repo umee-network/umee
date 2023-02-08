@@ -155,7 +155,7 @@ func (k Keeper) GetNextProgramID(ctx sdk.Context) uint32 {
 func (k Keeper) setNextProgramID(ctx sdk.Context, id uint32) error {
 	prev := k.GetNextProgramID(ctx)
 	if id < prev {
-		return incentive.ErrDecreaseNextProgramID.Wrapf("%s to %s", id, prev)
+		return incentive.ErrDecreaseNextProgramID.Wrapf("%d to %d", id, prev)
 	}
 	return store.SetUint32(k.KVStore(ctx), keyPrefixNextProgramID, id, 0, "next program ID")
 }
@@ -169,7 +169,7 @@ func (k Keeper) GetLastRewardsTime(ctx sdk.Context) uint64 {
 func (k Keeper) setLastRewardsTime(ctx sdk.Context, time uint64) error {
 	prev := k.GetLastRewardsTime(ctx)
 	if time < prev {
-		return incentive.ErrDecreaseLastRewardTime.Wrapf("%s to %s", time, prev)
+		return incentive.ErrDecreaseLastRewardTime.Wrapf("%d to %d", time, prev)
 	}
 	return store.SetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, time, 0, "last reward time")
 }
@@ -196,7 +196,7 @@ func (k Keeper) GetBonded(ctx sdk.Context, addr sdk.AccAddress, denom string, ti
 
 // setBonded sets the amount of uTokens of a given denom which are bonded to a single tier by an account
 func (k Keeper) setBonded(ctx sdk.Context,
-	addr sdk.AccAddress, uToken sdk.Coin, denom string, tier incentive.BondTier,
+	addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier,
 ) error {
 	key := keyBondAmount(addr, uToken.Denom, tier)
 	return store.SetInt(k.KVStore(ctx), key, uToken.Amount, sdk.ZeroInt(), "bonded amount")
@@ -204,7 +204,8 @@ func (k Keeper) setBonded(ctx sdk.Context,
 
 // GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken and tier -
 // for example, how much UMEE (reward) would have been earned by 1 ATOM bonded to the middle tier since genesis.
-func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string, tier incentive.BondTier) sdk.DecCoin {
+func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string, tier incentive.BondTier,
+) sdk.DecCoin {
 	key := keyRewardAccumulator(bondDenom, rewardDenom, tier)
 	amount := store.GetDec(k.KVStore(ctx), key, sdk.ZeroDec(), "reward accumulator")
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
