@@ -51,10 +51,6 @@ base = "OSMO"
 threshold = "2"
 
 [[deviation_thresholds]]
-base = "BTC"
-threshold = "1.5"
-
-[[deviation_thresholds]]
 base = "stATOM"
 threshold = "2"
 
@@ -212,21 +208,6 @@ providers = [
 quote = "USD"
 
 [[currency_pairs]]
-base = "BTC"
-providers = [
-  "coinbase",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "huobi",
-  "kraken",
-]
-quote = "USDT"
-
-[[currency_pairs]]
 base = "stATOM"
 providers = [
   "osmosisv2",
@@ -274,3 +255,8 @@ prometheus-retention-time = 100
 name = "binance"
 rest = "https://api1.binance.com"
 websocket = "stream.binance.com:9443"
+
+[[provider_endpoints]]
+name = "osmosisv2"
+rest = "https://api.osmo-api.prod.network.umee.cc"
+websocket = "api.osmo-api.prod.network.umee.cc"

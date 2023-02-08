@@ -16,6 +16,7 @@ import (
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
@@ -32,6 +33,19 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 	app.registerUpgrade3_3to4_0(upgradeInfo)
+	app.registerUpgrade4_1(upgradeInfo)
+}
+
+// performs upgrade from v4.0 to v4.1
+func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
+	const planName = "v4.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			uibc.ModuleName,
+		},
+	})
 }
 
 // performs upgrade from v3.3 -> v4
