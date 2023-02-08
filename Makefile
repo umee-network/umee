@@ -125,7 +125,7 @@ docker-build:
 	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
 docker-build-experimental:
-	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg experimental=true . 
+	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true . 
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
