@@ -32,13 +32,9 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 	app.registerUpgrade3_3to4_0(upgradeInfo)
-<<<<<<< HEAD
 	app.registerUpgrade4_0to4_0rc3(upgradeInfo)
 	app.registerUpgrade4_0rc3to4_0rc4(upgradeInfo)
-=======
-	app.registerUpgrade4_1(upgradeInfo)
 	app.registerUpgrade4_0_1(upgradeInfo)
->>>>>>> 7c9e5ef (feat: register v4.0.1 upgrade (#1802))
 }
 
 // performs upgrade from v4.0-rc3 -> v4.0-rc4
