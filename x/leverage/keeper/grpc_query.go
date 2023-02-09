@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -139,11 +138,11 @@ func (q Querier) MarketSummary(
 	if oraclePrice, _, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeSpot); oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	}
-	historicPrice, historicN, historicErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeHistoric)
+	historicPrice, _, historicErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeHistoric)
 	if historicErr == nil {
 		resp.OracleHistoricPrice = &historicPrice
 	} else {
-		resp.Errors += fmt.Sprintf("\nhistoric N \n  %d, error \n  %s", historicN, historicErr)
+		resp.Errors += historicErr.Error()
 	}
 
 	return &resp, nil
