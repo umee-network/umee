@@ -228,6 +228,11 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(pumpDenom, 2_400000), types.PriceModeLow)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
+
+	// lowercase 2.4 PUMP * $1.00
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(strings.ToLower(pumpDenom), 2_400000), types.PriceModeLow)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 }
 
 func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
