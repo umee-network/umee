@@ -135,11 +135,17 @@ func (q Querier) MarketSummary(
 	}
 
 	// Oracle prices in response will be nil if it is unavailable
-	if oraclePrice, _, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeSpot); oracleErr == nil {
+	oraclePrice, _, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeSpot)
+	if oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
+	} else {
+		resp.Errors += oracleErr.Error()
 	}
-	if historicPrice, _, historicErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeHistoric); historicErr == nil {
+	historicPrice, _, historicErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeHistoric)
+	if historicErr == nil {
 		resp.OracleHistoricPrice = &historicPrice
+	} else {
+		resp.Errors += historicErr.Error()
 	}
 
 	return &resp, nil

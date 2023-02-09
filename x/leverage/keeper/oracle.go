@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"strings"
+
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -40,7 +42,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		// historic price is required for modes other than spot
 		var numStamps uint32
 		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(
-			ctx, t.SymbolDenom, uint64(t.HistoricMedians))
+			ctx, strings.ToUpper(t.SymbolDenom), uint64(t.HistoricMedians))
 		if err != nil {
 			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
