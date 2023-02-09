@@ -1,6 +1,12 @@
 package keeper
 
 import (
+<<<<<<< HEAD
+=======
+	"strings"
+
+	"cosmossdk.io/errors"
+>>>>>>> ea76766 (fix: intercase leverage fix (#1800))
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -40,7 +46,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		// historic price is required for modes other than spot
 		var numStamps uint32
 		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(
-			ctx, t.SymbolDenom, uint64(t.HistoricMedians))
+			ctx, strings.ToUpper(t.SymbolDenom), uint64(t.HistoricMedians))
 		if err != nil {
 			return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
 		}
