@@ -50,7 +50,7 @@ func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
 }
 
 // performs upgrade from v4.0.0 to v4.0.1
-func (app *UmeeApp) registerUpgrade4_0_1(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade4_0_1(_ upgradetypes.Plan) {
 	const planName = "v4.0.1"
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
