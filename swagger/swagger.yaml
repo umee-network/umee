@@ -454,6 +454,8 @@ paths:
                   price is used if required medians is zero. Price is nil when
                   the oracle is down or insufficient historic medians are
                   available.
+              errors:
+                type: string
             description: >-
               QueryMarketSummaryResponse defines the response structure for the
               MarketSummary gRPC service handler.
@@ -2228,6 +2230,8 @@ definitions:
           the leverage registry. Current price is used if required medians is
           zero. Price is nil when the oracle is down or insufficient historic
           medians are available.
+      errors:
+        type: string
     description: >-
       QueryMarketSummaryResponse defines the response structure for the
       MarketSummary gRPC service handler.
