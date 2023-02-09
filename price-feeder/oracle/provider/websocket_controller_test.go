@@ -11,7 +11,7 @@ type TestProvider struct {
 	handlerCalled bool
 }
 
-func (mp *TestProvider) messageHandler(int, []byte) {
+func (mp *TestProvider) messageHandler(int, *WebsocketConnection, []byte) {
 	mp.handlerCalled = true
 }
 
@@ -47,11 +47,15 @@ func TestWebsocketController_readSuccess(t *testing.T) {
 			provider := TestProvider{}
 			mockClient := new(websocket.Conn)
 			c := &WebsocketController{
-				providerName:   ProviderMock,
-				messageHandler: provider.messageHandler,
-				client:         mockClient,
+				providerName: ProviderMock,
+				connections: []*WebsocketConnection{
+					{
+						messageHandler: provider.messageHandler,
+						client:         mockClient,
+					},
+				},
 			}
-			c.readSuccess(testCase.messageType, testCase.bz)
+			c.connections[0].readSuccess(testCase.messageType, testCase.bz)
 			require.Equal(t, provider.handlerCalled, testCase.shouldCallMessageHandler)
 		})
 	}

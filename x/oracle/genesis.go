@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/oracle/keeper"
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
@@ -14,14 +15,9 @@ import (
 func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisState) {
 	for _, d := range genState.FeederDelegations {
 		voter, err := sdk.ValAddressFromBech32(d.ValidatorAddress)
-		if err != nil {
-			panic(err)
-		}
-
+		util.Panic(err)
 		feeder, err := sdk.AccAddressFromBech32(d.FeederAddress)
-		if err != nil {
-			panic(err)
-		}
+		util.Panic(err)
 
 		keeper.SetFeederDelegation(ctx, voter, feeder)
 	}
@@ -32,27 +28,21 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 
 	for _, mc := range genState.MissCounters {
 		operator, err := sdk.ValAddressFromBech32(mc.ValidatorAddress)
-		if err != nil {
-			panic(err)
-		}
+		util.Panic(err)
 
 		keeper.SetMissCounter(ctx, operator, mc.MissCounter)
 	}
 
 	for _, ap := range genState.AggregateExchangeRatePrevotes {
 		valAddr, err := sdk.ValAddressFromBech32(ap.Voter)
-		if err != nil {
-			panic(err)
-		}
+		util.Panic(err)
 
 		keeper.SetAggregateExchangeRatePrevote(ctx, valAddr, ap)
 	}
 
 	for _, av := range genState.AggregateExchangeRateVotes {
 		valAddr, err := sdk.ValAddressFromBech32(av.Voter)
-		if err != nil {
-			panic(err)
-		}
+		util.Panic(err)
 
 		keeper.SetAggregateExchangeRateVote(ctx, valAddr, av)
 	}

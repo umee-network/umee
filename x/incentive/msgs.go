@@ -1,8 +1,8 @@
 package incentive
 
 import (
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v4/util/checkers"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -14,7 +14,7 @@ var (
 	_ sdk.Msg = &MsgBond{}
 	_ sdk.Msg = &MsgSponsor{}
 	_ sdk.Msg = &MsgGovSetParams{}
-	_ sdk.Msg = &MsgGovCreateProgram{}
+	_ sdk.Msg = &MsgGovCreatePrograms{}
 )
 
 func NewMsgClaim(account sdk.AccAddress) *MsgClaim {
@@ -164,38 +164,46 @@ func (msg MsgGovSetParams) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgGovSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgCreateProgram(authority, title, description string, program IncentiveProgram) *MsgGovCreateProgram {
-	return &MsgGovCreateProgram{
+func NewMsgCreateProgram(authority, title, description string, programs []IncentiveProgram) *MsgGovCreatePrograms {
+	return &MsgGovCreatePrograms{
 		Title:       title,
 		Description: description,
-		Program:     program,
+		Programs:    programs,
 		Authority:   authority,
 	}
 }
 
-func (msg MsgGovCreateProgram) ValidateBasic() error {
+func (msg MsgGovCreatePrograms) ValidateBasic() error {
 	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
 	}
-	return validateProposedIncentiveProgram(msg.Program)
+	if len(msg.Programs) == 0 {
+		return ErrEmptyProposal
+	}
+	for _, p := range msg.Programs {
+		if err := validateProposedIncentiveProgram(p); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // GetSignBytes implements Msg
-func (msg MsgGovCreateProgram) GetSignBytes() []byte {
+func (msg MsgGovCreatePrograms) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
-func (msg MsgGovCreateProgram) GetSigners() []sdk.AccAddress {
+func (msg MsgGovCreatePrograms) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
 // Route implements the sdk.Msg interface.
-func (msg MsgGovCreateProgram) Route() string { return RouterKey }
+func (msg MsgGovCreatePrograms) Route() string { return RouterKey }
 
 // Type implements the sdk.Msg interface.
-func (msg MsgGovCreateProgram) Type() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovCreatePrograms) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
 // to incentive programs which have not yet been funded or passed by governance
@@ -241,10 +249,10 @@ func (ip IncentiveProgram) Validate() error {
 	}
 	if !leveragetypes.HasUTokenPrefix(ip.Denom) {
 		// only allow uToken denoms
-		return sdkerrors.Wrap(leveragetypes.ErrNotUToken, ip.Denom)
+		return errors.Wrap(leveragetypes.ErrNotUToken, ip.Denom)
 	}
 
-	// TODO: Finish validate logic
+	// TODO #1749: Finish validate logic
 
 	return nil
 }

@@ -131,7 +131,7 @@ paths:
                 type: string
                 description: >-
                   Supplied Value is the sum of the USD value of all tokens the
-                  account has supplied, includng interest earned.
+                  account has supplied, including interest earned.
               collateral_value:
                 type: string
                 description: >-
@@ -361,7 +361,7 @@ paths:
                   all borrowers. Collateral is denominated in uTokenso, so both
                   uToken exchange rate and exponent must also be applied to
                   convert to symbol denom. For example, if collateral is 4000000
-                  u/uumee and uToken exhange rate is 1.2, then 5 UMEE have been
+                  u/uumee and uToken exchange rate is 1.2, then 5 UMEE have been
                   collateralized.
               borrowed:
                 type: string
@@ -394,13 +394,14 @@ paths:
                   This amount is less than total supply due to safety limits. It
                   is denominated in uTokens, so both uToken exchange rate and
                   exponent must be applied to convert to symbol denom. For
-                  example, if collateral is 4000000 u/uumee, uToken exhange rate
-                  is 1.2, and maximum borrow is 7000000 uumee, then a maximum of
-                  2 additional UMEE is permitted to be collateralized.
+                  example, if collateral is 4000000 u/uumee, uToken exchange
+                  rate is 1.2, and maximum borrow is 7000000 uumee, then a
+                  maximum of 2 additional UMEE is permitted to be
+                  collateralized.
               minimum_liquidity:
                 type: string
                 description: >-
-                  Mimimum Liquidity is the minimum amount of liquidity in the
+                  Minimum Liquidity is the minimum amount of liquidity in the
                   module required by safety limits, based on the current
                   collateral. It is denominated in base tokens, so exponent must
                   be applied to convert to symbol denom. For example, if
@@ -1218,7 +1219,7 @@ paths:
                   type: string
                 description: >-
                   activeRates defines a list of the denomination which oracle
-                  prices aggreed
+                  prices agreed
 
                   upon.
             description: |-
@@ -2021,7 +2022,7 @@ definitions:
         type: string
         description: >-
           Supplied Value is the sum of the USD value of all tokens the account
-          has supplied, includng interest earned.
+          has supplied, including interest earned.
       collateral_value:
         type: string
         description: >-
@@ -2143,7 +2144,7 @@ definitions:
           borrowers. Collateral is denominated in uTokenso, so both uToken
           exchange rate and exponent must also be applied to convert to symbol
           denom. For example, if collateral is 4000000 u/uumee and uToken
-          exhange rate is 1.2, then 5 UMEE have been collateralized.
+          exchange rate is 1.2, then 5 UMEE have been collateralized.
       borrowed:
         type: string
         description: >-
@@ -2174,13 +2175,13 @@ definitions:
           amount is less than total supply due to safety limits. It is
           denominated in uTokens, so both uToken exchange rate and exponent must
           be applied to convert to symbol denom. For example, if collateral is
-          4000000 u/uumee, uToken exhange rate is 1.2, and maximum borrow is
+          4000000 u/uumee, uToken exchange rate is 1.2, and maximum borrow is
           7000000 uumee, then a maximum of 2 additional UMEE is permitted to be
           collateralized.
       minimum_liquidity:
         type: string
         description: >-
-          Mimimum Liquidity is the minimum amount of liquidity in the module
+          Minimum Liquidity is the minimum amount of liquidity in the module
           required by safety limits, based on the current collateral. It is
           denominated in base tokens, so exponent must be applied to convert to
           symbol denom. For example, if liquidity is 9000000 uumee and minimum
@@ -2969,7 +2970,7 @@ definitions:
           type: string
         description: >-
           activeRates defines a list of the denomination which oracle prices
-          aggreed
+          agreed
 
           upon.
     description: |-

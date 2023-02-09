@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	// Experimental is a flag which determines expermiental features.
+	// Experimental is a flag which determines experimental features.
 	// It's set via build flag.
 	Experimental = true
 	// WasmProposalsEnabled enables all x/wasm proposals when it's value is "true"

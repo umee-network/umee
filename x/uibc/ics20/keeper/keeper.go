@@ -4,14 +4,13 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v5/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 
-	"github.com/umee-network/umee/v4/x/ibctransfer/types"
+	ibctransfer "github.com/umee-network/umee/v4/x/uibc"
 )
 
 // Keeper embeds the ICS-20 transfer keeper where we only override specific
@@ -20,10 +19,10 @@ type Keeper struct {
 	// embed the ICS-20 transfer keeper
 	ibctransferkeeper.Keeper
 
-	bankKeeper types.BankKeeper
+	bankKeeper ibctransfer.BankKeeper
 }
 
-func New(tk ibctransferkeeper.Keeper, bk types.BankKeeper) Keeper {
+func New(tk ibctransferkeeper.Keeper, bk ibctransfer.BankKeeper) Keeper {
 	return Keeper{
 		Keeper:     tk,
 		bankKeeper: bk,
@@ -64,12 +63,12 @@ func (k Keeper) SendTransfer(
 
 		hash, err := ibctransfertypes.ParseHexHash(hexHash)
 		if err != nil {
-			return sdkerrors.Wrap(ibctransfertypes.ErrInvalidDenomForTransfer, err.Error())
+			return ibctransfertypes.ErrInvalidDenomForTransfer.Wrap(err.Error())
 		}
 
 		denomTrace, ok := k.GetDenomTrace(ctx, hash)
 		if !ok {
-			return sdkerrors.Wrap(ibctransfertypes.ErrTraceNotFound, hexHash)
+			return ibctransfertypes.ErrTraceNotFound.Wrap(hexHash)
 		}
 
 		k.TrackDenomMetadata(ctx, denomTrace)

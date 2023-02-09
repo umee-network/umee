@@ -126,7 +126,7 @@ func NewKrakenProvider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderKraken,
+		endpoints.Name,
 		wsURL,
 		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
@@ -134,7 +134,7 @@ func NewKrakenProvider(
 		websocket.PingMessage,
 		krakenLogger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
@@ -151,7 +151,7 @@ func (p *KrakenProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interf
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -163,45 +163,68 @@ func (p *KrakenProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error
 	}
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
-	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
-		return err
-	}
+	p.wsc.AddWebsocketConnection(
+		newSubscriptionMsgs,
+		p.messageReceived,
+		time.Duration(0),
+		websocket.PingMessage,
+	)
 	p.setSubscribedPairs(newPairs...)
-	return nil
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *KrakenProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
-	p.mtx.RLock()
-	defer p.mtx.RUnlock()
-
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
+	tickerErrs := 0
 	for _, cp := range pairs {
 		key := cp.String()
-		tickerPrice, ok := p.tickers[key]
+		price, ok := p.tickers[key]
 		if !ok {
-			return nil, fmt.Errorf("kraken failed to get ticker price for %s", key)
+			p.logger.Warn().Err(fmt.Errorf(
+				types.ErrTickerNotFound.Error(),
+				p.endpoints.Name,
+				key,
+			))
+			tickerErrs++
+			continue
 		}
-		tickerPrices[key] = tickerPrice
+		tickerPrices[key] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
-// GetCandlePrices returns the candlePrices based on the saved map.
+// GetCandlePrices returns the candlePrices based on the provided pairs.
 func (p *KrakenProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
+	candleErrs := 0
 	for _, cp := range pairs {
 		key := cp.String()
-		candlePrice, err := p.getCandlePrices(key)
+		prices, err := p.getCandlePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
-		candlePrices[key] = candlePrice
+		candlePrices[key] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -221,7 +244,11 @@ func (p *KrakenProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 
 	candles, ok := p.candles[key]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("kraken failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			p.endpoints.Name,
+			key,
+		)
 	}
 
 	candleList := []types.CandlePrice{}
@@ -236,7 +263,7 @@ func (p *KrakenProvider) getCandlePrices(key string) ([]types.CandlePrice, error
 }
 
 // messageReceived handles any message sent by the provider.
-func (p *KrakenProvider) messageReceived(messageType int, bz []byte) {
+func (p *KrakenProvider) messageReceived(messageType int, _ *WebsocketConnection, bz []byte) {
 	if messageType != websocket.TextMessage {
 		return
 	}
@@ -529,7 +556,7 @@ func newKrakenCandleSubscriptionMsg(pairs ...string) KrakenSubscriptionMsg {
 	}
 }
 
-// krakenPairToCurrencyPairSymbol receives a kraken pair formated
+// krakenPairToCurrencyPairSymbol receives a kraken pair formatted
 // ex.: ATOM/USDT and return currencyPair Symbol ATOMUSDT.
 func krakenPairToCurrencyPairSymbol(krakenPair string) string {
 	return strings.ReplaceAll(krakenPair, "/", "")

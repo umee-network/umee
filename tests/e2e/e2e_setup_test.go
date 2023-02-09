@@ -36,6 +36,7 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/grpc/client"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -75,6 +76,7 @@ type IntegrationTestSuite struct {
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
+	umeeClient          *client.UmeeClient
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -103,7 +105,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	// 	s.Require().NoError(err)
 	// }
 
-	// The boostrapping phase is as follows:
+	// The bootstrapping phase is as follows:
 	//
 	// 1. Initialize Umee validator nodes.
 	// 2. Launch an Ethereum container that mines.
@@ -129,6 +131,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.runIBCRelayer()
 	// s.runContractDeployment()
 	// s.runOrchestrators()
+	s.initUmeeClient()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
@@ -1032,6 +1035,18 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
+}
+
+func (s *IntegrationTestSuite) initUmeeClient() {
+	var err error
+	s.umeeClient, err = client.NewUmeeClient(
+		s.chain.id,
+		"tcp://localhost:26657",
+		"tcp://localhost:9090",
+		"val1",
+		s.chain.validators[2].mnemonic,
+	)
+	s.Require().NoError(err)
 }
 
 func noRestart(config *docker.HostConfig) {

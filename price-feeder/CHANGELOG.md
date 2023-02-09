@@ -46,6 +46,28 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Improvements
+- [1769](https://github.com/umee-network/umee/pull/1769) Small config refactor to make integration test cleaner.
+- [1773](https://github.com/umee-network/umee/pull/1773) Websocket controller refactor to create a seperate webscoket connection per pair subrsibed to.
+- [1781](https://github.com/umee-network/umee/pull/1781) BTC was removed from example config since WBTC is used by the `Oracle` module instead.
+- [1792](https://github.com/umee-network/umee/pull/1792) Replace deprecated sdkerrors with new errors package.
+
+### Bugs
+- [1767](https://github.com/umee-network/umee/pull/1767) Fix getter methods in providers for tickers and candles.
+- [1781](https://github.com/umee-network/umee/pull/1781) Currency provider tracker fix to prevent CoinGecko API call failure from stopping the price feeder.
+- [1791](https://github.com/umee-network/umee/pull/1791) Fix Gate provider not receiving candles.
+
+## [v2.0.4](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.4) 2023-01-31
+
+### Improvements
+- [1768](https://github.com/umee-network/umee/pull/1768) New example config with new oracle assets in it, and enable "OSMO" as a quotable asset.
+
+## [v2.0.3](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.3) 2023-01-05
+
+### Bugs
+
+- [1672](https://github.com/umee-network/umee/pull/1672) Fix docker release and proto CI.
+
 ## [v2.0.2](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.2) 2022-12-14
 
 ### Bugs
@@ -121,7 +143,7 @@ This was released as a part of [Umee Prop 27.](https://www.mintscan.io/umee/prop
 - [#1255](https://github.com/umee-network/umee/pull/1255) Move TickerPrice and CandlePrice to types package
 - [#1374](https://github.com/umee-network/umee/pull/1374) Add standard for telemetry metrics.
 - [#1431](https://github.com/umee-network/umee/pull/1431) Convert floats to sdk decimal using helper functions in all providers.
-- [#1442](https://github.com/umee-network/umee/pull/1442) Remove unnecessary method in recconection logic.
+- [#1442](https://github.com/umee-network/umee/pull/1442) Remove unnecessary method in reconnection logic.
 
 ### Features
 

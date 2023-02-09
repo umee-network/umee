@@ -118,14 +118,20 @@ import (
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/swagger"
 	"github.com/umee-network/umee/v4/util/genmap"
-	uibctransfer "github.com/umee-network/umee/v4/x/ibctransfer"
-	uibctransferkeeper "github.com/umee-network/umee/v4/x/ibctransfer/keeper"
 	"github.com/umee-network/umee/v4/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	"github.com/umee-network/umee/v4/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+
+	// umee ibc-transfer and quota for ibc-transfer
+	"github.com/umee-network/umee/v4/x/uibc"
+	uics20transfer "github.com/umee-network/umee/v4/x/uibc/ics20"
+	uibctransferkeeper "github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
+	uibcmodule "github.com/umee-network/umee/v4/x/uibc/module"
+	uibcquota "github.com/umee-network/umee/v4/x/uibc/quota"
+	uibcquotakeeper "github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
 
 var (
@@ -174,7 +180,7 @@ func init() {
 	}
 
 	if Experimental {
-		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
+		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{}, uibcmodule.AppModuleBasic{})
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -196,6 +202,7 @@ func init() {
 
 	if Experimental {
 		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
+		maccPerms[uibc.ModuleName] = nil
 	}
 }
 
@@ -241,6 +248,7 @@ type UmeeApp struct {
 	LeverageKeeper     leveragekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
+	UIbcQuotaKeeper    uibcquotakeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -300,12 +308,11 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
-		ibchost.StoreKey, ibctransfertypes.StoreKey,
-		gravitytypes.StoreKey,
+		ibchost.StoreKey, ibctransfertypes.StoreKey, gravitytypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
 	}
 	if Experimental {
-		storeKeys = append(storeKeys, wasm.StoreKey)
+		storeKeys = append(storeKeys, wasm.StoreKey, uibc.StoreKey)
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -442,8 +449,7 @@ func New(
 		app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
-	var err error
-	app.LeverageKeeper, err = leveragekeeper.NewKeeper(
+	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
@@ -451,9 +457,6 @@ func New(
 		app.OracleKeeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
-	if err != nil {
-		panic(err)
-	}
 	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
 		leveragetypes.NewMultiHooks(
 			app.OracleKeeper.Hooks(),
@@ -494,13 +497,35 @@ func New(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
+	app.IBCKeeper = ibckeeper.NewKeeper(
+		appCodec,
+		keys[ibchost.StoreKey],
+		app.GetSubspace(ibchost.ModuleName),
+		*app.StakingKeeper,
+		app.UpgradeKeeper,
+		app.ScopedIBCKeeper,
+	)
+
+	var ics4Wrapper ibcporttypes.ICS4Wrapper
+	if Experimental {
+		app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
+			appCodec,
+			keys[uibc.StoreKey],
+			app.IBCKeeper.ChannelKeeper, app.LeverageKeeper,
+		)
+		ics4Wrapper = app.UIbcQuotaKeeper
+	} else {
+		ics4Wrapper = app.IBCKeeper.ChannelKeeper
+	}
+
+	// Middleware Stacks
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
 	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
 	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper,
+		ics4Wrapper, // ISC4 Wrapper: IBC Rate Limit middleware
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
 		app.AccountKeeper,
@@ -509,15 +534,34 @@ func New(
 	)
 
 	app.UIBCTransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
-	ibcTransferModule := ibctransfer.NewAppModule(ibcTransferKeeper)
-	uibcTransferIBCModule := uibctransfer.NewIBCModule(
-		ibctransfer.NewIBCModule(ibcTransferKeeper), app.UIBCTransferKeeper,
+
+	// Create Transfer Stack
+	// SendPacket, since it is originating from the application to core IBC:
+	// transferKeeper.SendPacket -> uibcquota.SendPacket -> channel.SendPacket
+
+	// RecvPacket, message that originates from core IBC and goes down to app, the flow is the other way
+	// channel.RecvPacket -> uibcquota.OnRecvPacket -> transfer.OnRecvPacket
+
+	// transfer stack contains (from top to bottom):
+	// - Umee IBC Transfer
+	// - IBC Rate Limit Middleware
+
+	// create IBC module from bottom to top of stack
+	var transferStack ibcporttypes.IBCModule
+	transferStack = uics20transfer.NewIBCModule(
+		ibctransfer.NewIBCModule(ibcTransferKeeper),
+		app.UIBCTransferKeeper,
 	)
 
+	if Experimental {
+		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
+	}
+
+	// Create IBC Router
 	// create static IBC router, add transfer route, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, uibcTransferIBCModule)
-
+	// Add transfer stack to IBC Router
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
 	ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -593,15 +637,18 @@ func New(
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 
-		ibcTransferModule,
+		ibctransfer.NewAppModule(ibcTransferKeeper),
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 	}
 	if Experimental {
-		appModules = append(appModules,
-			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper))
+		appModules = append(
+			appModules,
+			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
+			uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
+		)
 	}
 
 	app.mm = module.NewManager(appModules...)
@@ -626,6 +673,7 @@ func New(
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	}
+
 	endBlockers := []string{
 		crisistypes.ModuleName,
 		oracletypes.ModuleName, // must be before gov and staking
@@ -661,6 +709,7 @@ func New(
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 	}
+
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
@@ -676,10 +725,10 @@ func New(
 	}
 
 	if Experimental {
-		beginBlockers = append(beginBlockers, wasm.ModuleName)
-		endBlockers = append(endBlockers, wasm.ModuleName)
-		initGenesis = append(initGenesis, wasm.ModuleName)
-		orderMigrations = append(orderMigrations, wasm.ModuleName)
+		beginBlockers = append(beginBlockers, wasm.ModuleName, uibc.ModuleName)
+		endBlockers = append(endBlockers, wasm.ModuleName, uibc.ModuleName)
+		initGenesis = append(initGenesis, wasm.ModuleName, uibc.ModuleName)
+		orderMigrations = append(orderMigrations, wasm.ModuleName, uibc.ModuleName)
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
@@ -704,8 +753,10 @@ func New(
 		authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts),
 	}
 
-	simStateModules := genmap.Pick(app.mm.Modules,
-		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName})
+	simStateModules := genmap.Pick(
+		app.mm.Modules,
+		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName},
+	)
 	// TODO: Ensure x/leverage implements simulator and add it here:
 	simTestModules := genmap.Pick(simStateModules, []string{oracletypes.ModuleName})
 

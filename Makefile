@@ -10,6 +10,7 @@ TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.
 DOCKER         := $(shell which docker)
 PROJECT_NAME   := umee
 HTTPS_GIT      := https://github.com/umee-network/umee.git
+MOCKS_DIR = $(CURDIR)/tests/mocks
 
 ###############################################################################
 ##                                  Version                                  ##
@@ -123,6 +124,9 @@ clean:
 docker-build:
 	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
+docker-build-experimental:
+	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true . 
+
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
@@ -157,7 +161,7 @@ test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TES
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v --tags='$(TEST_E2E_TAGS)'
+test-e2e: ARGS=-timeout=25m -v -tags='$(TEST_E2E_TAGS)'
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
@@ -175,6 +179,14 @@ cover-html: test-unit-cover
 	@go tool cover -html=$(TEST_COVERAGE_PROFILE)
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
+
+
+$(MOCKS_DIR):
+	mkdir -p $(MOCKS_DIR)
+mocks: $(MOCKS_DIR)
+	@go install github.com/golang/mock/mockgen@v1.6.0
+	sh ./scripts/mockgen.sh
+.PHONY: mocks
 
 ###############################################################################
 ###                                Linting                                  ###

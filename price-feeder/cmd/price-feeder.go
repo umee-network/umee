@@ -24,7 +24,6 @@ import (
 	"github.com/umee-network/umee/price-feeder/v2/config"
 	"github.com/umee-network/umee/price-feeder/v2/oracle"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/client"
-	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
 	v1 "github.com/umee-network/umee/price-feeder/v2/router/v1"
 )
 
@@ -156,18 +155,13 @@ func priceFeederCmdHandler(cmd *cobra.Command, args []string) error {
 		deviations[deviation.Base] = threshold
 	}
 
-	endpoints := make(map[provider.Name]provider.Endpoint, len(cfg.ProviderEndpoints))
-	for _, endpoint := range cfg.ProviderEndpoints {
-		endpoints[endpoint.Name] = endpoint
-	}
-
 	oracle := oracle.New(
 		logger,
 		oracleClient,
-		cfg.CurrencyPairs,
+		cfg.ProviderPairs(),
 		providerTimeout,
 		deviations,
-		endpoints,
+		cfg.ProviderEndpointsMap(),
 	)
 
 	telemetryCfg := telemetry.Config{}

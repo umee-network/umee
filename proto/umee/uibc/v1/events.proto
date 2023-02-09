@@ -1,0 +1,21 @@
+syntax = "proto3";
+package umee.uibc.v1;
+
+import "gogoproto/gogo.proto";
+import "umee/uibc/v1/quota.proto";
+
+option go_package                      = "github.com/umee-network/umee/v4/x/uibc";
+option (gogoproto.goproto_getters_all) = false;
+
+// EventBadRevert is emitted on failure of ibc-transfer quota.
+message EventBadRevert {
+  // failure event type
+  string failure_type = 1;
+  // ibc packet data
+  string packet = 2;
+}
+
+// EventQuotaPause is emitted on quota tracking pause status change.
+message EventQuotaPause {
+  IBCTransferStatus status = 1;
+}

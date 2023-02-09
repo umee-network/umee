@@ -137,7 +137,7 @@ func NewGateProvider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderGate,
+		endpoints.Name,
 		wsURL,
 		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
@@ -145,7 +145,7 @@ func NewGateProvider(
 		websocket.PingMessage,
 		gateLogger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
@@ -162,7 +162,7 @@ func (p *GateProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []interfac
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -174,53 +174,76 @@ func (p *GateProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
 	}
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
-	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
-		return err
-	}
+	p.wsc.AddWebsocketConnection(
+		newSubscriptionMsgs,
+		p.messageReceived,
+		defaultPingDuration,
+		websocket.PingMessage,
+	)
 	p.setSubscribedPairs(newPairs...)
-	return nil
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *GateProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		price, err := p.getTickerPrice(currencyPair)
+	tickerErrs := 0
+	for _, cp := range pairs {
+		price, err := p.getTickerPrice(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
-
-		tickerPrices[currencyPair.String()] = price
+		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
-// GetCandlePrices returns the candlePrices based on the saved map
+// GetCandlePrices returns the candlePrices based on the provided pairs.
 func (p *GateProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		gp := currencyPairToGatePair(currencyPair)
-		price, err := p.getCandlePrices(gp)
+	candleErrs := 0
+	for _, cp := range pairs {
+		prices, err := p.getCandlePrices(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
-
-		candlePrices[currencyPair.String()] = price
+		candlePrices[cp.String()] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
-func (p *GateProvider) getCandlePrices(key string) ([]types.CandlePrice, error) {
+func (p *GateProvider) getCandlePrices(cp types.CurrencyPair) ([]types.CandlePrice, error) {
 	p.mtx.RLock()
 	defer p.mtx.RUnlock()
 
-	candles, ok := p.candles[key]
+	candles, ok := p.candles[currencyPairToGatePair(cp)]
 	if !ok {
-		return []types.CandlePrice{}, fmt.Errorf("gate failed to get candle prices for %s", key)
+		return []types.CandlePrice{}, fmt.Errorf(
+			types.ErrCandleNotFound.Error(),
+			p.endpoints.Name,
+			cp.String(),
+		)
 	}
 
 	candleList := []types.CandlePrice{}
@@ -245,10 +268,14 @@ func (p *GateProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPrice,
 		return tickerPair.toTickerPrice()
 	}
 
-	return types.TickerPrice{}, fmt.Errorf("gate failed to get ticker price for %s", gp)
+	return types.TickerPrice{}, fmt.Errorf(
+		types.ErrTickerNotFound.Error(),
+		p.endpoints.Name,
+		cp.String(),
+	)
 }
 
-func (p *GateProvider) messageReceived(_ int, bz []byte) {
+func (p *GateProvider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	var (
 		gateEvent GateEvent
 		gateErr   error

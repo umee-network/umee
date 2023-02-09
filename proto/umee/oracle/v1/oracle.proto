@@ -2,6 +2,7 @@ syntax = "proto3";
 package umee.oracle.v1;
 
 import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/oracle/types";
 
@@ -110,4 +111,21 @@ message ExchangeRateTuple {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+}
+
+// AvgCounter is holds information about the active avg aggreator windows, used
+// to quickly compute average price of an asset.
+message AvgCounter {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // sum of prices in the counter
+  string sum = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // number of aggregated prices in the counter
+  uint32 num = 2;
+  // Unix timestamp when the first price was aggregated in the counter
+  google.protobuf.Timestamp start = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
