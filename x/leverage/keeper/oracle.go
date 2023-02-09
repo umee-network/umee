@@ -1,12 +1,8 @@
 package keeper
 
 import (
-<<<<<<< HEAD
-=======
 	"strings"
 
-	"cosmossdk.io/errors"
->>>>>>> ea76766 (fix: intercase leverage fix (#1800))
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 

@@ -46,8 +46,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-<<<<<<< HEAD
-=======
 ### Fixes
 
 - [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
@@ -55,7 +53,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v4.0.0](https://github.com/umee-network/umee/releases/tag/v4.0.0) - 2023-01-20
 
->>>>>>> ea76766 (fix: intercase leverage fix (#1800))
 ### API Breaking
 
 - [1683](https://github.com/umee-network/umee/pull/1683) MaxWithdraw query now returns `sdk.Coins`, not `sdk.Coin` and will be empty (not zero coin) when returning a zero amount. Denom field in query is now optional.
