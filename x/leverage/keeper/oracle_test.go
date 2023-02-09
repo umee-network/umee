@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -152,6 +153,12 @@ func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 	require.Equal(uint32(6), e)
 
 	p, e, err = app.LeverageKeeper.TokenPrice(ctx, dumpDenom, types.PriceModeLow)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("0.50"), p)
+	require.Equal(uint32(6), e)
+
+	// Lowercase must be converted to uppercase symbol denom ("DUMP" from "dump")
+	p, e, err = app.LeverageKeeper.TokenPrice(ctx, strings.ToLower(dumpDenom), types.PriceModeLow)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.50"), p)
 	require.Equal(uint32(6), e)
