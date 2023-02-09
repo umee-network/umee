@@ -50,8 +50,8 @@ func (k Keeper) GetCommunityFundAddress(ctx sdk.Context) sdk.AccAddress {
 		keyPrefixParamCommunityFundAddress, "community fund address")
 }
 
-// setParams validates and sets the incentive module parameters
-func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
+// SetParams validates and sets the incentive module parameters
+func (k Keeper) SetParams(ctx sdk.Context, params incentive.Params) error {
 	kvs := k.KVStore(ctx)
 	if err := params.Validate(); err != nil {
 		return err
@@ -120,9 +120,9 @@ func (k Keeper) GetIncentiveProgram(ctx sdk.Context, id uint32) (
 	return incentive.IncentiveProgram{}, 0, incentive.ErrNoProgramWithID
 }
 
-// setIncentiveProgram stores an incentive program in either the upcoming, ongoing, or completed program lists.
+// SetIncentiveProgram stores an incentive program in either the upcoming, ongoing, or completed program lists.
 // does not validate the incentive program struct or the validity of its status change (e.g. upcoming -> complete)
-func (k Keeper) setIncentiveProgram(ctx sdk.Context,
+func (k Keeper) SetIncentiveProgram(ctx sdk.Context,
 	program incentive.IncentiveProgram, status incentive.ProgramStatus,
 ) error {
 	keys := [][]byte{
@@ -151,8 +151,8 @@ func (k Keeper) GetNextProgramID(ctx sdk.Context) uint32 {
 	return store.GetUint32(k.KVStore(ctx), keyPrefixNextProgramID, 0, "next program ID")
 }
 
-// setNextProgramID sets the ID that will be assigned to the next incentive program passed by governance.
-func (k Keeper) setNextProgramID(ctx sdk.Context, id uint32) error {
+// SetNextProgramID sets the ID that will be assigned to the next incentive program passed by governance.
+func (k Keeper) SetNextProgramID(ctx sdk.Context, id uint32) error {
 	prev := k.GetNextProgramID(ctx)
 	if id < prev {
 		return incentive.ErrDecreaseNextProgramID.Wrapf("%d to %d", id, prev)
@@ -165,8 +165,8 @@ func (k Keeper) GetLastRewardsTime(ctx sdk.Context) uint64 {
 	return store.GetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, 0, "last reward time")
 }
 
-// setLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
-func (k Keeper) setLastRewardsTime(ctx sdk.Context, time uint64) error {
+// SetLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
+func (k Keeper) SetLastRewardsTime(ctx sdk.Context, time uint64) error {
 	prev := k.GetLastRewardsTime(ctx)
 	if time < prev {
 		return incentive.ErrDecreaseLastRewardTime.Wrapf("%d to %d", time, prev)
@@ -181,8 +181,8 @@ func (k Keeper) GetTotalBonded(ctx sdk.Context, denom string, tier incentive.Bon
 	return sdk.NewCoin(denom, amount)
 }
 
-// setTotalBonded records the total amount of uTokens of a given denom which are bonded to the incentive module
-func (k Keeper) setTotalBonded(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
+// SetTotalBonded records the total amount of uTokens of a given denom which are bonded to the incentive module
+func (k Keeper) SetTotalBonded(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
 	key := keyTotalBonded(uTokens.Denom, tier)
 	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, sdk.ZeroInt(), "total bonded")
 }
@@ -194,8 +194,8 @@ func (k Keeper) GetBonded(ctx sdk.Context, addr sdk.AccAddress, denom string, ti
 	return sdk.NewCoin(denom, amount)
 }
 
-// setBonded sets the amount of uTokens of a given denom which are bonded to a single tier by an account
-func (k Keeper) setBonded(ctx sdk.Context,
+// SetBonded sets the amount of uTokens of a given denom which are bonded to a single tier by an account
+func (k Keeper) SetBonded(ctx sdk.Context,
 	addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier,
 ) error {
 	key := keyBondAmount(addr, uToken.Denom, tier)
@@ -211,8 +211,8 @@ func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom str
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
-// setRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier.
-func (k Keeper) setRewardAccumulator(ctx sdk.Context,
+// SetRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier.
+func (k Keeper) SetRewardAccumulator(ctx sdk.Context,
 	bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
 ) error {
 	key := keyRewardAccumulator(bondDenom, reward.Denom, tier)
@@ -230,8 +230,8 @@ func (k Keeper) GetRewardTracker(ctx sdk.Context,
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
-// setRewardTracker sets the reward tracker of a reward token for a single bonded uToken and tier for an address.
-func (k Keeper) setRewardTracker(ctx sdk.Context,
+// SetRewardTracker sets the reward tracker of a reward token for a single bonded uToken and tier for an address.
+func (k Keeper) SetRewardTracker(ctx sdk.Context,
 	addr sdk.AccAddress, bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
 ) error {
 	key := keyRewardTracker(addr, bondDenom, reward.Denom, tier)
@@ -253,8 +253,8 @@ func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.
 	return accUnbondings.Unbondings
 }
 
-// setUnbondings stores the full list of unbondings currently associated with an account.
-func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
+// SetUnbondings stores the full list of unbondings currently associated with an account.
+func (k Keeper) SetUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
 	kvStore := ctx.KVStore(k.storeKey)
 	addr, err := sdk.AccAddressFromBech32(unbondings.Account)
 	if err != nil {
