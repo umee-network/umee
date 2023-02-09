@@ -50,7 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
 
-## [v4.0.1](https://github.com/umee-network/umee/releases/tag/v4.0.0) - 2023-01-20
+## [v4.0.1](https://github.com/umee-network/umee/releases/tag/v4.0.1) - 2023-02-09
 
 ### Fixes
 
