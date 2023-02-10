@@ -4,10 +4,10 @@
 package keeper_test
 
 import (
-	"testing"
-
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"gotest.tools/v3/assert"
+	"testing"
 )
 
 func TestGRPCQueryParams(t *testing.T) {
@@ -49,21 +49,23 @@ func TestGRPCGetQuota(t *testing.T) {
 			req:    uibc.QueryQuota{},
 			errMsg: "",
 		}, {
-			name:   "valid req <get: uumee>",
+			name:   "valid req <OutflowSum zero due to ibc-transfer not hapeen>",
 			req:    uibc.QueryQuota{Denom: "umee"},
-			errMsg: "no quota for ibc denom",
-		}, {
-			name:   "valid req <error expected due to ibc-transfer not hapeen>",
-			req:    uibc.QueryQuota{Denom: "umee"},
-			errMsg: "no quota for ibc denom",
+			errMsg: "",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := client.Quota(ctx, &tc.req)
+			resp, err := client.Quota(ctx, &tc.req)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
+				if len(tc.req.Denom) == 0 {
+					assert.Equal(t, 0, len(resp.Quota))
+				} else {
+					assert.Equal(t, 1, len(resp.Quota))
+					assert.DeepEqual(t, sdk.NewDec(0), resp.Quota[0].OutflowSum)
+				}
 			} else {
 				assert.Error(t, err, tc.errMsg)
 			}
