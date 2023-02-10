@@ -296,6 +296,11 @@ func (k Keeper) AddHistoricPrice(
 	ak.updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
 }
 
+func (k Keeper) GetHistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	ak := AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
+	return ak.GetCurrentAvg(denom)
+}
+
 func (k Keeper) SetHistoricPrice(
 	ctx sdk.Context,
 	denom string,
