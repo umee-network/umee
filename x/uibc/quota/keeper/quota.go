@@ -43,7 +43,7 @@ func (k Keeper) GetQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, 
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.KeyTotalOutflows(ibcDenom))
 	if bz == nil {
-		return nil, uibc.ErrNoQuotaForIBCDenom
+		return &uibc.Quota{IbcDenom: ibcDenom, OutflowSum: sdk.NewDec(0)}, nil
 	}
 
 	var quotaOfIBCDenom uibc.Quota
