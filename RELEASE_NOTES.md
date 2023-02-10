@@ -10,6 +10,10 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 - new option is available in `app.toml`: `iavl-lazy-loading` (in general settings). When setting to `true`, lazy loading of iavl store will be enabled and improve start up time of archive nodes.
 
+## v4.0.1
+
+This release is a patch which contains a fix to how we handle assets with lowercase symbols on the leverage module. [Relevant PR here](https://github.com/umee-network/umee/pull/1800).
+
 ## v4.0.0
 
 This release contains the Historacle Upgrade, a pricing update which improves the way we treat quickly-changing prices in the leverage module.
