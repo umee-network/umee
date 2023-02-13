@@ -81,7 +81,11 @@ A `VotePeriod` during which either of the following events occur is considered a
 
 - The validator fails to vote within the `reward band` around the weighted median for one or more denominations.
 
-During every `SlashWindow`, participating validators must maintain a valid vote rate of at least `MinValidPerWindow` (5%), lest they get their stake slashed (currently set to 0.01%). The slashed validator is automatically temporarily "jailed" by the protocol (to protect the funds of delegators), and the operator is expected to fix the discrepancy promptly to resume validator participation.
+A `SlashWindow` is a window of time during which validators can miss votes. At the end of this period, the amount of misses are tallied and the proper reward or punishment is carried out.
+
+During every `SlashWindow` (currently set to 7 days), participating validators must maintain a valid vote rate of at least `MinValidPerWindow` (5%), lest they get their stake slashed (currently set to 0.01%). The slashed validator is automatically temporarily "jailed" by the protocol (to protect the funds of delegators), and the operator is expected to fix the discrepancy promptly to resume validator participation.
+
+Since the `MinValidPerWindow` is currently set to 5% validator must not miss more than 95% of votes in order to be safe from jailing.
 
 ### Abstaining from Voting
 
