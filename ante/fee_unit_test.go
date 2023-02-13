@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
 	evidence "github.com/cosmos/cosmos-sdk/x/evidence/types"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/v3/assert"
 
 	leverage "github.com/umee-network/umee/v4/x/leverage/types"
 )

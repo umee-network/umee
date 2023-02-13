@@ -248,7 +248,7 @@ type UmeeApp struct {
 	LeverageKeeper     leveragekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
-	uibcQuotaKeeper    uibcquotakeeper.Keeper
+	UIbcQuotaKeeper    uibcquotakeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -508,12 +508,12 @@ func New(
 
 	var ics4Wrapper ibcporttypes.ICS4Wrapper
 	if Experimental {
-		app.uibcQuotaKeeper = uibcquotakeeper.NewKeeper(
+		app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
 			appCodec,
 			keys[uibc.StoreKey],
-			app.IBCKeeper.ChannelKeeper, app.LeverageKeeper,
+			app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, app.OracleKeeper,
 		)
-		ics4Wrapper = app.uibcQuotaKeeper
+		ics4Wrapper = app.UIbcQuotaKeeper
 	} else {
 		ics4Wrapper = app.IBCKeeper.ChannelKeeper
 	}
@@ -554,7 +554,7 @@ func New(
 	)
 
 	if Experimental {
-		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.uibcQuotaKeeper)
+		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
 	}
 
 	// Create IBC Router
@@ -647,7 +647,7 @@ func New(
 		appModules = append(
 			appModules,
 			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-			uibcmodule.NewAppModule(appCodec, app.uibcQuotaKeeper),
+			uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
 		)
 	}
 

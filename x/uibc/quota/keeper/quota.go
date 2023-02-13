@@ -6,6 +6,7 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	prefixsore "github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
@@ -42,7 +43,7 @@ func (k Keeper) GetQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, 
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.KeyTotalOutflows(ibcDenom))
 	if bz == nil {
-		return nil, uibc.ErrNoQuotaForIBCDenom
+		return &uibc.Quota{IbcDenom: ibcDenom, OutflowSum: sdk.NewDec(0)}, nil
 	}
 
 	var quotaOfIBCDenom uibc.Quota
@@ -115,14 +116,14 @@ func (k Keeper) ResetQuota(ctx sdk.Context) error {
 		return err
 	}
 	k.SetTotalOutflowSum(ctx, zero)
-
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, uibc.KeyPrefixDenomQuota)
+	store = prefixsore.NewStore(store, uibc.KeyPrefixDenomQuota)
+	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
-		ibcDenom := uibc.DenomFromKeyTotalOutflows(iter.Key())
-		q := uibc.Quota{IbcDenom: ibcDenom, OutflowSum: zero}
-		store.Set(uibc.KeyTotalOutflows(ibcDenom), k.cdc.MustMarshal(&q))
+		ibcDenom := iter.Key()
+		q := uibc.Quota{IbcDenom: string(ibcDenom), OutflowSum: zero}
+		store.Set(ibcDenom, k.cdc.MustMarshal(&q))
 	}
 	return nil
 }
@@ -143,7 +144,8 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmat
 	exchangePrice, err := k.getExchangePrice(ctx, denom, amount)
 	if err != nil {
 		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
-		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
+		// TODO: write test case for this
+		if ltypes.ErrNotRegisteredToken.Is(err) {
 			return nil
 		} else if err != nil {
 			return err
@@ -179,10 +181,14 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 		if err != nil {
 			return sdk.Dec{}, err
 		}
+	} else {
+		if _, err := k.leverageKeeper.GetTokenSettings(ctx, denom); err != nil {
+			return sdk.Dec{}, err
+		}
 	}
 
 	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
-	return k.leverageKeeper.TokenValue(ctx, transferCoin, ltypes.PriceModeSpot)
+	return k.oracleKeeper.HistoricAvgPrice(ctx, transferCoin.Denom)
 }
 
 // UndoUpdateQuota undo the quota of ibc denom
@@ -196,10 +202,11 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 		return nil
 	}
 
+	// check the token is register or not
 	exchangePrice, err := k.getExchangePrice(ctx, denom, amount)
 	if err != nil {
 		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
-		if err.Error() == sdkerrors.Wrap(ltypes.ErrNotRegisteredToken, denom).Error() {
+		if ltypes.ErrNotRegisteredToken.Is(err) {
 			return nil
 		} else if err != nil {
 			return err

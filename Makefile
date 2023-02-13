@@ -124,6 +124,9 @@ clean:
 docker-build:
 	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
+docker-build-experimental:
+	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true . 
+
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
@@ -158,7 +161,7 @@ test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TES
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v --tags='$(TEST_E2E_TAGS)'
+test-e2e: ARGS=-timeout=25m -v -tags='$(TEST_E2E_TAGS)'
 test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
