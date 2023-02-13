@@ -14,7 +14,10 @@ func (k Keeper) CleanTokenRegistry(ctx sdk.Context) error {
 			uDenom := types.ToUTokenDenom(t.BaseDenom)
 			uSupply := k.GetUTokenSupply(ctx, uDenom)
 			if uSupply.IsZero() {
-				k.deleteTokenSettings(ctx, t)
+				err := k.deleteTokenSettings(ctx, t)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
