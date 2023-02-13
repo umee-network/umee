@@ -35,7 +35,16 @@ func (m Migrator) HistoracleParams3x4(ctx sdk.Context) error {
 
 // MigrateBNB fixes the BNB base denom without using leverage hooks
 func (m Migrator) MigrateBNB(ctx sdk.Context) error {
-	// badDenom := "ibc/77BCD42E49E5B7E0FC6B269FEBF0185B15044F13F6F38CA285DF0AF883459F40"
-	// correctDenom := "ibc/8184469200C5E667794375F5B0EC3B9ABB6FF79082941BF5D0F8FF59FEBA862E"
+	badDenom := "ibc/77BCD42E49E5B7E0FC6B269FEBF0185B15044F13F6F38CA285DF0AF883459F40"
+	correctDenom := "ibc/8184469200C5E667794375F5B0EC3B9ABB6FF79082941BF5D0F8FF59FEBA862E"
+	acceptList := m.keeper.AcceptList(ctx)
+	for _, d := range acceptList {
+		// Switch the base denom of the token with changing anything else
+		if d.BaseDenom == badDenom {
+			d.BaseDenom = correctDenom
+		}
+	}
+	// Overwrite previous accept list
+	m.keeper.SetAcceptList(ctx, acceptList)
 	return nil
 }
