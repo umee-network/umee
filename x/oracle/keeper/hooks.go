@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"strings"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -33,8 +35,12 @@ func (h Hooks) AfterTokenRegistered(ctx sdk.Context, token leveragetypes.Token) 
 
 	var tokenExists bool
 	for _, t := range acceptList {
-		if t.BaseDenom == token.BaseDenom {
+		// On case-insensitive match of symbol denom, update base denom and exponent
+		// to match the leverage registry. Does not modify existing symbol denom.
+		if strings.EqualFold(t.SymbolDenom, token.SymbolDenom) {
 			tokenExists = true
+			t.BaseDenom = token.BaseDenom
+			t.Exponent = token.Exponent
 			break
 		}
 	}

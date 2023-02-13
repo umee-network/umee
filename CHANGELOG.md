@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
+- [18XX](https://github.com/umee-network/umee/pull/18XX) Matches case-insensitve symbol denom, not base denom, when updating the oracle accept list in respose to the leverage token added hook. Also follows base denom and exponent changes.
 
 ## [v4.0.1](https://github.com/umee-network/umee/releases/tag/v4.0.1) - 2023-02-10
 
