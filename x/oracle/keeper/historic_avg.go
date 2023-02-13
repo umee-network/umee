@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"strings"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -107,7 +108,7 @@ func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
 
 	for ; iter.Valid(); iter.Next() {
 		var av types.AvgCounter
-		k.cdc.MustUnmarshal(iter.Value(), &av)
+		k.cdc.MustUnmarshal(iter.Value(), &av) // SYGET
 		avs = append(avs, av)
 	}
 
@@ -117,12 +118,13 @@ func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
 // setAvgCounters sets AllAvgCounter in the same order as in the slice.
 // Contract: MUST be the same order as returned from GetAllAvgCounters
 func (k AvgKeeper) setAvgCounters(denom string, acs []types.AvgCounter) {
+	denom = strings.ToUpper(denom) // setters enforce uppercase symbol denom
 	key := types.KeyAvgCounter(denom, 0)
 	lastIdx := len(key) - 1
 	for i := range acs {
 		key[lastIdx] = byte(i)
 		bz := k.cdc.MustMarshal(&acs[i])
-		k.store.Set(key, bz)
+		k.store.Set(key, bz) // SYSET
 	}
 }
 
@@ -134,7 +136,7 @@ func (k AvgKeeper) GetCurrentAvg(denom string) (sdk.Dec, error) {
 
 	key := types.KeyAvgCounter(denom, latestIdx)
 	var av types.AvgCounter
-	bz := k.store.Get(key)
+	bz := k.store.Get(key) // SYGET
 	if len(bz) == 0 {
 		return sdk.Dec{}, types.ErrNoLatestAvgPrice
 	}

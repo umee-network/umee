@@ -13,14 +13,14 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 	if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 		pruneHistoricPeriod := params.HistoricStampPeriod * params.MaximumPriceStamps
 		if pruneHistoricPeriod < blockHeight {
-			k.PruneHistoricPricesBeforeBlock(ctx, blockHeight-pruneHistoricPeriod)
+			k.PruneHistoricPricesBeforeBlock(ctx, blockHeight-pruneHistoricPeriod) // check
 		}
 
 		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
 			pruneMedianPeriod := params.MedianStampPeriod * params.MaximumMedianStamps
 			if pruneMedianPeriod < blockHeight {
-				k.PruneMediansBeforeBlock(ctx, blockHeight-pruneMedianPeriod)
-				k.PruneMedianDeviationsBeforeBlock(ctx, blockHeight-pruneMedianPeriod)
+				k.PruneMediansBeforeBlock(ctx, blockHeight-pruneMedianPeriod)          // check
+				k.PruneMedianDeviationsBeforeBlock(ctx, blockHeight-pruneMedianPeriod) // check
 			}
 		}
 	}
