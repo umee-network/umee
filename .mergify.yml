@@ -18,24 +18,6 @@ pull_request_rules:
           {{ title }} (#{{ number }})
           {{ body }}
 
-  - name: Backport patches to the release/v3.0.x branch
-    conditions:
-      - base=main
-      - label=S:backport/v3.0.x
-    actions:
-      backport:
-        branches:
-          - release/v3.0.x
-
-  - name: Backport patches to the release/v3.1.x branch
-    conditions:
-      - base=main
-      - label=S:backport/v3.1.x
-    actions:
-      backport:
-        branches:
-          - release/v3.1.x
-
   - name: Backport patches to the release/price-feeder/v2.x.x branch
     conditions:
       - base=main
@@ -53,3 +35,12 @@ pull_request_rules:
       backport:
         branches:
           - release/v4.0.x
+
+  - name: Backport patches to the release/v4.1.x branch
+    conditions:
+      - base=main
+      - label=S:backport/v4.1.x
+    actions:
+      backport:
+        branches:
+          - release/v4.1.x
