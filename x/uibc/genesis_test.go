@@ -1,5 +1,5 @@
-//xgo:build experimental
-// +xbuild experimental
+//go:build experimental
+// +build experimental
 
 package uibc
 
@@ -19,7 +19,7 @@ func TestGenesisValidation(t *testing.T) {
 	err = gs.Validate()
 	assert.ErrorContains(t, err, "total outflow sum cannot be negative")
 
-	gs.Quotas = sdk.DecCoins{sdk.NewInt64DecCoin("umee", -11123123)}
+	gs.Quotas = []sdk.DecCoin{{Denom: "umee", Amount: sdk.NewDec(-11123123)}}
 	err = gs.Validate()
 	assert.ErrorContains(t, err, "amount cannot be negative")
 }
