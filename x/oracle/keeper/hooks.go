@@ -34,13 +34,13 @@ func (h Hooks) AfterTokenRegistered(ctx sdk.Context, token leveragetypes.Token) 
 	acceptList := h.k.AcceptList(ctx)
 
 	var tokenExists bool
-	for _, t := range acceptList {
+	for i, t := range acceptList {
 		// On case-insensitive match of symbol denom, update base denom and exponent
 		// to match the leverage registry. Does not modify existing symbol denom.
 		if strings.EqualFold(t.SymbolDenom, token.SymbolDenom) {
 			tokenExists = true
-			t.BaseDenom = token.BaseDenom
-			t.Exponent = token.Exponent
+			acceptList[i].BaseDenom = token.BaseDenom
+			acceptList[i].Exponent = token.Exponent
 			break
 		}
 	}
