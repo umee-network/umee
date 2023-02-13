@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [18XX](https://github.com/umee-network/umee/pull/18XX) Blacklisted tokens automatically cleared from token registry if they have not yet been supplied.
+
 ### Fixes
 
 - [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
