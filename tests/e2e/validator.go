@@ -7,7 +7,6 @@ import (
 	"path"
 	"path/filepath"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -196,23 +195,6 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 		commissionRates,
 		minSelfDelegation,
 	)
-}
-
-func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string) (sdk.Msg, error) {
-	eth, err := gravitytypes.NewEthAddress(ethAddr)
-	if err != nil {
-		return nil, err
-	}
-	valAddr, err := v.keyInfo.GetAddress()
-	if err != nil {
-		return nil, err
-	}
-
-	return gravitytypes.NewMsgSetOrchestratorAddress(
-		sdk.ValAddress(valAddr),
-		orchAddr,
-		*eth,
-	), nil
 }
 
 func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
