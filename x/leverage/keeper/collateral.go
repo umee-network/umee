@@ -78,6 +78,33 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 	return total, nil
 }
 
+// VisibleCollateralValue uses the price oracle to determine the value (in USD) provided by
+// collateral sdk.Coins, using each token's uToken exchange rate. Always uses spot price.
+// Unlike CalculateCollateralValue, this function will not return an error if value calculation
+// fails on a token - instead, that token will contribute zero value to the total.
+func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins) sdk.Dec {
+	total := sdk.ZeroDec()
+
+	for _, coin := range collateral {
+		// convert uToken collateral to base assets
+		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		if err != nil {
+			continue
+		}
+
+		// get USD value of base assets
+		v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
+		if err != nil {
+			continue
+		}
+
+		// for coins that did not error, add their value to the total
+		total = total.Add(v)
+	}
+
+	return total
+}
+
 // GetAllTotalCollateral returns total collateral across all uTokens.
 func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 	total := sdk.NewCoins()
@@ -112,17 +139,16 @@ func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
 	return sdk.MinDec(collateralLiquidity, sdk.OneDec())
 }
 
-// CollateralShare calculates the portion of overall collateral
-// (measured in USD value) that a given uToken denom represents.
-func (k *Keeper) CollateralShare(ctx sdk.Context, denom string) (sdk.Dec, error) {
+// VisibleCollateralShare calculates the portion of overall collateral (measured in USD value) that a
+// given uToken denom represents. If an asset other than the denom requested is missing an oracle
+// price, it ignores that asset's contribution to the system's overall collateral, thus potentially
+// overestimating the requested denom's collateral share while improving availability.
+func (k *Keeper) VisibleCollateralShare(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	systemCollateral := k.GetAllTotalCollateral(ctx)
 	thisCollateral := sdk.NewCoins(sdk.NewCoin(denom, systemCollateral.AmountOf(denom)))
 
-	// get USD collateral value for all uTokens combined
-	totalValue, err := k.CalculateCollateralValue(ctx, systemCollateral)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
+	// get USD collateral value for all uTokens combined, except those experiencing price outages
+	totalValue := k.VisibleCollateralValue(ctx, systemCollateral)
 
 	// get USD collateral value for this uToken only
 	thisValue, err := k.CalculateCollateralValue(ctx, thisCollateral)
@@ -152,13 +178,19 @@ func (k Keeper) checkCollateralLiquidity(ctx sdk.Context, denom string) error {
 }
 
 // checkCollateralShare returns an error if a given uToken is above its collateral share
+// as calculated using only tokens whose oracle prices exist
 func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
 	if err != nil {
 		return err
 	}
 
-	share, err := k.CollateralShare(ctx, denom)
+	if token.MaxCollateralShare.Equal(sdk.OneDec()) {
+		// skip computation when collateral share is unrestricted
+		return nil
+	}
+
+	share, err := k.VisibleCollateralShare(ctx, denom)
 	if err != nil {
 		return err
 	}
