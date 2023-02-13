@@ -20,7 +20,7 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 	// require a new registered token updates the accept list
 	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
 		BaseDenom:   "ibc/CDC4587874B85BEA4FCEC3CEA5A1195139799A1FEE711A07D972537E18FDA39D",
-		SymbolDenom: "atom",
+		SymbolDenom: "ATOM",
 		Exponent:    6,
 	})
 	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 3)
