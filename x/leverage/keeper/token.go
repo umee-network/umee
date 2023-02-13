@@ -14,7 +14,7 @@ func (k Keeper) CleanTokenRegistry(ctx sdk.Context) error {
 			uDenom := types.ToUTokenDenom(t.BaseDenom)
 			uSupply := k.GetUTokenSupply(ctx, uDenom)
 			if uSupply.IsZero() {
-				k.deleteTokenSettings(ctx, t.BaseDenom)
+				k.deleteTokenSettings(ctx, t)
 			}
 		}
 	}
@@ -23,10 +23,12 @@ func (k Keeper) CleanTokenRegistry(ctx sdk.Context) error {
 
 // deleteTokenSettings deletes a Token in the x/leverage module's KVStore.
 // it should only be called by CleanTokenRegistry.
-func (k Keeper) deleteTokenSettings(ctx sdk.Context, denom string) error {
+func (k Keeper) deleteTokenSettings(ctx sdk.Context, token types.Token) error {
 	store := ctx.KVStore(k.storeKey)
-	tokenKey := types.KeyRegisteredToken(denom)
+	tokenKey := types.KeyRegisteredToken(token.BaseDenom)
 	store.Delete(tokenKey)
+	// call oracle hooks on deleted (not just blacklisted) token
+	k.hooks.AfterRegisteredTokenRemoved(ctx, token)
 	return nil
 }
 
