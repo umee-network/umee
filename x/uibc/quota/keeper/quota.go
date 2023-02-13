@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -63,7 +64,11 @@ func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas sdk.DecCoins) {
 func (k Keeper) SetDenomQuota(ctx sdk.Context, quota sdk.DecCoin) {
 	store := ctx.KVStore(k.storeKey)
 	key := uibc.KeyTotalOutflows(quota.Denom)
-	store.Set(key, k.cdc.MustMarshal(&quota))
+	bz, err := quota.Amount.Marshal()
+	if err != nil {
+		panic(fmt.Sprint("can't marshal quota: ", quota))
+	}
+	store.Set(key, bz)
 }
 
 // GetTotalOutflowSum returns the total outflow of ibc-transfer amount.
