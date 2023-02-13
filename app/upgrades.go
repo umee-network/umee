@@ -29,17 +29,17 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 	app.registerUpgrade3_0(upgradeInfo)
 	app.registerUpgrade3_1(upgradeInfo)
-
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 	app.registerUpgrade3_3to4_0(upgradeInfo)
 	app.registerUpgrade4_0_1(upgradeInfo)
 	app.registerUpgrade4_1(upgradeInfo)
+	app.registerUpgrade4_2(upgradeInfo)
 }
 
-// performs upgrade from v4.0 to v4.1
-func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
-	const planName = "v4.1"
+// performs upgrade from v4.1 to v4.2
+func (app *UmeeApp) registerUpgrade4_2(upgradeInfo upgradetypes.Plan) {
+	const planName = "v4.2"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
@@ -49,12 +49,16 @@ func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
 	})
 }
 
+// performs upgrade from v4.0.1 to v4.1
+func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
+	const planName = "v4.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+}
+
 // performs upgrade from v4.0.0 to v4.0.1
 func (app *UmeeApp) registerUpgrade4_0_1(_ upgradetypes.Plan) {
 	const planName = "v4.0.1"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		onlyModuleMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
 // performs upgrade from v3.3 -> v4
