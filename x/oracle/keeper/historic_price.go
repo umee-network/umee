@@ -54,8 +54,8 @@ func (k Keeper) SetHistoricMedian(
 ) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
-	denom = strings.ToUpper(denom)                  // setters enforce uppercase symbol denom
-	store.Set(types.KeyMedian(denom, blockNum), bz) // SYSET
+	denom = strings.ToUpper(denom) // setters enforce uppercase symbol denom
+	store.Set(types.KeyMedian(denom, blockNum), bz)
 }
 
 // HistoricMedianDeviation returns a given denom's most recently stamped
@@ -67,7 +67,7 @@ func (k Keeper) HistoricMedianDeviation(
 	store := ctx.KVStore(k.storeKey)
 	blockDiff := uint64(ctx.BlockHeight())%k.MedianStampPeriod(ctx) + 1
 	blockNum := uint64(ctx.BlockHeight()) - blockDiff
-	bz := store.Get(types.KeyMedianDeviation(denom, blockNum)) // SYGET
+	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
 	if bz == nil {
 		return &types.Price{}, types.ErrNoMedianDeviation.Wrap("denom: " + denom)
 	}
@@ -134,8 +134,8 @@ func (k Keeper) SetHistoricMedianDeviation(
 ) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: medianDeviation})
-	denom = strings.ToUpper(denom)                           // setters enforce uppercase symbol denom
-	store.Set(types.KeyMedianDeviation(denom, blockNum), bz) // SYSET
+	denom = strings.ToUpper(denom) // setters enforce uppercase symbol denom
+	store.Set(types.KeyMedianDeviation(denom, blockNum), bz)
 }
 
 // MedianOfHistoricMedians calculates and returns the median of the last stampNum
@@ -315,8 +315,8 @@ func (k Keeper) SetHistoricPrice(
 ) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
-	denom = strings.ToUpper(denom)                         // setters enforce uppercase symbol denom
-	store.Set(types.KeyHistoricPrice(denom, blockNum), bz) // SYSET
+	denom = strings.ToUpper(denom) // setters enforce uppercase symbol denom
+	store.Set(types.KeyHistoricPrice(denom, blockNum), bz)
 }
 
 // DeleteHistoricPrice deletes the historic price of a denom at a
@@ -327,7 +327,7 @@ func (k Keeper) DeleteHistoricPrice(
 	blockNum uint64,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyHistoricPrice(denom, blockNum)) // SYSET
+	store.Delete(types.KeyHistoricPrice(denom, blockNum))
 }
 
 // DeleteHistoricMedian deletes a given denom's median price at a given block.
@@ -337,7 +337,7 @@ func (k Keeper) DeleteHistoricMedian(
 	blockNum uint64,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyMedian(denom, blockNum)) // SYSET
+	store.Delete(types.KeyMedian(denom, blockNum))
 }
 
 // DeleteHistoricMedianDeviation deletes a given denom's standard deviation
@@ -348,7 +348,7 @@ func (k Keeper) DeleteHistoricMedianDeviation(
 	blockNum uint64,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	store.Delete(types.KeyMedianDeviation(denom, blockNum)) // SYSET
+	store.Delete(types.KeyMedianDeviation(denom, blockNum))
 }
 
 func (k Keeper) PruneHistoricPricesBeforeBlock(ctx sdk.Context, blockNum uint64) {

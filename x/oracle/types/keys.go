@@ -8,14 +8,6 @@ import (
 	"github.com/umee-network/umee/v4/util"
 )
 
-// NOTES:
-// - Average counter
-// - Historic median
-// - Historic median deviation
-// - Historic price
-// - Exchange rate (no migration required)
-// - Accept list
-
 const (
 	// ModuleName is the name of the oracle module
 	ModuleName = "oracle"

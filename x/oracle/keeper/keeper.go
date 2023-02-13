@@ -75,7 +75,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
 	store := ctx.KVStore(k.storeKey)
 	symbol = strings.ToUpper(symbol)
-	b := store.Get(types.KeyExchangeRate(symbol)) // SYGET
+	b := store.Get(types.KeyExchangeRate(symbol))
 	if b == nil {
 		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
 	}
@@ -118,8 +118,8 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
-	denom = strings.ToUpper(denom)              // setters enforce uppercase symbol denom
-	store.Set(types.KeyExchangeRate(denom), bz) // SYSET
+	denom = strings.ToUpper(denom) // setters enforce uppercase symbol denom
+	store.Set(types.KeyExchangeRate(denom), bz)
 }
 
 // SetExchangeRateWithEvent sets an consensus

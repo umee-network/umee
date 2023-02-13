@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"strings"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -49,6 +50,10 @@ func (k Keeper) AcceptList(ctx sdk.Context) (res types.DenomList) {
 // SetAcceptList updates the accepted list of assets supported by the x/oracle
 // module.
 func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
+	for i, t := range acceptList {
+		// setters enforce uppercase symbol denom
+		acceptList[i].SymbolDenom = strings.ToUpper(t.SymbolDenom)
+	}
 	k.paramSpace.Set(ctx, types.KeyAcceptList, acceptList)
 }
 
@@ -130,5 +135,9 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 
 // SetParams sets the total set of oracle parameters.
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
+	for i, t := range params.AcceptList {
+		// setters enforce uppercase symbol denom
+		params.AcceptList[i].SymbolDenom = strings.ToUpper(t.SymbolDenom)
+	}
 	k.paramSpace.SetParamSet(ctx, &params)
 }

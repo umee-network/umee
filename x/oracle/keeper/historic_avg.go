@@ -108,7 +108,7 @@ func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
 
 	for ; iter.Valid(); iter.Next() {
 		var av types.AvgCounter
-		k.cdc.MustUnmarshal(iter.Value(), &av) // SYGET
+		k.cdc.MustUnmarshal(iter.Value(), &av)
 		avs = append(avs, av)
 	}
 
@@ -124,7 +124,7 @@ func (k AvgKeeper) setAvgCounters(denom string, acs []types.AvgCounter) {
 	for i := range acs {
 		key[lastIdx] = byte(i)
 		bz := k.cdc.MustMarshal(&acs[i])
-		k.store.Set(key, bz) // SYSET
+		k.store.Set(key, bz)
 	}
 }
 
@@ -136,7 +136,7 @@ func (k AvgKeeper) GetCurrentAvg(denom string) (sdk.Dec, error) {
 
 	key := types.KeyAvgCounter(denom, latestIdx)
 	var av types.AvgCounter
-	bz := k.store.Get(key) // SYGET
+	bz := k.store.Get(key)
 	if len(bz) == 0 {
 		return sdk.Dec{}, types.ErrNoLatestAvgPrice
 	}
