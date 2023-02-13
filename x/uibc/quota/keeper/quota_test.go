@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/uibc"
 	"gotest.tools/v3/assert"
 )
 
@@ -15,26 +14,21 @@ func TestGetQuotas(t *testing.T) {
 	s := initKeeperTestSuite(t)
 	ctx, k := s.ctx, s.app.UIbcQuotaKeeper
 
-	quotas, err := k.GetQuotaOfIBCDenoms(ctx)
+	quotas, err := k.GetAllQuotas(ctx)
 	assert.NilError(t, err)
 	assert.Equal(t, len(quotas), 0)
 
-	setQuotas := []uibc.Quota{
-		{
-			IbcDenom:   "test_uumee",
-			OutflowSum: sdk.MustNewDecFromStr("10000"),
-		},
-	}
+	setQuotas := sdk.DecCoins{sdk.NewInt64DecCoin("test_uumee", 10000)}
 
 	k.SetDenomQuotas(ctx, setQuotas)
-	quotas, err = k.GetQuotaOfIBCDenoms(ctx)
+	quotas, err = k.GetAllQuotas(ctx)
 	assert.NilError(t, err)
 	assert.Equal(t, len(quotas), len(setQuotas))
 
 	// get the quota of denom
-	quota, err := k.GetQuotaByDenom(ctx, setQuotas[0].IbcDenom)
+	quota, err := k.GetQuota(ctx, setQuotas[0].Denom)
 	assert.NilError(t, err)
-	assert.Equal(t, quota.IbcDenom, setQuotas[0].IbcDenom)
+	assert.Equal(t, quota.Denom, setQuotas[0].Denom)
 }
 
 func TestGetLocalDenom(t *testing.T) {
@@ -48,19 +42,17 @@ func TestResetQuota(t *testing.T) {
 	s := initKeeperTestSuite(t)
 	ctx, k := s.ctx, s.app.UIbcQuotaKeeper
 
-	umeeQuota := uibc.Quota{IbcDenom: "uumee", OutflowSum: sdk.NewDec(1000)}
+	umeeQuota := sdk.NewInt64DecCoin("uumee", 1000)
 	k.SetDenomQuota(ctx, umeeQuota)
-	// get the qutoa
-	q, err := k.GetQuotaByDenom(ctx, umeeQuota.IbcDenom)
+	q, err := k.GetQuota(ctx, umeeQuota.Denom)
 	assert.NilError(t, err)
-	assert.Equal(t, q.GetIbcDenom(), umeeQuota.IbcDenom)
-	assert.DeepEqual(t, q.OutflowSum, umeeQuota.OutflowSum)
+	assert.DeepEqual(t, q, umeeQuota)
 
 	// reset the quota
 	k.ResetQuota(ctx)
 
 	// check the quota after reset
-	q, err = k.GetQuotaByDenom(ctx, umeeQuota.IbcDenom)
+	q, err = k.GetQuota(ctx, umeeQuota.Denom)
 	assert.NilError(t, err)
-	assert.DeepEqual(t, q.OutflowSum, sdk.NewDec(0))
+	assert.DeepEqual(t, q.Amount, sdk.NewDec(0))
 }
