@@ -5,7 +5,6 @@ import (
 	"strings"
 	"testing"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -18,7 +17,6 @@ import (
 	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
-	"github.com/umee-network/umee/v4/tests/util"
 )
 
 type KeeperTestSuite struct {
@@ -66,27 +64,6 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 			ChainID: chainID,
 			Height:  1,
 			Time:    s.coordinator.CurrentTime.UTC(),
-		}
-
-		// set gravity bridge delegate keys
-		umeApp := app.(*umeeapp.UmeeApp)
-		for _, val := range chain.Vals.Validators {
-			_, _, ethAddr, err := util.GenerateRandomEthKey()
-			assert.NilError(t, err)
-
-			gravityEthAddr, err := gravitytypes.NewEthAddress(ethAddr.Hex())
-			assert.NilError(t, err)
-
-			umeApp.GravityKeeper.SetOrchestratorValidator(
-				chain.GetContext(),
-				sdk.ValAddress(val.Address),
-				sdk.AccAddress(val.Address),
-			)
-			umeApp.GravityKeeper.SetEthAddressForValidator(
-				chain.GetContext(),
-				sdk.ValAddress(val.Address),
-				*gravityEthAddr,
-			)
 		}
 
 		chain.Coordinator = s.coordinator

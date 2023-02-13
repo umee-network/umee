@@ -1,7 +1,6 @@
 package ante
 
 import (
-	gbtypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
@@ -85,19 +84,6 @@ func IsOracleOrGravityTx(msgs []sdk.Msg) bool {
 			*oracletypes.MsgAggregateExchangeRateVote:
 			continue
 
-		// TODO: revisit free gravity msg set
-		case *gbtypes.MsgValsetConfirm,
-			*gbtypes.MsgConfirmBatch,
-			*gbtypes.MsgERC20DeployedClaim,
-			*gbtypes.MsgConfirmLogicCall,
-			*gbtypes.MsgLogicCallExecutedClaim,
-			*gbtypes.MsgSendToCosmosClaim,
-			*gbtypes.MsgExecuteIbcAutoForwards,
-			*gbtypes.MsgBatchSendToEthClaim,
-			*gbtypes.MsgValsetUpdatedClaim,
-			*gbtypes.MsgSubmitBadSignatureEvidence:
-			continue
-
 		default:
 			return false
 		}
@@ -119,7 +105,7 @@ func AssertMinProtocolGasPrice(gasPrices sdk.DecCoins) error {
 
 // getTxPriority returns naive tx priority based on the lowest fee amount (regardless of the
 // denom) and oracle tx check.
-// Dirty optimization: since we already check if msgs are oracle or gravity messages, then we
+// Dirty optimization: since we already check if msgs are oracle messages, then we
 // don't recomupte it again: isOracleOrGravity flag takes a precedence over msgs check.
 func getTxPriority( /*fees, gasAmount*/ isOracleOrGravity bool, msgs []sdk.Msg) int64 {
 	var priority int64
