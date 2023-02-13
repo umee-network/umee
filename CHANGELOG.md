@@ -48,7 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [18XX](https://github.com/umee-network/umee/pull/18XX) Blacklisted tokens automatically cleared from token registry if they have not yet been supplied.
+- [1808](https://github.com/umee-network/umee/pull/1808) Blacklisted tokens automatically cleared from token registry if they have not yet been supplied.
 
 ### Fixes
 
