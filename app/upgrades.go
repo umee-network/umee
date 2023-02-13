@@ -13,6 +13,7 @@ import (
 
 	"github.com/umee-network/umee/v4/app/upgradev3"
 	"github.com/umee-network/umee/v4/app/upgradev3x3"
+	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -40,7 +41,24 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 // performs upgrade from v4.0 to v4.1
 func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
 	const planName = "v4.1"
-	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(planName, func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		ctx.Logger().Info("Upgrade handler execution", "name", planName)
+		ctx.Logger().Info("Run v4.1 migration")
+		leverageUpgrader := leveragekeeper.NewMigrator(&app.LeverageKeeper)
+		err := leverageUpgrader.MigrateBNB(ctx)
+		if err != nil {
+			ctx.Logger().Error("Unable to run v4.1 leverage Migration!", "err", err)
+			return fromVM, err
+		}
+		oracleUpgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
+		err = oracleUpgrader.MigrateBNB(ctx)
+		if err != nil {
+			ctx.Logger().Error("Unable to run v4.1 oracle Migration!", "err", err)
+			return fromVM, err
+		}
+		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+	},
+	)
 
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 		Added: []string{

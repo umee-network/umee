@@ -32,3 +32,10 @@ func (m Migrator) HistoracleParams3x4(ctx sdk.Context) error {
 	m.keeper.SetMaximumMedianStamps(ctx, types.DefaultMaximumMedianStamps)
 	return nil
 }
+
+// MigrateBNB fixes the BNB base denom
+func (m Migrator) MigrateBNB(ctx sdk.Context) error {
+	// badDenom := "ibc/77BCD42E49E5B7E0FC6B269FEBF0185B15044F13F6F38CA285DF0AF883459F40"
+	// correctDenom := "ibc/8184469200C5E667794375F5B0EC3B9ABB6FF79082941BF5D0F8FF59FEBA862E"
+	return nil
+}
