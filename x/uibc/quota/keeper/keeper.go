@@ -16,18 +16,20 @@ type Keeper struct {
 	storeKey       storetypes.StoreKey
 	cdc            codec.BinaryCodec
 	leverageKeeper uibc.LeverageKeeper
+	oracleKeeper   uibc.OracleKeeper
 	ics4Wrapper    porttypes.ICS4Wrapper
 }
 
 func NewKeeper(
 	cdc codec.BinaryCodec, key storetypes.StoreKey, ics4Wrapper types.ICS4Wrapper, leverageKeeper uibc.LeverageKeeper,
+	oracleKeeper uibc.OracleKeeper,
 ) Keeper {
-
 	return Keeper{
 		cdc:            cdc,
 		storeKey:       key,
 		ics4Wrapper:    ics4Wrapper,
 		leverageKeeper: leverageKeeper,
+		oracleKeeper:   oracleKeeper,
 	}
 }
 
