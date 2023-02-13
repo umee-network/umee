@@ -188,7 +188,7 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 	}
 
 	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
-	return k.oracleKeeper.GetHistoricAvgPrice(ctx, transferCoin.Denom)
+	return k.oracleKeeper.HistoricAvgPrice(ctx, transferCoin.Denom)
 }
 
 // UndoUpdateQuota undo the quota of ibc denom

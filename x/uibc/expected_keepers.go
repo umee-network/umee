@@ -20,5 +20,5 @@ type LeverageKeeper interface {
 }
 
 type OracleKeeper interface {
-	GetHistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error)
+	HistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error)
 }

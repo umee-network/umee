@@ -49,7 +49,7 @@ func TestGRPCGetQuota(t *testing.T) {
 			req:    uibc.QueryQuota{},
 			errMsg: "",
 		}, {
-			name:   "valid req <OutflowSum zero due to ibc-transfer not hapeen>",
+			name:   "valid req: OutflowSum zero because ibc-transfer not hapeen",
 			req:    uibc.QueryQuota{Denom: "umee"},
 			errMsg: "",
 		},
