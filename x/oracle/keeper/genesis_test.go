@@ -56,9 +56,9 @@ FOUND:
 func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 	medians := []types.ExchangeRateTuple{
-		{Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("20.44")},
-		{Denom: "atom", ExchangeRate: sdk.MustNewDecFromStr("2.66")},
-		{Denom: "osmo", ExchangeRate: sdk.MustNewDecFromStr("13.64")},
+		{Denom: "UMEE", ExchangeRate: sdk.MustNewDecFromStr("20.44")},
+		{Denom: "ATOM", ExchangeRate: sdk.MustNewDecFromStr("2.66")},
+		{Denom: "OSMO", ExchangeRate: sdk.MustNewDecFromStr("13.64")},
 	}
 
 	for _, m := range medians {
@@ -90,9 +90,9 @@ FOUND:
 func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx
 	medians := []types.ExchangeRateTuple{
-		{Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("21.44")},
-		{Denom: "atom", ExchangeRate: sdk.MustNewDecFromStr("3.66")},
-		{Denom: "osmo", ExchangeRate: sdk.MustNewDecFromStr("14.64")},
+		{Denom: "UMEE", ExchangeRate: sdk.MustNewDecFromStr("21.44")},
+		{Denom: "ATOM", ExchangeRate: sdk.MustNewDecFromStr("3.66")},
+		{Denom: "OSMO", ExchangeRate: sdk.MustNewDecFromStr("14.64")},
 	}
 
 	for _, m := range medians {
