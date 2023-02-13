@@ -24,6 +24,7 @@ var (
 	ErrDuplicateToken       = errors.Register(ModuleName, 207, "duplicate token")
 	ErrCollateralWeightZero = errors.Register(ModuleName, 206,
 		"collateral weight of Token is zero: can't be used as a collateral")
+	ErrBadSupplyDetected = errors.Register(ModuleName, 207, "supply of a bad token detected")
 
 	// 3XX = User Positions
 	ErrInsufficientBalance    = errors.Register(ModuleName, 300, "insufficient balance")
