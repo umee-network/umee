@@ -283,6 +283,10 @@ func (k Keeper) IterateHistoricMedians(
 	}
 }
 
+func (k Keeper) AvgKeeper(ctx sdk.Context) AvgKeeper {
+	return AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
+}
+
 // AddHistoricPrice adds the historic price of a denom at the current
 // block height.
 func (k Keeper) AddHistoricPrice(
@@ -292,8 +296,11 @@ func (k Keeper) AddHistoricPrice(
 ) {
 	block := uint64(ctx.BlockHeight())
 	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
-	ak := AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
-	ak.updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
+	k.AvgKeeper(ctx).updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
+}
+
+func (k Keeper) HistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	return k.AvgKeeper(ctx).GetCurrentAvg(denom)
 }
 
 func (k Keeper) SetHistoricPrice(

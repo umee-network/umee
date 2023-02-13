@@ -16,6 +16,9 @@ type BankKeeper interface {
 
 type LeverageKeeper interface {
 	GetTokenSettings(ctx sdk.Context, baseDenom string) (ltypes.Token, error)
-	TokenValue(ctx sdk.Context, coin sdk.Coin, mode ltypes.PriceMode) (sdk.Dec, error)
 	ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
+}
+
+type OracleKeeper interface {
+	HistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error)
 }
