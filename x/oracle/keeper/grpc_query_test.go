@@ -205,10 +205,10 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	app, ctx := s.app, s.ctx
 
-	atomMedian0 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("49.99")}
-	umeeMedian0 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6541.48")}
-	atomMedian1 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("51.09")}
-	umeeMedian1 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6540.23")}
+	atomMedian0 := sdk.DecCoin{Denom: "ATOM", Amount: sdk.MustNewDecFromStr("49.99")}
+	umeeMedian0 := sdk.DecCoin{Denom: "UMEE", Amount: sdk.MustNewDecFromStr("6541.48")}
+	atomMedian1 := sdk.DecCoin{Denom: "ATOM", Amount: sdk.MustNewDecFromStr("51.09")}
+	umeeMedian1 := sdk.DecCoin{Denom: "UMEE", Amount: sdk.MustNewDecFromStr("6540.23")}
 
 	blockHeight0 := uint64(ctx.BlockHeight() - 4)
 	app.OracleKeeper.SetHistoricMedian(ctx, atomMedian0.Denom, blockHeight0, atomMedian0.Amount)
@@ -218,8 +218,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected := []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
-		*types.NewPrice(umeeMedian0.Amount, "umee", blockHeight0),
+		*types.NewPrice(atomMedian0.Amount, "ATOM", blockHeight0),
+		*types.NewPrice(umeeMedian0.Amount, "UMEE", blockHeight0),
 	}
 	s.Require().Equal(res.Medians, expected)
 
@@ -227,7 +227,7 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
+		*types.NewPrice(atomMedian0.Amount, "ATOM", blockHeight0),
 	}
 	s.Require().Equal(res.Medians, expected)
 
@@ -239,10 +239,10 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
-		*types.NewPrice(umeeMedian0.Amount, "umee", blockHeight0),
-		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
-		*types.NewPrice(umeeMedian1.Amount, "umee", blockHeight1),
+		*types.NewPrice(atomMedian0.Amount, "ATOM", blockHeight0),
+		*types.NewPrice(umeeMedian0.Amount, "UMEE", blockHeight0),
+		*types.NewPrice(atomMedian1.Amount, "ATOM", blockHeight1),
+		*types.NewPrice(umeeMedian1.Amount, "UMEE", blockHeight1),
 	}
 	s.Require().Equal(res.Medians, expected)
 
@@ -250,8 +250,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
-		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
+		*types.NewPrice(atomMedian0.Amount, "ATOM", blockHeight0),
+		*types.NewPrice(atomMedian1.Amount, "ATOM", blockHeight1),
 	}
 	s.Require().Equal(res.Medians, expected)
 
