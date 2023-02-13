@@ -46,5 +46,8 @@ func (m Migrator) MigrateBNB(ctx sdk.Context) error {
 	}
 	// Overwrite previous accept list
 	m.keeper.SetAcceptList(ctx, acceptList)
+	//
+	// Question: is there anything else in oracle state that is stored using base denom instead of symbol denom?
+	//
 	return nil
 }
