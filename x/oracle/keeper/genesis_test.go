@@ -11,16 +11,16 @@ func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
 
 	historicPrices := []types.Price{
 		{BlockNum: 10, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("20.45"),
+			Denom: "UMEE", ExchangeRate: sdk.MustNewDecFromStr("20.45"),
 		}},
 		{BlockNum: 11, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "umee", ExchangeRate: sdk.MustNewDecFromStr("20.44"),
+			Denom: "UMEE", ExchangeRate: sdk.MustNewDecFromStr("20.44"),
 		}},
 		{BlockNum: 10, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "btc", ExchangeRate: sdk.MustNewDecFromStr("1200.56"),
+			Denom: "BTC", ExchangeRate: sdk.MustNewDecFromStr("1200.56"),
 		}},
 		{BlockNum: 11, ExchangeRateTuple: types.ExchangeRateTuple{
-			Denom: "btc", ExchangeRate: sdk.MustNewDecFromStr("1200.19"),
+			Denom: "BTC", ExchangeRate: sdk.MustNewDecFromStr("1200.19"),
 		}},
 	}
 
