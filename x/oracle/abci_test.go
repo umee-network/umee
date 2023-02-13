@@ -173,17 +173,17 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	// umee has 100% power, and atom has 30%
 	val1Tuples = types.ExchangeRateTuples{
 		types.ExchangeRateTuple{
-			Denom:        "umee",
+			Denom:        "UMEE",
 			ExchangeRate: sdk.MustNewDecFromStr("1.0"),
 		},
 	}
 	val2Tuples = types.ExchangeRateTuples{
 		types.ExchangeRateTuple{
-			Denom:        "umee",
+			Denom:        "UMEE",
 			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
 		},
 		types.ExchangeRateTuple{
-			Denom:        "atom",
+			Denom:        "ATOM",
 			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
 		},
 	}
@@ -199,11 +199,11 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "umee")
+	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "UMEE")
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
-	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
-	s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, "atom"))
+	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "ATOM")
+	s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, "ATOM"))
 	s.Require().Equal(sdk.ZeroDec(), rate)
 
 	ctx = ctx.WithBlockHeight(originalBlockHeight)
@@ -249,7 +249,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			blockHeight += historicStampPeriod
 			ctx = ctx.WithBlockHeight(blockHeight)
 
-			var tuples = types.ExchangeRateTuples{}
+			tuples := types.ExchangeRateTuples{}
 			for denom, prices := range exchangeRates {
 				tuples = append(tuples, types.ExchangeRateTuple{
 					Denom:        denom,
