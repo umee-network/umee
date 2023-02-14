@@ -33,6 +33,8 @@ func NewKeeper(
 	}
 }
 
+// PrefixStore creates an new prefix store.
+// It will automatically remove provided prefix from keys when using with the iterator.
 func (k Keeper) PrefixStore(ctx *sdk.Context, prefix []byte) store.KVStore {
 	s := ctx.KVStore(k.storeKey)
 	return prefixstore.NewStore(s, uibc.KeyPrefixDenomQuota)
