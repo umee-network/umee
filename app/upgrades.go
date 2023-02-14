@@ -51,7 +51,7 @@ func (app *UmeeApp) registerUpgrade4_2(upgradeInfo upgradetypes.Plan) {
 }
 
 // performs upgrade from v4.0 to v4.1
-func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
 	const planName = "v4.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
