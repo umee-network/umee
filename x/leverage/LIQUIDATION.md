@@ -28,6 +28,8 @@ Umee provides a query to list addresses that are eligible for liquidation.
 * REST: `https://api.your.node.here/umee/leverage/v1/liquidation-targets`
 * CLI: `umeed q leverage liquidation-targets`
 
+There is also a courtesy endpoint at `https://api.mainnet.network.umee.cc/umee/leverage/v1/liquidation_targets` which provides a cached output for the query every 5 minutes when available.
+
 ### Enabling the `liquidation-targets` Query
 
 For performance reasons, this query is disabled by default:
