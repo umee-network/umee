@@ -46,15 +46,13 @@ func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec
 	return p, nil
 }
 
-func (m *mockOracleKeeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	p, ok := m.baseExchangeRates[denom]
-	if !ok {
-		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
-	}
-
-	return p, nil
+// Clear clears a denom from the mock oracle, simulating an outage.
+func (m *mockOracleKeeper) Clear(denom string) {
+	delete(m.symbolExchangeRates, denom)
+	delete(m.historicExchangeRates, denom)
 }
 
+// Reset restores the mock oracle's prices to its default values.
 func (m *mockOracleKeeper) Reset() {
 	m.symbolExchangeRates = map[string]sdk.Dec{
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
@@ -62,13 +60,6 @@ func (m *mockOracleKeeper) Reset() {
 		"DAI":  sdk.MustNewDecFromStr("1.00"),
 		"DUMP": sdk.MustNewDecFromStr("0.50"), // A token which has recently halved in price
 		"PUMP": sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
-	}
-	m.baseExchangeRates = map[string]sdk.Dec{
-		appparams.BondDenom: sdk.MustNewDecFromStr("0.00000421"),
-		atomDenom:           sdk.MustNewDecFromStr("0.00003938"),
-		daiDenom:            sdk.MustNewDecFromStr("0.000000000000000001"),
-		dumpDenom:           sdk.MustNewDecFromStr("0.0000005"),
-		pumpDenom:           sdk.MustNewDecFromStr("0.0000020"),
 	}
 	m.historicExchangeRates = map[string]sdk.Dec{
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
