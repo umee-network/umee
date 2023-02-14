@@ -1698,10 +1698,7 @@ func (s *IntegrationTestSuite) TestMaxCollateralShare() {
 	// now ATOM's (visible) collateral share is 100% and even the smallest collateralize will fail
 	msg := &types.MsgCollateralize{
 		Borrower: atomSupplier.String(),
-<<<<<<< HEAD
-		Asset:    coin("u/"+atomDenom, 10000),
-=======
-		Asset:    coin.New("u/"+atomDenom, 1),
+		Asset:    coin("u/"+atomDenom, 1),
 	}
 	_, err = srv.Collateralize(ctx, msg)
 	require.ErrorIs(err, types.ErrMaxCollateralShare)
@@ -1710,13 +1707,12 @@ func (s *IntegrationTestSuite) TestMaxCollateralShare() {
 	s.mockOracle.Reset()
 
 	// ensure the previous collateralize would have worked
-	s.collateralize(atomSupplier, coin.New("u/"+atomDenom, 1))
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 1))
 
 	// attempt to collateralize another 0.01 ATOM, which would result in too much collateral share for ATOM
 	msg = &types.MsgCollateralize{
 		Borrower: atomSupplier.String(),
-		Asset:    coin.New("u/"+atomDenom, 10000),
->>>>>>> e23e4fc (fix: collateral share restriction works during partial price outages (#1812))
+		Asset:    coin("u/"+atomDenom, 10000),
 	}
 	_, err = srv.Collateralize(ctx, msg)
 	require.ErrorIs(err, types.ErrMaxCollateralShare)
