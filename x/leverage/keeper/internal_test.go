@@ -5,7 +5,6 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"github.com/stretchr/testify/require"
 
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -20,7 +19,6 @@ type TestKeeper struct {
 // an additional TestKeeper that exposes normally
 // unexported methods for testing.
 func NewTestKeeper(
-	_ *require.Assertions,
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
