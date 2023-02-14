@@ -222,31 +222,40 @@ message QueryAccountSummary {
 // QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
 message QueryAccountSummaryResponse {
   // Supplied Value is the sum of the USD value of all tokens the account has supplied, including interest earned.
+  // Computation skips assets which are missing oracle prices, potentially resulting in a lower supplied
+  // value than if prices were all available.
   string supplied_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
   // Collateral Value is the sum of the USD value of all uTokens the account has collateralized.
+  // Computation skips collateral which is missing an oracle price, potentially resulting in a lower collateral
+  // value than if prices were all available.
   string collateral_value = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
   // Borrowed Value is the sum of the USD value of all tokens the account has borrowed, including interest owed.
   // It always uses spot prices.
+  // Computation skips borrows which are missing oracle prices, potentially resulting in a lower borrowed
+  // value than if prices were all available.
   string borrowed_value = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
   // Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
   // The lower of spot or historic price for each collateral token is used when calculating borrow limits.
+  // Computation skips collateral which is missing an oracle price, potentially resulting in a lower borrow
+  // limit than if prices were all available.
   string borrow_limit = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
   // Liquidation Threshold is the Borrowed Value at which the account becomes eligible for liquidation.
+  // Will be null if an oracle price required for computation is missing.
   string liquidation_threshold = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = true
   ];
 }
 

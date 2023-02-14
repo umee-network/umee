@@ -208,42 +208,45 @@ func (q Querier) AccountSummary(
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	// supplied value always uses spot prices
-	suppliedValue, err := q.Keeper.TotalTokenValue(ctx, supplied, types.PriceModeSpot)
-	if err != nil {
-		return nil, err
-	}
-	// borrowed value here is shown using spot prices, but leverage logic instead uses
+	// supplied value always uses spot prices, and skips supplied assets that are missing prices
+	suppliedValue := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeSpot)
+
+	// borrowed value uses spot prices here, but leverage logic instead uses
 	// the higher of spot or historic prices for each borrowed token when comparing it
-	// to borrow limit.
-	borrowedValue, err := q.Keeper.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
+	// to borrow limit. This line also skips borrowed assets that are missing prices.
+	borrowedValue := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+
+	// collateral value always uses spot prices, and this line skips assets that are missing prices
+	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral)
 	if err != nil {
-		return nil, err
-	}
-	// collateral value always uses spot prices
-	collateralValue, err := q.Keeper.CalculateCollateralValue(ctx, collateral)
-	if err != nil {
-		return nil, err
-	}
-	// borrow limit shown here as it is used in leverage logic:
-	// using the lower of spot or historic prices for each collateral token
-	borrowLimit, err := q.Keeper.CalculateBorrowLimit(ctx, collateral)
-	if err != nil {
-		return nil, err
-	}
-	// liquidation always uses spot prices
-	liquidationThreshold, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
-	if err != nil {
+		// this error isn't a missing price - it would be non-uToken collateral
 		return nil, err
 	}
 
-	return &types.QueryAccountSummaryResponse{
-		SuppliedValue:        suppliedValue,
-		CollateralValue:      collateralValue,
-		BorrowedValue:        borrowedValue,
-		BorrowLimit:          borrowLimit,
-		LiquidationThreshold: liquidationThreshold,
-	}, nil
+	// borrow limit shown here as it is used in leverage logic:
+	// using the lower of spot or historic prices for each collateral token
+	// skips collateral tokens with missing oracle prices
+	borrowLimit, err := q.Keeper.VisibleBorrowLimit(ctx, collateral)
+	if err != nil {
+		// this error isn't a missing price - it would be non-uToken collateral
+		return nil, err
+	}
+
+	resp := &types.QueryAccountSummaryResponse{
+		SuppliedValue:   suppliedValue,
+		CollateralValue: collateralValue,
+		BorrowedValue:   borrowedValue,
+		BorrowLimit:     borrowLimit,
+	}
+
+	// liquidation always uses spot prices. This response field will be null
+	// if a price is missing
+	liquidationThreshold, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
+	if err == nil {
+		resp.LiquidationThreshold = &liquidationThreshold
+	}
+
+	return resp, nil
 }
 
 func (q Querier) LiquidationTargets(
@@ -320,11 +323,13 @@ func (q Querier) MaxWithdraw(
 	}
 
 	for _, denom := range denoms {
+		// If a price is missing for the borrower's collateral,
+		// but not this uToken or any of their borrows, error
+		// will be nil and the resulting value will be what
+		// can safely be withdrawn even with missing prices.
+		// On non-nil error here, max withdraw is zero.
 		uToken, err := q.Keeper.maxWithdraw(ctx, addr, denom)
-		if err != nil {
-			return nil, err
-		}
-		if uToken.IsPositive() {
+		if err == nil && uToken.IsPositive() {
 			token, err := q.Keeper.ExchangeUToken(ctx, uToken)
 			if err != nil {
 				return nil, err
@@ -374,14 +379,15 @@ func (q Querier) MaxBorrow(
 	}
 
 	for _, denom := range denoms {
+		// If a price is missing for the borrower's collateral,
+		// but not this token or any of their borrows, error
+		// will be nil and the resulting value will be what
+		// can safely be borrowed even with missing prices.
+		// On non-nil error here, max borrow is zero.
 		maxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom)
-		if err != nil {
-			return nil, err
-		}
-		if maxBorrow.IsPositive() {
+		if err == nil && maxBorrow.IsPositive() {
 			maxTokens = maxTokens.Add(maxBorrow)
 		}
-
 	}
 
 	return &types.QueryMaxBorrowResponse{

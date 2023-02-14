@@ -74,6 +74,7 @@ func (s msgServer) Withdraw(
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
 	if err != nil {
 		return nil, err
@@ -107,6 +108,10 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
+	// If a price is missing for the borrower's collateral,
+	// but not this uToken or any of their borrows, error
+	// will be nil and the resulting value will be what
+	// can safely be withdrawn even with missing prices.
 	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
 	if err != nil {
 		return nil, err
@@ -123,6 +128,7 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
 	if err != nil {
 		return nil, err
@@ -172,6 +178,8 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
+	// Fail here if collateral share restrictions are violated,
+	// based on only collateral with known oracle prices
 	if err := s.keeper.checkCollateralShare(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
@@ -211,11 +219,13 @@ func (s msgServer) SupplyCollateral(
 		return nil, err
 	}
 
-	// Fail here if collateral share or liquidity restrictions are violated
+	// Fail here if collateral liquidity restrictions are violated
 	if err := s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
 
+	// Fail here if collateral share restrictions are violated,
+	// based on only collateral with known oracle prices
 	if err := s.keeper.checkCollateralShare(ctx, uToken.Denom); err != nil {
 		return nil, err
 	}
@@ -260,6 +270,7 @@ func (s msgServer) Decollateralize(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
@@ -292,6 +303,7 @@ func (s msgServer) Borrow(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
@@ -330,6 +342,10 @@ func (s msgServer) MaxBorrow(
 		return nil, err
 	}
 
+	// If a price is missing for the borrower's collateral,
+	// but not this uToken or any of their borrows, error
+	// will be nil and the resulting value will be what
+	// can safely be withdrawn even with missing prices.
 	maxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom)
 	if err != nil {
 		return nil, err
@@ -343,6 +359,7 @@ func (s msgServer) MaxBorrow(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
