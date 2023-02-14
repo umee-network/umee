@@ -48,6 +48,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
+<<<<<<< HEAD
+=======
+- [1812](https://github.com/umee-network/umee/pull/1812) MaxCollateralShare now works during partial oracle outages when certain conditions are safe.
+- [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
+
+## [v4.0.1](https://github.com/umee-network/umee/releases/tag/v4.0.1) - 2023-02-10
+
+### Fixes
+
+>>>>>>> e23e4fc (fix: collateral share restriction works during partial price outages (#1812))
 - [1800](https://github.com/umee-network/umee/pull/1800) Handle non-capitalized assets when calling the historacle data.
 
 ## [v4.0.0](https://github.com/umee-network/umee/releases/tag/v4.0.0) - 2023-01-20
