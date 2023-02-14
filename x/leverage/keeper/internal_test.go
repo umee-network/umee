@@ -19,10 +19,6 @@ type TestKeeper struct {
 // an additional TestKeeper that exposes normally
 // unexported methods for testing.
 func NewTestKeeper(
-<<<<<<< HEAD
-	require *require.Assertions,
-=======
->>>>>>> 0e4df51 (fix: 4.1 BNB migration (#1807))
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
@@ -30,7 +26,7 @@ func NewTestKeeper(
 	ok types.OracleKeeper,
 	enableLiquidatorQuery bool,
 ) (Keeper, TestKeeper) {
-	k, err := NewKeeper(
+	k, _ := NewKeeper(
 		cdc,
 		storeKey,
 		paramSpace,
@@ -38,7 +34,6 @@ func NewTestKeeper(
 		ok,
 		enableLiquidatorQuery,
 	)
-	require.NoError(err)
 	return k, TestKeeper{&k}
 }
 

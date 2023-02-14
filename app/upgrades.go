@@ -33,33 +33,10 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 	app.registerUpgrade3_3to4_0(upgradeInfo)
-	app.registerUpgrade4_0to4_0rc3(upgradeInfo)
-	app.registerUpgrade4_0rc3to4_0rc4(upgradeInfo)
 	app.registerUpgrade4_0_1(upgradeInfo)
+	app.registerUpgrade4_1(upgradeInfo)
 }
 
-// performs upgrade from v4.0-rc3 -> v4.0-rc4
-func (app UmeeApp) registerUpgrade4_0rc3to4_0rc4(_ upgradetypes.Plan) {
-	const planName = "v4.0-rc4"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			return fromVM, nil
-		})
-}
-
-<<<<<<< HEAD
-// performs upgrade from v4.0-rc2 (or rc1) -> v4.0-rc3
-func (app UmeeApp) registerUpgrade4_0to4_0rc3(_ upgradetypes.Plan) {
-	const planName = "v4.0-rc3"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			return fromVM, nil
-		})
-=======
 // performs upgrade from v4.0 to v4.1
 func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
 	const planName = "v4.1"
@@ -82,7 +59,6 @@ func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
->>>>>>> 0e4df51 (fix: 4.1 BNB migration (#1807))
 }
 
 // performs upgrade from v4.0.0 to v4.0.1
