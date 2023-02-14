@@ -91,7 +91,7 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	msgInvalidSalt := "invalid salt length; must be 64"
 	msgInvalidOverflowValue := "out of range; bitLen:"
 	msgInvalidHexString := "salt must be a valid hex string: invalid salt format"
-	msgInvalidUnknownRequest := "must provide at least one oracle exchange rate: unknown request"
+	msgInvalidUnknownRequest := "must provide at least one oracle exchange rate: invalid request"
 	msgInvalidFeederAddr := "invalid feeder address (empty address string is not allowed): invalid address"
 	msgInvalidOperatorAddr := "invalid operator address (empty address string is not allowed): invalid address"
 	msgInvalidOraclePrice := "failed to parse exchange rates string cause: invalid oracle price: invalid coins"
