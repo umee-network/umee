@@ -3,6 +3,7 @@ package umee.uibc.v1;
 
 import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "umee/uibc/v1/quota.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/uibc";
@@ -40,5 +41,8 @@ message QueryQuota {
 
 // QueryQuotaResponse defines response type of Query/Quota
 message QueryQuotaResponse {
-  repeated Quota quota = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin quotas = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable)     = false
+  ];
 }

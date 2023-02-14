@@ -21,7 +21,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 
 // ExportGenesis returns the x/uibc module's exported genesis state.
 func (k Keeper) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
-	quotas, err := k.GetQuotaOfIBCDenoms(ctx)
+	quotas, err := k.GetAllQuotas(ctx)
 	util.Panic(err)
 	quotaExpires, err := k.GetExpire(ctx)
 	util.Panic(err)

@@ -61,10 +61,10 @@ func TestGRPCGetQuota(t *testing.T) {
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				if len(tc.req.Denom) == 0 {
-					assert.Equal(t, 0, len(resp.Quota))
+					assert.Equal(t, 0, len(resp.Quotas))
 				} else {
-					assert.Equal(t, 1, len(resp.Quota))
-					assert.DeepEqual(t, sdk.NewDec(0), resp.Quota[0].OutflowSum)
+					assert.Equal(t, 1, len(resp.Quotas))
+					assert.DeepEqual(t, sdk.NewDec(0), resp.Quotas[0].Amount)
 				}
 			} else {
 				assert.Error(t, err, tc.errMsg)
