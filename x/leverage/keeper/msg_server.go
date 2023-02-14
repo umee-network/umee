@@ -343,7 +343,7 @@ func (s msgServer) MaxBorrow(
 	}
 
 	// If a price is missing for the borrower's collateral,
-	// but not this uToken or any of their borrows, error
+	// but not this token or any of their borrows, error
 	// will be nil and the resulting value will be what
 	// can safely be withdrawn even with missing prices.
 	maxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom)
