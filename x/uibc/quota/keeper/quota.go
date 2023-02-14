@@ -7,7 +7,6 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	prefixsore "github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
@@ -22,8 +21,7 @@ import (
 func (k Keeper) GetAllQuotas(ctx sdk.Context) (sdk.DecCoins, error) {
 	var quotas sdk.DecCoins
 	prefix := uibc.KeyPrefixDenomQuota
-	store := ctx.KVStore(k.storeKey)
-
+	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomQuota)
 	iter := sdk.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 
@@ -111,21 +109,20 @@ func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 	return &quotaExpires, nil
 }
 
-// ResetQuota will reset the ibc-transfer quotas
+// ResetQuota will zero the ibc-transfer quotas
 func (k Keeper) ResetQuota(ctx sdk.Context) error {
 	qd := k.GetParams(ctx).QuotaDuration
+	newExpires := ctx.BlockTime().Add(qd)
+	if err := k.SetExpire(ctx, newExpires); err != nil {
+		return err
+	}
 	zero := sdk.NewDec(0)
 	zeroBz, err := zero.Marshal()
 	if err != nil {
 		return err
 	}
-	newExpires := ctx.BlockTime().Add(qd)
-	if err := k.SetExpire(ctx, newExpires); err != nil {
-		return err
-	}
 	k.SetTotalOutflowSum(ctx, zero)
-	store := ctx.KVStore(k.storeKey)
-	store = prefixsore.NewStore(store, uibc.KeyPrefixDenomQuota)
+	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomQuota)
 	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
