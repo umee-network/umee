@@ -1,20 +1,11 @@
 package keeper
 
 import (
-<<<<<<< HEAD
 	"strings"
 
-=======
 	"cosmossdk.io/errors"
->>>>>>> 37909a3 (fix: deprecated use of sdkerrors (#1788))
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-<<<<<<< HEAD
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
-
-=======
-	"github.com/umee-network/umee/v4/util/sdkutil"
->>>>>>> 37909a3 (fix: deprecated use of sdkerrors (#1788))
 	"github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
