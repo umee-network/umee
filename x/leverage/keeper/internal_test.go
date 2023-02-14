@@ -20,7 +20,7 @@ type TestKeeper struct {
 // an additional TestKeeper that exposes normally
 // unexported methods for testing.
 func NewTestKeeper(
-	require *require.Assertions,
+	_ *require.Assertions,
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,

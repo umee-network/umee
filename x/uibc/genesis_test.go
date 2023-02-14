@@ -17,14 +17,9 @@ func TestGenesisValidation(t *testing.T) {
 
 	gs.TotalOutflowSum = sdk.NewDec(-123123)
 	err = gs.Validate()
-	assert.ErrorContains(t, err, "total outflow sum shouldn't be negative")
+	assert.ErrorContains(t, err, "total outflow sum cannot be negative")
 
-	gs.Quotas = []Quota{
-		{
-			IbcDenom:   "umee",
-			OutflowSum: sdk.NewDec(-11123123),
-		},
-	}
+	gs.Quotas = []sdk.DecCoin{{Denom: "umee", Amount: sdk.NewDec(-11123123)}}
 	err = gs.Validate()
-	assert.ErrorContains(t, err, "ibc denom quota expires shouldn't be empty")
+	assert.ErrorContains(t, err, "amount cannot be negative")
 }
