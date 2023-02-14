@@ -21,12 +21,7 @@ var (
 	ErrUnbondingWeightOrder = errors.Register(ModuleName, 201, "unbonding tier weights out of order")
 
 	// 3XX = Gov Proposal
-<<<<<<< HEAD
-	ErrNonzeroRemainingRewards = sdkerrors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
-	ErrNonzeroFundedRewards    = sdkerrors.Register(ModuleName, 301, "funded rewards must be zero in proposal")
-=======
 	ErrNonzeroRemainingRewards = errors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
 	ErrNonzeroFundedRewards    = errors.Register(ModuleName, 301, "funded rewards must be zero in proposal")
 	ErrEmptyProposal           = errors.Register(ModuleName, 302, "proposal contains no incentive programs")
->>>>>>> 37909a3 (fix: deprecated use of sdkerrors (#1788))
 )
