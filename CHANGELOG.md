@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [1808](https://github.com/umee-network/umee/pull/1808) Blacklisted tokens automatically cleared from token registry if they have not yet been supplied.
+
 ### Fixes
 
 - [1812](https://github.com/umee-network/umee/pull/1812) MaxCollateralShare now works during partial oracle outages when certain conditions are safe.
