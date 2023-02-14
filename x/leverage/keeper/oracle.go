@@ -3,12 +3,11 @@ package keeper
 import (
 	"strings"
 
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 
 	"github.com/umee-network/umee/v4/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
@@ -35,7 +34,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		// spot price is required for modes other than historic
 		spotPrice, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
 		if err != nil {
-			return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
 	}
 	if mode != types.PriceModeSpot {
@@ -44,7 +43,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(
 			ctx, strings.ToUpper(t.SymbolDenom), uint64(t.HistoricMedians))
 		if err != nil {
-			return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
 		if numStamps < t.HistoricMedians {
 			return sdk.ZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
@@ -69,7 +68,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 	}
 
 	if price.IsNil() || !price.IsPositive() {
-		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(types.ErrInvalidOraclePrice, baseDenom)
+		return sdk.ZeroDec(), t.Exponent, types.ErrInvalidOraclePrice.Wrap(baseDenom)
 	}
 
 	return price, t.Exponent, nil

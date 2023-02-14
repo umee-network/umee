@@ -47,7 +47,7 @@ func (msg MsgAggregateExchangeRatePrevote) GetSigners() []sdk.AccAddress {
 func (msg MsgAggregateExchangeRatePrevote) ValidateBasic() error {
 	_, err := AggregateVoteHashFromHex(msg.Hash)
 	if err != nil {
-		return sdkerrors.Wrapf(ErrInvalidHash, "invalid vote hash (%s)", err)
+		return ErrInvalidHash.Wrapf("invalid vote hash (%s)", err)
 	}
 
 	// HEX encoding doubles the hash length
@@ -57,12 +57,12 @@ func (msg MsgAggregateExchangeRatePrevote) ValidateBasic() error {
 
 	_, err = sdk.AccAddressFromBech32(msg.Feeder)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid feeder address (%s)", err)
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid feeder address (%s)", err)
 	}
 
 	_, err = sdk.ValAddressFromBech32(msg.Validator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address (%s)", err)
 	}
 
 	return nil
@@ -102,29 +102,29 @@ func (msg MsgAggregateExchangeRateVote) GetSigners() []sdk.AccAddress {
 func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Feeder)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid feeder address (%s)", err)
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid feeder address (%s)", err)
 	}
 
 	_, err = sdk.ValAddressFromBech32(msg.Validator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address (%s)", err)
 	}
 
 	if l := len(msg.ExchangeRates); l == 0 {
-		return sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, "must provide at least one oracle exchange rate")
+		return sdkerrors.ErrInvalidRequest.Wrap("must provide at least one oracle exchange rate")
 	} else if l > 4096 {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "exchange rates string can not exceed 4096 characters")
+		return sdkerrors.ErrInvalidRequest.Wrap("exchange rates string can not exceed 4096 characters")
 	}
 
 	exchangeRates, err := ParseExchangeRateTuples(msg.ExchangeRates)
 	if err != nil {
-		return sdkerrors.Wrap(sdkerrors.ErrInvalidCoins, "failed to parse exchange rates string cause: "+err.Error())
+		return sdkerrors.ErrInvalidCoins.Wrap("failed to parse exchange rates string cause: " + err.Error())
 	}
 
 	for _, exchangeRate := range exchangeRates {
 		// check overflow bit length
 		if exchangeRate.ExchangeRate.BigInt().BitLen() > 255+sdk.DecimalPrecisionBits {
-			return sdkerrors.Wrap(ErrInvalidExchangeRate, "overflow")
+			return ErrInvalidExchangeRate.Wrap("overflow")
 		}
 	}
 
@@ -133,7 +133,7 @@ func (msg MsgAggregateExchangeRateVote) ValidateBasic() error {
 	}
 	_, err = AggregateVoteHashFromHex(msg.Salt)
 	if err != nil {
-		return sdkerrors.Wrap(ErrInvalidSaltFormat, "salt must be a valid hex string")
+		return ErrInvalidSaltFormat.Wrap("salt must be a valid hex string")
 	}
 
 	return nil
@@ -168,12 +168,12 @@ func (msg MsgDelegateFeedConsent) GetSigners() []sdk.AccAddress {
 func (msg MsgDelegateFeedConsent) ValidateBasic() error {
 	_, err := sdk.ValAddressFromBech32(msg.Operator)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid operator address (%s)", err)
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid operator address (%s)", err)
 	}
 
 	_, err = sdk.AccAddressFromBech32(msg.Delegate)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "invalid delegate address (%s)", err)
+		return sdkerrors.ErrInvalidAddress.Wrapf("invalid delegate address (%s)", err)
 	}
 
 	return nil

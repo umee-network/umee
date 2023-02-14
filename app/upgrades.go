@@ -1,9 +1,9 @@
 package app
 
 import (
+	"cosmossdk.io/errors"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/group"
@@ -143,7 +143,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 			ctx.Logger().Info("Running setupBech32ibcKeeper")
 			err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			if err != nil {
-				return nil, sdkerrors.Wrapf(
+				return nil, errors.Wrapf(
 					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", planName)
 			}
 
@@ -156,7 +156,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 			ctx.Logger().Info("Updating validator minimum commission rate param of staking module")
 			minCommissionRate, err := upgradev3.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
 			if err != nil {
-				return vm, sdkerrors.Wrapf(
+				return vm, errors.Wrapf(
 					err, "%q Upgrade: failed to update minimum commission rate param of staking module",
 					planName)
 			}
@@ -165,7 +165,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 				"name", planName)
 			err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
-				return vm, sdkerrors.Wrapf(
+				return vm, errors.Wrapf(
 					err, "%q Upgrade: failed to update minimum commission rate for validators",
 					planName)
 			}
