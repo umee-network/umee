@@ -813,27 +813,32 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			supplier,
 			coin(umeeDenom, 80_000000),
 			types.ErrNotUToken,
-		}, {
+		},
+		{
 			"no collateral",
 			supplier,
 			coin("u/"+atomDenom, 40_000000),
 			types.ErrInsufficientCollateral,
-		}, {
+		},
+		{
 			"valid decollateralize",
 			supplier,
 			coin("u/"+umeeDenom, 80_000000),
 			nil,
-		}, {
+		},
+		{
 			"additional decollateralize",
 			supplier,
 			coin("u/"+umeeDenom, 10_000000),
 			nil,
-		}, {
+		},
+		{
 			"insufficient collateral",
 			supplier,
 			coin("u/"+umeeDenom, 40_000000),
 			types.ErrInsufficientCollateral,
-		}, {
+		},
+		{
 			"above borrow limit",
 			borrower,
 			coin("u/"+atomDenom, 100_000000),
@@ -845,17 +850,20 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			dumpborrower,
 			coin("u/"+pumpDenom, 20_000000),
 			nil,
-		}, {
+		},
+		{
 			"above borrow limit (undercollateralized under historic prices but ok with current prices)",
 			dumpborrower,
 			coin("u/"+pumpDenom, 20_000000),
 			types.ErrUndercollaterized,
-		}, {
+		},
+		{
 			"acceptable decollateralize (pump borrower)",
 			pumpborrower,
 			coin("u/"+dumpDenom, 20_000000),
 			nil,
-		}, {
+		},
+		{
 			"above borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
 			coin("u/"+dumpDenom, 20_000000),
@@ -1684,8 +1692,25 @@ func (s *IntegrationTestSuite) TestMaxCollateralShare() {
 	// so ATOM's collateral share ($46.46 / $467.46) is barely below 10%
 	s.collateralize(atomSupplier, coin("u/"+atomDenom, 1_180000))
 
-	// attempt to collateralize another 0.01 ATOM, which would result in too much collateral share for ATOM
+	// kill the oracle's ability to return UMEE price
+	s.mockOracle.Clear("UMEE")
+
+	// now ATOM's (visible) collateral share is 100% and even the smallest collateralize will fail
 	msg := &types.MsgCollateralize{
+		Borrower: atomSupplier.String(),
+		Asset:    coin("u/"+atomDenom, 1),
+	}
+	_, err = srv.Collateralize(ctx, msg)
+	require.ErrorIs(err, types.ErrMaxCollateralShare)
+
+	// return the oracle to normal
+	s.mockOracle.Reset()
+
+	// ensure the previous collateralize would have worked
+	s.collateralize(atomSupplier, coin("u/"+atomDenom, 1))
+
+	// attempt to collateralize another 0.01 ATOM, which would result in too much collateral share for ATOM
+	msg = &types.MsgCollateralize{
 		Borrower: atomSupplier.String(),
 		Asset:    coin("u/"+atomDenom, 10000),
 	}
