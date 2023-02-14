@@ -187,6 +187,7 @@ message QueryMarketSummaryResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = true
   ];
+  string errors = 20;
 }
 
 // QueryAccountBalances defines the request structure for the AccountBalances gRPC service handler.

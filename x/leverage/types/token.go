@@ -141,7 +141,7 @@ func (t Token) Validate() error {
 // AssertSupplyEnabled returns an error if a Token cannot be supplied.
 func (t Token) AssertSupplyEnabled() error {
 	if !t.EnableMsgSupply {
-		return sdkerrors.Wrap(ErrSupplyNotAllowed, t.BaseDenom)
+		return ErrSupplyNotAllowed.Wrap(t.BaseDenom)
 	}
 	return nil
 }
@@ -149,7 +149,7 @@ func (t Token) AssertSupplyEnabled() error {
 // AssertBorrowEnabled returns an error if a Token cannot be borrowed.
 func (t Token) AssertBorrowEnabled() error {
 	if !t.EnableMsgBorrow {
-		return sdkerrors.Wrap(ErrBorrowNotAllowed, t.BaseDenom)
+		return ErrBorrowNotAllowed.Wrap(t.BaseDenom)
 	}
 	return nil
 }
@@ -157,7 +157,7 @@ func (t Token) AssertBorrowEnabled() error {
 // AssertNotBlacklisted returns an error if a Token is blacklisted.
 func (t Token) AssertNotBlacklisted() error {
 	if t.Blacklist {
-		return sdkerrors.Wrap(ErrBlacklisted, t.BaseDenom)
+		return ErrBlacklisted.Wrap(t.BaseDenom)
 	}
 	return nil
 }

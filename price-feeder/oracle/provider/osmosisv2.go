@@ -99,7 +99,7 @@ func NewOsmosisV2Provider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderOsmosisV2,
+		endpoints.Name,
 		wsURL,
 		[]interface{}{""},
 		provider.messageReceived,
@@ -107,34 +107,43 @@ func NewOsmosisV2Provider(
 		websocket.PingMessage,
 		osmosisV2Logger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *OsmosisV2Provider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
 	p.setSubscribedPairs(cps...)
-	return nil
 }
 
 // GetTickerPrices returns the tickerPrices based on the saved map.
 func (p *OsmosisV2Provider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
+	tickerErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToOsmosisV2Pair(cp)
 		price, err := p.getTickerPrice(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
 		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
@@ -142,15 +151,25 @@ func (p *OsmosisV2Provider) GetTickerPrices(pairs ...types.CurrencyPair) (map[st
 func (p *OsmosisV2Provider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	candlePrices := make(map[string][]types.CandlePrice, len(pairs))
 
+	candleErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToOsmosisV2Pair(cp)
 		prices, err := p.getCandlePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			candleErrs++
+			continue
 		}
 		candlePrices[cp.String()] = prices
 	}
 
+	if candleErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoCandles.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return candlePrices, nil
 }
 
@@ -162,7 +181,7 @@ func (p *OsmosisV2Provider) getTickerPrice(key string) (types.TickerPrice, error
 	if !ok {
 		return types.TickerPrice{}, fmt.Errorf(
 			types.ErrTickerNotFound.Error(),
-			ProviderOsmosisV2,
+			p.endpoints.Name,
 			key,
 		)
 	}
@@ -178,7 +197,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	if !ok {
 		return []types.CandlePrice{}, fmt.Errorf(
 			types.ErrCandleNotFound.Error(),
-			ProviderOsmosisV2,
+			p.endpoints.Name,
 			key,
 		)
 	}
@@ -189,7 +208,7 @@ func (p *OsmosisV2Provider) getCandlePrices(key string) ([]types.CandlePrice, er
 	return candleList, nil
 }
 
-func (p *OsmosisV2Provider) messageReceived(_ int, bz []byte) {
+func (p *OsmosisV2Provider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	// check if message is an ack first
 	if string(bz) == "ack" {
 		return

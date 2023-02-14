@@ -4,9 +4,9 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
@@ -46,7 +46,7 @@ func (ms msgServer) AggregateExchangeRatePrevote(
 	// Convert hex string to votehash
 	voteHash, err := types.AggregateVoteHashFromHex(msg.Hash)
 	if err != nil {
-		return nil, sdkerrors.Wrap(types.ErrInvalidHash, err.Error())
+		return nil, types.ErrInvalidHash.Wrap(err.Error())
 	}
 
 	aggregatePrevote := types.NewAggregateExchangeRatePrevote(voteHash, valAddr, uint64(ctx.BlockHeight()))
@@ -75,7 +75,7 @@ func (ms msgServer) AggregateExchangeRateVote(
 	params := ms.GetParams(ctx)
 	aggregatePrevote, err := ms.GetAggregateExchangeRatePrevote(ctx, valAddr)
 	if err != nil {
-		return nil, sdkerrors.Wrap(types.ErrNoAggregatePrevote, msg.Validator)
+		return nil, types.ErrNoAggregatePrevote.Wrap(msg.Validator)
 	}
 
 	// Check the vote is submitted in the `period == prevote.period+1`
@@ -91,7 +91,7 @@ func (ms msgServer) AggregateExchangeRateVote(
 	// Verify that the vote hash and prevote hash match
 	hash := types.GetAggregateVoteHash(msg.Salt, msg.ExchangeRates, valAddr)
 	if aggregatePrevote.Hash != hash.String() {
-		return nil, sdkerrors.Wrapf(types.ErrVerificationFailed, "must be given %s not %s", aggregatePrevote.Hash, hash)
+		return nil, types.ErrVerificationFailed.Wrapf("must be given %s not %s", aggregatePrevote.Hash, hash)
 	}
 
 	// Filter out rates which aren't included in the AcceptList
@@ -129,13 +129,13 @@ func (ms msgServer) DelegateFeedConsent(
 
 	val := ms.StakingKeeper.Validator(ctx, operatorAddr)
 	if val == nil {
-		return nil, sdkerrors.Wrap(stakingtypes.ErrNoValidatorFound, msg.Operator)
+		return nil, stakingtypes.ErrNoValidatorFound.Wrap(msg.Operator)
 	}
 
 	ms.SetFeederDelegation(ctx, operatorAddr, delegateAddr)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventDelegateFeedConsent{
-		Operator: msg.Operator, Delegate: msg.Delegate,
-	})
 
-	return &types.MsgDelegateFeedConsentResponse{}, err
+	sdkutil.Emit(&ctx, &types.EventDelegateFeedConsent{
+		Operator: msg.Operator, Delegate: msg.Delegate})
+
+	return &types.MsgDelegateFeedConsentResponse{}, nil
 }

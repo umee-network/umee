@@ -51,10 +51,6 @@ base = "OSMO"
 threshold = "2"
 
 [[deviation_thresholds]]
-base = "BTC"
-threshold = "1.5"
-
-[[deviation_thresholds]]
 base = "stATOM"
 threshold = "2"
 
@@ -96,6 +92,7 @@ quote = "USDT"
 base = "ATOM"
 providers = [
   "kraken",
+  "binanceus",
 ]
 quote = "USD"
 
@@ -159,6 +156,7 @@ quote = "USD"
 base = "JUNO"
 providers = [
   "bitget",
+  "mexc",
 ]
 quote = "USDT"
 
@@ -198,6 +196,7 @@ quote = "ATOM"
 base = "OSMO"
 providers = [
   "bitget",
+  "gate",
 ]
 quote = "USDT"
 
@@ -207,21 +206,6 @@ providers = [
   "crypto",
 ]
 quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "coinbase",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "huobi",
-  "kraken",
-]
-quote = "USDT"
 
 [[currency_pairs]]
 base = "stATOM"
@@ -271,3 +255,8 @@ prometheus-retention-time = 100
 name = "binance"
 rest = "https://api1.binance.com"
 websocket = "stream.binance.com:9443"
+
+[[provider_endpoints]]
+name = "osmosisv2"
+rest = "https://api.osmo-api.prod.network.umee.cc"
+websocket = "api.osmo-api.prod.network.umee.cc"

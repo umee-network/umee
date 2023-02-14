@@ -23,7 +23,7 @@ func (q Querier) Params(goCtx context.Context, _ *uibc.QueryParams) (
 	*uibc.QueryParamsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := q.Keeper.GetParams(ctx)
+	params := q.GetParams(ctx)
 
 	return &uibc.QueryParamsResponse{Params: params}, nil
 }
@@ -35,16 +35,16 @@ func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if len(req.Denom) == 0 {
-		quotaOfIBCDenoms, err := q.Keeper.GetQuotaOfIBCDenoms(ctx)
+		quotas, err := q.GetAllQuotas(ctx)
 		if err != nil {
 			return &uibc.QueryQuotaResponse{}, err
 		}
-		return &uibc.QueryQuotaResponse{Quota: quotaOfIBCDenoms}, nil
+		return &uibc.QueryQuotaResponse{Quotas: quotas}, nil
 	}
 
-	quotaOfIBCDenom, err := q.Keeper.GetQuotaByDenom(ctx, req.Denom)
+	quota, err := q.GetQuota(ctx, req.Denom)
 	if err != nil {
 		return &uibc.QueryQuotaResponse{}, err
 	}
-	return &uibc.QueryQuotaResponse{Quota: []uibc.Quota{*quotaOfIBCDenom}}, nil
+	return &uibc.QueryQuotaResponse{Quotas: sdk.DecCoins{quota}}, nil
 }

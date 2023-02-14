@@ -123,7 +123,7 @@ func NewCoinbaseProvider(
 
 	provider.wsc = NewWebsocketController(
 		ctx,
-		ProviderCoinbase,
+		endpoints.Name,
 		wsURL,
 		provider.getSubscriptionMsgs(pairs...),
 		provider.messageReceived,
@@ -131,7 +131,7 @@ func NewCoinbaseProvider(
 		websocket.PingMessage,
 		coinbaseLogger,
 	)
-	go provider.wsc.Start()
+	provider.wsc.StartConnections()
 
 	return provider, nil
 }
@@ -153,7 +153,7 @@ func (p *CoinbaseProvider) getSubscriptionMsgs(cps ...types.CurrencyPair) []inte
 
 // SubscribeCurrencyPairs sends the new subscription messages to the websocket
 // and adds them to the providers subscribedPairs array
-func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) error {
+func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) {
 	p.mtx.Lock()
 	defer p.mtx.Unlock()
 
@@ -165,26 +165,37 @@ func (p *CoinbaseProvider) SubscribeCurrencyPairs(cps ...types.CurrencyPair) err
 	}
 
 	newSubscriptionMsgs := p.getSubscriptionMsgs(newPairs...)
-	if err := p.wsc.AddSubscriptionMsgs(newSubscriptionMsgs); err != nil {
-		return err
-	}
+	p.wsc.AddWebsocketConnection(
+		newSubscriptionMsgs,
+		p.messageReceived,
+		defaultPingDuration,
+		websocket.PingMessage,
+	)
 	p.setSubscribedPairs(newPairs...)
-	return nil
 }
 
-// GetTickerPrices returns the tickerPrices based on the saved map.
+// GetTickerPrices returns the tickerPrices based on the provided pairs.
 func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[string]types.TickerPrice, error) {
 	tickerPrices := make(map[string]types.TickerPrice, len(pairs))
 
-	for _, currencyPair := range pairs {
-		price, err := p.getTickerPrice(currencyPair)
+	tickerErrs := 0
+	for _, cp := range pairs {
+		price, err := p.getTickerPrice(cp)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tickerErrs++
+			continue
 		}
-
-		tickerPrices[currencyPair.String()] = price
+		tickerPrices[cp.String()] = price
 	}
 
+	if tickerErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
+	}
 	return tickerPrices, nil
 }
 
@@ -193,16 +204,23 @@ func (p *CoinbaseProvider) GetTickerPrices(pairs ...types.CurrencyPair) (map[str
 func (p *CoinbaseProvider) GetCandlePrices(pairs ...types.CurrencyPair) (map[string][]types.CandlePrice, error) {
 	tradeMap := make(map[string][]CoinbaseTrade, len(pairs))
 
+	tradeErrs := 0
 	for _, cp := range pairs {
 		key := currencyPairToCoinbasePair(cp)
 		tradeSet, err := p.getTradePrices(key)
 		if err != nil {
-			return nil, err
+			p.logger.Warn().Err(err)
+			tradeErrs++
+			continue
 		}
 		tradeMap[key] = tradeSet
 	}
-	if len(tradeMap) == 0 {
-		return nil, fmt.Errorf("no trades have been received")
+	if tradeErrs == len(pairs) {
+		return nil, fmt.Errorf(
+			types.ErrNoTickers.Error(),
+			p.endpoints.Name,
+			pairs,
+		)
 	}
 
 	candles := make(map[string][]types.CandlePrice)
@@ -292,7 +310,11 @@ func (p *CoinbaseProvider) getTickerPrice(cp types.CurrencyPair) (types.TickerPr
 		return tickerPair.toTickerPrice()
 	}
 
-	return types.TickerPrice{}, fmt.Errorf("coinbase failed to get ticker price for %s", gp)
+	return types.TickerPrice{}, fmt.Errorf(
+		types.ErrTickerNotFound.Error(),
+		p.endpoints.Name,
+		gp,
+	)
 }
 
 func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
@@ -307,7 +329,7 @@ func (p *CoinbaseProvider) getTradePrices(key string) ([]CoinbaseTrade, error) {
 	return trades, nil
 }
 
-func (p *CoinbaseProvider) messageReceived(_ int, bz []byte) {
+func (p *CoinbaseProvider) messageReceived(_ int, _ *WebsocketConnection, bz []byte) {
 	var coinbaseTrade CoinbaseTradeResponse
 	if err := json.Unmarshal(bz, &coinbaseTrade); err != nil {
 		p.logger.Error().Err(err).Msg("unable to unmarshal response")

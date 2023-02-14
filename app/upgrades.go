@@ -1,9 +1,9 @@
 package app
 
 import (
+	"cosmossdk.io/errors"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/group"
@@ -16,6 +16,7 @@ import (
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
@@ -28,34 +29,36 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 	app.registerUpgrade3_0(upgradeInfo)
 	app.registerUpgrade3_1(upgradeInfo)
-
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 	app.registerUpgrade3_3to4_0(upgradeInfo)
-	app.registerUpgrade4_0to4_0rc3(upgradeInfo)
-	app.registerUpgrade4_0rc3to4_0rc4(upgradeInfo)
+	app.registerUpgrade4_0_1(upgradeInfo)
+	app.registerUpgrade4_1(upgradeInfo)
+	app.registerUpgrade4_2(upgradeInfo)
 }
 
-// performs upgrade from v4.0-rc3 -> v4.0-rc4
-func (app UmeeApp) registerUpgrade4_0rc3to4_0rc4(_ upgradetypes.Plan) {
-	const planName = "v4.0-rc4"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			return fromVM, nil
-		})
+// performs upgrade from v4.1 to v4.2
+func (app *UmeeApp) registerUpgrade4_2(upgradeInfo upgradetypes.Plan) {
+	const planName = "v4.2"
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			uibc.ModuleName,
+		},
+	})
 }
 
-// performs upgrade from v4.0-rc2 (or rc1) -> v4.0-rc3
-func (app UmeeApp) registerUpgrade4_0to4_0rc3(_ upgradetypes.Plan) {
-	const planName = "v4.0-rc3"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			return fromVM, nil
-		})
+// performs upgrade from v4.0.1 to v4.1
+func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
+	const planName = "v4.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+}
+
+// performs upgrade from v4.0.0 to v4.0.1
+func (app *UmeeApp) registerUpgrade4_0_1(_ upgradetypes.Plan) {
+	const planName = "v4.0.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
 // performs upgrade from v3.3 -> v4
@@ -131,7 +134,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 			ctx.Logger().Info("Running setupBech32ibcKeeper")
 			err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			if err != nil {
-				return nil, sdkerrors.Wrapf(
+				return nil, errors.Wrapf(
 					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", planName)
 			}
 
@@ -144,7 +147,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 			ctx.Logger().Info("Updating validator minimum commission rate param of staking module")
 			minCommissionRate, err := upgradev3.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
 			if err != nil {
-				return vm, sdkerrors.Wrapf(
+				return vm, errors.Wrapf(
 					err, "%q Upgrade: failed to update minimum commission rate param of staking module",
 					planName)
 			}
@@ -153,7 +156,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 				"name", planName)
 			err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
 			if err != nil {
-				return vm, sdkerrors.Wrapf(
+				return vm, errors.Wrapf(
 					err, "%q Upgrade: failed to update minimum commission rate for validators",
 					planName)
 			}
