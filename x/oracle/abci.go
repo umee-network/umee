@@ -104,8 +104,6 @@ func EndBlocker(ctx sdk.Context, k keeper.Keeper) error {
 	return nil
 }
 
-<<<<<<< HEAD
-=======
 func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	// Build claim map over all validators in active set
 	validatorClaimMap := make(map[string]types.Claim)
@@ -184,7 +182,6 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	return nil
 }
 
->>>>>>> 852ff39 (fix: Enforce voting threshold param in oracle endblocker (#1707))
 // Tally calculates and returns the median. It sets the set of voters to be
 // rewarded, i.e. voted within a reasonable spread from the weighted median to
 // the store. Note, the ballot is sorted by ExchangeRate.
