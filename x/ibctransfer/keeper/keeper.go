@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v5/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
@@ -64,12 +63,12 @@ func (k Keeper) SendTransfer(
 
 		hash, err := ibctransfertypes.ParseHexHash(hexHash)
 		if err != nil {
-			return sdkerrors.Wrap(ibctransfertypes.ErrInvalidDenomForTransfer, err.Error())
+			return ibctransfertypes.ErrInvalidDenomForTransfer.Wrap(err.Error())
 		}
 
 		denomTrace, ok := k.GetDenomTrace(ctx, hash)
 		if !ok {
-			return sdkerrors.Wrap(ibctransfertypes.ErrTraceNotFound, hexHash)
+			return ibctransfertypes.ErrTraceNotFound.Wrap(hexHash)
 		}
 
 		k.TrackDenomMetadata(ctx, denomTrace)
