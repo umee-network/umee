@@ -172,7 +172,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		borrowValue := k.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
 
 		// compute liquidation threshold from enabled collateral
-		// in this case, we can't reasonable skil missing prices but can move on
+		// in this case, we can't reasonably skip missing prices but can move on
 		// to the next borrower instead of stopping the entire query
 		liquidationLimit, err := k.CalculateLiquidationThreshold(ctx, collateral)
 		if err == nil && liquidationLimit.LT(borrowValue) {
