@@ -15,7 +15,7 @@ func NewMigrator(keeper *Keeper) Migrator {
 	return Migrator{keeper: keeper}
 }
 
-// MigrateBNB fixes the BNB base denom
+// MigrateBNB fixes the BNB base denom for the 4.1 upgrade
 func (m Migrator) MigrateBNB(ctx sdk.Context) error {
 	badDenom := "ibc/77BCD42E49E5B7E0FC6B269FEBF0185B15044F13F6F38CA285DF0AF883459F40"
 	// Ensure zero supply of the token being removed from leverage registry
