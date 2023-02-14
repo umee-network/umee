@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -46,15 +47,13 @@ func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec
 	return p, nil
 }
 
-func (m *mockOracleKeeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
-	p, ok := m.baseExchangeRates[denom]
-	if !ok {
-		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
-	}
-
-	return p, nil
+// Clear clears a denom from the mock oracle, simulating an outage.
+func (m *mockOracleKeeper) Clear(denom string) {
+	delete(m.symbolExchangeRates, denom)
+	delete(m.historicExchangeRates, denom)
 }
 
+// Reset restores the mock oracle's prices to its default values.
 func (m *mockOracleKeeper) Reset() {
 	m.symbolExchangeRates = map[string]sdk.Dec{
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
@@ -62,13 +61,6 @@ func (m *mockOracleKeeper) Reset() {
 		"DAI":  sdk.MustNewDecFromStr("1.00"),
 		"DUMP": sdk.MustNewDecFromStr("0.50"), // A token which has recently halved in price
 		"PUMP": sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
-	}
-	m.baseExchangeRates = map[string]sdk.Dec{
-		appparams.BondDenom: sdk.MustNewDecFromStr("0.00000421"),
-		atomDenom:           sdk.MustNewDecFromStr("0.00003938"),
-		daiDenom:            sdk.MustNewDecFromStr("0.000000000000000001"),
-		dumpDenom:           sdk.MustNewDecFromStr("0.0000005"),
-		pumpDenom:           sdk.MustNewDecFromStr("0.0000020"),
 	}
 	m.historicExchangeRates = map[string]sdk.Dec{
 		"UMEE": sdk.MustNewDecFromStr("4.21"),
@@ -155,6 +147,12 @@ func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.50"), p)
 	require.Equal(uint32(6), e)
+
+	// Lowercase must be converted to uppercase symbol denom ("DUMP" from "dump")
+	p, e, err = app.LeverageKeeper.TokenPrice(ctx, strings.ToLower(dumpDenom), types.PriceModeLow)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("0.50"), p)
+	require.Equal(uint32(6), e)
 }
 
 func (s *IntegrationTestSuite) TestOracle_TokenValue() {
@@ -219,6 +217,11 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 
 	// 2.4 PUMP * $1.00
 	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(pumpDenom, 2_400000), types.PriceModeLow)
+	require.NoError(err)
+	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
+
+	// lowercase 2.4 PUMP * $1.00
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(strings.ToLower(pumpDenom), 2_400000), types.PriceModeLow)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("2.4"), v)
 }

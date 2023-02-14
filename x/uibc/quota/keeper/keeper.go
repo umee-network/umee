@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"time"
-
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/store"
+	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/ibc-go/v5/modules/apps/29-fee/types"
@@ -16,36 +16,26 @@ type Keeper struct {
 	storeKey       storetypes.StoreKey
 	cdc            codec.BinaryCodec
 	leverageKeeper uibc.LeverageKeeper
+	oracleKeeper   uibc.OracleKeeper
 	ics4Wrapper    porttypes.ICS4Wrapper
 }
 
 func NewKeeper(
 	cdc codec.BinaryCodec, key storetypes.StoreKey, ics4Wrapper types.ICS4Wrapper, leverageKeeper uibc.LeverageKeeper,
+	oracleKeeper uibc.OracleKeeper,
 ) Keeper {
-
 	return Keeper{
 		cdc:            cdc,
 		storeKey:       key,
 		ics4Wrapper:    ics4Wrapper,
 		leverageKeeper: leverageKeeper,
+		oracleKeeper:   oracleKeeper,
 	}
 }
 
-// UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
-func (k Keeper) UpdateQuotaParams(ctx sdk.Context, totalQuota, quotaPerDenom sdk.Dec, quotaDuration time.Duration,
-) error {
-	params := k.GetParams(ctx)
-	params.TotalQuota = totalQuota
-	params.QuotaDuration = quotaDuration
-	params.TokenQuota = quotaPerDenom
-
-	return k.SetParams(ctx, params)
-}
-
-// SetIBCPause update the ibc pause status in module params.
-func (k Keeper) SetIBCPause(ctx sdk.Context, ibcStatus uibc.IBCTransferStatus) error {
-	params := k.GetParams(ctx)
-	params.IbcPause = ibcStatus
-
-	return k.SetParams(ctx, params)
+// PrefixStore creates an new prefix store.
+// It will automatically remove provided prefix from keys when using with the iterator.
+func (k Keeper) PrefixStore(ctx *sdk.Context, prefix []byte) store.KVStore {
+	s := ctx.KVStore(k.storeKey)
+	return prefixstore.NewStore(s, prefix)
 }
