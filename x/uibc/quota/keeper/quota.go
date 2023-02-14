@@ -2,73 +2,74 @@ package keeper
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	prefixsore "github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 
+	"github.com/umee-network/umee/v4/util/coin"
 	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
-// GetQuotaOfIBCDenoms returns quota of all tokens.
-func (k Keeper) GetQuotaOfIBCDenoms(ctx sdk.Context) ([]uibc.Quota, error) {
-	var quotaOfIBCDenoms []uibc.Quota
-
-	prefix := uibc.KeyPrefixDenomQuota
-	store := ctx.KVStore(k.storeKey)
-
-	iter := sdk.KVStorePrefixIterator(store, prefix)
+// GetAllQuotas returns quota of all tokens.
+func (k Keeper) GetAllQuotas(ctx sdk.Context) (sdk.DecCoins, error) {
+	var quotas sdk.DecCoins
+	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomQuota)
+	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		var quotaOfIBCDenom uibc.Quota
-		if err := quotaOfIBCDenom.Unmarshal(iter.Value()); err != nil {
+		var quotaOfIBCDenom = sdk.DecCoin{Denom: string(iter.Key())}
+		if err := quotaOfIBCDenom.Amount.Unmarshal(iter.Value()); err != nil {
 			return nil, err
 		}
 
-		quotaOfIBCDenoms = append(quotaOfIBCDenoms, quotaOfIBCDenom)
+		quotas = append(quotas, quotaOfIBCDenom)
 	}
 
-	return quotaOfIBCDenoms, nil
+	return quotas, nil
 }
 
-// GetQuotaByDenom retunes the rate limits of ibc denom.
-func (k Keeper) GetQuotaByDenom(ctx sdk.Context, ibcDenom string) (*uibc.Quota, error) {
+// GetQuota retunes the rate limits of ibc denom.
+func (k Keeper) GetQuota(ctx sdk.Context, ibcDenom string) (sdk.DecCoin, error) {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.KeyTotalOutflows(ibcDenom))
 	if bz == nil {
-		return &uibc.Quota{IbcDenom: ibcDenom, OutflowSum: sdk.NewDec(0)}, nil
+		return coin.ZeroDec(ibcDenom), nil
 	}
 
-	var quotaOfIBCDenom uibc.Quota
-	if err := k.cdc.Unmarshal(bz, &quotaOfIBCDenom); err != nil {
-		return nil, err
-	}
+	var d sdk.Dec
+	err := d.Unmarshal(bz)
 
-	return &quotaOfIBCDenom, nil
+	return sdk.NewDecCoinFromDec(ibcDenom, d), err
 }
 
 // SetDenomQuotas save the updated token quota.
-func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas []uibc.Quota) {
-	for _, quotaOfIBCDenom := range quotas {
-		k.SetDenomQuota(ctx, quotaOfIBCDenom)
+func (k Keeper) SetDenomQuotas(ctx sdk.Context, quotas sdk.DecCoins) {
+	for _, q := range quotas {
+		k.SetDenomQuota(ctx, q)
 	}
 }
 
 // SetDenomQuota save the quota of denom into store.
-func (k Keeper) SetDenomQuota(ctx sdk.Context, quotaOfIBCDenom uibc.Quota) {
+func (k Keeper) SetDenomQuota(ctx sdk.Context, quota sdk.DecCoin) {
 	store := ctx.KVStore(k.storeKey)
-	key := uibc.KeyTotalOutflows(quotaOfIBCDenom.IbcDenom)
-	store.Set(key, k.cdc.MustMarshal(&quotaOfIBCDenom))
+	key := uibc.KeyTotalOutflows(quota.Denom)
+	bz, err := quota.Amount.Marshal()
+	if err != nil {
+		panic(fmt.Sprint("can't marshal quota: ", quota))
+	}
+	store.Set(key, bz)
 }
 
 // GetTotalOutflowSum returns the total outflow of ibc-transfer amount.
+// TODO: remove to GetTotalOutflow
 func (k Keeper) GetTotalOutflowSum(ctx sdk.Context) sdk.Dec {
 	store := ctx.KVStore(k.storeKey)
 	bz := store.Get(uibc.KeyPrefixTotalOutflows)
@@ -107,41 +108,40 @@ func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 	return &quotaExpires, nil
 }
 
-// ResetQuota will reset the ibc-transfer quotas
+// ResetQuota will zero the ibc-transfer quotas
 func (k Keeper) ResetQuota(ctx sdk.Context) error {
 	qd := k.GetParams(ctx).QuotaDuration
-	zero := sdk.NewDec(0)
 	newExpires := ctx.BlockTime().Add(qd)
 	if err := k.SetExpire(ctx, newExpires); err != nil {
 		return err
 	}
+	zero := sdk.NewDec(0)
+	zeroBz, err := zero.Marshal()
+	if err != nil {
+		return err
+	}
 	k.SetTotalOutflowSum(ctx, zero)
-	store := ctx.KVStore(k.storeKey)
-	store = prefixsore.NewStore(store, uibc.KeyPrefixDenomQuota)
+	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomQuota)
 	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		ibcDenom := iter.Key()
-		q := uibc.Quota{IbcDenom: string(ibcDenom), OutflowSum: zero}
-		store.Set(ibcDenom, k.cdc.MustMarshal(&q))
+		store.Set(ibcDenom, zeroBz)
 	}
 	return nil
 }
 
-// CheckAndUpdateQuota checks the quota of ibc-transfer of denom
-func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.Int) error {
+// CheckAndUpdateQuota checks if adding a newOutflow is doesn't exceed the max quota and
+// updates the current quota metrics.
+func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sdkmath.Int) error {
 	params := k.GetParams(ctx)
 
-	quotaOfIBCDenom, err := k.GetQuotaByDenom(ctx, denom)
+	quota, err := k.GetQuota(ctx, denom)
 	if err != nil {
 		return err
 	}
 
-	if quotaOfIBCDenom == nil {
-		return nil
-	}
-
-	exchangePrice, err := k.getExchangePrice(ctx, denom, amount)
+	exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
 	if err != nil {
 		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
 		// TODO: write test case for this
@@ -153,8 +153,8 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmat
 	}
 
 	// checking ibc-transfer token quota
-	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Add(exchangePrice)
-	if quotaOfIBCDenom.OutflowSum.GT(params.TokenQuota) {
+	quota.Amount = quota.Amount.Add(exchangePrice)
+	if quota.Amount.GT(params.TokenQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
@@ -165,7 +165,7 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, amount sdkmat
 	}
 
 	// update the per token outflow sum
-	k.SetDenomQuota(ctx, *quotaOfIBCDenom)
+	k.SetDenomQuota(ctx, quota)
 	// updating the total outflow sum
 	k.SetTotalOutflowSum(ctx, totalOutflowSum)
 	return nil
@@ -191,15 +191,11 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 	return k.oracleKeeper.HistoricAvgPrice(ctx, transferCoin.Denom)
 }
 
-// UndoUpdateQuota undo the quota of ibc denom
+// UndoUpdateQuota subtracts `amount` from quota metric of the ibc denom.
 func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.Int) error {
-	quotaOfIBCDenom, err := k.GetQuotaByDenom(ctx, denom)
+	quota, err := k.GetQuota(ctx, denom)
 	if err != nil {
 		return err
-	}
-
-	if quotaOfIBCDenom == nil {
-		return nil
 	}
 
 	// check the token is register or not
@@ -213,11 +209,14 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 		}
 	}
 
-	// reset the outflow limit of token
-	quotaOfIBCDenom.OutflowSum = quotaOfIBCDenom.OutflowSum.Sub(exchangePrice)
-	k.SetDenomQuota(ctx, *quotaOfIBCDenom)
+	// We ignore the update if the result is negative (due to quota reset on epoch)
+	quota.Amount = quota.Amount.Sub(exchangePrice)
+	if quota.Amount.IsNegative() {
+		return nil
+	}
 
-	// reset the total outflow sum
+	k.SetDenomQuota(ctx, quota)
+
 	totalOutflowSum := k.GetTotalOutflowSum(ctx)
 	k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
 	return nil

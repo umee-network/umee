@@ -4,9 +4,10 @@ import (
 	fmt "fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func NewGenesisState(params Params, quotas []Quota, outflowSum sdk.Dec) *GenesisState {
+func NewGenesisState(params Params, quotas sdk.DecCoins, outflowSum sdk.Dec) *GenesisState {
 	return &GenesisState{
 		Params:          params,
 		Quotas:          quotas,
@@ -29,13 +30,16 @@ func (gs GenesisState) Validate() error {
 	}
 
 	for _, quota := range gs.Quotas {
+		if quota.Amount.IsNil() {
+			return sdkerrors.ErrInvalidRequest.Wrap("ibc denom quota must be defined")
+		}
 		if err := quota.Validate(); err != nil {
 			return err
 		}
 	}
 
 	if gs.TotalOutflowSum.IsNegative() {
-		return fmt.Errorf("total outflow sum shouldn't be negative : %s ", gs.TotalOutflowSum.String())
+		return fmt.Errorf("total outflow sum cannot be negative : %s ", gs.TotalOutflowSum.String())
 	}
 
 	return nil

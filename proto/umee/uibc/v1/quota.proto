@@ -7,18 +7,6 @@ import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/uibc";
 
-// Quota stores current sum of IBC outflow transfers of IBC Denom.
-message Quota {
-  // ibc_denom defines the ibc denom
-  string ibc_denom = 1;
-  // outflow_sum defines the sum of price (USD) value of outflow tokens through ibc-transfer
-  string outflow_sum = 3 [
-    (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-}
-
 // Params of x/uibc module
 message Params {
   // ibc_status defines the wethever ibc-transfer enabled, disbaled or paused

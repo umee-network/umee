@@ -104,15 +104,3 @@ func (msg *MsgGovSetIBCPause) GetSignBytes() []byte {
 func (msg *MsgGovSetIBCPause) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
-
-func (q *Quota) Validate() error {
-	if len(q.IbcDenom) == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("ibc denom shouldn't be empty")
-	}
-
-	if q.OutflowSum.IsNil() || q.OutflowSum.IsNegative() {
-		return sdkerrors.ErrInvalidRequest.Wrap("ibc denom quota expires shouldn't be empty")
-	}
-
-	return nil
-}
