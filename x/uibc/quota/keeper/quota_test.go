@@ -1,5 +1,5 @@
-//go:build experimental
-// +build experimental
+//xgo:build experimental
+// +xbuild experimental
 
 package keeper_test
 
@@ -23,7 +23,7 @@ func TestGetQuotas(t *testing.T) {
 	k.SetDenomQuotas(ctx, setQuotas)
 	quotas, err = k.GetAllQuotas(ctx)
 	assert.NilError(t, err)
-	assert.Equal(t, len(quotas), len(setQuotas))
+	assert.DeepEqual(t, setQuotas, quotas)
 
 	// get the quota of denom
 	quota, err := k.GetQuota(ctx, setQuotas[0].Denom)

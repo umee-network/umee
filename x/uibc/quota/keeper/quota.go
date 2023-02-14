@@ -20,9 +20,8 @@ import (
 // GetAllQuotas returns quota of all tokens.
 func (k Keeper) GetAllQuotas(ctx sdk.Context) (sdk.DecCoins, error) {
 	var quotas sdk.DecCoins
-	prefix := uibc.KeyPrefixDenomQuota
 	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomQuota)
-	iter := sdk.KVStorePrefixIterator(store, prefix)
+	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
