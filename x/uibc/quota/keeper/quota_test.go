@@ -1,5 +1,5 @@
-//xgo:build experimental
-// +xbuild experimental
+//go:build experimental
+// +build experimental
 
 package keeper_test
 
