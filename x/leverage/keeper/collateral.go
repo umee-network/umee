@@ -82,19 +82,24 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 // collateral sdk.Coins, using each token's uToken exchange rate. Always uses spot price.
 // Unlike CalculateCollateralValue, this function will not return an error if value calculation
 // fails on a token - instead, that token will contribute zero value to the total.
-func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins) sdk.Dec {
+func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
 		baseAsset, err := k.ExchangeUToken(ctx, coin)
 		if err != nil {
-			continue
+			return sdk.ZeroDec(), err
 		}
 
 		// get USD value of base assets
 		v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
 		if err != nil {
+			k.Logger(ctx).Info(
+				"collateral value skipped",
+				"uToken", coin.String(),
+				"error", err.Error(),
+			)
 			continue
 		}
 
@@ -102,7 +107,7 @@ func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins) sd
 		total = total.Add(v)
 	}
 
-	return total
+	return total, nil
 }
 
 // GetAllTotalCollateral returns total collateral across all uTokens.
@@ -148,7 +153,10 @@ func (k *Keeper) VisibleCollateralShare(ctx sdk.Context, denom string) (sdk.Dec,
 	thisCollateral := sdk.NewCoins(sdk.NewCoin(denom, systemCollateral.AmountOf(denom)))
 
 	// get USD collateral value for all uTokens combined, except those experiencing price outages
-	totalValue := k.VisibleCollateralValue(ctx, systemCollateral)
+	totalValue, err := k.VisibleCollateralValue(ctx, systemCollateral)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
 
 	// get USD collateral value for this uToken only
 	thisValue, err := k.CalculateCollateralValue(ctx, thisCollateral)
