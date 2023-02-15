@@ -243,4 +243,186 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	s.mockOracle.Reset()
 }
 
-// TODO: Test complex (3-asset) scenarios
+// TestPartialCollateralPriceOutage tests price outage scenarios where two collateral
+// tokens are used and only one collateral token has unknown price
+func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// create an ATOM supplier
+	atomSupplier := s.newAccount(coin.New(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin.New(atomDenom, 100_000000))
+
+	// create a supplier to supply 150 UMEE, and collateralize 100 UMEE
+	// plus the same amounts of ATOM
+	bothSupplier := s.newAccount(coin.New(umeeDenom, 200_000000), coin.New(atomDenom, 200_000000))
+	s.supply(bothSupplier, coin.New(umeeDenom, 150_000000))
+	s.collateralize(bothSupplier, coin.New("u/"+umeeDenom, 100_000000))
+	s.supply(bothSupplier, coin.New(atomDenom, 150_000000))
+	s.collateralize(bothSupplier, coin.New("u/"+atomDenom, 100_000000))
+	// additionally borrow 0.000001 ATOM
+	s.borrow(bothSupplier, coin.New(atomDenom, 1))
+
+	// Create an UMEE price outage
+	s.mockOracle.Clear("UMEE")
+
+	// UMEE can still be supplied
+	msg1 := &types.MsgSupply{
+		Supplier: bothSupplier.String(),
+		Asset:    coin.New(umeeDenom, 50_000000),
+	}
+	_, err := srv.Supply(ctx, msg1)
+	require.NoError(err, "supply umee")
+
+	// ATOM can still be supplied
+	msg2 := &types.MsgSupply{
+		Supplier: bothSupplier.String(),
+		Asset:    coin.New(atomDenom, 50_000000),
+	}
+	_, err = srv.Supply(ctx, msg2)
+	require.NoError(err, "supply atom")
+
+	// Non-collateral UMEE can still be withdrawn
+	msg3 := &types.MsgWithdraw{
+		Supplier: bothSupplier.String(),
+		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+	}
+	_, err = srv.Withdraw(ctx, msg3)
+	require.NoError(err, "withdraw non-collateral umee")
+
+	// Non-collateral ATOM can still be withdrawn
+	msg4 := &types.MsgWithdraw{
+		Supplier: bothSupplier.String(),
+		Asset:    coin.New("u/"+atomDenom, 50_000000),
+	}
+	_, err = srv.Withdraw(ctx, msg4)
+	require.NoError(err, "withdraw non-collateral atom")
+
+	// Non-collateral and Collateral UMEE can still be withdrawn using max withdraw
+	msg5 := &types.MsgMaxWithdraw{
+		Supplier: bothSupplier.String(),
+		Denom:    umeeDenom,
+	}
+	_, err = srv.MaxWithdraw(ctx, msg5)
+	require.NoError(err, "max withdraw umee")
+	supplied, err := app.LeverageKeeper.GetSupplied(ctx, bothSupplier, umeeDenom)
+	require.NoError(err, "measure umee supplied")
+	require.Equal(int64(0), supplied.Amount.Int64(), "all umee withdrawn by maxwithdraw")
+
+	// Non-collateral ATOM and some collateral ATOM can still be withdrawn using max withdraw
+	msg6 := &types.MsgMaxWithdraw{
+		Supplier: bothSupplier.String(),
+		Denom:    atomDenom,
+	}
+	_, err = srv.MaxWithdraw(ctx, msg6)
+	require.NoError(err, "max withdraw non-collateral atom")
+	supplied, err = app.LeverageKeeper.GetSupplied(ctx, bothSupplier, atomDenom)
+	require.NoError(err, "measure atom supplied")
+	require.Equal(int64(4), supplied.Amount.Int64(), "some atom collateral withdrawn by maxwithdraw")
+
+	// UMEE can still be collateralized
+	s.supply(bothSupplier, coin.New(umeeDenom, 50_000000))
+	msg7 := &types.MsgCollateralize{
+		Borrower: bothSupplier.String(),
+		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+	}
+	_, err = srv.Collateralize(ctx, msg7)
+	require.NoError(err, "collateralize umee")
+
+	// ATOM can still be collateralized
+	s.supply(bothSupplier, coin.New(atomDenom, 50_000000))
+	msg8 := &types.MsgCollateralize{
+		Borrower: bothSupplier.String(),
+		Asset:    coin.New("u/"+atomDenom, 50_000000),
+	}
+	_, err = srv.Collateralize(ctx, msg8)
+	require.NoError(err, "collateralize atom")
+
+	// SupplyCollateral still works for UMEE
+	msg9 := &types.MsgSupplyCollateral{
+		Supplier: bothSupplier.String(),
+		Asset:    coin.New(umeeDenom, 50_000000),
+	}
+	_, err = srv.SupplyCollateral(ctx, msg9)
+	require.NoError(err, "supply+collateralize umee")
+
+	// SupplyCollateral still works for ATOM
+	msg10 := &types.MsgSupplyCollateral{
+		Supplier: bothSupplier.String(),
+		Asset:    coin.New(umeeDenom, 50_000000),
+	}
+	_, err = srv.SupplyCollateral(ctx, msg10)
+	require.NoError(err, "supply+collateralize atom")
+
+	// Collateral UMEE can still decollateralized even though collateral UMEE value is unknown
+	// because ATOM collateral is sufficient to cover borrows
+	msg11 := &types.MsgDecollateralize{
+		Borrower: bothSupplier.String(),
+		Asset:    coin.New("u/"+umeeDenom, 1),
+	}
+	_, err = srv.Decollateralize(ctx, msg11)
+	require.NoError(err, "decollateralize collateral umee")
+
+	// Collateral ATOM can still decollateralized even though collateral UMEE value is unknown
+	// because remaining ATOM collateral is sufficient to cover borrows
+	msg12 := &types.MsgDecollateralize{
+		Borrower: bothSupplier.String(),
+		Asset:    coin.New("u/"+atomDenom, 1),
+	}
+	_, err = srv.Decollateralize(ctx, msg12)
+	require.NoError(err, "decollateralize collateral atom")
+
+	// UMEE cannot be borrowed since UMEE value is unknown
+	msg13 := &types.MsgBorrow{
+		Borrower: bothSupplier.String(),
+		Asset:    coin.New(umeeDenom, 1),
+	}
+	_, err = srv.Borrow(ctx, msg13)
+	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "borrow umee")
+
+	// ATOM can be borrowed even though UMEE collateral value is unknown
+	// because because ATOM collateral is sufficient to cover borrows
+	msg14 := &types.MsgBorrow{
+		Borrower: bothSupplier.String(),
+		Asset:    coin.New(atomDenom, 1),
+	}
+	_, err = srv.Borrow(ctx, msg14)
+	require.NoError(err, "borrow atom")
+
+	// UMEE max-borrow succeeds with amount = zero since UMEE cannot be borrowed
+	msg15 := &types.MsgMaxBorrow{
+		Borrower: bothSupplier.String(),
+		Denom:    umeeDenom,
+	}
+	resp15, err := srv.MaxBorrow(ctx, msg15)
+	require.NoError(err, "max-borrow umee")
+	require.Equal(int64(0), resp15.Borrowed.Amount.Int64(), "max borrow umee")
+
+	// ATOM max-borrow succeeds with nonzero amountsince ATOM can still borrowed
+	msg16 := &types.MsgMaxBorrow{
+		Borrower: bothSupplier.String(),
+		Denom:    umeeDenom,
+	}
+	resp16, err := srv.MaxBorrow(ctx, msg16)
+	require.NoError(err, "max-borrow atom")
+	require.Greater(resp16.Borrowed.Amount.Int64(), int64(0), "max borrow atom")
+
+	// Liquidation is ineligible because known collateral covers all borrows
+	msg17 := &types.MsgLiquidate{
+		Liquidator:  bothSupplier.String(),
+		Borrower:    bothSupplier.String(),
+		Repayment:   coin.New(atomDenom, 1),
+		RewardDenom: atomDenom,
+	}
+	_, err = srv.Liquidate(ctx, msg17)
+	require.ErrorIs(err, types.ErrLiquidationIneligible, "liquidate atom")
+
+	// ATOM repay succeeds
+	msg18 := &types.MsgRepay{
+		Borrower: bothSupplier.String(),
+		Asset:    coin.New(atomDenom, 1),
+	}
+	_, err = srv.Repay(ctx, msg18)
+	require.NoError(err, "repay atom")
+
+	s.mockOracle.Reset()
+}
