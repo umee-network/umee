@@ -125,6 +125,8 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	}
 	_, err = srv.Repay(ctx, msg12)
 	require.NoError(err, "repay atom")
+
+	s.mockOracle.Reset()
 }
 
 // TestCollateralPriceOutage tests price outage scenarios where a collateral token
@@ -237,6 +239,8 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	}
 	_, err = srv.Repay(ctx, msg12)
 	require.NoError(err, "repay atom")
+
+	s.mockOracle.Reset()
 }
 
 // TODO: Test complex (3-asset) scenarios
