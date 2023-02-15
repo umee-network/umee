@@ -468,5 +468,11 @@ func (s msgServer) GovUpdateRegistry(
 		return &types.MsgGovUpdateRegistryResponse{}, err
 	}
 
+	// cleans blacklisted tokens from the registry if they have not been supplied
+	err = s.keeper.CleanTokenRegistry(ctx)
+	if err != nil {
+		return &types.MsgGovUpdateRegistryResponse{}, err
+	}
+
 	return &types.MsgGovUpdateRegistryResponse{}, nil
 }
