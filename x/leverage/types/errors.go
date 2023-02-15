@@ -23,8 +23,7 @@ var (
 	ErrBlacklisted          = errors.Register(ModuleName, 205, "blacklisted Token")
 	ErrCollateralWeightZero = errors.Register(ModuleName, 206,
 		"collateral weight of Token is zero: can't be used as a collateral")
-	ErrDuplicateToken    = errors.Register(ModuleName, 207, "duplicate token")
-	ErrBadSupplyDetected = errors.Register(ModuleName, 208, "supply of a bad token detected")
+	ErrDuplicateToken = errors.Register(ModuleName, 207, "duplicate token")
 
 	// 3XX = User Positions
 	ErrInsufficientBalance    = errors.Register(ModuleName, 300, "insufficient balance")
