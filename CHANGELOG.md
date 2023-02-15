@@ -55,6 +55,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1812](https://github.com/umee-network/umee/pull/1812) MaxCollateralShare now works during partial oracle outages when certain conditions are safe.
 - [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
 - [1807](https://github.com/umee-network/umee/pull/1807) Fixes BNB ibc denom in 4.1 migration
+- [1821](https://github.com/umee-network/umee/pull/1821) Allow safe leverage operations during partial oracle outages.
 
 ## [v4.0.1](https://github.com/umee-network/umee/releases/tag/v4.0.1) - 2023-02-10
 

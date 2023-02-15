@@ -7,7 +7,9 @@ import (
 )
 
 // maxWithdraw calculates the maximum amount of uTokens an account can currently withdraw.
-// input denom should be a base token.
+// input denom should be a base token. If oracle prices are missing for some of the borrower's
+// collateral (other than the denom being withdrawn), computes the maximum safe withdraw allowed
+// by only the collateral whose prices are known
 func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
@@ -18,12 +20,20 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
 	walletUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
 	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
-	specificCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
+	thisCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
+	otherCollateral := totalCollateral.Sub(thisCollateral)
 
 	// calculate borrowed value for the account, using the higher of spot or historic prices for each token
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
-	if err != nil {
+	if nonOracleError(err) {
+		// for errors besides a missing price, the whole transaction fails
 		return sdk.Coin{}, err
+	}
+	if err != nil {
+		// for missing prices on borrowed assets, we can't withdraw any collateral
+		// but can withdraw non-collateral uTokens
+		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
 
 	// if no non-blacklisted tokens are borrowed, withdraw the maximum available amount
@@ -33,8 +43,23 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 		return sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
 
+	// compute the borrower's borrow limit using all their collateral
+	// except the denom being withdrawn (also excluding collateral missing oracle prices)
+	otherBorrowLimit, err := k.VisibleBorrowLimit(ctx, otherCollateral)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	// if their other collateral fully covers all borrows, withdraw the maximum available amount
+	if borrowedValue.LT(otherBorrowLimit) {
+		withdrawAmount := walletUtokens.Add(totalCollateral.AmountOf(uDenom))
+		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), nil
+	}
+
 	// for nonzero borrows, calculations are based on unused borrow limit
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral)
+	// this treats collateral which is missing oracle prices as having zero value,
+	// resulting in a lower borrow limit but not in an error
+	borrowLimit, err := k.VisibleBorrowLimit(ctx, totalCollateral)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -48,20 +73,16 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
 
 	// calculate the contribution to borrow limit made by only the type of collateral being withdrawn
-	specificBorrowLimit, err := k.CalculateBorrowLimit(ctx, sdk.NewCoins(specificCollateral))
+	// this WILL error on a missing price, since the cases where we know other collateral is sufficient
+	// have all been eliminated
+	specificBorrowLimit, err := k.CalculateBorrowLimit(ctx, sdk.NewCoins(thisCollateral))
 	if err != nil {
 		return sdk.Coin{}, err
-	}
-	if unusedBorrowLimit.GT(specificBorrowLimit) {
-		// If borrow limit is sufficiently high even without this collateral, withdraw the full amount
-		withdrawAmount := walletUtokens.Add(specificCollateral.Amount)
-		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
-		return sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
 
 	// if only a portion of collateral is unused, withdraw only that portion
 	unusedCollateralFraction := unusedBorrowLimit.Quo(specificBorrowLimit)
-	unusedCollateral := unusedCollateralFraction.MulInt(specificCollateral.Amount).TruncateInt()
+	unusedCollateral := unusedCollateralFraction.MulInt(thisCollateral.Amount).TruncateInt()
 
 	// add wallet uTokens to the unused amount from collateral
 	withdrawAmount := unusedCollateral.Add(walletUtokens)
@@ -73,7 +94,8 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 }
 
 // maxBorrow calculates the maximum amount of a given token an account can currently borrow.
-// input denom should be a base token.
+// input denom should be a base token. If oracle prices are missing for some of the borrower's
+// collateral, computes the maximum safe borrow allowed by only the collateral whose prices are known
 func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if types.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
@@ -85,12 +107,17 @@ func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 
 	// calculate borrowed value for the account, using the higher of spot or historic prices
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
-	if err != nil {
+	if nonOracleError(err) {
+		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, err
 	}
+	if err != nil {
+		// oracle errors cause max borrow to be zero
+		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
+	}
 
-	// calculate borrow limit for the account
-	borrowLimit, err := k.CalculateBorrowLimit(ctx, totalCollateral)
+	// calculate borrow limit for the account, using only collateral whose price is known
+	borrowLimit, err := k.VisibleBorrowLimit(ctx, totalCollateral)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -104,8 +131,13 @@ func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 
 	// determine max borrow, using the higher of spot or historic prices for the token to borrow
 	maxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, types.PriceModeHigh)
-	if err != nil {
+	if nonOracleError(err) {
+		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, err
+	}
+	if err != nil {
+		// oracle errors cause max borrow to be zero
+		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
 
 	// also cap borrow amount at available liquidity
@@ -116,7 +148,8 @@ func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 
 // maxCollateralFromShare calculates the maximum amount of collateral a utoken denom
 // is allowed to have, taking into account its associated token's MaxCollateralShare
-// under current market conditions
+// under current market conditions. If any collateral denoms other than this are missing
+// oracle prices, calculates a (lower) maximum amount using the collateral with known prices.
 func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
 	if err != nil {
@@ -137,8 +170,8 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 	systemCollateral := k.GetAllTotalCollateral(ctx)
 	thisDenomCollateral := sdk.NewCoin(denom, systemCollateral.AmountOf(denom))
 
-	// get USD collateral value for all other denoms
-	otherDenomsValue, err := k.CalculateCollateralValue(ctx, systemCollateral.Sub(thisDenomCollateral))
+	// get USD collateral value for all other denoms, skipping those which are missing oracle prices
+	otherDenomsValue, err := k.VisibleCollateralValue(ctx, systemCollateral.Sub(thisDenomCollateral))
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -147,7 +180,7 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 	maxValue := otherDenomsValue.Quo(sdk.OneDec().Sub(token.MaxCollateralShare)).Mul(token.MaxCollateralShare)
 
 	// determine the amount of base tokens which would be required to reach maxValue,
-	// using the hgiher of spot or historic prices
+	// using the higher of spot or historic prices
 	udenom := types.ToUTokenDenom(denom)
 	maxUTokens, err := k.UTokenWithValue(ctx, udenom, maxValue, types.PriceModeHigh)
 	if err != nil {
