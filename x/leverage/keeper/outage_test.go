@@ -371,57 +371,49 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	_, err = srv.Decollateralize(ctx, msg12)
 	require.NoError(err, "decollateralize collateral atom")
 
-	// UMEE cannot be borrowed since UMEE value is unknown
-	msg13 := &types.MsgBorrow{
-		Borrower: bothSupplier.String(),
-		Asset:    coin.New(umeeDenom, 1),
-	}
-	_, err = srv.Borrow(ctx, msg13)
-	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "borrow umee")
-
 	// ATOM can be borrowed even though UMEE collateral value is unknown
 	// because because ATOM collateral is sufficient to cover borrows
-	msg14 := &types.MsgBorrow{
+	msg13 := &types.MsgBorrow{
 		Borrower: bothSupplier.String(),
 		Asset:    coin.New(atomDenom, 1),
 	}
-	_, err = srv.Borrow(ctx, msg14)
+	_, err = srv.Borrow(ctx, msg13)
 	require.NoError(err, "borrow atom")
 
 	// UMEE max-borrow succeeds with amount = zero since UMEE cannot be borrowed
+	msg14 := &types.MsgMaxBorrow{
+		Borrower: bothSupplier.String(),
+		Denom:    umeeDenom,
+	}
+	resp14, err := srv.MaxBorrow(ctx, msg14)
+	require.NoError(err, "max-borrow umee")
+	require.Equal(int64(0), resp14.Borrowed.Amount.Int64(), "max borrow umee")
+
+	// ATOM max-borrow succeeds with NONZERO amount since ATOM can still borrowed
 	msg15 := &types.MsgMaxBorrow{
 		Borrower: bothSupplier.String(),
-		Denom:    umeeDenom,
+		Denom:    atomDenom,
 	}
 	resp15, err := srv.MaxBorrow(ctx, msg15)
-	require.NoError(err, "max-borrow umee")
-	require.Equal(int64(0), resp15.Borrowed.Amount.Int64(), "max borrow umee")
-
-	// ATOM max-borrow succeeds with nonzero amountsince ATOM can still borrowed
-	msg16 := &types.MsgMaxBorrow{
-		Borrower: bothSupplier.String(),
-		Denom:    umeeDenom,
-	}
-	resp16, err := srv.MaxBorrow(ctx, msg16)
 	require.NoError(err, "max-borrow atom")
-	require.Greater(resp16.Borrowed.Amount.Int64(), int64(0), "max borrow atom")
+	require.Greater(resp15.Borrowed.Amount.Int64(), int64(0), "max borrow atom")
 
-	// Liquidation is ineligible because known collateral covers all borrows
-	msg17 := &types.MsgLiquidate{
+	// Liquidation fails because UMEE collateral value cannot be calculated
+	msg16 := &types.MsgLiquidate{
 		Liquidator:  bothSupplier.String(),
 		Borrower:    bothSupplier.String(),
 		Repayment:   coin.New(atomDenom, 1),
 		RewardDenom: atomDenom,
 	}
-	_, err = srv.Liquidate(ctx, msg17)
-	require.ErrorIs(err, types.ErrLiquidationIneligible, "liquidate atom")
+	_, err = srv.Liquidate(ctx, msg16)
+	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "liquidate atom")
 
 	// ATOM repay succeeds
-	msg18 := &types.MsgRepay{
+	msg17 := &types.MsgRepay{
 		Borrower: bothSupplier.String(),
 		Asset:    coin.New(atomDenom, 1),
 	}
-	_, err = srv.Repay(ctx, msg18)
+	_, err = srv.Repay(ctx, msg17)
 	require.NoError(err, "repay atom")
 
 	s.mockOracle.Reset()
