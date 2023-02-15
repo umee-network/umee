@@ -420,13 +420,9 @@ var xxx_messageInfo_QueryAccountSummary proto.InternalMessageInfo
 
 // QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
 type QueryAccountSummaryResponse struct {
-<<<<<<< HEAD
-	// Supplied Value is the sum of the USD value of all tokens the account has supplied, includng interest earned.
-=======
 	// Supplied Value is the sum of the USD value of all tokens the account has supplied, including interest earned.
 	// Computation skips assets which are missing oracle prices, potentially resulting in a lower supplied
 	// value than if prices were all available.
->>>>>>> 87b9ed4 (fix!: allow safe leverage operations during partial oracle outages (#1821))
 	SuppliedValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=supplied_value,json=suppliedValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"supplied_value"`
 	// Collateral Value is the sum of the USD value of all uTokens the account has collateralized.
 	// Computation skips collateral which is missing an oracle price, potentially resulting in a lower collateral

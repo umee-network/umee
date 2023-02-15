@@ -131,16 +131,12 @@ paths:
                 type: string
                 description: >-
                   Supplied Value is the sum of the USD value of all tokens the
-<<<<<<< HEAD
-                  account has supplied, includng interest earned.
-=======
                   account has supplied, including interest earned.
 
                   Computation skips assets which are missing oracle prices,
                   potentially resulting in a lower supplied
 
                   value than if prices were all available.
->>>>>>> 87b9ed4 (fix!: allow safe leverage operations during partial oracle outages (#1821))
               collateral_value:
                 type: string
                 description: >-
@@ -2048,16 +2044,12 @@ definitions:
         type: string
         description: >-
           Supplied Value is the sum of the USD value of all tokens the account
-<<<<<<< HEAD
-          has supplied, includng interest earned.
-=======
           has supplied, including interest earned.
 
           Computation skips assets which are missing oracle prices, potentially
           resulting in a lower supplied
 
           value than if prices were all available.
->>>>>>> 87b9ed4 (fix!: allow safe leverage operations during partial oracle outages (#1821))
       collateral_value:
         type: string
         description: >-

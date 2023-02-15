@@ -221,13 +221,9 @@ message QueryAccountSummary {
 
 // QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
 message QueryAccountSummaryResponse {
-<<<<<<< HEAD
-  // Supplied Value is the sum of the USD value of all tokens the account has supplied, includng interest earned.
-=======
   // Supplied Value is the sum of the USD value of all tokens the account has supplied, including interest earned.
   // Computation skips assets which are missing oracle prices, potentially resulting in a lower supplied
   // value than if prices were all available.
->>>>>>> 87b9ed4 (fix!: allow safe leverage operations during partial oracle outages (#1821))
   string supplied_value = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
