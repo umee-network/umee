@@ -25,8 +25,15 @@ func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string)
 
 	// calculate borrowed value for the account, using the higher of spot or historic prices for each token
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
-	if err != nil {
+	if nonOracleError(err) {
+		// for errors besides a missing price, the whole transaction fails
 		return sdk.Coin{}, err
+	}
+	if err != nil {
+		// for missing prices on borrowed assets, we can't withdraw any collateral
+		// but can withdraw non-collateral uTokens
+		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
 
 	// if no non-blacklisted tokens are borrowed, withdraw the maximum available amount
