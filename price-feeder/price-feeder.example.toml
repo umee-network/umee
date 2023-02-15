@@ -67,9 +67,15 @@ base = "UMEE"
 providers = [
   "okx",
   "gate",
-  "mexc",
 ]
 quote = "USDT"
+
+[[currency_pairs]]
+base = "UMEE"
+providers = [
+  "osmosisv2",
+]
+quote = "ATOM"
 
 [[currency_pairs]]
 base = "USDT"
@@ -144,28 +150,6 @@ providers = [
   "crypto",
 ]
 quote = "USDT"
-
-[[currency_pairs]]
-base = "JUNO"
-providers = [
-  "kraken",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "JUNO"
-providers = [
-  "bitget",
-  "mexc",
-]
-quote = "USDT"
-
-[[currency_pairs]]
-base = "JUNO"
-providers = [
-  "osmosisv2",
-]
-quote = "ATOM"
 
 [[currency_pairs]]
 base = "CRO"
@@ -255,8 +239,3 @@ prometheus-retention-time = 100
 name = "binance"
 rest = "https://api1.binance.com"
 websocket = "stream.binance.com:9443"
-
-[[provider_endpoints]]
-name = "osmosisv2"
-rest = "https://api.osmo-api.prod.network.umee.cc"
-websocket = "api.osmo-api.prod.network.umee.cc"
