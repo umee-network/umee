@@ -9,7 +9,9 @@ import (
 
 // assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
 // under either recent (historic median) or current prices. It returns an error if
-// prices cannot be calculated.
+// borrowed asset prices cannot be calculated, but will try to treat collateral whose prices are
+// unavailable as having zero value. This can still result in a borrow limit being too low,
+// unless the remaining collateral is enough to cover all borrows.
 // This should be checked in msg_server.go at the end of any transaction which is restricted
 // by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
 func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
@@ -20,7 +22,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	if err != nil {
 		return err
 	}
-	limit, err := k.CalculateBorrowLimit(ctx, collateral)
+	limit, err := k.VisibleBorrowLimit(ctx, collateral)
 	if err != nil {
 		return err
 	}
@@ -121,6 +123,45 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 			}
 			// add each collateral coin's weighted value to borrow limit
 			limit = limit.Add(v.Mul(ts.CollateralWeight))
+		}
+	}
+
+	return limit, nil
+}
+
+// VisibleBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
+// collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
+// The lower of spot price or historic price is used for each collateral token.
+// An error is returned if any input coins are not uTokens.
+// This function skips assets that are missing prices, which will lead to a lower borrow
+// limit when prices are down instead of a complete loss of borrowing ability.
+func (k Keeper) VisibleBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
+	limit := sdk.ZeroDec()
+
+	for _, coin := range collateral {
+		// convert uToken collateral to base assets
+		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		// ignore blacklisted tokens
+		if !ts.Blacklist {
+			// get USD value of base assets using the chosen price mode
+			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeLow)
+			if err == nil {
+				// if both spot and historic (if required) prices exist,
+				// add collateral coin's weighted value to borrow limit
+				limit = limit.Add(v.Mul(ts.CollateralWeight))
+			}
+			if nonOracleError(err) {
+				return sdk.ZeroDec(), err
+			}
 		}
 	}
 
