@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -9,6 +8,7 @@ import (
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 type mockOracleKeeper struct {
@@ -32,16 +32,22 @@ func (m *mockOracleKeeper) MedianOfHistoricMedians(ctx sdk.Context, denom string
 ) (sdk.Dec, uint32, error) {
 	p, ok := m.historicExchangeRates[denom]
 	if !ok {
-		return sdk.ZeroDec(), 0, fmt.Errorf("invalid denom: %s", denom)
+		// This error matches oracle behavior on zero historic medians
+		return sdk.ZeroDec(), 0, types.ErrNoHistoricMedians.Wrapf(
+			"requested %d, got %d",
+			numStamps,
+			0,
+		)
 	}
 
-	return p, 24, nil
+	return p, uint32(numStamps), nil
 }
 
 func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec, error) {
 	p, ok := m.symbolExchangeRates[denom]
 	if !ok {
-		return sdk.ZeroDec(), fmt.Errorf("invalid denom: %s", denom)
+		// This error matches oracle behavior on missing asset price
+		return sdk.ZeroDec(), oracletypes.ErrUnknownDenom.Wrap(denom)
 	}
 
 	return p, nil
