@@ -46,6 +46,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v4.1.0](https://github.com/umee-network/umee/releases/tag/v4.0.1) - 2023-02-15
+
 ### Features
 
 - [1808](https://github.com/umee-network/umee/pull/1808) Blacklisted tokens automatically cleared from token registry if they have not yet been supplied.
