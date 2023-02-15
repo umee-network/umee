@@ -209,17 +209,22 @@ func (q Querier) AccountSummary(
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
 	// supplied value always uses spot prices, and skips supplied assets that are missing prices
-	suppliedValue := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeSpot)
+	suppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeSpot)
+	if err != nil {
+		return nil, err
+	}
 
 	// borrowed value uses spot prices here, but leverage logic instead uses
 	// the higher of spot or historic prices for each borrowed token when comparing it
 	// to borrow limit. This line also skips borrowed assets that are missing prices.
-	borrowedValue := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+	borrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+	if err != nil {
+		return nil, err
+	}
 
 	// collateral value always uses spot prices, and this line skips assets that are missing prices
 	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral)
 	if err != nil {
-		// this error isn't a missing price - it would be non-uToken collateral
 		return nil, err
 	}
 
@@ -228,7 +233,6 @@ func (q Querier) AccountSummary(
 	// skips collateral tokens with missing oracle prices
 	borrowLimit, err := q.Keeper.VisibleBorrowLimit(ctx, collateral)
 	if err != nil {
-		// this error isn't a missing price - it would be non-uToken collateral
 		return nil, err
 	}
 
@@ -337,6 +341,10 @@ func (q Querier) MaxWithdraw(
 			maxUTokens = maxUTokens.Add(uToken)
 			maxTokens = maxTokens.Add(token)
 		}
+		// Non-price errors will cause the query itself to fail
+		if nonOracleError(err) {
+			return nil, err
+		}
 	}
 
 	return &types.QueryMaxWithdrawResponse{
@@ -387,6 +395,10 @@ func (q Querier) MaxBorrow(
 		maxBorrow, err := q.Keeper.maxBorrow(ctx, addr, denom)
 		if err == nil && maxBorrow.IsPositive() {
 			maxTokens = maxTokens.Add(maxBorrow)
+		}
+		// Non-price errors will cause the query itself to fail
+		if nonOracleError(err) {
+			return nil, err
 		}
 	}
 

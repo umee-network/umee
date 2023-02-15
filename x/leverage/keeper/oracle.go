@@ -121,7 +121,7 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.Pri
 
 // VisibleTokenValue functions like TotalTokenValue, but interprets missing oracle prices
 // as zero value instead of returning an error.
-func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) sdk.Dec {
+func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
 	accepted := k.filterAcceptedCoins(ctx, coins)
@@ -131,9 +131,12 @@ func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.P
 		if err == nil {
 			total = total.Add(v)
 		}
+		if nonOracleError(err) {
+			return sdk.ZeroDec(), err
+		}
 	}
 
-	return total
+	return total, nil
 }
 
 // TokenWithValue creates a token of a given denom with an given USD value.

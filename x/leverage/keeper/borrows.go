@@ -24,7 +24,6 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	}
 	limit, err := k.VisibleBorrowLimit(ctx, collateral)
 	if err != nil {
-		// This error is not a missing price
 		return err
 	}
 	if value.GT(limit) {
@@ -156,11 +155,13 @@ func (k Keeper) VisibleBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.D
 			// get USD value of base assets using the chosen price mode
 			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeLow)
 			if err == nil {
-				// if both spot and historic (if requeired) prices exist,
-				// add each collateral coin's weighted value to borrow limit
+				// if both spot and historic (if required) prices exist,
+				// add collateral coin's weighted value to borrow limit
 				limit = limit.Add(v.Mul(ts.CollateralWeight))
 			}
-
+			if nonOracleError(err) {
+				return sdk.ZeroDec(), err
+			}
 		}
 	}
 

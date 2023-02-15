@@ -29,7 +29,10 @@ func (k Keeper) getLiquidationAmounts(
 
 	// calculate borrower health in USD values, using spot prices only (no historic)
 	// borrowed value will skip borrowed tokens with unknown oracle prices, treating them as zero value
-	borrowedValue := k.VisibleTokenValue(ctx, totalBorrowed, types.PriceModeSpot)
+	borrowedValue, err := k.VisibleTokenValue(ctx, totalBorrowed, types.PriceModeSpot)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+	}
 	collateralValue, err := k.CalculateCollateralValue(ctx, borrowerCollateral)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err

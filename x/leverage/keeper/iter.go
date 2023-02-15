@@ -169,7 +169,10 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 
 		// use oracle helper functions to find total borrowed value in USD
 		// skips denoms without prices
-		borrowValue := k.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+		borrowValue, err := k.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+		if err != nil {
+			return err
+		}
 
 		// compute liquidation threshold from enabled collateral
 		// in this case, we can't reasonably skip missing prices but can move on
@@ -179,6 +182,10 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 			// If liquidation limit is smaller than borrowed value then the
 			// address is eligible for liquidation.
 			liquidationTargets = append(liquidationTargets, addr)
+		}
+		// Non-price errors will cause the query itself to fail
+		if nonOracleError(err) {
+			return err
 		}
 
 		return nil
