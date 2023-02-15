@@ -107,8 +107,13 @@ func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 
 	// calculate borrowed value for the account, using the higher of spot or historic prices
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
-	if err != nil {
+	if nonOracleError(err) {
+		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, err
+	}
+	if err != nil {
+		// oracle errors cause max borrow to be zero
+		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
 
 	// calculate borrow limit for the account, using only collateral whose price is known
@@ -126,8 +131,13 @@ func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 
 	// determine max borrow, using the higher of spot or historic prices for the token to borrow
 	maxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, types.PriceModeHigh)
-	if err != nil {
+	if nonOracleError(err) {
+		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, err
+	}
+	if err != nil {
+		// oracle errors cause max borrow to be zero
+		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
 
 	// also cap borrow amount at available liquidity
