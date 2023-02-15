@@ -18,7 +18,11 @@ func nonOracleError(err error) bool {
 		return false
 	}
 	// check typed errors
-	if errors.IsOf(err, leveragetypes.ErrNoHistoricMedians, oracletypes.ErrUnknownDenom) {
+	if errors.IsOf(err,
+		leveragetypes.ErrInvalidOraclePrice,
+		leveragetypes.ErrNoHistoricMedians,
+		oracletypes.ErrUnknownDenom,
+	) {
 		return false
 	}
 	// this error needs to be checked by string comparison
