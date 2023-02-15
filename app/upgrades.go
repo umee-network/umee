@@ -58,7 +58,7 @@ func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Run v4.1 migration")
 			leverageUpgrader := leveragekeeper.NewMigrator(&app.LeverageKeeper)
-			err, migrated := leverageUpgrader.MigrateBNB(ctx)
+			migrated, err := leverageUpgrader.MigrateBNB(ctx)
 			if err != nil {
 				ctx.Logger().Error("Error in v4.1 leverage Migration!", "err", err)
 				return fromVM, err

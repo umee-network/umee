@@ -17,7 +17,7 @@ func NewMigrator(keeper *Keeper) Migrator {
 
 // MigrateBNB fixes the BNB base denom for the 4.1 upgrade.
 // Also returns a boolean representing whether the token was changed.
-func (m Migrator) MigrateBNB(ctx sdk.Context) (error, bool) {
+func (m Migrator) MigrateBNB(ctx sdk.Context) (bool, error) {
 	// Bad BNB token denom
 	badDenom := "ibc/77BCD42E49E5B7E0FC6B269FEBF0185B15044F13F6F38CA285DF0AF883459F40"
 	// Ensure zero supply of the token being removed from leverage registry
@@ -25,11 +25,11 @@ func (m Migrator) MigrateBNB(ctx sdk.Context) (error, bool) {
 	if !uSupply.IsZero() {
 		ctx.Logger().Error("can't correctly migrate leverage with existing supply",
 			"token", badDenom, "total_u_supply", uSupply)
-		return nil, false
+		return false, nil
 	}
 	token, err := m.keeper.GetTokenSettings(ctx, badDenom)
 	if err != nil {
-		return err, false
+		return false, err
 	}
 	// Delete previous entry in token registry
 	store := ctx.KVStore(m.keeper.storeKey)
@@ -39,8 +39,8 @@ func (m Migrator) MigrateBNB(ctx sdk.Context) (error, bool) {
 	token.BaseDenom = correctDenom
 	bz, err := m.keeper.cdc.Marshal(&token)
 	if err != nil {
-		return err, false
+		return false, err
 	}
 	store.Set(types.KeyRegisteredToken(correctDenom), bz)
-	return nil, true
+	return true, nil
 }
