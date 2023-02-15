@@ -39,6 +39,8 @@ type IntegrationTestSuite struct {
 	setupAccountCounter sdkmath.Int
 	addrs               []sdk.AccAddress
 	msgSrvr             types.MsgServer
+
+	mockOracle *mockOracleKeeper
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -54,14 +56,15 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Time:    time.Unix(0, 0),
 	})
 
+	s.mockOracle = newMockOracleKeeper()
+
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
-		s.Require(),
 		app.AppCodec(),
 		app.GetKey(types.ModuleName),
 		app.GetSubspace(types.ModuleName),
 		app.BankKeeper,
-		newMockOracleKeeper(),
+		s.mockOracle,
 		true,
 	)
 

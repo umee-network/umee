@@ -13,6 +13,7 @@ import (
 
 	"github.com/umee-network/umee/v4/app/upgradev3"
 	"github.com/umee-network/umee/v4/app/upgradev3x3"
+	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -29,17 +30,17 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 	app.registerUpgrade3_0(upgradeInfo)
 	app.registerUpgrade3_1(upgradeInfo)
-
 	app.registerUpgrade3_1to3_3(upgradeInfo)
 	app.registerUpgrade3_2to3_3(upgradeInfo)
 	app.registerUpgrade3_3to4_0(upgradeInfo)
 	app.registerUpgrade4_0_1(upgradeInfo)
 	app.registerUpgrade4_1(upgradeInfo)
+	app.registerUpgrade4_2(upgradeInfo)
 }
 
-// performs upgrade from v4.0 to v4.1
-func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
-	const planName = "v4.1"
+// performs upgrade from v4.1 to v4.2
+func (app *UmeeApp) registerUpgrade4_2(upgradeInfo upgradetypes.Plan) {
+	const planName = "v4.2"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
@@ -49,12 +50,33 @@ func (app *UmeeApp) registerUpgrade4_1(upgradeInfo upgradetypes.Plan) {
 	})
 }
 
+// performs upgrade from v4.0 to v4.1
+func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
+	const planName = "v4.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			ctx.Logger().Info("Run v4.1 migration")
+			leverageUpgrader := leveragekeeper.NewMigrator(&app.LeverageKeeper)
+			migrated, err := leverageUpgrader.MigrateBNB(ctx)
+			if err != nil {
+				ctx.Logger().Error("Error in v4.1 leverage Migration!", "err", err)
+				return fromVM, err
+			}
+			if migrated {
+				// If leverage BNB migration was skipped, also skip oracle so they stay in sync
+				oracleUpgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
+				oracleUpgrader.MigrateBNB(ctx)
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
 // performs upgrade from v4.0.0 to v4.0.1
 func (app *UmeeApp) registerUpgrade4_0_1(_ upgradetypes.Plan) {
 	const planName = "v4.0.1"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		onlyModuleMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
 // performs upgrade from v3.3 -> v4
