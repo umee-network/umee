@@ -68,16 +68,18 @@ func (s msgServer) Withdraw(
 	if err != nil {
 		return nil, err
 	}
-	received, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
+	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
-	if err != nil {
-		return nil, err
+	if isFromCollateral {
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Ensure MinCollateralLiquidity is still satisfied after the transaction
@@ -122,16 +124,18 @@ func (s msgServer) MaxWithdraw(
 		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
-	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
+	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
 		return nil, err
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
-	if err != nil {
-		return nil, err
+	if isFromCollateral {
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Ensure MinCollateralLiquidity is still satisfied after the transaction

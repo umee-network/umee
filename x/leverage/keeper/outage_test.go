@@ -44,7 +44,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// Non-collateral UMEE can still be withdrawn using max withdraw
 	msg3 := &types.MsgMaxWithdraw{
 		Supplier: umeeSupplier.String(),
-		Denom:    "u/" + umeeDenom,
+		Denom:    umeeDenom,
 	}
 	_, err = srv.MaxWithdraw(ctx, msg3)
 	require.NoError(err, "max withdraw non-collateral umee")
