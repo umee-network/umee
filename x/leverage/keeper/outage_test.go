@@ -1,7 +1,6 @@
 package keeper_test
 
 import (
-	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
@@ -12,16 +11,16 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	ctx, srv, require := s.ctx, s.msgSrvr, s.Require()
 
 	// create an ATOM supplier
-	atomSupplier := s.newAccount(coin.New(atomDenom, 100_000000))
-	s.supply(atomSupplier, coin.New(atomDenom, 100_000000))
+	atomSupplier := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin(atomDenom, 100_000000))
 
 	// create a supplier to supply 150 UMEE, and collateralize 100 UMEE
-	umeeSupplier := s.newAccount(coin.New(umeeDenom, 200_000000))
-	s.supply(umeeSupplier, coin.New(umeeDenom, 150_000000))
-	s.collateralize(umeeSupplier, coin.New("u/"+umeeDenom, 100_000000))
+	umeeSupplier := s.newAccount(coin(umeeDenom, 200_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 150_000000))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100_000000))
 	// additionally borrow 0.000001 ATOM and 0.000001 UMEE with the UMEE supplier
-	s.borrow(umeeSupplier, coin.New(atomDenom, 1))
-	s.borrow(umeeSupplier, coin.New(umeeDenom, 1))
+	s.borrow(umeeSupplier, coin(atomDenom, 1))
+	s.borrow(umeeSupplier, coin(umeeDenom, 1))
 
 	// Create an ATOM price outage
 	s.mockOracle.Clear("ATOM")
@@ -29,7 +28,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// UMEE can still be supplied
 	msg1 := &types.MsgSupply{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New(umeeDenom, 50_000000),
+		Asset:    coin(umeeDenom, 50_000000),
 	}
 	_, err := srv.Supply(ctx, msg1)
 	require.NoError(err, "supply umee")
@@ -37,7 +36,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// Non-collateral UMEE can still be withdrawn
 	msg2 := &types.MsgWithdraw{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+		Asset:    coin("u/"+umeeDenom, 50_000000),
 	}
 	_, err = srv.Withdraw(ctx, msg2)
 	require.NoError(err, "withdraw non-collateral umee")
@@ -53,16 +52,16 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// Collateral UMEE cannot be withdrawn since borrowed ATOM value is unknown
 	msg4 := &types.MsgWithdraw{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 1),
+		Asset:    coin("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Withdraw(ctx, msg4)
 	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "withdraw collateral umee")
 
 	// UMEE can still be collateralized
-	s.supply(umeeSupplier, coin.New(umeeDenom, 50_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 50_000000))
 	msg5 := &types.MsgCollateralize{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+		Asset:    coin("u/"+umeeDenom, 50_000000),
 	}
 	_, err = srv.Collateralize(ctx, msg5)
 	require.NoError(err, "collateralize umee")
@@ -70,7 +69,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// SupplyCollateral still works for UMEE
 	msg6 := &types.MsgSupplyCollateral{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New(umeeDenom, 50_000000),
+		Asset:    coin(umeeDenom, 50_000000),
 	}
 	_, err = srv.SupplyCollateral(ctx, msg6)
 	require.NoError(err, "supply+collateralize umee")
@@ -78,7 +77,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// Collateral UMEE cannot be decollateralized since borrowed ATOM value is unknown
 	msg7 := &types.MsgDecollateralize{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 1),
+		Asset:    coin("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Decollateralize(ctx, msg7)
 	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "decollateralize collateral umee")
@@ -86,7 +85,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// UMEE cannot be borrowed since ATOM borrowed value is unknown
 	msg8 := &types.MsgBorrow{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New(umeeDenom, 1),
+		Asset:    coin(umeeDenom, 1),
 	}
 	_, err = srv.Borrow(ctx, msg8)
 	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "borrow umee")
@@ -103,7 +102,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// UMEE repay succeeds
 	msg10 := &types.MsgRepay{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New(umeeDenom, 1),
+		Asset:    coin(umeeDenom, 1),
 	}
 	_, err = srv.Repay(ctx, msg10)
 	require.NoError(err, "repay umee")
@@ -112,7 +111,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	msg11 := &types.MsgLiquidate{
 		Liquidator:  umeeSupplier.String(),
 		Borrower:    umeeSupplier.String(),
-		Repayment:   coin.New(umeeDenom, 1),
+		Repayment:   coin(umeeDenom, 1),
 		RewardDenom: umeeDenom,
 	}
 	_, err = srv.Liquidate(ctx, msg11)
@@ -121,7 +120,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 	// ATOM repay succeeds
 	msg12 := &types.MsgRepay{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New(atomDenom, 1),
+		Asset:    coin(atomDenom, 1),
 	}
 	_, err = srv.Repay(ctx, msg12)
 	require.NoError(err, "repay atom")
@@ -135,15 +134,15 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	ctx, srv, require := s.ctx, s.msgSrvr, s.Require()
 
 	// create an ATOM supplier
-	atomSupplier := s.newAccount(coin.New(atomDenom, 100_000000))
-	s.supply(atomSupplier, coin.New(atomDenom, 100_000000))
+	atomSupplier := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin(atomDenom, 100_000000))
 
 	// create a supplier to supply 150 UMEE, and collateralize 100 UMEE
-	umeeSupplier := s.newAccount(coin.New(umeeDenom, 200_000000))
-	s.supply(umeeSupplier, coin.New(umeeDenom, 150_000000))
-	s.collateralize(umeeSupplier, coin.New("u/"+umeeDenom, 100_000000))
+	umeeSupplier := s.newAccount(coin(umeeDenom, 200_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 150_000000))
+	s.collateralize(umeeSupplier, coin("u/"+umeeDenom, 100_000000))
 	// additionally borrow 0.000001 ATOM
-	s.borrow(umeeSupplier, coin.New(atomDenom, 1))
+	s.borrow(umeeSupplier, coin(atomDenom, 1))
 
 	// Create an UMEE price outage
 	s.mockOracle.Clear("UMEE")
@@ -151,7 +150,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	// UMEE can still be supplied
 	msg1 := &types.MsgSupply{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New(umeeDenom, 50_000000),
+		Asset:    coin(umeeDenom, 50_000000),
 	}
 	_, err := srv.Supply(ctx, msg1)
 	require.NoError(err, "supply umee")
@@ -159,7 +158,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	// Non-collateral UMEE can still be withdrawn
 	msg2 := &types.MsgWithdraw{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+		Asset:    coin("u/"+umeeDenom, 50_000000),
 	}
 	_, err = srv.Withdraw(ctx, msg2)
 	require.NoError(err, "withdraw non-collateral umee")
@@ -175,16 +174,16 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	// Collateral UMEE cannot be withdrawn since collateral UMEE value is unknown
 	msg4 := &types.MsgWithdraw{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 1),
+		Asset:    coin("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Withdraw(ctx, msg4)
 	require.ErrorIs(err, types.ErrUndercollaterized, "withdraw collateral umee")
 
 	// UMEE can still be collateralized
-	s.supply(umeeSupplier, coin.New(umeeDenom, 50_000000))
+	s.supply(umeeSupplier, coin(umeeDenom, 50_000000))
 	msg5 := &types.MsgCollateralize{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+		Asset:    coin("u/"+umeeDenom, 50_000000),
 	}
 	_, err = srv.Collateralize(ctx, msg5)
 	require.NoError(err, "collateralize umee")
@@ -192,7 +191,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	// SupplyCollateral still works for UMEE
 	msg6 := &types.MsgSupplyCollateral{
 		Supplier: umeeSupplier.String(),
-		Asset:    coin.New(umeeDenom, 50_000000),
+		Asset:    coin(umeeDenom, 50_000000),
 	}
 	_, err = srv.SupplyCollateral(ctx, msg6)
 	require.NoError(err, "supply+collateralize umee")
@@ -200,7 +199,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	// Collateral UMEE cannot be decollateralized since collateral UMEE value is unknown
 	msg7 := &types.MsgDecollateralize{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 1),
+		Asset:    coin("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Decollateralize(ctx, msg7)
 	require.ErrorIs(err, types.ErrUndercollaterized, "decollateralize collateral umee")
@@ -208,7 +207,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	// UMEE cannot be borrowed since UMEE value is unknown
 	msg8 := &types.MsgBorrow{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New(umeeDenom, 1),
+		Asset:    coin(umeeDenom, 1),
 	}
 	_, err = srv.Borrow(ctx, msg8)
 	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "borrow umee")
@@ -226,7 +225,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	msg11 := &types.MsgLiquidate{
 		Liquidator:  umeeSupplier.String(),
 		Borrower:    umeeSupplier.String(),
-		Repayment:   coin.New(umeeDenom, 1),
+		Repayment:   coin(umeeDenom, 1),
 		RewardDenom: umeeDenom,
 	}
 	_, err = srv.Liquidate(ctx, msg11)
@@ -235,7 +234,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 	// ATOM repay succeeds
 	msg12 := &types.MsgRepay{
 		Borrower: umeeSupplier.String(),
-		Asset:    coin.New(atomDenom, 1),
+		Asset:    coin(atomDenom, 1),
 	}
 	_, err = srv.Repay(ctx, msg12)
 	require.NoError(err, "repay atom")
@@ -249,18 +248,18 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create an ATOM supplier
-	atomSupplier := s.newAccount(coin.New(atomDenom, 100_000000))
-	s.supply(atomSupplier, coin.New(atomDenom, 100_000000))
+	atomSupplier := s.newAccount(coin(atomDenom, 100_000000))
+	s.supply(atomSupplier, coin(atomDenom, 100_000000))
 
 	// create a supplier to supply 150 UMEE, and collateralize 100 UMEE
 	// plus the same amounts of ATOM
-	bothSupplier := s.newAccount(coin.New(umeeDenom, 200_000000), coin.New(atomDenom, 200_000000))
-	s.supply(bothSupplier, coin.New(umeeDenom, 150_000000))
-	s.collateralize(bothSupplier, coin.New("u/"+umeeDenom, 100_000000))
-	s.supply(bothSupplier, coin.New(atomDenom, 150_000000))
-	s.collateralize(bothSupplier, coin.New("u/"+atomDenom, 100_000000))
+	bothSupplier := s.newAccount(coin(umeeDenom, 200_000000), coin(atomDenom, 200_000000))
+	s.supply(bothSupplier, coin(umeeDenom, 150_000000))
+	s.collateralize(bothSupplier, coin("u/"+umeeDenom, 100_000000))
+	s.supply(bothSupplier, coin(atomDenom, 150_000000))
+	s.collateralize(bothSupplier, coin("u/"+atomDenom, 100_000000))
 	// additionally borrow 0.000001 ATOM
-	s.borrow(bothSupplier, coin.New(atomDenom, 1))
+	s.borrow(bothSupplier, coin(atomDenom, 1))
 
 	// Create an UMEE price outage
 	s.mockOracle.Clear("UMEE")
@@ -268,7 +267,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// UMEE can still be supplied
 	msg1 := &types.MsgSupply{
 		Supplier: bothSupplier.String(),
-		Asset:    coin.New(umeeDenom, 50_000000),
+		Asset:    coin(umeeDenom, 50_000000),
 	}
 	_, err := srv.Supply(ctx, msg1)
 	require.NoError(err, "supply umee")
@@ -276,7 +275,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// ATOM can still be supplied
 	msg2 := &types.MsgSupply{
 		Supplier: bothSupplier.String(),
-		Asset:    coin.New(atomDenom, 50_000000),
+		Asset:    coin(atomDenom, 50_000000),
 	}
 	_, err = srv.Supply(ctx, msg2)
 	require.NoError(err, "supply atom")
@@ -284,7 +283,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// Non-collateral UMEE can still be withdrawn
 	msg3 := &types.MsgWithdraw{
 		Supplier: bothSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+		Asset:    coin("u/"+umeeDenom, 50_000000),
 	}
 	_, err = srv.Withdraw(ctx, msg3)
 	require.NoError(err, "withdraw non-collateral umee")
@@ -292,7 +291,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// Non-collateral ATOM can still be withdrawn
 	msg4 := &types.MsgWithdraw{
 		Supplier: bothSupplier.String(),
-		Asset:    coin.New("u/"+atomDenom, 50_000000),
+		Asset:    coin("u/"+atomDenom, 50_000000),
 	}
 	_, err = srv.Withdraw(ctx, msg4)
 	require.NoError(err, "withdraw non-collateral atom")
@@ -320,19 +319,19 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	require.Equal(int64(4), supplied.Amount.Int64(), "some atom collateral withdrawn by maxwithdraw")
 
 	// UMEE can still be collateralized
-	s.supply(bothSupplier, coin.New(umeeDenom, 50_000000))
+	s.supply(bothSupplier, coin(umeeDenom, 50_000000))
 	msg7 := &types.MsgCollateralize{
 		Borrower: bothSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 50_000000),
+		Asset:    coin("u/"+umeeDenom, 50_000000),
 	}
 	_, err = srv.Collateralize(ctx, msg7)
 	require.NoError(err, "collateralize umee")
 
 	// ATOM can still be collateralized
-	s.supply(bothSupplier, coin.New(atomDenom, 50_000000))
+	s.supply(bothSupplier, coin(atomDenom, 50_000000))
 	msg8 := &types.MsgCollateralize{
 		Borrower: bothSupplier.String(),
-		Asset:    coin.New("u/"+atomDenom, 50_000000),
+		Asset:    coin("u/"+atomDenom, 50_000000),
 	}
 	_, err = srv.Collateralize(ctx, msg8)
 	require.NoError(err, "collateralize atom")
@@ -340,7 +339,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// SupplyCollateral still works for UMEE
 	msg9 := &types.MsgSupplyCollateral{
 		Supplier: bothSupplier.String(),
-		Asset:    coin.New(umeeDenom, 50_000000),
+		Asset:    coin(umeeDenom, 50_000000),
 	}
 	_, err = srv.SupplyCollateral(ctx, msg9)
 	require.NoError(err, "supply+collateralize umee")
@@ -348,7 +347,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// SupplyCollateral still works for ATOM
 	msg10 := &types.MsgSupplyCollateral{
 		Supplier: bothSupplier.String(),
-		Asset:    coin.New(umeeDenom, 50_000000),
+		Asset:    coin(umeeDenom, 50_000000),
 	}
 	_, err = srv.SupplyCollateral(ctx, msg10)
 	require.NoError(err, "supply+collateralize atom")
@@ -357,7 +356,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// because ATOM collateral is sufficient to cover borrows
 	msg11 := &types.MsgDecollateralize{
 		Borrower: bothSupplier.String(),
-		Asset:    coin.New("u/"+umeeDenom, 1),
+		Asset:    coin("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Decollateralize(ctx, msg11)
 	require.NoError(err, "decollateralize collateral umee")
@@ -366,7 +365,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// because remaining ATOM collateral is sufficient to cover borrows
 	msg12 := &types.MsgDecollateralize{
 		Borrower: bothSupplier.String(),
-		Asset:    coin.New("u/"+atomDenom, 1),
+		Asset:    coin("u/"+atomDenom, 1),
 	}
 	_, err = srv.Decollateralize(ctx, msg12)
 	require.NoError(err, "decollateralize collateral atom")
@@ -375,7 +374,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// because because ATOM collateral is sufficient to cover borrows
 	msg13 := &types.MsgBorrow{
 		Borrower: bothSupplier.String(),
-		Asset:    coin.New(atomDenom, 1),
+		Asset:    coin(atomDenom, 1),
 	}
 	_, err = srv.Borrow(ctx, msg13)
 	require.NoError(err, "borrow atom")
@@ -402,7 +401,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	msg16 := &types.MsgLiquidate{
 		Liquidator:  bothSupplier.String(),
 		Borrower:    bothSupplier.String(),
-		Repayment:   coin.New(atomDenom, 1),
+		Repayment:   coin(atomDenom, 1),
 		RewardDenom: atomDenom,
 	}
 	_, err = srv.Liquidate(ctx, msg16)
@@ -411,7 +410,7 @@ func (s *IntegrationTestSuite) TestCollateralPartialPriceOutage() {
 	// ATOM repay succeeds
 	msg17 := &types.MsgRepay{
 		Borrower: bothSupplier.String(),
-		Asset:    coin.New(atomDenom, 1),
+		Asset:    coin(atomDenom, 1),
 	}
 	_, err = srv.Repay(ctx, msg17)
 	require.NoError(err, "repay atom")
