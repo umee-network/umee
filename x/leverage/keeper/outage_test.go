@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 // TestBorrowedPriceOutage tests price outage scenarios where a borrowed token
@@ -55,7 +56,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 		Asset:    coin.New("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Withdraw(ctx, msg4)
-	require.ErrorIs(err, types.ErrUndercollaterized, "withdraw collateral umee")
+	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "withdraw collateral umee")
 
 	// UMEE can still be collateralized
 	s.supply(umeeSupplier, coin.New(umeeDenom, 50_000000))
@@ -80,7 +81,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 		Asset:    coin.New("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Decollateralize(ctx, msg7)
-	require.ErrorIs(err, types.ErrUndercollaterized, "decollateralize collateral umee")
+	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "decollateralize collateral umee")
 
 	// UMEE cannot be borrowed since ATOM borrowed value is unknown
 	msg8 := &types.MsgBorrow{
@@ -88,7 +89,7 @@ func (s *IntegrationTestSuite) TestBorrowedPriceOutage() {
 		Asset:    coin.New(umeeDenom, 1),
 	}
 	_, err = srv.Borrow(ctx, msg8)
-	require.ErrorIs(err, types.ErrUndercollaterized, "borrow umee")
+	require.ErrorIs(err, oracletypes.ErrUnknownDenom, "borrow umee")
 
 	// UMEE max-borrow succeeds with amount = zero since UMEE cannot be borrowed
 	msg9 := &types.MsgMaxBorrow{
