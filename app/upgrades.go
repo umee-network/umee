@@ -58,16 +58,15 @@ func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Run v4.1 migration")
 			leverageUpgrader := leveragekeeper.NewMigrator(&app.LeverageKeeper)
-			err := leverageUpgrader.MigrateBNB(ctx)
+			err, migrated := leverageUpgrader.MigrateBNB(ctx)
 			if err != nil {
-				ctx.Logger().Error("Unable to run v4.1 leverage Migration!", "err", err)
+				ctx.Logger().Error("Error in v4.1 leverage Migration!", "err", err)
 				return fromVM, err
 			}
-			oracleUpgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
-			err = oracleUpgrader.MigrateBNB(ctx)
-			if err != nil {
-				ctx.Logger().Error("Unable to run v4.1 oracle Migration!", "err", err)
-				return fromVM, err
+			if migrated {
+				// If leverage BNB migration was skipped, also skip oracle so they stay in sync
+				oracleUpgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
+				oracleUpgrader.MigrateBNB(ctx)
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
