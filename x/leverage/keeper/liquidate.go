@@ -27,8 +27,9 @@ func (k Keeper) getLiquidationAmounts(
 	availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
 	repayDenomBorrowed := sdk.NewCoin(repayDenom, totalBorrowed.AmountOf(repayDenom))
 
-	// calculate borrower health in USD values
-	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeSpot)
+	// calculate borrower health in USD values, using spot prices only (no historic)
+	// borrowed value will skip borrowed tokens with unknown oracle prices, treating them as zero value
+	borrowedValue, err := k.VisibleTokenValue(ctx, totalBorrowed, types.PriceModeSpot)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}

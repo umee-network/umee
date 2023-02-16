@@ -299,6 +299,12 @@ See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/ume
 
 `Update-Registry` gov proposal will adds the new tokens to token registry or update the existing token with new settings.
 
+Under certain conditions, tokens will be automatically deleted:
+- The token has been blacklisted by a previous proposal or the current one
+- The token has not been supplied to the module, so there are no uTokens, borrows, or collateral associated with it.
+
+The conditions allow for mistakenly registered tokens which have never been used to be removed from the registry. It is not safe to remove a token with active supply or borrows, so those stay listed in the registry when blacklisted.
+
 ### CLI
 ```bash
 umeed tx gov submit-proposal [path-to-proposal-json] [flags]
