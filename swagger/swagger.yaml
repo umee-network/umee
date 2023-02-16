@@ -132,11 +132,21 @@ paths:
                 description: >-
                   Supplied Value is the sum of the USD value of all tokens the
                   account has supplied, including interest earned.
+
+                  Computation skips assets which are missing oracle prices,
+                  potentially resulting in a lower supplied
+
+                  value than if prices were all available.
               collateral_value:
                 type: string
                 description: >-
                   Collateral Value is the sum of the USD value of all uTokens
                   the account has collateralized.
+
+                  Computation skips collateral which is missing an oracle price,
+                  potentially resulting in a lower collateral
+
+                  value than if prices were all available.
               borrowed_value:
                 type: string
                 description: >-
@@ -144,6 +154,11 @@ paths:
                   account has borrowed, including interest owed.
 
                   It always uses spot prices.
+
+                  Computation skips borrows which are missing oracle prices,
+                  potentially resulting in a lower borrowed
+
+                  value than if prices were all available.
               borrow_limit:
                 type: string
                 description: >-
@@ -152,11 +167,19 @@ paths:
 
                   The lower of spot or historic price for each collateral token
                   is used when calculating borrow limits.
+
+                  Computation skips collateral which is missing an oracle price,
+                  potentially resulting in a lower borrow
+
+                  limit than if prices were all available.
               liquidation_threshold:
                 type: string
                 description: >-
                   Liquidation Threshold is the Borrowed Value at which the
                   account becomes eligible for liquidation.
+
+                  Will be null if an oracle price required for computation is
+                  missing.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -2023,11 +2046,21 @@ definitions:
         description: >-
           Supplied Value is the sum of the USD value of all tokens the account
           has supplied, including interest earned.
+
+          Computation skips assets which are missing oracle prices, potentially
+          resulting in a lower supplied
+
+          value than if prices were all available.
       collateral_value:
         type: string
         description: >-
           Collateral Value is the sum of the USD value of all uTokens the
           account has collateralized.
+
+          Computation skips collateral which is missing an oracle price,
+          potentially resulting in a lower collateral
+
+          value than if prices were all available.
       borrowed_value:
         type: string
         description: >-
@@ -2035,6 +2068,11 @@ definitions:
           has borrowed, including interest owed.
 
           It always uses spot prices.
+
+          Computation skips borrows which are missing oracle prices, potentially
+          resulting in a lower borrowed
+
+          value than if prices were all available.
       borrow_limit:
         type: string
         description: >-
@@ -2043,11 +2081,18 @@ definitions:
 
           The lower of spot or historic price for each collateral token is used
           when calculating borrow limits.
+
+          Computation skips collateral which is missing an oracle price,
+          potentially resulting in a lower borrow
+
+          limit than if prices were all available.
       liquidation_threshold:
         type: string
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
+
+          Will be null if an oracle price required for computation is missing.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
