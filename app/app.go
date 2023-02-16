@@ -177,10 +177,11 @@ func init() {
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
+		uibcmodule.AppModuleBasic{},
 	}
 
 	if Experimental {
-		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{}, uibcmodule.AppModuleBasic{})
+		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -198,11 +199,11 @@ func init() {
 		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:      nil,
+		uibc.ModuleName:             nil,
 	}
 
 	if Experimental {
 		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
-		maccPerms[uibc.ModuleName] = nil
 	}
 }
 
@@ -310,9 +311,10 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey, gravitytypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
+		uibc.StoreKey,
 	}
 	if Experimental {
-		storeKeys = append(storeKeys, wasm.StoreKey, uibc.StoreKey)
+		storeKeys = append(storeKeys, wasm.StoreKey)
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -507,16 +509,12 @@ func New(
 	)
 
 	var ics4Wrapper ibcporttypes.ICS4Wrapper
-	if Experimental {
-		app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
-			appCodec,
-			keys[uibc.StoreKey],
-			app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, app.OracleKeeper,
-		)
-		ics4Wrapper = app.UIbcQuotaKeeper
-	} else {
-		ics4Wrapper = app.IBCKeeper.ChannelKeeper
-	}
+	app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
+		appCodec,
+		keys[uibc.StoreKey],
+		app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, app.OracleKeeper,
+	)
+	ics4Wrapper = app.UIbcQuotaKeeper
 
 	// Middleware Stacks
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -553,9 +551,7 @@ func New(
 		app.UIBCTransferKeeper,
 	)
 
-	if Experimental {
-		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
-	}
+	transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
 
 	// Create IBC Router
 	// create static IBC router, add transfer route, then set and seal it
