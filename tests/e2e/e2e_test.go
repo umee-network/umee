@@ -146,6 +146,7 @@ func (s *IntegrationTestSuite) TestUmeeTokenTransfers() {
 // prices based on those params, checks that the stored medians and
 // medians deviations are correct, updates the oracle params with
 // a gov prop, then checks the medians and median deviations again.
+<<<<<<< HEAD
 func (s *IntegrationTestSuite) TestHistorical() {
 	umeeClient, err := client.NewUmeeClient(
 		s.chain.id,
@@ -154,6 +155,16 @@ func (s *IntegrationTestSuite) TestHistorical() {
 		"val1",
 		s.chain.validators[2].mnemonic,
 	)
+=======
+func (s *IntegrationTestSuite) TestMedians() {
+	err := grpc.MedianCheck(s.umeeClient)
+	s.Require().NoError(err)
+}
+
+func (s *IntegrationTestSuite) TestUpdateOracleParams() {
+	s.T().Skip("paused due to validator power threshold enforcing")
+	params, err := s.umeeClient.QueryClient.QueryParams()
+>>>>>>> c258acc (fix: getting bonded validator power in oracle endblocker (#1845))
 	s.Require().NoError(err)
 
 	err = grpc.MedianCheck(umeeClient)
