@@ -1034,21 +1034,6 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
 }
 
-<<<<<<< HEAD
-=======
-func (s *IntegrationTestSuite) initUmeeClient() {
-	var err error
-	s.umeeClient, err = client.NewUmeeClient(
-		s.chain.id,
-		"tcp://localhost:26657",
-		"tcp://localhost:9090",
-		"val1",
-		s.chain.validators[0].mnemonic,
-	)
-	s.Require().NoError(err)
-}
-
->>>>>>> c258acc (fix: getting bonded validator power in oracle endblocker (#1845))
 func noRestart(config *docker.HostConfig) {
 	// in this case we don't want the nodes to restart on failure
 	config.RestartPolicy = docker.RestartPolicy{
