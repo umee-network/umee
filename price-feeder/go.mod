@@ -5,7 +5,7 @@ go 1.19
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
 	github.com/armon/go-metrics v0.4.1
-	github.com/cosmos/cosmos-sdk v0.46.9
+	github.com/cosmos/cosmos-sdk v0.46.10
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/golangci/golangci-lint v1.51.1
 	github.com/gorilla/mux v1.8.0
@@ -307,7 +307,7 @@ require (
 replace (
 	github.com/CosmWasm/wasmd => github.com/notional-labs/wasmd v0.29.0-sdk46
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4
-	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.9-umee
+	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.10-umee
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
