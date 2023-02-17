@@ -187,4 +187,3 @@ jobs:
         run: |
           sleep 1m
           ./contrib/scripts/test_localnet_liveness.sh 50 5 50 localhost:26657
-
