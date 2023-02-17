@@ -16,11 +16,7 @@ jobs:
     name: PR Title Linter
     runs-on: ubuntu-latest
     steps:
-      - name: print event
-        run: echo ${{ github.event_name }}
-      - name: run only on pr
-        run: echo RUNNING
+      - uses: amannn/action-semantic-pull-request@v5
         if: ${{ github.event_name == "pull_request" }}
-      # - uses: amannn/action-semantic-pull-request@v5
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
