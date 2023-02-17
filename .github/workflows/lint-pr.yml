@@ -19,6 +19,6 @@ jobs:
       - name: event name
         run: echo ${{ github.event_name }}
       - uses: amannn/action-semantic-pull-request@v5
-        if: ${{ github.event_name == "pull_request" }}
+        if: ${{ github.event_name == 'pull_request' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
