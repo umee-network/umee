@@ -35,7 +35,7 @@ type IntegrationTestSuite struct {
 }
 
 const (
-	initialPower = int64(100)
+	initialPower = int64(10000)
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
@@ -57,8 +57,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 
-	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 70, true)
-	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 30, true)
+	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 7000, true)
+	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 3000, true)
 
 	staking.EndBlocker(ctx, *app.StakingKeeper)
 
