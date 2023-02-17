@@ -1,16 +1,12 @@
 name: "CodeQL"
 
 on:
+  merge_group:
   pull_request:
     paths: ["**.go"]
     branches:
       - main
       - release/**
-  push:
-    branches:
-      - main
-      - release/**
-    paths: ["**.go"]
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
