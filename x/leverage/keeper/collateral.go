@@ -94,17 +94,13 @@ func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins) (s
 
 		// get USD value of base assets
 		v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
-		if err != nil {
-			k.Logger(ctx).Info(
-				"collateral value skipped",
-				"uToken", coin.String(),
-				"error", err.Error(),
-			)
-			continue
+		if err == nil {
+			// for coins that did not error, add their value to the total
+			total = total.Add(v)
 		}
-
-		// for coins that did not error, add their value to the total
-		total = total.Add(v)
+		if nonOracleError(err) {
+			return sdk.ZeroDec(), err
+		}
 	}
 
 	return total, nil

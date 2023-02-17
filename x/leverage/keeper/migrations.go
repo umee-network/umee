@@ -29,7 +29,9 @@ func (m Migrator) MigrateBNB(ctx sdk.Context) (bool, error) {
 	}
 	token, err := m.keeper.GetTokenSettings(ctx, badDenom)
 	if err != nil {
-		return false, err
+		ctx.Logger().Error("leverage migration skipped due to missing token", "err", err.Error())
+		// If it's not a registered token, then we don't need to run this migration
+		return false, nil
 	}
 	// Delete previous entry in token registry
 	store := ctx.KVStore(m.keeper.storeKey)
