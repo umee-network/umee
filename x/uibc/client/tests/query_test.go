@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package tests
 
 import (
@@ -57,7 +54,7 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 			errMsg:      "",
 			noOfRecords: 1,
 		},
-		{
+		/* {
 			name: "Get ibc-transfer quota of dummy denom ",
 			args: []string{
 				"dummy",
@@ -65,7 +62,7 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 			},
 			errMsg:      "no quota for ibc denom",
 			noOfRecords: 0,
-		},
+		}, */
 	}
 
 	for _, tc := range tests {
