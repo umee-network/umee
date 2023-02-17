@@ -45,6 +45,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
 		addr := v.GetOperator()
 		validatorPowerRatio := sdk.NewDec(v.GetConsensusPower(powerReduction)).QuoInt64(totalBondedValidatorPower)
+		// Power is tracked as an int64 ranging from 0-100
 		validatorPower := validatorPowerRatio.MulInt64(100).RoundInt64()
 		validatorClaimMap[addr.String()] = types.NewClaim(validatorPower, 0, 0, addr)
 	}
