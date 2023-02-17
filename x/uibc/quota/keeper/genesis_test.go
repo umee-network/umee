@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package keeper_test
 
 import (
@@ -15,7 +12,6 @@ func TestInitGenesis(t *testing.T) {
 	app, ctx := s.app, s.ctx
 
 	defaultGs := uibc.DefaultGenesisState()
-
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)
 	params := app.UIbcQuotaKeeper.GetParams(ctx)
 	assert.Equal(t, params.IbcPause, defaultGs.Params.IbcPause)
