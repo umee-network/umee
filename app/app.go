@@ -429,16 +429,6 @@ func New(
 		govModuleAddr,
 	)
 
-	// ibc keeper
-	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec,
-		keys[ibchost.StoreKey],
-		app.GetSubspace(ibchost.ModuleName),
-		app.StakingKeeper,
-		app.UpgradeKeeper,
-		app.ScopedIBCKeeper,
-	)
-
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
@@ -638,12 +628,12 @@ func New(
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
+		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
 	}
 	if Experimental {
 		appModules = append(
 			appModules,
 			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-			uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
 		)
 	}
 
@@ -668,6 +658,7 @@ func New(
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	endBlockers := []string{
@@ -684,6 +675,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -704,6 +696,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	orderMigrations := []string{
@@ -718,13 +711,14 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	if Experimental {
-		beginBlockers = append(beginBlockers, wasm.ModuleName, uibc.ModuleName)
-		endBlockers = append(endBlockers, wasm.ModuleName, uibc.ModuleName)
-		initGenesis = append(initGenesis, wasm.ModuleName, uibc.ModuleName)
-		orderMigrations = append(orderMigrations, wasm.ModuleName, uibc.ModuleName)
+		beginBlockers = append(beginBlockers, wasm.ModuleName)
+		endBlockers = append(endBlockers, wasm.ModuleName)
+		initGenesis = append(initGenesis, wasm.ModuleName)
+		orderMigrations = append(orderMigrations, wasm.ModuleName)
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
