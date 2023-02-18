@@ -961,7 +961,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 	s.Require().NoError(err)
 
-	umeeVal := s.chain.validators[0]
+	umeeVal := s.chain.validators[2]
 	umeeValAddr, err := umeeVal.keyInfo.GetAddress()
 	s.Require().NoError(err)
 
