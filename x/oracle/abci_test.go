@@ -35,7 +35,7 @@ type IntegrationTestSuite struct {
 }
 
 const (
-	initialPower = int64(10000)
+	initialPower = int64(1000)
 )
 
 func (s *IntegrationTestSuite) SetupTest() {
@@ -52,13 +52,14 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.Denom = bondDenom
 
 	// mint and send coins to validator
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewIntFromUint64(3))))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr1, initCoins))
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
+	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr3, initCoins))
 
-	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 7000, true)
-	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 3000, true)
+	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 699, true)
+	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 300, true)
+	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 1, true)
 
 	staking.EndBlocker(ctx, *app.StakingKeeper)
 
@@ -68,7 +69,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(2)
+	valPubKeys = simapp.CreateTestPubKeys(3)
 
 	valPubKey1 = valPubKeys[0]
 	pubKey1    = secp256k1.GenPrivKey().PubKey()
@@ -79,6 +80,11 @@ var (
 	pubKey2    = secp256k1.GenPrivKey().PubKey()
 	addr2      = sdk.AccAddress(pubKey2.Address())
 	valAddr2   = sdk.ValAddress(pubKey2.Address())
+
+	valPubKey3 = valPubKeys[2]
+	pubKey3    = secp256k1.GenPrivKey().PubKey()
+	addr3      = sdk.AccAddress(pubKey3.Address())
+	valAddr3   = sdk.ValAddress(pubKey3.Address())
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
 	initCoins  = sdk.NewCoins(sdk.NewCoin(bondDenom, initTokens))
@@ -92,12 +98,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
 
 	var (
-		val1Tuples   types.ExchangeRateTuples
-		val2Tuples   types.ExchangeRateTuples
-		val1PreVotes types.AggregateExchangeRatePrevote
-		val2PreVotes types.AggregateExchangeRatePrevote
-		val1Votes    types.AggregateExchangeRateVote
-		val2Votes    types.AggregateExchangeRateVote
+		val1Tuples types.ExchangeRateTuples
+		val2Tuples types.ExchangeRateTuples
+		val3Tuples types.ExchangeRateTuples
 	)
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1Tuples = append(val1Tuples, types.ExchangeRateTuple{
@@ -108,36 +111,39 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 			Denom:        denom.SymbolDenom,
 			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
 		})
+		val3Tuples = append(val3Tuples, types.ExchangeRateTuple{
+			Denom:        denom.SymbolDenom,
+			ExchangeRate: sdk.MustNewDecFromStr("0.6"),
+		})
 	}
 
-	val1PreVotes = types.AggregateExchangeRatePrevote{
-		Hash:        "hash1",
-		Voter:       valAddr1.String(),
-		SubmitBlock: uint64(ctx.BlockHeight()),
+	createVote := func(hash string, val sdk.ValAddress, rates types.ExchangeRateTuples, blockHeight uint64) (types.AggregateExchangeRatePrevote, types.AggregateExchangeRateVote) {
+		preVote := types.AggregateExchangeRatePrevote{
+			Hash:        "hash1",
+			Voter:       val.String(),
+			SubmitBlock: uint64(blockHeight),
+		}
+		vote := types.AggregateExchangeRateVote{
+			ExchangeRateTuples: rates,
+			Voter:              val.String(),
+		}
+		return preVote, vote
 	}
-	val2PreVotes = types.AggregateExchangeRatePrevote{
-		Hash:        "hash2",
-		Voter:       valAddr2.String(),
-		SubmitBlock: uint64(ctx.BlockHeight()),
-	}
-
-	val1Votes = types.AggregateExchangeRateVote{
-		ExchangeRateTuples: val1Tuples,
-		Voter:              valAddr1.String(),
-	}
-	val2Votes = types.AggregateExchangeRateVote{
-		ExchangeRateTuples: val2Tuples,
-		Voter:              valAddr2.String(),
-	}
+	h := uint64(ctx.BlockHeight())
+	val1PreVotes, val1Votes := createVote("hash1", valAddr1, val1Tuples, h)
+	val2PreVotes, val2Votes := createVote("hash2", valAddr2, val2Tuples, h)
+	val3PreVotes, val3Votes := createVote("hash3", valAddr3, val3Tuples, h)
 
 	// total voting power per denom is 100%
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
@@ -146,12 +152,13 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
 	}
 
-	// update prevotes' block
+	// Test: only val2 votes.
+	// Total voting power per denom must be bigger than 30%. So if only val2 votes,
+	// we won't have a price for the denom update prevotes' block.
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
-	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+	h = uint64(ctx.BlockHeight())
+	val2PreVotes.SubmitBlock = h
 
-	// total voting power per denom is 30%
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
@@ -165,12 +172,37 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().Equal(sdk.ZeroDec(), rate)
 	}
 
-	// update prevotes' block
+	// Test: val2 and val3 votes.
+	// now we will have 30.1% of the power, so the we should have prices
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
-	val1PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
-	val2PreVotes.SubmitBlock = uint64(ctx.BlockHeight())
+	h = uint64(ctx.BlockHeight())
+	val2PreVotes.SubmitBlock = h
+	val3PreVotes.SubmitBlock = h
 
-	// umee has 100% power, and atom has 30%
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
+	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
+	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
+	oracle.EndBlocker(ctx, app.OracleKeeper)
+
+	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
+		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
+		s.Require().NoError(err)
+		s.Require().Equal(sdk.MustNewDecFromStr("0.5"), rate)
+	}
+
+	return
+	// Test: all validators vote again
+	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	h = uint64(ctx.BlockHeight())
+	val1PreVotes.SubmitBlock = h
+	val2PreVotes.SubmitBlock = h
+	val3PreVotes.SubmitBlock = h
+
+	// umee has 99.9% power, and atom has 30%
 	val1Tuples = types.ExchangeRateTuples{
 		types.ExchangeRateTuple{
 			Denom:        "umee",
