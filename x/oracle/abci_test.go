@@ -92,7 +92,6 @@ var (
 
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
-	originalBlockHeight := ctx.BlockHeight()
 	ctx = ctx.WithBlockHeight(1)
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
@@ -194,33 +193,27 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().Equal(sdk.MustNewDecFromStr("0.5"), rate)
 	}
 
-	return
-	// Test: all validators vote again
+	// TODO: check reward distribution
+
+	// Test: val1 and val2 vote again
+	// umee has 69.9% power, and atom has 30%, so we should have price for umee, but not for atom
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val1PreVotes.SubmitBlock = h
 	val2PreVotes.SubmitBlock = h
-	val3PreVotes.SubmitBlock = h
 
-	// umee has 99.9% power, and atom has 30%
-	val1Tuples = types.ExchangeRateTuples{
+	val1Votes.ExchangeRateTuples = types.ExchangeRateTuples{
 		types.ExchangeRateTuple{
 			Denom:        "umee",
 			ExchangeRate: sdk.MustNewDecFromStr("1.0"),
 		},
 	}
-	val2Tuples = types.ExchangeRateTuples{
-		types.ExchangeRateTuple{
-			Denom:        "umee",
-			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
-		},
+	val2Votes.ExchangeRateTuples = types.ExchangeRateTuples{
 		types.ExchangeRateTuple{
 			Denom:        "atom",
 			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
 		},
 	}
-	val1Votes.ExchangeRateTuples = val1Tuples
-	val2Votes.ExchangeRateTuples = val2Tuples
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr1, val1PreVotes)
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
@@ -237,8 +230,6 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
 	s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, "atom"))
 	s.Require().Equal(sdk.ZeroDec(), rate)
-
-	ctx = ctx.WithBlockHeight(originalBlockHeight)
 }
 
 var exchangeRates = map[string][]sdk.Dec{
