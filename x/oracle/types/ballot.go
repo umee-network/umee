@@ -114,7 +114,13 @@ func (pb ExchangeRateBallot) Len() int {
 // Less reports whether the element with
 // index i should sort before the element with index j.
 func (pb ExchangeRateBallot) Less(i, j int) bool {
-	return pb[i].ExchangeRate.LT(pb[j].ExchangeRate)
+	if pb[i].ExchangeRate.LT(pb[j].ExchangeRate) {
+		return true
+	}
+	if pb[i].ExchangeRate.Equal(pb[j].ExchangeRate) {
+		return bytes.Compare(pb[i].Voter, pb[j].Voter) < 0
+	}
+	return false
 }
 
 // Swap implements sort.Interface.
