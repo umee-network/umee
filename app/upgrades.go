@@ -35,12 +35,12 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade3_3to4_0(upgradeInfo)
 	app.registerUpgrade4_0_1(upgradeInfo)
 	app.registerUpgrade4_1(upgradeInfo)
-	app.registerUpgrade4_1_0rc3(upgradeInfo)
+	app.registerUpgrade4_1_0rc4(upgradeInfo)
 }
 
-// performs upgrade from v4.1.0-rc2 to v4.1.0-rc3
-func (app *UmeeApp) registerUpgrade4_1_0rc3(_ upgradetypes.Plan) {
-	const planName = "v4.1.0-rc3"
+// performs upgrade from v4.1.0-rc2 to v4.1.0-rc4
+func (app *UmeeApp) registerUpgrade4_1_0rc4(_ upgradetypes.Plan) {
+	const planName = "v4.1.0-rc4"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
