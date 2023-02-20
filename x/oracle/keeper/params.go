@@ -19,11 +19,22 @@ func (k Keeper) VotePeriod(ctx sdk.Context) (res uint64) {
 	return
 }
 
-// VoteThreshold returns the minimum percentage of votes that must be received
-// for a ballot to pass.
+// VoteThreshold returns the minimum rate of combined validator power of votes
+// that must be received for a ballot to pass.
 func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeyVoteThreshold, &res)
 	return
+}
+
+// SetVoteThreshold sets min combined validator power voting on a denom to accept
+// it as valid.
+// TODO: this is used in tests, we should refactor the way how this is handled.
+func (k Keeper) SetVoteThreshold(ctx sdk.Context, threshold sdk.Dec) error {
+	if err := types.ValidateVotingThreshold(threshold); err != nil {
+		return err
+	}
+	k.paramSpace.Set(ctx, types.KeyVoteThreshold, &threshold)
+	return nil
 }
 
 // RewardBand returns the ratio of allowable exchange rate error that a validator

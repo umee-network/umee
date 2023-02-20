@@ -57,11 +57,14 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr3, initCoins))
 
-	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 699, true)
-	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 300, true)
+	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 599, true)
+	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 400, true)
 	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 1, true)
 
 	staking.EndBlocker(ctx, *app.StakingKeeper)
+
+	err := app.OracleKeeper.SetVoteThreshold(ctx, sdk.MustNewDecFromStr("0.4"))
+	s.Require().NoError(err)
 
 	s.app = app
 	s.ctx = ctx
@@ -194,6 +197,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	}
 
 	// TODO: check reward distribution
+	// https://github.com/umee-network/umee/issues/1853
 
 	// Test: val1 and val2 vote again
 	// umee has 69.9% power, and atom has 30%, so we should have price for umee, but not for atom

@@ -1,6 +1,7 @@
 package oracle
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -38,16 +39,14 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	validatorClaimMap := make(map[string]types.Claim)
 	powerReduction := k.StakingKeeper.PowerReduction(ctx)
 	// Calculate total validator power
-	var totalBondedValidatorPower int64
+	var totalBondedPower int64
 	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
-		totalBondedValidatorPower += v.GetConsensusPower(powerReduction)
+		totalBondedPower += v.GetConsensusPower(powerReduction)
 	}
 	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
 		addr := v.GetOperator()
-		validatorPowerRatio := sdk.NewDec(v.GetConsensusPower(powerReduction)).QuoInt64(totalBondedValidatorPower)
-		// Power is tracked as an int64 ranging from 0-100
-		validatorPower := validatorPowerRatio.MulInt64(100).RoundInt64()
-		validatorClaimMap[addr.String()] = types.NewClaim(validatorPower, 0, 0, addr)
+		valPower := v.GetConsensusPower(powerReduction)
+		validatorClaimMap[addr.String()] = types.NewClaim(valPower, 0, 0, addr)
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
@@ -62,11 +61,13 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// NOTE: it filters out inactive or jailed validators
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
+	threshold := k.VoteThreshold(ctx).MulInt64(100).RoundInt().Int64()
+	fmt.Println(">>> threshold", threshold)
 
 	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 	for _, ballotDenom := range ballotDenomSlice {
 		// Convert ballot power to a percentage to compare with VoteThreshold param
-		if sdk.NewDecWithPrec(ballotDenom.Ballot.Power(), 2).LTE(k.VoteThreshold(ctx)) {
+		if ballotDenom.Ballot.Power()*100/totalBondedPower <= threshold {
 			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
 			continue
 		}

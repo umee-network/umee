@@ -4,8 +4,13 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	oneDec = sdk.OneDec()
 )
 
 // Parameter keys
@@ -376,5 +381,17 @@ func validateMaximumMedianStamps(i interface{}) error {
 		return fmt.Errorf("maximum median stamps must be positive: %d", v)
 	}
 
+	return nil
+}
+
+func ValidateVotingThreshold(x sdk.Dec) error {
+	if !x.IsPositive() || x.GT(oneDec) {
+		return sdkerrors.ErrInvalidRequest.Wrap("threshold must be bigger than zero and <= 1")
+	}
+	i := x.MulInt64(100).RoundInt64()
+	x2 := sdk.NewDecWithPrec(i, 2)
+	if !x2.Equal(x) {
+		return sdkerrors.ErrInvalidRequest.Wrap("threshold precision must be maximum 2 decimals")
+	}
 	return nil
 }
