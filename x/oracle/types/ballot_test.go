@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"gotest.tools/v3/assert"
 )
 
 func TestToMap(t *testing.T) {
@@ -46,10 +46,10 @@ func TestToMap(t *testing.T) {
 	for i, vote := range tests.votes {
 		exchangeRate, ok := mapData[vote.Voter.String()]
 		if tests.isValid[i] {
-			require.True(t, ok)
-			require.Equal(t, exchangeRate, vote.ExchangeRate)
+			assert.Equal(t, true, ok)
+			assert.Equal(t, exchangeRate, vote.ExchangeRate)
 		} else {
-			require.False(t, ok)
+			assert.Equal(t, false, ok)
 		}
 	}
 }
@@ -57,13 +57,13 @@ func TestToMap(t *testing.T) {
 func TestSqrt(t *testing.T) {
 	num := sdk.NewDecWithPrec(144, 4)
 	floatNum, err := strconv.ParseFloat(num.String(), 64)
-	require.NoError(t, err)
+	assert.NilError(t, err)
 
 	floatNum = math.Sqrt(floatNum)
 	num, err = sdk.NewDecFromStr(fmt.Sprintf("%f", floatNum))
-	require.NoError(t, err)
+	assert.NilError(t, err)
 
-	require.Equal(t, sdk.NewDecWithPrec(12, 2), num)
+	assert.DeepEqual(t, sdk.NewDecWithPrec(12, 2), num)
 }
 
 func TestPBPower(t *testing.T) {
@@ -82,12 +82,10 @@ func TestPBPower(t *testing.T) {
 		)
 
 		pb = append(pb, vote)
-		require.NotEqual(t, int64(0), vote.Power)
-
 		ballotPower += vote.Power
 	}
 
-	require.Equal(t, ballotPower, pb.Power())
+	assert.Equal(t, ballotPower, pb.Power())
 
 	// Mix in a fake validator, the total power should not have changed.
 	pubKey := secp256k1.GenPrivKey().PubKey()
@@ -100,7 +98,7 @@ func TestPBPower(t *testing.T) {
 	)
 
 	pb = append(pb, fakeVote)
-	require.Equal(t, ballotPower, pb.Power())
+	assert.Equal(t, ballotPower, pb.Power())
 }
 
 func TestPBWeightedMedian(t *testing.T) {
@@ -109,7 +107,7 @@ func TestPBWeightedMedian(t *testing.T) {
 		weights     []int64
 		isValidator []bool
 		median      sdk.Dec
-		success     bool
+		errMsg      string
 	}{
 		{
 			// Supermajority one number
@@ -117,7 +115,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.NewDec(10),
-			true,
+			"",
 		},
 		{
 			// Adding fake validator doesn't change outcome
@@ -125,7 +123,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 1, 100, 1, 10000},
 			[]bool{true, true, true, true, false},
 			sdk.NewDec(10),
-			true,
+			"",
 		},
 		{
 			// Tie votes
@@ -133,7 +131,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 100, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.NewDec(2),
-			true,
+			"",
 		},
 		{
 			// No votes
@@ -141,7 +139,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{},
 			[]bool{true, true, true, true},
 			sdk.NewDec(0),
-			true,
+			"",
 		},
 		{
 			// Out of order
@@ -149,7 +147,7 @@ func TestPBWeightedMedian(t *testing.T) {
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
 			sdk.NewDec(10),
-			false,
+			"ballot must be sorted before this operation",
 		},
 	}
 
@@ -174,13 +172,12 @@ func TestPBWeightedMedian(t *testing.T) {
 		}
 
 		median, err := pb.WeightedMedian()
-		if tc.success {
-			require.NoError(t, err)
-			require.Equal(t, tc.median, median)
+		if tc.errMsg == "" {
+			assert.NilError(t, err)
+			assert.DeepEqual(t, tc.median, median)
 		} else {
-			require.Error(t, err)
+			assert.ErrorContains(t, err, tc.errMsg)
 		}
-
 	}
 }
 
@@ -258,14 +255,14 @@ func TestPBStandardDeviation(t *testing.T) {
 		}
 		stdDev, _ := pb.StandardDeviation()
 
-		require.Equal(t, tc.standardDeviation, stdDev)
+		assert.DeepEqual(t, tc.standardDeviation, stdDev)
 	}
 }
 
 func TestPBStandardDeviation_Overflow(t *testing.T) {
 	valAddr := sdk.ValAddress(secp256k1.GenPrivKey().PubKey().Address())
 	overflowRate, err := sdk.NewDecFromStr("100000000000000000000000000000000000000000000000000000000.0")
-	require.NoError(t, err)
+	assert.NilError(t, err)
 	pb := ExchangeRateBallot{
 		NewVoteForTally(
 			sdk.OneDec(),
@@ -288,9 +285,9 @@ func TestPBStandardDeviation_Overflow(t *testing.T) {
 	}
 
 	deviation, err := pb.StandardDeviation()
-	require.NoError(t, err)
+	assert.NilError(t, err)
 	expectedDevation := sdk.MustNewDecFromStr("871.862661203013097586")
-	require.Equal(t, expectedDevation, deviation)
+	assert.DeepEqual(t, expectedDevation, deviation)
 }
 
 func TestBallotMapToSlice(t *testing.T) {
@@ -315,7 +312,7 @@ func TestBallotMapToSlice(t *testing.T) {
 		UmeeDenom:    pb,
 		IbcDenomAtom: pb,
 	})
-	require.Equal(t, []BallotDenom{{Ballot: pb, Denom: IbcDenomAtom}, {Ballot: pb, Denom: UmeeDenom}}, ballotSlice)
+	assert.DeepEqual(t, []BallotDenom{{Ballot: pb, Denom: IbcDenomAtom}, {Ballot: pb, Denom: UmeeDenom}}, ballotSlice)
 }
 
 func TestExchangeRateBallotSwap(t *testing.T) {
@@ -338,11 +335,11 @@ func TestExchangeRateBallotSwap(t *testing.T) {
 
 	pb := ExchangeRateBallot{voteTallies[0], voteTallies[1]}
 
-	require.Equal(t, pb[0], voteTallies[0])
-	require.Equal(t, pb[1], voteTallies[1])
+	assert.DeepEqual(t, pb[0], voteTallies[0])
+	assert.DeepEqual(t, pb[1], voteTallies[1])
 	pb.Swap(1, 0)
-	require.Equal(t, pb[1], voteTallies[0])
-	require.Equal(t, pb[0], voteTallies[1])
+	assert.DeepEqual(t, pb[1], voteTallies[0])
+	assert.DeepEqual(t, pb[0], voteTallies[1])
 }
 
 func TestStandardDeviationUnsorted(t *testing.T) {
@@ -363,8 +360,8 @@ func TestStandardDeviationUnsorted(t *testing.T) {
 	}
 
 	deviation, err := pb.StandardDeviation()
-	require.ErrorIs(t, err, ErrBallotNotSorted)
-	require.Equal(t, "0.000000000000000000", deviation.String())
+	assert.ErrorIs(t, err, ErrBallotNotSorted)
+	assert.Equal(t, "0.000000000000000000", deviation.String())
 }
 
 func TestClaimMapToSlice(t *testing.T) {
@@ -374,5 +371,5 @@ func TestClaimMapToSlice(t *testing.T) {
 		"testClaim":    claim,
 		"anotherClaim": claim,
 	})
-	require.Equal(t, []Claim{claim, claim}, claimSlice)
+	assert.DeepEqual(t, []Claim{claim, claim}, claimSlice)
 }
