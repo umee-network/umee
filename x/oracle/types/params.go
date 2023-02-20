@@ -376,6 +376,10 @@ func validateMaximumMedianStamps(i interface{}) error {
 	return nil
 }
 
+// ValidateVoteThreshold validates oracle exchange rates power vote threshold.
+// Must be
+// * a decimal value > 0.33 and <= 1.
+// * max precision is 2 (so 0.501 is not allowed)
 func ValidateVoteThreshold(x sdk.Dec) error {
 	if x.LTE(minVoteThreshold) || x.GT(oneDec) {
 		return sdkerrors.ErrInvalidRequest.Wrap("threshold must be bigger than 0.33 and <= 1")
