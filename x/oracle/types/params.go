@@ -14,6 +14,12 @@ var (
 	minVoteThreshold = sdk.NewDecWithPrec(33, 2) // 0.33
 )
 
+// maxium number of decimals allowed for VoteThreshold
+const (
+	MaxVoteThresholdPrecision  = 2
+	MaxVoteThresholdMultiplier = 100 // must be 10^MaxVoteThresholdPrecision
+)
+
 // Parameter keys
 var (
 	KeyVotePeriod               = []byte("VotePeriod")
@@ -384,8 +390,8 @@ func ValidateVoteThreshold(x sdk.Dec) error {
 	if x.LTE(minVoteThreshold) || x.GT(oneDec) {
 		return sdkerrors.ErrInvalidRequest.Wrap("threshold must be bigger than 0.33 and <= 1")
 	}
-	i := x.MulInt64(100).RoundInt64()
-	x2 := sdk.NewDecWithPrec(i, 2)
+	i := x.MulInt64(100).TruncateInt64()
+	x2 := sdk.NewDecWithPrec(i, MaxVoteThresholdPrecision)
 	if !x2.Equal(x) {
 		return sdkerrors.ErrInvalidRequest.Wrap("threshold precision must be maximum 2 decimals")
 	}

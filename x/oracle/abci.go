@@ -1,7 +1,6 @@
 package oracle
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -61,13 +60,14 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// NOTE: it filters out inactive or jailed validators
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
-	threshold := k.VoteThreshold(ctx).MulInt64(100).RoundInt().Int64()
-	fmt.Println(">>> threshold", threshold)
+	threshold := k.VoteThreshold(ctx).MulInt64(types.MaxVoteThresholdMultiplier).TruncateInt64()
 
 	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 	for _, ballotDenom := range ballotDenomSlice {
-		// Convert ballot power to a percentage to compare with VoteThreshold param
-		if ballotDenom.Ballot.Power()*100/totalBondedPower <= threshold {
+		// Calculate the rate as an integer value, scaled up using the same multiplayer as the
+		// `threshold` computed above
+		support := ballotDenom.Ballot.Power() * types.MaxVoteThresholdMultiplier / totalBondedPower
+		if support < threshold {
 			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
 			continue
 		}

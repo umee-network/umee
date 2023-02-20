@@ -42,24 +42,30 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
 	isCheckTx := false
 	app := umeeapp.Setup(s.T())
-	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
+	ctx := app.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 	})
 
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
 
+	// validate setup... umeeapp.Setup creates one validator, with 1uumee self delegation
+	setupVals := app.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	s.Require().Len(setupVals, 1)
+	s.Require().Equal(int64(1), setupVals[0].GetConsensusPower(app.StakingKeeper.PowerReduction(ctx)))
+
 	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
 	sh.Denom = bondDenom
 
-	// mint and send coins to validator
+	// mint and send coins to validators
 	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewIntFromUint64(3))))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr1, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr3, initCoins))
 
+	// self delegate 999 in total ... 1 val with 1uumee is already created in umeeapp.Setup
 	sh.CreateValidatorWithValPower(valAddr1, valPubKey1, 599, true)
-	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 400, true)
-	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 1, true)
+	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 398, true)
+	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 2, true)
 
 	staking.EndBlocker(ctx, *app.StakingKeeper)
 
@@ -154,9 +160,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
 	}
 
-	// Test: only val2 votes.
-	// Total voting power per denom must be bigger than 30%. So if only val2 votes,
-	// we won't have a price for the denom update prevotes' block.
+	// Test: only val2 votes (has 39% vote power).
+	// Total voting power per denom must be bigger or equal than 40% (see SetupTest).
+	// So if only val2 votes, we won't have a price for the denom update prevotes' block.
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
@@ -175,7 +181,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	}
 
 	// Test: val2 and val3 votes.
-	// now we will have 30.1% of the power, so the we should have prices
+	// now we will have 40% of the power, so now we should have prices
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
