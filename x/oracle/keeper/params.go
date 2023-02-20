@@ -19,7 +19,7 @@ func (k Keeper) VotePeriod(ctx sdk.Context) (res uint64) {
 	return
 }
 
-// VoteThreshold returns the minimum rate of combined validator power of votes
+// VoteThreshold returns the minimum portion of combined validator power of votes
 // that must be received for a ballot to pass.
 func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
 	k.paramSpace.Get(ctx, types.KeyVoteThreshold, &res)

@@ -162,7 +162,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	// Test: only val2 votes (has 39% vote power).
 	// Total voting power per denom must be bigger or equal than 40% (see SetupTest).
-	// So if only val2 votes, we won't have a price for the denom update prevotes' block.
+	// So if only val2 votes, we won't have any prices next block.
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h

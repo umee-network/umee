@@ -64,8 +64,8 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 	for _, ballotDenom := range ballotDenomSlice {
-		// Calculate the rate as an integer value, scaled up using the same multiplayer as the
-		// `threshold` computed above
+		// Calculate the portion of votes received as an integer, scaled up using the
+		// same multiplier as the `threshold` computed above
 		support := ballotDenom.Ballot.Power() * types.MaxVoteThresholdMultiplier / totalBondedPower
 		if support < threshold {
 			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
