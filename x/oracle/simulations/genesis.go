@@ -30,9 +30,9 @@ func GenVotePeriod(r *rand.Rand) uint64 {
 	return uint64(5 + r.Intn(100))
 }
 
-// GenVoteThreshold produces a randomized VoteThreshold in the range of [0.333, 0.666]
+// GenVoteThreshold produces a randomized VoteThreshold in the range of [0.34, 0.67]
 func GenVoteThreshold(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(333, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(333)), 3))
+	return sdk.NewDecWithPrec(34, 2).Add(sdk.NewDecWithPrec(int64(r.Intn(33)), 2))
 }
 
 // GenRewardBand produces a randomized RewardBand in the range of [0.000, 0.100]

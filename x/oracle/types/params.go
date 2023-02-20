@@ -4,8 +4,20 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	oneDec           = sdk.OneDec()
+	minVoteThreshold = sdk.NewDecWithPrec(33, 2) // 0.33
+)
+
+// maxium number of decimals allowed for VoteThreshold
+const (
+	MaxVoteThresholdPrecision  = 2
+	MaxVoteThresholdMultiplier = 100 // must be 10^MaxVoteThresholdPrecision
 )
 
 // Parameter keys
@@ -220,16 +232,7 @@ func validateVoteThreshold(i interface{}) error {
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
-
-	if v.LT(sdk.NewDecWithPrec(33, 2)) {
-		return fmt.Errorf("vote threshold must be bigger than 33%%: %s", v)
-	}
-
-	if v.GT(sdk.OneDec()) {
-		return fmt.Errorf("vote threshold too large: %s", v)
-	}
-
-	return nil
+	return ValidateVoteThreshold(v)
 }
 
 func validateRewardBand(i interface{}) error {
@@ -376,5 +379,21 @@ func validateMaximumMedianStamps(i interface{}) error {
 		return fmt.Errorf("maximum median stamps must be positive: %d", v)
 	}
 
+	return nil
+}
+
+// ValidateVoteThreshold validates oracle exchange rates power vote threshold.
+// Must be
+// * a decimal value > 0.33 and <= 1.
+// * max precision is 2 (so 0.501 is not allowed)
+func ValidateVoteThreshold(x sdk.Dec) error {
+	if x.LTE(minVoteThreshold) || x.GT(oneDec) {
+		return sdkerrors.ErrInvalidRequest.Wrapf("threshold must be bigger than %s and <= 1", minVoteThreshold)
+	}
+	i := x.MulInt64(100).TruncateInt64()
+	x2 := sdk.NewDecWithPrec(i, MaxVoteThresholdPrecision)
+	if !x2.Equal(x) {
+		return sdkerrors.ErrInvalidRequest.Wrap("threshold precision must be maximum 2 decimals")
+	}
 	return nil
 }
