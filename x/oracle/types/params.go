@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	oneDec = sdk.OneDec()
+	oneDec           = sdk.OneDec()
+	minVoteThreshold = sdk.NewDecWithPrec(33, 2) // 0.33
 )
 
 // Parameter keys
@@ -225,16 +226,7 @@ func validateVoteThreshold(i interface{}) error {
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
-
-	if v.LT(sdk.NewDecWithPrec(33, 2)) {
-		return fmt.Errorf("vote threshold must be bigger than 33%%: %s", v)
-	}
-
-	if v.GT(sdk.OneDec()) {
-		return fmt.Errorf("vote threshold too large: %s", v)
-	}
-
-	return nil
+	return ValidateVoteThreshold(v)
 }
 
 func validateRewardBand(i interface{}) error {
@@ -384,9 +376,9 @@ func validateMaximumMedianStamps(i interface{}) error {
 	return nil
 }
 
-func ValidateVotingThreshold(x sdk.Dec) error {
-	if !x.IsPositive() || x.GT(oneDec) {
-		return sdkerrors.ErrInvalidRequest.Wrap("threshold must be bigger than zero and <= 1")
+func ValidateVoteThreshold(x sdk.Dec) error {
+	if x.LTE(minVoteThreshold) || x.GT(oneDec) {
+		return sdkerrors.ErrInvalidRequest.Wrap("threshold must be bigger than 0.33 and <= 1")
 	}
 	i := x.MulInt64(100).RoundInt64()
 	x2 := sdk.NewDecWithPrec(i, 2)

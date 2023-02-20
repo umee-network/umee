@@ -30,7 +30,7 @@ func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
 // it as valid.
 // TODO: this is used in tests, we should refactor the way how this is handled.
 func (k Keeper) SetVoteThreshold(ctx sdk.Context, threshold sdk.Dec) error {
-	if err := types.ValidateVotingThreshold(threshold); err != nil {
+	if err := types.ValidateVoteThreshold(threshold); err != nil {
 		return err
 	}
 	k.paramSpace.Set(ctx, types.KeyVoteThreshold, &threshold)

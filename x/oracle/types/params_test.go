@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -245,4 +246,37 @@ func TestParamsEqual(t *testing.T) {
 	p13 := DefaultParams()
 	require.NotNil(t, p13.ParamSetPairs())
 	require.NotNil(t, p13.String())
+}
+
+func TestValidateVotingThreshold(t *testing.T) {
+	tcs := []struct {
+		name   string
+		t      sdk.Dec
+		errMsg string
+	}{
+		{"fail: negative", sdk.MustNewDecFromStr("-1"), "threshold must be"},
+		{"fail: zero", sdk.ZeroDec(), "threshold must be"},
+		{"fail: less than 0.33", sdk.MustNewDecFromStr("0.3"), "threshold must be"},
+		{"fail: equal 0.33", sdk.MustNewDecFromStr("0.33"), "threshold must be"},
+		{"fail: more than 1", sdk.MustNewDecFromStr("1.1"), "threshold must be"},
+		{"fail: more than 1", sdk.MustNewDecFromStr("10"), "threshold must be"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.333"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.401"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.409"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.4009"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdk.MustNewDecFromStr("0.999"), "maximum 2 decimals"},
+
+		{"ok: 1", sdk.MustNewDecFromStr("1"), ""},
+		{"ok: 0.34", sdk.MustNewDecFromStr("0.34"), ""},
+		{"ok: 0.99", sdk.MustNewDecFromStr("0.99"), ""},
+	}
+
+	for _, tc := range tcs {
+		err := ValidateVoteThreshold(tc.t)
+		if tc.errMsg == "" {
+			assert.NilError(t, err, "test_case", tc.name)
+		} else {
+			assert.ErrorContains(t, err, tc.errMsg, tc.name)
+		}
+	}
 }
