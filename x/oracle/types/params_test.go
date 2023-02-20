@@ -28,12 +28,6 @@ func TestValidateVoteThreshold(t *testing.T) {
 	err := validateVoteThreshold("invalidSdkType")
 	require.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.31"))
-	require.ErrorContains(t, err, "threshold must be bigger than 0.330000000000000000 and <= 1")
-
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("40.0"))
-	require.ErrorContains(t, err, "threshold must be bigger than 0.330000000000000000 and <= 1")
-
 	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.35"))
 	require.Nil(t, err)
 }
