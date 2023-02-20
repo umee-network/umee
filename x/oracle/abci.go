@@ -40,12 +40,10 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	// Calculate total validator power
 	var totalBondedPower int64
 	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
-		totalBondedPower += v.GetConsensusPower(powerReduction)
-	}
-	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
 		addr := v.GetOperator()
-		valPower := v.GetConsensusPower(powerReduction)
-		validatorClaimMap[addr.String()] = types.NewClaim(valPower, 0, 0, addr)
+		power := v.GetConsensusPower(powerReduction)
+		totalBondedPower += power
+		validatorClaimMap[addr.String()] = types.NewClaim(power, 0, 0, addr)
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
