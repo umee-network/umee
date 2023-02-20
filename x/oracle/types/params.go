@@ -388,7 +388,7 @@ func validateMaximumMedianStamps(i interface{}) error {
 // * max precision is 2 (so 0.501 is not allowed)
 func ValidateVoteThreshold(x sdk.Dec) error {
 	if x.LTE(minVoteThreshold) || x.GT(oneDec) {
-		return sdkerrors.ErrInvalidRequest.Wrap("threshold must be bigger than 0.33 and <= 1")
+		return sdkerrors.ErrInvalidRequest.Wrapf("threshold must be bigger than %s and <= 1", minVoteThreshold)
 	}
 	i := x.MulInt64(100).TruncateInt64()
 	x2 := sdk.NewDecWithPrec(i, MaxVoteThresholdPrecision)
