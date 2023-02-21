@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/stretchr/testify/require"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"gotest.tools/v3/assert"
 )
 
 func TestUpdateMinimumCommissionRateParam(t *testing.T) {
@@ -15,15 +15,15 @@ func TestUpdateMinimumCommissionRateParam(t *testing.T) {
 
 	// check default min commission rate
 	oldParams := sk.GetParams(ctx)
-	require.Equal(t, types.DefaultMinCommissionRate, oldParams.MinCommissionRate)
+	assert.Equal(t, types.DefaultMinCommissionRate, oldParams.MinCommissionRate)
 
 	//  update the min commission rate
 	_, err := UpdateMinimumCommissionRateParam(ctx, &sk)
-	require.NoError(t, err)
+	assert.NilError(t, err)
 
 	// get the updated params
 	updatedParams := sk.GetParams(ctx)
-	require.Equal(t, minCommissionRate, updatedParams.MinCommissionRate)
+	assert.Equal(t, minCommissionRate, updatedParams.MinCommissionRate)
 }
 
 func TestSetMinimumCommissionRateToValidators(t *testing.T) {
@@ -32,20 +32,19 @@ func TestSetMinimumCommissionRateToValidators(t *testing.T) {
 
 	// update the min commission rate
 	minCommissionRate, err := UpdateMinimumCommissionRateParam(ctx, &sk)
-	require.NoError(t, err)
-	require.NotNil(t, minCommissionRate)
+	assert.NilError(t, err)
 
 	// update min commisson rate to all validators
 	err = SetMinimumCommissionRateToValidators(ctx, &sk, minCommissionRate)
-	require.NoError(t, err)
+	assert.NilError(t, err)
 
 	// get the validator
 	validator, found := sk.GetValidator(ctx, valAddrs[0])
-	require.True(t, found)
-	require.True(t, minCommissionRate.Equal(validator.Commission.Rate))
+	assert.Equal(t, true, found)
+	assert.Equal(t, true, minCommissionRate.Equal(validator.Commission.Rate))
 
 	validator2, found := sk.GetValidator(ctx, valAddrs[1])
-	require.True(t, found)
+	assert.Equal(t, true, found)
 	// validator2 commission rate should be greater than minCommissionRate
-	require.True(t, minCommissionRate.LT(validator2.Commission.Rate))
+	assert.Equal(t, true, minCommissionRate.LT(validator2.Commission.Rate))
 }

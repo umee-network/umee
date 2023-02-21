@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 )
@@ -22,7 +22,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 	}
 
 	var gravityGenState gravitytypes.GenesisState
-	require.NoError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[gravitytypes.ModuleName], &gravityGenState))
+	assert.NilError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[gravitytypes.ModuleName], &gravityGenState))
 
 	gravityGenState.DelegateKeys = []gravitytypes.MsgSetOrchestratorAddress{
 		{
@@ -38,7 +38,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 	}
 
 	bz, err := cfg.Codec.MarshalJSON(&gravityGenState)
-	require.NoError(t, err)
+	assert.NilError(t, err)
 
 	cfg.GenesisState[gravitytypes.ModuleName] = bz
 
