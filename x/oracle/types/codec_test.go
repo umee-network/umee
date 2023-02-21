@@ -4,11 +4,11 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/codec/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestRegisterInterfaces(t *testing.T) {
 	registry := types.NewInterfaceRegistry()
 	RegisterInterfaces(registry)
-	require.Equal(t, registry.ListAllInterfaces(), []string([]string{}))
+	assert.DeepEqual(t, registry.ListAllInterfaces(), []string([]string{}))
 }

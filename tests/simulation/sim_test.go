@@ -28,12 +28,12 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
 	ibchost "github.com/cosmos/ibc-go/v5/modules/core/24-host"
 	"github.com/rs/zerolog"
-	"github.com/stretchr/testify/require"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
+	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
@@ -52,11 +52,11 @@ func TestFullAppSimulation(t *testing.T) {
 		t.Skip("skipping application simulation")
 	}
 
-	require.NoError(t, err, "simulation setup failed")
+	assert.NilError(t, err, "simulation setup failed")
 
 	defer func() {
 		db.Close()
-		require.NoError(t, os.RemoveAll(dir))
+		assert.NilError(t, os.RemoveAll(dir))
 	}()
 
 	app := umeeapp.New(
@@ -73,7 +73,7 @@ func TestFullAppSimulation(t *testing.T) {
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)
-	require.Equal(t, appparams.Name, app.Name())
+	assert.Equal(t, appparams.Name, app.Name())
 
 	// run randomized simulation
 	_, simParams, simErr := simulation.SimulateFromSeed(
@@ -90,8 +90,8 @@ func TestFullAppSimulation(t *testing.T) {
 
 	// export state and simParams before the simulation error is checked
 	err = simapp.CheckExportSimulation(app, config, simParams)
-	require.NoError(t, err)
-	require.NoError(t, simErr)
+	assert.NilError(t, err)
+	assert.NilError(t, simErr)
 
 	if config.Commit {
 		simapp.PrintStats(db)
@@ -163,7 +163,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				config,
 				app.AppCodec(),
 			)
-			require.NoError(t, err)
+			assert.NilError(t, err)
 
 			if config.Commit {
 				simapp.PrintStats(db)
@@ -173,7 +173,7 @@ func TestAppStateDeterminism(t *testing.T) {
 			appHashList[j] = appHash
 
 			if j != 0 {
-				require.Equal(
+				assert.Equal(
 					t,
 					string(appHashList[0]),
 					string(appHashList[j]),
@@ -191,11 +191,11 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		b.Skip("skipping application simulation")
 	}
 
-	require.NoError(b, err, "simulation setup failed")
+	assert.NilError(b, err, "simulation setup failed")
 
 	defer func() {
 		db.Close()
-		require.NoError(b, os.RemoveAll(dir))
+		assert.NilError(b, os.RemoveAll(dir))
 	}()
 
 	app := umeeapp.New(
@@ -228,8 +228,8 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 
 	// export state and simParams before the simulation error is checked
 	err = simapp.CheckExportSimulation(app, config, simParams)
-	require.NoError(b, err)
-	require.NoError(b, simErr)
+	assert.NilError(b, err)
+	assert.NilError(b, simErr)
 
 	if config.Commit {
 		simapp.PrintStats(db)
@@ -252,13 +252,13 @@ func TestAppImportExport(t *testing.T) {
 	defer func() {
 		defer func() {
 			db.Close()
-			require.NoError(t, os.RemoveAll(dir))
+			assert.NilError(t, os.RemoveAll(dir))
 		}()
 	}()
 
 	defer func() {
-		require.NoError(t, newDB.Close())
-		require.NoError(t, os.RemoveAll(newDir))
+		assert.NilError(t, newDB.Close())
+		assert.NilError(t, os.RemoveAll(newDir))
 	}()
 
 	if stopEarly {
@@ -309,11 +309,11 @@ func TestAppImportExport(t *testing.T) {
 		storeB := ctxB.KVStore(skp.B)
 
 		failedKVAs, failedKVBs := sdk.DiffKVStores(storeA, storeB, skp.Prefixes)
-		require.Equal(t, len(failedKVAs), len(failedKVBs), "unequal sets of key-values to compare")
+		assert.Equal(t, len(failedKVAs), len(failedKVBs), "unequal sets of key-values to compare")
 
 		fmt.Printf("compared %d different key/value pairs between %s and %s\n", len(failedKVAs), skp.A, skp.B)
 
-		require.Equal(t, 0, len(failedKVAs), simapp.GetSimulationLog(skp.A.Name(), app.SimulationManager().StoreDecoders, failedKVAs, failedKVBs))
+		assert.Equal(t, 0, len(failedKVAs), simapp.GetSimulationLog(skp.A.Name(), app.SimulationManager().StoreDecoders, failedKVAs, failedKVBs))
 	}
 }
 
@@ -332,12 +332,12 @@ func TestAppSimulationAfterImport(t *testing.T) {
 
 	defer func() {
 		db.Close()
-		require.NoError(t, os.RemoveAll(dir))
+		assert.NilError(t, os.RemoveAll(dir))
 	}()
 
 	defer func() {
-		require.NoError(t, newDB.Close())
-		require.NoError(t, os.RemoveAll(newDir))
+		assert.NilError(t, newDB.Close())
+		assert.NilError(t, os.RemoveAll(newDir))
 	}()
 
 	if stopEarly {
@@ -364,5 +364,5 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		config,
 		newApp.AppCodec(),
 	)
-	require.NoError(t, err)
+	assert.NilError(t, err)
 }
