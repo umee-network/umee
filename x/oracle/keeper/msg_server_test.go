@@ -6,8 +6,8 @@ import (
 	"math/rand"
 	"strings"
 
+	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/v4/x/oracle/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )

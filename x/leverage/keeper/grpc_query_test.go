@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -66,19 +67,19 @@ func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 uumee
-	addr := s.newAccount(coin(umeeDenom, 1000))
-	s.supply(addr, coin(umeeDenom, 1000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000))
+	addr := s.newAccount(coin.New(umeeDenom, 1000))
+	s.supply(addr, coin.New(umeeDenom, 1000))
+	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000))
 
 	resp, err := s.queryClient.AccountBalances(ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
 	require.NoError(err)
 
 	expected := types.QueryAccountBalancesResponse{
 		Supplied: sdk.NewCoins(
-			coin(umeeDenom, 1000),
+			coin.New(umeeDenom, 1000),
 		),
 		Collateral: sdk.NewCoins(
-			coin("u/"+umeeDenom, 1000),
+			coin.New("u/"+umeeDenom, 1000),
 		),
 		Borrowed: nil,
 	}
@@ -90,13 +91,14 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 UMEE
-	addr := s.newAccount(coin(umeeDenom, 1000_000000))
-	s.supply(addr, coin(umeeDenom, 1000_000000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+	addr := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(addr, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000_000000))
 
 	resp, err := s.queryClient.AccountSummary(ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
 	require.NoError(err)
 
+	lt := sdk.MustNewDecFromStr("1052.5")
 	expected := types.QueryAccountSummaryResponse{
 		// This result is umee's oracle exchange rate from
 		// from .Reset() in x/leverage/keeper/oracle_test.go
@@ -111,7 +113,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
 		// (1000) * 4.21 * 0.25 = 1052.5
-		LiquidationThreshold: sdk.MustNewDecFromStr("1052.5"),
+		LiquidationThreshold: &lt,
 	}
 
 	require.Equal(expected, *resp)
@@ -147,9 +149,9 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 UMEE
-	addr := s.newAccount(coin(umeeDenom, 1000_000000))
-	s.supply(addr, coin(umeeDenom, 1000_000000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+	addr := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(addr, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000_000000))
 
 	resp, err := s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
@@ -176,7 +178,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.Equal(expected, *resp)
 
 	// borrow 100 UMEE for non-trivial query
-	s.borrow(addr, coin(umeeDenom, 100_000000))
+	s.borrow(addr, coin.New(umeeDenom, 100_000000))
 
 	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
 		Address: addr.String(),
@@ -207,9 +209,9 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	ctx, require := s.ctx, s.Require()
 
 	// creates account which has supplied and collateralized 1000 UMEE
-	addr := s.newAccount(coin(umeeDenom, 1000_000000))
-	s.supply(addr, coin(umeeDenom, 1000_000000))
-	s.collateralize(addr, coin("u/"+umeeDenom, 1000_000000))
+	addr := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(addr, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000_000000))
 
 	resp, err := s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
 		Address: addr.String(),
@@ -234,7 +236,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.Equal(expected, *resp)
 
 	// borrow 100 UMEE for non-trivial query
-	s.borrow(addr, coin(umeeDenom, 100_000000))
+	s.borrow(addr, coin.New(umeeDenom, 100_000000))
 
 	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
 		Address: addr.String(),

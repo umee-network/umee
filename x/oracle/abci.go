@@ -37,9 +37,13 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	// Build claim map over all validators in active set
 	validatorClaimMap := make(map[string]types.Claim)
 	powerReduction := k.StakingKeeper.PowerReduction(ctx)
+	// Calculate total validator power
+	var totalBondedPower int64
 	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
 		addr := v.GetOperator()
-		validatorClaimMap[addr.String()] = types.NewClaim(v.GetConsensusPower(powerReduction), 0, 0, addr)
+		power := v.GetConsensusPower(powerReduction)
+		totalBondedPower += power
+		validatorClaimMap[addr.String()] = types.NewClaim(power, 0, 0, addr)
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
@@ -54,9 +58,18 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 
 	// NOTE: it filters out inactive or jailed validators
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
+	threshold := k.VoteThreshold(ctx).MulInt64(types.MaxVoteThresholdMultiplier).TruncateInt64()
 
 	// Iterate through ballots and update exchange rates; drop if not enough votes have been achieved.
 	for _, ballotDenom := range ballotDenomSlice {
+		// Calculate the portion of votes received as an integer, scaled up using the
+		// same multiplier as the `threshold` computed above
+		support := ballotDenom.Ballot.Power() * types.MaxVoteThresholdMultiplier / totalBondedPower
+		if support < threshold {
+			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
+			continue
+		}
+
 		denom := strings.ToUpper(ballotDenom.Denom)
 		// Get weighted median of exchange rates
 		exchangeRate, err := Tally(ballotDenom.Ballot, params.RewardBand, validatorClaimMap)
@@ -64,11 +77,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 			return err
 		}
 
-		// Set the exchange rate, emit ABCI event
-		if err = k.SetExchangeRateWithEvent(ctx, denom, exchangeRate); err != nil {
-			return err
-		}
-
+		k.SetExchangeRateWithEvent(ctx, denom, exchangeRate)
 		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 			k.AddHistoricPrice(ctx, denom, exchangeRate)
 		}

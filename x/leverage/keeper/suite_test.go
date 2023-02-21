@@ -40,6 +40,8 @@ type IntegrationTestSuite struct {
 	setupAccountCounter sdkmath.Int
 	addrs               []sdk.AccAddress
 	msgSrvr             types.MsgServer
+
+	mockOracle *mockOracleKeeper
 }
 
 func TestKeeperTestSuite(t *testing.T) {
@@ -55,14 +57,15 @@ func (s *IntegrationTestSuite) SetupTest() {
 		Time:    time.Unix(0, 0),
 	})
 
+	s.mockOracle = newMockOracleKeeper()
+
 	// we only override the Leverage keeper so we can supply a custom mock oracle
 	k, tk := keeper.NewTestKeeper(
-		s.Require(),
 		app.AppCodec(),
 		app.GetKey(types.ModuleName),
 		app.GetSubspace(types.ModuleName),
 		app.BankKeeper,
-		newMockOracleKeeper(),
+		s.mockOracle,
 		true,
 	)
 
@@ -105,11 +108,6 @@ func (s *IntegrationTestSuite) requireEqualCoins(coinsA, coinsB sdk.Coins, msgAn
 // newToken creates a test token with reasonable initial parameters
 func newToken(base, symbol string, exponent uint32) types.Token {
 	return fixtures.Token(base, symbol, exponent)
-}
-
-// coin creates a coin with a given base denom and amount
-func coin(denom string, amount int64) sdk.Coin {
-	return sdk.NewInt64Coin(denom, amount)
 }
 
 // registerToken adds or updates a token in the token registry and requires no error.

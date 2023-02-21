@@ -3,6 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -88,12 +89,9 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			"borrower", borrower,
 			"asset", asset,
 		)
-		err := ctx.EventManager().EmitTypedEvent(&types.EventRepayBadDebt{
+		sdkutil.Emit(&ctx, &types.EventRepayBadDebt{
 			Borrower: borrower, Asset: asset,
 		})
-		if err != nil {
-			return false, err
-		}
 	}
 
 	newModuleBalance := k.ModuleBalance(ctx, denom)
@@ -107,13 +105,10 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 			"module balance", newModuleBalance,
 			"reserves", newReserved,
 		)
-		err := ctx.EventManager().EmitTypedEvent(&types.EventReservesExhausted{
+		sdkutil.Emit(&ctx, &types.EventReservesExhausted{
 			Borrower: borrower, OutstandingDebt: newBorrowed,
 			ModuleBalance: newModuleBalance, Reserves: newReserved,
 		})
-		if err != nil {
-			return false, err
-		}
 	}
 
 	// True is returned on full repayment

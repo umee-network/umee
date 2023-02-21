@@ -4,11 +4,10 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestMedian(t *testing.T) {
-	require := require.New(t)
 	prices := []sdk.Dec{
 		sdk.MustNewDecFromStr("1.12"),
 		sdk.MustNewDecFromStr("1.07"),
@@ -17,16 +16,15 @@ func TestMedian(t *testing.T) {
 	}
 
 	median, err := Median(prices)
-	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("1.115"), median)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("1.115"), median)
 
 	// test empty prices list
 	median, err = Median([]sdk.Dec{})
-	require.ErrorIs(err, ErrEmptyList)
+	assert.ErrorIs(t, err, ErrEmptyList)
 }
 
 func TestMedianDeviation(t *testing.T) {
-	require := require.New(t)
 	prices := []sdk.Dec{
 		sdk.MustNewDecFromStr("1.12"),
 		sdk.MustNewDecFromStr("1.07"),
@@ -36,16 +34,15 @@ func TestMedianDeviation(t *testing.T) {
 	median := sdk.MustNewDecFromStr("1.115")
 
 	medianDeviation, err := MedianDeviation(median, prices)
-	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("0.048218253804964775"), medianDeviation)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("0.048218253804964775"), medianDeviation)
 
 	// test empty prices list
-	medianDeviation, err = MedianDeviation(median, []sdk.Dec{})
-	require.ErrorIs(err, ErrEmptyList)
+	_, err = MedianDeviation(median, []sdk.Dec{})
+	assert.ErrorIs(t, err, ErrEmptyList)
 }
 
 func TestAverage(t *testing.T) {
-	require := require.New(t)
 	prices := []sdk.Dec{
 		sdk.MustNewDecFromStr("1.12"),
 		sdk.MustNewDecFromStr("1.07"),
@@ -54,16 +51,15 @@ func TestAverage(t *testing.T) {
 	}
 
 	average, err := Average(prices)
-	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("1.125"), average)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("1.125"), average)
 
 	// test empty prices list
-	average, err = Average([]sdk.Dec{})
-	require.ErrorIs(err, ErrEmptyList)
+	_, err = Average([]sdk.Dec{})
+	assert.ErrorIs(t, err, ErrEmptyList)
 }
 
 func TestMin(t *testing.T) {
-	require := require.New(t)
 	prices := []sdk.Dec{
 		sdk.MustNewDecFromStr("1.12"),
 		sdk.MustNewDecFromStr("1.07"),
@@ -72,16 +68,15 @@ func TestMin(t *testing.T) {
 	}
 
 	min, err := Min(prices)
-	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("1.07"), min)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("1.07"), min)
 
 	// test empty prices list
-	min, err = Min([]sdk.Dec{})
-	require.ErrorIs(err, ErrEmptyList)
+	_, err = Min([]sdk.Dec{})
+	assert.ErrorIs(t, err, ErrEmptyList)
 }
 
 func TestMax(t *testing.T) {
-	require := require.New(t)
 	prices := []sdk.Dec{
 		sdk.MustNewDecFromStr("1.12"),
 		sdk.MustNewDecFromStr("1.07"),
@@ -90,10 +85,10 @@ func TestMax(t *testing.T) {
 	}
 
 	max, err := Max(prices)
-	require.NoError(err)
-	require.Equal(sdk.MustNewDecFromStr("1.2"), max)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("1.2"), max)
 
 	// test empty prices list
-	max, err = Max([]sdk.Dec{})
-	require.ErrorIs(err, ErrEmptyList)
+	_, err = Max([]sdk.Dec{})
+	assert.ErrorIs(t, err, ErrEmptyList)
 }

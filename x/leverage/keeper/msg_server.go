@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -47,14 +48,14 @@ func (s msgServer) Supply(
 		"supplied", msg.Asset.String(),
 		"received", received.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
+	sdkutil.Emit(&ctx, &types.EventSupply{
 		Supplier: msg.Supplier,
 		Asset:    msg.Asset,
 		Utoken:   received,
 	})
 	return &types.MsgSupplyResponse{
 		Received: received,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Withdraw(
@@ -67,15 +68,18 @@ func (s msgServer) Withdraw(
 	if err != nil {
 		return nil, err
 	}
-	received, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
+	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
-	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
-	if err != nil {
-		return nil, err
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
+	if isFromCollateral {
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Ensure MinCollateralLiquidity is still satisfied after the transaction
@@ -83,10 +87,10 @@ func (s msgServer) Withdraw(
 		return nil, err
 	}
 
-	err = s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
+	s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
 	return &types.MsgWithdrawResponse{
 		Received: received,
-	}, err
+	}, nil
 }
 
 func (s msgServer) MaxWithdraw(
@@ -106,25 +110,32 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
+	// If a price is missing for the borrower's collateral,
+	// but not this uToken or any of their borrows, error
+	// will be nil and the resulting value will be what
+	// can safely be withdrawn even with missing prices.
 	uToken, err := s.keeper.maxWithdraw(ctx, supplierAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
 
 	if uToken.IsZero() {
-		zeroCoin := sdkutil.ZeroCoin(msg.Denom)
+		zeroCoin := coin.Zero(msg.Denom)
 		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
-	received, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
+	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
 		return nil, err
 	}
 
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
-	err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
-	if err != nil {
-		return nil, err
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
+	if isFromCollateral {
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Ensure MinCollateralLiquidity is still satisfied after the transaction
@@ -132,26 +143,25 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
-	err = s.logWithdrawal(ctx, msg.Supplier, uToken, received, "maximum supplied assets withdrawn")
+	s.logWithdrawal(ctx, msg.Supplier, uToken, received, "maximum supplied assets withdrawn")
 	return &types.MsgMaxWithdrawResponse{
 		Withdrawn: uToken,
 		Received:  received,
-	}, err
+	}, nil
 }
 
-func (s msgServer) logWithdrawal(ctx sdk.Context, supplier string, redeemed, received sdk.Coin, desc string) error {
+func (s msgServer) logWithdrawal(ctx sdk.Context, supplier string, redeemed, received sdk.Coin, desc string) {
 	s.keeper.Logger(ctx).Debug(
 		desc,
 		"supplier", supplier,
 		"redeemed", redeemed.String(),
 		"received", received.String(),
 	)
-	err := ctx.EventManager().EmitTypedEvent(&types.EventWithdraw{
+	sdkutil.Emit(&ctx, &types.EventWithdraw{
 		Supplier: supplier,
 		Utoken:   redeemed,
 		Asset:    received,
 	})
-	return err
 }
 
 func (s msgServer) Collateralize(
@@ -172,6 +182,8 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
+	// Fail here if collateral share restrictions are violated,
+	// based on only collateral with known oracle prices
 	if err := s.keeper.checkCollateralShare(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
@@ -181,11 +193,11 @@ func (s msgServer) Collateralize(
 		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
+	sdkutil.Emit(&ctx, &types.EventCollaterize{
 		Borrower: msg.Borrower,
 		Utoken:   msg.Asset,
 	})
-	return &types.MsgCollateralizeResponse{}, err
+	return &types.MsgCollateralizeResponse{}, nil
 }
 
 func (s msgServer) SupplyCollateral(
@@ -211,11 +223,13 @@ func (s msgServer) SupplyCollateral(
 		return nil, err
 	}
 
-	// Fail here if collateral share or liquidity restrictions are violated
+	// Fail here if collateral liquidity restrictions are violated
 	if err := s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
 
+	// Fail here if collateral share restrictions are violated,
+	// based on only collateral with known oracle prices
 	if err := s.keeper.checkCollateralShare(ctx, uToken.Denom); err != nil {
 		return nil, err
 	}
@@ -226,25 +240,23 @@ func (s msgServer) SupplyCollateral(
 		"supplied", msg.Asset.String(),
 		"received", uToken.String(),
 	)
-	if err = ctx.EventManager().EmitTypedEvent(&types.EventSupply{
-		Supplier: msg.Supplier,
-		Asset:    msg.Asset,
-		Utoken:   uToken,
-	}); err != nil {
-		return nil, err
-	}
 	s.keeper.Logger(ctx).Debug(
 		"collateral added",
 		"borrower", msg.Supplier,
 		"amount", uToken.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventCollaterize{
+	sdkutil.Emit(&ctx, &types.EventSupply{
+		Supplier: msg.Supplier,
+		Asset:    msg.Asset,
+		Utoken:   uToken,
+	})
+	sdkutil.Emit(&ctx, &types.EventCollaterize{
 		Borrower: msg.Supplier,
 		Utoken:   uToken,
 	})
 	return &types.MsgSupplyCollateralResponse{
 		Collateralized: uToken,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Decollateralize(
@@ -262,6 +274,7 @@ func (s msgServer) Decollateralize(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
@@ -272,11 +285,11 @@ func (s msgServer) Decollateralize(
 		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventDecollaterize{
+	sdkutil.Emit(&ctx, &types.EventDecollaterize{
 		Borrower: msg.Borrower,
 		Utoken:   msg.Asset,
 	})
-	return &types.MsgDecollateralizeResponse{}, err
+	return &types.MsgDecollateralizeResponse{}, nil
 }
 
 func (s msgServer) Borrow(
@@ -294,6 +307,7 @@ func (s msgServer) Borrow(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
@@ -314,11 +328,11 @@ func (s msgServer) Borrow(
 		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
+	sdkutil.Emit(&ctx, &types.EventBorrow{
 		Borrower: msg.Borrower,
 		Asset:    msg.Asset,
 	})
-	return &types.MsgBorrowResponse{}, err
+	return &types.MsgBorrowResponse{}, nil
 }
 
 func (s msgServer) MaxBorrow(
@@ -332,12 +346,16 @@ func (s msgServer) MaxBorrow(
 		return nil, err
 	}
 
+	// If a price is missing for the borrower's collateral,
+	// but not this token or any of their borrows, error
+	// will be nil and the resulting value will be what
+	// can safely be borrowed even with missing prices.
 	maxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
 	if maxBorrow.IsZero() {
-		return &types.MsgMaxBorrowResponse{Borrowed: sdkutil.ZeroCoin(msg.Denom)}, nil
+		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
 	}
 
 	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
@@ -345,6 +363,7 @@ func (s msgServer) MaxBorrow(
 	}
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
 	if err != nil {
 		return nil, err
@@ -365,13 +384,13 @@ func (s msgServer) MaxBorrow(
 		"borrower", msg.Borrower,
 		"amount", maxBorrow.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventBorrow{
+	sdkutil.Emit(&ctx, &types.EventBorrow{
 		Borrower: msg.Borrower,
 		Asset:    maxBorrow,
 	})
 	return &types.MsgMaxBorrowResponse{
 		Borrowed: maxBorrow,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Repay(
@@ -394,13 +413,13 @@ func (s msgServer) Repay(
 		"attempted", msg.Asset.String(),
 		"repaid", repaid.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventRepay{
+	sdkutil.Emit(&ctx, &types.EventRepay{
 		Borrower: msg.Borrower,
 		Repaid:   repaid,
 	})
 	return &types.MsgRepayResponse{
 		Repaid: repaid,
-	}, err
+	}, nil
 }
 
 func (s msgServer) Liquidate(
@@ -431,7 +450,7 @@ func (s msgServer) Liquidate(
 		"liquidated", liquidated.String(),
 		"reward", reward.String(),
 	)
-	err = ctx.EventManager().EmitTypedEvent(&types.EventLiquidate{
+	sdkutil.Emit(&ctx, &types.EventLiquidate{
 		Liquidator: msg.Liquidator,
 		Borrower:   msg.Borrower,
 		Liquidated: liquidated,
@@ -440,7 +459,7 @@ func (s msgServer) Liquidate(
 		Repaid:     repaid,
 		Collateral: liquidated,
 		Reward:     reward,
-	}, err
+	}, nil
 }
 
 // GovUpdateRegistry updates existing tokens with new settings
@@ -466,6 +485,12 @@ func (s msgServer) GovUpdateRegistry(
 
 	// adds  the new token settings
 	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, registeredTokenDenoms, false)
+	if err != nil {
+		return &types.MsgGovUpdateRegistryResponse{}, err
+	}
+
+	// cleans blacklisted tokens from the registry if they have not been supplied
+	err = s.keeper.CleanTokenRegistry(ctx)
 	if err != nil {
 		return &types.MsgGovUpdateRegistryResponse{}, err
 	}

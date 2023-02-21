@@ -1,10 +1,8 @@
 package keeper
 
 import (
-	"fmt"
-
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/util/decmath"
@@ -38,7 +36,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 	historicPrices := k.historicPrices(ctx, denom, k.MaximumPriceStamps(ctx))
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
-		return sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return errors.Wrap(err, "denom: "+denom)
 	}
 
 	block := uint64(ctx.BlockHeight())
@@ -68,7 +66,7 @@ func (k Keeper) HistoricMedianDeviation(
 	blockNum := uint64(ctx.BlockHeight()) - blockDiff
 	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
 	if bz == nil {
-		return &types.Price{}, sdkerrors.Wrap(types.ErrNoMedianDeviation, fmt.Sprintf("denom: %s", denom))
+		return &types.Price{}, types.ErrNoMedianDeviation.Wrap("denom: " + denom)
 	}
 
 	decProto := sdk.DecProto{}
@@ -88,14 +86,14 @@ func (k Keeper) WithinHistoricMedianDeviation(
 	// get latest median
 	medians := k.HistoricMedians(ctx, denom, 1)
 	if len(medians) == 0 {
-		return false, sdkerrors.Wrap(types.ErrNoMedian, fmt.Sprintf("denom: %s", denom))
+		return false, types.ErrNoMedian.Wrap("denom: " + denom)
 	}
 	median := medians[0].ExchangeRateTuple.ExchangeRate
 
 	// get latest historic price
 	prices := k.historicPrices(ctx, denom, 1)
 	if len(prices) == 0 {
-		return false, sdkerrors.Wrap(types.ErrNoHistoricPrice, fmt.Sprintf("denom: %s", denom))
+		return false, types.ErrNoHistoricPrice.Wrap("denom: " + denom)
 	}
 	price := prices[0]
 
@@ -117,7 +115,7 @@ func (k Keeper) calcAndSetHistoricMedianDeviation(
 ) error {
 	medianDeviation, err := decmath.MedianDeviation(median, prices)
 	if err != nil {
-		return sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return errors.Wrap(err, "denom: "+denom)
 	}
 
 	block := uint64(ctx.BlockHeight())
@@ -150,7 +148,7 @@ func (k Keeper) MedianOfHistoricMedians(
 	}
 	median, err := decmath.Median(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return median, uint32(len(medians)), nil
@@ -170,7 +168,7 @@ func (k Keeper) AverageOfHistoricMedians(
 	}
 	average, err := decmath.Average(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return average, uint32(len(medians)), nil
@@ -190,7 +188,7 @@ func (k Keeper) MaxOfHistoricMedians(
 	}
 	max, err := decmath.Max(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return max, uint32(len(medians)), nil
@@ -210,7 +208,7 @@ func (k Keeper) MinOfHistoricMedians(
 	}
 	min, err := decmath.Min(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, sdkerrors.Wrap(err, fmt.Sprintf("denom: %s", denom))
+		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return min, uint32(len(medians)), nil
@@ -285,6 +283,10 @@ func (k Keeper) IterateHistoricMedians(
 	}
 }
 
+func (k Keeper) AvgKeeper(ctx sdk.Context) AvgKeeper {
+	return AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
+}
+
 // AddHistoricPrice adds the historic price of a denom at the current
 // block height.
 func (k Keeper) AddHistoricPrice(
@@ -294,8 +296,11 @@ func (k Keeper) AddHistoricPrice(
 ) {
 	block := uint64(ctx.BlockHeight())
 	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
-	ak := AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
-	ak.updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
+	k.AvgKeeper(ctx).updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
+}
+
+func (k Keeper) HistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
+	return k.AvgKeeper(ctx).GetCurrentAvg(denom)
 }
 
 func (k Keeper) SetHistoricPrice(

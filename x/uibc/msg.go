@@ -34,8 +34,8 @@ func (msg *MsgGovUpdateQuota) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateQuota) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.Wrap(err, "invalid authority address")
+	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+		return err
 	}
 
 	if msg.Total.IsNil() || !msg.Total.IsPositive() {
@@ -83,8 +83,8 @@ func (msg *MsgGovSetIBCPause) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovSetIBCPause) ValidateBasic() error {
-	if _, err := sdk.AccAddressFromBech32(msg.Authority); err != nil {
-		return sdkerrors.Wrap(err, "invalid authority address")
+	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+		return err
 	}
 
 	if err := validateIBCTransferStatus(msg.IbcPauseStatus); err != nil {
@@ -103,16 +103,4 @@ func (msg *MsgGovSetIBCPause) GetSignBytes() []byte {
 // GetSigners implements Msg
 func (msg *MsgGovSetIBCPause) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
-}
-
-func (q *Quota) Validate() error {
-	if len(q.IbcDenom) == 0 {
-		return sdkerrors.ErrInvalidRequest.Wrap("ibc denom shouldn't be empty")
-	}
-
-	if q.OutflowSum.IsNil() || q.OutflowSum.IsNegative() {
-		return sdkerrors.ErrInvalidRequest.Wrap("ibc denom quota expires shouldn't be empty")
-	}
-
-	return nil
 }

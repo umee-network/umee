@@ -1,12 +1,14 @@
 package keeper
 
 import (
+	"strings"
+
+	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
-
+	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
@@ -33,16 +35,16 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		// spot price is required for modes other than historic
 		spotPrice, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
 		if err != nil {
-			return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
 	}
 	if mode != types.PriceModeSpot {
 		// historic price is required for modes other than spot
 		var numStamps uint32
 		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(
-			ctx, t.SymbolDenom, uint64(t.HistoricMedians))
+			ctx, strings.ToUpper(t.SymbolDenom), uint64(t.HistoricMedians))
 		if err != nil {
-			return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(err, "oracle")
+			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
 		if numStamps < t.HistoricMedians {
 			return sdk.ZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
@@ -67,7 +69,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 	}
 
 	if price.IsNil() || !price.IsPositive() {
-		return sdk.ZeroDec(), t.Exponent, sdkerrors.Wrap(types.ErrInvalidOraclePrice, baseDenom)
+		return sdk.ZeroDec(), t.Exponent, types.ErrInvalidOraclePrice.Wrap(baseDenom)
 	}
 
 	return price, t.Exponent, nil
@@ -112,6 +114,26 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.Pri
 		}
 
 		total = total.Add(v)
+	}
+
+	return total, nil
+}
+
+// VisibleTokenValue functions like TotalTokenValue, but interprets missing oracle prices
+// as zero value instead of returning an error.
+func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+	total := sdk.ZeroDec()
+
+	accepted := k.filterAcceptedCoins(ctx, coins)
+
+	for _, c := range accepted {
+		v, err := k.TokenValue(ctx, c, mode)
+		if err == nil {
+			total = total.Add(v)
+		}
+		if nonOracleError(err) {
+			return sdk.ZeroDec(), err
+		}
 	}
 
 	return total, nil
@@ -192,9 +214,7 @@ func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 		"funded oracle",
 		"amount", rewards,
 	)
-	if err := ctx.EventManager().EmitTypedEvent(&types.EventFundOracle{Assets: rewards}); err != nil {
-		return err
-	}
+	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: rewards})
 
 	// Send rewards
 	if !rewards.IsZero() {

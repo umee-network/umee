@@ -1,7 +1,7 @@
 queue_rules:
   - name: default
     conditions:
-      - "#approved-reviews-by>1"
+      - "#approved-reviews-by>=1"
 
 pull_request_rules:
   - name: Automatic merge on approval
@@ -17,24 +17,6 @@ pull_request_rules:
         commit_message_template: |
           {{ title }} (#{{ number }})
           {{ body }}
-
-  - name: Backport patches to the release/v3.0.x branch
-    conditions:
-      - base=main
-      - label=S:backport/v3.0.x
-    actions:
-      backport:
-        branches:
-          - release/v3.0.x
-
-  - name: Backport patches to the release/v3.1.x branch
-    conditions:
-      - base=main
-      - label=S:backport/v3.1.x
-    actions:
-      backport:
-        branches:
-          - release/v3.1.x
 
   - name: Backport patches to the release/price-feeder/v2.x.x branch
     conditions:
@@ -53,3 +35,12 @@ pull_request_rules:
       backport:
         branches:
           - release/v4.0.x
+
+  - name: Backport patches to the release/v4.1.x branch
+    conditions:
+      - base=main
+      - label=S:backport/v4.1.x
+    actions:
+      backport:
+        branches:
+          - release/v4.1.x

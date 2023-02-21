@@ -177,10 +177,11 @@ func init() {
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
+		uibcmodule.AppModuleBasic{},
 	}
 
 	if Experimental {
-		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{}, uibcmodule.AppModuleBasic{})
+		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -198,11 +199,11 @@ func init() {
 		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName:      nil,
+		uibc.ModuleName:             nil,
 	}
 
 	if Experimental {
 		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
-		maccPerms[uibc.ModuleName] = nil
 	}
 }
 
@@ -310,9 +311,10 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey, gravitytypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
+		uibc.StoreKey,
 	}
 	if Experimental {
-		storeKeys = append(storeKeys, wasm.StoreKey, uibc.StoreKey)
+		storeKeys = append(storeKeys, wasm.StoreKey)
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -427,16 +429,6 @@ func New(
 		govModuleAddr,
 	)
 
-	// ibc keeper
-	app.IBCKeeper = ibckeeper.NewKeeper(
-		appCodec,
-		keys[ibchost.StoreKey],
-		app.GetSubspace(ibchost.ModuleName),
-		app.StakingKeeper,
-		app.UpgradeKeeper,
-		app.ScopedIBCKeeper,
-	)
-
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
@@ -507,16 +499,12 @@ func New(
 	)
 
 	var ics4Wrapper ibcporttypes.ICS4Wrapper
-	if Experimental {
-		app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
-			appCodec,
-			keys[uibc.StoreKey],
-			app.IBCKeeper.ChannelKeeper, app.LeverageKeeper,
-		)
-		ics4Wrapper = app.UIbcQuotaKeeper
-	} else {
-		ics4Wrapper = app.IBCKeeper.ChannelKeeper
-	}
+	app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
+		appCodec,
+		keys[uibc.StoreKey],
+		app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, app.OracleKeeper,
+	)
+	ics4Wrapper = app.UIbcQuotaKeeper
 
 	// Middleware Stacks
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -553,9 +541,7 @@ func New(
 		app.UIBCTransferKeeper,
 	)
 
-	if Experimental {
-		transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper)
-	}
+	transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
 
 	// Create IBC Router
 	// create static IBC router, add transfer route, then set and seal it
@@ -642,12 +628,12 @@ func New(
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
+		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
 	}
 	if Experimental {
 		appModules = append(
 			appModules,
 			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-			uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
 		)
 	}
 
@@ -672,6 +658,7 @@ func New(
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	endBlockers := []string{
@@ -688,6 +675,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -708,6 +696,7 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	orderMigrations := []string{
@@ -722,13 +711,14 @@ func New(
 		leveragetypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
+		uibc.ModuleName,
 	}
 
 	if Experimental {
-		beginBlockers = append(beginBlockers, wasm.ModuleName, uibc.ModuleName)
-		endBlockers = append(endBlockers, wasm.ModuleName, uibc.ModuleName)
-		initGenesis = append(initGenesis, wasm.ModuleName, uibc.ModuleName)
-		orderMigrations = append(orderMigrations, wasm.ModuleName, uibc.ModuleName)
+		beginBlockers = append(beginBlockers, wasm.ModuleName)
+		endBlockers = append(endBlockers, wasm.ModuleName)
+		initGenesis = append(initGenesis, wasm.ModuleName)
+		orderMigrations = append(orderMigrations, wasm.ModuleName)
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)

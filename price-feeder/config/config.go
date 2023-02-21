@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/spf13/viper"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	"github.com/umee-network/umee/price-feeder/v2/oracle/types"
 )
 
 const (
@@ -156,6 +157,30 @@ func (c Config) Validate() error {
 	return validate.Struct(c)
 }
 
+func (c Config) ProviderPairs() map[provider.Name][]types.CurrencyPair {
+	providerPairs := make(map[provider.Name][]types.CurrencyPair)
+
+	for _, pair := range c.CurrencyPairs {
+		for _, provider := range pair.Providers {
+			providerPairs[provider] = append(providerPairs[provider], types.CurrencyPair{
+				Base:  pair.Base,
+				Quote: pair.Quote,
+			})
+		}
+	}
+	return providerPairs
+}
+
+// ProviderEndpointsMap converts the provider_endpoints from the config
+// file into a map of provider.Endpoint where the key is the provider name
+func (c Config) ProviderEndpointsMap() map[provider.Name]provider.Endpoint {
+	endpoints := make(map[provider.Name]provider.Endpoint, len(c.ProviderEndpoints))
+	for _, endpoint := range c.ProviderEndpoints {
+		endpoints[endpoint.Name] = endpoint
+	}
+	return endpoints
+}
+
 // ParseConfig attempts to read and parse configuration from the given file path.
 // An error is returned if reading or parsing the config fails.
 func ParseConfig(configPath string) (Config, error) {
@@ -220,16 +245,6 @@ func ParseConfig(configPath string) (Config, error) {
 				return cfg, fmt.Errorf("all non-usd quotes require a conversion rate feed")
 			}
 		}
-	}
-
-	gatePairs := []string{}
-	for base, providers := range pairs {
-		if _, ok := providers[provider.ProviderGate]; ok {
-			gatePairs = append(gatePairs, base)
-		}
-	}
-	if len(gatePairs) > 1 {
-		return cfg, fmt.Errorf("gate provider does not support multiple pairs: %v", gatePairs)
 	}
 
 	for _, deviation := range cfg.Deviations {

@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package uibc
 
 import (
@@ -23,6 +20,7 @@ func validMsgGovUpdateQuota() MsgGovUpdateQuota {
 }
 
 func TestMsgGovUpdateQuota(t *testing.T) {
+	t.Parallel()
 	validMsg := validMsgGovUpdateQuota()
 
 	invalidAuthority := validMsg
@@ -74,6 +72,7 @@ func validMsgGovSetIBCPause() MsgGovSetIBCPause {
 }
 
 func TestMsgGovSetIBCPause(t *testing.T) {
+	t.Parallel()
 	validMsg := validMsgGovSetIBCPause()
 
 	invalidAuthority := validMsg

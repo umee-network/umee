@@ -2,9 +2,38 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
+
+// CleanTokenRegistry deletes all blacklisted tokens in the leverage registry
+// whose uToken supplies are zero. Called automatically on registry update.
+func (k Keeper) CleanTokenRegistry(ctx sdk.Context) error {
+	tokens := k.GetAllRegisteredTokens(ctx)
+	for _, t := range tokens {
+		if t.Blacklist {
+			uDenom := types.ToUTokenDenom(t.BaseDenom)
+			uSupply := k.GetUTokenSupply(ctx, uDenom)
+			if uSupply.IsZero() {
+				err := k.deleteTokenSettings(ctx, t)
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// deleteTokenSettings deletes a Token in the x/leverage module's KVStore.
+// it should only be called by CleanTokenRegistry.
+func (k Keeper) deleteTokenSettings(ctx sdk.Context, token types.Token) error {
+	store := ctx.KVStore(k.storeKey)
+	tokenKey := types.KeyRegisteredToken(token.BaseDenom)
+	store.Delete(tokenKey)
+	// call oracle hooks on deleted (not just blacklisted) token
+	k.hooks.AfterRegisteredTokenRemoved(ctx, token)
+	return nil
+}
 
 // SetTokenSettings stores a Token into the x/leverage module's KVStore.
 func (k Keeper) SetTokenSettings(ctx sdk.Context, token types.Token) error {
@@ -33,7 +62,7 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 	token := types.Token{}
 	bz := store.Get(tokenKey)
 	if len(bz) == 0 {
-		return token, sdkerrors.Wrap(types.ErrNotRegisteredToken, denom)
+		return token, types.ErrNotRegisteredToken.Wrap(denom)
 	}
 
 	err := k.cdc.Unmarshal(bz, &token)

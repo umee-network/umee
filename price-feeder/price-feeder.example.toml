@@ -51,10 +51,6 @@ base = "OSMO"
 threshold = "2"
 
 [[deviation_thresholds]]
-base = "BTC"
-threshold = "1.5"
-
-[[deviation_thresholds]]
 base = "stATOM"
 threshold = "2"
 
@@ -71,9 +67,15 @@ base = "UMEE"
 providers = [
   "okx",
   "gate",
-  "mexc",
 ]
 quote = "USDT"
+
+[[currency_pairs]]
+base = "UMEE"
+providers = [
+  "osmosisv2",
+]
+quote = "ATOM"
 
 [[currency_pairs]]
 base = "USDT"
@@ -96,6 +98,7 @@ quote = "USDT"
 base = "ATOM"
 providers = [
   "kraken",
+  "binanceus",
 ]
 quote = "USD"
 
@@ -149,27 +152,6 @@ providers = [
 quote = "USDT"
 
 [[currency_pairs]]
-base = "JUNO"
-providers = [
-  "kraken",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "JUNO"
-providers = [
-  "bitget",
-]
-quote = "USDT"
-
-[[currency_pairs]]
-base = "JUNO"
-providers = [
-  "osmosisv2",
-]
-quote = "ATOM"
-
-[[currency_pairs]]
 base = "CRO"
 providers = [
   "crypto",
@@ -198,6 +180,7 @@ quote = "ATOM"
 base = "OSMO"
 providers = [
   "bitget",
+  "gate",
 ]
 quote = "USDT"
 
@@ -207,21 +190,6 @@ providers = [
   "crypto",
 ]
 quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "coinbase",
-]
-quote = "USD"
-
-[[currency_pairs]]
-base = "BTC"
-providers = [
-  "huobi",
-  "kraken",
-]
-quote = "USDT"
 
 [[currency_pairs]]
 base = "stATOM"
