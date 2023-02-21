@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"math"
+	"sort"
 	"strconv"
 	"testing"
 
@@ -372,4 +373,30 @@ func TestClaimMapToSlice(t *testing.T) {
 		"anotherClaim": claim,
 	})
 	assert.DeepEqual(t, []Claim{claim, claim}, claimSlice)
+}
+
+func TestExchangeRateBallotSort(t *testing.T) {
+	v1 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
+	v1Cpy := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.2"), Voter: sdk.ValAddress{0, 1}}
+	v2 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1, 1}}
+	v3 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.1"), Voter: sdk.ValAddress{0, 1}}
+	v4 := VoteForTally{ExchangeRate: sdk.MustNewDecFromStr("0.5"), Voter: sdk.ValAddress{1}}
+
+	tcs := []struct {
+		got      ExchangeRateBallot
+		expected ExchangeRateBallot
+	}{
+		{got: ExchangeRateBallot{v1, v2, v3, v4},
+			expected: ExchangeRateBallot{v3, v2, v1, v4}},
+		{got: ExchangeRateBallot{v1},
+			expected: ExchangeRateBallot{v1}},
+		{got: ExchangeRateBallot{v1, v1Cpy},
+			expected: ExchangeRateBallot{v1, v1Cpy}},
+	}
+	for i, tc := range tcs {
+		t.Run(fmt.Sprint(i), func(t *testing.T) {
+			sort.Sort(tc.got)
+			assert.DeepEqual(t, tc.expected, tc.got)
+		})
+	}
 }
