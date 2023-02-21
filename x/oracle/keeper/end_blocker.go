@@ -57,7 +57,7 @@ func (k *Keeper) RecordEndBlockMetrics(ctx sdk.Context) {
 	}
 
 	medianDeviations := k.AllMedianDeviationPrices(ctx)
-	medianDeviations = *medianDeviations.FilterByBlock(medians.NewestBlockNum())
+	medianDeviations = *medianDeviations.FilterByBlock(medianDeviations.NewestBlockNum())
 	for _, medianDeviation := range medianDeviations {
 		metrics.SetGaugeWithLabels(
 			[]string{"median_deviation"},
