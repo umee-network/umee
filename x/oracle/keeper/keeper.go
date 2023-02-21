@@ -30,7 +30,8 @@ type Keeper struct {
 	distrKeeper   types.DistributionKeeper
 	StakingKeeper types.StakingKeeper
 
-	distrName string
+	distrName        string
+	telemetryEnabled bool
 }
 
 // NewKeeper constructs a new keeper for oracle
@@ -43,6 +44,7 @@ func NewKeeper(
 	distrKeeper types.DistributionKeeper,
 	stakingKeeper types.StakingKeeper,
 	distrName string,
+	telemetryEnabled bool,
 ) Keeper {
 	// ensure oracle module account is set
 	if addr := accountKeeper.GetModuleAddress(types.ModuleName); addr == nil {
@@ -55,14 +57,15 @@ func NewKeeper(
 	}
 
 	return Keeper{
-		cdc:           cdc,
-		storeKey:      storeKey,
-		paramSpace:    paramspace,
-		accountKeeper: accountKeeper,
-		bankKeeper:    bankKeeper,
-		distrKeeper:   distrKeeper,
-		StakingKeeper: stakingKeeper,
-		distrName:     distrName,
+		cdc:              cdc,
+		storeKey:         storeKey,
+		paramSpace:       paramspace,
+		accountKeeper:    accountKeeper,
+		bankKeeper:       bankKeeper,
+		distrKeeper:      distrKeeper,
+		StakingKeeper:    stakingKeeper,
+		distrName:        distrName,
+		telemetryEnabled: telemetryEnabled,
 	}
 }
 

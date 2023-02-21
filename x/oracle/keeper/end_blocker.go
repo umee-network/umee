@@ -33,6 +33,10 @@ func (k *Keeper) IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool
 }
 
 func (k *Keeper) RecordEndBlockMetrics(ctx sdk.Context) {
+	if !k.telemetryEnabled {
+		return
+	}
+
 	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
 		metrics.SetGaugeWithLabels(
 			[]string{"miss_counter"},

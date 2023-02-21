@@ -440,6 +440,7 @@ func New(
 		app.DistrKeeper,
 		app.StakingKeeper,
 		distrtypes.ModuleName,
+		cast.ToBool(appOpts.Get("telemetry.enabled")),
 	)
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
