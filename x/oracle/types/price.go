@@ -59,3 +59,13 @@ func (p *Prices) Sort() *Prices {
 	)
 	return &prices
 }
+
+func (p *Prices) NewestBlockNum() uint64 {
+	blockNum := uint64(0)
+	for _, price := range *p {
+		if price.BlockNum > blockNum {
+			blockNum = price.BlockNum
+		}
+	}
+	return blockNum
+}

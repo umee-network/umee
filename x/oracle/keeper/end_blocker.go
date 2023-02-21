@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"github.com/armon/go-metrics"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -29,4 +30,35 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 // IsPeriodLastBlock returns true if we are at the last block of the period
 func (k *Keeper) IsPeriodLastBlock(ctx sdk.Context, blocksPerPeriod uint64) bool {
 	return (uint64(ctx.BlockHeight())+1)%blocksPerPeriod == 0
+}
+
+func (k *Keeper) RecordEndBlockMetrics(ctx sdk.Context) {
+	k.IterateMissCounters(ctx, func(operator sdk.ValAddress, missCounter uint64) bool {
+		metrics.SetGaugeWithLabels(
+			[]string{"miss_counter"},
+			float32(missCounter),
+			[]metrics.Label{{Name: "address", Value: operator.String()}},
+		)
+		return false
+	})
+
+	medians := k.AllMedianPrices(ctx)
+	medians = *medians.FilterByBlock(medians.NewestBlockNum())
+	for _, median := range medians {
+		metrics.SetGaugeWithLabels(
+			[]string{"median"},
+			float32(median.ExchangeRateTuple.ExchangeRate.MustFloat64()),
+			[]metrics.Label{{Name: "denom", Value: median.ExchangeRateTuple.Denom}},
+		)
+	}
+
+	medianDeviations := k.AllMedianDeviationPrices(ctx)
+	medianDeviations = *medianDeviations.FilterByBlock(medians.NewestBlockNum())
+	for _, medianDeviation := range medianDeviations {
+		metrics.SetGaugeWithLabels(
+			[]string{"median_deviation"},
+			float32(medianDeviation.ExchangeRateTuple.ExchangeRate.MustFloat64()),
+			[]metrics.Label{{Name: "denom", Value: medianDeviation.ExchangeRateTuple.Denom}},
+		)
+	}
 }

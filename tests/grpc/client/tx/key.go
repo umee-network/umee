@@ -17,7 +17,7 @@ func CreateAccountFromMnemonic(name, mnemonic string) (*keyring.Record, keyring.
 	encodingConfig := umeeapp.MakeEncodingConfig()
 	cdc := encodingConfig.Codec
 
-	kb, err := keyring.New(keyringAppName, keyring.BackendTest, "", nil, cdc)
+	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
 		return nil, nil, err
 	}

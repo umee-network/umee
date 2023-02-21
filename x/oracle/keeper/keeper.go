@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/armon/go-metrics"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -126,6 +127,13 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 // exchange rate to the store with ABCI event
 func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
+
+	go metrics.SetGaugeWithLabels(
+		[]string{"exchange_rate"},
+		float32(exchangeRate.MustFloat64()),
+		[]metrics.Label{{Name: "denom", Value: denom}},
+	)
+
 	sdkutil.Emit(&ctx, &types.EventSetFxRate{
 		Denom: denom, Rate: exchangeRate,
 	})
