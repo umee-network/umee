@@ -21,13 +21,10 @@ func (k Keeper) OrganizeBallotByDenom(
 		// organize ballot only for the active validators
 		claim, ok := validatorClaimMap[vote.Voter]
 		if ok {
-			power := claim.Power
-
 			for _, tuple := range vote.ExchangeRateTuples {
-				tmpPower := power
 				votes[tuple.Denom] = append(
 					votes[tuple.Denom],
-					types.NewVoteForTally(tuple.ExchangeRate, tuple.Denom, voterAddr, tmpPower),
+					types.NewVoteForTally(tuple.ExchangeRate, tuple.Denom, voterAddr, claim.Power),
 				)
 			}
 		}
