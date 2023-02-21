@@ -136,39 +136,42 @@ func (k Keeper) ResetQuota(ctx sdk.Context) error {
 func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sdkmath.Int) error {
 	params := k.GetParams(ctx)
 
-	quota, err := k.GetQuota(ctx, denom)
-	if err != nil {
-		return err
-	}
+	okeeper := outflowKeeper{k.oracleKeeper, ctx.KVStore(k.storeKey)}
+	return okeeper.checkAndUpdateQuota(ctx, denom, newOutflow, params)
 
-	exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
-	if err != nil {
-		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
-		// TODO: write test case for this
-		if ltypes.ErrNotRegisteredToken.Is(err) {
-			return nil
-		} else if err != nil {
-			return err
-		}
-	}
+	// quota, err := k.GetQuota(ctx, denom)
+	// if err != nil {
+	// 	return err
+	// }
 
-	// checking ibc-transfer token quota
-	quota.Amount = quota.Amount.Add(exchangePrice)
-	if quota.Amount.GT(params.TokenQuota) {
-		return uibc.ErrQuotaExceeded
-	}
+	// exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
+	// if err != nil {
+	// 	// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
+	// 	// TODO: write test case for this
+	// 	if ltypes.ErrNotRegisteredToken.Is(err) {
+	// 		return nil
+	// 	} else if err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	// checking total outflow quota
-	totalOutflowSum := k.GetTotalOutflowSum(ctx).Add(exchangePrice)
-	if totalOutflowSum.GT(params.TotalQuota) {
-		return uibc.ErrQuotaExceeded
-	}
+	// // checking ibc-transfer token quota
+	// quota.Amount = quota.Amount.Add(exchangePrice)
+	// if quota.Amount.GT(params.TokenQuota) {
+	// 	return uibc.ErrQuotaExceeded
+	// }
 
-	// update the per token outflow sum
-	k.SetDenomQuota(ctx, quota)
-	// updating the total outflow sum
-	k.SetTotalOutflowSum(ctx, totalOutflowSum)
-	return nil
+	// // checking total outflow quota
+	// totalOutflowSum := k.GetTotalOutflowSum(ctx).Add(exchangePrice)
+	// if totalOutflowSum.GT(params.TotalQuota) {
+	// 	return uibc.ErrQuotaExceeded
+	// }
+
+	// // update the per token outflow sum
+	// k.SetDenomQuota(ctx, quota)
+	// // updating the total outflow sum
+	// k.SetTotalOutflowSum(ctx, totalOutflowSum)
+	// return nil
 }
 
 func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.Int) (sdk.Dec, error) {
