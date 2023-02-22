@@ -5,11 +5,10 @@ import (
 	"math"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestMergeBytes(t *testing.T) {
-	require := require.New(t)
 	tcs := []struct {
 		in       [][]byte
 		inMargin int
@@ -23,8 +22,8 @@ func TestMergeBytes(t *testing.T) {
 		{[][]byte{{1, 2}, {2}}, 3, []byte{1, 2, 2, 0, 0, 0}},
 		{[][]byte{{1, 2}, {2}, {3, 3}, {4}}, 1, []byte{1, 2, 2, 3, 3, 4, 0}},
 	}
-	for i, tc := range tcs {
-		require.Equal(tc.out, ConcatBytes(tc.inMargin, tc.in...), i)
+	for _, tc := range tcs {
+		assert.DeepEqual(t, tc.out, ConcatBytes(tc.inMargin, tc.in...))
 	}
 }
 
@@ -35,5 +34,5 @@ func TestUintWithNullPrefix(t *testing.T) {
 	expected = append(expected, num...)
 
 	out := UintWithNullPrefix(math.MaxUint64)
-	require.Equal(t, expected, out)
+	assert.DeepEqual(t, expected, out)
 }

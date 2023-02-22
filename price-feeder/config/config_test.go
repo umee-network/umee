@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/price-feeder/v2/config"
 	"github.com/umee-network/umee/price-feeder/v2/oracle/provider"
+	"gotest.tools/v3/assert"
 )
 
 func TestValidate(t *testing.T) {
@@ -128,7 +129,7 @@ func TestValidate(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			require.Equal(t, tc.cfg.Validate() != nil, tc.expectErr)
+			assert.Equal(t, tc.cfg.Validate() != nil, tc.expectErr)
 		})
 	}
 }
