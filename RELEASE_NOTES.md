@@ -12,7 +12,7 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 ## v4.1.0
 
-This release contains several fixes designed to make lending and borrowing more resilient during price outages. Short summary of changes is available in the [Changelog](./CHANGELOG.md#v410---2023-02-15)
+This release contains several fixes designed to make lending and borrowing more resilient during price outages. Short summary of changes is available in the [Changelog](./CHANGELOG.md)
 
 ## v4.0.1
 
