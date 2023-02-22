@@ -44,7 +44,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [Unreleased]
+## [v4.1.0](https://github.com/umee-network/umee/releases/tag/v4.1.0) - 2023-02-22
 
 ### Features
 
