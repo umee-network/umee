@@ -39,6 +39,8 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Swap binaries.
 - Restart the chain.
+- Ensure latest Peggo (v1.4.0) is running
+- Ensure latest Price Feeder (v2.1.0) is running
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
