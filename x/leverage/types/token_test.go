@@ -4,39 +4,39 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func TestToTokenDenom(t *testing.T) {
 	// Turns uToken denoms into base tokens
-	require.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
-	require.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
+	assert.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
+	assert.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
 
 	// Empty return for base tokens
-	require.Equal(t, "", types.ToTokenDenom("uumee"))
-	require.Equal(t, "", types.ToTokenDenom("ibc/abcd"))
+	assert.Equal(t, "", types.ToTokenDenom("uumee"))
+	assert.Equal(t, "", types.ToTokenDenom("ibc/abcd"))
 
 	// Empty return on repreated prefix
-	require.Equal(t, "", types.ToTokenDenom("u/u/abcd"))
+	assert.Equal(t, "", types.ToTokenDenom("u/u/abcd"))
 
 	// Edge cases
-	require.Equal(t, "", types.ToTokenDenom("u/"))
-	require.Equal(t, "", types.ToTokenDenom(""))
+	assert.Equal(t, "", types.ToTokenDenom("u/"))
+	assert.Equal(t, "", types.ToTokenDenom(""))
 }
 
 func TestToUTokenDenom(t *testing.T) {
 	// Turns base token denoms into base uTokens
-	require.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
-	require.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
+	assert.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
+	assert.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
 
 	// Empty return for uTokens
-	require.Equal(t, "", types.ToUTokenDenom("u/uumee"))
-	require.Equal(t, "", types.ToUTokenDenom("u/ibc/abcd"))
+	assert.Equal(t, "", types.ToUTokenDenom("u/uumee"))
+	assert.Equal(t, "", types.ToUTokenDenom("u/ibc/abcd"))
 
 	// Edge cases
-	require.Equal(t, "u/", types.ToUTokenDenom(""))
+	assert.Equal(t, "u/", types.ToUTokenDenom(""))
 }
 
 func validToken() types.Token {
@@ -97,7 +97,7 @@ addtokens:
       historic_medians: 24
 updatetokens: []
 `
-	require.Equal(t, expected, p.String())
+	assert.Equal(t, expected, p.String())
 }
 
 func TestToken_Validate(t *testing.T) {
@@ -239,9 +239,9 @@ func TestToken_Validate(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			err := tc.input.Validate()
 			if tc.expectErr {
-				require.Error(t, err)
+				assert.Error(t, err, err.Error())
 			} else {
-				require.NoError(t, err)
+				assert.NilError(t, err)
 			}
 		})
 	}

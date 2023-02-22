@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestMsgFeederDelegation(t *testing.T) {
@@ -31,9 +31,9 @@ func TestMsgFeederDelegation(t *testing.T) {
 	for i, tc := range tests {
 		msg := NewMsgDelegateFeedConsent(tc.delegator, tc.delegate)
 		if tc.expectPass {
-			require.Nil(t, msg.ValidateBasic(), "test: %v", i)
+			assert.NilError(t, msg.ValidateBasic(), "test: %v", i)
 		} else {
-			require.ErrorContainsf(t, msg.ValidateBasic(), tc.expectedErrorMsg, "test: %v", i)
+			assert.ErrorContains(t, msg.ValidateBasic(), tc.expectedErrorMsg)
 		}
 	}
 }
@@ -68,9 +68,9 @@ func TestMsgAggregateExchangeRatePrevote(t *testing.T) {
 	for i, tc := range tests {
 		msg := NewMsgAggregateExchangeRatePrevote(tc.hash, tc.feeder, sdk.ValAddress(tc.validator))
 		if tc.expectPass {
-			require.NoError(t, msg.ValidateBasic(), "test: %v", i)
+			assert.NilError(t, msg.ValidateBasic(), "test: %v", i)
 		} else {
-			require.ErrorContainsf(t, msg.ValidateBasic(), tc.expectedErrorMsg, "test: %v", i)
+			assert.ErrorContains(t, msg.ValidateBasic(), tc.expectedErrorMsg)
 		}
 	}
 }
@@ -122,9 +122,9 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	for i, tc := range tests {
 		msg := NewMsgAggregateExchangeRateVote(tc.salt, tc.exchangeRates, tc.feeder, sdk.ValAddress(tc.validator))
 		if tc.expectPass {
-			require.Nil(t, msg.ValidateBasic(), "test: %v", i)
+			assert.NilError(t, msg.ValidateBasic(), "test: %v", i)
 		} else {
-			require.ErrorContainsf(t, msg.ValidateBasic(), tc.expectedErrorMsg, "test: %v", i)
+			assert.ErrorContains(t, msg.ValidateBasic(), tc.expectedErrorMsg)
 		}
 	}
 }
@@ -142,8 +142,7 @@ func TestNewMsgAggregateExchangeRatePrevote(t *testing.T) {
 		vals[0],
 	)
 
-	require.NotNil(t, aggregateExchangeRatePreVote.GetSignBytes())
-	require.Equal(t, aggregateExchangeRatePreVote.GetSigners(), []sdk.AccAddress{feederAddr})
+	assert.DeepEqual(t, aggregateExchangeRatePreVote.GetSigners(), []sdk.AccAddress{feederAddr})
 }
 
 func TestNewMsgAggregateExchangeRateVote(t *testing.T) {
@@ -157,14 +156,12 @@ func TestNewMsgAggregateExchangeRateVote(t *testing.T) {
 		vals[0],
 	)
 
-	require.NotNil(t, aggregateExchangeRateVote.GetSignBytes())
-	require.Equal(t, aggregateExchangeRateVote.GetSigners(), []sdk.AccAddress{feederAddr})
+	assert.DeepEqual(t, aggregateExchangeRateVote.GetSigners(), []sdk.AccAddress{feederAddr})
 }
 
 func TestMsgDelegateFeedConsent(t *testing.T) {
 	vals := GenerateRandomValAddr(2)
 	msgFeedConsent := NewMsgDelegateFeedConsent(vals[0], sdk.AccAddress(vals[1]))
 
-	require.NotNil(t, msgFeedConsent.GetSignBytes())
-	require.Equal(t, msgFeedConsent.GetSigners(), []sdk.AccAddress{sdk.AccAddress(vals[0])})
+	assert.DeepEqual(t, msgFeedConsent.GetSigners(), []sdk.AccAddress{sdk.AccAddress(vals[0])})
 }
