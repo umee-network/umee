@@ -79,7 +79,9 @@ message QueryParamsResponse {
 
 // QueryRegisteredTokens defines the request structure for the RegisteredTokens
 // gRPC service handler.
-message QueryRegisteredTokens {}
+message QueryRegisteredTokens {
+  string base_denom = 1;
+}
 
 // QueryRegisteredTokensResponse defines the response structure for the
 // RegisteredTokens gRPC service handler.

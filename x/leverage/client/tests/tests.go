@@ -87,6 +87,30 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		{
+			"query registered token info by base_denom",
+			cli.GetCmdQueryRegisteredTokens(),
+			[]string{appparams.BondDenom},
+			false,
+			&types.QueryRegisteredTokensResponse{},
+			&types.QueryRegisteredTokensResponse{
+				Registry: []types.Token{
+					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+				},
+			},
+		},
+		{
+			"query registered token info by base_denom (token is not registered)",
+			cli.GetCmdQueryRegisteredTokens(),
+			[]string{"umm"},
+			true,
+			&types.QueryRegisteredTokensResponse{},
+			&types.QueryRegisteredTokensResponse{
+				Registry: []types.Token{
+					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+				},
+			},
+		},
+		{
 			"query market summary - zero supply",
 			cli.GetCmdQueryMarketSummary(),
 			[]string{
