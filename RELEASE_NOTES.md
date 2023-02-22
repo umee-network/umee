@@ -16,7 +16,7 @@ This release contains several fixes designed to make lending and borrowing more 
 
 Building from source will automatically link the `libwasmvm.x86_64.so` created as a part of the build process (you must build on the same host as you run the binary, or copy the `libwasmvm.x86_64.so` your lib directory).
 
-If you build on system different than Linux amd64, then you need to download appropriate version of libwasmvm (eg from [CosmWasm/wasmvm Releases](https://github.com/CosmWasm/wasmvm/releases)) or build it from source (you will need Rust toolchain).
+If you build on system other than Linux amd64, then you need to download appropriate version of libwasmvm (eg from [CosmWasm/wasmvm Releases](https://github.com/CosmWasm/wasmvm/releases)) or build it from source (you will need Rust toolchain).
 
 Otherwise you have to download `libwasmvm`. Please check [Supported Platforms](https://github.com/CosmWasm/wasmvm/tree/main/#supported-platforms). Example:
 
