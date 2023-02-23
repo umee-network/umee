@@ -12,7 +12,7 @@ import (
 func (s *IntegrationTestSuite) TestInvalidQueries() {
 	invalidQueries := []testQuery{
 		{
-			"query market summary - invalid denom",
+			"query market summary - denom not registered",
 			cli.GetCmdQueryMarketSummary(),
 			[]string{
 				"abcd",
@@ -48,6 +48,14 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 				"xyz",
 				"uumee",
 			},
+			true,
+			nil,
+			nil,
+		},
+		{
+			"query registered token - denom not registered",
+			cli.GetCmdQueryRegisteredTokens(),
+			[]string{"umm"},
 			true,
 			nil,
 			nil,
@@ -97,14 +105,6 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
 			},
-		},
-		{
-			"query registered token info by base_denom (token is not registered)",
-			cli.GetCmdQueryRegisteredTokens(),
-			[]string{"umm"},
-			true,
-			nil,
-			nil,
 		},
 		{
 			"query market summary - zero supply",
