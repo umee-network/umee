@@ -6,7 +6,7 @@ The Oracle module provides the Umee blockchain with an up-to-date and accurate p
 
 As price information is extrinsic to the blockchain, the Umee network relies on validators to periodically vote on current exchange rates, with the protocol tallying up the results once per `VotePeriod` and updating the on-chain exchange rates as the weighted median of the ballot.
 
-> Since the Oracle service is powered by validators, you may find it interesting to look at the [Staking](https://github.com/cosmos/cosmos-sdk/tree/master/x/staking/spec/README.md) module, which covers the logic for staking and validators.
+> Since the Oracle service is powered by validators, you may find it interesting to look at the [Staking](https://github.com/cosmos/cosmos-sdk/blob/79b74ff1216b8a07c5c9decedbe09bbd951f6a54/x/staking/README.md) module, which covers the logic for staking and validators.
 
 ## Contents
 
