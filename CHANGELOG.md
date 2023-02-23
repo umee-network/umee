@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [1808](https://github.com/umee-network/umee/pull/1808) Blacklisted tokens automatically cleared from token registry if they have not yet been supplied.
+- [1867](https://github.com/umee-network/umee/pull/1867) Add the registered token info by `base_denom` to cli and grpc web.
 
 ### Fixes
 

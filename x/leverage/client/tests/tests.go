@@ -103,12 +103,8 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			cli.GetCmdQueryRegisteredTokens(),
 			[]string{"umm"},
 			true,
-			&types.QueryRegisteredTokensResponse{},
-			&types.QueryRegisteredTokensResponse{
-				Registry: []types.Token{
-					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
-				},
-			},
+			nil,
+			nil,
 		},
 		{
 			"query market summary - zero supply",
