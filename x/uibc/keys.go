@@ -16,7 +16,7 @@ const (
 )
 
 var (
-	KeyPrefixDenomQuota    = []byte{0x01}
+	KeyPrefixDenomOutflows = []byte{0x01}
 	KeyPrefixTotalOutflows = []byte{0x02}
 	// KeyPrefixParams is the key to query all gov params
 	KeyPrefixParams = []byte{0x03}
@@ -26,5 +26,5 @@ var (
 
 func KeyTotalOutflows(ibcDenom string) []byte {
 	//  KeyPrefixDenomQuota| denom
-	return util.ConcatBytes(0, KeyPrefixDenomQuota, []byte(ibcDenom))
+	return util.ConcatBytes(0, KeyPrefixDenomOutflows, []byte(ibcDenom))
 }
