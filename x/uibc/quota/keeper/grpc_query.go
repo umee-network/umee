@@ -28,7 +28,7 @@ func (q Querier) Params(goCtx context.Context, _ *uibc.QueryParams) (
 	return &uibc.QueryParamsResponse{Params: params}, nil
 }
 
-// Outflows returns quotas of denoms.
+// Outflows queries denom outflows.
 func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 	*uibc.QueryOutflowsResponse, error,
 ) {
