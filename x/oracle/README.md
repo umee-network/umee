@@ -83,7 +83,8 @@ A `VotePeriod` during which either of the following events occur is considered a
 
 A `SlashWindow` is a window of time during which validators can miss votes. At the end of this period, the amount of misses are tallied and the proper reward or punishment is carried out.
 
-During every `SlashWindow` (currently set to 7 days), participating validators must maintain a valid vote rate of at least `MinValidPerWindow` (5%), lest they get their stake slashed (currently set to 0.01%). The slashed validator is automatically temporarily "jailed" by the protocol (to protect the funds of delegators), and the operator is expected to fix the discrepancy promptly to resume validator participation.
+During every `SlashWindow` (currently set to 7 days), participating validators must maintain a valid vote rate of at least `MinValidPerWindow` (5%), lest they get their stake slashed (currently set to 0.01%).
+The slashed validator is automatically temporarily "jailed" by the protocol (to protect the funds of delegators), and the operator is expected to fix the discrepancy promptly to resume validator participation.
 If the validator does not unjail, it will remain outside of the active set and delegates will not receive rewards.
 
 `MinValidPerWindow` is currently set to 5%. This means validator must not miss more than 95% of votes in order to be safe from jailing.
