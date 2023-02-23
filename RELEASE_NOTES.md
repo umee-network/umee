@@ -6,25 +6,17 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v4.1.0
+## v4.2.0
 
 - new option is available in `app.toml`: `iavl-lazy-loading` (in general settings). When setting to `true`, lazy loading of iavl store will be enabled and improve start up time of archive nodes.
 
-## v4.0.1
+## v4.1.0
 
-This release is a patch which contains a fix to how we handle assets with lowercase symbols on the leverage module. [Relevant PR here](https://github.com/umee-network/umee/pull/1800).
+This release contains several fixes designed to make lending and borrowing more resilient during price outages. Short summary of changes is available in the [Changelog](./CHANGELOG.md)
 
-## v4.0.0
-
-This release contains the Historacle Upgrade, a pricing update which improves the way we treat quickly-changing prices in the leverage module.
-
-- See the [Historacle Design Doc](./docs/design_docs/011-historacle-pricing.md) for a description of how these prices are calculated.
-- See the [Leverage Module Spec](./x/leverage/README.md#historic-borrow-limit-value) for a description of how these prices are treated by the leverage protocol.
+- [Price Feeder V2.1.0](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.1.0) is recommended for use with this release. Upgrading price feeder can be done immediately by any validators who have not already switched. It does not need to be simultaneously with the chain upgrade.
 
 **Please Note:**
-
-- This upgrade requires the use of [Price Feeder V2.0.3](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.3) **AFTER** the Umee v4.0 Upgrade. Prior to this upgrade, you should stay on [Price Feeder V2.0.2](https://github.com/umee-network/umee/releases/tag/price-feeder/v2.0.2).
-- To run the provided binary, you **have to have `libwasmvm.x86_64.so v1.1.1`** in your system lib directory.
 
 Building from source will automatically link the `libwasmvm.x86_64.so` created as a part of the build process (you must build on the same host as you run the binary, or copy the `libwasmvm.x86_64.so` your lib directory).
 
@@ -35,14 +27,7 @@ Otherwise you have to download `libwasmvm`. Please check [Supported Platforms](h
 ```bash
 wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -P /lib/
 ```
-
-Additional highlights:
-
-- [1694](https://github.com/umee-network/umee/pull/1694) `MsgMaxWithdraw`, `MsgMaxBorrow` and `MsgRepay` won't return errors if there is nothing to withdraw, borrow or repay respectively. Leverage `ErrMaxWithdrawZero` and `ErrMaxBorrowZero` has been removed.
-
-Please see the [CHANGELOG](./CHANGELOG.md#v4.0.0) for an exhaustive list of changes.
-
-### Update instructions
+### Upgrade instructions
 
 - Note: Skip this step if you build binary from source and are able to properly link libwasmvm.
   - Download `libwasmvm`:
@@ -52,13 +37,14 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 ```
 
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
-- Run latest Price Feeder (v2.0.3) - **updated**
 - Swap binaries.
 - Restart the chain.
+- Ensure latest Peggo (v1.4.0) is running
+- Ensure latest Price Feeder (v2.1.0) is running
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
-NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.0.0 --version`.
+NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.1.0 --version`.
 
 #### Docker
 

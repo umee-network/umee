@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestInterpolate(t *testing.T) {
@@ -16,27 +16,27 @@ func TestInterpolate(t *testing.T) {
 
 	// Sloped line, endpoint checks
 	result := Interpolate(x1, x1, y1, x2, y2)
-	require.Equal(t, y1, result)
+	assert.DeepEqual(t, y1, result)
 	result = Interpolate(x2, x1, y1, x2, y2)
-	require.Equal(t, y2, result)
+	assert.DeepEqual(t, y2, result)
 
 	// Sloped line, point on segment
 	result = Interpolate(sdk.MustNewDecFromStr("4.0"), x1, y1, x2, y2)
-	require.Equal(t, sdk.MustNewDecFromStr("13.2"), result)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("13.2"), result)
 
 	// Sloped line, point outside of segment
 	result = Interpolate(sdk.MustNewDecFromStr("2.0"), x1, y1, x2, y2)
-	require.Equal(t, sdk.MustNewDecFromStr("9.0"), result)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("9.0"), result)
 
 	// Vertical line: always return y1
 	result = Interpolate(sdk.ZeroDec(), x1, y1, x1, y2)
-	require.Equal(t, y1, result)
+	assert.Equal(t, y1, result)
 	result = Interpolate(x1, x1, y1, x1, y2)
-	require.Equal(t, y1, result)
+	assert.DeepEqual(t, y1, result)
 
 	// Undefined line (x1=x2, y1=y2): always return y1
 	result = Interpolate(sdk.ZeroDec(), x1, y1, x1, y1)
-	require.Equal(t, y1, result)
+	assert.DeepEqual(t, y1, result)
 	result = Interpolate(x1, x1, y1, x1, y1)
-	require.Equal(t, y1, result)
+	assert.DeepEqual(t, y1, result)
 }

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/x/leverage/types"
@@ -16,13 +16,13 @@ func TestAddressFromKey(t *testing.T) {
 	key := types.KeyAdjustedBorrow(address, appparams.BondDenom)
 	expectedAddress := types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
-	require.Equal(t, address, expectedAddress)
+	assert.DeepEqual(t, address, expectedAddress)
 
 	address = sdk.AccAddress([]byte("anotherAddr________________"))
 	key = types.KeyCollateralAmountNoDenom(address)
 	expectedAddress = types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
-	require.Equal(t, address, expectedAddress)
+	assert.DeepEqual(t, address, expectedAddress)
 }
 
 func TestDenomFromKeyWithAddress(t *testing.T) {
@@ -31,13 +31,13 @@ func TestDenomFromKeyWithAddress(t *testing.T) {
 	key := types.KeyAdjustedBorrow(address, denom)
 	expectedDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
 
-	require.Equal(t, denom, expectedDenom)
+	assert.Equal(t, denom, expectedDenom)
 
 	uDenom := fmt.Sprintf("u%s", denom)
 	key = types.KeyCollateralAmount(address, uDenom)
 	expectedDenom = types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralAmount)
 
-	require.Equal(t, uDenom, expectedDenom)
+	assert.Equal(t, uDenom, expectedDenom)
 }
 
 func TestDenomFromKey(t *testing.T) {
@@ -45,13 +45,13 @@ func TestDenomFromKey(t *testing.T) {
 	key := types.KeyReserveAmount(denom)
 	expectedDenom := types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
-	require.Equal(t, denom, expectedDenom)
+	assert.Equal(t, denom, expectedDenom)
 
 	uDenom := fmt.Sprintf("u%s", denom)
 	key = types.KeyReserveAmount(uDenom)
 	expectedDenom = types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
-	require.Equal(t, uDenom, expectedDenom)
+	assert.Equal(t, uDenom, expectedDenom)
 }
 
 func TestGetKeys(t *testing.T) {
@@ -186,15 +186,16 @@ func TestGetKeys(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		expectedKey := []byte{}
-		for _, e := range tc.expected {
-			expectedKey = append(expectedKey, e...)
-		}
-		require.Equalf(
-			t,
-			expectedKey,
-			tc.actual,
-			tc.description,
-		)
+		t.Run(tc.description, func(t *testing.T) {
+			expectedKey := []byte{}
+			for _, e := range tc.expected {
+				expectedKey = append(expectedKey, e...)
+			}
+			assert.DeepEqual(
+				t,
+				expectedKey,
+				tc.actual,
+			)
+		})
 	}
 }

@@ -3,8 +3,8 @@ package types_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/v4/x/oracle/types"
+	"gotest.tools/v3/assert"
 )
 
 func TestDenomString(t *testing.T) {
@@ -27,7 +27,7 @@ func TestDenomString(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		require.Equal(t, testCase.expectedStr, testCase.denom.String())
+		assert.Equal(t, testCase.expectedStr, testCase.denom.String())
 	}
 }
 
@@ -65,7 +65,7 @@ func TestDenomEqual(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		require.Equal(t, testCase.equal, testCase.denom.Equal(&testCase.denomCompared))
+		assert.Equal(t, testCase.equal, testCase.denom.Equal(&testCase.denomCompared))
 	}
 }
 
@@ -85,7 +85,7 @@ func TestDenomListString(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		require.Equal(t, testCase.expectedStr, testCase.denomList.String())
+		assert.Equal(t, testCase.expectedStr, testCase.denomList.String())
 	}
 }
 
@@ -123,6 +123,6 @@ func TestDenomListContains(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		require.Equal(t, testCase.symbolInList, testCase.denomList.Contains(testCase.denomSymbol))
+		assert.Equal(t, testCase.symbolInList, testCase.denomList.Contains(testCase.denomSymbol))
 	}
 }
