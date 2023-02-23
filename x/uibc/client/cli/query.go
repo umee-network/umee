@@ -22,7 +22,7 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdQueryParams(),
-		GetQuota(),
+		GetOutflows(),
 	)
 
 	return cmd
@@ -52,12 +52,12 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetQuota returns cmd to get the quota of ibc denoms.
-func GetQuota() *cobra.Command {
+// GetOutflows returns cmd creator
+func GetOutflows() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "quota [denom]",
+		Use:   "outflows [denom]",
 		Args:  cobra.MaximumNArgs(1),
-		Short: "Get the quota for ibc and native denoms",
+		Short: "Get the outflows for ibc and native denoms",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -65,11 +65,11 @@ func GetQuota() *cobra.Command {
 			}
 
 			queryClient := uibc.NewQueryClient(clientCtx)
-			queryReq := uibc.QueryQuota{}
+			queryReq := uibc.QueryOutflows{}
 			if len(args) > 0 {
 				queryReq.Denom = args[0]
 			}
-			resp, err := queryClient.Quota(cmd.Context(), &queryReq)
+			resp, err := queryClient.Outflows(cmd.Context(), &queryReq)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

@@ -67,11 +67,11 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetQuota(), tc.args)
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetOutflows(), tc.args)
 			if tc.errMsg == "" {
-				var res uibc.QueryQuotaResponse
+				var res uibc.QueryOutflowsResponse
 				assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-				assert.Equal(t, len(res.Quotas), tc.noOfRecords)
+				assert.Equal(t, len(res.Outflows), tc.noOfRecords)
 			} else {
 				assert.ErrorContains(t, err, tc.errMsg)
 			}
