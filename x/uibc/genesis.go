@@ -7,10 +7,10 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func NewGenesisState(params Params, quotas sdk.DecCoins, outflowSum sdk.Dec) *GenesisState {
+func NewGenesisState(params Params, outflows sdk.DecCoins, outflowSum sdk.Dec) *GenesisState {
 	return &GenesisState{
 		Params:          params,
-		Quotas:          quotas,
+		Outflows:        outflows,
 		TotalOutflowSum: outflowSum,
 	}
 }
@@ -18,7 +18,7 @@ func NewGenesisState(params Params, quotas sdk.DecCoins, outflowSum sdk.Dec) *Ge
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:          DefaultParams(),
-		Quotas:          nil,
+		Outflows:        nil,
 		TotalOutflowSum: sdk.NewDec(0),
 	}
 }
@@ -29,11 +29,11 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	for _, quota := range gs.Quotas {
-		if quota.Amount.IsNil() {
-			return sdkerrors.ErrInvalidRequest.Wrap("ibc denom quota must be defined")
+	for _, o := range gs.Outflows {
+		if o.Amount.IsNil() {
+			return sdkerrors.ErrInvalidRequest.Wrap("ibc denom outflow must be defined")
 		}
-		if err := quota.Validate(); err != nil {
+		if err := o.Validate(); err != nil {
 			return err
 		}
 	}

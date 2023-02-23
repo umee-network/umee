@@ -38,30 +38,30 @@ func TestGRPCGetQuota(t *testing.T) {
 	ctx, client := suite.ctx, suite.queryClient
 	tests := []struct {
 		name   string
-		req    uibc.QueryQuota
+		req    uibc.QueryOutflows
 		errMsg string
 	}{
 		{
 			name:   "valid",
-			req:    uibc.QueryQuota{},
+			req:    uibc.QueryOutflows{},
 			errMsg: "",
 		}, {
 			name:   "valid req: OutflowSum zero because ibc-transfer not hapeen",
-			req:    uibc.QueryQuota{Denom: "umee"},
+			req:    uibc.QueryOutflows{Denom: "umee"},
 			errMsg: "",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			resp, err := client.Quota(ctx, &tc.req)
+			resp, err := client.Outflows(ctx, &tc.req)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				if len(tc.req.Denom) == 0 {
-					assert.Equal(t, 0, len(resp.Quotas))
+					assert.Equal(t, 0, len(resp.Outflows))
 				} else {
-					assert.Equal(t, 1, len(resp.Quotas))
-					assert.DeepEqual(t, sdk.NewDec(0), resp.Quotas[0].Amount)
+					assert.Equal(t, 1, len(resp.Outflows))
+					assert.DeepEqual(t, sdk.NewDec(0), resp.Outflows[0].Amount)
 				}
 			} else {
 				assert.Error(t, err, tc.errMsg)
