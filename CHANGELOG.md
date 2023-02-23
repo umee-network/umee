@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## Features
+
+- [1867](https://github.com/umee-network/umee/pull/1867) Allow `/denom` option on registered tokens query to get only a single token by `base_denom`.
+
 ## [v4.1.0](https://github.com/umee-network/umee/releases/tag/v4.1.0) - 2023-02-15
 
 ### Features
