@@ -1,10 +1,11 @@
 package types
 
 import (
+	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
 )
@@ -31,7 +32,9 @@ func TestKeyExchangeRate(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyExchangeRate(testCase.denom)
-		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
+		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
+			assert.DeepEqual(t, testCase.expectedKey, actualKey)
+		})
 	}
 }
 
@@ -49,7 +52,9 @@ func TestKeyFeederDelegation(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyFeederDelegation(testCase.val)
-		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
+		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
+			assert.DeepEqual(t, testCase.expectedKey, actualKey)
+		})
 	}
 }
 
@@ -67,7 +72,9 @@ func TestKeyMissCounter(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyMissCounter(testCase.val)
-		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
+		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
+			assert.DeepEqual(t, testCase.expectedKey, actualKey)
+		})
 	}
 }
 
@@ -85,7 +92,9 @@ func TestKeyAggregateExchangeRatePrevote(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyAggregateExchangeRatePrevote(testCase.val)
-		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
+		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
+			assert.DeepEqual(t, testCase.expectedKey, actualKey)
+		})
 	}
 }
 
@@ -103,7 +112,9 @@ func TestKeyAggregateExchangeRateVote(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyAggregateExchangeRateVote(testCase.val)
-		require.Equalf(t, testCase.expectedKey, actualKey, "test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey)
+		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
+			assert.DeepEqual(t, testCase.expectedKey, actualKey)
+		})
 	}
 }
 
@@ -113,8 +124,8 @@ func TestParseDenomAndBlockFromHistoricPriceKey(t *testing.T) {
 	key := KeyHistoricPrice(denom, blockNum)
 
 	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixHistoricPrice)
-	require.Equal(t, denom, parsedDenom)
-	require.Equal(t, blockNum, parsedBlockNum)
+	assert.Equal(t, denom, parsedDenom)
+	assert.Equal(t, blockNum, parsedBlockNum)
 }
 
 func TestParseDenomAndBlockFromMedianKey(t *testing.T) {
@@ -123,8 +134,8 @@ func TestParseDenomAndBlockFromMedianKey(t *testing.T) {
 	key := KeyMedian(denom, blockNum)
 
 	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixMedian)
-	require.Equal(t, denom, parsedDenom)
-	require.Equal(t, blockNum, parsedBlockNum)
+	assert.Equal(t, denom, parsedDenom)
+	assert.Equal(t, blockNum, parsedBlockNum)
 }
 
 func TestParseDenomAndBlockFromMedianDeviationKey(t *testing.T) {
@@ -133,6 +144,6 @@ func TestParseDenomAndBlockFromMedianDeviationKey(t *testing.T) {
 	key := KeyMedianDeviation(denom, blockNum)
 
 	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixMedianDeviation)
-	require.Equal(t, denom, parsedDenom)
-	require.Equal(t, blockNum, parsedBlockNum)
+	assert.Equal(t, denom, parsedDenom)
+	assert.Equal(t, blockNum, parsedBlockNum)
 }

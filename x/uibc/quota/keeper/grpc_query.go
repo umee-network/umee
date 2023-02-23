@@ -28,23 +28,23 @@ func (q Querier) Params(goCtx context.Context, _ *uibc.QueryParams) (
 	return &uibc.QueryParamsResponse{Params: params}, nil
 }
 
-// Quota returns quotas of denoms.
-func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
-	*uibc.QueryQuotaResponse, error,
+// Outflows queries denom outflows.
+func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
+	*uibc.QueryOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if len(req.Denom) == 0 {
-		quotas, err := q.GetAllQuotas(ctx)
+		o, err := q.GetAllOutflows(ctx)
 		if err != nil {
-			return &uibc.QueryQuotaResponse{}, err
+			return &uibc.QueryOutflowsResponse{}, err
 		}
-		return &uibc.QueryQuotaResponse{Quotas: quotas}, nil
+		return &uibc.QueryOutflowsResponse{Outflows: o}, nil
 	}
 
-	quota, err := q.GetQuota(ctx, req.Denom)
+	o, err := q.GetOutflows(ctx, req.Denom)
 	if err != nil {
-		return &uibc.QueryQuotaResponse{}, err
+		return &uibc.QueryOutflowsResponse{}, err
 	}
-	return &uibc.QueryQuotaResponse{Quotas: sdk.DecCoins{quota}}, nil
+	return &uibc.QueryOutflowsResponse{Outflows: sdk.DecCoins{o}}, nil
 }
