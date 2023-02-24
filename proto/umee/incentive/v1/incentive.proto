@@ -69,22 +69,16 @@ message IncentiveProgram {
   // total_rewards are total amount of rewards which can be distributed to
   // suppliers by this program. This is set to its final value when the program
   // is proposed by governance.
-  cosmos.base.v1beta1.Coin total_rewards = 5 [
-    (gogoproto.nullable) = false
-  ];
+  cosmos.base.v1beta1.Coin total_rewards = 5 [(gogoproto.nullable) = false];
 
   // funded_rewards are total amount of rewards which have been funded by a
   // sponsor to this program. This is zero until the program is both passed
   // by governance and funded.
-  cosmos.base.v1beta1.Coin funded_rewards = 6 [
-    (gogoproto.nullable) = false
-  ];
+  cosmos.base.v1beta1.Coin funded_rewards = 6 [(gogoproto.nullable) = false];
 
   // remaining_rewards are total amount of this program's funded rewards
   // which have not yet been allocated to suppliers. This is zero until the
   // program is both passed by governance and funded, then begins decreasing
   // to zero as the program runs to completion.
-  cosmos.base.v1beta1.Coin remaining_rewards = 7 [
-    (gogoproto.nullable) = false
-  ];
+  cosmos.base.v1beta1.Coin remaining_rewards = 7 [(gogoproto.nullable) = false];
 }
