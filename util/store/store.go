@@ -174,7 +174,7 @@ func GetAddress(store sdk.KVStore, key []byte, errField string) sdk.AccAddress {
 			panic(fmt.Sprintf("%s is not valid: %s", errField, err))
 		}
 		// Returns valid address
-		return sdk.AccAddress(bz)
+		return addr
 	}
 	// No stored bytes at key: return empty address
 	return sdk.AccAddress{}
