@@ -12,19 +12,19 @@ option (gogoproto.goproto_getters_all) = false;
 
 // GenesisState defines the uibc module's genesis state.
 message GenesisState {
-  Params   params                             = 1 [(gogoproto.nullable) = false];
-  repeated cosmos.base.v1beta1.DecCoin quotas = 2 [
+  Params   params                               = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.DecCoin outflows = 2 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable)     = false
   ];
 
-  // total_outflow_sum defines the total outflow sum of ibc-transfer in USD
+  // total_outflow_sum defines the total outflow sum of ibc-transfer in USD.
   string total_outflow_sum = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  // quota_expires defines quota expires for  ibc-transfer denom in seconds
+  // quota_expires defines quota expire time (as unix timestamp) for ibc-transfer denom.
   google.protobuf.Timestamp quota_expires = 4 [
     (gogoproto.nullable) = false,
     (gogoproto.stdtime)  = true,

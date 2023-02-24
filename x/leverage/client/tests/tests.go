@@ -12,7 +12,7 @@ import (
 func (s *IntegrationTestSuite) TestInvalidQueries() {
 	invalidQueries := []testQuery{
 		{
-			"query market summary - invalid denom",
+			"query market summary - denom not registered",
 			cli.GetCmdQueryMarketSummary(),
 			[]string{
 				"abcd",
@@ -52,6 +52,14 @@ func (s *IntegrationTestSuite) TestInvalidQueries() {
 			nil,
 			nil,
 		},
+		{
+			"query registered token - denom not registered",
+			cli.GetCmdQueryRegisteredTokens(),
+			[]string{"umm"},
+			true,
+			nil,
+			nil,
+		},
 	}
 
 	// These queries do not require any borrower setup because they contain invalid arguments
@@ -78,6 +86,18 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			"query registered tokens",
 			cli.GetCmdQueryRegisteredTokens(),
 			[]string{},
+			false,
+			&types.QueryRegisteredTokensResponse{},
+			&types.QueryRegisteredTokensResponse{
+				Registry: []types.Token{
+					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+				},
+			},
+		},
+		{
+			"query registered token info by base_denom",
+			cli.GetCmdQueryRegisteredTokens(),
+			[]string{appparams.BondDenom},
 			false,
 			&types.QueryRegisteredTokensResponse{},
 			&types.QueryRegisteredTokensResponse{

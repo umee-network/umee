@@ -14,7 +14,7 @@ func BeginBlock(ctx sdk.Context, keeper keeper.Keeper) {
 
 	// reset quotas
 	if quotaExpires == nil || quotaExpires.Before(ctx.BlockTime()) {
-		util.Panic(keeper.ResetQuota(ctx))
+		util.Panic(keeper.ResetAllQuotas(ctx))
 	}
 }
 

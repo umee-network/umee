@@ -69,8 +69,8 @@ func GetCmdQueryParams() *cobra.Command {
 // the registered tokens in the x/leverage module.
 func GetCmdQueryRegisteredTokens() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "registered-tokens",
-		Args:  cobra.NoArgs,
+		Use:   "registered-tokens [base_denom]",
+		Args:  cobra.MaximumNArgs(1),
 		Short: "Query for all the current registered tokens",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -79,7 +79,11 @@ func GetCmdQueryRegisteredTokens() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			resp, err := queryClient.RegisteredTokens(cmd.Context(), &types.QueryRegisteredTokens{})
+			req := &types.QueryRegisteredTokens{}
+			if len(args) == 1 {
+				req.BaseDenom = args[0]
+			}
+			resp, err := queryClient.RegisteredTokens(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
