@@ -14,8 +14,8 @@
 //   - Getters panic on unmarshaling a negative value, and interpret empty data as zero.
 //
 // All functions require an errField parameter which is used when creating error messages. For example,
-// the errField "balance" could appear in errors like "-12 is not above the minimum balance of 0".
-// These errFields are cosmetic and do not affect the stored data (key or value) in any way.
+// the errField "balance" could appear in errors like "-12: cannot set negative balance". These errFields
+// are cosmetic and do not affect the stored data (key or value) in any way.
 package store
 
 import (
@@ -36,7 +36,7 @@ func GetInt(store sdk.KVStore, key []byte, errField string) sdkmath.Int {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
 		if val.IsNil() || val.IsNegative() {
-			panic(fmt.Sprintf("%s: negative %s not allowed", val, errField))
+			panic(fmt.Sprintf("%s: retrieved negative %s", val, errField))
 		}
 		return val
 	}
@@ -53,7 +53,7 @@ func SetInt(store sdk.KVStore, key []byte, val sdkmath.Int, errField string) err
 		return nil
 	}
 	if val.IsNegative() {
-		return fmt.Errorf("%s is below the minimum %s of zero", val, errField)
+		return fmt.Errorf("%s: cannot set negative %s", val, errField)
 	}
 	bz, err := val.Marshal()
 	if err != nil {
@@ -73,7 +73,7 @@ func GetDec(store sdk.KVStore, key []byte, errField string) sdk.Dec {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
 		if val.IsNil() || val.IsNegative() {
-			panic(fmt.Sprintf("%s: negative %s not allowed", val, errField))
+			panic(fmt.Sprintf("%s: retrieved negative %s", val, errField))
 		}
 		return val
 	}
@@ -90,7 +90,7 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 		return nil
 	}
 	if val.IsNegative() {
-		return fmt.Errorf("%s is below the minimum %s of zero", val, errField)
+		return fmt.Errorf("%s: cannot set negative %s", val, errField)
 	}
 	bz, err := val.Marshal()
 	if err != nil {
