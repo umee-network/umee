@@ -9,6 +9,10 @@
 // Setters return errors on bad input. For getters (which should only see bad data in exotic cases)
 // panics are used instead for simpler function signatures.
 //
+// Numerical getters and setters have a minimum value of zero, which will be interpreted as follows:
+//   - Setters reject negative input, and clear a KVStore entry when setting to exactly zero.
+//   - Getters panic on unmarshaling a negative value, and interpret empty data as zero.
+//
 // All functions require an errField parameter which is used when creating error messages. For example,
 // the errField "balance" could appear in errors like "-12 is not above the minimum balance of 0".
 // These errFields are cosmetic and do not affect the stored data (key or value) in any way.
@@ -22,34 +26,34 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 )
 
-// GetInt retrieves an sdkmath.Int from a KVStore, or a provided minimum value if no value is stored.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
+// GetInt retrieves an sdkmath.Int from a KVStore, or returns zero if no value is stored.
+// It panics if a stored value fails to unmarshal or is negative.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func GetInt(store sdk.KVStore, key []byte, min sdkmath.Int, errField string) sdkmath.Int {
+func GetInt(store sdk.KVStore, key []byte, errField string) sdkmath.Int {
 	if bz := store.Get(key); len(bz) > 0 {
 		val := sdk.ZeroInt()
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
-		if val.IsNil() || val.LTE(min) {
-			panic(fmt.Sprintf("%s is not above the minimum %s of %s", val, errField, min))
+		if val.IsNil() || val.IsNegative() {
+			panic(fmt.Sprintf("%s: negative %s not allowed", val, errField))
 		}
 		return val
 	}
-	// No stored bytes at key: return minimum value
-	return min
+	// No stored bytes at key: return zero
+	return sdk.ZeroInt()
 }
 
-// SetInt stores an sdkmath.Int in a KVStore, or clears if setting to a provided minimum value or nil.
-// Returns an error on attempting to store value lower than the minimum or on failure to encode.
+// SetInt stores an sdkmath.Int in a KVStore, or clears if setting to zero or nil.
+// Returns an error on attempting to store negative value or on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
-func SetInt(store sdk.KVStore, key []byte, val, min sdkmath.Int, errField string) error {
-	if val.IsNil() || val.Equal(min) {
+func SetInt(store sdk.KVStore, key []byte, val sdkmath.Int, errField string) error {
+	if val.IsNil() || val.IsZero() {
 		store.Delete(key)
 		return nil
 	}
-	if val.LT(min) {
-		return fmt.Errorf("%s is below the minimum %s of %s", val, errField, min)
+	if val.IsNegative() {
+		return fmt.Errorf("%s is below the minimum %s of zero", val, errField)
 	}
 	bz, err := val.Marshal()
 	if err != nil {
@@ -59,34 +63,34 @@ func SetInt(store sdk.KVStore, key []byte, val, min sdkmath.Int, errField string
 	return nil
 }
 
-// GetDec retrieves an sdk.Dec from a KVStore, or a provided minimum value if no value is stored.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
+// GetDec retrieves an sdk.Dec from a KVStore, or returns zero if no value is stored.
+// It panics if a stored value fails to unmarshal or is negative.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func GetDec(store sdk.KVStore, key []byte, min sdk.Dec, errField string) sdk.Dec {
+func GetDec(store sdk.KVStore, key []byte, errField string) sdk.Dec {
 	if bz := store.Get(key); len(bz) > 0 {
 		val := sdk.ZeroDec()
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
-		if val.IsNil() || val.LTE(min) {
-			panic(fmt.Sprintf("%s is not above the minimum %s of %s", val, errField, min))
+		if val.IsNil() || val.IsNegative() {
+			panic(fmt.Sprintf("%s: negative %s not allowed", val, errField))
 		}
 		return val
 	}
-	// No stored bytes at key: return minimum value
-	return min
+	// No stored bytes at key: return zero
+	return sdk.ZeroDec()
 }
 
-// SetDec stores an sdk.Dec in a KVStore, or clears if setting to a provided minimum value or nil.
-// Returns an error on attempting to store value lower than the minimum or on failure to encode.
+// SetDec stores an sdk.Dec in a KVStore, or clears if setting to zero or nil.
+// Returns an error on attempting to store negative value or on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
-func SetDec(store sdk.KVStore, key []byte, val, min sdk.Dec, errField string) error {
-	if val.IsNil() || val.Equal(min) {
+func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
+	if val.IsNil() || val.IsZero() {
 		store.Delete(key)
 		return nil
 	}
-	if val.LT(min) {
-		return fmt.Errorf("%s is below the minimum %s of %s", val, errField, min)
+	if val.IsNegative() {
+		return fmt.Errorf("%s is below the minimum %s of zero", val, errField)
 	}
 	bz, err := val.Marshal()
 	if err != nil {
@@ -96,34 +100,26 @@ func SetDec(store sdk.KVStore, key []byte, val, min sdk.Dec, errField string) er
 	return nil
 }
 
-// GetUint32 retrieves a uint32 from a KVStore, or a provided minimum value if no value is stored.
-// Uses gogoproto Uint32Value for unmarshaling.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
+// GetUint32 retrieves a uint32 from a KVStore, or returns zero if no value is stored.
+// Uses gogoproto Uint32Value for unmarshaling, and panics if a stored value fails to unmarshal.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func GetUint32(store sdk.KVStore, key []byte, min uint32, errField string) uint32 {
+func GetUint32(store sdk.KVStore, key []byte, errField string) uint32 {
 	if bz := store.Get(key); len(bz) > 0 {
 		val := gogotypes.UInt32Value{}
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
-		if val.Value <= min {
-			panic(fmt.Sprintf("%d is not above the minimum %s of %d", val.Value, errField, min))
-		}
 		return val.Value
 	}
-	// No stored bytes at key: return minimum value
-	return min
+	// No stored bytes at key: return zero
+	return 0
 }
 
-// SetUint32 stores a uint32 in a KVStore, or clears if setting to a provided minimum value.
-// Uses gogoproto Uint32Value for marshaling.
-// Returns an error on attempting to store value lower than the minimum or on failure to encode.
+// SetUint32 stores a uint32 in a KVStore, or clears if setting to zero.
+// Uses gogoproto Uint32Value for marshaling, and returns an error on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
-func SetUint32(store sdk.KVStore, key []byte, val, min uint32, errField string) error {
-	if val < min {
-		return fmt.Errorf("%d is below the minimum %s of %d", val, errField, min)
-	}
-	if val == min {
+func SetUint32(store sdk.KVStore, key []byte, val uint32, errField string) error {
+	if val == 0 {
 		store.Delete(key)
 	} else {
 		v := &gogotypes.UInt32Value{Value: val}
@@ -136,34 +132,26 @@ func SetUint32(store sdk.KVStore, key []byte, val, min uint32, errField string) 
 	return nil
 }
 
-// GetUint64 retrieves a uint32 from a KVStore, or a provided minimum value if no value is stored.
-// Uses gogoproto Uint64Value for unmarshaling.
-// It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
+// GetUint64 retrieves a uint64 from a KVStore, or returns zero if no value is stored.
+// Uses gogoproto Uint64Value for unmarshaling, and panics if a stored value fails to unmarshal.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func GetUint64(store sdk.KVStore, key []byte, min uint64, errField string) uint64 {
+func GetUint64(store sdk.KVStore, key []byte, errField string) uint64 {
 	if bz := store.Get(key); len(bz) > 0 {
 		val := gogotypes.UInt64Value{}
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
-		if val.Value <= min {
-			panic(fmt.Sprintf("%d is not above the minimum %s of %d", val.Value, errField, min))
-		}
 		return val.Value
 	}
-	// No stored bytes at key: return minimum value
-	return min
+	// No stored bytes at key: return zero
+	return 0
 }
 
-// SetUint64 stores a uint32 in a KVStore, or clears if setting to a provided minimum value.
-// Uses gogoproto Uint64Value for marshaling.
-// Returns an error on attempting to store value lower than the minimum or on failure to encode.
+// SetUint64 stores a uint32 in a KVStore, or clears if setting to zero.
+// Uses gogoproto Uint64Value for marshaling, and returns an error on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
-func SetUint64(store sdk.KVStore, key []byte, val, min uint64, errField string) error {
-	if val < min {
-		return fmt.Errorf("%d is below the minimum %s of %d", val, errField, min)
-	}
-	if val == min {
+func SetUint64(store sdk.KVStore, key []byte, val uint64, errField string) error {
+	if val == 0 {
 		store.Delete(key)
 	} else {
 		v := &gogotypes.UInt64Value{Value: val}
