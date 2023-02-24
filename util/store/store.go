@@ -35,7 +35,7 @@ func GetInt(store sdk.KVStore, key []byte, errField string) sdkmath.Int {
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
-		if val.IsNil() || val.IsNegative() {
+		if val.IsNegative() {
 			panic(fmt.Sprintf("%s: retrieved negative %s", val, errField))
 		}
 		return val
@@ -72,7 +72,7 @@ func GetDec(store sdk.KVStore, key []byte, errField string) sdk.Dec {
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
 		}
-		if val.IsNil() || val.IsNegative() {
+		if val.IsNegative() {
 			panic(fmt.Sprintf("%s: retrieved negative %s", val, errField))
 		}
 		return val
