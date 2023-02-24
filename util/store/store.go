@@ -42,7 +42,7 @@ func GetInt(store sdk.KVStore, key []byte, min sdkmath.Int, errField string) sdk
 
 // SetInt stores an sdkmath.Int in a KVStore, or clears if setting to a provided minimum value or nil.
 // Returns an error on attempting to store value lower than the minimum or on failure to encode.
-// Accepts an additional string which should describe the field being retrieved in custom error messages.
+// Accepts an additional string which should describe the field being set in custom error messages.
 func SetInt(store sdk.KVStore, key []byte, val, min sdkmath.Int, errField string) error {
 	if val.IsNil() || val.Equal(min) {
 		store.Delete(key)
@@ -79,7 +79,7 @@ func GetDec(store sdk.KVStore, key []byte, min sdk.Dec, errField string) sdk.Dec
 
 // SetDec stores an sdk.Dec in a KVStore, or clears if setting to a provided minimum value or nil.
 // Returns an error on attempting to store value lower than the minimum or on failure to encode.
-// Accepts an additional string which should describe the field being retrieved in custom error messages.
+// Accepts an additional string which should describe the field being set in custom error messages.
 func SetDec(store sdk.KVStore, key []byte, val, min sdk.Dec, errField string) error {
 	if val.IsNil() || val.Equal(min) {
 		store.Delete(key)
@@ -118,7 +118,7 @@ func GetUint32(store sdk.KVStore, key []byte, min uint32, errField string) uint3
 // SetUint32 stores a uint32 in a KVStore, or clears if setting to a provided minimum value.
 // Uses gogoproto Uint32Value for marshaling.
 // Returns an error on attempting to store value lower than the minimum or on failure to encode.
-// Accepts an additional string which should describe the field being retrieved in custom error messages.
+// Accepts an additional string which should describe the field being set in custom error messages.
 func SetUint32(store sdk.KVStore, key []byte, val, min uint32, errField string) error {
 	if val < min {
 		return fmt.Errorf("%d is below the minimum %s of %d", val, errField, min)
@@ -158,7 +158,7 @@ func GetUint64(store sdk.KVStore, key []byte, min uint64, errField string) uint6
 // SetUint64 stores a uint32 in a KVStore, or clears if setting to a provided minimum value.
 // Uses gogoproto Uint64Value for marshaling.
 // Returns an error on attempting to store value lower than the minimum or on failure to encode.
-// Accepts an additional string which should describe the field being retrieved in custom error messages.
+// Accepts an additional string which should describe the field being set in custom error messages.
 func SetUint64(store sdk.KVStore, key []byte, val, min uint64, errField string) error {
 	if val < min {
 		return fmt.Errorf("%d is below the minimum %s of %d", val, errField, min)
@@ -194,7 +194,7 @@ func GetAddress(store sdk.KVStore, key []byte, errField string) sdk.AccAddress {
 
 // SetAddress stores an sdk.AccAddress in a KVStore, or clears if setting to an empty or nil address.
 // Returns an error on attempting to store a non-empty address that fails sdk.VerifyAddressFormat.
-// Accepts an additional string which should describe the field being retrieved in custom error messages.
+// Accepts an additional string which should describe the field being set in custom error messages.
 func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress, errField string) error {
 	if val == nil || val.Empty() {
 		store.Delete(key)
