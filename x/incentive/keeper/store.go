@@ -2,6 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v4/util/store"
 	"github.com/umee-network/umee/v4/x/incentive"
@@ -117,7 +118,7 @@ func (k Keeper) GetIncentiveProgram(ctx sdk.Context, id uint32) (
 		}
 	}
 
-	return incentive.IncentiveProgram{}, 0, incentive.ErrNoProgramWithID
+	return incentive.IncentiveProgram{}, 0, sdkerrors.ErrNotFound
 }
 
 // SetIncentiveProgram stores an incentive program in either the upcoming, ongoing, or completed program lists.
