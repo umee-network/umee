@@ -12,7 +12,7 @@ import (
 // It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetInt(store sdk.KVStore, key []byte, min sdkmath.Int, desc string) sdkmath.Int {
-	if bz := store.Get(key); bz != nil {
+	if bz := store.Get(key); len(bz) > 0 {
 		val := sdk.ZeroInt()
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", desc, val, err))
@@ -49,7 +49,7 @@ func SetInt(store sdk.KVStore, key []byte, val, min sdkmath.Int, desc string) er
 // It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetDec(store sdk.KVStore, key []byte, min sdk.Dec, desc string) sdk.Dec {
-	if bz := store.Get(key); bz != nil {
+	if bz := store.Get(key); len(bz) > 0 {
 		val := sdk.ZeroDec()
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", desc, val, err))
@@ -87,7 +87,7 @@ func SetDec(store sdk.KVStore, key []byte, val, min sdk.Dec, desc string) error 
 // It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetUint32(store sdk.KVStore, key []byte, min uint32, desc string) uint32 {
-	if bz := store.Get(key); bz != nil {
+	if bz := store.Get(key); len(bz) > 0 {
 		val := gogotypes.UInt32Value{}
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", desc, val, err))
@@ -127,7 +127,7 @@ func SetUint32(store sdk.KVStore, key []byte, val, min uint32, desc string) erro
 // It panics if a stored value fails to unmarshal or is less than or equal to the minimum value.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetUint64(store sdk.KVStore, key []byte, min uint64, desc string) uint64 {
-	if bz := store.Get(key); bz != nil {
+	if bz := store.Get(key); len(bz) > 0 {
 		val := gogotypes.UInt64Value{}
 		if err := val.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", desc, val, err))
@@ -166,7 +166,7 @@ func SetUint64(store sdk.KVStore, key []byte, val, min uint64, desc string) erro
 // Panics if a non-empty address fails sdk.VerifyAddressFormat, so non-empty returns are always valid.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetAddress(store sdk.KVStore, key []byte, desc string) sdk.AccAddress {
-	if bz := store.Get(key); bz != nil {
+	if bz := store.Get(key); len(bz) > 0 {
 		addr := sdk.AccAddress(bz)
 		if err := sdk.VerifyAddressFormat(addr); err != nil {
 			panic(fmt.Sprintf("%s is not valid: %s", desc, err))
