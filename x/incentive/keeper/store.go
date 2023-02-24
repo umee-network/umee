@@ -105,7 +105,7 @@ func (k Keeper) GetIncentiveProgram(ctx sdk.Context, id uint32) (
 		incentive.ProgramStatusCompleted,
 	}
 
-	kvStore := ctx.KVStore(k.storeKey)
+	kvStore := k.KVStore(ctx)
 
 	// Looks for an incentive program with the specified ID in upcoming, ongoing, then completed program lists.
 	for _, status := range statuses {
@@ -131,7 +131,7 @@ func (k Keeper) SetIncentiveProgram(ctx sdk.Context,
 		keyIncentiveProgram(program.Id, incentive.ProgramStatusCompleted),
 	}
 
-	kvStore := ctx.KVStore(k.storeKey)
+	kvStore := k.KVStore(ctx)
 	for _, key := range keys {
 		// always clear the program from the status it was prevously stored under
 		kvStore.Delete(key)
@@ -241,7 +241,7 @@ func (k Keeper) SetRewardTracker(ctx sdk.Context,
 // GetUnbondings gets all unbondings currently associated with an account.
 func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.Unbonding {
 	key := keyUnbondings(addr)
-	kvStore := ctx.KVStore(k.storeKey)
+	kvStore := k.KVStore(ctx)
 
 	accUnbondings := incentive.AccountUnbondings{}
 	bz := kvStore.Get(key)
@@ -255,7 +255,7 @@ func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.
 
 // SetUnbondings stores the full list of unbondings currently associated with an account.
 func (k Keeper) SetUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
-	kvStore := ctx.KVStore(k.storeKey)
+	kvStore := k.KVStore(ctx)
 	addr, err := sdk.AccAddressFromBech32(unbondings.Account)
 	if err != nil {
 		// catches invalid and empty addresses
