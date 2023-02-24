@@ -25,9 +25,6 @@ var (
 	ErrNonzeroFundedRewards    = errors.Register(ModuleName, 301, "funded rewards must be zero in proposal")
 	ErrEmptyProposal           = errors.Register(ModuleName, 302, "proposal contains no incentive programs")
 
-	// 4XX = Programs
-	ErrNoProgramWithID = errors.Register(ModuleName, 400, "no incentive program with specified ID")
-
 	// 5XX = Misc
 	ErrDecreaseNextProgramID  = errors.Register(ModuleName, 500, "cannot decrease NextProgramID")
 	ErrDecreaseLastRewardTime = errors.Register(ModuleName, 501, "cannot decrease LastRewardTime")
