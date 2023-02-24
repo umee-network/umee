@@ -1,3 +1,13 @@
+// Package store implements KVStore getters and setters for various types.
+//
+// The methods in this package are made to be resistant to bugs introduced through the following pathways:
+//   - Manually edited genesis state (bad input will appear in SetX during ImportGenesis)
+//   - Bug in code (bad input could appear in SetX at any time)
+//   - Incomplete migration (bad data will be unmarshaled by GetX after the migration)
+//   - Incorrect binary swap (same vectors as incomplete migration)
+//
+// Setters return errors on bad input. For getters (which should only see bad data in exotic cases)
+// panics are used instead for simpler function signatures.
 package store
 
 import (
