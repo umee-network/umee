@@ -57,7 +57,7 @@ func SetInt(store sdk.KVStore, key []byte, val sdkmath.Int, errField string) err
 	}
 	bz, err := val.Marshal()
 	if err != nil {
-		return err
+		return fmt.Errorf("error while setting %s: %s", errField, err)
 	}
 	store.Set(key, bz)
 	return nil
@@ -94,7 +94,7 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 	}
 	bz, err := val.Marshal()
 	if err != nil {
-		return err
+		return fmt.Errorf("error while setting %s: %s", errField, err)
 	}
 	store.Set(key, bz)
 	return nil
@@ -125,7 +125,7 @@ func SetUint32(store sdk.KVStore, key []byte, val uint32, errField string) error
 		v := &gogotypes.UInt32Value{Value: val}
 		bz, err := v.Marshal()
 		if err != nil {
-			return err
+			return fmt.Errorf("error while setting %s: %s", errField, err)
 		}
 		store.Set(key, bz)
 	}
@@ -157,7 +157,7 @@ func SetUint64(store sdk.KVStore, key []byte, val uint64, errField string) error
 		v := &gogotypes.UInt64Value{Value: val}
 		bz, err := v.Marshal()
 		if err != nil {
-			return err
+			return fmt.Errorf("error while setting %s: %s", errField, err)
 		}
 		store.Set(key, bz)
 	}
