@@ -201,7 +201,7 @@ func ConvertTickersToUSD(
 		for asset := range assetMap {
 			if requiredConversions[providerName].Base == asset {
 				assetMap[asset] = types.TickerPrice{
-					Price: assetMap[asset].Price.Quo(
+					Price: assetMap[asset].Price.Mul(
 						conversionRates[requiredConversions[providerName].Quote],
 					),
 					Volume: assetMap[asset].Volume,
