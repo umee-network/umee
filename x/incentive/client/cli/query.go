@@ -104,4 +104,96 @@ func GetCmdQueryIncentiveProgram() *cobra.Command {
 	return cmd
 }
 
+// GetCmdQueryUpcomingIncentivePrograms creates a Cobra command to query for all upcoming
+// incentive programs.
+func GetCmdQueryUpcomingIncentivePrograms() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "upcoming",
+		Args:  cobra.NoArgs,
+		Short: fmt.Sprintf("Query all upcoming incentive programs"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := incentive.NewQueryClient(clientCtx)
+
+			resp, err := queryClient.UpcomingIncentivePrograms(cmd.Context(),
+				&incentive.QueryUpcomingIncentivePrograms{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryOngoingIncentivePrograms creates a Cobra command to query for all ongoing
+// incentive programs.
+func GetCmdQueryOngoingIncentivePrograms() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "ongoing",
+		Args:  cobra.NoArgs,
+		Short: fmt.Sprintf("Query all ongoing incentive programs"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := incentive.NewQueryClient(clientCtx)
+
+			resp, err := queryClient.OngoingIncentivePrograms(cmd.Context(),
+				&incentive.QueryOngoingIncentivePrograms{})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryCompletedIncentivePrograms creates a Cobra command to query for all completed
+// incentive programs.
+func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "completed",  // TODO: pagination
+		Args:  cobra.NoArgs, // TODO: pagination
+		Short: fmt.Sprintf("Query all completed incentive programs"),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := incentive.NewQueryClient(clientCtx)
+
+			resp, err := queryClient.CompletedIncentivePrograms(cmd.Context(),
+				&incentive.QueryCompletedIncentivePrograms{
+					// TODO: what pagination should we use for the CLI?
+				})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
 // TODO: Add all queries
