@@ -28,6 +28,7 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgBond{}, "umee/incentive/MsgBond", nil)
 	cdc.RegisterConcrete(&MsgBeginUnbonding{}, "umee/incentive/MsgBeginUnbonding", nil)
 	cdc.RegisterConcrete(&MsgSponsor{}, "umee/incentive/MsgSponsor", nil)
+	cdc.RegisterConcrete(&MsgGovSetParams{}, "umee/incentive/MsgGovSetParams", nil)
 	cdc.RegisterConcrete(&MsgGovCreatePrograms{}, "umee/incentive/MsgGovCreatePrograms", nil)
 }
 
@@ -38,11 +39,13 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgBond{},
 		&MsgBeginUnbonding{},
 		&MsgSponsor{},
+		&MsgGovSetParams{},
 		&MsgGovCreatePrograms{},
 	)
 
 	registry.RegisterImplementations(
 		(*govtypes.Content)(nil),
+		&MsgGovSetParams{},
 		&MsgGovCreatePrograms{},
 	)
 
