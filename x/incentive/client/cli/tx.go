@@ -69,7 +69,7 @@ func GetCmdBond() *cobra.Command {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[2])
+			asset, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
@@ -102,7 +102,7 @@ func GetCmdBeginUnbonding() *cobra.Command {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[2])
+			asset, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
@@ -135,7 +135,7 @@ func GetCmdSponsor() *cobra.Command {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[2])
+			asset, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
