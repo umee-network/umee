@@ -6,7 +6,7 @@ The Oracle module provides the Umee blockchain with an up-to-date and accurate p
 
 As price information is extrinsic to the blockchain, the Umee network relies on validators to periodically vote on current exchange rates, with the protocol tallying up the results once per `VotePeriod` and updating the on-chain exchange rates as the weighted median of the ballot.
 
-> Since the Oracle service is powered by validators, you may find it interesting to look at the [Staking](https://github.com/cosmos/cosmos-sdk/tree/master/x/staking/spec/README.md) module, which covers the logic for staking and validators.
+> Since the Oracle service is powered by validators, you may find it interesting to look at the [Staking](https://github.com/cosmos/cosmos-sdk/blob/79b74ff1216b8a07c5c9decedbe09bbd951f6a54/x/staking/README.md) module, which covers the logic for staking and validators.
 
 ## Contents
 
@@ -81,7 +81,13 @@ A `VotePeriod` during which either of the following events occur is considered a
 
 - The validator fails to vote within the `reward band` around the weighted median for one or more denominations.
 
-During every `SlashWindow`, participating validators must maintain a valid vote rate of at least `MinValidPerWindow` (5%), lest they get their stake slashed (currently set to 0.01%). The slashed validator is automatically temporarily "jailed" by the protocol (to protect the funds of delegators), and the operator is expected to fix the discrepancy promptly to resume validator participation.
+A `SlashWindow` is a window of time during which validators can miss votes. At the end of this period, the amount of misses are tallied and the proper reward or punishment is carried out.
+
+During every `SlashWindow` (currently set to 7 days), participating validators must maintain a valid vote rate of at least `MinValidPerWindow` (5%), lest they get their stake slashed (currently set to 0.01%).
+The slashed validator is automatically temporarily "jailed" by the protocol (to protect the funds of delegators), and the operator is expected to fix the discrepancy promptly to resume validator participation.
+If the validator does not unjail, it will remain outside of the active set and delegates will not receive rewards.
+
+`MinValidPerWindow` is currently set to 5%. This means validator must not miss more than 95% of votes in order to be safe from jailing.
 
 ### Abstaining from Voting
 

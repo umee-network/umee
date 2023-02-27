@@ -1082,6 +1082,11 @@ paths:
                     value:
                       type: string
                       format: byte
+      parameters:
+        - name: base_denom
+          in: query
+          required: false
+          type: string
       tags:
         - Query
   /umee/historacle/v1/denoms/median_deviations:
