@@ -104,13 +104,69 @@ func GetCmdQueryIncentiveProgram() *cobra.Command {
 	return cmd
 }
 
+// GetCmdQueryUnbondings creates a Cobra command to query all unbondings associated with a single account.
+func GetCmdQueryUnbondings() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "unbondings [address]",
+		Args:  cobra.ExactArgs(1),
+		Short: fmt.Sprintf("Query all %s module unbondings associated with a single account", incentive.ModuleName),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := incentive.NewQueryClient(clientCtx)
+
+			resp, err := queryClient.Unbondings(cmd.Context(), &incentive.QueryUnbondings{Address: args[0]})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryPendingRewards creates a Cobra command to query all pending incentive rewards associated with a single account.
+func GetCmdQueryPendingRewards() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "pending-rewards [address]",
+		Args:  cobra.ExactArgs(1),
+		Short: fmt.Sprintf("Query all pending %s module rewards associated with a single account", incentive.ModuleName),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := incentive.NewQueryClient(clientCtx)
+
+			resp, err := queryClient.PendingRewards(cmd.Context(), &incentive.QueryPendingRewards{Address: args[0]})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
 // GetCmdQueryUpcomingIncentivePrograms creates a Cobra command to query for all upcoming
 // incentive programs.
 func GetCmdQueryUpcomingIncentivePrograms() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upcoming",
 		Args:  cobra.NoArgs,
-		Short: fmt.Sprintf("Query all upcoming incentive programs"),
+		Short: "Query all upcoming incentive programs",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -201,5 +257,3 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 
 	return cmd
 }
-
-// TODO: Add all queries
