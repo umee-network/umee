@@ -98,7 +98,7 @@ func GetCmdQueryUnbondings() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryPendingRewards creates a Cobra command to query all pending incentive rewards associated with a single account.
+// GetCmdQueryPendingRewards creates a Cobra command to query the pending incentive rewards of a single account.
 func GetCmdQueryPendingRewards() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pending-rewards [address]",
