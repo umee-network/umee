@@ -107,7 +107,7 @@ func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
 
 	for ; iter.Valid(); iter.Next() {
 		var av types.AvgCounter
-		k.cdc.MustUnmarshal(iter.Value(), &av)
+		av.Unmarshal(iter.Value())
 		avs = append(avs, av)
 	}
 

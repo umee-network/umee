@@ -4,27 +4,29 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/cosmos/cosmos-sdk/store"
 	"gotest.tools/v3/assert"
+
+	"github.com/umee-network/umee/v4/tests/util"
+	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func TestAvgKeeper(t *testing.T) {
 	t.Parallel()
-	s := AvgKeeperSuite{}
+
+	db := util.KVStore(t)
+	s := AvgKeeperSuite{store: db}
 
 	t.Run("new counters", s.testNewCounters)
 	// t.Run("another scenario, s.testScenario2")
 }
 
 type AvgKeeperSuite struct {
-	cdc   codec.BinaryCodec
-	store sdk.KVStore
+	store store.KVStore
 }
 
 func (s AvgKeeperSuite) newAvgKeeper(period, shift time.Duration) AvgKeeper {
-	return AvgKeeper{cdc: s.cdc, store: s.store, period: period, shift: shift}
+	return AvgKeeper{store: s.store, period: period, shift: shift}
 }
 
 func (s AvgKeeperSuite) testNewCounters(t *testing.T) {
