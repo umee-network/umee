@@ -95,7 +95,7 @@ message QueryPendingRewardsResponse {
 // QueryBonded defines the request structure for the Bonded gRPC service handler.
 message QueryBonded {
   string address = 1;
-  string denom = 2;
+  string denom   = 2;
 }
 
 // QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
