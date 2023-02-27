@@ -6,6 +6,7 @@ import (
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
 
 var (
@@ -19,7 +20,7 @@ func init() {
 	amino.Seal()
 }
 
-// RegisterLegacyAminoCodec registers the necessary x/leverage interfaces and
+// RegisterLegacyAminoCodec registers the necessary x/incentive interfaces and
 // concrete types on the provided LegacyAmino codec. These types are used for
 // Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
@@ -37,6 +38,11 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgBond{},
 		&MsgBeginUnbonding{},
 		&MsgSponsor{},
+		&MsgGovCreatePrograms{},
+	)
+
+	registry.RegisterImplementations(
+		(*govtypes.Content)(nil),
 		&MsgGovCreatePrograms{},
 	)
 
