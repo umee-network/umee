@@ -95,7 +95,8 @@ message QueryPendingRewardsResponse {
 // QueryBonded defines the request structure for the Bonded gRPC service handler.
 message QueryBonded {
   string address = 1;
-  string denom   = 2;
+  // denom is an optional field which causes the query to return the totals of only one uToken
+  string denom = 2;
 }
 
 // QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
@@ -115,6 +116,7 @@ message QueryUnbondingsResponse {
 
 // QueryTotalBonded defines the request structure for the TotalBonded gRPC service handler.
 message QueryTotalBonded {
+  // denom is an optional field which causes the query to return the totals of only one uToken
   string denom = 1;
 }
 

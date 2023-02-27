@@ -209,7 +209,8 @@ func (m *QueryPendingRewardsResponse) GetRewards() github_com_cosmos_cosmos_sdk_
 // QueryBonded defines the request structure for the Bonded gRPC service handler.
 type QueryBonded struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Denom   string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+	// denom is an optional field which causes the query to return the totals of only one uToken
+	Denom string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
 func (m *QueryBonded) Reset()         { *m = QueryBonded{} }
@@ -396,6 +397,7 @@ func (m *QueryUnbondingsResponse) GetUnbondings() []Unbonding {
 
 // QueryTotalBonded defines the request structure for the TotalBonded gRPC service handler.
 type QueryTotalBonded struct {
+	// denom is an optional field which causes the query to return the totals of only one uToken
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
