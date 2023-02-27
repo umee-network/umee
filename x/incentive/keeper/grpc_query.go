@@ -104,6 +104,19 @@ func (q Querier) CompletedIncentivePrograms(
 	return resp, incentive.ErrNotImplemented
 }
 
+func (q Querier) PendingRewards(
+	goCtx context.Context,
+	req *incentive.QueryPendingRewards,
+) (*incentive.QueryPendingRewardsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	// TODO: calculate, without modifying, rewards which would result from MsgClaim
+
+	return &incentive.QueryPendingRewardsResponse{}, incentive.ErrNotImplemented
+}
+
 func (q Querier) Bonded(
 	goCtx context.Context,
 	req *incentive.QueryBonded,
