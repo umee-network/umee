@@ -17,7 +17,7 @@ const (
 )
 
 // GetQueryCmd returns the CLI query commands for the x/incentive module.
-func GetQueryCmd(queryRoute string) *cobra.Command {
+func GetQueryCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        incentive.ModuleName,
 		Short:                      fmt.Sprintf("Querying commands for the %s module", incentive.ModuleName),
