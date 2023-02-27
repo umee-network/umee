@@ -155,5 +155,3 @@ func (q Querier) Unbondings(
 
 	return &incentive.QueryUnbondingsResponse{}, incentive.ErrNotImplemented
 }
-
-// TODO: other queries
