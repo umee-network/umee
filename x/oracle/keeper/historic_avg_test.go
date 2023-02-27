@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	tassert "github.com/stretchr/testify/assert"
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v4/tests/util"
@@ -98,6 +99,7 @@ func (s AvgKeeperSuite) testLatestIndx(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t, i, 3)
 
+	// check that denom1 and denom2 don't conflict
 	i, err = k.getLatestIdx(s.denom2)
 	assert.NilError(t, err)
 	assert.Equal(t, i, 4)
@@ -105,17 +107,42 @@ func (s AvgKeeperSuite) testLatestIndx(t *testing.T) {
 }
 
 func (s AvgKeeperSuite) testGetCurrentAvg(t *testing.T) {
-	const denom1 = "d1"
 	k := s.newDefAvgKeeper(t)
 
 	// with no latest index, zero should be returned
-	v, err := k.GetCurrentAvg(denom1)
+	v, err := k.GetCurrentAvg(s.denom1)
 	assert.NilError(t, err)
 	assert.DeepEqual(t, v, sdk.ZeroDec())
 }
 
 func (s AvgKeeperSuite) testUpdateAvgCounter(t *testing.T) {
+	const period = time.Hour * 16
+	const shift = time.Hour * 2
 
+	now := time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC)
+	k := s.newAvgKeeper(t, period, shift)
+
+	k.updateAvgCounter(s.denom1, sdk.NewDec(1), now)
+	checkAvgPrice(t, k, "1", s.denom1)
+
+	// k.updateAvgCounter(s.denom1, sdk.NewDec(1), now.Add(time.Minute))
+	// checkAvgPrice(t, k, "1", s.denom1)
+
+	// k.updateAvgCounter(s.denom1, sdk.NewDec(4), now.Add(time.Minute*2))
+	// checkAvgPrice(t, k, "2", s.denom1)
+
+	// check that avg denoms don't conflict
+	k.updateAvgCounter(s.denom2, sdk.NewDec(7), now)
+	checkAvgPrice(t, k, "7", s.denom2)
+	checkAvgPrice(t, k, "1", s.denom1)
+}
+
+func checkAvgPrice(t *testing.T, k AvgKeeper, expected, denom string) {
+	expectedDec := sdk.MustNewDecFromStr(expected)
+	v, err := k.GetCurrentAvg(denom)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, expectedDec, v)
+	tassert.Equal(t, expectedDec, v)
 }
 
 func newAvgCounter(sum, num uint32, start time.Time) types.AvgCounter {
