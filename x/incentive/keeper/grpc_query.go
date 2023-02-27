@@ -36,7 +36,7 @@ func (q Querier) Params(
 }
 
 func (q Querier) IncentiveProgram(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryIncentiveProgram,
 ) (*incentive.QueryIncentiveProgramResponse, error) {
 	if req == nil {
@@ -53,7 +53,7 @@ func (q Querier) IncentiveProgram(
 }
 
 func (q Querier) UpcomingIncentivePrograms(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryUpcomingIncentivePrograms,
 ) (*incentive.QueryUpcomingIncentiveProgramsResponse, error) {
 	if req == nil {
@@ -70,7 +70,7 @@ func (q Querier) UpcomingIncentivePrograms(
 }
 
 func (q Querier) OngoingIncentivePrograms(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryOngoingIncentivePrograms,
 ) (*incentive.QueryOngoingIncentiveProgramsResponse, error) {
 	if req == nil {
@@ -87,7 +87,7 @@ func (q Querier) OngoingIncentivePrograms(
 }
 
 func (q Querier) CompletedIncentivePrograms(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryCompletedIncentivePrograms,
 ) (*incentive.QueryCompletedIncentiveProgramsResponse, error) {
 	if req == nil {
@@ -105,7 +105,7 @@ func (q Querier) CompletedIncentivePrograms(
 }
 
 func (q Querier) PendingRewards(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryPendingRewards,
 ) (*incentive.QueryPendingRewardsResponse, error) {
 	if req == nil {
@@ -118,7 +118,7 @@ func (q Querier) PendingRewards(
 }
 
 func (q Querier) Bonded(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryBonded,
 ) (*incentive.QueryBondedResponse, error) {
 	if req == nil {
@@ -131,7 +131,7 @@ func (q Querier) Bonded(
 }
 
 func (q Querier) TotalBonded(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryTotalBonded,
 ) (*incentive.QueryTotalBondedResponse, error) {
 	if req == nil {
@@ -144,7 +144,7 @@ func (q Querier) TotalBonded(
 }
 
 func (q Querier) Unbondings(
-	goCtx context.Context,
+	_ context.Context,
 	req *incentive.QueryUnbondings,
 ) (*incentive.QueryUnbondingsResponse, error) {
 	if req == nil {
