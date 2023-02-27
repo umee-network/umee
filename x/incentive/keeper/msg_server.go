@@ -19,8 +19,8 @@ func NewMsgServerImpl(keeper Keeper) incentive.MsgServer {
 }
 
 func (s msgServer) Claim(
-	goCtx context.Context,
-	msg *incentive.MsgClaim,
+	_ context.Context,
+	_ *incentive.MsgClaim,
 ) (*incentive.MsgClaimResponse, error) {
 	// TODO: Implement
 
@@ -28,8 +28,8 @@ func (s msgServer) Claim(
 }
 
 func (s msgServer) Bond(
-	goCtx context.Context,
-	msg *incentive.MsgBond,
+	_ context.Context,
+	_ *incentive.MsgBond,
 ) (*incentive.MsgBondResponse, error) {
 	// TODO: Implement
 
@@ -37,8 +37,8 @@ func (s msgServer) Bond(
 }
 
 func (s msgServer) BeginUnbonding(
-	goCtx context.Context,
-	msg *incentive.MsgBeginUnbonding,
+	_ context.Context,
+	_ *incentive.MsgBeginUnbonding,
 ) (*incentive.MsgBeginUnbondingResponse, error) {
 	// TODO: Implement
 
@@ -46,8 +46,8 @@ func (s msgServer) BeginUnbonding(
 }
 
 func (s msgServer) Sponsor(
-	goCtx context.Context,
-	msg *incentive.MsgSponsor,
+	_ context.Context,
+	_ *incentive.MsgSponsor,
 ) (*incentive.MsgSponsorResponse, error) {
 	// TODO: Implement
 
@@ -55,8 +55,8 @@ func (s msgServer) Sponsor(
 }
 
 func (s msgServer) GovSetParams(
-	goCtx context.Context,
-	msg *incentive.MsgGovSetParams,
+	_ context.Context,
+	_ *incentive.MsgGovSetParams,
 ) (*incentive.MsgGovSetParamsResponse, error) {
 	// TODO: Implement
 
@@ -64,8 +64,8 @@ func (s msgServer) GovSetParams(
 }
 
 func (s msgServer) GovCreatePrograms(
-	goCtx context.Context,
-	msg *incentive.MsgGovCreatePrograms,
+	_ context.Context,
+	_ *incentive.MsgGovCreatePrograms,
 ) (*incentive.MsgGovCreateProgramsResponse, error) {
 	// TODO: Implement
 
