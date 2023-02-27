@@ -168,8 +168,8 @@ func GetCmdQueryOngoingIncentivePrograms() *cobra.Command {
 // incentive programs.
 func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "completed",  // TODO: pagination
-		Args:  cobra.NoArgs, // TODO: pagination
+		Use:   "completed",
+		Args:  cobra.NoArgs,
 		Short: fmt.Sprintf("Query all completed incentive programs"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -179,9 +179,14 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 
+			pageReq, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
 			resp, err := queryClient.CompletedIncentivePrograms(cmd.Context(),
 				&incentive.QueryCompletedIncentivePrograms{
-					// TODO: what pagination should we use for the CLI?
+					Pagination: pageReq,
 				})
 			if err != nil {
 				return err
@@ -192,6 +197,7 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "completed incentive programs")
 
 	return cmd
 }
