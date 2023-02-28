@@ -1,7 +1,6 @@
 syntax = "proto3";
 package umeenetwork.umee.incentive.v1;
 
-import "cosmos/base/query/v1beta1/pagination.proto";
 import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
 import "umee/incentive/v1/incentive.proto";
@@ -149,17 +148,12 @@ message QueryOngoingIncentiveProgramsResponse {
 
 // QueryCompletedIncentivePrograms defines the request structure for the
 // CompletedIncentivePrograms gRPC service handler.
-message QueryCompletedIncentivePrograms {
-  // pagination defines an optional pagination for the request.
-  cosmos.base.query.v1beta1.PageRequest pagination = 1;
-}
+message QueryCompletedIncentivePrograms {}
 
 // QueryCompletedIncentiveProgramsResponse defines the response structure for the
 // CompletedIncentivePrograms gRPC service handler.
 message QueryCompletedIncentiveProgramsResponse {
   repeated IncentiveProgram programs = 1 [(gogoproto.nullable) = false];
-  // pagination defines an optional pagination for the request.
-  cosmos.base.query.v1beta1.PageRequest pagination = 2;
 }
 
 // QueryIncentiveProgram defines the request structure for the IncentiveProgram
