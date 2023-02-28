@@ -99,9 +99,9 @@ func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 	if bz == nil {
 		return nil, nil
 	}
-	now := ctx.BlockTime()
+	now := time.Time{}
 	if err := now.UnmarshalBinary(bz); err != nil {
-		return &now, err
+		return nil, err
 	}
 	return &now, nil
 }

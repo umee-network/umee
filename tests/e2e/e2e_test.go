@@ -2,7 +2,6 @@ package e2e
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"cosmossdk.io/math"
@@ -15,26 +14,25 @@ import (
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 	var ibcStakeDenom string
 
-	valAddr, err := s.chain.validators[0].keyInfo.GetAddress()
-	s.Require().NoError(err)
-
 	s.Run("send_stake_to_umee", func() {
+		// require the recipient account receives the IBC tokens (IBC packets ACKd)
+		var (
+			balances sdk.Coins
+			err      error
+		)
+
+		valAddr, err := s.chain.validators[0].keyInfo.GetAddress()
+		s.Require().NoError(err)
 		recipient := valAddr.String()
 		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
 		s.sendIBC(gaiaChainID, s.chain.id, recipient, token)
 
 		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 
-		// require the recipient account receives the IBC tokens (IBC packets ACKd)
-		var (
-			balances sdk.Coins
-			err      error
-		)
 		s.Require().Eventually(
 			func() bool {
 				balances, err = queryUmeeAllBalances(umeeAPIEndpoint, recipient)
 				s.Require().NoError(err)
-
 				return balances.Len() == 3
 			},
 			time.Minute,
@@ -42,7 +40,8 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		)
 
 		for _, c := range balances {
-			if strings.Contains(c.Denom, "ibc/") {
+			// C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878 = denom-hash(transfer/channe-0/stake)
+			if c.Denom == "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878" {
 				ibcStakeDenom = c.Denom
 				s.Require().Equal(token.Amount.Int64(), c.Amount.Int64())
 				break
@@ -52,32 +51,34 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.Require().NotEmpty(ibcStakeDenom)
 	})
 
-	s.Run("ibc_txs_registered_token", func() {
-		recipient := valAddr.String()
-		token := sdk.NewInt64Coin(appparams.BondDenom, 100000000) // 100UMEE
-		s.sendIBC(gaiaChainID, s.chain.id, recipient, token)
-
-		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-
+	s.Run("send_umee_to_gaia", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		var (
-			balances sdk.Coins
-			err      error
+			supply sdk.Coins
+			err    error
 		)
+
+		s.Require().NoError(err)
+		token := sdk.NewInt64Coin(appparams.BondDenom, 100000000) // 100UMEE
+		// send 100UMEE to umee to gaia
+		// Note: receiver is null means hermes will default send to key_name (from config)
+		s.sendIBC(s.chain.id, gaiaChainID, "", token)
+
+		gaiaAPIEndpoint := fmt.Sprintf("http://%s", s.gaiaResource.GetHostPort("1317/tcp"))
+
 		s.Require().Eventually(
 			func() bool {
-				balances, err = queryUmeeAllBalances(umeeAPIEndpoint, recipient)
+				supply, err = queryTotalSupply(gaiaAPIEndpoint)
 				s.Require().NoError(err)
-
-				return balances.Len() == 3
+				return supply.Len() == 2
 			},
 			time.Minute,
 			5*time.Second,
 		)
 
-		for _, c := range balances {
-			if strings.Contains(c.Denom, "ibc/") {
-				s.Require().NotEmpty(c.Denom)
+		for _, c := range supply {
+			// 9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728 = denom-hash(transfer/channe-0/uumee)
+			if c.Denom == "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728" {
 				s.Require().Equal(token.Amount.Int64(), c.Amount.Int64())
 				break
 			}

@@ -398,27 +398,31 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 	defer cancel()
 
 	s.T().Logf("sending %s from %s to %s (%s)", token, srcChainID, dstChainID, recipient)
+	cmd := []string{
+		"hermes",
+		fmt.Sprintf("--config=%s", "/home/hermes/.hermes/config.toml"),
+		"tx",
+		"ft-transfer",
+		fmt.Sprintf("--src-chain=%s", srcChainID),
+		fmt.Sprintf("--dst-chain=%s", dstChainID),
+		fmt.Sprintf("--src-port=%s", "transfer"),
+		fmt.Sprintf("--src-channel=%s", "channel-0"),
+		fmt.Sprintf("--amount=%s", token.Amount.String()),
+		fmt.Sprintf("--denom=%s", token.Denom),
+		"--timeout-height-offset=1000",
+	}
+
+	if len(recipient) != 0 {
+		cmd = append(cmd, fmt.Sprintf("--receiver=%s", recipient))
+	}
 
 	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
 		Context:      ctx,
 		AttachStdout: true,
 		AttachStderr: true,
 		Container:    s.hermesResource.Container.ID,
-		User:         "root",
-		Cmd: []string{
-			"hermes",
-			"tx",
-			"raw",
-			"ft-transfer",
-			dstChainID,
-			srcChainID,
-			"transfer",  // source chain port ID
-			"channel-0", // since only one connection/channel exists, assume 0
-			token.Amount.String(),
-			fmt.Sprintf("--denom=%s", token.Denom),
-			fmt.Sprintf("--receiver=%s", recipient),
-			"--timeout-height-offset=1000",
-		},
+		User:         "hermes",
+		Cmd:          cmd,
 	})
 	s.Require().NoError(err)
 
@@ -485,6 +489,27 @@ func queryUmeeAllBalances(endpoint, addr string) (sdk.Coins, error) {
 	}
 
 	return balancesResp.Balances, nil
+}
+
+func queryTotalSupply(endpoint string) (sdk.Coins, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/cosmos/bank/v1beta1/supply", endpoint))
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	bz, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var balancesResp banktypes.QueryTotalSupplyResponse
+	if err := cdc.UnmarshalJSON(bz, &balancesResp); err != nil {
+		return nil, err
+	}
+
+	return balancesResp.Supply, nil
 }
 
 func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {

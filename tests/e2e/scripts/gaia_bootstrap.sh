@@ -8,4 +8,5 @@ gaiad add-genesis-account $(gaiad keys show val01 -a --keyring-backend=test) 100
 gaiad gentx val01 500000000000stake --chain-id=$UMEE_E2E_GAIA_CHAIN_ID --keyring-backend=test
 gaiad collect-gentxs
 sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' /root/.gaia/config/config.toml
+sed -i -e 's/enable = false/enable = true/g' /root/.gaia/config/app.toml
 gaiad start --x-crisis-skip-assert-invariants

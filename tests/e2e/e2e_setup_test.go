@@ -714,12 +714,13 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.hermesResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-gaia-relayer",
-			Repository: "ghcr.io/umee-network/hermes-e2e",
-			Tag:        "latest",
+			Repository: "informalsystems/hermes",
+			Tag:        "1.1.0",
 			NetworkID:  s.dkrNet.Network.ID,
 			Mounts: []string{
-				fmt.Sprintf("%s/:/root/hermes", hermesCfgPath),
+				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
 			},
+			ExposedPorts: []string{"3031"},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
 			},
@@ -734,7 +735,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 			Entrypoint: []string{
 				"sh",
 				"-c",
-				"chmod +x /root/hermes/hermes_bootstrap.sh && /root/hermes/hermes_bootstrap.sh",
+				"chmod +x /home/hermes/hermes_bootstrap.sh && /home/hermes/hermes_bootstrap.sh",
 			},
 		},
 		noRestart,
@@ -774,7 +775,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.T().Logf("started Hermes relayer container: %s", s.hermesResource.Container.ID)
 
 	// create the client, connection and channel between the Umee and Gaia chains
-	s.connectIBCChains()
+	// s.connectIBCChains()
 }
 
 func (s *IntegrationTestSuite) runContractDeployment() {
