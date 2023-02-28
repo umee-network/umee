@@ -36,14 +36,19 @@ func (q Querier) Params(
 }
 
 func (q Querier) IncentiveProgram(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryIncentiveProgram,
 ) (*incentive.QueryIncentiveProgramResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	program := incentive.IncentiveProgram{}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	program, _, err := q.Keeper.GetIncentiveProgram(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &incentive.QueryIncentiveProgramResponse{
 		Program: program,
@@ -53,52 +58,57 @@ func (q Querier) IncentiveProgram(
 }
 
 func (q Querier) UpcomingIncentivePrograms(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryUpcomingIncentivePrograms,
 ) (*incentive.QueryUpcomingIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get all programs
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	programs := q.Keeper.GetAllIncentivePrograms(ctx, incentive.ProgramStatusUpcoming)
 
 	resp := &incentive.QueryUpcomingIncentiveProgramsResponse{
-		Programs: make([]incentive.IncentiveProgram, 0),
+		Programs: programs,
 	}
 
 	return resp, incentive.ErrNotImplemented
 }
 
 func (q Querier) OngoingIncentivePrograms(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryOngoingIncentivePrograms,
 ) (*incentive.QueryOngoingIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get all programs
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	programs := q.Keeper.GetAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
 
 	resp := &incentive.QueryOngoingIncentiveProgramsResponse{
-		Programs: make([]incentive.IncentiveProgram, 0),
+		Programs: programs,
 	}
 
 	return resp, incentive.ErrNotImplemented
 }
 
 func (q Querier) CompletedIncentivePrograms(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryCompletedIncentivePrograms,
 ) (*incentive.QueryCompletedIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get all programs (also: pagination)
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	programs := q.Keeper.GetAllIncentivePrograms(ctx, incentive.ProgramStatusCompleted)
 
 	resp := &incentive.QueryCompletedIncentiveProgramsResponse{
-		Programs: make([]incentive.IncentiveProgram, 0),
-		// TODO: pagination
+		Programs: programs,
 	}
 
 	return resp, incentive.ErrNotImplemented
