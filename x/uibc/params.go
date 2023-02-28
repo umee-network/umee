@@ -27,7 +27,7 @@ func DefaultParams() Params {
 		IbcPause:      DefaultIBCPause,
 		TotalQuota:    DefaultTotalQuota,
 		TokenQuota:    DefaultQuotaPerIBCDenom,
-		QuotaDuration: time.Duration(time.Second * DefaultQuotaDurationPerDenom),
+		QuotaDuration: time.Second * DefaultQuotaDurationPerDenom,
 	}
 }
 
