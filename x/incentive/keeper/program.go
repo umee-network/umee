@@ -8,7 +8,7 @@ import (
 
 // CreateIncentiveProgram saves an incentive program to upcoming programs after it
 // passes governance, and also attempts to fund it from the module's community fund
-// address if sufficent funds are available. The program is always added to upcoming
+// address if sufficient funds are available. The program is always added to upcoming
 // even if funding fails or its start date has already passed, but an error is returned
 // instead if it fails validation.
 func (k Keeper) CreateIncentiveProgram(
@@ -46,9 +46,5 @@ func (k Keeper) CreateIncentiveProgram(
 	}
 
 	// Increment module's NextProgramID
-	if err := k.SetNextProgramID(ctx, id+1); err != nil {
-		return err
-	}
-
-	return nil
+	return k.SetNextProgramID(ctx, id+1)
 }
