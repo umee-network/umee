@@ -44,7 +44,6 @@ func (q Querier) IncentiveProgram(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	program, _, err := q.Keeper.GetIncentiveProgram(ctx, req.Id)
 	if err != nil {
 		return nil, err
