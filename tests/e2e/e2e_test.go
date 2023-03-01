@@ -58,7 +58,6 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 			err    error
 		)
 
-		s.Require().NoError(err)
 		token := sdk.NewInt64Coin(appparams.BondDenom, 100000000) // 100UMEE
 		// send 100UMEE to umee to gaia
 		// Note: receiver is null means hermes will default send to key_name (from config)
@@ -76,13 +75,44 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 			5*time.Second,
 		)
 
+		ibcDenom := "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
 		for _, c := range supply {
 			// 9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728 = denom-hash(transfer/channe-0/uumee)
-			if c.Denom == "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728" {
+			if c.Denom == ibcDenom {
 				s.Require().Equal(token.Amount.Int64(), c.Amount.Int64())
 				break
 			}
 		}
+
+		// sending back some amount from receiver to sender (ibc/XXX)
+		s.sendIBC(gaiaChainID, s.chain.id, "", sdk.NewInt64Coin(ibcDenom, 1000))
+		s.Require().Eventually(
+			func() bool {
+				supply, err = queryTotalSupply(gaiaAPIEndpoint)
+				s.Require().NoError(err)
+				return supply.Len() == 2
+			},
+			time.Minute,
+			5*time.Second,
+		)
+		for _, c := range supply {
+			if c.Denom == ibcDenom {
+				s.Require().Equal(token.Amount.Sub(math.NewInt(1000)).Int64(), c.Amount.Int64())
+				break
+			}
+		}
+
+		// sending back remaining ibc amount from receiver to sender (ibc/XXX)
+		s.sendIBC(gaiaChainID, s.chain.id, "", sdk.NewInt64Coin(ibcDenom, token.Amount.Sub(math.NewInt(1000)).Int64()))
+		s.Require().Eventually(
+			func() bool {
+				supply, err = queryTotalSupply(gaiaAPIEndpoint)
+				s.Require().NoError(err)
+				return supply.Len() == 1
+			},
+			time.Minute,
+			5*time.Second,
+		)
 	})
 
 	var ibcStakeERC20Addr string
