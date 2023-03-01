@@ -3,6 +3,8 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
@@ -55,19 +57,38 @@ func (s msgServer) Sponsor(
 }
 
 func (s msgServer) GovSetParams(
-	_ context.Context,
-	_ *incentive.MsgGovSetParams,
+	goCtx context.Context,
+	msg *incentive.MsgGovSetParams,
 ) (*incentive.MsgGovSetParamsResponse, error) {
-	// TODO: Implement
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	return &incentive.MsgGovSetParamsResponse{}, incentive.ErrNotImplemented
+	// todo: check GetSigners security, other things
+
+	if err := msg.Params.Validate(); err != nil {
+		return &incentive.MsgGovSetParamsResponse{}, err
+	}
+
+	if err := s.keeper.SetParams(ctx, msg.Params); err != nil {
+		return &incentive.MsgGovSetParamsResponse{}, err
+	}
+
+	return &incentive.MsgGovSetParamsResponse{}, nil
 }
 
 func (s msgServer) GovCreatePrograms(
-	_ context.Context,
-	_ *incentive.MsgGovCreatePrograms,
+	goCtx context.Context,
+	msg *incentive.MsgGovCreatePrograms,
 ) (*incentive.MsgGovCreateProgramsResponse, error) {
-	// TODO: Implement
+	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	return &incentive.MsgGovCreateProgramsResponse{}, incentive.ErrNotImplemented
+	// todo: check GetSigners security, other things
+
+	// For each program being created, create it with the next available ID
+	for _, program := range msg.Programs {
+		if err := s.keeper.CreateIncentiveProgram(ctx, program, msg.FromCommunityFund); err != nil {
+			return &incentive.MsgGovCreateProgramsResponse{}, err
+		}
+	}
+
+	return &incentive.MsgGovCreateProgramsResponse{}, nil
 }

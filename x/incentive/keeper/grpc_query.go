@@ -54,7 +54,7 @@ func (q Querier) IncentiveProgram(
 		Program: program,
 	}
 
-	return resp, incentive.ErrNotImplemented
+	return resp, nil
 }
 
 func (q Querier) UpcomingIncentivePrograms(
@@ -92,7 +92,7 @@ func (q Querier) OngoingIncentivePrograms(
 		Programs: programs,
 	}
 
-	return resp, incentive.ErrNotImplemented
+	return resp, nil
 }
 
 func (q Querier) CompletedIncentivePrograms(
@@ -111,7 +111,7 @@ func (q Querier) CompletedIncentivePrograms(
 		Programs: programs,
 	}
 
-	return resp, incentive.ErrNotImplemented
+	return resp, nil
 }
 
 func (q Querier) PendingRewards(

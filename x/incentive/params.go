@@ -16,7 +16,8 @@ var (
 	defaultTierWeightShort         = sdk.MustNewDecFromStr("0.5")
 	defaultTierWeightMiddle        = sdk.MustNewDecFromStr("0.8")
 
-	// TODO #1749: default community fund address
+	// The default community fund address is empty - in this state, the module
+	// will function but all incentive programs must be funded manually with MsgSponsor.
 	defaultCommunityFundAddress = ""
 )
 
@@ -107,22 +108,18 @@ func validateMaxUnbondings(i interface{}) error {
 }
 
 func validateCommunityFundAddress(i interface{}) error {
-	_, ok := i.(string)
+	s, ok := i.(string)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	// TODO #1749: enable once defaultCommunityFundAddress is known
-	/*
-		addr, err := sdk.AccAddressFromBech32(v)
+	// Address must be either empty or fully valid
+	if s != "" {
+		_, err := sdk.AccAddressFromBech32(s)
 		if err != nil {
 			return err
 		}
-
-		if addr.Empty() {
-			return ErrEmptyAddress
-		}
-	*/
+	}
 
 	return nil
 }
