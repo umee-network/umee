@@ -66,7 +66,6 @@ func (q Querier) UpcomingIncentivePrograms(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	programs := q.Keeper.GetAllIncentivePrograms(ctx, incentive.ProgramStatusUpcoming)
 
 	resp := &incentive.QueryUpcomingIncentiveProgramsResponse{
