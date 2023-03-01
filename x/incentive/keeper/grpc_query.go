@@ -85,7 +85,6 @@ func (q Querier) OngoingIncentivePrograms(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
 	programs := q.Keeper.GetAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
 
 	resp := &incentive.QueryOngoingIncentiveProgramsResponse{
