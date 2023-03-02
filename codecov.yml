@@ -23,7 +23,7 @@ coverage:
     changes: false
 
 comment:
-  layout: "reach, diff, files"
+  layout: "reach, diff, flags, files"
   behavior: default # update if exists else create new
   require_changes: true
 
