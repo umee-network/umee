@@ -64,7 +64,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.sendIBC(s.chain.id, gaiaChainID, "", token)
 
 		gaiaAPIEndpoint := fmt.Sprintf("http://%s", s.gaiaResource.GetHostPort("1317/tcp"))
-
+		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
 		s.Require().Eventually(
 			func() bool {
 				supply, err = queryTotalSupply(gaiaAPIEndpoint)
@@ -86,6 +86,22 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 		// sending back some amount from receiver to sender (ibc/XXX)
 		s.sendIBC(gaiaChainID, s.chain.id, "", sdk.NewInt64Coin(ibcDenom, 1000))
+		// check the ibc (umee) quota after ibc txs
+		s.Require().Eventually(
+			func() bool {
+				outflows, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
+				for _, o := range outflows {
+					fmt.Println("o ", o.Denom, o.Amount)
+				}
+				s.Require().NoError(err)
+				outflow := outflows.AmountOf(appparams.BondDenom)
+				s.T().Logf("quota outflow of %s is %s ", appparams.BondDenom, outflow.String())
+				s.Require().True(outflow.GT(sdk.NewDec(0)))
+				return outflows.Len() == 1
+			},
+			time.Minute,
+			5*time.Second,
+		)
 		s.Require().Eventually(
 			func() bool {
 				supply, err = queryTotalSupply(gaiaAPIEndpoint)
@@ -101,6 +117,22 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 				break
 			}
 		}
+
+		// reset the outflows
+		s.T().Logf("sleeping for 120s for reseting the quotas")
+		time.Sleep(time.Second * 120)
+		s.Require().Eventually(
+			func() bool {
+				outflows, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
+				s.Require().NoError(err)
+				outflow := outflows.AmountOf(appparams.BondDenom)
+				s.T().Logf("quota outflow after reset : %s is %s ", appparams.BondDenom, outflow.String())
+				s.Require().True(outflow.Equal(sdk.NewDec(0)))
+				return outflows.Len() == 1
+			},
+			time.Minute,
+			5*time.Second,
+		)
 
 		// sending back remaining ibc amount from receiver to sender (ibc/XXX)
 		s.sendIBC(gaiaChainID, s.chain.id, "", sdk.NewInt64Coin(ibcDenom, token.Amount.Sub(math.NewInt(1000)).Int64()))

@@ -20,6 +20,7 @@ import (
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ory/dockertest/v3/docker"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 func (s *IntegrationTestSuite) deployERC20Token(baseDenom string) string {
@@ -510,6 +511,27 @@ func queryTotalSupply(endpoint string) (sdk.Coins, error) {
 	}
 
 	return balancesResp.Supply, nil
+}
+
+func queryOutflows(endpoint, denom string) (sdk.DecCoins, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/umee/uibc/v1/outflows/%s", endpoint, denom))
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	bz, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	var outflowsResponse uibc.QueryOutflowsResponse
+	if err := cdc.UnmarshalJSON(bz, &outflowsResponse); err != nil {
+		return nil, err
+	}
+
+	return outflowsResponse.Outflows, nil
 }
 
 func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {

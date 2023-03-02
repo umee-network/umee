@@ -40,6 +40,7 @@ import (
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 const (
@@ -316,6 +317,19 @@ func (s *IntegrationTestSuite) initGenesis() {
 	bz, err = cdc.MarshalJSON(&bankGenState)
 	s.Require().NoError(err)
 	appGenState[banktypes.ModuleName] = bz
+
+	// uibc (ibc quota)
+	var uibcGenState uibc.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[uibc.ModuleName], &uibcGenState))
+
+	// 100$ for each token
+	uibcGenState.Params.TokenQuota = sdk.NewDec(100)
+	// quota duraiton 60s, quotas will be reset
+	uibcGenState.Params.QuotaDuration = time.Second * 120
+
+	bz, err = cdc.MarshalJSON(&uibcGenState)
+	s.Require().NoError(err)
+	appGenState[uibc.ModuleName] = bz
 
 	var genUtilGenState genutiltypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
