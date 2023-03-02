@@ -7,12 +7,8 @@ coverage:
     # Learn more at https://docs.codecov.io/docs/commit-status
     project:
       default:
-        target: 70%
-        # threshold: 1% # allow this much decrease on project
-        flags:
-          - app
-          - modules
-          - client
+        target: 70% # overall coverage percentage
+        threshold: 1% # allow this much decrease on project
       app:
         target: 70%
         flags:
@@ -49,7 +45,9 @@ ignore:
   - "*.md"
   - "*.rst"
   - "**/*.pb.go"
+  - "**/*.pb.gw.go"
   - "types/*.pb.go"
+  - "types/*.pb.gw.go"
   - "tests/*"
   - "tests/**/*"
   - "x/**/*.pb.go"
