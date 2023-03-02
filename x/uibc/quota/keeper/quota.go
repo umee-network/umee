@@ -17,6 +17,8 @@ import (
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
+var ten = sdk.MustNewDecFromStr("10")
+
 // GetAllOutflows returns outflows of all tokens.
 func (k Keeper) GetAllOutflows(ctx sdk.Context) (sdk.DecCoins, error) {
 	var outflows sdk.DecCoins
@@ -99,9 +101,9 @@ func (k Keeper) GetExpire(ctx sdk.Context) (*time.Time, error) {
 	if bz == nil {
 		return nil, nil
 	}
-	now := time.Time{}
+	now := ctx.BlockTime()
 	if err := now.UnmarshalBinary(bz); err != nil {
-		return nil, err
+		return &now, err
 	}
 	return &now, nil
 }
@@ -167,7 +169,10 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 
 func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.Int) (sdk.Dec, error) {
 	transferCoin := sdk.NewCoin(denom, amount)
-	var err error
+	var (
+		err          error
+		exchangeRate sdk.Dec
+	)
 
 	// convert to base asset if it is `uToken`
 	if ltypes.HasUTokenPrefix(denom) {
@@ -175,14 +180,25 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 		if err != nil {
 			return sdk.Dec{}, err
 		}
-	} else {
-		if _, err := k.leverageKeeper.GetTokenSettings(ctx, denom); err != nil {
-			return sdk.Dec{}, err
-		}
+		//TODO: needs to confirm should i get exchange rate for uToken or not ?
+		// get the exchange rate for uToken
+		// exchangeRate = k.leverageKeeper.DeriveExchangeRate(ctx, transferCoin.Denom)
 	}
 
-	// get the exchange price (eg: UMEE) in USD from oracle using base denom eg: `uumee`
-	return k.oracleKeeper.HistoricAvgPrice(ctx, transferCoin.Denom)
+	ts, err := k.leverageKeeper.GetTokenSettings(ctx, transferCoin.Denom)
+	if err != nil {
+		return sdk.Dec{}, err
+	}
+	transferCoin = sdk.NewCoin(ts.SymbolDenom, amount)
+
+	// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE` (uumee)
+	exchangeRate, err = k.oracleKeeper.HistoricAvgPrice(ctx, transferCoin.Denom)
+	if err != nil {
+		return sdk.Dec{}, err
+	}
+	// calculate total exchange rate
+	powerReduction := ten.Power(uint64(ts.Exponent))
+	return sdk.NewDecFromInt(transferCoin.Amount).Quo(powerReduction).Mul(exchangeRate), nil
 }
 
 // UndoUpdateQuota subtracts `amount` from quota metric of the ibc denom.
