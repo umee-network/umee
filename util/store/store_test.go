@@ -61,3 +61,16 @@ func TestGetAndSetUint64(t *testing.T) {
 	v := GetUint64(store, key, "no error")
 	assert.DeepEqual(t, v, val)
 }
+
+func TestSetAndGetAddress(t *testing.T) {
+	store := util.KVStore(t)
+	key := []byte("uint32")
+	val := sdk.AccAddress("1234")
+	// set uint32
+	err := SetAddress(store, key, val, "no error")
+	assert.NilError(t, err)
+
+	// get uint32
+	v := GetAddress(store, key, "no error")
+	assert.DeepEqual(t, v, val)
+}

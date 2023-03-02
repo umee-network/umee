@@ -29,7 +29,7 @@ coverage:
 comment:
   layout: "reach, diff, flags, files"
   behavior: default # update if exists else create new
-  require_changes: true
+  require_changes: false
 
 flags:
   app:
