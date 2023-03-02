@@ -7,6 +7,7 @@ coverage:
     # Learn more at https://docs.codecov.io/docs/commit-status
     project:
       default:
+        target: 70%
         threshold: 1% # allow this much decrease on project
       app:
         target: 70%

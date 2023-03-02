@@ -138,8 +138,7 @@ var (
 	_ CosmosApp               = (*UmeeApp)(nil)
 	_ servertypes.Application = (*UmeeApp)(nil)
 
-	// DefaultNodeHome defines the default home directory for the application
-	// daemon.
+	// DefaultNodeHome defines the default home directory for the application daemon.
 	DefaultNodeHome string
 
 	// ModuleBasics defines the module BasicManager is in charge of setting up basic,
