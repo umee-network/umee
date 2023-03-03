@@ -54,9 +54,6 @@ func (k AvgKeeper) updateAvgCounter(
 			continue
 		}
 
-		// TODO: update the algorithm to handle a chain halt scenario
-		// https://linear.app/umee/issue/UMEE-308/
-
 		t := a.Start.Add(k.period)
 		if now.Before(t) {
 			a.Sum = a.Sum.Add(exchangeRate)
