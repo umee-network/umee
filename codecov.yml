@@ -11,34 +11,23 @@ coverage:
         threshold: 1% # allow this much decrease on project
       app:
         target: 70%
-        flags:
-          - app
+        paths:
+          - "app/"
       modules:
         target: 70%
-        flags:
-          - modules
+        paths:
+          - "x/"
+          - "!x/**/client/" # ignore client package
       client:
-        flags:
+        paths:
           - client
+          - "x/**/client/"
     changes: false
 
 comment:
-  layout: "reach, diff, flags, files"
+  layout: "reach, diff, files"
   behavior: default # update if exists else create new
   require_changes: false
-
-flags:
-  app:
-    paths:
-      - "app/"
-  modules:
-    paths:
-      - "x/"
-      - "!x/**/client/" # ignore client package
-  client:
-    paths:
-      - "client/"
-      - "x/**/client/"
 
 ignore:
   - "docs"
@@ -46,11 +35,10 @@ ignore:
   - "*.rst"
   - "**/*.pb.go"
   - "**/*.pb.gw.go"
-  - "types/*.pb.go"
-  - "types/*.pb.gw.go"
   - "tests/*"
   - "tests/**/*"
   - "x/**/*.pb.go"
+  - "x/**/*.pb.gw.go"
   - "x/**/test_common.go"
   - "scripts/"
   - "contrib"

@@ -89,7 +89,6 @@ jobs:
         with:
           file: ./coverage.txt
           fail_ci_if_error: true
-          flags: app,modules,client
 
   test-e2e:
     runs-on: ubuntu-latest
