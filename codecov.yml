@@ -23,11 +23,13 @@ coverage:
           - client
           - "x/**/client/"
     changes: false
+    patch: off
+
 
 comment:
   layout: "reach, diff, files"
   behavior: default # update if exists else create new
-  require_changes: false
+  require_changes: true
 
 ignore:
   - "docs"
@@ -39,6 +41,8 @@ ignore:
   - "tests/**/*"
   - "x/**/*.pb.go"
   - "x/**/*.pb.gw.go"
+  - "x/**/**/*.pb.go"
+  - "x/**/**/*.pb.gw.go"
   - "x/**/test_common.go"
   - "scripts/"
   - "contrib"
