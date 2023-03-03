@@ -8,7 +8,7 @@ import (
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
-const (
+var (
 	AvgPeriod time.Duration = time.Hour * 16
 	AvgShift  time.Duration = time.Hour * 2
 )
