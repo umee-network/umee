@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	AvgPeriod time.Duration = time.Hour * 16
-	AvgShift  time.Duration = time.Hour * 2
+	AvgPeriod = time.Hour * 16
+	AvgShift  = time.Hour * 2
 )
 
 // VotePeriod returns the number of blocks during which voting takes place.
