@@ -2,7 +2,8 @@ coverage:
   precision: 2
   round: down
   range: 70...100
-
+  require_ci_to_pass: false
+  
   status:
     # Learn more at https://docs.codecov.io/docs/commit-status
     project:
@@ -36,13 +37,10 @@ ignore:
   - "*.md"
   - "*.rst"
   - "**/*.pb.go"
-  - "**/*.pb.gw.go"
+  - "types/*.pb.go"
   - "tests/*"
   - "tests/**/*"
   - "x/**/*.pb.go"
-  - "x/**/*.pb.gw.go"
-  - "x/**/**/*.pb.go"
-  - "x/**/**/*.pb.gw.go"
   - "x/**/test_common.go"
   - "scripts/"
   - "contrib"
