@@ -247,19 +247,18 @@ func txCommand(ac appCreator) *cobra.Command {
 
 // Add snapshots
 	snapshotDir := filepath.Join(cast.ToString(appOpts.Get(flags.FlagHome)), "data", "snapshots")
-        snapshotDB, err := sdk.NewLevelDB("metadata", snapshotDir)
-        if err != nil {
-                panic(err)
-        }
-        snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
-        if err != nil {
-                panic(err)
-        }
+	//nolint: staticcheck
+	snapshotDB, err := sdk.NewLevelDB("metadata", snapshotDir)
+	if err != nil {
+		panic(err)
+	}
+	snapshotStore, err := snapshots.NewStore(snapshotDB, snapshotDir)
+	if err != nil {
+		panic(err)
+	}
 
 return app.New(
 	appOpts,
-	baseapp.SetSnapshotStore(snapshotStore),
-	baseapp.SetSnapshotInterval(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval))),
-	baseapp.SetSnapshotKeepRecent(cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent))),
+	baseapp.SetSnapshot(snapshotStore, snapshottypes.NewSnapshotOptions(cast.ToUint64(appOpts.Get(server.FlagStateSyncSnapshotInterval)), cast.ToUint32(appOpts.Get(server.FlagStateSyncSnapshotKeepRecent)))),
 	)
 }
