@@ -23,6 +23,7 @@ func TestAvgKeeper(t *testing.T) {
 	t.Run("UpdateAvgCounterSimple", s.testUpdateAvgCounterSimple)
 	t.Run("UpdateAvgCounterShift", s.testUpdateAvgCounterShift)
 	t.Run("UpdateAvgCounterCycle", s.testUpdateAvgCounterCycle)
+	t.Run("UpdateAvgCounterHalt", s.testUpdateAvgCounterHalt)
 }
 
 type AvgKeeperSuite struct {
@@ -215,6 +216,28 @@ func (s AvgKeeperSuite) testUpdateAvgCounterCycle(t *testing.T) {
 	checkCounter(t, k, s.denom1, 2, "2", 1)
 	checkCounter(t, k, s.denom1, 1, "5", 3)
 	checkCounter(t, k, s.denom1, 0, "5", 3)
+}
+
+func (s AvgKeeperSuite) testUpdateAvgCounterHalt(t *testing.T) {
+	now, shift, k := s.setupUpdateAvgCounter(t)
+	k.updateAvgCounter(s.denom1, sdk.NewDec(1), now)
+	checkAvgPrice(t, k, "1", s.denom1, 0)
+
+	var numCounters = k.numCounters()
+	// go to the latest shift in the epoch
+	now = now.Add(shift * time.Duration(numCounters-1))
+	k.updateAvgCounter(s.denom1, sdk.NewDec(3), now)
+	checkAvgPrice(t, k, "2", s.denom1, 0)
+
+	// go 2 periods forward
+	now = now.Add(shift * time.Duration(numCounters))
+	k.updateAvgCounter(s.denom1, sdk.NewDec(6), now)
+	checkAvgPrice(t, k, "6", s.denom1, 0)
+
+	// go 2 periods -1 shift forward
+	now = now.Add(shift * time.Duration(2*numCounters-1))
+	k.updateAvgCounter(s.denom1, sdk.NewDec(7), now)
+	checkAvgPrice(t, k, "7", s.denom1, byte(numCounters)-1)
 }
 
 func checkAvgPrice(t *testing.T, k AvgKeeper, expected, denom string, idx byte) {
