@@ -356,15 +356,18 @@ func (s *IntegrationTestSuite) connectIBCChains() {
 		AttachStdout: true,
 		AttachStderr: true,
 		Container:    s.hermesResource.Container.ID,
-		User:         "root",
+		User:         "hermes",
 		Cmd: []string{
 			"hermes",
+			"--config=/home/hermes/.hermes/config.toml",
 			"create",
 			"channel",
-			s.chain.id,
-			gaiaChainID,
-			"--port-a=transfer",
-			"--port-b=transfer",
+			"--yes",
+			fmt.Sprintf("--a-chain=%s", s.chain.id),
+			"--a-port=transfer",
+			fmt.Sprintf("--b-chain=%s", gaiaChainID),
+			"--b-port=transfer",
+			"--new-client-connection",
 		},
 	})
 	s.Require().NoError(err)
@@ -386,8 +389,8 @@ func (s *IntegrationTestSuite) connectIBCChains() {
 	)
 
 	s.Require().Containsf(
-		errBuf.String(),
-		"successfully opened init channel",
+		outBuf.String(),
+		"SUCCESS",
 		"failed to connect chains via IBC: %s", errBuf.String(),
 	)
 

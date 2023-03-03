@@ -90,9 +90,6 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.Require().Eventually(
 			func() bool {
 				outflows, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
-				for _, o := range outflows {
-					fmt.Println("o ", o.Denom, o.Amount)
-				}
 				s.Require().NoError(err)
 				outflow := outflows.AmountOf(appparams.BondDenom)
 				s.T().Logf("quota outflow of %s is %s ", appparams.BondDenom, outflow.String())
@@ -119,7 +116,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		}
 
 		// reset the outflows
-		s.T().Logf("sleeping for 120s for reseting the quotas")
+		s.T().Logf("sleeping for 120s for to check the quota reset")
 		time.Sleep(time.Second * 120)
 		s.Require().Eventually(
 			func() bool {

@@ -95,13 +95,13 @@ hermes --config /home/hermes/.hermes/config.toml keys add --chain ${UMEE_E2E_GAI
 hermes --config /home/hermes/.hermes/config.toml keys add --chain ${UMEE_E2E_UMEE_CHAIN_ID} --mnemonic-file /home/hermes/.hermes/mnemonic-file2.txt
 
 ### Configure the clients and connection
-echo "Initiating connection handshake..."
-hermes --config /home/hermes/.hermes/config.toml create connection --a-chain ${UMEE_E2E_UMEE_CHAIN_ID} --b-chain ${UMEE_E2E_GAIA_CHAIN_ID}
+# echo "Initiating connection handshake..."
+# hermes --config /home/hermes/.hermes/config.toml create connection --a-chain ${UMEE_E2E_UMEE_CHAIN_ID} --b-chain ${UMEE_E2E_GAIA_CHAIN_ID}
 
-sleep 2 
+# sleep 2 
 
-echo "Creating the channels..."
-hermes --config /home/hermes/.hermes/config.toml create channel --order unordered --a-chain ${UMEE_E2E_UMEE_CHAIN_ID} --a-connection connection-0 --a-port transfer --b-port transfer
+# echo "Creating the channels..."
+# hermes --config /home/hermes/.hermes/config.toml create channel --a-chain ${UMEE_E2E_UMEE_CHAIN_ID} --a-connection connection-0 --a-port transfer --b-port transfer
 # start Hermes relayer
 echo "Starting the hermes relayer"
 hermes --config /home/hermes/.hermes/config.toml start
