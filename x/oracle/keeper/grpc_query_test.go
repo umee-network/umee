@@ -362,8 +362,8 @@ func (s *IntegrationTestSuite) TestQuerier_AvgPrice() {
 	s.Require().Equal(res.Price, p.Amount)
 
 	_, err = s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: ""})
-	s.Require().Error(err) // Denom must be required
+	s.Require().ErrorContains(err, "denom must be defined")
 
 	_, err = s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: "12"})
-	s.Require().Error(err) // malformed denom
+	s.Require().ErrorContains(err, "malformed denom")
 }

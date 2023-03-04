@@ -314,7 +314,7 @@ func (q querier) AvgPrice(
 	req *types.QueryAvgPrice,
 ) (*types.QueryAvgPriceResponse, error) {
 	if req.Denom == "" {
-		return nil, status.Error(codes.InvalidArgument, "querying multiple denoms is currenlty not supported")
+		return nil, status.Error(codes.InvalidArgument, "denom must be defined")
 	}
 	if err := sdk.ValidateDenom(req.Denom); err != nil {
 		return nil, status.Error(codes.InvalidArgument, fmt.Sprint("malformed denom:", err))
