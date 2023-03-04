@@ -72,7 +72,7 @@ func NewKeeper(
 		StakingKeeper: stakingKeeper,
 		distrName:     distrName,
 
-		// default values
+		// AvgPeriod and AvgShift must not be changed after an app started.
 		AvgPeriod: defaultAvgPeriod,
 		AvgShift:  defaultAvgShift,
 	}
