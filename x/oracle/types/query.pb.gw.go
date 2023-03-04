@@ -481,12 +481,7 @@ func request_Query_AvgPrice_0(ctx context.Context, marshaler runtime.Marshaler, 
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "denom")
 	}
 
-	if protoReq.XDenom == nil {
-		protoReq.XDenom = &QueryAvgPrice_Denom{}
-	} else if _, ok := protoReq.XDenom.(*QueryAvgPrice_Denom); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *QueryAvgPrice_Denom, but: %t\n", protoReq.XDenom)
-	}
-	protoReq.XDenom.(*QueryAvgPrice_Denom).Denom, err = runtime.String(val)
+	protoReq.Denom, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "denom", err)
@@ -513,12 +508,7 @@ func local_request_Query_AvgPrice_0(ctx context.Context, marshaler runtime.Marsh
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "denom")
 	}
 
-	if protoReq.XDenom == nil {
-		protoReq.XDenom = &QueryAvgPrice_Denom{}
-	} else if _, ok := protoReq.XDenom.(*QueryAvgPrice_Denom); !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "expect type: *QueryAvgPrice_Denom, but: %t\n", protoReq.XDenom)
-	}
-	protoReq.XDenom.(*QueryAvgPrice_Denom).Denom, err = runtime.String(val)
+	protoReq.Denom, err = runtime.String(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "denom", err)

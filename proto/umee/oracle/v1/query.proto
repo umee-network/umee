@@ -95,7 +95,7 @@ service Query {
         "/umee/historacle/v1/denoms/median_deviations";
   }
 
-  // QueryAvgPrice returns avg price of a given denom
+  // QueryAvgPrice returns avg price of a given denom (required).
   rpc AvgPrice(QueryAvgPrice)
       returns (QueryAvgPriceResponse) {
     option (google.api.http).get =
@@ -292,7 +292,7 @@ message QueryAvgPrice {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
-  optional string denom = 1;
+  string denom = 1;
 }
 
 // QueryAvgPriceResponse is a response type for AvgPrice method
@@ -300,8 +300,8 @@ message QueryAvgPriceResponse {
   option (gogoproto.equal)           = false;
   option (gogoproto.goproto_getters) = false;
 
-  repeated cosmos.base.v1beta1.DecCoin prices = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable)     = false
+  string price = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
   ];
 }

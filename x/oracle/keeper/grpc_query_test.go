@@ -350,3 +350,32 @@ func (s *IntegrationTestSuite) TestInvalidBechAddress() {
 	s.Require().Nil(resAggregateVote)
 	s.Require().ErrorContains(err, invalidAddressMsg)
 }
+
+func (s *IntegrationTestSuite) TestQuerier_AvgPrice() {
+	app, ctx := s.app, s.ctx
+
+	atomMedianDeviation := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("39.99")}
+	umeeMedianDeviation := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("9541.48")}
+
+	app.OracleKeeper.SetMedianStampPeriod(ctx, 1)
+	blockHeight := uint64(ctx.BlockHeight() - 1)
+	app.OracleKeeper.SetHistoricMedianDeviation(ctx, atomMedianDeviation.Denom, blockHeight, atomMedianDeviation.Amount)
+	app.OracleKeeper.SetHistoricMedianDeviation(ctx, umeeMedianDeviation.Denom, blockHeight, umeeMedianDeviation.Amount)
+
+	res, err := s.queryClient.MedianDeviations(ctx.Context(), &types.QueryMedianDeviations{})
+	s.Require().NoError(err)
+
+	expected := []types.Price{
+		*types.NewPrice(atomMedianDeviation.Amount, "atom", blockHeight),
+		*types.NewPrice(umeeMedianDeviation.Amount, "umee", blockHeight),
+	}
+	s.Require().Equal(res.MedianDeviations, expected)
+
+	res, err = s.queryClient.MedianDeviations(ctx.Context(), &types.QueryMedianDeviations{Denom: atomMedianDeviation.Denom})
+	s.Require().NoError(err)
+
+	expected = []types.Price{
+		*types.NewPrice(atomMedianDeviation.Amount, "atom", blockHeight),
+	}
+	s.Require().Equal(res.MedianDeviations, expected)
+}

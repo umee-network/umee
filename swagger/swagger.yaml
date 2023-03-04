@@ -1091,7 +1091,7 @@ paths:
         - Query
   /umee/historacle/v1/avg_price/{denom}:
     get:
-      summary: QueryAvgPrice returns avg price of a given denom
+      summary: QueryAvgPrice returns avg price of a given denom (required).
       operationId: AvgPrice
       responses:
         '200':
@@ -1099,24 +1099,8 @@ paths:
           schema:
             type: object
             properties:
-              prices:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    denom:
-                      type: string
-                    amount:
-                      type: string
-                  description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+              price:
+                type: string
             title: QueryAvgPriceResponse is a response type for AvgPrice method
         default:
           description: An unexpected error response.
@@ -3212,20 +3196,8 @@ definitions:
   umee.oracle.v1.QueryAvgPriceResponse:
     type: object
     properties:
-      prices:
-        type: array
-        items:
-          type: object
-          properties:
-            denom:
-              type: string
-            amount:
-              type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+      price:
+        type: string
     title: QueryAvgPriceResponse is a response type for AvgPrice method
   umee.oracle.v1.QueryExchangeRatesResponse:
     type: object
