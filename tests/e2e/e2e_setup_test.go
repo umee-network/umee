@@ -324,8 +324,10 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	// 100$ for each token
 	uibcGenState.Params.TokenQuota = sdk.NewDec(100)
-	// quota duraiton 60s, quotas will be reset
-	uibcGenState.Params.QuotaDuration = time.Second * 120
+	// 120$ for all tokens on quota duration
+	uibcGenState.Params.TotalQuota = sdk.NewDec(120)
+	// quotas will reset every 300
+	uibcGenState.Params.QuotaDuration = time.Second * 300
 
 	bz, err = cdc.MarshalJSON(&uibcGenState)
 	s.Require().NoError(err)
@@ -728,8 +730,8 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	s.hermesResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-gaia-relayer",
-			Repository: "informalsystems/hermes",
-			Tag:        "1.1.0",
+			Repository: "ghcr.io/umee-network/hermes-e2e",
+			Tag:        "latest",
 			NetworkID:  s.dkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
@@ -781,7 +783,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 
 			return status == "success" && len(result["chains"].([]interface{})) == 2
 		},
-		15*time.Minute,
+		5*time.Minute,
 		time.Second,
 		"hermes relayer not healthy",
 	)
