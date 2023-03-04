@@ -350,3 +350,20 @@ func (s *IntegrationTestSuite) TestInvalidBechAddress() {
 	s.Require().Nil(resAggregateVote)
 	s.Require().ErrorContains(err, invalidAddressMsg)
 }
+
+func (s *IntegrationTestSuite) TestQuerier_AvgPrice() {
+	app, ctx := s.app, s.ctx
+
+	p := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("12.1")}
+	app.OracleKeeper.AddHistoricPrice(ctx, p.Denom, p.Amount)
+
+	res, err := s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: p.Denom})
+	s.Require().NoError(err)
+	s.Require().Equal(res.Price, p.Amount)
+
+	_, err = s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: ""})
+	s.Require().ErrorContains(err, "denom must be defined")
+
+	_, err = s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: "12"})
+	s.Require().ErrorContains(err, "malformed denom")
+}
