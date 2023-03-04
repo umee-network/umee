@@ -37,7 +37,7 @@ func (s AvgKeeperSuite) newAvgKeeper(t *testing.T, period, shift time.Duration) 
 }
 
 func (s AvgKeeperSuite) newDefAvgKeeper(t *testing.T) AvgKeeper {
-	return s.newAvgKeeper(t, AvgPeriod, AvgShift)
+	return s.newAvgKeeper(t, defaultAvgPeriod, defaultAvgShift)
 }
 
 func (s AvgKeeperSuite) testNewCounters(t *testing.T) {
