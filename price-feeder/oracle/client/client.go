@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
+	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
@@ -39,7 +40,7 @@ type (
 		OracleAddrString    string
 		ValidatorAddr       sdk.ValAddress
 		ValidatorAddrString string
-		Encoding            umeeparams.EncodingConfig
+		Encoding            sdkparams.EncodingConfig
 		GasPrices           string
 		GasAdjustment       float64
 		GRPCEndpoint        string
