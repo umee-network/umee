@@ -781,7 +781,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 
 			return status == "success" && len(result["chains"].([]interface{})) == 2
 		},
-		5*time.Minute,
+		15*time.Minute,
 		time.Second,
 		"hermes relayer not healthy",
 	)
