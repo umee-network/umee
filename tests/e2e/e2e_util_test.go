@@ -546,7 +546,7 @@ func queryExchangeRate(endpoint, denom string) (sdk.DecCoins, error) {
 }
 
 func queryOutflows(endpoint, denom string) (sdk.DecCoins, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/umee/uibc/v1/outflows/%s", endpoint, denom))
+	resp, err := http.Get(fmt.Sprintf("%s/umee/uibc/v1/outflows?denom=%s", endpoint, denom))
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
 	}

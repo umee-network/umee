@@ -180,19 +180,15 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 		if err != nil {
 			return sdk.Dec{}, err
 		}
-		//TODO: needs to confirm should i get exchange rate for uToken or not ?
-		// get the exchange rate for uToken
-		// exchangeRate = k.leverageKeeper.DeriveExchangeRate(ctx, transferCoin.Denom)
 	}
 
 	ts, err := k.leverageKeeper.GetTokenSettings(ctx, transferCoin.Denom)
 	if err != nil {
 		return sdk.Dec{}, err
 	}
-	transferCoin = sdk.NewCoin(ts.SymbolDenom, amount)
 
 	// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE` (uumee)
-	exchangeRate, err = k.oracleKeeper.HistoricAvgPrice(ctx, transferCoin.Denom)
+	exchangeRate, err = k.oracleKeeper.HistoricAvgPrice(ctx, ts.SymbolDenom)
 	if err != nil {
 		return sdk.Dec{}, err
 	}

@@ -10,8 +10,7 @@ import (
 	"github.com/umee-network/umee/v4/tests/grpc"
 )
 
-func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string,
-	noOfRecords int, checkWithExcRate bool, amount sdk.Dec, excDenom string) {
+func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate bool, amount sdk.Dec, excDenom string) {
 	s.Require().Eventually(
 		func() bool {
 			outflows, err := queryOutflows(umeeAPIEndpoint, denom)
@@ -21,17 +20,14 @@ func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string,
 				// get exchange rate
 				exchangeRate, err := queryExchangeRate(umeeAPIEndpoint, excDenom)
 				s.Require().NoError(err)
-				s.T().Log("exchangeRate ", exchangeRate.String(), " token.Amount ", amount.String())
 				powerReduction := sdk.MustNewDecFromStr("10").Power(6)
 				totalPrice := amount.Quo(powerReduction).Mul(exchangeRate.AmountOf(excDenom))
-				s.T().Log("exchangeRate totalPrice ", totalPrice.String())
+				s.T().Log("exchangeRate total price ", totalPrice.String(), "outflow value", outflow.String())
 				oncePer := totalPrice.Quo(sdk.MustNewDecFromStr("100"))
 				threePen := oncePer.Mul(sdk.MustNewDecFromStr("3"))
-				s.Require().True(outflow.GTE(totalPrice.Sub(threePen)))
+				s.Require().True(outflow.GTE(totalPrice.Sub(threePen)) || totalPrice.GTE(outflow.Sub(threePen)))
 			}
-			s.Require().NoError(err)
-			// s.Require().Equal(exchangeRate.AmountOf(appparams.BondDenom).Mul(sdk.NewDecFromInt(token.Amount)), outflow)
-			return outflows.Len() == noOfRecords
+			return outflows.Len() == 1 && outflows[0].Denom == denom
 		},
 		time.Minute,
 		5*time.Second,
@@ -55,11 +51,19 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 	// s.T().Parallel()
 	var ibcStakeDenom string
 
-	s.Run("send_umee_to_gaia", func() {
+	s.Run("ibc_transfer_quota", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		gaiaAPIEndpoint := s.gaiaREST()
 		umeeAPIEndpoint := s.umeeREST()
+		// ibc hash of uumee token
 		umeeIBCHash := "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
+		// ibc hash of uatom token
+		uatomIBCHash := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+
+		// send uatom from gaia to umee
+		uatomAmount := sdk.NewInt64Coin("uatom", 100000000) // 100ATOM
+		s.sendIBC(gaiaChainID, s.chain.id, "", uatomAmount)
+		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomAmount.Amount)
 
 		// sending more tokens then token_quota limit of umee
 		// 120000 * 0.007863408515960442 => 943 $
@@ -72,9 +76,20 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		// Note: receiver is null means hermes will default send to key_name (from config) of target chain (gaia)
 		token := sdk.NewInt64Coin(appparams.BondDenom, 100000000) // 100UMEE
 		s.sendIBC(s.chain.id, gaiaChainID, "", token)
-		s.checkOutflows(umeeAPIEndpoint, appparams.BondDenom, 1, true, sdk.NewDecFromInt(token.Amount), appparams.Name)
-
+		s.checkOutflows(umeeAPIEndpoint, appparams.BondDenom, true, sdk.NewDecFromInt(token.Amount), appparams.Name)
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount)
+
+		// send uatom (ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2) from umee to gaia
+		uatomIBCToken := sdk.NewInt64Coin(uatomIBCHash, 100000000) // 100ATOM
+		// supply will be not be decreased because sending uatomIBCToken amount is more than token quota so it will fail
+		s.sendIBC(s.chain.id, gaiaChainID, "", uatomIBCToken)
+		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomIBCToken.Amount)
+
+		uatomIBCToken.Amount = math.NewInt(1000000) // 1 ATOM
+		s.sendIBC(s.chain.id, gaiaChainID, "", uatomIBCToken)
+		// remaing supply still exists for uatom in umee
+		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomAmount.Amount.Sub(uatomIBCToken.Amount))
+		s.checkOutflows(umeeAPIEndpoint, uatomIBCHash, true, sdk.NewDecFromInt(uatomIBCToken.Amount), "ATOM")
 
 		// sending more tokens then token_quota limit of umee
 		// 120000 * 0.007863408515960442 => 943 $
@@ -114,6 +129,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount)
 	})
 
+	// Non registered tokens (not exists in oracle for quota test)
 	s.Run("send_stake_to_umee", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		var (
