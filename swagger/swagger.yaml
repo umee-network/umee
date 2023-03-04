@@ -1089,6 +1089,64 @@ paths:
           type: string
       tags:
         - Query
+  /umee/historacle/v1/avg_price/{denom}:
+    get:
+      summary: QueryAvgPrice returns avg price of a given denom
+      operationId: AvgPrice
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              prices:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            title: QueryAvgPriceResponse is a response type for AvgPrice method
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
   /umee/historacle/v1/denoms/median_deviations:
     get:
       summary: |-
@@ -3151,6 +3209,24 @@ definitions:
     description: |-
       QueryAggregateVotesResponse is response type for the
       Query/AggregateVotes RPC method.
+  umee.oracle.v1.QueryAvgPriceResponse:
+    type: object
+    properties:
+      prices:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+    title: QueryAvgPriceResponse is a response type for AvgPrice method
   umee.oracle.v1.QueryExchangeRatesResponse:
     type: object
     properties:
