@@ -10,8 +10,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-const ()
-
 type Client struct {
 	GrpcConn     *grpc.ClientConn
 	grpcEndpoint string
