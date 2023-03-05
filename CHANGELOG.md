@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ## Features
 
 - [1867](https://github.com/umee-network/umee/pull/1867) Allow `/denom` option on registered tokens query to get only a single token by `base_denom`.
+- [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
 
 ## [v4.1.0](https://github.com/umee-network/umee/releases/tag/v4.1.0) - 2023-02-15
 
