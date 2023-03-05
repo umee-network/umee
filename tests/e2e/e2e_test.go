@@ -114,7 +114,6 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 		// reset the outflows
 		s.T().Logf("waiting until quota reset, basically it will take around 300 seconds to do quota reset")
-		// time.Sleep(time.Second * 120)
 		s.Require().Eventually(
 			func() bool {
 				outflows, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
