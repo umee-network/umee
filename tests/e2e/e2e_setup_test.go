@@ -35,7 +35,6 @@ import (
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	"github.com/umee-network/umee/v4/app/params"
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/client"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
@@ -1040,7 +1039,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 func (s *IntegrationTestSuite) initUmeeClient() {
 	var err error
-	ecfg := params.MakeEncodingConfig()
+	ecfg := appparams.MakeEncodingConfig()
 	s.umee, err = client.NewClient(
 		s.chain.id,
 		"tcp://localhost:26657",

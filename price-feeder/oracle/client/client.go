@@ -23,7 +23,6 @@ import (
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 	umeeapp "github.com/umee-network/umee/v4/app"
-	umeeparams "github.com/umee-network/umee/v4/app/params"
 )
 
 type (
