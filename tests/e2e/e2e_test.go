@@ -10,6 +10,20 @@ import (
 	"github.com/umee-network/umee/v4/tests/grpc"
 )
 
+func (s *IntegrationTestSuite) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdk.Dec) {
+	// TODO: needs to check with avgPrice instead of exchange rate
+	// get exchange rate
+	exchangeRate, err := queryExchangeRate(endpoint, excDenom)
+	s.Require().NoError(err)
+	powerReduction := sdk.MustNewDecFromStr("10").Power(6)
+	totalPrice := amount.Quo(powerReduction).Mul(exchangeRate.AmountOf(excDenom))
+	s.T().Log("exchangeRate total price ", totalPrice.String(), "outflow value", outflow.String())
+	percentageDiff := totalPrice.Mul(perDiff)
+	// Note: checking outflow >= total_price with percentageDiff
+	// either total_price >= outflow with percentageDiff
+	s.Require().True(outflow.GTE(totalPrice.Sub(percentageDiff)) || totalPrice.GTE(outflow.Sub(percentageDiff)))
+}
+
 func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate bool, amount sdk.Dec, excDenom string) {
 	s.Require().Eventually(
 		func() bool {
@@ -17,15 +31,7 @@ func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string, chec
 			s.Require().NoError(err)
 			if checkWithExcRate {
 				outflow := outflows.AmountOf(denom)
-				// get exchange rate
-				exchangeRate, err := queryExchangeRate(umeeAPIEndpoint, excDenom)
-				s.Require().NoError(err)
-				powerReduction := sdk.MustNewDecFromStr("10").Power(6)
-				totalPrice := amount.Quo(powerReduction).Mul(exchangeRate.AmountOf(excDenom))
-				s.T().Log("exchangeRate total price ", totalPrice.String(), "outflow value", outflow.String())
-				oncePer := totalPrice.Quo(sdk.MustNewDecFromStr("100"))
-				threePen := oncePer.Mul(sdk.MustNewDecFromStr("3"))
-				s.Require().True(outflow.GTE(totalPrice.Sub(threePen)) || totalPrice.GTE(outflow.Sub(threePen)))
+				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, outflow, amount, sdk.MustNewDecFromStr("0.03"))
 			}
 			return outflows.Len() == 1 && outflows[0].Denom == denom
 		},
@@ -65,7 +71,8 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.sendIBC(gaiaChainID, s.chain.id, "", uatomAmount)
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomAmount.Amount)
 
-		// sending more tokens then token_quota limit of umee
+		// TODO: needs to calculate the quota before ibc-transfer to check quota
+		// sending more tokens than token_quota limit of umee
 		// 120000 * 0.007863408515960442 => 943 $
 		exceedAmount := sdk.NewInt64Coin(appparams.BondDenom, 120000000000) // 120000UMEE
 		s.sendIBC(s.chain.id, gaiaChainID, "", exceedAmount)
