@@ -10,27 +10,30 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-const (
-	queryTimeout = 15 * time.Second
-)
+const ()
 
 type Client struct {
+	GrpcConn     *grpc.ClientConn
 	grpcEndpoint string
-	grpcConn     *grpc.ClientConn
+	QueryTimeout time.Duration
 }
 
-func NewClient(grpcEndpoint string) (*Client, error) {
-	qc := &Client{grpcEndpoint: grpcEndpoint}
+func NewClient(grpcEndpoint string, queryTimeout time.Duration) (*Client, error) {
+	qc := &Client{grpcEndpoint: grpcEndpoint, QueryTimeout: queryTimeout}
 	return qc, qc.dialGrpcConn()
 }
 
 func (c *Client) dialGrpcConn() (err error) {
-	c.grpcConn, err = grpc.Dial(
+	c.GrpcConn, err = grpc.Dial(
 		c.grpcEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),
 	)
 	return err
+}
+
+func (c Client) NewCtx() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), c.QueryTimeout)
 }
 
 func dialerFunc(_ context.Context, addr string) (net.Conn, error) {
