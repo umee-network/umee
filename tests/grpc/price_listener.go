@@ -3,12 +3,12 @@ package grpc
 import (
 	"fmt"
 
-	"github.com/umee-network/umee/v4/tests/grpc/client"
+	"github.com/umee-network/umee/v4/client"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func listenForPrices(
-	umeeClient *client.UmeeClient,
+	umee client.Client,
 	params oracletypes.Params,
 	chainHeight *ChainHeight,
 ) (*PriceStore, error) {
@@ -26,7 +26,7 @@ func listenForPrices(
 	for i := 0; i < int(params.MedianStampPeriod); i++ {
 		height := <-chainHeight.HeightChanged
 		if isPeriodFirstBlock(height, params.HistoricStampPeriod) {
-			exchangeRates, err := umeeClient.QueryClient.QueryExchangeRates()
+			exchangeRates, err := umee.QueryExchangeRates()
 			fmt.Printf("block %d stamp: %+v\n", height, exchangeRates)
 			if err != nil {
 				return nil, err
@@ -37,7 +37,7 @@ func listenForPrices(
 		}
 	}
 
-	medians, err := umeeClient.QueryClient.QueryMedians()
+	medians, err := umee.QueryMedians()
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func listenForPrices(
 		priceStore.medians[median.ExchangeRateTuple.Denom] = median.ExchangeRateTuple.ExchangeRate
 	}
 
-	medianDeviations, err := umeeClient.QueryClient.QueryMedianDeviations()
+	medianDeviations, err := umee.QueryMedianDeviations()
 	if err != nil {
 		return nil, err
 	}

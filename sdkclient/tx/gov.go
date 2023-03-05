@@ -25,9 +25,28 @@ func (c *Client) GovVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 	return c.BroadcastTx(msg)
 }
 
-func (c *Client) GovParamChange(title, description string, changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
-
+func (c *Client) GovParamChange(title, description string, changes []proposal.ParamChange, deposit sdk.Coins,
+) (*sdk.TxResponse, error) {
 	content := proposal.NewParameterChangeProposal(title, description, changes)
+	fromAddr, err := c.keyringRecord.GetAddress()
+	if err != nil {
+		return nil, err
+	}
+	msg, err := govtypes.NewMsgSubmitProposal(content, deposit, fromAddr)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.BroadcastTx(msg)
+}
+
+func (c *Client) GovSubmitProposal(changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
+	content := proposal.NewParameterChangeProposal(
+		"update historic stamp period",
+		"auto grpc proposal",
+		changes,
+	)
+
 	fromAddr, err := c.keyringRecord.GetAddress()
 	if err != nil {
 		return nil, err

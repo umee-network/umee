@@ -6,6 +6,7 @@ import (
 
 	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/rs/zerolog"
+	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	"github.com/umee-network/umee/v4/sdkclient/query"
 	"github.com/umee-network/umee/v4/sdkclient/tx"
 )
@@ -41,4 +42,8 @@ func (c Client) NewChainHeightListener(ctx context.Context, logger zerolog.Logge
 
 func (c Client) QueryTimeout() time.Duration {
 	return c.Query.QueryTimeout
+}
+
+func (c Client) TmClient() rpcclient.Client {
+	return c.Tx.ClientContext.Client
 }
