@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -457,46 +456,41 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 	time.Sleep(time.Second * 12)
 }
 
-func queryUmeeTx(endpoint, txHash string) error {
-	resp, err := http.Get(fmt.Sprintf("%s/cosmos/tx/v1beta1/txs/%s", endpoint, txHash))
+func queryREST(endpoint string, valPtr interface{}) error {
+	resp, err := http.Get(endpoint)
 	if err != nil {
 		return fmt.Errorf("failed to execute HTTP request: %w", err)
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("tx query returned non-200 status: %d", resp.StatusCode)
+		return fmt.Errorf("tx query returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
 	}
 
+	if err := json.NewDecoder(resp.Body).Decode(valPtr); err != nil {
+		return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
+	}
+	return nil
+}
+
+func queryUmeeTx(endpoint, txHash string) error {
+	endpoint = fmt.Sprintf("%s/cosmos/tx/v1beta1/txs/%s", endpoint, txHash)
 	var result map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return fmt.Errorf("failed to read response body: %w", err)
+	if err := queryREST(endpoint, &result); err != nil {
+		return err
 	}
 
 	txResp := result["tx_response"].(map[string]interface{})
 	if v := txResp["code"]; v.(float64) != 0 {
 		return fmt.Errorf("tx %s failed with status code %v", txHash, v)
 	}
-
 	return nil
 }
 
 func queryUmeeAllBalances(endpoint, addr string) (sdk.Coins, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s", endpoint, addr))
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
+	endpoint = fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s", endpoint, addr)
 	var balancesResp banktypes.QueryAllBalancesResponse
-	if err := cdc.UnmarshalJSON(bz, &balancesResp); err != nil {
+	if err := queryREST(endpoint, &balancesResp); err != nil {
 		return nil, err
 	}
 
@@ -504,20 +498,9 @@ func queryUmeeAllBalances(endpoint, addr string) (sdk.Coins, error) {
 }
 
 func queryTotalSupply(endpoint string) (sdk.Coins, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/cosmos/bank/v1beta1/supply", endpoint))
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
+	endpoint = fmt.Sprintf("%s/cosmos/bank/v1beta1/supply", endpoint)
 	var balancesResp banktypes.QueryTotalSupplyResponse
-	if err := cdc.UnmarshalJSON(bz, &balancesResp); err != nil {
+	if err := queryREST(endpoint, &balancesResp); err != nil {
 		return nil, err
 	}
 
@@ -525,93 +508,43 @@ func queryTotalSupply(endpoint string) (sdk.Coins, error) {
 }
 
 func queryExchangeRate(endpoint, denom string) (sdk.DecCoins, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/umee/oracle/v1/denoms/exchange_rates/%s", endpoint, denom))
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
+	endpoint = fmt.Sprintf("%s/umee/oracle/v1/denoms/exchange_rates/%s", endpoint, denom)
+	var resp oracletypes.QueryExchangeRatesResponse
+	if err := queryREST(endpoint, &resp); err != nil {
 		return nil, err
 	}
 
-	var exchangeRatesResponse oracletypes.QueryExchangeRatesResponse
-	if err := cdc.UnmarshalJSON(bz, &exchangeRatesResponse); err != nil {
-		return nil, err
-	}
-
-	return exchangeRatesResponse.ExchangeRates, nil
+	return resp.ExchangeRates, nil
 }
 
 func queryOutflows(endpoint, denom string) (sdk.DecCoins, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/umee/uibc/v1/outflows?denom=%s", endpoint, denom))
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
+	endpoint = fmt.Sprintf("%s/umee/uibc/v1/outflows?denom=%s", endpoint, denom)
+	var resp uibc.QueryOutflowsResponse
+	if err := queryREST(endpoint, &resp); err != nil {
 		return nil, err
 	}
 
-	var outflowsResponse uibc.QueryOutflowsResponse
-	if err := cdc.UnmarshalJSON(bz, &outflowsResponse); err != nil {
-		return nil, err
-	}
-
-	return outflowsResponse.Outflows, nil
+	return resp.Outflows, nil
 }
 
 func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
-	var zeroCoin sdk.Coin
-
-	path := fmt.Sprintf(
-		"%s/cosmos/bank/v1beta1/balances/%s/by_denom?denom=%s",
-		endpoint, addr, denom,
-	)
-	resp, err := http.Get(path)
-	if err != nil {
-		return zeroCoin, fmt.Errorf("failed to execute HTTP request: %w", err)
+	endpoint = fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s/by_denom?denom=%s", endpoint, addr, denom)
+	var resp banktypes.QueryBalanceResponse
+	if err := queryREST(endpoint, &resp); err != nil {
+		return sdk.Coin{}, err
 	}
 
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return zeroCoin, err
-	}
-
-	var balanceResp banktypes.QueryBalanceResponse
-	if err := cdc.UnmarshalJSON(bz, &balanceResp); err != nil {
-		return zeroCoin, err
-	}
-
-	return *balanceResp.Balance, nil
+	return *resp.Balance, nil
 }
 
 func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/gravity/v1beta/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom))
-	if err != nil {
-		return "", false, fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
+	endpoint = fmt.Sprintf("%s/gravity/v1beta/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom)
+	var resp gravitytypes.QueryDenomToERC20Response
+	if err := queryREST(endpoint, &resp); err != nil {
 		return "", false, err
 	}
 
-	var denomToERC20Resp gravitytypes.QueryDenomToERC20Response
-	if err := cdc.UnmarshalJSON(bz, &denomToERC20Resp); err != nil {
-		return "", false, err
-	}
-
-	return denomToERC20Resp.Erc20, denomToERC20Resp.CosmosOriginated, nil
+	return resp.Erc20, resp.CosmosOriginated, nil
 }
 
 func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
@@ -619,7 +552,6 @@ func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
 	if err != nil {
 		return err
 	}
-
 	if pending {
 		return fmt.Errorf("ethereum tx %s is still pending", txHash)
 	}
