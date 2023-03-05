@@ -20,7 +20,7 @@ service Query {
   // Outflow returns IBC denom outflows in the current epoch.
   // If denom is empty, returns outflows of all tokens in the current epoch.
   rpc Outflows(QueryOutflows) returns (QueryOutflowsResponse) {
-    option (google.api.http).get = "/umee/uibc/v1/outflows/{denom}";
+    option (google.api.http).get = "/umee/uibc/v1/outflows";
   }
 }
 

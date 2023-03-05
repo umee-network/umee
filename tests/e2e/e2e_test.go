@@ -1,8 +1,6 @@
 package e2e
 
 import (
-	"fmt"
-	"strings"
 	"time"
 
 	"cosmossdk.io/math"
@@ -12,44 +10,158 @@ import (
 	"github.com/umee-network/umee/v4/tests/grpc"
 )
 
+func (s *IntegrationTestSuite) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdk.Dec) {
+	// TODO: needs to check with avgPrice instead of exchange rate
+	// get exchange rate
+	exchangeRate, err := queryExchangeRate(endpoint, excDenom)
+	s.Require().NoError(err)
+	powerReduction := sdk.MustNewDecFromStr("10").Power(6)
+	totalPrice := amount.Quo(powerReduction).Mul(exchangeRate.AmountOf(excDenom))
+	s.T().Log("exchangeRate total price ", totalPrice.String(), "outflow value", outflow.String())
+	percentageDiff := totalPrice.Mul(perDiff)
+	// Note: checking outflow >= total_price with percentageDiff
+	// either total_price >= outflow with percentageDiff
+	s.Require().True(outflow.GTE(totalPrice.Sub(percentageDiff)) || totalPrice.GTE(outflow.Sub(percentageDiff)))
+}
+
+func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate bool, amount sdk.Dec, excDenom string) {
+	s.Require().Eventually(
+		func() bool {
+			outflows, err := queryOutflows(umeeAPIEndpoint, denom)
+			s.Require().NoError(err)
+			if checkWithExcRate {
+				outflow := outflows.AmountOf(denom)
+				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, outflow, amount, sdk.MustNewDecFromStr("0.03"))
+			}
+			return outflows.Len() == 1 && outflows[0].Denom == denom
+		},
+		time.Minute,
+		5*time.Second,
+	)
+}
+
+func (s *IntegrationTestSuite) checkSupply(endpoint, ibcDenom string, amount math.Int) {
+	s.Require().Eventually(
+		func() bool {
+			supply, err := queryTotalSupply(endpoint)
+			s.Require().NoError(err)
+			s.Require().Equal(supply.AmountOf(ibcDenom).Int64(), amount.Int64())
+			return supply.AmountOf(ibcDenom).Equal(amount)
+		},
+		time.Minute,
+		5*time.Second,
+	)
+}
+
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
+	// s.T().Parallel()
 	var ibcStakeDenom string
 
-	valAddr, err := s.chain.validators[0].keyInfo.GetAddress()
-	s.Require().NoError(err)
+	s.Run("ibc_transfer_quota", func() {
+		// require the recipient account receives the IBC tokens (IBC packets ACKd)
+		gaiaAPIEndpoint := s.gaiaREST()
+		umeeAPIEndpoint := s.umeeREST()
+		// ibc hash of uumee token
+		umeeIBCHash := "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
+		// ibc hash of uatom token
+		uatomIBCHash := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
 
+		// send uatom from gaia to umee
+		uatomAmount := sdk.NewInt64Coin("uatom", 100000000) // 100ATOM
+		s.sendIBC(gaiaChainID, s.chain.id, "", uatomAmount)
+		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomAmount.Amount)
+
+		// TODO: needs to calculate the quota before ibc-transfer to check quota
+		// sending more tokens than token_quota limit of umee
+		// 120000 * 0.007863408515960442 => 943 $
+		exceedAmount := sdk.NewInt64Coin(appparams.BondDenom, 120000000000) // 120000UMEE
+		s.sendIBC(s.chain.id, gaiaChainID, "", exceedAmount)
+		// check the ibc (umee) quota after ibc txs
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
+
+		// send 100UMEE from umee to gaia
+		// Note: receiver is null means hermes will default send to key_name (from config) of target chain (gaia)
+		token := sdk.NewInt64Coin(appparams.BondDenom, 100000000) // 100UMEE
+		s.sendIBC(s.chain.id, gaiaChainID, "", token)
+		s.checkOutflows(umeeAPIEndpoint, appparams.BondDenom, true, sdk.NewDecFromInt(token.Amount), appparams.Name)
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount)
+
+		// send uatom (ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2) from umee to gaia
+		uatomIBCToken := sdk.NewInt64Coin(uatomIBCHash, 100000000) // 100ATOM
+		// supply will be not be decreased because sending uatomIBCToken amount is more than token quota so it will fail
+		s.sendIBC(s.chain.id, gaiaChainID, "", uatomIBCToken)
+		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomIBCToken.Amount)
+
+		uatomIBCToken.Amount = math.NewInt(1000000) // 1 ATOM
+		s.sendIBC(s.chain.id, gaiaChainID, "", uatomIBCToken)
+		// remaing supply still exists for uatom in umee
+		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomAmount.Amount.Sub(uatomIBCToken.Amount))
+		s.checkOutflows(umeeAPIEndpoint, uatomIBCHash, true, sdk.NewDecFromInt(uatomIBCToken.Amount), "ATOM")
+
+		// sending more tokens then token_quota limit of umee
+		// 120000 * 0.007863408515960442 => 943 $
+		s.sendIBC(s.chain.id, gaiaChainID, "", exceedAmount)
+		// check the ibc (umee) supply after ibc txs, it will same as previous because it will fail because to quota limit exceed
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount)
+
+		// sending back some amount from receiver to sender (ibc/XXX)
+		s.sendIBC(gaiaChainID, s.chain.id, "", sdk.NewInt64Coin(umeeIBCHash, 1000))
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount.Sub(math.NewInt(1000)))
+
+		// sending back remaining ibc amount from receiver to sender (ibc/XXX)
+		s.sendIBC(gaiaChainID, s.chain.id, "", sdk.NewInt64Coin(umeeIBCHash, token.Amount.Sub(math.NewInt(1000)).Int64()))
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
+
+		// reset the outflows
+		s.T().Logf("waiting until quota reset, basically it will take around 300 seconds to do quota reset")
+		s.Require().Eventually(
+			func() bool {
+				outflows, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
+				s.Require().NoError(err)
+				outflow := outflows.AmountOf(appparams.BondDenom)
+				if outflow.Equal(sdk.NewDec(0)) {
+					s.T().Logf("quota is reset : %s is %s ", appparams.BondDenom, outflow.String())
+				}
+				return outflow.Equal(sdk.NewDec(0))
+			},
+			5*time.Minute,
+			5*time.Second,
+		)
+
+		// after reset sending again tokens from umee to gaia
+		// send 100UMEE from umee to gaia
+		// Note: receiver is null means hermes will default send to key_name (from config) of target chain (gaia)
+		s.sendIBC(s.chain.id, gaiaChainID, "", token)
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount)
+	})
+
+	// Non registered tokens (not exists in oracle for quota test)
 	s.Run("send_stake_to_umee", func() {
-		recipient := valAddr.String()
-		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
-		s.sendIBC(gaiaChainID, s.chain.id, recipient, token)
-
-		umeeAPIEndpoint := fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
-
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		var (
 			balances sdk.Coins
 			err      error
 		)
+
+		stakeIBCHash := "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
+		umeeAPIEndpoint := s.umeeREST()
+
+		valAddr, err := s.chain.validators[0].keyInfo.GetAddress()
+		s.Require().NoError(err)
+		recipient := valAddr.String()
+		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
+		s.sendIBC(gaiaChainID, s.chain.id, recipient, token)
+
 		s.Require().Eventually(
 			func() bool {
 				balances, err = queryUmeeAllBalances(umeeAPIEndpoint, recipient)
 				s.Require().NoError(err)
-
-				return balances.Len() == 3
+				return token.Amount.Equal(balances.AmountOf(stakeIBCHash))
 			},
 			time.Minute,
 			5*time.Second,
 		)
-
-		for _, c := range balances {
-			if strings.Contains(c.Denom, "ibc/") {
-				ibcStakeDenom = c.Denom
-				s.Require().Equal(token.Amount.Int64(), c.Amount.Int64())
-				break
-			}
-		}
-
-		s.Require().NotEmpty(ibcStakeDenom)
+		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
 	})
 
 	var ibcStakeERC20Addr string
