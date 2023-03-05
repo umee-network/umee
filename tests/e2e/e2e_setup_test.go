@@ -301,7 +301,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	var govGenState govtypesv1.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
-	var votingPeroid = 5 * time.Second
+	votingPeroid := 5 * time.Second
 	govGenState.VotingParams.VotingPeriod = &votingPeroid
 
 	bz, err = cdc.MarshalJSON(&govGenState)

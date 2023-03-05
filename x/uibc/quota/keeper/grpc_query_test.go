@@ -1,10 +1,11 @@
 package keeper_test
 
 import (
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"gotest.tools/v3/assert"
-	"testing"
 )
 
 func TestGRPCQueryParams(t *testing.T) {

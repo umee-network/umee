@@ -27,7 +27,7 @@ func (k Keeper) GetAllOutflows(ctx sdk.Context) (sdk.DecCoins, error) {
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
-		var o = sdk.DecCoin{Denom: string(iter.Key())}
+		o := sdk.DecCoin{Denom: string(iter.Key())}
 		if err := o.Amount.Unmarshal(iter.Value()); err != nil {
 			return nil, err
 		}
