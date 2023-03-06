@@ -78,7 +78,7 @@ func (k Keeper) increaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentiv
 
 // decreaseBond decreases the bonded uToken amount for an account at a given tier, and updates the module's total.
 // it also clears reward trackers for any bond tiers which have reached zero for the account, to save storage.
-// This token must be called when unbondings are completed (not created) and when the leverage module forcefully
+// This function must be called when unbondings are completed (not created) and when the leverage module forcefully
 // liquidates bonded collateral.
 func (k Keeper) decreaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, unbond sdk.Coin) error {
 	// calculate and set new bonded amount after subtracting the currently unbonding tokens
