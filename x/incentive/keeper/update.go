@@ -40,7 +40,10 @@ func (k Keeper) updateAccount(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, 
 		return sdk.NewCoins(), err
 	}
 
-	// then claims rewards for all currently bonded uTokens
+	// then claims rewards for all bonded (but not currently unbonding) uTokens
+	//
+	// TODO: need to subtract unbonding amounts, as this currently does not account for that
+	//
 	rewards := sdk.NewCoins()
 	if err := k.iterateAccountBonds(ctx, addr,
 		func(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, uToken sdk.Coin) error {
