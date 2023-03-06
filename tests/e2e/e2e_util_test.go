@@ -545,6 +545,28 @@ func queryExchangeRate(endpoint, denom string) (sdk.DecCoins, error) {
 	return exchangeRatesResponse.ExchangeRates, nil
 }
 
+func queryHistroAvgPrice(endpoint, denom string) (sdk.Dec, error) {
+	url := fmt.Sprintf("%s/umee/historacle/v1/avg_price/%s", endpoint, strings.ToUpper(denom))
+	resp, err := http.Get(url)
+	if err != nil {
+		return sdk.Dec{}, fmt.Errorf("failed to execute HTTP request: %w", err)
+	}
+
+	defer resp.Body.Close()
+
+	bz, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return sdk.Dec{}, err
+	}
+
+	var avgPriceResponse oracletypes.QueryAvgPriceResponse
+	if err := cdc.UnmarshalJSON(bz, &avgPriceResponse); err != nil {
+		return sdk.Dec{}, err
+	}
+
+	return avgPriceResponse.Price, nil
+}
+
 func queryOutflows(endpoint, denom string) (sdk.DecCoins, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/umee/uibc/v1/outflows?denom=%s", endpoint, denom))
 	if err != nil {
