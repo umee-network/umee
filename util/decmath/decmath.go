@@ -7,9 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var (
-	ErrEmptyList = fmt.Errorf("empty price list passed in")
-)
+var ErrEmptyList = fmt.Errorf("empty price list passed in")
 
 // Median returns the median of a list of sdk.Dec. Returns error
 // if ds is empty list.

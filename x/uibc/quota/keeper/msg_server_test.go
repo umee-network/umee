@@ -31,7 +31,8 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 				PerDenom:    sdk.NewDec(1),
 			},
 			errMsg: "expected gov account as only signer for proposal message",
-		}, {
+		},
+		{
 			name: "invalid quota in msg",
 			msg: uibc.MsgGovUpdateQuota{
 				Title:         "title",
@@ -42,7 +43,8 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 				Total:         sdk.NewDec(100),
 			},
 			errMsg: "total quota must be greater than or equal to per_denom quota",
-		}, {
+		},
+		{
 			name: "valid msg",
 			msg: uibc.MsgGovUpdateQuota{
 				Title:         "title",

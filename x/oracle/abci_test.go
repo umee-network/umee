@@ -282,7 +282,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			blockHeight += historicStampPeriod
 			ctx = ctx.WithBlockHeight(blockHeight)
 
-			var tuples = types.ExchangeRateTuples{}
+			tuples := types.ExchangeRateTuples{}
 			for denom, prices := range exchangeRates {
 				tuples = append(tuples, types.ExchangeRateTuple{
 					Denom:        denom,
