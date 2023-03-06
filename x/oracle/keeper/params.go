@@ -8,9 +8,9 @@ import (
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
-const (
-	AvgPeriod time.Duration = time.Hour * 16
-	AvgShift  time.Duration = time.Hour * 2
+var (
+	AvgPeriod = time.Hour * 16
+	AvgShift  = time.Hour * 2
 )
 
 // VotePeriod returns the number of blocks during which voting takes place.
