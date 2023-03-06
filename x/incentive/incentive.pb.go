@@ -27,7 +27,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // Params defines the parameters for the incentive module.
 type Params struct {
-	// max_unbondings defines the maximum amount of concurrent unbondings an address can have.
+	// max_unbondings defines the maximum amount of concurrent unbondings an address can have
+	// on each unbonding tier of each bonded uToken denom.
 	MaxUnbondings uint32 `protobuf:"varint,1,opt,name=max_unbondings,json=maxUnbondings,proto3" json:"max_unbondings,omitempty"`
 	// unbonding_duration_long defines the unbonding duration (in seconds) of the long tier.
 	UnbondingDurationLong uint64 `protobuf:"varint,2,opt,name=unbonding_duration_long,json=unbondingDurationLong,proto3" json:"unbonding_duration_long,omitempty"`

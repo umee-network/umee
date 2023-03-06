@@ -10,7 +10,8 @@ option go_package = "github.com/umee-network/umee/v4/x/incentive";
 message Params {
   option (gogoproto.equal) = true;
 
-  // max_unbondings defines the maximum amount of concurrent unbondings an address can have.
+  // max_unbondings defines the maximum amount of concurrent unbondings an address can have
+  // on each unbonding tier of each bonded uToken denom.
   uint32 max_unbondings = 1;
 
   // unbonding_duration_long defines the unbonding duration (in seconds) of the long tier.

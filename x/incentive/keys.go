@@ -20,9 +20,11 @@ type (
 )
 
 const (
-	BondTierLong BondTier = iota
-	BondTierMiddle
+	// BondTierUnspecified is used in functions which query unbondings, to indicate that all tiers should be counted
+	BondTierUnspecified BondTier = iota
 	BondTierShort
+	BondTierMiddle
+	BondTierLong
 )
 
 const (

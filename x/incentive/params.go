@@ -9,7 +9,7 @@ import (
 const secondsPerDay = 86400
 
 var (
-	defaultMaxUnbondings           = uint32(20)
+	defaultMaxUnbondings           = uint32(5)
 	defaultUnbondingDurationShort  = uint64(secondsPerDay)
 	defaultUnbondingDurationMiddle = uint64(secondsPerDay * 7)
 	defaultUnbondingDurationLong   = uint64(secondsPerDay * 14)

@@ -25,6 +25,13 @@ var (
 	ErrNonzeroFundedRewards    = errors.Register(ModuleName, 301, "funded rewards must be zero in proposal")
 	ErrEmptyProposal           = errors.Register(ModuleName, 302, "proposal contains no incentive programs")
 
+	// 4XX = Messages
+	ErrSponsorIneligible      = errors.Register(ModuleName, 400, "incentive program not eligible for sponsorship")
+	ErrSponsorInvalid         = errors.Register(ModuleName, 401, "incorrect funding for incentive program")
+	ErrMaxUnbondings          = errors.Register(ModuleName, 402, "exceeds maximum concurrent unbondings for a single uToken")
+	ErrInsufficientBonded     = errors.Register(ModuleName, 403, "insufficient bonded, but not already unbonding, uTokens")
+	ErrInsufficientCollateral = errors.Register(ModuleName, 404, "insufficient collateral to create bond")
+
 	// 5XX = Misc
 	ErrDecreaseNextProgramID  = errors.Register(ModuleName, 500, "cannot decrease NextProgramID")
 	ErrDecreaseLastRewardTime = errors.Register(ModuleName, 501, "cannot decrease LastRewardTime")

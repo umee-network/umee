@@ -87,12 +87,19 @@ func keyBondAmountNoDenom(addr sdk.AccAddress) []byte {
 // denom and tier.
 func keyRewardAccumulator(bondedDenom, rewardDenom string, tier incentive.BondTier) []byte {
 	// rewardAccumulatorPrefix | bondedDenom | 0x00 | tier | rewardDenom | 0x00
-	return util.ConcatBytes(1, keyRewardAccumulatorNoReward(bondedDenom), []byte{byte(tier)}, []byte(rewardDenom))
+	return util.ConcatBytes(1, keyRewardAccumulatorNoReward(bondedDenom, tier), []byte(rewardDenom))
 }
 
 // keyRewardAccumulatorNoReward returns the common prefix used by all RewardAccumulators for a bonded uToken
+// denom and tier.
+func keyRewardAccumulatorNoReward(bondedDenom string, tier incentive.BondTier) []byte {
+	// rewardAccumulatorPrefix | bondedDenom | 0x00 | tier
+	return util.ConcatBytes(0, keyRewardAccumulatorNoTier(bondedDenom), []byte{byte(tier)})
+}
+
+// keyRewardAccumulatorNoTier returns the common prefix used by all RewardAccumulators for a bonded uToken
 // denom.
-func keyRewardAccumulatorNoReward(bondedDenom string) []byte {
+func keyRewardAccumulatorNoTier(bondedDenom string) []byte {
 	// rewardAccumulatorPrefix | bondedDenom | 0x00
 	return util.ConcatBytes(1, keyPrefixRewardAccumulator, []byte(bondedDenom))
 }
@@ -101,12 +108,19 @@ func keyRewardAccumulatorNoReward(bondedDenom string) []byte {
 // denom and tier.
 func keyRewardTracker(addr sdk.AccAddress, bondedDenom, rewardDenom string, tier incentive.BondTier) []byte {
 	// rewardTrackerPrefix | lengthprefixed(addr) | bondedDenom | 0x00 | tier | rewardDenom | 0x00
-	return util.ConcatBytes(1, keyRewardTrackerNoReward(addr, bondedDenom), []byte{byte(tier)}, []byte(rewardDenom))
+	return util.ConcatBytes(1, keyRewardTrackerNoReward(addr, bondedDenom, tier), []byte(rewardDenom))
 }
 
-// keyRewardTrackerNoReward returns the common prefix used by all reward trackers for an account and bonded uToken
-// denom.
-func keyRewardTrackerNoReward(addr sdk.AccAddress, bondedDenom string) []byte {
+// keyRewardTrackerNoReward returns a KVStore key for a single reward tracker denom for an account and bonded uToken
+// denom and tier.
+func keyRewardTrackerNoReward(addr sdk.AccAddress, bondedDenom string, tier incentive.BondTier) []byte {
+	// rewardTrackerPrefix | lengthprefixed(addr) | bondedDenom | 0x00 | tier
+	return util.ConcatBytes(0, keyRewardTrackerNoTier(addr, bondedDenom), []byte{byte(tier)})
+}
+
+// keyRewardTrackerNoTier returns the common prefix used by all reward trackers for an account and bonded uToken
+// denom across all unbonding tiers.
+func keyRewardTrackerNoTier(addr sdk.AccAddress, bondedDenom string) []byte {
 	// rewardTrackerPrefix | lengthprefixed(addr) | bondedDenom | 0x00
 	return util.ConcatBytes(1, keyRewardTrackerNoDenom(addr), []byte(bondedDenom))
 }
