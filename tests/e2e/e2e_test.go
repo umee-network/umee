@@ -11,12 +11,11 @@ import (
 )
 
 func (s *IntegrationTestSuite) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdk.Dec) {
-	// TODO: needs to check with avgPrice instead of exchange rate
-	// get exchange rate
-	exchangeRate, err := queryExchangeRate(endpoint, excDenom)
+	// get historic average price for denom (SYMBOL_DENOM)
+	histoAvgPrice, err := queryHistroAvgPrice(endpoint, excDenom)
 	s.Require().NoError(err)
 	powerReduction := sdk.MustNewDecFromStr("10").Power(6)
-	totalPrice := amount.Quo(powerReduction).Mul(exchangeRate.AmountOf(excDenom))
+	totalPrice := amount.Quo(powerReduction).Mul(histoAvgPrice)
 	s.T().Log("exchangeRate total price ", totalPrice.String(), "outflow value", outflow.String())
 	percentageDiff := totalPrice.Mul(perDiff)
 	// Note: checking outflow >= total_price with percentageDiff
@@ -31,7 +30,7 @@ func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string, chec
 			s.Require().NoError(err)
 			if checkWithExcRate {
 				outflow := outflows.AmountOf(denom)
-				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, outflow, amount, sdk.MustNewDecFromStr("0.03"))
+				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, outflow, amount, sdk.MustNewDecFromStr("0.01"))
 			}
 			return outflows.Len() == 1 && outflows[0].Denom == denom
 		},
