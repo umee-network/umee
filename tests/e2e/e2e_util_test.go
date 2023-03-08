@@ -517,7 +517,7 @@ func queryExchangeRate(endpoint, denom string) (sdk.DecCoins, error) {
 	return resp.ExchangeRates, nil
 }
 
-func queryHistroAvgPrice(endpoint, denom string) (sdk.Dec, error) {
+func queryHistAvgPrice(endpoint, denom string) (sdk.Dec, error) {
 	endpoint = fmt.Sprintf("%s/umee/historacle/v1/avg_price/%s", endpoint, strings.ToUpper(denom))
 	var resp oracletypes.QueryAvgPriceResponse
 	if err := queryREST(endpoint, &resp); err != nil {
