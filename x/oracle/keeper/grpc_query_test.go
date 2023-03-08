@@ -354,7 +354,8 @@ func (s *IntegrationTestSuite) TestInvalidBechAddress() {
 func (s *IntegrationTestSuite) TestQuerier_AvgPrice() {
 	app, ctx := s.app, s.ctx
 
-	p := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("12.1")}
+	// Note: oracle will save avg price with Upper Case Denom
+	p := sdk.DecCoin{Denom: "ATOM", Amount: sdk.MustNewDecFromStr("12.1")}
 	app.OracleKeeper.AddHistoricPrice(ctx, p.Denom, p.Amount)
 
 	res, err := s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: p.Denom})
