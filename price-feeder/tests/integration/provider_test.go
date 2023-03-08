@@ -43,7 +43,6 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 	for key, pairs := range cfg.ProviderPairs() {
 		providerName := key
 		currencyPairs := pairs
-
 		endpoint := endpoints[providerName]
 		s.T().Run(string(providerName), func(t *testing.T) {
 			t.Parallel()
