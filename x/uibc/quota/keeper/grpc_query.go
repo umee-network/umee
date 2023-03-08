@@ -33,18 +33,14 @@ func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 	*uibc.QueryOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
+	var o sdk.Dec
 	if len(req.Denom) == 0 {
-		o, err := q.GetAllOutflows(ctx)
-		if err != nil {
-			return &uibc.QueryOutflowsResponse{}, err
-		}
-		return &uibc.QueryOutflowsResponse{Outflows: o}, nil
+		o = q.GetTotalOutflow(ctx)
+	} else {
+		var err
+	if o, err = q.GetOutflows(ctx, req.Denom); err ! = nil {
+		return nil, err
 	}
 
-	o, err := q.GetOutflows(ctx, req.Denom)
-	if err != nil {
-		return &uibc.QueryOutflowsResponse{}, err
-	}
-	return &uibc.QueryOutflowsResponse{Outflows: sdk.DecCoins{o}}, nil
+	return &uibc.QueryOutflowsResponse{Outflows: o}, nil
 }

@@ -3,7 +3,6 @@ package umee.uibc.v1;
 
 import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
 import "umee/uibc/v1/quota.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/uibc";
@@ -41,8 +40,7 @@ message QueryOutflows {
 
 // QueryOutflowResponse defines response type of Query/Outflow
 message QueryOutflowsResponse {
-  repeated cosmos.base.v1beta1.DecCoin outflows = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable)     = false
+  string outflows = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 }
