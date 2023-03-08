@@ -18,15 +18,9 @@ service Query {
   }
 
   // Outflow returns IBC denom outflows in the current quota period.
-  // Returns error if denom is not specified.
+  // If denom is not specified, returns sum of all registered outflows.
   rpc Outflows(QueryOutflows) returns (QueryOutflowsResponse) {
-    option (google.api.http).get = "/umee/uibc/v1/outflows";
-  }
-
-  // Outflow returns IBC denom outflows in the current quota period.
-  // Returns error if denom is not specified.
-  rpc TotalOutflows(QueryOutflows) returns (QueryOutflowsResponse) {
-    option (google.api.http).get = "/umee/uibc/v1/outflows";
+    option (google.api.http).get = "/umee/uibc/v1/outflows/{denom}";
   }
 }
 
