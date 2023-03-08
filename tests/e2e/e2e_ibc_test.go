@@ -15,7 +15,7 @@ var (
 
 func (s *IntegrationTestSuite) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdk.Dec) {
 	// get historic average price for denom (SYMBOL_DENOM)
-	histoAvgPrice, err := queryHistroAvgPrice(endpoint, excDenom)
+	histoAvgPrice, err := queryHistAvgPrice(endpoint, excDenom)
 	s.Require().NoError(err)
 	totalPrice := amount.Quo(powerReduction).Mul(histoAvgPrice)
 	s.T().Log("exchangeRate total price ", totalPrice.String(), "outflow value", outflow.String())
@@ -73,7 +73,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 		// send uatom from gaia to umee
 		// Note : gaia -> umee (ibc_quota will not check token limit)
-		histoAvgPriceOfAtom, err := queryHistroAvgPrice(umeeAPIEndpoint, atomSymbol)
+		histoAvgPriceOfAtom, err := queryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
 		s.Require().NoError(err)
 		emOfAtom := sdk.NewDecFromInt(totalQuota).Quo(histoAvgPriceOfAtom)
 		uatomAmount := sdk.NewInt64Coin("uatom", emOfAtom.Mul(powerReduction).RoundInt64())
@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomAmount.Amount)
 
 		// sending more tokens than token_quota limit of umee (token_quota is 100$)
-		histoAvgPriceOfUmee, err := queryHistroAvgPrice(umeeAPIEndpoint, umeeSymbol)
+		histoAvgPriceOfUmee, err := queryHistAvgPrice(umeeAPIEndpoint, umeeSymbol)
 		s.Require().NoError(err)
 		exceedAmountOfUmee := sdk.NewDecFromInt(totalQuota).Quo(histoAvgPriceOfUmee)
 		s.T().Logf("sending %s amount %s more than %s", umeeSymbol, exceedAmountOfUmee.String(), totalQuota.String())
