@@ -32,6 +32,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryFeederDelegation(),
 		GetCmdQueryMissCounter(),
 		GetCmdQuerySlashWindow(),
+		GetCmdQueryHistoricAvgPrice(),
 	)
 
 	return cmd
@@ -270,6 +271,29 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.SlashWindow(cmd.Context(), &types.QuerySlashWindow{})
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryHistoricAvgPrice implements the historic avg price command.
+func GetCmdQueryHistoricAvgPrice() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "avg-price [denom]",
+		Short:   "Query the historic avg price for denom",
+		Args:    cobra.ExactArgs(1),
+		Example: "$ umeed query oracle avg-price UMEE",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+
+			res, err := queryClient.AvgPrice(cmd.Context(), &types.QueryAvgPrice{Denom: strings.ToUpper(args[0])})
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
