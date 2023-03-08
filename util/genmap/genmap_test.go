@@ -8,7 +8,8 @@ import (
 
 func TestPick(t *testing.T) {
 	m := map[string]int{
-		"one": 1, "two": 2, "three": 3}
+		"one": 1, "two": 2, "three": 3,
+	}
 
 	m2 := Pick(m, []string{"one"})
 	assert.DeepEqual(t, map[string]int{"one": 1}, m2)

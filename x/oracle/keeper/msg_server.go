@@ -135,7 +135,8 @@ func (ms msgServer) DelegateFeedConsent(
 	ms.SetFeederDelegation(ctx, operatorAddr, delegateAddr)
 
 	sdkutil.Emit(&ctx, &types.EventDelegateFeedConsent{
-		Operator: msg.Operator, Delegate: msg.Delegate})
+		Operator: msg.Operator, Delegate: msg.Delegate,
+	})
 
 	return &types.MsgDelegateFeedConsentResponse{}, nil
 }

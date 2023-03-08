@@ -16,14 +16,20 @@ type AvgKeeper struct {
 }
 
 func (k Keeper) AvgKeeper(ctx sdk.Context) AvgKeeper {
-	return AvgKeeper{store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
+
+	return AvgKeeper{store: ctx.KVStore(k.storeKey), period: k.AvgPeriod, shift: k.AvgShift}
+}
+
+func (k AvgKeeper) numCounters() int64 {
+	return int64(k.period) / int64(k.shift)
 }
 
 func (k AvgKeeper) newCounters(start time.Time) []types.AvgCounter {
-	num := int64(k.period) / int64(k.shift)
+	num := k.numCounters()
 	acs := make([]types.AvgCounter, num)
 	for i := int64(0); i < num; i++ {
 		acs[i].Start = start
+		acs[i].Sum = sdk.ZeroDec()
 		start = start.Add(k.shift)
 	}
 	return acs
@@ -42,40 +48,42 @@ func (k AvgKeeper) updateAvgCounter(
 		acs = k.newCounters(now)
 	}
 
-	// current counter is the one which most of the aggregated prices,
-	// so the one with the oldest Start (unless it cycled over)
-	currentCounter := -1
-	oldest := acs[0].Start
 	for i := range acs {
 		a := &acs[i]
 		// initialization: in the first run, we will have all by one Starts after "now"
-		if a.Start.After(now) {
+		if now.Before(a.Start) {
 			continue
 		}
 
-		// TODO: update the algorithm to handle a chain halt scenario
-		// https://linear.app/umee/issue/UMEE-308/
-
 		t := a.Start.Add(k.period)
-		if t.After(now) {
-			a.Sum = exchangeRate
-			a.Num = 1
-			a.Start = now
-		} else {
+		if now.Before(t) {
 			a.Sum = a.Sum.Add(exchangeRate)
 			a.Num++
-		}
-		// Can't use `Before` to handle the case where there are no prices
-		if !a.Start.After(oldest) {
-			oldest = t
-			currentCounter = i
+		} else {
+			a.Sum = exchangeRate
+			a.Num = 1
+			a.Start = t
+			for t = t.Add(k.period); !now.Before(t); t = t.Add(k.period) {
+				a.Start = t
+			}
 		}
 	}
 	k.setAvgCounters(denom, acs)
 
-	if currentCounter >= 0 {
-		k.setLatestIdx(denom, byte(currentCounter))
+	// find the oldest "Start", need to do it in a separate loop, because in the loop above
+	// we update "Start"
+	// current counter is the one which most of the aggregated prices,
+	// so the one with the oldest Start (unless it cycled over)
+	oldestCounter := -1
+	oldest := acs[0].Start
+	for i := range acs {
+		// Can't use `Before` to handle the case where there are no prices
+		if !acs[i].Start.After(oldest) {
+			oldest = acs[i].Start
+			oldestCounter = i
+		}
 	}
+	k.setLatestIdx(denom, byte(oldestCounter))
 }
 
 func (k AvgKeeper) getLatestIdx(denom string) (byte, error) {
@@ -137,16 +145,20 @@ func (k AvgKeeper) GetCurrentAvg(denom string) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.Dec{}, err
 	}
-
-	key := types.KeyAvgCounter(denom, latestIdx)
-	bz := k.store.Get(key)
-	if len(bz) == 0 {
-		return sdk.Dec{}, types.ErrNoLatestAvgPrice
-	}
-	var av types.AvgCounter
-	if err := av.Unmarshal(bz); err != nil {
+	av, err := k.getCounter(denom, latestIdx)
+	if err != nil {
 		return sdk.Dec{}, nil
 	}
 
 	return av.Sum.Quo(sdk.NewDec(int64(av.Num))), nil
+}
+
+func (k AvgKeeper) getCounter(denom string, idx byte) (types.AvgCounter, error) {
+	key := types.KeyAvgCounter(denom, idx)
+	bz := k.store.Get(key)
+	if len(bz) == 0 {
+		return types.AvgCounter{}, types.ErrNoLatestAvgPrice
+	}
+	var av types.AvgCounter
+	return av, av.Unmarshal(bz)
 }

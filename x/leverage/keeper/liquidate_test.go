@@ -187,7 +187,6 @@ func TestComputeLiquidation(t *testing.T) {
 }
 
 func TestCloseFactor(t *testing.T) {
-
 	type testCase struct {
 		borrowedValue                sdk.Dec
 		collateralValue              sdk.Dec

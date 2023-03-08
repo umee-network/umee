@@ -17,7 +17,7 @@ const (
 var (
 	// 1M USD daily limit for all denoms
 	DefaultTotalQuota = sdk.MustNewDecFromStr("1000000")
-	// 600K USD dail limit for each denom
+	// 600K USD daily limit for each denom
 	DefaultQuotaPerIBCDenom = sdk.MustNewDecFromStr("600000")
 )
 
@@ -27,7 +27,7 @@ func DefaultParams() Params {
 		IbcPause:      DefaultIBCPause,
 		TotalQuota:    DefaultTotalQuota,
 		TokenQuota:    DefaultQuotaPerIBCDenom,
-		QuotaDuration: DefaultQuotaDurationPerDenom,
+		QuotaDuration: time.Second * DefaultQuotaDurationPerDenom,
 	}
 }
 
