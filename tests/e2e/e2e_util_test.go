@@ -458,7 +458,10 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 	time.Sleep(time.Second * 12)
 }
 
-func queryREST(endpoint string, valPtr proto.Message) error {
+// queryREST make http query to grpc-web endpoint and tries to decode valPtr using proto-JSON
+// decoder if valPtr implements proto.Message. Otherwise standard JSON decoder is used.
+// valPtr must be a pointer.
+func queryREST(endpoint string, valPtr interface{}) error {
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		return fmt.Errorf("failed to execute HTTP request: %w", err)
@@ -469,12 +472,18 @@ func queryREST(endpoint string, valPtr proto.Message) error {
 		return fmt.Errorf("tx query returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
 	}
 
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
-	}
-	if err = cdc.UnmarshalJSON(bz, valPtr); err != nil {
-		return fmt.Errorf("failed to decode response body: %w, endpoint: %s", err, endpoint)
+	if valPtr, ok := valPtr.(proto.Message); ok {
+		bz, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
+		}
+		if err = cdc.UnmarshalJSON(bz, valPtr); err != nil {
+			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
+		}
+	} else {
+		if err := json.NewDecoder(resp.Body).Decode(valPtr); err != nil {
+			return fmt.Errorf("failed to json.decode response body: %w, endpoint: %s", err, endpoint)
+		}
 	}
 
 	return nil
