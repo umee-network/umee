@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"strconv"
@@ -18,6 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	ethcmn "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/gogo/protobuf/proto"
 	"github.com/ory/dockertest/v3/docker"
 
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -456,7 +458,7 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 	time.Sleep(time.Second * 12)
 }
 
-func queryREST(endpoint string, valPtr interface{}) error {
+func queryREST(endpoint string, valPtr proto.Message) error {
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		return fmt.Errorf("failed to execute HTTP request: %w", err)
@@ -467,9 +469,14 @@ func queryREST(endpoint string, valPtr interface{}) error {
 		return fmt.Errorf("tx query returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
 	}
 
-	if err := json.NewDecoder(resp.Body).Decode(valPtr); err != nil {
+	bz, err := io.ReadAll(resp.Body)
+	if err != nil {
 		return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
 	}
+	if err = cdc.UnmarshalJSON(bz, valPtr); err != nil {
+		return fmt.Errorf("failed to decode response body: %w, endpoint: %s", err, endpoint)
+	}
+
 	return nil
 }
 
