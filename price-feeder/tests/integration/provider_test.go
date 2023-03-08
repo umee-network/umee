@@ -43,6 +43,23 @@ func (s *IntegrationTestSuite) TestWebsocketProviders() {
 	for key, pairs := range cfg.ProviderPairs() {
 		providerName := key
 		currencyPairs := pairs
+
+		// Filter by provider
+		// if providerName != provider.ProviderBitget {
+		// 	continue
+		// }
+
+		// Filter by currency pair
+		// currencyPairs = []types.CurrencyPair{}
+		// for _, pair := range pairs {
+		// 	if pair.Base == "MATIC" {
+		// 		currencyPairs = append(currencyPairs, pair)
+		// 	}
+		// }
+		// if len(currencyPairs) == 0 {
+		// 	continue
+		// }
+
 		endpoint := endpoints[providerName]
 		s.T().Run(string(providerName), func(t *testing.T) {
 			t.Parallel()
