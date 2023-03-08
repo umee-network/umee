@@ -53,12 +53,18 @@ func (s AvgKeeperSuite) testNewCounters(t *testing.T) {
 		shift    time.Duration
 		expected []types.AvgCounter
 	}{
-		{"period = shift",
-			shift, shift, allCounters[:1]},
-		{"period = 2*shift",
-			shift * 2, shift, allCounters[:2]},
-		{"period = 2.5*shift",
-			shift*2 + shift/2, shift, allCounters[:2]},
+		{
+			"period = shift",
+			shift, shift, allCounters[:1],
+		},
+		{
+			"period = 2*shift",
+			shift * 2, shift, allCounters[:2],
+		},
+		{
+			"period = 2.5*shift",
+			shift*2 + shift/2, shift, allCounters[:2],
+		},
 	}
 	for _, tc := range tcs {
 		k := s.newAvgKeeper(t, tc.period, tc.shift)
@@ -107,7 +113,6 @@ func (s AvgKeeperSuite) testLatestIndx(t *testing.T) {
 	i, err = k.getLatestIdx(s.denom2)
 	assert.NilError(t, err)
 	assert.Equal(t, i, 4)
-
 }
 
 func (s AvgKeeperSuite) testGetCurrentAvg(t *testing.T) {
@@ -144,12 +149,11 @@ func (s AvgKeeperSuite) testUpdateAvgCounterSimple(t *testing.T) {
 	k.updateAvgCounter(s.denom2, sdk.NewDec(7), now)
 	checkAvgPrice(t, k, "7", s.denom2, 0)
 	checkAvgPrice(t, k, "3", s.denom1, 0)
-
 }
 
 func (s AvgKeeperSuite) testUpdateAvgCounterShift(t *testing.T) {
 	now, shift, k := s.setupUpdateAvgCounter(t)
-	var numCounters = k.numCounters()
+	numCounters := k.numCounters()
 
 	k.updateAvgCounter(s.denom1, sdk.NewDec(1), now)
 	checkAvgPrice(t, k, "1", s.denom1, 0)
@@ -182,7 +186,7 @@ func (s AvgKeeperSuite) testUpdateAvgCounterCycle(t *testing.T) {
 	k.updateAvgCounter(s.denom1, sdk.NewDec(1), now)
 	checkAvgPrice(t, k, "1", s.denom1, 0)
 
-	var numCounters = k.numCounters()
+	numCounters := k.numCounters()
 	// go to the latest shift in the epoch
 	now = now.Add(shift * time.Duration(numCounters-1))
 	k.updateAvgCounter(s.denom1, sdk.NewDec(3), now)
@@ -223,7 +227,7 @@ func (s AvgKeeperSuite) testUpdateAvgCounterHalt(t *testing.T) {
 	k.updateAvgCounter(s.denom1, sdk.NewDec(1), now)
 	checkAvgPrice(t, k, "1", s.denom1, 0)
 
-	var numCounters = k.numCounters()
+	numCounters := k.numCounters()
 	// go to the latest shift in the epoch
 	now = now.Add(shift * time.Duration(numCounters-1))
 	k.updateAvgCounter(s.denom1, sdk.NewDec(3), now)

@@ -20,7 +20,7 @@ require (
 	github.com/tendermint/tendermint v0.34.26
 	github.com/umee-network/umee/v4 v4.0.0
 	golang.org/x/sync v0.1.0
-	golang.org/x/term v0.5.0
+	golang.org/x/term v0.6.0
 	google.golang.org/grpc v1.53.0
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.4.0
@@ -286,7 +286,7 @@ require (
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/tools v0.6.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
