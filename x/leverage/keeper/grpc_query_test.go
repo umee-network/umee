@@ -4,18 +4,54 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"gotest.tools/v3/assert"
 
+	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
-	ctx, require := s.ctx, s.Require()
+	ctx := s.ctx
 
-	resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &types.QueryRegisteredTokens{})
-	require.NoError(err)
-	require.Len(resp.Registry, 5, "token registry length")
+	tests := []struct {
+		name           string
+		errMsg         string
+		req            types.QueryRegisteredTokens
+		expectedTokens int
+	}{
+		{
+			"valid: get the all registered tokens",
+			"",
+			types.QueryRegisteredTokens{},
+			5,
+		},
+		{
+			"valid: get the registered token info by base_denom",
+			"",
+			types.QueryRegisteredTokens{BaseDenom: appparams.BondDenom},
+			1,
+		},
+		{
+			"invalid: get the not registered token info by base_denom",
+			"not a registered Token",
+			types.QueryRegisteredTokens{BaseDenom: "not_reg_token"},
+			0,
+		},
+	}
+
+	for _, tc := range tests {
+		s.Run(tc.name, func() {
+			resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &tc.req)
+			if tc.errMsg == "" {
+				assert.NilError(s.T(), err)
+				assert.Equal(s.T(), tc.expectedTokens, len(resp.Registry))
+			} else {
+				assert.ErrorContains(s.T(), err, "not a registered Token")
+			}
+		})
+	}
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Params() {

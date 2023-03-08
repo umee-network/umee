@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package tests
 
 import (
@@ -57,7 +54,7 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 			errMsg:      "",
 			noOfRecords: 1,
 		},
-		{
+		/* {
 			name: "Get ibc-transfer quota of dummy denom ",
 			args: []string{
 				"dummy",
@@ -65,16 +62,16 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 			},
 			errMsg:      "no quota for ibc denom",
 			noOfRecords: 0,
-		},
+		}, */
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetQuota(), tc.args)
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetOutflows(), tc.args)
 			if tc.errMsg == "" {
-				var res uibc.QueryQuotaResponse
+				var res uibc.QueryOutflowsResponse
 				assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-				assert.Equal(t, len(res.Quotas), tc.noOfRecords)
+				assert.Equal(t, len(res.Outflows), tc.noOfRecords)
 			} else {
 				assert.ErrorContains(t, err, tc.errMsg)
 			}

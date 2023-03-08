@@ -45,15 +45,20 @@ func (q Querier) RegisteredTokens(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	tokens := q.Keeper.GetAllRegisteredTokens(ctx)
-
-	resp := &types.QueryRegisteredTokensResponse{
-		Registry: make([]types.Token, len(tokens)),
+	var tokens []types.Token
+	if len(req.BaseDenom) != 0 {
+		token, err := q.Keeper.GetTokenSettings(ctx, req.BaseDenom)
+		if err != nil {
+			return nil, err
+		}
+		tokens = append(tokens, token)
+	} else {
+		tokens = q.Keeper.GetAllRegisteredTokens(ctx)
 	}
 
-	copy(resp.Registry, tokens)
-
-	return resp, nil
+	return &types.QueryRegisteredTokensResponse{
+		Registry: tokens,
+	}, nil
 }
 
 func (q Querier) MarketSummary(

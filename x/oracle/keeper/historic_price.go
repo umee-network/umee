@@ -283,10 +283,6 @@ func (k Keeper) IterateHistoricMedians(
 	}
 }
 
-func (k Keeper) AvgKeeper(ctx sdk.Context) AvgKeeper {
-	return AvgKeeper{cdc: k.cdc, store: ctx.KVStore(k.storeKey), period: AvgPeriod, shift: AvgShift}
-}
-
 // AddHistoricPrice adds the historic price of a denom at the current
 // block height.
 func (k Keeper) AddHistoricPrice(

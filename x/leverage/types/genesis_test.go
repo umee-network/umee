@@ -3,12 +3,12 @@ package types
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestGenesisValidation(t *testing.T) {
 	genState := DefaultGenesis()
-	require.NoError(t, genState.Validate())
+	assert.NilError(t, genState.Validate())
 
 	// TODO #484: expand this test to cover failure cases.
 }

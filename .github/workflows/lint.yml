@@ -1,10 +1,7 @@
 name: Lint
 on:
   pull_request:
-  push:
-    branches:
-      - main
-      - release/**
+  merge_group:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -64,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |

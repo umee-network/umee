@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package tests
 
 import (
@@ -44,7 +41,7 @@ func TestIntegrationSuite(t *testing.T) {
 
 	var uibcGenState uibc.GenesisState
 	assert.NilError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[uibc.ModuleName], &uibcGenState))
-	uibcGenState.Quotas = sdk.DecCoins{sdk.NewInt64DecCoin("uumee", 0)}
+	uibcGenState.Outflows = sdk.DecCoins{sdk.NewInt64DecCoin("uumee", 0)}
 	uibcGenState.TotalOutflowSum = sdk.NewDec(10)
 
 	bz, err = cfg.Codec.MarshalJSON(&uibcGenState)

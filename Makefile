@@ -59,7 +59,7 @@ ifeq ($(LEDGER_ENABLED),true)
 endif
 
 whitespace :=
-whitespace += $(whitespace)
+whitespace := $(whitespace) $(whitespace)
 comma := ,
 
 build_tags += $(BUILD_TAGS)
@@ -184,8 +184,7 @@ cover-html: test-unit-cover
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
 mocks: $(MOCKS_DIR)
-	@go install github.com/golang/mock/mockgen@v1.6.0
-	sh ./scripts/mockgen.sh
+	sh ./contrib/scripts/mockgen.sh
 .PHONY: mocks
 
 ###############################################################################

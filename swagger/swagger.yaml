@@ -1082,6 +1082,53 @@ paths:
                     value:
                       type: string
                       format: byte
+      parameters:
+        - name: base_denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/historacle/v1/avg_price/{denom}:
+    get:
+      summary: QueryAvgPrice returns avg price of a given denom (required).
+      operationId: AvgPrice
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              price:
+                type: string
+            title: QueryAvgPriceResponse is a response type for AvgPrice method
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          in: path
+          required: true
+          type: string
       tags:
         - Query
   /umee/historacle/v1/denoms/median_deviations:
@@ -3146,6 +3193,12 @@ definitions:
     description: |-
       QueryAggregateVotesResponse is response type for the
       Query/AggregateVotes RPC method.
+  umee.oracle.v1.QueryAvgPriceResponse:
+    type: object
+    properties:
+      price:
+        type: string
+    title: QueryAvgPriceResponse is a response type for AvgPrice method
   umee.oracle.v1.QueryExchangeRatesResponse:
     type: object
     properties:

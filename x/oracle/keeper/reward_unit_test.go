@@ -3,11 +3,10 @@ package keeper
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestPrependUmeeIfUnique(t *testing.T) {
-	require := require.New(t)
 	tcs := []struct {
 		in  []string
 		out []string
@@ -18,8 +17,7 @@ func TestPrependUmeeIfUnique(t *testing.T) {
 		{[]string{"x", "a", "heeeyyy"}, []string{"uumee", "x", "a", "heeeyyy"}},
 		{[]string{"x", "a", "uumee"}, []string{"x", "a", "uumee"}},
 	}
-	for i, tc := range tcs {
-		require.Equal(tc.out, prependUmeeIfUnique(tc.in), i)
+	for _, tc := range tcs {
+		assert.DeepEqual(t, tc.out, prependUmeeIfUnique(tc.in))
 	}
-
 }

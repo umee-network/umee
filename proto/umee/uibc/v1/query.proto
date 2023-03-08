@@ -17,10 +17,10 @@ service Query {
     option (google.api.http).get = "/umee/uibc/v1/params";
   }
 
-  // Quota queries the rate limits of ibc denoms.
-  // If denom is empty, returns quota for all tokens.
-  rpc Quota(QueryQuota) returns (QueryQuotaResponse) {
-    option (google.api.http).get = "/umee/uibc/v1/quota/{denom}";
+  // Outflow returns IBC denom outflows in the current epoch.
+  // If denom is empty, returns outflows of all tokens in the current epoch.
+  rpc Outflows(QueryOutflows) returns (QueryOutflowsResponse) {
+    option (google.api.http).get = "/umee/uibc/v1/outflows";
   }
 }
 
@@ -34,14 +34,14 @@ message QueryParamsResponse {
   Params params = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryQuota defines request type for query the quota of denoms
-message QueryQuota {
+// QueryOutflow defines request type for query the quota of denoms
+message QueryOutflows {
   string denom = 1;
 }
 
-// QueryQuotaResponse defines response type of Query/Quota
-message QueryQuotaResponse {
-  repeated cosmos.base.v1beta1.DecCoin quotas = 1 [
+// QueryOutflowResponse defines response type of Query/Outflow
+message QueryOutflowsResponse {
+  repeated cosmos.base.v1beta1.DecCoin outflows = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable)     = false
   ];
