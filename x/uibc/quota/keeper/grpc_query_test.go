@@ -43,7 +43,7 @@ func TestGRPCGetQuota(t *testing.T) {
 		errMsg string
 	}{
 		{
-			name:   "valid",
+			name:   "valid: total outflows",
 			req:    uibc.QueryOutflows{},
 			errMsg: "",
 		}, {
@@ -58,12 +58,8 @@ func TestGRPCGetQuota(t *testing.T) {
 			resp, err := client.Outflows(ctx, &tc.req)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
-				if len(tc.req.Denom) == 0 {
-					assert.Equal(t, 0, len(resp.Outflows))
-				} else {
-					assert.Equal(t, 1, len(resp.Outflows))
-					assert.DeepEqual(t, sdk.NewDec(0), resp.Outflows[0].Amount)
-				}
+				// TODO: add more data to check non zero values
+				assert.DeepEqual(t, sdk.NewDec(0), resp.Amount)
 			} else {
 				assert.Error(t, err, tc.errMsg)
 			}
