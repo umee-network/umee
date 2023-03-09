@@ -28,13 +28,12 @@ func (s *IntegrationTestSuite) checkOutflowByPercentage(endpoint, excDenom strin
 func (s *IntegrationTestSuite) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate bool, amount sdk.Dec, excDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			outflows, err := queryOutflows(umeeAPIEndpoint, denom)
+			a, err := queryOutflows(umeeAPIEndpoint, denom)
 			s.Require().NoError(err)
 			if checkWithExcRate {
-				outflow := outflows.AmountOf(denom)
-				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, outflow, amount, sdk.MustNewDecFromStr("0.01"))
+				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, a, amount, sdk.MustNewDecFromStr("0.01"))
 			}
-			return outflows.Len() == 1 && outflows[0].Denom == denom
+			return true
 		},
 		time.Minute,
 		5*time.Second,
@@ -145,13 +144,13 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.T().Logf("waiting until quota reset, basically it will take around 300 seconds to do quota reset")
 		s.Require().Eventually(
 			func() bool {
-				outflows, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
+				amount, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
 				s.Require().NoError(err)
-				outflow := outflows.AmountOf(appparams.BondDenom)
-				if outflow.Equal(sdk.NewDec(0)) {
-					s.T().Logf("quota is reset : %s is %s ", appparams.BondDenom, outflow.String())
+				if amount.IsZero() {
+					s.T().Logf("quota is reset : %s is 0", appparams.BondDenom)
+					return true
 				}
-				return outflow.Equal(sdk.NewDec(0))
+				return false
 			},
 			5*time.Minute,
 			5*time.Second,

@@ -49,7 +49,7 @@ func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 }
 
 // AllOutflows queries outflows for all denom in the current period.
-func (q Querier) AllOutflows(goCtx context.Context, req *uibc.QueryAllOutflows) (
+func (q Querier) AllOutflows(goCtx context.Context, _ *uibc.QueryAllOutflows) (
 	*uibc.QueryAllOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
