@@ -69,7 +69,7 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 			if tc.errMsg == "" {
 				var res uibc.QueryOutflowsResponse
 				assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-				assert.Equal(t, res.Amount, sdk.NewDec(0))
+				assert.DeepEqual(t, res.Amount, sdk.NewDec(0))
 			} else {
 				assert.ErrorContains(t, err, tc.errMsg)
 			}
