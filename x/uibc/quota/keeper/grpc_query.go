@@ -28,7 +28,8 @@ func (q Querier) Params(goCtx context.Context, _ *uibc.QueryParams) (
 	return &uibc.QueryParamsResponse{Params: params}, nil
 }
 
-// Outflows queries denom outflows.
+// Outflows queries denom outflows in the current period.
+// If req.Denom is not set, then we return total outflows.
 func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 	*uibc.QueryOutflowsResponse, error,
 ) {
@@ -37,11 +38,24 @@ func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 	if len(req.Denom) == 0 {
 		o = q.GetTotalOutflow(ctx)
 	} else {
-		var err error
-		if o, err = q.GetOutflows(ctx, req.Denom); err ! = nil {
+		d, err := q.GetOutflows(ctx, req.Denom)
+		if err != nil {
 			return nil, err
 		}
+		o = d.Amount
 	}
 
-	return &uibc.QueryOutflowsResponse{Outflows: o}, nil
+	return &uibc.QueryOutflowsResponse{Amount: o}, nil
+}
+
+// AllOutflows queries outflows for all denom in the current period.
+func (q Querier) AllOutflows(goCtx context.Context, req *uibc.QueryAllOutflows) (
+	*uibc.QueryAllOutflowsResponse, error,
+) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	o, err := q.GetAllOutflows(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &uibc.QueryAllOutflowsResponse{Outflows: o}, nil
 }
