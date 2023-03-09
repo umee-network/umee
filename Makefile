@@ -59,7 +59,7 @@ ifeq ($(LEDGER_ENABLED),true)
 endif
 
 whitespace :=
-whitespace += $(whitespace)
+whitespace := $(whitespace) $(whitespace)
 comma := ,
 
 build_tags += $(BUILD_TAGS)
