@@ -37,9 +37,10 @@ func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 	if len(req.Denom) == 0 {
 		o = q.GetTotalOutflow(ctx)
 	} else {
-		var err
-	if o, err = q.GetOutflows(ctx, req.Denom); err ! = nil {
-		return nil, err
+		var err error
+		if o, err = q.GetOutflows(ctx, req.Denom); err ! = nil {
+			return nil, err
+		}
 	}
 
 	return &uibc.QueryOutflowsResponse{Outflows: o}, nil
