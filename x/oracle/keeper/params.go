@@ -1,16 +1,9 @@
 package keeper
 
 import (
-	"time"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/x/oracle/types"
-)
-
-var (
-	AvgPeriod = time.Hour * 16
-	AvgShift  = time.Hour * 2
 )
 
 // VotePeriod returns the number of blocks during which voting takes place.

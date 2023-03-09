@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -30,7 +31,15 @@ type Keeper struct {
 	StakingKeeper types.StakingKeeper
 
 	distrName string
+
+	AvgPeriod time.Duration
+	AvgShift  time.Duration
 }
+
+const (
+	defaultAvgPeriod time.Duration = time.Hour * 16
+	defaultAvgShift  time.Duration = time.Hour * 2
+)
 
 // NewKeeper constructs a new keeper for oracle
 func NewKeeper(
@@ -62,6 +71,10 @@ func NewKeeper(
 		distrKeeper:   distrKeeper,
 		StakingKeeper: stakingKeeper,
 		distrName:     distrName,
+
+		// AvgPeriod and AvgShift must not be changed after an app started.
+		AvgPeriod: defaultAvgPeriod,
+		AvgShift:  defaultAvgShift,
 	}
 }
 
