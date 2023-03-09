@@ -6,6 +6,8 @@ package uibc
 import (
 	context "context"
 	fmt "fmt"
+	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	grpc1 "github.com/gogo/protobuf/grpc"
 	proto "github.com/gogo/protobuf/proto"
@@ -182,41 +184,125 @@ func (m *QueryOutflowsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryOutflowsResponse proto.InternalMessageInfo
 
+// QueryOutflow defines request type for query the quota of denoms
+type QueryAllOutflows struct {
+}
+
+func (m *QueryAllOutflows) Reset()         { *m = QueryAllOutflows{} }
+func (m *QueryAllOutflows) String() string { return proto.CompactTextString(m) }
+func (*QueryAllOutflows) ProtoMessage()    {}
+func (*QueryAllOutflows) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2ca7e17b0958935d, []int{4}
+}
+func (m *QueryAllOutflows) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAllOutflows) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllOutflows.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAllOutflows) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllOutflows.Merge(m, src)
+}
+func (m *QueryAllOutflows) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAllOutflows) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllOutflows.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllOutflows proto.InternalMessageInfo
+
+// QueryOutflowResponse defines response type of Query/Outflow
+type QueryAllOutflowsResponse struct {
+	Outflows github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,1,rep,name=outflows,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"outflows"`
+}
+
+func (m *QueryAllOutflowsResponse) Reset()         { *m = QueryAllOutflowsResponse{} }
+func (m *QueryAllOutflowsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAllOutflowsResponse) ProtoMessage()    {}
+func (*QueryAllOutflowsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_2ca7e17b0958935d, []int{5}
+}
+func (m *QueryAllOutflowsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryAllOutflowsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryAllOutflowsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryAllOutflowsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAllOutflowsResponse.Merge(m, src)
+}
+func (m *QueryAllOutflowsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryAllOutflowsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAllOutflowsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryAllOutflowsResponse proto.InternalMessageInfo
+
 func init() {
 	proto.RegisterType((*QueryParams)(nil), "umee.uibc.v1.QueryParams")
 	proto.RegisterType((*QueryParamsResponse)(nil), "umee.uibc.v1.QueryParamsResponse")
 	proto.RegisterType((*QueryOutflows)(nil), "umee.uibc.v1.QueryOutflows")
 	proto.RegisterType((*QueryOutflowsResponse)(nil), "umee.uibc.v1.QueryOutflowsResponse")
+	proto.RegisterType((*QueryAllOutflows)(nil), "umee.uibc.v1.QueryAllOutflows")
+	proto.RegisterType((*QueryAllOutflowsResponse)(nil), "umee.uibc.v1.QueryAllOutflowsResponse")
 }
 
 func init() { proto.RegisterFile("umee/uibc/v1/query.proto", fileDescriptor_2ca7e17b0958935d) }
 
 var fileDescriptor_2ca7e17b0958935d = []byte{
-	// 384 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x52, 0xcf, 0x8e, 0xd2, 0x40,
-	0x18, 0x6f, 0x8d, 0x10, 0x1c, 0xe4, 0x32, 0x56, 0x83, 0x95, 0x0c, 0x58, 0x23, 0x31, 0x26, 0x74,
-	0x02, 0xfa, 0x04, 0x84, 0x98, 0x78, 0x52, 0x7b, 0xf4, 0x62, 0x4a, 0x19, 0x6b, 0x03, 0xed, 0x57,
-	0x3b, 0x53, 0x90, 0x18, 0x2f, 0x3e, 0x81, 0x89, 0x6f, 0xe1, 0x93, 0x70, 0x24, 0xf1, 0xb2, 0xa7,
-	0xfd, 0x43, 0xf7, 0x41, 0x36, 0x9d, 0x29, 0x4d, 0xbb, 0xd9, 0xdd, 0x53, 0x67, 0xbe, 0xdf, 0x6f,
-	0x7e, 0x7f, 0xbe, 0x14, 0x75, 0xd3, 0x90, 0x31, 0x9a, 0x06, 0x73, 0x8f, 0xae, 0xc7, 0xf4, 0x7b,
-	0xca, 0x92, 0xad, 0x1d, 0x27, 0x20, 0x00, 0x3f, 0xcc, 0x11, 0x3b, 0x47, 0xec, 0xf5, 0xd8, 0xec,
-	0xf9, 0x00, 0xfe, 0x8a, 0x51, 0x37, 0x0e, 0xa8, 0x1b, 0x45, 0x20, 0x5c, 0x11, 0x40, 0xc4, 0x15,
-	0xd7, 0x34, 0x7c, 0xf0, 0x41, 0x1e, 0x69, 0x7e, 0x2a, 0xa6, 0xd7, 0xb5, 0x41, 0xb8, 0x0a, 0xb1,
-	0x3a, 0xa8, 0xfd, 0x29, 0xb7, 0xfa, 0xe8, 0x26, 0x6e, 0xc8, 0xad, 0xf7, 0xe8, 0x51, 0xe5, 0xea,
-	0x30, 0x1e, 0x43, 0xc4, 0x19, 0x9e, 0xa0, 0x66, 0x2c, 0x27, 0x5d, 0x7d, 0xa0, 0xbf, 0x6a, 0x4f,
-	0x0c, 0xbb, 0x1a, 0xc9, 0x56, 0xec, 0xe9, 0xfd, 0xdd, 0x69, 0x5f, 0x73, 0x0a, 0xa6, 0xf5, 0x12,
-	0x75, 0xa4, 0xd4, 0x87, 0x54, 0x7c, 0x5d, 0xc1, 0x86, 0x63, 0x03, 0x35, 0x16, 0x2c, 0x82, 0x50,
-	0x6a, 0x3c, 0x70, 0xd4, 0xc5, 0xfa, 0x82, 0x1e, 0xd7, 0x68, 0xa5, 0xe7, 0x3b, 0xd4, 0x82, 0x62,
-	0xa6, 0x5e, 0x4c, 0x5f, 0xff, 0x3b, 0xeb, 0x0f, 0xfd, 0x40, 0x7c, 0x4b, 0xe7, 0xb6, 0x07, 0x21,
-	0xf5, 0x80, 0x87, 0xc0, 0x8b, 0xcf, 0x88, 0x2f, 0x96, 0x54, 0x6c, 0x63, 0xc6, 0xed, 0x19, 0xf3,
-	0x9c, 0xf2, 0xed, 0x24, 0xd3, 0x51, 0x43, 0x3a, 0xe0, 0x05, 0x6a, 0xaa, 0xa4, 0xf8, 0x69, 0x3d,
-	0x7f, 0xa5, 0xb2, 0xf9, 0xfc, 0x56, 0xe8, 0x98, 0xcc, 0xea, 0xfd, 0xfe, 0x7f, 0xf9, 0xf7, 0xde,
-	0x13, 0x6c, 0xd0, 0xda, 0x5a, 0x55, 0x6f, 0x2c, 0x50, 0xab, 0xac, 0xfc, 0xec, 0x06, 0xb1, 0x23,
-	0x68, 0xbe, 0xb8, 0x03, 0x2c, 0xbd, 0x86, 0xd2, 0x6b, 0x80, 0x49, 0xdd, 0xeb, 0xd8, 0x8e, 0xfe,
-	0x94, 0x5b, 0xfc, 0x35, 0x9d, 0xed, 0x2e, 0x88, 0xb6, 0x3b, 0x10, 0x7d, 0x7f, 0x20, 0xfa, 0xf9,
-	0x81, 0xe8, 0x7f, 0x32, 0xa2, 0xed, 0x33, 0xa2, 0x9d, 0x64, 0x44, 0xfb, 0x5c, 0xdd, 0x5a, 0xae,
-	0x33, 0x8a, 0x98, 0xd8, 0x40, 0xb2, 0x54, 0xa2, 0xeb, 0xb7, 0xf4, 0x87, 0x54, 0x9e, 0x37, 0xe5,
-	0x4f, 0xf1, 0xe6, 0x2a, 0x00, 0x00, 0xff, 0xff, 0x19, 0x08, 0xad, 0x4b, 0x8c, 0x02, 0x00, 0x00,
+	// 489 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x93, 0x4f, 0x6f, 0xd3, 0x30,
+	0x18, 0xc6, 0x93, 0xc1, 0xa6, 0xe1, 0x32, 0x09, 0x99, 0x82, 0x4a, 0xa8, 0xdc, 0x11, 0x44, 0x35,
+	0x81, 0x6a, 0xab, 0x1d, 0x5f, 0x80, 0x32, 0x21, 0x71, 0x02, 0x7a, 0xe4, 0x82, 0x92, 0xd4, 0x84,
+	0x68, 0x49, 0xde, 0x50, 0x3b, 0x1d, 0x15, 0xe2, 0xc2, 0x8d, 0x1b, 0x12, 0xdf, 0x62, 0x9f, 0xa4,
+	0xc7, 0x49, 0x5c, 0x38, 0x6d, 0xd0, 0xf2, 0x41, 0x90, 0xed, 0x24, 0x24, 0xd3, 0x98, 0x38, 0x35,
+	0x7e, 0x9f, 0xd7, 0xcf, 0xef, 0xfd, 0xe3, 0xa2, 0x4e, 0x9e, 0x70, 0xce, 0xf2, 0xc8, 0x0f, 0xd8,
+	0x7c, 0xc8, 0xde, 0xe7, 0x7c, 0xb6, 0xa0, 0xd9, 0x0c, 0x24, 0xe0, 0xeb, 0x4a, 0xa1, 0x4a, 0xa1,
+	0xf3, 0xa1, 0xd3, 0x0d, 0x01, 0xc2, 0x98, 0x33, 0x2f, 0x8b, 0x98, 0x97, 0xa6, 0x20, 0x3d, 0x19,
+	0x41, 0x2a, 0x4c, 0xae, 0xd3, 0x0e, 0x21, 0x04, 0xfd, 0xc9, 0xd4, 0x57, 0x11, 0x3d, 0xef, 0x0d,
+	0xd2, 0x2b, 0x14, 0x12, 0x80, 0x48, 0x40, 0x30, 0xdf, 0x13, 0x9c, 0xcd, 0x87, 0x3e, 0x97, 0xde,
+	0x90, 0x05, 0x10, 0xa5, 0x46, 0x77, 0x77, 0x50, 0xeb, 0x95, 0x2a, 0xe5, 0xa5, 0x37, 0xf3, 0x12,
+	0xe1, 0x3e, 0x47, 0x37, 0x6b, 0xc7, 0x09, 0x17, 0x19, 0xa4, 0x82, 0xe3, 0x11, 0xda, 0xca, 0x74,
+	0xa4, 0x63, 0xef, 0xda, 0x7b, 0xad, 0x51, 0x9b, 0xd6, 0x4b, 0xa6, 0x26, 0x7b, 0x7c, 0x75, 0x79,
+	0xda, 0xb3, 0x26, 0x45, 0xa6, 0xfb, 0x00, 0xed, 0x68, 0xab, 0x17, 0xb9, 0x7c, 0x1b, 0xc3, 0x91,
+	0xc0, 0x6d, 0xb4, 0x39, 0xe5, 0x29, 0x24, 0xda, 0xe3, 0xda, 0xc4, 0x1c, 0xdc, 0x37, 0xe8, 0x56,
+	0x23, 0xad, 0x62, 0x3e, 0x43, 0xdb, 0x50, 0xc4, 0xcc, 0x8d, 0xf1, 0xc3, 0xe3, 0xb3, 0x5e, 0x3f,
+	0x8c, 0xe4, 0xbb, 0xdc, 0xa7, 0x01, 0x24, 0xac, 0x68, 0xcd, 0xfc, 0x0c, 0xc4, 0xf4, 0x90, 0xc9,
+	0x45, 0xc6, 0x05, 0x3d, 0xe0, 0xc1, 0xa4, 0xba, 0xeb, 0x62, 0x74, 0x43, 0x03, 0x9e, 0xc4, 0x71,
+	0xc9, 0x70, 0xbf, 0xd8, 0xa8, 0x73, 0x3e, 0x58, 0x81, 0x93, 0x06, 0xf8, 0xca, 0x5e, 0x6b, 0xd4,
+	0xa5, 0x86, 0x41, 0xd5, 0x14, 0x69, 0x31, 0x45, 0x85, 0x79, 0x0a, 0x51, 0x3a, 0xde, 0x57, 0x6d,
+	0x1f, 0x9f, 0xf5, 0x1e, 0xfd, 0x5f, 0x69, 0xea, 0x8e, 0xf8, 0x5b, 0xdf, 0xe8, 0x74, 0x03, 0x6d,
+	0xea, 0x5a, 0xf0, 0x14, 0x6d, 0x99, 0x49, 0xe2, 0x3b, 0xcd, 0xf9, 0xd6, 0x56, 0xe2, 0xdc, 0xfb,
+	0xa7, 0x54, 0x36, 0xe0, 0x76, 0x3f, 0x7f, 0xff, 0xfd, 0x6d, 0xe3, 0x36, 0x6e, 0xb3, 0xc6, 0xb3,
+	0x30, 0x7b, 0xc1, 0x12, 0x6d, 0x57, 0x2b, 0xb9, 0x7b, 0x81, 0x59, 0x29, 0x3a, 0xf7, 0x2f, 0x11,
+	0x2b, 0x56, 0x5f, 0xb3, 0x76, 0x31, 0x69, 0xb2, 0xca, 0xee, 0xd8, 0x47, 0xbd, 0xe5, 0x4f, 0x78,
+	0x81, 0x5a, 0xb5, 0x59, 0x63, 0x72, 0x81, 0x77, 0x4d, 0x77, 0xfa, 0x97, 0xeb, 0x15, 0xde, 0xd5,
+	0xf8, 0x2e, 0x76, 0x9a, 0x78, 0x2f, 0x8e, 0x07, 0x65, 0x09, 0xe3, 0x83, 0xe5, 0x2f, 0x62, 0x2d,
+	0x57, 0xc4, 0x3e, 0x59, 0x11, 0xfb, 0xe7, 0x8a, 0xd8, 0x5f, 0xd7, 0xc4, 0x3a, 0x59, 0x13, 0xeb,
+	0xc7, 0x9a, 0x58, 0xaf, 0xeb, 0x0f, 0x4a, 0x79, 0x0c, 0x52, 0x2e, 0x8f, 0x60, 0x76, 0x68, 0x0c,
+	0xe7, 0x8f, 0xd9, 0x07, 0xed, 0xea, 0x6f, 0xe9, 0xff, 0xcb, 0xfe, 0x9f, 0x00, 0x00, 0x00, 0xff,
+	0xff, 0x4a, 0xab, 0x3b, 0x46, 0xc7, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -236,6 +322,8 @@ type QueryClient interface {
 	// Outflow returns IBC denom outflows in the current quota period.
 	// If denom is not specified, returns sum of all registered outflows.
 	Outflows(ctx context.Context, in *QueryOutflows, opts ...grpc.CallOption) (*QueryOutflowsResponse, error)
+	// AllOutflow returns outflows for each denom in the current quota period.
+	AllOutflows(ctx context.Context, in *QueryAllOutflows, opts ...grpc.CallOption) (*QueryAllOutflowsResponse, error)
 }
 
 type queryClient struct {
@@ -264,6 +352,15 @@ func (c *queryClient) Outflows(ctx context.Context, in *QueryOutflows, opts ...g
 	return out, nil
 }
 
+func (c *queryClient) AllOutflows(ctx context.Context, in *QueryAllOutflows, opts ...grpc.CallOption) (*QueryAllOutflowsResponse, error) {
+	out := new(QueryAllOutflowsResponse)
+	err := c.cc.Invoke(ctx, "/umee.uibc.v1.Query/AllOutflows", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 type QueryServer interface {
 	// Params queries the parameters of the x/uibc module.
@@ -271,6 +368,8 @@ type QueryServer interface {
 	// Outflow returns IBC denom outflows in the current quota period.
 	// If denom is not specified, returns sum of all registered outflows.
 	Outflows(context.Context, *QueryOutflows) (*QueryOutflowsResponse, error)
+	// AllOutflow returns outflows for each denom in the current quota period.
+	AllOutflows(context.Context, *QueryAllOutflows) (*QueryAllOutflowsResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -282,6 +381,9 @@ func (*UnimplementedQueryServer) Params(ctx context.Context, req *QueryParams) (
 }
 func (*UnimplementedQueryServer) Outflows(ctx context.Context, req *QueryOutflows) (*QueryOutflowsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Outflows not implemented")
+}
+func (*UnimplementedQueryServer) AllOutflows(ctx context.Context, req *QueryAllOutflows) (*QueryAllOutflowsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AllOutflows not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -324,6 +426,24 @@ func _Query_Outflows_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_AllOutflows_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAllOutflows)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).AllOutflows(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.uibc.v1.Query/AllOutflows",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).AllOutflows(ctx, req.(*QueryAllOutflows))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "umee.uibc.v1.Query",
 	HandlerType: (*QueryServer)(nil),
@@ -335,6 +455,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Outflows",
 			Handler:    _Query_Outflows_Handler,
+		},
+		{
+			MethodName: "AllOutflows",
+			Handler:    _Query_AllOutflows_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -457,6 +581,66 @@ func (m *QueryOutflowsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryAllOutflows) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllOutflows) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllOutflows) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryAllOutflowsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryAllOutflowsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryAllOutflowsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Outflows) > 0 {
+		for iNdEx := len(m.Outflows) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Outflows[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0xa
+		}
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -510,6 +694,30 @@ func (m *QueryOutflowsResponse) Size() (n int) {
 	l = len(m.Outflows)
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryAllOutflows) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *QueryAllOutflowsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Outflows) > 0 {
+		for _, e := range m.Outflows {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
 	}
 	return n
 }
@@ -795,6 +1003,140 @@ func (m *QueryOutflowsResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			m.Outflows = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAllOutflows) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllOutflows: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllOutflows: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryAllOutflowsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryAllOutflowsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryAllOutflowsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Outflows", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Outflows = append(m.Outflows, types.DecCoin{})
+			if err := m.Outflows[len(m.Outflows)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
