@@ -267,8 +267,15 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 
+			pageReq, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
 			resp, err := queryClient.CompletedIncentivePrograms(cmd.Context(),
-				&incentive.QueryCompletedIncentivePrograms{})
+				&incentive.QueryCompletedIncentivePrograms{
+					Pagination: pageReq,
+				})
 			if err != nil {
 				return err
 			}

@@ -101,7 +101,12 @@ func (q Querier) CompletedIncentivePrograms(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	programs := q.Keeper.GetAllIncentivePrograms(ctx, incentive.ProgramStatusCompleted)
+	programs := q.Keeper.GetPaginatedIncentivePrograms(
+		ctx,
+		incentive.ProgramStatusCompleted,
+		req.Pagination.Offset,
+		req.Pagination.Limit,
+	)
 
 	resp := &incentive.QueryCompletedIncentiveProgramsResponse{
 		Programs: programs,
