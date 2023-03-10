@@ -143,8 +143,6 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 
 	exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
 	if err != nil {
-		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
-		// TODO: write test case for this
 		if ltypes.ErrNotRegisteredToken.Is(err) {
 			return nil
 		} else if err != nil {
