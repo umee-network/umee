@@ -155,6 +155,8 @@ func (s AvgKeeperSuite) testUpdateAvgCounterShift(t *testing.T) {
 	now, shift, k := s.setupUpdateAvgCounter(t)
 	numCounters := k.numCounters()
 
+	checkAvgPrice(t, k, "0", "u/nonexistingdenom", 0)
+
 	k.updateAvgCounter(s.denom1, sdk.NewDec(1), now)
 	checkAvgPrice(t, k, "1", s.denom1, 0)
 	for i := 1; i < int(numCounters); i++ {

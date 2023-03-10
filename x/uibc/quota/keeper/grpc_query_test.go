@@ -50,6 +50,10 @@ func TestGRPCQueryOutflows(t *testing.T) {
 			name:   "valid req: OutflowSum zero because ibc-transfer not hapeen",
 			req:    uibc.QueryOutflows{Denom: "umee"},
 			errMsg: "",
+		}, {
+			name:   "non existing denom",
+			req:    uibc.QueryOutflows{Denom: "doesntexists"},
+			errMsg: "",
 		},
 	}
 
