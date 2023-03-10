@@ -28,7 +28,6 @@ func (c *Client) TxVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
 func (c *Client) TxSubmitProposal(
 	changes []proposal.ParamChange,
 ) (*sdk.TxResponse, error) {
-
 	content := proposal.NewParameterChangeProposal(
 		"update historic stamp period",
 		"auto grpc proposal",
