@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 	"gotest.tools/v3/assert"
 
@@ -32,18 +33,16 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 	clientCtx := val.ClientCtx
 
 	tests := []struct {
-		name        string
-		args        []string
-		errMsg      string
-		noOfRecords int
+		name   string
+		args   []string
+		errMsg string
 	}{
 		{
 			name: "Get ibc-transfer quota of all denoms",
 			args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			errMsg:      "",
-			noOfRecords: 1,
+			errMsg: "",
 		},
 		{
 			name: "Get ibc-transfer quota of denom umee",
@@ -51,8 +50,7 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 				"uumee",
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			errMsg:      "",
-			noOfRecords: 1,
+			errMsg: "",
 		},
 		/* {
 			name: "Get ibc-transfer quota of dummy denom ",
@@ -67,11 +65,11 @@ func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetQuota(), tc.args)
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetOutflows(), tc.args)
 			if tc.errMsg == "" {
-				var res uibc.QueryQuotaResponse
+				var res uibc.QueryOutflowsResponse
 				assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-				assert.Equal(t, len(res.Quotas), tc.noOfRecords)
+				assert.DeepEqual(t, res.Amount, sdk.NewDec(0))
 			} else {
 				assert.ErrorContains(t, err, tc.errMsg)
 			}

@@ -127,6 +127,17 @@ func request_Query_Bonded_0(ctx context.Context, marshaler runtime.Marshaler, cl
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "address", err)
 	}
 
+	val, ok = pathParams["denom"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "denom")
+	}
+
+	protoReq.Denom, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "denom", err)
+	}
+
 	msg, err := client.Bonded(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -152,6 +163,17 @@ func local_request_Query_Bonded_0(ctx context.Context, marshaler runtime.Marshal
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "address", err)
+	}
+
+	val, ok = pathParams["denom"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "denom")
+	}
+
+	protoReq.Denom, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "denom", err)
 	}
 
 	msg, err := server.Bonded(ctx, &protoReq)
@@ -217,6 +239,24 @@ func request_Query_TotalBonded_0(ctx context.Context, marshaler runtime.Marshale
 	var protoReq QueryTotalBonded
 	var metadata runtime.ServerMetadata
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["denom"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "denom")
+	}
+
+	protoReq.Denom, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "denom", err)
+	}
+
 	msg, err := client.TotalBonded(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -225,6 +265,24 @@ func request_Query_TotalBonded_0(ctx context.Context, marshaler runtime.Marshale
 func local_request_Query_TotalBonded_0(ctx context.Context, marshaler runtime.Marshaler, server QueryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq QueryTotalBonded
 	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["denom"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "denom")
+	}
+
+	protoReq.Denom, err = runtime.String(val)
+
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "denom", err)
+	}
 
 	msg, err := server.TotalBonded(ctx, &protoReq)
 	return msg, metadata, err
@@ -799,11 +857,11 @@ var (
 
 	pattern_Query_PendingRewards_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "incentive", "v1", "pending_rewards", "address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Bonded_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "incentive", "v1", "bonded", "address"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Bonded_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"umee", "incentive", "v1", "bonded", "address", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_Unbondings_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "incentive", "v1", "unbondings", "address"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_TotalBonded_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "incentive", "v1", "total_bonded"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_TotalBonded_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "incentive", "v1", "total_bonded", "denom"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_CompletedIncentivePrograms_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"umee", "incentive", "v1", "incentive_programs", "completed"}, "", runtime.AssumeColonVerbOpt(false)))
 

@@ -3,9 +3,8 @@ package keeper
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"cosmossdk.io/errors"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v4/util/decmath"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -27,12 +26,12 @@ func TestErrorMatching(t *testing.T) {
 	err6 := leveragetypes.ErrNotRegisteredToken
 	err7 := errors.New("foo", 1, "bar")
 
-	require.Equal(t, false, nonOracleError(nil))
-	require.Equal(t, false, nonOracleError(err1))
-	require.Equal(t, false, nonOracleError(err2))
-	require.Equal(t, false, nonOracleError(err3))
-	require.Equal(t, true, nonOracleError(err4))
-	require.Equal(t, true, nonOracleError(err5))
-	require.Equal(t, true, nonOracleError(err6))
-	require.Equal(t, true, nonOracleError(err7))
+	assert.Equal(t, false, nonOracleError(nil))
+	assert.Equal(t, false, nonOracleError(err1))
+	assert.Equal(t, false, nonOracleError(err2))
+	assert.Equal(t, false, nonOracleError(err3))
+	assert.Equal(t, true, nonOracleError(err4))
+	assert.Equal(t, true, nonOracleError(err5))
+	assert.Equal(t, true, nonOracleError(err6))
+	assert.Equal(t, true, nonOracleError(err7))
 }

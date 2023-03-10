@@ -26,11 +26,11 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/stretchr/testify/require"
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	"github.com/tendermint/tendermint/libs/log"
 	tmtypes "github.com/tendermint/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
+	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
@@ -309,7 +309,7 @@ func appExportAndImport(t *testing.T) (
 		t.Skip("skipping application simulation")
 	}
 
-	require.NoError(t, err, "simulation setup failed")
+	assert.NilError(t, err, "simulation setup failed")
 
 	app := umeeapp.New(
 		logger,
@@ -325,7 +325,7 @@ func appExportAndImport(t *testing.T) (
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)
-	require.Equal(t, appparams.Name, app.Name())
+	assert.Equal(t, appparams.Name, app.Name())
 
 	// run randomized simulation
 	stopEarly, simParams, simErr := simulation.SimulateFromSeed(
@@ -342,8 +342,8 @@ func appExportAndImport(t *testing.T) (
 
 	// export state and simParams before the simulation error is checked
 	err = simapp.CheckExportSimulation(app, config, simParams)
-	require.NoError(t, err)
-	require.NoError(t, simErr)
+	assert.NilError(t, err)
+	assert.NilError(t, simErr)
 
 	if config.Commit {
 		simapp.PrintStats(db)
@@ -352,12 +352,12 @@ func appExportAndImport(t *testing.T) (
 	fmt.Printf("exporting genesis...\n")
 
 	exported, err := app.ExportAppStateAndValidators(false, []string{})
-	require.NoError(t, err)
+	assert.NilError(t, err)
 
 	fmt.Printf("importing genesis...\n")
 
 	config, newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
-	require.NoError(t, err, "simulation setup failed")
+	assert.NilError(t, err, "simulation setup failed")
 
 	newApp := umeeapp.New(
 		logger,
@@ -373,7 +373,7 @@ func appExportAndImport(t *testing.T) (
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)
-	require.Equal(t, appparams.Name, newApp.Name())
+	assert.Equal(t, appparams.Name, newApp.Name())
 
 	return db, dir, app, logger, exported, stopEarly, newDB, newDir, newApp, config
 }

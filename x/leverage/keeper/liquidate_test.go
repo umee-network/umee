@@ -5,14 +5,12 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v4/x/leverage/keeper"
 )
 
 func TestComputeLiquidation(t *testing.T) {
-	require := require.New(t)
-
 	type testCase struct {
 		availableRepay       sdkmath.Int
 		availableCollateral  sdkmath.Int
@@ -46,11 +44,11 @@ func TestComputeLiquidation(t *testing.T) {
 			tc.liquidationIncentive,
 		)
 
-		require.True(sdkmath.NewInt(expectedRepay).Equal(repay),
+		assert.Equal(t, true, sdkmath.NewInt(expectedRepay).Equal(repay),
 			msg+" (repay); expected: %d, got: %s", expectedRepay, repay)
-		require.True(sdkmath.NewInt(expectedCollateral).Equal(collateral),
+		assert.Equal(t, true, sdkmath.NewInt(expectedCollateral).Equal(collateral),
 			msg+" (collateral); expected: %d, got: %s", expectedCollateral, collateral)
-		require.True(sdkmath.NewInt(expectedReward).Equal(reward), msg+" (reward); got: %d, expected: %s", expectedReward, reward)
+		assert.Equal(t, true, sdkmath.NewInt(expectedReward).Equal(reward), msg+" (reward); got: %d, expected: %s", expectedReward, reward)
 	}
 
 	// basic liquidation of 1000 borrowed tokens with plenty of available rewards and collateral
@@ -189,8 +187,6 @@ func TestComputeLiquidation(t *testing.T) {
 }
 
 func TestCloseFactor(t *testing.T) {
-	require := require.New(t)
-
 	type testCase struct {
 		borrowedValue                sdk.Dec
 		collateralValue              sdk.Dec
@@ -213,16 +209,18 @@ func TestCloseFactor(t *testing.T) {
 	}
 
 	runTestCase := func(tc testCase, expectedCloseFactor string, msg string) {
-		closeFactor := keeper.ComputeCloseFactor(
-			tc.borrowedValue,
-			tc.collateralValue,
-			tc.liquidationThreshold,
-			tc.smallLiquidationSize,
-			tc.minimumCloseFactor,
-			tc.completeLiquidationThreshold,
-		)
+		t.Run(msg, func(t *testing.T) {
+			closeFactor := keeper.ComputeCloseFactor(
+				tc.borrowedValue,
+				tc.collateralValue,
+				tc.liquidationThreshold,
+				tc.smallLiquidationSize,
+				tc.minimumCloseFactor,
+				tc.completeLiquidationThreshold,
+			)
 
-		require.Equal(sdk.MustNewDecFromStr(expectedCloseFactor), closeFactor, msg)
+			assert.DeepEqual(t, sdk.MustNewDecFromStr(expectedCloseFactor), closeFactor)
+		})
 	}
 
 	// In the base case, close factor scales from 10% to 100% as borrowed value

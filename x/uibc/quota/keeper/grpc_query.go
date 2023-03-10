@@ -28,23 +28,34 @@ func (q Querier) Params(goCtx context.Context, _ *uibc.QueryParams) (
 	return &uibc.QueryParamsResponse{Params: params}, nil
 }
 
-// Quota returns quotas of denoms.
-func (q Querier) Quota(goCtx context.Context, req *uibc.QueryQuota) (
-	*uibc.QueryQuotaResponse, error,
+// Outflows queries denom outflows in the current period.
+// If req.Denom is not set, then we return total outflows.
+func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
+	*uibc.QueryOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
+	var o sdk.Dec
 	if len(req.Denom) == 0 {
-		quotas, err := q.GetAllQuotas(ctx)
+		o = q.GetTotalOutflow(ctx)
+	} else {
+		d, err := q.GetOutflows(ctx, req.Denom)
 		if err != nil {
-			return &uibc.QueryQuotaResponse{}, err
+			return nil, err
 		}
-		return &uibc.QueryQuotaResponse{Quotas: quotas}, nil
+		o = d.Amount
 	}
 
-	quota, err := q.GetQuota(ctx, req.Denom)
+	return &uibc.QueryOutflowsResponse{Amount: o}, nil
+}
+
+// AllOutflows queries outflows for all denom in the current period.
+func (q Querier) AllOutflows(goCtx context.Context, _ *uibc.QueryAllOutflows) (
+	*uibc.QueryAllOutflowsResponse, error,
+) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	o, err := q.GetAllOutflows(ctx)
 	if err != nil {
-		return &uibc.QueryQuotaResponse{}, err
+		return nil, err
 	}
-	return &uibc.QueryQuotaResponse{Quotas: sdk.DecCoins{quota}}, nil
+	return &uibc.QueryAllOutflowsResponse{Outflows: o}, nil
 }

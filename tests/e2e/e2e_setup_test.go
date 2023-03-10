@@ -35,6 +35,7 @@ import (
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 const (
@@ -186,6 +187,12 @@ func (s *IntegrationTestSuite) initGenesis() {
 	leverageGenState.Registry = append(leverageGenState.Registry,
 		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 	)
+	for index, t := range leverageGenState.Registry {
+		if t.BaseDenom == oracletypes.AtomDenom {
+			// replace atom test ibc hash for testing
+			leverageGenState.Registry[index].BaseDenom = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+		}
+	}
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)
 	s.Require().NoError(err)
@@ -200,6 +207,12 @@ func (s *IntegrationTestSuite) initGenesis() {
 	oracleGenState.Params.MedianStampPeriod = 20
 	oracleGenState.Params.MaximumMedianStamps = 2
 
+	for index, t := range oracleGenState.Params.AcceptList {
+		if t.BaseDenom == oracletypes.AtomDenom {
+			oracleGenState.Params.AcceptList[index].BaseDenom = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+		}
+	}
+
 	bz, err = cdc.MarshalJSON(&oracleGenState)
 	s.Require().NoError(err)
 	appGenState[oracletypes.ModuleName] = bz
@@ -208,7 +221,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	var govGenState govtypesv1.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
-	var votingPeroid = 5 * time.Second
+	votingPeroid := 5 * time.Second
 	govGenState.VotingParams.VotingPeriod = &votingPeroid
 
 	bz, err = cdc.MarshalJSON(&govGenState)
@@ -236,6 +249,21 @@ func (s *IntegrationTestSuite) initGenesis() {
 	bz, err = cdc.MarshalJSON(&bankGenState)
 	s.Require().NoError(err)
 	appGenState[banktypes.ModuleName] = bz
+
+	// uibc (ibc quota)
+	var uibcGenState uibc.GenesisState
+	s.Require().NoError(cdc.UnmarshalJSON(appGenState[uibc.ModuleName], &uibcGenState))
+
+	// 100$ for each token
+	uibcGenState.Params.TokenQuota = sdk.NewDec(100)
+	// 120$ for all tokens on quota duration
+	uibcGenState.Params.TotalQuota = sdk.NewDec(120)
+	// quotas will reset every 300 seconds
+	uibcGenState.Params.QuotaDuration = time.Second * 300
+
+	bz, err = cdc.MarshalJSON(&uibcGenState)
+	s.Require().NoError(err)
+	appGenState[uibc.ModuleName] = bz
 
 	var genUtilGenState genutiltypes.GenesisState
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
@@ -491,8 +519,9 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 			Tag:        "latest",
 			NetworkID:  s.dkrNet.Network.ID,
 			Mounts: []string{
-				fmt.Sprintf("%s/:/root/hermes", hermesCfgPath),
+				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
 			},
+			ExposedPorts: []string{"3031"},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
 			},
@@ -507,7 +536,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 			Entrypoint: []string{
 				"sh",
 				"-c",
-				"chmod +x /root/hermes/hermes_bootstrap.sh && /root/hermes/hermes_bootstrap.sh",
+				"chmod +x /home/hermes/hermes_bootstrap.sh && /home/hermes/hermes_bootstrap.sh",
 			},
 		},
 		noRestart,
@@ -566,7 +595,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 	s.Require().NoError(err)
 
-	umeeVal := s.chain.validators[0]
+	umeeVal := s.chain.validators[2]
 	umeeValAddr, err := umeeVal.keyInfo.GetAddress()
 	s.Require().NoError(err)
 
@@ -646,7 +675,7 @@ func (s *IntegrationTestSuite) initUmeeClient() {
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
 		"val1",
-		s.chain.validators[2].mnemonic,
+		s.chain.validators[0].mnemonic,
 	)
 	s.Require().NoError(err)
 }

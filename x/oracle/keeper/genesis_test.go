@@ -2,8 +2,8 @@ package keeper_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/v4/x/oracle/types"
+	"gotest.tools/v3/assert"
 )
 
 func (s *IntegrationTestSuite) TestIterateAllHistoricPrices() {
@@ -73,7 +73,7 @@ func (s *IntegrationTestSuite) TestIterateAllMedianPrices() {
 			return false
 		},
 	)
-	require.Equal(s.T(), len(medians), len(newMedians))
+	assert.Equal(s.T(), len(medians), len(newMedians))
 
 FOUND:
 	for _, oldMedian := range medians {
@@ -107,7 +107,7 @@ func (s *IntegrationTestSuite) TestIterateAllMedianDeviationPrices() {
 			return false
 		},
 	)
-	require.Equal(s.T(), len(medians), len(newMedians))
+	assert.Equal(s.T(), len(medians), len(newMedians))
 
 FOUND:
 	for _, oldMedian := range medians {

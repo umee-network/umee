@@ -40,7 +40,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 // performs upgrade from v4.1 to v4.2
 func (app *UmeeApp) registerUpgrade4_2(upgradeInfo upgradetypes.Plan) {
-	const planName = "v4.2"
+	const planName = "v4.2-beta1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
@@ -52,7 +52,7 @@ func (app *UmeeApp) registerUpgrade4_2(upgradeInfo upgradetypes.Plan) {
 
 // performs upgrade from v4.0 to v4.1
 func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
-	const planName = "v4.1"
+	const planName = "v4.1.0"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)

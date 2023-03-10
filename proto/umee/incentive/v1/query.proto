@@ -26,7 +26,7 @@ service Query {
   // Bonded queries all bonded collateral uTokens associated with an account.
   rpc Bonded(QueryBonded)
       returns (QueryBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/bonded/{address}";
+    option (google.api.http).get = "/umee/incentive/v1/bonded/{address}/{denom}";
   }
 
   // Unbondings queries all current uToken unbondings associated with an account.
@@ -38,7 +38,7 @@ service Query {
   // TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
   rpc TotalBonded(QueryTotalBonded)
       returns (QueryTotalBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/total_bonded";
+    option (google.api.http).get = "/umee/incentive/v1/total_bonded/{denom}";
   }
 
   // CompletedIncentivePrograms queries for all incentives programs that have been passed
@@ -69,13 +69,6 @@ service Query {
   }
 }
 
-// TotalBond tracks the amount of coins of one uToken denomination bonded to a
-// given reward tier without specifying an account.
-message TotalBond {
-  uint32                   tier   = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
-}
-
 // QueryParams defines the request structure for the Params gRPC service
 // handler.
 message QueryParams {}
@@ -102,6 +95,8 @@ message QueryPendingRewardsResponse {
 // QueryBonded defines the request structure for the Bonded gRPC service handler.
 message QueryBonded {
   string address = 1;
+  // denom is an optional field which causes the query to return the totals of only one uToken
+  string denom = 2;
 }
 
 // QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
@@ -121,6 +116,8 @@ message QueryUnbondingsResponse {
 
 // QueryTotalBonded defines the request structure for the TotalBonded gRPC service handler.
 message QueryTotalBonded {
+  // denom is an optional field which causes the query to return the totals of only one uToken
+  string denom = 1;
 }
 
 // QueryTotalBondedResponse defines the response structure for the TotalBonded gRPC service handler.

@@ -1,6 +1,7 @@
 name: Tests
 on:
   pull_request:
+  merge_group:
   push:
     branches:
       - main
@@ -119,7 +120,7 @@ jobs:
       - name: Build Docker Image
         if: env.GIT_DIFF
         run: |
-          DOCKER_BUILDKIT=1 make docker-build
+          DOCKER_BUILDKIT=1 make docker-build-experimental
 
       - name: Test E2E
         if: env.GIT_DIFF

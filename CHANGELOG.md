@@ -46,6 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## Features
+
+- [1867](https://github.com/umee-network/umee/pull/1867) Allow `/denom` option on registered tokens query to get only a single token by `base_denom`.
+
+## [v4.1.0](https://github.com/umee-network/umee/releases/tag/v4.1.0) - 2023-02-15
+
 ### Features
 
 - [1808](https://github.com/umee-network/umee/pull/1808) Blacklisted tokens automatically cleared from token registry if they have not yet been supplied.
@@ -56,6 +62,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
 - [1807](https://github.com/umee-network/umee/pull/1807) Fixes BNB ibc denom in 4.1 migration
 - [1821](https://github.com/umee-network/umee/pull/1821) Allow safe leverage operations during partial oracle outages.
+- [1845](https://github.com/umee-network/umee/pull/1845) Fix validator power calculation during oracle ballot counting.
 
 ## [v4.0.1](https://github.com/umee-network/umee/releases/tag/v4.0.1) - 2023-02-10
 

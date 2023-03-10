@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -306,4 +308,23 @@ func (q querier) MedianDeviations(
 	}
 
 	return &types.QueryMedianDeviationsResponse{MedianDeviations: *medianDeviations.Sort()}, nil
+}
+
+// AvgPrice queries historic avg price for requested denom.
+func (q querier) AvgPrice(
+	goCtx context.Context,
+	req *types.QueryAvgPrice,
+) (*types.QueryAvgPriceResponse, error) {
+	if req.Denom == "" {
+		return nil, status.Error(codes.InvalidArgument, "denom must be defined")
+	}
+	if err := sdk.ValidateDenom(req.Denom); err != nil {
+		return nil, status.Error(codes.InvalidArgument, fmt.Sprint("malformed denom:", err))
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	p, err := q.HistoricAvgPrice(ctx, strings.ToUpper(req.Denom))
+	if err != nil {
+		return nil, err
+	}
+	return &types.QueryAvgPriceResponse{Price: p}, nil
 }

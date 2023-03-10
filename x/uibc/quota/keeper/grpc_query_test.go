@@ -1,10 +1,11 @@
 package keeper_test
 
 import (
+	"testing"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"gotest.tools/v3/assert"
-	"testing"
 )
 
 func TestGRPCQueryParams(t *testing.T) {
@@ -32,40 +33,41 @@ func TestGRPCQueryParams(t *testing.T) {
 	}
 }
 
-func TestGRPCGetQuota(t *testing.T) {
+func TestGRPCQueryOutflows(t *testing.T) {
 	t.Parallel()
 	suite := initKeeperTestSuite(t)
 	ctx, client := suite.ctx, suite.queryClient
 	tests := []struct {
 		name   string
-		req    uibc.QueryQuota
+		req    uibc.QueryOutflows
 		errMsg string
 	}{
 		{
-			name:   "valid",
-			req:    uibc.QueryQuota{},
+			name:   "valid: total outflows",
+			req:    uibc.QueryOutflows{},
 			errMsg: "",
 		}, {
 			name:   "valid req: OutflowSum zero because ibc-transfer not hapeen",
-			req:    uibc.QueryQuota{Denom: "umee"},
+			req:    uibc.QueryOutflows{Denom: "umee"},
 			errMsg: "",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			resp, err := client.Quota(ctx, &tc.req)
+			resp, err := client.Outflows(ctx, &tc.req)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
-				if len(tc.req.Denom) == 0 {
-					assert.Equal(t, 0, len(resp.Quotas))
-				} else {
-					assert.Equal(t, 1, len(resp.Quotas))
-					assert.DeepEqual(t, sdk.NewDec(0), resp.Quotas[0].Amount)
-				}
+				assert.DeepEqual(t, sdk.NewDec(0), resp.Amount)
 			} else {
 				assert.Error(t, err, tc.errMsg)
 			}
 		})
 	}
+
+	t.Run("all-outflows", func(t *testing.T) {
+		resp, err := client.AllOutflows(ctx, &uibc.QueryAllOutflows{})
+		assert.NilError(t, err)
+		assert.Equal(t, 0, len(resp.Outflows))
+	})
 }

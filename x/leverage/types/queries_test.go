@@ -3,11 +3,10 @@ package types
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 )
 
 func TestQueryMaxWithdraw(t *testing.T) {
-	require := require.New(t)
 	tcs := []struct {
 		name string
 		q    QueryMaxWithdraw
@@ -15,12 +14,15 @@ func TestQueryMaxWithdraw(t *testing.T) {
 	}{
 		{"no address", QueryMaxWithdraw{}, "empty address"},
 	}
+
 	for _, tc := range tcs {
-		err := tc.q.ValidateBasic()
-		if tc.err == "" {
-			require.NoError(err, tc.name)
-		} else {
-			require.ErrorContains(err, tc.err, tc.name)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			err := tc.q.ValidateBasic()
+			if tc.err == "" {
+				assert.NilError(t, err)
+			} else {
+				assert.ErrorContains(t, err, tc.err)
+			}
+		})
 	}
 }
