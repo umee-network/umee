@@ -143,8 +143,6 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 
 	exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
 	if err != nil {
-		// Note: skip the ibc-transfer quota checking if `denom` is not support by leverage
-		// TODO: write test case for this
 		if ltypes.ErrNotRegisteredToken.Is(err) {
 			return nil
 		} else if err != nil {
@@ -188,7 +186,7 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 	}
 
 	// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE` (uumee)
-	exchangeRate, err = k.oracleKeeper.HistoricAvgPrice(ctx, ts.SymbolDenom)
+	exchangeRate, err = k.oracleKeeper.HistoricAvgPrice(ctx, strings.ToUpper(ts.SymbolDenom))
 	if err != nil {
 		return sdk.Dec{}, err
 	}
