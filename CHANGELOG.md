@@ -54,17 +54,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1568](https://github.com/umee-network/umee/pull/1568) IBC ICS20 transfer quota. New Cosmos SDK module and IBC ICS20 middleware to limit IBC token outflows.
 - [1764](https://github.com/umee-network/umee/pull/1764) New `util.Panic` helper function.
 - [1725](https://github.com/umee-network/umee/pull/1725) historacle: average prices.
-- [](https://github.com/umee-network/umee/pull/)
-- [](https://github.com/umee-network/umee/pull/)
-- [](https://github.com/umee-network/umee/pull/)
-- [](https://github.com/umee-network/umee/pull/)
-- [](https://github.com/umee-network/umee/pull/)
 
 ### Improvements
 
 - [1744](https://github.com/umee-network/umee/pull/1744) docs: testing guidelines.
 - [1771](https://github.com/umee-network/umee/pull/1771) CI: add experimental e2e tests on docker image.
-- [1788](https://github.com/umee-network/umee/pull/1788) deprecated use of sdkerrors.
+- [1788](https://github.com/umee-network/umee/pull/1788) deprecated use of `sdkerrors`.
 - [1835](https://github.com/umee-network/umee/pull/1835) CI: use experimental for default CI tests.
 - [1864](https://github.com/umee-network/umee/pull/1864) testing: mock gen integration.
 
