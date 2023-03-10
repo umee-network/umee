@@ -74,6 +74,10 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		s.Require().NoError(err)
 		emOfAtom := sdk.NewDecFromInt(totalQuota).Quo(histoAvgPriceOfAtom)
 		uatomAmount := sdk.NewInt64Coin("uatom", emOfAtom.Mul(powerReduction).RoundInt64())
+
+		s.Require().Greater(histoAvgPriceOfAtom, sdk.NewDec(1), "price should be non zero, and expecting higher than 1")
+		s.Require().Greater(uatomAmount, sdk.NewDec(2_000_000), "amount should be non zero, and expecting much higher than 2 atom = 2e6 uatom")
+
 		s.sendIBC(gaiaChainID, s.chain.id, "", uatomAmount)
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, uatomAmount.Amount)
 
