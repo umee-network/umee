@@ -7,15 +7,25 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/gogo/protobuf/proto"
 	"github.com/ory/dockertest/v3/docker"
 
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 	"github.com/umee-network/umee/v4/x/uibc"
 )
+
+func (s *IntegrationTestSuite) umeeREST() string {
+	return fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
+}
+
+func (s *IntegrationTestSuite) gaiaREST() string {
+	return fmt.Sprintf("http://%s", s.gaiaResource.GetHostPort("1317/tcp"))
+}
 
 func (s *IntegrationTestSuite) connectIBCChains() {
 	s.T().Logf("connecting %s and %s chains via IBC", s.chain.id, gaiaChainID)
@@ -224,116 +234,6 @@ func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 	return *resp.Balance, nil
 }
 
-<<<<<<< HEAD
-||||||| eb01e9d2
-func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/gravity/v1beta/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom))
-	if err != nil {
-		return "", false, fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-
-	defer resp.Body.Close()
-
-	bz, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", false, err
-	}
-
-	var denomToERC20Resp gravitytypes.QueryDenomToERC20Response
-	if err := cdc.UnmarshalJSON(bz, &denomToERC20Resp); err != nil {
-		return "", false, err
-	}
-
-	return denomToERC20Resp.Erc20, denomToERC20Resp.CosmosOriginated, nil
-}
-
-func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
-	_, pending, err := c.TransactionByHash(ctx, ethcmn.HexToHash(txHash))
-	if err != nil {
-		return err
-	}
-
-	if pending {
-		return fmt.Errorf("ethereum tx %s is still pending", txHash)
-	}
-
-	return nil
-}
-
-func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int64, error) {
-	data, err := ethABI.Pack(abiMethodNameBalanceOf, ethcmn.HexToAddress(recipientAddr))
-	if err != nil {
-		return 0, fmt.Errorf("failed to pack ABI method call: %w", err)
-	}
-
-	token := ethcmn.HexToAddress(contractAddr)
-	callMsg := ethereum.CallMsg{
-		To:   &token,
-		Data: data,
-	}
-
-	bz, err := c.CallContract(ctx, callMsg, nil)
-	if err != nil {
-		return 0, fmt.Errorf("failed to call Ethereum contract: %w", err)
-	}
-
-	balance, err := strconv.ParseInt(ethcmn.Bytes2Hex(bz), 16, 32)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse balance: %w", err)
-	}
-
-	return balance, nil
-}
-
-=======
-func queryDenomToERC20(endpoint, denom string) (string, bool, error) {
-	endpoint = fmt.Sprintf("%s/gravity/v1beta/cosmos_originated/denom_to_erc20?denom=%s", endpoint, denom)
-	var resp gravitytypes.QueryDenomToERC20Response
-	if err := queryREST(endpoint, &resp); err != nil {
-		return "", false, err
-	}
-
-	return resp.Erc20, resp.CosmosOriginated, nil
-}
-
-func queryEthTx(ctx context.Context, c *ethclient.Client, txHash string) error {
-	_, pending, err := c.TransactionByHash(ctx, ethcmn.HexToHash(txHash))
-	if err != nil {
-		return err
-	}
-	if pending {
-		return fmt.Errorf("ethereum tx %s is still pending", txHash)
-	}
-
-	return nil
-}
-
-func queryEthTokenBalance(ctx context.Context, c *ethclient.Client, contractAddr, recipientAddr string) (int64, error) {
-	data, err := ethABI.Pack(abiMethodNameBalanceOf, ethcmn.HexToAddress(recipientAddr))
-	if err != nil {
-		return 0, fmt.Errorf("failed to pack ABI method call: %w", err)
-	}
-
-	token := ethcmn.HexToAddress(contractAddr)
-	callMsg := ethereum.CallMsg{
-		To:   &token,
-		Data: data,
-	}
-
-	bz, err := c.CallContract(ctx, callMsg, nil)
-	if err != nil {
-		return 0, fmt.Errorf("failed to call Ethereum contract: %w", err)
-	}
-
-	balance, err := strconv.ParseInt(ethcmn.Bytes2Hex(bz), 16, 32)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse balance: %w", err)
-	}
-
-	return balance, nil
-}
-
->>>>>>> main
 func (s *IntegrationTestSuite) queryUmeeBalance(
 	umeeValIdx int,
 	umeeTokenDenom string,

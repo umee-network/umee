@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 )

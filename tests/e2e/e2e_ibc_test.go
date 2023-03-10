@@ -55,7 +55,6 @@ func (s *IntegrationTestSuite) checkSupply(endpoint, ibcDenom string, amount mat
 
 func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 	// s.T().Parallel()
-	var ibcStakeDenom string
 
 	s.Run("ibc_transfer_quota", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
