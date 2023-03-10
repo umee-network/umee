@@ -106,7 +106,8 @@ var xxx_messageInfo_Params proto.InternalMessageInfo
 // See https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
 // for more details.
 type Token struct {
-	// Base Denom is the denomination of the underlying base token.
+	// Base Denom is the denomination of the underlying base token. Must be the base
+	// denom as registered in the Bank module (so IBC denom for IBC tokens).
 	BaseDenom string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty" yaml:"base_denom"`
 	// Reserve Factor defines what portion of accrued interest goes to reserves
 	// when this token is borrowed.
