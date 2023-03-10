@@ -9,9 +9,7 @@ import (
 	appparams "github.com/umee-network/umee/v4/app/params"
 )
 
-var (
-	powerReduction = sdk.MustNewDecFromStr("10").Power(6)
-)
+var powerReduction = sdk.MustNewDecFromStr("10").Power(6)
 
 func (s *IntegrationTestSuite) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdk.Dec) {
 	// get historic average price for denom (SYMBOL_DENOM)
