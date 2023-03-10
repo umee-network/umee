@@ -36,22 +36,11 @@ var (
 	KeyMaximumMedianStamps      = []byte("MedianStampAmount")
 )
 
-// Default parameter values
-const (
-	DefaultVotePeriod               = BlocksPerMinute / 2 // 30 seconds
-	DefaultSlashWindow              = BlocksPerWeek       // window for a week
-	DefaultRewardDistributionWindow = BlocksPerYear       // window for a year
-	DefaultHistoricStampPeriod      = BlocksPerMinute * 5 // window for 5 minutes
-	DefaultMaximumPriceStamps       = 36                  // retain for 3 hours
-	DefaultMedianStampPeriod        = BlocksPerHour * 3   // window for 3 hours
-	DefaultMaximumMedianStamps      = 24                  // retain for 3 days
-)
+var _ paramstypes.ParamSet = &Params{}
 
-// Default parameter values
-var (
-	DefaultVoteThreshold = sdk.NewDecWithPrec(50, 2) // 50%
-	DefaultRewardBand    = sdk.NewDecWithPrec(2, 2)  // 2% (-1, 1)
-	DefaultAcceptList    = DenomList{
+// DefaultParams creates default oracle module parameters
+func DefaultParams() Params {
+	acceptList := DenomList{
 		{
 			BaseDenom:   UmeeDenom,
 			SymbolDenom: UmeeSymbol,
@@ -63,27 +52,20 @@ var (
 			Exponent:    AtomExponent,
 		},
 	}
-	DefaultSlashFraction     = sdk.NewDecWithPrec(1, 4) // 0.01%
-	DefaultMinValidPerWindow = sdk.NewDecWithPrec(5, 2) // 5%
-)
 
-var _ paramstypes.ParamSet = &Params{}
-
-// DefaultParams creates default oracle module parameters
-func DefaultParams() Params {
 	return Params{
-		VotePeriod:               DefaultVotePeriod,
-		VoteThreshold:            DefaultVoteThreshold,
-		RewardBand:               DefaultRewardBand,
-		RewardDistributionWindow: DefaultRewardDistributionWindow,
-		AcceptList:               DefaultAcceptList,
-		SlashFraction:            DefaultSlashFraction,
-		SlashWindow:              DefaultSlashWindow,
-		MinValidPerWindow:        DefaultMinValidPerWindow,
-		HistoricStampPeriod:      DefaultHistoricStampPeriod,
-		MedianStampPeriod:        DefaultMedianStampPeriod,
-		MaximumPriceStamps:       DefaultMaximumPriceStamps,
-		MaximumMedianStamps:      DefaultMaximumMedianStamps,
+		VotePeriod:               BlocksPerMinute / 2,       // 30 seconds
+		VoteThreshold:            sdk.NewDecWithPrec(50, 2), // 50%,
+		RewardBand:               sdk.NewDecWithPrec(2, 2),  // 2% (-1, 1)
+		RewardDistributionWindow: BlocksPerYear,
+		AcceptList:               acceptList,
+		SlashFraction:            sdk.NewDecWithPrec(1, 4), // 0.01%
+		SlashWindow:              BlocksPerWeek,
+		MinValidPerWindow:        sdk.NewDecWithPrec(5, 2), // 5%
+		HistoricStampPeriod:      BlocksPerMinute * 5,      // 5min
+		MedianStampPeriod:        BlocksPerHour * 3,        // 3h
+		MaximumPriceStamps:       36,                       // 3h
+		MaximumMedianStamps:      24,                       // 3 days
 	}
 }
 
