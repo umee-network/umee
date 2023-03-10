@@ -33,7 +33,7 @@ func TestGRPCQueryParams(t *testing.T) {
 	}
 }
 
-func TestGRPCGetQuota(t *testing.T) {
+func TestGRPCQueryOutflows(t *testing.T) {
 	t.Parallel()
 	suite := initKeeperTestSuite(t)
 	ctx, client := suite.ctx, suite.queryClient
@@ -43,7 +43,7 @@ func TestGRPCGetQuota(t *testing.T) {
 		errMsg string
 	}{
 		{
-			name:   "valid",
+			name:   "valid: total outflows",
 			req:    uibc.QueryOutflows{},
 			errMsg: "",
 		}, {
@@ -58,15 +58,16 @@ func TestGRPCGetQuota(t *testing.T) {
 			resp, err := client.Outflows(ctx, &tc.req)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
-				if len(tc.req.Denom) == 0 {
-					assert.Equal(t, 0, len(resp.Outflows))
-				} else {
-					assert.Equal(t, 1, len(resp.Outflows))
-					assert.DeepEqual(t, sdk.NewDec(0), resp.Outflows[0].Amount)
-				}
+				assert.DeepEqual(t, sdk.NewDec(0), resp.Amount)
 			} else {
 				assert.Error(t, err, tc.errMsg)
 			}
 		})
 	}
+
+	t.Run("all-outflows", func(t *testing.T) {
+		resp, err := client.AllOutflows(ctx, &uibc.QueryAllOutflows{})
+		assert.NilError(t, err)
+		assert.Equal(t, 0, len(resp.Outflows))
+	})
 }
