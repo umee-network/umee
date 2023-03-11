@@ -77,6 +77,11 @@ func (q Querier) InspectNeat(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
+	// The "all" symbol denom is converted to empty symbol denom
+	if strings.EqualFold(req.Symbol, "all") {
+		req.Symbol = ""
+	}
+
 	req2 := types.QueryInspect{
 		Symbol: req.Symbol,
 		Value:  req.Value,
