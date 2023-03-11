@@ -286,18 +286,18 @@ paths:
                     supplied_value:
                       type: string
                       description: >-
-                        Supplied Value is the sum of the USD value of all tokens
-                        the account has supplied, includng interest earned.
+                        Supplied Value is the total USD value of all tokens the
+                        account has supplied, includng interest earned.
                     collateral_value:
                       type: string
                       description: >-
-                        Collateral Value is the sum of the USD value of all
-                        uTokens the account has collateralized.
+                        Collateral Value is the total USD value of the account's
+                        collateral.
                     borrowed_value:
                       type: string
                       description: >-
-                        Borrowed Value is the sum of the USD value of all tokens
-                        the account has borrowed, including interest owed.
+                        Borrowed Value is the total USD value of all tokens the
+                        account has borrowed, including interest owed.
                     borrow_limit:
                       type: string
                       description: >-
@@ -386,30 +386,28 @@ paths:
                   properties:
                     account:
                       type: string
-                    account_size:
+                    borrowed:
                       type: number
                       format: double
                       description: >-
-                        Account Size is the sum of the USD value of all tokens
-                        the account has supplied, includng interest earned.
-                    C:
-                      type: number
-                      format: double
-                      description: C is collateral value as a portion of account size.
-                    B:
-                      type: number
-                      format: double
-                      description: B is borrowed value as a portion of account size.
+                        Borrowed is account's borrowed value, either in total or
+                        just a specified denom.
                     L:
                       type: number
                       format: double
-                      description: L is the borrow limit as a portion of account size.
+                      description: L is borrowed value as a portion of borrow limit.
                     Q:
                       type: number
                       format: double
                       description: >-
-                        Q is the liquidation threshold as a portion of account
-                        size.
+                        Q is borrowed value as a portion of liquidation
+                        threshold.
+                    V:
+                      type: number
+                      format: double
+                      description: >-
+                        V is the borrowed value as a portion of collateral
+                        value.
                   title: >-
                     BorrowerSummaryNeat defines a borrower's address and account
                     health without requiring sdk.Dec formatting
@@ -2101,18 +2099,16 @@ definitions:
       supplied_value:
         type: string
         description: >-
-          Supplied Value is the sum of the USD value of all tokens the account
-          has supplied, includng interest earned.
+          Supplied Value is the total USD value of all tokens the account has
+          supplied, includng interest earned.
       collateral_value:
         type: string
-        description: >-
-          Collateral Value is the sum of the USD value of all uTokens the
-          account has collateralized.
+        description: Collateral Value is the total USD value of the account's collateral.
       borrowed_value:
         type: string
         description: >-
-          Borrowed Value is the sum of the USD value of all tokens the account
-          has borrowed, including interest owed.
+          Borrowed Value is the total USD value of all tokens the account has
+          borrowed, including interest owed.
       borrow_limit:
         type: string
         description: >-
@@ -2139,28 +2135,24 @@ definitions:
     properties:
       account:
         type: string
-      account_size:
+      borrowed:
         type: number
         format: double
         description: >-
-          Account Size is the sum of the USD value of all tokens the account has
-          supplied, includng interest earned.
-      C:
-        type: number
-        format: double
-        description: C is collateral value as a portion of account size.
-      B:
-        type: number
-        format: double
-        description: B is borrowed value as a portion of account size.
+          Borrowed is account's borrowed value, either in total or just a
+          specified denom.
       L:
         type: number
         format: double
-        description: L is the borrow limit as a portion of account size.
+        description: L is borrowed value as a portion of borrow limit.
       Q:
         type: number
         format: double
-        description: Q is the liquidation threshold as a portion of account size.
+        description: Q is borrowed value as a portion of liquidation threshold.
+      V:
+        type: number
+        format: double
+        description: V is the borrowed value as a portion of collateral value.
     title: >-
       BorrowerSummaryNeat defines a borrower's address and account health
       without requiring sdk.Dec formatting
@@ -2397,28 +2389,24 @@ definitions:
           properties:
             account:
               type: string
-            account_size:
+            borrowed:
               type: number
               format: double
               description: >-
-                Account Size is the sum of the USD value of all tokens the
-                account has supplied, includng interest earned.
-            C:
-              type: number
-              format: double
-              description: C is collateral value as a portion of account size.
-            B:
-              type: number
-              format: double
-              description: B is borrowed value as a portion of account size.
+                Borrowed is account's borrowed value, either in total or just a
+                specified denom.
             L:
               type: number
               format: double
-              description: L is the borrow limit as a portion of account size.
+              description: L is borrowed value as a portion of borrow limit.
             Q:
               type: number
               format: double
-              description: Q is the liquidation threshold as a portion of account size.
+              description: Q is borrowed value as a portion of liquidation threshold.
+            V:
+              type: number
+              format: double
+              description: V is the borrowed value as a portion of collateral value.
           title: >-
             BorrowerSummaryNeat defines a borrower's address and account health
             without requiring sdk.Dec formatting
@@ -2444,18 +2432,18 @@ definitions:
             supplied_value:
               type: string
               description: >-
-                Supplied Value is the sum of the USD value of all tokens the
-                account has supplied, includng interest earned.
+                Supplied Value is the total USD value of all tokens the account
+                has supplied, includng interest earned.
             collateral_value:
               type: string
               description: >-
-                Collateral Value is the sum of the USD value of all uTokens the
-                account has collateralized.
+                Collateral Value is the total USD value of the account's
+                collateral.
             borrowed_value:
               type: string
               description: >-
-                Borrowed Value is the sum of the USD value of all tokens the
-                account has borrowed, including interest owed.
+                Borrowed Value is the total USD value of all tokens the account
+                has borrowed, including interest owed.
             borrow_limit:
               type: string
               description: >-

@@ -32,7 +32,7 @@ func (q Querier) Inspect(
 	var sorting inspectorSort
 
 	// The "all" symbol denom is converted to empty symbol denom
-	if strings.ToLower(req.Symbol) == "all" {
+	if strings.EqualFold(req.Symbol, "all") {
 		req.Symbol = ""
 	}
 	if req.Value.IsNil() {
@@ -91,13 +91,16 @@ func (q Querier) InspectNeat(
 	borrowers := []types.BorrowerSummaryNeat{}
 	for _, b := range resp2.Borrowers {
 		if b.SuppliedValue.IsPositive() {
+			borrowed := b.BorrowedValue
+			if req.Symbol != "" {
+				borrowed = b.SpecificBorrowValue
+			}
 			neat := types.BorrowerSummaryNeat{
-				Account:     b.Address,
-				AccountSize: neat(b.SuppliedValue),
-				C:           neat(b.CollateralValue.Quo(b.SuppliedValue)),
-				B:           neat(b.BorrowedValue.Quo(b.SuppliedValue)),
-				L:           neat(b.BorrowLimit.Quo(b.SuppliedValue)),
-				Q:           neat(b.LiquidationThreshold.Quo(b.SuppliedValue)),
+				Account:  b.Address,
+				Borrowed: neat(borrowed),
+				L:        neat(b.BorrowedValue.Quo(b.BorrowLimit)),
+				Q:        neat(b.BorrowedValue.Quo(b.LiquidationThreshold)),
+				V:        neat(b.BorrowedValue.Quo(b.CollateralValue)),
 			}
 			borrowers = append(borrowers, neat)
 		}
