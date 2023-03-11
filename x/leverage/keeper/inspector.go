@@ -40,13 +40,22 @@ func (q Querier) Inspect(
 	}
 	specific := req.Symbol != ""
 
+	// TODO: divide up flavor options so mix and match is possible
+	// (e.g. X by Y)
+
 	switch strings.ToLower(req.Flavor) {
 	case "borrowed":
 		filter = withMinBorrowedValue(req.Value, specific)
 		sorting = moreBorrowed(specific)
 	case "collateral":
 		filter = withMinCollateralValue(req.Value, specific)
-		sorting = moreBorrowed(specific)
+		sorting = moreCollateral(specific)
+	case "collateral-by-borrowed":
+		filter = withMinCollateralValue(req.Value, specific)
+		sorting = moreBorrowed(false)
+	case "collateral-by-danger":
+		filter = withMinCollateralValue(req.Value, specific)
+		sorting = moreDanger()
 	case "borrowed-by-danger":
 		filter = withMinBorrowedValue(req.Value, specific)
 		sorting = moreDanger()

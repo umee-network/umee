@@ -37,3 +37,14 @@ func moreBorrowed(specific bool) inspectorSort {
 		return a.BorrowedValue.GTE(b.BorrowedValue)
 	}
 }
+
+func moreCollateral(specific bool) inspectorSort {
+	if specific {
+		return func(a, b *types.BorrowerSummary) bool {
+			return a.SpecificCollateralValue.GTE(b.SpecificCollateralValue)
+		}
+	}
+	return func(a, b *types.BorrowerSummary) bool {
+		return a.CollateralValue.GTE(b.CollateralValue)
+	}
+}
