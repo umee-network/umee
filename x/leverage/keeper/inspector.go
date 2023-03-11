@@ -90,7 +90,7 @@ func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filter inspectorFilter,
 	sortedBorrowers := []types.BorrowerSummary{}
 
 	// convert from pointers
-	for _, b := range borrowers {
+	for _, b := range filteredBorrowers {
 		sortedBorrowers = append(sortedBorrowers, *b)
 	}
 
