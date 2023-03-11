@@ -34,6 +34,9 @@ func (q Querier) Inspect(
 	if strings.ToLower(req.Symbol) == "all" {
 		req.Symbol = ""
 	}
+	if req.Value.IsNil() {
+		req.Value = sdk.ZeroDec()
+	}
 
 	switch strings.ToLower(req.Flavor) {
 	case "borrowed":
