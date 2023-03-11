@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"math"
 	"sort"
 	"strings"
 
@@ -67,6 +68,63 @@ func (q Querier) Inspect(
 	return &types.QueryInspectResponse{Borrowers: borrowers}, nil
 }
 
+// Otherwise from grpc_query.go
+func (q Querier) InspectNeat(
+	goCtx context.Context,
+	req *types.QueryInspectNeat,
+) (*types.QueryInspectNeatResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	req2 := types.QueryInspect{
+		Symbol: req.Symbol,
+		Value:  req.Value,
+		Flavor: req.Flavor,
+	}
+
+	resp2, err := q.Inspect(goCtx, &req2)
+	if err != nil {
+		return nil, err
+	}
+
+	borrowers := []types.BorrowerSummaryNeat{}
+	for _, b := range resp2.Borrowers {
+		if b.SuppliedValue.IsPositive() {
+			neat := types.BorrowerSummaryNeat{
+				Account:     b.Address,
+				AccountSize: neat(b.SuppliedValue),
+				C:           neat(b.CollateralValue.Quo(b.SuppliedValue)),
+				B:           neat(b.BorrowedValue.Quo(b.SuppliedValue)),
+				L:           neat(b.BorrowLimit.Quo(b.SuppliedValue)),
+				Q:           neat(b.LiquidationThreshold.Quo(b.SuppliedValue)),
+			}
+			borrowers = append(borrowers, neat)
+		}
+	}
+
+	return &types.QueryInspectNeatResponse{Borrowers: borrowers}, nil
+}
+
+// Neat truncates an sdk.Dec to a common-sense precision based on its size and converts it to float.
+// This makes a big difference in readability when using the CLI.
+func neat(num sdk.Dec) float64 {
+	n := num.MustFloat64()
+	precision := 3 // Round to thousandths for ratios and sub-dollar amounts
+	if n > 1 {
+		precision = 1 // Round to dime
+	}
+	if n > 1000 {
+		precision = 0 // Round to dollar
+	}
+	if n > 1_000_000 {
+		precision = -3 // Round to thousand
+	}
+	// Truncate the float at a certain precision (can be negative)
+	x := math.Pow(10, float64(precision))
+	return float64(int(n*x)) / x
+}
+
 // filteredSortedBorrowers returns a list of borrower addresses and their account summaries sorted and filtered
 // by selected methods. Sorting is ascending in X if the sort function provided is "less X", and descending in
 // X if the function provided is "more X"
@@ -105,7 +163,7 @@ func (k Keeper) unsortedBorrowers(ctx sdk.Context, symbol string) []*types.Borro
 	denom, uDenom := "", ""
 	tokens := k.GetAllRegisteredTokens(ctx)
 	for _, t := range tokens {
-		if strings.ToUpper(t.SymbolDenom) == strings.ToUpper(symbol) {
+		if strings.EqualFold(t.SymbolDenom, symbol) {
 			denom = t.BaseDenom
 			uDenom = types.ToUTokenDenom(denom)
 		}

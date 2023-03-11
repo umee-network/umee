@@ -38,3 +38,32 @@ func GetCmdQueryInspect() *cobra.Command {
 
 	return cmd
 }
+
+// GetCmdQueryInspectNeat creates a Cobra command to query for the inspector command.
+func GetCmdQueryInspectNeat() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "inspect-neat [flavor] [denom] [value]",
+		Args:    cobra.ExactArgs(3),
+		Short:   "Inspect accounts with the leverage module.",
+		Example: "umeed q leverage inspect-neat danger-by-borrowed all 0.95",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryInspectNeat{
+				Flavor: args[0],
+				Symbol: args[1],
+				Value:  sdk.MustNewDecFromStr(args[2]),
+			}
+			resp, err := queryClient.InspectNeat(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}

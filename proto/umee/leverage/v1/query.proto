@@ -73,6 +73,12 @@ service Query {
       returns (QueryInspectResponse) {
     option (google.api.http).get = "/umee/leverage/v1/inspect/{flavor}/{symbol}";
   }
+
+  // InspectNeat is a neater customizable inspector query.
+  rpc InspectNeat(QueryInspectNeat)
+      returns (QueryInspectNeatResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/inspect_neat/{flavor}/{symbol}";
+  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service

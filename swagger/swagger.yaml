@@ -323,8 +323,105 @@ paths:
                     BorrowerSummary defines a borrower's address and account
                     health.
             description: >-
-              QueryinspectResponse defines the response structure for the
+              QueryInspectResponse defines the response structure for the
               Inspect gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: flavor
+          description: >-
+            Flavor is a simple string which selects the logic behind the
+            inspector query.
+          in: path
+          required: true
+          type: string
+        - name: symbol
+          description: >-
+            Symbol optionally selects a symbol denom for query flavors that
+            allow one to be specified.
+          in: path
+          required: true
+          type: string
+        - name: value
+          description: Value is the optional value parameter, usually a minimum value.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/leverage/v1/inspect_neat/{flavor}/{symbol}:
+    get:
+      summary: InspectNeat is a neater customizable inspector query.
+      operationId: InspectNeat
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              borrowers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    account:
+                      type: string
+                    account_size:
+                      type: number
+                      format: double
+                      description: >-
+                        Account Size is the sum of the USD value of all tokens
+                        the account has supplied, includng interest earned.
+                    C:
+                      type: number
+                      format: double
+                      description: C is collateral value as a portion of account size.
+                    B:
+                      type: number
+                      format: double
+                      description: B is borrowed value as a portion of account size.
+                    L:
+                      type: number
+                      format: double
+                      description: L is the borrow limit as a portion of account size.
+                    Q:
+                      type: number
+                      format: double
+                      description: >-
+                        Q is the liquidation threshold as a portion of account
+                        size.
+                  title: >-
+                    BorrowerSummaryNeat defines a borrower's address and account
+                    health without requiring sdk.Dec formatting
+              skipped:
+                type: integer
+                format: int32
+                description: >-
+                  Skipped is how many account had to be skipped due to zero
+                  supplied value.
+            description: >-
+              QueryInspectNeatResponse defines the response structure for the
+              InspectNeat gRPC service handler.
         default:
           description: An unexpected error response.
           schema:
@@ -2037,6 +2134,36 @@ definitions:
           SpecificBorrowValue is the amount of Borrowed Value which is the
           result of a specified borrowed denom.
     description: BorrowerSummary defines a borrower's address and account health.
+  umee.leverage.v1.BorrowerSummaryNeat:
+    type: object
+    properties:
+      account:
+        type: string
+      account_size:
+        type: number
+        format: double
+        description: >-
+          Account Size is the sum of the USD value of all tokens the account has
+          supplied, includng interest earned.
+      C:
+        type: number
+        format: double
+        description: C is collateral value as a portion of account size.
+      B:
+        type: number
+        format: double
+        description: B is borrowed value as a portion of account size.
+      L:
+        type: number
+        format: double
+        description: L is the borrow limit as a portion of account size.
+      Q:
+        type: number
+        format: double
+        description: Q is the liquidation threshold as a portion of account size.
+    title: >-
+      BorrowerSummaryNeat defines a borrower's address and account health
+      without requiring sdk.Dec formatting
   umee.leverage.v1.Params:
     type: object
     properties:
@@ -2260,6 +2387,50 @@ definitions:
     description: >-
       QueryBadDebtsResponse defines the response structure for the BedDebts gRPC
       service handler.
+  umee.leverage.v1.QueryInspectNeatResponse:
+    type: object
+    properties:
+      borrowers:
+        type: array
+        items:
+          type: object
+          properties:
+            account:
+              type: string
+            account_size:
+              type: number
+              format: double
+              description: >-
+                Account Size is the sum of the USD value of all tokens the
+                account has supplied, includng interest earned.
+            C:
+              type: number
+              format: double
+              description: C is collateral value as a portion of account size.
+            B:
+              type: number
+              format: double
+              description: B is borrowed value as a portion of account size.
+            L:
+              type: number
+              format: double
+              description: L is the borrow limit as a portion of account size.
+            Q:
+              type: number
+              format: double
+              description: Q is the liquidation threshold as a portion of account size.
+          title: >-
+            BorrowerSummaryNeat defines a borrower's address and account health
+            without requiring sdk.Dec formatting
+      skipped:
+        type: integer
+        format: int32
+        description: >-
+          Skipped is how many account had to be skipped due to zero supplied
+          value.
+    description: >-
+      QueryInspectNeatResponse defines the response structure for the
+      InspectNeat gRPC service handler.
   umee.leverage.v1.QueryInspectResponse:
     type: object
     properties:
@@ -2307,7 +2478,7 @@ definitions:
                 result of a specified borrowed denom.
           description: BorrowerSummary defines a borrower's address and account health.
     description: >-
-      QueryinspectResponse defines the response structure for the Inspect gRPC
+      QueryInspectResponse defines the response structure for the Inspect gRPC
       service handler.
   umee.leverage.v1.QueryLiquidationTargetsResponse:
     type: object

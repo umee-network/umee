@@ -41,7 +41,7 @@ func withMinLTV(value sdk.Dec) inspectorFilter {
 
 // withZeroes returns borrower summaries with unexpected zero values (knowing that borrower summaries only exist
 // for accounts with borrowed tokens)
-func withZeroes(value sdk.Dec) inspectorFilter {
+func withZeroes() inspectorFilter {
 	return func(bs *types.BorrowerSummary) bool {
 		return bs.CollateralValue.IsZero() || bs.LiquidationThreshold.IsZero() || bs.BorrowedValue.IsZero()
 	}

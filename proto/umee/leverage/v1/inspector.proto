@@ -21,12 +21,36 @@ message QueryInspect {
   ];
 }
 
-// QueryinspectResponse defines the response structure for the Inspect gRPC service handler.
+// QueryInspectResponse defines the response structure for the Inspect gRPC service handler.
 message QueryInspectResponse {
   repeated BorrowerSummary borrowers = 1 [
     (gogoproto.nullable) = false
   ];
 }
+
+// QueryInspectNeat defines the request structure for the
+// InspectNeat gRPC service handler.
+message QueryInspectNeat {
+  // Flavor is a simple string which selects the logic behind the inspector query.
+  string flavor = 1;
+  // Symbol optionally selects a symbol denom for query flavors that allow one to be specified.
+  string symbol = 2;
+  // Value is the optional value parameter, usually a minimum value.
+  string value = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// QueryInspectNeatResponse defines the response structure for the InspectNeat gRPC service handler.
+message QueryInspectNeatResponse {
+  repeated BorrowerSummaryNeat borrowers = 1 [
+    (gogoproto.nullable) = false
+  ];
+  // Skipped is how many account had to be skipped due to zero supplied value.
+  int32 skipped = 2;
+}
+
 // BorrowerSummary defines a borrower's address and account health.
 message BorrowerSummary {
   option (gogoproto.equal) = true;
@@ -66,4 +90,20 @@ message BorrowerSummary {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+}
+
+// BorrowerSummaryNeat defines a borrower's address and account health without requiring sdk.Dec formatting
+message BorrowerSummaryNeat {
+  option (gogoproto.equal) = true;
+  string account           = 1;
+  // Account Size is the sum of the USD value of all tokens the account has supplied, includng interest earned.
+  double account_size = 2;
+  // C is collateral value as a portion of account size.
+  double C = 3;
+  // B is borrowed value as a portion of account size.
+  double B = 4;
+  // L is the borrow limit as a portion of account size.
+  double L = 5;
+  // Q is the liquidation threshold as a portion of account size.
+  double Q = 6;
 }
