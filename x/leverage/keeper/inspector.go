@@ -140,8 +140,6 @@ func (k Keeper) unsortedBorrowers(ctx sdk.Context) []*types.BorrowerSummary {
 			BorrowedValue:        borrowedValue,
 			BorrowLimit:          borrowLimit,
 			LiquidationThreshold: liquidationThreshold,
-			TopBorrowed:          "not implemented",
-			TopCollateral:        "not implemented",
 		}
 		borrowers = append(borrowers, &summary)
 		return nil

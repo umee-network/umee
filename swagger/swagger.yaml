@@ -308,16 +308,6 @@ paths:
                       description: >-
                         Liquidation Threshold is the Borrowed Value at which the
                         account becomes eligible for liquidation.
-                    top_borrowed:
-                      type: string
-                      description: >-
-                        Top borrowed is the account's most borrowed symbol denom
-                        by USD value.
-                    top_collateral:
-                      type: string
-                      description: >-
-                        Top collateral is the account's most collateralized
-                        symbol denom by USD value.
                   description: >-
                     BorrowerSummary defines a borrower's address and account
                     health.
@@ -2025,14 +2015,6 @@ definitions:
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
-      top_borrowed:
-        type: string
-        description: Top borrowed is the account's most borrowed symbol denom by USD value.
-      top_collateral:
-        type: string
-        description: >-
-          Top collateral is the account's most collateralized symbol denom by
-          USD value.
     description: BorrowerSummary defines a borrower's address and account health.
   umee.leverage.v1.Params:
     type: object
@@ -2292,16 +2274,6 @@ definitions:
               description: >-
                 Liquidation Threshold is the Borrowed Value at which the account
                 becomes eligible for liquidation.
-            top_borrowed:
-              type: string
-              description: >-
-                Top borrowed is the account's most borrowed symbol denom by USD
-                value.
-            top_collateral:
-              type: string
-              description: >-
-                Top collateral is the account's most collateralized symbol denom
-                by USD value.
           description: BorrowerSummary defines a borrower's address and account health.
     description: >-
       QueryinspectResponse defines the response structure for the Inspect gRPC

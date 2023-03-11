@@ -56,8 +56,4 @@ message BorrowerSummary {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  // Top borrowed is the account's most borrowed symbol denom by USD value.
-  string top_borrowed = 7;
-  // Top collateral is the account's most collateralized symbol denom by USD value.
-  string top_collateral = 8;
 }
