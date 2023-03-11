@@ -16,7 +16,7 @@ func GetCmdQueryInspect() *cobra.Command {
 		Use:     "inspect [flavor] [denom] [value]",
 		Args:    cobra.ExactArgs(3),
 		Short:   "Inspect accounts with the leverage module.",
-		Example: "umeed q leverage inspect borrowed all 100.00",
+		Example: "umeed q leverage inspect danger-by-borrowed all 0.95",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {

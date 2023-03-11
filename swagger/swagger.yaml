@@ -308,6 +308,17 @@ paths:
                       description: >-
                         Liquidation Threshold is the Borrowed Value at which the
                         account becomes eligible for liquidation.
+                    specific_collateral_value:
+                      type: string
+                      description: >-
+                        SpecificCollateralValue is the amount of Collateral
+                        Value which is the result of a specified collateral
+                        denom.
+                    specific_borrow_value:
+                      type: string
+                      description: >-
+                        SpecificBorrowValue is the amount of Borrowed Value
+                        which is the result of a specified borrowed denom.
                   description: >-
                     BorrowerSummary defines a borrower's address and account
                     health.
@@ -2015,6 +2026,16 @@ definitions:
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
+      specific_collateral_value:
+        type: string
+        description: >-
+          SpecificCollateralValue is the amount of Collateral Value which is the
+          result of a specified collateral denom.
+      specific_borrow_value:
+        type: string
+        description: >-
+          SpecificBorrowValue is the amount of Borrowed Value which is the
+          result of a specified borrowed denom.
     description: BorrowerSummary defines a borrower's address and account health.
   umee.leverage.v1.Params:
     type: object
@@ -2274,6 +2295,16 @@ definitions:
               description: >-
                 Liquidation Threshold is the Borrowed Value at which the account
                 becomes eligible for liquidation.
+            specific_collateral_value:
+              type: string
+              description: >-
+                SpecificCollateralValue is the amount of Collateral Value which
+                is the result of a specified collateral denom.
+            specific_borrow_value:
+              type: string
+              description: >-
+                SpecificBorrowValue is the amount of Borrowed Value which is the
+                result of a specified borrowed denom.
           description: BorrowerSummary defines a borrower's address and account health.
     description: >-
       QueryinspectResponse defines the response structure for the Inspect gRPC

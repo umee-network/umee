@@ -37,20 +37,28 @@ func (q Querier) Inspect(
 	if req.Value.IsNil() {
 		req.Value = sdk.ZeroDec()
 	}
+	specific := req.Symbol != ""
 
 	switch strings.ToLower(req.Flavor) {
 	case "borrowed":
-		filter = withMinBorrowedValue(req.Value)
-		sorting = moreBorrowed()
-	case "health":
-		filter = withMinBorrowedValue(req.Value)
-		sorting = lessHealthy()
+		filter = withMinBorrowedValue(req.Value, specific)
+		sorting = moreBorrowed(specific)
+	case "collateral":
+		filter = withMinCollateralValue(req.Value, specific)
+		sorting = moreBorrowed(specific)
+	case "borrowed-by-danger":
+		filter = withMinBorrowedValue(req.Value, specific)
+		sorting = moreDanger()
+	case "danger-by-borrowed":
+		filter = withMinDanger(req.Value)
+		sorting = moreBorrowed(specific)
 	default:
 		status.Error(codes.InvalidArgument, "unknown inspector flavor: "+req.Flavor)
 	}
 	borrowers, err := k.filteredSortedBorrowers(ctx,
 		filter,
 		sorting,
+		req.Symbol,
 	)
 	if err != nil {
 		return nil, err
@@ -62,9 +70,9 @@ func (q Querier) Inspect(
 // filteredSortedBorrowers returns a list of borrower addresses and their account summaries sorted and filtered
 // by selected methods. Sorting is ascending in X if the sort function provided is "less X", and descending in
 // X if the function provided is "more X"
-func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filter inspectorFilter, sorting inspectorSort,
+func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filter inspectorFilter, sorting inspectorSort, symbol string,
 ) ([]types.BorrowerSummary, error) {
-	borrowers := k.unsortedBorrowers(ctx)
+	borrowers := k.unsortedBorrowers(ctx, symbol)
 
 	// filters the borrowers
 	filteredBorrowers := []*types.BorrowerSummary{}
@@ -89,9 +97,19 @@ func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filter inspectorFilter,
 	return sortedBorrowers, nil
 }
 
-// unsortedBorrowers returns a list of borrower addresses and their account summaries, without filters or sorting
-func (k Keeper) unsortedBorrowers(ctx sdk.Context) []*types.BorrowerSummary {
+// unsortedBorrowers returns a list of borrower addresses and their account summaries, without filters or sorting.
+// Also accepts a symbol denom to use for the SpecificBorrowValue and SpecificCollateralValue fields.
+func (k Keeper) unsortedBorrowers(ctx sdk.Context, symbol string) []*types.BorrowerSummary {
 	prefix := types.KeyPrefixAdjustedBorrow
+
+	denom, uDenom := "", ""
+	tokens := k.GetAllRegisteredTokens(ctx)
+	for _, t := range tokens {
+		if strings.ToUpper(t.SymbolDenom) == strings.ToUpper(symbol) {
+			denom = t.BaseDenom
+			uDenom = types.ToUTokenDenom(denom)
+		}
+	}
 
 	// which addresses have already been checked
 	borrowers := []*types.BorrowerSummary{}
@@ -108,41 +126,32 @@ func (k Keeper) unsortedBorrowers(ctx sdk.Context) []*types.BorrowerSummary {
 		checkedAddrs[addr.String()] = struct{}{}
 
 		borrowed := k.GetBorrowerBorrows(ctx, addr)
-		borrowedValue, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
-		if err != nil {
-			return err
-		}
-
-		supplied, err := k.GetAllSupplied(ctx, addr)
-		if err != nil {
-			return err
-		}
+		borrowedValue, _ := k.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
+		supplied, _ := k.GetAllSupplied(ctx, addr)
 		collateral := k.GetBorrowerCollateral(ctx, addr)
+		suppliedValue, _ := k.TotalTokenValue(ctx, supplied, types.PriceModeSpot)
+		collateralValue, _ := k.CalculateCollateralValue(ctx, collateral)
+		borrowLimit, _ := k.CalculateBorrowLimit(ctx, collateral)
+		liquidationThreshold, _ := k.CalculateLiquidationThreshold(ctx, collateral)
 
-		suppliedValue, err := k.TotalTokenValue(ctx, supplied, types.PriceModeSpot)
-		if err != nil {
-			return err
-		}
-		collateralValue, err := k.CalculateCollateralValue(ctx, collateral)
-		if err != nil {
-			return err
-		}
-		borrowLimit, err := k.CalculateBorrowLimit(ctx, collateral)
-		if err != nil {
-			return err
-		}
-		liquidationThreshold, err := k.CalculateLiquidationThreshold(ctx, collateral)
-		if err != nil {
-			return err
+		specificBorrowedValue := sdk.ZeroDec()
+		specificCollateralValue := sdk.ZeroDec()
+		if denom != "" {
+			specificBorrowed := sdk.NewCoin(denom, borrowed.AmountOf(denom))
+			specificCollateral := sdk.NewCoin(uDenom, collateral.AmountOf(uDenom))
+			specificBorrowedValue, _ = k.TokenValue(ctx, specificBorrowed, types.PriceModeSpot)
+			specificCollateralValue, _ = k.TokenValue(ctx, specificCollateral, types.PriceModeSpot)
 		}
 
 		summary := types.BorrowerSummary{
-			Address:              addr.String(),
-			SuppliedValue:        suppliedValue,
-			CollateralValue:      collateralValue,
-			BorrowedValue:        borrowedValue,
-			BorrowLimit:          borrowLimit,
-			LiquidationThreshold: liquidationThreshold,
+			Address:                 addr.String(),
+			SuppliedValue:           suppliedValue,
+			CollateralValue:         collateralValue,
+			BorrowedValue:           borrowedValue,
+			BorrowLimit:             borrowLimit,
+			LiquidationThreshold:    liquidationThreshold,
+			SpecificCollateralValue: specificBorrowedValue,
+			SpecificBorrowValue:     specificCollateralValue,
 		}
 		borrowers = append(borrowers, &summary)
 		return nil

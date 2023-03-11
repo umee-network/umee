@@ -56,4 +56,14 @@ message BorrowerSummary {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+  // SpecificCollateralValue is the amount of Collateral Value which is the result of a specified collateral denom.
+  string specific_collateral_value = 7 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // SpecificBorrowValue is the amount of Borrowed Value which is the result of a specified borrowed denom.
+  string specific_borrow_value = 8 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }

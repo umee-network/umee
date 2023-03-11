@@ -9,25 +9,25 @@ import (
 // inspectorFilter defines a function which decides whether to pay attention to a BorrowerSummary
 type inspectorFilter func(*types.BorrowerSummary) bool
 
-func withMinBorrowedValue(value sdk.Dec) inspectorFilter {
+func withMinBorrowedValue(value sdk.Dec, specific bool) inspectorFilter {
 	return func(bs *types.BorrowerSummary) bool {
+		if specific {
+			return bs.SpecificBorrowValue.GTE(value)
+		}
 		return bs.BorrowedValue.GTE(value)
 	}
 }
 
-func withMinCollateralValue(value sdk.Dec) inspectorFilter {
+func withMinCollateralValue(value sdk.Dec, specific bool) inspectorFilter {
 	return func(bs *types.BorrowerSummary) bool {
+		if specific {
+			return bs.SpecificCollateralValue.GTE(value)
+		}
 		return bs.CollateralValue.GTE(value)
 	}
 }
 
-func withMinSuppliedlValue(value sdk.Dec) inspectorFilter {
-	return func(bs *types.BorrowerSummary) bool {
-		return bs.SuppliedValue.GTE(value)
-	}
-}
-
-func withMinThresholdUsage(value sdk.Dec) inspectorFilter {
+func withMinDanger(value sdk.Dec) inspectorFilter {
 	return func(bs *types.BorrowerSummary) bool {
 		return bs.LiquidationThreshold.IsPositive() && bs.BorrowedValue.Quo(bs.LiquidationThreshold).GTE(value)
 	}
@@ -36,12 +36,6 @@ func withMinThresholdUsage(value sdk.Dec) inspectorFilter {
 func withMinLTV(value sdk.Dec) inspectorFilter {
 	return func(bs *types.BorrowerSummary) bool {
 		return bs.CollateralValue.IsPositive() && bs.BorrowedValue.Quo(bs.CollateralValue).GTE(value)
-	}
-}
-
-func withMinLimitUsage(value sdk.Dec) inspectorFilter {
-	return func(bs *types.BorrowerSummary) bool {
-		return bs.BorrowLimit.IsPositive() && bs.BorrowedValue.Quo(bs.BorrowLimit).GTE(value)
 	}
 }
 

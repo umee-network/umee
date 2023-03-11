@@ -19,7 +19,7 @@ func (s byCustom) Less(i, j int) bool { return s.less(s.bs[i], s.bs[j]) }
 // which must return true if a should come before b using custom logic for sorts.
 type inspectorSort func(a, b *types.BorrowerSummary) bool
 
-func lessHealthy() inspectorSort {
+func moreDanger() inspectorSort {
 	return func(a, b *types.BorrowerSummary) bool {
 		ha := a.LiquidationThreshold.Quo(a.BorrowedValue)
 		hb := b.LiquidationThreshold.Quo(b.BorrowedValue)
@@ -27,7 +27,12 @@ func lessHealthy() inspectorSort {
 	}
 }
 
-func moreBorrowed() inspectorSort {
+func moreBorrowed(specific bool) inspectorSort {
+	if specific {
+		return func(a, b *types.BorrowerSummary) bool {
+			return a.SpecificBorrowValue.GTE(b.SpecificBorrowValue)
+		}
+	}
 	return func(a, b *types.BorrowerSummary) bool {
 		return a.BorrowedValue.GTE(b.BorrowedValue)
 	}
