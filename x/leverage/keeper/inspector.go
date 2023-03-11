@@ -113,8 +113,8 @@ func (q Querier) InspectNeat(
 // This makes a big difference in readability when using the CLI.
 func neat(num sdk.Dec) float64 {
 	n := num.MustFloat64()
-	precision := 3 // Round to thousandths for ratios and sub-dollar amounts
-	if n > 1 {
+	precision := 3 // Round to thousandths for ratios and small-dollar amounts
+	if n > 10 {
 		precision = 1 // Round to dime
 	}
 	if n > 1000 {
@@ -122,6 +122,12 @@ func neat(num sdk.Dec) float64 {
 	}
 	if n > 1_000_000 {
 		precision = -3 // Round to thousand
+	}
+	if n < 0.001 {
+		precision = 6 // round to millionths
+	}
+	if n < 0.000001 {
+		return n // maximum precision
 	}
 	// Truncate the float at a certain precision (can be negative)
 	x := math.Pow(10, float64(precision))

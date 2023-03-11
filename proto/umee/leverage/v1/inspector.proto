@@ -95,9 +95,9 @@ message BorrowerSummary {
 // BorrowerSummaryNeat defines a borrower's address and account health without requiring sdk.Dec formatting
 message BorrowerSummaryNeat {
   option (gogoproto.equal) = true;
-  string account           = 1;
+  string Account           = 1;
   // Borrowed is account's borrowed value, either in total or just a specified denom.
-  double borrowed = 2;
+  double Borrowed = 2;
   // L is borrowed value as a portion of borrow limit.
   double L = 3;
   // Q is borrowed value as a portion of liquidation threshold.

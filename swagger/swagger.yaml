@@ -384,9 +384,9 @@ paths:
                 items:
                   type: object
                   properties:
-                    account:
+                    Account:
                       type: string
-                    borrowed:
+                    Borrowed:
                       type: number
                       format: double
                       description: >-
@@ -2133,9 +2133,9 @@ definitions:
   umee.leverage.v1.BorrowerSummaryNeat:
     type: object
     properties:
-      account:
+      Account:
         type: string
-      borrowed:
+      Borrowed:
         type: number
         format: double
         description: >-
@@ -2387,9 +2387,9 @@ definitions:
         items:
           type: object
           properties:
-            account:
+            Account:
               type: string
-            borrowed:
+            Borrowed:
               type: number
               format: double
               description: >-
