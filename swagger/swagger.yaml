@@ -266,6 +266,91 @@ paths:
                       format: byte
       tags:
         - Query
+  /umee/leverage/v1/borrowers:
+    get:
+      summary: >-
+        Borrowers queries a list of all borrowers' account healths, sorted by
+        borrowed amounts (for whale watching)
+      operationId: Borrowers
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              borrowers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                    supplied_value:
+                      type: string
+                      description: >-
+                        Supplied Value is the sum of the USD value of all tokens
+                        the account has supplied, includng interest earned.
+                    collateral_value:
+                      type: string
+                      description: >-
+                        Collateral Value is the sum of the USD value of all
+                        uTokens the account has collateralized.
+                    borrowed_value:
+                      type: string
+                      description: >-
+                        Borrowed Value is the sum of the USD value of all tokens
+                        the account has borrowed, including interest owed.
+                    borrow_limit:
+                      type: string
+                      description: >-
+                        Borrow Limit is the maximum Borrowed Value the account
+                        is allowed to reach through direct borrowing.
+                    liquidation_threshold:
+                      type: string
+                      description: >-
+                        Liquidation Threshold is the Borrowed Value at which the
+                        account becomes eligible for liquidation.
+                  description: >-
+                    BorrowerSummary defines a borrower's address and account
+                    health.
+                description: >-
+                  Targets are borrow positions currently marked for bad debt
+                  repayment. Each contains an Address and a Denom.
+            description: >-
+              QueryBorrowersResponse defines the response structure for the
+              Borrowers gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: minimum_value
+          description: >-
+            Minimum value is the minimum borrowed USD value to include in the
+            returned list of borrowers.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
   /umee/leverage/v1/liquidation_targets:
     get:
       summary: >-
@@ -1893,6 +1978,37 @@ definitions:
     description: >-
       BadDebt is a bad debt instance used in the leverage module's genesis
       state.
+  umee.leverage.v1.BorrowerSummary:
+    type: object
+    properties:
+      address:
+        type: string
+      supplied_value:
+        type: string
+        description: >-
+          Supplied Value is the sum of the USD value of all tokens the account
+          has supplied, includng interest earned.
+      collateral_value:
+        type: string
+        description: >-
+          Collateral Value is the sum of the USD value of all uTokens the
+          account has collateralized.
+      borrowed_value:
+        type: string
+        description: >-
+          Borrowed Value is the sum of the USD value of all tokens the account
+          has borrowed, including interest owed.
+      borrow_limit:
+        type: string
+        description: >-
+          Borrow Limit is the maximum Borrowed Value the account is allowed to
+          reach through direct borrowing.
+      liquidation_threshold:
+        type: string
+        description: >-
+          Liquidation Threshold is the Borrowed Value at which the account
+          becomes eligible for liquidation.
+    description: BorrowerSummary defines a borrower's address and account health.
   umee.leverage.v1.Params:
     type: object
     properties:
@@ -2116,6 +2232,48 @@ definitions:
     description: >-
       QueryBadDebtsResponse defines the response structure for the BedDebts gRPC
       service handler.
+  umee.leverage.v1.QueryBorrowersResponse:
+    type: object
+    properties:
+      borrowers:
+        type: array
+        items:
+          type: object
+          properties:
+            address:
+              type: string
+            supplied_value:
+              type: string
+              description: >-
+                Supplied Value is the sum of the USD value of all tokens the
+                account has supplied, includng interest earned.
+            collateral_value:
+              type: string
+              description: >-
+                Collateral Value is the sum of the USD value of all uTokens the
+                account has collateralized.
+            borrowed_value:
+              type: string
+              description: >-
+                Borrowed Value is the sum of the USD value of all tokens the
+                account has borrowed, including interest owed.
+            borrow_limit:
+              type: string
+              description: >-
+                Borrow Limit is the maximum Borrowed Value the account is
+                allowed to reach through direct borrowing.
+            liquidation_threshold:
+              type: string
+              description: >-
+                Liquidation Threshold is the Borrowed Value at which the account
+                becomes eligible for liquidation.
+          description: BorrowerSummary defines a borrower's address and account health.
+        description: >-
+          Targets are borrow positions currently marked for bad debt repayment.
+          Each contains an Address and a Denom.
+    description: >-
+      QueryBorrowersResponse defines the response structure for the Borrowers
+      gRPC service handler.
   umee.leverage.v1.QueryLiquidationTargetsResponse:
     type: object
     properties:

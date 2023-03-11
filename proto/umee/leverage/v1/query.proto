@@ -7,6 +7,8 @@ import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
+import "umee/leverage/v1/inspector.proto";
+
 option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
@@ -64,6 +66,12 @@ service Query {
   rpc MaxBorrow(QueryMaxBorrow)
       returns (QueryMaxBorrowResponse) {
     option (google.api.http).get = "/umee/leverage/v1/max_borrow";
+  }
+
+  // Borrowers queries a list of all borrowers' account healths, sorted by borrowed amounts (for whale watching)
+  rpc Borrowers(QueryBorrowers)
+      returns (QueryBorrowersResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/borrowers";
   }
 }
 
