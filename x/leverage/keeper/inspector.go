@@ -76,7 +76,7 @@ func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filter inspectorFilter,
 
 	// sorts the borrowers
 	sort.Sort(byCustom{
-		bs:   borrowers,
+		bs:   filteredBorrowers,
 		less: sorting,
 	})
 	sortedBorrowers := []types.BorrowerSummary{}
