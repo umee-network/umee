@@ -266,12 +266,10 @@ paths:
                       format: byte
       tags:
         - Query
-  /umee/leverage/v1/borrowers:
+  /umee/leverage/v1/inspect/{flavor}/{symbol}/{value}:
     get:
-      summary: >-
-        Borrowers queries a list of all borrowers' account healths, sorted by
-        borrowed amounts (for whale watching)
-      operationId: Borrowers
+      summary: Inspect is the customizable inspector query.
+      operationId: Inspect
       responses:
         '200':
           description: A successful response.
@@ -310,15 +308,22 @@ paths:
                       description: >-
                         Liquidation Threshold is the Borrowed Value at which the
                         account becomes eligible for liquidation.
+                    top_borrowed:
+                      type: string
+                      description: >-
+                        Top borrowed is the account's most borrowed symbol denom
+                        by USD value.
+                    top_collateral:
+                      type: string
+                      description: >-
+                        Top collateral is the account's most collateralized
+                        symbol denom by USD value.
                   description: >-
                     BorrowerSummary defines a borrower's address and account
                     health.
-                description: >-
-                  Targets are borrow positions currently marked for bad debt
-                  repayment. Each contains an Address and a Denom.
             description: >-
-              QueryBorrowersResponse defines the response structure for the
-              Borrowers gRPC service handler.
+              QueryinspectResponse defines the response structure for the
+              Inspect gRPC service handler.
         default:
           description: An unexpected error response.
           schema:
@@ -342,12 +347,24 @@ paths:
                       type: string
                       format: byte
       parameters:
-        - name: minimum_value
+        - name: flavor
           description: >-
-            Minimum value is the minimum borrowed USD value to include in the
-            returned list of borrowers.
-          in: query
-          required: false
+            Flavor is a simple string which selects the logic behind the
+            inspector query.
+          in: path
+          required: true
+          type: string
+        - name: symbol
+          description: >-
+            Symbol optionally selects a symbol denom for query flavors that
+            allow one to be specified.
+          in: path
+          required: true
+          type: string
+        - name: value
+          description: Value is the optional value parameter, usually a minimum value.
+          in: path
+          required: true
           type: string
       tags:
         - Query
@@ -2008,6 +2025,14 @@ definitions:
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
+      top_borrowed:
+        type: string
+        description: Top borrowed is the account's most borrowed symbol denom by USD value.
+      top_collateral:
+        type: string
+        description: >-
+          Top collateral is the account's most collateralized symbol denom by
+          USD value.
     description: BorrowerSummary defines a borrower's address and account health.
   umee.leverage.v1.Params:
     type: object
@@ -2232,7 +2257,7 @@ definitions:
     description: >-
       QueryBadDebtsResponse defines the response structure for the BedDebts gRPC
       service handler.
-  umee.leverage.v1.QueryBorrowersResponse:
+  umee.leverage.v1.QueryInspectResponse:
     type: object
     properties:
       borrowers:
@@ -2267,13 +2292,20 @@ definitions:
               description: >-
                 Liquidation Threshold is the Borrowed Value at which the account
                 becomes eligible for liquidation.
+            top_borrowed:
+              type: string
+              description: >-
+                Top borrowed is the account's most borrowed symbol denom by USD
+                value.
+            top_collateral:
+              type: string
+              description: >-
+                Top collateral is the account's most collateralized symbol denom
+                by USD value.
           description: BorrowerSummary defines a borrower's address and account health.
-        description: >-
-          Targets are borrow positions currently marked for bad debt repayment.
-          Each contains an Address and a Denom.
     description: >-
-      QueryBorrowersResponse defines the response structure for the Borrowers
-      gRPC service handler.
+      QueryinspectResponse defines the response structure for the Inspect gRPC
+      service handler.
   umee.leverage.v1.QueryLiquidationTargetsResponse:
     type: object
     properties:

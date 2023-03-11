@@ -68,10 +68,10 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/max_borrow";
   }
 
-  // Borrowers queries a list of all borrowers' account healths, sorted by borrowed amounts (for whale watching)
-  rpc Borrowers(QueryBorrowers)
-      returns (QueryBorrowersResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/borrowers";
+  // Inspect is the customizable inspector query.
+  rpc Inspect(QueryInspect)
+      returns (QueryInspectResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/inspect/{flavor}/{symbol}/{value}";
   }
 }
 

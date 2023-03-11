@@ -7,19 +7,22 @@ option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
-// QueryBorrowers defines the request structure for the
-// Borrowers gRPC service handler.
-message QueryBorrowers {
-  // Minimum value is the minimum borrowed USD value to include in the returned list of borrowers
-  string minimum_value = 1 [
+// QueryInspect defines the request structure for the
+// Inspect gRPC service handler.
+message QueryInspect {
+  // Flavor is a simple string which selects the logic behind the inspector query.
+  string flavor = 1;
+  // Symbol optionally selects a symbol denom for query flavors that allow one to be specified.
+  string symbol = 2;
+  // Value is the optional value parameter, usually a minimum value.
+  string value = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
 }
 
-// QueryBorrowersResponse defines the response structure for the Borrowers gRPC service handler.
-message QueryBorrowersResponse {
-  // Targets are borrow positions currently marked for bad debt repayment. Each contains an Address and a Denom.
+// QueryinspectResponse defines the response structure for the Inspect gRPC service handler.
+message QueryInspectResponse {
   repeated BorrowerSummary borrowers = 1 [
     (gogoproto.nullable) = false
   ];
@@ -53,4 +56,8 @@ message BorrowerSummary {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+  // Top borrowed is the account's most borrowed symbol denom by USD value.
+  string top_borrowed = 7;
+  // Top collateral is the account's most collateralized symbol denom by USD value.
+  string top_collateral = 8;
 }

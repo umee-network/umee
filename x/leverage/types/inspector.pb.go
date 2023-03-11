@@ -24,25 +24,29 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// QueryBorrowers defines the request structure for the
-// Borrowers gRPC service handler.
-type QueryBorrowers struct {
-	// Minimum value is the minimum borrowed USD value to include in the returned list of borrowers
-	MinimumValue github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=minimum_value,json=minimumValue,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"minimum_value"`
+// QueryInspect defines the request structure for the
+// Inspect gRPC service handler.
+type QueryInspect struct {
+	// Flavor is a simple string which selects the logic behind the inspector query.
+	Flavor string `protobuf:"bytes,1,opt,name=flavor,proto3" json:"flavor,omitempty"`
+	// Symbol optionally selects a symbol denom for query flavors that allow one to be specified.
+	Symbol string `protobuf:"bytes,2,opt,name=symbol,proto3" json:"symbol,omitempty"`
+	// Value is the optional value parameter, usually a minimum value.
+	Value github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=value,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"value"`
 }
 
-func (m *QueryBorrowers) Reset()         { *m = QueryBorrowers{} }
-func (m *QueryBorrowers) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowers) ProtoMessage()    {}
-func (*QueryBorrowers) Descriptor() ([]byte, []int) {
+func (m *QueryInspect) Reset()         { *m = QueryInspect{} }
+func (m *QueryInspect) String() string { return proto.CompactTextString(m) }
+func (*QueryInspect) ProtoMessage()    {}
+func (*QueryInspect) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e28247c0efa3108d, []int{0}
 }
-func (m *QueryBorrowers) XXX_Unmarshal(b []byte) error {
+func (m *QueryInspect) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowers) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryInspect) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowers.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryInspect.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -52,36 +56,35 @@ func (m *QueryBorrowers) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowers) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowers.Merge(m, src)
+func (m *QueryInspect) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryInspect.Merge(m, src)
 }
-func (m *QueryBorrowers) XXX_Size() int {
+func (m *QueryInspect) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowers) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowers.DiscardUnknown(m)
+func (m *QueryInspect) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryInspect.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowers proto.InternalMessageInfo
+var xxx_messageInfo_QueryInspect proto.InternalMessageInfo
 
-// QueryBorrowersResponse defines the response structure for the Borrowers gRPC service handler.
-type QueryBorrowersResponse struct {
-	// Targets are borrow positions currently marked for bad debt repayment. Each contains an Address and a Denom.
+// QueryinspectResponse defines the response structure for the Inspect gRPC service handler.
+type QueryInspectResponse struct {
 	Borrowers []BorrowerSummary `protobuf:"bytes,1,rep,name=borrowers,proto3" json:"borrowers"`
 }
 
-func (m *QueryBorrowersResponse) Reset()         { *m = QueryBorrowersResponse{} }
-func (m *QueryBorrowersResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryBorrowersResponse) ProtoMessage()    {}
-func (*QueryBorrowersResponse) Descriptor() ([]byte, []int) {
+func (m *QueryInspectResponse) Reset()         { *m = QueryInspectResponse{} }
+func (m *QueryInspectResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryInspectResponse) ProtoMessage()    {}
+func (*QueryInspectResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e28247c0efa3108d, []int{1}
 }
-func (m *QueryBorrowersResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryInspectResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBorrowersResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryInspectResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBorrowersResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryInspectResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -91,17 +94,17 @@ func (m *QueryBorrowersResponse) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *QueryBorrowersResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBorrowersResponse.Merge(m, src)
+func (m *QueryInspectResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryInspectResponse.Merge(m, src)
 }
-func (m *QueryBorrowersResponse) XXX_Size() int {
+func (m *QueryInspectResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBorrowersResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBorrowersResponse.DiscardUnknown(m)
+func (m *QueryInspectResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryInspectResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBorrowersResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryInspectResponse proto.InternalMessageInfo
 
 // BorrowerSummary defines a borrower's address and account health.
 type BorrowerSummary struct {
@@ -116,6 +119,10 @@ type BorrowerSummary struct {
 	BorrowLimit github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,5,opt,name=borrow_limit,json=borrowLimit,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"borrow_limit"`
 	// Liquidation Threshold is the Borrowed Value at which the account becomes eligible for liquidation.
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold"`
+	// Top borrowed is the account's most borrowed symbol denom by USD value.
+	TopBorrowed string `protobuf:"bytes,7,opt,name=top_borrowed,json=topBorrowed,proto3" json:"top_borrowed,omitempty"`
+	// Top collateral is the account's most collateralized symbol denom by USD value.
+	TopCollateral string `protobuf:"bytes,8,opt,name=top_collateral,json=topCollateral,proto3" json:"top_collateral,omitempty"`
 }
 
 func (m *BorrowerSummary) Reset()         { *m = BorrowerSummary{} }
@@ -152,42 +159,45 @@ func (m *BorrowerSummary) XXX_DiscardUnknown() {
 var xxx_messageInfo_BorrowerSummary proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*QueryBorrowers)(nil), "umee.leverage.v1.QueryBorrowers")
-	proto.RegisterType((*QueryBorrowersResponse)(nil), "umee.leverage.v1.QueryBorrowersResponse")
+	proto.RegisterType((*QueryInspect)(nil), "umee.leverage.v1.QueryInspect")
+	proto.RegisterType((*QueryInspectResponse)(nil), "umee.leverage.v1.QueryInspectResponse")
 	proto.RegisterType((*BorrowerSummary)(nil), "umee.leverage.v1.BorrowerSummary")
 }
 
 func init() { proto.RegisterFile("umee/leverage/v1/inspector.proto", fileDescriptor_e28247c0efa3108d) }
 
 var fileDescriptor_e28247c0efa3108d = []byte{
-	// 421 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x93, 0xbf, 0x6e, 0xd4, 0x40,
-	0x10, 0xc6, 0x6d, 0xee, 0x08, 0xca, 0x26, 0xb9, 0x44, 0x56, 0x40, 0x16, 0x85, 0xef, 0xb8, 0x02,
-	0xa5, 0xc9, 0x2e, 0x01, 0x2a, 0x4a, 0x0b, 0x3a, 0x84, 0x14, 0x87, 0x20, 0x41, 0x63, 0xf9, 0xec,
-	0x91, 0x6f, 0x95, 0x5d, 0xaf, 0xd9, 0x3f, 0x0e, 0xf7, 0x16, 0x3c, 0x02, 0x8f, 0x73, 0x65, 0x4a,
-	0x44, 0x11, 0xc1, 0x5d, 0x43, 0xcd, 0x13, 0x20, 0xff, 0x59, 0x5d, 0x72, 0xa5, 0x2b, 0x7b, 0xc6,
-	0xdf, 0xfc, 0xe6, 0xfb, 0x24, 0x0f, 0x9a, 0x18, 0x0e, 0x40, 0x18, 0x54, 0x20, 0x93, 0x1c, 0x48,
-	0x75, 0x46, 0x68, 0xa1, 0x4a, 0x48, 0xb5, 0x90, 0xb8, 0x94, 0x42, 0x0b, 0xef, 0xa8, 0x56, 0x60,
-	0xab, 0xc0, 0xd5, 0xd9, 0xd3, 0xe3, 0x5c, 0xe4, 0xa2, 0xf9, 0x48, 0xea, 0xb7, 0x56, 0x37, 0x05,
-	0x34, 0x3a, 0x37, 0x20, 0x17, 0xa1, 0x90, 0x52, 0x5c, 0x83, 0x54, 0xde, 0x05, 0x3a, 0xe0, 0xb4,
-	0xa0, 0xdc, 0xf0, 0xb8, 0x4a, 0x98, 0x01, 0xdf, 0x9d, 0xb8, 0x27, 0xbb, 0x21, 0x5e, 0xde, 0x8e,
-	0x9d, 0x5f, 0xb7, 0xe3, 0xe7, 0x39, 0xd5, 0x73, 0x33, 0xc3, 0xa9, 0xe0, 0x24, 0x15, 0x8a, 0x0b,
-	0xd5, 0x3d, 0x4e, 0x55, 0x76, 0x45, 0xf4, 0xa2, 0x04, 0x85, 0xdf, 0x42, 0x1a, 0xed, 0x77, 0x90,
-	0x4f, 0x35, 0x63, 0x1a, 0xa3, 0x27, 0xf7, 0xd7, 0x44, 0xa0, 0x4a, 0x51, 0x28, 0xf0, 0xde, 0xa1,
-	0xdd, 0x99, 0x6d, 0xfa, 0xee, 0x64, 0x70, 0xb2, 0xf7, 0xf2, 0x19, 0xde, 0x36, 0x8f, 0xed, 0xdc,
-	0x85, 0xe1, 0x3c, 0x91, 0x8b, 0x70, 0x58, 0xbb, 0x89, 0x36, 0x93, 0xd3, 0x7f, 0x03, 0x74, 0xb8,
-	0x25, 0xf2, 0x7c, 0xf4, 0x28, 0xc9, 0x32, 0x09, 0x4a, 0xb5, 0x19, 0x22, 0x5b, 0x7a, 0x97, 0x68,
-	0xa4, 0x4c, 0x59, 0x32, 0x0a, 0x59, 0x17, 0xf2, 0x41, 0xaf, 0x90, 0x07, 0x96, 0xd2, 0xa4, 0xf4,
-	0x3e, 0xa3, 0xa3, 0x54, 0x30, 0x96, 0x68, 0x90, 0x09, 0xeb, 0xc0, 0x83, 0x5e, 0xe0, 0xc3, 0x0d,
-	0xa7, 0x45, 0x5f, 0xa2, 0x51, 0x17, 0xd6, 0x3a, 0x1e, 0xf6, 0x73, 0x6c, 0x29, 0x2d, 0xf6, 0x1c,
-	0xed, 0xb7, 0x8d, 0x98, 0x51, 0x4e, 0xb5, 0xff, 0xb0, 0x17, 0x74, 0xaf, 0x65, 0xbc, 0xaf, 0x11,
-	0x5e, 0x8a, 0x1e, 0x33, 0xfa, 0xd5, 0xd0, 0x2c, 0xd1, 0x54, 0x14, 0xb1, 0x9e, 0x4b, 0x50, 0x73,
-	0xc1, 0x32, 0x7f, 0xa7, 0x17, 0xfb, 0xf8, 0x0e, 0xec, 0xa3, 0x65, 0xbd, 0x19, 0xfe, 0xfd, 0x31,
-	0x76, 0xc3, 0x0f, 0xcb, 0x3f, 0x81, 0xb3, 0x5c, 0x05, 0xee, 0xcd, 0x2a, 0x70, 0x7f, 0xaf, 0x02,
-	0xf7, 0xfb, 0x3a, 0x70, 0x6e, 0xd6, 0x81, 0xf3, 0x73, 0x1d, 0x38, 0x5f, 0x5e, 0xdc, 0xd9, 0x50,
-	0xff, 0x50, 0xa7, 0x05, 0xe8, 0x6b, 0x21, 0xaf, 0x9a, 0x82, 0x54, 0xaf, 0xc9, 0xb7, 0xcd, 0x05,
-	0x35, 0xfb, 0x66, 0x3b, 0xcd, 0x4d, 0xbc, 0xfa, 0x1f, 0x00, 0x00, 0xff, 0xff, 0x46, 0x84, 0x6f,
-	0xed, 0x5f, 0x03, 0x00, 0x00,
+	// 477 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x93, 0xc1, 0x6e, 0xd3, 0x30,
+	0x1c, 0xc6, 0x93, 0xad, 0xeb, 0x98, 0xdb, 0x75, 0x93, 0x55, 0x50, 0xc4, 0x21, 0xed, 0x2a, 0x81,
+	0x76, 0x59, 0xc2, 0x80, 0x13, 0xc7, 0x32, 0x0e, 0x48, 0x08, 0x69, 0x85, 0x21, 0x81, 0x84, 0xa2,
+	0x34, 0xf9, 0xd3, 0x46, 0x73, 0xfa, 0x37, 0xb6, 0x93, 0xd1, 0x3b, 0x0f, 0xc0, 0x23, 0xf0, 0x20,
+	0x3c, 0x40, 0x8f, 0x3b, 0x22, 0x0e, 0x13, 0xb4, 0x17, 0x1e, 0x03, 0x39, 0x4e, 0x68, 0xd5, 0x63,
+	0x77, 0x4a, 0xfe, 0x5f, 0x3e, 0xff, 0xf4, 0x7d, 0x8e, 0x4d, 0xba, 0x59, 0x0a, 0xe0, 0x33, 0xc8,
+	0x41, 0x84, 0x23, 0xf0, 0xf3, 0x53, 0x3f, 0x99, 0x48, 0x0e, 0x91, 0x42, 0xe1, 0x71, 0x81, 0x0a,
+	0xe9, 0xa1, 0x76, 0x78, 0x95, 0xc3, 0xcb, 0x4f, 0xef, 0xb7, 0x47, 0x38, 0xc2, 0xe2, 0xa3, 0xaf,
+	0xdf, 0x8c, 0xaf, 0xf7, 0xd5, 0x26, 0xcd, 0xf3, 0x0c, 0xc4, 0xf4, 0xa5, 0x01, 0xd0, 0x7b, 0xa4,
+	0xfe, 0x89, 0x85, 0x39, 0x0a, 0xc7, 0xee, 0xda, 0xc7, 0x7b, 0x83, 0x72, 0xd2, 0xba, 0x9c, 0xa6,
+	0x43, 0x64, 0xce, 0x96, 0xd1, 0xcd, 0x44, 0xcf, 0xc8, 0x4e, 0x1e, 0xb2, 0x0c, 0x9c, 0x6d, 0x2d,
+	0xf7, 0xbd, 0xd9, 0x4d, 0xc7, 0xfa, 0x75, 0xd3, 0x79, 0x38, 0x4a, 0xd4, 0x38, 0x1b, 0x7a, 0x11,
+	0xa6, 0x7e, 0x84, 0x32, 0x45, 0x59, 0x3e, 0x4e, 0x64, 0x7c, 0xe9, 0xab, 0x29, 0x07, 0xe9, 0x9d,
+	0x41, 0x34, 0x30, 0x8b, 0x7b, 0x1f, 0x49, 0x7b, 0x35, 0xc5, 0x00, 0x24, 0xc7, 0x89, 0x04, 0xfa,
+	0x82, 0xec, 0x0d, 0x51, 0x08, 0xbc, 0x02, 0x21, 0x1d, 0xbb, 0xbb, 0x7d, 0xdc, 0x78, 0x7c, 0xe4,
+	0xad, 0x57, 0xf3, 0xfa, 0xa5, 0xe5, 0x4d, 0x96, 0xa6, 0xa1, 0x98, 0xf6, 0x6b, 0x3a, 0xc4, 0x60,
+	0xb9, 0xb2, 0xf7, 0xa3, 0x46, 0x0e, 0xd6, 0x4c, 0xd4, 0x21, 0xbb, 0x61, 0x1c, 0x0b, 0x90, 0xb2,
+	0x6c, 0x5a, 0x8d, 0xf4, 0x82, 0xb4, 0x64, 0xc6, 0x39, 0x4b, 0x20, 0x0e, 0x4c, 0xb7, 0xad, 0x8d,
+	0xba, 0xed, 0x57, 0x94, 0x77, 0x1a, 0x42, 0xdf, 0x93, 0xc3, 0x08, 0x19, 0x0b, 0x15, 0x88, 0x90,
+	0x05, 0xb7, 0xd9, 0xb4, 0x83, 0x25, 0xc7, 0xa0, 0x2f, 0x48, 0xab, 0x2c, 0x5b, 0x25, 0xae, 0x6d,
+	0x96, 0xb8, 0xa2, 0x18, 0xec, 0x39, 0x69, 0x1a, 0x21, 0x60, 0x49, 0x9a, 0x28, 0x67, 0x67, 0x23,
+	0x68, 0xc3, 0x30, 0x5e, 0x69, 0x04, 0x8d, 0xc8, 0x5d, 0x96, 0x7c, 0xce, 0x92, 0x38, 0x54, 0x09,
+	0x4e, 0x02, 0x35, 0x16, 0x20, 0xc7, 0xc8, 0x62, 0xa7, 0xbe, 0x11, 0xbb, 0xbd, 0x02, 0x7b, 0x5b,
+	0xb1, 0xe8, 0x11, 0x69, 0x2a, 0xe4, 0x41, 0x55, 0xc6, 0xd9, 0x2d, 0xfe, 0x6f, 0x43, 0x21, 0x2f,
+	0x0f, 0x41, 0x4c, 0x1f, 0x90, 0x96, 0xb6, 0x2c, 0x37, 0xd2, 0xb9, 0x53, 0x98, 0xf6, 0x15, 0xf2,
+	0xe7, 0xff, 0xc5, 0x67, 0xb5, 0xbf, 0xdf, 0x3b, 0x76, 0xff, 0xf5, 0xec, 0x8f, 0x6b, 0xcd, 0xe6,
+	0xae, 0x7d, 0x3d, 0x77, 0xed, 0xdf, 0x73, 0xd7, 0xfe, 0xb6, 0x70, 0xad, 0xeb, 0x85, 0x6b, 0xfd,
+	0x5c, 0xb8, 0xd6, 0x87, 0x47, 0x2b, 0x59, 0xf5, 0xd1, 0x3c, 0x99, 0x80, 0xba, 0x42, 0x71, 0x59,
+	0x0c, 0x7e, 0xfe, 0xd4, 0xff, 0xb2, 0xbc, 0xa9, 0x45, 0xf2, 0x61, 0xbd, 0xb8, 0x7b, 0x4f, 0xfe,
+	0x05, 0x00, 0x00, 0xff, 0xff, 0x70, 0x7b, 0x85, 0x21, 0xc7, 0x03, 0x00, 0x00,
 }
 
 func (this *BorrowerSummary) Equal(that interface{}) bool {
@@ -227,9 +237,15 @@ func (this *BorrowerSummary) Equal(that interface{}) bool {
 	if !this.LiquidationThreshold.Equal(that1.LiquidationThreshold) {
 		return false
 	}
+	if this.TopBorrowed != that1.TopBorrowed {
+		return false
+	}
+	if this.TopCollateral != that1.TopCollateral {
+		return false
+	}
 	return true
 }
-func (m *QueryBorrowers) Marshal() (dAtA []byte, err error) {
+func (m *QueryInspect) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -239,30 +255,44 @@ func (m *QueryBorrowers) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowers) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryInspect) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowers) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryInspect) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	{
-		size := m.MinimumValue.Size()
+		size := m.Value.Size()
 		i -= size
-		if _, err := m.MinimumValue.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.Value.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintInspector(dAtA, i, uint64(size))
 	}
 	i--
-	dAtA[i] = 0xa
+	dAtA[i] = 0x1a
+	if len(m.Symbol) > 0 {
+		i -= len(m.Symbol)
+		copy(dAtA[i:], m.Symbol)
+		i = encodeVarintInspector(dAtA, i, uint64(len(m.Symbol)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Flavor) > 0 {
+		i -= len(m.Flavor)
+		copy(dAtA[i:], m.Flavor)
+		i = encodeVarintInspector(dAtA, i, uint64(len(m.Flavor)))
+		i--
+		dAtA[i] = 0xa
+	}
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBorrowersResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryInspectResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -272,12 +302,12 @@ func (m *QueryBorrowersResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBorrowersResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryInspectResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBorrowersResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryInspectResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -319,6 +349,20 @@ func (m *BorrowerSummary) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.TopCollateral) > 0 {
+		i -= len(m.TopCollateral)
+		copy(dAtA[i:], m.TopCollateral)
+		i = encodeVarintInspector(dAtA, i, uint64(len(m.TopCollateral)))
+		i--
+		dAtA[i] = 0x42
+	}
+	if len(m.TopBorrowed) > 0 {
+		i -= len(m.TopBorrowed)
+		copy(dAtA[i:], m.TopBorrowed)
+		i = encodeVarintInspector(dAtA, i, uint64(len(m.TopBorrowed)))
+		i--
+		dAtA[i] = 0x3a
+	}
 	{
 		size := m.LiquidationThreshold.Size()
 		i -= size
@@ -390,18 +434,26 @@ func encodeVarintInspector(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *QueryBorrowers) Size() (n int) {
+func (m *QueryInspect) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = m.MinimumValue.Size()
+	l = len(m.Flavor)
+	if l > 0 {
+		n += 1 + l + sovInspector(uint64(l))
+	}
+	l = len(m.Symbol)
+	if l > 0 {
+		n += 1 + l + sovInspector(uint64(l))
+	}
+	l = m.Value.Size()
 	n += 1 + l + sovInspector(uint64(l))
 	return n
 }
 
-func (m *QueryBorrowersResponse) Size() (n int) {
+func (m *QueryInspectResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -436,6 +488,14 @@ func (m *BorrowerSummary) Size() (n int) {
 	n += 1 + l + sovInspector(uint64(l))
 	l = m.LiquidationThreshold.Size()
 	n += 1 + l + sovInspector(uint64(l))
+	l = len(m.TopBorrowed)
+	if l > 0 {
+		n += 1 + l + sovInspector(uint64(l))
+	}
+	l = len(m.TopCollateral)
+	if l > 0 {
+		n += 1 + l + sovInspector(uint64(l))
+	}
 	return n
 }
 
@@ -445,7 +505,7 @@ func sovInspector(x uint64) (n int) {
 func sozInspector(x uint64) (n int) {
 	return sovInspector(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *QueryBorrowers) Unmarshal(dAtA []byte) error {
+func (m *QueryInspect) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -468,15 +528,15 @@ func (m *QueryBorrowers) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowers: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryInspect: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowers: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryInspect: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MinimumValue", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Flavor", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -504,7 +564,71 @@ func (m *QueryBorrowers) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.MinimumValue.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			m.Flavor = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Symbol", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInspector
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInspector
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInspector
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Symbol = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Value", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInspector
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInspector
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInspector
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.Value.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -529,7 +653,7 @@ func (m *QueryBorrowers) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBorrowersResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryInspectResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -552,10 +676,10 @@ func (m *QueryBorrowersResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBorrowersResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryInspectResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBorrowersResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryInspectResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -843,6 +967,70 @@ func (m *BorrowerSummary) Unmarshal(dAtA []byte) error {
 			if err := m.LiquidationThreshold.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TopBorrowed", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInspector
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInspector
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInspector
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TopBorrowed = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TopCollateral", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInspector
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInspector
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInspector
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.TopCollateral = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

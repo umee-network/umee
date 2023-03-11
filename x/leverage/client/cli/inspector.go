@@ -10,13 +10,13 @@ import (
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
-// GetCmdQueryBorrowers creates a Cobra command to query for
-// all borrowers sorted by borrowed value.
-func GetCmdQueryBorrowers() *cobra.Command {
+// GetCmdQueryInspect creates a Cobra command to query for the inspector command.
+func GetCmdQueryInspect() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "borrowers",
-		Args:  cobra.ExactArgs(0),
-		Short: "Query for all borrower addresses sorted by borrowed value",
+		Use:     "inspect [flavor] [denom] [value]",
+		Args:    cobra.ExactArgs(3),
+		Short:   "Inspect accounts with the leverage module.",
+		Example: "umeed q leverage inspect borrowed all 100.00",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -24,8 +24,12 @@ func GetCmdQueryBorrowers() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryBorrowers{MinimumValue: sdk.MustNewDecFromStr("0")}
-			resp, err := queryClient.Borrowers(cmd.Context(), req)
+			req := &types.QueryInspect{
+				Flavor: args[0],
+				Symbol: args[1],
+				Value:  sdk.MustNewDecFromStr(args[2]),
+			}
+			resp, err := queryClient.Inspect(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

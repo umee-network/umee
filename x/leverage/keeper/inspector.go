@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"sort"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -12,22 +13,33 @@ import (
 )
 
 // Otherwise from grpc_query.go
-func (q Querier) Borrowers(
+func (q Querier) Inspect(
 	goCtx context.Context,
-	req *types.QueryBorrowers,
-) (*types.QueryBorrowersResponse, error) {
+	req *types.QueryInspect,
+) (*types.QueryInspectResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
+	borrowers, err := []types.BorrowerSummary{}, error(nil)
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	borrowers, err := q.Keeper.GetSortedBorrowers(ctx, req.MinimumValue)
+	// The "all" symbol denom is converted to empty
+	if strings.ToLower(req.Symbol) == "all" {
+		req.Symbol = ""
+	}
+
+	switch strings.ToLower(req.Flavor) {
+	case "borrowed":
+		borrowers, err = q.Keeper.GetSortedBorrowers(ctx, req.Value)
+	default:
+		status.Error(codes.InvalidArgument, "unknown inspector flavor: "+req.Flavor)
+	}
 	if err != nil {
 		return nil, err
 	}
 
-	return &types.QueryBorrowersResponse{Borrowers: borrowers}, nil
+	return &types.QueryInspectResponse{Borrowers: borrowers}, nil
 }
 
 // Bsums will implement sort.Sort
