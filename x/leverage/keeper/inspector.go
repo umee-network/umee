@@ -21,6 +21,11 @@ func (q Querier) Inspect(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
+	// This query is also disabled by default as a safety measure. Enable with liquidator queries.
+	if !q.Keeper.liquidatorQueryEnabled {
+		return nil, types.ErrNotLiquidatorNode
+	}
+
 	borrowers, err := []types.BorrowerSummary{}, error(nil)
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
