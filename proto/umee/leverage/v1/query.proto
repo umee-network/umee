@@ -71,7 +71,7 @@ service Query {
   // Inspect is the customizable inspector query.
   rpc Inspect(QueryInspect)
       returns (QueryInspectResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/inspect/{flavor}/{symbol}/{value}";
+    option (google.api.http).get = "/umee/leverage/v1/inspect/{flavor}/{symbol}";
   }
 }
 
