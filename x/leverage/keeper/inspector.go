@@ -26,20 +26,29 @@ func (q Querier) Inspect(
 		return nil, types.ErrNotLiquidatorNode
 	}
 
-	borrowers, err := []types.BorrowerSummary{}, error(nil)
-	ctx := sdk.UnwrapSDKContext(goCtx)
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	var filter inspectorFilter
+	var sorting inspectorSort
 
-	// The "all" symbol denom is converted to empty
+	// The "all" symbol denom is converted to empty symbol denom
 	if strings.ToLower(req.Symbol) == "all" {
 		req.Symbol = ""
 	}
 
 	switch strings.ToLower(req.Flavor) {
 	case "borrowed":
-		borrowers, err = q.Keeper.GetSortedBorrowers(ctx, req.Value)
+		filter = withMinBorrowedValue(req.Value)
+		sorting = moreBorrowed()
+	case "health":
+		filter = withMinBorrowedValue(req.Value)
+		sorting = lessHealthy()
 	default:
 		status.Error(codes.InvalidArgument, "unknown inspector flavor: "+req.Flavor)
 	}
+	borrowers, err := k.filteredSortedBorrowers(ctx,
+		filter,
+		sorting,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -47,36 +56,42 @@ func (q Querier) Inspect(
 	return &types.QueryInspectResponse{Borrowers: borrowers}, nil
 }
 
-// Bsums will implement sort.Sort
-type Bsums []*types.BorrowerSummary
+// filteredSortedBorrowers returns a list of borrower addresses and their account summaries sorted and filtered
+// by selected methods. Sorting is ascending in X if the sort function provided is "less X", and descending in
+// X if the function provided is "more X"
+func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filter inspectorFilter, sorting inspectorSort,
+) ([]types.BorrowerSummary, error) {
+	borrowers := k.unsortedBorrowers(ctx)
 
-func (s Bsums) Len() int      { return len(s) }
-func (s Bsums) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
+	// filters the borrowers
+	filteredBorrowers := []*types.BorrowerSummary{}
+	for _, bs := range borrowers {
+		if filter(bs) {
+			filteredBorrowers = append(filteredBorrowers, bs)
+		}
+	}
 
-// ByHealth implements sort.Interface by providing Less and using the Len and
-// Swap methods of the embedded bsums value.
-type ByHealth struct{ Bsums }
+	// sorts the borrowers
+	sort.Sort(byCustom{
+		bs:   borrowers,
+		less: sorting,
+	})
+	sortedBorrowers := []types.BorrowerSummary{}
 
-func (s ByHealth) Less(i, j int) bool {
-	// health is > 100% when a borrower cannot be liquidated, and < 100% otherwise
-	hi := s.Bsums[i].LiquidationThreshold.Quo(s.Bsums[i].BorrowedValue)
-	hj := s.Bsums[j].LiquidationThreshold.Quo(s.Bsums[j].BorrowedValue)
-	return hi.LT(hj)
+	// convert from pointers
+	for _, b := range borrowers {
+		sortedBorrowers = append(sortedBorrowers, *b)
+	}
+
+	return sortedBorrowers, nil
 }
 
-// ByValue implements sort.Interface by providing Less and using the Len and
-// Swap methods of the embedded bsums value.
-type ByValue struct{ Bsums }
-
-func (s ByValue) Less(i, j int) bool { return s.Bsums[i].BorrowedValue.LTE(s.Bsums[j].BorrowedValue) }
-
-// GetSortedBorrowers returns a list of borrower addresses and their account summaries sorted by
-// borrowed value (descending) and filtered below a minimum borrowed value.
-func (k Keeper) GetSortedBorrowers(ctx sdk.Context, minValue sdk.Dec) ([]types.BorrowerSummary, error) {
+// unsortedBorrowers returns a list of borrower addresses and their account summaries, without filters or sorting
+func (k Keeper) unsortedBorrowers(ctx sdk.Context) []*types.BorrowerSummary {
 	prefix := types.KeyPrefixAdjustedBorrow
 
 	// which addresses have already been checked
-	borrowers := Bsums{}
+	borrowers := []*types.BorrowerSummary{}
 	checkedAddrs := map[string]interface{}{}
 
 	iterator := func(key, _ []byte) error {
@@ -93,11 +108,6 @@ func (k Keeper) GetSortedBorrowers(ctx sdk.Context, minValue sdk.Dec) ([]types.B
 		borrowedValue, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
 		if err != nil {
 			return err
-		}
-
-		// ignore borrowers smaller than the cutoff
-		if borrowedValue.LT(minValue) {
-			return nil
 		}
 
 		supplied, err := k.GetAllSupplied(ctx, addr)
@@ -130,24 +140,14 @@ func (k Keeper) GetSortedBorrowers(ctx sdk.Context, minValue sdk.Dec) ([]types.B
 			BorrowedValue:        borrowedValue,
 			BorrowLimit:          borrowLimit,
 			LiquidationThreshold: liquidationThreshold,
+			TopBorrowed:          "not implemented",
+			TopCollateral:        "not implemented",
 		}
 		borrowers = append(borrowers, &summary)
-
 		return nil
 	}
 
 	// collect all borrower summaries (unsorted)
-	if err := k.iterate(ctx, prefix, iterator); err != nil {
-		return nil, err
-	}
-
-	// sorts the borrowers
-	sort.Sort(ByValue{borrowers})
-	// sort.Sort(ByHealth{borrowers})
-	sortedBorrowers := []types.BorrowerSummary{}
-	for _, b := range borrowers {
-		sortedBorrowers = append(sortedBorrowers, *b)
-	}
-
-	return sortedBorrowers, nil
+	_ = k.iterate(ctx, prefix, iterator)
+	return borrowers
 }
