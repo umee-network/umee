@@ -6,7 +6,7 @@ import (
 
 // BankKeeper defines the expected x/bank keeper interface.
 type BankKeeper interface {
-	SendCoinsFromModuleToAccount(
+	SendCoinsFromModuleToAccount( // testing codecov
 		ctx sdk.Context, senderModule string, recipientAddr sdk.AccAddress, amt sdk.Coins,
 	) error
 	SendCoinsFromAccountToModule(
