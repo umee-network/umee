@@ -821,7 +821,10 @@ paths:
                       type: string
                       description: >-
                         Base Denom is the denomination of the underlying base
-                        token.
+                        token. Must be the base
+
+                        denom as registered in the Bank module (so IBC denom for
+                        IBC tokens).
                     reserve_factor:
                       type: string
                       description: >-
@@ -2485,7 +2488,12 @@ definitions:
           properties:
             base_denom:
               type: string
-              description: Base Denom is the denomination of the underlying base token.
+              description: >-
+                Base Denom is the denomination of the underlying base token.
+                Must be the base
+
+                denom as registered in the Bank module (so IBC denom for IBC
+                tokens).
             reserve_factor:
               type: string
               description: >-
@@ -2709,7 +2717,11 @@ definitions:
     properties:
       base_denom:
         type: string
-        description: Base Denom is the denomination of the underlying base token.
+        description: >-
+          Base Denom is the denomination of the underlying base token. Must be
+          the base
+
+          denom as registered in the Bank module (so IBC denom for IBC tokens).
       reserve_factor:
         type: string
         description: >-

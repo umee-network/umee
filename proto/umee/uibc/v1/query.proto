@@ -3,8 +3,9 @@ package umee.uibc.v1;
 
 import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
 import "umee/uibc/v1/quota.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/uibc";
 
@@ -17,10 +18,15 @@ service Query {
     option (google.api.http).get = "/umee/uibc/v1/params";
   }
 
-  // Outflow returns IBC denom outflows in the current epoch.
-  // If denom is empty, returns outflows of all tokens in the current epoch.
+  // Outflow returns IBC denom outflows in the current quota period.
+  // If denom is not specified, returns sum of all registered outflows.
   rpc Outflows(QueryOutflows) returns (QueryOutflowsResponse) {
     option (google.api.http).get = "/umee/uibc/v1/outflows";
+  }
+
+  // AllOutflow returns outflows for each denom in the current quota period.
+  rpc AllOutflows(QueryAllOutflows) returns (QueryAllOutflowsResponse) {
+    option (google.api.http).get = "/umee/uibc/v1/all-outflows";
   }
 }
 
@@ -41,6 +47,18 @@ message QueryOutflows {
 
 // QueryOutflowResponse defines response type of Query/Outflow
 message QueryOutflowsResponse {
+  string amount = 1 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// QueryOutflow defines request type for query the quota of denoms
+message QueryAllOutflows {}
+
+// QueryOutflowResponse defines response type of Query/Outflow
+message QueryAllOutflowsResponse {
   repeated cosmos.base.v1beta1.DecCoin outflows = 1 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable)     = false

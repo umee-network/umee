@@ -7,14 +7,14 @@ require (
 	cosmossdk.io/math v1.0.0-beta.6
 	github.com/CosmWasm/wasmd v0.29.0
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.5.3
-	github.com/cosmos/cosmos-proto v1.0.0-beta.2
+	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.46.10
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v5 v5.2.0
 	github.com/ethereum/go-ethereum v1.11.3
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/mock v1.6.0
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.3
 	github.com/golangci/golangci-lint v1.51.2
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
@@ -32,7 +32,7 @@ require (
 	github.com/tendermint/tm-db v0.6.7
 	google.golang.org/genproto v0.0.0-20230125152338-dcaf20b6aeaa
 	google.golang.org/grpc v1.53.0
-	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8
+	google.golang.org/protobuf v1.29.0
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.4.0
 	mvdan.cc/gofumpt v0.4.0
