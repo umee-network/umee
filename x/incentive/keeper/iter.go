@@ -44,7 +44,7 @@ func (k Keeper) GetAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 // iterateAccountBonds iterates over all bonded uTokens for an address by each individual
 // uToken denom and tier
 func (k Keeper) iterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
-	cb func(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, uToken sdk.Coin) error,
+	_ func(ctx sdk.Context, addr sdk.AccAddress, _ incentive.BondTier, _ sdk.Coin) error,
 ) error {
 	prefix := keyBondAmountNoDenom(addr)
 

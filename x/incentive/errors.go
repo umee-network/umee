@@ -28,7 +28,7 @@ var (
 	// 4XX = Messages
 	ErrSponsorIneligible      = errors.Register(ModuleName, 400, "incentive program not eligible for sponsorship")
 	ErrSponsorInvalid         = errors.Register(ModuleName, 401, "incorrect funding for incentive program")
-	ErrMaxUnbondings          = errors.Register(ModuleName, 402, "exceeds maximum concurrent unbondings for a single uToken")
+	ErrMaxUnbondings          = errors.Register(ModuleName, 402, "exceeds max concurrent unbondings for a single uToken")
 	ErrInsufficientBonded     = errors.Register(ModuleName, 403, "insufficient bonded, but not already unbonding, uTokens")
 	ErrInsufficientCollateral = errors.Register(ModuleName, 404, "insufficient collateral to create bond")
 

@@ -104,7 +104,6 @@ func (q Querier) CompletedIncentivePrograms(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
 	programs := k.GetPaginatedIncentivePrograms(

@@ -65,7 +65,9 @@ func (k Keeper) increaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentiv
 	bonded := k.GetBonded(ctx, addr, bond.Denom, tier)
 	// if bonded amount was zero, reward tracker must be initialized
 	if bonded.IsZero() {
-		k.updateRewardTracker(ctx, addr, tier, bond.Denom)
+		if err := k.updateRewardTracker(ctx, addr, tier, bond.Denom); err != nil {
+			return err
+		}
 	}
 	// update bonded amount
 	if err := k.SetBonded(ctx, addr, bonded.Add(bond), tier); err != nil {

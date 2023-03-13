@@ -197,7 +197,8 @@ func (s msgServer) GovCreatePrograms(
 }
 
 // addressUTokenTier parses common input fields from MsgBond and MsgBeginUnbonding, and ensures the asset is a uToken.
-func addressUTokenTier(account string, asset sdk.Coin, tierUint uint32) (sdk.AccAddress, string, incentive.BondTier, error) {
+func addressUTokenTier(account string, asset sdk.Coin, tierUint uint32,
+) (sdk.AccAddress, string, incentive.BondTier, error) {
 	addr, err := sdk.AccAddressFromBech32(account)
 	if err != nil {
 		return sdk.AccAddress{}, "", incentive.BondTierUnspecified, err
