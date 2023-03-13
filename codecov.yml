@@ -7,9 +7,8 @@ coverage:
     # Learn more at https://docs.codecov.io/docs/commit-status
     project:
       default:
-        target: auto
+        target: 90%
         threshold: 0%
-        base: auto
         if_ci_failed: error
         if_not_found: success
       app:
@@ -36,10 +35,14 @@ ignore:
   - "*.md"
   - "*.rst"
   - "**/*.pb.go"
-  - "types/*.pb.go"
+  - "**/*.pb.gw.go"
   - "tests/*"
   - "tests/**/*"
   - "x/**/*.pb.go"
+  - "x/**/*.pb.gw.go"
+  - "x/**/types/*.pb.go"
+  - "x/**/types/*.pb.gw.go"
   - "x/**/test_common.go"
   - "scripts/"
   - "contrib"
+  - "proto/"
