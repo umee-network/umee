@@ -81,7 +81,8 @@ message Params {
 message Token {
   option (gogoproto.equal) = true;
 
-  // Base Denom is the denomination of the underlying base token.
+  // Base Denom is the denomination of the underlying base token. Must be the base
+  // denom as registered in the Bank module (so IBC denom for IBC tokens).
   string base_denom = 1 [(gogoproto.moretags) = "yaml:\"base_denom\""];
 
   // Reserve Factor defines what portion of accrued interest goes to reserves
