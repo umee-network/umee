@@ -12,7 +12,7 @@ import (
 // REQUIREMENT: This function must be called during any message or hook which creates an unbonding or updates
 // bonded amounts. Leverage hooks which decrease borrower collateral must also call this before acting.
 // This ensures that between any two consecutive claims by a single account, bonded amounts were constant
-// for each bond tier and collateral uToken denom.
+// on that account for each bond tier and collateral uToken denom.
 func (k Keeper) updateAccount(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, error) {
 	current := k.GetUnbondings(ctx, addr)
 	remaining := incentive.AccountUnbondings{
