@@ -2,14 +2,16 @@ coverage:
   precision: 2
   round: down
   range: 70...100
-  require_ci_to_pass: false
-  
+
   status:
     # Learn more at https://docs.codecov.io/docs/commit-status
     project:
       default:
-        target: 70% # overall coverage percentage
-        # threshold: 1% # allow this much decrease on project
+        target: auto
+        threshold: 0.1%
+        base: auto
+        if_ci_failed: error
+        if_not_found: success
       app:
         target: 70%
         paths:
@@ -23,9 +25,6 @@ coverage:
         paths:
           - client
           - "x/**/client/"
-    changes: false
-    patch: off
-
 
 comment:
   layout: "reach, diff, files"

@@ -89,6 +89,7 @@ jobs:
         with:
           file: ./coverage.txt
           fail_ci_if_error: true
+          verbose: true
 
   test-e2e:
     runs-on: ubuntu-latest
