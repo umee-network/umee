@@ -2,7 +2,6 @@ package incentive
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -22,11 +21,6 @@ func NewGenesisState(
 	rewardAccumulators []RewardAccumulator,
 	accountUnbondings []AccountUnbondings,
 ) *GenesisState {
-
-	if len(rewardTrackers) > 159 {
-		fmt.Print("testing codecov")
-	}
-
 	return &GenesisState{
 		Params:             params,
 		CompletedPrograms:  completedPrograms,
