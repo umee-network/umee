@@ -543,14 +543,14 @@ func queryHistAvgPrice(endpoint, denom string) (sdk.Dec, error) {
 	return resp.Price, nil
 }
 
-func queryOutflows(endpoint, denom string) (sdk.DecCoins, error) {
+func queryOutflows(endpoint, denom string) (sdk.Dec, error) {
 	endpoint = fmt.Sprintf("%s/umee/uibc/v1/outflows?denom=%s", endpoint, denom)
 	var resp uibc.QueryOutflowsResponse
 	if err := queryREST(endpoint, &resp); err != nil {
-		return nil, err
+		return sdk.Dec{}, err
 	}
 
-	return resp.Outflows, nil
+	return resp.Amount, nil
 }
 
 func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
