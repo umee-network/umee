@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
@@ -14,8 +15,11 @@ func (k Keeper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability,
 		return errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
-	if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
-		return errors.Wrap(err, "bad packet in rate limit's SendPacket")
+	params := k.GetParams(ctx)
+	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
+		if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
+			return errors.Wrap(err, "bad packet in rate limit's SendPacket")
+		}
 	}
 
 	return k.ics4Wrapper.SendPacket(ctx, chanCap, packet)
