@@ -37,7 +37,7 @@ func (s AvgKeeperSuite) newAvgKeeper(t *testing.T, period, shift time.Duration) 
 }
 
 func (s AvgKeeperSuite) newDefAvgKeeper(t *testing.T) AvgKeeper {
-	return s.newAvgKeeper(t, AvgPeriod, AvgShift)
+	return s.newAvgKeeper(t, defaultAvgPeriod, defaultAvgShift)
 }
 
 func (s AvgKeeperSuite) testNewCounters(t *testing.T) {
@@ -154,6 +154,8 @@ func (s AvgKeeperSuite) testUpdateAvgCounterSimple(t *testing.T) {
 func (s AvgKeeperSuite) testUpdateAvgCounterShift(t *testing.T) {
 	now, shift, k := s.setupUpdateAvgCounter(t)
 	numCounters := k.numCounters()
+
+	checkAvgPrice(t, k, "0", "u/nonexistingdenom", 0)
 
 	k.updateAvgCounter(s.denom1, sdk.NewDec(1), now)
 	checkAvgPrice(t, k, "1", s.denom1, 0)

@@ -62,27 +62,27 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 	}
 }
 
-func validMsgGovSetIBCPause() MsgGovSetIBCPause {
-	return MsgGovSetIBCPause{
-		Title:          "title",
-		Authority:      authtypes.NewModuleAddress("gov").String(),
-		Description:    "desc",
-		IbcPauseStatus: 1,
+func validMsgGovSetIBCStatus() MsgGovSetIBCStatus {
+	return MsgGovSetIBCStatus{
+		Title:       "title",
+		Authority:   authtypes.NewModuleAddress("gov").String(),
+		Description: "desc",
+		IbcStatus:   1,
 	}
 }
 
-func TestMsgGovSetIBCPause(t *testing.T) {
+func TestMsgGovSetIBCStatus(t *testing.T) {
 	t.Parallel()
-	validMsg := validMsgGovSetIBCPause()
+	validMsg := validMsgGovSetIBCStatus()
 
 	invalidAuthority := validMsg
 	invalidAuthority.Authority = authtypes.NewModuleAddress("govv").String()
 
-	invalidIBCPauseStatus := validMsg
-	invalidIBCPauseStatus.IbcPauseStatus = 10
+	invalidIBCStatus := validMsg
+	invalidIBCStatus.IbcStatus = 10
 
 	tests := []struct {
-		msg    MsgGovSetIBCPause
+		msg    MsgGovSetIBCStatus
 		name   string
 		errMsg string
 	}{
@@ -96,7 +96,7 @@ func TestMsgGovSetIBCPause(t *testing.T) {
 			errMsg: "invalid authority",
 		}, {
 			name:   "invalid ibc pause status in msg",
-			msg:    invalidIBCPauseStatus,
+			msg:    invalidIBCStatus,
 			errMsg: "invalid ibc-transfer status",
 		},
 	}
