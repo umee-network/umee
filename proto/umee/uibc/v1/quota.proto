@@ -10,7 +10,7 @@ option go_package = "github.com/umee-network/umee/v4/x/uibc";
 // Params of x/uibc module
 message Params {
   // ibc_status defines the wethever ibc-transfer enabled, disbaled or paused
-  IBCTransferStatus ibc_pause = 1;
+  IBCTransferStatus ibc_status = 1;
   // total_quota defines the total outflow limit of ibc-transfer in USD
   string total_quota = 2 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
@@ -36,10 +36,10 @@ message Params {
 enum IBCTransferStatus {
   // UNSPECIFIED  defines a no-op status.
   IBC_TRANSFER_STATUS_UNSPECIFIED = 0;
-  // DISABLED defines the quota checking diabled for ibc-transfer.
-  IBC_TRANSFER_STATUS_DISABLED = 1;
-  // ENABLED defines the enable quota checking for ibc-transfer.
-  IBC_TRANSFER_STATUS_ENABLED = 2;
-  // PAUSED defines pause the ibc-transfer from app.
-  IBC_TRANSFER_STATUS_PAUSED = 3;
+  // DISABLED: quota checks are disabled.
+  IBC_TRANSFER_STATUS_QUOTA_DISABLED = 1;
+  // ENABLED: quota checks are enabled.
+  IBC_TRANSFER_STATUS_QUOTA_ENABLED = 2;
+  // PAUSED: all IBC transfers are paused.
+  IBC_TRANSFER_STATUS_TRANSFERS_PAUSED = 3;
 }
