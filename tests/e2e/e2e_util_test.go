@@ -472,12 +472,12 @@ func queryREST(endpoint string, valPtr interface{}) error {
 		return fmt.Errorf("tx query returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
 	}
 
-	if valPtr, ok := valPtr.(proto.Message); ok {
+	if valProto, ok := valPtr.(proto.Message); ok {
 		bz, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
 		}
-		if err = cdc.UnmarshalJSON(bz, valPtr); err != nil {
+		if err = cdc.UnmarshalJSON(bz, valProto); err != nil {
 			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
 		}
 	} else {
