@@ -50,7 +50,7 @@ func (m msgServer) GovSetIBCStatus(
 	if err := m.keeper.SetIBCStatus(ctx, msg.IbcStatus); err != nil {
 		return &uibc.MsgGovSetIBCStatusResponse{}, err
 	}
-	sdkutil.Emit(&ctx, &uibc.EventQuotaPause{
+	sdkutil.Emit(&ctx, &uibc.EventIBCTransferStatus{
 		Status: msg.IbcStatus,
 	})
 
