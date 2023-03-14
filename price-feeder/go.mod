@@ -5,7 +5,7 @@ go 1.19
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
 	github.com/armon/go-metrics v0.4.1
-	github.com/cosmos/cosmos-sdk v0.46.10
+	github.com/cosmos/cosmos-sdk v0.46.11
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/golangci/golangci-lint v1.51.2
 	github.com/gorilla/mux v1.8.0
@@ -17,7 +17,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
-	github.com/tendermint/tendermint v0.34.26
+	github.com/tendermint/tendermint v0.34.27
 	github.com/umee-network/umee/v4 v4.0.0
 	golang.org/x/sync v0.1.0
 	golang.org/x/term v0.6.0
@@ -34,7 +34,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v0.8.0 // indirect
 	cloud.google.com/go/storage v1.27.0 // indirect
-	cosmossdk.io/math v1.0.0-beta.6 // indirect
+	cosmossdk.io/math v1.0.0-rc.0 // indirect
 	filippo.io/edwards25519 v1.0.0-rc.1 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.1 // indirect
@@ -74,6 +74,7 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/cockroachdb/apd/v2 v2.0.2 // indirect
 	github.com/coinbase/rosetta-sdk-go v0.7.9 // indirect
+	github.com/cometbft/cometbft-db v0.7.0 // indirect
 	github.com/confio/ics23/go v0.9.0 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3 // indirect
@@ -97,7 +98,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1-0.20200219035652-afde56e7acac // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/esimonov/ifshort v1.0.4 // indirect
-	github.com/ethereum/go-ethereum v1.11.3 // indirect
+	github.com/ethereum/go-ethereum v1.11.4 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
 	github.com/fatih/color v1.14.1 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
@@ -257,6 +258,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/t-yuki/gocover-cobertura v0.0.0-20180217150009-aaee18c8195c // indirect
 	github.com/tdakkota/asciicheck v0.1.1 // indirect
+	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
 	github.com/tendermint/tm-db v0.6.7 // indirect
 	github.com/tetafro/godot v1.4.11 // indirect
@@ -308,11 +310,11 @@ require (
 replace (
 	github.com/CosmWasm/wasmd => github.com/notional-labs/wasmd v0.29.0-sdk46
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4
-	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.10-umee
+	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.11-umee
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.2
-	github.com/tendermint/tendermint => github.com/informalsystems/tendermint v0.34.26
+	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.27
 	github.com/umee-network/umee/v4 => ../
 )
