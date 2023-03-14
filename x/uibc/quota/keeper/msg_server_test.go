@@ -88,41 +88,41 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 	}
 }
 
-func TestMsgServer_GovSetIBCPause(t *testing.T) {
+func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 	t.Parallel()
 	s := initKeeperTestSuite(t)
 	ctx := s.ctx
 
 	tests := []struct {
 		name   string
-		msg    uibc.MsgGovSetIBCPause
+		msg    uibc.MsgGovSetIBCStatus
 		errMsg string
 	}{
 		{
 			name: "invalid authority address in msg",
-			msg: uibc.MsgGovSetIBCPause{
-				Title:          "title",
-				Description:    "desc",
-				Authority:      authtypes.NewModuleAddress("govv").String(),
-				IbcPauseStatus: 1,
+			msg: uibc.MsgGovSetIBCStatus{
+				Title:       "title",
+				Description: "desc",
+				Authority:   authtypes.NewModuleAddress("govv").String(),
+				IbcStatus:   1,
 			},
 			errMsg: "expected gov account as only signer for proposal message",
 		}, {
 			name: "invalid ibc-transfer status in msg",
-			msg: uibc.MsgGovSetIBCPause{
-				Title:          "title",
-				Description:    "desc",
-				Authority:      authtypes.NewModuleAddress("gov").String(),
-				IbcPauseStatus: 5,
+			msg: uibc.MsgGovSetIBCStatus{
+				Title:       "title",
+				Description: "desc",
+				Authority:   authtypes.NewModuleAddress("gov").String(),
+				IbcStatus:   5,
 			},
 			errMsg: "invalid ibc-transfer status",
 		}, {
 			name: "valid in msg <enable the ibc-transfer pause",
-			msg: uibc.MsgGovSetIBCPause{
-				Title:          "title",
-				Description:    "desc",
-				Authority:      authtypes.NewModuleAddress("gov").String(),
-				IbcPauseStatus: 2,
+			msg: uibc.MsgGovSetIBCStatus{
+				Title:       "title",
+				Description: "desc",
+				Authority:   authtypes.NewModuleAddress("gov").String(),
+				IbcStatus:   2,
 			},
 			errMsg: "",
 		},
@@ -130,13 +130,13 @@ func TestMsgServer_GovSetIBCPause(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := s.msgServer.GovSetIBCPause(ctx, &tc.msg)
+			_, err := s.msgServer.GovSetIBCStatus(ctx, &tc.msg)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				// check the update ibc-transfer pause status
 				params, err := s.queryClient.Params(ctx, &uibc.QueryParams{})
 				assert.NilError(t, err)
-				assert.Equal(t, params.Params.IbcStatus, tc.msg.IbcPauseStatus)
+				assert.Equal(t, params.Params.IbcStatus, tc.msg.IbcStatus)
 			} else {
 				assert.ErrorContains(t, err, tc.errMsg)
 			}

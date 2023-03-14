@@ -42,8 +42,8 @@ func (k Keeper) UpdateQuotaParams(ctx sdk.Context, totalQuota, quotaPerDenom sdk
 	return k.SetParams(ctx, params)
 }
 
-// SetIBCPause update the ibc pause status in module params.
-func (k Keeper) SetIBCPause(ctx sdk.Context, ibcStatus uibc.IBCTransferStatus) error {
+// SetIBCStatus update the ibc pause status in module params.
+func (k Keeper) SetIBCStatus(ctx sdk.Context, ibcStatus uibc.IBCTransferStatus) error {
 	params := k.GetParams(ctx)
 	params.IbcStatus = ibcStatus
 
