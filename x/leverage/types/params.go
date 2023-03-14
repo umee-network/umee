@@ -18,14 +18,6 @@ var (
 	KeyDirectLiquidationFee         = []byte("DirectLiquidationFee")
 )
 
-var (
-	defaultCompleteLiquidationThreshold = sdk.MustNewDecFromStr("0.4")
-	defaultMinimumCloseFactor           = sdk.MustNewDecFromStr("0.05")
-	defaultOracleRewardFactor           = sdk.MustNewDecFromStr("0.01")
-	defaultSmallLiquidationSize         = sdk.MustNewDecFromStr("500.00")
-	defaultDirectLiquidationFee         = sdk.MustNewDecFromStr("0.05")
-)
-
 func NewParams() Params {
 	return Params{}
 }
@@ -77,11 +69,11 @@ func ParamKeyTable() paramtypes.KeyTable {
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		CompleteLiquidationThreshold: defaultCompleteLiquidationThreshold,
-		MinimumCloseFactor:           defaultMinimumCloseFactor,
-		OracleRewardFactor:           defaultOracleRewardFactor,
-		SmallLiquidationSize:         defaultSmallLiquidationSize,
-		DirectLiquidationFee:         defaultDirectLiquidationFee,
+		CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
+		MinimumCloseFactor:           sdk.MustNewDecFromStr("0.05"),
+		OracleRewardFactor:           sdk.MustNewDecFromStr("0.01"),
+		SmallLiquidationSize:         sdk.MustNewDecFromStr("500.00"),
+		DirectLiquidationFee:         sdk.MustNewDecFromStr("0.05"),
 	}
 }
 
