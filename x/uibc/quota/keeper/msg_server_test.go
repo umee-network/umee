@@ -136,7 +136,7 @@ func TestMsgServer_GovSetIBCPause(t *testing.T) {
 				// check the update ibc-transfer pause status
 				params, err := s.queryClient.Params(ctx, &uibc.QueryParams{})
 				assert.NilError(t, err)
-				assert.Equal(t, params.Params.IbcPause, tc.msg.IbcPauseStatus)
+				assert.Equal(t, params.Params.IbcStatus, tc.msg.IbcPauseStatus)
 			} else {
 				assert.ErrorContains(t, err, tc.errMsg)
 			}

@@ -10,7 +10,7 @@ import (
 // DefaultParams returns default genesis params
 func DefaultParams() Params {
 	return Params{
-		IbcPause:      IBCTransferStatus_IBC_TRANSFER_STATUS_DISABLED,
+		IbcStatus:     IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED,
 		TotalQuota:    sdk.NewDec(1_000_000),
 		TokenQuota:    sdk.NewDec(600_000),
 		QuotaDuration: time.Second * 60 * 60 * 24, // 24h
@@ -18,22 +18,18 @@ func DefaultParams() Params {
 }
 
 func (p Params) Validate() error {
-	if err := validateIBCTransferStatus(p.IbcPause); err != nil {
+	if err := validateIBCTransferStatus(p.IbcStatus); err != nil {
 		return err
 	}
-
 	if err := validateQuotaDuration(p.QuotaDuration); err != nil {
 		return err
 	}
-
 	if err := validateQuota(p.TotalQuota, "total quota"); err != nil {
 		return err
 	}
-
 	if err := validateQuota(p.TokenQuota, "quota per token"); err != nil {
 		return err
 	}
-
 	if p.TotalQuota.LT(p.TokenQuota) {
 		return fmt.Errorf("token quota shouldn't be less than quota per denom")
 	}
@@ -42,9 +38,9 @@ func (p Params) Validate() error {
 }
 
 func validateIBCTransferStatus(status IBCTransferStatus) error {
-	if status == IBCTransferStatus_IBC_TRANSFER_STATUS_DISABLED ||
-		status == IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED ||
-		status == IBCTransferStatus_IBC_TRANSFER_STATUS_PAUSED {
+	if status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED {
 		return nil
 	}
 
