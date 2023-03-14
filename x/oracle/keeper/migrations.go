@@ -26,10 +26,12 @@ func (m Migrator) Migrate1to2(ctx sdk.Context) error {
 
 // HistoracleParams3x4 updates Historic Params to defaults for the v4.0 upgrade
 func (m Migrator) HistoracleParams3x4(ctx sdk.Context) error {
-	m.keeper.SetHistoricStampPeriod(ctx, types.DefaultHistoricStampPeriod)
-	m.keeper.SetMedianStampPeriod(ctx, types.DefaultMedianStampPeriod)
-	m.keeper.SetMaximumPriceStamps(ctx, types.DefaultMaximumPriceStamps)
-	m.keeper.SetMaximumMedianStamps(ctx, types.DefaultMaximumMedianStamps)
+	p := types.DefaultParams()
+
+	m.keeper.SetHistoricStampPeriod(ctx, p.HistoricStampPeriod)
+	m.keeper.SetMedianStampPeriod(ctx, p.MedianStampPeriod)
+	m.keeper.SetMaximumPriceStamps(ctx, p.MaximumPriceStamps)
+	m.keeper.SetMaximumMedianStamps(ctx, p.MaximumMedianStamps)
 	return nil
 }
 

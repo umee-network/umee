@@ -7,27 +7,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const (
-	// Default ibc-transfer quota is disabled
-	DefaultIBCPause = IBCTransferStatus_IBC_TRANSFER_STATUS_DISABLED
-	// 24 hours time interval for ibc-transfer quota limit
-	DefaultQuotaDurationPerDenom = 60 * 60 * 24
-)
-
-var (
-	// 1M USD daily limit for all denoms
-	DefaultTotalQuota = sdk.MustNewDecFromStr("1000000")
-	// 600K USD daily limit for each denom
-	DefaultQuotaPerIBCDenom = sdk.MustNewDecFromStr("600000")
-)
-
 // DefaultParams returns default genesis params
 func DefaultParams() Params {
 	return Params{
-		IbcPause:      DefaultIBCPause,
-		TotalQuota:    DefaultTotalQuota,
-		TokenQuota:    DefaultQuotaPerIBCDenom,
-		QuotaDuration: time.Second * DefaultQuotaDurationPerDenom,
+		IbcPause:      IBCTransferStatus_IBC_TRANSFER_STATUS_DISABLED,
+		TotalQuota:    sdk.NewDec(1_000_000),
+		TokenQuota:    sdk.NewDec(600_000),
+		QuotaDuration: time.Second * 60 * 60 * 24, // 24h
 	}
 }
 
@@ -62,7 +48,7 @@ func validateIBCTransferStatus(status IBCTransferStatus) error {
 		return nil
 	}
 
-	return fmt.Errorf("invalid ibc-transfer status : %s", status.String())
+	return fmt.Errorf("invalid ibc-transfer status: %s", status.String())
 }
 
 func validateQuotaDuration(d time.Duration) error {
