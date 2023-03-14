@@ -12,9 +12,10 @@ func TestInitGenesis(t *testing.T) {
 	app, ctx := s.app, s.ctx
 
 	defaultGs := uibc.DefaultGenesisState()
+	assert.Equal(t, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED, defaultGs.Params.IbcStatus)
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)
 	params := app.UIbcQuotaKeeper.GetParams(ctx)
-	assert.Equal(t, params.IbcPause, defaultGs.Params.IbcPause)
+	assert.Equal(t, params.IbcStatus, defaultGs.Params.IbcStatus)
 }
 
 func TestExportGenesis(t *testing.T) {
@@ -25,8 +26,8 @@ func TestExportGenesis(t *testing.T) {
 	eGs := app.UIbcQuotaKeeper.ExportGenesis(ctx)
 	assert.DeepEqual(t, eGs, defaultGs)
 	// update params in genesis state
-	defaultGs.Params.IbcPause = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED
+	defaultGs.Params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)
 	eGs = app.UIbcQuotaKeeper.ExportGenesis(ctx)
-	assert.Equal(t, eGs.Params.IbcPause, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_ENABLED)
+	assert.Equal(t, eGs.Params.IbcStatus, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED)
 }
