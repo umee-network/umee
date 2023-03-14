@@ -13,17 +13,11 @@ WORKDIR /src/umee
 COPY go.mod go.sum ./
 RUN go mod download
 
-## Download go module dependnecies for price-feeder
-WORKDIR /src/umee/price-feeder
-COPY price-feeder/go.mod price-feeder/go.sum ./
-RUN go mod download
-
 ## Build umeed and price-feeder
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
-RUN make install 
-RUN cd price-feeder && make install
+RUN make install
 
 ## Prepare the final clear binary
 FROM ubuntu:rolling

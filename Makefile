@@ -30,7 +30,7 @@ endif
 
 build_tags = netgo
 
-#  experimental feature 
+#  experimental feature
 ifeq ($(EXPERIMENTAL),true)
 	build_tags += experimental
 endif
@@ -121,17 +121,27 @@ clean:
 ##                                  Docker                                   ##
 ###############################################################################
 
+WASMVM_VERSION= $(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2)
+
 docker-build:
 	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
 docker-build-experimental:
-	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true . 
+	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true .
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
 docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
+
+docker-build-price-feeder:
+	@git clone --branch umee https://github.com/ojo-network/price-feeder
+	@docker build -t ghcr.io/umee-network/price-feeder-umee-e2e -f price-feeder/Dockerfile price-feeder
+	@rm -rf price-feeder
+
+docker-push-price-feeder:
+	@docker push ghcr.io/umee-network/price-feeder-umee-e2e
 
 .PHONY: docker-build docker-push-hermes docker-push-gaia
 
@@ -145,7 +155,7 @@ TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
 TEST_COVERAGE_PROFILE=coverage.txt
 
-UNIT_TEST_TAGS = norace 
+UNIT_TEST_TAGS = norace
 TEST_RACE_TAGS = ""
 TEST_E2E_TAGS = ""
 
