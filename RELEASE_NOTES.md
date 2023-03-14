@@ -22,7 +22,7 @@ Other highlights:
 
 ## Validators
 
-Given recent spam transactions in Umee, we request all validators to set a `minimum-gas-prices` setting (in app `config/app.toml` file, general settings) must be at least. We recommend `0.06uumee` which is equal the current Keplr _average_ setting:
+Given recent spam transactions in Umee, we request all validators set a `minimum-gas-prices` setting (in app `config/app.toml` file, general settings). We recommend `0.06uumee` which is equal the current Keplr _average_ setting:
 
 ```
 minimum-gas-prices = "0.06uumee"
