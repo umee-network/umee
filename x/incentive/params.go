@@ -8,28 +8,17 @@ import (
 
 const secondsPerDay = 86400
 
-var (
-	defaultMaxUnbondings           = uint32(20)
-	defaultUnbondingDurationShort  = uint64(secondsPerDay)
-	defaultUnbondingDurationMiddle = uint64(secondsPerDay * 7)
-	defaultUnbondingDurationLong   = uint64(secondsPerDay * 14)
-	defaultTierWeightShort         = sdk.MustNewDecFromStr("0.5")
-	defaultTierWeightMiddle        = sdk.MustNewDecFromStr("0.8")
-
-	// TODO #1749: default community fund address
-	defaultCommunityFundAddress = ""
-)
-
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MaxUnbondings:           defaultMaxUnbondings,
-		UnbondingDurationLong:   defaultUnbondingDurationLong,
-		UnbondingDurationMiddle: defaultUnbondingDurationMiddle,
-		UnbondingDurationShort:  defaultUnbondingDurationShort,
-		TierWeightMiddle:        defaultTierWeightMiddle,
-		TierWeightShort:         defaultTierWeightShort,
-		CommunityFundAddress:    defaultCommunityFundAddress,
+		MaxUnbondings:           20,
+		UnbondingDurationLong:   secondsPerDay * 14,
+		UnbondingDurationMiddle: secondsPerDay * 7,
+		UnbondingDurationShort:  secondsPerDay,
+		TierWeightMiddle:        sdk.MustNewDecFromStr("0.8"),
+		TierWeightShort:         sdk.MustNewDecFromStr("0.5"),
+		// TODO #1749: default community fund address
+		CommunityFundAddress: "",
 	}
 }
 
