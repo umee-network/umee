@@ -19,8 +19,11 @@ Other highlights:
 
 - Oracle: Avg prices. We compute average price based on ~16h rolling window.
 - New option is available in `app.toml`: `iavl-lazy-loading` (in general settings). When setting to `true`, lazy loading of iavl store will be enabled and improve start up time of archive nodes.
+- Migration from Tendermint to [CometBFT](https://github.com/cometbft/cometbft).
 
-## Validators
+See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.2.0/CHANGELOG.md) for a full list of changes.
+
+### Validators
 
 Given recent spam transactions in Umee, we request all validators set a `minimum-gas-prices` setting (in app `config/app.toml` file, general settings). We recommend `0.1uumee` which is equal the current Keplr _average_ setting:
 
