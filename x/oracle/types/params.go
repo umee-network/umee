@@ -46,11 +46,6 @@ func DefaultParams() Params {
 			SymbolDenom: UmeeSymbol,
 			Exponent:    UmeeExponent,
 		},
-		{
-			BaseDenom:   AtomDenom,
-			SymbolDenom: AtomSymbol,
-			Exponent:    AtomExponent,
-		},
 	}
 
 	return Params{
