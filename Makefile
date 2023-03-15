@@ -121,8 +121,6 @@ clean:
 ##                                  Docker                                   ##
 ###############################################################################
 
-WASMVM_VERSION= $(go list -m github.com/CosmWasm/wasmvm | cut -d ' ' -f 2)
-
 docker-build:
 	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
@@ -212,7 +210,6 @@ lint:
 	@go install mvdan.cc/gofumpt
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
 	@$(golangci_lint_cmd) run
-	@cd price-feeder && $(golangci_lint_cmd) run
 
 lint-fix:
 	@echo "--> Running linter to fix the lint issues"
@@ -220,7 +217,6 @@ lint-fix:
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
 	@$(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
 	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
-	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
 
 .PHONY: lint lint-fix
 

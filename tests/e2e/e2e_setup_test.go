@@ -50,6 +50,9 @@ const (
 
 	ethChainID uint = 15
 	ethMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
+
+	priceFeederContainerRepo = "ghcr.io/umee-network/price-feeder-umee-e2e"
+	priceFeederServerPort    = "7171/tcp"
 )
 
 var (
@@ -980,47 +983,32 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.T().Log("starting price-feeder container...")
 
-	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-price-feeder-")
-	s.Require().NoError(err)
-	s.tmpDirs = append(s.tmpDirs, tmpDir)
-
-	priceFeederCfgPath := path.Join(tmpDir, "price-feeder")
-
-	s.Require().NoError(os.MkdirAll(priceFeederCfgPath, 0o755))
-	_, err = copyFile(
-		filepath.Join("./scripts/", "price_feeder_bootstrap.sh"),
-		filepath.Join(priceFeederCfgPath, "price_feeder_bootstrap.sh"),
-	)
-	s.Require().NoError(err)
-
 	umeeVal := s.chain.validators[2]
 	umeeValAddr, err := umeeVal.keyInfo.GetAddress()
 	s.Require().NoError(err)
+
+	grpcEndpoint := fmt.Sprintf("tcp://%s:%s", umeeVal.instanceName(), "9090")
+	tmrpcEndpoint := fmt.Sprintf("http://%s:%s", umeeVal.instanceName(), "26657")
 
 	s.priceFeederResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-price-feeder",
 			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umee-network/umeed-e2e",
+			Repository: priceFeederContainerRepo,
 			Mounts: []string{
-				fmt.Sprintf("%s/:/root/price-feeder", priceFeederCfgPath),
 				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"7171/tcp": {{HostIP: "", HostPort: "7171"}},
 			},
 			Env: []string{
-				"UMEE_E2E_UMEE_VAL_KEY_DIR=/root/.umee",
 				fmt.Sprintf("PRICE_FEEDER_PASS=%s", keyringPassphrase),
-				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeValAddr),
-				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_CHAIN_ID=%s", s.chain.id),
-			},
-			Entrypoint: []string{
-				"sh",
-				"-c",
-				"chmod +x /root/price-feeder/price_feeder_bootstrap.sh && sh /root/price-feeder/price_feeder_bootstrap.sh",
+				fmt.Sprintf("ACCOUNT_ADDRESS=%s", umeeValAddr),
+				fmt.Sprintf("ACCOUNT_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
+				fmt.Sprintf("KEYRING_DIR=%s", "/root/.umee"),
+				fmt.Sprintf("ACCOUNT_CHAIN_ID=%s", s.chain.id),
+				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
+				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
 		},
 		noRestart,
