@@ -4,22 +4,22 @@ go 1.19
 
 require (
 	cosmossdk.io/errors v1.0.0-beta.7
-	cosmossdk.io/math v1.0.0-beta.6
+	cosmossdk.io/math v1.0.0-rc.0
 	github.com/CosmWasm/wasmd v0.29.0
 	github.com/Gravity-Bridge/Gravity-Bridge/module v1.5.3
-	github.com/cosmos/cosmos-proto v1.0.0-beta.2
-	github.com/cosmos/cosmos-sdk v0.46.10
+	github.com/cosmos/cosmos-proto v1.0.0-beta.3
+	github.com/cosmos/cosmos-sdk v0.46.11
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v5 v5.2.0
-	github.com/ethereum/go-ethereum v1.11.2
+	github.com/ethereum/go-ethereum v1.11.4
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/mock v1.6.0
-	github.com/golang/protobuf v1.5.2
+	github.com/golang/protobuf v1.5.3
 	github.com/golangci/golangci-lint v1.51.2
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/ignite/cli v0.26.1
-	github.com/mgechev/revive v1.2.5
+	github.com/mgechev/revive v1.3.0
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/osmosis-labs/bech32-ibc v0.3.1
 	github.com/prometheus/client_golang v1.14.0
@@ -28,11 +28,11 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.2
-	github.com/tendermint/tendermint v0.34.26
+	github.com/tendermint/tendermint v0.34.27
 	github.com/tendermint/tm-db v0.6.7
 	google.golang.org/genproto v0.0.0-20230125152338-dcaf20b6aeaa
 	google.golang.org/grpc v1.53.0
-	google.golang.org/protobuf v1.28.2-0.20220831092852-f930b1dc76e8
+	google.golang.org/protobuf v1.29.1
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.4.0
 	mvdan.cc/gofumpt v0.4.0
@@ -84,10 +84,11 @@ require (
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/charithe/durationcheck v0.0.9 // indirect
-	github.com/chavacava/garif v0.0.0-20221024190013-b3ef35877348 // indirect
+	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/cockroachdb/apd/v2 v2.0.2 // indirect
 	github.com/coinbase/rosetta-sdk-go v0.7.9 // indirect
+	github.com/cometbft/cometbft-db v0.7.0 // indirect
 	github.com/confio/ics23/go v0.9.0 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
@@ -115,7 +116,7 @@ require (
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/esimonov/ifshort v1.0.4 // indirect
 	github.com/ettle/strcase v0.1.1 // indirect
-	github.com/fatih/color v1.14.1 // indirect
+	github.com/fatih/color v1.15.0 // indirect
 	github.com/fatih/structtag v1.2.0 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/firefart/nonamedreturns v1.0.4 // indirect
@@ -278,6 +279,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 // indirect
 	github.com/t-yuki/gocover-cobertura v0.0.0-20180217150009-aaee18c8195c // indirect
 	github.com/tdakkota/asciicheck v0.1.1 // indirect
+	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect
 	github.com/tetafro/godot v1.4.11 // indirect
 	github.com/tidwall/btree v1.5.0 // indirect
@@ -308,14 +310,14 @@ require (
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/exp v0.0.0-20230206171751-46f607a40771 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230203172020-98cc5a0785f9 // indirect
-	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/mod v0.9.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/oauth2 v0.4.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
-	golang.org/x/tools v0.6.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/term v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
+	golang.org/x/tools v0.7.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.107.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -333,10 +335,10 @@ require (
 replace (
 	github.com/CosmWasm/wasmd => github.com/notional-labs/wasmd v0.29.0-sdk46
 	github.com/Gravity-Bridge/Gravity-Bridge/module => github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4
-	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.10-umee
+	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.11-umee
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
 	github.com/osmosis-labs/bech32-ibc => github.com/umee-network/bech32-ibc v0.3.2
-	github.com/tendermint/tendermint => github.com/informalsystems/tendermint v0.34.26
+	github.com/tendermint/tendermint => github.com/cometbft/cometbft v0.34.27
 )

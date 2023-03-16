@@ -37,22 +37,22 @@ func (m msgServer) GovUpdateQuota(goCtx context.Context, msg *uibc.MsgGovUpdateQ
 	return &uibc.MsgGovUpdateQuotaResponse{}, nil
 }
 
-// GovSetIBCPause implements types.MsgServer
-func (m msgServer) GovSetIBCPause(
-	goCtx context.Context, msg *uibc.MsgGovSetIBCPause,
-) (*uibc.MsgGovSetIBCPauseResponse, error) {
+// GovSetIBCStatus implements types.MsgServer
+func (m msgServer) GovSetIBCStatus(
+	goCtx context.Context, msg *uibc.MsgGovSetIBCStatus,
+) (*uibc.MsgGovSetIBCStatusResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
 	}
 
-	if err := m.keeper.SetIBCPause(ctx, msg.IbcPauseStatus); err != nil {
-		return &uibc.MsgGovSetIBCPauseResponse{}, err
+	if err := m.keeper.SetIBCStatus(ctx, msg.IbcStatus); err != nil {
+		return &uibc.MsgGovSetIBCStatusResponse{}, err
 	}
-	sdkutil.Emit(&ctx, &uibc.EventQuotaPause{
-		Status: msg.IbcPauseStatus,
+	sdkutil.Emit(&ctx, &uibc.EventIBCTransferStatus{
+		Status: msg.IbcStatus,
 	})
 
-	return &uibc.MsgGovSetIBCPauseResponse{}, nil
+	return &uibc.MsgGovSetIBCStatusResponse{}, nil
 }

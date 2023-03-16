@@ -386,12 +386,18 @@ func TestExchangeRateBallotSort(t *testing.T) {
 		got      ExchangeRateBallot
 		expected ExchangeRateBallot
 	}{
-		{got: ExchangeRateBallot{v1, v2, v3, v4},
-			expected: ExchangeRateBallot{v3, v2, v1, v4}},
-		{got: ExchangeRateBallot{v1},
-			expected: ExchangeRateBallot{v1}},
-		{got: ExchangeRateBallot{v1, v1Cpy},
-			expected: ExchangeRateBallot{v1, v1Cpy}},
+		{
+			got:      ExchangeRateBallot{v1, v2, v3, v4},
+			expected: ExchangeRateBallot{v3, v2, v1, v4},
+		},
+		{
+			got:      ExchangeRateBallot{v1},
+			expected: ExchangeRateBallot{v1},
+		},
+		{
+			got:      ExchangeRateBallot{v1, v1Cpy},
+			expected: ExchangeRateBallot{v1, v1Cpy},
+		},
 	}
 	for i, tc := range tcs {
 		t.Run(fmt.Sprint(i), func(t *testing.T) {

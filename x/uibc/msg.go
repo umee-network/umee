@@ -11,7 +11,7 @@ import (
 
 var (
 	_ sdk.Msg = &MsgGovUpdateQuota{}
-	_ sdk.Msg = &MsgGovSetIBCPause{}
+	_ sdk.Msg = &MsgGovSetIBCStatus{}
 )
 
 // GetTitle returns the title of the proposal.
@@ -64,30 +64,30 @@ func (msg *MsgGovUpdateQuota) GetSigners() []sdk.AccAddress {
 }
 
 // GetTitle implements govv1b1.Content interface.
-func (msg *MsgGovSetIBCPause) GetTitle() string { return msg.Title }
+func (msg *MsgGovSetIBCStatus) GetTitle() string { return msg.Title }
 
 // GetDescription implements govv1b1.Content interface.
-func (msg *MsgGovSetIBCPause) GetDescription() string { return msg.Description }
+func (msg *MsgGovSetIBCStatus) GetDescription() string { return msg.Description }
 
 // Route implements Msg
-func (msg MsgGovSetIBCPause) Route() string { return RouterKey }
+func (msg MsgGovSetIBCStatus) Route() string { return RouterKey }
 
 // Type implements Msg
-func (msg MsgGovSetIBCPause) Type() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovSetIBCStatus) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // String implements the Stringer interface.
-func (msg *MsgGovSetIBCPause) String() string {
+func (msg *MsgGovSetIBCStatus) String() string {
 	out, _ := json.Marshal(msg)
 	return string(out)
 }
 
 // ValidateBasic implements Msg
-func (msg *MsgGovSetIBCPause) ValidateBasic() error {
+func (msg *MsgGovSetIBCStatus) ValidateBasic() error {
 	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
 		return err
 	}
 
-	if err := validateIBCTransferStatus(msg.IbcPauseStatus); err != nil {
+	if err := validateIBCTransferStatus(msg.IbcStatus); err != nil {
 		return err
 	}
 
@@ -95,12 +95,12 @@ func (msg *MsgGovSetIBCPause) ValidateBasic() error {
 }
 
 // GetSignBytes implements Msg
-func (msg *MsgGovSetIBCPause) GetSignBytes() []byte {
+func (msg *MsgGovSetIBCStatus) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
 
 // GetSigners implements Msg
-func (msg *MsgGovSetIBCPause) GetSigners() []sdk.AccAddress {
+func (msg *MsgGovSetIBCStatus) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
