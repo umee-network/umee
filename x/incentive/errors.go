@@ -11,10 +11,11 @@ var (
 	ErrNotImplemented = errors.Register(ModuleName, 0, "not implemented")
 
 	// 1XX = General
-	ErrInvalidProgramID = errors.Register(ModuleName, 100, "invalid program ID")
-	ErrNilAsset         = errors.Register(ModuleName, 101, "nil asset")
-	ErrInvalidTier      = errors.Register(ModuleName, 102, "invalid unbonding tier")
-	ErrEmptyAddress     = errors.Register(ModuleName, 103, "empty address")
+	ErrInvalidProgramID     = errors.Register(ModuleName, 100, "invalid program ID")
+	ErrNilAsset             = errors.Register(ModuleName, 101, "nil asset")
+	ErrInvalidTier          = errors.Register(ModuleName, 102, "invalid unbonding tier")
+	ErrEmptyAddress         = errors.Register(ModuleName, 103, "empty address")
+	ErrInvalidProgramStatus = errors.Register(ModuleName, 104, "invalid program status")
 
 	// 2XX = Params
 	ErrUnbondingTierOrder   = errors.Register(ModuleName, 200, "unbonding tier lock durations out of order")

@@ -16,14 +16,15 @@ message GenesisState {
   uint32                     next_program_id     = 5;
   uint64                     last_rewards_time   = 6;
   repeated TotalBond         total_bonded        = 7 [(gogoproto.nullable) = false];
-  repeated Bond              bonds               = 8 [(gogoproto.nullable) = false];
-  repeated RewardTracker     reward_trackers     = 9 [(gogoproto.nullable) = false];
-  repeated RewardAccumulator reward_accumulators = 10 [(gogoproto.nullable) = false];
-  repeated AccountUnbondings account_unbondings  = 11 [(gogoproto.nullable) = false];
+  repeated TotalBond         total_unbonding     = 8 [(gogoproto.nullable) = false];
+  repeated Bond              bonds               = 9 [(gogoproto.nullable) = false];
+  repeated RewardTracker     reward_trackers     = 10 [(gogoproto.nullable) = false];
+  repeated RewardAccumulator reward_accumulators = 11 [(gogoproto.nullable) = false];
+  repeated AccountUnbondings account_unbondings  = 12 [(gogoproto.nullable) = false];
 }
 
-// TotalBond tracks the amount of coins of one uToken denomination bonded to a
-// given reward tier by all accounts.
+// TotalBond tracks the amount of coins of one uToken denomination bonded to, or unbonding from,
+// a given reward tier by all accounts.
 message TotalBond {
   uint32                   tier   = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
@@ -66,13 +67,15 @@ message RewardAccumulator {
 
 // Unbonding is a structure that tracks an in-progress token unbonding.
 message Unbonding {
-  uint32                   tier   = 1;
-  uint64                   end    = 2;
-  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  uint64                   end    = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// AccountUnbondings is a structure that is used to store all of an account's unbondings.
+// AccountUnbondings is a structure that is used to store all of an account's unbondings
+// for a given bond denom and tier.
 message AccountUnbondings {
   string             account    = 1;
-  repeated Unbonding unbondings = 2 [(gogoproto.nullable) = false];
+  string             denom      = 2;
+  uint32             tier       = 3;
+  repeated Unbonding unbondings = 4 [(gogoproto.nullable) = false];
 }

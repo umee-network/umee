@@ -41,6 +41,12 @@ service Query {
     option (google.api.http).get = "/umee/incentive/v1/total_bonded/{denom}";
   }
 
+  // TotalUnbonding queries the sum of all unbonding collateral uTokens, separated by tier.
+  rpc TotalUnbonding(QueryTotalUnbonding)
+      returns (QueryTotalUnbondingResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/total_unbonding/{denom}";
+  }
+
   // CompletedIncentivePrograms queries for all incentives programs that have been passed
   // by governance, and either run to completion or expired immediately due to not being funded.
   rpc CompletedIncentivePrograms(QueryCompletedIncentivePrograms)
@@ -123,6 +129,17 @@ message QueryTotalBonded {
 // QueryTotalBondedResponse defines the response structure for the TotalBonded gRPC service handler.
 message QueryTotalBondedResponse {
   repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryTotalUnbonding defines the request structure for the TotalUnbonding gRPC service handler.
+message QueryTotalUnbonding {
+  // denom is an optional field which causes the query to return the totals of only one uToken
+  string denom = 1;
+}
+
+// QueryTotalUnbondingResponse defines the response structure for the TotalUnbonding gRPC service handler.
+message QueryTotalUnbondingResponse {
+  repeated TotalBond unbonding = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryUpcomingIncentivePrograms defines the request structure for the

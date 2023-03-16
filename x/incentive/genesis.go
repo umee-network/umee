@@ -16,6 +16,7 @@ func NewGenesisState(
 	nextProgramID uint32,
 	lastRewardTime uint64,
 	totalBonded []TotalBond,
+	totalUnbonding []TotalBond,
 	bonds []Bond,
 	rewardTrackers []RewardTracker,
 	rewardAccumulators []RewardAccumulator,
@@ -29,6 +30,7 @@ func NewGenesisState(
 		NextProgramId:      nextProgramID,
 		LastRewardsTime:    lastRewardTime,
 		TotalBonded:        totalBonded,
+		TotalUnbonding:     totalUnbonding,
 		Bonds:              bonds,
 		RewardTrackers:     rewardTrackers,
 		RewardAccumulators: rewardAccumulators,
@@ -48,6 +50,9 @@ func DefaultGenesisState() *GenesisState {
 // ValidateGenesis checks a genesis state for basic issues
 func ValidateGenesis(_ GenesisState) error {
 	// TODO #1749
+	// Unbondings should be organized properly into AccountUnbondings (by denom especially)
+	// Also: sum of bonds should equal TotalBonds, and sum of unbondings equal TotalUnbonding
+	// Any uToken denom field must have uToken prefix - non uToken fields cannot
 	return nil
 }
 
@@ -119,18 +124,19 @@ func NewRewardAccumulator(denom string, tier uint32, coins sdk.DecCoins) RewardA
 }
 
 // NewUnbonding creates the Unbonding struct used in GenesisState
-func NewUnbonding(tier uint32, endTime uint64, coin sdk.Coin) Unbonding {
+func NewUnbonding(endTime uint64, coin sdk.Coin) Unbonding {
 	return Unbonding{
-		Tier:   tier,
 		End:    endTime,
 		Amount: coin,
 	}
 }
 
 // NewAccountUnbondings creates the AccountUnbondings struct used in GenesisState
-func NewAccountUnbondings(addr string, unbondings []Unbonding) AccountUnbondings {
+func NewAccountUnbondings(addr, denom string, tier BondTier, unbondings []Unbonding) AccountUnbondings {
 	return AccountUnbondings{
 		Account:    addr,
+		Denom:      denom,
+		Tier:       uint32(tier),
 		Unbondings: unbondings,
 	}
 }

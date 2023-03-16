@@ -26,19 +26,15 @@ func (k Keeper) accountBonds(ctx sdk.Context, addr sdk.AccAddress, denom string,
 	unbonding = sdk.NewCoin(denom, sdk.ZeroInt())
 	unbondings = []incentive.Unbonding{}
 
-	// sum all bonded tokens for this denom, for the specified tier or across all tiers
+	time := k.GetLastRewardsTime(ctx)
+
+	// sum all bonded and unbonding tokens for this denom, for the specified tier or across all tiers
 	for _, t := range []incentive.BondTier{incentive.BondTierLong, incentive.BondTierMiddle, incentive.BondTierShort} {
 		if tier == incentive.BondTierUnspecified || t == tier {
 			bonded = bonded.Add(k.GetBonded(ctx, addr, denom, t))
-		}
-	}
 
-	time := k.GetLastRewardsTime(ctx)
-	storedUnbondings := k.GetUnbondings(ctx, addr)
-	for _, u := range storedUnbondings {
-		if tier == incentive.BondTierUnspecified || u.Tier == uint32(tier) {
-			// match both tier (if specified) and denom
-			if u.Amount.Denom == denom {
+			tierUnbondings := k.GetUnbondings(ctx, addr, denom, t)
+			for _, u := range tierUnbondings {
 				if u.End > time {
 					// this unbonding is still ongoing, and can be counted normally
 					unbondings = append(unbondings, u)

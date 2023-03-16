@@ -32,6 +32,7 @@ var (
 	keyPrefixRewardTracker             = []byte{0x09}
 	keyPrefixRewardAccumulator         = []byte{0x0A}
 	keyPrefixUnbonding                 = []byte{0x0B}
+	keyPrefixTotalUnbonding            = []byte{0x0C}
 )
 
 // keyIncentiveProgram returns a KVStore key for an incentive program.
@@ -83,6 +84,18 @@ func keyBondAmountNoDenom(addr sdk.AccAddress) []byte {
 	return util.ConcatBytes(0, keyPrefixBondAmount, address.MustLengthPrefix(addr))
 }
 
+// keyTotalUnbonding returns a KVStore key for total unbonding uTokens for a single tier.
+func keyTotalUnbonding(denom string, tier incentive.BondTier) []byte {
+	// totalUnbondingPrefix | denom | 0x00 | tier
+	return util.ConcatBytes(0, keyTotalUnbondingNoTier(denom), []byte{byte(tier)})
+}
+
+// keyTotalUnbondingNoTier returns the common prefix used by all total unbondings for a uToken denom.
+func keyTotalUnbondingNoTier(denom string) []byte {
+	// totalUnbondingPrefix | denom | 0x00
+	return util.ConcatBytes(1, keyPrefixTotalUnbonding, []byte(denom))
+}
+
 // keyRewardAccumulator returns a KVStore key for a single RewardAccumulator denom for a bonded uToken
 // denom and tier.
 func keyRewardAccumulator(bondedDenom, rewardDenom string, tier incentive.BondTier) []byte {
@@ -131,8 +144,20 @@ func keyRewardTrackerNoDenom(addr sdk.AccAddress) []byte {
 	return util.ConcatBytes(0, keyPrefixRewardTracker, address.MustLengthPrefix(addr))
 }
 
-// keyUnbondings returns a key to store all active unbondings on an account
-func keyUnbondings(addr sdk.AccAddress) []byte {
+// keyUnbondings returns a key to store all active unbondings on an account for a given denom and tier
+func keyUnbondings(addr sdk.AccAddress, denom string, tier incentive.BondTier) []byte {
+	// unbondingPrefix | lengthprefixed(addr) | denom | 0x00 | tier
+	return util.ConcatBytes(0, keyUnbondingsNoTier(addr, denom), []byte{byte(tier)})
+}
+
+// keyUnbondingsNoTier returns the common prefix used by all unbondings from a given account and denom.
+func keyUnbondingsNoTier(addr sdk.AccAddress, denom string) []byte {
+	// unbondingPrefix | lengthprefixed(addr) | denom | 0x00
+	return util.ConcatBytes(1, keyUnbondingsNoDenom(addr), []byte(denom))
+}
+
+// keyUnbondingsNoDenom returns the common prefix used by all unbondings from a given account.
+func keyUnbondingsNoDenom(addr sdk.AccAddress) []byte {
 	// unbondingPrefix | lengthprefixed(addr)
-	return util.ConcatBytes(0, keyPrefixUnbonding, address.MustLengthPrefix(addr))
+	return util.ConcatBytes(0, keyPrefixBondAmount, address.MustLengthPrefix(addr))
 }
