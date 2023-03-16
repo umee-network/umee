@@ -69,7 +69,7 @@ To install the `umeed` binary:
 $ make build
 ```
 
-### Recommended Databases
+### Recommended Database Backend
 
 We recommend to use RocksDB. It requires to install `rocksdb` system libraries.
 We plan to migrate newer version of badgerdb, which brings lot of improvements and simplifies the setup.
