@@ -10,50 +10,50 @@ import (
 
 // GetMaxUnbondings gets the maximum number of unbondings an account is allowed to have at one time.
 func (k Keeper) GetMaxUnbondings(ctx sdk.Context) uint32 {
-	return store.GetUint32(k.kVStore(ctx),
+	return store.GetUint32(k.KVStore(ctx),
 		keyPrefixParamMaxUnbondings, "max unbondings")
 }
 
 // GetUnbondingDurationLong gets the duration in seconds of the long bonding tier.
 func (k Keeper) GetUnbondingDurationLong(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.kVStore(ctx),
+	return store.GetUint64(k.KVStore(ctx),
 		keyPrefixParamUnbondingDurationLong, "long unbonding duration")
 }
 
 // GetUnbondingDurationMiddle gets the duration in seconds of the middle bonding tier.
 func (k Keeper) GetUnbondingDurationMiddle(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.kVStore(ctx),
+	return store.GetUint64(k.KVStore(ctx),
 		keyPrefixParamUnbondingDurationMiddle, "middle unbonding duration")
 }
 
 // GetUnbondingDurationShort gets the duration in seconds of the short bonding tier.
 func (k Keeper) GetUnbondingDurationShort(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.kVStore(ctx),
+	return store.GetUint64(k.KVStore(ctx),
 		keyPrefixParamUnbondingDurationShort, "short unbonding duration")
 }
 
 // GetTierWeightShort gets the ratio of rewards received by the short tier of bonded assets. Ranges 0 - 1.
 func (k Keeper) GetTierWeightMiddle(ctx sdk.Context) sdk.Dec {
-	return store.GetDec(k.kVStore(ctx),
+	return store.GetDec(k.KVStore(ctx),
 		keyPrefixParamTierWeightMiddle, "middle tier weight")
 }
 
 // GetTierWeightShort gets the ratio of rewards received by the middle tier of bonded assets. Ranges 0 - 1.
 func (k Keeper) GetTierWeightShort(ctx sdk.Context) sdk.Dec {
-	return store.GetDec(k.kVStore(ctx),
+	return store.GetDec(k.KVStore(ctx),
 		keyPrefixParamTierWeightShort, "short tier weight")
 }
 
 // GetCommunityFundAddress retrieves the community fund address parameter. It is guaranteed to be
 // either valid (by sdk.ValidateAddressFormat) or empty.
 func (k Keeper) GetCommunityFundAddress(ctx sdk.Context) sdk.AccAddress {
-	return store.GetAddress(k.kVStore(ctx),
+	return store.GetAddress(k.KVStore(ctx),
 		keyPrefixParamCommunityFundAddress, "community fund address")
 }
 
 // SetParams validates and sets the incentive module parameters
 func (k Keeper) SetParams(ctx sdk.Context, params incentive.Params) error {
-	kvs := k.kVStore(ctx)
+	kvs := k.KVStore(ctx)
 	if err := params.Validate(); err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 		incentive.ProgramStatusCompleted,
 	}
 
-	kvStore := k.kVStore(ctx)
+	kvStore := k.KVStore(ctx)
 
 	// Looks for an incentive program with the specified ID in upcoming, ongoing, then completed program lists.
 	for _, status := range statuses {
@@ -132,7 +132,7 @@ func (k Keeper) SetIncentiveProgram(ctx sdk.Context,
 		keyIncentiveProgram(program.Id, incentive.ProgramStatusCompleted),
 	}
 
-	kvStore := k.kVStore(ctx)
+	kvStore := k.KVStore(ctx)
 	for _, key := range keys {
 		// always clear the program from the status it was prevously stored under
 		kvStore.Delete(key)
@@ -149,7 +149,7 @@ func (k Keeper) SetIncentiveProgram(ctx sdk.Context,
 
 // getNextProgramID gets the ID that will be assigned to the next incentive program passed by governance.
 func (k Keeper) getNextProgramID(ctx sdk.Context) uint32 {
-	return store.GetUint32(k.kVStore(ctx), keyPrefixNextProgramID, "next program ID")
+	return store.GetUint32(k.KVStore(ctx), keyPrefixNextProgramID, "next program ID")
 }
 
 // setNextProgramID sets the ID that will be assigned to the next incentive program passed by governance.
@@ -158,12 +158,12 @@ func (k Keeper) setNextProgramID(ctx sdk.Context, id uint32) error {
 	if id < prev {
 		return incentive.ErrDecreaseNextProgramID.Wrapf("%d to %d", id, prev)
 	}
-	return store.SetUint32(k.kVStore(ctx), keyPrefixNextProgramID, id, "next program ID")
+	return store.SetUint32(k.KVStore(ctx), keyPrefixNextProgramID, id, "next program ID")
 }
 
 // GetLastRewardsTime gets the last unix time incentive rewards were computed globally by EndBlocker.
 func (k Keeper) GetLastRewardsTime(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.kVStore(ctx), keyPrefixLastRewardsTime, "last reward time")
+	return store.GetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, "last reward time")
 }
 
 // SetLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
@@ -172,26 +172,26 @@ func (k Keeper) SetLastRewardsTime(ctx sdk.Context, time uint64) error {
 	if time < prev {
 		return incentive.ErrDecreaseLastRewardTime.Wrapf("%d to %d", time, prev)
 	}
-	return store.SetUint64(k.kVStore(ctx), keyPrefixLastRewardsTime, time, "last reward time")
+	return store.SetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, time, "last reward time")
 }
 
 // GetTotalBonded retrieves the total amount of uTokens of a given denom which are bonded to the incentive module
 func (k Keeper) GetTotalBonded(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
 	key := keyTotalBonded(denom, tier)
-	amount := store.GetInt(k.kVStore(ctx), key, "total bonded")
+	amount := store.GetInt(k.KVStore(ctx), key, "total bonded")
 	return sdk.NewCoin(denom, amount)
 }
 
 // SetTotalBonded records the total amount of uTokens of a given denom which are bonded to the incentive module
 func (k Keeper) SetTotalBonded(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
 	key := keyTotalBonded(uTokens.Denom, tier)
-	return store.SetInt(k.kVStore(ctx), key, uTokens.Amount, "total bonded")
+	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, "total bonded")
 }
 
 // GetBonded retrieves the amount of uTokens of a given denom which are bonded to a single tier by an account
 func (k Keeper) GetBonded(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier) sdk.Coin {
 	key := keyBondAmount(addr, denom, tier)
-	amount := store.GetInt(k.kVStore(ctx), key, "bonded amount")
+	amount := store.GetInt(k.KVStore(ctx), key, "bonded amount")
 	return sdk.NewCoin(denom, amount)
 }
 
@@ -200,7 +200,7 @@ func (k Keeper) SetBonded(ctx sdk.Context,
 	addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier,
 ) error {
 	key := keyBondAmount(addr, uToken.Denom, tier)
-	return store.SetInt(k.kVStore(ctx), key, uToken.Amount, "bonded amount")
+	return store.SetInt(k.KVStore(ctx), key, uToken.Amount, "bonded amount")
 }
 
 // GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken and tier -
@@ -208,7 +208,7 @@ func (k Keeper) SetBonded(ctx sdk.Context,
 func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string, tier incentive.BondTier,
 ) sdk.DecCoin {
 	key := keyRewardAccumulator(bondDenom, rewardDenom, tier)
-	amount := store.GetDec(k.kVStore(ctx), key, "reward accumulator")
+	amount := store.GetDec(k.KVStore(ctx), key, "reward accumulator")
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
@@ -217,7 +217,7 @@ func (k Keeper) SetRewardAccumulator(ctx sdk.Context,
 	bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
 ) error {
 	key := keyRewardAccumulator(bondDenom, reward.Denom, tier)
-	return store.SetDec(k.kVStore(ctx), key, reward.Amount, "reward accumulator")
+	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward accumulator")
 }
 
 // GetRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken and tier on one account -
@@ -227,7 +227,7 @@ func (k Keeper) GetRewardTracker(ctx sdk.Context,
 	addr sdk.AccAddress, bondDenom, rewardDenom string, tier incentive.BondTier,
 ) sdk.DecCoin {
 	key := keyRewardTracker(addr, bondDenom, rewardDenom, tier)
-	amount := store.GetDec(k.kVStore(ctx), key, "reward tracker")
+	amount := store.GetDec(k.KVStore(ctx), key, "reward tracker")
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
@@ -236,13 +236,13 @@ func (k Keeper) SetRewardTracker(ctx sdk.Context,
 	addr sdk.AccAddress, bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
 ) error {
 	key := keyRewardTracker(addr, bondDenom, reward.Denom, tier)
-	return store.SetDec(k.kVStore(ctx), key, reward.Amount, "reward tracker")
+	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward tracker")
 }
 
 // GetUnbondings gets all unbondings currently associated with an account.
 func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.Unbonding {
 	key := keyUnbondings(addr)
-	kvStore := k.kVStore(ctx)
+	kvStore := k.KVStore(ctx)
 
 	accUnbondings := incentive.AccountUnbondings{}
 	bz := kvStore.Get(key)
@@ -256,7 +256,7 @@ func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.
 
 // SetUnbondings stores the full list of unbondings currently associated with an account.
 func (k Keeper) SetUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
-	kvStore := k.kVStore(ctx)
+	kvStore := k.KVStore(ctx)
 	addr, err := sdk.AccAddressFromBech32(unbondings.Account)
 	if err != nil {
 		// catches invalid and empty addresses

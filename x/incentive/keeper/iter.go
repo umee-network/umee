@@ -37,7 +37,7 @@ func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 		return nil
 	}
 
-	util.Panic(store.Iterate(k.kVStore(ctx), prefix, iterator))
+	util.Panic(store.Iterate(k.KVStore(ctx), prefix, iterator))
 	return programs
 }
 
@@ -73,6 +73,6 @@ func (k Keeper) getPaginatedIncentivePrograms(
 		return nil
 	}
 
-	util.Panic(store.IteratePaginated(k.kVStore(ctx), prefix, uint(page), uint(limit), iterator))
+	util.Panic(store.IteratePaginated(k.KVStore(ctx), prefix, uint(page), uint(limit), iterator))
 	return programs
 }
