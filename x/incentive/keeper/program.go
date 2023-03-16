@@ -6,12 +6,12 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
-// CreateIncentiveProgram saves an incentive program to upcoming programs after it
+// createIncentiveProgram saves an incentive program to upcoming programs after it
 // passes governance, and also attempts to fund it from the module's community fund
 // address if sufficient funds are available. The program is always added to upcoming
 // even if funding fails or its start date has already passed, but an error is returned
 // instead if it fails validation.
-func (k Keeper) CreateIncentiveProgram(
+func (k Keeper) createIncentiveProgram(
 	ctx sdk.Context,
 	program incentive.IncentiveProgram,
 	fromCommunityFund bool,
@@ -39,12 +39,12 @@ func (k Keeper) CreateIncentiveProgram(
 	}
 
 	// Set program's ID to the next available value and store it in upcoming incentive programs
-	id := k.GetNextProgramID(ctx)
+	id := k.getNextProgramID(ctx)
 	program.Id = id
 	if err := k.SetIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming); err != nil {
 		return err
 	}
 
 	// Increment module's NextProgramID
-	return k.SetNextProgramID(ctx, id+1)
+	return k.setNextProgramID(ctx, id+1)
 }

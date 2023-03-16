@@ -42,7 +42,7 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Coin {
 	return sdk.NewCoin(denom, amount)
 }
 
-// KVStore returns the module's KVStore
-func (k Keeper) KVStore(ctx sdk.Context) sdk.KVStore {
+// kVStore returns the module's KVStore
+func (k Keeper) kVStore(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.storeKey)
 }

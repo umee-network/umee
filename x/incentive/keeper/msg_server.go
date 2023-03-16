@@ -85,7 +85,7 @@ func (s msgServer) GovCreatePrograms(
 
 	// For each program being created, create it with the next available ID
 	for _, program := range msg.Programs {
-		if err := s.keeper.CreateIncentiveProgram(ctx, program, msg.FromCommunityFund); err != nil {
+		if err := s.keeper.createIncentiveProgram(ctx, program, msg.FromCommunityFund); err != nil {
 			return &incentive.MsgGovCreateProgramsResponse{}, err
 		}
 	}
