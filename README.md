@@ -28,7 +28,7 @@ Umee will allow a multitude of decentralized debt products.
   - [Release Compatibility Matrix](#release-compatibility-matrix)
 - [Active Networks](#active-networks)
   - [Public](#public)
-- [Install](#install)
+- [Build](#build)
   - [Swagger](#swagger)
   - [Cosmovisor](#cosmovisor)
 
@@ -108,6 +108,15 @@ db_backend = "badgerdb"
 
 ```shell
 go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
+```
+
+- Create folders for Cosmovisor
+
+```shell
+mkdir -p ~/.umee/cosmovisor/genesis/bin
+mkdir -p ~/.umee/cosmovisor/upgrades
+
+cp <path-to-umeed-binary> ~/.umee/cosmovisor/genesis/bin
 ```
 
 - For the usual use of `cosmovisor`, we recommend setting theses env variables
