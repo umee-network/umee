@@ -24,13 +24,13 @@ ENABLE_ROCKSDB ?= false
 ##                                   Build                                   ##
 ###############################################################################
 
+build_tags = netgo
 
 #  experimental feature
 ifeq ($(EXPERIMENTAL),true)
 	build_tags += experimental
 endif
 
-build_tags = netgo
 ifeq ($(LEDGER_ENABLED),true)
   ifeq ($(OS),Windows_NT)
     GCCEXE = $(shell where gcc.exe 2> NUL)
