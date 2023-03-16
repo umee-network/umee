@@ -266,7 +266,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	leverageGenState.Registry = append(leverageGenState.Registry,
 		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
-		fixtures.Token(ATOM_BASE_DENOM, ATOM_SYMBOL, uint32(ATOM_EXPONENT)),
+		fixtures.Token(ATOMBaseDenom, ATOM, uint32(ATOMExponent)),
 	)
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)
@@ -283,9 +283,9 @@ func (s *IntegrationTestSuite) initGenesis() {
 	oracleGenState.Params.MaximumMedianStamps = 2
 
 	oracleGenState.Params.AcceptList = append(oracleGenState.Params.AcceptList, oracletypes.Denom{
-		BaseDenom:   ATOM_BASE_DENOM,
-		SymbolDenom: ATOM_SYMBOL,
-		Exponent:    uint32(ATOM_EXPONENT),
+		BaseDenom:   ATOMBaseDenom,
+		SymbolDenom: ATOM,
+		Exponent:    uint32(ATOMExponent),
 	})
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
