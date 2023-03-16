@@ -74,20 +74,20 @@ $ make build
 We recommend to use RocksDB. It requires to install `rocksdb` system libraries.
 We plan to migrate newer version of badgerdb, which brings lot of improvements and simplifies the setup.
 
-To build with rocksdb enabled:
+To build with `rocksdb` enabled:
 
 ```bash
-ENABLE_ROCKSDB=rocksdb COSMOS_BUILD_OPTIONS=rocksdb  make build
+ENABLE_ROCKSDB=true COSMOS_BUILD_OPTIONS=rocksdb  make build
 ```
 
 Once you generate config files, you need to update:
 
 ```bash
 # app.toml / base configuration options
-app-db-backend = "badgerdb"
+app-db-backend = "rocksdb"
 
 # config.toml / base configuration options
-db_backend = "badgerdb"
+db_backend = "rocksdb"
 ```
 
 ### Swagger
