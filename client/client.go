@@ -7,12 +7,12 @@ import (
 	"github.com/umee-network/umee/v4/sdkclient"
 )
 
+// Client sdkclient.Client and provides umee chain specific transactions and queries.
 type Client struct {
 	sdkclient.Client
 }
 
-// Initializes a cosmos sdk client context and transaction factory for
-// signing and broadcasting transactions
+// NewClient constructs Client object.
 func NewClient(
 	chainID,
 	tmrpcEndpoint,

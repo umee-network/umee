@@ -11,8 +11,10 @@ import (
 	"github.com/umee-network/umee/v4/sdkclient/tx"
 )
 
-// OjoClient is a helper for initializing a keychain, a cosmos-sdk client context,
-// and sending transactions/queries to a specific Umee node
+// Client provides basic capabilities to connect to a Cosmos SDK based chain and execute
+// transactions and queries. The object should be extended by another struct to provide
+// chain specific transactions and queries. Example:
+// https://github.com/umee-network/umee/blob/main/client
 type Client struct {
 	Query *query.Client
 	Tx    *tx.Client
