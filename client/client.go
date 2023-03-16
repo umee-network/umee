@@ -20,9 +20,9 @@ func NewClient(
 	accountName,
 	accountMnemonic string,
 	gasAdjustment float64,
-	ecfg sdkparams.EncodingConfig,
+	encCfg sdkparams.EncodingConfig,
 ) (Client, error) {
-	c, err := sdkclient.NewClient(chainID, tmrpcEndpoint, grpcEndpoint, accountName, accountMnemonic, gasAdjustment, ecfg)
+	c, err := sdkclient.NewClient(chainID, tmrpcEndpoint, grpcEndpoint, accountName, accountMnemonic, gasAdjustment, encCfg)
 	if err != nil {
 		return Client{}, err
 	}

@@ -27,14 +27,14 @@ func NewClient(
 	accountName,
 	accountMnemonic string,
 	gasAdjustment float64,
-	ecfg sdkparams.EncodingConfig,
+	encCfg sdkparams.EncodingConfig,
 ) (uc Client, err error) {
 	uc = Client{}
 	uc.Query, err = query.NewClient(grpcEndpoint, 15*time.Second)
 	if err != nil {
 		return Client{}, err
 	}
-	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, accountName, accountMnemonic, gasAdjustment, ecfg)
+	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, accountName, accountMnemonic, gasAdjustment, encCfg)
 	return uc, err
 }
 

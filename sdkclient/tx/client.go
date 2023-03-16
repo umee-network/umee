@@ -25,7 +25,7 @@ type Client struct {
 	keyringKeyring keyring.Keyring
 	keyringRecord  *keyring.Record
 	txFactory      *tx.Factory
-	ecfg           sdkparams.EncodingConfig
+	encCfg         sdkparams.EncodingConfig
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
@@ -36,16 +36,16 @@ func NewClient(
 	accountName string,
 	accountMnemonic string,
 	gasAdjustment float64,
-	ecfg sdkparams.EncodingConfig,
+	encCfg sdkparams.EncodingConfig,
 ) (c *Client, err error) {
 	c = &Client{
 		ChainID:       chainID,
 		TMRPCEndpoint: tmrpcEndpoint,
 		gasAdjustment: gasAdjustment,
-		ecfg:          ecfg,
+		encCfg:        encCfg,
 	}
 
-	c.keyringRecord, c.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic, ecfg.Codec)
+	c.keyringRecord, c.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic, encCfg.Codec)
 	if err != nil {
 		return nil, err
 	}
@@ -73,13 +73,13 @@ func (c *Client) initClientCtx() error {
 
 	c.ClientContext = &client.Context{
 		ChainID:           c.ChainID,
-		InterfaceRegistry: c.ecfg.InterfaceRegistry,
+		InterfaceRegistry: c.encCfg.InterfaceRegistry,
 		Output:            os.Stderr,
 		BroadcastMode:     flags.BroadcastBlock,
-		TxConfig:          c.ecfg.TxConfig,
+		TxConfig:          c.encCfg.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
-		Codec:             c.ecfg.Codec,
-		LegacyAmino:       c.ecfg.Amino,
+		Codec:             c.encCfg.Codec,
+		LegacyAmino:       c.encCfg.Amino,
 		Input:             os.Stdin,
 		NodeURI:           c.TMRPCEndpoint,
 		Client:            tmRPCClient,
