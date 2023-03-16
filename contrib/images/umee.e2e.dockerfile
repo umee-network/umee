@@ -13,7 +13,7 @@ WORKDIR /src/umee
 COPY go.mod go.sum ./
 RUN go mod download
 
-## Build umeed and price-feeder
+## Build umeed
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
