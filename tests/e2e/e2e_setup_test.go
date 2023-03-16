@@ -1005,6 +1005,9 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
+			Cmd: []string{
+				"--skip-provider-check",
+			},
 		},
 		noRestart,
 	)

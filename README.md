@@ -106,3 +106,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 ```
 
 - To use `cosmovisor` for starting `umeed` process, instead of calling `umeed start`, use `cosmovisor run start [umeed flags]`
+
+# Oracle Price Feeder
+
+After Umee Version v4.2.x, the reccomended `price-feeder` to run along the Umee node should be the [umee branch](https://github.com/ojo-network/price-feeder/tree/umee) of the Ojo Network's `price-feeder`.
