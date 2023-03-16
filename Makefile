@@ -141,6 +141,9 @@ build-experimental: go.sum
 
 build-no_cgo:
 	@echo "--> Building static binary with no CGO nor GLIBC dynamic linking..."
+	ifneq ($(ENABLE_ROCKSDB),true)
+		$(error RocksDB requires CGO)
+	endif
 	CGO_ENABLED=0 CGO_LDFLAGS="-static" $(MAKE) build
 
 

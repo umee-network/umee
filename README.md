@@ -54,20 +54,24 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 |    v4.1.x    |    ✓    |      ✗       |  v0.46.7+  | v5.2.x | v1.3.x+ |    v2.1.0    |   umee/v4 v1.5.3-umee-4    |
 |    v4.2.x    |    ✓    |      ✗       | v0.46.10+  | v5.2.x | v1.3.x+ |    v2.1.0    |   umee/v4 v1.5.3-umee-4    |
 
-## Active Networks
+### Active Networks
 
-### Public
+Public:
 
 - [umee-1](networks/umee-1) (mainnet)
 - [canon-2](networks/canon-2) (testnet)
 
-## Install
+## Build
 
 To install the `umeed` binary:
 
 ```shell
-$ make install
+$ make build
 ```
+
+### Recommended Databases
+
+We recommend to use RocksDB. It requires to install `rocksdb` system libraries.
 
 ### Swagger
 
