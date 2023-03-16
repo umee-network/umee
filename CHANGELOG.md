@@ -46,10 +46,30 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## Features
+### Features
+
+- [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
+
+## [v4.2.0](https://github.com/umee-network/umee/releases/tag/v4.2.0) - 2023-03-15
+
+### Features
 
 - [1867](https://github.com/umee-network/umee/pull/1867) Allow `/denom` option on registered tokens query to get only a single token by `base_denom`.
-- [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
+- [1568](https://github.com/umee-network/umee/pull/1568) IBC ICS20 transfer quota. New Cosmos SDK module and IBC ICS20 middleware to limit IBC token outflows.
+- [1764](https://github.com/umee-network/umee/pull/1764) New `util.Panic` helper function.
+- [1725](https://github.com/umee-network/umee/pull/1725) historacle: average prices.
+
+### Improvements
+
+- [1744](https://github.com/umee-network/umee/pull/1744) docs: testing guidelines.
+- [1771](https://github.com/umee-network/umee/pull/1771) CI: add experimental e2e tests on docker image.
+- [1788](https://github.com/umee-network/umee/pull/1788) deprecated use of `sdkerrors`.
+- [1835](https://github.com/umee-network/umee/pull/1835) CI: use experimental for default CI tests.
+- [1864](https://github.com/umee-network/umee/pull/1864) testing: mock gen integration.
+
+### Fixes
+
+- [1767](https://github.com/umee-network/umee/pull/1767) Oracle: Fix `GetTickerPrice()` and `GetCandlePrice()`.
 
 ## [v4.1.0](https://github.com/umee-network/umee/releases/tag/v4.1.0) - 2023-02-15
 
@@ -59,11 +79,14 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
-- [1812](https://github.com/umee-network/umee/pull/1812) MaxCollateralShare now works during partial oracle outages when certain conditions are safe.
+- [1707](https://github.com/umee-network/umee/pull/1707) Oracle: Enforce voting threshold param in oracle endblocker.
 - [1736](https://github.com/umee-network/umee/pull/1736) Blacklisted tokens no longer add themselves back to the oracle accept list.
 - [1807](https://github.com/umee-network/umee/pull/1807) Fixes BNB ibc denom in 4.1 migration
+- [1812](https://github.com/umee-network/umee/pull/1812) MaxCollateralShare now works during partial oracle outages when certain conditions are safe.
 - [1821](https://github.com/umee-network/umee/pull/1821) Allow safe leverage operations during partial oracle outages.
 - [1845](https://github.com/umee-network/umee/pull/1845) Fix validator power calculation during oracle ballot counting.
+- [1851](https://github.com/umee-network/umee/pull/1851) Oracle: ballot sorting.
+- [1852](https://github.com/umee-network/umee/pull/1852) Oracle: power vote calculation.
 
 ## [v4.0.1](https://github.com/umee-network/umee/releases/tag/v4.0.1) - 2023-02-10
 
@@ -81,7 +104,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1680](https://github.com/umee-network/umee/pull/1680) Add amino support for MsgMaxWithdraw.
+- [1694](https://github.com/umee-network/umee/pull/1694) `leverage.MaxBorrow` return zero instead of failing when there is no more to borrow.
 - [1710](https://github.com/umee-network/umee/pull/1710) Skip blacklisted tokens in MaxBorrow and MaxWithdraw queries.
+- [1717](https://github.com/umee-network/umee/pull/1717) Oracle: Add blockNum to median and median deviation queries.
 
 ### Features
 

@@ -266,13 +266,8 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	leverageGenState.Registry = append(leverageGenState.Registry,
 		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+		fixtures.Token(ATOM_BASE_DENOM, ATOM_SYMBOL, uint32(ATOM_EXPONENT)),
 	)
-	for index, t := range leverageGenState.Registry {
-		if t.BaseDenom == oracletypes.AtomDenom {
-			// replace atom test ibc hash for testing
-			leverageGenState.Registry[index].BaseDenom = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
-		}
-	}
 
 	bz, err = cdc.MarshalJSON(&leverageGenState)
 	s.Require().NoError(err)
@@ -287,11 +282,11 @@ func (s *IntegrationTestSuite) initGenesis() {
 	oracleGenState.Params.MedianStampPeriod = 20
 	oracleGenState.Params.MaximumMedianStamps = 2
 
-	for index, t := range oracleGenState.Params.AcceptList {
-		if t.BaseDenom == oracletypes.AtomDenom {
-			oracleGenState.Params.AcceptList[index].BaseDenom = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
-		}
-	}
+	oracleGenState.Params.AcceptList = append(oracleGenState.Params.AcceptList, oracletypes.Denom{
+		BaseDenom:   ATOM_BASE_DENOM,
+		SymbolDenom: ATOM_SYMBOL,
+		Exponent:    uint32(ATOM_EXPONENT),
+	})
 
 	bz, err = cdc.MarshalJSON(&oracleGenState)
 	s.Require().NoError(err)
