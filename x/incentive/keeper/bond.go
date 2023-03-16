@@ -28,7 +28,7 @@ func (k Keeper) accountBonds(ctx sdk.Context, addr sdk.AccAddress, denom string,
 
 	// sum all bonded tokens for this denom, for the specified tier or across all tiers
 	for _, t := range []incentive.BondTier{incentive.BondTierLong, incentive.BondTierMiddle, incentive.BondTierShort} {
-		if tier == incentive.BondTierUnspecified || t == tier {
+		if tier == incentive.BondTierUnspecified || tier == t {
 			bonded = bonded.Add(k.GetBonded(ctx, addr, denom, t))
 		}
 	}
