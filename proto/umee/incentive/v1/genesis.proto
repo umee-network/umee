@@ -56,14 +56,8 @@ message RewardAccumulator {
   ];
 }
 
-// Unbonding is a structure that tracks an in-progress token unbonding.
-message Unbonding {
-  uint64                   end    = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
-}
-
 // AccountUnbondings is a structure that is used to store all of an account's unbondings
-// for a single bonded uToken denom and and unbonding tier.
+// for a single bonded uToken denom and and unbonding tier in both KVStore and genesis state.
 message AccountUnbondings {
   string             account    = 1;
   string             denom      = 2;

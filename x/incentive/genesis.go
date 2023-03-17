@@ -15,7 +15,6 @@ func NewGenesisState(
 	upcomingPrograms []IncentiveProgram,
 	nextProgramID uint32,
 	lastRewardTime uint64,
-	totalBonded []TotalBond,
 	bonds []Bond,
 	rewardTrackers []RewardTracker,
 	rewardAccumulators []RewardAccumulator,
@@ -28,7 +27,6 @@ func NewGenesisState(
 		UpcomingPrograms:   upcomingPrograms,
 		NextProgramId:      nextProgramID,
 		LastRewardsTime:    lastRewardTime,
-		TotalBonded:        totalBonded,
 		Bonds:              bonds,
 		RewardTrackers:     rewardTrackers,
 		RewardAccumulators: rewardAccumulators,
@@ -69,7 +67,8 @@ func NewIncentiveProgram(
 	startTime uint64,
 	duration uint64,
 	bondDenom string,
-	totalRewards, fundedRewards, remainingRewards sdk.Coin,
+	totalRewards, remainingRewards sdk.Coin,
+	funded bool,
 ) IncentiveProgram {
 	return IncentiveProgram{
 		Id:               id,
@@ -77,8 +76,8 @@ func NewIncentiveProgram(
 		Duration:         duration,
 		Denom:            bondDenom,
 		TotalRewards:     totalRewards,
-		FundedRewards:    fundedRewards,
 		RemainingRewards: remainingRewards,
+		Funded:           funded,
 	}
 }
 
@@ -119,18 +118,19 @@ func NewRewardAccumulator(denom string, tier uint32, coins sdk.DecCoins) RewardA
 }
 
 // NewUnbonding creates the Unbonding struct used in GenesisState
-func NewUnbonding(tier uint32, endTime uint64, coin sdk.Coin) Unbonding {
+func NewUnbonding(endTime uint64, coin sdk.Coin) Unbonding {
 	return Unbonding{
-		Tier:   tier,
 		End:    endTime,
 		Amount: coin,
 	}
 }
 
 // NewAccountUnbondings creates the AccountUnbondings struct used in GenesisState
-func NewAccountUnbondings(addr string, unbondings []Unbonding) AccountUnbondings {
+func NewAccountUnbondings(addr, denom string, tier BondTier, unbondings []Unbonding) AccountUnbondings {
 	return AccountUnbondings{
 		Account:    addr,
+		Tier:       uint32(tier),
+		Denom:      denom,
 		Unbondings: unbondings,
 	}
 }

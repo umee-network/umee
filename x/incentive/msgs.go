@@ -214,8 +214,8 @@ func validateProposedIncentiveProgram(program IncentiveProgram) error {
 	if !program.RemainingRewards.IsZero() {
 		return ErrNonzeroRemainingRewards.Wrap(program.RemainingRewards.String())
 	}
-	if !program.FundedRewards.IsZero() {
-		return ErrNonzeroFundedRewards.Wrap(program.FundedRewards.String())
+	if program.Funded {
+		return ErrProposedFundedProgram
 	}
 	return program.Validate()
 }

@@ -34,7 +34,7 @@ func (k Keeper) createIncentiveProgram(
 					return err
 				}
 				// Set program's funded and remaining rewards to the amount just funded
-				program.FundedRewards = program.TotalRewards
+				program.Funded = true
 				program.RemainingRewards = program.TotalRewards
 			} else {
 				ctx.Logger().Error("incentive community fund insufficient. proposal will revert to manual funding.")

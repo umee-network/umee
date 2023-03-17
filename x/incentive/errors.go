@@ -23,7 +23,7 @@ var (
 
 	// 3XX = Gov Proposal
 	ErrNonzeroRemainingRewards = errors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
-	ErrNonzeroFundedRewards    = errors.Register(ModuleName, 301, "funded rewards must be zero in proposal")
+	ErrProposedFundedProgram   = errors.Register(ModuleName, 301, "proposed program must have funded = false")
 	ErrEmptyProposal           = errors.Register(ModuleName, 302, "proposal contains no incentive programs")
 
 	// 4XX = Messages

@@ -9,15 +9,16 @@ import (
 // Assumes the validity of the unbonding has already been checked.
 func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier) error {
 	unbonding := incentive.Unbonding{
-		Tier:   uint32(tier),
 		Amount: uToken,
 		End:    k.GetLastRewardsTime(ctx) + k.unbondTime(ctx, tier),
 	}
 	unbondings := incentive.AccountUnbondings{
 		Account:    addr.String(),
-		Unbondings: append(k.GetUnbondings(ctx, addr), unbonding),
+		Tier:       uint32(tier),
+		Denom:      uToken.Denom,
+		Unbondings: append(k.GetUnbondings(ctx, addr, uToken.Denom, tier), unbonding),
 	}
-	return k.SetUnbondings(ctx, unbondings)
+	return k.SetUnbondings(ctx, unbondings, tier, uToken.Denom)
 }
 
 // bondTier converts from the uint32 used in message types to the enumeration, returning an error

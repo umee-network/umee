@@ -133,7 +133,7 @@ func (s msgServer) Sponsor(
 	if status != incentive.ProgramStatusUpcoming {
 		return nil, incentive.ErrSponsorIneligible.Wrap("program exists but is not upcoming")
 	}
-	if !program.FundedRewards.IsZero() {
+	if program.Funded {
 		return nil, incentive.ErrSponsorIneligible.Wrap("program is already funded")
 	}
 	if program.TotalRewards.Denom != msg.Asset.Denom {
@@ -154,7 +154,7 @@ func (s msgServer) Sponsor(
 	}
 
 	// update the program's funded amount in store
-	program.FundedRewards = program.TotalRewards
+	program.Funded = true
 	err = k.SetIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming)
 	return &incentive.MsgSponsorResponse{}, err
 }

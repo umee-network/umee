@@ -168,6 +168,19 @@ func (q Querier) TotalBonded(
 	return &incentive.QueryTotalBondedResponse{}, incentive.ErrNotImplemented
 }
 
+func (q Querier) TotalUnbonding(
+	_ context.Context,
+	req *incentive.QueryTotalUnbonding,
+) (*incentive.QueryTotalUnbondingResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	// TODO: unbonding uTokens across one or all denoms, all tiers
+
+	return &incentive.QueryTotalUnbondingResponse{}, incentive.ErrNotImplemented
+}
+
 func (q Querier) Unbondings(
 	goCtx context.Context,
 	req *incentive.QueryUnbondings,
@@ -182,7 +195,11 @@ func (q Querier) Unbondings(
 		return nil, err
 	}
 
-	unbondings := k.GetUnbondings(ctx, addr)
+	unbondings := []incentive.Unbonding{}
+	err = k.iterateAccountUnbondings(ctx, addr, func(ctx sdk.Context, au incentive.AccountUnbondings) error {
+		unbondings = append(unbondings, au.Unbondings...)
+		return nil
+	})
 
-	return &incentive.QueryUnbondingsResponse{Unbondings: unbondings}, incentive.ErrNotImplemented
+	return &incentive.QueryUnbondingsResponse{Unbondings: unbondings}, err
 }

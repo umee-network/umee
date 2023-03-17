@@ -42,6 +42,20 @@ func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 	return programs, err
 }
 
+// iterateAccountUnbondings iterates over all unbonding uTokens for an address
+func (k Keeper) iterateAccountUnbondings(ctx sdk.Context, addr sdk.AccAddress,
+	_ func(_ sdk.Context, _ incentive.AccountUnbondings) error,
+) error {
+	prefix := keyUnbondingsNoDenom(addr)
+
+	iterator := func(key, val []byte) error {
+		// TODO: implement (used for account updating and also queries)
+		return incentive.ErrNotImplemented
+	}
+
+	return store.Iterate(k.KVStore(ctx), prefix, iterator)
+}
+
 // iterateAccountBonds iterates over all bonded uTokens for an address by each individual
 // uToken denom and tier
 func (k Keeper) iterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
