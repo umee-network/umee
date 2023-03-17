@@ -65,7 +65,10 @@ func (q Querier) UpcomingIncentivePrograms(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	programs := q.Keeper.getAllIncentivePrograms(ctx, incentive.ProgramStatusUpcoming)
+	programs, err := q.Keeper.getAllIncentivePrograms(ctx, incentive.ProgramStatusUpcoming)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &incentive.QueryUpcomingIncentiveProgramsResponse{
 		Programs: programs,
@@ -83,7 +86,10 @@ func (q Querier) OngoingIncentivePrograms(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	programs := q.Keeper.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	programs, err := q.Keeper.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &incentive.QueryOngoingIncentiveProgramsResponse{
 		Programs: programs,
@@ -101,12 +107,15 @@ func (q Querier) CompletedIncentivePrograms(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	programs := q.Keeper.getPaginatedIncentivePrograms(
+	programs, err := q.Keeper.getPaginatedIncentivePrograms(
 		ctx,
 		incentive.ProgramStatusCompleted,
 		req.Pagination.Offset,
 		req.Pagination.Limit,
 	)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &incentive.QueryCompletedIncentiveProgramsResponse{
 		Programs: programs,
