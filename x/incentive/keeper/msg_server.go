@@ -94,7 +94,7 @@ func (s msgServer) BeginUnbonding(
 	bonded, currentUnbonding, unbondings := k.accountBonds(ctx, addr, denom, tier)
 
 	// prevent unbonding spam
-	if len(unbondings) >= int(k.GetMaxUnbondings(ctx)) {
+	if len(unbondings) >= int(k.getMaxUnbondings(ctx)) {
 		return nil, incentive.ErrMaxUnbondings.Wrapf("%d", len(unbondings))
 	}
 
@@ -155,7 +155,7 @@ func (s msgServer) Sponsor(
 
 	// update the program's funded amount in store
 	program.Funded = true
-	err = k.SetIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming)
+	err = k.setIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming)
 	return &incentive.MsgSponsorResponse{}, err
 }
 
@@ -171,7 +171,7 @@ func (s msgServer) GovSetParams(
 		return &incentive.MsgGovSetParamsResponse{}, err
 	}
 
-	if err := s.keeper.SetParams(ctx, msg.Params); err != nil {
+	if err := s.keeper.setParams(ctx, msg.Params); err != nil {
 		return &incentive.MsgGovSetParamsResponse{}, err
 	}
 

@@ -13,7 +13,7 @@ func (k Keeper) clearRewardTracker(ctx sdk.Context, addr sdk.AccAddress, tier in
 	trackers := k.getFullRewardTracker(ctx, addr, bondDenom, tier)
 	for _, rewardCoin := range trackers {
 		zeroCoin := sdk.NewDecCoinFromDec(rewardCoin.Denom, sdk.ZeroDec())
-		if err := k.SetRewardTracker(ctx, addr, bondDenom, zeroCoin, tier); err != nil {
+		if err := k.setRewardTracker(ctx, addr, bondDenom, zeroCoin, tier); err != nil {
 			return err
 		}
 	}
@@ -28,7 +28,7 @@ func (k Keeper) updateRewardTracker(ctx sdk.Context, addr sdk.AccAddress, tier i
 	accumulators := k.getFullRewardAccumulator(ctx, bondDenom, tier)
 	for _, rewardCoin := range trackers {
 		accumulator := sdk.NewDecCoinFromDec(rewardCoin.Denom, accumulators.AmountOf(rewardCoin.Denom))
-		if err := k.SetRewardTracker(ctx, addr, bondDenom, accumulator, tier); err != nil {
+		if err := k.setRewardTracker(ctx, addr, bondDenom, accumulator, tier); err != nil {
 			return err
 		}
 	}

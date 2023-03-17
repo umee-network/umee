@@ -10,15 +10,15 @@ import (
 func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier) error {
 	unbonding := incentive.Unbonding{
 		Amount: uToken,
-		End:    k.GetLastRewardsTime(ctx) + k.unbondTime(ctx, tier),
+		End:    k.getLastRewardsTime(ctx) + k.unbondTime(ctx, tier),
 	}
 	unbondings := incentive.AccountUnbondings{
 		Account:    addr.String(),
 		Tier:       uint32(tier),
 		Denom:      uToken.Denom,
-		Unbondings: append(k.GetUnbondings(ctx, addr, uToken.Denom, tier), unbonding),
+		Unbondings: append(k.getUnbondings(ctx, addr, uToken.Denom, tier), unbonding),
 	}
-	return k.SetUnbondings(ctx, unbondings)
+	return k.setUnbondings(ctx, unbondings)
 }
 
 // bondTier converts from the uint32 used in message types to the enumeration, returning an error
@@ -35,11 +35,11 @@ func bondTier(n uint32) (incentive.BondTier, error) {
 func (k Keeper) unbondTime(ctx sdk.Context, tier incentive.BondTier) uint64 {
 	switch tier {
 	case incentive.BondTierLong:
-		return k.GetUnbondingDurationLong(ctx)
+		return k.getUnbondingDurationLong(ctx)
 	case incentive.BondTierMiddle:
-		return k.GetUnbondingDurationMiddle(ctx)
+		return k.getUnbondingDurationMiddle(ctx)
 	case incentive.BondTierShort:
-		return k.GetUnbondingDurationShort(ctx)
+		return k.getUnbondingDurationShort(ctx)
 	default:
 		return 0
 	}

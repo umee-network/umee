@@ -20,7 +20,7 @@ func (k Keeper) createIncentiveProgram(
 		return err
 	}
 
-	addr := k.GetCommunityFundAddress(ctx)
+	addr := k.getCommunityFundAddress(ctx)
 	if fromCommunityFund {
 		if !addr.Empty() {
 			// If the module has set a community fund address and the proposal
@@ -47,7 +47,7 @@ func (k Keeper) createIncentiveProgram(
 	// Set program's ID to the next available value and store it in upcoming incentive programs
 	id := k.getNextProgramID(ctx)
 	program.Id = id
-	if err := k.SetIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming); err != nil {
+	if err := k.setIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming); err != nil {
 		return err
 	}
 
