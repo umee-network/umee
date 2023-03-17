@@ -3,12 +3,13 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
 // getAllBonded gets the total amount of a uToken bonded to an account across all three unbonding tiers
 func (k Keeper) getAllBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	bonded := sdk.NewCoin(denom, sdk.ZeroInt())
+	bonded := coin.Zero(denom)
 	for _, tier := range []incentive.BondTier{incentive.BondTierLong, incentive.BondTierMiddle, incentive.BondTierShort} {
 		bonded = bonded.Add(k.GetBonded(ctx, addr, denom, tier))
 	}
@@ -22,8 +23,8 @@ func (k Keeper) getAllBonded(ctx sdk.Context, addr sdk.AccAddress, denom string)
 func (k Keeper) accountBonds(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier) (
 	bonded sdk.Coin, unbonding sdk.Coin, unbondings []incentive.Unbonding,
 ) {
-	bonded = sdk.NewCoin(denom, sdk.ZeroInt())
-	unbonding = sdk.NewCoin(denom, sdk.ZeroInt())
+	bonded = coin.Zero(denom)
+	unbonding = coin.Zero(denom)
 	unbondings = []incentive.Unbonding{}
 
 	// sum all bonded tokens for this denom, for the specified tier or across all tiers
