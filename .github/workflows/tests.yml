@@ -120,12 +120,12 @@ jobs:
       - name: Build Docker Image
         if: env.GIT_DIFF
         run: |
-          DOCKER_BUILDKIT=1 make docker-build
+          DOCKER_BUILDKIT=1 make docker-build-experimental
 
       - name: Test E2E
         if: env.GIT_DIFF
         run: |
-          make test-e2e
+          EXPERIMENTAL=true make test-e2e
 
   liveness-test:
     needs: install-tparse
