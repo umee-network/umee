@@ -272,20 +272,19 @@ func (k Keeper) GetUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string
 
 // SetUnbondings stores the list of unbondings currently associated with an account, denom, and tier.
 // It also updates the account's unbonding amounts and the module's total unbonding amounts.
-func (k Keeper) SetUnbondings(
-	ctx sdk.Context, unbondings incentive.AccountUnbondings, tier incentive.BondTier, denom string,
-) error {
+func (k Keeper) SetUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
 	kvStore := k.KVStore(ctx)
 	addr, err := sdk.AccAddressFromBech32(unbondings.Account)
 	if err != nil {
 		// catches invalid and empty addresses
 		return err
 	}
+	tier := incentive.BondTier(unbondings.Tier)
 	if err := tier.Validate(false); err != nil {
-		// catched invalid or unspecified tier
+		// catches invalid or unspecified tier
 		return err
 	}
-	key := keyUnbondings(addr, denom, tier)
+	key := keyUnbondings(addr, unbondings.Denom, tier)
 	if len(unbondings.Unbondings) == 0 {
 		// clear store on no unbondings remaining
 		kvStore.Delete(key)

@@ -18,7 +18,7 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 		Denom:      uToken.Denom,
 		Unbondings: append(k.GetUnbondings(ctx, addr, uToken.Denom, tier), unbonding),
 	}
-	return k.SetUnbondings(ctx, unbondings, tier, uToken.Denom)
+	return k.SetUnbondings(ctx, unbondings)
 }
 
 // bondTier converts from the uint32 used in message types to the enumeration, returning an error
