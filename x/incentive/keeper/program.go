@@ -21,20 +21,26 @@ func (k Keeper) createIncentiveProgram(
 	}
 
 	addr := k.GetCommunityFundAddress(ctx)
-	if fromCommunityFund && !addr.Empty() {
-		// If the module has set a community fund address and the proposal
-		// requested it, we can attempt to instantly fund the module when
-		// the proposal passes.
-		funds := k.bankKeeper.SpendableCoins(ctx, addr)
-		rewards := sdk.NewCoins(program.TotalRewards)
-		if funds.IsAllGT(rewards) {
-			// Community fund has the required tokens to fund the program
-			if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, addr, incentive.ModuleName, rewards); err != nil {
-				return err
+	if fromCommunityFund {
+		if !addr.Empty() {
+			// If the module has set a community fund address and the proposal
+			// requested it, we can attempt to instantly fund the module when
+			// the proposal passes.
+			funds := k.bankKeeper.SpendableCoins(ctx, addr)
+			rewards := sdk.NewCoins(program.TotalRewards)
+			if funds.IsAllGT(rewards) {
+				// Community fund has the required tokens to fund the program
+				if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, addr, incentive.ModuleName, rewards); err != nil {
+					return err
+				}
+				// Set program's funded and remaining rewards to the amount just funded
+				program.FundedRewards = program.TotalRewards
+				program.RemainingRewards = program.TotalRewards
+			} else {
+				ctx.Logger().Error("incentive community fund insufficient. proposal will revert to manual funding.")
 			}
-			// Set program's funded and remaining rewards to the amount just funded
-			program.FundedRewards = program.TotalRewards
-			program.RemainingRewards = program.TotalRewards
+		} else {
+			ctx.Logger().Error("incentive community fund not set. proposal will revert to manual funding.")
 		}
 	}
 
