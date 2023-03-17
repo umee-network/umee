@@ -15,6 +15,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"reflect"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -1013,19 +1014,18 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 	s.Require().NoError(err)
 
-	var (
-		outBuf io.Writer
-		errBuf io.Writer
-	)
+	var outputStream io.Writer
 	err = s.dkrPool.Client.Logs(docker.LogsOptions{
 			Container:    s.priceFeederResource.Container.ID,
 			Follow:       true,
 			Stdout:       true,
 			Stderr:       true,
 			Tail:         "all",
-			OutputStream: outBuf,
-			ErrorStream: errBuf,
+			OutputStream: outputStream,
 		})
+
+	output := fmt.Sprint(outputStream)
+	fmt.Println(reflect.TypeOf(output))
 
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort("7171/tcp"))
 	s.Require().Eventually(
@@ -1033,7 +1033,6 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 			resp, err := http.Get(endpoint)
 			if err != nil {
 				s.T().Log("Price feeder endpoint not available", err)
-				fmt.Println(outBuf)
 				return false
 			}
 
