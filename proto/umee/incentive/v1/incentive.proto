@@ -72,10 +72,11 @@ message IncentiveProgram {
   // is proposed by governance.
   cosmos.base.v1beta1.Coin total_rewards = 5 [(gogoproto.nullable) = false];
 
-  // funded_rewards are total amount of rewards which have been funded by a
-  // sponsor to this program. This is zero until the program is both passed
-  // by governance and funded.
-  cosmos.base.v1beta1.Coin funded_rewards = 6 [(gogoproto.nullable) = false];
+  // funded indicates whether a program bas been funded. This can happen when
+  // a program passes if funding from community fund, or any time before the
+  // program's start time if funding with MsgSponsor. A program that reaches
+  // its start time without being funded is cancelled.
+  bool funded = 6;
 
   // remaining_rewards are total amount of this program's funded rewards
   // which have not yet been allocated to suppliers. This is zero until the

@@ -126,7 +126,7 @@ func (s msgServer) Sponsor(
 
 	// Error messages that follow are designed to promote third party usability, so they are more
 	// verbose and situational than usual.
-	program, status, err := k.GetIncentiveProgram(ctx, msg.Program)
+	program, status, err := k.getIncentiveProgram(ctx, msg.Program)
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +188,7 @@ func (s msgServer) GovCreatePrograms(
 
 	// For each program being created, create it with the next available ID
 	for _, program := range msg.Programs {
-		if err := s.keeper.CreateIncentiveProgram(ctx, program, msg.FromCommunityFund); err != nil {
+		if err := s.keeper.createIncentiveProgram(ctx, program, msg.FromCommunityFund); err != nil {
 			return &incentive.MsgGovCreateProgramsResponse{}, err
 		}
 	}
