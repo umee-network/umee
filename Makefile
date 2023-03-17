@@ -106,10 +106,33 @@ build_tags += $(BUILD_TAGS)
 build_tags := $(strip $(build_tags))
 
 BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
+# check for nostrip option
+ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
+  BUILD_FLAGS += -trimpath
+endif
 
-build: go.sum
-	@echo "--> Building..."
-	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
+# Check for debug option
+ifeq (debug,$(findstring debug,$(COSMOS_BUILD_OPTIONS)))
+  BUILD_FLAGS += -gcflags "all=-N -l"
+endif
+
+all: tools build lint test
+
+echo-build-tags:
+	echo ${BUILD_TAGS}
+
+BUILD_TARGETS := build install
+
+build: BUILD_ARGS=-o $(BUILDDIR)/
+build-linux:
+	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) LEDGER_ENABLED=false $(MAKE) build
+
+$(BUILD_TARGETS): go.sum $(BUILDDIR)/
+	go $@ -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+
+$(BUILDDIR)/:
+	mkdir -p $(BUILDDIR)/
+
 
 build-experimental: go.sum
 	@echo "--> Building Experimental version..."
@@ -217,33 +240,6 @@ $(MOCKS_DIR):
 mocks: $(MOCKS_DIR)
 	sh ./contrib/scripts/mockgen.sh
 .PHONY: mocks
-
-###############################################################################
-###                                Linting                                  ###
-###############################################################################
-
-golangci_lint_cmd=golangci-lint
-
-lint:
-	@echo "--> Running linter with revive"
-	@go install github.com/mgechev/revive
-	@revive -config .revive.toml -formatter friendly ./...
-# note: on new OSX, might require brew install diffutils
-	@echo "--> Running regular linter"
-	@go install mvdan.cc/gofumpt
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
-	@$(golangci_lint_cmd) run
-	@cd price-feeder && $(golangci_lint_cmd) run
-
-lint-fix:
-	@echo "--> Running linter to fix the lint issues"
-	@go install mvdan.cc/gofumpt
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
-	@$(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
-	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
-	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
-
-.PHONY: lint lint-fix
 
 ###############################################################################
 ##                                Simulations                                ##
