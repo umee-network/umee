@@ -1,8 +1,8 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -203,4 +203,86 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 		return types.ErrMaxCollateralShare.Wrapf("%s share is %s", denom, share)
 	}
 	return nil
+}
+
+//// AvailableCollateralLiquidity
+//func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdk.Dec, error) {
+//	// Definition of collateral liquidity:
+//	// CL = liquidity / collateral
+//	//		where liquidity = (module balance - reserves)
+//
+//	// Effects of a collateral withdrawal:
+//	//	liquidity decreases by token amount. collateral decreases by token amount.
+//	//
+//	// CL = L / C
+//	//		= (L1 - X) / (C1 - X)
+//
+//	// Effects of a non-collateral withdrawal:
+//	//	liquidity decreases by token amount. collateral is unchanged
+//	//
+//	// CL = L / C
+//	//		= (L1 - X) / (C1)
+//
+//	// Effects of withdrawing X collateral and Y non-collateral:
+//	//
+//	// CL = L / C
+//	//		= (L1 - X - Y) / (C1- X)
+//
+//	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
+//	if err != nil {
+//		return sdk.ZeroDec(), err
+//	}
+//
+//
+//
+//	availableCollateralLiquidity := liquidity.
+//}
+
+// AvailableCollateralLiquidity2 calculates ...
+func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, supplierAddr sdk.AccAddress, denom string) (sdkmath.Int, error) {
+	// CL = L / C
+	//		= (L1 - X - Y) / (C1- X)
+
+	// If targeting a given maximize (X+Y), should we try to withdraw X or Y first?
+
+	// X = amount of collateral to withdraw
+	// Y = amount of non-collateral to withdraw
+
+	uDenom := types.ToUTokenDenom(denom)
+
+	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	// Withdraw will first attempt to use any uTokens in the supplier's wallet
+	amountFromWallet := k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uDenom)
+
+	collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
+	collateralAmount := collateral.AmountOf(uDenom)
+
+	// L1
+	liquidity := k.AvailableLiquidity(ctx, denom)
+
+	totalCollateral := k.GetTotalCollateral(ctx, uDenom)
+
+	// C1
+	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	// CL
+	minCollateralLiquidity := token.MinCollateralLiquidity
+
+	// x = (L1 - CL*C1) / ( 1 - CL)
+
+	//collateralToWithdraw := (liquidity.Sub(minCollateralLiquidity.Mul(totalTokenCollateral))).Quo(sdk.NewInt(1).Sub(minCollateralLiquidity))
+	totalAvailable := totalTokenCollateral.AmountOf(denom).Add(liquidity)
+	uTokenTotalAvailable, err := k.ExchangeToken(ctx, sdk.NewCoin(uDenom, totalAvailable))
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	return uTokenTotalAvailable.Amount, nil
 }

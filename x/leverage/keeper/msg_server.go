@@ -124,6 +124,10 @@ func (s msgServer) MaxWithdraw(
 		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
+	//
+	uTokenTotalAvailable, err := s.keeper.AvailableCollateralLiquidity(ctx, supplierAddr, msg.Denom)
+	uToken.Amount = sdk.MinInt(uToken.Amount, uTokenTotalAvailable)
+
 	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
 		return nil, err
