@@ -8,10 +8,11 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
-// GetAllIncentivePrograms returns all incentive programs
+// getAllIncentivePrograms returns all incentive programs
 // that have been passed by governance and have a particular status.
 // The status of an incentive program is either Upcoming, Ongoing, or Completed.
-func (k Keeper) GetAllIncentivePrograms(ctx sdk.Context, status incentive.ProgramStatus) []incentive.IncentiveProgram {
+func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.ProgramStatus,
+) ([]incentive.IncentiveProgram, error) {
 	programs := []incentive.IncentiveProgram{}
 
 	var prefix []byte
@@ -23,7 +24,7 @@ func (k Keeper) GetAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 	case incentive.ProgramStatusCompleted:
 		prefix = keyPrefixCompletedIncentiveProgram
 	default:
-		return []incentive.IncentiveProgram{}
+		return []incentive.IncentiveProgram{}, incentive.ErrInvalidProgramStatus
 	}
 
 	iterator := func(_, val []byte) error {
@@ -37,8 +38,8 @@ func (k Keeper) GetAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 		return nil
 	}
 
-	util.Panic(store.Iterate(k.KVStore(ctx), prefix, iterator))
-	return programs
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return programs, err
 }
 
 // iterateAccountBonds iterates over all bonded uTokens for an address by each individual
@@ -87,13 +88,13 @@ func (k Keeper) getFullRewardAccumulator(ctx sdk.Context, denom string, tier inc
 	return accumulator
 }
 
-// GetPaginatedIncentivePrograms returns all incentive programs
+// getPaginatedIncentivePrograms returns all incentive programs
 // that have been passed by governance and have a particular status.
 // The status of an incentive program is either Upcoming, Ongoing, or Completed.
 // Accepts pagination parameters which specify the length of a page and which page to fetch.
-func (k Keeper) GetPaginatedIncentivePrograms(
+func (k Keeper) getPaginatedIncentivePrograms(
 	ctx sdk.Context, status incentive.ProgramStatus, page, limit uint64,
-) []incentive.IncentiveProgram {
+) ([]incentive.IncentiveProgram, error) {
 	programs := []incentive.IncentiveProgram{}
 
 	var prefix []byte
@@ -105,7 +106,7 @@ func (k Keeper) GetPaginatedIncentivePrograms(
 	case incentive.ProgramStatusCompleted:
 		prefix = keyPrefixCompletedIncentiveProgram
 	default:
-		return []incentive.IncentiveProgram{}
+		return []incentive.IncentiveProgram{}, incentive.ErrInvalidProgramStatus
 	}
 
 	iterator := func(_, val []byte) error {
@@ -119,6 +120,6 @@ func (k Keeper) GetPaginatedIncentivePrograms(
 		return nil
 	}
 
-	util.Panic(store.IteratePaginated(k.KVStore(ctx), prefix, uint(page), uint(limit), iterator))
-	return programs
+	err := store.IteratePaginated(k.KVStore(ctx), prefix, uint(page), uint(limit), iterator)
+	return programs, err
 }

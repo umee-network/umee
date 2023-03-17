@@ -27,8 +27,7 @@ Umee will allow a multitude of decentralized debt products.
 - [Releases](#releases)
   - [Release Compatibility Matrix](#release-compatibility-matrix)
 - [Active Networks](#active-networks)
-  - [Public](#public)
-- [Install](#install)
+- [Build](#build)
   - [Swagger](#swagger)
   - [Cosmovisor](#cosmovisor)
 
@@ -52,20 +51,42 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 |    v3.3.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.2    |   umee/v3 v1.5.3-umee-3    |
 |    v4.0.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.3    |   umee/v4 v1.5.3-umee-4    |
 |    v4.1.x    |    ✓    |      ✗       |  v0.46.7+  | v5.2.x | v1.3.x+ |    v2.1.0    |   umee/v4 v1.5.3-umee-4    |
+|    v4.2.x    |    ✓    |      ✗       | v0.46.10+  | v5.2.x | v1.3.x+ |    v2.1.0    |   umee/v4 v1.5.3-umee-4    |
 
-## Active Networks
+### Active Networks
 
-### Public
+Public:
 
 - [umee-1](networks/umee-1) (mainnet)
 - [canon-2](networks/canon-2) (testnet)
 
-## Install
+## Build
 
 To install the `umeed` binary:
 
 ```shell
-$ make install
+$ make build
+```
+
+### Recommended Database Backend
+
+We recommend to use RocksDB. It requires to install `rocksdb` system libraries.
+We plan to migrate newer version of badgerdb, which brings lot of improvements and simplifies the setup.
+
+To build with `rocksdb` enabled:
+
+```bash
+ENABLE_ROCKSDB=true COSMOS_BUILD_OPTIONS=rocksdb  make build
+```
+
+Once you generate config files, you need to update:
+
+```bash
+# app.toml / base configuration options
+app-db-backend = "rocksdb"
+
+# config.toml / base configuration options
+db_backend = "rocksdb"
 ```
 
 ### Swagger
@@ -86,6 +107,15 @@ $ make install
 
 ```shell
 go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
+```
+
+- Create folders for Cosmovisor
+
+```shell
+mkdir -p ~/.umee/cosmovisor/genesis/bin
+mkdir -p ~/.umee/cosmovisor/upgrades
+
+cp <path-to-umeed-binary> ~/.umee/cosmovisor/genesis/bin
 ```
 
 - For the usual use of `cosmovisor`, we recommend setting theses env variables

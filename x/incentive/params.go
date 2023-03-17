@@ -26,13 +26,13 @@ func (p Params) Validate() error {
 	if err := validateMaxUnbondings(p.MaxUnbondings); err != nil {
 		return err
 	}
-	if err := validateLockDuration(p.UnbondingDurationLong); err != nil {
+	if err := validateUnbondingDuration(p.UnbondingDurationLong); err != nil {
 		return err
 	}
-	if err := validateLockDuration(p.UnbondingDurationMiddle); err != nil {
+	if err := validateUnbondingDuration(p.UnbondingDurationMiddle); err != nil {
 		return err
 	}
-	if err := validateLockDuration(p.UnbondingDurationShort); err != nil {
+	if err := validateUnbondingDuration(p.UnbondingDurationShort); err != nil {
 		return err
 	}
 	if err := validateTierWeight(p.TierWeightMiddle); err != nil {
@@ -53,12 +53,7 @@ func (p Params) Validate() error {
 	return nil
 }
 
-func validateTierWeight(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateTierWeight(v sdk.Dec) error {
 	if v.IsNegative() {
 		return fmt.Errorf("tier weight cannot be negative: %d", v)
 	}
@@ -69,24 +64,15 @@ func validateTierWeight(i interface{}) error {
 	return nil
 }
 
-func validateLockDuration(i interface{}) error {
-	v, ok := i.(uint64)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateUnbondingDuration(v uint64) error {
 	if v == 0 {
-		return fmt.Errorf("lock duration cannot be zero")
+		return fmt.Errorf("unbonding duration cannot be zero")
 	}
 
 	return nil
 }
 
-func validateMaxUnbondings(i interface{}) error {
-	v, ok := i.(uint64)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
+func validateMaxUnbondings(v uint32) error {
 	if v == 0 {
 		return fmt.Errorf("max unbondings cannot be zero")
 	}
@@ -94,15 +80,10 @@ func validateMaxUnbondings(i interface{}) error {
 	return nil
 }
 
-func validateCommunityFundAddress(i interface{}) error {
-	s, ok := i.(string)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateCommunityFundAddress(addr string) error {
 	// Address must be either empty or fully valid
-	if s != "" {
-		_, err := sdk.AccAddressFromBech32(s)
+	if addr != "" {
+		_, err := sdk.AccAddressFromBech32(addr)
 		if err != nil {
 			return err
 		}
