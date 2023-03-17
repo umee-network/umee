@@ -84,16 +84,3 @@ message IncentiveProgram {
   // to zero as the program runs to completion.
   cosmos.base.v1beta1.Coin remaining_rewards = 7 [(gogoproto.nullable) = false];
 }
-
-// TotalBond tracks the amount of coins of one uToken denomination bonded to a
-// given reward tier by all accounts. Used by queries TotalBonded and TotalUnbonding.
-message TotalBond {
-  uint32                   tier   = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
-}
-
-// Unbonding is a structure that tracks an in-progress token unbonding.
-message Unbonding {
-  uint64                   end    = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
-}

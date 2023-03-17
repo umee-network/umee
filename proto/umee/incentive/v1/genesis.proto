@@ -21,6 +21,13 @@ message GenesisState {
   repeated AccountUnbondings account_unbondings  = 10 [(gogoproto.nullable) = false];
 }
 
+// TotalBond tracks the amount of coins of one uToken denomination bonded to a
+// given reward tier by all accounts. Used by queries TotalBonded and TotalUnbonding.
+message TotalBond {
+  uint32                   tier   = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+}
+
 // Bond tracks the amount of coins of one uToken denomination bonded to a
 // given reward tier by a single account.
 message Bond {
@@ -54,6 +61,12 @@ message RewardAccumulator {
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
+}
+
+// Unbonding is a structure that tracks an in-progress token unbonding.
+message Unbonding {
+  uint64                   end    = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
 // AccountUnbondings is a structure that is used to store all of an account's unbondings
