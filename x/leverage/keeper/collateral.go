@@ -239,9 +239,9 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 //}
 
 // AvailableCollateralLiquidity2 calculates ...
-func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, supplierAddr sdk.AccAddress, denom string) (sdkmath.Int, error) {
+func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// CL = L / C
-	//		= (L1 - X - Y) / (C1- X)
+	//	  = (L1 - X - Y) / (C1 - X)
 
 	// If targeting a given maximize (X+Y), should we try to withdraw X or Y first?
 
@@ -254,12 +254,6 @@ func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, supplierAddr sdk.A
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
-
-	// Withdraw will first attempt to use any uTokens in the supplier's wallet
-	amountFromWallet := k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uDenom)
-
-	collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
-	collateralAmount := collateral.AmountOf(uDenom)
 
 	// L1
 	liquidity := k.AvailableLiquidity(ctx, denom)
@@ -275,11 +269,9 @@ func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, supplierAddr sdk.A
 	// CL
 	minCollateralLiquidity := token.MinCollateralLiquidity
 
-	// x = (L1 - CL*C1) / ( 1 - CL)
-
-	//collateralToWithdraw := (liquidity.Sub(minCollateralLiquidity.Mul(totalTokenCollateral))).Quo(sdk.NewInt(1).Sub(minCollateralLiquidity))
-	totalAvailable := totalTokenCollateral.AmountOf(denom).Add(liquidity)
-	uTokenTotalAvailable, err := k.ExchangeToken(ctx, sdk.NewCoin(uDenom, totalAvailable))
+	// x = (L1 - CL*C1) / (1 - CL)
+	totalAvailable := (sdk.NewDec(liquidity.Int64()).Sub(sdk.NewDec(totalTokenCollateral.AmountOf(denom).Int64()).Mul(minCollateralLiquidity))).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
+	uTokenTotalAvailable, err := k.ExchangeToken(ctx, sdk.NewCoin(uDenom, sdkmath.NewInt(totalAvailable.RoundInt64())))
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
