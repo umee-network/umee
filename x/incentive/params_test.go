@@ -6,7 +6,7 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestParams(t *testing.T) {
+func TestDefaultParams(t *testing.T) {
 	params := DefaultParams()
 	err := params.Validate()
 	assert.NilError(t, err)
