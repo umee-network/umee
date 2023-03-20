@@ -166,8 +166,8 @@ func (k Keeper) getLastRewardsTime(ctx sdk.Context) uint64 {
 	return store.GetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, "last reward time")
 }
 
-// setLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
-func (k Keeper) setLastRewardsTime(ctx sdk.Context, time uint64) error {
+// SetLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
+func (k Keeper) SetLastRewardsTime(ctx sdk.Context, time uint64) error {
 	prev := k.getLastRewardsTime(ctx)
 	if time < prev {
 		return incentive.ErrDecreaseLastRewardTime.Wrapf("%d to %d", time, prev)
@@ -188,17 +188,17 @@ func (k Keeper) setTotalBonded(ctx sdk.Context, uTokens sdk.Coin, tier incentive
 	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, "total bonded")
 }
 
-// getTotalUnbonding retrieves the total amount of uTokens of a given denom which are unbonding from
+// GetTotalUnbonding retrieves the total amount of uTokens of a given denom which are unbonding from
 // the incentive module
-func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
+func (k Keeper) GetTotalUnbonding(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
 	key := keyTotalUnbonding(denom, tier)
 	amount := store.GetInt(k.KVStore(ctx), key, "total unbonding")
 	return sdk.NewCoin(denom, amount)
 }
 
-// setTotalUnbonding records the total amount of uTokens of a given denom which are unbonding from the
+// SetTotalUnbonding records the total amount of uTokens of a given denom which are unbonding from the
 // incentive module
-func (k Keeper) setTotalUnbonding(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
+func (k Keeper) SetTotalUnbonding(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
 	key := keyTotalUnbonding(uTokens.Denom, tier)
 	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, "total unbonding")
 }
@@ -218,27 +218,27 @@ func (k Keeper) setBonded(ctx sdk.Context,
 	return store.SetInt(k.KVStore(ctx), key, uToken.Amount, "bonded amount")
 }
 
-// getRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken and tier -
+// GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken and tier -
 // for example, how much UMEE (reward) would have been earned by 1 ATOM bonded to the middle tier since genesis.
-func (k Keeper) getRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string, tier incentive.BondTier,
+func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string, tier incentive.BondTier,
 ) sdk.DecCoin {
 	key := keyRewardAccumulator(bondDenom, rewardDenom, tier)
 	amount := store.GetDec(k.KVStore(ctx), key, "reward accumulator")
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
-// setRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier.
-func (k Keeper) setRewardAccumulator(ctx sdk.Context,
+// SetRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier.
+func (k Keeper) SetRewardAccumulator(ctx sdk.Context,
 	bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
 ) error {
 	key := keyRewardAccumulator(bondDenom, reward.Denom, tier)
 	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward accumulator")
 }
 
-// getRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken and tier on one account -
+// GetRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken and tier on one account -
 // this is the value of the reward accumulator for those specific denoms and tier the last time this account performed
 // and action that requires a reward tracker update (i.e. Bond, Claim, BeginUnbonding, or being Liquidated).
-func (k Keeper) getRewardTracker(ctx sdk.Context,
+func (k Keeper) GetRewardTracker(ctx sdk.Context,
 	addr sdk.AccAddress, bondDenom, rewardDenom string, tier incentive.BondTier,
 ) sdk.DecCoin {
 	key := keyRewardTracker(addr, bondDenom, rewardDenom, tier)

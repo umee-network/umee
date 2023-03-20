@@ -62,7 +62,7 @@ func (k Keeper) increaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentiv
 	bonded := k.getBonded(ctx, addr, bond.Denom, tier)
 	// if bonded amount was zero, reward tracker must be initialized
 	if bonded.IsZero() {
-		if err := k.updateRewardTracker(ctx, addr, tier, bond.Denom); err != nil {
+		if err := k.UpdateRewardTracker(ctx, addr, tier, bond.Denom); err != nil {
 			return err
 		}
 	}
@@ -75,11 +75,11 @@ func (k Keeper) increaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentiv
 	return k.setTotalBonded(ctx, total.Add(bond), tier)
 }
 
-// decreaseBond decreases the bonded uToken amount for an account at a given tier, and updates the module's total.
+// DecreaseBond decreases the bonded uToken amount for an account at a given tier, and updates the module's total.
 // it also clears reward trackers for any bond tiers which have reached zero for the account, to save storage.
 // This function must be called when unbondings are completed (not created) and when the leverage module forcefully
 // liquidates bonded collateral.
-func (k Keeper) decreaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, unbond sdk.Coin) error {
+func (k Keeper) DecreaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, unbond sdk.Coin) error {
 	// calculate and set new bonded amount after subtracting the currently unbonding tokens
 	bonded := k.getBonded(ctx, addr, unbond.Denom, tier).Sub(unbond)
 	if err := k.setBonded(ctx, addr, bonded, tier); err != nil {
@@ -87,7 +87,7 @@ func (k Keeper) decreaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentiv
 	}
 	// if the new bond for this account + tier + denom has reached zero, it is safe to stop tracking rewards
 	if bonded.IsZero() {
-		err := k.clearRewardTracker(ctx, addr, tier, unbond.Denom)
+		err := k.ClearRewardTracker(ctx, addr, tier, unbond.Denom)
 		if err != nil {
 			return err
 		}

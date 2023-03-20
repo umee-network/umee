@@ -56,9 +56,9 @@ func (k Keeper) iterateAccountUnbondings(ctx sdk.Context, addr sdk.AccAddress,
 	return store.Iterate(k.KVStore(ctx), prefix, iterator)
 }
 
-// iterateAccountBonds iterates over all bonded uTokens for an address by each individual
+// IterateAccountBonds iterates over all bonded uTokens for an address by each individual
 // uToken denom and tier
-func (k Keeper) iterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
+func (k Keeper) IterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
 	_ func(ctx sdk.Context, addr sdk.AccAddress, _ incentive.BondTier, _ sdk.Coin) error,
 ) error {
 	prefix := keyBondAmountNoDenom(addr)
