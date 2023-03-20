@@ -46,6 +46,7 @@ ignore:
   - "**/*.json"
   - "**/*.toml"
   - "**/*.rst"
+  - "**/*.md"
 # auto-generated files
   - "**/*.pb.go"
   - "**/*.pb.gw.go"
