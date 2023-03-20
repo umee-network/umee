@@ -87,8 +87,10 @@ jobs:
       - uses: codecov/codecov-action@v3
         if: env.GIT_DIFF
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.txt
           fail_ci_if_error: true
+          verbose: true
 
   test-e2e:
     runs-on: ubuntu-latest
