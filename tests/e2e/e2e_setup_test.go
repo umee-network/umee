@@ -15,7 +15,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"reflect"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/server"
@@ -1013,19 +1012,6 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 		noRestart,
 	)
 	s.Require().NoError(err)
-
-	var outputStream io.Writer
-	err = s.dkrPool.Client.Logs(docker.LogsOptions{
-			Container:    s.priceFeederResource.Container.ID,
-			Follow:       true,
-			Stdout:       true,
-			Stderr:       true,
-			Tail:         "all",
-			OutputStream: outputStream,
-		})
-
-	output := fmt.Sprint(outputStream)
-	fmt.Println(reflect.TypeOf(output))
 
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort("7171/tcp"))
 	s.Require().Eventually(
