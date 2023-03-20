@@ -130,6 +130,7 @@ import (
 	uics20transfer "github.com/umee-network/umee/v4/x/uibc/ics20"
 	uibctransferkeeper "github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
 	uibcmodule "github.com/umee-network/umee/v4/x/uibc/module"
+	uibcoracle "github.com/umee-network/umee/v4/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v4/x/uibc/quota"
 	uibcquotakeeper "github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
@@ -502,7 +503,7 @@ func New(
 	app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
 		appCodec,
 		keys[uibc.StoreKey],
-		app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, app.OracleKeeper,
+		app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
 	)
 	ics4Wrapper = app.UIbcQuotaKeeper
 
