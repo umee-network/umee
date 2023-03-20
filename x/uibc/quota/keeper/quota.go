@@ -186,7 +186,7 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 	}
 
 	// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE` (uumee)
-	exchangeRate, err = k.oracleKeeper.HistoricAvgPrice(ctx, strings.ToUpper(ts.SymbolDenom))
+	exchangeRate, err = k.oracle.Price(ctx, strings.ToUpper(ts.SymbolDenom))
 	if err != nil {
 		return sdk.Dec{}, err
 	}
