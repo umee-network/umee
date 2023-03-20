@@ -20,6 +20,9 @@ type LeverageKeeper interface {
 	DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec
 }
 
-type OracleKeeper interface {
-	HistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error)
+// Oracle interface for price feed.
+// The uibc design doesn't depend on any particular price metric (spot price, avg ...), so it's
+// up to the integration which price should be used.
+type Oracle interface {
+	Price(ctx sdk.Context, denom string) (sdk.Dec, error)
 }
