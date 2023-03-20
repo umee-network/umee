@@ -220,7 +220,8 @@ func (k Keeper) setBonded(ctx sdk.Context,
 }
 
 // getUnbonding retrieves the amount of uTokens of a given denom which are unbonding from a single tier by an account
-func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier) sdk.Coin {
+func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier,
+) sdk.Coin {
 	key := keyUnbondAmount(addr, denom, tier)
 	amount := store.GetInt(k.KVStore(ctx), key, "unbonding amount")
 	return sdk.NewCoin(denom, amount)
