@@ -1019,6 +1019,14 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 			resp, err := http.Get(endpoint)
 			if err != nil {
 				s.T().Log("Price feeder endpoint not available", err)
+				s.dkrPool.Client.Logs(docker.LogsOptions{
+					Container:    s.priceFeederResource.Container.ID,
+					OutputStream: os.Stdout,
+					ErrorStream:  os.Stderr,
+					Stdout:       true,
+					Stderr:       true,
+					Tail:         "false",
+				})
 				return false
 			}
 
