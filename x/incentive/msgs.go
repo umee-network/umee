@@ -248,8 +248,20 @@ func (ip IncentiveProgram) Validate() error {
 		return err
 	}
 	if !leveragetypes.HasUTokenPrefix(ip.UToken) {
-		// only allow uToken denoms
+		// only allow uToken denoms as bonded denoms
 		return errors.Wrap(leveragetypes.ErrNotUToken, ip.UToken)
+	}
+
+	if err := ip.TotalRewards.Validate(); err != nil {
+		return err
+	}
+	if leveragetypes.HasUTokenPrefix(ip.TotalRewards.Denom) {
+		// only allow base token denoms as rewards
+		return errors.Wrap(leveragetypes.ErrUToken, ip.TotalRewards.Denom)
+	}
+
+	if err := ip.RemainingRewards.Validate(); err != nil {
+		return err
 	}
 
 	// TODO #1749: Finish validate logic
