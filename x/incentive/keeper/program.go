@@ -46,7 +46,7 @@ func (k Keeper) createIncentiveProgram(
 
 	// Set program's ID to the next available value and store it in upcoming incentive programs
 	id := k.getNextProgramID(ctx)
-	program.Id = id
+	program.ID = id
 	if err := k.setIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming); err != nil {
 		return err
 	}

@@ -127,9 +127,9 @@ func (k Keeper) setIncentiveProgram(ctx sdk.Context,
 	program incentive.IncentiveProgram, status incentive.ProgramStatus,
 ) error {
 	keys := [][]byte{
-		keyIncentiveProgram(program.Id, incentive.ProgramStatusUpcoming),
-		keyIncentiveProgram(program.Id, incentive.ProgramStatusOngoing),
-		keyIncentiveProgram(program.Id, incentive.ProgramStatusCompleted),
+		keyIncentiveProgram(program.ID, incentive.ProgramStatusUpcoming),
+		keyIncentiveProgram(program.ID, incentive.ProgramStatusOngoing),
+		keyIncentiveProgram(program.ID, incentive.ProgramStatusCompleted),
 	}
 
 	kvStore := k.KVStore(ctx)
@@ -138,7 +138,7 @@ func (k Keeper) setIncentiveProgram(ctx sdk.Context,
 		kvStore.Delete(key)
 	}
 
-	key := keyIncentiveProgram(program.Id, status)
+	key := keyIncentiveProgram(program.ID, status)
 	bz, err := k.cdc.Marshal(&program)
 	if err != nil {
 		return err

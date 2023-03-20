@@ -10,14 +10,14 @@ import "umee/incentive/v1/incentive.proto";
 // GenesisState defines the x/incentive module's genesis state.
 message GenesisState {
   Params                     params              = 1 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram  completed_programs  = 2 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram  ongoing_programs    = 3 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram  upcoming_programs   = 4 [(gogoproto.nullable) = false];
-  uint32                     next_program_id     = 5;
-  uint64                     last_rewards_time   = 6;
-  repeated Bond              bonds               = 7 [(gogoproto.nullable) = false];
-  repeated RewardTracker     reward_trackers     = 8 [(gogoproto.nullable) = false];
-  repeated RewardAccumulator reward_accumulators = 9 [(gogoproto.nullable) = false];
+  uint32                     next_program_id     = 2;
+  uint64                     last_rewards_time   = 3;
+  repeated RewardTracker     reward_trackers     = 4 [(gogoproto.nullable) = false];
+  repeated RewardAccumulator reward_accumulators = 5 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram  upcoming_programs   = 6 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram  ongoing_programs    = 7 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram  completed_programs  = 8 [(gogoproto.nullable) = false];
+  repeated Bond              bonds               = 9 [(gogoproto.nullable) = false];
   repeated AccountUnbondings account_unbondings  = 10 [(gogoproto.nullable) = false];
 }
 

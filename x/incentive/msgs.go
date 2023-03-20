@@ -164,7 +164,7 @@ func (msg MsgGovSetParams) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgGovSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgCreateProgram(authority, title, description string, programs []IncentiveProgram) *MsgGovCreatePrograms {
+func NewMsgGovCreatePrograms(authority, title, description string, programs []IncentiveProgram) *MsgGovCreatePrograms {
 	return &MsgGovCreatePrograms{
 		Title:       title,
 		Description: description,
@@ -208,8 +208,8 @@ func (msg MsgGovCreatePrograms) Type() string { return sdk.MsgTypeURL(&msg) }
 // validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
 // to incentive programs which have not yet been funded or passed by governance
 func validateProposedIncentiveProgram(program IncentiveProgram) error {
-	if program.Id != 0 {
-		return ErrInvalidProgramID.Wrapf("%d", program.Id)
+	if program.ID != 0 {
+		return ErrInvalidProgramID.Wrapf("%d", program.ID)
 	}
 	if !program.RemainingRewards.IsZero() {
 		return ErrNonzeroRemainingRewards.Wrap(program.RemainingRewards.String())
@@ -244,12 +244,12 @@ func validateSenderAssetTier(sender string, tier uint32, asset *sdk.Coin) error 
 // Validate performs validation on an IncentiveProgram type returning an error
 // if the program is invalid.
 func (ip IncentiveProgram) Validate() error {
-	if err := sdk.ValidateDenom(ip.Denom); err != nil {
+	if err := sdk.ValidateDenom(ip.UToken); err != nil {
 		return err
 	}
-	if !leveragetypes.HasUTokenPrefix(ip.Denom) {
+	if !leveragetypes.HasUTokenPrefix(ip.UToken) {
 		// only allow uToken denoms
-		return errors.Wrap(leveragetypes.ErrNotUToken, ip.Denom)
+		return errors.Wrap(leveragetypes.ErrNotUToken, ip.UToken)
 	}
 
 	// TODO #1749: Finish validate logic
