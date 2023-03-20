@@ -2,7 +2,6 @@ package keeper_test
 
 import (
 	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/v4/util/coin"
@@ -659,6 +658,48 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 		// check all available invariants
 		s.checkInvariants(tc.msg)
 	}
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxWithdrawEdgeCase() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 800_000000))
+	s.supply(supplier, coin.New(umeeDenom, 800_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+
+	// create and fund another supplier with 200 UMEE, then collateralize 200 of supplied UMEE
+	other := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(other, coin.New(umeeDenom, 200_000000))
+	s.collateralize(other, coin.New("u/"+umeeDenom, 200_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	// borrow 750 UMEE
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+	s.borrow(borrower, coin.New(umeeDenom, 750_000000))
+
+	// the other user executes MaxWithdraw
+	msg := &types.MsgMaxWithdraw{
+		Supplier: other.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE withdraw amount:
+	// 		= (liquidity - min_collateral_liquidity * collateral) / (1 - min_collateral_liquidity)
+	// 		= (250 - 0.2*1000)/(1 - 0.2)
+	//		= 62.5
+
+	// verify the outputs of withdraw function
+	resp, err := srv.MaxWithdraw(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 62_500000), resp.Received)
 }
 
 func (s *IntegrationTestSuite) TestMsgCollateralize() {

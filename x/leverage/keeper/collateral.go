@@ -3,6 +3,7 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -205,40 +206,12 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-//// AvailableCollateralLiquidity
-//func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdk.Dec, error) {
-//	// Definition of collateral liquidity:
-//	// CL = liquidity / collateral
-//	//		where liquidity = (module balance - reserves)
+// AvailableCollateralLiquidity calculates the maximum available amount of uToken to withdraw
+// from the module given a token's denom.
+// The formula derives from:
 //
-//	// Effects of a collateral withdrawal:
-//	//	liquidity decreases by token amount. collateral decreases by token amount.
-//	//
-//	// CL = L / C
-//	//		= (L1 - X) / (C1 - X)
-//
-//	// Effects of a non-collateral withdrawal:
-//	//	liquidity decreases by token amount. collateral is unchanged
-//	//
-//	// CL = L / C
-//	//		= (L1 - X) / (C1)
-//
-//	// Effects of withdrawing X collateral and Y non-collateral:
-//	//
-//	// CL = L / C
-//	//		= (L1 - X - Y) / (C1- X)
-//
-//	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
-//	if err != nil {
-//		return sdk.ZeroDec(), err
-//	}
-//
-//
-//
-//	availableCollateralLiquidity := liquidity.
-//}
-
-// AvailableCollateralLiquidity2 calculates ...
+//	min_collateral_liquidity = (module_liquidity - X)/(module_collateral - X)
+//	X = (module_liquidity - min_collateral_liquidity * module_collateral) / (1 - min_collateral_liquidity)
 func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// CL = L / C
 	//	  = (L1 - X - Y) / (C1 - X)
@@ -248,9 +221,7 @@ func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdk
 	// X = amount of collateral to withdraw
 	// Y = amount of non-collateral to withdraw
 
-	uDenom := types.ToUTokenDenom(denom)
-
-	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -258,6 +229,7 @@ func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdk
 	// L1
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
+	uDenom := types.ToUTokenDenom(denom)
 	totalCollateral := k.GetTotalCollateral(ctx, uDenom)
 
 	// C1
@@ -271,7 +243,8 @@ func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdk
 
 	// x = (L1 - CL*C1) / (1 - CL)
 	totalAvailable := (sdk.NewDec(liquidity.Int64()).Sub(sdk.NewDec(totalTokenCollateral.AmountOf(denom).Int64()).Mul(minCollateralLiquidity))).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
-	uTokenTotalAvailable, err := k.ExchangeToken(ctx, sdk.NewCoin(uDenom, sdkmath.NewInt(totalAvailable.RoundInt64())))
+
+	uTokenTotalAvailable, err := k.ExchangeToken(ctx, sdk.NewCoin(denom, sdkmath.NewInt(totalAvailable.RoundInt64())))
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
