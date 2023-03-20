@@ -40,14 +40,19 @@ flags:
       - "x/**/client/"
 
 ignore:
-  - "docs"
-  - "*.md"
-  - "*.rst"
+# ignore all files of these types
+  - "**/*.proto"
+  - "**/*.yml"
+  - "**/*.json"
+  - "**/*.toml"
+  - "**/*.rst"
+  - "**/*.md"
+# auto-generated files
   - "**/*.pb.go"
-  - "types/*.pb.go"
-  - "tests/*"
-  - "tests/**/*"
-  - "x/**/*.pb.go"
-  - "x/**/test_common.go"
-  - "scripts/"
+  - "**/*.pb.gw.go"
+# ignore these folders and all their contents
+  - "docs"
+  - "tests"
+  - "scripts"
   - "contrib"
+  - "swagger"
