@@ -1014,48 +1014,61 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.Require().NoError(err)
 
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort("7171/tcp"))
-	s.Require().Eventually(
-		func() bool {
-			resp, err := http.Get(endpoint)
-			if err != nil {
-				s.T().Log("Price feeder endpoint not available", err)
-				s.dkrPool.Client.Logs(docker.LogsOptions{
-					Container:    s.priceFeederResource.Container.ID,
-					OutputStream: os.Stdout,
-					ErrorStream:  os.Stderr,
-					Stdout:       true,
-					Stderr:       true,
-					Tail:         "false",
-				})
-				return false
-			}
 
-			defer resp.Body.Close()
+	checkHealth := func() bool {
+		resp, err := http.Get(endpoint)
+		if err != nil {
+			s.T().Log("Price feeder endpoint not available", err)
+			return false
+		}
 
-			bz, err := io.ReadAll(resp.Body)
-			if err != nil {
-				s.T().Log("Can't get price feeder response", err)
-				return false
-			}
+		defer resp.Body.Close()
 
-			var respBody map[string]interface{}
-			if err := json.Unmarshal(bz, &respBody); err != nil {
-				s.T().Log("Can't unmarshal price feed", err)
-				return false
-			}
+		bz, err := io.ReadAll(resp.Body)
+		if err != nil {
+			s.T().Log("Can't get price feeder response", err)
+			return false
+		}
 
-			prices, ok := respBody["prices"].(map[string]interface{})
-			if !ok {
-				s.T().Log("price feeder: no prices")
-				return false
-			}
+		var respBody map[string]interface{}
+		if err := json.Unmarshal(bz, &respBody); err != nil {
+			s.T().Log("Can't unmarshal price feed", err)
+			return false
+		}
 
-			return len(prices) > 0
-		},
-		time.Minute,
-		time.Second,
-		"price-feeder not healthy",
-	)
+		prices, ok := respBody["prices"].(map[string]interface{})
+		if !ok {
+			s.T().Log("price feeder: no prices")
+			return false
+		}
+
+		return len(prices) > 0
+	}
+
+	isHealthy := false
+	for i := 0; i < 20; i++ {
+		isHealthy := checkHealth()
+		if isHealthy {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	if !isHealthy {
+		err := s.dkrPool.Client.Logs(docker.LogsOptions{
+			Container:    s.priceFeederResource.Container.ID,
+			OutputStream: os.Stdout,
+			ErrorStream:  os.Stderr,
+			Stdout:       true,
+			Stderr:       true,
+			Tail:         "false",
+		})
+		if err != nil {
+			s.T().Log("Error retrieving price feeder logs", err)
+		}
+
+		s.T().Fatal("price-feeder not healthy")
+	}
 
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
 }
