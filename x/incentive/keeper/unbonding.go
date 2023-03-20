@@ -6,8 +6,12 @@ import (
 )
 
 // addUnbonding creates an unbonding and adds it to the account's current unbondings in the store.
-// Assumes the validity of the unbonding has already been checked.
+// Assumes the validity of the unbonding has already been checked. Also updates unbonding amounts
+// indirectly by calling setUnbondings.
 func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier) error {
+	if err := k.decreaseBond(ctx, addr, tier, uToken); err != nil {
+		return err
+	}
 	unbonding := incentive.Unbonding{
 		Amount: uToken,
 		End:    k.getLastRewardsTime(ctx) + k.unbondTime(ctx, tier),
@@ -19,15 +23,6 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 		Unbondings: append(k.getUnbondings(ctx, addr, uToken.Denom, tier), unbonding),
 	}
 	return k.setUnbondings(ctx, unbondings)
-}
-
-// bondTier converts from the uint32 used in message types to the enumeration, returning an error
-// if it is not valid. Does not allow incentive.BondTierUnspecified
-func bondTier(n uint32) (incentive.BondTier, error) {
-	if n == 0 || n > uint32(incentive.BondTierLong) {
-		return incentive.BondTierUnspecified, incentive.ErrInvalidTier.Wrapf("%d", n)
-	}
-	return incentive.BondTier(n), nil
 }
 
 // unbondTime returns how long a given tier must wait to unbond, in seconds.

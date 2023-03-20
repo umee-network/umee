@@ -166,8 +166,8 @@ func (k Keeper) getLastRewardsTime(ctx sdk.Context) uint64 {
 	return store.GetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, "last reward time")
 }
 
-// SetLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
-func (k Keeper) SetLastRewardsTime(ctx sdk.Context, time uint64) error {
+// setLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
+func (k Keeper) setLastRewardsTime(ctx sdk.Context, time uint64) error {
 	prev := k.getLastRewardsTime(ctx)
 	if time < prev {
 		return incentive.ErrDecreaseLastRewardTime.Wrapf("%d to %d", time, prev)
@@ -182,25 +182,12 @@ func (k Keeper) getTotalBonded(ctx sdk.Context, denom string, tier incentive.Bon
 	return sdk.NewCoin(denom, amount)
 }
 
-// setTotalBonded records the total amount of uTokens of a given denom which are bonded to the incentive module
-func (k Keeper) setTotalBonded(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
-	key := keyTotalBonded(uTokens.Denom, tier)
-	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, "total bonded")
-}
-
-// GetTotalUnbonding retrieves the total amount of uTokens of a given denom which are unbonding from
+// getTotalUnbonding retrieves the total amount of uTokens of a given denom which are unbonding from
 // the incentive module
-func (k Keeper) GetTotalUnbonding(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
+func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
 	key := keyTotalUnbonding(denom, tier)
 	amount := store.GetInt(k.KVStore(ctx), key, "total unbonding")
 	return sdk.NewCoin(denom, amount)
-}
-
-// SetTotalUnbonding records the total amount of uTokens of a given denom which are unbonding from the
-// incentive module
-func (k Keeper) SetTotalUnbonding(ctx sdk.Context, uTokens sdk.Coin, tier incentive.BondTier) error {
-	key := keyTotalUnbonding(uTokens.Denom, tier)
-	return store.SetInt(k.KVStore(ctx), key, uTokens.Amount, "total unbonding")
 }
 
 // getBonded retrieves the amount of uTokens of a given denom which are bonded to a single tier by an account
@@ -210,12 +197,33 @@ func (k Keeper) getBonded(ctx sdk.Context, addr sdk.AccAddress, denom string, ti
 	return sdk.NewCoin(denom, amount)
 }
 
-// setBonded sets the amount of uTokens of a given denom which are bonded to a single tier by an account
+// setBonded sets the amount of uTokens of a given denom which are bonded to a single tier by an account.
+// Automatically updates TotalBonded as well.
+//
+// REQUIREMENT: This is the only function which is allowed to set TotalBonded.
 func (k Keeper) setBonded(ctx sdk.Context,
 	addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier,
 ) error {
+	// compute the change in bonded amount (can be negative when bond decreases)
+	delta := uToken.Amount.Sub(k.getBonded(ctx, addr, uToken.Denom, tier).Amount)
+
+	// Set bond amount
 	key := keyBondAmount(addr, uToken.Denom, tier)
-	return store.SetInt(k.KVStore(ctx), key, uToken.Amount, "bonded amount")
+	if err := store.SetInt(k.KVStore(ctx), key, uToken.Amount, "bonded amount"); err != nil {
+		return err
+	}
+
+	// Update total bonded for this utoken denom using the computed change
+	total := k.getTotalBonded(ctx, uToken.Denom, tier)
+	totalkey := keyTotalBonded(uToken.Denom, tier)
+	return store.SetInt(k.KVStore(ctx), totalkey, total.Amount.Add(delta), "total bonded")
+}
+
+// getUnbonding retrieves the amount of uTokens of a given denom which are unbonding from a single tier by an account
+func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier) sdk.Coin {
+	key := keyUnbondAmount(addr, denom, tier)
+	amount := store.GetInt(k.KVStore(ctx), key, "unbonding amount")
+	return sdk.NewCoin(denom, amount)
 }
 
 // GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken and tier -
@@ -271,7 +279,9 @@ func (k Keeper) getUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string
 }
 
 // setUnbondings stores the list of unbondings currently associated with an account, denom, and tier.
-// It also updates the account's unbonding amounts and the module's total unbonding amounts.
+// It also updates the account's stored unbonding amounts, and thus the module's total unbonding as well.
+//
+// REQUIREMENT: This is the only function which is allowed to set unbonding amounts and total unbonding.
 func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
 	kvStore := k.KVStore(ctx)
 	addr, err := sdk.AccAddressFromBech32(unbondings.Account)
@@ -284,6 +294,30 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		// catches invalid or unspecified tier
 		return err
 	}
+	denom := unbondings.Denom
+
+	// compute the new total unbonding specific to this account, denom, and tier
+	newUnbonding := sdk.ZeroInt()
+	for _, u := range unbondings.Unbondings {
+		newUnbonding = newUnbonding.Add(u.Amount.Amount)
+	}
+	// compute the change in unbonding amount (can be negative when unbonding decreases)
+	delta := newUnbonding.Sub(k.getUnbondingAmount(ctx, addr, denom, tier).Amount)
+
+	// Update unbonding amount
+	amountKey := keyUnbondAmount(addr, denom, tier)
+	if err := store.SetInt(k.KVStore(ctx), amountKey, newUnbonding, "unbonding amount"); err != nil {
+		return err
+	}
+
+	// Update total unbonding for this utoken denom using the computed change
+	total := k.getTotalUnbonding(ctx, denom, tier)
+	totalkey := keyTotalUnbonding(denom, tier)
+	if err := store.SetInt(k.KVStore(ctx), totalkey, total.Amount.Add(delta), "total unbonding"); err != nil {
+		return err
+	}
+
+	// set list of unbondings
 	key := keyUnbondings(addr, unbondings.Denom, tier)
 	if len(unbondings.Unbondings) == 0 {
 		// clear store on no unbondings remaining
@@ -294,9 +328,5 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		return err
 	}
 	kvStore.Set(key, bz)
-
-	// TODO: also always set account's Unbonding amounts
-	// TODO: also update module's total Unbonding amounts
-
 	return nil
 }

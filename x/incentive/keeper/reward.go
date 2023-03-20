@@ -6,9 +6,42 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
-// ClearRewardTracker clears all reward trackers matching a specific account + tier + bonded uToken denom
+// UpdateRewards increases the module's LastInterestTime and any rewardAccumulators associated with
+// ongoing incentive programs.
+func (k Keeper) UpdateRewards(ctx sdk.Context) error {
+	currentTime := uint64(ctx.BlockTime().Unix())
+	prevRewardTime := k.getLastRewardsTime(ctx)
+	if prevRewardTime <= 0 {
+		// if stored LastRewardTime is zero (or negative), either the chain has just started
+		// or the genesis file has been modified intentionally. In either case, proceed as if
+		// 0 seconds have passed since the last block, thus accruing no rewards and setting
+		// the current BlockTime as the new starting point.
+		prevRewardTime = currentTime
+	}
+
+	if currentTime < prevRewardTime {
+		// TODO fix this when tendermint solves https://github.com/tendermint/tendermint/issues/8773
+		k.Logger(ctx).With("EndBlocker will wait for block time > prevRewardTime").Error(
+			incentive.ErrDecreaseLastRewardTime.Error(),
+			"current", currentTime,
+			"prev", prevRewardTime,
+		)
+
+		// if LastRewardTime appears to be in the future, do nothing (besides logging) and leave
+		// LastRewardTime at its stored value. This will repeat every block until BlockTime exceeds
+		// LastRewardTime.
+		return nil
+	}
+
+	// TODO: reward accumulator math
+
+	// set LastRewardTime to current block time
+	return k.setLastRewardsTime(ctx, currentTime)
+}
+
+// clearRewardTracker clears all reward trackers matching a specific account + tier + bonded uToken denom
 // from the store by setting them to zero
-func (k Keeper) ClearRewardTracker(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, bondDenom string,
+func (k Keeper) clearRewardTracker(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, bondDenom string,
 ) error {
 	trackers := k.getFullRewardTracker(ctx, addr, bondDenom, tier)
 	for _, rewardCoin := range trackers {

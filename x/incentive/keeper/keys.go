@@ -27,12 +27,13 @@ var (
 	keyPrefixCompletedIncentiveProgram = []byte{0x04}
 	keyPrefixNextProgramID             = []byte{0x05}
 	keyPrefixLastRewardsTime           = []byte{0x06}
-	keyPrefixTotalBonded               = []byte{0x07}
-	keyPrefixBondAmount                = []byte{0x08}
-	keyPrefixRewardTracker             = []byte{0x09}
-	keyPrefixRewardAccumulator         = []byte{0x0A}
-	keyPrefixUnbondings                = []byte{0x0B}
-	keyPrefixTotalUnbonding            = []byte{0x0C}
+	keyPrefixRewardTracker             = []byte{0x07}
+	keyPrefixRewardAccumulator         = []byte{0x08}
+	keyPrefixUnbondings                = []byte{0x09}
+	keyPrefixBondAmount                = []byte{0x0A}
+	keyPrefixUnbondAmount              = []byte{0x0B}
+	keyPrefixTotalBonded               = []byte{0x0C}
+	keyPrefixTotalUnbonding            = []byte{0x0D}
 )
 
 // keyIncentiveProgram returns a KVStore key for an incentive program.
@@ -94,6 +95,24 @@ func keyBondAmountNoTier(addr sdk.AccAddress, denom string) []byte {
 func keyBondAmountNoDenom(addr sdk.AccAddress) []byte {
 	// bondPrefix | lengthprefixed(addr)
 	return util.ConcatBytes(0, keyPrefixBondAmount, address.MustLengthPrefix(addr))
+}
+
+// keyUnbondAmount returns a KVStore key for unbonding amounts for a uToken denom, account, and tier.
+func keyUnbondAmount(addr sdk.AccAddress, denom string, tier incentive.BondTier) []byte {
+	// unbondPrefix | lengthprefixed(addr) | denom | 0x00 | tier
+	return util.ConcatBytes(0, keyUnbondAmountNoTier(addr, denom), []byte{byte(tier)})
+}
+
+// keyUnbondAmountNoTier returns the common prefix used by all uTokens unbonding from a given account and denom.
+func keyUnbondAmountNoTier(addr sdk.AccAddress, denom string) []byte {
+	// unbondPrefix | lengthprefixed(addr) | denom | 0x00
+	return util.ConcatBytes(1, keyUnbondAmountNoDenom(addr), []byte(denom))
+}
+
+// keyUnbondAmountNoDenom returns the common prefix used by all uTokens unbonding from to a given account.
+func keyUnbondAmountNoDenom(addr sdk.AccAddress) []byte {
+	// unbondPrefix | lengthprefixed(addr)
+	return util.ConcatBytes(0, keyPrefixUnbondAmount, address.MustLengthPrefix(addr))
 }
 
 // keyRewardAccumulator returns a KVStore key for a single RewardAccumulator denom for a bonded uToken
