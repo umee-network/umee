@@ -15,7 +15,7 @@ jobs:
   install-tparse:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         with:
           go-version: 1.19
       - uses: actions/cache@v3
@@ -51,7 +51,7 @@ jobs:
             go.sum
       - name: Setup go
         if: steps.cache-binaries.outputs.cache-hit != 'true' && env.GIT_DIFF
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: 1.19
           cache: true
@@ -75,7 +75,7 @@ jobs:
             **/**.go
             go.mod
             go.sum
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
           go-version: 1.19
@@ -104,7 +104,7 @@ jobs:
             **/**.go
             go.mod
             go.sum
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
           go-version: 1.19
@@ -140,7 +140,7 @@ jobs:
             **/**.go
             price-feeder/go.mod
             price-feeder/go.sum
-      - uses: actions/setup-go@v3
+      - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
           go-version: 1.19
