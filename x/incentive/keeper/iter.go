@@ -3,6 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/util/store"
 	"github.com/umee-network/umee/v4/x/incentive"
 )
@@ -39,6 +40,66 @@ func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 
 	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
 	return programs, err
+}
+
+// iterateAccountUnbondings iterates over all unbonding uTokens for an address
+func (k Keeper) iterateAccountUnbondings(ctx sdk.Context, addr sdk.AccAddress,
+	_ func(_ sdk.Context, _ incentive.AccountUnbondings) error,
+) error {
+	prefix := keyUnbondingsNoDenom(addr)
+
+	iterator := func(key, val []byte) error {
+		// TODO: implement (used for account updating and also queries)
+		return incentive.ErrNotImplemented
+	}
+
+	return store.Iterate(k.KVStore(ctx), prefix, iterator)
+}
+
+// IterateAccountBonds iterates over all bonded uTokens for an address by each individual
+// uToken denom and tier
+func (k Keeper) IterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
+	_ func(ctx sdk.Context, addr sdk.AccAddress, _ incentive.BondTier, _ sdk.Coin) error,
+) error {
+	prefix := keyBondAmountNoDenom(addr)
+
+	iterator := func(key, val []byte) error {
+		// TODO: implement (used for reward claiming and also queries)
+		return incentive.ErrNotImplemented
+	}
+
+	return store.Iterate(k.KVStore(ctx), prefix, iterator)
+}
+
+// getFullRewardTracker combines all single-reward-denom reward trackers for a bonded uToken and tier
+func (k Keeper) getFullRewardTracker(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier,
+) sdk.DecCoins {
+	prefix := keyRewardTrackerNoReward(addr, denom, tier)
+
+	tracker := sdk.NewDecCoins()
+	iterator := func(key, val []byte) error {
+		// TODO: implement
+
+		return incentive.ErrNotImplemented
+	}
+
+	util.Panic(store.Iterate(k.KVStore(ctx), prefix, iterator))
+	return tracker
+}
+
+// getFullRewardAccumulator combines all single-reward-denom reward accumulators for a uToken denom and tier
+func (k Keeper) getFullRewardAccumulator(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.DecCoins {
+	prefix := keyRewardAccumulatorNoReward(denom, tier)
+
+	accumulator := sdk.NewDecCoins()
+	iterator := func(key, val []byte) error {
+		// TODO: implement
+
+		return incentive.ErrNotImplemented
+	}
+
+	util.Panic(store.Iterate(k.KVStore(ctx), prefix, iterator))
+	return accumulator
 }
 
 // getPaginatedIncentivePrograms returns all incentive programs
