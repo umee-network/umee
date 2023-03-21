@@ -13,17 +13,16 @@ WORKDIR /src/umee
 COPY go.mod go.sum ./
 RUN go mod download
 
-## Download go module dependnecies for price-feeder
-WORKDIR /src/umee/price-feeder
-COPY price-feeder/go.mod price-feeder/go.sum ./
-RUN go mod download
-
 ## Build umeed and price-feeder
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
-RUN make install 
-RUN cd price-feeder && make install
+RUN make install
+WORKDIR /src/price-feeder
+# TODO: find the latest version
+RUN wget https://github.com/umee-network/umee/releases/download/price-feeder%2Fv2.1.0/price-feeder-v2.1.0-linux-amd64.tar.gz -O - | tar -zxf - \
+  && chmod a+x price-fee*/price-feeder \
+  && mv price-fee*/price-feeder /go/bin/
 
 ## Prepare the final clear binary
 FROM ubuntu:rolling
