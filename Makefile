@@ -232,7 +232,7 @@ cover-html: test-unit-cover
 test-e2e: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
 
-test-e2e-cov:
+test-e2e-cov: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
 
 test-e2e-clean:
