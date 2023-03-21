@@ -1047,7 +1047,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 	isHealthy := false
 	for i := 0; i < 20; i++ {
-		isHealthy := checkHealth()
+		isHealthy = checkHealth()
 		if isHealthy {
 			break
 		}

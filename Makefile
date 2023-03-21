@@ -181,7 +181,7 @@ docker-push-gaia:
 
 docker-build-price-feeder:
 	@git clone --branch umee https://github.com/ojo-network/price-feeder
-	@docker buildx build --platform linux/amd64 -t ghcr.io/umee-network/price-feeder-umee-e2e -f price-feeder/Dockerfile price-feeder
+	@docker build -t ghcr.io/umee-network/price-feeder-umee-e2e -f price-feeder/Dockerfile price-feeder
 	@rm -rf price-feeder
 
 docker-push-price-feeder:
