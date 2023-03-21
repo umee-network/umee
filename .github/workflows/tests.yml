@@ -94,6 +94,7 @@ jobs:
 
   test-e2e:
     runs-on: ubuntu-latest
+    container: ubuntu
     needs: install-tparse
     timeout-minutes: 25
     steps:
