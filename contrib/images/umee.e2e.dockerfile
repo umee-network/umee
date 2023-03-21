@@ -6,7 +6,6 @@ FROM ghcr.io/umee-network/peggo:latest-1.4 as peggo
 
 FROM golang:1.19-bullseye AS builder
 ARG EXPERIMENTAL=false
-ENV EXPERIMENTAL $EXPERIMENTAL
 
 ## Download go module dependencies for umeed
 WORKDIR /src/umee
@@ -19,6 +18,8 @@ COPY price-feeder/go.mod price-feeder/go.sum ./
 RUN go mod download
 
 ## Build umeed and price-feeder
+## optimization: we move setting experimental flag here.
+ENV EXPERIMENTAL $EXPERIMENTAL
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
