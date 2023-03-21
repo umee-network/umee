@@ -1,11 +1,9 @@
 package incentive
 
 import (
-	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util/checkers"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 var (
@@ -23,18 +21,18 @@ func NewMsgClaim(account sdk.AccAddress) *MsgClaim {
 	}
 }
 
-func (msg *MsgClaim) ValidateBasic() error {
+func (msg MsgClaim) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Account)
 	return err
 }
 
-func (msg *MsgClaim) GetSigners() []sdk.AccAddress {
+func (msg MsgClaim) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgClaim) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgClaim) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
@@ -52,17 +50,17 @@ func NewMsgBond(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBond {
 	}
 }
 
-func (msg *MsgBond) ValidateBasic() error {
+func (msg MsgBond) ValidateBasic() error {
 	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
 }
 
-func (msg *MsgBond) GetSigners() []sdk.AccAddress {
+func (msg MsgBond) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgBond) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgBond) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
@@ -80,17 +78,17 @@ func NewMsgBeginUnbonding(account sdk.AccAddress, tier uint32, asset sdk.Coin) *
 	}
 }
 
-func (msg *MsgBeginUnbonding) ValidateBasic() error {
+func (msg MsgBeginUnbonding) ValidateBasic() error {
 	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
 }
 
-func (msg *MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
+func (msg MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgBeginUnbonding) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgBeginUnbonding) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
@@ -108,20 +106,20 @@ func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32, asset sdk.Coin) *Ms
 	}
 }
 
-func (msg *MsgSponsor) ValidateBasic() error {
+func (msg MsgSponsor) ValidateBasic() error {
 	if msg.Program == 0 {
 		return ErrInvalidProgramID.Wrapf("%d", msg.Program)
 	}
 	return validateSenderAsset(msg.Sponsor, &msg.Asset)
 }
 
-func (msg *MsgSponsor) GetSigners() []sdk.AccAddress {
+func (msg MsgSponsor) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Sponsor)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgSponsor) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgSponsor) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
@@ -164,7 +162,7 @@ func (msg MsgGovSetParams) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgGovSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgCreateProgram(authority, title, description string, programs []IncentiveProgram) *MsgGovCreatePrograms {
+func NewMsgGovCreatePrograms(authority, title, description string, programs []IncentiveProgram) *MsgGovCreatePrograms {
 	return &MsgGovCreatePrograms{
 		Title:       title,
 		Description: description,
@@ -205,21 +203,6 @@ func (msg MsgGovCreatePrograms) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgGovCreatePrograms) Type() string { return sdk.MsgTypeURL(&msg) }
 
-// validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
-// to incentive programs which have not yet been funded or passed by governance
-func validateProposedIncentiveProgram(program IncentiveProgram) error {
-	if program.Id != 0 {
-		return ErrInvalidProgramID.Wrapf("%d", program.Id)
-	}
-	if !program.RemainingRewards.IsZero() {
-		return ErrNonzeroRemainingRewards.Wrap(program.RemainingRewards.String())
-	}
-	if !program.FundedRewards.IsZero() {
-		return ErrNonzeroFundedRewards.Wrap(program.FundedRewards.String())
-	}
-	return program.Validate()
-}
-
 func validateSenderAsset(sender string, asset *sdk.Coin) error {
 	_, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
@@ -238,21 +221,5 @@ func validateSenderAssetTier(sender string, tier uint32, asset *sdk.Coin) error 
 	if tier < 1 || tier > 3 {
 		return ErrInvalidTier.Wrapf("%d", tier)
 	}
-	return nil
-}
-
-// Validate performs validation on an IncentiveProgram type returning an error
-// if the program is invalid.
-func (ip IncentiveProgram) Validate() error {
-	if err := sdk.ValidateDenom(ip.Denom); err != nil {
-		return err
-	}
-	if !leveragetypes.HasUTokenPrefix(ip.Denom) {
-		// only allow uToken denoms
-		return errors.Wrap(leveragetypes.ErrNotUToken, ip.Denom)
-	}
-
-	// TODO #1749: Finish validate logic
-
 	return nil
 }

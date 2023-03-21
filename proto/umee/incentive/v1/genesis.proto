@@ -10,20 +10,19 @@ import "umee/incentive/v1/incentive.proto";
 // GenesisState defines the x/incentive module's genesis state.
 message GenesisState {
   Params                     params              = 1 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram  completed_programs  = 2 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram  ongoing_programs    = 3 [(gogoproto.nullable) = false];
-  repeated IncentiveProgram  upcoming_programs   = 4 [(gogoproto.nullable) = false];
-  uint32                     next_program_id     = 5;
-  uint64                     last_rewards_time   = 6;
-  repeated TotalBond         total_bonded        = 7 [(gogoproto.nullable) = false];
-  repeated Bond              bonds               = 8 [(gogoproto.nullable) = false];
-  repeated RewardTracker     reward_trackers     = 9 [(gogoproto.nullable) = false];
-  repeated RewardAccumulator reward_accumulators = 10 [(gogoproto.nullable) = false];
-  repeated AccountUnbondings account_unbondings  = 11 [(gogoproto.nullable) = false];
+  uint32                     next_program_id     = 2;
+  uint64                     last_rewards_time   = 3;
+  repeated RewardTracker     reward_trackers     = 4 [(gogoproto.nullable) = false];
+  repeated RewardAccumulator reward_accumulators = 5 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram  upcoming_programs   = 6 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram  ongoing_programs    = 7 [(gogoproto.nullable) = false];
+  repeated IncentiveProgram  completed_programs  = 8 [(gogoproto.nullable) = false];
+  repeated Bond              bonds               = 9 [(gogoproto.nullable) = false];
+  repeated AccountUnbondings account_unbondings  = 10 [(gogoproto.nullable) = false];
 }
 
 // TotalBond tracks the amount of coins of one uToken denomination bonded to a
-// given reward tier by all accounts.
+// given reward tier by all accounts. Used by queries TotalBonded and TotalUnbonding.
 message TotalBond {
   uint32                   tier   = 1;
   cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
@@ -53,7 +52,7 @@ message RewardTracker {
 }
 
 // RewardAccumulator is a global reward tracking struct that indicates the amount
-// of rewards that a single unit of denom would have acucmulated if it was bonded
+// of rewards that a single unit of denom would have accumulated if it was bonded
 // at a given tier since genesis.
 message RewardAccumulator {
   uint32   tier                                       = 1;
@@ -66,13 +65,15 @@ message RewardAccumulator {
 
 // Unbonding is a structure that tracks an in-progress token unbonding.
 message Unbonding {
-  uint32                   tier   = 1;
-  uint64                   end    = 2;
-  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  uint64                   end    = 1;
+  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
 }
 
-// AccountUnbondings is a structure that is used to store all of an account's unbondings.
+// AccountUnbondings is a structure that is used to store all of an account's unbondings
+// for a single bonded uToken denom and and unbonding tier in both KVStore and genesis state.
 message AccountUnbondings {
   string             account    = 1;
-  repeated Unbonding unbondings = 2 [(gogoproto.nullable) = false];
+  string             denom      = 2;
+  uint32             tier       = 3;
+  repeated Unbonding unbondings = 4 [(gogoproto.nullable) = false];
 }
