@@ -3,7 +3,7 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	
+
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -206,48 +206,86 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-// AvailableCollateralLiquidity calculates the maximum available amount of uToken to withdraw
-// from the module given a token's denom.
-// The formula derives from:
-//
-//	min_collateral_liquidity = (module_liquidity - X)/(module_collateral - X)
-//	X = (module_liquidity - min_collateral_liquidity * module_collateral) / (1 - min_collateral_liquidity)
-func (k Keeper) AvailableCollateralLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
-	// CL = L / C
-	//	  = (L1 - X - Y) / (C1 - X)
+// AvailableModuleCollateralLiquidity calculates the maximum available amount of uToken to withdraw
+// from the module given a token's denom. This amount is the sum of maximum available liquidity and
+// collateral from the module.
+func (k Keeper) AvailableModuleCollateralLiquidity(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdkmath.Int, error) {
+	uDenom := types.ToUTokenDenom(denom)
+	userSpendableUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
 
-	// If targeting a given maximize (X+Y), should we try to withdraw X or Y first?
-
-	// X = amount of collateral to withdraw
-	// Y = amount of non-collateral to withdraw
-
-	token, err := k.GetTokenSettings(ctx, denom)
-	if err != nil {
-		return sdk.ZeroInt(), err
-	}
-
-	// L1
+	// Get module liquidity for the denom
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
-	uDenom := types.ToUTokenDenom(denom)
+	// Get module collateral for the uDenom
 	totalCollateral := k.GetTotalCollateral(ctx, uDenom)
-
-	// C1
 	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
 
-	// CL
-	minCollateralLiquidity := token.MinCollateralLiquidity
-
-	// x = (L1 - CL*C1) / (1 - CL)
-	totalAvailable := (sdk.NewDec(liquidity.Int64()).Sub(sdk.NewDec(totalTokenCollateral.AmountOf(denom).Int64()).Mul(minCollateralLiquidity))).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
-
-	uTokenTotalAvailable, err := k.ExchangeToken(ctx, sdk.NewCoin(denom, sdkmath.NewInt(totalAvailable.RoundInt64())))
+	// Get min_collateral_liquidity for the denom
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
+	minCollateralLiquidity := token.MinCollateralLiquidity
 
-	return uTokenTotalAvailable.Amount, nil
+	// The formula to calculate the available_module_liquidity is as follows:
+	//
+	// 	min_collateral_liquidity = (module_liquidity - available_module_liquidity) / module_collateral
+	// 	available_module_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
+	availableModuleLiquidity :=
+		sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
+
+	// If available_module_liquidity is 0 or less, we cannot withdraw anything
+	if availableModuleLiquidity.LTE(sdk.ZeroDec()) {
+		return sdkmath.ZeroInt(), nil
+	}
+
+	// If user_spendable_utokens >= available_module_liquidity we can only withdraw
+	// available_module_liquidity
+	if userSpendableUtokens.GTE(availableModuleLiquidity.TruncateInt()) {
+		return availableModuleLiquidity.TruncateInt(), nil
+	}
+
+	// If after subtracting all the user_spendable_utokens from the available_module_liquidity,
+	// the result is higher than the total module_collateral, we can withdraw user_spendable_utokens + module_collateral.
+	if availableModuleLiquidity.TruncateInt().Sub(userSpendableUtokens).GTE(totalTokenCollateral.AmountOf(denom)) {
+		return userSpendableUtokens.Add(totalTokenCollateral.AmountOf(denom)), nil
+	}
+
+	// At this point we know that there is enough available_module_liquidity to withdraw user_spendable_utokens.
+	// Now we need to get the available_module_collateral after withdrawing user_spendable_utokens:
+	//
+	// min_collateral_liquidity = (module_liquidity - user_spendable_utokens - available_module_collateral)
+	//									/ (module_collateral  - available_module_collateral)
+	//
+	// available_module_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity * module_collateral)
+	//									/ (1 - min_collateral_liquidity)
+	availableModuleCollateral :=
+		(sdk.NewDec(liquidity.Sub(userSpendableUtokens).Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
+
+	// Summarizing both we obtain the max available liquidity + collateral we can withdraw from the module
+	return userSpendableUtokens.Add(availableModuleCollateral.TruncateInt()), nil
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -125,13 +125,22 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	// Get the total available for uToken to prevent withdraws above this limit.
-	uTokenTotalAvailable, err := s.keeper.AvailableCollateralLiquidity(ctx, msg.Denom)
-	//todo: analyze exit path
+	uTokenTotalAvailable, err := s.keeper.AvailableModuleCollateralLiquidity(ctx, supplierAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
+
+	// If no uTokens is available from liquidity and collateral, nothing can be withdrawn.
+	if uTokenTotalAvailable.IsZero() {
+		zeroCoin := coin.Zero(msg.Denom)
+		zeroUcoin := coin.Zero(uToken.Denom)
+		return &types.MsgMaxWithdrawResponse{Withdrawn: zeroUcoin, Received: zeroCoin}, nil
+	}
+
+	// Get the minimum between the available and the desired to withdraw
 	uToken.Amount = sdk.MinInt(uToken.Amount, uTokenTotalAvailable)
 
+	// Proceed to withdraw
 	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
 		return nil, err
