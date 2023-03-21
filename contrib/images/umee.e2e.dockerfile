@@ -22,7 +22,7 @@ RUN go mod download
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
-RUN make install 
+RUN BUILD_TAGS=badgerdb make install
 RUN cd price-feeder && make install
 
 ## Prepare the final clear binary
