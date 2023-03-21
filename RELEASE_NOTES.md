@@ -33,6 +33,14 @@ minimum-gas-prices = "0.1uumee"
 
 In next release we will be enforcing the minimum setting.
 
+#### Peggo
+
+Related to min gas price updates, you MUST also set the related parameter when starting Peggo:
+
+```
+--cosmos-gas-prices="0.1uumee"
+```
+
 ### Upgrade instructions
 
 - Note: Skip this step if you build binary from source and are able to properly link libwasmvm.
@@ -48,7 +56,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 - Swap binaries.
 - Restart the chain.
 - Ensure latest Peggo (v1.4.0) is running
-- Ensure latest Price Feeder (v2.1.0) is running
+- Ensure latest Price Feeder (v2.1.0) is running and check your price feeder config is up to date.
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
