@@ -1,0 +1,50 @@
+coverage:
+  precision: 2
+  round: down
+  range: 70...100
+
+  status:
+    # Learn more at https://docs.codecov.io/docs/commit-status
+    project:
+      default:
+        target: auto
+        threshold: 2% # # allow this much decrease on project
+        if_ci_failed: error
+        if_not_found: success
+      app:
+        target: 70%
+        paths:
+          - "app/"
+      modules:
+        target: 70%
+        paths:
+          - "x/"
+          - "!x/**/client/" # ignore client package
+      client:
+        target: 70%
+        paths:
+          - client
+          - "x/**/client/"
+
+comment:
+  layout: "reach, diff, files"
+  behavior: default # update if exists else create new
+  require_changes: true
+
+ignore:
+# ignore all files of these types
+  - "**/*.proto"
+  - "**/*.yml"
+  - "**/*.json"
+  - "**/*.toml"
+  - "**/*.rst"
+  - "**/*.md"
+# auto-generated files
+  - "**/*.pb.go"
+  - "**/*.pb.gw.go"
+# ignore these folders and all their contents
+  - "docs"
+  - "tests"
+  - "scripts"
+  - "contrib"
+  - "swagger"

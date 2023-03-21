@@ -95,9 +95,9 @@ func (k Keeper) SetParams(ctx sdk.Context, params incentive.Params) error {
 	return nil
 }
 
-// GetIncentiveProgram gets an incentive program by ID, regardless of the program's status.
+// getIncentiveProgram gets an incentive program by ID, regardless of the program's status.
 // Returns the program's status if found, or an error if it does not exist.
-func (k Keeper) GetIncentiveProgram(ctx sdk.Context, id uint32) (
+func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 	incentive.IncentiveProgram, incentive.ProgramStatus, error,
 ) {
 	statuses := []incentive.ProgramStatus{
@@ -147,14 +147,14 @@ func (k Keeper) SetIncentiveProgram(ctx sdk.Context,
 	return nil
 }
 
-// GetNextProgramID gets the ID that will be assigned to the next incentive program passed by governance.
-func (k Keeper) GetNextProgramID(ctx sdk.Context) uint32 {
+// getNextProgramID gets the ID that will be assigned to the next incentive program passed by governance.
+func (k Keeper) getNextProgramID(ctx sdk.Context) uint32 {
 	return store.GetUint32(k.KVStore(ctx), keyPrefixNextProgramID, "next program ID")
 }
 
-// SetNextProgramID sets the ID that will be assigned to the next incentive program passed by governance.
-func (k Keeper) SetNextProgramID(ctx sdk.Context, id uint32) error {
-	prev := k.GetNextProgramID(ctx)
+// setNextProgramID sets the ID that will be assigned to the next incentive program passed by governance.
+func (k Keeper) setNextProgramID(ctx sdk.Context, id uint32) error {
+	prev := k.getNextProgramID(ctx)
 	if id < prev {
 		return incentive.ErrDecreaseNextProgramID.Wrapf("%d to %d", id, prev)
 	}
