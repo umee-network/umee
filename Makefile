@@ -186,14 +186,13 @@ docker-push-gaia:
 ###############################################################################
 
 PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
-PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
 TEST_PACKAGES=./...
-TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
+TEST_TARGETS := test-unit test-unit-cover test-race
 TEST_COVERAGE_PROFILE=coverage.txt
 
 UNIT_TEST_TAGS = norace 
 TEST_RACE_TAGS = ""
-TEST_E2E_TAGS = ""
+TEST_E2E_TAGS = "e2e"
 
 ifeq ($(EXPERIMENTAL),true)
 	UNIT_TEST_TAGS	+= experimental
@@ -207,8 +206,6 @@ test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TES
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v -tags='$(TEST_E2E_TAGS)'
-test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
 run-tests:
@@ -226,6 +223,12 @@ cover-html: test-unit-cover
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
 
+test-e2e:
+# NOTE: when building locally, requires to run: $(MAKE) docker-build
+	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
+
+test-e2e-cov:
+	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
 
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
