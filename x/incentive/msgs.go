@@ -23,18 +23,18 @@ func NewMsgClaim(account sdk.AccAddress) *MsgClaim {
 	}
 }
 
-func (msg *MsgClaim) ValidateBasic() error {
+func (msg MsgClaim) ValidateBasic() error {
 	_, err := sdk.AccAddressFromBech32(msg.Account)
 	return err
 }
 
-func (msg *MsgClaim) GetSigners() []sdk.AccAddress {
+func (msg MsgClaim) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgClaim) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgClaim) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
@@ -52,17 +52,17 @@ func NewMsgBond(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBond {
 	}
 }
 
-func (msg *MsgBond) ValidateBasic() error {
+func (msg MsgBond) ValidateBasic() error {
 	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
 }
 
-func (msg *MsgBond) GetSigners() []sdk.AccAddress {
+func (msg MsgBond) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgBond) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgBond) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
@@ -80,17 +80,17 @@ func NewMsgBeginUnbonding(account sdk.AccAddress, tier uint32, asset sdk.Coin) *
 	}
 }
 
-func (msg *MsgBeginUnbonding) ValidateBasic() error {
+func (msg MsgBeginUnbonding) ValidateBasic() error {
 	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
 }
 
-func (msg *MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
+func (msg MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Account)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgBeginUnbonding) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgBeginUnbonding) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
@@ -108,20 +108,20 @@ func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32, asset sdk.Coin) *Ms
 	}
 }
 
-func (msg *MsgSponsor) ValidateBasic() error {
+func (msg MsgSponsor) ValidateBasic() error {
 	if msg.Program == 0 {
 		return ErrInvalidProgramID.Wrapf("%d", msg.Program)
 	}
 	return validateSenderAsset(msg.Sponsor, &msg.Asset)
 }
 
-func (msg *MsgSponsor) GetSigners() []sdk.AccAddress {
+func (msg MsgSponsor) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Sponsor)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgSponsor) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
+func (msg MsgSponsor) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
 	return sdk.MustSortJSON(bz)
 }
 
