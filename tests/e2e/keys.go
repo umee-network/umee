@@ -7,6 +7,12 @@ import (
 	"github.com/cosmos/go-bip39"
 )
 
+var (
+	ATOM          = "ATOM"
+	ATOMBaseDenom = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+	ATOMExponent  = 6
+)
+
 func createMnemonic() (string, error) {
 	entropySeed, err := bip39.NewEntropy(256)
 	if err != nil {
