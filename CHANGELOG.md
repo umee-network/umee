@@ -46,6 +46,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Fixes
+
+- [1929](https://github.com/umee-network/umee/pull/1929) Leverage: Fix `MaxWithdraw` taking into account the Module 
+  Available Liquidity and Collateral and Min Liquidity Collateral parameter.
+
 ## [v4.2.0](https://github.com/umee-network/umee/releases/tag/v4.2.0) - 2023-03-15
 
 ### Features

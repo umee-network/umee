@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util/coin"
@@ -139,7 +140,7 @@ func (s msgServer) MaxWithdraw(
 	// Get the minimum between the available and the desired to withdraw
 	uToken.Amount = sdk.MinInt(uToken.Amount, uTokenTotalAvailable)
 
-	// Proceed to withdraw
+	// Proceed to withdraw.
 	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
 	if err != nil {
 		return nil, err
