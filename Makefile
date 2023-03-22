@@ -232,6 +232,10 @@ cover-html: test-unit-cover
 test-e2e: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
 
+# Trimmed variant of e2e to run local tests
+test-e2e-local: $(TEST_E2E_DEPS)
+	go test ./tests/e2e-local/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
+
 test-e2e-cov: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
 
