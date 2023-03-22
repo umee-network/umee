@@ -129,7 +129,7 @@ func (s msgServer) MaxWithdraw(
 		return nil, err
 	}
 
-	// If no uTokens is available from liquidity and collateral, nothing can be withdrawn.
+	// If zero uTokens are available from liquidity and collateral, nothing can be withdrawn.
 	if uTokenTotalAvailable.IsZero() {
 		zeroCoin := coin.Zero(msg.Denom)
 		zeroUcoin := coin.Zero(uToken.Denom)
