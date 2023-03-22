@@ -73,8 +73,6 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 ifeq ($(ENABLE_ROCKSDB),true)
   BUILD_TAGS += rocksdb
   test_tags += rocksdb
-else
-  $(warning RocksDB support is disabled; to build and test with RocksDB support, set ENABLE_ROCKSDB=true)
 endif
 
 # DB backend selection
@@ -125,14 +123,17 @@ BUILD_TARGETS := build install
 
 build: BUILD_ARGS=-o $(BUILDDIR)/
 build-linux:
+	@if [ "${ENABLE_ROCKSDB}" != "true" ]; then \
+		echo "RocksDB support is disabled; to build and test with RocksDB support, set ENABLE_ROCKSDB=true"; fi
 	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) LEDGER_ENABLED=false $(MAKE) build
 
 $(BUILD_TARGETS): go.sum $(BUILDDIR)/
+	@if [ "${ENABLE_ROCKSDB}" != "true" ]; then \
+		echo "RocksDB support is disabled; to build and test with RocksDB support, set ENABLE_ROCKSDB=true"; fi
 	go $@ -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
 
 $(BUILDDIR)/:
 	mkdir -p $(BUILDDIR)/
-
 
 build-experimental: go.sum
 	@echo "--> Building Experimental version..."
@@ -168,10 +169,10 @@ go.sum: go.mod
 ###############################################################################
 
 docker-build:
-	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
+	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
 docker-build-experimental:
-	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true . 
+	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true .
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
@@ -186,19 +187,20 @@ docker-push-gaia:
 ###############################################################################
 
 PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
-PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
 TEST_PACKAGES=./...
-TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
+TEST_TARGETS := test-unit test-unit-cover test-race
 TEST_COVERAGE_PROFILE=coverage.txt
 
 UNIT_TEST_TAGS = norace 
 TEST_RACE_TAGS = ""
-TEST_E2E_TAGS = ""
+TEST_E2E_TAGS = "e2e"
+TEST_E2E_DEPS = docker-build
 
 ifeq ($(EXPERIMENTAL),true)
-	UNIT_TEST_TAGS	+= experimental
-	TEST_RACE_TAGS 	+= experimental
-	TEST_E2E_TAGS 	+= experimental
+	UNIT_TEST_TAGS += experimental
+	TEST_RACE_TAGS += experimental
+	TEST_E2E_TAGS += experimental
+	TEST_E2E_DEPS = docker-build-experimental
 endif
 
 test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
@@ -207,8 +209,6 @@ test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TES
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v -tags='$(TEST_E2E_TAGS)'
-test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
 run-tests:
@@ -226,6 +226,18 @@ cover-html: test-unit-cover
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
 
+# NOTE: when building locally, we need to run: $(MAKE) docker-build
+# however we should be able to optimize it:
+# https://linear.app/umee/issue/UMEE-463/fix-docker-login-problem-when-running-e2e-tests
+test-e2e: $(TEST_E2E_DEPS)
+	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
+
+test-e2e-cov: $(TEST_E2E_DEPS)
+	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
+
+test-e2e-clean:
+	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
+	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
