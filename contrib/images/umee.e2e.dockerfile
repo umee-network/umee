@@ -20,7 +20,7 @@ RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";
 RUN make install
 WORKDIR /src/price-feeder
 # TODO: find the latest version
-RUN wget https://github.com/umee-network/umee/releases/download/price-feeder%2Fv2.1.0/price-feeder-v2.1.0-linux-amd64.tar.gz -O - | tar -zxf - \
+RUN wget https://github.com/ojo-network/price-feeder/releases/latest/download/price-feeder-v0.1.1-linux-amd64.tar.gz -O - | tar -zxf - \
   && chmod a+x price-fee*/price-feeder \
   && mv price-fee*/price-feeder /go/bin/
 
