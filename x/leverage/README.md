@@ -75,8 +75,7 @@ Users have the following actions available to them:
   Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
 - `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdrawn. 
-  This amount is calculated taking into account the available liquidity and collateral the user has, and the 
-  available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` of the `Token`. 
+  This amount is calculated taking into account the available liquidity and collateral the user has, and the available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` of the `Token`. 
 
 - `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#borrow-limit).
 
