@@ -52,8 +52,11 @@ message RewardTracker {
 }
 
 // RewardAccumulator is a global reward tracking struct that indicates the amount
-// of rewards that a single unit of denom would have accumulated if it was bonded
-// at a given tier since genesis.
+// of rewards that a reference amount of a bonded uToken denom would have accumulated
+// if it was bonded at a given tier since genesis. To prevent rounding issues, the
+// reference amount is 10^exponent of the uToken's smallest possible amount, generally
+// but not necessarily matching the exponent of the associated base token registered
+// with the leverage module.
 message RewardAccumulator {
   uint32   tier                                       = 1;
   string   denom                                      = 2;
@@ -61,6 +64,7 @@ message RewardAccumulator {
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
+  uint32   exponent = 4;
 }
 
 // Unbonding is a structure that tracks an in-progress token unbonding.
