@@ -67,18 +67,16 @@ Users have the following actions available to them:
 
 - Enable or Disable (`MsgSetCollateral`) a uToken denomination as collateral for borrowing.
 
-  Enabling _uTokens_ as collateral stores them in the `leverage` module account, so they cannot be transferred while 
-  in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
+  Enabling _uTokens_ as collateral stores them in the `leverage` module account, so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
   If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
 
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
   Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
-- `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdrawn. This 
-  amount is calculated taking into account the available liquidity and collateral the user has, and the available 
-  liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` of the 
-  `Token`. 
+- `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdrawn. 
+  This amount is calculated taking into account the available liquidity and collateral the user has, and the 
+  available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` of the `Token`. 
 
 - `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#borrow-limit).
 
