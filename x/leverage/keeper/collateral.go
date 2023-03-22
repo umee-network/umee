@@ -265,7 +265,7 @@ func (k Keeper) AvailableModuleCollateralLiquidity(ctx sdk.Context, addr sdk.Acc
 	availableModuleCollateral :=
 		(sdk.NewDec(liquidity.Sub(userSpendableUtokens).Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
 
-	// Summarizing both we obtain the max available liquidity + collateral we can withdraw from the module
+	// Summarizing both (user_spendable_utokens + available_module_collateral) we obtain the max we can withdraw from the module
 	return userSpendableUtokens.Add(availableModuleCollateral.TruncateInt()), nil
 }
 
