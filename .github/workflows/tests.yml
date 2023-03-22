@@ -119,11 +119,6 @@ jobs:
         # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
 
-      - name: Build Docker Image
-        if: env.GIT_DIFF
-        run: |
-          DOCKER_BUILDKIT=1 make docker-build-experimental
-
       - name: Test E2E
         if: env.GIT_DIFF
         run: |

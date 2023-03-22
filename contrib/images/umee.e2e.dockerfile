@@ -6,7 +6,6 @@ FROM ghcr.io/umee-network/peggo:latest-1.4 as peggo
 
 FROM golang:1.19-bullseye AS builder
 ARG EXPERIMENTAL=false
-ENV EXPERIMENTAL $EXPERIMENTAL
 
 ## Download go module dependencies for umeed
 WORKDIR /src/umee
