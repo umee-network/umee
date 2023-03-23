@@ -6,11 +6,11 @@ import (
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
-// maxWithdraw calculates the maximum amount of uTokens an account can currently withdraw.
+// userMaxWithdraw calculates the maximum amount of uTokens an account can currently withdraw.
 // input denom should be a base token. If oracle prices are missing for some of the borrower's
 // collateral (other than the denom being withdrawn), computes the maximum safe withdraw allowed
 // by only the collateral whose prices are known
-func (k *Keeper) maxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
+func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
 	availableUTokens, err := k.ExchangeToken(ctx, availableTokens)

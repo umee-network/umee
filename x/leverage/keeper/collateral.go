@@ -206,23 +206,22 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-// AvailableModuleCollateralLiquidity calculates the maximum available amount of uToken to withdraw
+// moduleMaxWithdraw calculates the maximum available amount of uToken to withdraw
 // from the module given a token denom and a user's address. The calculation first finds the maximum
 // amount of non-collateral uTokens the user can withdraw up to the amount in their wallet, then
 // determines how much collateral can be withdrawn in addition to that. The returned value is the sum
 // of the two values.
-func (k Keeper) AvailableModuleCollateralLiquidity(ctx sdk.Context, addr sdk.AccAddress, denom string) (
+func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (
 	sdkmath.Int,
 	error,
 ) {
-	uDenom := types.ToUTokenDenom(denom)
-	userSpendableUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
+	denom := types.ToTokenDenom(spendableUTokens.Denom)
 
 	// Get module liquidity for the denom
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
 	// Get module collateral for the uDenom
-	totalCollateral := k.GetTotalCollateral(ctx, uDenom)
+	totalCollateral := k.GetTotalCollateral(ctx, spendableUTokens.Denom)
 	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
 		return sdk.ZeroInt(), err
@@ -249,15 +248,15 @@ func (k Keeper) AvailableModuleCollateralLiquidity(ctx sdk.Context, addr sdk.Acc
 
 	// If user_spendable_utokens >= available_module_liquidity we can only withdraw
 	// available_module_liquidity.
-	if userSpendableUtokens.GTE(availableModuleLiquidity.TruncateInt()) {
+	if spendableUTokens.Amount.GTE(availableModuleLiquidity.TruncateInt()) {
 		return availableModuleLiquidity.TruncateInt(), nil
 	}
 
 	// If after subtracting all the user_spendable_utokens from the available_module_liquidity,
 	// the result is higher than the total module_collateral,
 	// we can withdraw user_spendable_utokens + module_collateral.
-	if availableModuleLiquidity.TruncateInt().Sub(userSpendableUtokens).GTE(totalTokenCollateral.AmountOf(denom)) {
-		return userSpendableUtokens.Add(totalTokenCollateral.AmountOf(denom)), nil
+	if availableModuleLiquidity.TruncateInt().Sub(spendableUTokens.Amount).GTE(totalTokenCollateral.AmountOf(denom)) {
+		return spendableUTokens.Amount.Add(totalTokenCollateral.AmountOf(denom)), nil
 	}
 
 	// At this point we know that there is enough available_module_liquidity to withdraw user_spendable_utokens.
@@ -269,7 +268,7 @@ func (k Keeper) AvailableModuleCollateralLiquidity(ctx sdk.Context, addr sdk.Acc
 	// available_module_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity
 	//									* module_collateral) / (1 - min_collateral_liquidity)
 	availableModuleCollateral :=
-		(sdk.NewDec(liquidity.Sub(userSpendableUtokens).Int64()).Sub(
+		(sdk.NewDec(liquidity.Sub(spendableUTokens.Amount).Int64()).Sub(
 			minCollateralLiquidity.MulInt(
 				totalTokenCollateral.AmountOf(denom),
 			),
@@ -277,5 +276,5 @@ func (k Keeper) AvailableModuleCollateralLiquidity(ctx sdk.Context, addr sdk.Acc
 
 	// Summarizing both (user_spendable_utokens + available_module_collateral) we obtain the max we can withdraw from
 	// the module.
-	return userSpendableUtokens.Add(availableModuleCollateral.TruncateInt()), nil
+	return spendableUTokens.Amount.Add(availableModuleCollateral.TruncateInt()), nil
 }
