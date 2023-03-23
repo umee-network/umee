@@ -831,7 +831,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw_ChangingUtokenExchangeRate() {
 	// withdrawing 100 from available_module_liquidity, 730 more can be withdrawn from collateral,
 	// the user only has 100 as users_spendable_utokens and 100 as collateral,
 	// so the total of 200 uTokens will be withdrawn.
-	// given the conversion rate of 1.2, it will get 240 Tokens for 200 uTokens
+	// given the conversion rate of 1.2, it will get 240 Tokens for 200 uTokens.
 
 	// verify the outputs of withdraw function
 	resp, err := srv.MaxWithdraw(ctx, msg)
