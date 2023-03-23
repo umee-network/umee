@@ -56,7 +56,7 @@ func (kvStoreDB) CacheWrap() types.CacheWrap {
 	panic("not implemented")
 }
 
-func (kvStoreDB) CacheWrapWithTrace(w io.Writer, tc types.TraceContext) types.CacheWrap {
+func (kvStoreDB) CacheWrapWithTrace(_ io.Writer, _ types.TraceContext) types.CacheWrap {
 	panic("not implemented")
 }
 
