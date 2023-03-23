@@ -181,9 +181,10 @@ docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
 
 docker-build-price-feeder:
-	@git clone --branch umee https://github.com/ojo-network/price-feeder
-	@docker build -t ghcr.io/ojo-network/price-feeder-umee -f price-feeder/Dockerfile price-feeder
-	@rm -rf price-feeder
+	@mkdir tmp
+	@cd tmp; git clone --branch umee https://github.com/ojo-network/price-feeder
+	@cd tmp; docker build -t ghcr.io/ojo-network/price-feeder-umee -f price-feeder/Dockerfile price-feeder
+	@rm -rf tmp
 
 docker-push-price-feeder:
 	@docker push ghcr.io/ojo-network/price-feeder-umee
