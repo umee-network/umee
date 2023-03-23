@@ -8,6 +8,9 @@ import (
 )
 
 func TestIterate(t *testing.T) {
+	// test: insert data out of order
+	// expect: iterate will fetch data in order.
+
 	type pair struct {
 		K, V []byte
 	}
