@@ -113,7 +113,6 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		claimSlice,
 	)
 
-	// Clear the ballot
 	k.ClearVotes(ctx, params.VotePeriod)
 	return nil
 }

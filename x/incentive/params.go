@@ -11,7 +11,7 @@ const secondsPerDay = 86400
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MaxUnbondings:           20,
+		MaxUnbondings:           5,
 		UnbondingDurationLong:   secondsPerDay * 14,
 		UnbondingDurationMiddle: secondsPerDay * 7,
 		UnbondingDurationShort:  secondsPerDay,

@@ -23,6 +23,7 @@ The `price-feeder` tool is responsible for performing the following:
    specification.
 
 <!-- markdown-link-check-disable -->
+
 ## Providers
 
 The list of current supported providers:
@@ -52,6 +53,14 @@ Please see the [example configuration](price-feeder.example.toml) for more detai
 ```shell
 $ price-feeder /path/to/price_feeder_config.toml
 ```
+
+Umee rules for checking the free oracle transactions are:
+
+- must be only prevote or vote
+- gas is limited to [`MaxMsgGasUsage`](https://github.com/umee-network/umee/blob/main/ante/fee.go#L15) constant.
+
+So, if you don't want to pay for gas, TX must be below `MaxMsgGasUsage`. If you set too much gas (which is what is happening when when you set `gas_adjustment` to 2), then the tx will allocate 2x gas, and hence will go above the free quota, so you would need to attach fee to pay for that gas.
+The easiest is to just set constant gas. We recommend 10k below the `MaxMsgGasUsage`.
 
 ## Configuration
 
