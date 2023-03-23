@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -119,8 +118,6 @@ func (s msgServer) MaxWithdraw(
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Printf("uToken: %s\n", uToken)
 
 	if uToken.IsZero() {
 		zeroCoin := coin.Zero(msg.Denom)
