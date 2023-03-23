@@ -38,6 +38,8 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 Since `umeed v3.2` there is a new runtime dependency: `libwasmvm.x86_64.so v1.1.1` is required.
 Building from source will automatically link the `libwasmvm.x86_64.so` created as a part of the build process (you must build on same host as you run the binary, or copy the `libwasmvm.x86_64.so` your lib directory).
 
+Since `umeed v4.2` the recommended oracle price feeder has been moved to this [repository](https://github.com/ojo-network/price-feeder/tree/umee) with the version prefix `umee/v.x`.
+
 ### Release Compatibility Matrix
 
 | Umee Version | Mainnet | Experimental | Cosmos SDK |  IBC   |  Peggo  | Price Feeder |       Gravity Bridge       |
@@ -51,7 +53,7 @@ Building from source will automatically link the `libwasmvm.x86_64.so` created a
 |    v3.3.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.2    |   umee/v3 v1.5.3-umee-3    |
 |    v4.0.x    |    ✓    |      ✗       |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.3    |   umee/v4 v1.5.3-umee-4    |
 |    v4.1.x    |    ✓    |      ✗       |  v0.46.7+  | v5.2.x | v1.3.x+ |    v2.1.0    |   umee/v4 v1.5.3-umee-4    |
-|    v4.2.x    |    ✓    |      ✗       | v0.46.10+  | v5.2.x | v1.3.x+ |    v2.1.0    |   umee/v4 v1.5.3-umee-4    |
+|    v4.2.x    |    ✓    |      ✗       | v0.46.10+  | v5.2.x | v1.3.x+ | umee/v2.1.1  |   umee/v4 v1.5.3-umee-4    |
 
 ### Active Networks
 
