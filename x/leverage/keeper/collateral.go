@@ -207,8 +207,10 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 }
 
 // AvailableModuleCollateralLiquidity calculates the maximum available amount of uToken to withdraw
-// from the module given a token's denom. This amount is the sum of maximum available liquidity and
-// collateral from the module.
+// from the module given a token denom and a user's address. The calculation first finds the maximum
+// amount of non-collateral uTokens the user can withdraw up to the amount in their wallet, then
+// determines how much collateral can be withdrawn in addition to that. The returned value is the sum
+// of the two values.
 func (k Keeper) AvailableModuleCollateralLiquidity(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 	sdkmath.Int,
 	error,
