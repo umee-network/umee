@@ -34,6 +34,7 @@ var (
 	ErrInsufficientCollateral = errors.Register(ModuleName, 404, "insufficient collateral to create bond")
 
 	// 5XX = Misc
-	ErrDecreaseNextProgramID  = errors.Register(ModuleName, 500, "cannot decrease NextProgramID")
-	ErrDecreaseLastRewardTime = errors.Register(ModuleName, 501, "cannot decrease LastRewardTime")
+	ErrDecreaseNextProgramID     = errors.Register(ModuleName, 500, "cannot decrease NextProgramID")
+	ErrDecreaseLastRewardTime    = errors.Register(ModuleName, 501, "cannot decrease LastRewardTime")
+	ErrChangeAccumulatorExponent = errors.Register(ModuleName, 502, "cannot change RewardAccumulator.Exponent once set")
 )

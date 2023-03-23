@@ -29,11 +29,12 @@ var (
 	keyPrefixLastRewardsTime           = []byte{0x06}
 	keyPrefixRewardTracker             = []byte{0x07}
 	keyPrefixRewardAccumulator         = []byte{0x08}
-	keyPrefixUnbondings                = []byte{0x09}
-	keyPrefixBondAmount                = []byte{0x0A}
-	keyPrefixUnbondAmount              = []byte{0x0B}
-	keyPrefixTotalBonded               = []byte{0x0C}
-	keyPrefixTotalUnbonding            = []byte{0x0D}
+	keyPrefixRewardAccumulatorExponent = []byte{0x09}
+	keyPrefixUnbondings                = []byte{0x0A}
+	keyPrefixBondAmount                = []byte{0x0B}
+	keyPrefixUnbondAmount              = []byte{0x0C}
+	keyPrefixTotalBonded               = []byte{0x0D}
+	keyPrefixTotalUnbonding            = []byte{0x0E}
 )
 
 // keyIncentiveProgram returns a KVStore key for an incentive program.
@@ -134,6 +135,12 @@ func keyRewardAccumulatorNoReward(bondedDenom string, tier incentive.BondTier) [
 func keyRewardAccumulatorNoTier(bondedDenom string) []byte {
 	// rewardAccumulatorPrefix | bondedDenom | 0x00
 	return util.ConcatBytes(1, keyPrefixRewardAccumulator, []byte(bondedDenom))
+}
+
+// keyRewardAccumulatorExponent returns the key for a single RewardAccumulator's exponent field.
+func keyRewardAccumulatorExponent(bondedDenom string) []byte {
+	// rewardAccumulatorExponentPrefix | bondedDenom | 0x00
+	return util.ConcatBytes(1, keyPrefixRewardAccumulatorExponent, []byte(bondedDenom))
 }
 
 // keyRewardTracker returns a KVStore key for a single reward tracker denom for an account and bonded uToken

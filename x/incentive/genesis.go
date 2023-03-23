@@ -109,10 +109,11 @@ func NewRewardTracker(addr, denom string, tier uint32, coins sdk.DecCoins) Rewar
 }
 
 // NewRewardAccumulator creates the RewardAccumulator struct used in GenesisState
-func NewRewardAccumulator(denom string, tier uint32, coins sdk.DecCoins) RewardAccumulator {
+func NewRewardAccumulator(denom string, tier, exponent uint32, coins sdk.DecCoins) RewardAccumulator {
 	return RewardAccumulator{
 		Denom:         denom,
 		Tier:          tier,
+		Exponent:      exponent,
 		RewardTracker: coins,
 	}
 }

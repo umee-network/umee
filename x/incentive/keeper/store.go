@@ -236,12 +236,29 @@ func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom str
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
-// SetRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier.
+// SetRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier. Does not
+// affect the reward accumulator's exponent.
 func (k Keeper) SetRewardAccumulator(ctx sdk.Context,
 	bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
 ) error {
 	key := keyRewardAccumulator(bondDenom, reward.Denom, tier)
 	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward accumulator")
+}
+
+// GetRewardAccumulatorExponent retrieves the exponent of a bonded uToken denom's RewardAccumulator
+func (k Keeper) GetRewardAccumulatorExponent(ctx sdk.Context, bondDenom string) uint32 {
+	key := keyRewardAccumulatorExponent(bondDenom)
+	return store.GetUint32(k.KVStore(ctx), key, "reward accumulator exponent")
+}
+
+// SetRewardAccumulatorExponent sets the exponent of a bonded uToken denom's RewardAccumulator. Because this value
+// should never be changed after initially set, the function panics if the exponent is already nonzero.
+func (k Keeper) SetRewardAccumulatorExponent(ctx sdk.Context, bondDenom string, exponent uint32) error {
+	if k.GetRewardAccumulatorExponent(ctx, bondDenom) != 0 {
+		return incentive.ErrChangeAccumulatorExponent.Wrap(bondDenom)
+	}
+	key := keyRewardAccumulatorExponent(bondDenom)
+	return store.SetUint32(k.KVStore(ctx), key, exponent, "reward accumulator exponent")
 }
 
 // GetRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken and tier on one account -
