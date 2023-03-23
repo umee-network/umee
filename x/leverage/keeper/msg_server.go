@@ -137,7 +137,7 @@ func (s msgServer) MaxWithdraw(
 		return &types.MsgMaxWithdrawResponse{Withdrawn: zeroUcoin, Received: zeroCoin}, nil
 	}
 
-	// Get the minimum between the available and the desired to withdraw
+	// Use the minimum of the user's max withdraw based on borrows and the module's max withdraw based on liquidity
 	uToken.Amount = sdk.MinInt(uToken.Amount, uTokenTotalAvailable)
 
 	// Proceed to withdraw.
