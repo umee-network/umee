@@ -274,7 +274,7 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (
 			),
 		)).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
 
-	// Summarizing both (user_spendable_utokens + available_module_collateral) we obtain the max we can withdraw from
+	// Adding (user_spendable_utokens + available_module_collateral) we obtain the max uTokens the account can withdraw from
 	// the module.
 	return spendableUTokens.Amount.Add(availableModuleCollateral.TruncateInt()), nil
 }
