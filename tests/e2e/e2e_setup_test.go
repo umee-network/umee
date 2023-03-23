@@ -1007,6 +1007,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 			},
 			Cmd: []string{
 				"--skip-provider-check",
+				"--log-level=debug",
 			},
 		},
 		noRestart,
