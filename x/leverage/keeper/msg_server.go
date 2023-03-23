@@ -114,7 +114,7 @@ func (s msgServer) MaxWithdraw(
 	// but not this uToken or any of their borrows, error
 	// will be nil and the resulting value will be what
 	// can safely be withdrawn even with missing prices.
-	uToken, err := s.keeper.userMaxWithdraw(ctx, supplierAddr, msg.Denom)
+	uToken, userSpendableUtokens, err := s.keeper.userMaxWithdraw(ctx, supplierAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -124,11 +124,8 @@ func (s msgServer) MaxWithdraw(
 		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
 
-	// Get user spendable uTokens
-	userSpendableUtokens := s.keeper.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uToken.Denom)
-
 	// Get the total available for uToken to prevent withdraws above this limit.
-	uTokenTotalAvailable, err := s.keeper.moduleMaxWithdraw(ctx, sdk.NewCoin(uToken.Denom, userSpendableUtokens))
+	uTokenTotalAvailable, err := s.keeper.moduleMaxWithdraw(ctx, userSpendableUtokens)
 	if err != nil {
 		return nil, err
 	}

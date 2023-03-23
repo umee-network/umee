@@ -337,7 +337,7 @@ func (q Querier) MaxWithdraw(
 		// will be nil and the resulting value will be what
 		// can safely be withdrawn even with missing prices.
 		// On non-nil error here, max withdraw is zero.
-		uToken, err := q.Keeper.userMaxWithdraw(ctx, addr, denom)
+		uToken, _, err := q.Keeper.userMaxWithdraw(ctx, addr, denom)
 		if err == nil && uToken.IsPositive() {
 			token, err := q.Keeper.ExchangeUToken(ctx, uToken)
 			if err != nil {
