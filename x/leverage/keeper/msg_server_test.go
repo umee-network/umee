@@ -786,7 +786,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw_NoAvailableModuleLiquidity() {
 	// verify the outputs of withdraw function
 	resp, err := srv.MaxWithdraw(ctx, msg)
 	require.NoError(err)
-	require.Equal(coin.New(umeeDenom, 0_000000), resp.Received)
+	require.Equal(coin.New(umeeDenom, 0), resp.Received)
 }
 
 func (s *IntegrationTestSuite) TestMsgCollateralize() {
