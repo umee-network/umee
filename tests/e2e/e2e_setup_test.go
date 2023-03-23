@@ -51,8 +51,9 @@ const (
 	ethChainID uint = 15
 	ethMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
 
-	priceFeederContainerRepo = "ghcr.io/ojo-network/price-feeder-umee"
-	priceFeederServerPort    = "7171/tcp"
+	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-umee"
+	priceFeederServerPort     = "7171/tcp"
+	priceFeederMaxStartupTime = 20 // seconds
 )
 
 var (
@@ -994,7 +995,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				"7171/tcp": {{HostIP: "", HostPort: "7171"}},
+				priceFeederServerPort: {{HostIP: "", HostPort: "7171"}},
 			},
 			Env: []string{
 				fmt.Sprintf("PRICE_FEEDER_PASS=%s", keyringPassphrase),
@@ -1014,7 +1015,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort("7171/tcp"))
+	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort(priceFeederServerPort))
 
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
@@ -1047,7 +1048,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	}
 
 	isHealthy := false
-	for i := 0; i < 20; i++ {
+	for i := 0; i < priceFeederMaxStartupTime; i++ {
 		isHealthy = checkHealth()
 		if isHealthy {
 			break
