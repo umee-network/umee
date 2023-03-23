@@ -10,13 +10,14 @@ coverage:
         target: 65.5%
         threshold: 2% # allow this much decrease on project
         if_ci_failed: error
+        if_not_found: success # if tests are not run
       modules:
         target: 62%
         paths:
           - "x/"
           - "!x/**/client/" # ignore client package
       client:
-        target: 80%
+        target: 96%
         paths:
           - client
           - "x/**/client/"
