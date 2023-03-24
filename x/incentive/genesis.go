@@ -101,20 +101,20 @@ func NewTotalBond(tier uint32, coin sdk.Coin) Bond {
 // NewRewardTracker creates the RewardTracker struct used in GenesisState
 func NewRewardTracker(addr, denom string, tier uint32, coins sdk.DecCoins) RewardTracker {
 	return RewardTracker{
-		Account:       addr,
-		Denom:         denom,
-		Tier:          tier,
-		RewardTracker: coins,
+		Account: addr,
+		Denom:   denom,
+		Tier:    tier,
+		Rewards: coins,
 	}
 }
 
 // NewRewardAccumulator creates the RewardAccumulator struct used in GenesisState
 func NewRewardAccumulator(denom string, tier, exponent uint32, coins sdk.DecCoins) RewardAccumulator {
 	return RewardAccumulator{
-		Denom:         denom,
-		Tier:          tier,
-		Exponent:      exponent,
-		RewardTracker: coins,
+		Denom:    denom,
+		Tier:     tier,
+		Exponent: exponent,
+		Rewards:  coins,
 	}
 }
 

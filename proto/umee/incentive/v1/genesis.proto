@@ -42,10 +42,10 @@ message Bond {
 // RewardAccumulator for a tier and the last value at which the user updated bonds or claimed
 // tokens. Their pending rewards increase by only the rewards accrued in that time period.
 message RewardTracker {
-  string   account                                    = 1;
-  uint32   tier                                       = 2;
-  string   denom                                      = 3;
-  repeated cosmos.base.v1beta1.DecCoin reward_tracker = 4 [
+  string   account                             = 1;
+  uint32   tier                                = 2;
+  string   denom                               = 3;
+  repeated cosmos.base.v1beta1.DecCoin rewards = 4 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
@@ -57,9 +57,9 @@ message RewardTracker {
 // reference amount is 10^exponent of the uToken's smallest possible amount, generally
 // matching the exponent of the associated base token registered with the leverage module.
 message RewardAccumulator {
-  uint32   tier                                       = 1;
-  string   denom                                      = 2;
-  repeated cosmos.base.v1beta1.DecCoin reward_tracker = 3 [
+  uint32   tier                                = 1;
+  string   denom                               = 2;
+  repeated cosmos.base.v1beta1.DecCoin rewards = 3 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
