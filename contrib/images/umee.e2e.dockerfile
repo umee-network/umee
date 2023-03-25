@@ -13,10 +13,12 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 ## Build umeed
+## optimization: we move setting experimental flag here.
+ENV EXPERIMENTAL $EXPERIMENTAL
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
-RUN make install
+RUN BUILD_TAGS=badgerdb make install
 
 ## Prepare the final clear binary
 FROM ubuntu:rolling

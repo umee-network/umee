@@ -122,7 +122,7 @@ jobs:
       - name: Test E2E
         if: env.GIT_DIFF
         run: |
-          make test-e2e
+          EXPERIMENTAL=true make test-e2e
 
   liveness-test:
     needs: install-tparse
