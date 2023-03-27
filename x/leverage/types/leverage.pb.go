@@ -185,7 +185,10 @@ type Token struct {
 	// Borrowing, collateralizing, or withdrawing assets is not allowed when the
 	// result of such action invalidates min_collateral_liquidity.
 	// Liquidity can only drop below this value due to interest or liquidations.
-	// Valid values: 0 - 1
+	// The goal is to assure that there is enough available (not borrowed) token to be available
+	// for withdraw when there is a collateral liquidation and the liquidator needs to
+	// withdraw uToken.
+	// Valid values: 0 - inf
 	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
 	// Max Supply is the maximum amount of tokens the protocol can hold.
 	// Adding more supply of the given token to the protocol will return an error.

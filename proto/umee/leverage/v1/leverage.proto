@@ -217,7 +217,10 @@ message Token {
   // Borrowing, collateralizing, or withdrawing assets is not allowed when the
   // result of such action invalidates min_collateral_liquidity.
   // Liquidity can only drop below this value due to interest or liquidations.
-  // Valid values: 0 - 1
+  // The goal is to assure that there is enough available (not borrowed) token to be available
+  // for withdraw when there is a collateral liquidation and the liquidator needs to
+  // withdraw uToken.
+  // Valid values: 0 - inf
   string min_collateral_liquidity = 17 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,

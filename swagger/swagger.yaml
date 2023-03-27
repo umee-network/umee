@@ -1014,7 +1014,15 @@ paths:
                         Liquidity can only drop below this value due to interest
                         or liquidations.
 
-                        Valid values: 0 - 1
+                        The goal is to assure that there is enough available
+                        (not borrowed) token to be available
+
+                        for withdraw when there is a collateral liquidation and
+                        the liquidator needs to
+
+                        withdraw uToken.
+
+                        Valid values: 0 - inf
                     max_supply:
                       type: string
                       description: >-
@@ -2670,7 +2678,15 @@ definitions:
                 Liquidity can only drop below this value due to interest or
                 liquidations.
 
-                Valid values: 0 - 1
+                The goal is to assure that there is enough available (not
+                borrowed) token to be available
+
+                for withdraw when there is a collateral liquidation and the
+                liquidator needs to
+
+                withdraw uToken.
+
+                Valid values: 0 - inf
             max_supply:
               type: string
               description: >-
@@ -2886,7 +2902,15 @@ definitions:
           Liquidity can only drop below this value due to interest or
           liquidations.
 
-          Valid values: 0 - 1
+          The goal is to assure that there is enough available (not borrowed)
+          token to be available
+
+          for withdraw when there is a collateral liquidation and the liquidator
+          needs to
+
+          withdraw uToken.
+
+          Valid values: 0 - inf
       max_supply:
         type: string
         description: >-
