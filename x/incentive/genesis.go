@@ -34,8 +34,8 @@ func NewGenesisState(
 	}
 }
 
-// DefaultGenesisState returns the default genesis state
-func DefaultGenesisState() *GenesisState {
+// DefaultGenesis returns the default genesis state
+func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		Params:          DefaultParams(),
 		NextProgramId:   1,
@@ -43,8 +43,8 @@ func DefaultGenesisState() *GenesisState {
 	}
 }
 
-// ValidateGenesis checks a genesis state for basic issues
-func ValidateGenesis(_ GenesisState) error {
+// Validate checks a genesis state for basic issues
+func (gs GenesisState) Validate() error {
 	// TODO #1749
 	return nil
 }

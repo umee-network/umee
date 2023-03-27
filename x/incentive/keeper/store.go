@@ -8,6 +8,18 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
+func (k Keeper) GetParams(ctx sdk.Context) incentive.Params {
+	return incentive.Params{
+		MaxUnbondings:           k.getMaxUnbondings(ctx),
+		UnbondingDurationLong:   k.getUnbondingDurationLong(ctx),
+		UnbondingDurationMiddle: k.getUnbondingDurationMiddle(ctx),
+		UnbondingDurationShort:  k.getUnbondingDurationShort(ctx),
+		TierWeightMiddle:        k.getTierWeightMiddle(ctx),
+		TierWeightShort:         k.getTierWeightShort(ctx),
+		CommunityFundAddress:    k.getCommunityFundAddress(ctx).String(),
+	}
+}
+
 // getMaxUnbondings gets the maximum number of unbondings an account is allowed to have at one time.
 func (k Keeper) getMaxUnbondings(ctx sdk.Context) uint32 {
 	return store.GetUint32(k.KVStore(ctx),

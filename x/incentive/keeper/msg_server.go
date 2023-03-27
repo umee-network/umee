@@ -61,7 +61,7 @@ func (s msgServer) Bond(
 	bonded := k.getAllBonded(ctx, addr, denom)
 
 	// ensure account has enough collateral to bond the new amount on top of its current amount
-	collateral := k.leverageKeeper.GetCollateralAmount(ctx, addr, denom)
+	collateral := k.leverageKeeper.GetCollateral(ctx, addr, denom)
 	if collateral.IsLT(bonded.Add(msg.Asset)) {
 		return nil, incentive.ErrInsufficientCollateral.Wrapf(
 			"collateral: %s bonded: %s requested: %s",
