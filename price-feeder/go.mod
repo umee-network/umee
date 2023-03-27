@@ -7,7 +7,7 @@ require (
 	github.com/armon/go-metrics v0.4.1
 	github.com/cosmos/cosmos-sdk v0.46.11
 	github.com/go-playground/validator/v10 v10.12.0
-	github.com/golangci/golangci-lint v1.52.1
+	github.com/golangci/golangci-lint v1.52.2
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/justinas/alice v1.2.0
@@ -208,7 +208,7 @@ require (
 	github.com/minio/highwayhash v1.0.2 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/moricho/tparallel v0.3.0 // indirect
+	github.com/moricho/tparallel v0.3.1 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/nakabonne/nestif v0.3.1 // indirect
 	github.com/nbutton23/zxcvbn-go v0.0.0-20210217022336-fa2cb2858354 // indirect
