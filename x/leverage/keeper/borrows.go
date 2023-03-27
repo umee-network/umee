@@ -256,7 +256,8 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, userMaxBorrow sdk.Coin) (sdk.Co
 	// The formula to calculate max_borrow respecting the max_supply_utilization is as follows:
 	//
 	// max_supply_utilization = (total_borrowed +  module_max_borrow) / (module_liquidity + total_borrowed)
-	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed - total_borrowed
+	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed
+	//						- total_borrowed
 	moduleMaxBorrow := maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(
 		sdk.NewDec(totalBorrowed.Int64()),
 	)
