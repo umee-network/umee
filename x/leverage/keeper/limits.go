@@ -197,8 +197,11 @@ func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	// Get module liquidity for the denom
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
+	// Get uDenom
+	udenom := types.ToUTokenDenom(denom)
+
 	// Get module collateral for the uDenom
-	totalCollateral := k.GetTotalCollateral(ctx, denom)
+	totalCollateral := k.GetTotalCollateral(ctx, udenom)
 	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
 		return sdkmath.Int{}, err
