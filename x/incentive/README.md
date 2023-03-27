@@ -23,7 +23,7 @@ The incentive module depends on the `x/leverage` module for information about us
 
 ### Bonding Collateral
 
-If a user has `collateral uTokens` in the `x/leverage` module, then they can `bond` it to the `x/incentive` module.
+A user can bond their `x/leverage` collaterized `uTokens` in a `x/incentive` module to receive extra rewards.
 
 Bonding prevents the user from using any `leverage.MsgDecollateralize` or `leverage.MsgWithdraw` which would reduce the user's collateral below the bonded amount.
 
