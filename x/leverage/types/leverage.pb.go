@@ -116,13 +116,15 @@ type Token struct {
 	// Collateral Weight defines what portion of the total value of the asset
 	// can contribute to a users borrowing power. If the collateral weight is
 	// zero, using this asset as collateral against borrowing will be disabled.
+	// Must be smaller than `liquidation_threshold`.
 	// Valid values: 0-1.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight" yaml:"collateral_weight"`
 	// Liquidation Threshold defines what amount of the total value of the
 	// asset as a collateral can contribute to a user's liquidation threshold
 	// (above which they become eligible for liquidation).
-	// See also: min_close_factor.
+	// Must be bigger than `collateral_weight`.
 	// Valid values: 0-1.
+	// See also: min_close_factor.
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
 	// Base Borrow Rate defines the minimum interest rate for borrowing this
 	// asset.

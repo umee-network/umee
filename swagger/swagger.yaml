@@ -846,6 +846,8 @@ paths:
                         zero, using this asset as collateral against borrowing
                         will be disabled.
 
+                        Must be smaller than `liquidation_threshold`.
+
                         Valid values: 0-1.
                     liquidation_threshold:
                       type: string
@@ -858,9 +860,11 @@ paths:
 
                         (above which they become eligible for liquidation).
 
-                        See also: min_close_factor.
+                        Must be bigger than `collateral_weight`.
 
                         Valid values: 0-1.
+
+                        See also: min_close_factor.
                     base_borrow_rate:
                       type: string
                       title: >-
@@ -2515,6 +2519,8 @@ definitions:
                 zero, using this asset as collateral against borrowing will be
                 disabled.
 
+                Must be smaller than `liquidation_threshold`.
+
                 Valid values: 0-1.
             liquidation_threshold:
               type: string
@@ -2527,9 +2533,11 @@ definitions:
 
                 (above which they become eligible for liquidation).
 
-                See also: min_close_factor.
+                Must be bigger than `collateral_weight`.
 
                 Valid values: 0-1.
+
+                See also: min_close_factor.
             base_borrow_rate:
               type: string
               title: >-
@@ -2741,6 +2749,8 @@ definitions:
           zero, using this asset as collateral against borrowing will be
           disabled.
 
+          Must be smaller than `liquidation_threshold`.
+
           Valid values: 0-1.
       liquidation_threshold:
         type: string
@@ -2748,8 +2758,9 @@ definitions:
           Liquidation Threshold defines what amount of the total value of the
           asset as a collateral can contribute to a user's liquidation threshold
           (above which they become eligible for liquidation).
-          See also: min_close_factor.
+          Must be bigger than `collateral_weight`.
           Valid values: 0-1.
+          See also: min_close_factor.
       base_borrow_rate:
         type: string
         title: |-
