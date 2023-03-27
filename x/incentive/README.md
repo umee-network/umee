@@ -27,7 +27,7 @@ A user can bond their `x/leverage` collaterized `uTokens` in a `x/incentive` mod
 
 Bonding prevents the user from using any `leverage.MsgDecollateralize` or `leverage.MsgWithdraw` which would reduce the user's collateral below the bonded amount.
 
-For example a user with `100 u/UMEE` non-collateral and `50 u/UMEE` collateral in the leverage module, and `40 u/UMEE` bonded with the incentive module, their maximum `leverage.MsgDecollateralize` allowed by their bond is `10 u/UMEE` and their maximum `leverage.MsgWithdraw` is `110u/UMEE`.
+**Example:** a user has `100 u/UMEE` and `50 u/UMEE` collateral in the leverage module. `40 u/UMEE` from that `50 u/UMEE` is bonded in the incentive module. Their maximum `leverage.MsgDecollateralize` allowed by their bond is `10 u/UMEE` and their maximum `leverage.MsgWithdraw` is `110u/UMEE`.
 
 Bonded collateral is eligible for incentive program rewards as long as it is not currently unbonding.
 
