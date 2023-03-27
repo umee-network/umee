@@ -31,7 +31,7 @@ Bonding prevents the user from using any `leverage.MsgDecollateralize` or `lever
 
 Bonded collateral is eligible for incentive program rewards as long as it is not currently unbonding.
 
-When bonding collateral, the user selects which `Unbonding Tier` it is being bonded to, from `Short/Middle/Long`. When the user start unbonding a uToken, the unbonding tier to which it was originally bonded determines how long the token will be unbonding before it is freed.
+When bonding collateral, the user selects which `Unbonding Tier` it is being bonded to. The options are: `Short`, `Middle`, `Long`. When the user starts unbonding a uToken, the unbonding tier determines the time after which the tokens are unlocked to the user.
 
 Unbonding uTokens are not eligible for incentive rewards while they unbond, but are still subject to the same restrictions on `leverage.MsgWithdraw` and `leverage.MsgDecollateralize` as bonded tokens.
 
