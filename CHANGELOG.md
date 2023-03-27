@@ -49,7 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1929](https://github.com/umee-network/umee/pull/1929) Leverage: `MaxWithdraw` now accounts for `MinCollateralLiquidity`
-- [1954](https://github.com/umee-network/umee/pull/1954) Leverage: `MaxBorrow` now accounts for 
+- [1954](https://github.com/umee-network/umee/pull/1954) Leverage: `MaxBorrow` now accounts for
   `MinCollateralLiquidity` and `MaxSupplyUtilization`
 
 ## [v4.2.0](https://github.com/umee-network/umee/releases/tag/v4.2.0) - 2023-03-15
