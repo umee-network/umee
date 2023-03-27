@@ -238,7 +238,7 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, userMaxBorrow sdk.Coin) (sdk.Co
 	}
 
 	// Use the minimum of the user's max borrow and the available from module liquidity
-	moduleMaxBorrow := sdk.MinInt(moduleAvailableLiquidity, userMaxBorrow.Amount)
+	amountToBorrow := sdk.MinInt(moduleAvailableLiquidity, userMaxBorrow.Amount)
 
 	// Get max_supply_utilization for the denom
 	token, err := k.GetTokenSettings(ctx, userMaxBorrow.Denom)
@@ -255,12 +255,17 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, userMaxBorrow sdk.Coin) (sdk.Co
 
 	// The formula to calculate max_borrow respecting the max_supply_utilization is as follows:
 	//
-	// max_supply_utilization = (total_borrowed +  max_borrow) / (module_liquidity + total_borrowed)
-	// max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed - total_borrowed
-	maxBorrow := maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(
+	// max_supply_utilization = (total_borrowed +  module_max_borrow) / (module_liquidity + total_borrowed)
+	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed - total_borrowed
+	moduleMaxBorrow := maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(
 		sdk.NewDec(totalBorrowed.Int64()),
 	)
 
-	// Use the minimum between max borrow applying min_collateral_liquidity and max_supply_utilization
-	return sdk.NewCoin(userMaxBorrow.Denom, sdk.MinInt(moduleMaxBorrow, maxBorrow.TruncateInt())), nil
+	// If module_max_borrow is 0 or less, we cannot borrow anything
+	if moduleMaxBorrow.LTE(sdk.ZeroDec()) {
+		return coin.Zero(userMaxBorrow.Denom), nil
+	}
+
+	// Use the minimum between module_max_borrow and (module_available_liquidity or user_max_borrow)
+	return sdk.NewCoin(userMaxBorrow.Denom, sdk.MinInt(amountToBorrow, moduleMaxBorrow.TruncateInt())), nil
 }
