@@ -37,7 +37,7 @@ Unbonding uTokens are not eligible for incentive rewards while they unbond, but 
 
 ### Incentive Programs
 
-An `IncentiveProgram` is a fixed-duration program which distributes a predetermined total amount of one base token to users which have bonded uTokens of a selected denom during its duration.
+An `IncentiveProgram` is a fixed-duration program which distributes a predetermined amount of one reward token to users which have bonded selected uTokens during its duration.
 
 For example, the following incentive program would, at each block during the `864000 seconds` after its start at `unix time 1679659746`, distribute a portion of its total `1000 UMEE` rewards to users who have bonded (but are not currently unbonding) `u/uumee` to the incentive module.
 
