@@ -42,7 +42,7 @@ func (am IBCModule) OnRecvPacket(
 	// Allowing only registered token
 	var data ibctransfertypes.FungibleTokenPacketData
 	if err := ibctransfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		ackErr := sdkerrors.Wrapf(sdkerrors.ErrInvalidType, "cannot unmarshal ICS-20 transfer packet data")
+		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
 		return channeltypes.NewErrorAcknowledgement(ackErr)
 	}
 
