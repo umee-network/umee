@@ -190,3 +190,33 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 	// return the computed maximum or the current uToken supply, whichever is smaller
 	return sdk.MinInt(k.GetUTokenSupply(ctx, denom).Amount, maxUTokens.Amount), nil
 }
+
+// moduleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
+// respecting the MinCollateralLiquidity set for given Token.
+func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
+	// Get module liquidity for the denom
+	liquidity := k.AvailableLiquidity(ctx, denom)
+
+	// Get module collateral for the uDenom
+	totalCollateral := k.GetTotalCollateral(ctx, denom)
+	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
+	if err != nil {
+		return sdkmath.Int{}, err
+	}
+
+	// Get min_collateral_liquidity for the denom
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdkmath.Int{}, err
+	}
+	minCollateralLiquidity := token.MinCollateralLiquidity
+
+	// The formula to calculate the module_available_liquidity is as follows:
+	//
+	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
+	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
+	moduleAvailableLiquidity :=
+		sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
+
+	return moduleAvailableLiquidity.TruncateInt(), nil
+}
