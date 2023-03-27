@@ -51,7 +51,7 @@ const (
 	ethChainID uint = 15
 	ethMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
 
-	priceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-umee"
+	priceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee-e2e"
 	priceFeederServerPort     = "7171/tcp"
 	priceFeederMaxStartupTime = 20 // seconds
 )
