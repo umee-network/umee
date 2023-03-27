@@ -44,3 +44,6 @@ tests/e2e/keyring-test
 
 # private files
 private*
+
+#IntelliJ
+.idea/

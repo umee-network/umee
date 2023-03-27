@@ -197,8 +197,8 @@ cloud.google.com/go/workflows v1.7.0/go.mod h1:JhSrZuVZWuiDfKEFxU0/F1PQjmpnpcoIS
 collectd.org v0.3.0/go.mod h1:A/8DzQBkF6abtvrT2j/AU/4tiBgJWYyh0y/oB/4MlWE=
 cosmossdk.io/errors v1.0.0-beta.7 h1:gypHW76pTQGVnHKo6QBkb4yFOJjC+sUGRc5Al3Odj1w=
 cosmossdk.io/errors v1.0.0-beta.7/go.mod h1:mz6FQMJRku4bY7aqS/Gwfcmr/ue91roMEKAmDUDpBfE=
-cosmossdk.io/math v1.0.0-rc.0 h1:ml46ukocrAAoBpYKMidF0R2tQJ1Uxfns0yH8wqgMAFc=
-cosmossdk.io/math v1.0.0-rc.0/go.mod h1:Ygz4wBHrgc7g0N+8+MrnTfS9LLn9aaTGa9hKopuym5k=
+cosmossdk.io/math v1.0.0 h1:ro9w7eKx23om2tZz/VM2Pf+z2WAbGX1yDQQOJ6iGeJw=
+cosmossdk.io/math v1.0.0/go.mod h1:Ygz4wBHrgc7g0N+8+MrnTfS9LLn9aaTGa9hKopuym5k=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 filippo.io/edwards25519 v1.0.0-rc.1 h1:m0VOOB23frXZvAOK44usCgLWvtsxIoMCTBGJZlpmGfU=
 filippo.io/edwards25519 v1.0.0-rc.1/go.mod h1:N1IkdkCkiLB6tki+MYJoSx2JTY9NUlxZE7eHn5EwJns=
@@ -670,8 +670,8 @@ github.com/golangci/go-misc v0.0.0-20220329215616-d24fe342adfe h1:6RGUuS7EGotKx6
 github.com/golangci/go-misc v0.0.0-20220329215616-d24fe342adfe/go.mod h1:gjqyPShc/m8pEMpk0a3SeagVb0kaqvhscv+i9jI5ZhQ=
 github.com/golangci/gofmt v0.0.0-20220901101216-f2edd75033f2 h1:amWTbTGqOZ71ruzrdA+Nx5WA3tV1N0goTspwmKCQvBY=
 github.com/golangci/gofmt v0.0.0-20220901101216-f2edd75033f2/go.mod h1:9wOXstvyDRshQ9LggQuzBCGysxs3b6Uo/1MvYCR2NMs=
-github.com/golangci/golangci-lint v1.52.1 h1:TwQtQi5dGE/uFOxYGKwddJo7T9sHsRfTUN00HZMl5Jo=
-github.com/golangci/golangci-lint v1.52.1/go.mod h1:wlTh+d/oVlgZC2yCe6nlxrxNAnuhEQC0Zdygoh72Uak=
+github.com/golangci/golangci-lint v1.52.2 h1:FrPElUUI5rrHXg1mQ7KxI1MXPAw5lBVskiz7U7a8a1A=
+github.com/golangci/golangci-lint v1.52.2/go.mod h1:S5fhC5sHM5kE22/HcATKd1XLWQxX+y7mHj8B5H91Q/0=
 github.com/golangci/lint-1 v0.0.0-20181222135242-d2cdd8c08219/go.mod h1:/X8TswGSh1pIozq4ZwCfxS0WA5JGXguxk94ar/4c87Y=
 github.com/golangci/lint-1 v0.0.0-20191013205115-297bf364a8e0 h1:MfyDlzVjl1hoaPzPD4Gpb/QgoRfSBR0jdhwGyAWwMSA=
 github.com/golangci/lint-1 v0.0.0-20191013205115-297bf364a8e0/go.mod h1:66R6K6P6VWk9I95jvqGxkqJxVWGFy9XlDwLwVz1RCFg=
@@ -1058,8 +1058,8 @@ github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3Rllmb
 github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9Gz0M=
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
 github.com/modocache/gover v0.0.0-20171022184752-b58185e213c5/go.mod h1:caMODM3PzxT8aQXRPkAt8xlV/e7d7w8GM5g0fa5F0D8=
-github.com/moricho/tparallel v0.3.0 h1:8dDx3S3e+jA+xiQXC7O3dvfRTe/J+FYlTDDW01Y7z/Q=
-github.com/moricho/tparallel v0.3.0/go.mod h1:leENX2cUv7Sv2qDgdi0D0fCftN8fRC67Bcn8pqzeYNI=
+github.com/moricho/tparallel v0.3.1 h1:fQKD4U1wRMAYNngDonW5XupoB/ZGJHdpzrWqgyg9krA=
+github.com/moricho/tparallel v0.3.1/go.mod h1:leENX2cUv7Sv2qDgdi0D0fCftN8fRC67Bcn8pqzeYNI=
 github.com/mschoch/smat v0.0.0-20160514031455-90eadee771ae/go.mod h1:qAyveg+e4CE+eKJXWVjKXM4ck2QobLqTDytGJbLLhJg=
 github.com/mtibben/percent v0.2.1 h1:5gssi8Nqo8QU/r2pynCm+hBQHpkB/uNK7BJCFogWdzs=
 github.com/mtibben/percent v0.2.1/go.mod h1:KG9uO+SZkUp+VkRHsCdYQV3XSZrrSpR3O9ibNBTZrns=
