@@ -195,10 +195,6 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
-	if err := s.keeper.checkCollateralLiquidity(ctx, types.ToTokenDenom(msg.Asset.Denom)); err != nil {
-		return nil, err
-	}
-
 	// Fail here if collateral share restrictions are violated,
 	// based on only collateral with known oracle prices
 	if err := s.keeper.checkCollateralShare(ctx, msg.Asset.Denom); err != nil {
