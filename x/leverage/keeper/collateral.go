@@ -206,11 +206,10 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-// moduleMaxWithdraw calculates the maximum available amount of uToken to withdraw
-// from the module given a token denom and a user's address. The calculation first finds the maximum
-// amount of non-collateral uTokens the user can withdraw up to the amount in their wallet, then
-// determines how much collateral can be withdrawn in addition to that. The returned value is the sum
-// of the two values.
+// moduleMaxWithdraw calculates the maximum available amount of uToken to withdraw from the module given the amount of
+// user's spendable tokens. The calculation first finds the maximum amount of non-collateral uTokens the user can
+// withdraw up to the amount in their wallet, then determines how much collateral can be withdrawn in addition to that.
+// The returned value is the sum of the two values.
 func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (
 	sdkmath.Int,
 	error,

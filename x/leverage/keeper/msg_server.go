@@ -367,7 +367,16 @@ func (s msgServer) MaxBorrow(
 	// but not this token or any of their borrows, error
 	// will be nil and the resulting value will be what
 	// can safely be borrowed even with missing prices.
-	maxBorrow, err := s.keeper.maxBorrow(ctx, borrowerAddr, msg.Denom)
+	userMaxBorrow, err := s.keeper.userMaxBorrow(ctx, borrowerAddr, msg.Denom)
+	if err != nil {
+		return nil, err
+	}
+	if userMaxBorrow.IsZero() {
+		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
+	}
+
+	// Get the max available to borrow from the module
+	maxBorrow, err := s.keeper.moduleMaxBorrow(ctx, userMaxBorrow)
 	if err != nil {
 		return nil, err
 	}
@@ -375,6 +384,7 @@ func (s msgServer) MaxBorrow(
 		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
 	}
 
+	// Proceed to borrow
 	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
 		return nil, err
 	}

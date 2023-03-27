@@ -93,10 +93,10 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
 }
 
-// maxBorrow calculates the maximum amount of a given token an account can currently borrow.
+// userMaxBorrow calculates the maximum amount of a given token an account can currently borrow.
 // input denom should be a base token. If oracle prices are missing for some of the borrower's
 // collateral, computes the maximum safe borrow allowed by only the collateral whose prices are known
-func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
+func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if types.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
 	}
