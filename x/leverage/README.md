@@ -81,7 +81,7 @@ Users have the following actions available to them:
 
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#borrow-apy).
 
-- `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed.
+- `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed. This amount is calculated taking into account users borrows and his borrow limit, the available liquidity that can be borrowed respecting the `min_collateral_liquidity` and `max_supply_utilization` of the `Token`. 
 
 - `MsgRepay` assets of a borrowed type, directly reducing the amount owed.
 
