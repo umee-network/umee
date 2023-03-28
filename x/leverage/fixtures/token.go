@@ -21,7 +21,7 @@ func Token(base, symbol string, exponent uint32) types.Token {
 		Exponent:               exponent,
 		ReserveFactor:          sdk.MustNewDecFromStr("0.2"),
 		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.25"),
+		LiquidationThreshold:   sdk.MustNewDecFromStr("0.26"),
 		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
 		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
 		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
