@@ -219,8 +219,8 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 		return sdk.ZeroInt(), err
 	}
 
-	// If module_available_liquidity is 0 or less, we cannot withdraw anything
-	if moduleAvailableLiquidity.LTE(sdkmath.ZeroInt()) {
+	// If module_available_liquidity is zero, we cannot withdraw anything
+	if !moduleAvailableLiquidity.IsPositive() {
 		return sdkmath.ZeroInt(), nil
 	}
 

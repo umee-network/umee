@@ -4,7 +4,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -220,38 +219,35 @@ func (k Keeper) checkSupplyUtilization(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-// moduleMaxBorrow calculates maximum amount of Token to borrow from the module given the maximum amount of Token the
-// user can borrow. The calculation first finds the maximum amount of Token that can be borrowed from the module,
+// moduleMaxBorrow calculates maximum amount of Token to borrow from the module.
+// The calculation first finds the maximum amount of Token that can be borrowed from the module,
 // respecting the min_collateral_liquidity parameter, then determines the maximum amount of Token that can be borrowed
-// from the module, respecting the max_supply_utilization parameter. The minimum between these three values is
+// from the module, respecting the max_supply_utilization parameter. The minimum between these two values is
 // selected, given that the min_collateral_liquidity and max_supply_utilization are both limiting factors.
-func (k Keeper) moduleMaxBorrow(ctx sdk.Context, userMaxBorrow sdk.Coin) (sdk.Coin, error) {
+func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// Get the module_available_liquidity
-	moduleAvailableLiquidity, err := k.moduleAvailableLiquidity(ctx, userMaxBorrow.Denom)
+	moduleAvailableLiquidity, err := k.moduleAvailableLiquidity(ctx, denom)
 	if err != nil {
-		return coin.Zero(userMaxBorrow.Denom), err
+		return sdk.ZeroInt(), err
 	}
 
-	// If module_available_liquidity is 0 or less, we cannot borrow anything
+	// If module_available_liquidity is zero, we cannot borrow anything
 	if !moduleAvailableLiquidity.IsPositive() {
-		return coin.Zero(userMaxBorrow.Denom), nil
+		return sdk.ZeroInt(), nil
 	}
-
-	// Use the minimum of the user's max borrow and the available from module liquidity
-	amountToBorrow := sdk.MinInt(moduleAvailableLiquidity, userMaxBorrow.Amount)
 
 	// Get max_supply_utilization for the denom
-	token, err := k.GetTokenSettings(ctx, userMaxBorrow.Denom)
+	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
-		return coin.Zero(userMaxBorrow.Denom), err
+		return sdk.ZeroInt(), err
 	}
 	maxSupplyUtilization := token.MaxSupplyUtilization
 
 	// Get total_borrowed from module for the denom
-	totalBorrowed := k.GetTotalBorrowed(ctx, userMaxBorrow.Denom).Amount
+	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount
 
 	// Get module liquidity for the denom
-	liquidity := k.AvailableLiquidity(ctx, userMaxBorrow.Denom)
+	liquidity := k.AvailableLiquidity(ctx, denom)
 
 	// The formula to calculate max_borrow respecting the max_supply_utilization is as follows:
 	//
@@ -264,9 +260,9 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, userMaxBorrow sdk.Coin) (sdk.Co
 
 	// If module_max_borrow is zero, we cannot borrow anything
 	if !moduleMaxBorrow.IsPositive() {
-		return coin.Zero(userMaxBorrow.Denom), nil
+		return sdk.ZeroInt(), nil
 	}
 
-	// Use the minimum between module_max_borrow and (module_available_liquidity or user_max_borrow)
-	return sdk.NewCoin(userMaxBorrow.Denom, sdk.MinInt(amountToBorrow, moduleMaxBorrow.TruncateInt())), nil
+	// Use the minimum between module_max_borrow and module_available_liquidity
+	return sdk.MinInt(moduleAvailableLiquidity, moduleMaxBorrow.TruncateInt()), nil
 }

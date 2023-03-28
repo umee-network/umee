@@ -196,7 +196,7 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// Get module liquidity for the Token
 	liquidity := k.AvailableLiquidity(ctx, denom)
-	
+
 	// Get module collateral for the associated uToken
 	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
 	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
@@ -218,5 +218,5 @@ func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	moduleAvailableLiquidity :=
 		sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
 
-	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(),sdk.ZeroInt()), nil
+	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
 }

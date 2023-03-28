@@ -376,16 +376,19 @@ func (s msgServer) MaxBorrow(
 	}
 
 	// Get the max available to borrow from the module
-	maxBorrow, err := s.keeper.moduleMaxBorrow(ctx, userMaxBorrow)
+	moduleMaxBorrow, err := s.keeper.moduleMaxBorrow(ctx, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
-	if maxBorrow.IsZero() {
+	if moduleMaxBorrow.IsZero() {
 		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
 	}
 
+	// Select the minimum between user_max_borrow and module_max_borrow
+	userMaxBorrow.Amount = sdk.MinInt(userMaxBorrow.Amount, moduleMaxBorrow)
+
 	// Proceed to borrow
-	if err := s.keeper.Borrow(ctx, borrowerAddr, maxBorrow); err != nil {
+	if err := s.keeper.Borrow(ctx, borrowerAddr, userMaxBorrow); err != nil {
 		return nil, err
 	}
 
@@ -397,26 +400,26 @@ func (s msgServer) MaxBorrow(
 	}
 
 	// Check MaxSupplyUtilization after transaction
-	if err = s.keeper.checkSupplyUtilization(ctx, maxBorrow.Denom); err != nil {
+	if err = s.keeper.checkSupplyUtilization(ctx, userMaxBorrow.Denom); err != nil {
 		return nil, err
 	}
 
 	// Check MinCollateralLiquidity is still satisfied after the transaction
-	if err = s.keeper.checkCollateralLiquidity(ctx, maxBorrow.Denom); err != nil {
+	if err = s.keeper.checkCollateralLiquidity(ctx, userMaxBorrow.Denom); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"assets borrowed",
 		"borrower", msg.Borrower,
-		"amount", maxBorrow.String(),
+		"amount", moduleMaxBorrow.String(),
 	)
 	sdkutil.Emit(&ctx, &types.EventBorrow{
 		Borrower: msg.Borrower,
-		Asset:    maxBorrow,
+		Asset:    userMaxBorrow,
 	})
 	return &types.MsgMaxBorrowResponse{
-		Borrowed: maxBorrow,
+		Borrowed: userMaxBorrow,
 	}, nil
 }
 
