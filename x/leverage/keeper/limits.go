@@ -218,5 +218,5 @@ func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	moduleAvailableLiquidity :=
 		sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
 
-	return moduleAvailableLiquidity.TruncateInt(), nil
+	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(),sdk.ZeroInt()), nil
 }
