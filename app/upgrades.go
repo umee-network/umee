@@ -40,7 +40,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 }
 
 // performs upgrade from v4.2 to v4.3
-func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade4_3(_ upgradetypes.Plan) {
 	const planName = "v4.3-beta" // TODO: change before the main release
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
