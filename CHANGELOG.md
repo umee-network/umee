@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1929](https://github.com/umee-network/umee/pull/1929) Leverage: `MaxWithdraw` now accounts for `MinCollateralLiquidity`
+- [1956](https://github.com/umee-network/umee/pull/1956) Leverage: token liquidation threshold must be bigger than collateral_weight.
 - [1954](https://github.com/umee-network/umee/pull/1954) Leverage: `MaxBorrow` now accounts for
   `MinCollateralLiquidity` and `MaxSupplyUtilization`
 

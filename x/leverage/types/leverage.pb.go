@@ -116,13 +116,15 @@ type Token struct {
 	// Collateral Weight defines what portion of the total value of the asset
 	// can contribute to a users borrowing power. If the collateral weight is
 	// zero, using this asset as collateral against borrowing will be disabled.
+	// Must be smaller than `liquidation_threshold`.
 	// Valid values: 0-1.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight" yaml:"collateral_weight"`
 	// Liquidation Threshold defines what amount of the total value of the
 	// asset as a collateral can contribute to a user's liquidation threshold
 	// (above which they become eligible for liquidation).
-	// See also: min_close_factor.
+	// Must be bigger than `collateral_weight`.
 	// Valid values: 0-1.
+	// See also: min_close_factor.
 	LiquidationThreshold github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,4,opt,name=liquidation_threshold,json=liquidationThreshold,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"liquidation_threshold" yaml:"liquidation_threshold"`
 	// Base Borrow Rate defines the minimum interest rate for borrowing this
 	// asset.
@@ -183,7 +185,10 @@ type Token struct {
 	// Borrowing, collateralizing, or withdrawing assets is not allowed when the
 	// result of such action invalidates min_collateral_liquidity.
 	// Liquidity can only drop below this value due to interest or liquidations.
-	// Valid values: 0 - 1
+	// The goal is to assure that there is enough available (not borrowed) token to be available
+	// for withdraw when there is a collateral liquidation and the liquidator needs to
+	// withdraw uToken.
+	// Valid values: 0 - inf
 	MinCollateralLiquidity github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,17,opt,name=min_collateral_liquidity,json=minCollateralLiquidity,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"min_collateral_liquidity" yaml:"min_collateral_liquidity"`
 	// Max Supply is the maximum amount of tokens the protocol can hold.
 	// Adding more supply of the given token to the protocol will return an error.
