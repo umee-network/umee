@@ -77,7 +77,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
 	if currentTime < prevInterestTime {
-		// TODO fix this when tendermint solves https://github.com/tendermint/tendermint/issues/8773
+		// precaution against this and similar issues: https://github.com/tendermint/tendermint/issues/8773
 		k.Logger(ctx).With("AccrueAllInterest will wait for block time > prevInterestTime").Error(
 			types.ErrNegativeTimeElapsed.Error(),
 			"current", currentTime,
@@ -133,11 +133,14 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			interestAccrued.TruncateInt(),
 		))
 
-		// calculate new reserves accrued for this denom
-		newReserves = newReserves.Add(sdk.NewCoin(
-			token.BaseDenom,
-			interestAccrued.Mul(token.ReserveFactor).TruncateInt(),
-		))
+		// if interest accrued on this denom is at least one base token
+		if interestAccrued.GT(sdk.OneDec()) {
+			// calculate new reserves gained for this denom, rounding up
+			newReserves = newReserves.Add(sdk.NewCoin(
+				token.BaseDenom,
+				interestAccrued.Mul(token.ReserveFactor).Ceil().TruncateInt(),
+			))
+		}
 
 		// calculate oracle rewards accrued for this denom
 		oracleRewards = oracleRewards.Add(sdk.NewCoin(

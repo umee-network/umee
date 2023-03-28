@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [1929](https://github.com/umee-network/umee/pull/1929) Leverage: `MaxWithdraw` now accounts for `MinCollateralLiquidity`
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Leverage: Reserved amount per block now rounds up.
 
 ## [v4.2.0](https://github.com/umee-network/umee/releases/tag/v4.2.0) - 2023-03-15
 
