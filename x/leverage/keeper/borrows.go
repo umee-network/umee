@@ -262,8 +262,8 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, userMaxBorrow sdk.Coin) (sdk.Co
 		sdk.NewDec(totalBorrowed.Int64()),
 	)
 
-	// If module_max_borrow is 0 or less, we cannot borrow anything
-	if moduleMaxBorrow.LTE(sdk.ZeroDec()) {
+	// If module_max_borrow is zero, we cannot borrow anything
+	if !moduleMaxBorrow.IsPositive() {
 		return coin.Zero(userMaxBorrow.Denom), nil
 	}
 
