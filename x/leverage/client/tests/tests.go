@@ -230,17 +230,17 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdLiquidate(),
 		[]string{
 			val.Address.String(),
-			"5uumee", // borrower liquidates itself, reduces borrow amount and collateral by 5
+			"5uumee", // borrower attempts to liquidate itself, but is ineligible
 			"uumee",
 		},
-		nil,
+		types.ErrLiquidationIneligible,
 	}
 
 	repay := testTransaction{
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			"250uumee", // repays only the remaining borrowed balance, reduced automatically from 250
+			"255uumee", // repays only the remaining borrowed balance, reduced automatically from 255
 		},
 		nil,
 	}
@@ -249,7 +249,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"remove collateral",
 		cli.GetCmdDecollateralize(),
 		[]string{
-			"895u/uumee", // 100 u/uumee will remain
+			"900u/uumee", // 100 u/uumee will remain
 		},
 		nil,
 	}
@@ -258,7 +258,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"withdraw",
 		cli.GetCmdWithdraw(),
 		[]string{
-			"795u/uumee", // 200 u/uumee will remain
+			"800u/uumee", // 200 u/uumee will remain
 		},
 		nil,
 	}
@@ -272,7 +272,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		nil,
 	}
 
-	lt1 := sdk.MustNewDecFromStr("0.0085610525")
+	lt1 := sdk.MustNewDecFromStr("0.0089034946")
 
 	nonzeroQueries := []testQuery{
 		{
@@ -315,7 +315,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				BorrowedValue: sdk.MustNewDecFromStr("0.00858671"),
 				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
 				BorrowLimit: sdk.MustNewDecFromStr("0.0085610525"),
-				// (1001 / 1000000) * 0.25 * 34.21 = 0.0085610525
+				// (1001 / 1000000) * 0.26 * 34.21 = 0.008903494600000000
 				LiquidationThreshold: &lt1,
 			},
 		},
