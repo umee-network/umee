@@ -77,8 +77,8 @@ func CheckIBCInflow(ctx sdk.Context,
 		// NOTE: sourcePrefix contains the trailing "/"
 		prefixedDenom := sourcePrefix + dataDenom
 		// construct the denomination trace from the full raw denomination and get the ibc_denom
-		ibc_denom := ibctransfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
-		_, err := lkeeper.GetTokenSettings(ctx, ibc_denom)
+		ibcDenom := ibctransfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
+		_, err := lkeeper.GetTokenSettings(ctx, ibcDenom)
 		if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
 			return channeltypes.NewErrorAcknowledgement(err)
 		}
