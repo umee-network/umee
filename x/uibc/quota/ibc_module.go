@@ -53,11 +53,8 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 
 // OnTimeoutPacket implements types.Middleware
 func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
-	params := im.keeper.GetParams(ctx)
-	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
-		err := im.RevertQuotaUpdate(ctx, packet.Data)
-		emitOnRevertQuota(&ctx, "timeout", packet.Data, err)
-	}
+	err := im.RevertQuotaUpdate(ctx, packet.Data)
+	emitOnRevertQuota(&ctx, "timeout", packet.Data, err)
 
 	return im.IBCModule.OnTimeoutPacket(ctx, packet, relayer)
 }
