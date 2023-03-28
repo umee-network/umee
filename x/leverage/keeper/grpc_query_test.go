@@ -134,7 +134,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	resp, err := s.queryClient.AccountSummary(ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
 	require.NoError(err)
 
-	lt := sdk.MustNewDecFromStr("1052.5")
+	lt := sdk.MustNewDecFromStr("1094.600000000000000000")
 	expected := types.QueryAccountSummaryResponse{
 		// This result is umee's oracle exchange rate from
 		// from .Reset() in x/leverage/keeper/oracle_test.go
@@ -148,7 +148,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		BorrowedValue: sdk.ZeroDec(),
 		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
-		// (1000) * 4.21 * 0.25 = 1052.5
+		// (1000) * 4.21 * 0.26 = 1094.6
 		LiquidationThreshold: &lt,
 	}
 

@@ -1611,18 +1611,6 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 }
 
 func (s *IntegrationTestSuite) TestMsgLiquidate() {
-	type testCase struct {
-		msg               string
-		liquidator        sdk.AccAddress
-		borrower          sdk.AccAddress
-		attemptedRepay    sdk.Coin
-		rewardDenom       string
-		expectedRepay     sdk.Coin
-		expectedLiquidate sdk.Coin
-		expectedReward    sdk.Coin
-		err               error
-	}
-
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a liquidator which supplies plenty of UMEE and ATOM to the module
@@ -1664,9 +1652,19 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 	s.supply(closeBorrower, coin.New(umeeDenom, 400_000000))
 	s.collateralize(closeBorrower, coin.New("u/"+umeeDenom, 400_000000))
 	// artificially borrow just barely above liquidation threshold to simulate interest accruing
-	s.forceBorrow(closeBorrower, coin.New(umeeDenom, 102_000000))
+	s.forceBorrow(closeBorrower, coin.New(umeeDenom, 106_000000))
 
-	tcs := []testCase{
+	tcs := []struct {
+		msg               string
+		liquidator        sdk.AccAddress
+		borrower          sdk.AccAddress
+		attemptedRepay    sdk.Coin
+		rewardDenom       string
+		expectedRepay     sdk.Coin
+		expectedLiquidate sdk.Coin
+		expectedReward    sdk.Coin
+		err               error
+	}{
 		{
 			"healthy borrower",
 			liquidator,
@@ -1743,9 +1741,9 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			closeBorrower,
 			coin.New(umeeDenom, 200_000000),
 			"u/" + umeeDenom,
-			coin.New(umeeDenom, 7_752000),
-			coin.New("u/"+umeeDenom, 8_527200),
-			coin.New("u/"+umeeDenom, 8_527200),
+			coin.New(umeeDenom, 8_150541),
+			coin.New("u/"+umeeDenom, 8_965595),
+			coin.New("u/"+umeeDenom, 8_965595),
 			nil,
 		},
 	}
@@ -1784,9 +1782,9 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			// verify the output of liquidate function
 			resp, err := srv.Liquidate(ctx, msg)
 			require.NoError(err, tc.msg)
-			require.Equal(tc.expectedRepay, resp.Repaid, tc.msg, "repaid")
-			require.Equal(tc.expectedLiquidate, resp.Collateral, tc.msg, "liquidated")
-			require.Equal(tc.expectedReward, resp.Reward, tc.msg, "reward")
+			require.Equal(tc.expectedRepay.String(), resp.Repaid.String(), tc.msg)
+			require.Equal(tc.expectedLiquidate.String(), resp.Collateral.String(), tc.msg)
+			require.Equal(tc.expectedReward.String(), resp.Reward.String(), tc.msg)
 
 			// final state (liquidated denom)
 			lfUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
@@ -1809,9 +1807,9 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 				bfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.attemptedRepay.Denom)
 
 				// verify borrowed denom uToken supply is unchanged
-				require.Equal(biUTokenSupply, bfUTokenSupply, tc.msg, "uToken supply (borrowed denom")
+				require.Equal(biUTokenSupply, bfUTokenSupply, "%s: %s", tc.msg, "uToken supply (borrowed denom")
 				// verify borrowed denom uToken exchange rate is unchanged
-				require.Equal(biExchangeRate, bfExchangeRate, tc.msg, "uToken exchange rate (borrowed denom")
+				require.Equal(biExchangeRate, bfExchangeRate, "%s: %s", tc.msg, "uToken exchange rate (borrowed denom")
 			}
 
 			// verify liquidated denom uToken supply is unchanged if indirect liquidation, or reduced if direct
@@ -1819,14 +1817,14 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			if !types.HasUTokenPrefix(tc.rewardDenom) {
 				expectedLiquidatedUTokenSupply = expectedLiquidatedUTokenSupply.Sub(tc.expectedLiquidate)
 			}
-			require.Equal(expectedLiquidatedUTokenSupply, lfUTokenSupply, tc.msg, "uToken supply (liquidated denom")
+			require.Equal(expectedLiquidatedUTokenSupply, lfUTokenSupply, "%s: %s", tc.msg, "uToken supply (liquidated denom")
 			// verify liquidated denom uToken exchange rate is unchanged
-			require.Equal(liExchangeRate, lfExchangeRate, tc.msg, "uToken exchange rate (liquidated denom")
+			require.Equal(liExchangeRate, lfExchangeRate, "%s: %s", tc.msg, "uToken exchange rate (liquidated denom")
 
 			// verify borrower balances unchanged
-			require.Equal(biBalance, bfBalance, tc.msg, "borrower balances")
+			require.Equal(biBalance, bfBalance, "%s: %s", tc.msg, "borrower balances")
 			// verify borrower collateral reduced by the expected amount
-			s.requireEqualCoins(biCollateral.Sub(tc.expectedLiquidate), bfCollateral, tc.msg, "borrower collateral")
+			s.requireEqualCoins(biCollateral.Sub(tc.expectedLiquidate), bfCollateral, "%s: %s", tc.msg, "borrower collateral")
 			// verify borrowed coins decreased by expected amount
 			s.requireEqualCoins(biBorrowed.Sub(tc.expectedRepay), bfBorrowed, "borrowed coins")
 
@@ -1834,7 +1832,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			require.Equal(liBalance.Sub(tc.expectedRepay).Add(tc.expectedReward), lfBalance,
 				tc.msg, "liquidator balances")
 			// verify liquidator collateral unchanged
-			require.Equal(liCollateral, lfCollateral, tc.msg, "liquidator collateral")
+			require.Equal(liCollateral, lfCollateral, "%s: %s", tc.msg, "liquidator collateral")
 			// verify liquidator borrowed coins unchanged
 			s.requireEqualCoins(liBorrowed, lfBorrowed, "liquidator borrowed coins")
 
