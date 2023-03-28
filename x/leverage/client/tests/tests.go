@@ -230,17 +230,17 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		cli.GetCmdLiquidate(),
 		[]string{
 			val.Address.String(),
-			"5uumee", // borrower liquidates itself, reduces borrow amount and collateral by 5
+			"5uumee", // borrower attempts to liquidate itself, but is ineligible
 			"uumee",
 		},
-		nil,
+		types.ErrLiquidationIneligible,
 	}
 
 	repay := testTransaction{
 		"repay",
 		cli.GetCmdRepay(),
 		[]string{
-			"250uumee", // repays only the remaining borrowed balance, reduced automatically from 250
+			"255uumee", // repays only the remaining borrowed balance, reduced automatically from 255
 		},
 		nil,
 	}
@@ -249,7 +249,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"remove collateral",
 		cli.GetCmdDecollateralize(),
 		[]string{
-			"895u/uumee", // 100 u/uumee will remain
+			"900u/uumee", // 100 u/uumee will remain
 		},
 		nil,
 	}
@@ -258,7 +258,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		"withdraw",
 		cli.GetCmdWithdraw(),
 		[]string{
-			"795u/uumee", // 200 u/uumee will remain
+			"800u/uumee", // 200 u/uumee will remain
 		},
 		nil,
 	}

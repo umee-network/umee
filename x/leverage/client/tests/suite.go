@@ -121,6 +121,6 @@ func (t testQuery) Run(s *IntegrationTestSuite) {
 
 		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), t.responseType)
 		require.NoError(err, t.msg)
-		require.Equal(t.expectedResponse, t.responseType, t.msg)
+		require.Equal(t.expectedResponse.String(), t.responseType.String(), t.msg)
 	}
 }
