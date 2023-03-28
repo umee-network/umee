@@ -272,7 +272,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 		nil,
 	}
 
-	lt1 := sdk.MustNewDecFromStr("0.0085610525")
+	lt1 := sdk.MustNewDecFromStr("0.0089034946")
 
 	nonzeroQueries := []testQuery{
 		{
@@ -315,7 +315,7 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				BorrowedValue: sdk.MustNewDecFromStr("0.00858671"),
 				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
 				BorrowLimit: sdk.MustNewDecFromStr("0.0085610525"),
-				// (1001 / 1000000) * 0.25 * 34.21 = 0.0085610525
+				// (1001 / 1000000) * 0.26 * 34.21 = 0.008903494600000000
 				LiquidationThreshold: &lt1,
 			},
 		},

@@ -100,7 +100,7 @@ func (t testTransaction) Run(s *IntegrationTestSuite) {
 	require.NoError(err, t.msg)
 
 	if t.expectedErr == nil {
-		require.Equal(0, int(resp.Code), "msg", t.msg, "resp", resp)
+		require.Equal(0, int(resp.Code), "msg: %s\nresp: %s", t.msg, resp)
 	} else {
 		require.Equal(int(t.expectedErr.ABCICode()), int(resp.Code), t.msg)
 	}
@@ -121,7 +121,6 @@ func (t testQuery) Run(s *IntegrationTestSuite) {
 
 		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), t.responseType)
 		require.NoError(err, t.msg)
-
-		require.Equal(t.expectedResponse, t.responseType)
+		require.Equal(t.expectedResponse, t.responseType, t.msg)
 	}
 }
