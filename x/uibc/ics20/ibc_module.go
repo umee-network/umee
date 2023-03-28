@@ -10,6 +10,7 @@ import (
 
 	ibcutil "github.com/umee-network/umee/v4/util/ibc"
 	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
 )
 
@@ -17,14 +18,14 @@ import (
 // methods.
 type IBCModule struct {
 	// leverage keeper
-	lkeeper keeper.LeverageKeeper
+	lkeeper uibc.LeverageKeeper
 	// embed the ICS-20 transfer's AppModule
 	ibctransfer.IBCModule
 
 	keeper keeper.Keeper
 }
 
-func NewIBCModule(leverageKeeper keeper.LeverageKeeper, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
+func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
 	return IBCModule{
 		lkeeper:   leverageKeeper,
 		IBCModule: am,
@@ -39,21 +40,10 @@ func (am IBCModule) OnRecvPacket(
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
-	// Allowing only registered token
-	var data ibctransfertypes.FungibleTokenPacketData
-	if err := ibctransfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
-		return channeltypes.NewErrorAcknowledgement(ackErr)
-	}
-
-	_, denom, err := ibcutil.GetFundsFromPacket(packet)
-	if err != nil {
-		return channeltypes.NewErrorAcknowledgement(err)
-	}
-
-	_, err = am.lkeeper.GetTokenSettings(ctx, denom)
-	if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
-		return channeltypes.NewErrorAcknowledgement(err)
+	// Allowing only registered token for ibc transfer
+	ackErr := CheckIBCInflow(ctx, packet, am.lkeeper)
+	if ackErr != nil {
+		return ackErr
 	}
 
 	ack := am.IBCModule.OnRecvPacket(ctx, packet, relayer)
@@ -66,4 +56,27 @@ func (am IBCModule) OnRecvPacket(
 	}
 
 	return ack
+}
+
+func CheckIBCInflow(ctx sdk.Context,
+	packet channeltypes.Packet,
+	lkeeper uibc.LeverageKeeper,
+) ibcexported.Acknowledgement {
+	var data ibctransfertypes.FungibleTokenPacketData
+	if err := ibctransfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
+		return channeltypes.NewErrorAcknowledgement(ackErr)
+	}
+
+	_, denom, err := ibcutil.GetFundsFromPacket(packet)
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+
+	_, err = lkeeper.GetTokenSettings(ctx, denom)
+	if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+
+	return nil
 }
