@@ -8,7 +8,6 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
 	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
 
-	ibcutil "github.com/umee-network/umee/v4/util/ibc"
 	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
@@ -40,8 +39,15 @@ func (am IBCModule) OnRecvPacket(
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
+	var data ibctransfertypes.FungibleTokenPacketData
+	if err := ibctransfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
+		return channeltypes.NewErrorAcknowledgement(ackErr)
+	}
+
 	// Allowing only registered token for ibc transfer
-	ackErr := CheckIBCInflow(ctx, packet, am.lkeeper)
+	isSourceChain := ibctransfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+	ackErr := CheckIBCInflow(ctx, packet, am.lkeeper, data.Denom, isSourceChain)
 	if ackErr != nil {
 		return ackErr
 	}
@@ -61,21 +67,21 @@ func (am IBCModule) OnRecvPacket(
 func CheckIBCInflow(ctx sdk.Context,
 	packet channeltypes.Packet,
 	lkeeper uibc.LeverageKeeper,
+	dataDenom string, isSourceChain bool,
 ) ibcexported.Acknowledgement {
-	var data ibctransfertypes.FungibleTokenPacketData
-	if err := ibctransfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
-		return channeltypes.NewErrorAcknowledgement(ackErr)
-	}
-
-	_, denom, err := ibcutil.GetFundsFromPacket(packet)
-	if err != nil {
-		return channeltypes.NewErrorAcknowledgement(err)
-	}
-
-	_, err = lkeeper.GetTokenSettings(ctx, denom)
-	if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
-		return channeltypes.NewErrorAcknowledgement(err)
+	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
+	// check ibc_denom is exists in leverage token registry
+	if isSourceChain {
+		// since SendPacket did not prefix the denomination, we must prefix denomination here
+		sourcePrefix := ibctransfertypes.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
+		// NOTE: sourcePrefix contains the trailing "/"
+		prefixedDenom := sourcePrefix + dataDenom
+		// construct the denomination trace from the full raw denomination and get the ibc_denom
+		ibc_denom := ibctransfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
+		_, err := lkeeper.GetTokenSettings(ctx, ibc_denom)
+		if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
+			return channeltypes.NewErrorAcknowledgement(err)
+		}
 	}
 
 	return nil
