@@ -5,6 +5,7 @@ import (
 )
 
 var (
+	// TODO: why are both of these returning as "/"?
 	proposalTypeMsgGovSetParams      = MsgGovSetParams{}.Type()
 	proposalTypeMsgGovCreatePrograms = MsgGovCreatePrograms{}.Type()
 )
