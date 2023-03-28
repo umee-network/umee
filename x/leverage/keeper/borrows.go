@@ -233,7 +233,7 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, userMaxBorrow sdk.Coin) (sdk.Co
 	}
 
 	// If module_available_liquidity is 0 or less, we cannot borrow anything
-	if moduleAvailableLiquidity.LTE(sdkmath.ZeroInt()) {
+	if !moduleAvailableLiquidity.IsPositive() {
 		return coin.Zero(userMaxBorrow.Denom), nil
 	}
 
