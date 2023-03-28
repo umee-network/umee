@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/group"
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	// ibcv6 "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/controller/migrations/v6"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
 	"github.com/umee-network/umee/v4/app/upgradev3"
@@ -41,13 +42,19 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 // performs upgrade from v4.2 to v4.3
 func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
-	const planName = "v4.3"
-	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
-	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-		Added: []string{
-			uibc.ModuleName,
+	const planName = "v4.3-beta" // TODO: change before the main release
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			// TODO: probably we don't need this because this is only related to the controller.
+			// if err := ibcv6.MigrateICS27ChannelCapability(ctx, app.appCodec, capabilityStoreKey, app.CapabilityKeeper, moduleName); err != nil {
+			// 	return nil, err
+			// }
+
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
-	})
+	)
 }
 
 // performs upgrade from v4.1 to v4.2
