@@ -5,8 +5,6 @@ import (
 )
 
 var (
-	// TODO: why are both of these returning as "/"?
-	// should resemble /umee.incentive.v1.MsgGovSetParams
 	proposalTypeMsgGovSetParams      = MsgGovSetParams{}.Type()
 	proposalTypeMsgGovCreatePrograms = MsgGovCreatePrograms{}.Type()
 )

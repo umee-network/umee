@@ -77,9 +77,9 @@ func TestRoutes(t *testing.T) {
 		assert.Assert(t, len(msg.GetSignBytes()) != 0)
 		// exact match required
 		assert.Equal(t,
-			// example: "/umeenetwork.umee.incentive.v1.MsgBond"
+			// example: "/umee.incentive.v1.MsgBond"
 			// with %T returning "incentive.MsgBond"
-			addV1ToType(fmt.Sprintf("/umeenetwork.umee.%T", msg)),
+			addV1ToType(fmt.Sprintf("/umee.%T", msg)),
 			msg.Type(),
 		)
 	}

@@ -99,8 +99,12 @@ func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
 	if err != nil {
 		return err
 	}
-	err = store.SetAddress(kvs, keyPrefixParamCommunityFundAddress,
-		sdk.MustAccAddressFromBech32(params.CommunityFundAddress), "community fund address")
+	if params.CommunityFundAddress == "" {
+		err = store.SetAddress(kvs, keyPrefixParamCommunityFundAddress, nil, "community fund address")
+	} else {
+		err = store.SetAddress(kvs, keyPrefixParamCommunityFundAddress,
+			sdk.MustAccAddressFromBech32(params.CommunityFundAddress), "community fund address")
+	}
 	if err != nil {
 		return err
 	}
