@@ -124,28 +124,6 @@ jobs:
         run: |
           EXPERIMENTAL=true make test-e2e
 
-  price-feeder:
-    runs-on: ubuntu-latest
-    needs: install-tparse
-    steps:
-      - uses: actions/checkout@v3
-      - uses: technote-space/get-diff-action@v6.1.2
-        with:
-          PATTERNS: |
-            **/**.go
-            price-feeder/go.mod
-            price-feeder/go.sum
-      - uses: actions/setup-go@v4
-        if: env.GIT_DIFF
-        with:
-          go-version: 1.19
-          cache: true
-          cache-dependency-path: price-feeder/go.sum
-      - name: Test price-feeder
-        if: env.GIT_DIFF
-        run: |
-          cd price-feeder && make test-unit
-
   liveness-test:
     needs: install-tparse
     # needs: build-umeed
