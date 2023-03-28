@@ -4,21 +4,29 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
 )
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
-func (k Keeper) SendPacket(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet ibcexported.PacketI) error {
-	funds, denom, err := k.GetFundsFromPacket(packet)
+func (k Keeper) SendPacket(ctx sdk.Context,
+	chanCap *capabilitytypes.Capability,
+	sourcePort string,
+	sourceChannel string,
+	timeoutHeight clienttypes.Height,
+	timeoutTimestamp uint64,
+	data []byte) (uint64, error) {
+
+	funds, denom, err := k.GetFundsFromPacket(data)
 	if err != nil {
-		return errors.Wrap(err, "bad packet in rate limit's SendPacket")
+		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
 	if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
-		return errors.Wrap(err, "bad packet in rate limit's SendPacket")
+		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
-	return k.ics4Wrapper.SendPacket(ctx, chanCap, packet)
+	return k.ics4Wrapper.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
 }
 
 // WriteAcknowledgement wraps IBC ChannelKeeper's WriteAcknowledgement function
