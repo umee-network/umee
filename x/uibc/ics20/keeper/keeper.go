@@ -42,7 +42,7 @@ func (k Keeper) SendTransfer(
 	timeoutTimestamp uint64,
 ) error {
 	// first, relay the SendTransfer to the real (embedded) ICS-20 transfer keeper
-	if err := k.Keeper.SendTransfer(
+	if err := k.Keeper.Transfer(
 		ctx,
 		sourcePort,
 		sourceChannel,

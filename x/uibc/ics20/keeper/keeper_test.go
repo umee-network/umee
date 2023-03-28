@@ -133,6 +133,7 @@ func TestTrackMetadata(t *testing.T) {
 			strconv.Itoa(1),
 			AddressFromString("a3"),
 			AddressFromString("a4"),
+			""
 		)
 
 		packet := channeltypes.NewPacket(
@@ -162,6 +163,7 @@ func TestTrackMetadata(t *testing.T) {
 			strconv.Itoa(1),
 			AddressFromString("a2"),
 			AddressFromString("a1"),
+			"memo"
 		)
 
 		packet := channeltypes.NewPacket(
@@ -193,6 +195,7 @@ func TestTrackMetadata(t *testing.T) {
 			strconv.Itoa(1),
 			AddressFromString("a1"),
 			AddressFromString("a2"),
+			"memo",
 		)
 
 		packet := channeltypes.NewPacket(
