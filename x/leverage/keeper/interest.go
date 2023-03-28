@@ -138,7 +138,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			// calculate new reserves gained for this denom, rounding up
 			newReserves = newReserves.Add(sdk.NewCoin(
 				token.BaseDenom,
-				interestAccrued.Mul(token.ReserveFactor).Ceil().TruncateInt(),
+				interestAccrued.Mul(token.ReserveFactor).Ceil().RoundInt(),
 			))
 		}
 
