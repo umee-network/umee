@@ -1474,8 +1474,8 @@ github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqz
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
 github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4 h1:6uF05P2w+ueKvBNqAh2GdVt8WFeCakVPzZU/LNwnEAY=
 github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-4/go.mod h1:qf/p/AIVfuGzBg2bYx1yg4PbHhazGfdqnm6j1BKZ62M=
-github.com/umee-network/bech32-ibc v0.3.2 h1:T2QgfMVktA9iAYLYmhmcukJr5qoaEJgRLDoUtHK8CzE=
-github.com/umee-network/bech32-ibc v0.3.2/go.mod h1:kbT1K+mxxzDkvmcsHtBXgM2meNv6AXroxPdSeWAcZE0=
+github.com/umee-network/bech32-ibc v0.3.3 h1:wUX5uSYZl8yiFdttOvunfRihsE4miYmzl7pK2FEUs+U=
+github.com/umee-network/bech32-ibc v0.3.3/go.mod h1:UbhzCKN+Z7RoUdCkAanmIy+wufwQ/aQJrDEoVORhC2Y=
 github.com/umee-network/cosmos-sdk v0.46.11-umee h1:XzoK7WFw6FcqGJSQUrRYAyrU3lcuKry6A4W24Uv9cWc=
 github.com/umee-network/cosmos-sdk v0.46.11-umee/go.mod h1:bG4AkW9bqc8ycrryyKGQEl3YV9BY2wr6HggGq8kvcgM=
 github.com/urfave/cli v1.20.0/go.mod h1:70zkFmudgCuE/ngEzBv17Jvp/497gISqfk5gWijbERA=
