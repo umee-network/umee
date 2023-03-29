@@ -6,6 +6,8 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
+
+	ibcutil "github.com/umee-network/umee/v4/util/ibc"
 )
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
@@ -17,7 +19,7 @@ func (k Keeper) SendPacket(ctx sdk.Context,
 	timeoutTimestamp uint64,
 	data []byte) (uint64, error) {
 
-	funds, denom, err := k.GetFundsFromPacket(data)
+	funds, denom, err := ibcutil.GetFundsFromPacket(data)
 	if err != nil {
 		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}

@@ -11,6 +11,7 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 Highlights:
 
 - IBC updated to `ibc-go v6.1`. That also triggered our wasmvm dependency update (see `libwasmvm` update in Validators section)
+- ICA
 
 See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.3.0/CHANGELOG.md) for a full list of changes.
 
@@ -37,24 +38,18 @@ You MUST also set the related parameter when starting Peggo `--cosmos-gas-prices
 
 ### Upgrade instructions
 
-- Note: Skip this step if you build binary from source and are able to properly link libwasmvm.
-  - Download `libwasmvm`:
-
-```bash
-$ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
-```
-
 - Download latest binary or build from source.
-- Run the binary to make sure it works for you: `umeed --version`
+- Make sure `libwasmvm.$(uname -m).so` is properly linked
+  - Run the binary to make sure it works for you: `umeed --version`
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Swap binaries.
-- Restart the chain.
 - Ensure latest Peggo (v1.4.0) is running
 - Ensure latest Price Feeder (v2.1.0) is running and check your price feeder config is up to date.
+- Restart the chain.
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
-NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.1.0 --version`.
+NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.3.0 --version`.
 
 #### Docker
 
