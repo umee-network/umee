@@ -1,0 +1,43 @@
+package ibc
+
+import (
+	"encoding/json"
+	"strings"
+
+	sdkmath "cosmossdk.io/math"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
+	"github.com/cosmos/ibc-go/v5/modules/core/exported"
+)
+
+// GetFundsFromPacket returns transfer amount and denom
+func GetFundsFromPacket(packet exported.PacketI) (sdkmath.Int, string, error) {
+	var packetData transfertypes.FungibleTokenPacketData
+	err := json.Unmarshal(packet.GetData(), &packetData)
+	if err != nil {
+		return sdkmath.Int{}, "", err
+	}
+
+	amount, ok := sdkmath.NewIntFromString(packetData.Amount)
+	if !ok {
+		return sdkmath.Int{}, "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
+	}
+
+	return amount, GetLocalDenom(packetData.Denom), nil
+}
+
+// GetLocalDenom retruns ibc denom
+// Expected denoms in the following cases:
+//
+// send non-native: transfer/channel-0/denom -> ibc/xxx
+// send native: denom -> denom
+// recv (B)non-native: denom
+// recv (B)native: transfer/channel-0/denom
+func GetLocalDenom(denom string) string {
+	if strings.HasPrefix(denom, "transfer/") {
+		denomTrace := transfertypes.ParseDenomTrace(denom)
+		return denomTrace.IBCDenom()
+	}
+
+	return denom
+}
