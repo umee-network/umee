@@ -97,6 +97,7 @@ message Token {
   // Collateral Weight defines what portion of the total value of the asset
   // can contribute to a users borrowing power. If the collateral weight is
   // zero, using this asset as collateral against borrowing will be disabled.
+  // Must be smaller than `liquidation_threshold`.
   // Valid values: 0-1.
   string collateral_weight = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
@@ -107,8 +108,9 @@ message Token {
   // Liquidation Threshold defines what amount of the total value of the
   // asset as a collateral can contribute to a user's liquidation threshold
   // (above which they become eligible for liquidation).
-  // See also: min_close_factor.
+  // Must be bigger than `collateral_weight`.
   // Valid values: 0-1.
+  // See also: min_close_factor.
   string liquidation_threshold = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
@@ -215,7 +217,10 @@ message Token {
   // Borrowing, collateralizing, or withdrawing assets is not allowed when the
   // result of such action invalidates min_collateral_liquidity.
   // Liquidity can only drop below this value due to interest or liquidations.
-  // Valid values: 0 - 1
+  // The goal is to assure that there is enough available (not borrowed) token to be available
+  // for withdraw when there is a collateral liquidation and the liquidator needs to
+  // withdraw uToken.
+  // Valid values: 0 - inf
   string min_collateral_liquidity = 17 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false,
