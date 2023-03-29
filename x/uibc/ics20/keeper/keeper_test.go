@@ -190,54 +190,33 @@ func TestTrackMetadata(t *testing.T) {
 			"photon",
 		}, "/")
 
-		data := ibctransfertypes.NewFungibleTokenPacketData(
-			denom,
-			strconv.Itoa(1),
-			AddressFromString("a1"),
-			AddressFromString("a2"),
-			"memo",
-		)
-
-		packet := channeltypes.NewPacket(
-			data.GetBytes(),
-			uint64(1),
-			"transfer",
-			"channel-0",
-			"transfer",
-			"channel-0",
-			clienttypes.NewHeight(0, 100),
-			0,
-		)
-
-		sender, err := sdk.AccAddressFromBech32(data.Sender)
+		sender, err := sdk.AccAddressFromBech32(AddressFromString("a1"))
 		assert.NilError(t, err)
-
-		denomTrace := ibctransfertypes.ParseDenomTrace(data.Denom)
+		receiver := AddressFromString("a2")
+		denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 		ibcDenom := denomTrace.IBCDenom()
+		coin := sdk.NewCoin(ibcDenom, sdk.NewInt(1))
+		goCtx := s.chainB.GetContext()
 
 		registeredenom := func() {
-			denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 			traceHash := denomTrace.Hash()
-			if !s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
-				s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
+			if !s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.HasDenomTrace(goCtx, traceHash) {
+				s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SetDenomTrace(goCtx, denomTrace)
 			}
 		}
 
 		registeredenom()
 
-		amount, err := strconv.Atoi(data.Amount)
-		assert.NilError(t, err)
-
-		err = s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SendTransfer(
-			s.chainB.GetContext(),
-			packet.SourcePort,
-			packet.SourceChannel,
-			sdk.NewCoin(ibcDenom, sdk.NewInt(int64(amount))),
-			sender,
-			data.Receiver,
-			clienttypes.NewHeight(0, 110),
-			0,
-		)
+		msg := ibctransfertypes.MsgTransfer{
+			SourcePort: "transfer", SourceChannel: "channel-0",
+			Token:            coin,
+			Sender:           sender.String(),
+			Receiver:         receiver,
+			TimeoutHeight:    clienttypes.NewHeight(0, 110),
+			TimeoutTimestamp: 0,
+			Memo:             "",
+		}
+		_, err = s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.Transfer(goCtx, &msg)
 		assert.NilError(t, err)
 	})
 
