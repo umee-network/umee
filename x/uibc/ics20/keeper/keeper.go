@@ -30,7 +30,8 @@ func New(tk ibctransferkeeper.Keeper, bk ibctransfer.BankKeeper) Keeper {
 }
 
 // Transfer defines a rpc handler method for MsgTransfer.
-func (k Keeper) Transfer(goCtx context.Context, msg *ibctransfertypes.MsgTransfer) (*ibctransfertypes.MsgTransferResponse, error) {
+func (k Keeper) Transfer(goCtx context.Context, msg *ibctransfertypes.MsgTransfer,
+) (*ibctransfertypes.MsgTransferResponse, error) {
 	resp, err := k.Keeper.Transfer(goCtx, msg)
 	if err != nil {
 		return resp, err
