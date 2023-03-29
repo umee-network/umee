@@ -1,16 +1,12 @@
 package keeper
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 
 	"github.com/umee-network/umee/v4/util/coin"
 	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -224,36 +220,4 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 	totalOutflowSum := k.GetTotalOutflow(ctx)
 	k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
 	return nil
-}
-
-// GetFundsFromPacket returns transfer amount and denom
-func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (sdkmath.Int, string, error) {
-	var packetData transfertypes.FungibleTokenPacketData
-	err := json.Unmarshal(packet.GetData(), &packetData)
-	if err != nil {
-		return sdkmath.Int{}, "", err
-	}
-
-	amount, ok := sdkmath.NewIntFromString(packetData.Amount)
-	if !ok {
-		return sdkmath.Int{}, "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
-	}
-
-	return amount, k.GetLocalDenom(packetData.Denom), nil
-}
-
-// GetLocalDenom retruns ibc denom
-// Expected denoms in the following cases:
-//
-// send non-native: transfer/channel-0/denom -> ibc/xxx
-// send native: denom -> denom
-// recv (B)non-native: denom
-// recv (B)native: transfer/channel-0/denom
-func (k Keeper) GetLocalDenom(denom string) string {
-	if strings.HasPrefix(denom, "transfer/") {
-		denomTrace := transfertypes.ParseDenomTrace(denom)
-		return denomTrace.IBCDenom()
-	}
-
-	return denom
 }

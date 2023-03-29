@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
+	ibcutil "github.com/umee-network/umee/v4/util/ibc"
 )
 
 func TestGetQuotas(t *testing.T) {
@@ -30,8 +30,7 @@ func TestGetQuotas(t *testing.T) {
 }
 
 func TestGetLocalDenom(t *testing.T) {
-	k := keeper.Keeper{}
-	out := k.GetLocalDenom("umee")
+	out := ibcutil.GetLocalDenom("umee")
 	assert.Equal(t, "umee", out)
 }
 
