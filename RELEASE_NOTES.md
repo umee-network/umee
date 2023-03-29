@@ -6,6 +6,38 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v4.3.0
+
+Highlights:
+
+- ICA
+
+### Upgrade instructions
+
+- Note: Skip this step if you build binary from source and are able to properly link libwasmvm.
+
+  - Download `libwasmvm`:
+
+  ```bash
+  $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
+  ```
+
+- Download latest binary or build from source.
+- Run the binary to make sure it works for you: `umeed --version`
+- Wait for software upgrade proposal to pass and trigger the chain upgrade.
+- Swap binaries.
+- Restart the chain.
+- Ensure latest Peggo (v1.4.0) is running
+- Ensure latest Price Feeder (v2.1.0) is running and check your price feeder config is up to date.
+
+You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
+
+NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.3.0 version`.
+
+#### Docker
+
+Docker images are available in [ghcr.io umee-network](https://github.com/umee-network/umee/pkgs/container/umeed) repository.
+
 ## v4.2.0
 
 The main highlight of this release is new `x/uibc` module which introduces IBC Quota functionality.
@@ -40,31 +72,6 @@ Related to min gas price updates, you MUST also set the related parameter when s
 ```
 --cosmos-gas-prices="0.1uumee"
 ```
-
-### Upgrade instructions
-
-- Note: Skip this step if you build binary from source and are able to properly link libwasmvm.
-  - Download `libwasmvm`:
-
-```bash
-$ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
-```
-
-- Download latest binary or build from source.
-- Run the binary to make sure it works for you: `umeed --version`
-- Wait for software upgrade proposal to pass and trigger the chain upgrade.
-- Swap binaries.
-- Restart the chain.
-- Ensure latest Peggo (v1.4.0) is running
-- Ensure latest Price Feeder (v2.1.0) is running and check your price feeder config is up to date.
-
-You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
-
-NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.1.0 --version`.
-
-#### Docker
-
-Docker images are available in [ghcr.io umee-network](https://github.com/umee-network/umee/pkgs/container/umeed) repository.
 
 ## v4.1.0
 

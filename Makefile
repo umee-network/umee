@@ -191,7 +191,7 @@ TEST_PACKAGES=./...
 TEST_TARGETS := test-unit test-unit-cover test-race
 TEST_COVERAGE_PROFILE=coverage.txt
 
-UNIT_TEST_TAGS = norace 
+UNIT_TEST_TAGS = norace
 TEST_RACE_TAGS = ""
 TEST_E2E_TAGS = "e2e"
 TEST_E2E_DEPS = docker-build
