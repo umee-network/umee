@@ -540,15 +540,26 @@ func New(
 		ibctransfer.NewIBCModule(ibcTransferKeeper),
 		app.UIBCTransferKeeper,
 	)
-
 	transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
 
-	// Create IBC Router
-	// create static IBC router, add transfer route, then set and seal it
-	ibcRouter := ibcporttypes.NewRouter()
-	// Add transfer stack to IBC Router
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferStack)
-	ibcRouter.AddRoute(wasm.ModuleName, wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper))
+	/*
+		Create fee enabled wasm ibc Stack
+		var wasmStack ibcporttypes.IBCModule
+		wasmStack = wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, app.IBCFeeKeeper)
+		wasmStack = ibcfee.NewIBCMiddleware(wasmStack, app.IBCFeeKeeper)
+	*/
+
+	// Create static IBC router, add app routes, then set and seal it
+	ibcRouter := ibcporttypes.NewRouter().
+		AddRoute(ibctransfertypes.ModuleName, transferStack)
+	/*
+		// we will add cosmwasm IBC routing later
+		AddRoute(wasm.ModuleName, wasmStack).
+		// we don't integrate the controller now
+		AddRoute(intertxtypes.ModuleName, icaControllerStack).
+		AddRoute(icacontrollertypes.SubModuleName, icaControllerStack).
+		AddRoute(icahosttypes.SubModuleName, icaHostStack)
+	*/
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
