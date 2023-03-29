@@ -21,7 +21,7 @@ import (
 
 func TestCheckIBCInflow(t *testing.T) {
 	ctx := sdk.NewContext(nil, tmproto.Header{}, false, nil)
-	denom := strings.Join([]string{
+	notRegisteredDenom := strings.Join([]string{
 		"transfer",
 		"dest_chain",
 		"quark",
@@ -35,7 +35,8 @@ func TestCheckIBCInflow(t *testing.T) {
 	// registered token, expected token
 	mlk.EXPECT().GetTokenSettings(ctx, "UMEE").Return(lfixtures.Token("uumee", "UMEE", 6), nil).AnyTimes()
 	// Not registered token, error is expected
-	mlk.EXPECT().GetTokenSettings(ctx, "ibc/C5417054F532756246BD4694713BE30A10D53C878EBF5E2E9EC49BE86B7D89BB").Return(lfixtures.Token("uumee", "UMEE", 6), ltypes.ErrNotRegisteredToken).AnyTimes()
+	mlk.EXPECT().GetTokenSettings(ctx, "ibc/C5417054F532756246BD4694713BE30A10D53C878EBF5E2E9EC49BE86B7D89BB").
+		Return(lfixtures.Token("uumee", "UMEE", 6), ltypes.ErrNotRegisteredToken).AnyTimes()
 
 	// registered token
 	data := ibctransfertypes.NewFungibleTokenPacketData(
@@ -60,7 +61,7 @@ func TestCheckIBCInflow(t *testing.T) {
 	assert.Equal(t, nil, ackErr)
 
 	// Not registered token
-	data.Denom = denom
+	data.Denom = notRegisteredDenom
 	packet.Data = data.GetBytes()
 
 	ackErr = CheckIBCInflow(ctx, packet, mlk, data.Denom, true)
