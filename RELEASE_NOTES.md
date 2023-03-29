@@ -32,7 +32,7 @@ Highlights:
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
-NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.3.0 --version`.
+NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.3.0 version`.
 
 #### Docker
 
