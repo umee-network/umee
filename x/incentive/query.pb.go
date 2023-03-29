@@ -1118,7 +1118,7 @@ func (c *queryClient) Bonded(ctx context.Context, in *QueryBonded, opts ...grpc.
 
 func (c *queryClient) Unbondings(ctx context.Context, in *QueryUnbondings, opts ...grpc.CallOption) (*QueryUnbondingsResponse, error) {
 	out := new(QueryUnbondingsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/Unbondings", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/Unbondings", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1127,7 +1127,7 @@ func (c *queryClient) Unbondings(ctx context.Context, in *QueryUnbondings, opts 
 
 func (c *queryClient) PendingRewards(ctx context.Context, in *QueryPendingRewards, opts ...grpc.CallOption) (*QueryPendingRewardsResponse, error) {
 	out := new(QueryPendingRewardsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/PendingRewards", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/PendingRewards", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1264,7 +1264,7 @@ func _Query_TotalBonded_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/TotalBonded",
+		FullMethod: "/umee.incentive.v1.Query/TotalBonded",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).TotalBonded(ctx, req.(*QueryTotalBonded))
@@ -1282,7 +1282,7 @@ func _Query_TotalUnbonding_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/TotalUnbonding",
+		FullMethod: "/umee.incentive.v1.Query/TotalUnbonding",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).TotalUnbonding(ctx, req.(*QueryTotalUnbonding))
@@ -1300,7 +1300,7 @@ func _Query_Bonded_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/Bonded",
+		FullMethod: "/umee.incentive.v1.Query/Bonded",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Bonded(ctx, req.(*QueryBonded))
@@ -1318,7 +1318,7 @@ func _Query_Unbondings_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/Unbondings",
+		FullMethod: "/umee.incentive.v1.Query/Unbondings",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Unbondings(ctx, req.(*QueryUnbondings))
@@ -1336,7 +1336,7 @@ func _Query_PendingRewards_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/PendingRewards",
+		FullMethod: "/umee.incentive.v1.Query/PendingRewards",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).PendingRewards(ctx, req.(*QueryPendingRewards))
