@@ -93,10 +93,10 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
 }
 
-// maxBorrow calculates the maximum amount of a given token an account can currently borrow.
+// userMaxBorrow calculates the maximum amount of a given token an account can currently borrow.
 // input denom should be a base token. If oracle prices are missing for some of the borrower's
 // collateral, computes the maximum safe borrow allowed by only the collateral whose prices are known
-func (k *Keeper) maxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
+func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if types.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
 	}
@@ -189,4 +189,34 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 
 	// return the computed maximum or the current uToken supply, whichever is smaller
 	return sdk.MinInt(k.GetUTokenSupply(ctx, denom).Amount, maxUTokens.Amount), nil
+}
+
+// moduleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
+// respecting the MinCollateralLiquidity set for given Token.
+func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
+	// Get module liquidity for the Token
+	liquidity := k.AvailableLiquidity(ctx, denom)
+
+	// Get module collateral for the associated uToken
+	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
+	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
+	if err != nil {
+		return sdkmath.Int{}, err
+	}
+
+	// Get min_collateral_liquidity for the denom
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdkmath.Int{}, err
+	}
+	minCollateralLiquidity := token.MinCollateralLiquidity
+
+	// The formula to calculate the module_available_liquidity is as follows:
+	//
+	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
+	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
+	moduleAvailableLiquidity :=
+		sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
+
+	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
 }
