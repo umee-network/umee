@@ -18,10 +18,6 @@ var (
 	KeyDirectLiquidationFee         = []byte("DirectLiquidationFee")
 )
 
-func NewParams() Params {
-	return Params{}
-}
-
 // ParamSetPairs implements the ParamSet interface and returns all the key/value
 // pairs pairs of x/leverage module's parameters.
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {

@@ -143,7 +143,32 @@ func TestMsgGovUpdateRegistryOtherFunctionality(t *testing.T) {
 		[]types.Token{umee}, []types.Token{},
 	)
 
-	tassert.NotEmpty(t, msg.String(), "result shouldn't be empty")
+	expResult := `authority: umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp
+title: title
+description: description
+addtokens: []
+updatetokens:
+    - base_denom: uumee
+      reserve_factor: "0.200000000000000000"
+      collateral_weight: "0.250000000000000000"
+      liquidation_threshold: "0.250000000000000000"
+      base_borrow_rate: "0.020000000000000000"
+      kink_borrow_rate: "0.220000000000000000"
+      max_borrow_rate: "1.520000000000000000"
+      kink_utilization: "0.800000000000000000"
+      liquidation_incentive: "0.100000000000000000"
+      symbol_denom: UMEE
+      exponent: 6
+      enable_msg_supply: true
+      enable_msg_borrow: true
+      blacklist: false
+      max_collateral_share: "1.000000000000000000"
+      max_supply_utilization: "0.900000000000000000"
+      min_collateral_liquidity: "0.000000000000000000"
+      max_supply: "100000000000"
+      historic_medians: 24
+`
+	assert.Equal(t, expResult, msg.String())
 	tassert.NotNil(t, msg.GetSignBytes(), "sign byte shouldn't be nil")
 	tassert.NotEmpty(t, msg.GetSigners(), "signers shouldn't be empty")
 }
