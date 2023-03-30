@@ -12,6 +12,11 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 	if err := k.decreaseBond(ctx, addr, uToken); err != nil {
 		return err
 	}
+	if k.getUnbondingDuration(ctx) == 0 {
+		// For unbonding duration zero, return after decreasing bonded amount
+		// without creating an unbonding struct
+		return nil
+	}
 	unbonding := incentive.Unbonding{
 		Amount: uToken,
 		End:    k.getLastRewardsTime(ctx) + k.getUnbondingDuration(ctx),
