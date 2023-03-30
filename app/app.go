@@ -165,7 +165,7 @@ func init() {
 		StakingModule{},
 		MintModule{},
 		distr.AppModuleBasic{},
-		GovModule{AppModuleBasic: gov.NewAppModuleBasic(getGovProposalHandlers())},
+		gov.NewAppModuleBasic(getGovProposalHandlers()),
 		params.AppModuleBasic{},
 		CrisisModule{},
 		SlashingModule{},
