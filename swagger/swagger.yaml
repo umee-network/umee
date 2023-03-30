@@ -4,7 +4,7 @@ info:
   description: A REST interface for state queries
   version: 1.0.0
 paths:
-  /umee/leverage/v1/account_balances:
+  /umee/leverage/v1/account_balances/{address}:
     get:
       summary: >-
         AccountBalances queries an account's current supply, collateral, and
@@ -109,12 +109,12 @@ paths:
                       format: byte
       parameters:
         - name: address
-          in: query
-          required: false
+          in: path
+          required: true
           type: string
       tags:
         - Query
-  /umee/leverage/v1/account_summary:
+  /umee/leverage/v1/account_summary/{address}:
     get:
       summary: >-
         AccountSummary queries USD values representing an account's total
@@ -207,8 +207,8 @@ paths:
                       format: byte
       parameters:
         - name: address
-          in: query
-          required: false
+          in: path
+          required: true
           type: string
       tags:
         - Query
@@ -312,7 +312,7 @@ paths:
                       format: byte
       tags:
         - Query
-  /umee/leverage/v1/market_summary:
+  /umee/leverage/v1/market_summary/{denom}:
     get:
       summary: >-
         MarketSummary queries a base asset's current borrowing and supplying
@@ -507,12 +507,12 @@ paths:
                       format: byte
       parameters:
         - name: denom
-          in: query
-          required: false
+          in: path
+          required: true
           type: string
       tags:
         - Query
-  /umee/leverage/v1/max_borrow:
+  /umee/leverage/v1/max_borrow/{address}/{denom}:
     get:
       summary: >-
         MaxBorrow queries the maximum amount of a given token an address can
@@ -569,19 +569,19 @@ paths:
                       format: byte
       parameters:
         - name: address
-          in: query
-          required: false
+          in: path
+          required: true
           type: string
         - name: denom
           description: |-
             denom is the base token denom to borrow.
             empty denom will query all registered tokens.
-          in: query
-          required: false
+          in: path
+          required: true
           type: string
       tags:
         - Query
-  /umee/leverage/v1/max_withdraw:
+  /umee/leverage/v1/max_withdraw/{address}/{denom}:
     get:
       summary: >-
         MaxWithdraw queries the maximum amount of a given token an address can
@@ -658,8 +658,8 @@ paths:
                       format: byte
       parameters:
         - name: address
-          in: query
-          required: false
+          in: path
+          required: true
           type: string
         - name: denom
           description: >-
@@ -667,8 +667,8 @@ paths:
             withdraw.
 
             empty denom will query all registered tokens.
-          in: query
-          required: false
+          in: path
+          required: true
           type: string
       tags:
         - Query
@@ -846,8 +846,6 @@ paths:
                         zero, using this asset as collateral against borrowing
                         will be disabled.
 
-                        Must be smaller than `liquidation_threshold`.
-
                         Valid values: 0-1.
                     liquidation_threshold:
                       type: string
@@ -860,11 +858,9 @@ paths:
 
                         (above which they become eligible for liquidation).
 
-                        Must be bigger than `collateral_weight`.
+                        See also: min_close_factor.
 
                         Valid values: 0-1.
-
-                        See also: min_close_factor.
                     base_borrow_rate:
                       type: string
                       title: >-
@@ -1014,15 +1010,7 @@ paths:
                         Liquidity can only drop below this value due to interest
                         or liquidations.
 
-                        The goal is to assure that there is enough available
-                        (not borrowed) token to be available
-
-                        for withdraw when there is a collateral liquidation and
-                        the liquidator needs to
-
-                        withdraw uToken.
-
-                        Valid values: 0 - inf
+                        Valid values: 0 - 1
                     max_supply:
                       type: string
                       description: >-
@@ -2527,8 +2515,6 @@ definitions:
                 zero, using this asset as collateral against borrowing will be
                 disabled.
 
-                Must be smaller than `liquidation_threshold`.
-
                 Valid values: 0-1.
             liquidation_threshold:
               type: string
@@ -2541,11 +2527,9 @@ definitions:
 
                 (above which they become eligible for liquidation).
 
-                Must be bigger than `collateral_weight`.
+                See also: min_close_factor.
 
                 Valid values: 0-1.
-
-                See also: min_close_factor.
             base_borrow_rate:
               type: string
               title: >-
@@ -2678,15 +2662,7 @@ definitions:
                 Liquidity can only drop below this value due to interest or
                 liquidations.
 
-                The goal is to assure that there is enough available (not
-                borrowed) token to be available
-
-                for withdraw when there is a collateral liquidation and the
-                liquidator needs to
-
-                withdraw uToken.
-
-                Valid values: 0 - inf
+                Valid values: 0 - 1
             max_supply:
               type: string
               description: >-
@@ -2765,8 +2741,6 @@ definitions:
           zero, using this asset as collateral against borrowing will be
           disabled.
 
-          Must be smaller than `liquidation_threshold`.
-
           Valid values: 0-1.
       liquidation_threshold:
         type: string
@@ -2774,9 +2748,8 @@ definitions:
           Liquidation Threshold defines what amount of the total value of the
           asset as a collateral can contribute to a user's liquidation threshold
           (above which they become eligible for liquidation).
-          Must be bigger than `collateral_weight`.
-          Valid values: 0-1.
           See also: min_close_factor.
+          Valid values: 0-1.
       base_borrow_rate:
         type: string
         title: |-
@@ -2902,15 +2875,7 @@ definitions:
           Liquidity can only drop below this value due to interest or
           liquidations.
 
-          The goal is to assure that there is enough available (not borrowed)
-          token to be available
-
-          for withdraw when there is a collateral liquidation and the liquidator
-          needs to
-
-          withdraw uToken.
-
-          Valid values: 0 - inf
+          Valid values: 0 - 1
       max_supply:
         type: string
         description: >-

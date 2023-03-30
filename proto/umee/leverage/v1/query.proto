@@ -27,19 +27,19 @@ service Query {
   // MarketSummary queries a base asset's current borrowing and supplying conditions.
   rpc MarketSummary(QueryMarketSummary)
       returns (QueryMarketSummaryResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/market_summary";
+    option (google.api.http).get = "/umee/leverage/v1/market_summary/{denom}";
   }
 
   // AccountBalances queries an account's current supply, collateral, and borrow positions.
   rpc AccountBalances(QueryAccountBalances)
       returns (QueryAccountBalancesResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/account_balances";
+    option (google.api.http).get = "/umee/leverage/v1/account_balances/{address}";
   }
 
   // AccountSummary queries USD values representing an account's total positions and borrowing limits. It requires oracle prices to return successfully.
   rpc AccountSummary(QueryAccountSummary)
       returns (QueryAccountSummaryResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/account_summary";
+    option (google.api.http).get = "/umee/leverage/v1/account_summary/{address}";
   }
 
   // LiquidationTargets queries a list of all borrower account addresses eligible for liquidation.
@@ -57,13 +57,13 @@ service Query {
   // MaxWithdraw queries the maximum amount of a given token an address can withdraw.
   rpc MaxWithdraw(QueryMaxWithdraw)
       returns (QueryMaxWithdrawResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/max_withdraw";
+    option (google.api.http).get = "/umee/leverage/v1/max_withdraw/{address}/{denom}";
   }
 
   // MaxBorrow queries the maximum amount of a given token an address can borrow.
   rpc MaxBorrow(QueryMaxBorrow)
       returns (QueryMaxBorrowResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/max_borrow";
+    option (google.api.http).get = "/umee/leverage/v1/max_borrow/{address}/{denom}";
   }
 }
 
