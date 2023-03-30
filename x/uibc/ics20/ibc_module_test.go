@@ -44,6 +44,7 @@ func TestCheckIBCInflow(t *testing.T) {
 		amount,
 		AddressFromString("a3"),
 		AddressFromString("a4"),
+		"memo",
 	)
 
 	packet := channeltypes.NewPacket(
