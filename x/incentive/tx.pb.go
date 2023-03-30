@@ -710,7 +710,7 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// Claim defines a method for claiming any pending incentive rewards.
 	Claim(ctx context.Context, in *MsgClaim, opts ...grpc.CallOption) (*MsgClaimResponse, error)
-	// Bond defines a method for bonding uToken collateral into reward tier.
+	// Bond defines a method for bonding uToken collateral.
 	Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOption) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error)
@@ -789,7 +789,7 @@ func (c *msgClient) GovCreatePrograms(ctx context.Context, in *MsgGovCreateProgr
 type MsgServer interface {
 	// Claim defines a method for claiming any pending incentive rewards.
 	Claim(context.Context, *MsgClaim) (*MsgClaimResponse, error)
-	// Bond defines a method for bonding uToken collateral into reward tier.
+	// Bond defines a method for bonding uToken collateral.
 	Bond(context.Context, *MsgBond) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
 	BeginUnbonding(context.Context, *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error)

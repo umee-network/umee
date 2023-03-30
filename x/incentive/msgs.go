@@ -42,16 +42,15 @@ func (msg MsgClaim) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgClaim) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgBond(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBond {
+func NewMsgBond(account sdk.AccAddress, asset sdk.Coin) *MsgBond {
 	return &MsgBond{
 		Account: account.String(),
-		Tier:    tier,
 		Asset:   asset,
 	}
 }
 
 func (msg MsgBond) ValidateBasic() error {
-	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
+	return validateSenderAsset(msg.Account, &msg.Asset)
 }
 
 func (msg MsgBond) GetSigners() []sdk.AccAddress {
@@ -70,16 +69,15 @@ func (msg MsgBond) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgBond) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgBeginUnbonding(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBeginUnbonding {
+func NewMsgBeginUnbonding(account sdk.AccAddress, asset sdk.Coin) *MsgBeginUnbonding {
 	return &MsgBeginUnbonding{
 		Account: account.String(),
-		Tier:    tier,
 		Asset:   asset,
 	}
 }
 
 func (msg MsgBeginUnbonding) ValidateBasic() error {
-	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
+	return validateSenderAsset(msg.Account, &msg.Asset)
 }
 
 func (msg MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
@@ -212,14 +210,4 @@ func validateSenderAsset(sender string, asset *sdk.Coin) error {
 		return ErrNilAsset
 	}
 	return asset.Validate()
-}
-
-func validateSenderAssetTier(sender string, tier uint32, asset *sdk.Coin) error {
-	if err := validateSenderAsset(sender, asset); err != nil {
-		return err
-	}
-	if tier < 1 || tier > 3 {
-		return ErrInvalidTier.Wrapf("%d", tier)
-	}
-	return nil
 }

@@ -31,7 +31,7 @@ func (q Querier) Params(
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	params := k.getParams(ctx)
+	params := k.GetParams(ctx)
 
 	return &incentive.QueryParamsResponse{Params: params}, nil
 }
@@ -150,7 +150,7 @@ func (q Querier) Bonded(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get one or all denoms, all tiers bonded to this address
+	// TODO: get one or all denoms bonded to this address
 
 	return &incentive.QueryBondedResponse{}, incentive.ErrNotImplemented
 }
@@ -163,7 +163,7 @@ func (q Querier) TotalBonded(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: bonded uTokens across one or all denoms, all tiers
+	// TODO: bonded uTokens across one or all denoms
 
 	return &incentive.QueryTotalBondedResponse{}, incentive.ErrNotImplemented
 }
@@ -176,7 +176,7 @@ func (q Querier) TotalUnbonding(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: unbonding uTokens across one or all denoms, all tiers
+	// TODO: unbonding uTokens across one or all denoms
 
 	return &incentive.QueryTotalUnbondingResponse{}, incentive.ErrNotImplemented
 }

@@ -57,9 +57,9 @@ func (k Keeper) iterateAccountUnbondings(ctx sdk.Context, addr sdk.AccAddress,
 }
 
 // IterateAccountBonds iterates over all bonded uTokens for an address by each individual
-// uToken denom and tier
+// uToken denom
 func (k Keeper) IterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
-	_ func(ctx sdk.Context, addr sdk.AccAddress, _ incentive.BondTier, _ sdk.Coin) error,
+	_ func(ctx sdk.Context, addr sdk.AccAddress, _ sdk.Coin) error,
 ) error {
 	prefix := keyBondAmountNoDenom(addr)
 
@@ -71,10 +71,10 @@ func (k Keeper) IterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
 	return store.Iterate(k.KVStore(ctx), prefix, iterator)
 }
 
-// getFullRewardTracker combines all single-reward-denom reward trackers for a bonded uToken and tier
-func (k Keeper) getFullRewardTracker(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier,
+// getFullRewardTracker combines all single-reward-denom reward trackers for a bonded uToken
+func (k Keeper) getFullRewardTracker(ctx sdk.Context, addr sdk.AccAddress, denom string,
 ) sdk.DecCoins {
-	prefix := keyRewardTrackerNoReward(addr, denom, tier)
+	prefix := keyRewardTrackerNoReward(addr, denom)
 
 	tracker := sdk.NewDecCoins()
 	iterator := func(key, val []byte) error {
@@ -87,9 +87,9 @@ func (k Keeper) getFullRewardTracker(ctx sdk.Context, addr sdk.AccAddress, denom
 	return tracker
 }
 
-// getFullRewardAccumulator combines all single-reward-denom reward accumulators for a uToken denom and tier
-func (k Keeper) getFullRewardAccumulator(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.DecCoins {
-	prefix := keyRewardAccumulatorNoReward(denom, tier)
+// getFullRewardAccumulator combines all single-reward-denom reward accumulators for a uToken denom
+func (k Keeper) getFullRewardAccumulator(ctx sdk.Context, denom string) sdk.DecCoins {
+	prefix := keyRewardAccumulatorNoReward(denom)
 
 	accumulator := sdk.NewDecCoins()
 	iterator := func(key, val []byte) error {

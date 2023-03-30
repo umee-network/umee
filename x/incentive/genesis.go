@@ -82,37 +82,26 @@ func NewIncentiveProgram(
 }
 
 // NewBond creates the Bond struct used in GenesisState
-func NewBond(addr string, tier uint32, coin sdk.Coin) Bond {
+func NewBond(addr string, coin sdk.Coin) Bond {
 	return Bond{
 		Account: addr,
-		Tier:    tier,
 		Amount:  coin,
 	}
 }
 
-// NewTotalBond creates the TotalBond struct used in GenesisState
-func NewTotalBond(tier uint32, coin sdk.Coin) Bond {
-	return Bond{
-		Tier:   tier,
-		Amount: coin,
-	}
-}
-
 // NewRewardTracker creates the RewardTracker struct used in GenesisState
-func NewRewardTracker(addr, denom string, tier uint32, coins sdk.DecCoins) RewardTracker {
+func NewRewardTracker(addr, denom string, coins sdk.DecCoins) RewardTracker {
 	return RewardTracker{
 		Account: addr,
 		Denom:   denom,
-		Tier:    tier,
 		Rewards: coins,
 	}
 }
 
 // NewRewardAccumulator creates the RewardAccumulator struct used in GenesisState
-func NewRewardAccumulator(denom string, tier, exponent uint32, coins sdk.DecCoins) RewardAccumulator {
+func NewRewardAccumulator(denom string, exponent uint32, coins sdk.DecCoins) RewardAccumulator {
 	return RewardAccumulator{
 		Denom:    denom,
-		Tier:     tier,
 		Exponent: exponent,
 		Rewards:  coins,
 	}
@@ -127,10 +116,9 @@ func NewUnbonding(endTime uint64, coin sdk.Coin) Unbonding {
 }
 
 // NewAccountUnbondings creates the AccountUnbondings struct used in GenesisState
-func NewAccountUnbondings(addr, denom string, tier BondTier, unbondings []Unbonding) AccountUnbondings {
+func NewAccountUnbondings(addr, denom string, unbondings []Unbonding) AccountUnbondings {
 	return AccountUnbondings{
 		Account:    addr,
-		Tier:       uint32(tier),
 		Denom:      denom,
 		Unbondings: unbondings,
 	}

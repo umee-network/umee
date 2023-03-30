@@ -13,8 +13,7 @@ import (
 )
 
 const (
-	govAddr  = "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp"
-	longTier = uint32(incentive.BondTierLong)
+	govAddr = "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp"
 )
 
 var (
@@ -26,8 +25,8 @@ var (
 
 func TestMsgs(t *testing.T) {
 	userMsgs := []sdk.Msg{
-		incentive.NewMsgBond(testAddr, longTier, uToken),
-		incentive.NewMsgBeginUnbonding(testAddr, longTier, uToken),
+		incentive.NewMsgBond(testAddr, uToken),
+		incentive.NewMsgBeginUnbonding(testAddr, uToken),
 		incentive.NewMsgClaim(testAddr),
 		incentive.NewMsgSponsor(testAddr, 3, token),
 	}
@@ -63,8 +62,8 @@ type sdkmsg interface {
 
 func TestRoutes(t *testing.T) {
 	msgs := []sdkmsg{
-		*incentive.NewMsgBond(testAddr, longTier, uToken),
-		*incentive.NewMsgBeginUnbonding(testAddr, longTier, uToken),
+		*incentive.NewMsgBond(testAddr, uToken),
+		*incentive.NewMsgBeginUnbonding(testAddr, uToken),
 		*incentive.NewMsgClaim(testAddr),
 		*incentive.NewMsgSponsor(testAddr, 3, token),
 		*incentive.NewMsgGovCreatePrograms(govAddr, "title", "desc", []incentive.IncentiveProgram{program}),

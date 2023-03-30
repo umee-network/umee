@@ -10,13 +10,9 @@ import (
 
 func (k Keeper) GetParams(ctx sdk.Context) incentive.Params {
 	return incentive.Params{
-		MaxUnbondings:           k.getMaxUnbondings(ctx),
-		UnbondingDurationLong:   k.getUnbondingDurationLong(ctx),
-		UnbondingDurationMiddle: k.getUnbondingDurationMiddle(ctx),
-		UnbondingDurationShort:  k.getUnbondingDurationShort(ctx),
-		TierWeightMiddle:        k.getTierWeightMiddle(ctx),
-		TierWeightShort:         k.getTierWeightShort(ctx),
-		CommunityFundAddress:    k.getCommunityFundAddress(ctx).String(),
+		MaxUnbondings:        k.getMaxUnbondings(ctx),
+		UnbondingDuration:    k.getUnbondingDuration(ctx),
+		CommunityFundAddress: k.getCommunityFundAddress(ctx).String(),
 	}
 }
 
@@ -26,34 +22,10 @@ func (k Keeper) getMaxUnbondings(ctx sdk.Context) uint32 {
 		keyPrefixParamMaxUnbondings, "max unbondings")
 }
 
-// getUnbondingDurationLong gets the duration in seconds of the long bonding tier.
-func (k Keeper) getUnbondingDurationLong(ctx sdk.Context) uint64 {
+// getUnbondingDuration gets the duration in seconds of uToken unbonding
+func (k Keeper) getUnbondingDuration(ctx sdk.Context) uint64 {
 	return store.GetUint64(k.KVStore(ctx),
-		keyPrefixParamUnbondingDurationLong, "long unbonding duration")
-}
-
-// getUnbondingDurationMiddle gets the duration in seconds of the middle bonding tier.
-func (k Keeper) getUnbondingDurationMiddle(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.KVStore(ctx),
-		keyPrefixParamUnbondingDurationMiddle, "middle unbonding duration")
-}
-
-// getUnbondingDurationShort gets the duration in seconds of the short bonding tier.
-func (k Keeper) getUnbondingDurationShort(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.KVStore(ctx),
-		keyPrefixParamUnbondingDurationShort, "short unbonding duration")
-}
-
-// GetTierWeightShort gets the ratio of rewards received by the short tier of bonded assets. Ranges 0 - 1.
-func (k Keeper) getTierWeightMiddle(ctx sdk.Context) sdk.Dec {
-	return store.GetDec(k.KVStore(ctx),
-		keyPrefixParamTierWeightMiddle, "middle tier weight")
-}
-
-// getTierWeightShort gets the ratio of rewards received by the middle tier of bonded assets. Ranges 0 - 1.
-func (k Keeper) getTierWeightShort(ctx sdk.Context) sdk.Dec {
-	return store.GetDec(k.KVStore(ctx),
-		keyPrefixParamTierWeightShort, "short tier weight")
+		keyPrefixParamUnbondingDuration, "unbonding duration")
 }
 
 // getCommunityFundAddress retrieves the community fund address parameter. It is guaranteed to be
@@ -74,28 +46,8 @@ func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
 	if err != nil {
 		return err
 	}
-	err = store.SetUint64(kvs, keyPrefixParamUnbondingDurationLong,
-		params.UnbondingDurationLong, "long unbonding duration")
-	if err != nil {
-		return err
-	}
-	err = store.SetUint64(kvs, keyPrefixParamUnbondingDurationMiddle,
-		params.UnbondingDurationMiddle, "middle unbonding duration")
-	if err != nil {
-		return err
-	}
-	err = store.SetUint64(kvs, keyPrefixParamUnbondingDurationShort,
-		params.UnbondingDurationShort, "short unbonding duration")
-	if err != nil {
-		return err
-	}
-	err = store.SetDec(kvs, keyPrefixParamTierWeightMiddle,
-		params.TierWeightMiddle, "middle tier weight")
-	if err != nil {
-		return err
-	}
-	err = store.SetDec(kvs, keyPrefixParamTierWeightShort,
-		params.TierWeightShort, "short tier weight")
+	err = store.SetUint64(kvs, keyPrefixParamUnbondingDuration,
+		params.UnbondingDuration, "unbonding duration")
 	if err != nil {
 		return err
 	}
@@ -192,72 +144,66 @@ func (k Keeper) setLastRewardsTime(ctx sdk.Context, time uint64) error {
 }
 
 // getTotalBonded retrieves the total amount of uTokens of a given denom which are bonded to the incentive module
-func (k Keeper) getTotalBonded(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
-	key := keyTotalBonded(denom, tier)
+func (k Keeper) getTotalBonded(ctx sdk.Context, denom string) sdk.Coin {
+	key := keyTotalBonded(denom)
 	amount := store.GetInt(k.KVStore(ctx), key, "total bonded")
 	return sdk.NewCoin(denom, amount)
 }
 
 // getTotalUnbonding retrieves the total amount of uTokens of a given denom which are unbonding from
 // the incentive module
-func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.Coin {
-	key := keyTotalUnbonding(denom, tier)
+func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string) sdk.Coin {
+	key := keyTotalUnbonding(denom)
 	amount := store.GetInt(k.KVStore(ctx), key, "total unbonding")
 	return sdk.NewCoin(denom, amount)
 }
 
-// getBonded retrieves the amount of uTokens of a given denom which are bonded to a single tier by an account
-func (k Keeper) getBonded(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier) sdk.Coin {
-	key := keyBondAmount(addr, denom, tier)
+// getBonded retrieves the amount of uTokens of a given denom which are bonded by an account
+func (k Keeper) getBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	key := keyBondAmount(addr, denom)
 	amount := store.GetInt(k.KVStore(ctx), key, "bonded amount")
 	return sdk.NewCoin(denom, amount)
 }
 
-// setBonded sets the amount of uTokens of a given denom which are bonded to a single tier by an account.
+// setBonded sets the amount of uTokens of a given denom which are bonded by an account.
 // Automatically updates TotalBonded as well.
 //
 // REQUIREMENT: This is the only function which is allowed to set TotalBonded.
-func (k Keeper) setBonded(ctx sdk.Context,
-	addr sdk.AccAddress, uToken sdk.Coin, tier incentive.BondTier,
-) error {
+func (k Keeper) setBonded(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
 	// compute the change in bonded amount (can be negative when bond decreases)
-	delta := uToken.Amount.Sub(k.getBonded(ctx, addr, uToken.Denom, tier).Amount)
+	delta := uToken.Amount.Sub(k.getBonded(ctx, addr, uToken.Denom).Amount)
 
 	// Set bond amount
-	key := keyBondAmount(addr, uToken.Denom, tier)
+	key := keyBondAmount(addr, uToken.Denom)
 	if err := store.SetInt(k.KVStore(ctx), key, uToken.Amount, "bonded amount"); err != nil {
 		return err
 	}
 
 	// Update total bonded for this utoken denom using the computed change
-	total := k.getTotalBonded(ctx, uToken.Denom, tier)
-	totalkey := keyTotalBonded(uToken.Denom, tier)
+	total := k.getTotalBonded(ctx, uToken.Denom)
+	totalkey := keyTotalBonded(uToken.Denom)
 	return store.SetInt(k.KVStore(ctx), totalkey, total.Amount.Add(delta), "total bonded")
 }
 
-// getUnbonding retrieves the amount of uTokens of a given denom which are unbonding from a single tier by an account
-func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier,
-) sdk.Coin {
-	key := keyUnbondAmount(addr, denom, tier)
+// getUnbonding retrieves the amount of uTokens of a given denom which are unbonding by an account
+func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	key := keyUnbondAmount(addr, denom)
 	amount := store.GetInt(k.KVStore(ctx), key, "unbonding amount")
 	return sdk.NewCoin(denom, amount)
 }
 
-// GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken and tier -
-// for example, how much UMEE (reward) would have been earned by 1 ATOM bonded to the middle tier since genesis.
-func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string, tier incentive.BondTier,
-) sdk.DecCoin {
-	key := keyRewardAccumulator(bondDenom, rewardDenom, tier)
+// GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken -
+// for example, how much UMEE (reward) would have been earned by 1 ATOM (bonded) since genesis.
+func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string) sdk.DecCoin {
+	key := keyRewardAccumulator(bondDenom, rewardDenom)
 	amount := store.GetDec(k.KVStore(ctx), key, "reward accumulator")
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
-// SetRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken and tier. Does not
+// SetRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken. Does not
 // affect the reward accumulator's exponent.
-func (k Keeper) SetRewardAccumulator(ctx sdk.Context,
-	bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
-) error {
-	key := keyRewardAccumulator(bondDenom, reward.Denom, tier)
+func (k Keeper) SetRewardAccumulator(ctx sdk.Context, bondDenom string, reward sdk.DecCoin) error {
+	key := keyRewardAccumulator(bondDenom, reward.Denom)
 	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward accumulator")
 }
 
@@ -277,29 +223,24 @@ func (k Keeper) SetRewardAccumulatorExponent(ctx sdk.Context, bondDenom string, 
 	return store.SetUint32(k.KVStore(ctx), key, exponent, "reward accumulator exponent")
 }
 
-// GetRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken and tier on one account -
-// this is the value of the reward accumulator for those specific denoms and tier the last time this account performed
+// GetRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken on one account -
+// this is the value of the reward accumulator for those specific denoms the last time this account performed
 // and action that requires a reward tracker update (i.e. Bond, Claim, BeginUnbonding, or being Liquidated).
-func (k Keeper) GetRewardTracker(ctx sdk.Context,
-	addr sdk.AccAddress, bondDenom, rewardDenom string, tier incentive.BondTier,
-) sdk.DecCoin {
-	key := keyRewardTracker(addr, bondDenom, rewardDenom, tier)
+func (k Keeper) GetRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom, rewardDenom string) sdk.DecCoin {
+	key := keyRewardTracker(addr, bondDenom, rewardDenom)
 	amount := store.GetDec(k.KVStore(ctx), key, "reward tracker")
 	return sdk.NewDecCoinFromDec(rewardDenom, amount)
 }
 
-// setRewardTracker sets the reward tracker of a reward token for a single bonded uToken and tier for an address.
-func (k Keeper) setRewardTracker(ctx sdk.Context,
-	addr sdk.AccAddress, bondDenom string, reward sdk.DecCoin, tier incentive.BondTier,
-) error {
-	key := keyRewardTracker(addr, bondDenom, reward.Denom, tier)
+// setRewardTracker sets the reward tracker of a reward token for a single bonded uToken for an address.
+func (k Keeper) setRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string, reward sdk.DecCoin) error {
+	key := keyRewardTracker(addr, bondDenom, reward.Denom)
 	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward tracker")
 }
 
-// getUnbondings gets all unbondings currently associated with an account, bonded denom, and tier.
-func (k Keeper) getUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier,
-) []incentive.Unbonding {
-	key := keyUnbondings(addr, denom, tier)
+// getUnbondings gets all unbondings currently associated with an account, bonded denom.
+func (k Keeper) getUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string) []incentive.Unbonding {
+	key := keyUnbondings(addr, denom)
 	kvStore := k.KVStore(ctx)
 
 	accUnbondings := incentive.AccountUnbondings{}
@@ -312,7 +253,7 @@ func (k Keeper) getUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string
 	return accUnbondings.Unbondings
 }
 
-// setUnbondings stores the list of unbondings currently associated with an account, denom, and tier.
+// setUnbondings stores the list of unbondings currently associated with an account and denom.
 // It also updates the account's stored unbonding amounts, and thus the module's total unbonding as well.
 //
 // REQUIREMENT: This is the only function which is allowed to set unbonding amounts and total unbonding.
@@ -323,36 +264,31 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		// catches invalid and empty addresses
 		return err
 	}
-	tier, err := bondTier(unbondings.Tier)
-	if err != nil {
-		// catches invalid or unspecified tier
-		return err
-	}
 	denom := unbondings.Denom
 
-	// compute the new total unbonding specific to this account, denom, and tier
+	// compute the new total unbonding specific to this account and denom.
 	newUnbonding := sdk.ZeroInt()
 	for _, u := range unbondings.Unbondings {
 		newUnbonding = newUnbonding.Add(u.Amount.Amount)
 	}
 	// compute the change in unbonding amount (can be negative when unbonding decreases)
-	delta := newUnbonding.Sub(k.getUnbondingAmount(ctx, addr, denom, tier).Amount)
+	delta := newUnbonding.Sub(k.getUnbondingAmount(ctx, addr, denom).Amount)
 
 	// Update unbonding amount
-	amountKey := keyUnbondAmount(addr, denom, tier)
+	amountKey := keyUnbondAmount(addr, denom)
 	if err := store.SetInt(k.KVStore(ctx), amountKey, newUnbonding, "unbonding amount"); err != nil {
 		return err
 	}
 
 	// Update total unbonding for this utoken denom using the computed change
-	total := k.getTotalUnbonding(ctx, denom, tier)
-	totalkey := keyTotalUnbonding(denom, tier)
+	total := k.getTotalUnbonding(ctx, denom)
+	totalkey := keyTotalUnbonding(denom)
 	if err := store.SetInt(k.KVStore(ctx), totalkey, total.Amount.Add(delta), "total unbonding"); err != nil {
 		return err
 	}
 
 	// set list of unbondings
-	key := keyUnbondings(addr, unbondings.Denom, tier)
+	key := keyUnbondings(addr, unbondings.Denom)
 	if len(unbondings.Unbondings) == 0 {
 		// clear store on no unbondings remaining
 		kvStore.Delete(key)

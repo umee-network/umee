@@ -17,7 +17,7 @@ service Msg {
   // Claim defines a method for claiming any pending incentive rewards.
   rpc Claim(MsgClaim) returns (MsgClaimResponse);
 
-  // Bond defines a method for bonding uToken collateral into reward tier.
+  // Bond defines a method for bonding uToken collateral.
   rpc Bond(MsgBond) returns (MsgBondResponse);
 
   // BeginUnbonding defines a method for starting to unbond uToken collateral.

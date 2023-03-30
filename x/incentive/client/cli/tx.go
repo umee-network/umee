@@ -60,26 +60,21 @@ func GetCmdClaim() *cobra.Command {
 // transaction with a MsgBond message.
 func GetCmdBond() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "bond [tier] [utokens]",
-		Args:  cobra.ExactArgs(2),
-		Short: "Bond some uToken collateral to a specific unbonding tier",
+		Use:   "bond [utokens]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Bond some uToken collateral",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			asset, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
 
-			tier, err := strconv.ParseUint(args[0], 10, 32)
-			if err != nil {
-				return err
-			}
-
-			msg := incentive.NewMsgBond(clientCtx.GetFromAddress(), uint32(tier), asset)
+			msg := incentive.NewMsgBond(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -93,26 +88,21 @@ func GetCmdBond() *cobra.Command {
 // transaction with a MsgBeginUnbonding message.
 func GetCmdBeginUnbonding() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "begin-unbonding [tier] [utokens]",
-		Args:  cobra.ExactArgs(2),
-		Short: "Begin unbonding some currently bonded utokens from a specifc unbonding tier",
+		Use:   "begin-unbonding [utokens]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Begin unbonding some currently bonded utokens",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
 			if err != nil {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
+			asset, err := sdk.ParseCoinNormalized(args[0])
 			if err != nil {
 				return err
 			}
 
-			tier, err := strconv.ParseUint(args[0], 10, 32)
-			if err != nil {
-				return err
-			}
-
-			msg := incentive.NewMsgBeginUnbonding(clientCtx.GetFromAddress(), uint32(tier), asset)
+			msg := incentive.NewMsgBeginUnbonding(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

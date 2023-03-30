@@ -39,41 +39,41 @@ func (k Keeper) UpdateRewards(ctx sdk.Context) error {
 	return k.setLastRewardsTime(ctx, currentTime)
 }
 
-// clearRewardTracker clears all reward trackers matching a specific account + tier + bonded uToken denom
+// clearRewardTracker clears all reward trackers matching a specific account + bonded uToken denom
 // from the store by setting them to zero
-func (k Keeper) clearRewardTracker(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, bondDenom string,
+func (k Keeper) clearRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string,
 ) error {
-	trackers := k.getFullRewardTracker(ctx, addr, bondDenom, tier)
+	trackers := k.getFullRewardTracker(ctx, addr, bondDenom)
 	for _, rewardCoin := range trackers {
 		zeroCoin := sdk.NewDecCoinFromDec(rewardCoin.Denom, sdk.ZeroDec())
-		if err := k.setRewardTracker(ctx, addr, bondDenom, zeroCoin, tier); err != nil {
+		if err := k.setRewardTracker(ctx, addr, bondDenom, zeroCoin); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// UpdateRewardTracker updates all reward trackers matching a specific account + tier + bonded uToken denom
-// by setting them to the current values of that tier + uToken denom's reward accumulators
-func (k Keeper) UpdateRewardTracker(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, bondDenom string,
+// UpdateRewardTracker updates all reward trackers matching a specific account + bonded uToken denom
+// by setting them to the current values of that uToken denom's reward accumulators
+func (k Keeper) UpdateRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string,
 ) error {
-	trackers := k.getFullRewardTracker(ctx, addr, bondDenom, tier)
-	accumulators := k.getFullRewardAccumulator(ctx, bondDenom, tier)
+	trackers := k.getFullRewardTracker(ctx, addr, bondDenom)
+	accumulators := k.getFullRewardAccumulator(ctx, bondDenom)
 	for _, rewardCoin := range trackers {
 		accumulator := sdk.NewDecCoinFromDec(rewardCoin.Denom, accumulators.AmountOf(rewardCoin.Denom))
-		if err := k.setRewardTracker(ctx, addr, bondDenom, accumulator, tier); err != nil {
+		if err := k.setRewardTracker(ctx, addr, bondDenom, accumulator); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// ClaimReward claims a single account's bonded uToken tier's reward, then updates its reward tracker.
+// ClaimReward claims a single account's bonded uToken's reward, then updates its reward tracker.
 // Returns rewards claimed.
-func (k Keeper) ClaimReward(_ sdk.Context, _ sdk.AccAddress, _ incentive.BondTier, _ sdk.Coin,
+func (k Keeper) ClaimReward(_ sdk.Context, _ sdk.AccAddress, _ sdk.Coin,
 ) (sdk.Coins, error) {
 	// TODO - implement claim logic (especially needs high exponent asset compatibility)
 	rewards := sdk.NewCoins()
 	return rewards, incentive.ErrNotImplemented
-	// k.updateRewardTracker(ctx, addr, tier, bonded.Denom)
+	// k.updateRewardTracker(ctx, addr, bonded.Denom)
 }

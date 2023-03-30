@@ -45,7 +45,7 @@ func (s msgServer) Bond(
 	msg *incentive.MsgBond,
 ) (*incentive.MsgBondResponse, error) {
 	k, ctx := s.keeper, sdk.UnwrapSDKContext(goCtx)
-	addr, denom, tier, err := addressUTokenTier(msg.Account, msg.Asset, msg.Tier)
+	addr, denom, err := addressUToken(msg.Account, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +58,7 @@ func (s msgServer) Bond(
 	}
 
 	// get current account state for the requested uToken denom only
-	bonded := k.getAllBonded(ctx, addr, denom)
+	bonded := k.getBonded(ctx, addr, denom)
 
 	// ensure account has enough collateral to bond the new amount on top of its current amount
 	collateral := k.leverageKeeper.GetCollateral(ctx, addr, denom)
@@ -69,7 +69,7 @@ func (s msgServer) Bond(
 		)
 	}
 
-	err = k.increaseBond(ctx, addr, tier, msg.Asset)
+	err = k.increaseBond(ctx, addr, msg.Asset)
 	return &incentive.MsgBondResponse{}, err
 }
 
@@ -78,7 +78,7 @@ func (s msgServer) BeginUnbonding(
 	msg *incentive.MsgBeginUnbonding,
 ) (*incentive.MsgBeginUnbondingResponse, error) {
 	k, ctx := s.keeper, sdk.UnwrapSDKContext(goCtx)
-	addr, denom, tier, err := addressUTokenTier(msg.Account, msg.Asset, msg.Tier)
+	addr, denom, err := addressUToken(msg.Account, msg.Asset)
 	if err != nil {
 		return nil, err
 	}
@@ -90,8 +90,8 @@ func (s msgServer) BeginUnbonding(
 		return nil, err
 	}
 
-	// get current account state for the requested uToken denom and unbonding tier only
-	bonded, currentUnbonding, unbondings := k.accountBonds(ctx, addr, denom, tier)
+	// get current account state for the requested uToken denom only
+	bonded, currentUnbonding, unbondings := k.accountBonds(ctx, addr, denom)
 
 	// prevent unbonding spam
 	if len(unbondings) >= int(k.getMaxUnbondings(ctx)) {
@@ -109,7 +109,7 @@ func (s msgServer) BeginUnbonding(
 	}
 
 	// start the unbonding
-	err = k.addUnbonding(ctx, addr, msg.Asset, tier)
+	err = k.addUnbonding(ctx, addr, msg.Asset)
 	return &incentive.MsgBeginUnbondingResponse{}, err
 }
 
@@ -196,21 +196,16 @@ func (s msgServer) GovCreatePrograms(
 	return &incentive.MsgGovCreateProgramsResponse{}, nil
 }
 
-// addressUTokenTier parses common input fields from MsgBond and MsgBeginUnbonding, and ensures the asset is a uToken.
+// addressUToken parses common input fields from MsgBond and MsgBeginUnbonding, and ensures the asset is a uToken.
 // Returns account as AccAddress, uToken denom and error.
-func addressUTokenTier(account string, asset sdk.Coin, tierUint uint32,
-) (sdk.AccAddress, string, incentive.BondTier, error) {
+func addressUToken(account string, asset sdk.Coin) (sdk.AccAddress, string, error) {
 	addr, err := sdk.AccAddressFromBech32(account)
 	if err != nil {
-		return sdk.AccAddress{}, "", incentive.BondTierUnspecified, err
-	}
-	tier, err := bondTier(tierUint)
-	if err != nil {
-		return sdk.AccAddress{}, "", incentive.BondTierUnspecified, err
+		return sdk.AccAddress{}, "", err
 	}
 	if !leveragetypes.HasUTokenPrefix(asset.Denom) {
-		return sdk.AccAddress{}, "", incentive.BondTierUnspecified, leveragetypes.ErrNotUToken.Wrap(asset.Denom)
+		return sdk.AccAddress{}, "", leveragetypes.ErrNotUToken.Wrap(asset.Denom)
 	}
 
-	return addr, asset.Denom, tier, err
+	return addr, asset.Denom, err
 }
