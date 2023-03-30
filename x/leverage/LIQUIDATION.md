@@ -24,7 +24,7 @@ The main collateral will allow you to borrow any tokens required during liquidat
 
 ## Querying for Eligible Liquidation Targets
 
-Umee provides a query to list addresses that are eligible for liquidation.
+Umee provides a query to list addresses that are eligible for liquidation:
 * REST: `https://api.your.node.here/umee/leverage/v1/liquidation-targets`
 * CLI: `umeed q leverage liquidation-targets`
 
