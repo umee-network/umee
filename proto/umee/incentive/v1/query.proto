@@ -17,13 +17,13 @@ service Query {
     option (google.api.http).get = "/umee/incentive/v1/params";
   }
 
-  // TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
+  // TotalBonded queries the sum of all bonded collateral uTokens.
   rpc TotalBonded(QueryTotalBonded)
       returns (QueryTotalBondedResponse) {
     option (google.api.http).get = "/umee/incentive/v1/total_bonded/{denom}";
   }
 
-  // TotalUnbonding queries the sum of all unbonding collateral uTokens, separated by tier.
+  // TotalUnbonding queries the sum of all unbonding collateral uTokens.
   rpc TotalUnbonding(QueryTotalUnbonding)
       returns (QueryTotalUnbondingResponse) {
     option (google.api.http).get = "/umee/incentive/v1/total_unbonding/{denom}";
@@ -107,7 +107,10 @@ message QueryBonded {
 
 // QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
 message QueryBondedResponse {
-  repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin bonded = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
 
 // QueryUnbondings defines the request structure for the Unbondings gRPC service handler.
@@ -128,7 +131,10 @@ message QueryTotalBonded {
 
 // QueryTotalBondedResponse defines the response structure for the TotalBonded gRPC service handler.
 message QueryTotalBondedResponse {
-  repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin bonded = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
 
 // QueryTotalUnbonding defines the request structure for the TotalUnbonding gRPC service handler.
@@ -139,7 +145,10 @@ message QueryTotalUnbonding {
 
 // QueryTotalUnbondingResponse defines the response structure for the TotalUnbonding gRPC service handler.
 message QueryTotalUnbondingResponse {
-  repeated TotalBond unbonding = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin unbonding = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
 
 // QueryUpcomingIncentivePrograms defines the request structure for the

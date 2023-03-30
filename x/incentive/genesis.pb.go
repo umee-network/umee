@@ -142,73 +142,18 @@ func (m *GenesisState) GetAccountUnbondings() []AccountUnbondings {
 	return nil
 }
 
-// TotalBond tracks the amount of coins of one uToken denomination bonded to a
-// given reward tier by all accounts. Used by queries TotalBonded and TotalUnbonding.
-type TotalBond struct {
-	Tier   uint32     `protobuf:"varint,1,opt,name=tier,proto3" json:"tier,omitempty"`
-	Amount types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
-}
-
-func (m *TotalBond) Reset()         { *m = TotalBond{} }
-func (m *TotalBond) String() string { return proto.CompactTextString(m) }
-func (*TotalBond) ProtoMessage()    {}
-func (*TotalBond) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3f117566517b8062, []int{1}
-}
-func (m *TotalBond) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *TotalBond) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_TotalBond.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *TotalBond) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TotalBond.Merge(m, src)
-}
-func (m *TotalBond) XXX_Size() int {
-	return m.Size()
-}
-func (m *TotalBond) XXX_DiscardUnknown() {
-	xxx_messageInfo_TotalBond.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TotalBond proto.InternalMessageInfo
-
-func (m *TotalBond) GetTier() uint32 {
-	if m != nil {
-		return m.Tier
-	}
-	return 0
-}
-
-func (m *TotalBond) GetAmount() types.Coin {
-	if m != nil {
-		return m.Amount
-	}
-	return types.Coin{}
-}
-
-// Bond tracks the amount of coins of one uToken denomination bonded to a
-// given reward tier by a single account.
+// Bond tracks the amount of coins of one uToken denomination bonded
+// by a single account.
 type Bond struct {
 	Account string     `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	Tier    uint32     `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
-	Amount  types.Coin `protobuf:"bytes,3,opt,name=amount,proto3" json:"amount"`
+	Amount  types.Coin `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount"`
 }
 
 func (m *Bond) Reset()         { *m = Bond{} }
 func (m *Bond) String() string { return proto.CompactTextString(m) }
 func (*Bond) ProtoMessage()    {}
 func (*Bond) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3f117566517b8062, []int{2}
+	return fileDescriptor_3f117566517b8062, []int{1}
 }
 func (m *Bond) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -244,13 +189,6 @@ func (m *Bond) GetAccount() string {
 	return ""
 }
 
-func (m *Bond) GetTier() uint32 {
-	if m != nil {
-		return m.Tier
-	}
-	return 0
-}
-
 func (m *Bond) GetAmount() types.Coin {
 	if m != nil {
 		return m.Amount
@@ -258,23 +196,22 @@ func (m *Bond) GetAmount() types.Coin {
 	return types.Coin{}
 }
 
-// RewardTracker tracks the value of a given tier and lock denom's RewardAccumulator
-// at the last time a specific account calculated pending rewards for it. When calculating
+// RewardTracker tracks the value of a given lock denom's RewardAccumulator at the
+// ast time a specific account calculated pending rewards for it. When calculating
 // available rewards, this value is used to determine the difference between the current
-// RewardAccumulator for a tier and the last value at which the user updated bonds or claimed
+// RewardAccumulator for a uToken and the last value at which the user updated bonds or claimed
 // tokens. Their pending rewards increase by only the rewards accrued in that time period.
 type RewardTracker struct {
 	Account string                                      `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	Tier    uint32                                      `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
-	Denom   string                                      `protobuf:"bytes,3,opt,name=denom,proto3" json:"denom,omitempty"`
-	Rewards github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,4,rep,name=rewards,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"rewards"`
+	Denom   string                                      `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
+	Rewards github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,3,rep,name=rewards,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"rewards"`
 }
 
 func (m *RewardTracker) Reset()         { *m = RewardTracker{} }
 func (m *RewardTracker) String() string { return proto.CompactTextString(m) }
 func (*RewardTracker) ProtoMessage()    {}
 func (*RewardTracker) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3f117566517b8062, []int{3}
+	return fileDescriptor_3f117566517b8062, []int{2}
 }
 func (m *RewardTracker) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -310,13 +247,6 @@ func (m *RewardTracker) GetAccount() string {
 	return ""
 }
 
-func (m *RewardTracker) GetTier() uint32 {
-	if m != nil {
-		return m.Tier
-	}
-	return 0
-}
-
 func (m *RewardTracker) GetDenom() string {
 	if m != nil {
 		return m.Denom
@@ -333,21 +263,20 @@ func (m *RewardTracker) GetRewards() github_com_cosmos_cosmos_sdk_types.DecCoins
 
 // RewardAccumulator is a global reward tracking struct that indicates the amount
 // of rewards that a reference amount of a bonded uToken denom would have accumulated
-// if it was bonded at a given tier since genesis. To prevent rounding issues, the
-// reference amount is 10^exponent of the uToken's smallest possible amount, generally
-// matching the exponent of the associated base token registered with the leverage module.
+// if it was bonded since genesis. To prevent rounding issues, the reference amount is
+// 10^exponent of the uToken's smallest possible amount, generally matching the exponent
+// of the associated base token registered with the leverage module.
 type RewardAccumulator struct {
-	Tier     uint32                                      `protobuf:"varint,1,opt,name=tier,proto3" json:"tier,omitempty"`
-	Denom    string                                      `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-	Rewards  github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,3,rep,name=rewards,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"rewards"`
-	Exponent uint32                                      `protobuf:"varint,4,opt,name=exponent,proto3" json:"exponent,omitempty"`
+	Denom    string                                      `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	Rewards  github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,2,rep,name=rewards,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"rewards"`
+	Exponent uint32                                      `protobuf:"varint,3,opt,name=exponent,proto3" json:"exponent,omitempty"`
 }
 
 func (m *RewardAccumulator) Reset()         { *m = RewardAccumulator{} }
 func (m *RewardAccumulator) String() string { return proto.CompactTextString(m) }
 func (*RewardAccumulator) ProtoMessage()    {}
 func (*RewardAccumulator) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3f117566517b8062, []int{4}
+	return fileDescriptor_3f117566517b8062, []int{3}
 }
 func (m *RewardAccumulator) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -375,13 +304,6 @@ func (m *RewardAccumulator) XXX_DiscardUnknown() {
 }
 
 var xxx_messageInfo_RewardAccumulator proto.InternalMessageInfo
-
-func (m *RewardAccumulator) GetTier() uint32 {
-	if m != nil {
-		return m.Tier
-	}
-	return 0
-}
 
 func (m *RewardAccumulator) GetDenom() string {
 	if m != nil {
@@ -414,7 +336,7 @@ func (m *Unbonding) Reset()         { *m = Unbonding{} }
 func (m *Unbonding) String() string { return proto.CompactTextString(m) }
 func (*Unbonding) ProtoMessage()    {}
 func (*Unbonding) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3f117566517b8062, []int{5}
+	return fileDescriptor_3f117566517b8062, []int{4}
 }
 func (m *Unbonding) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -458,19 +380,18 @@ func (m *Unbonding) GetAmount() types.Coin {
 }
 
 // AccountUnbondings is a structure that is used to store all of an account's unbondings
-// for a single bonded uToken denom and and unbonding tier in both KVStore and genesis state.
+// for a single bonded uToken denom in both KVStore and genesis state.
 type AccountUnbondings struct {
 	Account    string      `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
 	Denom      string      `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
-	Tier       uint32      `protobuf:"varint,3,opt,name=tier,proto3" json:"tier,omitempty"`
-	Unbondings []Unbonding `protobuf:"bytes,4,rep,name=unbondings,proto3" json:"unbondings"`
+	Unbondings []Unbonding `protobuf:"bytes,3,rep,name=unbondings,proto3" json:"unbondings"`
 }
 
 func (m *AccountUnbondings) Reset()         { *m = AccountUnbondings{} }
 func (m *AccountUnbondings) String() string { return proto.CompactTextString(m) }
 func (*AccountUnbondings) ProtoMessage()    {}
 func (*AccountUnbondings) Descriptor() ([]byte, []int) {
-	return fileDescriptor_3f117566517b8062, []int{6}
+	return fileDescriptor_3f117566517b8062, []int{5}
 }
 func (m *AccountUnbondings) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -513,13 +434,6 @@ func (m *AccountUnbondings) GetDenom() string {
 	return ""
 }
 
-func (m *AccountUnbondings) GetTier() uint32 {
-	if m != nil {
-		return m.Tier
-	}
-	return 0
-}
-
 func (m *AccountUnbondings) GetUnbondings() []Unbonding {
 	if m != nil {
 		return m.Unbondings
@@ -529,7 +443,6 @@ func (m *AccountUnbondings) GetUnbondings() []Unbonding {
 
 func init() {
 	proto.RegisterType((*GenesisState)(nil), "umee.incentive.v1.GenesisState")
-	proto.RegisterType((*TotalBond)(nil), "umee.incentive.v1.TotalBond")
 	proto.RegisterType((*Bond)(nil), "umee.incentive.v1.Bond")
 	proto.RegisterType((*RewardTracker)(nil), "umee.incentive.v1.RewardTracker")
 	proto.RegisterType((*RewardAccumulator)(nil), "umee.incentive.v1.RewardAccumulator")
@@ -540,51 +453,49 @@ func init() {
 func init() { proto.RegisterFile("umee/incentive/v1/genesis.proto", fileDescriptor_3f117566517b8062) }
 
 var fileDescriptor_3f117566517b8062 = []byte{
-	// 701 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x95, 0xcf, 0x6e, 0xd3, 0x4a,
-	0x14, 0xc6, 0xe3, 0x26, 0x69, 0x9b, 0xd3, 0x9b, 0x9b, 0x66, 0x6e, 0xa5, 0x6b, 0x2a, 0x94, 0x86,
-	0x80, 0x50, 0x04, 0xaa, 0xad, 0xb6, 0x48, 0xac, 0x1b, 0x40, 0xa8, 0x2b, 0x2a, 0x13, 0xaa, 0x02,
-	0x8b, 0x68, 0x62, 0x8f, 0x8c, 0x95, 0x78, 0xc6, 0xf2, 0x8c, 0xd3, 0xf2, 0x16, 0xec, 0x79, 0x03,
-	0x9e, 0x82, 0x15, 0xea, 0xb2, 0x4b, 0x56, 0xfc, 0x69, 0x5f, 0x04, 0xcd, 0x78, 0xec, 0xa4, 0x8d,
-	0x8b, 0x14, 0x24, 0x56, 0x99, 0x39, 0xf3, 0xcd, 0xef, 0x7c, 0x3a, 0x73, 0x4e, 0x0c, 0x5b, 0x49,
-	0x48, 0x88, 0x1d, 0x50, 0x97, 0x50, 0x11, 0x4c, 0x88, 0x3d, 0xd9, 0xb1, 0x7d, 0x42, 0x09, 0x0f,
-	0xb8, 0x15, 0xc5, 0x4c, 0x30, 0xd4, 0x94, 0x02, 0x2b, 0x17, 0x58, 0x93, 0x9d, 0xcd, 0x96, 0xcb,
-	0x78, 0xc8, 0xb8, 0x3d, 0xc4, 0x5c, 0x5e, 0x18, 0x12, 0x81, 0x77, 0x6c, 0x97, 0x05, 0x34, 0xbd,
-	0xb2, 0xb9, 0xe1, 0x33, 0x9f, 0xa9, 0xa5, 0x2d, 0x57, 0x3a, 0x7a, 0x67, 0x3e, 0xd3, 0x94, 0xaa,
-	0x24, 0x9d, 0x9f, 0x55, 0xf8, 0xe7, 0x79, 0x9a, 0xfd, 0xa5, 0xc0, 0x82, 0xa0, 0xc7, 0xb0, 0x1c,
-	0xe1, 0x18, 0x87, 0xdc, 0x34, 0xda, 0x46, 0x77, 0x6d, 0xf7, 0x96, 0x35, 0xe7, 0xc6, 0x3a, 0x54,
-	0x82, 0x5e, 0xe5, 0xec, 0xdb, 0x56, 0xc9, 0xd1, 0x72, 0x74, 0x1f, 0x1a, 0x94, 0x9c, 0x8a, 0x41,
-	0x14, 0x33, 0x3f, 0xc6, 0xe1, 0x20, 0xf0, 0xcc, 0xa5, 0xb6, 0xd1, 0xad, 0x3b, 0x75, 0x19, 0x3e,
-	0x4c, 0xa3, 0x07, 0x1e, 0x7a, 0x00, 0xcd, 0x31, 0xe6, 0x62, 0x10, 0x93, 0x13, 0x1c, 0x7b, 0x7c,
-	0x20, 0x82, 0x90, 0x98, 0xe5, 0xb6, 0xd1, 0xad, 0x38, 0x0d, 0x79, 0xe0, 0xa4, 0xf1, 0x7e, 0x10,
-	0x12, 0xf4, 0x02, 0x1a, 0xa9, 0x6c, 0x20, 0x62, 0xec, 0x8e, 0x48, 0xcc, 0xcd, 0x4a, 0xbb, 0xdc,
-	0x5d, 0xdb, 0x6d, 0x17, 0xb8, 0x4a, 0x2f, 0xf6, 0x53, 0xa1, 0x36, 0xf7, 0x6f, 0x3c, 0x1b, 0xe4,
-	0xe8, 0x2d, 0xfc, 0xa7, 0x81, 0xd8, 0x75, 0x93, 0x30, 0x19, 0x63, 0xc1, 0x62, 0x6e, 0x56, 0x15,
-	0xf4, 0xde, 0x8d, 0xd0, 0xfd, 0xa9, 0x58, 0x83, 0x51, 0x7c, 0xfd, 0x80, 0xa3, 0x23, 0x68, 0x26,
-	0x91, 0xcb, 0xc2, 0x80, 0xfa, 0x59, 0x15, 0xb8, 0xb9, 0xac, 0xd0, 0x77, 0x0b, 0xd0, 0x07, 0xd9,
-	0x46, 0xd7, 0x46, 0x93, 0xd7, 0x33, 0x86, 0x0e, 0x73, 0xd4, 0x87, 0x75, 0x46, 0x7d, 0x76, 0x05,
-	0xbb, 0xb2, 0x28, 0xb6, 0xa1, 0x11, 0x39, 0xf5, 0x18, 0x90, 0xcb, 0xc2, 0x68, 0x4c, 0x04, 0xf1,
-	0xa6, 0xdc, 0xd5, 0x45, 0xb9, 0xcd, 0x1c, 0x92, 0x93, 0xf7, 0xa0, 0x3a, 0x64, 0xd4, 0xe3, 0x66,
-	0x4d, 0xc1, 0xfe, 0x2f, 0x80, 0xf5, 0x18, 0xf5, 0x34, 0x20, 0xd5, 0xa2, 0xd7, 0x80, 0xb0, 0xeb,
-	0xb2, 0x84, 0x8a, 0x41, 0x42, 0x65, 0x28, 0xa0, 0x3e, 0x37, 0xe1, 0xc6, 0x87, 0xd9, 0x4f, 0xc5,
-	0xaf, 0x72, 0x6d, 0xe6, 0x07, 0x5f, 0x3f, 0xe8, 0x1c, 0x43, 0xad, 0xcf, 0x04, 0x1e, 0xcb, 0xa4,
-	0x08, 0x41, 0x45, 0x04, 0x24, 0x56, 0xdd, 0x5d, 0x77, 0xd4, 0x5a, 0xf6, 0x3c, 0x0e, 0xe5, 0x25,
-	0xd5, 0xb1, 0xb2, 0xe7, 0xd3, 0x71, 0xb3, 0xe4, 0xb8, 0x59, 0x7a, 0xdc, 0xac, 0x27, 0x2c, 0xa0,
-	0x59, 0xcf, 0xa7, 0xf2, 0x4e, 0x08, 0x15, 0x05, 0x35, 0x61, 0x45, 0xa7, 0x55, 0xdc, 0x9a, 0x93,
-	0x6d, 0xf3, 0x74, 0x4b, 0x85, 0xe9, 0xca, 0x8b, 0xa5, 0xfb, 0x6c, 0x40, 0xfd, 0x4a, 0x97, 0x2f,
-	0x98, 0x78, 0x03, 0xaa, 0x1e, 0xa1, 0x2c, 0x54, 0x79, 0x6b, 0x4e, 0xba, 0x41, 0x23, 0x58, 0xd1,
-	0xb3, 0xa8, 0x87, 0xeb, 0x76, 0xa1, 0x9f, 0xa7, 0xc4, 0x55, 0x96, 0xf6, 0xa4, 0xa5, 0x4f, 0xdf,
-	0xb7, 0x1e, 0xfa, 0x81, 0x78, 0x97, 0x0c, 0x2d, 0x97, 0x85, 0xb6, 0xfe, 0x77, 0x4a, 0x7f, 0xb6,
-	0xb9, 0x37, 0xb2, 0xc5, 0xfb, 0x88, 0xf0, 0xec, 0x0e, 0x77, 0xb2, 0x0c, 0x9d, 0x2f, 0x06, 0x34,
-	0xe7, 0x66, 0xaa, 0xf0, 0x51, 0x72, 0xb3, 0x4b, 0x37, 0x98, 0x2d, 0xff, 0x6d, 0xb3, 0x68, 0x13,
-	0x56, 0xc9, 0x69, 0xc4, 0x28, 0xa1, 0xc2, 0xac, 0x28, 0x6b, 0xf9, 0xbe, 0x73, 0x04, 0xb5, 0xbc,
-	0xc5, 0xd0, 0x3a, 0x94, 0x09, 0xf5, 0x94, 0xfd, 0x8a, 0x23, 0x97, 0x7f, 0xde, 0x52, 0x1f, 0x0d,
-	0x68, 0xce, 0xf5, 0xf6, 0x6f, 0xde, 0xb9, 0xb8, 0x4c, 0x59, 0x41, 0xcb, 0x33, 0x05, 0xed, 0x01,
-	0xcc, 0x4c, 0x56, 0xf6, 0xd4, 0xf3, 0x93, 0x95, 0xa7, 0xd5, 0xce, 0x66, 0x6e, 0xf5, 0x9e, 0x9d,
-	0x5d, 0xb4, 0x8c, 0xf3, 0x8b, 0x96, 0xf1, 0xe3, 0xa2, 0x65, 0x7c, 0xb8, 0x6c, 0x95, 0xce, 0x2f,
-	0x5b, 0xa5, 0xaf, 0x97, 0xad, 0xd2, 0x9b, 0xd9, 0x0a, 0x4b, 0xe6, 0x36, 0x25, 0xe2, 0x84, 0xc5,
-	0x23, 0xb5, 0xb1, 0x27, 0x8f, 0xec, 0xd3, 0xe9, 0xb7, 0x67, 0xb8, 0xac, 0x3e, 0x3e, 0x7b, 0xbf,
-	0x02, 0x00, 0x00, 0xff, 0xff, 0x5e, 0xba, 0x0d, 0x67, 0x0b, 0x07, 0x00, 0x00,
+	// 663 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x94, 0xdf, 0x6e, 0xd3, 0x30,
+	0x14, 0xc6, 0x9b, 0xb5, 0xdd, 0xd6, 0x33, 0x4a, 0x57, 0x33, 0x89, 0x30, 0xa1, 0xac, 0x14, 0x84,
+	0x2a, 0xd0, 0x12, 0x6d, 0x43, 0xe2, 0x7a, 0x05, 0x84, 0x76, 0xc5, 0x14, 0xc6, 0xc4, 0xe0, 0x22,
+	0x72, 0x13, 0x2b, 0x44, 0x5d, 0xec, 0x28, 0x76, 0xba, 0xf1, 0x04, 0xdc, 0xf2, 0x1c, 0x88, 0x2b,
+	0x9e, 0x62, 0x97, 0xbb, 0xe4, 0x8a, 0x3f, 0xdb, 0x8b, 0xa0, 0xd8, 0x4e, 0xda, 0xad, 0x1d, 0xd2,
+	0x90, 0xb8, 0x6a, 0x7c, 0xfc, 0x9d, 0xdf, 0x77, 0xea, 0x73, 0x6c, 0x58, 0xcb, 0x62, 0x42, 0x9c,
+	0x88, 0xfa, 0x84, 0x8a, 0x68, 0x44, 0x9c, 0xd1, 0x86, 0x13, 0x12, 0x4a, 0x78, 0xc4, 0xed, 0x24,
+	0x65, 0x82, 0xa1, 0x76, 0x2e, 0xb0, 0x4b, 0x81, 0x3d, 0xda, 0x58, 0xb5, 0x7c, 0xc6, 0x63, 0xc6,
+	0x9d, 0x01, 0xe6, 0x79, 0xc2, 0x80, 0x08, 0xbc, 0xe1, 0xf8, 0x2c, 0xa2, 0x2a, 0x65, 0x75, 0x25,
+	0x64, 0x21, 0x93, 0x9f, 0x4e, 0xfe, 0xa5, 0xa3, 0xf7, 0xa6, 0x9d, 0xc6, 0x54, 0x29, 0xe9, 0xfe,
+	0xae, 0xc3, 0x8d, 0x97, 0xca, 0xfd, 0xb5, 0xc0, 0x82, 0xa0, 0xa7, 0x30, 0x9f, 0xe0, 0x14, 0xc7,
+	0xdc, 0x34, 0x3a, 0x46, 0x6f, 0x69, 0xf3, 0x8e, 0x3d, 0x55, 0x8d, 0xbd, 0x2b, 0x05, 0xfd, 0xda,
+	0xc9, 0x8f, 0xb5, 0x8a, 0xab, 0xe5, 0xe8, 0x21, 0xb4, 0x28, 0x39, 0x16, 0x5e, 0x92, 0xb2, 0x30,
+	0xc5, 0xb1, 0x17, 0x05, 0xe6, 0x5c, 0xc7, 0xe8, 0x35, 0xdd, 0x66, 0x1e, 0xde, 0x55, 0xd1, 0x9d,
+	0x00, 0x3d, 0x82, 0xf6, 0x21, 0xe6, 0xc2, 0x4b, 0xc9, 0x11, 0x4e, 0x03, 0xee, 0x89, 0x28, 0x26,
+	0x66, 0xb5, 0x63, 0xf4, 0x6a, 0x6e, 0x2b, 0xdf, 0x70, 0x55, 0x7c, 0x2f, 0x8a, 0x09, 0x7a, 0x05,
+	0x2d, 0x25, 0xf3, 0x44, 0x8a, 0xfd, 0x21, 0x49, 0xb9, 0x59, 0xeb, 0x54, 0x7b, 0x4b, 0x9b, 0x9d,
+	0x19, 0x55, 0xa9, 0xc4, 0x3d, 0x25, 0xd4, 0xc5, 0xdd, 0x4c, 0x27, 0x83, 0x1c, 0xbd, 0x87, 0x5b,
+	0x1a, 0x88, 0x7d, 0x3f, 0x8b, 0xb3, 0x43, 0x2c, 0x58, 0xca, 0xcd, 0xba, 0x84, 0x3e, 0xb8, 0x12,
+	0xba, 0x3d, 0x16, 0x6b, 0x30, 0x4a, 0x2f, 0x6f, 0x70, 0xb4, 0x0f, 0xed, 0x2c, 0xf1, 0x59, 0x1c,
+	0xd1, 0xb0, 0x38, 0x05, 0x6e, 0xce, 0x4b, 0xf4, 0xfd, 0x19, 0xe8, 0x9d, 0x62, 0xa1, 0xcf, 0x46,
+	0x93, 0x97, 0x0b, 0x86, 0x0e, 0x73, 0xb4, 0x07, 0xcb, 0x8c, 0x86, 0xec, 0x02, 0x76, 0xe1, 0xba,
+	0xd8, 0x96, 0x46, 0x94, 0xd4, 0xb7, 0x80, 0x7c, 0x16, 0x27, 0x87, 0x44, 0x90, 0x60, 0xcc, 0x5d,
+	0xbc, 0x2e, 0xb7, 0x5d, 0x42, 0x4a, 0xf2, 0x16, 0xd4, 0x07, 0x8c, 0x06, 0xdc, 0x6c, 0x48, 0xd8,
+	0xed, 0x19, 0xb0, 0x3e, 0xa3, 0x81, 0x06, 0x28, 0x2d, 0x3a, 0x00, 0x84, 0x7d, 0x9f, 0x65, 0x54,
+	0x78, 0x19, 0xcd, 0x43, 0x11, 0x0d, 0xb9, 0x09, 0x57, 0x36, 0x66, 0x5b, 0x89, 0xdf, 0x94, 0xda,
+	0xa2, 0x1e, 0x7c, 0x79, 0xa3, 0x7b, 0x00, 0xb5, 0xdc, 0x0f, 0x99, 0xb0, 0xa0, 0x37, 0xe5, 0x6c,
+	0x37, 0xdc, 0x62, 0x99, 0x0f, 0x3d, 0x8e, 0xe5, 0xc6, 0x9c, 0x1e, 0x7a, 0x75, 0xdf, 0xec, 0xfc,
+	0xbe, 0xd9, 0xfa, 0xbe, 0xd9, 0xcf, 0x58, 0x44, 0x8b, 0xa1, 0x57, 0xf2, 0xee, 0x57, 0x03, 0x9a,
+	0x17, 0xe6, 0xee, 0x2f, 0x26, 0x2b, 0x50, 0x0f, 0x08, 0x65, 0xb1, 0xf4, 0x68, 0xb8, 0x6a, 0x81,
+	0x86, 0xb0, 0xa0, 0x6f, 0x82, 0x59, 0x95, 0x7f, 0xf6, 0xee, 0x4c, 0xef, 0xe7, 0xc4, 0x97, 0xf6,
+	0x5b, 0xb9, 0xfd, 0x97, 0x9f, 0x6b, 0x8f, 0xc3, 0x48, 0x7c, 0xc8, 0x06, 0xb6, 0xcf, 0x62, 0x47,
+	0xbf, 0x0d, 0xea, 0x67, 0x9d, 0x07, 0x43, 0x47, 0x7c, 0x4c, 0x08, 0x2f, 0x72, 0xb8, 0x5b, 0x38,
+	0x74, 0xbf, 0x19, 0xd0, 0x9e, 0x9a, 0xe8, 0x71, 0x61, 0xc6, 0x15, 0x85, 0xcd, 0xfd, 0xef, 0xc2,
+	0xd0, 0x2a, 0x2c, 0x92, 0xe3, 0x84, 0x51, 0x42, 0x85, 0x7c, 0x0b, 0x9a, 0x6e, 0xb9, 0xee, 0xee,
+	0x43, 0xa3, 0x6c, 0x26, 0x5a, 0x86, 0x2a, 0xa1, 0x81, 0xac, 0xb4, 0xe6, 0xe6, 0x9f, 0xff, 0xde,
+	0xbb, 0x4f, 0x06, 0xb4, 0xa7, 0xa6, 0xe8, 0xda, 0xfd, 0xeb, 0x03, 0x4c, 0xcc, 0x6b, 0xd1, 0xc2,
+	0xe9, 0x79, 0x2d, 0x2d, 0x74, 0x15, 0x13, 0x59, 0xfd, 0x17, 0x27, 0x67, 0x96, 0x71, 0x7a, 0x66,
+	0x19, 0xbf, 0xce, 0x2c, 0xe3, 0xf3, 0xb9, 0x55, 0x39, 0x3d, 0xb7, 0x2a, 0xdf, 0xcf, 0xad, 0xca,
+	0xbb, 0xc9, 0xd3, 0xcc, 0x99, 0xeb, 0x94, 0x88, 0x23, 0x96, 0x0e, 0xe5, 0xc2, 0x19, 0x3d, 0x71,
+	0x8e, 0xc7, 0x2f, 0xfa, 0x60, 0x5e, 0x3e, 0xe9, 0x5b, 0x7f, 0x02, 0x00, 0x00, 0xff, 0xff, 0x20,
+	0x9c, 0xb3, 0x67, 0x61, 0x06, 0x00, 0x00,
 }
 
 func (m *GenesisState) Marshal() (dAtA []byte, err error) {
@@ -728,44 +639,6 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *TotalBond) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *TotalBond) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *TotalBond) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size, err := m.Amount.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintGenesis(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0x12
-	if m.Tier != 0 {
-		i = encodeVarintGenesis(dAtA, i, uint64(m.Tier))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
 func (m *Bond) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -795,12 +668,7 @@ func (m *Bond) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintGenesis(dAtA, i, uint64(size))
 	}
 	i--
-	dAtA[i] = 0x1a
-	if m.Tier != 0 {
-		i = encodeVarintGenesis(dAtA, i, uint64(m.Tier))
-		i--
-		dAtA[i] = 0x10
-	}
+	dAtA[i] = 0x12
 	if len(m.Account) > 0 {
 		i -= len(m.Account)
 		copy(dAtA[i:], m.Account)
@@ -842,7 +710,7 @@ func (m *RewardTracker) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintGenesis(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x1a
 		}
 	}
 	if len(m.Denom) > 0 {
@@ -850,12 +718,7 @@ func (m *RewardTracker) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Denom)
 		i = encodeVarintGenesis(dAtA, i, uint64(len(m.Denom)))
 		i--
-		dAtA[i] = 0x1a
-	}
-	if m.Tier != 0 {
-		i = encodeVarintGenesis(dAtA, i, uint64(m.Tier))
-		i--
-		dAtA[i] = 0x10
+		dAtA[i] = 0x12
 	}
 	if len(m.Account) > 0 {
 		i -= len(m.Account)
@@ -890,7 +753,7 @@ func (m *RewardAccumulator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	if m.Exponent != 0 {
 		i = encodeVarintGenesis(dAtA, i, uint64(m.Exponent))
 		i--
-		dAtA[i] = 0x20
+		dAtA[i] = 0x18
 	}
 	if len(m.Rewards) > 0 {
 		for iNdEx := len(m.Rewards) - 1; iNdEx >= 0; iNdEx-- {
@@ -903,7 +766,7 @@ func (m *RewardAccumulator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintGenesis(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x1a
+			dAtA[i] = 0x12
 		}
 	}
 	if len(m.Denom) > 0 {
@@ -911,12 +774,7 @@ func (m *RewardAccumulator) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		copy(dAtA[i:], m.Denom)
 		i = encodeVarintGenesis(dAtA, i, uint64(len(m.Denom)))
 		i--
-		dAtA[i] = 0x12
-	}
-	if m.Tier != 0 {
-		i = encodeVarintGenesis(dAtA, i, uint64(m.Tier))
-		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -990,13 +848,8 @@ func (m *AccountUnbondings) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintGenesis(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x22
+			dAtA[i] = 0x1a
 		}
-	}
-	if m.Tier != 0 {
-		i = encodeVarintGenesis(dAtA, i, uint64(m.Tier))
-		i--
-		dAtA[i] = 0x18
 	}
 	if len(m.Denom) > 0 {
 		i -= len(m.Denom)
@@ -1085,20 +938,6 @@ func (m *GenesisState) Size() (n int) {
 	return n
 }
 
-func (m *TotalBond) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Tier != 0 {
-		n += 1 + sovGenesis(uint64(m.Tier))
-	}
-	l = m.Amount.Size()
-	n += 1 + l + sovGenesis(uint64(l))
-	return n
-}
-
 func (m *Bond) Size() (n int) {
 	if m == nil {
 		return 0
@@ -1108,9 +947,6 @@ func (m *Bond) Size() (n int) {
 	l = len(m.Account)
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
-	}
-	if m.Tier != 0 {
-		n += 1 + sovGenesis(uint64(m.Tier))
 	}
 	l = m.Amount.Size()
 	n += 1 + l + sovGenesis(uint64(l))
@@ -1126,9 +962,6 @@ func (m *RewardTracker) Size() (n int) {
 	l = len(m.Account)
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
-	}
-	if m.Tier != 0 {
-		n += 1 + sovGenesis(uint64(m.Tier))
 	}
 	l = len(m.Denom)
 	if l > 0 {
@@ -1149,9 +982,6 @@ func (m *RewardAccumulator) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.Tier != 0 {
-		n += 1 + sovGenesis(uint64(m.Tier))
-	}
 	l = len(m.Denom)
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
@@ -1195,9 +1025,6 @@ func (m *AccountUnbondings) Size() (n int) {
 	l = len(m.Denom)
 	if l > 0 {
 		n += 1 + l + sovGenesis(uint64(l))
-	}
-	if m.Tier != 0 {
-		n += 1 + sovGenesis(uint64(m.Tier))
 	}
 	if len(m.Unbondings) > 0 {
 		for _, e := range m.Unbondings {
@@ -1573,108 +1400,6 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *TotalBond) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowGenesis
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: TotalBond: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TotalBond: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tier", wireType)
-			}
-			m.Tier = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenesis
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tier |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenesis
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthGenesis
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthGenesis
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipGenesis(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthGenesis
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
 func (m *Bond) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -1737,25 +1462,6 @@ func (m *Bond) Unmarshal(dAtA []byte) error {
 			m.Account = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tier", wireType)
-			}
-			m.Tier = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenesis
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tier |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
 			}
@@ -1871,25 +1577,6 @@ func (m *RewardTracker) Unmarshal(dAtA []byte) error {
 			m.Account = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tier", wireType)
-			}
-			m.Tier = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenesis
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tier |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
 			}
@@ -1921,7 +1608,7 @@ func (m *RewardTracker) Unmarshal(dAtA []byte) error {
 			}
 			m.Denom = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Rewards", wireType)
 			}
@@ -2006,25 +1693,6 @@ func (m *RewardAccumulator) Unmarshal(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tier", wireType)
-			}
-			m.Tier = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenesis
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tier |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
 			}
@@ -2056,7 +1724,7 @@ func (m *RewardAccumulator) Unmarshal(dAtA []byte) error {
 			}
 			m.Denom = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 3:
+		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Rewards", wireType)
 			}
@@ -2090,7 +1758,7 @@ func (m *RewardAccumulator) Unmarshal(dAtA []byte) error {
 				return err
 			}
 			iNdEx = postIndex
-		case 4:
+		case 3:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Exponent", wireType)
 			}
@@ -2326,25 +1994,6 @@ func (m *AccountUnbondings) Unmarshal(dAtA []byte) error {
 			m.Denom = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tier", wireType)
-			}
-			m.Tier = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGenesis
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tier |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 4:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Unbondings", wireType)
 			}

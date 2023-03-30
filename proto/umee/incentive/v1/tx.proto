@@ -50,8 +50,7 @@ message MsgClaimResponse {
 // MsgBond represents a account's request to bond uToken collateral.
 message MsgBond {
   string                   account = 1;
-  uint32                   tier    = 2;
-  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset   = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBondResponse defines the Msg/Lock response type.
@@ -60,8 +59,7 @@ message MsgBondResponse {}
 // MsgBeginUnbonding represents a account's request to begin unbonding uToken collateral.
 message MsgBeginUnbonding {
   string                   account = 1;
-  uint32                   tier    = 2;
-  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin asset   = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBeginUnbondingResponse defines the Msg/BeginUnbonding response type.

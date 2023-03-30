@@ -11,35 +11,11 @@ message Params {
   option (gogoproto.equal) = true;
 
   // max_unbondings defines the maximum amount of concurrent unbondings an address can have
-  // on each unbonding tier of each bonded uToken denom.
+  // of each bonded uToken denom.
   uint32 max_unbondings = 1;
 
-  // unbonding_duration_long defines the unbonding duration (in seconds) of the long tier.
-  uint64 unbonding_duration_long = 2;
-
-  // unbonding_duration_middle defines the unbonding duration (in seconds) of the middle tier.
-  uint64 unbonding_duration_middle = 3;
-
-  // unbonding_duration_short defines the unbonding duration (in seconds) of the short tier.
-  uint64 unbonding_duration_short = 4;
-
-  // tier_weight_short defines the proportion of rewards which assets bonded
-  // in the short unbonding duration receive compared to what the same amount
-  // would receive bonded to the long tier.
-  // valid values: [0;1]
-  string tier_weight_short = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-
-  // tier_weight_middle defines the proportion of rewards which assets bonded
-  // in the middle unbonding duration receive compared to what the same amount
-  // would receive bonded to the long tier.
-  // valid values: [0;1]
-  string tier_weight_middle = 6 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  // unbonding_duration defines the unbonding duration (in seconds).
+  uint64 unbonding_duration = 2;
 
   // community_fund_address is the address from which all incentive programs
   // proposed with "from_community_fund = true" will receive their funding.
