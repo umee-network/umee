@@ -14,10 +14,6 @@ func TestDefaultParams(t *testing.T) {
 	invalidMaxUnbondings.MaxUnbondings = 0
 	assert.ErrorContains(t, invalidMaxUnbondings.Validate(), "max unbondings cannot be zero")
 
-	invalidUnbond := DefaultParams()
-	invalidUnbond.UnbondingDuration = 0
-	assert.ErrorContains(t, invalidUnbond.Validate(), "unbonding duration cannot be zero")
-
 	invalidCommunityFund := DefaultParams()
 	invalidCommunityFund.CommunityFundAddress = "abcdefgh"
 	assert.ErrorContains(t, invalidCommunityFund.Validate(), "decoding bech32 failed")

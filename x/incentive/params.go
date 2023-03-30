@@ -32,10 +32,6 @@ func (p Params) Validate() error {
 }
 
 func validateUnbondingDuration(v uint64) error {
-	if v == 0 {
-		return fmt.Errorf("unbonding duration cannot be zero")
-	}
-
 	return nil
 }
 
