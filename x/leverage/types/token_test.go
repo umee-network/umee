@@ -46,7 +46,7 @@ func validToken() types.Token {
 		Exponent:               6,
 		ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
 		CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.5"),
+		LiquidationThreshold:   sdk.MustNewDecFromStr("0.51"),
 		BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
 		KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
 		MaxBorrowRate:          sdk.MustNewDecFromStr("1"),
@@ -79,7 +79,7 @@ addtokens:
     - base_denom: uumee
       reserve_factor: "40.000000000000000000"
       collateral_weight: "0.500000000000000000"
-      liquidation_threshold: "0.500000000000000000"
+      liquidation_threshold: "0.510000000000000000"
       base_borrow_rate: "0.010000000000000000"
       kink_borrow_rate: "0.050000000000000000"
       max_borrow_rate: "1.000000000000000000"
@@ -113,10 +113,16 @@ func TestToken_Validate(t *testing.T) {
 	invalidReserveFactor.ReserveFactor = sdk.MustNewDecFromStr("-0.25")
 
 	invalidCollateralWeight := validToken()
-	invalidCollateralWeight.CollateralWeight = sdk.MustNewDecFromStr("50.00")
+	invalidCollateralWeight.CollateralWeight = sdk.MustNewDecFromStr("1.1")
+
+	invalidCollateralWeight2 := validToken()
+	invalidCollateralWeight2.CollateralWeight = sdk.OneDec()
 
 	invalidLiquidationThreshold := validToken()
-	invalidLiquidationThreshold.LiquidationThreshold = sdk.MustNewDecFromStr("0.40")
+	invalidLiquidationThreshold.LiquidationThreshold = invalidLiquidationThreshold.CollateralWeight
+
+	invalidLiquidationThreshold2 := validToken()
+	invalidLiquidationThreshold2.LiquidationThreshold = sdk.OneDec()
 
 	invalidBaseBorrowRate := validToken()
 	invalidBaseBorrowRate.BaseBorrowRate = sdk.MustNewDecFromStr("-0.01")
@@ -179,8 +185,16 @@ func TestToken_Validate(t *testing.T) {
 			input:     invalidCollateralWeight,
 			expectErr: true,
 		},
+		"invalid collateral weight2": {
+			input:     invalidCollateralWeight2,
+			expectErr: true,
+		},
 		"invalid liquidation threshold": {
 			input:     invalidLiquidationThreshold,
+			expectErr: true,
+		},
+		"invalid liquidation threshold2": {
+			input:     invalidLiquidationThreshold2,
 			expectErr: true,
 		},
 		"invalid base borrow rate": {

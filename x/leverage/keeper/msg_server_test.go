@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	"github.com/umee-network/umee/v4/x/leverage/types"
@@ -659,6 +660,184 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 		// check all available invariants
 		s.checkInvariants(tc.msg)
 	}
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxWithdraw_NoUsersSpendableUtokens() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 800_000000))
+	s.supply(supplier, coin.New(umeeDenom, 800_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+
+	// create and fund another supplier with 200 UMEE, then collateralize 200 of supplied UMEE
+	other := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(other, coin.New(umeeDenom, 200_000000))
+	s.collateralize(other, coin.New("u/"+umeeDenom, 200_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	// borrow 750 UMEE
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+	s.borrow(borrower, coin.New(umeeDenom, 750_000000))
+
+	// the other user executes MaxWithdraw
+	msg := &types.MsgMaxWithdraw{
+		Supplier: other.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE withdraw amount (0 from available_module_liquidity and 62.5 from available_module_collateral):
+	// 		= (liquidity - users_spendable_utokens - min_collateral_liquidity * collateral) / (1 - min_collateral_liquidity)
+	// 		= (250 - 0 - 0.2*1000)/(1 - 0.2)
+	//		= 62.5
+
+	// verify the outputs of withdraw function
+	resp, err := srv.MaxWithdraw(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 62_500000), resp.Received)
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxWithdraw_UsersSpendableUtokensGreaterAvailableModuleLiquidity() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 800_000000))
+	s.supply(supplier, coin.New(umeeDenom, 800_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+
+	// create and fund another supplier with 200 UMEE
+	other := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(other, coin.New(umeeDenom, 200_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	// borrow 750 UMEE
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+	s.borrow(borrower, coin.New(umeeDenom, 750_000000))
+
+	// the other user executes MaxWithdraw
+	msg := &types.MsgMaxWithdraw{
+		Supplier: other.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE withdraw amount (90 from available_module_liquidity and 0 from available_module_collateral):
+	// 		= liquidity - min_collateral_liquidity * collateral
+	// 		= 250 - 0.2*800
+	//		= 90
+	// since available_module_liquidity is 90 and it's less than the users_spendable_tokens
+	// only the available_module_liquidity can be withdrawn
+
+	// verify the outputs of withdraw function
+	resp, err := srv.MaxWithdraw(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 90_000000), resp.Received)
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxWithdraw_NoAvailableModuleLiquidity() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 800_000000))
+	s.supply(supplier, coin.New(umeeDenom, 800_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+
+	// create and fund another supplier with 200 UMEE
+	// collateralize 200 UMEE
+	other := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(other, coin.New(umeeDenom, 200_000000))
+	s.collateralize(other, coin.New("u/"+umeeDenom, 200_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	// borrow 800 UMEE
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+	s.borrow(borrower, coin.New(umeeDenom, 800_000000))
+
+	// the other user executes MaxWithdraw
+	msg := &types.MsgMaxWithdraw{
+		Supplier: other.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE withdraw amount (0 from available_module_liquidity and 0 from available_module_collateral):
+	// 		= liquidity - min_collateral_liquidity * collateral
+	// 		= 200 - 0.2*1000
+	//		= 0
+	// since available_module_liquidity is zero, nothing to withdraw
+
+	// verify the outputs of withdraw function
+	resp, err := srv.MaxWithdraw(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 0), resp.Received)
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxWithdraw_ChangingUtokenExchangeRate() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 800_000000))
+	s.supply(supplier, coin.New(umeeDenom, 800_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+
+	// create and fund another supplier with 200 UMEE
+	// collateralize 100 UMEE
+	other := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(other, coin.New(umeeDenom, 200_000000))
+	s.collateralize(other, coin.New("u/"+umeeDenom, 100_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	// borrow 100 UMEE and force the uToken exchange rate of UMEE to 1.2
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+	s.borrow(borrower, coin.New(umeeDenom, 100_000000))
+	s.tk.SetBorrow(ctx, borrower, coin.New(umeeDenom, 300_000000))
+
+	// the other user executes MaxWithdraw
+	msg := &types.MsgMaxWithdraw{
+		Supplier: other.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE withdraw amount (100 from available_module_liquidity and 100 from available_module_collateral):
+	// 		= (liquidity - users_spendable_utokens - min_collateral_liquidity * collateral) / (1 - min_collateral_liquidity)
+	// 		= (900 - 100 - 0.2*1080) / 0.8
+	//		= 730
+	// withdrawing 100 from available_module_liquidity, 730 more can be withdrawn from collateral,
+	// the user only has 100 as users_spendable_utokens and 100 as collateral,
+	// so the total of 200 uTokens will be withdrawn.
+	// given the conversion rate of 1.2, it will get 240 Tokens for 200 uTokens.
+
+	// verify the outputs of withdraw function
+	resp, err := srv.MaxWithdraw(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 240_000000), resp.Received)
+	require.Equal(coin.New("u/"+umeeDenom, 200_000000), resp.Withdrawn)
 }
 
 func (s *IntegrationTestSuite) TestMsgCollateralize() {
@@ -1318,6 +1497,182 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 	}
 }
 
+func (s *IntegrationTestSuite) TestMsgMaxBorrow_NoAvailableModuleLiquidity() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 800_000000))
+	s.supply(supplier, coin.New(umeeDenom, 800_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+
+	// create and fund another supplier with 200 UMEE
+	// collateralize 200 UMEE
+	other := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(other, coin.New(umeeDenom, 200_000000))
+	s.collateralize(other, coin.New("u/"+umeeDenom, 200_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	// borrow 800 UMEE
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+	s.borrow(borrower, coin.New(umeeDenom, 800_000000))
+
+	// the other user executes MaxBorrow
+	msg := &types.MsgMaxBorrow{
+		Borrower: other.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE borrow amount is 0, given there is no available liquidity in the module:
+	// 		= liquidity - min_collateral_liquidity * collateral
+	// 		= 200 - 0.2*1000
+	//		= 0
+	// since available_module_liquidity is zero, nothing to withdraw
+
+	// verify the outputs of borrow function
+	resp, err := srv.MaxBorrow(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 0), resp.Borrowed)
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxBorrow_UserMaxBorrowGreaterModuleMaxBorrow() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 1000 UMEE, then collateralize 800 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(supplier, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+
+	// the borrower user executes MaxBorrow
+	msg := &types.MsgMaxBorrow{
+		Borrower: borrower.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE borrow amount 840:
+	// 		= liquidity - min_collateral_liquidity * collateral
+	// 		= 1000 - 0.2*800
+	//		= 840
+	// available_module_liquidity = 840
+
+	// verify the outputs of borrow function
+	resp, err := srv.MaxBorrow(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 840_000000), resp.Borrowed)
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxBorrow_DecreasingMaxSupplyUtilization() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	// and MaxSupplyUtilization to 0.7
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MaxSupplyUtilization = sdk.MustNewDecFromStr("0.7")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 1000 UMEE, then collateralize 800 of supplied UMEE
+	// also borrow 100 UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(supplier, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 800_000000))
+	s.borrow(supplier, coin.New(umeeDenom, 100_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+
+	// the borrower user executes MaxBorrow
+	msg := &types.MsgMaxBorrow{
+		Borrower: borrower.String(),
+		Denom:    umeeDenom,
+	}
+
+	// expected UMEE borrow amount 600:
+	// 		= liquidity - min_collateral_liquidity * collateral
+	// 		= 900 - 0.2*800
+	//		= 740
+	// available_module_liquidity = 740
+	//
+	// the max_supply_utilization is set to 0.7, the max amount to borrow based on that is as follows:
+	// 		= max_supply_utilization * available_liquidity + max_supply_utilization * total_borrowed - total_borrowed
+	//		= 0.7 * 900 + 0.7 * 100 - 100
+	//		= 600
+	// the user can only borrow 600 UMEE
+
+	// verify the outputs of borrow function
+	resp, err := srv.MaxBorrow(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 600_000000), resp.Borrowed)
+}
+
+func (s *IntegrationTestSuite) TestMsgMaxBorrow_ZeroAvailableBasedOnMaxSupplyUtilization() {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
+	// and MaxSupplyUtilization to 0.5
+	umeeToken := newToken(umeeDenom, "UMEE", 6)
+	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MaxSupplyUtilization = sdk.MustNewDecFromStr("0.5")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
+
+	// create and fund a supplier with 3000 UMEE, then collateralize 2500 of supplied UMEE
+	supplier := s.newAccount(coin.New(umeeDenom, 3000_000000))
+	s.supply(supplier, coin.New(umeeDenom, 3000_000000))
+	s.collateralize(supplier, coin.New("u/"+umeeDenom, 2500_000000))
+
+	// create a borrower with 2000 ATOM, then collateralize 2000 of supplied ATOM
+	borrower := s.newAccount(coin.New(atomDenom, 2000_000000))
+	s.supply(borrower, coin.New(atomDenom, 2000_000000))
+	s.collateralize(borrower, coin.New("u/"+atomDenom, 2000_000000))
+
+	// the borrower user executes MaxBorrow
+	msg := &types.MsgMaxBorrow{
+		Borrower: borrower.String(),
+		Denom:    umeeDenom,
+	}
+
+	// borrow up to maximum available given the max_supply_utilization = 0.5
+	resp, err := srv.MaxBorrow(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 1500_000000), resp.Borrowed)
+
+	// after that try to MaxBorrow again
+	// expected UMEE borrow amount 0:
+	// 		= liquidity - min_collateral_liquidity * collateral
+	// 		= 1500 - 0.2*2500
+	//		= 1000
+	// available_module_liquidity = 1000
+	//
+	// the max_supply_utilization is set to 0.5, the max amount to borrow based on that is as follows:
+	// 		= max_supply_utilization * available_liquidity + max_supply_utilization * total_borrowed - total_borrowed
+	//		= 0.5 * 1500 + 0.5 * 1500 - 1500
+	//		= 0
+	// there is nothing to borrow because the module reached max_supply_utilization with the previous borrow
+
+	// verify the outputs of borrow function
+	resp, err = srv.MaxBorrow(ctx, msg)
+	require.NoError(err)
+	require.Equal(coin.New(umeeDenom, 0), resp.Borrowed)
+}
+
 func (s *IntegrationTestSuite) TestMsgRepay() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
@@ -1432,18 +1787,6 @@ func (s *IntegrationTestSuite) TestMsgRepay() {
 }
 
 func (s *IntegrationTestSuite) TestMsgLiquidate() {
-	type testCase struct {
-		msg               string
-		liquidator        sdk.AccAddress
-		borrower          sdk.AccAddress
-		attemptedRepay    sdk.Coin
-		rewardDenom       string
-		expectedRepay     sdk.Coin
-		expectedLiquidate sdk.Coin
-		expectedReward    sdk.Coin
-		err               error
-	}
-
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a liquidator which supplies plenty of UMEE and ATOM to the module
@@ -1485,9 +1828,19 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 	s.supply(closeBorrower, coin.New(umeeDenom, 400_000000))
 	s.collateralize(closeBorrower, coin.New("u/"+umeeDenom, 400_000000))
 	// artificially borrow just barely above liquidation threshold to simulate interest accruing
-	s.forceBorrow(closeBorrower, coin.New(umeeDenom, 102_000000))
+	s.forceBorrow(closeBorrower, coin.New(umeeDenom, 106_000000))
 
-	tcs := []testCase{
+	tcs := []struct {
+		msg               string
+		liquidator        sdk.AccAddress
+		borrower          sdk.AccAddress
+		attemptedRepay    sdk.Coin
+		rewardDenom       string
+		expectedRepay     sdk.Coin
+		expectedLiquidate sdk.Coin
+		expectedReward    sdk.Coin
+		err               error
+	}{
 		{
 			"healthy borrower",
 			liquidator,
@@ -1564,9 +1917,9 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			closeBorrower,
 			coin.New(umeeDenom, 200_000000),
 			"u/" + umeeDenom,
-			coin.New(umeeDenom, 7_752000),
-			coin.New("u/"+umeeDenom, 8_527200),
-			coin.New("u/"+umeeDenom, 8_527200),
+			coin.New(umeeDenom, 8_150541),
+			coin.New("u/"+umeeDenom, 8_965595),
+			coin.New("u/"+umeeDenom, 8_965595),
 			nil,
 		},
 	}
@@ -1605,9 +1958,9 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			// verify the output of liquidate function
 			resp, err := srv.Liquidate(ctx, msg)
 			require.NoError(err, tc.msg)
-			require.Equal(tc.expectedRepay, resp.Repaid, tc.msg, "repaid")
-			require.Equal(tc.expectedLiquidate, resp.Collateral, tc.msg, "liquidated")
-			require.Equal(tc.expectedReward, resp.Reward, tc.msg, "reward")
+			require.Equal(tc.expectedRepay.String(), resp.Repaid.String(), tc.msg)
+			require.Equal(tc.expectedLiquidate.String(), resp.Collateral.String(), tc.msg)
+			require.Equal(tc.expectedReward.String(), resp.Reward.String(), tc.msg)
 
 			// final state (liquidated denom)
 			lfUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
@@ -1630,9 +1983,9 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 				bfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.attemptedRepay.Denom)
 
 				// verify borrowed denom uToken supply is unchanged
-				require.Equal(biUTokenSupply, bfUTokenSupply, tc.msg, "uToken supply (borrowed denom")
+				require.Equal(biUTokenSupply, bfUTokenSupply, "%s: %s", tc.msg, "uToken supply (borrowed denom")
 				// verify borrowed denom uToken exchange rate is unchanged
-				require.Equal(biExchangeRate, bfExchangeRate, tc.msg, "uToken exchange rate (borrowed denom")
+				require.Equal(biExchangeRate, bfExchangeRate, "%s: %s", tc.msg, "uToken exchange rate (borrowed denom")
 			}
 
 			// verify liquidated denom uToken supply is unchanged if indirect liquidation, or reduced if direct
@@ -1640,14 +1993,14 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			if !types.HasUTokenPrefix(tc.rewardDenom) {
 				expectedLiquidatedUTokenSupply = expectedLiquidatedUTokenSupply.Sub(tc.expectedLiquidate)
 			}
-			require.Equal(expectedLiquidatedUTokenSupply, lfUTokenSupply, tc.msg, "uToken supply (liquidated denom")
+			require.Equal(expectedLiquidatedUTokenSupply, lfUTokenSupply, "%s: %s", tc.msg, "uToken supply (liquidated denom")
 			// verify liquidated denom uToken exchange rate is unchanged
-			require.Equal(liExchangeRate, lfExchangeRate, tc.msg, "uToken exchange rate (liquidated denom")
+			require.Equal(liExchangeRate, lfExchangeRate, "%s: %s", tc.msg, "uToken exchange rate (liquidated denom")
 
 			// verify borrower balances unchanged
-			require.Equal(biBalance, bfBalance, tc.msg, "borrower balances")
+			require.Equal(biBalance, bfBalance, "%s: %s", tc.msg, "borrower balances")
 			// verify borrower collateral reduced by the expected amount
-			s.requireEqualCoins(biCollateral.Sub(tc.expectedLiquidate), bfCollateral, tc.msg, "borrower collateral")
+			s.requireEqualCoins(biCollateral.Sub(tc.expectedLiquidate), bfCollateral, "%s: %s", tc.msg, "borrower collateral")
 			// verify borrowed coins decreased by expected amount
 			s.requireEqualCoins(biBorrowed.Sub(tc.expectedRepay), bfBorrowed, "borrowed coins")
 
@@ -1655,7 +2008,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			require.Equal(liBalance.Sub(tc.expectedRepay).Add(tc.expectedReward), lfBalance,
 				tc.msg, "liquidator balances")
 			// verify liquidator collateral unchanged
-			require.Equal(liCollateral, lfCollateral, tc.msg, "liquidator collateral")
+			require.Equal(liCollateral, lfCollateral, "%s: %s", tc.msg, "liquidator collateral")
 			// verify liquidator borrowed coins unchanged
 			s.requireEqualCoins(liBorrowed, lfBorrowed, "liquidator borrowed coins")
 

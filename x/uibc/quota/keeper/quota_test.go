@@ -5,11 +5,12 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
+
+	ibcutil "github.com/umee-network/umee/v4/util/ibc"
 )
 
 func TestGetQuotas(t *testing.T) {
-	s := initKeeperTestSuite(t)
-	ctx, k := s.ctx, s.app.UIbcQuotaKeeper
+	ctx, k := initSimpleKeeper(t)
 
 	quotas, err := k.GetAllOutflows(ctx)
 	assert.NilError(t, err)
@@ -29,9 +30,7 @@ func TestGetQuotas(t *testing.T) {
 }
 
 func TestGetLocalDenom(t *testing.T) {
-	s := initKeeperTestSuite(t)
-	k := s.app.UIbcQuotaKeeper
-	out := k.GetLocalDenom("umee")
+	out := ibcutil.GetLocalDenom("umee")
 	assert.Equal(t, "umee", out)
 }
 

@@ -67,20 +67,21 @@ Users have the following actions available to them:
 
 - Enable or Disable (`MsgSetCollateral`) a uToken denomination as collateral for borrowing.
 
-  Enabling _uTokens_ as collateral stores them in the `leverage` module account so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
+  Enabling _uTokens_ as collateral stores them in the `leverage` module account, so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
   If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
 
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
   Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
-- `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdawn.
+- `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdrawn.
+  This amount is calculated taking into account the available uTokens and collateral the user has, their borrow limit, and the available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` of the `Token`.
 
 - `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#borrow-limit).
 
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#borrow-apy).
 
-- `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed.
+- `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed. This amount is calculated taking into account the user's borrow limit and the module's available liquidity respecting the `min_collateral_liquidity` and `max_supply_utilization` of the `Token`.
 
 - `MsgRepay` assets of a borrowed type, directly reducing the amount owed.
 

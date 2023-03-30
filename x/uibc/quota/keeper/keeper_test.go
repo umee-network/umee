@@ -6,6 +6,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/simapp"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -17,6 +18,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/tsdk"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
@@ -56,7 +58,7 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	s := &KeeperTestSuite{}
 	isCheckTx := false
 	app := umeeapp.Setup(t)
-	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
+	ctx := app.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  9,
 	})
@@ -85,4 +87,12 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	s.msgServer = keeper.NewMsgServerImpl(app.UIbcQuotaKeeper)
 
 	return s
+}
+
+// creates keeper without external dependencies (app, leverage etc...)
+func initSimpleKeeper(t *testing.T) (sdk.Context, keeper.Keeper) {
+	storeKey := storetypes.NewMemoryStoreKey("quota")
+	k := keeper.NewKeeper(nil, storeKey, nil, nil, nil)
+	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
+	return ctx, k
 }
