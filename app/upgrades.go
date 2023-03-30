@@ -6,9 +6,19 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/group"
 	"github.com/cosmos/cosmos-sdk/x/nft"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
+	icagenesis "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/genesis/types"
+	icahosttypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
 	"github.com/umee-network/umee/v4/app/upgradev3"
@@ -40,9 +50,54 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 }
 
 // performs upgrade from v4.2 to v4.3
-func (app *UmeeApp) registerUpgrade4_3(_ upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 	const planName = "v4.3-beta" // TODO: change before the main release
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+
+			// set the ICS27 consensus version so InitGenesis is not run
+			oldIcaVersion := fromVM[icatypes.ModuleName]
+			fromVM[icatypes.ModuleName] = app.mm.Modules[icatypes.ModuleName].ConsensusVersion()
+			g := icagenesis.GenesisState{HostGenesisState: icagenesis.DefaultHostGenesis()}
+			g.HostGenesisState.Params.AllowMessages = []string{
+				sdk.MsgTypeURL(&banktypes.MsgSend{}),
+				sdk.MsgTypeURL(&stakingtypes.MsgDelegate{}),
+				sdk.MsgTypeURL(&stakingtypes.MsgBeginRedelegate{}),
+				sdk.MsgTypeURL(&stakingtypes.MsgUndelegate{}),
+				sdk.MsgTypeURL(&stakingtypes.MsgCancelUnbondingDelegation{}),
+				sdk.MsgTypeURL(&stakingtypes.MsgCreateValidator{}),
+				sdk.MsgTypeURL(&stakingtypes.MsgEditValidator{}),
+				sdk.MsgTypeURL(&distrtypes.MsgWithdrawDelegatorReward{}),
+				sdk.MsgTypeURL(&distrtypes.MsgSetWithdrawAddress{}),
+				sdk.MsgTypeURL(&distrtypes.MsgWithdrawValidatorCommission{}),
+				sdk.MsgTypeURL(&distrtypes.MsgFundCommunityPool{}),
+				sdk.MsgTypeURL(&govv1.MsgVote{}),
+				sdk.MsgTypeURL(&govv1beta1.MsgVote{}),
+
+				sdk.MsgTypeURL(&ibctransfertypes.MsgTransfer{}),
+			}
+			// initialize ICS27 module
+			icamodule, ok := app.mm.Modules[icatypes.ModuleName].(ica.AppModule)
+			if !ok {
+				panic("Modules[icatypes.ModuleName] is not of type ica.AppModule")
+			}
+			// skip InitModule in upgrade tests after the upgrade has gone through.
+			if oldIcaVersion != fromVM[icatypes.ModuleName] {
+				icamodule.InitModule(ctx, g.ControllerGenesisState.Params, g.HostGenesisState.Params)
+			}
+
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			icahosttypes.StoreKey,
+		},
+	})
+
 }
 
 // performs upgrade from v4.1 to v4.2
@@ -62,7 +117,6 @@ func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			ctx.Logger().Info("Run v4.1 migration")
 			leverageUpgrader := leveragekeeper.NewMigrator(&app.LeverageKeeper)
 			migrated, err := leverageUpgrader.MigrateBNB(ctx)
 			if err != nil {
@@ -193,9 +247,6 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 			group.ModuleName,
 			nft.ModuleName,
 			bech32ibctypes.ModuleName,
-			// icacontrollertypes.StoreKey,
-			// icahosttypes.StoreKey,
-
 			oracletypes.ModuleName,
 			leveragetypes.ModuleName,
 		},
