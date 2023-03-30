@@ -108,8 +108,9 @@ func NewRewardAccumulator(denom string, exponent uint32, coins sdk.DecCoins) Rew
 }
 
 // NewUnbonding creates the Unbonding struct used in GenesisState
-func NewUnbonding(endTime uint64, coin sdk.Coin) Unbonding {
+func NewUnbonding(startTime, endTime uint64, coin sdk.Coin) Unbonding {
 	return Unbonding{
+		Start:  startTime,
 		End:    endTime,
 		Amount: coin,
 	}

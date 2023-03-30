@@ -17,9 +17,15 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 		// without creating an unbonding struct
 		return nil
 	}
+	currentTime := k.getLastRewardsTime(ctx)
 	unbonding := incentive.Unbonding{
 		Amount: uToken,
-		End:    k.getLastRewardsTime(ctx) + k.getUnbondingDuration(ctx),
+		// Start and end time are stored based on current parameters, and
+		// the stored end time does not change even if the module's unbonding
+		// duration parameter is changed. The unbonding will still end early
+		// if that parameter is reduced though.
+		Start: currentTime,
+		End:   currentTime + k.getUnbondingDuration(ctx),
 	}
 	unbondings := incentive.AccountUnbondings{
 		Account:    addr.String(),

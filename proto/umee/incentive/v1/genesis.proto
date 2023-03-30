@@ -57,9 +57,13 @@ message RewardAccumulator {
 }
 
 // Unbonding is a structure that tracks an in-progress token unbonding.
+// It tracks both its start time and end time, so that if the module's
+// unbonding time changes, the unbonding can complete at the earlier of
+// its original end time or its new one based on the new parameter.
 message Unbonding {
-  uint64                   end    = 1;
-  cosmos.base.v1beta1.Coin amount = 2 [(gogoproto.nullable) = false];
+  uint64                   start  = 1;
+  uint64                   end    = 2;
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
 }
 
 // AccountUnbondings is a structure that is used to store all of an account's unbondings

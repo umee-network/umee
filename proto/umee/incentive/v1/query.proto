@@ -29,16 +29,10 @@ service Query {
     option (google.api.http).get = "/umee/incentive/v1/total_unbonding/{denom}";
   }
 
-  // Bonded queries all bonded collateral uTokens associated with an account.
-  rpc Bonded(QueryBonded)
-      returns (QueryBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/bonded/{address}/{denom}";
-  }
-
-  // Unbondings queries all current uToken unbondings associated with an account.
-  rpc Unbondings(QueryUnbondings)
-      returns (QueryUnbondingsResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/unbondings/{address}";
+  // AccountBonds queries all bonded collateral and unbondings associated with an account.
+  rpc AccountBonds(QueryAccountBonds)
+      returns (QueryAccountBondsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/account_bonds/{address}";
   }
 
   // PendingRewards queries unclaimed incentive rewards associated with an account.
@@ -98,29 +92,22 @@ message QueryPendingRewardsResponse {
   ];
 }
 
-// QueryBonded defines the request structure for the Bonded gRPC service handler.
-message QueryBonded {
+// QueryAccountBonds defines the request structure for the AccountBonds gRPC service handler.
+message QueryAccountBonds {
   string address = 1;
-  // denom is an optional field which causes the query to return the totals of only one uToken
-  string denom = 2;
 }
 
-// QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
-message QueryBondedResponse {
+// QueryAccountBondsResponse defines the response structure for the AccountBonds gRPC service handler.
+message QueryAccountBondsResponse {
   repeated cosmos.base.v1beta1.Coin bonded = 1 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
-}
-
-// QueryUnbondings defines the request structure for the Unbondings gRPC service handler.
-message QueryUnbondings {
-  string address = 1;
-}
-
-// QueryUnbondingsResponse defines the response structure for the Unbondings gRPC service handler.
-message QueryUnbondingsResponse {
-  repeated Unbonding unbondings = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin unbonding = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  repeated Unbonding unbondings = 3 [(gogoproto.nullable) = false];
 }
 
 // QueryTotalBonded defines the request structure for the TotalBonded gRPC service handler.

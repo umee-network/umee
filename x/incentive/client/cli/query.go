@@ -28,9 +28,9 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		GetCmdQueryParams(),
-		GetCmdQueryUnbondings(),
-		GetCmdQueryBonded(),
+		GetCmdQueryAccountBonds(),
 		GetCmdQueryTotalBonded(),
+		GetCmdQueryTotalUnbonding(),
 		GetCmdQueryPendingRewards(),
 		GetCmdQueryUpcomingIncentivePrograms(),
 		GetCmdQueryOngoingIncentivePrograms(),
@@ -70,12 +70,12 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryUnbondings creates a Cobra command to query all unbondings associated with a single account.
-func GetCmdQueryUnbondings() *cobra.Command {
+// GetCmdQueryAccountBonds creates a Cobra command to query all bonds and unbondings associated with a single account.
+func GetCmdQueryAccountBonds() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "unbondings [address]",
+		Use:   "account-bonds [address]",
 		Args:  cobra.ExactArgs(1),
-		Short: fmt.Sprintf("Query all %s module unbondings associated with a single account", incentive.ModuleName),
+		Short: fmt.Sprintf("Query all %s module bonds and unbondings associated with an account", incentive.ModuleName),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -84,7 +84,7 @@ func GetCmdQueryUnbondings() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 
-			resp, err := queryClient.Unbondings(cmd.Context(), &incentive.QueryUnbondings{Address: args[0]})
+			resp, err := queryClient.AccountBonds(cmd.Context(), &incentive.QueryAccountBonds{Address: args[0]})
 			if err != nil {
 				return err
 			}
@@ -126,39 +126,6 @@ func GetCmdQueryPendingRewards() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBonded creates a Cobra command to query bonded tokens associated with a single account.
-func GetCmdQueryBonded() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "bonded [address] [denom]",
-		Args:  cobra.RangeArgs(1, 2),
-		Short: fmt.Sprintf("Query an address's uTokens bonded to the %s module", incentive.ModuleName),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			queryClient := incentive.NewQueryClient(clientCtx)
-
-			denom := ""
-			if len(args) > 1 {
-				denom = args[1]
-			}
-
-			resp, err := queryClient.Bonded(cmd.Context(), &incentive.QueryBonded{Address: args[0], Denom: denom})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-
-	return cmd
-}
-
 // GetCmdQueryTotalBonded creates a Cobra command to query bonded tokens across all users.
 func GetCmdQueryTotalBonded() *cobra.Command {
 	cmd := &cobra.Command{
@@ -179,6 +146,39 @@ func GetCmdQueryTotalBonded() *cobra.Command {
 			}
 
 			resp, err := queryClient.TotalBonded(cmd.Context(), &incentive.QueryTotalBonded{Denom: denom})
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(resp)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryTotalUnbonding creates a Cobra command to query unbonding tokens across all users.
+func GetCmdQueryTotalUnbonding() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "total-unbonding [denom]",
+		Args:  cobra.RangeArgs(0, 1),
+		Short: fmt.Sprintf("Query the total uTokens unbonding from the %s module", incentive.ModuleName),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := incentive.NewQueryClient(clientCtx)
+
+			denom := ""
+			if len(args) > 0 {
+				denom = args[0]
+			}
+
+			resp, err := queryClient.TotalUnbonding(cmd.Context(), &incentive.QueryTotalUnbonding{Denom: denom})
 			if err != nil {
 				return err
 			}

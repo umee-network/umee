@@ -91,7 +91,7 @@ func (s msgServer) BeginUnbonding(
 	}
 
 	// get current account state for the requested uToken denom only
-	bonded, currentUnbonding, unbondings := k.accountBonds(ctx, addr, denom)
+	bonded, currentUnbonding, unbondings := k.BondSummary(ctx, addr, denom)
 
 	// prevent unbonding spam
 	if len(unbondings) >= int(k.getMaxUnbondings(ctx)) {

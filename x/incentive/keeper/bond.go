@@ -7,10 +7,10 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
-// accountBonds gets the total bonded and unbonding for a given account, as well as a list of ongoing unbondings,
+// BondSummary gets the total bonded and unbonding for a given account, as well as a list of ongoing unbondings,
 // for a single uToken denom. It ignores completed unbondings without actually clearing those unbondings in state,
 // so it is safe for use by queries and any parts of Msg functions which are not intended to alter state.
-func (k Keeper) accountBonds(ctx sdk.Context, addr sdk.AccAddress, denom string) (
+func (k Keeper) BondSummary(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 	bonded sdk.Coin, unbonding sdk.Coin, unbondings []incentive.Unbonding,
 ) {
 	bonded = coin.Zero(denom)
@@ -18,14 +18,17 @@ func (k Keeper) accountBonds(ctx sdk.Context, addr sdk.AccAddress, denom string)
 	unbondings = []incentive.Unbonding{}
 
 	time := k.getLastRewardsTime(ctx)
+	duration := k.getUnbondingDuration(ctx)
 
 	// sum all bonded and unbonding tokens for this denom
 	bonded = bonded.Add(k.getBonded(ctx, addr, denom))
 
 	storedUnbondings := k.getUnbondings(ctx, addr, denom)
 	for _, u := range storedUnbondings {
-		if u.End > time {
-			// this unbonding is still ongoing, and can be counted normally
+		if u.End > time && u.Start+duration > time {
+			// If unbonding has passed neither its original end time nor its dynamic end time based on parameters
+			// the unbonding is still ongoing, and can be counted normally.
+			// This logic allows a reduction in unbonding duration param to speed up existing unbondings.
 			unbondings = append(unbondings, u)
 			unbonding = unbonding.Add(u.Amount)
 		}

@@ -142,17 +142,17 @@ func (q Querier) PendingRewards(
 	return &incentive.QueryPendingRewardsResponse{}, incentive.ErrNotImplemented
 }
 
-func (q Querier) Bonded(
+func (q Querier) AccountBonds(
 	_ context.Context,
-	req *incentive.QueryBonded,
-) (*incentive.QueryBondedResponse, error) {
+	req *incentive.QueryAccountBonds,
+) (*incentive.QueryAccountBondsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get one or all denoms bonded to this address
+	// TODO: get all denoms bonded to this address
 
-	return &incentive.QueryBondedResponse{}, incentive.ErrNotImplemented
+	return &incentive.QueryAccountBondsResponse{}, incentive.ErrNotImplemented
 }
 
 func (q Querier) TotalBonded(
@@ -179,27 +179,4 @@ func (q Querier) TotalUnbonding(
 	// TODO: unbonding uTokens across one or all denoms
 
 	return &incentive.QueryTotalUnbondingResponse{}, incentive.ErrNotImplemented
-}
-
-func (q Querier) Unbondings(
-	goCtx context.Context,
-	req *incentive.QueryUnbondings,
-) (*incentive.QueryUnbondingsResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
-	addr, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	unbondings := []incentive.Unbonding{}
-	err = k.iterateAccountUnbondings(ctx, addr, func(ctx sdk.Context, au incentive.AccountUnbondings) error {
-		unbondings = append(unbondings, au.Unbondings...)
-		return nil
-	})
-
-	return &incentive.QueryUnbondingsResponse{Unbondings: unbondings}, err
 }
