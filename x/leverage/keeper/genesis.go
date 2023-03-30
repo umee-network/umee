@@ -70,13 +70,13 @@ func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		var amount sdkmath.Int
+		var amount sdk.Dec
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
 			return err
 		}
 
-		borrows = append(borrows, types.NewAdjustedBorrow(addr.String(), sdk.NewDecCoin(denom, amount)))
+		borrows = append(borrows, types.NewAdjustedBorrow(addr.String(), sdk.NewDecCoinFromDec(denom, amount)))
 		return nil
 	}
 
