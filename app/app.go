@@ -11,6 +11,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/libs/log"
 	tmos "github.com/tendermint/tendermint/libs/os"
+	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	dbm "github.com/tendermint/tm-db"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
@@ -117,6 +118,7 @@ import (
 	// cosmwasm
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmclient "github.com/CosmWasm/wasmd/x/wasm/client"
+	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	customante "github.com/umee-network/umee/v4/ante"
@@ -202,6 +204,7 @@ func init() {
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		nft.ModuleName:                 nil,
+		wasm.ModuleName:                {authtypes.Burner},
 
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		icatypes.ModuleName:         nil,
@@ -372,7 +375,9 @@ func New(
 	app.ScopedTransferKeeper = app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 
-	app.initializeCustomScopedKeepers()
+	if Experimental {
+		app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
+	}
 
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
@@ -827,11 +832,27 @@ func New(
 	// upgrade.
 	app.setPostHandler()
 
-	app.registerCustomExtensions()
+	if Experimental {
+		if manager := app.SnapshotManager(); manager != nil {
+			err := manager.RegisterExtensions(
+				wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper))
+			if err != nil {
+				panic(fmt.Errorf("failed to register snapshot extension: %s", err))
+			}
+		}
+	}
 
 	if loadLatest {
 		if err := app.LoadLatestVersion(); err != nil {
 			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
+		}
+
+		if Experimental {
+			// Initialize pinned codes in wasmvm as they are not persisted there
+			ctx := app.NewUncachedContext(true, tmproto.Header{})
+			if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
+				tmos.Exit(fmt.Sprintf("failed initialize pinned codes %s", err))
+			}
 		}
 	}
 
