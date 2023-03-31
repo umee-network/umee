@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/simapp"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -93,6 +96,20 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 func initSimpleKeeper(t *testing.T) (sdk.Context, keeper.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	k := keeper.NewKeeper(nil, storeKey, nil, nil, nil)
+	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
+	return ctx, k
+}
+
+// creates keeper with all external dependencies (app, leverage etc...)
+func initFullKeeper(
+	t *testing.T,
+	cdc codec.BinaryCodec,
+	ics4Wrapper porttypes.ICS4Wrapper,
+	leverageKeeper uibc.LeverageKeeper,
+	oracleKeeper uibc.Oracle,
+) (sdk.Context, keeper.Keeper) {
+	storeKey := storetypes.NewMemoryStoreKey("quota")
+	k := keeper.NewKeeper(cdc, storeKey, ics4Wrapper, leverageKeeper, oracleKeeper)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return ctx, k
 }
