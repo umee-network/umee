@@ -10,10 +10,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
-	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
-	ibctesting "github.com/cosmos/ibc-go/v5/testing"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	ibctesting "github.com/cosmos/ibc-go/v6/testing"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"gotest.tools/v3/assert"
 
@@ -133,6 +133,7 @@ func TestTrackMetadata(t *testing.T) {
 			strconv.Itoa(1),
 			AddressFromString("a3"),
 			AddressFromString("a4"),
+			"",
 		)
 
 		packet := channeltypes.NewPacket(
@@ -162,6 +163,7 @@ func TestTrackMetadata(t *testing.T) {
 			strconv.Itoa(1),
 			AddressFromString("a2"),
 			AddressFromString("a1"),
+			"memo",
 		)
 
 		packet := channeltypes.NewPacket(
@@ -188,53 +190,33 @@ func TestTrackMetadata(t *testing.T) {
 			"photon",
 		}, "/")
 
-		data := ibctransfertypes.NewFungibleTokenPacketData(
-			denom,
-			strconv.Itoa(1),
-			AddressFromString("a1"),
-			AddressFromString("a2"),
-		)
-
-		packet := channeltypes.NewPacket(
-			data.GetBytes(),
-			uint64(1),
-			"transfer",
-			"channel-0",
-			"transfer",
-			"channel-0",
-			clienttypes.NewHeight(0, 100),
-			0,
-		)
-
-		sender, err := sdk.AccAddressFromBech32(data.Sender)
+		sender, err := sdk.AccAddressFromBech32(AddressFromString("a1"))
 		assert.NilError(t, err)
-
-		denomTrace := ibctransfertypes.ParseDenomTrace(data.Denom)
+		receiver := AddressFromString("a2")
+		denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 		ibcDenom := denomTrace.IBCDenom()
+		coin := sdk.NewCoin(ibcDenom, sdk.NewInt(1))
+		goCtx := s.chainB.GetContext()
 
 		registeredenom := func() {
-			denomTrace := ibctransfertypes.ParseDenomTrace(denom)
 			traceHash := denomTrace.Hash()
-			if !s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.HasDenomTrace(s.chainB.GetContext(), traceHash) {
-				s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SetDenomTrace(s.chainB.GetContext(), denomTrace)
+			if !s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.HasDenomTrace(goCtx, traceHash) {
+				s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SetDenomTrace(goCtx, denomTrace)
 			}
 		}
 
 		registeredenom()
 
-		amount, err := strconv.Atoi(data.Amount)
-		assert.NilError(t, err)
-
-		err = s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.SendTransfer(
-			s.chainB.GetContext(),
-			packet.SourcePort,
-			packet.SourceChannel,
-			sdk.NewCoin(ibcDenom, sdk.NewInt(int64(amount))),
-			sender,
-			data.Receiver,
-			clienttypes.NewHeight(0, 110),
-			0,
-		)
+		msg := ibctransfertypes.MsgTransfer{
+			SourcePort: "transfer", SourceChannel: "channel-0",
+			Token:            coin,
+			Sender:           sender.String(),
+			Receiver:         receiver,
+			TimeoutHeight:    clienttypes.NewHeight(0, 110),
+			TimeoutTimestamp: 0,
+			Memo:             "",
+		}
+		_, err = s.GetUmeeApp(s.chainB, t).UIBCTransferKeeper.Transfer(goCtx, &msg)
 		assert.NilError(t, err)
 	})
 
