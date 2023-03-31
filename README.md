@@ -30,6 +30,7 @@ Umee will allow a multitude of decentralized debt products.
 - [Build](#build)
   - [Swagger](#swagger)
   - [Cosmovisor](#cosmovisor)
+- [Liquidators](#liquidators)
 
 ## Releases
 
@@ -148,3 +149,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.1.1/internal/api/lib
 ```
 
 - To use `cosmovisor` for starting `umeed` process, instead of calling `umeed start`, use `cosmovisor run start [umeed flags]`
+
+## Liquidators
+
+A guide to running liquidations on Umee can be found [here](./x/leverage/LIQUIDATION.md)
