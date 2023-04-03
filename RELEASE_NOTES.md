@@ -11,7 +11,8 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 Highlights:
 
 - IBC updated to `ibc-go v6.1`. That also triggered our wasmvm dependency update (see `libwasmvm` update in Validators section)
-- ICA
+- ICA Host integration.
+- IBC ICS20: we will only accept tokens (denoms) which are registered in the x/leverage token registry. You can check the supported tokens by `umeed q leverage registered-tokens` or by visiting [umee/leverage/v1/registered_tokens](https://umee-api.polkachu.com/umee/leverage/v1/registered_tokens).
 
 See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.3.0/CHANGELOG.md) for a full list of changes.
 
