@@ -27,8 +27,6 @@ var (
 // pass into the application.
 func GetWasmEnabledProposals() []wasm.ProposalType { return []wasm.ProposalType{} }
 
-func (app *UmeeApp) registerCustomExtensions() {}
-
 func (app *UmeeApp) customKeepers(
 	_ *baseapp.BaseApp,
 	_ map[string]*storetypes.KVStoreKey,
@@ -36,5 +34,3 @@ func (app *UmeeApp) customKeepers(
 	_ servertypes.AppOptions,
 	_ []wasm.Option) {
 }
-
-func (app *UmeeApp) initializeCustomScopedKeepers() {}

@@ -20,4 +20,5 @@ type LeverageKeeper interface {
 	GetCollateralAmount(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
 	IsAcceptedUToken(ctx sdk.Context, uTokenDenom string) bool
 	AssertNotBlacklisted(ctx sdk.Context, denom string) error
+	// TODO: hooks
 }

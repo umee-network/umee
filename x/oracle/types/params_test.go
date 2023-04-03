@@ -239,7 +239,7 @@ func TestParamsEqual(t *testing.T) {
 	assert.ErrorContains(t, err, "oracle parameter AcceptList Denom must have SymbolDenom")
 
 	p13 := DefaultParams()
-	assert.Equal(t, len(p13.AcceptList), 2)
+	assert.Equal(t, len(p13.AcceptList), 1)
 }
 
 func TestValidateVotingThreshold(t *testing.T) {

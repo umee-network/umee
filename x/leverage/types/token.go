@@ -73,23 +73,24 @@ func (t Token) Validate() error {
 		return ErrUToken.Wrap(t.SymbolDenom)
 	}
 
+	one := sdk.OneDec()
+
 	// Reserve factor is non-negative and less than 1.
-	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GTE(sdk.OneDec()) {
+	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GTE(one) {
 		return fmt.Errorf("invalid reserve factor: %s", t.ReserveFactor)
 	}
 	// Collateral weight is non-negative and less than 1.
-	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GTE(sdk.OneDec()) {
+	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GTE(one) {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
-	// Liquidation threshold is at least collateral weight, but less than 1.
-	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GTE(sdk.OneDec()) {
-		return fmt.Errorf("invalid liquidation threshold: %s", t.LiquidationThreshold)
+	if !t.LiquidationThreshold.GT(t.CollateralWeight) || t.LiquidationThreshold.GTE(one) {
+		return fmt.Errorf("liquidation threshold must be bigger than collateral weight, got: %s", t.LiquidationThreshold)
 	}
 
 	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
 	// multiple interest rates being defined at exactly 0% or 100% utilization
 	// e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.
-	if !t.KinkUtilization.IsPositive() || t.KinkUtilization.GTE(sdk.OneDec()) {
+	if !t.KinkUtilization.IsPositive() || t.KinkUtilization.GTE(one) {
 		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilization)
 	}
 
@@ -119,15 +120,15 @@ func (t Token) Validate() error {
 		}
 	}
 
-	if t.MaxCollateralShare.IsNegative() || t.MaxCollateralShare.GT(sdk.OneDec()) {
+	if t.MaxCollateralShare.IsNegative() || t.MaxCollateralShare.GT(one) {
 		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxCollateralShare must be between 0 and 1")
 	}
 
-	if t.MaxSupplyUtilization.IsNegative() || t.MaxSupplyUtilization.GT(sdk.OneDec()) {
+	if t.MaxSupplyUtilization.IsNegative() || t.MaxSupplyUtilization.GT(one) {
 		return sdkerrors.ErrInvalidRequest.Wrap("Token.MaxSupplyUtilization must be between 0 and 1")
 	}
 
-	if t.MinCollateralLiquidity.IsNegative() || t.MinCollateralLiquidity.GT(sdk.OneDec()) {
+	if t.MinCollateralLiquidity.IsNegative() || t.MinCollateralLiquidity.GT(one) {
 		return sdkerrors.ErrInvalidRequest.Wrap("Token.MinCollateralLiquidity be between 0 and 1")
 	}
 
@@ -190,38 +191,8 @@ func defaultUmeeToken() Token {
 	}
 }
 
-func defaultAtomToken() Token {
-	return Token{
-		// Denom matches mainnet (channel-1) ATOM
-		BaseDenom:       "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9",
-		SymbolDenom:     "ATOM",
-		Exponent:        6,
-		EnableMsgSupply: true,
-		EnableMsgBorrow: true,
-		Blacklist:       false,
-		// Reserves
-		ReserveFactor: sdk.MustNewDecFromStr("0.10"),
-		// Interest rate model
-		BaseBorrowRate:  sdk.MustNewDecFromStr("0.03"),
-		KinkBorrowRate:  sdk.MustNewDecFromStr("0.11"),
-		MaxBorrowRate:   sdk.MustNewDecFromStr("0.80"),
-		KinkUtilization: sdk.MustNewDecFromStr("0.70"),
-		// Collateral
-		CollateralWeight:     sdk.MustNewDecFromStr("0.70"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.80"),
-		// Liquidation
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.05"),
-		// Market limits
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.95"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.18"),
-		MaxSupply:              sdk.NewInt(0),
-	}
-}
-
 func DefaultRegistry() []Token {
 	return []Token{
 		defaultUmeeToken(),
-		defaultAtomToken(),
 	}
 }

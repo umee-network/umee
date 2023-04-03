@@ -1,28 +1,24 @@
 #!/usr/bin/make -f
 
-
-BRANCH         := $(shell git rev-parse --abbrev-ref HEAD)
-COMMIT         := $(shell git log -1 --format='%H')
-BUILD_DIR      ?= $(CURDIR)/build
-DIST_DIR       ?= $(CURDIR)/dist
+PACKAGES_NOSIMULATION=$(shell go list ./... | grep -v '/simulation')
+PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
+export VERSION := $(shell echo $(shell git describe --always --match "v*") | sed 's/^v//')
+export TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
+export COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
-TM_VERSION     := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
-DOCKER         := $(shell which docker)
-PROJECT_NAME   := umee
-HTTPS_GIT      := https://github.com/umee-network/umee.git
+BINDIR ?= $(GOPATH)/bin
+BUILDDIR ?= $(CURDIR)/build
+DIST_DIR ?= $(CURDIR)/dist
 MOCKS_DIR = $(CURDIR)/tests/mocks
+HTTPS_GIT := https://github.com/umee-network/umee.git
+DOCKER := $(shell which docker)
+DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc8
+PROJECT_NAME := umee
 
-###############################################################################
-##                                  Version                                  ##
-###############################################################################
+# RocksDB is a native dependency, so we don't assume the library is installed.
+# Instead, it must be explicitly enabled and we warn when it is not.
+ENABLE_ROCKSDB ?= false
 
-ifeq (,$(VERSION))
-  VERSION := $(shell git describe --exact-match 2>/dev/null)
-  # if VERSION is empty, then populate it with branch's name and raw commit hash
-  ifeq (,$(VERSION))
-    VERSION := $(BRANCH)-$(COMMIT)
-  endif
-endif
 
 ###############################################################################
 ##                                   Build                                   ##
@@ -30,7 +26,7 @@ endif
 
 build_tags = netgo
 
-#  experimental feature 
+#  experimental feature
 ifeq ($(EXPERIMENTAL),true)
 	build_tags += experimental
 endif
@@ -58,11 +54,13 @@ ifeq ($(LEDGER_ENABLED),true)
   endif
 endif
 
-whitespace :=
-whitespace := $(whitespace) $(whitespace)
-comma := ,
+ifeq (secp,$(findstring secp,$(COSMOS_BUILD_OPTIONS)))
+  build_tags += libsecp256k1_sdk
+endif
 
-build_tags += $(BUILD_TAGS)
+whitespace :=
+whitespace += $(whitespace)
+comma := ,
 build_tags_comma_sep := $(subst $(whitespace),$(comma),$(build_tags))
 
 ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
@@ -70,20 +68,72 @@ ldflags = -X github.com/cosmos/cosmos-sdk/version.Name=umee \
 		  -X github.com/cosmos/cosmos-sdk/version.Version=$(VERSION) \
 		  -X github.com/cosmos/cosmos-sdk/version.Commit=$(COMMIT) \
 		  -X "github.com/cosmos/cosmos-sdk/version.BuildTags=$(build_tags_comma_sep)" \
-		  -X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TM_VERSION)
+			-X github.com/tendermint/tendermint/version.TMCoreSemVer=$(TMVERSION)
+
+ifeq ($(ENABLE_ROCKSDB),true)
+  BUILD_TAGS += rocksdb
+  test_tags += rocksdb
+endif
+
+# DB backend selection
+ifeq (cleveldb,$(findstring cleveldb,$(COSMOS_BUILD_OPTIONS)))
+  build_tags += gcc
+endif
+ifeq (badgerdb,$(findstring badgerdb,$(COSMOS_BUILD_OPTIONS)))
+  BUILD_TAGS += badgerdb
+endif
+# handle rocksdb
+ifeq (rocksdb,$(findstring rocksdb,$(COSMOS_BUILD_OPTIONS)))
+  ifneq ($(ENABLE_ROCKSDB),true)
+    $(error Cannot use RocksDB backend unless ENABLE_ROCKSDB=true)
+  endif
+  CGO_ENABLED=1
+endif
 
 ifeq ($(LINK_STATICALLY),true)
 	ldflags += -linkmode=external -extldflags "-Wl,-z,muldefs -static"
 endif
 
+ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
+  ldflags += -w -s
+endif
 ldflags += $(LDFLAGS)
 ldflags := $(strip $(ldflags))
 
-BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
+build_tags += $(BUILD_TAGS)
+build_tags := $(strip $(build_tags))
 
-build: go.sum
-	@echo "--> Building..."
-	go build -mod=readonly $(BUILD_FLAGS) -o $(BUILD_DIR)/ ./...
+BUILD_FLAGS := -tags "$(build_tags)" -ldflags '$(ldflags)'
+# check for nostrip option
+ifeq (,$(findstring nostrip,$(COSMOS_BUILD_OPTIONS)))
+  BUILD_FLAGS += -trimpath
+endif
+
+# Check for debug option
+ifeq (debug,$(findstring debug,$(COSMOS_BUILD_OPTIONS)))
+  BUILD_FLAGS += -gcflags "all=-N -l"
+endif
+
+all: tools build lint test
+
+echo-build-tags:
+	echo ${BUILD_TAGS}
+
+BUILD_TARGETS := build install
+
+build: BUILD_ARGS=-o $(BUILDDIR)/
+build-linux:
+	@if [ "${ENABLE_ROCKSDB}" != "true" ]; then \
+		echo "RocksDB support is disabled; to build and test with RocksDB support, set ENABLE_ROCKSDB=true"; fi
+	GOOS=linux GOARCH=$(if $(findstring aarch64,$(shell uname -m)) || $(findstring arm64,$(shell uname -m)),arm64,amd64) LEDGER_ENABLED=false $(MAKE) build
+
+$(BUILD_TARGETS): go.sum $(BUILDDIR)/
+	@if [ "${ENABLE_ROCKSDB}" != "true" ]; then \
+		echo "RocksDB support is disabled; to build and test with RocksDB support, set ENABLE_ROCKSDB=true"; fi
+	go $@ -mod=readonly $(BUILD_FLAGS) $(BUILD_ARGS) ./...
+
+$(BUILDDIR)/:
+	mkdir -p $(BUILDDIR)/
 
 build-experimental: go.sum
 	@echo "--> Building Experimental version..."
@@ -91,22 +141,11 @@ build-experimental: go.sum
 
 build-no_cgo:
 	@echo "--> Building static binary with no CGO nor GLIBC dynamic linking..."
+	ifneq ($(ENABLE_ROCKSDB),true)
+		$(error RocksDB requires CGO)
+	endif
 	CGO_ENABLED=0 CGO_LDFLAGS="-static" $(MAKE) build
 
-build-linux: go.sum
-	LEDGER_ENABLED=false GOOS=linux GOARCH=amd64 $(MAKE) build
-
-install: go.sum
-	@echo "--> Installing..."
-	go install -mod=readonly $(BUILD_FLAGS) ./...
-
-go-mod-cache: go.sum
-	@echo "--> Download go modules to local cache"
-	@go mod download
-
-go.sum: go.mod
-	@echo "--> Ensure dependencies have not been modified"
-	@go mod verify
 
 go-mod-tidy:
 	@contrib/scripts/go-mod-tidy-all.sh
@@ -115,17 +154,25 @@ clean:
 	@echo "--> Cleaning..."
 	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
 
-.PHONY: install build build-linux clean
+.PHONY: build build-linux build-experimental build-no_cgo clean go-mod-tidy
+
+###############################################################################
+###                          Tools & Dependencies                           ###
+###############################################################################
+
+go.sum: go.mod
+	echo "Ensure dependencies have not been modified ..." >&2
+	go mod verify
 
 ###############################################################################
 ##                                  Docker                                   ##
 ###############################################################################
 
 docker-build:
-	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
+	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
 docker-build-experimental:
-	@docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true . 
+	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true .
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
@@ -140,19 +187,20 @@ docker-push-gaia:
 ###############################################################################
 
 PACKAGES_UNIT=$(shell go list ./... | grep -v -e '/tests/e2e' -e '/tests/simulation' -e '/tests/network')
-PACKAGES_E2E=$(shell go list ./... | grep '/e2e')
 TEST_PACKAGES=./...
-TEST_TARGETS := test-unit test-unit-cover test-race test-e2e
+TEST_TARGETS := test-unit test-unit-cover test-race
 TEST_COVERAGE_PROFILE=coverage.txt
 
-UNIT_TEST_TAGS = norace 
+UNIT_TEST_TAGS = norace
 TEST_RACE_TAGS = ""
-TEST_E2E_TAGS = ""
+TEST_E2E_TAGS = "e2e"
+TEST_E2E_DEPS = docker-build
 
 ifeq ($(EXPERIMENTAL),true)
-	UNIT_TEST_TAGS	+= experimental
-	TEST_RACE_TAGS 	+= experimental
-	TEST_E2E_TAGS 	+= experimental
+	UNIT_TEST_TAGS += experimental
+	TEST_RACE_TAGS += experimental
+	TEST_E2E_TAGS += experimental
+	TEST_E2E_DEPS = docker-build-experimental
 endif
 
 test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
@@ -161,8 +209,6 @@ test-unit-cover: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)' -coverprofile=$(TES
 test-unit-cover: TEST_PACKAGES=$(PACKAGES_UNIT)
 test-race: ARGS=-timeout=10m -race -tags='$(TEST_RACE_TAGS)'
 test-race: TEST_PACKAGES=$(PACKAGES_UNIT)
-test-e2e: ARGS=-timeout=25m -v -tags='$(TEST_E2E_TAGS)'
-test-e2e: TEST_PACKAGES=$(PACKAGES_E2E)
 $(TEST_TARGETS): run-tests
 
 run-tests:
@@ -180,6 +226,18 @@ cover-html: test-unit-cover
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
 
+# NOTE: when building locally, we need to run: $(MAKE) docker-build
+# however we should be able to optimize it:
+# https://linear.app/umee/issue/UMEE-463/fix-docker-login-problem-when-running-e2e-tests
+test-e2e: $(TEST_E2E_DEPS)
+	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
+
+test-e2e-cov: $(TEST_E2E_DEPS)
+	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
+
+test-e2e-clean:
+	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
+	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
@@ -187,32 +245,6 @@ mocks: $(MOCKS_DIR)
 	sh ./contrib/scripts/mockgen.sh
 .PHONY: mocks
 
-###############################################################################
-###                                Linting                                  ###
-###############################################################################
-
-golangci_lint_cmd=golangci-lint
-
-lint:
-	@echo "--> Running linter with revive"
-	@go install github.com/mgechev/revive
-	@revive -config .revive.toml -formatter friendly ./...
-# note: on new OSX, might require brew install diffutils
-	@echo "--> Running regular linter"
-	@go install mvdan.cc/gofumpt
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
-	@$(golangci_lint_cmd) run
-	@cd price-feeder && $(golangci_lint_cmd) run
-
-lint-fix:
-	@echo "--> Running linter to fix the lint issues"
-	@go install mvdan.cc/gofumpt
-	@go install github.com/golangci/golangci-lint/cmd/golangci-lint
-	@$(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
-	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
-	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
-
-.PHONY: lint lint-fix
 
 ###############################################################################
 ##                                Simulations                                ##
@@ -259,29 +291,55 @@ test-app-import-export \
 test-app-after-import \
 test-app-benchmark-invariants
 
+
+###############################################################################
+###                                Linting                                  ###
+###############################################################################
+
+golangci_lint_cmd := go run github.com/golangci/golangci-lint/cmd/golangci-lint
+revive_cmd := go run github.com/mgechev/revive
+
+# note: on new OSX, might require brew install diffutils
+lint:
+	@echo "--> Running revive"
+	@${revive_cmd} -config .revive.toml -formatter friendly ./...
+# todo: many errors to fix in price-feeder
+#	@cd price-feeder && $(revive_cmd) -formatter friendly ./...
+	@echo "--> Running golangci_lint"
+	@${golangci_lint_cmd} run
+	@cd price-feeder && $(golangci_lint_cmd) run
+
+lint-fix:
+	@echo "--> Running linter to fix the lint issues"
+	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
+	@${golangci_lint_cmd} run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
+
+.PHONY: lint lint-fix
+
 ###############################################################################
 ##                                 Protobuf                                  ##
 ###############################################################################
 
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.8.0
 
-containerProtoVer=v0.7
-containerProtoImage=tendermintdev/sdk-proto-gen:$(containerProtoVer)
-containerProtoGen=$(PROJECT_NAME)-proto-gen-$(containerProtoVer)
-containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(containerProtoVer)
-containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(containerProtoVer)
+protoVer=v0.7
+protoImageName=tendermintdev/sdk-proto-gen:$(protoVer)
+containerProtoGen=$(PROJECT_NAME)-proto-gen-$(protoVer)
+containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(protoVer)
+containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(protoVer)
 
 proto-all: proto-format proto-lint proto-gen proto-swagger-gen
 .PHONY: proto-all proto-gen proto-lint proto-check-breaking proto-format proto-swagger-gen
 
 proto-gen:
 	@echo "Generating Protobuf files"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
-		sh ./contrib/scripts/protocgen.sh; fi
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
+w		sh ./contrib/scripts/protocgen.sh; fi
 
 proto-swagger-gen:
-	@echo "Generating Swagger of Protobuf"
-	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(containerProtoImage) \
+	@echo "Generating Protobuf Swagger"
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
 		sh ./contrib/scripts/protoc-swagger-gen.sh; fi
 
 proto-format:

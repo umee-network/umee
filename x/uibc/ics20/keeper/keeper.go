@@ -1,14 +1,14 @@
 package keeper
 
 import (
+	"context"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	ibctransferkeeper "github.com/cosmos/ibc-go/v5/modules/apps/transfer/keeper"
-	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
-	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
+	ibctransferkeeper "github.com/cosmos/ibc-go/v6/modules/apps/transfer/keeper"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
 
 	ibctransfer "github.com/umee-network/umee/v4/x/uibc"
 )
@@ -29,52 +29,35 @@ func New(tk ibctransferkeeper.Keeper, bk ibctransfer.BankKeeper) Keeper {
 	}
 }
 
-// SendTransfer delegates the SendTransfer call to the embedded ICS-20 transfer
-// module and updates metadata if successful.
-func (k Keeper) SendTransfer(
-	ctx sdk.Context,
-	sourcePort,
-	sourceChannel string,
-	token sdk.Coin,
-	sender sdk.AccAddress,
-	receiver string,
-	timeoutHeight clienttypes.Height,
-	timeoutTimestamp uint64,
-) error {
-	// first, relay the SendTransfer to the real (embedded) ICS-20 transfer keeper
-	if err := k.Keeper.SendTransfer(
-		ctx,
-		sourcePort,
-		sourceChannel,
-		token,
-		sender,
-		receiver,
-		timeoutHeight,
-		timeoutTimestamp,
-	); err != nil {
-		return err
+// Transfer defines a rpc handler method for MsgTransfer.
+func (k Keeper) Transfer(goCtx context.Context, msg *ibctransfertypes.MsgTransfer,
+) (*ibctransfertypes.MsgTransferResponse, error) {
+	resp, err := k.Keeper.Transfer(goCtx, msg)
+	if err != nil {
+		return resp, err
 	}
 
 	// track metadata
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	denom := msg.Token.Denom
 	ibcPrefix := ibctransfertypes.DenomPrefix + "/"
-	if strings.HasPrefix(token.Denom, ibcPrefix) {
+	if strings.HasPrefix(denom, ibcPrefix) {
 		// trim the denomination prefix, by default "ibc/"
-		hexHash := token.Denom[len(ibcPrefix):]
-
+		hexHash := denom[len(ibcPrefix):]
 		hash, err := ibctransfertypes.ParseHexHash(hexHash)
 		if err != nil {
-			return ibctransfertypes.ErrInvalidDenomForTransfer.Wrap(err.Error())
+			return resp, ibctransfertypes.ErrInvalidDenomForTransfer.Wrap(err.Error())
 		}
-
 		denomTrace, ok := k.GetDenomTrace(ctx, hash)
 		if !ok {
-			return ibctransfertypes.ErrTraceNotFound.Wrap(hexHash)
+			return resp, ibctransfertypes.ErrTraceNotFound.Wrap(hexHash)
 		}
 
 		k.TrackDenomMetadata(ctx, denomTrace)
 	}
 
-	return nil
+	return resp, err
+
 }
 
 // OnRecvPacket delegates the OnRecvPacket call to the embedded ICS-20 transfer

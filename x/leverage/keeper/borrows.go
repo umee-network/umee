@@ -218,3 +218,51 @@ func (k Keeper) checkSupplyUtilization(ctx sdk.Context, denom string) error {
 	}
 	return nil
 }
+
+// moduleMaxBorrow calculates maximum amount of Token to borrow from the module.
+// The calculation first finds the maximum amount of Token that can be borrowed from the module,
+// respecting the min_collateral_liquidity parameter, then determines the maximum amount of Token that can be borrowed
+// from the module, respecting the max_supply_utilization parameter. The minimum between these two values is
+// selected, given that the min_collateral_liquidity and max_supply_utilization are both limiting factors.
+func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, error) {
+	// Get the module_available_liquidity
+	moduleAvailableLiquidity, err := k.moduleAvailableLiquidity(ctx, denom)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	// If module_available_liquidity is zero, we cannot borrow anything
+	if !moduleAvailableLiquidity.IsPositive() {
+		return sdk.ZeroInt(), nil
+	}
+
+	// Get max_supply_utilization for the denom
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+	maxSupplyUtilization := token.MaxSupplyUtilization
+
+	// Get total_borrowed from module for the denom
+	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount
+
+	// Get module liquidity for the denom
+	liquidity := k.AvailableLiquidity(ctx, denom)
+
+	// The formula to calculate max_borrow respecting the max_supply_utilization is as follows:
+	//
+	// max_supply_utilization = (total_borrowed +  module_max_borrow) / (module_liquidity + total_borrowed)
+	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed
+	//						- total_borrowed
+	moduleMaxBorrow := maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(
+		sdk.NewDec(totalBorrowed.Int64()),
+	)
+
+	// If module_max_borrow is zero, we cannot borrow anything
+	if !moduleMaxBorrow.IsPositive() {
+		return sdk.ZeroInt(), nil
+	}
+
+	// Use the minimum between module_max_borrow and module_available_liquidity
+	return sdk.MinInt(moduleAvailableLiquidity, moduleMaxBorrow.TruncateInt()), nil
+}

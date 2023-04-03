@@ -22,7 +22,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrOneAsset
 
 	// Note: Setting umee liquidation threshold to 0.05 to make the user eligible to liquidation
 	umeeToken := newToken("uumee", "UMEE", 6)
-	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.04")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
 
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
@@ -60,7 +60,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 
 	// Note: Setting umee liquidation threshold to 0.05 to make the user eligible for liquidation
 	umeeToken := newToken("uumee", "UMEE", 6)
-	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.04")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
 
 	require.NoError(app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
@@ -68,7 +68,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_OneAddrTwoAsset
 	// Note: Setting atom collateral weight to 0.01 to make the user eligible for liquidation
 	atomIBCToken := newToken(atomDenom, "ATOM", 6)
 	atomIBCToken.CollateralWeight = sdk.MustNewDecFromStr("0.01")
-	atomIBCToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.01")
+	atomIBCToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.011")
 
 	require.NoError(app.LeverageKeeper.SetTokenSettings(s.ctx, atomIBCToken))
 
@@ -102,7 +102,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 
 	// Note: Setting umee liquidation threshold to 0.05 to make the first supplier eligible for liquidation
 	umeeToken := newToken("uumee", "UMEE", 6)
-	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.05")
+	umeeToken.CollateralWeight = sdk.MustNewDecFromStr("0.04")
 	umeeToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.05")
 
 	require.NoError(app.LeverageKeeper.SetTokenSettings(s.ctx, umeeToken))
@@ -110,7 +110,7 @@ func (s *IntegrationTestSuite) TestGetEligibleLiquidationTargets_TwoAddr() {
 	// Note: Setting atom collateral weight to 0.01 to make the second supplier eligible for liquidation
 	atomIBCToken := newToken(atomDenom, "ATOM", 6)
 	atomIBCToken.CollateralWeight = sdk.MustNewDecFromStr("0.01")
-	atomIBCToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.01")
+	atomIBCToken.LiquidationThreshold = sdk.MustNewDecFromStr("0.011")
 
 	require.NoError(app.LeverageKeeper.SetTokenSettings(s.ctx, atomIBCToken))
 

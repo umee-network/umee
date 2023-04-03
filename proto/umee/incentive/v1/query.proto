@@ -17,10 +17,16 @@ service Query {
     option (google.api.http).get = "/umee/incentive/v1/params";
   }
 
-  // PendingRewards queries unclaimed incentive rewards associated with an account.
-  rpc PendingRewards(QueryPendingRewards)
-      returns (QueryPendingRewardsResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/pending_rewards/{address}";
+  // TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
+  rpc TotalBonded(QueryTotalBonded)
+      returns (QueryTotalBondedResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/total_bonded/{denom}";
+  }
+
+  // TotalUnbonding queries the sum of all unbonding collateral uTokens, separated by tier.
+  rpc TotalUnbonding(QueryTotalUnbonding)
+      returns (QueryTotalUnbondingResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/total_unbonding/{denom}";
   }
 
   // Bonded queries all bonded collateral uTokens associated with an account.
@@ -35,10 +41,10 @@ service Query {
     option (google.api.http).get = "/umee/incentive/v1/unbondings/{address}";
   }
 
-  // TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
-  rpc TotalBonded(QueryTotalBonded)
-      returns (QueryTotalBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/total_bonded/{denom}";
+  // PendingRewards queries unclaimed incentive rewards associated with an account.
+  rpc PendingRewards(QueryPendingRewards)
+      returns (QueryPendingRewardsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/pending_rewards/{address}";
   }
 
   // CompletedIncentivePrograms queries for all incentives programs that have been passed
@@ -123,6 +129,17 @@ message QueryTotalBonded {
 // QueryTotalBondedResponse defines the response structure for the TotalBonded gRPC service handler.
 message QueryTotalBondedResponse {
   repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryTotalUnbonding defines the request structure for the TotalUnbonding gRPC service handler.
+message QueryTotalUnbonding {
+  // denom is an optional field which causes the query to return the totals of only one uToken
+  string denom = 1;
+}
+
+// QueryTotalUnbondingResponse defines the response structure for the TotalUnbonding gRPC service handler.
+message QueryTotalUnbondingResponse {
+  repeated TotalBond unbonding = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryUpcomingIncentivePrograms defines the request structure for the

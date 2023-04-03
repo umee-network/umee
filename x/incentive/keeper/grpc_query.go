@@ -29,79 +29,104 @@ func (q Querier) Params(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := q.Keeper.GetParams(ctx)
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+
+	params := k.getParams(ctx)
 
 	return &incentive.QueryParamsResponse{Params: params}, nil
 }
 
 func (q Querier) IncentiveProgram(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryIncentiveProgram,
 ) (*incentive.QueryIncentiveProgramResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	program := incentive.IncentiveProgram{}
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+
+	program, _, err := k.getIncentiveProgram(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &incentive.QueryIncentiveProgramResponse{
 		Program: program,
 	}
 
-	return resp, incentive.ErrNotImplemented
+	return resp, nil
 }
 
 func (q Querier) UpcomingIncentivePrograms(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryUpcomingIncentivePrograms,
 ) (*incentive.QueryUpcomingIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get all programs
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+
+	programs, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusUpcoming)
+	if err != nil {
+		return nil, err
+	}
 
 	resp := &incentive.QueryUpcomingIncentiveProgramsResponse{
-		Programs: make([]incentive.IncentiveProgram, 0),
+		Programs: programs,
 	}
 
 	return resp, incentive.ErrNotImplemented
 }
 
 func (q Querier) OngoingIncentivePrograms(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryOngoingIncentivePrograms,
 ) (*incentive.QueryOngoingIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get all programs
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	resp := &incentive.QueryOngoingIncentiveProgramsResponse{
-		Programs: make([]incentive.IncentiveProgram, 0),
+	programs, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, incentive.ErrNotImplemented
+	resp := &incentive.QueryOngoingIncentiveProgramsResponse{
+		Programs: programs,
+	}
+
+	return resp, nil
 }
 
 func (q Querier) CompletedIncentivePrograms(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryCompletedIncentivePrograms,
 ) (*incentive.QueryCompletedIncentiveProgramsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get all programs (also: pagination)
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	resp := &incentive.QueryCompletedIncentiveProgramsResponse{
-		Programs: make([]incentive.IncentiveProgram, 0),
-		// TODO: pagination
+	programs, err := k.getPaginatedIncentivePrograms(
+		ctx,
+		incentive.ProgramStatusCompleted,
+		req.Pagination.Offset,
+		req.Pagination.Limit,
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	return resp, incentive.ErrNotImplemented
+	resp := &incentive.QueryCompletedIncentiveProgramsResponse{
+		Programs: programs,
+	}
+
+	return resp, nil
 }
 
 func (q Querier) PendingRewards(
@@ -143,15 +168,38 @@ func (q Querier) TotalBonded(
 	return &incentive.QueryTotalBondedResponse{}, incentive.ErrNotImplemented
 }
 
-func (q Querier) Unbondings(
+func (q Querier) TotalUnbonding(
 	_ context.Context,
+	req *incentive.QueryTotalUnbonding,
+) (*incentive.QueryTotalUnbondingResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	// TODO: unbonding uTokens across one or all denoms, all tiers
+
+	return &incentive.QueryTotalUnbondingResponse{}, incentive.ErrNotImplemented
+}
+
+func (q Querier) Unbondings(
+	goCtx context.Context,
 	req *incentive.QueryUnbondings,
 ) (*incentive.QueryUnbondingsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: get all unbondings associated with a single address
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
 
-	return &incentive.QueryUnbondingsResponse{}, incentive.ErrNotImplemented
+	unbondings := []incentive.Unbonding{}
+	err = k.iterateAccountUnbondings(ctx, addr, func(ctx sdk.Context, au incentive.AccountUnbondings) error {
+		unbondings = append(unbondings, au.Unbondings...)
+		return nil
+	})
+
+	return &incentive.QueryUnbondingsResponse{Unbondings: unbondings}, err
 }
