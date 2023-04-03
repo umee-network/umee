@@ -44,7 +44,7 @@ You MUST also set the related parameter when starting Peggo `--cosmos-gas-prices
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Swap binaries.
 - Ensure latest Peggo (v1.4.0) is running
-- Ensure latest Price Feeder (v2.1.0) is running and check your price feeder config is up to date.
+- Ensure latest Price Feeder (v2.1.1) is running and check your price feeder config is up to date.
 - Restart the chain.
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
