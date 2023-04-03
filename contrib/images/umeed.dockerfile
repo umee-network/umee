@@ -1,7 +1,7 @@
 # Stage-1: build
 # We use Debian Bullseye rather then Alpine because Alpine has problem building libwasmvm
 # - requires to download libwasmvm_muslc from external source. Build with glibc is straightforward.
-FROM golang:1.19-bullseye AS builder
+FROM golang:1.20-bullseye AS builder
 
 WORKDIR /src/
 # optimization: if go.sum didn't change, docker will use cached image
