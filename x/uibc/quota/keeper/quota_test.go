@@ -136,6 +136,7 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	umeePrice := sdk.MustNewDecFromStr("0.37")
 	umeeQuota := sdkmath.NewInt(10000)
 	umeeToken := sdk.NewCoin("umee", umeeAmount)
+	umeeExponent := 6
 	// gomock initializations
 	leverageCtrl := gomock.NewController(t)
 	defer leverageCtrl.Finish()
@@ -153,7 +154,7 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 
 	// umee
 	leverageMlk.EXPECT().GetTokenSettings(ctx, "umee").Return(
-		lfixtures.Token("umee", "UMEE", 6), nil,
+		lfixtures.Token("umee", "UMEE", uint32(umeeExponent)), nil,
 	).AnyTimes()
 	oracleMlk.EXPECT().Price(ctx, "UMEE").Return(umeePrice, nil).AnyTimes()
 
@@ -177,7 +178,7 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	o, err = k.GetOutflows(ctx, umeeToken.Denom)
 	assert.NilError(t, err)
 
-	powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(6))
+	powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(umeeExponent))
 	expectedQuota := sdk.NewDec(umeeQuota.Int64()).Sub(sdk.NewDecFromInt(umeeToken.Amount).Quo(powerReduction).Mul(umeePrice))
 	assert.DeepEqual(t, o.Amount, expectedQuota)
 }
