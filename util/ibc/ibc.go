@@ -6,14 +6,13 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	"github.com/cosmos/ibc-go/v5/modules/core/exported"
+	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 )
 
 // GetFundsFromPacket returns transfer amount and denom
-func GetFundsFromPacket(packet exported.PacketI) (sdkmath.Int, string, error) {
+func GetFundsFromPacket(data []byte) (sdkmath.Int, string, error) {
 	var packetData transfertypes.FungibleTokenPacketData
-	err := json.Unmarshal(packet.GetData(), &packetData)
+	err := json.Unmarshal(data, &packetData)
 	if err != nil {
 		return sdkmath.Int{}, "", err
 	}
