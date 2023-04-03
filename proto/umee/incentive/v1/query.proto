@@ -20,13 +20,13 @@ service Query {
   // TotalBonded queries the sum of all bonded collateral uTokens.
   rpc TotalBonded(QueryTotalBonded)
       returns (QueryTotalBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/total_bonded/{denom}";
+    option (google.api.http).get = "/umee/incentive/v1/total_bonded";
   }
 
   // TotalUnbonding queries the sum of all unbonding collateral uTokens.
   rpc TotalUnbonding(QueryTotalUnbonding)
       returns (QueryTotalUnbondingResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/total_unbonding/{denom}";
+    option (google.api.http).get = "/umee/incentive/v1/total_unbonding";
   }
 
   // AccountBonds queries all bonded collateral and unbondings associated with an account.

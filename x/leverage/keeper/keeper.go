@@ -21,6 +21,7 @@ type Keeper struct {
 	hooks                  types.Hooks
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
+	incentiveKeeper        types.IncentiveKeeper
 	liquidatorQueryEnabled bool
 }
 
@@ -60,6 +61,14 @@ func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
 	k.hooks = h
 
 	return k
+}
+
+// SetIncentiveKeeper sets a pointer to the incentive keeper. Can only be set once.
+func (k *Keeper) SetIncentiveKeeper(ik types.IncentiveKeeper) {
+	if k.incentiveKeeper != nil {
+		panic("incentive keeper already set")
+	}
+	k.incentiveKeeper = ik
 }
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
@@ -143,10 +152,22 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		// Check for sufficient collateral
 		collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
 		collateralAmount := collateral.AmountOf(uToken.Denom)
-		if collateral.AmountOf(uToken.Denom).LT(amountFromCollateral) {
+		if collateralAmount.LT(amountFromCollateral) {
 			return sdk.Coin{}, isFromCollateral, types.ErrInsufficientBalance.Wrapf(
 				"%s uToken balance + %s from collateral is less than %s to withdraw",
 				amountFromWallet, collateralAmount, uToken)
+		}
+
+		restrictedCollateral, err := k.getBondedAndUnbonding(ctx, supplierAddr, uToken.Denom)
+		if err != nil {
+			return sdk.Coin{}, isFromCollateral, err
+		}
+
+		freeCollateral := collateralAmount.Sub(restrictedCollateral.Amount)
+		if freeCollateral.LT(amountFromCollateral) {
+			return sdk.Coin{}, isFromCollateral, types.ErrBondedCollateral.Wrapf(
+				"%s unbonded uTokens are less than %s %s to withdraw",
+				freeCollateral, amountFromCollateral, uToken.Denom)
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
@@ -261,8 +282,21 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 
 	// Detect where sufficient collateral exists to disable
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	if collateral.AmountOf(uToken.Denom).LT(uToken.Amount) {
+	collateralAmount := collateral.AmountOf(uToken.Denom)
+	if collateralAmount.LT(uToken.Amount) {
 		return types.ErrInsufficientCollateral
+	}
+
+	restrictedCollateral, err := k.getBondedAndUnbonding(ctx, borrowerAddr, uToken.Denom)
+	if err != nil {
+		return err
+	}
+
+	freeCollateral := collateralAmount.Sub(restrictedCollateral.Amount)
+	if freeCollateral.LT(uToken.Amount) {
+		return types.ErrBondedCollateral.Wrapf(
+			"%s unbonded uTokens are less than %s %s to withdraw",
+			freeCollateral, uToken, uToken.Denom)
 	}
 
 	// Disabling uTokens as collateral withdraws any stored collateral of the denom in question
@@ -333,6 +367,12 @@ func (k Keeper) Liquidate(
 
 	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
 	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// finally, force incentive module to update bond and unbonding amounts if required
+	err = k.forceSetCollateral(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
+	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 

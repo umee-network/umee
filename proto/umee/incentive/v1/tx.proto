@@ -23,6 +23,9 @@ service Msg {
   // BeginUnbonding defines a method for starting to unbond uToken collateral.
   rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
 
+  // EmergencyUnbond defines a method for instantly unbonding uToken collateral in exchange for a fee.
+  rpc EmergencyUnbond(MsgEmergencyUnbond) returns (MsgEmergencyUnbondResponse);
+
   // Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
   // The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
   rpc Sponsor(MsgSponsor) returns (MsgSponsorResponse);
@@ -64,6 +67,15 @@ message MsgBeginUnbonding {
 
 // MsgBeginUnbondingResponse defines the Msg/BeginUnbonding response type.
 message MsgBeginUnbondingResponse {}
+
+// MsgEmergencyUnbond represents a account's request to instantly unbond uToken collateral for a fee.
+message MsgEmergencyUnbond {
+  string                   account = 1;
+  cosmos.base.v1beta1.Coin asset   = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgEmergencyUnbondResponse defines the Msg/EmergencyUnbond response type.
+message MsgEmergencyUnbondResponse {}
 
 // MsgSponsor represents a sponsor's request to fund rewards for an incentive program.
 // The program must have been passed by governance, not yet started, and not yet funded.

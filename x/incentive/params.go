@@ -13,6 +13,7 @@ func DefaultParams() Params {
 	return Params{
 		MaxUnbondings:        5,
 		UnbondingDuration:    secondsPerDay * 1,
+		EmergencyUnbondFee:   sdk.MustNewDecFromStr("0.01"),
 		CommunityFundAddress: "",
 	}
 }
@@ -25,13 +26,28 @@ func (p Params) Validate() error {
 	if err := validateUnbondingDuration(p.UnbondingDuration); err != nil {
 		return err
 	}
+	if err := validateEmergencyUnbondFee(p.EmergencyUnbondFee); err != nil {
+		return err
+	}
 	if err := validateCommunityFundAddress(p.CommunityFundAddress); err != nil {
 		return err
 	}
 	return nil
 }
 
-func validateUnbondingDuration(v uint64) error {
+func validateUnbondingDuration(v int64) error {
+	// non-negative durations, including zero (instant unbond), are allowed
+	if v < 0 {
+		return fmt.Errorf("invalid unbonding duration: %d", v)
+	}
+	return nil
+}
+
+func validateEmergencyUnbondFee(v sdk.Dec) error {
+	if v.IsNil() || v.IsNegative() || v.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid emergency unbonding fee: %s", v)
+	}
+
 	return nil
 }
 

@@ -8,8 +8,9 @@ import (
 
 var (
 	_ sdk.Msg = &MsgClaim{}
-	_ sdk.Msg = &MsgBeginUnbonding{}
 	_ sdk.Msg = &MsgBond{}
+	_ sdk.Msg = &MsgBeginUnbonding{}
+	_ sdk.Msg = &MsgEmergencyUnbond{}
 	_ sdk.Msg = &MsgSponsor{}
 	_ sdk.Msg = &MsgGovSetParams{}
 	_ sdk.Msg = &MsgGovCreatePrograms{}
@@ -95,6 +96,33 @@ func (msg MsgBeginUnbonding) Route() string { return RouterKey }
 
 // Type implements the sdk.Msg interface.
 func (msg MsgBeginUnbonding) Type() string { return sdk.MsgTypeURL(&msg) }
+
+func NewMsgEmergencyUnbond(account sdk.AccAddress, asset sdk.Coin) *MsgEmergencyUnbond {
+	return &MsgEmergencyUnbond{
+		Account: account.String(),
+		Asset:   asset,
+	}
+}
+
+func (msg MsgEmergencyUnbond) ValidateBasic() error {
+	return validateSenderAsset(msg.Account, &msg.Asset)
+}
+
+func (msg MsgEmergencyUnbond) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Account)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg MsgEmergencyUnbond) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// Route implements the sdk.Msg interface.
+func (msg MsgEmergencyUnbond) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgEmergencyUnbond) Type() string { return sdk.MsgTypeURL(&msg) }
 
 func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32, asset sdk.Coin) *MsgSponsor {
 	return &MsgSponsor{

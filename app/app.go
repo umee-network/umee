@@ -466,6 +466,7 @@ func New(
 		app.BankKeeper,
 		app.LeverageKeeper,
 	)
+	app.LeverageKeeper.SetIncentiveKeeper(&app.IncentiveKeeper)
 
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],

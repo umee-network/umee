@@ -32,7 +32,7 @@ type IntegrationTestSuite struct {
 
 	ctx                 sdk.Context
 	app                 *umeeapp.UmeeApp
-	k                   keeper.Keeper // maybe use TestKeeper?
+	k                   keeper.TestKeeper
 	queryClient         incentive.QueryClient
 	setupAccountCounter sdkmath.Int
 	addrs               []sdk.AccAddress
@@ -57,17 +57,15 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.mockLeverage = newMockLeverageKeeper()
 
 	// override the Incentive keeper so we can supply a custom mock leverage keeper
-	k := keeper.NewKeeper(
+	k, tk := keeper.NewTestKeeper(
 		app.AppCodec(),
 		app.GetKey(incentive.ModuleName),
 		app.BankKeeper,
 		s.mockLeverage,
 	)
 
-	s.k = k
+	s.k = tk
 	app.IncentiveKeeper = k
-	// TODO: if I need to add hooks
-	// app.IncentiveKeeper = *app.IncentiveKeeper.SetHooks(types.NewMultiHooks())
 
 	// can override default genesis here if needed
 	incentivemodule.InitGenesis(ctx, app.IncentiveKeeper, *incentive.DefaultGenesis())

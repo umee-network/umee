@@ -9,30 +9,13 @@ import (
 )
 
 func (k Keeper) GetParams(ctx sdk.Context) incentive.Params {
-	return incentive.Params{
-		MaxUnbondings:        k.getMaxUnbondings(ctx),
-		UnbondingDuration:    k.getUnbondingDuration(ctx),
-		CommunityFundAddress: k.getCommunityFundAddress(ctx).String(),
+	params := incentive.Params{}
+	ok := store.GetObject(k.KVStore(ctx), k.cdc, keyPrefixParams, &params, "params")
+	if !ok {
+		// on missing module parameters, return defaults rather than panicking or returning zero values
+		return incentive.DefaultParams()
 	}
-}
-
-// getMaxUnbondings gets the maximum number of unbondings an account is allowed to have at one time.
-func (k Keeper) getMaxUnbondings(ctx sdk.Context) uint32 {
-	return store.GetUint32(k.KVStore(ctx),
-		keyPrefixParamMaxUnbondings, "max unbondings")
-}
-
-// getUnbondingDuration gets the duration in seconds of uToken unbonding
-func (k Keeper) getUnbondingDuration(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.KVStore(ctx),
-		keyPrefixParamUnbondingDuration, "unbonding duration")
-}
-
-// getCommunityFundAddress retrieves the community fund address parameter. It is guaranteed to be
-// either valid (by sdk.ValidateAddressFormat) or empty.
-func (k Keeper) getCommunityFundAddress(ctx sdk.Context) sdk.AccAddress {
-	return store.GetAddress(k.KVStore(ctx),
-		keyPrefixParamCommunityFundAddress, "community fund address")
+	return params
 }
 
 // setParams validates and sets the incentive module parameters
@@ -41,26 +24,7 @@ func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
 	if err := params.Validate(); err != nil {
 		return err
 	}
-	err := store.SetUint32(kvs, keyPrefixParamMaxUnbondings,
-		params.MaxUnbondings, "max unbondings")
-	if err != nil {
-		return err
-	}
-	err = store.SetUint64(kvs, keyPrefixParamUnbondingDuration,
-		params.UnbondingDuration, "unbonding duration")
-	if err != nil {
-		return err
-	}
-	if params.CommunityFundAddress == "" {
-		err = store.SetAddress(kvs, keyPrefixParamCommunityFundAddress, nil, "community fund address")
-	} else {
-		err = store.SetAddress(kvs, keyPrefixParamCommunityFundAddress,
-			sdk.MustAccAddressFromBech32(params.CommunityFundAddress), "community fund address")
-	}
-	if err != nil {
-		return err
-	}
-	return nil
+	return store.SetObject(kvs, k.cdc, keyPrefixParams, &params, "params")
 }
 
 // getIncentiveProgram gets an incentive program by ID, regardless of the program's status.
@@ -75,17 +39,20 @@ func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 	}
 
 	kvStore := k.KVStore(ctx)
+	program := incentive.IncentiveProgram{}
 
 	// Looks for an incentive program with the specified ID in upcoming, ongoing, then completed program lists.
 	for _, status := range statuses {
-		program := incentive.IncentiveProgram{}
-		bz := kvStore.Get(keyIncentiveProgram(id, status))
-		if len(bz) != 0 {
-			err := k.cdc.Unmarshal(bz, &program)
-			return program, status, err
+		ok := store.GetObject(kvStore, k.cdc, keyIncentiveProgram(id, status), &program, "incentive program")
+		if ok {
+			if program.ID != id {
+				return incentive.IncentiveProgram{}, 0, incentive.ErrInvalidProgramID
+			}
+			return program, status, nil
 		}
 	}
 
+	// If the program was not found in any of the three lists
 	return incentive.IncentiveProgram{}, 0, sdkerrors.ErrNotFound
 }
 
@@ -107,11 +74,7 @@ func (k Keeper) setIncentiveProgram(ctx sdk.Context,
 	}
 
 	key := keyIncentiveProgram(program.ID, status)
-	bz, err := k.cdc.Marshal(&program)
-	if err != nil {
-		return err
-	}
-	kvStore.Set(key, bz)
+	store.SetObject(kvStore, k.cdc, key, &program, "incentive program")
 	return nil
 }
 
@@ -130,17 +93,23 @@ func (k Keeper) setNextProgramID(ctx sdk.Context, id uint32) error {
 }
 
 // getLastRewardsTime gets the last unix time incentive rewards were computed globally by EndBlocker.
-func (k Keeper) getLastRewardsTime(ctx sdk.Context) uint64 {
-	return store.GetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, "last reward time")
+// panics if it would return a negative value.
+func (k Keeper) GetLastRewardsTime(ctx sdk.Context) int64 {
+	t := store.GetInt64(k.KVStore(ctx), keyPrefixLastRewardsTime, "last reward time")
+	if t < 0 {
+		panic("negative last reward time")
+	}
+	return t
 }
 
 // setLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
-func (k Keeper) setLastRewardsTime(ctx sdk.Context, time uint64) error {
-	prev := k.getLastRewardsTime(ctx)
-	if time < prev {
+// does not accept negative unix time.
+func (k Keeper) setLastRewardsTime(ctx sdk.Context, time int64) error {
+	prev := k.GetLastRewardsTime(ctx)
+	if time < 0 || time < prev {
 		return incentive.ErrDecreaseLastRewardTime.Wrapf("%d to %d", time, prev)
 	}
-	return store.SetUint64(k.KVStore(ctx), keyPrefixLastRewardsTime, time, "last reward time")
+	return store.SetInt64(k.KVStore(ctx), keyPrefixLastRewardsTime, time, "last reward time")
 }
 
 // getTotalBonded retrieves the total amount of uTokens of a given denom which are bonded to the incentive module
@@ -150,16 +119,8 @@ func (k Keeper) getTotalBonded(ctx sdk.Context, denom string) sdk.Coin {
 	return sdk.NewCoin(denom, amount)
 }
 
-// getTotalUnbonding retrieves the total amount of uTokens of a given denom which are unbonding from
-// the incentive module
-func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string) sdk.Coin {
-	key := keyTotalUnbonding(denom)
-	amount := store.GetInt(k.KVStore(ctx), key, "total unbonding")
-	return sdk.NewCoin(denom, amount)
-}
-
-// getBonded retrieves the amount of uTokens of a given denom which are bonded by an account
-func (k Keeper) getBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+// GetBonded retrieves the amount of uTokens of a given denom which are bonded by an account
+func (k Keeper) GetBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	key := keyBondAmount(addr, denom)
 	amount := store.GetInt(k.KVStore(ctx), key, "bonded amount")
 	return sdk.NewCoin(denom, amount)
@@ -171,7 +132,7 @@ func (k Keeper) getBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sd
 // REQUIREMENT: This is the only function which is allowed to set TotalBonded.
 func (k Keeper) setBonded(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
 	// compute the change in bonded amount (can be negative when bond decreases)
-	delta := uToken.Amount.Sub(k.getBonded(ctx, addr, uToken.Denom).Amount)
+	delta := uToken.Amount.Sub(k.GetBonded(ctx, addr, uToken.Denom).Amount)
 
 	// Set bond amount
 	key := keyBondAmount(addr, uToken.Denom)
@@ -192,64 +153,24 @@ func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom s
 	return sdk.NewCoin(denom, amount)
 }
 
-// GetRewardAccumulator retrieves the reward accumulator of a reward token for a single bonded uToken -
-// for example, how much UMEE (reward) would have been earned by 1 ATOM (bonded) since genesis.
-func (k Keeper) GetRewardAccumulator(ctx sdk.Context, bondDenom, rewardDenom string) sdk.DecCoin {
-	key := keyRewardAccumulator(bondDenom, rewardDenom)
-	amount := store.GetDec(k.KVStore(ctx), key, "reward accumulator")
-	return sdk.NewDecCoinFromDec(rewardDenom, amount)
+// getTotalUnbonding retrieves the total amount of uTokens of a given denom which are unbonding from
+// the incentive module
+func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string) sdk.Coin {
+	key := keyTotalUnbonding(denom)
+	amount := store.GetInt(k.KVStore(ctx), key, "total unbonding")
+	return sdk.NewCoin(denom, amount)
 }
 
-// SetRewardAccumulator sets the reward accumulator of a reward token for a single bonded uToken. Does not
-// affect the reward accumulator's exponent.
-func (k Keeper) SetRewardAccumulator(ctx sdk.Context, bondDenom string, reward sdk.DecCoin) error {
-	key := keyRewardAccumulator(bondDenom, reward.Denom)
-	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward accumulator")
-}
-
-// GetRewardAccumulatorExponent retrieves the exponent of a bonded uToken denom's RewardAccumulator
-func (k Keeper) GetRewardAccumulatorExponent(ctx sdk.Context, bondDenom string) uint32 {
-	key := keyRewardAccumulatorExponent(bondDenom)
-	return store.GetUint32(k.KVStore(ctx), key, "reward accumulator exponent")
-}
-
-// SetRewardAccumulatorExponent sets the exponent of a bonded uToken denom's RewardAccumulator. Because this value
-// should never be changed after initially set, the function panics if the exponent is already nonzero.
-func (k Keeper) SetRewardAccumulatorExponent(ctx sdk.Context, bondDenom string, exponent uint32) error {
-	if k.GetRewardAccumulatorExponent(ctx, bondDenom) != 0 {
-		return incentive.ErrChangeAccumulatorExponent.Wrap(bondDenom)
-	}
-	key := keyRewardAccumulatorExponent(bondDenom)
-	return store.SetUint32(k.KVStore(ctx), key, exponent, "reward accumulator exponent")
-}
-
-// GetRewardTracker retrieves the reward tracker of a reward token for a single bonded uToken on one account -
-// this is the value of the reward accumulator for those specific denoms the last time this account performed
-// and action that requires a reward tracker update (i.e. Bond, Claim, BeginUnbonding, or being Liquidated).
-func (k Keeper) GetRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom, rewardDenom string) sdk.DecCoin {
-	key := keyRewardTracker(addr, bondDenom, rewardDenom)
-	amount := store.GetDec(k.KVStore(ctx), key, "reward tracker")
-	return sdk.NewDecCoinFromDec(rewardDenom, amount)
-}
-
-// setRewardTracker sets the reward tracker of a reward token for a single bonded uToken for an address.
-func (k Keeper) setRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string, reward sdk.DecCoin) error {
-	key := keyRewardTracker(addr, bondDenom, reward.Denom)
-	return store.SetDec(k.KVStore(ctx), key, reward.Amount, "reward tracker")
-}
-
-// getUnbondings gets all unbondings currently associated with an account, bonded denom.
+// getUnbondings gets all unbondings currently associated with an account and bonded denom.
 func (k Keeper) getUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string) []incentive.Unbonding {
 	key := keyUnbondings(addr, denom)
 	kvStore := k.KVStore(ctx)
 
 	accUnbondings := incentive.AccountUnbondings{}
-	bz := kvStore.Get(key)
-	if len(bz) == 0 {
+	ok := store.GetObject(kvStore, k.cdc, key, &accUnbondings, "account unbondings")
+	if !ok {
 		return []incentive.Unbonding{}
 	}
-
-	k.cdc.MustUnmarshal(bz, &accUnbondings)
 	return accUnbondings.Unbondings
 }
 
@@ -293,10 +214,53 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		// clear store on no unbondings remaining
 		kvStore.Delete(key)
 	}
-	bz, err := k.cdc.Marshal(&unbondings)
-	if err != nil {
-		return err
+	return store.SetObject(kvStore, k.cdc, key, &unbondings, "account unbondings")
+}
+
+// getRewardAccumulator retrieves the reward accumulator of all reward tokens for a single bonded uToken -
+// for example, how much UMEE, ATOM, etc (reward) would have been earned by 1 ATOM (bonded) since genesis.
+func (k Keeper) getRewardAccumulator(ctx sdk.Context, bondDenom string) incentive.RewardAccumulator {
+	key := keyRewardAccumulator(bondDenom)
+	accumulator := incentive.RewardAccumulator{}
+	ok := store.GetObject(k.KVStore(ctx), k.cdc, key, &accumulator, "reward accumulator")
+	if ok {
+		return accumulator
 	}
-	kvStore.Set(key, bz)
-	return nil
+	return incentive.NewRewardAccumulator(bondDenom, 0, sdk.NewDecCoins())
+}
+
+// setRewardAccumulator sets the full reward accumulator for a single bonded uToken.
+func (k Keeper) setRewardAccumulator(ctx sdk.Context, accumulator incentive.RewardAccumulator) error {
+	key := keyRewardAccumulator(accumulator.Denom)
+	return store.SetObject(k.KVStore(ctx), k.cdc, key, &accumulator, "reward accumulator")
+}
+
+// GetRewardTracker retrieves the reward tracker for a single bonded uToken on one account - this is the value of
+// the reward accumulator for that specific denom the last time this account performed any action that required
+// a reward tracker update (i.e. Bond, Claim, BeginUnbonding, or being Liquidated).
+func (k Keeper) getRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string) incentive.RewardTracker {
+	key := keyRewardTracker(addr, bondDenom)
+	tracker := incentive.RewardTracker{}
+	ok := store.GetObject(k.KVStore(ctx), k.cdc, key, &tracker, "reward tracker")
+	if ok {
+		return tracker
+	}
+	return incentive.NewRewardTracker(addr.String(), bondDenom, sdk.NewDecCoins())
+}
+
+// setRewardTracker sets the reward tracker for a single bonded uToken for an address.
+// automatically clear the entry if rewards are all zero.
+func (k Keeper) setRewardTracker(ctx sdk.Context, tracker incentive.RewardTracker) error {
+	key := keyRewardTracker(sdk.MustAccAddressFromBech32(tracker.Account), tracker.Denom)
+	if tracker.Rewards.IsZero() {
+		k.clearRewardTracker(ctx, sdk.MustAccAddressFromBech32(tracker.Account), tracker.Denom)
+		return nil
+	}
+	return store.SetObject(k.KVStore(ctx), k.cdc, key, &tracker, "reward tracker")
+}
+
+// clearRewardTracker clears a reward tracker matching a specific account + bonded uToken from the store
+func (k Keeper) clearRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string) {
+	key := keyRewardTracker(addr, bondDenom)
+	k.KVStore(ctx).Delete(key)
 }

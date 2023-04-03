@@ -20,17 +20,19 @@ func (k Keeper) createIncentiveProgram(
 		return err
 	}
 
-	addr := k.getCommunityFundAddress(ctx)
+	addr := k.GetParams(ctx).CommunityFundAddress
 	if fromCommunityFund {
-		if !addr.Empty() {
+		if addr != "" {
+			communityAddress := sdk.MustAccAddressFromBech32(addr)
 			// If the module has set a community fund address and the proposal
 			// requested it, we can attempt to instantly fund the module when
 			// the proposal passes.
-			funds := k.bankKeeper.SpendableCoins(ctx, addr)
+			funds := k.bankKeeper.SpendableCoins(ctx, communityAddress)
 			rewards := sdk.NewCoins(program.TotalRewards)
 			if funds.IsAllGT(rewards) {
 				// Community fund has the required tokens to fund the program
-				if err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, addr, incentive.ModuleName, rewards); err != nil {
+				err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, communityAddress, incentive.ModuleName, rewards)
+				if err != nil {
 					return err
 				}
 				// Set program's funded and remaining rewards to the amount just funded

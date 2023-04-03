@@ -2,78 +2,99 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
-// UpdateRewards increases the module's LastInterestTime and any rewardAccumulators associated with
-// ongoing incentive programs.
-func (k Keeper) UpdateRewards(ctx sdk.Context) error {
-	currentTime := uint64(ctx.BlockTime().Unix())
-	prevRewardTime := k.getLastRewardsTime(ctx)
-	if prevRewardTime <= 0 {
-		// if stored LastRewardTime is zero (or negative), either the chain has just started
-		// or the genesis file has been modified intentionally. In either case, proceed as if
-		// 0 seconds have passed since the last block, thus accruing no rewards and setting
-		// the current BlockTime as the new starting point.
-		prevRewardTime = currentTime
-	}
-
-	if currentTime < prevRewardTime {
-		// TODO fix this when tendermint solves https://github.com/tendermint/tendermint/issues/8773
-		k.Logger(ctx).With("EndBlocker will wait for block time > prevRewardTime").Error(
-			incentive.ErrDecreaseLastRewardTime.Error(),
-			"current", currentTime,
-			"prev", prevRewardTime,
-		)
-
-		// if LastRewardTime appears to be in the future, do nothing (besides logging) and leave
-		// LastRewardTime at its stored value. This will repeat every block until BlockTime exceeds
-		// LastRewardTime.
-		return nil
-	}
-
-	// TODO: reward accumulator math
-
-	// set LastRewardTime to current block time
-	return k.setLastRewardsTime(ctx, currentTime)
-}
-
-// clearRewardTracker clears all reward trackers matching a specific account + bonded uToken denom
-// from the store by setting them to zero
-func (k Keeper) clearRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string,
+// updateRewardTracker updates the reward tracker matching a specific account + bonded uToken denom
+// by setting it to the current value of that uToken denom's reward accumulator. Used after claiming
+// rewards or when setting bonded amount from zero to a nonzero amount (i.e. initializing reward tracker).
+func (k Keeper) updateRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string,
 ) error {
-	trackers := k.getFullRewardTracker(ctx, addr, bondDenom)
-	for _, rewardCoin := range trackers {
-		zeroCoin := sdk.NewDecCoinFromDec(rewardCoin.Denom, sdk.ZeroDec())
-		if err := k.setRewardTracker(ctx, addr, bondDenom, zeroCoin); err != nil {
-			return err
-		}
-	}
-	return nil
+	tracker := k.getRewardTracker(ctx, addr, bondDenom)
+	accumulator := k.getRewardAccumulator(ctx, bondDenom)
+
+	tracker.Rewards = accumulator.Rewards
+
+	// reward tracker contains address and bond denom, plus updated reward coins
+	return k.setRewardTracker(ctx, tracker)
 }
 
-// UpdateRewardTracker updates all reward trackers matching a specific account + bonded uToken denom
-// by setting them to the current values of that uToken denom's reward accumulators
-func (k Keeper) UpdateRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string,
-) error {
-	trackers := k.getFullRewardTracker(ctx, addr, bondDenom)
-	accumulators := k.getFullRewardAccumulator(ctx, bondDenom)
-	for _, rewardCoin := range trackers {
-		accumulator := sdk.NewDecCoinFromDec(rewardCoin.Denom, accumulators.AmountOf(rewardCoin.Denom))
-		if err := k.setRewardTracker(ctx, addr, bondDenom, accumulator); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-// ClaimReward claims a single account's bonded uToken's reward, then updates its reward tracker.
-// Returns rewards claimed.
-func (k Keeper) ClaimReward(_ sdk.Context, _ sdk.AccAddress, _ sdk.Coin,
-) (sdk.Coins, error) {
-	// TODO - implement claim logic (especially needs high exponent asset compatibility)
+// claimRewards claims a single account's uToken's rewards for all bonded uToken denoms. Returns rewards claimed.
+func (k Keeper) claimRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, error) {
 	rewards := sdk.NewCoins()
-	return rewards, incentive.ErrNotImplemented
-	// k.updateRewardTracker(ctx, addr, bonded.Denom)
+	bondedDenoms := k.getAllBondDenoms(ctx, addr)
+	for _, bondDenom := range bondedDenoms {
+		tokens, err := k.calculateSingleReward(ctx, addr, bondDenom)
+		if err != nil {
+			return sdk.NewCoins(), err
+		}
+
+		// If all rewards were too small to disburse for this specific bonded denom,
+		// skips updating its reward tracker to prevent wasting of fractional rewards.
+		// If nonzero, proceed to claim.
+		if !tokens.IsZero() {
+			// send claimed rewards from incentive module to user account
+			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, incentive.ModuleName, addr, tokens); err != nil {
+				return sdk.NewCoins(), err
+			}
+			// update the user's reward tracker to indicate that they last claimed rewards at the current
+			// value of rewardAccumulator
+			if err := k.updateRewardTracker(ctx, addr, bondDenom); err != nil {
+				return sdk.NewCoins(), err
+			}
+
+			// adds rewards claimed from this single bonded denom to the total
+			rewards = rewards.Add(tokens...)
+		}
+	}
+	return rewards, nil
+}
+
+// calculateRewards calculates a single account's uToken's pending rewards for all bonded uToken denoms,
+// without claiming them or updating its reward trackers. Returns rewards pending.
+func (k Keeper) calculateRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, error) {
+	rewards := sdk.NewCoins()
+	bondedDenoms := k.getAllBondDenoms(ctx, addr)
+	for _, bondDenom := range bondedDenoms {
+		tokens, err := k.calculateSingleReward(ctx, addr, bondDenom)
+		if err != nil {
+			return sdk.NewCoins(), err
+		}
+		if !tokens.IsZero() {
+			// adds rewards pending for this single bonded denom to the total
+			rewards = rewards.Add(tokens...)
+		}
+	}
+	return rewards, nil
+}
+
+// calculateSingleReward calculates a single account's uToken's rewards for a single bonded uToken denom,
+// without claiming them or updating its reward tracker. Returns rewards pending.
+func (k Keeper) calculateSingleReward(ctx sdk.Context, addr sdk.AccAddress, bondDenom string) (sdk.Coins, error) {
+	rewards := sdk.NewCoins()
+
+	accumulator := k.getRewardAccumulator(ctx, bondDenom)
+	tracker := k.getRewardTracker(ctx, addr, bondDenom)
+
+	// Rewards are based on the amount accumulator has increased since tracker was last updated
+	delta := accumulator.Rewards.Sub(tracker.Rewards)
+	if delta.IsZero() {
+		return sdk.NewCoins(), nil
+	}
+
+	// Actual token amounts must be reduced according to accumulator's exponent
+	for _, coin := range delta {
+		bonded := k.GetBonded(ctx, addr, bondDenom)
+
+		// reward = bonded * delta / 10^exponent
+		rewardDec := sdk.NewDecFromInt(bonded.Amount).Quo(
+			ten.Power(uint64(accumulator.Exponent)),
+		).Mul(coin.Amount)
+
+		// rewards round down
+		reward := sdk.NewCoin(coin.Denom, rewardDec.TruncateInt())
+		rewards = rewards.Add(reward)
+	}
+
+	return rewards, nil
 }

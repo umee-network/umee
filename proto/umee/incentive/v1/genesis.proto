@@ -11,7 +11,7 @@ import "umee/incentive/v1/incentive.proto";
 message GenesisState {
   Params                     params              = 1 [(gogoproto.nullable) = false];
   uint32                     next_program_id     = 2;
-  uint64                     last_rewards_time   = 3;
+  int64                      last_rewards_time   = 3;
   repeated RewardTracker     reward_trackers     = 4 [(gogoproto.nullable) = false];
   repeated RewardAccumulator reward_accumulators = 5 [(gogoproto.nullable) = false];
   repeated IncentiveProgram  upcoming_programs   = 6 [(gogoproto.nullable) = false];
@@ -61,8 +61,8 @@ message RewardAccumulator {
 // unbonding time changes, the unbonding can complete at the earlier of
 // its original end time or its new one based on the new parameter.
 message Unbonding {
-  uint64                   start  = 1;
-  uint64                   end    = 2;
+  int64                    start  = 1;
+  int64                    end    = 2;
   cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
 }
 

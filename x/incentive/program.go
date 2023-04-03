@@ -45,6 +45,13 @@ func (ip IncentiveProgram) Validate() error {
 		return err
 	}
 
+	if ip.Duration <= 0 {
+		return errors.Wrapf(ErrInvalidProgramDuration, "%d", ip.Duration)
+	}
+	if ip.StartTime <= 0 {
+		return errors.Wrapf(ErrInvalidProgramStart, "%d", ip.Duration)
+	}
+
 	// TODO #1749: Finish validate logic
 
 	return nil

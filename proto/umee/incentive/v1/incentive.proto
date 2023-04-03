@@ -10,19 +10,26 @@ option go_package = "github.com/umee-network/umee/v4/x/incentive";
 message Params {
   option (gogoproto.equal) = true;
 
-  // max_unbondings defines the maximum amount of concurrent unbondings an address can have
+  // max_unbondings is the maximum amount of concurrent unbondings an address can have
   // of each bonded uToken denom.
   uint32 max_unbondings = 1;
 
-  // unbonding_duration defines the unbonding duration (in seconds).
-  uint64 unbonding_duration = 2;
+  // unbonding_duration is the unbonding duration (in seconds).
+  int64 unbonding_duration = 2;
+
+  // emergency_unbond_fee is the portion of a bond that is paid when it is instantly
+  // released using MsgEmergencyUnbond. For example, 0.01 is a 1% fee. Ranges 0-1.
+  string emergency_unbond_fee = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 
   // community_fund_address is the address from which all incentive programs
   // proposed with "from_community_fund = true" will receive their funding.
   // Since funds are withdrawn automatically when an incentive program passes
   // governance, this account should always contain sufficient balance to
   // cover incentive programs which are being voted upon.
-  string community_fund_address = 7;
+  string community_fund_address = 4;
 }
 
 // IncentiveProgram defines a liquidity mining incentive program on a single
@@ -38,11 +45,11 @@ message IncentiveProgram {
   // start_time is the unix time (in seconds) at which the incentives begin.
   // If a program is passed after its intended start time, its start time
   // will be increased to the current time, with program duration unchanged.
-  uint64 start_time = 2;
+  int64 start_time = 2;
 
   // duration is the length of the incentive program from start time to
   // completion in seconds.
-  uint64 duration = 3;
+  int64 duration = 3;
 
   // uToken is the incentivized uToken collateral. Suppliers who collateralize
   // this asset then bond it to the incentive module are eligible for this program's

@@ -18,7 +18,7 @@ func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.Ac
 }
 
 // burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
-// during liquidations.
+// during direct liquidations and during donateCollateral.
 func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
 	err := k.setCollateral(ctx, addr, k.GetCollateral(ctx, addr, uToken.Denom).Sub(uToken))
 	if err != nil {
@@ -238,8 +238,7 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (
 	//
 	// 	min_collateral_liquidity = (module_liquidity - available_module_liquidity) / module_collateral
 	// 	available_module_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	availableModuleLiquidity :=
-		sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
+	availableModuleLiquidity := sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
 
 	// If available_module_liquidity is 0 or less, we cannot withdraw anything
 	if availableModuleLiquidity.LTE(sdk.ZeroDec()) {
@@ -267,12 +266,11 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (
 	//
 	// available_module_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity
 	//									* module_collateral) / (1 - min_collateral_liquidity)
-	availableModuleCollateral :=
-		(sdk.NewDec(liquidity.Sub(spendableUTokens.Amount).Int64()).Sub(
-			minCollateralLiquidity.MulInt(
-				totalTokenCollateral.AmountOf(denom),
-			),
-		)).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
+	availableModuleCollateral := (sdk.NewDec(liquidity.Sub(spendableUTokens.Amount).Int64()).Sub(
+		minCollateralLiquidity.MulInt(
+			totalTokenCollateral.AmountOf(denom),
+		),
+	)).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
 
 	// Adding (user_spendable_utokens + available_module_collateral) we obtain the max uTokens the account can
 	// withdraw from the module.

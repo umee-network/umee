@@ -12,12 +12,7 @@ import (
 
 // KVStore key prefixes
 var (
-	// Individually store params from MsgGovSetParams
-	keyPrefixParamMaxUnbondings        = []byte{0x01, 0x01}
-	keyPrefixParamUnbondingDuration    = []byte{0x01, 0x02}
-	keyPrefixParamCommunityFundAddress = []byte{0x01, 0x03}
-
-	// Regular state
+	keyPrefixParams                    = []byte{0x01}
 	keyPrefixUpcomingIncentiveProgram  = []byte{0x02}
 	keyPrefixOngoingIncentiveProgram   = []byte{0x03}
 	keyPrefixCompletedIncentiveProgram = []byte{0x04}
@@ -25,12 +20,11 @@ var (
 	keyPrefixLastRewardsTime           = []byte{0x06}
 	keyPrefixRewardTracker             = []byte{0x07}
 	keyPrefixRewardAccumulator         = []byte{0x08}
-	keyPrefixRewardAccumulatorExponent = []byte{0x09}
-	keyPrefixUnbondings                = []byte{0x0A}
-	keyPrefixBondAmount                = []byte{0x0B}
-	keyPrefixUnbondAmount              = []byte{0x0C}
-	keyPrefixTotalBonded               = []byte{0x0D}
-	keyPrefixTotalUnbonding            = []byte{0x0E}
+	keyPrefixUnbondings                = []byte{0x09}
+	keyPrefixBondAmount                = []byte{0x0A}
+	keyPrefixUnbondAmount              = []byte{0x0B}
+	keyPrefixTotalBonded               = []byte{0x0C}
+	keyPrefixTotalUnbonding            = []byte{0x0D}
 )
 
 // keyIncentiveProgram returns a KVStore key for an incentive program.
@@ -88,32 +82,14 @@ func keyUnbondAmountNoDenom(addr sdk.AccAddress) []byte {
 	return util.ConcatBytes(0, keyPrefixUnbondAmount, address.MustLengthPrefix(addr))
 }
 
-// keyRewardAccumulator returns a KVStore key for a single RewardAccumulator denom for a bonded uToken.
-func keyRewardAccumulator(bondedDenom, rewardDenom string) []byte {
-	// rewardAccumulatorPrefix | bondedDenom | 0x00 | rewardDenom | 0x00
-	return util.ConcatBytes(1, keyRewardAccumulatorNoReward(bondedDenom), []byte(rewardDenom))
-}
-
-// keyRewardAccumulatorNoReward returns the common prefix used by all RewardAccumulators for a bonded uToken.
-func keyRewardAccumulatorNoReward(bondedDenom string) []byte {
+// keyRewardAccumulator returns a KVStore key for a RewardAccumulator denom for a bonded uToken.
+func keyRewardAccumulator(bondedDenom string) []byte {
 	// rewardAccumulatorPrefix | bondedDenom | 0x00
 	return util.ConcatBytes(1, keyPrefixRewardAccumulator, []byte(bondedDenom))
 }
 
-// keyRewardAccumulatorExponent returns the key for a single RewardAccumulator's exponent field.
-func keyRewardAccumulatorExponent(bondedDenom string) []byte {
-	// rewardAccumulatorExponentPrefix | bondedDenom | 0x00
-	return util.ConcatBytes(1, keyPrefixRewardAccumulatorExponent, []byte(bondedDenom))
-}
-
 // keyRewardTracker returns a KVStore key for a single reward tracker denom for an account and bonded uToken.
-func keyRewardTracker(addr sdk.AccAddress, bondedDenom, rewardDenom string) []byte {
-	// rewardTrackerPrefix | lengthprefixed(addr) | bondedDenom | 0x00 | rewardDenom | 0x00
-	return util.ConcatBytes(1, keyRewardTrackerNoReward(addr, bondedDenom), []byte(rewardDenom))
-}
-
-// keyRewardTrackerNoReward returns a KVStore key for a single reward tracker denom for an account and bonded uToken.
-func keyRewardTrackerNoReward(addr sdk.AccAddress, bondedDenom string) []byte {
+func keyRewardTracker(addr sdk.AccAddress, bondedDenom string) []byte {
 	// rewardTrackerPrefix | lengthprefixed(addr) | bondedDenom | 0x00
 	return util.ConcatBytes(1, keyRewardTrackerNoDenom(addr), []byte(bondedDenom))
 }

@@ -14,7 +14,7 @@ func NewGenesisState(
 	ongoingPrograms []IncentiveProgram,
 	upcomingPrograms []IncentiveProgram,
 	nextProgramID uint32,
-	lastRewardTime uint64,
+	lastRewardTime int64,
 	bonds []Bond,
 	rewardTrackers []RewardTracker,
 	rewardAccumulators []RewardAccumulator,
@@ -64,8 +64,8 @@ func GetGenesisStateFromAppState(cdc codec.JSONCodec, appState map[string]json.R
 // NewIncentiveProgram creates the IncentiveProgram struct used in GenesisState
 func NewIncentiveProgram(
 	id uint32,
-	startTime uint64,
-	duration uint64,
+	startTime int64,
+	duration int64,
 	uDenom string,
 	totalRewards, remainingRewards sdk.Coin,
 	funded bool,
@@ -108,7 +108,7 @@ func NewRewardAccumulator(denom string, exponent uint32, coins sdk.DecCoins) Rew
 }
 
 // NewUnbonding creates the Unbonding struct used in GenesisState
-func NewUnbonding(startTime, endTime uint64, coin sdk.Coin) Unbonding {
+func NewUnbonding(startTime, endTime int64, coin sdk.Coin) Unbonding {
 	return Unbonding{
 		Start:  startTime,
 		End:    endTime,

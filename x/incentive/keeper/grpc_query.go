@@ -77,7 +77,7 @@ func (q Querier) UpcomingIncentivePrograms(
 		Programs: programs,
 	}
 
-	return resp, incentive.ErrNotImplemented
+	return resp, err
 }
 
 func (q Querier) OngoingIncentivePrograms(
@@ -130,53 +130,99 @@ func (q Querier) CompletedIncentivePrograms(
 }
 
 func (q Querier) PendingRewards(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryPendingRewards,
 ) (*incentive.QueryPendingRewardsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: calculate, without modifying, rewards which would result from MsgClaim
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty address")
+	}
 
-	return &incentive.QueryPendingRewardsResponse{}, incentive.ErrNotImplemented
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	pending, err := k.calculateRewards(ctx, addr)
+	return &incentive.QueryPendingRewardsResponse{Rewards: pending}, err
 }
 
 func (q Querier) AccountBonds(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryAccountBonds,
 ) (*incentive.QueryAccountBondsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
+	if req.Address == "" {
+		return nil, status.Error(codes.InvalidArgument, "empty address")
+	}
 
-	// TODO: get all denoms bonded to this address
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
 
-	return &incentive.QueryAccountBondsResponse{}, incentive.ErrNotImplemented
+	totalBonded := sdk.NewCoins()
+	totalUnbonding := sdk.NewCoins()
+	accountUnbondings := []incentive.Unbonding{}
+
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	denoms := k.getAllBondDenoms(ctx, addr)
+	for _, denom := range denoms {
+		bonded, unbonding, unbondings := k.BondSummary(ctx, addr, denom)
+		totalBonded = totalBonded.Add(bonded)
+		totalUnbonding = totalUnbonding.Add(unbonding)
+		accountUnbondings = append(accountUnbondings, unbondings...)
+	}
+
+	return &incentive.QueryAccountBondsResponse{
+		Bonded:     totalBonded,
+		Unbonding:  totalUnbonding,
+		Unbondings: accountUnbondings,
+	}, nil
 }
 
 func (q Querier) TotalBonded(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryTotalBonded,
 ) (*incentive.QueryTotalBondedResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: bonded uTokens across one or all denoms
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	return &incentive.QueryTotalBondedResponse{}, incentive.ErrNotImplemented
+	var total sdk.Coins
+	if req.Denom != "" {
+		total = sdk.NewCoins(k.getTotalBonded(ctx, req.Denom))
+	} else {
+		total = k.getAllTotalBonded(ctx)
+	}
+
+	return &incentive.QueryTotalBondedResponse{Bonded: total}, nil
 }
 
 func (q Querier) TotalUnbonding(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryTotalUnbonding,
 ) (*incentive.QueryTotalUnbondingResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: unbonding uTokens across one or all denoms
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	return &incentive.QueryTotalUnbondingResponse{}, incentive.ErrNotImplemented
+	var total sdk.Coins
+	if req.Denom != "" {
+		total = sdk.NewCoins(k.getTotalUnbonding(ctx, req.Denom))
+	} else {
+		total = k.getAllTotalUnbonding(ctx)
+	}
+
+	return &incentive.QueryTotalUnbondingResponse{Unbonding: total}, nil
 }

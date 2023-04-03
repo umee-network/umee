@@ -32,7 +32,7 @@ func (s msgServer) Claim(
 	}
 
 	// clear completed unbondings and claim all rewards
-	rewards, err := k.updateAccount(ctx, addr)
+	rewards, err := k.UpdateAccount(ctx, addr)
 	if err != nil {
 		return nil, err
 	}
@@ -52,13 +52,13 @@ func (s msgServer) Bond(
 
 	// clear completed unbondings and claim all rewards
 	// this must happen before bonded amount is increased, as rewards are for the previously bonded amount only
-	_, err = k.updateAccount(ctx, addr)
+	_, err = k.UpdateAccount(ctx, addr)
 	if err != nil {
 		return nil, err
 	}
 
 	// get current account state for the requested uToken denom only
-	bonded := k.getBonded(ctx, addr, denom)
+	bonded := k.GetBonded(ctx, addr, denom)
 
 	// ensure account has enough collateral to bond the new amount on top of its current amount
 	collateral := k.leverageKeeper.GetCollateral(ctx, addr, denom)
@@ -85,7 +85,7 @@ func (s msgServer) BeginUnbonding(
 
 	// clear completed unbondings and claim all rewards
 	// this must happen before unbonding is created, as rewards are for the previously bonded amount
-	_, err = k.updateAccount(ctx, addr)
+	_, err = k.UpdateAccount(ctx, addr)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (s msgServer) BeginUnbonding(
 	bonded, currentUnbonding, unbondings := k.BondSummary(ctx, addr, denom)
 
 	// prevent unbonding spam
-	if len(unbondings) >= int(k.getMaxUnbondings(ctx)) {
+	if len(unbondings) >= int(k.GetParams(ctx).MaxUnbondings) {
 		return nil, incentive.ErrMaxUnbondings.Wrapf("%d", len(unbondings))
 	}
 
@@ -111,6 +111,41 @@ func (s msgServer) BeginUnbonding(
 	// start the unbonding
 	err = k.addUnbonding(ctx, addr, msg.Asset)
 	return &incentive.MsgBeginUnbondingResponse{}, err
+}
+
+func (s msgServer) EmergencyUnbond(
+	goCtx context.Context,
+	msg *incentive.MsgEmergencyUnbond,
+) (*incentive.MsgEmergencyUnbondResponse, error) {
+	k, ctx := s.keeper, sdk.UnwrapSDKContext(goCtx)
+	addr, denom, err := addressUToken(msg.Account, msg.Asset)
+	if err != nil {
+		return nil, err
+	}
+
+	// clear completed unbondings and claim all rewards
+	// this must happen before emergency unbonding, as rewards are for the previously bonded amount
+	_, err = k.UpdateAccount(ctx, addr)
+	if err != nil {
+		return nil, err
+	}
+
+	// get current account state for the requested uToken denom only
+	bonded, currentUnbonding, _ := k.BondSummary(ctx, addr, denom)
+
+	// reject emergency unbondings greater than maximum available amount
+	if currentUnbonding.Add(msg.Asset).Amount.GT(bonded.Amount.Add(currentUnbonding.Amount)) {
+		return nil, incentive.ErrInsufficientBonded.Wrapf(
+			"bonded: %s, unbonding: %s, requested: %s",
+			bonded,
+			currentUnbonding,
+			msg.Asset,
+		)
+	}
+
+	// execute the emergency unbonding, including the fee
+	err = k.emergencyUnbond(ctx, addr, msg.Asset)
+	return &incentive.MsgEmergencyUnbondResponse{}, err
 }
 
 func (s msgServer) Sponsor(
