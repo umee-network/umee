@@ -130,3 +130,54 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	err = k.CheckAndUpdateQuota(ctx, daiToken.Denom, daiToken.Amount)
 	assert.NilError(t, err)
 }
+
+func TestKeeper_UndoUpdateQuota(t *testing.T) {
+	umeeAmount := sdkmath.NewInt(100_000000)
+	umeePrice := sdk.MustNewDecFromStr("0.37")
+	umeeQuota := sdkmath.NewInt(10000)
+	umeeToken := sdk.NewCoin("umee", umeeAmount)
+	// gomock initializations
+	leverageCtrl := gomock.NewController(t)
+	defer leverageCtrl.Finish()
+	leverageMlk := mocks.NewMockLeverageKeeper(leverageCtrl)
+
+	oracleCtrl := gomock.NewController(t)
+	defer oracleCtrl.Finish()
+	oracleMlk := mocks.NewMockOracle(oracleCtrl)
+
+	interfaceRegistry := ctypes.NewInterfaceRegistry()
+	marshaller := codec.NewProtoCodec(interfaceRegistry)
+	ctx, k := initFullKeeper(t, marshaller, nil, leverageMlk, oracleMlk)
+	err := k.ResetAllQuotas(ctx)
+	assert.NilError(t, err)
+
+	// umee
+	leverageMlk.EXPECT().GetTokenSettings(ctx, "umee").Return(
+		lfixtures.Token("umee", "UMEE", 6), nil,
+	).AnyTimes()
+	oracleMlk.EXPECT().Price(ctx, "UMEE").Return(umeePrice, nil).AnyTimes()
+
+	err = k.SetParams(ctx, uibc.DefaultParams())
+	assert.NilError(t, err)
+
+	err = k.UndoUpdateQuota(ctx, umeeToken.Denom, umeeToken.Amount)
+	// the result is ignored due to quota reset
+	assert.NilError(t, err)
+
+	o, err := k.GetOutflows(ctx, umeeToken.Denom)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, o.Amount, sdk.ZeroDec())
+
+	setQuotas := sdk.DecCoins{sdk.NewInt64DecCoin("umee", umeeQuota.Int64())}
+	k.SetOutflows(ctx, setQuotas)
+
+	err = k.UndoUpdateQuota(ctx, umeeToken.Denom, umeeToken.Amount)
+	assert.NilError(t, err)
+
+	o, err = k.GetOutflows(ctx, umeeToken.Denom)
+	assert.NilError(t, err)
+
+	powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(6))
+	expectedQuota := sdk.NewDec(umeeQuota.Int64()).Sub(sdk.NewDecFromInt(umeeToken.Amount).Quo(powerReduction).Mul(umeePrice))
+	assert.DeepEqual(t, o.Amount, expectedQuota)
+}
