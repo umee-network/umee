@@ -41,8 +41,11 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
-		err := im.RevertQuotaUpdate(ctx, packet.Data)
-		emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
+		params := im.keeper.GetParams(ctx)
+		if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
+			err := im.RevertQuotaUpdate(ctx, packet.Data)
+			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
+		}
 	}
 
 	return im.IBCModule.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
