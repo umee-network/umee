@@ -67,6 +67,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		s.mockOracle,
 		true,
 	)
+	// since we override leverage keeper, we must set this again as well
+	k.SetIncentiveKeeper(app.IncentiveKeeper)
 
 	s.tk = tk
 	app.LeverageKeeper = k
