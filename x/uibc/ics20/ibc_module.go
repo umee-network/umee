@@ -3,10 +3,10 @@ package ics20
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	ibctransfer "github.com/cosmos/ibc-go/v5/modules/apps/transfer"
-	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
-	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
+	ibctransfer "github.com/cosmos/ibc-go/v6/modules/apps/transfer"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
 	"github.com/umee-network/umee/v4/x/uibc"

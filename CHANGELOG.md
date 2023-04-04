@@ -46,10 +46,24 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [1963](https://github.com/umee-network/umee/pull/1963) ICA Host integration.
+- [1953](https://github.com/umee-network/umee/pull/1953) IBC: accept only inflow of leverage registered tokens
+- [1967](https://github.com/umee-network/umee/pull/1967) Gravity Bridge phase out phase-2: disable Umee -> Ethereum transfers.
+
+### Improvements
+
+- [1959](https://github.com/umee-network/umee/pull/1959) Update IBC to v6.1
+
 ### Fixes
 
 - [1929](https://github.com/umee-network/umee/pull/1929) Leverage: `MaxWithdraw` now accounts for `MinCollateralLiquidity`
+- [1957](https://github.com/umee-network/umee/pull/1957) Leverage: Reserved amount per block now rounds up.
 - [1956](https://github.com/umee-network/umee/pull/1956) Leverage: token liquidation threshold must be bigger than collateral_weight.
+- [1954](https://github.com/umee-network/umee/pull/1954) Leverage: `MaxBorrow` now accounts for
+  `MinCollateralLiquidity` and `MaxSupplyUtilization`
+- [1968](https://github.com/umee-network/umee/pull/1968) Leverage: fix type cast of AdjustedBorrow in ExportGenesis
 
 ## [v4.2.0](https://github.com/umee-network/umee/releases/tag/v4.2.0) - 2023-03-15
 

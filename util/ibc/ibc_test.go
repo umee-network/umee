@@ -6,9 +6,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v5/modules/core/02-client/types"
-	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	"github.com/tendermint/tendermint/crypto"
 	"gotest.tools/v3/assert"
 )
@@ -26,21 +24,10 @@ func TestGetFundsFromPacket(t *testing.T) {
 		amount,
 		AddressFromString("a3"),
 		AddressFromString("a4"),
+		"memo",
 	)
 
-	packet := channeltypes.NewPacket(
-		data.GetBytes(),
-		uint64(1),
-		"transfer",
-		"channel-0",
-		"transfer",
-		"channel-0",
-		clienttypes.NewHeight(0, 100),
-		0,
-	)
-
-	famount, fdenom, err := GetFundsFromPacket(packet)
-
+	famount, fdenom, err := GetFundsFromPacket(data.GetBytes())
 	assert.NilError(t, err)
 	assert.Equal(t, denom, fdenom)
 	assert.Equal(t, famount.String(), amount)

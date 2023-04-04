@@ -81,7 +81,7 @@ Users have the following actions available to them:
 
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#borrow-apy).
 
-- `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed.
+- `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed. This amount is calculated taking into account the user's borrow limit and the module's available liquidity respecting the `min_collateral_liquidity` and `max_supply_utilization` of the `Token`.
 
 - `MsgRepay` assets of a borrowed type, directly reducing the amount owed.
 
@@ -234,6 +234,8 @@ if portionOverLimit > params.CompleteLiquidationThreshold {
   )
 }
 ```
+
+Note that close factor is always `1.0` if borrowed value is below the module parameter `SmallLiquidationSize`.
 
 #### Total Supplied
 

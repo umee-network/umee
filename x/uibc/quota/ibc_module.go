@@ -8,9 +8,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
+	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 
 	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/uibc"
