@@ -57,6 +57,7 @@ func (k Keeper) Transfer(goCtx context.Context, msg *ibctransfertypes.MsgTransfe
 	}
 
 	return resp, err
+
 }
 
 // OnRecvPacket delegates the OnRecvPacket call to the embedded ICS-20 transfer
