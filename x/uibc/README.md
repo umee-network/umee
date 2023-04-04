@@ -22,7 +22,7 @@ The purpose of the `x/uibc/ics20` module is to wrap the core IBC module and crea
 
 ### Considerations
 
-The IBC ICS-20 doesn't doesn't carry any metadata information, so we only fill up the base denom. Importantly, we don't know about the `Exponent`, and we set `Exponent := 0`. In many cases this is wrong, and should be overwritten by chain governance.
+The IBC ICS-20 doesn't carry any metadata information, so we only fill up the base denom. Importantly, we don't know about the `Exponent`, and we set `Exponent := 0`. In many cases this is wrong, and should be overwritten by chain governance.
 
 ## IBC Quota
 
@@ -51,7 +51,7 @@ If a quota parameter is set to zero then we consider it as unlimited.
 
 All quotas are reset in `BeginBlocker` whenever a time difference between the new block, and the previous reset is more than `Params.QuotaDuration` in seconds (initially set to 24h).
 
-Transfer is reverted whenever it breaks the any quota.
+Transfer is reverted whenever it breaks any quota.
 
 Transfer of tokens, which are not registered in the x/leverage Token Registry are not subject to the quota limit.
 
@@ -72,8 +72,8 @@ The ICS-20 quota mechanism is controlled by the `Params.IbcStatus`, which can ha
 In the state we store:
 
 - Module [parameters](../../proto/umee/uibc/v1/quota.proto#L11).
-- Running sum of total outflow values, serialized as uint32 big-endian (no need for `sdk.Int`).
-- Running sum of per token outflow values, serialized as uint32 big-endian (no need for `sdk.Int`).
+- Running sum of total outflow values, serialized as `sdk.Dec`.
+- Running sum of per token outflow values, serialized as `sdk.Dec`.
 - Next quota expire time (after which the quota reset happens).
 
 ### Messages
