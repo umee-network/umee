@@ -28,7 +28,7 @@ func (k Keeper) SendPacket(ctx sdk.Context,
 	params := k.GetParams(ctx)
 	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
 		if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
-			return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
+			return 0, errors.Wrap(err, "SendPacket over the IBC Quota")
 		}
 	}
 
