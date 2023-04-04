@@ -33,11 +33,14 @@ func (k Keeper) forceSetCollateral(ctx sdk.Context, addr sdk.AccAddress, collate
 	return k.incentiveKeeper.ForceSetCollateral(ctx, addr, collateral)
 }
 
-// getBondedAndUnbonding sums the bonded and unbonding collateral amounts for an account which may have collateral
-// bonded to the incentive module.
-func (k Keeper) getBondedAndUnbonding(ctx sdk.Context, addr sdk.AccAddress, uDenom string) (sdk.Coin, error) {
+// unbondedCollateral returns the collateral an account has which is neither bonded nor currently unbonding.
+// This collateral is available for immediate decollateralizing or withdrawal.
+func (k Keeper) unbondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom string) (sdk.Coin, error) {
 	if k.incentiveKeeper == nil {
 		return sdk.Coin{}, types.ErrIncentiveKeeperNotSet
 	}
-	return k.incentiveKeeper.RestrictedCollateral(ctx, addr, uDenom), nil
+	collateralAmount := k.GetBorrowerCollateral(ctx, addr).AmountOf(uDenom)
+	unavailable := k.incentiveKeeper.RestrictedCollateral(ctx, addr, uDenom).Amount
+	available := sdk.MaxInt(collateralAmount.Sub(unavailable), sdk.ZeroInt())
+	return sdk.NewCoin(uDenom, available), nil
 }

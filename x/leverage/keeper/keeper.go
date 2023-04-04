@@ -158,16 +158,14 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 				amountFromWallet, collateralAmount, uToken)
 		}
 
-		restrictedCollateral, err := k.getBondedAndUnbonding(ctx, supplierAddr, uToken.Denom)
+		unbondedCollateral, err := k.unbondedCollateral(ctx, supplierAddr, uToken.Denom)
 		if err != nil {
 			return sdk.Coin{}, isFromCollateral, err
 		}
-
-		freeCollateral := collateralAmount.Sub(restrictedCollateral.Amount)
-		if freeCollateral.LT(amountFromCollateral) {
+		if unbondedCollateral.Amount.LT(amountFromCollateral) {
 			return sdk.Coin{}, isFromCollateral, types.ErrBondedCollateral.Wrapf(
-				"%s unbonded uTokens are less than %s %s to withdraw",
-				freeCollateral, amountFromCollateral, uToken.Denom)
+				"%s unbonded collateral is less than %s to withdraw from collateral",
+				unbondedCollateral, amountFromCollateral)
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
@@ -287,20 +285,17 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 		return types.ErrInsufficientCollateral
 	}
 
-	restrictedCollateral, err := k.getBondedAndUnbonding(ctx, borrowerAddr, uToken.Denom)
+	unbondedCollateral, err := k.unbondedCollateral(ctx, borrowerAddr, uToken.Denom)
 	if err != nil {
 		return err
 	}
-
-	freeCollateral := collateralAmount.Sub(restrictedCollateral.Amount)
-	if freeCollateral.LT(uToken.Amount) {
+	if unbondedCollateral.Amount.LT(uToken.Amount) {
 		return types.ErrBondedCollateral.Wrapf(
-			"%s unbonded uTokens are less than %s %s to withdraw",
-			freeCollateral, uToken, uToken.Denom)
+			"%s unbonded collateral uTokens are less than %s to decollateralize",
+			unbondedCollateral, uToken)
 	}
 
-	// Disabling uTokens as collateral withdraws any stored collateral of the denom in question
-	// from the module account and returns it to the user
+	// Decollateralizing uTokens withdraws them from the module account and returns them to the user
 	newCollateralAmount := collateral.AmountOf(uToken.Denom).Sub(uToken.Amount)
 	if err := k.setCollateral(ctx, borrowerAddr, sdk.NewCoin(uToken.Denom, newCollateralAmount)); err != nil {
 		return err
@@ -370,7 +365,9 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// finally, force incentive module to update bond and unbonding amounts if required
+	// finally, force incentive module to update bond and unbonding amounts if required,
+	// by ending existing unbondings early or instantly unbonding some bonded tokens
+	// until bonded + unbonding for the account is not greater than its collateral amount
 	err = k.forceSetCollateral(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
