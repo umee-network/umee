@@ -131,12 +131,14 @@ func (k Keeper) ResetAllQuotas(ctx sdk.Context) error {
 // updates the current quota metrics.
 func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sdkmath.Int) error {
 	params := k.GetParams(ctx)
+	if params.TokenQuota.IsZero() && params.TotalQuota.IsZero() {
+		return nil
+	}
 
 	o, err := k.GetOutflows(ctx, denom)
 	if err != nil {
 		return err
 	}
-
 	exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
 	if err != nil {
 		if ltypes.ErrNotRegisteredToken.Is(err) {
@@ -147,12 +149,12 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 	}
 
 	o.Amount = o.Amount.Add(exchangePrice)
-	if o.Amount.GT(params.TokenQuota) {
+	if !params.TokenQuota.IsZero() && o.Amount.GT(params.TokenQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
 	totalOutflowSum := k.GetTotalOutflow(ctx).Add(exchangePrice)
-	if totalOutflowSum.GT(params.TotalQuota) {
+	if !params.TotalQuota.IsZero() && totalOutflowSum.GT(params.TotalQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
