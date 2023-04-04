@@ -520,13 +520,12 @@ func New(
 		app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(),
 	)
 
-	var ics4Wrapper ibcporttypes.ICS4Wrapper
+	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
 		appCodec,
 		keys[uibc.StoreKey],
 		app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
 	)
-	ics4Wrapper = app.UIbcQuotaKeeper
 
 	// Middleware Stacks
 	// Create an original ICS-20 transfer keeper and AppModule and then use it to
@@ -535,7 +534,7 @@ func New(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
-		ics4Wrapper, // ISC4 Wrapper: IBC Rate Limit middleware
+		app.UIbcQuotaKeeper, // ISC4 Wrapper: IBC Rate Limit middleware
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
 		app.AccountKeeper,
@@ -558,13 +557,14 @@ func New(
 
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
+	transferStack = ibctransfer.NewIBCModule(ibcTransferKeeper)
 	transferStack = uics20transfer.NewIBCModule(
 		app.LeverageKeeper,
-		ibctransfer.NewIBCModule(ibcTransferKeeper),
+		transferStack,
 		app.UIBCTransferKeeper,
 	)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
-	transferStack = uibcquota.NewIBCMiddleware(transferStack, app.UIbcQuotaKeeper, appCodec)
+	transferStack = uibcquota.NewICS20Middleware(transferStack, app.UIbcQuotaKeeper, appCodec)
 
 	// Create Interchain Accounts Stack
 	// SendPacket, since it is originating from the application to core IBC:

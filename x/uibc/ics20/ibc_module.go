@@ -3,9 +3,9 @@ package ics20
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	ibctransfer "github.com/cosmos/ibc-go/v6/modules/apps/transfer"
 	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	ibcporttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -13,18 +13,17 @@ import (
 	"github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
 )
 
-// IBCModule embeds the ICS-20 transfer IBCModule where we only override specific
-// methods.
+// IBCModule wraps ICS-20 IBC module to limit token transfer inflows.
 type IBCModule struct {
 	// leverage keeper
 	lkeeper uibc.LeverageKeeper
-	// embed the ICS-20 transfer's AppModule
-	ibctransfer.IBCModule
+	// embed the ICS-20 transfer's AppModule: ibctransfer.IBCModule
+	ibcporttypes.IBCModule
 
 	keeper keeper.Keeper
 }
 
-func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
+func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibcporttypes.IBCModule, k keeper.Keeper) IBCModule {
 	return IBCModule{
 		lkeeper:   leverageKeeper,
 		IBCModule: am,
