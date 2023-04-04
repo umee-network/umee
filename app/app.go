@@ -557,10 +557,9 @@ func New(
 
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
-	transferStack = ibctransfer.NewIBCModule(ibcTransferKeeper)
 	transferStack = uics20transfer.NewIBCModule(
 		app.LeverageKeeper,
-		transferStack,
+		ibctransfer.NewIBCModule(ibcTransferKeeper),
 		app.UIBCTransferKeeper,
 	)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)

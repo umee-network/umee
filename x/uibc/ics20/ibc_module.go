@@ -3,6 +3,7 @@ package ics20
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	ibctransfer "github.com/cosmos/ibc-go/v6/modules/apps/transfer"
 	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
 	ibcporttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
@@ -23,7 +24,7 @@ type IBCModule struct {
 	keeper keeper.Keeper
 }
 
-func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibcporttypes.IBCModule, k keeper.Keeper) IBCModule {
+func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
 	return IBCModule{
 		lkeeper:   leverageKeeper,
 		IBCModule: am,
