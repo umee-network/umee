@@ -47,15 +47,15 @@ func (k Keeper) GetOutflows(ctx sdk.Context, ibcDenom string) (sdk.DecCoin, erro
 	return sdk.NewDecCoinFromDec(ibcDenom, d), err
 }
 
-// SetOutflows save the updated IBC outflows of by provided tokens.
-func (k Keeper) SetOutflows(ctx sdk.Context, outflows sdk.DecCoins) {
+// SetTokenOutflows save the updated IBC outflows of by provided tokens.
+func (k Keeper) SetTokenOutflows(ctx sdk.Context, outflows sdk.DecCoins) {
 	for _, q := range outflows {
-		k.SetDenomOutflow(ctx, q)
+		k.SetTokenOutflow(ctx, q)
 	}
 }
 
-// SetDenomOutflow save the outflows of denom into store.
-func (k Keeper) SetDenomOutflow(ctx sdk.Context, outflow sdk.DecCoin) {
+// SetTokenOutflow save the outflows of denom into store.
+func (k Keeper) SetTokenOutflow(ctx sdk.Context, outflow sdk.DecCoin) {
 	store := ctx.KVStore(k.storeKey)
 	key := uibc.KeyTotalOutflows(outflow.Denom)
 	bz, err := outflow.Amount.Marshal()
@@ -131,14 +131,6 @@ func (k Keeper) ResetAllQuotas(ctx sdk.Context) error {
 // updates the current quota metrics.
 func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sdkmath.Int) error {
 	params := k.GetParams(ctx)
-	if params.TokenQuota.IsZero() && params.TotalQuota.IsZero() {
-		return nil
-	}
-
-	o, err := k.GetOutflows(ctx, denom)
-	if err != nil {
-		return err
-	}
 	exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
 	if err != nil {
 		if ltypes.ErrNotRegisteredToken.Is(err) {
@@ -148,6 +140,10 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 		}
 	}
 
+	o, err := k.GetOutflows(ctx, denom)
+	if err != nil {
+		return err
+	}
 	o.Amount = o.Amount.Add(exchangePrice)
 	if !params.TokenQuota.IsZero() && o.Amount.GT(params.TokenQuota) {
 		return uibc.ErrQuotaExceeded
@@ -158,7 +154,7 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 		return uibc.ErrQuotaExceeded
 	}
 
-	k.SetDenomOutflow(ctx, o)
+	k.SetTokenOutflow(ctx, o)
 	k.SetTotalOutflowSum(ctx, totalOutflowSum)
 	return nil
 }
@@ -217,7 +213,7 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 		return nil
 	}
 
-	k.SetDenomOutflow(ctx, o)
+	k.SetTokenOutflow(ctx, o)
 
 	totalOutflowSum := k.GetTotalOutflow(ctx)
 	k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
