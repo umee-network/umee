@@ -62,7 +62,7 @@ When multiple incentive programs are active simultaneously, they compute their r
 
 ### Claiming Rewards
 
-A user can claim rewards for all of their bonded uTokens at once using `MsgClaim`. When a user claims rewards, an appropriate amount of liquid tokens are sent from the `x/incentive` module account to their wallet.
+A user can claim rewards for all of their bonded uTokens at once using `MsgClaim`. When a user claims rewards, an appropriate amount of tokens are sent from the `x/incentive` module account to their wallet.
 
 There are also times where rewards must be claimed automatically to maintain rewards-tracking math. These times are:
 - On `MsgBond`
@@ -73,7 +73,7 @@ Any of the actions above cause the same tokens to be transferred to the user as 
 
 By automatically claiming rewards whenever a user's bonded amount changes, the module guarantees the following invariant:
 
-> Between any two consecutive reward claims by an account associated with a specific bonded uToken denom and tier, the amount of bonded `uTokens` of the given denom to that tier remained constant.
+> Between any two consecutive reward claims by an account associated with a specific bonded uToken denom, the amount of bonded `uTokens` of the given denom for that account remained constant.
 
 ### Reward Accumulators
 
@@ -89,7 +89,7 @@ ra := RewardAccumulator{
 
 The example reward accumulator above can be interpreted as:
 
-> If `10^6` `u/uumee` was bonded to tier `2` at genesis and had remained bonded since, it would have accumulated `0.00023uumee` and `0.00014ibc/1234` in rewards.
+> If `10^6` `u/uumee` was bonded at genesis and had remained bonded since, it would have accumulated `0.00023uumee` and `0.00014ibc/1234` in rewards.
 
 The incentive module must store one `RewardAccumulator` for each uToken denom that is currently (or has been previously) incentivized.
 
@@ -113,7 +113,7 @@ rt := RewardTracker{
 
 The example reward tracker above can be interpreted as:
 
-> The last time account `umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm` claimed rewards for bonded `u/uumee`, the value of `RewardAccumulator` (not tracker) for that denom and tier was `"0.00020uumee, 0.00014ibc/1234"`. Therefore, the rewards to claim this time should be based on the _increase_ since then.
+> The last time account `umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm` claimed rewards for bonded `u/uumee`, the value of `RewardAccumulator` (not tracker) for that denom was `"0.00020uumee, 0.00014ibc/1234"`. Therefore, the rewards to claim this time should be based on the _increase_ since then.
 
 Because the amount of bonded uTokens for this user was constant between the previous `RewardTracker` increase and the current moment, the following simple calculation determines rewards:
 
@@ -138,7 +138,7 @@ The incentive module stores the following in its KVStore and genesis state:
 
 Additionally, some mathematically redundant information is maintained in `KVStore` but not genesis state for efficient operations:
 - `TotalBonded` for every bonded uToken denom (total excludes unbondings).
-- `TotalUnbonding` for every bonded uToken denom and tier.
+- `TotalUnbonding` for every bonded uToken denom.
 - `AmountUnbonding` for each account with one or more unbondings in progress.
 
 These totals are kept in sync with the values they track by the functions in `keeper/store.go`, which update the totals whenever any of the values they reference are changed for any reason (including when importing genesis state).
