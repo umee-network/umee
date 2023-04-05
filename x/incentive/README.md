@@ -15,7 +15,7 @@ The incentive module depends on the `x/leverage` module for information about us
 1. **[Concepts](#concepts)**
    - [Bonding Collateral](#bonding-collateral)
    - [Incentive Programs](#incentive-programs)
-   - [Claiming Rewarss](#claiming-rewards)
+   - [Claiming Rewards](#claiming-rewards)
    - [Reward Accumulators](#reward-accumulators)
    - [Reward Trackers](#reward-trackers)
 2. **[State](#state)**
