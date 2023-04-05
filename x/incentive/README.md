@@ -117,7 +117,7 @@ The example reward tracker above can be interpreted as:
 
 Because the amount of bonded uTokens for this user was constant between the previous `RewardTracker` increase and the current moment, the following simple calculation determines rewards:
 
-> rewarss to claim = (RewardAccumulator - RewardTracker) * (AmoundBonded / 10^Exponent)
+> rewards to claim = (RewardAccumulator - RewardTracker) * (AmoundBonded / 10^Exponent)
 
 Whenever an account claims rewards (including the times when rewards are claimed automatically due to `MsgBond`, `MsgBeginUnbonding`, or `leverage.MsgLiquidate`), the account's `RewardTracker` of the affected denom must be updated to the current value of `RewardAccumulator`.
 
@@ -151,6 +151,7 @@ Permissionless:
 - `MsgClaim` Claims any pending rewards for all bonded uTokens
 - `MsgBond` Bonds uToken collateral (and claims pending rewarda)
 - `MsgBeginUnbonding` Starts unbonding uToken collateral (and claims pending rewards)
+- `MsgBeginUnbonding` Instantly unbonds uToken collateral for a fee based on amount unbonded (and claims pending rewards)
 - `MsgSponsor` Funds an entire incentive program with rewards, if it has been passed by governance but not yet funded.
 
 Governance controlled:
