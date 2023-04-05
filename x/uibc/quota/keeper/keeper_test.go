@@ -92,14 +92,6 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	return s
 }
 
-// creates keeper without external dependencies (app, leverage etc...)
-func initSimpleKeeper(t *testing.T) (sdk.Context, keeper.Keeper) {
-	storeKey := storetypes.NewMemoryStoreKey("quota")
-	k := keeper.NewKeeper(nil, storeKey, nil, nil, nil)
-	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	return ctx, k
-}
-
 // creates keeper with all external dependencies (app, leverage etc...)
 func initFullKeeper(
 	t *testing.T,
