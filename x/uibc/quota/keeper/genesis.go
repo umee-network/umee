@@ -12,7 +12,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 	err := k.SetParams(ctx, genState.Params)
 	util.Panic(err)
 
-	k.SetOutflows(ctx, genState.Outflows)
+	k.SetTokenOutflows(ctx, genState.Outflows)
 	k.SetTotalOutflowSum(ctx, genState.TotalOutflowSum)
 
 	err = k.SetExpire(ctx, genState.QuotaExpires)
