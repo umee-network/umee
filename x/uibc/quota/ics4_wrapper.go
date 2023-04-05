@@ -8,12 +8,12 @@ import (
 )
 
 // GetAppVersion implements types.Middleware
-func (im IBCMiddleware) GetAppVersion(ctx sdk.Context, portID string, channelID string) (string, bool) {
+func (im ICS20Middleware) GetAppVersion(ctx sdk.Context, portID string, channelID string) (string, bool) {
 	return im.keeper.GetAppVersion(ctx, portID, channelID)
 }
 
 // SendPacket implements types.Middleware
-func (im IBCMiddleware) SendPacket(
+func (im ICS20Middleware) SendPacket(
 	ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	sourcePort string,
@@ -26,7 +26,7 @@ func (im IBCMiddleware) SendPacket(
 }
 
 // WriteAcknowledgement implements types.Middleware
-func (im IBCMiddleware) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
+func (im ICS20Middleware) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
 	packet exported.PacketI, ack exported.Acknowledgement,
 ) error {
 	return im.keeper.WriteAcknowledgement(ctx, chanCap, packet, ack)
