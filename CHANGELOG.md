@@ -60,7 +60,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
   and `x/uibc`
 - [1913](https://github.com/umee-network/umee/pull/1913), [1974](https://github.com/umee-network/umee/pull/1974) uibc: quota status check.
 - [1973](https://github.com/umee-network/umee/pull/1973) UIBC: handle zero Quota Params.
->>>>>>> main
 
 ### Fixes
 
