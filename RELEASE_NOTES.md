@@ -10,6 +10,7 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 Highlights:
 
+- Gravity Bridge Shutdown Phase 2. Following [Prop-67](https://www.mintscan.io/umee/proposals/67) we are disabling Umee -> Ethereum token transfers. Ethereum -> Umee transfers are still possible, and we encourage everyone to move the tokens back to Umee. In May we are planning the complete shut down. See more in the [blog post](https://umee.cc/blog/bridgemigration).
 - IBC updated to `ibc-go v6.1`. That also triggered our wasmvm dependency update (see `libwasmvm` update in Validators section)
 - ICA Host integration.
 - IBC ICS20: we will only accept tokens (denoms) which are registered in the x/leverage token registry. You can check the supported tokens by `umeed q leverage registered-tokens` or by visiting [umee/leverage/v1/registered_tokens](https://umee-api.polkachu.com/umee/leverage/v1/registered_tokens).
