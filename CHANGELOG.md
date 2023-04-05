@@ -51,11 +51,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1963](https://github.com/umee-network/umee/pull/1963) ICA Host integration.
 - [1953](https://github.com/umee-network/umee/pull/1953) IBC: accept only inflow of leverage registered tokens
 - [1967](https://github.com/umee-network/umee/pull/1967) Gravity Bridge phase out phase-2: disable Umee -> Ethereum transfers.
+- [1967](https://github.com/umee-network/umee/pull/1967) Gravity Bridge phase out phase-2: disable Umee -> Ethereum transfers.
 
 ### Improvements
 
 - [1959](https://github.com/umee-network/umee/pull/1959) Update IBC to v6.1
 - [1913](https://github.com/umee-network/umee/pull/1913), [1974](https://github.com/umee-network/umee/pull/1974) uibc: quota status check.
+- [1973](https://github.com/umee-network/umee/pull/1973) UIBC: handle zero Quota Params.
 
 ### Fixes
 
