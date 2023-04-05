@@ -42,7 +42,7 @@ type TestKeeper struct {
 }
 
 func (k TestKeeper) checkOutflows(denom string, perToken, total int64) {
-	o, err := k.GetOutflows(*k.ctx, denom)
+	o, err := k.GetTokenOutflows(*k.ctx, denom)
 	require.NoError(k.t, err)
 	require.Equal(k.t, sdk.NewDec(perToken), o.Amount)
 

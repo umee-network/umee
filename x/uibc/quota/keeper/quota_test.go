@@ -13,7 +13,7 @@ func TestResetQuota(t *testing.T) {
 
 	umeeQuota := sdk.NewInt64DecCoin("uumee", 1000)
 	k.SetTokenOutflow(ctx, umeeQuota)
-	q, err := k.GetOutflows(ctx, umeeQuota.Denom)
+	q, err := k.GetTokenOutflows(ctx, umeeQuota.Denom)
 	assert.NilError(t, err)
 	assert.DeepEqual(t, q, umeeQuota)
 
@@ -21,7 +21,7 @@ func TestResetQuota(t *testing.T) {
 	k.ResetAllQuotas(ctx)
 
 	// check the quota after reset
-	q, err = k.GetOutflows(ctx, umeeQuota.Denom)
+	q, err = k.GetTokenOutflows(ctx, umeeQuota.Denom)
 	assert.NilError(t, err)
 	assert.DeepEqual(t, q.Amount, sdk.NewDec(0))
 }

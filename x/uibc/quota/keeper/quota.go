@@ -15,7 +15,7 @@ import (
 
 var ten = sdk.MustNewDecFromStr("10")
 
-// GetAllOutflows returns outflows of all tokens.
+// GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows(ctx sdk.Context) (sdk.DecCoins, error) {
 	var outflows sdk.DecCoins
 	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomOutflows)
@@ -33,21 +33,22 @@ func (k Keeper) GetAllOutflows(ctx sdk.Context) (sdk.DecCoins, error) {
 	return outflows, nil
 }
 
-// GetOutflows retunes the rate limits of ibc denom.
-func (k Keeper) GetOutflows(ctx sdk.Context, ibcDenom string) (sdk.DecCoin, error) {
+// GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
+func (k Keeper) GetTokenOutflows(ctx sdk.Context, denom string) (sdk.DecCoin, error) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(uibc.KeyTotalOutflows(ibcDenom))
+	bz := store.Get(uibc.KeyTotalOutflows(denom))
 	if bz == nil {
-		return coin.ZeroDec(ibcDenom), nil
+		return coin.ZeroDec(denom), nil
 	}
 
 	var d sdk.Dec
 	err := d.Unmarshal(bz)
 
-	return sdk.NewDecCoinFromDec(ibcDenom, d), err
+	return sdk.NewDecCoinFromDec(denom, d), err
 }
 
-// SetTokenOutflows save the updated IBC outflows of by provided tokens.
+// SetTokenOutflows saves provided updated IBC outflows as a pair: USD value, denom name in the
+// DecCoin structure.
 func (k Keeper) SetTokenOutflows(ctx sdk.Context, outflows sdk.DecCoins) {
 	for _, q := range outflows {
 		k.SetTokenOutflow(ctx, q)
@@ -140,7 +141,7 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 		}
 	}
 
-	o, err := k.GetOutflows(ctx, denom)
+	o, err := k.GetTokenOutflows(ctx, denom)
 	if err != nil {
 		return err
 	}
@@ -191,7 +192,7 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 
 // UndoUpdateQuota subtracts `amount` from quota metric of the ibc denom.
 func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.Int) error {
-	o, err := k.GetOutflows(ctx, denom)
+	o, err := k.GetTokenOutflows(ctx, denom)
 	if err != nil {
 		return err
 	}

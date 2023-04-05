@@ -25,7 +25,7 @@ func TestGetQuotas(t *testing.T) {
 	require.Equal(t, setQuotas, quotas)
 
 	// get the quota of denom
-	quota, err := k.GetOutflows(ctx, setQuotas[0].Denom)
+	quota, err := k.GetTokenOutflows(ctx, setQuotas[0].Denom)
 	require.NoError(t, err)
 	require.Equal(t, quota.Denom, setQuotas[0].Denom)
 }
