@@ -18,11 +18,12 @@ type Keeper struct {
 	cdc                    codec.Codec
 	storeKey               storetypes.StoreKey
 	paramSpace             paramtypes.Subspace
-	hooks                  types.Hooks
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
-	incentiveKeeper        types.IncentiveKeeper
 	liquidatorQueryEnabled bool
+
+	tokenHooks []types.TokenHooks
+	bondHooks  []types.BondHooks
 }
 
 func NewKeeper(
@@ -52,23 +53,26 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-// SetHooks sets the module's hooks. Note, hooks can only be set once.
-func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
-	if k.hooks != nil {
-		panic("leverage hooks already set")
+// SetTokenHooks sets the module's token registry hooks. Token hooks can only be set once.
+func (k *Keeper) SetTokenHooks(h ...types.TokenHooks) *Keeper {
+	if k.tokenHooks != nil {
+		panic("leverage token hooks already set")
 	}
 
-	k.hooks = h
+	k.tokenHooks = h
 
 	return k
 }
 
-// SetIncentiveKeeper sets a pointer to the incentive keeper. Can only be set once.
-func (k *Keeper) SetIncentiveKeeper(ik types.IncentiveKeeper) {
-	if k.incentiveKeeper != nil {
-		panic("incentive keeper already set")
+// SetBondHooks sets the module's bonded amount and force unbonding hooks. Bond hooks can only be set once.
+func (k *Keeper) SetBondHooks(h ...types.BondHooks) *Keeper {
+	if k.bondHooks != nil {
+		panic("leverage bond hooks already set")
 	}
-	k.incentiveKeeper = ik
+
+	k.bondHooks = h
+
+	return k
 }
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
@@ -368,7 +372,7 @@ func (k Keeper) Liquidate(
 	// finally, force incentive module to update bond and unbonding amounts if required,
 	// by ending existing unbondings early or instantly unbonding some bonded tokens
 	// until bonded + unbonding for the account is not greater than its collateral amount
-	err = k.forceSetCollateral(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
+	err = k.reduceBondTo(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}

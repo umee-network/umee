@@ -67,12 +67,11 @@ func (s *IntegrationTestSuite) SetupTest() {
 		s.mockOracle,
 		true,
 	)
-	// since we override leverage keeper, we must set this again as well
-	k.SetIncentiveKeeper(app.IncentiveKeeper)
 
 	s.tk = tk
 	app.LeverageKeeper = k
-	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(types.NewMultiHooks())
+	app.LeverageKeeper = *app.LeverageKeeper.SetTokenHooks()
+	app.LeverageKeeper = *app.LeverageKeeper.SetBondHooks()
 
 	// override DefaultGenesis token registry with fixtures.Token
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())

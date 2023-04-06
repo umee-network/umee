@@ -471,19 +471,18 @@ func New(
 		app.OracleKeeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
-	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
-		leveragetypes.NewMultiHooks(
-			app.OracleKeeper.Hooks(),
-		),
-	)
 	app.IncentiveKeeper = incentivekeeper.NewKeeper(
 		appCodec,
 		keys[incentive.StoreKey],
 		app.BankKeeper,
 		app.LeverageKeeper,
 	)
-	app.LeverageKeeper.SetIncentiveKeeper(&app.IncentiveKeeper)
-
+	app.LeverageKeeper = *app.LeverageKeeper.SetTokenHooks(
+		app.OracleKeeper.Hooks(),
+	)
+	app.LeverageKeeper = *app.LeverageKeeper.SetBondHooks(
+		app.IncentiveKeeper.BondHooks(),
+	)
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
 		app.GetSubspace(gravitytypes.ModuleName),
@@ -812,8 +811,10 @@ func New(
 
 	simStateModules := genmap.Pick(
 		app.mm.Modules,
-		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName,
-			ibchost.ModuleName},
+		[]string{
+			stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName,
+			ibchost.ModuleName,
+		},
 	)
 	// TODO: Ensure x/leverage implements simulator and add it here:
 	// TODO: same for incentive

@@ -2,8 +2,6 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // DonateCollateral burns some collateral uTokens already present in the module, then adds their equivalent amount
@@ -20,27 +18,4 @@ func (k Keeper) DonateCollateral(ctx sdk.Context, fromAddr sdk.AccAddress, uToke
 	// increase module reserves
 	reserves := k.GetReserves(ctx, token.Denom)
 	return k.setReserves(ctx, reserves.Add(token))
-}
-
-// forceSetCollateral claims rewards and finishes completed unbondings for an account which may have collateral
-// bonded to the incentive module, then detects if the sum of its bonded and unbonding amounts are greater than
-// the new value. If they are, forcefully finishes unbondings than instantly unbonds collateral until their sum
-// is equal to the collateral amount.
-func (k Keeper) forceSetCollateral(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
-	if k.incentiveKeeper == nil {
-		return types.ErrIncentiveKeeperNotSet
-	}
-	return k.incentiveKeeper.ForceSetCollateral(ctx, addr, collateral)
-}
-
-// unbondedCollateral returns the collateral an account has which is neither bonded nor currently unbonding.
-// This collateral is available for immediate decollateralizing or withdrawal.
-func (k Keeper) unbondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom string) (sdk.Coin, error) {
-	if k.incentiveKeeper == nil {
-		return sdk.Coin{}, types.ErrIncentiveKeeperNotSet
-	}
-	collateralAmount := k.GetBorrowerCollateral(ctx, addr).AmountOf(uDenom)
-	unavailable := k.incentiveKeeper.RestrictedCollateral(ctx, addr, uDenom).Amount
-	available := sdk.MaxInt(collateralAmount.Sub(unavailable), sdk.ZeroInt())
-	return sdk.NewCoin(uDenom, available), nil
 }
