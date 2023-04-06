@@ -48,6 +48,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
+
+## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-5
+
+### Features
+
 - [1963](https://github.com/umee-network/umee/pull/1963) ICA Host integration.
 - [1953](https://github.com/umee-network/umee/pull/1953) IBC: accept only inflow of leverage registered tokens
 - [1967](https://github.com/umee-network/umee/pull/1967) Gravity Bridge phase out phase-2: disable Umee -> Ethereum transfers.
