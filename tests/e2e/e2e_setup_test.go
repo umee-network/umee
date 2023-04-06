@@ -36,7 +36,7 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/tests/grpc/client"
+	"github.com/umee-network/umee/v4/client"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -81,7 +81,7 @@ type IntegrationTestSuite struct {
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
-	umeeClient          *client.UmeeClient
+	umee                client.Client
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -1077,12 +1077,15 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 func (s *IntegrationTestSuite) initUmeeClient() {
 	var err error
-	s.umeeClient, err = client.NewUmeeClient(
+	ecfg := appparams.MakeEncodingConfig()
+	s.umee, err = client.NewClient(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
 		"val1",
 		s.chain.validators[0].mnemonic,
+		1,
+		ecfg,
 	)
 	s.Require().NoError(err)
 }
