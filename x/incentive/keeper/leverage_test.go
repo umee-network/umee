@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/incentive"
+	leveragefixtures "github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -39,7 +39,15 @@ func (m *mockLeverageKeeper) setCollateral(addr sdk.AccAddress, denom string, am
 	m.collateral[addr.String()][denom] = amount
 }
 
-// GetTokenSettings implements the expected leverage keeper
+// GetTokenSettings implements the expected leverage keeper, with UMEE, ATOM, and DAI registered.
 func (m *mockLeverageKeeper) GetTokenSettings(ctx sdk.Context, denom string) (leveragetypes.Token, error) {
-	return leveragetypes.Token{}, incentive.ErrNotImplemented
+	switch denom {
+	case umeeDenom:
+		return leveragefixtures.Token(denom, "UMEE", 6), nil
+	case leveragefixtures.AtomDenom:
+		return leveragefixtures.Token(denom, "ATOM", 6), nil
+	case leveragefixtures.DaiDenom:
+		return leveragefixtures.Token(denom, "DAI", 18), nil
+	}
+	return leveragetypes.Token{}, leveragetypes.ErrNotRegisteredToken
 }
