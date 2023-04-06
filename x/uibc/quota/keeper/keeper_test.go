@@ -56,7 +56,7 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	s := &KeeperTestSuite{}
 	isCheckTx := false
 	app := umeeapp.Setup(t)
-	ctx := app.BaseApp.NewContext(isCheckTx, tmproto.Header{
+	ctx := app.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  9,
 	})

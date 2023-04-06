@@ -10,7 +10,8 @@ option go_package = "github.com/umee-network/umee/v4/x/incentive";
 message Params {
   option (gogoproto.equal) = true;
 
-  // max_unbondings defines the maximum amount of concurrent unbondings an address can have.
+  // max_unbondings defines the maximum amount of concurrent unbondings an address can have
+  // on each unbonding tier of each bonded uToken denom.
   uint32 max_unbondings = 1;
 
   // unbonding_duration_long defines the unbonding duration (in seconds) of the long tier.
@@ -54,31 +55,39 @@ message IncentiveProgram {
   option (gogoproto.equal) = true;
 
   // ID uniquely identifies the incentive program after it has been created.
-  // It is zero when the program is being proposed by governance.
-  uint32 id = 1;
+  // It is zero when the program is being proposed by governance, and is set
+  // to its final value when the proposal passes.
+  uint32 ID = 1;
 
   // start_time is the unix time (in seconds) at which the incentives begin.
+  // If a program is passed after its intended start time, its start time
+  // will be increased to the current time, with program duration unchanged.
   uint64 start_time = 2;
 
-  // duration is the length of the incentive program in seconds.
+  // duration is the length of the incentive program from start time to
+  // completion in seconds.
   uint64 duration = 3;
 
-  // denom is the incentivized uToken collateral.
-  string denom = 4;
+  // uToken is the incentivized uToken collateral. Suppliers who collateralize
+  // this asset then bond it to the incentive module are eligible for this program's
+  // rewards.
+  string uToken = 4;
+
+  // funded indicates whether a program bas been funded. This can happen when
+  // a program passes if funding from community fund, or any time before the
+  // program's start time if funding with MsgSponsor. A program that reaches
+  // its start time without being funded is cancelled.
+  bool funded = 5;
 
   // total_rewards are total amount of rewards which can be distributed to
   // suppliers by this program. This is set to its final value when the program
   // is proposed by governance.
-  cosmos.base.v1beta1.Coin total_rewards = 5 [(gogoproto.nullable) = false];
-
-  // funded_rewards are total amount of rewards which have been funded by a
-  // sponsor to this program. This is zero until the program is both passed
-  // by governance and funded.
-  cosmos.base.v1beta1.Coin funded_rewards = 6 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin total_rewards = 6 [(gogoproto.nullable) = false];
 
   // remaining_rewards are total amount of this program's funded rewards
   // which have not yet been allocated to suppliers. This is zero until the
-  // program is both passed by governance and funded, then begins decreasing
+  // program is both passed by governance and funded, at which point it
+  // starts at the same value as total_rewards then begins decreasing
   // to zero as the program runs to completion.
   cosmos.base.v1beta1.Coin remaining_rewards = 7 [(gogoproto.nullable) = false];
 }

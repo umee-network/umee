@@ -2,25 +2,31 @@ package ics20
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ibctransfer "github.com/cosmos/ibc-go/v5/modules/apps/transfer"
-	ibctransfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
-	ibcexported "github.com/cosmos/ibc-go/v5/modules/core/exported"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	ibctransfer "github.com/cosmos/ibc-go/v6/modules/apps/transfer"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	ibcporttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
 
+	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
 )
 
-// IBCModule embeds the ICS-20 transfer IBCModule where we only override specific
-// methods.
+// IBCModule wraps ICS-20 IBC module to limit token transfer inflows.
 type IBCModule struct {
-	// embed the ICS-20 transfer's AppModule
-	ibctransfer.IBCModule
+	// leverage keeper
+	lkeeper uibc.LeverageKeeper
+	// embed the ICS-20 transfer's AppModule: ibctransfer.IBCModule
+	ibcporttypes.IBCModule
 
 	keeper keeper.Keeper
 }
 
-func NewIBCModule(am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
+func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
 	return IBCModule{
+		lkeeper:   leverageKeeper,
 		IBCModule: am,
 		keeper:    k,
 	}
@@ -33,6 +39,19 @@ func (am IBCModule) OnRecvPacket(
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
+	var data ibctransfertypes.FungibleTokenPacketData
+	if err := ibctransfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
+		return channeltypes.NewErrorAcknowledgement(ackErr)
+	}
+
+	// Allowing only registered token for ibc transfer
+	isSourceChain := ibctransfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+	ackErr := CheckIBCInflow(ctx, packet, am.lkeeper, data.Denom, isSourceChain)
+	if ackErr != nil {
+		return ackErr
+	}
+
 	ack := am.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	if ack.Success() {
 		var data ibctransfertypes.FungibleTokenPacketData
@@ -43,4 +62,27 @@ func (am IBCModule) OnRecvPacket(
 	}
 
 	return ack
+}
+
+func CheckIBCInflow(ctx sdk.Context,
+	packet channeltypes.Packet,
+	lkeeper uibc.LeverageKeeper,
+	dataDenom string, isSourceChain bool,
+) ibcexported.Acknowledgement {
+	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
+	// check ibc_denom is exists in leverage token registry
+	if isSourceChain {
+		// since SendPacket did not prefix the denomination, we must prefix denomination here
+		sourcePrefix := ibctransfertypes.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
+		// NOTE: sourcePrefix contains the trailing "/"
+		prefixedDenom := sourcePrefix + dataDenom
+		// construct the denomination trace from the full raw denomination and get the ibc_denom
+		ibcDenom := ibctransfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
+		_, err := lkeeper.GetTokenSettings(ctx, ibcDenom)
+		if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
+			return channeltypes.NewErrorAcknowledgement(err)
+		}
+	}
+
+	return nil
 }

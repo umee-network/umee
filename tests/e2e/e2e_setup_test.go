@@ -50,6 +50,10 @@ const (
 
 	ethChainID uint = 15
 	ethMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
+
+	priceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
+	priceFeederServerPort     = "7171/tcp"
+	priceFeederMaxStartupTime = 20 // seconds
 )
 
 var (
@@ -975,88 +979,98 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.T().Log("starting price-feeder container...")
 
-	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-price-feeder-")
-	s.Require().NoError(err)
-	s.tmpDirs = append(s.tmpDirs, tmpDir)
-
-	priceFeederCfgPath := path.Join(tmpDir, "price-feeder")
-
-	s.Require().NoError(os.MkdirAll(priceFeederCfgPath, 0o755))
-	_, err = copyFile(
-		filepath.Join("./scripts/", "price_feeder_bootstrap.sh"),
-		filepath.Join(priceFeederCfgPath, "price_feeder_bootstrap.sh"),
-	)
-	s.Require().NoError(err)
-
 	umeeVal := s.chain.validators[2]
 	umeeValAddr, err := umeeVal.keyInfo.GetAddress()
 	s.Require().NoError(err)
+
+	grpcEndpoint := fmt.Sprintf("tcp://%s:%s", umeeVal.instanceName(), "9090")
+	tmrpcEndpoint := fmt.Sprintf("http://%s:%s", umeeVal.instanceName(), "26657")
 
 	s.priceFeederResource, err = s.dkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-price-feeder",
 			NetworkID:  s.dkrNet.Network.ID,
-			Repository: "umee-network/umeed-e2e",
+			Repository: priceFeederContainerRepo,
 			Mounts: []string{
-				fmt.Sprintf("%s/:/root/price-feeder", priceFeederCfgPath),
 				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				"7171/tcp": {{HostIP: "", HostPort: "7171"}},
+				priceFeederServerPort: {{HostIP: "", HostPort: "7171"}},
 			},
 			Env: []string{
-				"UMEE_E2E_UMEE_VAL_KEY_DIR=/root/.umee",
 				fmt.Sprintf("PRICE_FEEDER_PASS=%s", keyringPassphrase),
-				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_ADDRESS=%s", umeeValAddr),
-				fmt.Sprintf("UMEE_E2E_PRICE_FEEDER_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[0].Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_CHAIN_ID=%s", s.chain.id),
+				fmt.Sprintf("ACCOUNT_ADDRESS=%s", umeeValAddr),
+				fmt.Sprintf("ACCOUNT_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
+				fmt.Sprintf("KEYRING_DIR=%s", "/root/.umee"),
+				fmt.Sprintf("ACCOUNT_CHAIN_ID=%s", s.chain.id),
+				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
+				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
-			Entrypoint: []string{
-				"sh",
-				"-c",
-				"chmod +x /root/price-feeder/price_feeder_bootstrap.sh && sh /root/price-feeder/price_feeder_bootstrap.sh",
+			Cmd: []string{
+				"--skip-provider-check",
+				"--log-level=debug",
 			},
 		},
 		noRestart,
 	)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort("7171/tcp"))
-	s.Require().Eventually(
-		func() bool {
-			resp, err := http.Get(endpoint)
-			if err != nil {
-				s.T().Log("Price feeder endpoint not available", err)
-				return false
-			}
+	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort(priceFeederServerPort))
 
-			defer resp.Body.Close()
+	checkHealth := func() bool {
+		resp, err := http.Get(endpoint)
+		if err != nil {
+			s.T().Log("Price feeder endpoint not available", err)
+			return false
+		}
 
-			bz, err := io.ReadAll(resp.Body)
-			if err != nil {
-				s.T().Log("Can't get price feeder response", err)
-				return false
-			}
+		defer resp.Body.Close()
 
-			var respBody map[string]interface{}
-			if err := json.Unmarshal(bz, &respBody); err != nil {
-				s.T().Log("Can't unmarshal price feed", err)
-				return false
-			}
+		bz, err := io.ReadAll(resp.Body)
+		if err != nil {
+			s.T().Log("Can't get price feeder response", err)
+			return false
+		}
 
-			prices, ok := respBody["prices"].(map[string]interface{})
-			if !ok {
-				s.T().Log("price feeder: no prices")
-				return false
-			}
+		var respBody map[string]interface{}
+		if err := json.Unmarshal(bz, &respBody); err != nil {
+			s.T().Log("Can't unmarshal price feed", err)
+			return false
+		}
 
-			return len(prices) > 0
-		},
-		time.Minute,
-		time.Second,
-		"price-feeder not healthy",
-	)
+		prices, ok := respBody["prices"].(map[string]interface{})
+		if !ok {
+			s.T().Log("price feeder: no prices")
+			return false
+		}
+
+		return len(prices) > 0
+	}
+
+	isHealthy := false
+	for i := 0; i < priceFeederMaxStartupTime; i++ {
+		isHealthy = checkHealth()
+		if isHealthy {
+			break
+		}
+		time.Sleep(time.Second)
+	}
+
+	if !isHealthy {
+		err := s.dkrPool.Client.Logs(docker.LogsOptions{
+			Container:    s.priceFeederResource.Container.ID,
+			OutputStream: os.Stdout,
+			ErrorStream:  os.Stderr,
+			Stdout:       true,
+			Stderr:       true,
+			Tail:         "false",
+		})
+		if err != nil {
+			s.T().Log("Error retrieving price feeder logs", err)
+		}
+
+		s.T().Fatal("price-feeder not healthy")
+	}
 
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
 }

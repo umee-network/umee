@@ -14,7 +14,7 @@ func (s *IntegrationTestSuite) TestGetToken() {
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("0.2"), t.ReserveFactor)
 	require.Equal(sdk.MustNewDecFromStr("0.25"), t.CollateralWeight)
-	require.Equal(sdk.MustNewDecFromStr("0.25"), t.LiquidationThreshold)
+	require.Equal(sdk.MustNewDecFromStr("0.26"), t.LiquidationThreshold)
 	require.Equal(sdk.MustNewDecFromStr("0.02"), t.BaseBorrowRate)
 	require.Equal(sdk.MustNewDecFromStr("0.22"), t.KinkBorrowRate)
 	require.Equal(sdk.MustNewDecFromStr("1.52"), t.MaxBorrowRate)

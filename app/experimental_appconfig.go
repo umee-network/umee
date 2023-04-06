@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/CosmWasm/wasmd/x/wasm"
-	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -59,17 +58,6 @@ func GetWasmEnabledProposals() []wasm.ProposalType {
 	return proposals
 }
 
-func (app *UmeeApp) registerCustomExtensions() {
-	if manager := app.SnapshotManager(); manager != nil {
-		err := manager.RegisterExtensions(
-			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
-		)
-		if err != nil {
-			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
-		}
-	}
-}
-
 func (app *UmeeApp) customKeepers(
 	bApp *baseapp.BaseApp, keys map[string]*storetypes.KVStoreKey, appCodec codec.Codec,
 	govRouter govv1beta1.Router, homePath string, appOpts servertypes.AppOptions,
@@ -96,17 +84,12 @@ func (app *UmeeApp) customKeepers(
 		app.DistrKeeper,
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
-		app.ScopedWasmKeeper,
-		&app.UIBCTransferKeeper.Keeper,
+		app.ScopedWasmKeeper,           // capabilities
+		&app.UIBCTransferKeeper.Keeper, // ICS20TransferPortSource
 		app.MsgServiceRouter(),
-		app.GRPCQueryRouter(),
 		wasmDir,
 		wasmConfig,
 		availableCapabilities,
 		wasmOpts...,
 	)
-}
-
-func (app *UmeeApp) initializeCustomScopedKeepers() {
-	app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
 }
