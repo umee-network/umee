@@ -1,4 +1,4 @@
-# Parity Stability Module
+# Me-Token Module
 
 ## Abstract
 
