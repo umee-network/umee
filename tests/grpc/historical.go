@@ -13,7 +13,7 @@ import (
 // records historical stamp data based on the oracle params, computes the
 // median/median deviation and then compares that to the data in the
 // median/median deviation gRPC query
-func MedianCheck(umee client.Client) error {
+func MedianCheck(umee *client.Client) error {
 	ctx, cancel := umee.NewQCtxWithCancel()
 	defer cancel()
 

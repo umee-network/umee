@@ -2,33 +2,19 @@ package tx
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 )
 
-func (c *Client) GovVoteYes(proposalID uint64) (*sdk.TxResponse, error) {
-	voter, err := c.keyringRecord.GetAddress()
-	if err != nil {
-		return nil, err
-	}
-
-	voteType, err := govtypes.VoteOptionFromString("VOTE_OPTION_YES")
-	if err != nil {
-		return nil, err
-	}
-
-	msg := govtypes.NewMsgVote(
-		voter,
-		proposalID,
-		voteType,
-	)
-	return c.BroadcastTx(msg)
+func (c *Client) GovVoteYes(proposalID uint64) error {
+	return c.BroadcastTxVotes(proposalID)
 }
 
 func (c *Client) GovParamChange(title, description string, changes []proposal.ParamChange, deposit sdk.Coins,
 ) (*sdk.TxResponse, error) {
 	content := proposal.NewParameterChangeProposal(title, description, changes)
-	fromAddr, err := c.keyringRecord.GetAddress()
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +33,7 @@ func (c *Client) GovSubmitProposal(changes []proposal.ParamChange, deposit sdk.C
 		changes,
 	)
 
-	fromAddr, err := c.keyringRecord.GetAddress()
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -57,4 +43,23 @@ func (c *Client) GovSubmitProposal(changes []proposal.ParamChange, deposit sdk.C
 	}
 
 	return c.BroadcastTx(msg)
+}
+
+func (c *Client) TxSubmitProposalWithMsg(msgs []sdk.Msg) (*sdk.TxResponse, error) {
+	deposit, err := sdk.ParseCoinsNormalized("1000uumee")
+	if err != nil {
+		return nil, err
+	}
+
+	fromAddr, err := c.keyringRecord[0].GetAddress()
+	if err != nil {
+		return nil, err
+	}
+
+	submitProposal, err := v1.NewMsgSubmitProposal(msgs, deposit, fromAddr.String(), "")
+	if err != nil {
+		return nil, err
+	}
+
+	return c.BroadcastTx(submitProposal)
 }

@@ -23,9 +23,8 @@ type Client struct {
 func NewClient(
 	chainID,
 	tmrpcEndpoint,
-	grpcEndpoint,
-	accountName,
-	accountMnemonic string,
+	grpcEndpoint string,
+	mnemonics []string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (uc Client, err error) {
@@ -34,7 +33,7 @@ func NewClient(
 	if err != nil {
 		return Client{}, err
 	}
-	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, accountName, accountMnemonic, gasAdjustment, encCfg)
+	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	return uc, err
 }
 

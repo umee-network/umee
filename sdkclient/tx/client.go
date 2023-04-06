@@ -1,7 +1,9 @@
 package tx
 
 import (
+	"fmt"
 	"os"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -11,6 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 )
@@ -23,7 +26,7 @@ type Client struct {
 	gasAdjustment float64
 
 	keyringKeyring keyring.Keyring
-	keyringRecord  *keyring.Record
+	keyringRecord  []*keyring.Record
 	txFactory      *tx.Factory
 	encCfg         sdkparams.EncodingConfig
 }
@@ -33,8 +36,7 @@ type Client struct {
 func NewClient(
 	chainID string,
 	tmrpcEndpoint string,
-	accountName string,
-	accountMnemonic string,
+	mnemonics []string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (c *Client, err error) {
@@ -45,9 +47,17 @@ func NewClient(
 		encCfg:        encCfg,
 	}
 
-	c.keyringRecord, c.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic, encCfg.Codec)
+	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, "", nil, encCfg.Codec)
 	if err != nil {
 		return nil, err
+	}
+
+	for index, menomic := range mnemonics {
+		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic, encCfg.Codec)
+		c.keyringRecord = append(c.keyringRecord, kr)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = c.initClientCtx()
@@ -60,7 +70,7 @@ func NewClient(
 }
 
 func (c *Client) initClientCtx() error {
-	fromAddress, _ := c.keyringRecord.GetAddress()
+	fromAddress, _ := c.keyringRecord[0].GetAddress()
 
 	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(c.TMRPCEndpoint)
 	if err != nil {
@@ -85,8 +95,8 @@ func (c *Client) initClientCtx() error {
 		Client:            tmRPCClient,
 		Keyring:           c.keyringKeyring,
 		FromAddress:       fromAddress,
-		FromName:          c.keyringRecord.Name,
-		From:              c.keyringRecord.Name,
+		FromName:          c.keyringRecord[0].Name,
+		From:              c.keyringRecord[0].Name,
 		OutputFormat:      "json",
 		UseLedger:         false,
 		Simulate:          false,
@@ -110,5 +120,46 @@ func (c *Client) initTxFactory() {
 }
 
 func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
+	c.ClientContext.From = c.keyringRecord[0].Name
+	c.ClientContext.FromName = c.keyringRecord[0].Name
+	c.ClientContext.FromAddress, _ = c.keyringRecord[0].GetAddress()
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
+}
+
+func (c *Client) BroadcastTxVotes(proposalID uint64) error {
+	for index := range c.keyringRecord {
+		voter, err := c.keyringRecord[index].GetAddress()
+		if err != nil {
+			return err
+		}
+
+		voteType, err := govtypes.VoteOptionFromString("VOTE_OPTION_YES")
+		if err != nil {
+			return err
+		}
+
+		msg := govtypes.NewMsgVote(
+			voter,
+			proposalID,
+			voteType,
+		)
+
+		c.ClientContext.From = c.keyringRecord[index].Name
+		c.ClientContext.FromName = c.keyringRecord[index].Name
+		c.ClientContext.FromAddress, _ = c.keyringRecord[index].GetAddress()
+
+		for retry := 0; retry < 5; retry++ {
+			// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
+			if _, err = BroadcastTx(*c.ClientContext, *c.txFactory, []sdk.Msg{msg}...); err == nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

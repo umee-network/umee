@@ -12,22 +12,17 @@ const (
 	keyringAppName    = "testnet"
 )
 
-func CreateAccountFromMnemonic(name, mnemonic string, cdc codec.Codec) (*keyring.Record, keyring.Keyring, error) {
-	kb, err := keyring.New(keyringAppName, keyring.BackendTest, "", nil, cdc)
-	if err != nil {
-		return nil, nil, err
-	}
-
+func CreateAccountFromMnemonic(kb keyring.Keyring, name, mnemonic string, cdc codec.Codec) (*keyring.Record, error) {
 	keyringAlgos, _ := kb.SupportedAlgorithms()
 	algo, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), keyringAlgos)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	account, err := kb.NewAccount(name, mnemonic, "", sdk.FullFundraiserPath, algo)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return account, kb, nil
+	return account, nil
 }

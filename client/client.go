@@ -9,26 +9,24 @@ import (
 
 // Client sdkclient.Client and provides umee chain specific transactions and queries.
 type Client struct {
-	sdkclient.Client
+	*sdkclient.Client
 }
 
 // NewClient constructs Client object.
 func NewClient(
 	chainID,
 	tmrpcEndpoint,
-	grpcEndpoint,
-	accountName,
-	accountMnemonic string,
+	grpcEndpoint string,
+	mnemonics []string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
-) (Client, error) {
-	c, err := sdkclient.NewClient(chainID, tmrpcEndpoint, grpcEndpoint,
-		accountName, accountMnemonic, gasAdjustment, encCfg)
+) (*Client, error) {
+	c, err := sdkclient.NewClient(chainID, tmrpcEndpoint, grpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	if err != nil {
-		return Client{}, err
+		return nil, err
 	}
-	return Client{
-		Client: c,
+	return &Client{
+		Client: &c,
 	}, nil
 }
 

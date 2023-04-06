@@ -9,7 +9,7 @@ import (
 )
 
 func listenForPrices(
-	umee client.Client,
+	umee *client.Client,
 	params oracletypes.Params,
 	chainHeight *sdkclient.ChainHeightListener,
 ) (*PriceStore, error) {
