@@ -53,7 +53,7 @@ func NewClient(
 	}
 
 	for index, menomic := range mnemonics {
-		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic, encCfg.Codec)
+		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic)
 		c.keyringRecord = append(c.keyringRecord, kr)
 		if err != nil {
 			return nil, err

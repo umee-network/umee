@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,7 +11,7 @@ const (
 	keyringAppName    = "testnet"
 )
 
-func CreateAccountFromMnemonic(kb keyring.Keyring, name, mnemonic string, cdc codec.Codec) (*keyring.Record, error) {
+func CreateAccountFromMnemonic(kb keyring.Keyring, name, mnemonic string) (*keyring.Record, error) {
 	keyringAlgos, _ := kb.SupportedAlgorithms()
 	algo, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), keyringAlgos)
 	if err != nil {
