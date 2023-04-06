@@ -14,7 +14,7 @@ import (
 // median/median deviation and then compares that to the data in the
 // median/median deviation gRPC query
 func MedianCheck(umee client.Client) error {
-	ctx, cancel := umee.NewQCtx()
+	ctx, cancel := umee.NewQCtxWithCancel()
 	defer cancel()
 
 	params, err := umee.QueryOracleParams()
@@ -27,7 +27,7 @@ func MedianCheck(umee client.Client) error {
 		denomAcceptList = append(denomAcceptList, strings.ToUpper(acceptItem.SymbolDenom))
 	}
 
-	chainHeight, err := NewChainHeight(ctx, umee.TmClient(), zerolog.Nop())
+	chainHeight, err := umee.NewChainHeightListener(ctx, zerolog.Nop())
 	if err != nil {
 		return err
 	}

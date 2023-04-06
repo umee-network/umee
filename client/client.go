@@ -35,3 +35,7 @@ func NewClient(
 func (c *Client) NewQCtx() (context.Context, context.CancelFunc) {
 	return c.Query.NewCtx()
 }
+
+func (c *Client) NewQCtxWithCancel() (context.Context, context.CancelFunc) {
+	return c.Query.NewCtxWithCancel()
+}

@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	"github.com/umee-network/umee/v4/client"
+	sdkclient "github.com/umee-network/umee/v4/sdkclient"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 func listenForPrices(
 	umee client.Client,
 	params oracletypes.Params,
-	chainHeight *ChainHeight,
+	chainHeight *sdkclient.ChainHeightListener,
 ) (*PriceStore, error) {
 	priceStore := NewPriceStore()
 	// Wait until the beginning of a median period

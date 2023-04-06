@@ -34,6 +34,10 @@ func (c Client) NewCtx() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), c.QueryTimeout)
 }
 
+func (c Client) NewCtxWithCancel() (context.Context, context.CancelFunc) {
+	return context.WithCancel(context.Background())
+}
+
 func dialerFunc(_ context.Context, addr string) (net.Conn, error) {
 	return Connect(addr)
 }
