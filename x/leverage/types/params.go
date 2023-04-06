@@ -100,6 +100,10 @@ func validateLiquidationThreshold(i interface{}) error {
 		return fmt.Errorf("complete liquidation threshold must be positive: %d", v)
 	}
 
+	if v.GT(sdk.OneDec()) {
+		return fmt.Errorf("complete liquidation threshold cannot exceed 1: %d", v)
+	}
+
 	return nil
 }
 

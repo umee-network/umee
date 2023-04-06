@@ -50,49 +50,51 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	// gomock initializations
 	leverageCtrl := gomock.NewController(t)
 	defer leverageCtrl.Finish()
-	leverageMlk := mocks.NewMockLeverageKeeper(leverageCtrl)
+	leverageMock := mocks.NewMockLeverageKeeper(leverageCtrl)
 
 	oracleCtrl := gomock.NewController(t)
 	defer oracleCtrl.Finish()
-	oracleMlk := mocks.NewMockOracle(oracleCtrl)
+	oracleMock := mocks.NewMockOracle(oracleCtrl)
 
 	interfaceRegistry := ctypes.NewInterfaceRegistry()
 	marshaller := codec.NewProtoCodec(interfaceRegistry)
-	ctx, k := initFullKeeper(t, marshaller, nil, leverageMlk, oracleMlk)
+	ctx, k := initFullKeeper(t, marshaller, nil, leverageMock, oracleMock)
 	err := k.ResetAllQuotas(ctx)
 	assert.NilError(t, err)
 
-	// invalid token
-	leverageMlk.EXPECT().ExchangeUToken(ctx, invalidToken).Return(sdk.Coin{}, ltypes.ErrNotUToken).AnyTimes()
+	// invalid token, returns error from mock leverage
+	leverageMock.EXPECT().ExchangeUToken(ctx, invalidToken).Return(sdk.Coin{}, ltypes.ErrNotUToken).AnyTimes()
 
 	err = k.CheckAndUpdateQuota(ctx, invalidToken.Denom, invalidToken.Amount)
 	assert.ErrorIs(t, err, ltypes.ErrNotUToken)
 
-	// uumee
-	leverageMlk.EXPECT().ExchangeUToken(ctx, umeeUToken).Return(
+	// UMEE uToken, exchanges correctly, but returns ErrNotRegisteredToken when trying to get Token's settings
+	// from leverage mock keeper
+	leverageMock.EXPECT().ExchangeUToken(ctx, umeeUToken).Return(
 		sdk.NewCoin("umee", sdkmath.NewInt(100)),
 		nil,
 	).AnyTimes()
-	leverageMlk.EXPECT().GetTokenSettings(ctx, "umee").Return(ltypes.Token{}, ltypes.ErrNotRegisteredToken).AnyTimes()
+	leverageMock.EXPECT().GetTokenSettings(ctx, "umee").Return(ltypes.Token{}, ltypes.ErrNotRegisteredToken).AnyTimes()
 
 	err = k.CheckAndUpdateQuota(ctx, umeeUToken.Denom, umeeUToken.Amount)
 	// returns nil when the error is ErrNotRegisteredToken
 	assert.NilError(t, err)
 
-	// atom
-	leverageMlk.EXPECT().GetTokenSettings(ctx, "atom").Return(
+	// ATOM, returns token settings correctly from leverage mock keeper,
+	// then returns an error when trying to get token prices from oracle mock keeper
+	leverageMock.EXPECT().GetTokenSettings(ctx, "atom").Return(
 		lfixtures.Token("atom", "ATOM", 6), nil,
 	).AnyTimes()
-	oracleMlk.EXPECT().Price(ctx, "ATOM").Return(sdk.Dec{}, types.ErrMalformedLatestAvgPrice)
+	oracleMock.EXPECT().Price(ctx, "ATOM").Return(sdk.Dec{}, types.ErrMalformedLatestAvgPrice)
 
 	err = k.CheckAndUpdateQuota(ctx, atomToken.Denom, atomToken.Amount)
 	assert.ErrorIs(t, err, types.ErrMalformedLatestAvgPrice)
 
-	// dai
-	leverageMlk.EXPECT().GetTokenSettings(ctx, "dai").Return(
+	// DAI returns token settings and prices from mock leverage and oracle keepers, no errors expected
+	leverageMock.EXPECT().GetTokenSettings(ctx, "dai").Return(
 		lfixtures.Token("dai", "DAI", 6), nil,
 	).AnyTimes()
-	oracleMlk.EXPECT().Price(ctx, "DAI").Return(sdk.MustNewDecFromStr("0.37"), nil)
+	oracleMock.EXPECT().Price(ctx, "DAI").Return(sdk.MustNewDecFromStr("0.37"), nil)
 
 	err = k.SetParams(ctx, uibc.DefaultParams())
 	assert.NilError(t, err)
@@ -113,26 +115,23 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	// gomock initializations
 	leverageCtrl := gomock.NewController(t)
 	defer leverageCtrl.Finish()
-	leverageMlk := mocks.NewMockLeverageKeeper(leverageCtrl)
+	leverageMock := mocks.NewMockLeverageKeeper(leverageCtrl)
 
 	oracleCtrl := gomock.NewController(t)
 	defer oracleCtrl.Finish()
-	oracleMlk := mocks.NewMockOracle(oracleCtrl)
+	oracleMock := mocks.NewMockOracle(oracleCtrl)
 
 	interfaceRegistry := ctypes.NewInterfaceRegistry()
 	marshaller := codec.NewProtoCodec(interfaceRegistry)
-	ctx, k := initFullKeeper(t, marshaller, nil, leverageMlk, oracleMlk)
+	ctx, k := initFullKeeper(t, marshaller, nil, leverageMock, oracleMock)
 	err := k.ResetAllQuotas(ctx)
 	assert.NilError(t, err)
 
-	// umee
-	leverageMlk.EXPECT().GetTokenSettings(ctx, "umee").Return(
+	// UMEE, returns token settings and prices from mock leverage and oracle keepers, no errors expected
+	leverageMock.EXPECT().GetTokenSettings(ctx, "umee").Return(
 		lfixtures.Token("umee", "UMEE", uint32(umeeExponent)), nil,
 	).AnyTimes()
-	oracleMlk.EXPECT().Price(ctx, "UMEE").Return(umeePrice, nil).AnyTimes()
-
-	err = k.SetParams(ctx, uibc.DefaultParams())
-	assert.NilError(t, err)
+	oracleMock.EXPECT().Price(ctx, "UMEE").Return(umeePrice, nil).AnyTimes()
 
 	err = k.UndoUpdateQuota(ctx, umeeToken.Denom, umeeToken.Amount)
 	// the result is ignored due to quota reset
@@ -151,6 +150,9 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	o, err = k.GetTokenOutflows(ctx, umeeToken.Denom)
 	assert.NilError(t, err)
 
+	// the expected quota is calculated as follows:
+	// umee_value = umee_amount * umee_price
+	// expected_quota = current_quota - umee_value
 	powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(umeeExponent))
 	expectedQuota := sdk.NewDec(umeeQuota.Int64()).Sub(sdk.NewDecFromInt(umeeToken.Amount).Quo(powerReduction).Mul(umeePrice))
 	assert.DeepEqual(t, o.Amount, expectedQuota)

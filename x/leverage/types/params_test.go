@@ -28,6 +28,13 @@ func TestParams_Validate(t *testing.T) {
 			"complete liquidation threshold must be positive",
 		},
 		{
+			"exceeded complete liquidation threshold",
+			Params{
+				CompleteLiquidationThreshold: exceededDec,
+			},
+			"complete liquidation threshold cannot exceed 1",
+		},
+		{
 			"negative minimum close factor",
 			Params{
 				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),

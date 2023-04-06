@@ -20,21 +20,12 @@ func TestGenesisValidation(t *testing.T) {
 	}{
 		{"default genesis", *DefaultGenesis(), false, ""},
 		{
-			"invalid paramos",
+			"invalid params",
 			*NewGenesisState(
 				Params{
 					CompleteLiquidationThreshold: sdk.MustNewDecFromStr("-0.4"),
 				}, nil, nil, nil, nil, 0, nil, nil, nil,
 			),
-			true,
-			"complete liquidation threshold must be positive",
-		},
-		{
-			"invalid params", GenesisState{
-				Params: Params{
-					CompleteLiquidationThreshold: sdk.MustNewDecFromStr("-0.4"),
-				},
-			},
 			true,
 			"complete liquidation threshold must be positive",
 		},
