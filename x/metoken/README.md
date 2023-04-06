@@ -1,13 +1,13 @@
-# Me-Token Module
+# MeToken Module
 
 ## Abstract
 
-This document specifies the `x/me-token` module of the Umee chain.
+This document specifies the `x/metoken` module of the Umee chain.
 
-The `me-token` module allows users to swap and redeem stable assets for an index Token. This index Token will 
+The `metoken` module allows users to swap and redeem stable assets for an index Token. This index Token will 
 maintain the parity between underlying assets given a specific configuration.
 
-The `me-token` module depends directly on `x/leverage` for supplying and withdrawing assets, and the cosmos `x/bank` 
+The `metoken` module depends directly on `x/leverage` for supplying and withdrawing assets, and the cosmos `x/bank` 
 module as these all affect account balances.
 
 ## Contents
@@ -31,7 +31,7 @@ module as these all affect account balances.
 
 ### Accepted Assets
 
-At the foundation of the `me-token` module is the _Index Registry_, which contains a list of indexes with their accepted assets and other parameters.
+At the foundation of the `metoken` module is the _Index Registry_, which contains a list of indexes with their accepted assets and other parameters.
 
 This list is controlled by governance and an emergency group. Assets that are not in the index registry are not available for swapping or redeeming for the index's Token.
 
@@ -45,29 +45,29 @@ Users have the following actions available to them:
   the initial 1:1 [Exchange Rate](#exchange-rate) to calculate the index Token amount.
   
   Calculated index Token amount will be minted and transferred to the user's account, meanwhile the accepted asset for 
-  the swap will be transferred to the `leverage` module pools and the `me-token` module reserves. The portion to be 
+  the swap will be transferred to the `leverage` module pools and the `metoken` module reserves. The portion to be 
   transferred to each one is determined by the _Index Registry_ configuration of each accepted asset.
 
 - Redeem index Token for accepted asset with the [Incentivizing Displacement](#incentivizing-displacement) applied to
   the initial 1:1 [Exchange Rate](#exchange-rate) to calculate the asset amount.
 
   The index Token amount will be withdrawn from the user's account and burned, meanwhile the chosen asset to redeem 
-  will be transferred from the `leverage` module pools and the `me-token` module reserves to the user's account.
+  will be transferred from the `leverage` module pools and the `metoken` module reserves to the user's account.
 
   When is not possible to withdraw the needed portion from the `leverage` module given its own constraints, the part 
   taken from the reserves will increase in order to complete the redemption.
 
 ### Derived Values
 
-Some important quantities that govern the behavior of the `me-token` module are derived from a combination of 
+Some important quantities that govern the behavior of the `metoken` module are derived from a combination of 
 parameters. The math and reasoning behind these values will appear below.
 
 As a reminder, the following values are always available as a basis for calculations:
 
 - Account Token balances, available through the `bank` module.
 - Index parameters from the _Index Registry_.
-- Total reserves of any Token denomination, saved in `me-token` module reserve balance.
-- Total amount of any Token denomination transferred to the `leverage` module, stored in `me-token` module [State](#state).
+- Total reserves of any Token denomination, saved in `metoken` module reserve balance.
+- Total amount of any Token denomination transferred to the `leverage` module, stored in `metoken` module [State](#state).
 
 The more complex derived values must use the values above as a basis.
 
@@ -116,7 +116,7 @@ following amount of it:
 
 ### Reserves
 
-The `me-token` module will have its own reserves to stabilize the processing of the withdrawals. A percentage of 
+The `metoken` module will have its own reserves to stabilize the processing of the withdrawals. A percentage of 
 every swap will be transferred to the reserves and a percentage of every withdrawal will be taken from the reserves. 
 This percentage is determined by the parameters of every asset.
 
@@ -124,15 +124,15 @@ This percentage is determined by the parameters of every asset.
 
 The reserves will be re-balanced twice a day. The workflow for every Token of each Index is as follows:
 
-- Get the amount of Token is transferred to the `leverage` module, stored in `me-token` module [State](#state).
-- Get the amount of Token is maintained in the `me-token` module reserves.
+- Get the amount of Token is transferred to the `leverage` module, stored in `metoken` module [State](#state).
+- Get the amount of Token is maintained in the `metoken` module reserves.
 - Check if the portion of reserves is bellow the desired and transfer the missing amount from `leverage` module to 
-  `me-token` reserves.
-- Update `rebalancing_block`, stored in the `me-token` module [State](#state).
+  `metoken` reserves.
+- Update `rebalancing_block`, stored in the `metoken` module [State](#state).
 
 ## State
 
-The `x/me-token` module keeps the following objects in state:
+The `x/metoken` module keeps the following objects in state:
 
 - Registered Index (Index settings)\*: `0x01 | index_name -> Index`
 - Transferred to `leverage` module Amount: `0x02 | denom -> sdkmath.Int`
@@ -185,6 +185,6 @@ See `todo: add link for params proto file after creation` for list of supported 
 
 ## End Block
 
-Every block, the `me-token` module runs the following steps in order:
+Every block, the `metoken` module runs the following steps in order:
 
 - Re-balance Reserves if at `rebalancing_block`
