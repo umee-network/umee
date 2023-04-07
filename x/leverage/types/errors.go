@@ -21,9 +21,12 @@ var (
 	ErrSupplyNotAllowed     = errors.Register(ModuleName, 203, "supplying of Token disabled")
 	ErrBorrowNotAllowed     = errors.Register(ModuleName, 204, "borrowing of Token disabled")
 	ErrBlacklisted          = errors.Register(ModuleName, 205, "blacklisted Token")
-	ErrCollateralWeightZero = errors.Register(ModuleName, 206,
-		"collateral weight of Token is zero: can't be used as a collateral")
-	ErrDuplicateToken = errors.Register(ModuleName, 207, "duplicate token")
+	ErrCollateralWeightZero = errors.Register(
+		ModuleName, 206,
+		"collateral weight of Token is zero: can't be used as a collateral",
+	)
+	ErrDuplicateToken          = errors.Register(ModuleName, 207, "duplicate token")
+	ErrEmptyAddAndUpdateTokens = errors.Register(ModuleName, 208, "empty add and update tokens")
 
 	// 3XX = User Positions
 	ErrInsufficientBalance    = errors.Register(ModuleName, 300, "insufficient balance")
