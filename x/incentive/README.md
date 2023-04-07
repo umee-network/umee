@@ -8,7 +8,8 @@ The incentive module allows users to `Bond` collateral `uTokens` from the `x/lev
 
 Users can `Unbond` tokens over a period of time, after which they can be withdrawn. `UnbondingDuration` is a module parameter (the same for all tokens) set by governance. Typical values might be `1 day`, `7 days`, or `0 days` (instant unbonding).
 
-The incentive module depends on the `x/leverage` module for information about users' bonded collateral, and also requires that the leverage module prevent bonded or currently unbonding collateral from being withdrawn. There are also a few more advanced interactions, such as instantly unbonding collateral when it is liquidated, and registering an `exponent` when a uToken denom is incentivized for the first time.
+The incentive module depends on the `x/leverage` module for information about users' bonded collateral, and also requires that the leverage module prevent bonded or currently unbonding collateral from being withdrawn.
+There are also a few more advanced interactions, such as instantly unbonding collateral when it is liquidated, and registering an `exponent` when a uToken denom is incentivized for the first time.
 
 ## Contents
 
