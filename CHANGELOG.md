@@ -62,6 +62,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [1959](https://github.com/umee-network/umee/pull/1959) Update IBC to v6.1
+- [1962](https://github.com/umee-network/umee/pull/1962) Increasing unit test coverage for `x/leverage`, `x/oracle`
+  and `x/uibc`
 - [1913](https://github.com/umee-network/umee/pull/1913), [1974](https://github.com/umee-network/umee/pull/1974) uibc: quota status check.
 - [1973](https://github.com/umee-network/umee/pull/1973) UIBC: handle zero Quota Params.
 
