@@ -73,22 +73,6 @@ func (k Keeper) getPaginatedIncentivePrograms(
 	return programs, err
 }
 
-// getAccountUnbondings gets all account unbondings for a single address
-func (k Keeper) getAccountUnbondings(ctx sdk.Context, addr sdk.AccAddress) []incentive.AccountUnbondings {
-	prefix := keyUnbondingsNoDenom(addr)
-	unbondings := []incentive.AccountUnbondings{}
-
-	iterator := func(key, val []byte) error {
-		au := incentive.AccountUnbondings{}
-		k.cdc.MustUnmarshal(val, &au)
-		unbondings = append(unbondings, au)
-		return nil
-	}
-
-	util.Panic(store.Iterate(k.KVStore(ctx), prefix, iterator))
-	return unbondings
-}
-
 // getAllBondDenoms gets all uToken denoms for which an account has nonzero bonded amounts.
 // useful for setting up queries which look at all of an account's bonds or unbondings.
 func (k Keeper) getAllBondDenoms(ctx sdk.Context, addr sdk.AccAddress) []string {

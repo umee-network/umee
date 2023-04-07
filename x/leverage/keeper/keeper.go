@@ -162,10 +162,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 				amountFromWallet, collateralAmount, uToken)
 		}
 
-		unbondedCollateral, err := k.unbondedCollateral(ctx, supplierAddr, uToken.Denom)
-		if err != nil {
-			return sdk.Coin{}, isFromCollateral, err
-		}
+		unbondedCollateral := k.unbondedCollateral(ctx, supplierAddr, uToken.Denom)
 		if unbondedCollateral.Amount.LT(amountFromCollateral) {
 			return sdk.Coin{}, isFromCollateral, types.ErrBondedCollateral.Wrapf(
 				"%s unbonded collateral is less than %s to withdraw from collateral",
@@ -289,10 +286,7 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 		return types.ErrInsufficientCollateral
 	}
 
-	unbondedCollateral, err := k.unbondedCollateral(ctx, borrowerAddr, uToken.Denom)
-	if err != nil {
-		return err
-	}
+	unbondedCollateral := k.unbondedCollateral(ctx, borrowerAddr, uToken.Denom)
 	if unbondedCollateral.Amount.LT(uToken.Amount) {
 		return types.ErrBondedCollateral.Wrapf(
 			"%s unbonded collateral uTokens are less than %s to decollateralize",

@@ -9,11 +9,11 @@ import (
 
 // unbondedCollateral returns the collateral an account has which is neither bonded nor currently unbonding.
 // This collateral is available for immediate decollateralizing or withdrawal.
-func (k Keeper) unbondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom string) (sdk.Coin, error) {
+func (k Keeper) unbondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom string) sdk.Coin {
 	collateralAmount := k.GetBorrowerCollateral(ctx, addr).AmountOf(uDenom)
 	unavailable := k.bondedCollateral(ctx, addr, uDenom)
 	available := sdk.MaxInt(collateralAmount.Sub(unavailable.Amount), sdk.ZeroInt())
-	return sdk.NewCoin(uDenom, available), nil
+	return sdk.NewCoin(uDenom, available)
 }
 
 // liquidateCollateral burns uToken collateral and sends the base token reward to the liquidator.

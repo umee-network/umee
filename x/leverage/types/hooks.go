@@ -1,6 +1,7 @@
 package types
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -21,7 +22,7 @@ type TokenHooks interface {
 // this amount to be reduced in the event of a liquidation.
 type BondHooks interface {
 	// Used to ensure bonded or unbonding collateral cannot be decollateralized or withdrawn.
-	GetBonded(ctx sdk.Context, addr sdk.AccAddress, uDenom string) sdk.Int
+	GetBonded(ctx sdk.Context, addr sdk.AccAddress, uDenom string) sdkmath.Int
 
 	// Used when liquidating an account, and collateral must be unbonded instantly until bonded amount
 	// is no greater than the account's remaining collateral uTokens.

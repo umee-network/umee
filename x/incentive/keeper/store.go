@@ -74,8 +74,7 @@ func (k Keeper) setIncentiveProgram(ctx sdk.Context,
 	}
 
 	key := keyIncentiveProgram(program.ID, status)
-	store.SetObject(kvStore, k.cdc, key, &program, "incentive program")
-	return nil
+	return store.SetObject(kvStore, k.cdc, key, &program, "incentive program")
 }
 
 // getNextProgramID gets the ID that will be assigned to the next incentive program passed by governance.

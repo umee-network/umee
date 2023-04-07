@@ -29,10 +29,7 @@ func (p Params) Validate() error {
 	if err := validateEmergencyUnbondFee(p.EmergencyUnbondFee); err != nil {
 		return err
 	}
-	if err := validateCommunityFundAddress(p.CommunityFundAddress); err != nil {
-		return err
-	}
-	return nil
+	return validateCommunityFundAddress(p.CommunityFundAddress)
 }
 
 func validateUnbondingDuration(v int64) error {

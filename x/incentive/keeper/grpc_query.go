@@ -147,7 +147,7 @@ func (q Querier) PendingRewards(
 	}
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
-	pending, err := k.calculateRewards(ctx, addr)
+	pending := k.calculateRewards(ctx, addr)
 	return &incentive.QueryPendingRewardsResponse{Rewards: pending}, err
 }
 

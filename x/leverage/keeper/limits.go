@@ -22,10 +22,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
 	thisCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
 	otherCollateral := totalCollateral.Sub(thisCollateral)
-	unbondedCollateral, err := k.unbondedCollateral(ctx, addr, uDenom)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
-	}
+	unbondedCollateral := k.unbondedCollateral(ctx, addr, uDenom)
 
 	// calculate borrowed value for the account, using the higher of spot or historic prices for each token
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
@@ -224,7 +221,9 @@ func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	//
 	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
 	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	moduleAvailableLiquidity := sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
+	moduleAvailableLiquidity := sdk.NewDec(liquidity.Int64()).Sub(
+		minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)),
+	)
 
 	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
 }

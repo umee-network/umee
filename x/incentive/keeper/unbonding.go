@@ -98,7 +98,7 @@ func (k Keeper) emergencyUnbond(ctx sdk.Context, addr sdk.AccAddress, uToken sdk
 // ForceSetCollateral is used by leverage module liquidation hooks to immediately unbond collateral
 // which is bonded to or unbonding from an account. The uToken it accepts as input is the amount of
 // collateral which the liquidated borrower is left with - bonds and unbondings must be removed
-// until they do not total to more than this ammount.
+// until they do not total to more than this amount.
 func (k Keeper) ForceSetCollateral(ctx sdk.Context, addr sdk.AccAddress, newCollateral sdk.Coin) error {
 	// first finishes any in-progress unbondings and claims rewards
 	if _, err := k.UpdateAccount(ctx, addr); err != nil {

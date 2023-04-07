@@ -32,7 +32,10 @@ import (
 // valid zero values for its type.
 func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
 	if bz := store.Get(key); len(bz) > 0 {
-		cdc.MustUnmarshal(bz, object)
+		err := cdc.Unmarshal(bz, object)
+		if err != nil {
+			panic(errField + " could not be unmarshaled: " + err.Error())
+		}
 		return true
 	}
 	// No stored bytes at key: return false
@@ -43,7 +46,7 @@ func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.Prot
 func SetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
 	bz, err := cdc.Marshal(object)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to encode %s, %s", errField, err.Error())
 	}
 	store.Set(key, bz)
 	return nil

@@ -13,7 +13,7 @@ const (
 )
 
 // RegisterInvariants registers the incentive module invariants
-func RegisterInvariants(ir sdk.InvariantRegistry, k Keeper) {
+func RegisterInvariants(_ sdk.InvariantRegistry, _ Keeper) {
 	// ir.RegisterRoute(incentive.ModuleName, routeNextID, NextIDInvariant(k))
 }
 

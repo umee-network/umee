@@ -24,10 +24,7 @@ func (k Keeper) claimRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, e
 	rewards := sdk.NewCoins()
 	bondedDenoms := k.getAllBondDenoms(ctx, addr)
 	for _, bondDenom := range bondedDenoms {
-		tokens, err := k.calculateSingleReward(ctx, addr, bondDenom)
-		if err != nil {
-			return sdk.NewCoins(), err
-		}
+		tokens := k.calculateSingleReward(ctx, addr, bondDenom)
 
 		// If all rewards were too small to disburse for this specific bonded denom,
 		// skips updating its reward tracker to prevent wasting of fractional rewards.
@@ -52,25 +49,22 @@ func (k Keeper) claimRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, e
 
 // calculateRewards calculates a single account's uToken's pending rewards for all bonded uToken denoms,
 // without claiming them or updating its reward trackers. Returns rewards pending.
-func (k Keeper) calculateRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, error) {
+func (k Keeper) calculateRewards(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
 	rewards := sdk.NewCoins()
 	bondedDenoms := k.getAllBondDenoms(ctx, addr)
 	for _, bondDenom := range bondedDenoms {
-		tokens, err := k.calculateSingleReward(ctx, addr, bondDenom)
-		if err != nil {
-			return sdk.NewCoins(), err
-		}
+		tokens := k.calculateSingleReward(ctx, addr, bondDenom)
 		if !tokens.IsZero() {
 			// adds rewards pending for this single bonded denom to the total
 			rewards = rewards.Add(tokens...)
 		}
 	}
-	return rewards, nil
+	return rewards
 }
 
 // calculateSingleReward calculates a single account's uToken's rewards for a single bonded uToken denom,
 // without claiming them or updating its reward tracker. Returns rewards pending.
-func (k Keeper) calculateSingleReward(ctx sdk.Context, addr sdk.AccAddress, bondDenom string) (sdk.Coins, error) {
+func (k Keeper) calculateSingleReward(ctx sdk.Context, addr sdk.AccAddress, bondDenom string) sdk.Coins {
 	rewards := sdk.NewCoins()
 
 	accumulator := k.getRewardAccumulator(ctx, bondDenom)
@@ -79,7 +73,7 @@ func (k Keeper) calculateSingleReward(ctx sdk.Context, addr sdk.AccAddress, bond
 	// Rewards are based on the amount accumulator has increased since tracker was last updated
 	delta := accumulator.Rewards.Sub(tracker.Rewards)
 	if delta.IsZero() {
-		return sdk.NewCoins(), nil
+		return sdk.NewCoins()
 	}
 
 	// Actual token amounts must be reduced according to accumulator's exponent
@@ -96,5 +90,5 @@ func (k Keeper) calculateSingleReward(ctx sdk.Context, addr sdk.AccAddress, bond
 		rewards = rewards.Add(reward)
 	}
 
-	return rewards, nil
+	return rewards
 }
