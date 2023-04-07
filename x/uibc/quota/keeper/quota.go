@@ -1,16 +1,12 @@
 package keeper
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	"github.com/cosmos/ibc-go/v5/modules/core/exported"
 
 	"github.com/umee-network/umee/v4/util/coin"
 	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -19,7 +15,7 @@ import (
 
 var ten = sdk.MustNewDecFromStr("10")
 
-// GetAllOutflows returns outflows of all tokens.
+// GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows(ctx sdk.Context) (sdk.DecCoins, error) {
 	var outflows sdk.DecCoins
 	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomOutflows)
@@ -37,29 +33,30 @@ func (k Keeper) GetAllOutflows(ctx sdk.Context) (sdk.DecCoins, error) {
 	return outflows, nil
 }
 
-// GetOutflows retunes the rate limits of ibc denom.
-func (k Keeper) GetOutflows(ctx sdk.Context, ibcDenom string) (sdk.DecCoin, error) {
+// GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
+func (k Keeper) GetTokenOutflows(ctx sdk.Context, denom string) (sdk.DecCoin, error) {
 	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(uibc.KeyTotalOutflows(ibcDenom))
+	bz := store.Get(uibc.KeyTotalOutflows(denom))
 	if bz == nil {
-		return coin.ZeroDec(ibcDenom), nil
+		return coin.ZeroDec(denom), nil
 	}
 
 	var d sdk.Dec
 	err := d.Unmarshal(bz)
 
-	return sdk.NewDecCoinFromDec(ibcDenom, d), err
+	return sdk.NewDecCoinFromDec(denom, d), err
 }
 
-// SetOutflows save the updated IBC outflows of by provided tokens.
-func (k Keeper) SetOutflows(ctx sdk.Context, outflows sdk.DecCoins) {
+// SetTokenOutflows saves provided updated IBC outflows as a pair: USD value, denom name in the
+// DecCoin structure.
+func (k Keeper) SetTokenOutflows(ctx sdk.Context, outflows sdk.DecCoins) {
 	for _, q := range outflows {
-		k.SetDenomOutflow(ctx, q)
+		k.SetTokenOutflow(ctx, q)
 	}
 }
 
-// SetDenomOutflow save the outflows of denom into store.
-func (k Keeper) SetDenomOutflow(ctx sdk.Context, outflow sdk.DecCoin) {
+// SetTokenOutflow save the outflows of denom into store.
+func (k Keeper) SetTokenOutflow(ctx sdk.Context, outflow sdk.DecCoin) {
 	store := ctx.KVStore(k.storeKey)
 	key := uibc.KeyTotalOutflows(outflow.Denom)
 	bz, err := outflow.Amount.Marshal()
@@ -135,12 +132,6 @@ func (k Keeper) ResetAllQuotas(ctx sdk.Context) error {
 // updates the current quota metrics.
 func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sdkmath.Int) error {
 	params := k.GetParams(ctx)
-
-	o, err := k.GetOutflows(ctx, denom)
-	if err != nil {
-		return err
-	}
-
 	exchangePrice, err := k.getExchangePrice(ctx, denom, newOutflow)
 	if err != nil {
 		if ltypes.ErrNotRegisteredToken.Is(err) {
@@ -150,17 +141,21 @@ func (k Keeper) CheckAndUpdateQuota(ctx sdk.Context, denom string, newOutflow sd
 		}
 	}
 
+	o, err := k.GetTokenOutflows(ctx, denom)
+	if err != nil {
+		return err
+	}
 	o.Amount = o.Amount.Add(exchangePrice)
-	if o.Amount.GT(params.TokenQuota) {
+	if !params.TokenQuota.IsZero() && o.Amount.GT(params.TokenQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
 	totalOutflowSum := k.GetTotalOutflow(ctx).Add(exchangePrice)
-	if totalOutflowSum.GT(params.TotalQuota) {
+	if !params.TotalQuota.IsZero() && totalOutflowSum.GT(params.TotalQuota) {
 		return uibc.ErrQuotaExceeded
 	}
 
-	k.SetDenomOutflow(ctx, o)
+	k.SetTokenOutflow(ctx, o)
 	k.SetTotalOutflowSum(ctx, totalOutflowSum)
 	return nil
 }
@@ -197,7 +192,7 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 
 // UndoUpdateQuota subtracts `amount` from quota metric of the ibc denom.
 func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.Int) error {
-	o, err := k.GetOutflows(ctx, denom)
+	o, err := k.GetTokenOutflows(ctx, denom)
 	if err != nil {
 		return err
 	}
@@ -219,41 +214,9 @@ func (k Keeper) UndoUpdateQuota(ctx sdk.Context, denom string, amount sdkmath.In
 		return nil
 	}
 
-	k.SetDenomOutflow(ctx, o)
+	k.SetTokenOutflow(ctx, o)
 
 	totalOutflowSum := k.GetTotalOutflow(ctx)
 	k.SetTotalOutflowSum(ctx, totalOutflowSum.Sub(exchangePrice))
 	return nil
-}
-
-// GetFundsFromPacket returns transfer amount and denom
-func (k Keeper) GetFundsFromPacket(packet exported.PacketI) (sdkmath.Int, string, error) {
-	var packetData transfertypes.FungibleTokenPacketData
-	err := json.Unmarshal(packet.GetData(), &packetData)
-	if err != nil {
-		return sdkmath.Int{}, "", err
-	}
-
-	amount, ok := sdkmath.NewIntFromString(packetData.Amount)
-	if !ok {
-		return sdkmath.Int{}, "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
-	}
-
-	return amount, k.GetLocalDenom(packetData.Denom), nil
-}
-
-// GetLocalDenom retruns ibc denom
-// Expected denoms in the following cases:
-//
-// send non-native: transfer/channel-0/denom -> ibc/xxx
-// send native: denom -> denom
-// recv (B)non-native: denom
-// recv (B)native: transfer/channel-0/denom
-func (k Keeper) GetLocalDenom(denom string) string {
-	if strings.HasPrefix(denom, "transfer/") {
-		denomTrace := transfertypes.ParseDenomTrace(denom)
-		return denomTrace.IBCDenom()
-	}
-
-	return denom
 }

@@ -46,6 +46,36 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
+
+## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-5
+
+### Features
+
+- [1963](https://github.com/umee-network/umee/pull/1963) ICA Host integration.
+- [1953](https://github.com/umee-network/umee/pull/1953) IBC: accept only inflow of leverage registered tokens
+- [1967](https://github.com/umee-network/umee/pull/1967) Gravity Bridge phase out phase-2: disable Umee -> Ethereum transfers.
+- [1967](https://github.com/umee-network/umee/pull/1967) Gravity Bridge phase out phase-2: disable Umee -> Ethereum transfers.
+
+### Improvements
+
+- [1959](https://github.com/umee-network/umee/pull/1959) Update IBC to v6.1
+- [1962](https://github.com/umee-network/umee/pull/1962) Increasing unit test coverage for `x/leverage`, `x/oracle`
+  and `x/uibc`
+- [1913](https://github.com/umee-network/umee/pull/1913), [1974](https://github.com/umee-network/umee/pull/1974) uibc: quota status check.
+- [1973](https://github.com/umee-network/umee/pull/1973) UIBC: handle zero Quota Params.
+
+### Fixes
+
+- [1929](https://github.com/umee-network/umee/pull/1929) Leverage: `MaxWithdraw` now accounts for `MinCollateralLiquidity`
+- [1957](https://github.com/umee-network/umee/pull/1957) Leverage: Reserved amount per block now rounds up.
+- [1956](https://github.com/umee-network/umee/pull/1956) Leverage: token liquidation threshold must be bigger than collateral_weight.
+- [1954](https://github.com/umee-network/umee/pull/1954) Leverage: `MaxBorrow` now accounts for
+  `MinCollateralLiquidity` and `MaxSupplyUtilization`
+- [1968](https://github.com/umee-network/umee/pull/1968) Leverage: fix type cast of AdjustedBorrow in ExportGenesis
+
 ## [v4.2.0](https://github.com/umee-network/umee/releases/tag/v4.2.0) - 2023-03-15
 
 ### Features

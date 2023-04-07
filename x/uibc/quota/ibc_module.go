@@ -8,24 +8,29 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	transfertypes "github.com/cosmos/ibc-go/v5/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v5/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v5/modules/core/05-port/types"
+	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 
 	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
 
-type IBCMiddleware struct {
+var _ porttypes.Middleware = ICS20Middleware{}
+
+// ICS20Middleware overwrites OnAcknowledgementPacket and OnTimeoutPacket to revert
+// quota update on acknowledgement error or timeout.
+type ICS20Middleware struct {
 	porttypes.IBCModule
 	keeper keeper.Keeper
 	cdc    codec.JSONCodec
 }
 
-// NewIBCMiddleware creates a new IBCMiddlware given the keeper and underlying application
-func NewIBCMiddleware(app porttypes.IBCModule, k keeper.Keeper, cdc codec.JSONCodec) IBCMiddleware {
-	return IBCMiddleware{
+// NewICS20Middleware is an IBCMiddlware constructor.
+// `app` must be an ICS20 app.
+func NewICS20Middleware(app porttypes.IBCModule, k keeper.Keeper, cdc codec.JSONCodec) ICS20Middleware {
+	return ICS20Middleware{
 		IBCModule: app,
 		keeper:    k,
 		cdc:       cdc,
@@ -33,7 +38,7 @@ func NewIBCMiddleware(app porttypes.IBCModule, k keeper.Keeper, cdc codec.JSONCo
 }
 
 // OnAcknowledgementPacket implements types.Middleware
-func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
+func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
 	relayer sdk.AccAddress,
 ) error {
 	var ack channeltypes.Acknowledgement
@@ -41,15 +46,18 @@ func (im IBCMiddleware) OnAcknowledgementPacket(ctx sdk.Context, packet channelt
 		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
-		err := im.RevertQuotaUpdate(ctx, packet.Data)
-		emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
+		params := im.keeper.GetParams(ctx)
+		if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
+			err := im.RevertQuotaUpdate(ctx, packet.Data)
+			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
+		}
 	}
 
 	return im.IBCModule.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
 }
 
 // OnTimeoutPacket implements types.Middleware
-func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
+func (im ICS20Middleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
 	err := im.RevertQuotaUpdate(ctx, packet.Data)
 	emitOnRevertQuota(&ctx, "timeout", packet.Data, err)
 
@@ -57,7 +65,7 @@ func (im IBCMiddleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Pac
 }
 
 // RevertQuotaUpdate Notifies the contract that a sent packet wasn't properly received
-func (im IBCMiddleware) RevertQuotaUpdate(
+func (im ICS20Middleware) RevertQuotaUpdate(
 	ctx sdk.Context,
 	packetData []byte,
 ) error {
