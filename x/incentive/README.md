@@ -151,7 +151,7 @@ Permissionless:
 - `MsgClaim` Claims any pending rewards for all bonded uTokens
 - `MsgBond` Bonds uToken collateral (and claims pending rewarda)
 - `MsgBeginUnbonding` Starts unbonding uToken collateral (and claims pending rewards)
-- `MsgBeginUnbonding` Instantly unbonds uToken collateral for a fee based on amount unbonded (and claims pending rewards)
+- `MsgEmergencyUnbond` Instantly unbonds uToken collateral for a fee based on amount unbonded (and claims pending rewards)
 - `MsgSponsor` Funds an entire incentive program with rewards, if it has been passed by governance but not yet funded.
 
 Governance controlled:
