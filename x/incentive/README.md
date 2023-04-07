@@ -39,6 +39,9 @@ Unbonding uTokens are not eligible for incentive rewards while they unbond, but 
 
 The module parameter `MaxUnbondings` limits how many concurrent unbondings a user can have of the same uToken denom, to prevent spam.
 
+Additionally, `MsgEmergencyUnbond` can instantly unbond collateral, starting with in-progress unbondings then bonded tokens.
+This costs a fee - for example, if the parameter `EmergencyUnbondFee` is `0.01`, then 1% of the uTokens unbonded would be donated to the `x/leverage` module reserves while the other 99% are returned to the user.
+
 ### Incentive Programs
 
 An `IncentiveProgram` is a fixed-duration program which distributes a predetermined amount of one reward token to users which have bonded selected uTokens during its duration.
