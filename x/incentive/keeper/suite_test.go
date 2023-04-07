@@ -8,6 +8,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
@@ -79,4 +80,34 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.queryClient = incentive.NewQueryClient(queryHelper)
 	s.addrs = umeeapp.AddTestAddrsIncremental(app, s.ctx, 1, sdk.NewInt(3000000))
 	s.msgSrvr = keeper.NewMsgServerImpl(s.app.IncentiveKeeper)
+}
+
+// newAccount creates a new account for testing, and funds it with any input tokens.
+func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
+	app, ctx := s.app, s.ctx
+
+	// create a unique address
+	s.setupAccountCounter = s.setupAccountCounter.Add(sdk.OneInt())
+	addrStr := fmt.Sprintf("%-20s", "addr"+s.setupAccountCounter.String()+"_______________")
+	addr := sdk.AccAddress([]byte(addrStr))
+
+	// register the account in AccountKeeper
+	acct := app.AccountKeeper.NewAccountWithAddress(ctx, addr)
+	app.AccountKeeper.SetAccount(ctx, acct)
+
+	s.fundAccount(addr, funds...)
+
+	return addr
+}
+
+// fundAccount mints and sends tokens to an account for testing.
+func (s *IntegrationTestSuite) fundAccount(addr sdk.AccAddress, funds ...sdk.Coin) {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	coins := sdk.NewCoins(funds...)
+	if !coins.IsZero() {
+		// mint and send tokens to account
+		require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, coins))
+		require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, coins))
+	}
 }

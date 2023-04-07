@@ -11,12 +11,14 @@ import (
 // mockLeverageKeeper implements the methods called by the incentive module on the leverage module,
 // but will not independently call any methods on the incentive module as the real leverage module does.
 type mockLeverageKeeper struct {
-	// collateral[address][uToken] = int
+	// collateral[address][uToken] = int64
 	collateral map[string]map[string]int64
 }
 
 func newMockLeverageKeeper() *mockLeverageKeeper {
-	m := &mockLeverageKeeper{}
+	m := &mockLeverageKeeper{
+		collateral: map[string]map[string]int64{},
+	}
 	return m
 }
 
@@ -36,6 +38,9 @@ func (m *mockLeverageKeeper) DonateCollateral(ctx sdk.Context, addr sdk.AccAddre
 
 // setCollateral sets an account's collateral in the mock leverage keeper without requiring any supplying action
 func (m *mockLeverageKeeper) setCollateral(addr sdk.AccAddress, denom string, amount int64) {
+	if _, ok := m.collateral[addr.String()]; !ok {
+		m.collateral[addr.String()] = map[string]int64{}
+	}
 	m.collateral[addr.String()][denom] = amount
 }
 
