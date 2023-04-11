@@ -15,7 +15,6 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/incentive"
 	"github.com/umee-network/umee/v4/x/incentive/keeper"
 	incentivemodule "github.com/umee-network/umee/v4/x/incentive/module"
@@ -106,7 +105,7 @@ func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 // advanceTime runs the functions normally contained in EndBlocker with a fixed time elapsed.
 // requires nonzero lastRewardsTime and a positive duration. Requires no error.
 func (s *IntegrationTestSuite) advanceTime(duration int64) {
-	k, ctx := s.k, s.ctx
+	k, ctx, require := s.k, s.ctx, s.Require()
 	if duration <= 0 {
 		panic("advanceTime needs positive duration")
 	}
@@ -118,8 +117,8 @@ func (s *IntegrationTestSuite) advanceTime(duration int64) {
 
 	// simulate new block time to target an exact time elapsed
 	blockTime := prevTime + duration
-	util.Panic(k.UpdateRewards(ctx, prevTime, blockTime))
-	util.Panic(k.UpdatePrograms(ctx, blockTime))
+	require.Nil(k.UpdateRewards(ctx, prevTime, blockTime), "update rewards")
+	require.Nil(k.UpdatePrograms(ctx, blockTime), "update programs")
 }
 
 // fundAccount mints and sends tokens to an account for testing.
