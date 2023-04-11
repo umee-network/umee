@@ -5,12 +5,23 @@ import (
 	"strconv"
 	"time"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
-	"github.com/umee-network/umee/v4/tests/grpc/client"
+	"github.com/umee-network/umee/v4/client"
 )
 
-func SubmitAndPassProposal(umeeClient *client.UmeeClient, changes []proposal.ParamChange) error {
-	resp, err := umeeClient.TxClient.TxSubmitProposal(changes)
+var govDeposit sdk.Coins
+
+func init() {
+	var err error
+	govDeposit, err = sdk.ParseCoinsNormalized("10000000uumee")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func SubmitAndPassProposal(umee client.Client, changes []proposal.ParamChange) error {
+	resp, err := umee.Tx.GovSubmitProposal(changes, govDeposit)
 	if err != nil {
 		return err
 	}
@@ -35,12 +46,12 @@ func SubmitAndPassProposal(umeeClient *client.UmeeClient, changes []proposal.Par
 		return err
 	}
 
-	_, err = umeeClient.TxClient.TxVoteYes(proposalIDInt)
+	_, err = umee.Tx.GovVoteYes(proposalIDInt)
 	if err != nil {
 		return err
 	}
 
-	prop, err := umeeClient.QueryClient.QueryProposal(proposalIDInt)
+	prop, err := umee.Query.GovProposal(proposalIDInt)
 	if err != nil {
 		return err
 	}
@@ -50,7 +61,7 @@ func SubmitAndPassProposal(umeeClient *client.UmeeClient, changes []proposal.Par
 	fmt.Printf("sleeping %s until end of voting period + 1 block\n", sleepDuration)
 	time.Sleep(sleepDuration)
 
-	prop, err = umeeClient.QueryClient.QueryProposal(proposalIDInt)
+	prop, err = umee.Query.GovProposal(proposalIDInt)
 	if err != nil {
 		return err
 	}
