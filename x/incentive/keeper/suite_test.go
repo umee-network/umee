@@ -111,3 +111,17 @@ func (s *IntegrationTestSuite) fundAccount(addr sdk.AccAddress, funds ...sdk.Coi
 		require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, coins))
 	}
 }
+
+// bond utokens to an account and require no errors. Use when setting up incentive scenarios.
+func (s *IntegrationTestSuite) bond(addr sdk.AccAddress, coins ...sdk.Coin) {
+	srv, ctx, require := s.msgSrvr, s.ctx, s.Require()
+
+	for _, coin := range coins {
+		msg := &incentive.MsgBond{
+			Account: addr.String(),
+			Asset:   coin,
+		}
+		_, err := srv.Bond(ctx, msg)
+		require.NoError(err, "bond")
+	}
+}
