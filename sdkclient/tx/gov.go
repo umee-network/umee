@@ -1,15 +1,13 @@
 package tx
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 )
-
-func (c *Client) GovVoteYes(proposalID uint64) error {
-	return c.BroadcastTxVotes(proposalID)
-}
 
 func (c *Client) GovParamChange(title, description string, changes []proposal.ParamChange, deposit sdk.Coins,
 ) (*sdk.TxResponse, error) {
@@ -62,4 +60,43 @@ func (c *Client) TxSubmitProposalWithMsg(msgs []sdk.Msg) (*sdk.TxResponse, error
 	}
 
 	return c.BroadcastTx(submitProposal)
+}
+
+// TxGovVoteYesAll creates transactions (one for each registered account) to approve a given proposal.
+func (c *Client) TxGovVoteYesAll(proposalID uint64) error {
+	for index := range c.keyringRecord {
+		voter, err := c.keyringRecord[index].GetAddress()
+		if err != nil {
+			return err
+		}
+
+		voteType, err := govtypes.VoteOptionFromString("VOTE_OPTION_YES")
+		if err != nil {
+			return err
+		}
+
+		msg := govtypes.NewMsgVote(
+			voter,
+			proposalID,
+			voteType,
+		)
+
+		c.ClientContext.From = c.keyringRecord[index].Name
+		c.ClientContext.FromName = c.keyringRecord[index].Name
+		c.ClientContext.FromAddress, _ = c.keyringRecord[index].GetAddress()
+
+		for retry := 0; retry < 5; retry++ {
+			// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
+			if _, err = BroadcastTx(*c.ClientContext, *c.txFactory, []sdk.Msg{msg}...); err == nil {
+				break
+			}
+			time.Sleep(time.Second * 1)
+		}
+
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -6,11 +6,11 @@ import (
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
-func (c *Client) OracleQueryClient() oracletypes.QueryClient {
+func (c Client) OracleQueryClient() oracletypes.QueryClient {
 	return oracletypes.NewQueryClient(c.Query.GrpcConn)
 }
 
-func (c *Client) QueryOracleParams() (oracletypes.Params, error) {
+func (c Client) QueryOracleParams() (oracletypes.Params, error) {
 	ctx, cancel := c.NewQCtx()
 	defer cancel()
 
@@ -18,7 +18,7 @@ func (c *Client) QueryOracleParams() (oracletypes.Params, error) {
 	return queryResponse.Params, err
 }
 
-func (c *Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
+func (c Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
 	ctx, cancel := c.NewQCtx()
 	defer cancel()
 
@@ -26,7 +26,7 @@ func (c *Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
 	return queryResponse.ExchangeRates, err
 }
 
-func (c *Client) QueryMedians() ([]oracletypes.Price, error) {
+func (c Client) QueryMedians() ([]oracletypes.Price, error) {
 	ctx, cancel := c.NewQCtx()
 	defer cancel()
 
@@ -34,7 +34,7 @@ func (c *Client) QueryMedians() ([]oracletypes.Price, error) {
 	return resp.Medians, err
 }
 
-func (c *Client) QueryMedianDeviations() ([]oracletypes.Price, error) {
+func (c Client) QueryMedianDeviations() ([]oracletypes.Price, error) {
 	ctx, cancel := c.NewQCtx()
 	defer cancel()
 

@@ -82,7 +82,7 @@ type IntegrationTestSuite struct {
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
-	umee                *client.Client
+	umee                client.Client
 }
 
 func TestIntegrationTestSuite(t *testing.T) {

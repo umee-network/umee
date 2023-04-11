@@ -9,10 +9,11 @@ import (
 
 // Client sdkclient.Client and provides umee chain specific transactions and queries.
 type Client struct {
-	*sdkclient.Client
+	sdkclient.Client
 }
 
 // NewClient constructs Client object.
+// Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
 	chainID,
 	tmrpcEndpoint,
@@ -20,20 +21,20 @@ func NewClient(
 	mnemonics []string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
-) (*Client, error) {
+) (Client, error) {
 	c, err := sdkclient.NewClient(chainID, tmrpcEndpoint, grpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	if err != nil {
-		return nil, err
+		return Client{}, err
 	}
-	return &Client{
-		Client: &c,
+	return Client{
+		Client: c,
 	}, nil
 }
 
-func (c *Client) NewQCtx() (context.Context, context.CancelFunc) {
+func (c Client) NewQCtx() (context.Context, context.CancelFunc) {
 	return c.Query.NewCtx()
 }
 
-func (c *Client) NewQCtxWithCancel() (context.Context, context.CancelFunc) {
+func (c Client) NewQCtxWithCancel() (context.Context, context.CancelFunc) {
 	return c.Query.NewCtxWithCancel()
 }

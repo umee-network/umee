@@ -24,7 +24,7 @@ func init() {
 	}
 }
 
-func SubmitAndPassProposal(umee *client.Client, changes []proposal.ParamChange) error {
+func SubmitAndPassProposal(umee client.Client, changes []proposal.ParamChange) error {
 	resp, err := umee.Tx.GovSubmitProposal(changes, govDeposit)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func OracleParamChanges(
 	}
 }
 
-func UIBCIBCTransferSatusUpdate(umeeClient *client.Client, status uibc.IBCTransferStatus) error {
+func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransferStatus) error {
 	msg := uibc.MsgGovSetIBCStatus{
 		Authority:   authtypes.NewModuleAddress(gtypes.ModuleName).String(),
 		Title:       "Update the ibc transfer status",
@@ -77,7 +77,7 @@ func UIBCIBCTransferSatusUpdate(umeeClient *client.Client, status uibc.IBCTransf
 	return err
 }
 
-func MakeVoteAndCheckProposal(umeeClient *client.Client, resp sdk.TxResponse) error {
+func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) error {
 	var proposalID string
 	for _, event := range resp.Logs[0].Events {
 		if event.Type == "submit_proposal" {
@@ -98,7 +98,7 @@ func MakeVoteAndCheckProposal(umeeClient *client.Client, resp sdk.TxResponse) er
 		return err
 	}
 
-	err = umeeClient.Tx.GovVoteYes(proposalIDInt)
+	err = umeeClient.Tx.TxGovVoteYesAll(proposalIDInt)
 	if err != nil {
 		return err
 	}

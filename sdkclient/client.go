@@ -15,6 +15,7 @@ import (
 // transactions and queries. The object should be extended by another struct to provide
 // chain specific transactions and queries. Example:
 // https://github.com/umee-network/umee/blob/main/client
+// For signing the transactions accounts are created by names like this val0, val1....
 type Client struct {
 	Query *query.Client
 	Tx    *tx.Client

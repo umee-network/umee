@@ -3,7 +3,6 @@ package tx
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -13,7 +12,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 )
@@ -33,6 +31,7 @@ type Client struct {
 
 // Initializes a cosmos sdk client context and transaction factory for
 // signing and broadcasting transactions
+// Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
 	chainID string,
 	tmrpcEndpoint string,
@@ -124,42 +123,4 @@ func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 	c.ClientContext.FromName = c.keyringRecord[0].Name
 	c.ClientContext.FromAddress, _ = c.keyringRecord[0].GetAddress()
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
-}
-
-func (c *Client) BroadcastTxVotes(proposalID uint64) error {
-	for index := range c.keyringRecord {
-		voter, err := c.keyringRecord[index].GetAddress()
-		if err != nil {
-			return err
-		}
-
-		voteType, err := govtypes.VoteOptionFromString("VOTE_OPTION_YES")
-		if err != nil {
-			return err
-		}
-
-		msg := govtypes.NewMsgVote(
-			voter,
-			proposalID,
-			voteType,
-		)
-
-		c.ClientContext.From = c.keyringRecord[index].Name
-		c.ClientContext.FromName = c.keyringRecord[index].Name
-		c.ClientContext.FromAddress, _ = c.keyringRecord[index].GetAddress()
-
-		for retry := 0; retry < 5; retry++ {
-			// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-			if _, err = BroadcastTx(*c.ClientContext, *c.txFactory, []sdk.Msg{msg}...); err == nil {
-				break
-			}
-			time.Sleep(time.Second * 1)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
