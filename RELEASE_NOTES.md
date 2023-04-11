@@ -24,7 +24,7 @@ See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.3.0/CHANGELOG.md) f
 Our dependencies have been updated. Now the binary requires `libwasmvm v1.2.1`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
 
 - copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.2.1/internal/api/libwasmvm.$(uname -m).so`
-- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.2.1/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
+- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.2.1/internal/api/libwasmvm.$(uname -m).so -O /usr/lib/libwasmvm.$(uname -m).so`
 
 You don't need to do anything if you are using our Docker image.
 
