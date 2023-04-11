@@ -36,3 +36,11 @@ func NewTestKeeper(
 func (tk *TestKeeper) SetLastRewardsTime(ctx sdk.Context, t int64) error {
 	return tk.Keeper.setLastRewardsTime(ctx, t)
 }
+
+func (tk *TestKeeper) UpdateRewards(ctx sdk.Context, prevTime, blockTime int64) error {
+	return tk.Keeper.updateRewards(ctx, prevTime, blockTime)
+}
+
+func (tk *TestKeeper) UpdatePrograms(ctx sdk.Context, blockTime int64) error {
+	return tk.Keeper.updatePrograms(ctx, blockTime)
+}

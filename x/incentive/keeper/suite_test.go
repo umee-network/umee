@@ -15,6 +15,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/x/incentive"
 	"github.com/umee-network/umee/v4/x/incentive/keeper"
 	incentivemodule "github.com/umee-network/umee/v4/x/incentive/module"
@@ -68,8 +69,10 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.k = tk
 	app.IncentiveKeeper = k
 
-	// can override default genesis here if needed
-	incentivemodule.InitGenesis(ctx, app.IncentiveKeeper, *incentive.DefaultGenesis())
+	// can override default genesis here if needed - in our case, we will set initial unix time to 1
+	gen := incentive.DefaultGenesis()
+	gen.LastRewardsTime = 1
+	incentivemodule.InitGenesis(ctx, app.IncentiveKeeper, *gen)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	incentive.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.IncentiveKeeper))
@@ -98,6 +101,25 @@ func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 	s.fundAccount(addr, funds...)
 
 	return addr
+}
+
+// advanceTime runs the functions normally contained in EndBlocker with a fixed time elapsed.
+// requires nonzero lastRewardsTime and a positive duration. Requires no error.
+func (s *IntegrationTestSuite) advanceTime(duration int64) {
+	k, ctx := s.k, s.ctx
+	if duration <= 0 {
+		panic("advanceTime needs positive duration")
+	}
+
+	prevTime := s.k.GetLastRewardsTime(ctx)
+	if prevTime <= 0 {
+		panic("last rewards time not initialized")
+	}
+
+	// simulate new block time to target an exact time elapsed
+	blockTime := prevTime + duration
+	util.Panic(k.UpdateRewards(ctx, prevTime, blockTime))
+	util.Panic(k.UpdatePrograms(ctx, blockTime))
 }
 
 // fundAccount mints and sends tokens to an account for testing.

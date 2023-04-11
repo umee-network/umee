@@ -164,6 +164,16 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// exceed max unbondings
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.ErrorIs(err, incentive.ErrMaxUnbondings, "max unbondings")
+
+	// forcefully advance time, but not enough to finish any unbondings
+	s.advanceTime(1)
+	_, err = srv.BeginUnbonding(ctx, msg)
+	require.ErrorIs(err, incentive.ErrMaxUnbondings, "max unbondings")
+
+	// forcefully advance time, enough to finish all unbondings
+	s.advanceTime(s.k.GetParams(s.ctx).UnbondingDuration)
+	_, err = srv.BeginUnbonding(ctx, msg)
+	require.Nil(err, "unbonding available after max unbondings finish")
 }
 
 func (s *IntegrationTestSuite) TestMsgGovSetParams() {
