@@ -27,18 +27,18 @@ func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sd
 	// make sure gas in enough to execute the txs
 	txf = txf.WithGas(adjusted * 3 / 2)
 
-	unsignedTx, err := txf.BuildUnsignedTx(msgs...)
+	txBuilder, err := txf.BuildUnsignedTx(msgs...)
 	if err != nil {
 		return nil, err
 	}
 
-	unsignedTx.SetFeeGranter(clientCtx.GetFeeGranterAddress())
+	txBuilder.SetFeeGranter(clientCtx.GetFeeGranterAddress())
 
-	if err = tx.Sign(txf, clientCtx.GetFromName(), unsignedTx, true); err != nil {
+	if err = tx.Sign(txf, clientCtx.GetFromName(), txBuilder, true); err != nil {
 		return nil, err
 	}
 
-	txBytes, err := clientCtx.TxConfig.TxEncoder()(unsignedTx.GetTx())
+	txBytes, err := clientCtx.TxConfig.TxEncoder()(txBuilder.GetTx())
 	if err != nil {
 		return nil, err
 	}

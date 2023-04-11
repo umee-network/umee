@@ -18,10 +18,6 @@ var (
 	KeyDirectLiquidationFee         = []byte("DirectLiquidationFee")
 )
 
-func NewParams() Params {
-	return Params{}
-}
-
 // ParamSetPairs implements the ParamSet interface and returns all the key/value
 // pairs pairs of x/leverage module's parameters.
 func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
@@ -102,6 +98,10 @@ func validateLiquidationThreshold(i interface{}) error {
 
 	if !v.IsPositive() {
 		return fmt.Errorf("complete liquidation threshold must be positive: %d", v)
+	}
+
+	if v.GT(sdk.OneDec()) {
+		return fmt.Errorf("complete liquidation threshold cannot exceed 1: %d", v)
 	}
 
 	return nil

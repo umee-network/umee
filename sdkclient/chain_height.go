@@ -1,4 +1,4 @@
-package grpc
+package sdkclient
 
 import (
 	"context"
@@ -16,11 +16,11 @@ var (
 	queryEventNewBlockHeader        = tmtypes.QueryForEvent(tmtypes.EventNewBlockHeader)
 )
 
-// ChainHeight is used to cache the chain height of the
+// ChainHeightListener is used to cache the chain height of the
 // current node which is being updated each time the
 // node sends an event of EventNewBlockHeader.
 // It starts a goroutine to subscribe to blockchain new block event and update the cached height.
-type ChainHeight struct {
+type ChainHeightListener struct {
 	Logger zerolog.Logger
 
 	mtx               sync.RWMutex
@@ -31,11 +31,11 @@ type ChainHeight struct {
 
 // NewChainHeight returns a new ChainHeight struct that
 // starts a new goroutine subscribed to EventNewBlockHeader.
-func NewChainHeight(
+func NewChainHeightListener(
 	ctx context.Context,
 	rpcClient tmrpcclient.Client,
 	logger zerolog.Logger,
-) (*ChainHeight, error) {
+) (*ChainHeightListener, error) {
 	if !rpcClient.IsRunning() {
 		if err := rpcClient.Start(); err != nil {
 			return nil, err
@@ -47,19 +47,18 @@ func NewChainHeight(
 	if err != nil {
 		return nil, err
 	}
-
-	chainHeight := &ChainHeight{
-		Logger: logger.With().Str("oracle_client", "chain_height").Logger(),
+	chainHeight := &ChainHeightListener{
+		Logger:        logger.With().Str("app_client", "chain_height").Logger(),
+		HeightChanged: make(chan int64),
 	}
-	chainHeight.HeightChanged = make(chan int64)
 
 	go chainHeight.subscribe(ctx, rpcClient, newBlockHeaderSubscription)
 
 	return chainHeight, nil
 }
 
-// updateChainHeight receives the data to be updated thread safe.
-func (chainHeight *ChainHeight) updateChainHeight(blockHeight int64, err error) {
+// setChainHeight receives the data to be updated thread safe.
+func (chainHeight *ChainHeightListener) setChainHeight(blockHeight int64, err error) {
 	chainHeight.mtx.Lock()
 	defer chainHeight.mtx.Unlock()
 
@@ -75,7 +74,7 @@ func (chainHeight *ChainHeight) updateChainHeight(blockHeight int64, err error) 
 
 // subscribe listens to new blocks being made
 // and updates the chain height.
-func (chainHeight *ChainHeight) subscribe(
+func (chainHeight *ChainHeightListener) subscribe(
 	ctx context.Context,
 	eventsClient tmrpcclient.EventsClient,
 	newBlockHeaderSubscription <-chan tmctypes.ResultEvent,
@@ -86,7 +85,7 @@ func (chainHeight *ChainHeight) subscribe(
 			err := eventsClient.Unsubscribe(ctx, tmtypes.EventNewBlockHeader, queryEventNewBlockHeader.String())
 			if err != nil {
 				chainHeight.Logger.Err(err)
-				chainHeight.updateChainHeight(chainHeight.lastChainHeight, err)
+				chainHeight.setChainHeight(chainHeight.lastChainHeight, err)
 			}
 			chainHeight.Logger.Info().Msg("closing the ChainHeight subscription")
 			return
@@ -95,16 +94,16 @@ func (chainHeight *ChainHeight) subscribe(
 			eventDataNewBlockHeader, ok := resultEvent.Data.(tmtypes.EventDataNewBlockHeader)
 			if !ok {
 				chainHeight.Logger.Err(errParseEventDataNewBlockHeader)
-				chainHeight.updateChainHeight(chainHeight.lastChainHeight, errParseEventDataNewBlockHeader)
+				chainHeight.setChainHeight(chainHeight.lastChainHeight, errParseEventDataNewBlockHeader)
 				continue
 			}
-			chainHeight.updateChainHeight(eventDataNewBlockHeader.Header.Height, nil)
+			chainHeight.setChainHeight(eventDataNewBlockHeader.Header.Height, nil)
 		}
 	}
 }
 
-// GetChainHeight returns the last chain height available.
-func (chainHeight *ChainHeight) GetChainHeight() (int64, error) {
+// GetHeight returns the last chain height available.
+func (chainHeight *ChainHeightListener) GetHeight() (int64, error) {
 	chainHeight.mtx.RLock()
 	defer chainHeight.mtx.RUnlock()
 
