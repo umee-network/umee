@@ -150,6 +150,20 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	}
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.Nil(err, "begin unbonding 50 unknown")
+
+	// attempt a large number of unbondings to hit MaxUnbondings
+	msg = &incentive.MsgBeginUnbonding{
+		Account: umeeSupplier.String(),
+		Asset:   coin.New("u/"+umeeDenom, 1),
+	}
+	// create 4 more unbondings of u/uumee on this account, to hit the default maximum of 5
+	for i := 1; i < 5; i++ {
+		_, err = srv.BeginUnbonding(ctx, msg)
+		require.Nil(err, "repeat begin unbonding 1")
+	}
+	// exceed max unbondings
+	_, err = srv.BeginUnbonding(ctx, msg)
+	require.ErrorIs(err, incentive.ErrMaxUnbondings, "max unbondings")
 }
 
 func (s *IntegrationTestSuite) TestMsgGovSetParams() {
