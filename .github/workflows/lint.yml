@@ -1,7 +1,8 @@
 name: Lint
 on:
-  pull_request:
   merge_group:
+    types: [checks_requested]
+  pull_request:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -37,10 +38,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          # Full git history is needed to get a proper list of changed files
-          # within `super-linter`.
-          fetch-depth: 0
       - name: Run super-linter
         uses: github/super-linter@v4
         env:
