@@ -6,6 +6,35 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v4.4.0
+
+Highlights:
+
+- TODO
+
+<!-- TODO: See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.3.0/CHANGELOG.md) for a full list of changes. -->
+
+### Validators
+
+We changed our GitHub release configuration, and now provide binaries in `.tar.gz` tarball.
+
+### Upgrade instructions
+
+- Download latest binary or build from source.
+- Make sure `libwasmvm.$(uname -m).so` is properly linked
+  - Run the binary to make sure it works for you: `umeed version`
+- Wait for software upgrade proposal to pass and trigger the chain upgrade.
+- Swap binaries.
+- Ensure latest Peggo (v1.4.0) is running
+- Ensure latest Price Feeder (v2.1.1) is running and check your price feeder config is up to date. Price Feeder was moved to the new repository: [ojo-network/price-feeder](https://github.com/ojo-network/price-feeder/tree/umee).
+- Restart the chain.
+
+You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
+
+#### Docker
+
+Docker images are available in [ghcr.io umee-network](https://github.com/umee-network/umee/pkgs/container/umeed) repository.
+
 ## v4.3.0
 
 Highlights:
@@ -37,25 +66,6 @@ minimum-gas-prices = "0.1uumee"
 ```
 
 You MUST also set the related parameter when starting Peggo `--cosmos-gas-prices="0.1uumee"`
-
-### Upgrade instructions
-
-- Download latest binary or build from source.
-- Make sure `libwasmvm.$(uname -m).so` is properly linked
-  - Run the binary to make sure it works for you: `umeed --version`
-- Wait for software upgrade proposal to pass and trigger the chain upgrade.
-- Swap binaries.
-- Ensure latest Peggo (v1.4.0) is running
-- Ensure latest Price Feeder (v2.1.1) is running and check your price feeder config is up to date. Price Feeder was moved to the new repository: [ojo-network/price-feeder](https://github.com/ojo-network/price-feeder/tree/umee).
-- Restart the chain.
-
-You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
-
-NOTE: BEFORE the upgrade, make sure the binary is working and libwasmvm is in your system. You can test it by running `./umeed-v4.3.0 --version`.
-
-#### Docker
-
-Docker images are available in [ghcr.io umee-network](https://github.com/umee-network/umee/pkgs/container/umeed) repository.
 
 ## v4.2.0
 
