@@ -44,6 +44,12 @@ func (ip IncentiveProgram) Validate() error {
 	if err := ip.RemainingRewards.Validate(); err != nil {
 		return err
 	}
+	if ip.RemainingRewards.Denom != ip.TotalRewards.Denom {
+		return ErrProgramRewardMismatch
+	}
+	if !ip.Funded && ip.RemainingRewards.IsPositive() {
+		return ErrNonfundedProgramRewards
+	}
 
 	if ip.Duration <= 0 {
 		return errors.Wrapf(ErrInvalidProgramDuration, "%d", ip.Duration)
@@ -51,8 +57,6 @@ func (ip IncentiveProgram) Validate() error {
 	if ip.StartTime <= 0 {
 		return errors.Wrapf(ErrInvalidProgramStart, "%d", ip.Duration)
 	}
-
-	// TODO #1749: Finish validate logic
 
 	return nil
 }

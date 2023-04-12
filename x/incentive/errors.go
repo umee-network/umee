@@ -8,12 +8,14 @@ import (
 
 var (
 	// 1XX = General
-	ErrInvalidProgramID       = errors.Register(ModuleName, 100, "invalid program ID")
-	ErrNilAsset               = errors.Register(ModuleName, 101, "nil asset")
-	ErrEmptyAddress           = errors.Register(ModuleName, 102, "empty address")
-	ErrInvalidProgramStatus   = errors.Register(ModuleName, 103, "invalid program status")
-	ErrInvalidProgramDuration = errors.Register(ModuleName, 104, "invalid program duration")
-	ErrInvalidProgramStart    = errors.Register(ModuleName, 105, "invalid program start time")
+	ErrInvalidProgramID        = errors.Register(ModuleName, 100, "invalid program ID")
+	ErrNilAsset                = errors.Register(ModuleName, 101, "nil asset")
+	ErrEmptyAddress            = errors.Register(ModuleName, 102, "empty address")
+	ErrInvalidProgramStatus    = errors.Register(ModuleName, 103, "invalid program status")
+	ErrInvalidProgramDuration  = errors.Register(ModuleName, 104, "invalid program duration")
+	ErrInvalidProgramStart     = errors.Register(ModuleName, 105, "invalid program start time")
+	ErrProgramRewardMismatch   = errors.Register(ModuleName, 106, "program total and remaining reward denoms mismatched")
+	ErrNonfundedProgramRewards = errors.Register(ModuleName, 107, "nonzero remaining rewards on a non-funded program")
 
 	// 3XX = Gov Proposal
 	ErrNonzeroRemainingRewards = errors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
