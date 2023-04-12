@@ -1,8 +1,8 @@
 name: Lint
 on:
-  pull_request:
   merge_group:
     types: [checks_requested]
+  pull_request:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
