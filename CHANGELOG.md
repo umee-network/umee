@@ -46,10 +46,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-
 ### Features
 
 - [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
+
+### Improvements
+
+- [1989](https://github.com/umee-network/umee/pull/1989) Leverage: fix the duplicate symbol denoms issue on adding new tokens to registry.
+
+### Fixes
+
+- .
 
 ## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-5
 
@@ -76,7 +83,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1954](https://github.com/umee-network/umee/pull/1954) Leverage: `MaxBorrow` now accounts for
   `MinCollateralLiquidity` and `MaxSupplyUtilization`
 - [1968](https://github.com/umee-network/umee/pull/1968) Leverage: fix type cast of AdjustedBorrow in ExportGenesis
-- [1989](https://github.com/umee-network/umee/pull/1989) Leverage: fix the duplicate symbol denoms issue on adding new tokens to registry.
 
 ## [v4.2.0](https://github.com/umee-network/umee/releases/tag/v4.2.0) - 2023-03-15
 
