@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"strings"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -70,8 +72,9 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 }
 
 // SaveOrUpdateTokenSettingsToRegistry adds new tokens or updates the new tokens settings to registry.
+// It requires maps of the currently registered base and symbol denoms, so it can prevent duplicates of either.
 func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
-	ctx sdk.Context, tokens []types.Token, registeredTokenDenoms map[string]bool, update bool,
+	ctx sdk.Context, tokens []types.Token, regdTkDenoms, regdSymDenoms map[string]bool, update bool,
 ) error {
 	for _, token := range tokens {
 		if err := token.Validate(); err != nil {
@@ -81,12 +84,16 @@ func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
 
 	for _, token := range tokens {
 		if update {
-			if _, ok := registeredTokenDenoms[token.BaseDenom]; !ok {
+			if _, ok := regdTkDenoms[token.BaseDenom]; !ok {
 				return types.ErrNotRegisteredToken.Wrapf("token %s is not registered", token.BaseDenom)
 			}
 		} else {
-			if _, ok := registeredTokenDenoms[token.BaseDenom]; ok {
+			if _, ok := regdTkDenoms[token.BaseDenom]; ok {
 				return types.ErrDuplicateToken.Wrapf("token %s is already registered", token.BaseDenom)
+			}
+
+			if _, ok := regdSymDenoms[strings.ToUpper(token.SymbolDenom)]; ok {
+				return types.ErrDuplicateToken.Wrapf("symbol denom %s is already registered", token.SymbolDenom)
 			}
 		}
 	}
