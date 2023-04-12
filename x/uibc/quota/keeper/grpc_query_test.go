@@ -59,7 +59,7 @@ func TestGRPCQueryOutflows(t *testing.T) {
 			errMsg:        "",
 			outflowAmount: 0,
 		}, {
-			name:          "non existing denom",
+			name:          "existing denom",
 			req:           uibc.QueryOutflows{Denom: "utest"},
 			errMsg:        "",
 			outflowAmount: 1111,
