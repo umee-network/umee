@@ -66,52 +66,59 @@ func (k Keeper) finishUnbondings(ctx sdk.Context, addr sdk.AccAddress) error {
 	return nil
 }
 
-// emergencyUnbond
-func (k Keeper) emergencyUnbond(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
-	penaltyAmount := k.GetParams(ctx).EmergencyUnbondFee.MulInt(uToken.Amount).TruncateInt()
-
-	// instant unbonding penalty is donated to the leverage module as uTokens which are immediately
-	// burned. leverage reserved amount increases by token equivalent.
-	if err := k.leverageKeeper.DonateCollateral(ctx, addr, sdk.NewCoin(uToken.Denom, penaltyAmount)); err != nil {
-		return err
-	}
-
-	//
-	// TODO: reduce unbondings first, then bonded amount, to reach required instant unbond amount
-	//
-
-	// bonded, unbonding, unbondings := k.BondSummary(ctx, addr, uToken.Denom)
-	// remainingToUnbond := uToken.Amount
-
-	/*
-		for _, u := range unbondings {
-			// iterate through unbondings in progress
-			if u.Amount.Denom == uToken.Denom {
-
-			}
-		}
-	*/
-
-	return incentive.ErrNotImplemented
-}
-
-// ForceSetCollateral is used by leverage module liquidation hooks to immediately unbond collateral
-// which is bonded to or unbonding from an account. The uToken it accepts as input is the amount of
-// collateral which the liquidated borrower is left with - bonds and unbondings must be removed
-// until they do not total to more than this amount.
-func (k Keeper) ForceSetCollateral(ctx sdk.Context, addr sdk.AccAddress, newCollateral sdk.Coin) error {
-	// first finishes any in-progress unbondings and claims rewards
+// ReduceBondTo is used by leverage liquidation hooks. It updates an account's unbondings and
+// rewards then uses the same logic as MsgEmergencyUnbond to instantly unbond some collateral.
+func (k Keeper) ReduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral sdk.Coin) error {
+	// ensure rewards and unbondings are up to date when using liquidation hooks
 	if _, err := k.UpdateAccount(ctx, addr); err != nil {
 		return err
 	}
-	// then detects if bonded or unbonding collateral needs to be forcefully reduced
-	bonded, _, _ := k.BondSummary(ctx, addr, newCollateral.Denom)
-	if bonded.Amount.GT(newCollateral.Amount) {
-		//
-		// TODO: reduce unbondings first, then bonded amount, until bonded = newCollateral
-		//
-		return incentive.ErrNotImplemented
+	return k.reduceBondTo(ctx, addr, newCollateral)
+}
+
+// reduceBondTo is used by MsgEmergencyUnbond and by liquidation hooks to immediately unbond collateral
+// which is bonded to or unbonding from an account. The uToken it accepts as input is the amount of
+// collateral which the borrower is left with: bonds and unbondings must be removed until they do not
+// total to more than this amount.
+func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral sdk.Coin) error {
+	// detect if bonded or unbonding collateral needs to be forcefully reduced
+	bonded, unbonding, unbondings := k.BondSummary(ctx, addr, newCollateral.Denom)
+	if bonded.Amount.Add(unbonding.Amount).LTE(newCollateral.Amount) {
+		// nothing needs to happen
+		return nil
 	}
-	// no reduction was required
-	return nil
+	if bonded.Amount.GTE(newCollateral.Amount) {
+		// if remaining collateral is less than or equal to bonded amount,
+		// all in-progress unbondings and potentially some bonded tokens
+		// must be instantly unbonded.
+		if err := k.setBonded(ctx, addr, newCollateral); err != nil {
+			return err
+		}
+		// set new (empty) list of unbondings, which clears it from store
+		au := incentive.AccountUnbondings{
+			Account:    addr.String(),
+			Denom:      newCollateral.Denom,
+			Unbondings: []incentive.Unbonding{},
+		}
+		return k.setUnbondings(ctx, au)
+	}
+	// if we have not returned yet, the only some in-progress unbondings will be
+	// instantly unbonded.
+	amountToUnbond := bonded.Amount.Add(unbonding.Amount).Sub(newCollateral.Amount)
+	for _, u := range unbondings {
+		// for ongoing unbondings, starting with the oldest
+		if amountToUnbond.IsPositive() {
+			specificReduction := sdk.MinInt(amountToUnbond, u.Amount.Amount)
+			// reduce the in-progress unbonding amount, and the remaining instant unbond
+			u.Amount.Amount = u.Amount.Amount.Sub(specificReduction)
+			amountToUnbond = amountToUnbond.Sub(specificReduction)
+		}
+	}
+	// set new (reduced but not empty) list of unbondings
+	au := incentive.AccountUnbondings{
+		Account:    addr.String(),
+		Denom:      newCollateral.Denom,
+		Unbondings: unbondings,
+	}
+	return k.setUnbondings(ctx, au)
 }

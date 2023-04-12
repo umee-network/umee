@@ -29,5 +29,5 @@ func (h BondHooks) GetBonded(ctx sdk.Context, addr sdk.AccAddress, uDenom string
 // ReduceBondTo instantly unbonds uTokens until an account's bonded amount of a given uToken
 // is no greater than a certain amount.
 func (h BondHooks) ReduceBondTo(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
-	return h.k.ForceSetCollateral(ctx, addr, uToken)
+	return h.k.ReduceBondTo(ctx, addr, uToken)
 }

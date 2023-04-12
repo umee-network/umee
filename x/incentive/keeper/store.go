@@ -175,6 +175,7 @@ func (k Keeper) getUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string
 
 // setUnbondings stores the list of unbondings currently associated with an account and denom.
 // It also updates the account's stored unbonding amounts, and thus the module's total unbonding as well.
+// Any zero-amount unbondings are automatically filtered out before storage.
 //
 // REQUIREMENT: This is the only function which is allowed to set unbonding amounts and total unbonding.
 func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbondings) error {
@@ -185,6 +186,15 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		return err
 	}
 	denom := unbondings.Denom
+
+	// remove any zero-amount unbondings before setting
+	nonzeroUnbondings := []incentive.Unbonding{}
+	for _, u := range unbondings.Unbondings {
+		if u.Amount.Amount.IsPositive() {
+			nonzeroUnbondings = append(nonzeroUnbondings, u)
+		}
+	}
+	unbondings.Unbondings = nonzeroUnbondings
 
 	// compute the new total unbonding specific to this account and denom.
 	newUnbonding := sdk.ZeroInt()

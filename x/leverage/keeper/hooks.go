@@ -44,7 +44,7 @@ func (k *Keeper) bondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom s
 // until bonded (plus unbonding) amount is equal to or less than a given uToken amount. This is used during
 // liquidations.
 //
-// If multiple modules have registered bondHooks, applies this effect to each module indepdently of the others.
+// If multiple modules have registered bondHooks, applies this effect to each module independently of the others.
 func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
 	for _, h := range k.bondHooks {
 		err := h.ReduceBondTo(ctx, addr, collateral)

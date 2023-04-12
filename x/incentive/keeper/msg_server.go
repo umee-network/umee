@@ -143,8 +143,17 @@ func (s msgServer) EmergencyUnbond(
 		)
 	}
 
-	// execute the emergency unbonding, including the fee
-	err = k.emergencyUnbond(ctx, addr, msg.Asset)
+	// instant unbonding penalty is donated to the leverage module as uTokens which are immediately
+	// burned. leverage reserved amount increases by token equivalent.
+	penaltyAmount := k.GetParams(ctx).EmergencyUnbondFee.MulInt(msg.Asset.Amount).TruncateInt()
+	if err := k.leverageKeeper.DonateCollateral(ctx, addr, sdk.NewCoin(denom, penaltyAmount)); err != nil {
+		return nil, err
+	}
+
+	// reduce account's bonded and unbonding amounts, thus releasing the appropriate collateral.
+	newBondPlusUnbond := bonded.Add(currentUnbonding).Sub(msg.Asset)
+	// besides the penalty fee, this is the same mechanism used to free collateral before liquidation.
+	err = k.reduceBondTo(ctx, addr, newBondPlusUnbond)
 	return &incentive.MsgEmergencyUnbondResponse{}, err
 }
 
