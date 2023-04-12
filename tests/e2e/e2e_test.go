@@ -77,7 +77,6 @@ func (s *IntegrationTestSuite) TestMedians() {
 }
 
 func (s *IntegrationTestSuite) TestUpdateOracleParams() {
-	s.T().Skip("paused due to validator power threshold enforcing")
 	params, err := s.umee.QueryOracleParams()
 	s.Require().NoError(err)
 
