@@ -7,6 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
+	"github.com/umee-network/umee/v4/tests/grpc"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 var powerReduction = sdk.MustNewDecFromStr("10").Power(6)
@@ -157,11 +159,38 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 			5*time.Second,
 		)
 
-		// after reset sending again tokens from umee to gaia
-		// send 100UMEE from umee to gaia
-		// Note: receiver is null means hermes will default send to key_name (from config) of target chain (gaia)
+		/****
+			IBC_Status : disble (making ibc_transfer quota check disabled)
+			No Outflows will updated
+		***/
+		// Make gov proposal to disable the quota check on ibc-transfer
+		err = grpc.UIBCIBCTransferSatusUpdate(
+			s.umee,
+			uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED,
+		)
+		s.Require().NoError(err)
+		// Get the uibc params for quota checking
+		uibcParams, err := s.umee.QueryUIBCParams()
+		s.Require().NoError(err)
+		s.Require().Equal(uibcParams.IbcStatus, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED)
+		token = sdk.NewInt64Coin("uumee", 100000000) // 100 Umee
+		// sending the umee tokens
 		s.sendIBC(s.chain.id, gaiaChainID, "", token)
+		// Check the outflows
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount)
+		s.Require().Eventually(
+			func() bool {
+				a, err := queryOutflows(umeeAPIEndpoint, appparams.BondDenom)
+				s.Require().NoError(err)
+				return a.Equal(sdk.ZeroDec())
+			},
+			time.Minute,
+			5*time.Second,
+		)
+		// resend the umee token from gaia to umee
+		s.sendIBC(gaiaChainID, s.chain.id, "", sdk.NewInt64Coin(umeeIBCHash, token.Amount.Int64()))
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdk.ZeroInt())
+
 	})
 
 	// Non registered tokens (not exists in oracle for quota test)
