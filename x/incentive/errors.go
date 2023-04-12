@@ -7,9 +7,6 @@ import (
 )
 
 var (
-	// 0 = TODO
-	ErrNotImplemented = errors.Register(ModuleName, 0, "not implemented")
-
 	// 1XX = General
 	ErrInvalidProgramID       = errors.Register(ModuleName, 100, "invalid program ID")
 	ErrNilAsset               = errors.Register(ModuleName, 101, "nil asset")
