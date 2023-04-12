@@ -14,8 +14,9 @@ import (
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
 	registeredUmee := fixtures.Token("uumee", "UMEE", 6)
-	newTokens := fixtures.Token("uabcd", "ABCD", 6)
-
+	ntA := fixtures.Token("unta", "ABCD", 6)
+	// new token with existed symbol denom
+	ntB := fixtures.Token("untb", "ABCD", 6)
 	testCases := []struct {
 		name      string
 		req       *types.MsgGovUpdateRegistry
@@ -41,7 +42,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				Title:       "test",
 				Description: "test",
 				AddTokens: []types.Token{
-					newTokens,
+					ntA,
 				},
 			},
 			true,
@@ -65,11 +66,23 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				Title:       "test",
 				Description: "test",
 				AddTokens: []types.Token{
-					newTokens,
+					ntA,
 				},
 			},
 			false,
 			"",
+		}, {
+			"regisering new token with existed symbol denom",
+			&types.MsgGovUpdateRegistry{
+				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				AddTokens: []types.Token{
+					ntB,
+				},
+			},
+			true,
+			fmt.Sprintf("symbol denom %s is already registered", ntB.SymbolDenom),
 		},
 	}
 
@@ -87,9 +100,9 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
 				s.Require().Len(tokens, 6)
 
-				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uabcd")
+				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, ntA.BaseDenom)
 				s.Require().NoError(err)
-				s.Require().Equal(token.BaseDenom, "uabcd")
+				s.Require().Equal(token.BaseDenom, ntA.BaseDenom)
 			}
 		})
 	}
