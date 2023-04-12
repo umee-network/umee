@@ -209,8 +209,6 @@ func (s msgServer) GovSetParams(
 ) (*incentive.MsgGovSetParamsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	// todo: check GetSigners security, other things
-
 	if err := msg.Params.Validate(); err != nil {
 		return &incentive.MsgGovSetParamsResponse{}, err
 	}
@@ -227,8 +225,6 @@ func (s msgServer) GovCreatePrograms(
 	msg *incentive.MsgGovCreatePrograms,
 ) (*incentive.MsgGovCreateProgramsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	// todo: check GetSigners security, other things
 
 	// For each program being created, create it with the next available ID
 	for _, program := range msg.Programs {
