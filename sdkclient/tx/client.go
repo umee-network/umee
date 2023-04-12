@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -23,18 +24,18 @@ type Client struct {
 	gasAdjustment float64
 
 	keyringKeyring keyring.Keyring
-	keyringRecord  *keyring.Record
+	keyringRecord  []*keyring.Record
 	txFactory      *tx.Factory
 	encCfg         sdkparams.EncodingConfig
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
 // signing and broadcasting transactions
+// Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
 	chainID string,
 	tmrpcEndpoint string,
-	accountName string,
-	accountMnemonic string,
+	mnemonics []string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (c *Client, err error) {
@@ -45,9 +46,17 @@ func NewClient(
 		encCfg:        encCfg,
 	}
 
-	c.keyringRecord, c.keyringKeyring, err = CreateAccountFromMnemonic(accountName, accountMnemonic, encCfg.Codec)
+	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, "", nil, encCfg.Codec)
 	if err != nil {
 		return nil, err
+	}
+
+	for index, menomic := range mnemonics {
+		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic)
+		c.keyringRecord = append(c.keyringRecord, kr)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = c.initClientCtx()
@@ -60,7 +69,7 @@ func NewClient(
 }
 
 func (c *Client) initClientCtx() error {
-	fromAddress, _ := c.keyringRecord.GetAddress()
+	fromAddress, _ := c.keyringRecord[0].GetAddress()
 
 	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(c.TMRPCEndpoint)
 	if err != nil {
@@ -85,8 +94,8 @@ func (c *Client) initClientCtx() error {
 		Client:            tmRPCClient,
 		Keyring:           c.keyringKeyring,
 		FromAddress:       fromAddress,
-		FromName:          c.keyringRecord.Name,
-		From:              c.keyringRecord.Name,
+		FromName:          c.keyringRecord[0].Name,
+		From:              c.keyringRecord[0].Name,
 		OutputFormat:      "json",
 		UseLedger:         false,
 		Simulate:          false,
@@ -110,5 +119,8 @@ func (c *Client) initTxFactory() {
 }
 
 func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
+	c.ClientContext.From = c.keyringRecord[0].Name
+	c.ClientContext.FromName = c.keyringRecord[0].Name
+	c.ClientContext.FromAddress, _ = c.keyringRecord[0].GetAddress()
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
 }
