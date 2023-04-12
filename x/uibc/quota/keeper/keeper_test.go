@@ -78,6 +78,7 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
+	app.UIbcQuotaKeeper.SetTokenOutflow(ctx, sdk.NewDecCoin("utest", sdk.NewInt(1111)))
 
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
