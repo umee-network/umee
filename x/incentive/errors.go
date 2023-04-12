@@ -16,6 +16,8 @@ var (
 	ErrInvalidProgramStart     = errors.Register(ModuleName, 105, "invalid program start time")
 	ErrProgramRewardMismatch   = errors.Register(ModuleName, 106, "program total and remaining reward denoms mismatched")
 	ErrNonfundedProgramRewards = errors.Register(ModuleName, 107, "nonzero remaining rewards on a non-funded program")
+	ErrProgramWithoutRewards   = errors.Register(ModuleName, 108, "incentive program must have nonzero rewards")
+	ErrInvalidUnbonding        = errors.Register(ModuleName, 109, "invalid unbonding")
 
 	// 3XX = Gov Proposal
 	ErrNonzeroRemainingRewards = errors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
