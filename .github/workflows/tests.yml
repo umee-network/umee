@@ -3,10 +3,6 @@ on:
   pull_request:
   merge_group:
     types: [checks_requested]
-  push:
-    branches:
-      - main
-      - release/**
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
