@@ -25,12 +25,12 @@ func validateProposedIncentiveProgram(program IncentiveProgram) error {
 // Validate performs validation on an IncentiveProgram type returning an error
 // if the program is invalid.
 func (ip IncentiveProgram) Validate() error {
-	if err := sdk.ValidateDenom(ip.UToken); err != nil {
+	if err := sdk.ValidateDenom(ip.UDenom); err != nil {
 		return err
 	}
-	if !leveragetypes.HasUTokenPrefix(ip.UToken) {
+	if !leveragetypes.HasUTokenPrefix(ip.UDenom) {
 		// only allow uToken denoms as bonded denoms
-		return errors.Wrap(leveragetypes.ErrNotUToken, ip.UToken)
+		return errors.Wrap(leveragetypes.ErrNotUToken, ip.UDenom)
 	}
 
 	if err := ip.TotalRewards.Validate(); err != nil {

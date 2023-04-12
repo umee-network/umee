@@ -25,7 +25,7 @@ message GenesisState {
 // by a single account.
 message Bond {
   string                   account = 1;
-  cosmos.base.v1beta1.Coin amount  = 2 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin uToken  = 2 [(gogoproto.nullable) = false];
 }
 
 // RewardTracker tracks the value of a given lock denom's RewardAccumulator at the
@@ -63,7 +63,7 @@ message RewardAccumulator {
 message Unbonding {
   int64                    start  = 1;
   int64                    end    = 2;
-  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin uToken = 3 [(gogoproto.nullable) = false];
 }
 
 // AccountUnbondings is a structure that is used to store all of an account's unbondings

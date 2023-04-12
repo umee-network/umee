@@ -46,12 +46,12 @@ func (msg MsgClaim) Type() string { return sdk.MsgTypeURL(&msg) }
 func NewMsgBond(account sdk.AccAddress, asset sdk.Coin) *MsgBond {
 	return &MsgBond{
 		Account: account.String(),
-		Asset:   asset,
+		UToken:  asset,
 	}
 }
 
 func (msg MsgBond) ValidateBasic() error {
-	return validateSenderAsset(msg.Account, &msg.Asset)
+	return validateSenderAsset(msg.Account, &msg.UToken)
 }
 
 func (msg MsgBond) GetSigners() []sdk.AccAddress {
@@ -73,12 +73,12 @@ func (msg MsgBond) Type() string { return sdk.MsgTypeURL(&msg) }
 func NewMsgBeginUnbonding(account sdk.AccAddress, asset sdk.Coin) *MsgBeginUnbonding {
 	return &MsgBeginUnbonding{
 		Account: account.String(),
-		Asset:   asset,
+		UToken:  asset,
 	}
 }
 
 func (msg MsgBeginUnbonding) ValidateBasic() error {
-	return validateSenderAsset(msg.Account, &msg.Asset)
+	return validateSenderAsset(msg.Account, &msg.UToken)
 }
 
 func (msg MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
@@ -100,12 +100,12 @@ func (msg MsgBeginUnbonding) Type() string { return sdk.MsgTypeURL(&msg) }
 func NewMsgEmergencyUnbond(account sdk.AccAddress, asset sdk.Coin) *MsgEmergencyUnbond {
 	return &MsgEmergencyUnbond{
 		Account: account.String(),
-		Asset:   asset,
+		UToken:  asset,
 	}
 }
 
 func (msg MsgEmergencyUnbond) ValidateBasic() error {
-	return validateSenderAsset(msg.Account, &msg.Asset)
+	return validateSenderAsset(msg.Account, &msg.UToken)
 }
 
 func (msg MsgEmergencyUnbond) GetSigners() []sdk.AccAddress {

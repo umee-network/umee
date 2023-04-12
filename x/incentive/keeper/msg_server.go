@@ -45,7 +45,7 @@ func (s msgServer) Bond(
 	msg *incentive.MsgBond,
 ) (*incentive.MsgBondResponse, error) {
 	k, ctx := s.keeper, sdk.UnwrapSDKContext(goCtx)
-	addr, denom, err := addressUToken(msg.Account, msg.Asset)
+	addr, denom, err := addressUToken(msg.Account, msg.UToken)
 	if err != nil {
 		return nil, err
 	}
@@ -62,14 +62,14 @@ func (s msgServer) Bond(
 
 	// ensure account has enough collateral to bond the new amount on top of its current amount
 	collateral := k.leverageKeeper.GetCollateral(ctx, addr, denom)
-	if collateral.IsLT(bonded.Add(msg.Asset)) {
+	if collateral.IsLT(bonded.Add(msg.UToken)) {
 		return nil, incentive.ErrInsufficientCollateral.Wrapf(
 			"collateral: %s bonded: %s requested: %s",
-			collateral, bonded, msg.Asset,
+			collateral, bonded, msg.UToken,
 		)
 	}
 
-	err = k.increaseBond(ctx, addr, msg.Asset)
+	err = k.increaseBond(ctx, addr, msg.UToken)
 	return &incentive.MsgBondResponse{}, err
 }
 
@@ -78,7 +78,7 @@ func (s msgServer) BeginUnbonding(
 	msg *incentive.MsgBeginUnbonding,
 ) (*incentive.MsgBeginUnbondingResponse, error) {
 	k, ctx := s.keeper, sdk.UnwrapSDKContext(goCtx)
-	addr, denom, err := addressUToken(msg.Account, msg.Asset)
+	addr, denom, err := addressUToken(msg.Account, msg.UToken)
 	if err != nil {
 		return nil, err
 	}
@@ -99,17 +99,17 @@ func (s msgServer) BeginUnbonding(
 	}
 
 	// reject unbondings greater than maximum available amount
-	if currentUnbonding.Add(msg.Asset).Amount.GT(bonded.Amount) {
+	if currentUnbonding.Add(msg.UToken).Amount.GT(bonded.Amount) {
 		return nil, incentive.ErrInsufficientBonded.Wrapf(
 			"bonded: %s, unbonding: %s, requested: %s",
 			bonded,
 			currentUnbonding,
-			msg.Asset,
+			msg.UToken,
 		)
 	}
 
 	// start the unbonding
-	err = k.addUnbonding(ctx, addr, msg.Asset)
+	err = k.addUnbonding(ctx, addr, msg.UToken)
 	return &incentive.MsgBeginUnbondingResponse{}, err
 }
 
@@ -118,7 +118,7 @@ func (s msgServer) EmergencyUnbond(
 	msg *incentive.MsgEmergencyUnbond,
 ) (*incentive.MsgEmergencyUnbondResponse, error) {
 	k, ctx := s.keeper, sdk.UnwrapSDKContext(goCtx)
-	addr, denom, err := addressUToken(msg.Account, msg.Asset)
+	addr, denom, err := addressUToken(msg.Account, msg.UToken)
 	if err != nil {
 		return nil, err
 	}
@@ -134,24 +134,24 @@ func (s msgServer) EmergencyUnbond(
 	bonded, currentUnbonding, _ := k.BondSummary(ctx, addr, denom)
 
 	// reject emergency unbondings greater than maximum available amount
-	if currentUnbonding.Add(msg.Asset).Amount.GT(bonded.Amount.Add(currentUnbonding.Amount)) {
+	if currentUnbonding.Add(msg.UToken).Amount.GT(bonded.Add(currentUnbonding).Amount) {
 		return nil, incentive.ErrInsufficientBonded.Wrapf(
 			"bonded: %s, unbonding: %s, requested: %s",
 			bonded,
 			currentUnbonding,
-			msg.Asset,
+			msg.UToken,
 		)
 	}
 
 	// instant unbonding penalty is donated to the leverage module as uTokens which are immediately
 	// burned. leverage reserved amount increases by token equivalent.
-	penaltyAmount := k.GetParams(ctx).EmergencyUnbondFee.MulInt(msg.Asset.Amount).TruncateInt()
+	penaltyAmount := k.GetParams(ctx).EmergencyUnbondFee.MulInt(msg.UToken.Amount).TruncateInt()
 	if err := k.leverageKeeper.DonateCollateral(ctx, addr, sdk.NewCoin(denom, penaltyAmount)); err != nil {
 		return nil, err
 	}
 
 	// reduce account's bonded and unbonding amounts, thus releasing the appropriate collateral.
-	newBondPlusUnbond := bonded.Add(currentUnbonding).Sub(msg.Asset)
+	newBondPlusUnbond := bonded.Add(currentUnbonding).Sub(msg.UToken)
 	// besides the penalty fee, this is the same mechanism used to free collateral before liquidation.
 	err = k.reduceBondTo(ctx, addr, newBondPlusUnbond)
 	return &incentive.MsgEmergencyUnbondResponse{}, err

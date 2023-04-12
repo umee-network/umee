@@ -32,7 +32,7 @@ func (s *IntegrationTestSuite) TestMsgBond() {
 	// empty address
 	msg := &incentive.MsgBond{
 		Account: "",
-		Asset:   coin.New("u/"+umeeDenom, 10),
+		UToken:  coin.New("u/"+umeeDenom, 10),
 	}
 	_, err := srv.Bond(ctx, msg)
 	require.ErrorContains(err, "empty address", "empty address")
@@ -40,7 +40,7 @@ func (s *IntegrationTestSuite) TestMsgBond() {
 	// attempt to bond 10 u/uumee out of 50 available
 	msg = &incentive.MsgBond{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New("u/"+umeeDenom, 10),
+		UToken:  coin.New("u/"+umeeDenom, 10),
 	}
 	_, err = srv.Bond(ctx, msg)
 	require.Nil(err, "bond 10")
@@ -48,7 +48,7 @@ func (s *IntegrationTestSuite) TestMsgBond() {
 	// attempt to bond 40 u/uumee out of the remaining 40 available
 	msg = &incentive.MsgBond{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New("u/"+umeeDenom, 40),
+		UToken:  coin.New("u/"+umeeDenom, 40),
 	}
 	_, err = srv.Bond(ctx, msg)
 	require.Nil(err, "bond 40")
@@ -56,7 +56,7 @@ func (s *IntegrationTestSuite) TestMsgBond() {
 	// attempt to bond 10 u/uumee, but all 50 is already bonded
 	msg = &incentive.MsgBond{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New("u/"+umeeDenom, 40),
+		UToken:  coin.New("u/"+umeeDenom, 40),
 	}
 	_, err = srv.Bond(ctx, msg)
 	require.ErrorIs(err, incentive.ErrInsufficientCollateral, "bond 10 #2")
@@ -64,7 +64,7 @@ func (s *IntegrationTestSuite) TestMsgBond() {
 	// attempt to bond 10 u/unknown, which should work
 	msg = &incentive.MsgBond{
 		Account: unknownSupplier.String(),
-		Asset:   coin.New("u/unknown", 10),
+		UToken:  coin.New("u/unknown", 10),
 	}
 	_, err = srv.Bond(ctx, msg)
 	require.Nil(err, "bond 10 unknown uToken")
@@ -72,7 +72,7 @@ func (s *IntegrationTestSuite) TestMsgBond() {
 	// attempt to bond 10 u/uumee, from an account which has zero
 	msg = &incentive.MsgBond{
 		Account: unknownSupplier.String(),
-		Asset:   coin.New("u/"+umeeDenom, 10),
+		UToken:  coin.New("u/"+umeeDenom, 10),
 	}
 	_, err = srv.Bond(ctx, msg)
 	require.ErrorIs(err, incentive.ErrInsufficientCollateral, "bond 10 #3")
@@ -80,7 +80,7 @@ func (s *IntegrationTestSuite) TestMsgBond() {
 	// attempt to bond 10 uumee, which should fail
 	msg = &incentive.MsgBond{
 		Account: errorSupplier.String(),
-		Asset:   coin.New(umeeDenom, 10),
+		UToken:  coin.New(umeeDenom, 10),
 	}
 	_, err = srv.Bond(ctx, msg)
 	require.ErrorIs(err, leveragetypes.ErrNotUToken, "bond non-uToken")
@@ -106,7 +106,7 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// empty address
 	msg := &incentive.MsgBeginUnbonding{
 		Account: "",
-		Asset:   coin.New("u/"+umeeDenom, 10),
+		UToken:  coin.New("u/"+umeeDenom, 10),
 	}
 	_, err := srv.BeginUnbonding(ctx, msg)
 	require.ErrorContains(err, "empty address", "empty address")
@@ -114,7 +114,7 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// base token
 	msg = &incentive.MsgBeginUnbonding{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New(umeeDenom, 10),
+		UToken:  coin.New(umeeDenom, 10),
 	}
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.ErrorIs(err, leveragetypes.ErrNotUToken)
@@ -122,7 +122,7 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// attempt to begin unbonding 10 u/uumee out of 50 available
 	msg = &incentive.MsgBeginUnbonding{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New("u/"+umeeDenom, 10),
+		UToken:  coin.New("u/"+umeeDenom, 10),
 	}
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.Nil(err, "begin unbonding 10")
@@ -130,7 +130,7 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// attempt to begin unbonding 50 u/uumee more (only 40 available)
 	msg = &incentive.MsgBeginUnbonding{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New("u/"+umeeDenom, 40),
+		UToken:  coin.New("u/"+umeeDenom, 40),
 	}
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.ErrorIs(err, incentive.ErrInsufficientBonded, "begin unbonding 40")
@@ -138,7 +138,7 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// attempt to begin unbonding 50 u/unknown but from the wrong account
 	msg = &incentive.MsgBeginUnbonding{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New("u/unknown", 50),
+		UToken:  coin.New("u/unknown", 50),
 	}
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.ErrorIs(err, incentive.ErrInsufficientBonded, "begin unbonding 50 unknown (wrong account)")
@@ -146,7 +146,7 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// attempt to begin unbonding 50 u/unknown but from the correct account
 	msg = &incentive.MsgBeginUnbonding{
 		Account: unknownSupplier.String(),
-		Asset:   coin.New("u/unknown", 50),
+		UToken:  coin.New("u/unknown", 50),
 	}
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.Nil(err, "begin unbonding 50 unknown")
@@ -154,7 +154,7 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// attempt a large number of unbondings to hit MaxUnbondings
 	msg = &incentive.MsgBeginUnbonding{
 		Account: umeeSupplier.String(),
-		Asset:   coin.New("u/"+umeeDenom, 1),
+		UToken:  coin.New("u/"+umeeDenom, 1),
 	}
 	// create 4 more unbondings of u/uumee on this account, to hit the default maximum of 5
 	for i := 1; i < 5; i++ {

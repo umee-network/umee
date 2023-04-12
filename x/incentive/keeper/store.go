@@ -190,7 +190,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 	// remove any zero-amount unbondings before setting
 	nonzeroUnbondings := []incentive.Unbonding{}
 	for _, u := range unbondings.Unbondings {
-		if u.Amount.Amount.IsPositive() {
+		if u.UToken.Amount.IsPositive() {
 			nonzeroUnbondings = append(nonzeroUnbondings, u)
 		}
 	}
@@ -199,7 +199,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 	// compute the new total unbonding specific to this account and denom.
 	newUnbonding := sdk.ZeroInt()
 	for _, u := range unbondings.Unbondings {
-		newUnbonding = newUnbonding.Add(u.Amount.Amount)
+		newUnbonding = newUnbonding.Add(u.UToken.Amount)
 	}
 	// compute the change in unbonding amount (can be negative when unbonding decreases)
 	delta := newUnbonding.Sub(k.getUnbondingAmount(ctx, addr, denom).Amount)

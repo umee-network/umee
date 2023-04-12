@@ -20,7 +20,7 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 	}
 	currentTime := k.GetLastRewardsTime(ctx)
 	unbonding := incentive.Unbonding{
-		Amount: uToken,
+		UToken: uToken,
 		// Start and end time are stored based on current parameters, and
 		// the stored end time does not change even if the module's unbonding
 		// duration parameter is changed. The unbonding will still end early
@@ -108,9 +108,9 @@ func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral
 	for _, u := range unbondings {
 		// for ongoing unbondings, starting with the oldest
 		if amountToUnbond.IsPositive() {
-			specificReduction := sdk.MinInt(amountToUnbond, u.Amount.Amount)
+			specificReduction := sdk.MinInt(amountToUnbond, u.UToken.Amount)
 			// reduce the in-progress unbonding amount, and the remaining instant unbond
-			u.Amount.Amount = u.Amount.Amount.Sub(specificReduction)
+			u.UToken.Amount = u.UToken.Amount.Sub(specificReduction)
 			amountToUnbond = amountToUnbond.Sub(specificReduction)
 		}
 	}

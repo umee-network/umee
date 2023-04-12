@@ -140,7 +140,7 @@ func (s *IntegrationTestSuite) bond(addr sdk.AccAddress, coins ...sdk.Coin) {
 	for _, coin := range coins {
 		msg := &incentive.MsgBond{
 			Account: addr.String(),
-			Asset:   coin,
+			UToken:  coin,
 		}
 		_, err := srv.Bond(ctx, msg)
 		require.NoError(err, "bond")

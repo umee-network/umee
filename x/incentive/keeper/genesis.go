@@ -35,7 +35,7 @@ func (k Keeper) InitGenesis(ctx sdk.Context, gs incentive.GenesisState) {
 	}
 
 	for _, b := range gs.Bonds {
-		if err := k.setBonded(ctx, sdk.MustAccAddressFromBech32(b.Account), b.Amount); err != nil {
+		if err := k.setBonded(ctx, sdk.MustAccAddressFromBech32(b.Account), b.UToken); err != nil {
 			panic(err)
 		}
 	}

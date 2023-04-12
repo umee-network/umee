@@ -37,7 +37,7 @@ func (k Keeper) BondSummary(ctx sdk.Context, addr sdk.AccAddress, denom string) 
 			// the unbonding is still ongoing, and can be counted normally.
 			// This logic allows a reduction in unbonding duration param to speed up existing unbondings.
 			unbondings = append(unbondings, u)
-			unbonding = unbonding.Add(u.Amount)
+			unbonding = unbonding.Add(u.UToken)
 		}
 		// Otherwise, this unbonding is completed, and will be quietly cleared by the next state-altering message
 		// which is permitted to affect this account. For now, it is omitted from the returned unbonding total.

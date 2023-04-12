@@ -74,7 +74,7 @@ func NewIncentiveProgram(
 		ID:               id,
 		StartTime:        startTime,
 		Duration:         duration,
-		UToken:           uDenom,
+		UDenom:           uDenom,
 		TotalRewards:     totalRewards,
 		RemainingRewards: remainingRewards,
 		Funded:           funded,
@@ -85,7 +85,7 @@ func NewIncentiveProgram(
 func NewBond(addr string, coin sdk.Coin) Bond {
 	return Bond{
 		Account: addr,
-		Amount:  coin,
+		UToken:  coin,
 	}
 }
 
@@ -112,7 +112,7 @@ func NewUnbonding(startTime, endTime int64, coin sdk.Coin) Unbonding {
 	return Unbonding{
 		Start:  startTime,
 		End:    endTime,
-		Amount: coin,
+		UToken: coin,
 	}
 }
 
