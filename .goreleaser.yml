@@ -25,17 +25,13 @@ builds:
 #      - arm64  # github only supports linux @ amd64
 
 archives:
-  - id: bins
-    format: binary
+  - id: tarball
+    format: tar.gz
+    wrap_in_directory: false # must not wrap into directory to support cosmwasm
     name_template: "{{ .Binary }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-
-  # - id: tarball
-  #   format: tar.gz
-  #   wrap_in_directory: false # must not wrap into directory to support cosmwasm
-  #   name_template: "{{ .Binary }}-v{{ .Version }}-{{ .Os }}-{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
-  #   files:
-  #     - LICENSE
-  #     - README.md
+    files:
+      - LICENSE
+      - README.md
 
 release:
   github:
