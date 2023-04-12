@@ -13,7 +13,7 @@ type Client struct {
 }
 
 // NewClient constructs Client object.
-// Accounts are generated using the list of mnemonics. Each string must be a sequence of words, 
+// Accounts are generated using the list of mnemonics. Each string must be a sequence of words,
 // eg: `["w11 w12 w13", "w21 w22 w23"]`. Keyring names for created accounts will be: val1, val2....
 func NewClient(
 	chainID,
