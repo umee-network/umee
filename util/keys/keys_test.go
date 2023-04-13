@@ -8,7 +8,7 @@ import (
 
 func TestLeadingAddressAndDenom(t *testing.T) {
 	testCases := []struct {
-		msg       string
+		name       string
 		prefix    []byte
 		key       []byte
 		expectErr string
