@@ -478,10 +478,10 @@ func New(
 		app.BankKeeper,
 		app.LeverageKeeper,
 	)
-	app.LeverageKeeper = *app.LeverageKeeper.SetTokenHooks(
+	app.LeverageKeeper.SetTokenHooks(
 		app.OracleKeeper.Hooks(),
 	)
-	app.LeverageKeeper = *app.LeverageKeeper.SetBondHooks(
+	app.LeverageKeeper.SetBondHooks(
 		app.IncentiveKeeper.BondHooks(),
 	)
 	app.GravityKeeper = gravitykeeper.NewKeeper(

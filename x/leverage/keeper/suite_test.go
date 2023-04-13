@@ -70,8 +70,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	s.tk = tk
 	app.LeverageKeeper = k
-	app.LeverageKeeper = *app.LeverageKeeper.SetTokenHooks()
-	app.LeverageKeeper = *app.LeverageKeeper.SetBondHooks()
+	// since keeper was overridden, we need to set these hooks again
+	app.LeverageKeeper.SetTokenHooks()
+	app.LeverageKeeper.SetBondHooks() // TODO: add a mock (or real) incentive module here
 
 	// override DefaultGenesis token registry with fixtures.Token
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())

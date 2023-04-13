@@ -54,25 +54,21 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 }
 
 // SetTokenHooks sets the module's token registry hooks. Token hooks can only be set once.
-func (k *Keeper) SetTokenHooks(h ...types.TokenHooks) *Keeper {
+func (k *Keeper) SetTokenHooks(h ...types.TokenHooks) {
 	if k.tokenHooks != nil {
 		panic("leverage token hooks already set")
 	}
 
 	k.tokenHooks = h
-
-	return k
 }
 
 // SetBondHooks sets the module's bonded amount and force unbonding hooks. Bond hooks can only be set once.
-func (k *Keeper) SetBondHooks(h ...types.BondHooks) *Keeper {
+func (k *Keeper) SetBondHooks(h ...types.BondHooks) {
 	if k.bondHooks != nil {
 		panic("leverage bond hooks already set")
 	}
 
 	k.bondHooks = h
-
-	return k
 }
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
