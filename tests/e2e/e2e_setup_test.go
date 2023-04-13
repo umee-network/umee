@@ -35,8 +35,9 @@ import (
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/tests/grpc/client"
+	"github.com/umee-network/umee/v4/client"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
@@ -81,7 +82,7 @@ type IntegrationTestSuite struct {
 	valResources        []*dockertest.Resource
 	orchResources       []*dockertest.Resource
 	gravityContractAddr string
-	umeeClient          *client.UmeeClient
+	umee                client.Client
 }
 
 func TestIntegrationTestSuite(t *testing.T) {
@@ -302,6 +303,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	votingPeroid := 5 * time.Second
 	govGenState.VotingParams.VotingPeriod = &votingPeroid
+	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
 	bz, err = cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)
@@ -1077,12 +1079,19 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 func (s *IntegrationTestSuite) initUmeeClient() {
 	var err error
-	s.umeeClient, err = client.NewUmeeClient(
+	mnemonics := make([]string, 0)
+	for _, v := range s.chain.validators {
+		mnemonics = append(mnemonics, v.mnemonic)
+	}
+	ecfg := app.MakeEncodingConfig()
+
+	s.umee, err = client.NewClient(
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
-		"val1",
-		s.chain.validators[0].mnemonic,
+		mnemonics,
+		1,
+		ecfg,
 	)
 	s.Require().NoError(err)
 }

@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/simapp"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -45,6 +48,8 @@ var (
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
 	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
+
+	sampleOutflow = sdk.NewDecCoin("utest", sdk.NewInt(1111))
 )
 
 type KeeperTestSuite struct {
@@ -55,6 +60,7 @@ type KeeperTestSuite struct {
 }
 
 func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+	t.Parallel()
 	s := &KeeperTestSuite{}
 	isCheckTx := false
 	app := umeeapp.Setup(t)
@@ -75,6 +81,7 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
+	app.UIbcQuotaKeeper.SetTokenOutflow(ctx, sampleOutflow)
 
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
@@ -89,10 +96,16 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	return s
 }
 
-// creates keeper without external dependencies (app, leverage etc...)
-func initSimpleKeeper(t *testing.T) (sdk.Context, keeper.Keeper) {
+// creates keeper with all external dependencies (app, leverage etc...)
+func initFullKeeper(
+	t *testing.T,
+	cdc codec.BinaryCodec,
+	ics4Wrapper porttypes.ICS4Wrapper,
+	leverageKeeper uibc.LeverageKeeper,
+	oracleKeeper uibc.Oracle,
+) (sdk.Context, keeper.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
-	k := keeper.NewKeeper(nil, storeKey, nil, nil, nil)
+	k := keeper.NewKeeper(cdc, storeKey, ics4Wrapper, leverageKeeper, oracleKeeper)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return ctx, k
 }

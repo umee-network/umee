@@ -1,7 +1,8 @@
 name: Lint
 on:
-  pull_request:
   merge_group:
+    types: [checks_requested]
+  pull_request:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -31,24 +32,12 @@ jobs:
           version: latest
           args: --timeout 8m
 
-      - name: golangci-lint pricefeeder
-        uses: golangci/golangci-lint-action@v3
-        if: ${{ contains(env.GIT_DIFF, 'price-feeder/')  }}
-        with:
-          version: latest
-          working-directory: price-feeder
-          args: --timeout 8m
-
   super-linter:
     name: Run super-linter
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          # Full git history is needed to get a proper list of changed files
-          # within `super-linter`.
-          fetch-depth: 0
       - name: Run super-linter
         uses: github/super-linter@v4
         env:
