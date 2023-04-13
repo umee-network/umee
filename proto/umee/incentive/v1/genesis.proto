@@ -29,7 +29,7 @@ message Bond {
 }
 
 // RewardTracker tracks the value of a given lock denom's RewardAccumulator at the
-// ast time a specific account calculated pending rewards for it. When calculating
+// last time a specific account calculated pending rewards for it. When calculating
 // available rewards, this value is used to determine the difference between the current
 // RewardAccumulator for a uToken and the last value at which the user updated bonds or claimed
 // tokens. Their pending rewards increase by only the rewards accrued in that time period.
