@@ -39,7 +39,7 @@ func LeadingDenom(prefix, key []byte) (denom string, read int, err error) {
 			return denom, read, nil
 		}
 	}
-	return "", 0, fmt.Errorf("did not find expected null terminator after denom")
+	return "", 0, fmt.Errorf("null terminator not found")
 }
 
 // LeadingAddressAndDenom extracts addr and denom from a key of the form of
