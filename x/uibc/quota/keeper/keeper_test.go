@@ -60,6 +60,7 @@ type KeeperTestSuite struct {
 }
 
 func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+	t.Parallel()
 	s := &KeeperTestSuite{}
 	isCheckTx := false
 	app := umeeapp.Setup(t)
