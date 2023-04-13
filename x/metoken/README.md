@@ -44,6 +44,7 @@ The Index will have the following parameters:
 - MeToken denom: the denomination of the Index meToken that will be given to user in exchange for accepted assets.
 - MeToken max supply: the maximum amount of Index meTokens that can be minted. A swap that requires to mint more
   Index meToken than this value will result in an error.
+- Index type: the Index type will determine how the fee is calculated. Valid values: stable/non-stable.
 - Fee:
   - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
     when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values
@@ -103,7 +104,8 @@ The more complex derived values must use the values above as basis.
 
 The fee to be applied for the swap or the redemption will be dynamic and based on the deviation from the
 `target_allocation` of an asset and its current allocation in the Index. The fee will be transferred to the
-`metoken` module reserves. The formula for calculating the dynamic fee is as follows:
+`metoken` fee receiver address and its usage will be determined in the future. The formula for calculating the dynamic
+fee is as follows:
 
 ``` makefile
 dynamic_fee = balanced_fee + [allocation_delta_percentage * (balanced_fee / 100)]
@@ -193,8 +195,7 @@ Calculations for redemption:
 
 The `metoken` module will have its own reserves to stabilize the processing of the withdrawals. A portion of
 every swap will be transferred to the reserves and a percentage of every withdrawal will be taken from the reserves.
-This portion is determined by the parameters of every asset. Every charged fee will be also transferred to the
-`metoken` module reserves.
+This portion is determined by the parameters of every asset.
 
 #### Reserves Re-balancing
 
