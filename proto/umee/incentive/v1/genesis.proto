@@ -35,7 +35,7 @@ message Bond {
 // tokens. Their pending rewards increase by only the rewards accrued in that time period.
 message RewardTracker {
   string   account                             = 1;
-  string   denom                               = 2;
+  string   uToken                              = 2;
   repeated cosmos.base.v1beta1.DecCoin rewards = 3 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
@@ -48,7 +48,7 @@ message RewardTracker {
 // 10^exponent of the uToken's smallest possible amount, generally matching the exponent
 // of the associated base token registered with the leverage module.
 message RewardAccumulator {
-  string   denom                               = 1;
+  string   uToken                              = 1;
   repeated cosmos.base.v1beta1.DecCoin rewards = 2 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
@@ -70,6 +70,6 @@ message Unbonding {
 // for a single bonded uToken denom in both KVStore and genesis state.
 message AccountUnbondings {
   string             account    = 1;
-  string             denom      = 2;
+  string             uToken     = 2;
   repeated Unbonding unbondings = 3 [(gogoproto.nullable) = false];
 }

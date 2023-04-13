@@ -51,10 +51,10 @@ message IncentiveProgram {
   // completion in seconds.
   int64 duration = 3;
 
-  // uDenom is the incentivized uToken collateral denom. Suppliers who collateralize
+  // uToken is the incentivized uToken collateral denom. Suppliers who collateralize
   // this asset then bond it to the incentive module are eligible for this program's
   // rewards.
-  string uDenom = 4;
+  string uToken = 4;
 
   // funded indicates whether a program bas been funded. This can happen when
   // a program passes if funding from community fund, or any time before the

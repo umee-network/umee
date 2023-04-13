@@ -185,7 +185,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		// catches invalid and empty addresses
 		return err
 	}
-	denom := unbondings.Denom
+	denom := unbondings.UToken
 
 	// remove any zero-amount unbondings before setting
 	nonzeroUnbondings := []incentive.Unbonding{}
@@ -218,7 +218,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 	}
 
 	// set list of unbondings
-	key := keyUnbondings(addr, unbondings.Denom)
+	key := keyUnbondings(addr, unbondings.UToken)
 	if len(unbondings.Unbondings) == 0 {
 		// clear store on no unbondings remaining
 		kvStore.Delete(key)
@@ -240,7 +240,7 @@ func (k Keeper) getRewardAccumulator(ctx sdk.Context, bondDenom string) incentiv
 
 // setRewardAccumulator sets the full reward accumulator for a single bonded uToken.
 func (k Keeper) setRewardAccumulator(ctx sdk.Context, accumulator incentive.RewardAccumulator) error {
-	key := keyRewardAccumulator(accumulator.Denom)
+	key := keyRewardAccumulator(accumulator.UToken)
 	return store.SetObject(k.KVStore(ctx), k.cdc, key, &accumulator, "reward accumulator")
 }
 
@@ -260,9 +260,9 @@ func (k Keeper) getRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom
 // setRewardTracker sets the reward tracker for a single bonded uToken for an address.
 // automatically clear the entry if rewards are all zero.
 func (k Keeper) setRewardTracker(ctx sdk.Context, tracker incentive.RewardTracker) error {
-	key := keyRewardTracker(sdk.MustAccAddressFromBech32(tracker.Account), tracker.Denom)
+	key := keyRewardTracker(sdk.MustAccAddressFromBech32(tracker.Account), tracker.UToken)
 	if tracker.Rewards.IsZero() {
-		k.clearRewardTracker(ctx, sdk.MustAccAddressFromBech32(tracker.Account), tracker.Denom)
+		k.clearRewardTracker(ctx, sdk.MustAccAddressFromBech32(tracker.Account), tracker.UToken)
 		return nil
 	}
 	return store.SetObject(k.KVStore(ctx), k.cdc, key, &tracker, "reward tracker")

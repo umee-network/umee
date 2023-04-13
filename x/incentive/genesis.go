@@ -61,8 +61,8 @@ func (gs GenesisState) Validate() error {
 		if _, err := sdk.AccAddressFromBech32(rt.Account); err != nil {
 			return err
 		}
-		if !leveragetypes.HasUTokenPrefix(rt.Denom) {
-			return leveragetypes.ErrNotUToken.Wrap(rt.Denom)
+		if !leveragetypes.HasUTokenPrefix(rt.UToken) {
+			return leveragetypes.ErrNotUToken.Wrap(rt.UToken)
 		}
 		if err := rt.Rewards.Validate(); err != nil {
 			return err
@@ -75,8 +75,8 @@ func (gs GenesisState) Validate() error {
 	}
 	// TODO: enforce no duplicate denoms
 	for _, ra := range gs.RewardAccumulators {
-		if !leveragetypes.HasUTokenPrefix(ra.Denom) {
-			return leveragetypes.ErrNotUToken.Wrap(ra.Denom)
+		if !leveragetypes.HasUTokenPrefix(ra.UToken) {
+			return leveragetypes.ErrNotUToken.Wrap(ra.UToken)
 		}
 		if err := ra.Rewards.Validate(); err != nil {
 			return err
@@ -122,8 +122,8 @@ func (gs GenesisState) Validate() error {
 		if _, err := sdk.AccAddressFromBech32(au.Account); err != nil {
 			return err
 		}
-		if !leveragetypes.HasUTokenPrefix(au.Denom) {
-			return leveragetypes.ErrNotUToken.Wrap(au.Denom)
+		if !leveragetypes.HasUTokenPrefix(au.UToken) {
+			return leveragetypes.ErrNotUToken.Wrap(au.UToken)
 		}
 		for _, u := range au.Unbondings {
 			if u.End < u.Start {
@@ -163,7 +163,7 @@ func NewIncentiveProgram(
 		ID:               id,
 		StartTime:        startTime,
 		Duration:         duration,
-		UDenom:           uDenom,
+		UToken:           uDenom,
 		TotalRewards:     totalRewards,
 		RemainingRewards: remainingRewards,
 		Funded:           funded,
@@ -179,18 +179,18 @@ func NewBond(addr string, coin sdk.Coin) Bond {
 }
 
 // NewRewardTracker creates the RewardTracker struct used in GenesisState
-func NewRewardTracker(addr, denom string, coins sdk.DecCoins) RewardTracker {
+func NewRewardTracker(addr, uDenom string, coins sdk.DecCoins) RewardTracker {
 	return RewardTracker{
 		Account: addr,
-		Denom:   denom,
+		UToken:  uDenom,
 		Rewards: coins,
 	}
 }
 
 // NewRewardAccumulator creates the RewardAccumulator struct used in GenesisState
-func NewRewardAccumulator(denom string, exponent uint32, coins sdk.DecCoins) RewardAccumulator {
+func NewRewardAccumulator(uDenom string, exponent uint32, coins sdk.DecCoins) RewardAccumulator {
 	return RewardAccumulator{
-		Denom:    denom,
+		UToken:   uDenom,
 		Exponent: exponent,
 		Rewards:  coins,
 	}
@@ -206,10 +206,10 @@ func NewUnbonding(startTime, endTime int64, coin sdk.Coin) Unbonding {
 }
 
 // NewAccountUnbondings creates the AccountUnbondings struct used in GenesisState
-func NewAccountUnbondings(addr, denom string, unbondings []Unbonding) AccountUnbondings {
+func NewAccountUnbondings(addr, uDenom string, unbondings []Unbonding) AccountUnbondings {
 	return AccountUnbondings{
 		Account:    addr,
-		Denom:      denom,
+		UToken:     uDenom,
 		Unbondings: unbondings,
 	}
 }

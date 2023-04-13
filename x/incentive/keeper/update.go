@@ -43,7 +43,7 @@ func (k Keeper) updateRewards(ctx sdk.Context, prevTime, blockTime int64) error 
 			return err
 		}
 		for _, ip := range ongoingPrograms {
-			bondedDenom := ip.UDenom
+			bondedDenom := ip.UToken
 			bonded := k.getTotalBonded(ctx, bondedDenom)
 
 			// calculate the amount of time (in seconds) that remained on the incentive

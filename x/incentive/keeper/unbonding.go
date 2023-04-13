@@ -30,7 +30,7 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 	}
 	unbondings := incentive.AccountUnbondings{
 		Account:    addr.String(),
-		Denom:      uToken.Denom,
+		UToken:     uToken.Denom,
 		Unbondings: append(k.getUnbondings(ctx, addr, uToken.Denom), unbonding),
 	}
 	return k.setUnbondings(ctx, unbondings)
@@ -97,7 +97,7 @@ func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral
 		// set new (empty) list of unbondings, which clears it from store
 		au := incentive.AccountUnbondings{
 			Account:    addr.String(),
-			Denom:      newCollateral.Denom,
+			UToken:     newCollateral.Denom,
 			Unbondings: []incentive.Unbonding{},
 		}
 		return k.setUnbondings(ctx, au)
@@ -117,7 +117,7 @@ func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral
 	// set new (reduced but not empty) list of unbondings
 	au := incentive.AccountUnbondings{
 		Account:    addr.String(),
-		Denom:      newCollateral.Denom,
+		UToken:     newCollateral.Denom,
 		Unbondings: unbondings,
 	}
 	return k.setUnbondings(ctx, au)
