@@ -73,6 +73,7 @@ func TestGRPCQueryOutflows(t *testing.T) {
 				assert.NilError(t, err)
 				assert.DeepEqual(t, sdk.NewDec(tc.outflowAmount), resp.Amount)
 			} else {
+				// query outflows never returns error if there is no denom present it will return 0
 				assert.Error(t, err, tc.errMsg)
 			}
 		})
