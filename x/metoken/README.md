@@ -222,13 +222,11 @@ The following serialization methods are used unless otherwise stated:
 
 ## Queries
 
-See [metoken query proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/query.proto) for list of
-supported queries.
+See <LINK TO BE ADDED> for list of supported queries.
 
 ## Messages
 
-See [metoken tx proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/tx.proto) for list of
-supported messages.
+See <LINK TO BE ADDED> for list of supported messages.
 
 ## Update Registry Proposal
 
@@ -315,13 +313,11 @@ where `proposal.json` contains:
 
 ## Events
 
-See [metoken events proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/events.proto) for
-list of supported events.
+See <LINK TO BE ADDED> for list of supported events.
 
 ## Params
 
-See [metoken module proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/metoken.proto) for
-list of supported module params.
+See <LINK TO BE ADDED> for list of supported module params.
 
 ## End Block
 
