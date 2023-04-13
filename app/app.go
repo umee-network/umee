@@ -816,8 +816,7 @@ func New(
 			ibchost.ModuleName,
 		},
 	)
-	// TODO: Ensure x/leverage implements simulator and add it here:
-	// TODO: same for incentive
+	// TODO: Ensure x/leverage, x/incentive implement simulator and add it here:
 	simTestModules := genmap.Pick(simStateModules,
 		[]string{oracletypes.ModuleName, ibchost.ModuleName})
 
