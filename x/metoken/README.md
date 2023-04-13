@@ -4,10 +4,10 @@
 
 This document specifies the `x/metoken` module of the Umee chain.
 
-The `metoken` module allows users to swap and redeem accepted assets for an Index meToken. The Index meToken will 
+The `metoken` module allows users to swap and redeem accepted assets for an Index meToken. The Index meToken will
 maintain the parity between underlying assets given a specific configuration.
 
-The `metoken` module depends directly on `x/leverage` for supplying and withdrawing assets, and the cosmos `x/bank` 
+The `metoken` module depends directly on `x/leverage` for supplying and withdrawing assets, and the cosmos `x/bank`
 module as these all affect account balances.
 
 ## Contents
@@ -35,60 +35,59 @@ At the foundation of the `metoken` module is the _Index Registry_, which contain
 
 This list is controlled by governance. Assets that are not in the index registry are not available for swapping or redeeming for the Index meToken.
 
-In an extreme case an asset can be deleted from the _Index Registry_, this will disallow to swap given asset for the 
-Index meToken or redeem a meToken for that asset.
+In an extreme case an asset can be deleted from the _Index Registry_, this will disallow to swap given asset for the Index meToken or redeem a meToken for that asset.
 
 ### Index Parameters
 
 The Index will have the following parameters:
 
- - MeToken denom: the denomination of the Index meToken that will be given to user in exchange for accepted assets.
- - MeToken max supply: the maximum amount of Index meTokens that can be minted. A swap that requires to mint more 
-   Index meToken than this value will result in an error. 
- - Fee:
-   - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value, 
-     when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values 
-     0-∞.
-   - Balanced fee: the fee to be charged to the user when the index is balanced. It must be greater than Min fee and 
-     lower than Max fee, it cannot be 0.
-   - Max fee: the maximum fee to be charged to the user. The applied fee will tend to increase up to this value,
-     when the accepted asset is oversupplied in the index. It must be greater than Min and Balanced fee. If the value 
-     is 0, no Max fee will be applied.
- - Accepted Assets: a list where each asset will have the following parameters:
-   - Asset denom: the denomination of the underlying asset.
-   - Reserve portion: the portion of swapped assets that will be transferred to `metoken` module as reserves, and the 
-     minimum portion that will be taken from `metoken` module reserves when a redemption occurs.
-   - Target allocation: the portion of an accepted asset the Index is targeting to have. This value will be 
-     calculated in the addition and the update of an Index, as well as when an asset is deleted from it. The value 
-     would be 1/amount of assets in the Index.
+- MeToken denom: the denomination of the Index meToken that will be given to user in exchange for accepted assets.
+- MeToken max supply: the maximum amount of Index meTokens that can be minted. A swap that requires to mint more
+  Index meToken than this value will result in an error. 
+- Fee:
+  - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
+    when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values
+    0-∞.
+  - Balanced fee: the fee to be charged to the user when the index is balanced. It must be greater than Min fee and
+    lower than Max fee, it cannot be 0.
+  - Max fee: the maximum fee to be charged to the user. The applied fee will tend to increase up to this value,
+    when the accepted asset is oversupplied in the index. It must be greater than Min and Balanced fee. If the value
+    is 0, no Max fee will be applied.
+- Accepted Assets: a list where each asset will have the following parameters:
+  - Asset denom: the denomination of the underlying asset.
+  - Reserve portion: the portion of swapped assets that will be transferred to `metoken` module as reserves, and the
+    minimum portion that will be taken from `metoken` module reserves when a redemption occurs.
+  - Target allocation: the portion of an accepted asset the Index is targeting to have. This value will be
+    calculated in the addition and the update of an Index, as well as when an asset is deleted from it. The value
+    would be 1/amount of assets in the Index.
 
 ### Swapping and Redeeming
 
 Users have the following actions available to them:
 
-- Swap accepted asset for Index meToken. Every accepted asset can be swapped for the Index meToken with 1:1 exchange 
-  rate. The user will need to pay a [Dynamic Fee](#dynamic-fee) for the swap. The fee will be charged in the 
+- Swap accepted asset for Index meToken. Every accepted asset can be swapped for the Index meToken with 1:1 exchange
+  rate. The user will need to pay a [Dynamic Fee](#dynamic-fee) for the swap. The fee will be charged in the
   accepted asset the Index meToken is swapped for.
   
-  Index meToken amount needed for the swap will be minted and transferred to the user's account, while the accepted 
-  asset for the swap will be transferred to the `leverage` module pools and the `metoken` module reserves. 
+  Index meToken amount needed for the swap will be minted and transferred to the user's account, while the accepted
+  asset for the swap will be transferred to the `leverage` module pools and the `metoken` module reserves.
   The portion to be transferred to each one is determined by the _Index Registry_ configuration of each accepted asset.
 
-- Redeem Index meToken for accepted asset. Index meToken can be redeemed for every accepted asset with 1:1 exchange 
+- Redeem Index meToken for accepted asset. Index meToken can be redeemed for every accepted asset with 1:1 exchange
   rate. The user will need to pay a [Dynamic Fee](#dynamic-fee) for the redemption. The fee will be charged in the
   accepted asset the Index meToken is redeemed for.
 
-  Index meToken amount needed for the redemption will be withdrawn from the user's account and burned, while 
-  the chosen asset to redeem will be transferred from the `leverage` module pools and the `metoken` module reserves 
-  to the user's account. The portion to be withdrawn from each one is determined by the _Index Registry_ 
+  Index meToken amount needed for the redemption will be withdrawn from the user's account and burned, while
+  the chosen asset to redeem will be transferred from the `leverage` module pools and the `metoken` module reserves
+  to the user's account. The portion to be withdrawn from each one is determined by the _Index Registry_
   configuration of each accepted asset.
 
-  When it is not possible to withdraw the needed portion from the `leverage` module given its own constraints, the part 
+  When it is not possible to withdraw the needed portion from the `leverage` module given its own constraints, the part
   taken from the reserves will increase in order to complete the redemption, if possible.
 
 ### Derived Values
 
-Some important quantities that govern the behavior of the `metoken` module are derived from a combination of 
+Some important quantities that govern the behavior of the `metoken` module are derived from a combination of
 parameters. The math and reasoning behind these values will appear below.
 
 As a reminder, the following values are always available as a basis for calculations:
@@ -102,20 +101,20 @@ The more complex derived values must use the values above as basis.
 
 #### Dynamic Fee
 
-The fee to be applied for the swap or the redemption will be dynamic and based on the deviation from the 
-`target_allocation` of an asset and its current allocation in the Index. The fee will be transferred to the 
+The fee to be applied for the swap or the redemption will be dynamic and based on the deviation from the
+`target_allocation` of an asset and its current allocation in the Index. The fee will be transferred to the
 `metoken` module reserves. The formula for calculating the dynamic fee is as follows:
 
-```
+``` makefile
 dynamic_fee = balanced_fee + [allocation_delta_percentage * (balanced_fee / 100)]
 
 If the dynamic_fee is lower than min_fee   -> dynamic_fee = min_fee
 If the dynamic_fee is greater than max_fee -> dynamic_fee = max_fee
 ```
 
-Example for the meUSD index, and the following fee and accepted assets: 
+Example for the meUSD index, and the following fee and accepted assets:
 
-```
+``` makefile
 - Fee:
   - Min: 0.001
   - Balanced: 0.2
@@ -150,7 +149,7 @@ Calculations for redemption:
 ```
 
 Another example with an edge case where the min and max fee are used:
-```
+``` makefile
 - Fee:
   - Min: 0.01
   - Balanced: 0.3
@@ -192,9 +191,9 @@ Calculations for redemption:
 
 ### Reserves
 
-The `metoken` module will have its own reserves to stabilize the processing of the withdrawals. A portion of 
-every swap will be transferred to the reserves and a percentage of every withdrawal will be taken from the reserves. 
-This portion is determined by the parameters of every asset. Every charged fee will be also transferred to the 
+The `metoken` module will have its own reserves to stabilize the processing of the withdrawals. A portion of
+every swap will be transferred to the reserves and a percentage of every withdrawal will be taken from the reserves.
+This portion is determined by the parameters of every asset. Every charged fee will be also transferred to the
 `metoken` module reserves.
 
 #### Reserves Re-balancing
@@ -204,7 +203,7 @@ The workflow for every asset of each Index is as follows:
 
 - Get the amount of Token transferred to the `leverage` module, stored in `metoken` module [State](#state).
 - Get the amount of Token maintained in the `metoken` module reserves.
-- Check if the portion of reserves is bellow the desired and transfer the missing amount from `leverage` module to 
+- Check if the portion of reserves is bellow the desired and transfer the missing amount from `leverage` module to
   `metoken` reserves.
 - Update `rebalancing_block`, stored in the `metoken` module [State](#state).
 
@@ -220,16 +219,15 @@ The `x/metoken` module keeps the following objects in state:
 The following serialization methods are used unless otherwise stated:
 
 - `sdk.Dec.Marshal()` and `sdk.Int.Marshal()` for numeric types
-- `[]byte(denom) | 0x00` for asset denominations (strings)
 
 ## Queries
 
-See [metoken query proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/query.proto) for list of 
+See [metoken query proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/query.proto) for list of
 supported queries.
 
 ## Messages
 
-See [metoken tx proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/tx.proto) for list of 
+See [metoken tx proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/tx.proto) for list of
 supported messages.
 
 ## Update Registry Proposal
@@ -317,12 +315,12 @@ where `proposal.json` contains:
 
 ## Events
 
-See [metoken events proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/events.proto) for 
+See [metoken events proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/events.proto) for
 list of supported events.
 
 ## Params
 
-See [metoken module proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/metoken.proto) for 
+See [metoken module proto](https://github.com/umee-network/umee/tree/main/proto/umee/metoken/v1/metoken.proto) for
 list of supported module params.
 
 ## End Block
