@@ -24,7 +24,7 @@ func LeadingAddress(prefix, key []byte) (addr sdk.AccAddress, read int, err erro
 }
 
 // LeadingDenom extracts denom from a key of the form of
-// prefix | denom | 0x00 | ...
+// prefix | bytes(string) | 0x0 | ...
 // prefix can be nil if it must be skipped
 // also returns how many bytes were read
 func LeadingDenom(prefix, key []byte) (denom string, read int, err error) {
