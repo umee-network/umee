@@ -43,7 +43,7 @@ The Index will have the following parameters:
 
 - MeToken denom: the denomination of the Index meToken that will be given to user in exchange for accepted assets.
 - MeToken max supply: the maximum amount of Index meTokens that can be minted. A swap that requires to mint more
-  Index meToken than this value will result in an error. 
+  Index meToken than this value will result in an error.
 - Fee:
   - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
     when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values
