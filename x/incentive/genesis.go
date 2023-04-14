@@ -3,6 +3,7 @@ package incentive
 import (
 	"encoding/json"
 
+	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -56,37 +57,21 @@ func (gs GenesisState) Validate() error {
 	if gs.LastRewardsTime < 0 {
 		return ErrDecreaseLastRewardTime.Wrap("last reward time must not be negative")
 	}
+
 	// TODO: enforce no duplicate (account,denom)
 	for _, rt := range gs.RewardTrackers {
-		if _, err := sdk.AccAddressFromBech32(rt.Account); err != nil {
+		if err := rt.Validate(); err != nil {
 			return err
-		}
-		if !leveragetypes.HasUTokenPrefix(rt.UToken) {
-			return leveragetypes.ErrNotUToken.Wrap(rt.UToken)
-		}
-		if err := rt.Rewards.Validate(); err != nil {
-			return err
-		}
-		for _, r := range rt.Rewards {
-			if leveragetypes.HasUTokenPrefix(r.Denom) {
-				return leveragetypes.ErrUToken.Wrap(r.Denom)
-			}
 		}
 	}
+
 	// TODO: enforce no duplicate denoms
 	for _, ra := range gs.RewardAccumulators {
-		if !leveragetypes.HasUTokenPrefix(ra.UToken) {
-			return leveragetypes.ErrNotUToken.Wrap(ra.UToken)
-		}
-		if err := ra.Rewards.Validate(); err != nil {
+		if err := ra.Validate(); err != nil {
 			return err
 		}
-		for _, r := range ra.Rewards {
-			if leveragetypes.HasUTokenPrefix(r.Denom) {
-				return leveragetypes.ErrUToken.Wrap(r.Denom)
-			}
-		}
 	}
+
 	// TODO: enforce no duplicate program IDs
 	for _, up := range gs.UpcomingPrograms {
 		if err := validatePassedIncentiveProgram(up); err != nil {
@@ -106,32 +91,15 @@ func (gs GenesisState) Validate() error {
 
 	// TODO: enforce no duplicate (account,denom)
 	for _, b := range gs.Bonds {
-		if _, err := sdk.AccAddressFromBech32(b.Account); err != nil {
+		if err := b.Validate(); err != nil {
 			return err
-		}
-		if err := b.UToken.Validate(); err != nil {
-			return err
-		}
-		if !leveragetypes.HasUTokenPrefix(b.UToken.Denom) {
-			return leveragetypes.ErrNotUToken.Wrap(b.UToken.Denom)
 		}
 	}
 
 	// TODO: enforce no duplicate (account,denom)
 	for _, au := range gs.AccountUnbondings {
-		if _, err := sdk.AccAddressFromBech32(au.Account); err != nil {
+		if err := au.Validate(); err != nil {
 			return err
-		}
-		if !leveragetypes.HasUTokenPrefix(au.UToken) {
-			return leveragetypes.ErrNotUToken.Wrap(au.UToken)
-		}
-		for _, u := range au.Unbondings {
-			if u.End < u.Start {
-				return ErrInvalidUnbonding.Wrap("start time > end time")
-			}
-			if err := u.UToken.Validate(); err != nil {
-				return err
-			}
 		}
 	}
 
@@ -170,12 +138,91 @@ func NewIncentiveProgram(
 	}
 }
 
+// Validate performs validation on an IncentiveProgram type returning an error
+// if the program is invalid.
+func (ip IncentiveProgram) Validate() error {
+	if err := sdk.ValidateDenom(ip.UToken); err != nil {
+		return err
+	}
+	if !leveragetypes.HasUTokenPrefix(ip.UToken) {
+		// only allow uToken denoms as bonded denoms
+		return errors.Wrap(leveragetypes.ErrNotUToken, ip.UToken)
+	}
+
+	if err := ip.TotalRewards.Validate(); err != nil {
+		return err
+	}
+	if leveragetypes.HasUTokenPrefix(ip.TotalRewards.Denom) {
+		// only allow base token denoms as rewards
+		return errors.Wrap(leveragetypes.ErrUToken, ip.TotalRewards.Denom)
+	}
+	if ip.TotalRewards.IsZero() {
+		return ErrProgramWithoutRewards
+	}
+
+	if err := ip.RemainingRewards.Validate(); err != nil {
+		return err
+	}
+	if ip.RemainingRewards.Denom != ip.TotalRewards.Denom {
+		return ErrProgramRewardMismatch
+	}
+	if !ip.Funded && ip.RemainingRewards.IsPositive() {
+		return ErrNonfundedProgramRewards
+	}
+
+	if ip.Duration <= 0 {
+		return errors.Wrapf(ErrInvalidProgramDuration, "%d", ip.Duration)
+	}
+	if ip.StartTime <= 0 {
+		return errors.Wrapf(ErrInvalidProgramStart, "%d", ip.Duration)
+	}
+
+	return nil
+}
+
+// validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
+// to incentive programs which have not yet been funded or passed by governance
+func validateProposedIncentiveProgram(program IncentiveProgram) error {
+	if program.ID != 0 {
+		return ErrInvalidProgramID.Wrapf("%d", program.ID)
+	}
+	if !program.RemainingRewards.IsZero() {
+		return ErrNonzeroRemainingRewards.Wrap(program.RemainingRewards.String())
+	}
+	if program.Funded {
+		return ErrProposedFundedProgram
+	}
+	return program.Validate()
+}
+
+// validatePassedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
+// to incentive programs which have already been passed by governance
+func validatePassedIncentiveProgram(program IncentiveProgram) error {
+	if program.ID == 0 {
+		return ErrInvalidProgramID.Wrapf("%d", program.ID)
+	}
+	return program.Validate()
+}
+
 // NewBond creates the Bond struct used in GenesisState
 func NewBond(addr string, coin sdk.Coin) Bond {
 	return Bond{
 		Account: addr,
 		UToken:  coin,
 	}
+}
+
+func (b Bond) Validate() error {
+	if _, err := sdk.AccAddressFromBech32(b.Account); err != nil {
+		return err
+	}
+	if err := b.UToken.Validate(); err != nil {
+		return err
+	}
+	if !leveragetypes.HasUTokenPrefix(b.UToken.Denom) {
+		return leveragetypes.ErrNotUToken.Wrap(b.UToken.Denom)
+	}
+	return nil
 }
 
 // NewRewardTracker creates the RewardTracker struct used in GenesisState
@@ -187,6 +234,24 @@ func NewRewardTracker(addr, uDenom string, coins sdk.DecCoins) RewardTracker {
 	}
 }
 
+func (rt RewardTracker) Validate() error {
+	if _, err := sdk.AccAddressFromBech32(rt.Account); err != nil {
+		return err
+	}
+	if !leveragetypes.HasUTokenPrefix(rt.UToken) {
+		return leveragetypes.ErrNotUToken.Wrap(rt.UToken)
+	}
+	if err := rt.Rewards.Validate(); err != nil {
+		return err
+	}
+	for _, r := range rt.Rewards {
+		if leveragetypes.HasUTokenPrefix(r.Denom) {
+			return leveragetypes.ErrUToken.Wrap(r.Denom)
+		}
+	}
+	return nil
+}
+
 // NewRewardAccumulator creates the RewardAccumulator struct used in GenesisState
 func NewRewardAccumulator(uDenom string, exponent uint32, coins sdk.DecCoins) RewardAccumulator {
 	return RewardAccumulator{
@@ -194,6 +259,21 @@ func NewRewardAccumulator(uDenom string, exponent uint32, coins sdk.DecCoins) Re
 		Exponent: exponent,
 		Rewards:  coins,
 	}
+}
+
+func (ra RewardAccumulator) Validate() error {
+	if !leveragetypes.HasUTokenPrefix(ra.UToken) {
+		return leveragetypes.ErrNotUToken.Wrap(ra.UToken)
+	}
+	if err := ra.Rewards.Validate(); err != nil {
+		return err
+	}
+	for _, r := range ra.Rewards {
+		if leveragetypes.HasUTokenPrefix(r.Denom) {
+			return leveragetypes.ErrUToken.Wrap(r.Denom)
+		}
+	}
+	return nil
 }
 
 // NewUnbonding creates the Unbonding struct used in GenesisState
@@ -205,6 +285,13 @@ func NewUnbonding(startTime, endTime int64, coin sdk.Coin) Unbonding {
 	}
 }
 
+func (u Unbonding) Validate() error {
+	if u.End < u.Start {
+		return ErrInvalidUnbonding.Wrap("start time > end time")
+	}
+	return u.UToken.Validate()
+}
+
 // NewAccountUnbondings creates the AccountUnbondings struct used in GenesisState
 func NewAccountUnbondings(addr, uDenom string, unbondings []Unbonding) AccountUnbondings {
 	return AccountUnbondings{
@@ -212,4 +299,23 @@ func NewAccountUnbondings(addr, uDenom string, unbondings []Unbonding) AccountUn
 		UToken:     uDenom,
 		Unbondings: unbondings,
 	}
+}
+
+func (au AccountUnbondings) Validate() error {
+	if _, err := sdk.AccAddressFromBech32(au.Account); err != nil {
+		return err
+	}
+	if !leveragetypes.HasUTokenPrefix(au.UToken) {
+		return leveragetypes.ErrNotUToken.Wrap(au.UToken)
+	}
+	for _, u := range au.Unbondings {
+		if u.UToken.Denom != au.UToken {
+			return ErrInvalidUnbonding.Wrapf("unbonding denom %s does not match accountUnbondings denom %s",
+				u.UToken.Denom, au.UToken)
+		}
+		if err := u.Validate(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
