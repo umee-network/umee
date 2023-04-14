@@ -6,19 +6,19 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-func TestLeadingAddressAndDenom(t *testing.T) {
+func TestExtractAddressAndString(t *testing.T) {
 	testCases := []struct {
 		name       string
-		prefix    []byte
-		key       []byte
-		expectErr string
-		addr      []byte
-		denom     string
-		read      int
+		startIndex int
+		key        []byte
+		expectErr  string
+		addr       []byte
+		s          string
+		nextIndex  int
 	}{
 		{
 			"typical case",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 1, 4, 97, 98, 99, 0},
 			"",
 			[]byte{4},
@@ -27,7 +27,7 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 		},
 		{
 			"trailing data",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 1, 4, 97, 98, 99, 0, 1, 2, 3},
 			"",
 			[]byte{4},
@@ -36,7 +36,7 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 		},
 		{
 			"no prefix",
-			[]byte{},
+			0,
 			[]byte{1, 4, 97, 98, 99, 0},
 			"",
 			[]byte{4},
@@ -45,7 +45,7 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 		},
 		{
 			"zero length address, correctly prefixed",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 0, 97, 98, 99, 0},
 			"",
 			[]byte{},
@@ -53,26 +53,26 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 			7,
 		},
 		{
-			"prefix variation", // not a problem as long as length is the same
-			[]byte{1, 1},
-			[]byte{2, 2, 1, 4, 97, 98, 99, 0},
-			"",
+			"empty string, properly terminated",
+			2,
+			[]byte{2, 2, 1, 4, 0},
+			"key too short to contain non-empty null terminated string after startIndex",
 			[]byte{4},
-			"abc",
-			8,
+			"",
+			0,
 		},
 		{
-			"empty denom, properly terminated",
-			[]byte{2, 2},
-			[]byte{2, 2, 1, 4, 0},
+			"null terminator before string",
+			2,
+			[]byte{2, 2, 1, 4, 0, 0},
+			"empty null-terminated string not allowed in key",
+			[]byte{},
 			"",
-			[]byte{4},
-			"",
-			5,
+			0,
 		},
 		{
 			"key too short (empty)",
-			[]byte{2, 2},
+			2,
 			[]byte{},
 			"key too short",
 			[]byte{},
@@ -81,7 +81,7 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 		},
 		{
 			"key too short (prefix only)",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2},
 			"key too short",
 			[]byte{},
@@ -90,7 +90,7 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 		},
 		{
 			"key too short (no addr)",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 1},
 			"key too short",
 			[]byte{},
@@ -98,8 +98,8 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 			0,
 		},
 		{
-			"key too short 4 (too short for addr len prefix)",
-			[]byte{2, 2},
+			"key too short (big addr len prefix)",
+			2,
 			[]byte{2, 2, 42, 4, 4, 4, 97, 98, 99, 0},
 			"key too short",
 			[]byte{},
@@ -107,10 +107,10 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 			0,
 		},
 		{
-			"non-terminated denom",
-			[]byte{2, 2},
+			"non-terminated string",
+			2,
 			[]byte{2, 2, 1, 4, 97, 98, 99},
-			"did not find expected null terminator",
+			"null terminator not found",
 			[]byte{},
 			"",
 			0,
@@ -118,29 +118,29 @@ func TestLeadingAddressAndDenom(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		addr, denom, read, err := LeadingAddressAndDenom(tc.prefix, tc.key)
+		addr, denom, read, err := ExtractAddressAndString(tc.startIndex, tc.key)
 		if tc.expectErr != "" {
 			assert.ErrorContains(t, err, tc.expectErr)
 		} else {
-			assert.Equal(t, denom, tc.denom, tc.msg)
-			assert.Equal(t, read, tc.read, tc.msg)
+			assert.Equal(t, denom, tc.s, tc.name)
+			assert.Equal(t, read, tc.nextIndex, tc.name)
 			assert.DeepEqual(t, []byte(addr), tc.addr)
 		}
 	}
 }
 
-func TestLeadingAddress(t *testing.T) {
+func TestExtractAddress(t *testing.T) {
 	testCases := []struct {
-		msg       string
-		prefix    []byte
-		key       []byte
-		expectErr string
-		addr      []byte
-		read      int
+		name       string
+		startIndex int
+		key        []byte
+		expectErr  string
+		addr       []byte
+		nextIndex  int
 	}{
 		{
 			"typical case",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 1, 4},
 			"",
 			[]byte{4},
@@ -148,7 +148,7 @@ func TestLeadingAddress(t *testing.T) {
 		},
 		{
 			"trailing data",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 1, 4, 97, 98, 99, 0, 1, 2, 3},
 			"",
 			[]byte{4},
@@ -156,7 +156,7 @@ func TestLeadingAddress(t *testing.T) {
 		},
 		{
 			"no prefix",
-			[]byte{},
+			0,
 			[]byte{1, 4},
 			"",
 			[]byte{4},
@@ -164,23 +164,15 @@ func TestLeadingAddress(t *testing.T) {
 		},
 		{
 			"zero length address, correctly prefixed",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 0, 97, 98, 99, 0},
 			"",
 			[]byte{},
 			3,
 		},
 		{
-			"prefix variation", // not a problem as long as length is the same
-			[]byte{1, 1},
-			[]byte{2, 2, 1, 4, 97, 98, 99, 0},
-			"",
-			[]byte{4},
-			4,
-		},
-		{
 			"key too short (empty)",
-			[]byte{2, 2},
+			2,
 			[]byte{},
 			"key too short",
 			[]byte{},
@@ -188,7 +180,7 @@ func TestLeadingAddress(t *testing.T) {
 		},
 		{
 			"key too short (prefix only)",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2},
 			"key too short",
 			[]byte{},
@@ -196,15 +188,15 @@ func TestLeadingAddress(t *testing.T) {
 		},
 		{
 			"key too short (no addr)",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 1},
 			"key too short",
 			[]byte{},
 			0,
 		},
 		{
-			"key too short 4 (too short for addr len prefix)",
-			[]byte{2, 2},
+			"key too short (big addr len prefix)",
+			2,
 			[]byte{2, 2, 42, 4, 4, 4, 97, 98, 99, 0},
 			"key too short",
 			[]byte{},
@@ -213,28 +205,28 @@ func TestLeadingAddress(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		addr, read, err := LeadingAddress(tc.prefix, tc.key)
+		addr, read, err := ExtractAddress(tc.startIndex, tc.key)
 		if tc.expectErr != "" {
 			assert.ErrorContains(t, err, tc.expectErr)
 		} else {
-			assert.Equal(t, read, tc.read, tc.msg)
+			assert.Equal(t, read, tc.nextIndex, tc.name)
 			assert.DeepEqual(t, []byte(addr), tc.addr)
 		}
 	}
 }
 
-func TestLeadingDenom(t *testing.T) {
+func TestExtractString(t *testing.T) {
 	testCases := []struct {
-		msg       string
-		prefix    []byte
-		key       []byte
-		expectErr string
-		denom     string
-		read      int
+		name       string
+		startIndex int
+		key        []byte
+		expectErr  string
+		s          string
+		nextIndex  int
 	}{
 		{
 			"typical case",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 97, 98, 99, 0},
 			"",
 			"abc",
@@ -242,7 +234,7 @@ func TestLeadingDenom(t *testing.T) {
 		},
 		{
 			"trailing data",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2, 97, 98, 99, 0, 1, 2, 3},
 			"",
 			"abc",
@@ -250,31 +242,31 @@ func TestLeadingDenom(t *testing.T) {
 		},
 		{
 			"no prefix",
-			[]byte{},
+			0,
 			[]byte{97, 98, 99, 0},
 			"",
 			"abc",
 			4,
 		},
 		{
-			"prefix variation", // not a problem as long as length is the same
-			[]byte{1, 1},
-			[]byte{2, 2, 97, 98, 99, 0},
+			"empty string, properly terminated",
+			2,
+			[]byte{2, 2, 0},
+			"key too short to contain non-empty null terminated string after startIndex",
 			"",
-			"abc",
-			6,
+			0,
 		},
 		{
-			"empty denom, properly terminated",
-			[]byte{2, 2},
-			[]byte{2, 2, 0},
+			"null terminator before string",
+			2,
+			[]byte{2, 2, 0, 9, 9},
+			"empty null-terminated string not allowed in key",
 			"",
-			"",
-			3,
+			0,
 		},
 		{
 			"key too short (empty)",
-			[]byte{2, 2},
+			2,
 			[]byte{},
 			"key too short",
 			"",
@@ -282,29 +274,29 @@ func TestLeadingDenom(t *testing.T) {
 		},
 		{
 			"key too short (prefix only)",
-			[]byte{2, 2},
+			2,
 			[]byte{2, 2},
 			"key too short",
 			"",
 			0,
 		},
 		{
-			"non-terminated denom",
-			[]byte{2, 2},
+			"non-terminated string",
+			2,
 			[]byte{2, 2, 97, 98, 99},
-			"did not find expected null terminator",
+			"null terminator not found",
 			"",
 			0,
 		},
 	}
 
 	for _, tc := range testCases {
-		denom, read, err := LeadingDenom(tc.prefix, tc.key)
+		denom, read, err := ExtractString(tc.startIndex, tc.key)
 		if tc.expectErr != "" {
 			assert.ErrorContains(t, err, tc.expectErr)
 		} else {
-			assert.Equal(t, denom, tc.denom, tc.msg)
-			assert.Equal(t, read, tc.read, tc.msg)
+			assert.Equal(t, denom, tc.s, tc.name)
+			assert.Equal(t, read, tc.nextIndex, tc.name)
 		}
 	}
 }

@@ -80,7 +80,7 @@ func (k Keeper) getAllBondDenoms(ctx sdk.Context, addr sdk.AccAddress) []string 
 	bonds := []string{}
 
 	iterator := func(key, val []byte) error {
-		_, denom, _, err := keys.LeadingAddressAndDenom(keyPrefixBondAmount, key)
+		_, denom, _, err := keys.ExtractAddressAndString(len(keyPrefixBondAmount), key)
 		if err != nil {
 			return err
 		}
@@ -98,7 +98,7 @@ func (k Keeper) getAllBonds(ctx sdk.Context) []incentive.Bond {
 	bonds := []incentive.Bond{}
 
 	iterator := func(key, val []byte) error {
-		addr, denom, _, err := keys.LeadingAddressAndDenom(keyPrefixBondAmount, key)
+		addr, denom, _, err := keys.ExtractAddressAndString(len(keyPrefixBondAmount), key)
 		if err != nil {
 			return err
 		}
@@ -121,7 +121,7 @@ func (k Keeper) getAllTotalBonded(ctx sdk.Context) sdk.Coins {
 	total := sdk.NewCoins()
 
 	iterator := func(key, val []byte) error {
-		denom, _, err := keys.LeadingDenom(keyPrefixTotalBonded, key)
+		denom, _, err := keys.ExtractString(len(keyPrefixTotalBonded), key)
 		if err != nil {
 			return err
 		}
@@ -188,7 +188,7 @@ func (k Keeper) getAllTotalUnbonding(ctx sdk.Context) sdk.Coins {
 	total := sdk.NewCoins()
 
 	iterator := func(key, val []byte) error {
-		denom, _, err := keys.LeadingDenom(keyPrefixTotalUnbonding, key)
+		denom, _, err := keys.ExtractString(len(keyPrefixTotalUnbonding), key)
 		if err != nil {
 			return err
 		}
