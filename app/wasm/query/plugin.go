@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	sdkerrors "cosmossdk.io/errors"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gogo/protobuf/proto"
 
 	lvkeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
