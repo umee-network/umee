@@ -478,12 +478,9 @@ func New(
 		app.BankKeeper,
 		app.LeverageKeeper,
 	)
-	app.LeverageKeeper.SetTokenHooks(
-		app.OracleKeeper.Hooks(),
-	)
-	app.LeverageKeeper.SetBondHooks(
-		app.IncentiveKeeper.BondHooks(),
-	)
+	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
+	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
+
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
 		app.GetSubspace(gravitytypes.ModuleName),
