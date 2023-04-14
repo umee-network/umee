@@ -20,7 +20,6 @@ func (k Keeper) RestrictedCollateral(ctx sdk.Context, addr sdk.AccAddress, denom
 func (k Keeper) BondSummary(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 	bonded sdk.Coin, unbonding sdk.Coin, unbondings []incentive.Unbonding,
 ) {
-	bonded = coin.Zero(denom)
 	unbonding = coin.Zero(denom)
 	unbondings = []incentive.Unbonding{}
 
