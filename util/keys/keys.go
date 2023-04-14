@@ -43,7 +43,7 @@ func LeadingDenom(prefix, key []byte) (denom string, read int, err error) {
 }
 
 // LeadingAddressAndDenom extracts addr and denom from a key of the form of
-// prefix | lengthPrefixed(addr) | denom | 0x00 ...
+// prefix | lengthPrefixed(addr) | denom | 0x0 |  ...
 func LeadingAddressAndDenom(prefix, key []byte) (addr sdk.AccAddress, denom string, read int, err error) {
 	// first parse leading address
 	addr, read, err = LeadingAddress(prefix, key)
