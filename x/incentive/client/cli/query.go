@@ -78,7 +78,7 @@ func GetCmdQueryAccountBonds() *cobra.Command {
 			}
 
 			queryClient := incentive.NewQueryClient(clientCtx)
-  
+
 			resp, err := queryClient.AccountBonds(cmd.Context(), &incentive.QueryAccountBonds{Address: args[0]})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
@@ -126,6 +126,7 @@ func GetCmdQueryTotalBonded() *cobra.Command {
 				denom = args[0]
 			}
 
+			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.TotalBonded(cmd.Context(), &incentive.QueryTotalBonded{Denom: denom})
 			if err != nil {
 				return err
@@ -155,6 +156,7 @@ func GetCmdQueryTotalUnbonding() *cobra.Command {
 				denom = args[0]
 			}
 
+			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.TotalUnbonding(cmd.Context(), &incentive.QueryTotalUnbonding{Denom: denom})
 			if err != nil {
 				return err
