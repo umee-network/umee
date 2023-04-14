@@ -14,6 +14,8 @@ import (
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+
+	umeewasm "github.com/umee-network/umee/v4/app/wasm"
 )
 
 const (
@@ -70,6 +72,9 @@ func (app *UmeeApp) customKeepers(
 	}
 
 	app.wasmCfg = wasmConfig
+
+	// Registering the custom plugins (leverage and oracle queries and msgs)
+	wasmOpts = append(umeewasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper), wasmOpts...)
 
 	// The last arguments can contain custom message handlers, and custom query handlers,
 	// if we want to allow any custom callbacks
