@@ -54,7 +54,7 @@ func (gs GenesisState) Validate() error {
 		return ErrInvalidProgramID.Wrap("next program ID must not be zero")
 	}
 	if gs.LastRewardsTime < 0 {
-		return ErrDecreaseLastRewardTime.Wrap("last reward time was negative")
+		return ErrDecreaseLastRewardTime.Wrap("last reward time must not be negative")
 	}
 	// TODO: enforce no duplicate (account,denom)
 	for _, rt := range gs.RewardTrackers {
