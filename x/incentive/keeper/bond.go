@@ -28,7 +28,7 @@ func (k Keeper) BondSummary(ctx sdk.Context, addr sdk.AccAddress, denom string) 
 	duration := k.GetParams(ctx).UnbondingDuration
 
 	// sum all bonded and unbonding tokens for this denom
-	bonded = bonded.Add(k.GetBonded(ctx, addr, denom))
+	bonded = k.GetBonded(ctx, addr, denom)
 
 	storedUnbondings := k.getUnbondings(ctx, addr, denom)
 	for _, u := range storedUnbondings {
