@@ -49,6 +49,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
+- [1993](https://github.com/umee-network/umee/pull/1993) Updated our Cosmos SDK fork to 0.46.12 and included an option to disable colored logs.
+
+### Improvements
+
+- [1989](https://github.com/umee-network/umee/pull/1989) Leverage: fix the duplicate symbol denoms issue on adding new tokens to registry.
+
+### Fixes
+
+- .
 
 ## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-5
 

@@ -12,7 +12,6 @@ import (
 )
 
 func TestMsgServer_GovUpdateQuota(t *testing.T) {
-	t.Parallel()
 	s := initKeeperTestSuite(t)
 	ctx := s.ctx
 
@@ -89,7 +88,6 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 }
 
 func TestMsgServer_GovSetIBCStatus(t *testing.T) {
-	t.Parallel()
 	s := initKeeperTestSuite(t)
 	ctx := s.ctx
 

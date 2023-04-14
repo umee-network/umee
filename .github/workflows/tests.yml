@@ -2,10 +2,7 @@ name: Tests
 on:
   pull_request:
   merge_group:
-  push:
-    branches:
-      - main
-      - release/**
+    types: [checks_requested]
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -84,7 +81,7 @@ jobs:
         if: env.GIT_DIFF
         run: |
           EXPERIMENTAL=true make test-unit-cover
-      - uses: codecov/codecov-action@v3.1.1
+      - uses: codecov/codecov-action@v3.1.2
         if: env.GIT_DIFF
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

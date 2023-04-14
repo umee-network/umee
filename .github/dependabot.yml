@@ -16,14 +16,3 @@ updates:
     labels:
       - "A:Automerge"
       - "T:Dependencies"
-
-  - package-ecosystem: gomod
-    directory: "/price-feeder"
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    reviewers:
-      - umee-network/core-devs
-    labels:
-      - "A:Automerge"
-      - "T:Dependencies"

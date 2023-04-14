@@ -34,44 +34,45 @@ func TestGRPCQueryParams(t *testing.T) {
 }
 
 func TestGRPCQueryOutflows(t *testing.T) {
-	t.Parallel()
 	suite := initKeeperTestSuite(t)
 	ctx, client := suite.ctx, suite.queryClient
 	tests := []struct {
-		name   string
-		req    uibc.QueryOutflows
-		errMsg string
+		name          string
+		req           uibc.QueryOutflows
+		outflowAmount int64
 	}{
 		{
-			name:   "valid: total outflows",
-			req:    uibc.QueryOutflows{},
-			errMsg: "",
+			name:          "valid: total outflows",
+			req:           uibc.QueryOutflows{},
+			outflowAmount: 0,
 		}, {
-			name:   "valid req: OutflowSum zero because ibc-transfer not hapeen",
-			req:    uibc.QueryOutflows{Denom: "umee"},
-			errMsg: "",
+			name:          "valid req: OutflowSum zero because ibc-transfer not hapeen",
+			req:           uibc.QueryOutflows{Denom: "umee"},
+			outflowAmount: 0,
 		}, {
-			name:   "non existing denom",
-			req:    uibc.QueryOutflows{Denom: "doesntexists"},
-			errMsg: "",
+			name:          "non existing denom",
+			req:           uibc.QueryOutflows{Denom: "doesntexists"},
+			outflowAmount: 0,
+		}, {
+			name:          "existing denom",
+			req:           uibc.QueryOutflows{Denom: "utest"},
+			outflowAmount: 1111,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			// query outflows never returns error if there is no denom present it will return 0
 			resp, err := client.Outflows(ctx, &tc.req)
-			if tc.errMsg == "" {
-				assert.NilError(t, err)
-				assert.DeepEqual(t, sdk.NewDec(0), resp.Amount)
-			} else {
-				assert.Error(t, err, tc.errMsg)
-			}
+
+			assert.NilError(t, err)
+			assert.DeepEqual(t, sdk.NewDec(tc.outflowAmount), resp.Amount)
 		})
 	}
 
 	t.Run("all-outflows", func(t *testing.T) {
 		resp, err := client.AllOutflows(ctx, &uibc.QueryAllOutflows{})
 		assert.NilError(t, err)
-		assert.Equal(t, 0, len(resp.Outflows))
+		assert.Equal(t, 1, len(resp.Outflows))
 	})
 }
