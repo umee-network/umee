@@ -51,7 +51,7 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 	if gs.NextProgramId == 0 {
-		return ErrInvalidProgramID.Wrap("next program ID was zero")
+		return ErrInvalidProgramID.Wrap("next program ID must not be zero")
 	}
 	if gs.LastRewardsTime < 0 {
 		return ErrDecreaseLastRewardTime.Wrap("last reward time was negative")
