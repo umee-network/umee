@@ -13,11 +13,14 @@ import (
 type mockLeverageKeeper struct {
 	// collateral[address][uToken] = int64
 	collateral map[string]map[string]int64
+	// to test emergency unbondings
+	donatedCollateral sdk.Coins
 }
 
 func newMockLeverageKeeper() *mockLeverageKeeper {
 	m := &mockLeverageKeeper{
-		collateral: map[string]map[string]int64{},
+		collateral:        map[string]map[string]int64{},
+		donatedCollateral: sdk.NewCoins(),
 	}
 	return m
 }
@@ -34,6 +37,11 @@ func (m *mockLeverageKeeper) GetCollateral(ctx sdk.Context, addr sdk.AccAddress,
 // DonateCollateral implements the expected leverage keeper
 func (m *mockLeverageKeeper) DonateCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
 	return nil
+}
+
+// getDonatedCollateral is used to test the effects of emergency unbondings
+func (m *mockLeverageKeeper) getDonatedCollateral(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	return sdk.NewCoin(denom, m.donatedCollateral.AmountOf(denom))
 }
 
 // setCollateral sets an account's collateral in the mock leverage keeper without requiring any supplying action

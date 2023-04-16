@@ -74,17 +74,17 @@ func (gs GenesisState) Validate() error {
 
 	// TODO: enforce no duplicate program IDs
 	for _, up := range gs.UpcomingPrograms {
-		if err := validatePassedIncentiveProgram(up); err != nil {
+		if err := up.ValidatePassed(); err != nil {
 			return err
 		}
 	}
 	for _, op := range gs.OngoingPrograms {
-		if err := validatePassedIncentiveProgram(op); err != nil {
+		if err := op.ValidatePassed(); err != nil {
 			return err
 		}
 	}
 	for _, cp := range gs.CompletedPrograms {
-		if err := validatePassedIncentiveProgram(cp); err != nil {
+		if err := cp.ValidatePassed(); err != nil {
 			return err
 		}
 	}
@@ -180,9 +180,9 @@ func (ip IncentiveProgram) Validate() error {
 	return nil
 }
 
-// validateProposedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
+// ValidateProposed runs IncentiveProgram.Validate and also checks additional requirements applying
 // to incentive programs which have not yet been funded or passed by governance
-func validateProposedIncentiveProgram(program IncentiveProgram) error {
+func (program IncentiveProgram) ValidateProposed() error {
 	if program.ID != 0 {
 		return ErrInvalidProgramID.Wrapf("%d", program.ID)
 	}
@@ -195,9 +195,9 @@ func validateProposedIncentiveProgram(program IncentiveProgram) error {
 	return program.Validate()
 }
 
-// validatePassedIncentiveProgram runs IncentiveProgram.Validate and also checks additional requirements applying
+// ValidatePassed runs IncentiveProgram.Validate and also checks additional requirements applying
 // to incentive programs which have already been passed by governance
-func validatePassedIncentiveProgram(program IncentiveProgram) error {
+func (program IncentiveProgram) ValidatePassed() error {
 	if program.ID == 0 {
 		return ErrInvalidProgramID.Wrapf("%d", program.ID)
 	}

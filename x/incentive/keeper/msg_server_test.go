@@ -222,3 +222,62 @@ func (s *IntegrationTestSuite) TestMsgGovSetParams() {
 	// ensure params have not changed
 	require.Equal(newParams, s.k.GetParams(ctx))
 }
+
+func (s *IntegrationTestSuite) TestMsgGovCreatePrograms() {
+	ctx, srv, require := s.ctx, s.msgSrvr, s.Require()
+
+	// create an account to use as community fund, with 15 UMEE
+	_ = s.initCommunityFund(
+		sdk.NewInt64Coin(umeeDenom, 15_000000),
+	)
+
+	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+
+	validProgram := incentive.IncentiveProgram{
+		ID:               0,
+		StartTime:        100,
+		Duration:         100,
+		UToken:           "u/" + umeeDenom,
+		Funded:           false,
+		TotalRewards:     sdk.NewInt64Coin(umeeDenom, 10_000000),
+		RemainingRewards: coin.Zero(umeeDenom),
+	}
+
+	// require that NextProgramID starts at the correct value
+	require.Equal(uint32(1), s.k.GetNextProgramID(ctx), "initial next ID")
+
+	// add program and expect no error
+	validMsg := &incentive.MsgGovCreatePrograms{
+		Authority:         govAccAddr,
+		Title:             "Add valid program",
+		Description:       "Awards 10 UMEE to u/UMEE suppliers over 100 blocks",
+		Programs:          []incentive.IncentiveProgram{validProgram},
+		FromCommunityFund: true,
+	}
+	// pass and fund the program using 10 UMEE from community fund
+	_, err := srv.GovCreatePrograms(ctx, validMsg)
+	require.Nil(err, "set valid program")
+	require.Equal(uint32(2), s.k.GetNextProgramID(ctx), "next Id after 1 program passed")
+
+	// pass and then attempt to fund the program again using 10 UMEE from community fund, but only 5 remains
+	_, err = srv.GovCreatePrograms(ctx, validMsg)
+	require.Nil(err, "insufficient funds, but still passes and reverts to manual funding")
+	require.Equal(uint32(3), s.k.GetNextProgramID(ctx), "next Id after 2 programs passed")
+
+	invalidProgram := validProgram
+	invalidProgram.ID = 1
+	invalidMsg := &incentive.MsgGovCreatePrograms{
+		Authority:         govAccAddr,
+		Title:             "Add invalid program",
+		Description:       "",
+		Programs:          []incentive.IncentiveProgram{invalidProgram},
+		FromCommunityFund: true,
+	}
+	// program should fail to be added, and nextID is unchanged
+	_, err = srv.GovCreatePrograms(ctx, invalidMsg)
+	require.ErrorIs(err, incentive.ErrInvalidProgramID, "set invalid program")
+	require.Equal(uint32(3), s.k.GetNextProgramID(ctx), "next ID after 2 programs passed an 1 failed")
+
+	// TODO: messages with multiple programs, including partially invalid
+	// and checking exact equality with upcoming programs set
+}

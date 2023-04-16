@@ -133,6 +133,31 @@ func (s *IntegrationTestSuite) fundAccount(addr sdk.AccAddress, funds ...sdk.Coi
 	}
 }
 
+// initCommunityFund creates and funds an account, then sets it as the module's community fund
+// newAccount creates a new account for testing, and funds it with any input tokens.
+func (s *IntegrationTestSuite) initCommunityFund(funds ...sdk.Coin) sdk.AccAddress {
+	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
+
+	// create and fund account
+	addr := s.newAccount(funds...)
+
+	// change only the community fund address in params
+	params := s.k.GetParams(ctx)
+	params.CommunityFundAddress = addr.String()
+
+	// set params and expect no error
+	validMsg := &incentive.MsgGovSetParams{
+		Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+		Title:       "Update Params",
+		Description: "New valid values",
+		Params:      params,
+	}
+	_, err := srv.GovSetParams(ctx, validMsg)
+	require.Nil(err, "init community fund")
+
+	return addr
+}
+
 // bond utokens to an account and require no errors. Use when setting up incentive scenarios.
 func (s *IntegrationTestSuite) bond(addr sdk.AccAddress, coins ...sdk.Coin) {
 	srv, ctx, require := s.msgSrvr, s.ctx, s.Require()

@@ -44,3 +44,12 @@ func (tk *TestKeeper) UpdateRewards(ctx sdk.Context, prevTime, blockTime int64) 
 func (tk *TestKeeper) UpdatePrograms(ctx sdk.Context, blockTime int64) error {
 	return tk.Keeper.updatePrograms(ctx, blockTime)
 }
+
+func (tk *TestKeeper) GetIncentivePrograms(ctx sdk.Context, status incentive.ProgramStatus,
+) ([]incentive.IncentiveProgram, error) {
+	return tk.Keeper.getAllIncentivePrograms(ctx, status)
+}
+
+func (tk *TestKeeper) GetNextProgramID(ctx sdk.Context) uint32 {
+	return tk.Keeper.getNextProgramID(ctx)
+}

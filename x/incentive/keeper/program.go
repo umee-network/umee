@@ -16,7 +16,7 @@ func (k Keeper) createIncentiveProgram(
 	program incentive.IncentiveProgram,
 	fromCommunityFund bool,
 ) error {
-	if err := program.Validate(); err != nil {
+	if err := program.ValidateProposed(); err != nil {
 		return err
 	}
 

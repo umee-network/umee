@@ -205,7 +205,7 @@ func (msg MsgGovCreatePrograms) ValidateBasic() error {
 		return ErrEmptyProposal
 	}
 	for _, p := range msg.Programs {
-		if err := validateProposedIncentiveProgram(p); err != nil {
+		if err := p.ValidateProposed(); err != nil {
 			return err
 		}
 	}
