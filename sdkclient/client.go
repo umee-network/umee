@@ -15,6 +15,8 @@ import (
 // transactions and queries. The object should be extended by another struct to provide
 // chain specific transactions and queries. Example:
 // https://github.com/umee-network/umee/blob/main/client
+// Accounts are generated using the list of mnemonics. Each string must be a sequence of words,
+// eg: `["w11 w12 w13", "w21 w22 w23"]`. Keyring names for created accounts will be: val1, val2....
 type Client struct {
 	Query *query.Client
 	Tx    *tx.Client
@@ -23,9 +25,8 @@ type Client struct {
 func NewClient(
 	chainID,
 	tmrpcEndpoint,
-	grpcEndpoint,
-	accountName,
-	accountMnemonic string,
+	grpcEndpoint string,
+	mnemonics []string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (uc Client, err error) {
@@ -34,7 +35,7 @@ func NewClient(
 	if err != nil {
 		return Client{}, err
 	}
-	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, accountName, accountMnemonic, gasAdjustment, encCfg)
+	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	return uc, err
 }
 

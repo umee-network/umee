@@ -48,6 +48,8 @@ var (
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
 	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
+
+	sampleOutflow = sdk.NewDecCoin("utest", sdk.NewInt(1111))
 )
 
 type KeeperTestSuite struct {
@@ -58,6 +60,7 @@ type KeeperTestSuite struct {
 }
 
 func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+	t.Parallel()
 	s := &KeeperTestSuite{}
 	isCheckTx := false
 	app := umeeapp.Setup(t)
@@ -78,6 +81,7 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
+	app.UIbcQuotaKeeper.SetTokenOutflow(ctx, sampleOutflow)
 
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
