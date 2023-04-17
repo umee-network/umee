@@ -130,10 +130,11 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	// attempt to begin unbonding 50 u/uumee more (only 40 available)
 	msg = &incentive.MsgBeginUnbonding{
 		Account: umeeSupplier.String(),
-		UToken:  coin.New("u/"+umeeDenom, 40),
+		UToken:  coin.New("u/"+umeeDenom, 50),
 	}
 	_, err = srv.BeginUnbonding(ctx, msg)
-	require.ErrorIs(err, incentive.ErrInsufficientBonded, "begin unbonding 40")
+	require.ErrorIs(err, incentive.ErrInsufficientBonded, "begin unbonding 50")
+	// TODO: why was this passing at amount 40?
 
 	// attempt to begin unbonding 50 u/unknown but from the wrong account
 	msg = &incentive.MsgBeginUnbonding{
@@ -174,6 +175,86 @@ func (s *IntegrationTestSuite) TestMsgBeginUnbonding() {
 	s.advanceTime(s.k.GetParams(s.ctx).UnbondingDuration)
 	_, err = srv.BeginUnbonding(ctx, msg)
 	require.Nil(err, "unbonding available after max unbondings finish")
+}
+
+func (s *IntegrationTestSuite) TestMsgEmergencyUnbond() {
+	ctx, srv, require := s.ctx, s.msgSrvr, s.Require()
+	lk := s.mockLeverage
+
+	// create an account which the mock leverage keeper will report as
+	// having 50u/uumee collateral. No tokens ot uTokens are actually minted.
+	// bond those uTokens.
+	umeeSupplier := s.newAccount()
+	lk.setCollateral(umeeSupplier, "u/"+umeeDenom, 50)
+	s.bond(umeeSupplier, coin.New("u/"+umeeDenom, 50))
+
+	// create an additional account which has supplied an unregistered denom
+	// which nonetheless has a uToken prefix. Bond those utokens.
+	unknownSupplier := s.newAccount()
+	lk.setCollateral(unknownSupplier, "u/unknown", 50)
+	s.bond(unknownSupplier, coin.New("u/unknown", 50))
+
+	// empty address
+	msg := &incentive.MsgEmergencyUnbond{
+		Account: "",
+		UToken:  coin.New("u/"+umeeDenom, 10),
+	}
+	_, err := srv.EmergencyUnbond(ctx, msg)
+	require.ErrorContains(err, "empty address", "empty address")
+
+	// base token
+	msg = &incentive.MsgEmergencyUnbond{
+		Account: umeeSupplier.String(),
+		UToken:  coin.New(umeeDenom, 10),
+	}
+	_, err = srv.EmergencyUnbond(ctx, msg)
+	require.ErrorIs(err, leveragetypes.ErrNotUToken)
+
+	// attempt to emergency unbond 10 u/uumee out of 50 available
+	msg = &incentive.MsgEmergencyUnbond{
+		Account: umeeSupplier.String(),
+		UToken:  coin.New("u/"+umeeDenom, 10),
+	}
+	_, err = srv.EmergencyUnbond(ctx, msg)
+	require.Nil(err, "emergency unbond 10")
+
+	// attempt to emergency unbond 50 u/uumee more (only 40 available)
+	msg = &incentive.MsgEmergencyUnbond{
+		Account: umeeSupplier.String(),
+		UToken:  coin.New("u/"+umeeDenom, 50),
+	}
+	_, err = srv.EmergencyUnbond(ctx, msg)
+	require.ErrorIs(err, incentive.ErrInsufficientBonded, "emergency unbond 50")
+
+	// attempt to emergency unbond 50 u/unknown but from the wrong account
+	msg = &incentive.MsgEmergencyUnbond{
+		Account: umeeSupplier.String(),
+		UToken:  coin.New("u/unknown", 50),
+	}
+	_, err = srv.EmergencyUnbond(ctx, msg)
+	require.ErrorIs(err, incentive.ErrInsufficientBonded, "emergency unbond 50 unknown (wrong account)")
+
+	// attempt to emergency unbond 50 u/unknown but from the correct account
+	msg = &incentive.MsgEmergencyUnbond{
+		Account: unknownSupplier.String(),
+		UToken:  coin.New("u/unknown", 50),
+	}
+	_, err = srv.EmergencyUnbond(ctx, msg)
+	require.Nil(err, "emergency unbond 50 unknown")
+
+	// attempt a large number of emergency unbondings which would hit MaxUnbondings if they were not instant
+	msg = &incentive.MsgEmergencyUnbond{
+		Account: umeeSupplier.String(),
+		UToken:  coin.New("u/"+umeeDenom, 1),
+	}
+	// 4 more emergency unbondings of u/uumee on this account, which would reach the default maximum of 5 if not instant
+	for i := 1; i < 5; i++ {
+		_, err = srv.EmergencyUnbond(ctx, msg)
+		require.Nil(err, "repeat emergency unbond 1")
+	}
+	// this would exceed max unbondings, but because the unbondings are instant, it does not
+	_, err = srv.EmergencyUnbond(ctx, msg)
+	require.Nil(err, "emergency unbond does is not restricted by max unbondings")
 }
 
 func (s *IntegrationTestSuite) TestMsgGovSetParams() {
