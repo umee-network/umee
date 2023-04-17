@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -499,30 +500,31 @@ func (s msgServer) GovUpdateRegistry(
 	msg *types.MsgGovUpdateRegistry,
 ) (*types.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	regdTkDenoms := make(map[string]bool)
+	regdSymDenoms := make(map[string]bool)
 
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
-	registeredTokenDenoms := make(map[string]bool)
-
 	for _, token := range registeredTokens {
-		registeredTokenDenoms[token.BaseDenom] = true
+		regdTkDenoms[token.BaseDenom] = true
+		regdSymDenoms[strings.ToUpper(token.SymbolDenom)] = true
 	}
 
 	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, registeredTokenDenoms, true)
+	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regdTkDenoms, regdSymDenoms, true)
 	if err != nil {
-		return &types.MsgGovUpdateRegistryResponse{}, err
+		return nil, err
 	}
 
-	// adds  the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, registeredTokenDenoms, false)
+	// adds the new token settings
+	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regdTkDenoms, regdSymDenoms, false)
 	if err != nil {
-		return &types.MsgGovUpdateRegistryResponse{}, err
+		return nil, err
 	}
 
 	// cleans blacklisted tokens from the registry if they have not been supplied
 	err = s.keeper.CleanTokenRegistry(ctx)
 	if err != nil {
-		return &types.MsgGovUpdateRegistryResponse{}, err
+		return nil, err
 	}
 
 	return &types.MsgGovUpdateRegistryResponse{}, nil

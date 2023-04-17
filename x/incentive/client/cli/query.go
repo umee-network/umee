@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
+	"github.com/umee-network/umee/v4/util/cli"
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
@@ -55,18 +56,12 @@ func GetCmdQueryParams() *cobra.Command {
 			}
 
 			queryClient := incentive.NewQueryClient(clientCtx)
-
 			resp, err := queryClient.Params(cmd.Context(), &incentive.QueryParams{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }
 
@@ -83,18 +78,12 @@ func GetCmdQueryUnbondings() *cobra.Command {
 			}
 
 			queryClient := incentive.NewQueryClient(clientCtx)
-
 			resp, err := queryClient.Unbondings(cmd.Context(), &incentive.QueryUnbondings{Address: args[0]})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }
 
@@ -111,18 +100,12 @@ func GetCmdQueryPendingRewards() *cobra.Command {
 			}
 
 			queryClient := incentive.NewQueryClient(clientCtx)
-
 			resp, err := queryClient.PendingRewards(cmd.Context(), &incentive.QueryPendingRewards{Address: args[0]})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }
 
@@ -137,25 +120,18 @@ func GetCmdQueryBonded() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			queryClient := incentive.NewQueryClient(clientCtx)
-
 			denom := ""
 			if len(args) > 1 {
 				denom = args[1]
 			}
 
+			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.Bonded(cmd.Context(), &incentive.QueryBonded{Address: args[0], Denom: denom})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }
 
@@ -170,25 +146,18 @@ func GetCmdQueryTotalBonded() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			queryClient := incentive.NewQueryClient(clientCtx)
-
 			denom := ""
 			if len(args) > 0 {
 				denom = args[0]
 			}
 
+			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.TotalBonded(cmd.Context(), &incentive.QueryTotalBonded{Denom: denom})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }
 
@@ -206,19 +175,13 @@ func GetCmdQueryUpcomingIncentivePrograms() *cobra.Command {
 			}
 
 			queryClient := incentive.NewQueryClient(clientCtx)
-
 			resp, err := queryClient.UpcomingIncentivePrograms(cmd.Context(),
 				&incentive.QueryUpcomingIncentivePrograms{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }
 
@@ -236,19 +199,13 @@ func GetCmdQueryOngoingIncentivePrograms() *cobra.Command {
 			}
 
 			queryClient := incentive.NewQueryClient(clientCtx)
-
 			resp, err := queryClient.OngoingIncentivePrograms(cmd.Context(),
 				&incentive.QueryOngoingIncentivePrograms{})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }
 
@@ -265,28 +222,22 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 				return err
 			}
 
-			queryClient := incentive.NewQueryClient(clientCtx)
-
 			pageReq, err := client.ReadPageRequest(cmd.Flags())
 			if err != nil {
 				return err
 			}
 
+			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.CompletedIncentivePrograms(cmd.Context(),
 				&incentive.QueryCompletedIncentivePrograms{
 					Pagination: pageReq,
 				})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
 	flags.AddPaginationFlagsToCmd(cmd, "completed incentive programs")
-
 	return cmd
 }
 
@@ -302,24 +253,17 @@ func GetCmdQueryIncentiveProgram() *cobra.Command {
 			if err != nil {
 				return err
 			}
-
-			queryClient := incentive.NewQueryClient(clientCtx)
-
 			id, err := strconv.ParseUint(args[0], 10, 32)
 			if err != nil {
 				return err
 			}
 
+			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.IncentiveProgram(cmd.Context(), &incentive.QueryIncentiveProgram{Id: uint32(id)})
-			if err != nil {
-				return err
-			}
-
-			return clientCtx.PrintProto(resp)
+			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-
 	return cmd
 }

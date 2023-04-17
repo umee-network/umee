@@ -335,7 +335,7 @@ proto-all: proto-format proto-lint proto-gen proto-swagger-gen
 proto-gen:
 	@echo "Generating Protobuf files"
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
-w		sh ./contrib/scripts/protocgen.sh; fi
+		sh ./contrib/scripts/protocgen.sh; fi
 
 proto-swagger-gen:
 	@echo "Generating Protobuf Swagger"
