@@ -186,6 +186,11 @@ func (s msgServer) Sponsor(
 	if !program.TotalRewards.Amount.Equal(msg.Asset.Amount) {
 		return nil, incentive.ErrSponsorInvalid.Wrap("sponsor amount must match exact total rewards required")
 	}
+	spendable := k.bankKeeper.SpendableCoins(ctx, sponsor).AmountOf(program.TotalRewards.Denom)
+	if spendable.LT(program.TotalRewards.Amount) {
+		return nil, incentive.ErrSponsorInvalid.Wrapf("insufficient sponsor tokens: want %s, have %s",
+			program.TotalRewards, spendable)
+	}
 
 	// transfer rewards from sponsor to incentive module
 	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx,

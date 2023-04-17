@@ -255,6 +255,75 @@ func (s *IntegrationTestSuite) TestMsgEmergencyUnbond() {
 	// this would exceed max unbondings, but because the unbondings are instant, it does not
 	_, err = srv.EmergencyUnbond(ctx, msg)
 	require.Nil(err, "emergency unbond does is not restricted by max unbondings")
+
+	// TODO: confirm donated collateral amounts using mock leverage keeper
+}
+
+func (s *IntegrationTestSuite) TestMsgSponsor() {
+	ctx, srv, require := s.ctx, s.msgSrvr, s.Require()
+
+	sponsor := s.newAccount(sdk.NewInt64Coin(umeeDenom, 15_000000))
+
+	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+
+	validProgram := incentive.IncentiveProgram{
+		ID:               0,
+		StartTime:        100,
+		Duration:         100,
+		UToken:           "u/" + umeeDenom,
+		Funded:           false,
+		TotalRewards:     sdk.NewInt64Coin(umeeDenom, 10_000000),
+		RemainingRewards: coin.Zero(umeeDenom),
+	}
+
+	// require that NextProgramID starts at the correct value
+	require.Equal(uint32(1), s.k.GetNextProgramID(ctx), "initial next ID")
+
+	// add program and expect no error
+	validMsg := &incentive.MsgGovCreatePrograms{
+		Authority:         govAccAddr,
+		Title:             "Add two valid program",
+		Description:       "Both will require manual funding",
+		Programs:          []incentive.IncentiveProgram{validProgram, validProgram},
+		FromCommunityFund: true,
+	}
+	// pass but do not fund the programs
+	_, err := srv.GovCreatePrograms(ctx, validMsg)
+	require.Nil(err, "set valid programs")
+	require.Equal(uint32(3), s.k.GetNextProgramID(ctx), "next Id after 2 programs passed")
+
+	wrongAssetSponsorMsg := &incentive.MsgSponsor{
+		Sponsor: sponsor.String(),
+		Program: 1,
+		Asset:   sdk.NewInt64Coin(umeeDenom, 5_000000),
+	}
+	wrongProgramSponsorMsg := &incentive.MsgSponsor{
+		Sponsor: sponsor.String(),
+		Program: 3,
+		Asset:   sdk.NewInt64Coin(umeeDenom, 10_000000),
+	}
+	validSponsorMsg := &incentive.MsgSponsor{
+		Sponsor: sponsor.String(),
+		Program: 1,
+		Asset:   sdk.NewInt64Coin(umeeDenom, 10_000000),
+	}
+	failSponsorMsg := &incentive.MsgSponsor{
+		Sponsor: sponsor.String(),
+		Program: 2,
+		Asset:   sdk.NewInt64Coin(umeeDenom, 10_000000),
+	}
+
+	// test cases
+	_, err = srv.Sponsor(ctx, wrongAssetSponsorMsg)
+	require.ErrorIs(err, incentive.ErrSponsorInvalid, "sponsor without exact asset match")
+	_, err = srv.Sponsor(ctx, wrongProgramSponsorMsg)
+	require.ErrorContains(err, "not found", "sponsor non-existing program")
+	_, err = srv.Sponsor(ctx, validSponsorMsg)
+	require.Nil(err, "valid sponsor")
+	_, err = srv.Sponsor(ctx, validSponsorMsg)
+	require.ErrorIs(err, incentive.ErrSponsorIneligible, "already funded program")
+	_, err = srv.Sponsor(ctx, failSponsorMsg)
+	require.ErrorContains(err, "insufficient sponsor tokens", "sponsor with insufficient funds")
 }
 
 func (s *IntegrationTestSuite) TestMsgGovSetParams() {
