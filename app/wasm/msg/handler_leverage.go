@@ -78,8 +78,8 @@ func (m UmeeMsg) HandleLiquidate(
 	return s.Liquidate(ctx, req)
 }
 
-// HandleSupplyCollateralize handles the supply the assets and collateral their assets.
-func (m UmeeMsg) HandleSupplyCollateralize(
+// HandleSupplyCollateral handles the supply the assets and collateral their assets.
+func (m UmeeMsg) HandleSupplyCollateral(
 	ctx context.Context,
 	s lvtypes.MsgServer,
 ) (proto.Message, error) {

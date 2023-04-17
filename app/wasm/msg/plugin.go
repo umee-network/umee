@@ -50,7 +50,7 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 	case AssignedMsgLiquidate:
 		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgSupplyCollateralize:
-		_, err = smartcontractMessage.HandleSupplyCollateralize(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleSupplyCollateral(sdkCtx, plugin.lvMsgServer)
 
 	default:
 		err = wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
