@@ -29,8 +29,8 @@ const (
 	// borrowed coins to the capital facility in exchange for some of their
 	// collateral.
 	AssignedMsgLiquidate
-	// AssignedMsgSupplyCollateralize represents the call to supply and collateralize their assets.
-	AssignedMsgSupplyCollateralize
+	// AssignedMsgSupplyCollateral represents the call to supply and collateralize their assets.
+	AssignedMsgSupplyCollateral
 	AssignedMsgMaxWithdraw
 )
 
@@ -54,7 +54,7 @@ type UmeeMsg struct {
 	// to the capital facility in exchange for some of their collateral.
 	Liquidate *lvtypes.MsgLiquidate `json:"liquidate,omitempty"`
 	// Used to do supply and collateralize their assets.
-	SupplyCollateralize *lvtypes.MsgSupplyCollateral `json:"supply_collateralize,omitempty"`
+	SupplyCollateral *lvtypes.MsgSupplyCollateral `json:"supply_collateralize,omitempty"`
 	// Used to do withdraw maximum assets by supplier.
 	AssignedMsgMaxWithdraw *lvtypes.MsgMaxWithdraw `json:"max_withdraw,omitempty"`
 }

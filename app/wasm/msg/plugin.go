@@ -49,7 +49,7 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 		_, err = smartcontractMessage.HandleRepay(sdkCtx, plugin.lvMsgServer)
 	case AssignedMsgLiquidate:
 		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgSupplyCollateralize:
+	case AssignedMsgSupplyCollateral:
 		_, err = smartcontractMessage.HandleSupplyCollateral(sdkCtx, plugin.lvMsgServer)
 
 	default:

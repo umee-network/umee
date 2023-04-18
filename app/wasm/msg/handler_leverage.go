@@ -83,6 +83,6 @@ func (m UmeeMsg) HandleSupplyCollateral(
 	ctx context.Context,
 	s lvtypes.MsgServer,
 ) (proto.Message, error) {
-	req := &lvtypes.MsgSupplyCollateral{Supplier: m.SupplyCollateralize.Supplier, Asset: m.Supply.Asset}
+	req := &lvtypes.MsgSupplyCollateral{Supplier: m.SupplyCollateral.Supplier, Asset: m.Supply.Asset}
 	return s.SupplyCollateral(ctx, req)
 }
