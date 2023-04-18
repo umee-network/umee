@@ -6,7 +6,7 @@ This document specifies the `x/metoken` module of the Umee chain.
 
 meToken is a new Token that represents an Index composed of assets used for swaps and redemptions. It can be minted
 during the swap of the Index accepted assets and burned to redeem any Index accepted asset. Each Index will have a
-unique name for the Token that represents it.
+unique name for the meToken that represents it.
 
 The `metoken` module allows users to swap and redeem accepted assets for an Index meToken. The Index meToken will
 maintain the parity between underlying assets given a specific configuration.
@@ -23,7 +23,6 @@ prices and the cosmos `x/bank` module for balance updates (coins).
     - Important Derived Values:
         - [Dynamic Fee](#dynamic-fee)
     - [Reserves](#reserves)
-    - [Fees](#fees)
 2. **[State](#state)**
 3. **[Queries](#queries)**
 4. **[Messages](#messages)**
@@ -49,8 +48,8 @@ The Index will have the following parameters:
 - meToken denom: a denom of the meToken Index that will be given to user in exchange for accepted assets.
 - meToken max supply: the maximum amount of meTokens (in specific Index) that can be minted. A swap that requires to
   mint more meToken than this value will result in an error. Every meToken will always have a value of 1 USD.
-- Fees: every fee is calculated in USD, but charged to the user in the asset that is used in the operation.
-  The calculation will be explained below, the following values will be used as parameters for that calculation:
+- Fees: every fee is calculated and charged to the user in the asset that is used in the operation. The calculation
+  will be explained below, the following values will be used as parameters for that calculation:
     - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
       when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values
       `[0-∞]`.
@@ -112,9 +111,10 @@ The more complex derived values must use the values above as basis.
 #### Dynamic Fee
 
 The fee to be applied for the swap or the redemption will be dynamic and based on the deviation from the
-`target_allocation` of an asset and its current allocation in the Index. The fee will be transferred to the
-`metoken` fee receiver address and its usage will be determined in the future. The formula for calculating the dynamic
-fee is as follows:
+`target_allocation` of an asset and its current allocation in the Index. Every charged fee to the user will be
+transferred to the `metoken` module balance and the value will be added to the [State](#state). In that way it is
+possible to discriminate between the reserves and fees saved on the `metoken` module balance.
+The formula for calculating the dynamic fee is as follows:
 
 ``` text
 dynamic_fee = balanced_fee + [allocation_delta * (balanced_fee / 100)]
@@ -261,22 +261,16 @@ The `metoken` module will have its own reserves to stabilize the processing of t
 every swap will be transferred to the reserves and a percentage of every withdrawal will be taken from the reserves.
 This portion is determined by the parameters of every asset in the Index.
 
-All the reserves will be saved to the `metoken` module balance along with all the fees. The amount of fees for every 
-asset will be saved to the `metoken` module state. The reserves will be `balance - fee` for every asset.
-
-### Fees
-
-Every charged fee to the user will be transferred to the `metoken` module balance and the value will be added to the
-[State](#state). In that way it is possible to discriminate between the reserves and fees saven on the `metoken` 
-module balance.
+All the reserves will be saved to the `metoken` module balance along with all the fees. The amount of fees for every
+asset will be saved to the `metoken` module [State](#state). The reserves are equal to `balance - fee` for every asset.
 
 #### Reserves Re-balancing
 
-The frequency of the Reserves Re-balancing will be determined by module parameter `rebalancing_frequency`. 
+The frequency of the Reserves Re-balancing will be determined by module parameter `rebalancing_frequency`.
 The workflow for every asset of each Index is as follows:
 
 - Get the amount of Token transferred to the `leverage` module, stored in `metoken` module [State](#state).
-- Get the amount of Token maintained in the `metoken` module balance and deduct it by the fees amount stored in 
+- Get the amount of Token maintained in the `metoken` module balance and deduct it by the fee amount stored in
   `metoken` module [State](#state). The result is the amount of Token reserves.
 - Check if the portion of reserves is bellow the desired and transfer the missing amount from `leverage` module to
   `metoken` reserves.
