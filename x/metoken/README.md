@@ -50,20 +50,20 @@ The Index will have the following parameters:
   mint more meToken than this value will result in an error. Every meToken will always have a value of 1 USD.
 - Fees: every fee is calculated and charged to the user in the asset that is used in the operation. The calculation
   will be explained below, the following values will be used as parameters for that calculation:
-    - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
-      when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values
-      `[0-∞]`.
-    - Balanced fee: the fee to be charged to the user when the index is balanced. It must be greater than Min fee and
-      lower than Max fee, it cannot be 0.
-    - Max fee: the maximum fee to be charged to the user. The applied fee will tend to increase up to this value,
-      when the accepted asset is oversupplied in the index. It must be greater than Min and Balanced fee. If the value
-      is 0, no Max fee will be applied.
+  - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
+    when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values
+    `[0-∞]`.
+  - Balanced fee: the fee to be charged to the user when the index is balanced. It must be greater than Min fee and
+    lower than Max fee, it cannot be 0.
+  - Max fee: the maximum fee to be charged to the user. The applied fee will tend to increase up to this value,
+    when the accepted asset is oversupplied in the index. It must be greater than Min and Balanced fee. If the value
+    is 0, no Max fee will be applied.
 - Accepted Assets: a list where each asset will have the following parameters:
-    - Asset denom.
-    - Reserve portion: the portion of swapped assets that will be transferred to `metoken` module as reserves, and the
-      minimum portion that will be taken from `metoken` module reserves when a redemption occurs. Valid values: `[0-1)`.
-    - Target allocation: the portion of an accepted asset the Index is targeting to have. The sum of
-      `target_allocation` of every accepted asset in the Index should be equal to 1. Valid values: `[0-1)`.
+  - Asset denom.
+  - Reserve portion: the portion of swapped assets that will be transferred to `metoken` module as reserves, and the
+    minimum portion that will be taken from `metoken` module reserves when a redemption occurs. Valid values: `[0-1)`.
+  - Target allocation: the portion of an accepted asset the Index is targeting to have. The sum of
+    `target_allocation` of every accepted asset in the Index should be equal to 1. Valid values: `[0-1)`.
 
 ### Swapping and Redeeming
 
@@ -367,7 +367,8 @@ where `proposal.json` contains:
           "accepted_assets": [
             {
               "asset_denom": "EURC",
-              "reserve_portion": "0.3"
+              "reserve_portion": "0.3",
+              "total_allocation": "0.333"
             }
           ]
         }
@@ -391,4 +392,4 @@ See <LINK TO BE ADDED> for list of supported module params.
 
 Every block, the `metoken` module runs the following steps in order:
 
-- Re-balance Reserves if at `rebalancing_block`.
+- Re-balance Reserves if at or after `next_rebalancing` timestamp.
