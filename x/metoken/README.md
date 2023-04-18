@@ -251,7 +251,7 @@ Example:
 ```bash
 umeed tx gov submit-proposal /path/to/proposal.json --from umee1..
 
-// Note `authority` will be gov module account address in proposal.json
+# Note `authority` will be gov module account address in proposal.json
 umeed q auth module-accounts -o json | jq '.accounts[] | select(.name=="gov") | .base_account.address'
 ```
 
