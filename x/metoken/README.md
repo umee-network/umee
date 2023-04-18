@@ -2,11 +2,11 @@
 
 ## Abstract
 
+This document specifies the `x/metoken` module of the Umee chain.
+
 meToken is a new Token that represents an Index composed of assets used for swaps and redemptions. It can be minted
 during the swap of the Index accepted assets and burned to redeem any Index accepted asset. Each Index will have a
 unique name for the Token that represents it.
-
-This document specifies the `x/metoken` module of the Umee chain.
 
 The `metoken` module allows users to swap and redeem accepted assets for an Index meToken. The Index meToken will
 maintain the parity between underlying assets given a specific configuration.
@@ -23,6 +23,7 @@ prices and the cosmos `x/bank` module for balance updates (coins).
     - Important Derived Values:
         - [Dynamic Fee](#dynamic-fee)
     - [Reserves](#reserves)
+    - [Fees](#fees)
 2. **[State](#state)**
 3. **[Queries](#queries)**
 4. **[Messages](#messages)**
@@ -120,6 +121,10 @@ dynamic_fee = balanced_fee + [allocation_delta * (balanced_fee / 100)]
 
 If the dynamic_fee is lower than min_fee   -> dynamic_fee = min_fee
 If the dynamic_fee is greater than max_fee -> dynamic_fee = max_fee
+
+where: 
+allocation_delta for the swap = (current_allocation - target_allocation) / target_allocation
+allocation_delta for the redemption = (target_allocation - current_allocation) / target_allocation
 ```
 
 Example for the meUSD index, and the following fee and accepted assets:
@@ -131,31 +136,56 @@ Example for the meUSD index, and the following fee and accepted assets:
   - Max: 0.5
 
 - USDT:
+  - reserve_portion: 0.2
   - target_allocation: 0.33333
 - USDC: 
+  - reserve_portion: 0.2
   - target_allocation: 0.33333
 - IST: 
+  - reserve_portion: 0.2
   - target_allocation: 0.33333
 
 After several swaps the index has 1200 USDT, 760 USDC and 3000 IST. Total supply: 4960. 
 
 Calculations for swap:
-- USDT deviation from targeted allocation: (0.24193 - 0.33333)/0.33333 = -0.2742027
-- USDC deviation from targeted allocation: (0.15322 - 0.33333)/0.33333 = -0.5403354
-- IST  deviation from targeted allocation: (0.60483 - 0.33333)/0.33333 =  0.8145081
+- USDT allocation_delta: (0.24193 - 0.33333)/0.33333 = -0.2742027
+- USDC allocation_delta: (0.15322 - 0.33333)/0.33333 = -0.5403354
+- IST  allocation_delta: (0.60483 - 0.33333)/0.33333 =  0.8145081
 
-- USDT swap fee: 0.2 - 0.2742027*0.2 = 0.14515
-- USDC swap fee: 0.2 - 0.5403354*0.2 = 0.09193
-- IST  swap fee: 0.2 + 0.8145081*0.2 = 0.36290
+- USDT fee: 0.2 - 0.2742027*0.2 = 0.14515
+- USDC fee: 0.2 - 0.5403354*0.2 = 0.09193
+- IST  fee: 0.2 + 0.8145081*0.2 = 0.36290
+
+Following this values, let's simulate a swap. A user wants to buy meUSD for 10 USDT and the value of 1 USDT is 0.998
+USD.
+
+meUSD = 10 * 0.998 * (1 - 0.14515)
+meUSD = 8.531403
+
+The user will receive 8.531403 meUSD. 1.4515 USDT will be the total saved fee and 8.5485 USDT will be splitted 
+between the reserves and the liquidity for the leverage module based on the reserve_portion.
+6.8388 USDT will be transferred to the leverage module and 1.7097 USDT will be transferred to reserves.
 
 Calculations for redemption:
-- USDT deviation from targeted allocation: (0.33333 - 0.24193)/0.33333 =  0.2742027
-- USDC deviation from targeted allocation: (0.33333 - 0.15322)/0.33333 =  0.5403354
-- IST  deviation from targeted allocation: (0.33333 - 0.60483)/0.33333 = -0.8145081
+- USDT allocation_delta: (0.33333 - 0.24193)/0.33333 =  0.2742027
+- USDC allocation_delta: (0.33333 - 0.15322)/0.33333 =  0.5403354
+- IST  allocation_delta: (0.33333 - 0.60483)/0.33333 = -0.8145081
 
-- USDT swap fee: 0.2 + 0.2742027*0.2 = 0.25484
-- USDC swap fee: 0.2 + 0.5403354*0.2 = 0.30806
-- IST  swap fee: 0.2 - 0.8145081*0.2 = 0.03709
+- USDT fee: 0.2 + 0.2742027*0.2 = 0.25484
+- USDC fee: 0.2 + 0.5403354*0.2 = 0.30806
+- IST  fee: 0.2 - 0.8145081*0.2 = 0.03709
+
+Following this values, let's simulate a redemption. A user wants to sell 20 meUSD for IST and the value of 1 
+IST is 1.00002 USD.
+
+IST = 20 * (1 / 1.00002) * (1 - 0.03709)
+IST = 19.25781
+
+The user will receive 19.25781 IST. 0.74178 IST will be the total saved fee. 20 meUSD will be taken from the 
+user's account and burned.
+The total value to be withdrawn is 19.99959 IST and it will be splitted between the reserves and the liquidity from the
+leverage module based on the reserve_portion.
+15.99967 will be taken from leverage module and 3.99992 from the reserves.
 ```
 
 Another example with an edge case where the min and max fee are used:
@@ -166,37 +196,63 @@ Another example with an edge case where the min and max fee are used:
   - Max: 0.8
 
 - USDT:
+  - reserve_portion: 0.3
   - target_allocation: 0.25
 - USDC: 
+  - reserve_portion: 0.3
   - target_allocation: 0.25
 - IST: 
+  - reserve_portion: 0.3
   - target_allocation: 0.25
-- MSK: 
+- MSK:
+  - reserve_portion: 0.3 
   - target_allocation: 0.25
 
-After several swaps the index has 3500 USDT, 100 USDC, 300 IST and 0 MKS. Total supply: 3900. 
+After several swaps the index has 3500 USDT, 100 USDC, 300 IST and 0 MSK. Total supply: 3900. 
 
 Calculations for swap:
-- USDT deviation from targeted allocation: (0.89743 - 0.25)/0.25 =  2.58972
-- USDC deviation from targeted allocation: (0.02564 - 0.25)/0.25 = -0.89744
-- IST  deviation from targeted allocation: (0.07692 - 0.25)/0.25 = -0.69232
-- MKS  deviation from targeted allocation: (0.0 - 0.25)/0.25     = -1.0
+- USDT allocation_delta: (0.89743 - 0.25)/0.25 =  2.58972
+- USDC allocation_delta: (0.02564 - 0.25)/0.25 = -0.89744
+- IST  allocation_delta: (0.07692 - 0.25)/0.25 = -0.69232
+- MSK  allocation_delta: (0.0 - 0.25)/0.25     = -1.0
 
-- USDT swap fee: 0.3 + 2.58972*0.3 = 1.07691 -> This exceedes the max fee (0.8). In this case the max fee will be used.
-- USDC swap fee: 0.3 - 0.89744*0.3 = 0.03076
-- IST  swap fee: 0.3 - 0.69232*0.3 = 0.09230
-- MKS  swap fee: 0.3 - 1.0*0.3     = 0       -> This is below the min fee (0.01). For this swap the min fee will be applied.
+- USDT fee: 0.3 + 2.58972*0.3 = 1.07691 -> This exceedes the max fee (0.8). In this case the max fee will be used.
+- USDC fee: 0.3 - 0.89744*0.3 = 0.03076
+- IST  fee: 0.3 - 0.69232*0.3 = 0.09230
+- MSK  fee: 0.3 - 1.0*0.3     = 0       -> This is below the min fee (0.01). For this swap the min fee will be applied.
+
+Following this values, let's simulate a swap. A user wants to buy meUSD for 10 MSK and the value of 1 MSK is 1.0
+USD.
+
+meUSD = 10 * 1.0 * (1 - 0.01)
+meUSD = 9.9
+
+The user will receive 9.9 meUSD. 0.1 MSK will be the total saved fee and 9.9 MSK will be splitted 
+between the reserves and the liquidity for the leverage module based on the reserve_portion.
+6.93 MSK will be transferred to the leverage module and 2.97 MSK will be transferred to reserves.
 
 Calculations for redemption:
-- USDT deviation from targeted allocation: (0.25 - 0.89743)/0.25 = -2.58972
-- USDC deviation from targeted allocation: (0.25 - 0.02564)/0.25 =  0.8974358
-- IST  deviation from targeted allocation: (0.25 - 0.07692)/0.25 =  0.69232
-- MKS  deviation from targeted allocation: (0.25 - 0.0)/0.25     =  1.0
+- USDT allocation_delta: (0.25 - 0.89743)/0.25 = -2.58972
+- USDC allocation_delta: (0.25 - 0.02564)/0.25 =  0.8974358
+- IST  allocation_delta: (0.25 - 0.07692)/0.25 =  0.69232
+- MSK  allocation_delta: (0.25 - 0.0)/0.25     =  1.0
 
-- USDT swap fee: 0.3 - 2.58972*0.3 = -0.47691 -> This is below the min fee (0.01) and also the fee can't be negative. For this swap the min fee will be applied.
-- USDC swap fee: 0.3 + 0.89744*0.3 = 0.56923
-- IST  swap fee: 0.3 + 0.69232(0.3 = 0.50769
-- MKS  swap fee: 0.3 + 1.0*0.3     = 0.6      -> In this case the redeption is not possible since there is no MKS liquidity anyway.
+- USDT fee: 0.3 - 2.58972*0.3 = -0.47691 -> This is below the min fee (0.01) and also the fee can't be negative. For this swap the min fee will be applied.
+- USDC fee: 0.3 + 0.89744*0.3 = 0.56923
+- IST  fee: 0.3 + 0.69232(0.3 = 0.50769
+- MSK  fee: 0.3 + 1.0*0.3     = 0.6      -> In this case the redeption is not possible since there is no MSK liquidity anyway.
+
+Following this values, let's simulate a redemption. A user wants to sell 20 meUSD for USDC and the value of 1 
+USDC is 0.99993 USD.
+
+USDC = 20 * (1 / 0.99993) * (1 - 0.56923)
+USDC = 8.616
+
+The user will receive 8.616 USDC. 11.38539 USDC will be the total saved fee. 20 meUSD will be taken from the 
+user's account and burned.
+The total value to be withdrawn is 20.00139 IST and it will be splitted between the reserves and the liquidity from the
+leverage module based on the reserve_portion.
+14.000973 will be taken from leverage module and 6.000417 from the reserves.
 ```
 
 ### Reserves
@@ -205,25 +261,37 @@ The `metoken` module will have its own reserves to stabilize the processing of t
 every swap will be transferred to the reserves and a percentage of every withdrawal will be taken from the reserves.
 This portion is determined by the parameters of every asset in the Index.
 
+All the reserves will be saved to the `metoken` module balance along with all the fees. The amount of fees for every 
+asset will be saved to the `metoken` module state. The reserves will be `balance - fee` for every asset.
+
+### Fees
+
+Every charged fee to the user will be transferred to the `metoken` module balance and the value will be added to the
+[State](#state). In that way it is possible to discriminate between the reserves and fees saven on the `metoken` 
+module balance.
+
 #### Reserves Re-balancing
 
-The reserves will be re-balanced twice a day. The frequency will be controlled by updates of the `rebalancing_block`.
+The frequency of the Reserves Re-balancing will be determined by module parameter `rebalancing_frequency`. 
 The workflow for every asset of each Index is as follows:
 
 - Get the amount of Token transferred to the `leverage` module, stored in `metoken` module [State](#state).
-- Get the amount of Token maintained in the `metoken` module reserves.
+- Get the amount of Token maintained in the `metoken` module balance and deduct it by the fees amount stored in 
+  `metoken` module [State](#state). The result is the amount of Token reserves.
 - Check if the portion of reserves is bellow the desired and transfer the missing amount from `leverage` module to
   `metoken` reserves.
-- Update `rebalancing_block`, stored in the `metoken` module [State](#state).
+- Update `next_rebalancing`, stored in the `metoken` module [State](#state) adding the `rebalancing_frequency` to
+  the previous value.
 
 ## State
 
 The `x/metoken` module keeps the following objects in state:
 
 - Index Registry: `0x01 | index_name -> Index`
-- Transferred to `leverage` module Amount: `0x02 | denom -> sdkmath.Int`
-- Next Block for Reserves Re-balancing: `0x03 -> sdkmath.Int`
-- Total Token Supply: `0x04 | denom -> sdk.Int`
+- Transferred to `leverage` module Amount: `0x02 | denom -> sdk.Dec`
+- Module saved `fees` Amount: `0x03 | denom -> sdk.Dec`
+- Next Time (unix timestamp) for Reserves Re-balancing: `0x04 -> sdkmath.Int`
+- Total meToken Supply: `0x05 | denom -> sdk.Int`
 
 The following serialization methods are used unless otherwise stated:
 
@@ -277,15 +345,18 @@ where `proposal.json` contains:
           "accepted_assets": [
             {
               "asset_denom": "USDT",
-              "reserve_portion": "0.2"
+              "reserve_portion": "0.2",
+              "total_allocation": "0.333"
             },
             {
               "asset_denom": "USDC",
-              "reserve_portion": "0.2"
+              "reserve_portion": "0.2",
+              "total_allocation": "0.334"
             },
             {
               "asset_denom": "IST",
-              "reserve_portion": "0.2"
+              "reserve_portion": "0.2",
+              "total_allocation": "0.333"
             }
           ]
         }
@@ -305,12 +376,6 @@ where `proposal.json` contains:
               "reserve_portion": "0.3"
             }
           ]
-        }
-      ],
-      "delete_tokens": [
-        {
-          "metoken_denom": "meCNYT",
-          "deleted_asset": "CNYT"
         }
       ]
     }
