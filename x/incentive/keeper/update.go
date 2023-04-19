@@ -37,76 +37,77 @@ func (k Keeper) updateRewards(ctx sdk.Context, prevTime, blockTime int64) error 
 	timeElapsed := blockTime - prevTime
 
 	// Require nonzero time elapsed
-	if timeElapsed > 0 {
-		ongoingPrograms, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
-		if err != nil {
+	if timeElapsed <= 0 {
+		return nil
+	}
+	ongoingPrograms, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	if err != nil {
+		return err
+	}
+	for _, p := range ongoingPrograms {
+		bondedDenom := p.UToken
+		bonded := k.getTotalBonded(ctx, bondedDenom)
+
+		// calculate the amount of time (in seconds) that remained on the incentive
+		// program after the previous calculation.
+		prevRemainingTime := (p.StartTime + p.Duration) - prevTime
+		// if remaining time was zero or negative, but program had not been removed
+		// from ongoing programs, using a value of 1 second ensures all its remaining
+		// rewards are distributed
+		if prevRemainingTime < 1 {
+			prevRemainingTime = 1
+		}
+
+		programRewardsFraction := sdk.MinDec(
+			// The portion of a program's remaining rewards,
+			// ranging from 0 to 1, which will be distributed this
+			// block. The max value of 1 means 100% of remaining rewards
+			// will be used, as occurs when a program is ending.
+			sdk.OneDec(),
+			sdk.NewDecFromInt(sdk.NewInt(timeElapsed)).Quo(
+				sdk.NewDecFromInt(sdk.NewInt(prevRemainingTime)),
+			),
+		)
+
+		// each incentive program has only one reward denom
+		rewardDenom := p.RemainingRewards.Denom
+
+		// get this block's rewards (as a token amount) for this incentive program only
+		thisBlockRewards := sdk.NewCoin(
+			rewardDenom,
+			sdk.NewDecFromInt(p.RemainingRewards.Amount).Mul(programRewardsFraction).TruncateInt(),
+		)
+
+		accumulator := k.getRewardAccumulator(ctx, bondedDenom)
+
+		// get expected increase of bondDenom's rewardAccumulator of reward denom,
+		// by dividing this block's rewards proportionally among bonded uTokens,
+		// and adjusting for the reward accumulator's exponent
+		accumulatorIncrease := sdk.NewDecFromInt(thisBlockRewards.Amount).Mul(
+			ten.Power(uint64(accumulator.Exponent)),
+		).Quo(
+			sdk.NewDecFromInt(bonded.Amount),
+		)
+
+		// if accumulator increase is so small it rounds to zero even after power adjustment,
+		// no rewards were distributed
+		if accumulatorIncrease.IsZero() {
+			// incentive program and reward accumulator are not updated
+			continue
+		}
+
+		// if nonzero, increase reward accumulator using rewards from this incentive program
+		// and subtract them from that program's remaining rewards
+		accumulator.Rewards = accumulator.Rewards.Add(sdk.NewDecCoinFromDec(rewardDenom, accumulatorIncrease))
+		p.RemainingRewards = p.RemainingRewards.Sub(thisBlockRewards)
+
+		// update incentive program with reduced remaining rewards
+		if err := k.setIncentiveProgram(ctx, p, incentive.ProgramStatusOngoing); err != nil {
 			return err
 		}
-		for _, ip := range ongoingPrograms {
-			bondedDenom := ip.UToken
-			bonded := k.getTotalBonded(ctx, bondedDenom)
-
-			// calculate the amount of time (in seconds) that remained on the incentive
-			// program after the previous calculation.
-			prevRemainingTime := (ip.StartTime + ip.Duration) - prevTime
-			// if remaining time was zero or negative, but program had not been removed
-			// from ongoing programs, using a value of 1 second ensures all its remaining
-			// rewards are distributed
-			if prevRemainingTime < 1 {
-				prevRemainingTime = 1
-			}
-
-			programRewardsFraction := sdk.MinDec(
-				// The portion of a program's remaining rewards,
-				// ranging from 0 to 1, which will be distributed this
-				// block. The max value of 1 means 100% of remaining rewards
-				// will be used, as occurs when a program is ending.
-				sdk.OneDec(),
-				sdk.NewDecFromInt(sdk.NewInt(timeElapsed)).Quo(
-					sdk.NewDecFromInt(sdk.NewInt(prevRemainingTime)),
-				),
-			)
-
-			// each incentive program has only one reward denom
-			rewardDenom := ip.RemainingRewards.Denom
-
-			// get this block's rewards (as a token amount) for this incentive program only
-			thisBlockRewards := sdk.NewCoin(
-				rewardDenom,
-				sdk.NewDecFromInt(ip.RemainingRewards.Amount).Mul(programRewardsFraction).TruncateInt(),
-			)
-
-			accumulator := k.getRewardAccumulator(ctx, bondedDenom)
-
-			// get expected increase of bondDenom's rewardAccumulator of reward denom,
-			// by dividing this block's rewards proportionally among bonded uTokens,
-			// and adjusting for the reward accumulator's exponent
-			accumulatorIncrease := sdk.NewDecFromInt(thisBlockRewards.Amount).Mul(
-				ten.Power(uint64(accumulator.Exponent)),
-			).Quo(
-				sdk.NewDecFromInt(bonded.Amount),
-			)
-
-			// if accumulator increase is so small it rounds to zero even after power adjustment,
-			// no rewards were distributed
-			if accumulatorIncrease.IsZero() {
-				// incentive program and reward accumulator are not updated
-				continue
-			}
-
-			// if nonzero, increase reward accumulator using rewards from this incentive program
-			// and subtract them from that program's remaining rewards
-			accumulator.Rewards = accumulator.Rewards.Add(sdk.NewDecCoinFromDec(rewardDenom, accumulatorIncrease))
-			ip.RemainingRewards = ip.RemainingRewards.Sub(thisBlockRewards)
-
-			// update incentive program with reduced remaining rewards
-			if err := k.setIncentiveProgram(ctx, ip, incentive.ProgramStatusOngoing); err != nil {
-				return err
-			}
-			// update reward accumulator with increased value
-			if err := k.setRewardAccumulator(ctx, accumulator); err != nil {
-				return err
-			}
+		// update reward accumulator with increased value
+		if err := k.setRewardAccumulator(ctx, accumulator); err != nil {
+			return err
 		}
 	}
 
