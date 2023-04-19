@@ -62,7 +62,8 @@ func (k *Keeper) SetTokenHooks(h ...types.TokenHooks) {
 	k.tokenHooks = h
 }
 
-// SetBondHooks sets the module's bonded amount and force unbonding hooks. Bond hooks can only be set once.
+// SetBondHooks sets the module's bonded amount and force unbonding hooks. 
+// Panics if Bond hooks have been already set.
 func (k *Keeper) SetBondHooks(h ...types.BondHooks) {
 	if k.bondHooks != nil {
 		panic("leverage bond hooks already set")
