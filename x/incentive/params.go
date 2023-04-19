@@ -42,7 +42,7 @@ func validateUnbondingDuration(v int64) error {
 
 func validateEmergencyUnbondFee(v sdk.Dec) error {
 	if v.IsNil() || v.IsNegative() || v.GTE(sdk.OneDec()) {
-		return fmt.Errorf("invalid emergency unbonding fee: %s", v)
+		return fmt.Errorf("invalid emergency unbonding fee: %s, valid values: [0, 1)", v)
 	}
 
 	return nil
