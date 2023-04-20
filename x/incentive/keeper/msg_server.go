@@ -134,7 +134,7 @@ func (s msgServer) EmergencyUnbond(
 	bonded, currentUnbonding, _ := k.BondSummary(ctx, addr, denom)
 
 	// reject emergency unbondings greater than maximum available amount
-	if currentUnbonding.Add(msg.UToken).Amount.GT(bonded.Add(currentUnbonding).Amount) {
+	if msg.UToken.Amount.GT(bonded.Add(currentUnbonding).Amount) {
 		return nil, incentive.ErrInsufficientBonded.Wrapf(
 			"bonded: %s, unbonding: %s, requested: %s",
 			bonded,

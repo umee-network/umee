@@ -32,6 +32,10 @@ func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
 func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 	incentive.IncentiveProgram, incentive.ProgramStatus, error,
 ) {
+	if id == 0 {
+		return incentive.IncentiveProgram{}, 0, incentive.ErrInvalidProgramID.Wrap("zero")
+	}
+
 	statuses := []incentive.ProgramStatus{
 		incentive.ProgramStatusUpcoming,
 		incentive.ProgramStatusOngoing,
@@ -53,7 +57,7 @@ func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 	}
 
 	// If the program was not found in any of the three lists
-	return incentive.IncentiveProgram{}, 0, sdkerrors.ErrNotFound
+	return incentive.IncentiveProgram{}, 0, sdkerrors.ErrNotFound.Wrapf("incentive program %d", id)
 }
 
 // setIncentiveProgram stores an incentive program in either the upcoming, ongoing, or completed program lists.

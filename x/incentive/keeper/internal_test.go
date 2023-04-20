@@ -50,6 +50,15 @@ func (tk *TestKeeper) GetIncentivePrograms(ctx sdk.Context, status incentive.Pro
 	return tk.Keeper.getAllIncentivePrograms(ctx, status)
 }
 
+func (tk *TestKeeper) GetIncentiveProgram(ctx sdk.Context, id uint32,
+) (incentive.IncentiveProgram, incentive.ProgramStatus, error) {
+	return tk.Keeper.getIncentiveProgram(ctx, id)
+}
+
 func (tk *TestKeeper) GetNextProgramID(ctx sdk.Context) uint32 {
 	return tk.Keeper.getNextProgramID(ctx)
+}
+
+func (tk *TestKeeper) PendingRewards(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+	return tk.Keeper.calculateRewards(ctx, addr)
 }
