@@ -14,6 +14,7 @@ import (
 )
 
 func TestIntegrationTestSuite(t *testing.T) {
+	t.Parallel()
 	cfg := umeeapp.IntegrationTestNetworkConfig()
 	cfg.NumValidators = 2
 	cfg.Mnemonics = []string{
