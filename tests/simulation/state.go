@@ -1,6 +1,7 @@
 package simulation
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,7 +36,6 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/tests/util"
 )
 
 // GenesisState of the blockchain is represented here as a map of raw json
@@ -185,12 +185,8 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 		delegateKeys := make([]gravitytypes.MsgSetOrchestratorAddress, 0, len(stakingState.Validators))
 		for _, val := range stakingState.Validators {
 			if val.Status != stakingtypes.Bonded {
-				_, _, ethAddr, err := util.GenerateRandomEthKeyFromRand(r)
-				if err != nil {
-					panic(err)
-				}
-
-				gravityEthAddr, err := gravitytypes.NewEthAddress(ethAddr.Hex())
+				dummyethaddr := hex.EncodeToString([]byte(val.OperatorAddress))
+				gravityEthAddr, err := gravitytypes.NewEthAddress("0x" + dummyethaddr[:40])
 				if err != nil {
 					panic(err)
 				}

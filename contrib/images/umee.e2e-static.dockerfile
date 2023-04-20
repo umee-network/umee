@@ -2,7 +2,7 @@
 # Creates static binaries, by building from the latest version of:
 # umeed, price-feeder, peggo
 
-FROM golang:1.19-alpine AS builder
+FROM golang:1.20-alpine AS builder
 ENV PACKAGES make git gcc linux-headers build-base curl
 RUN apk add --no-cache $PACKAGES
 
