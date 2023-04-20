@@ -20,11 +20,11 @@ func (s *IntegrationTests) TestQueryParams(t *testing.T) {
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			ExpectErr:    false,
 			ResponseType: &uibc.QueryParamsResponse{},
 			ExpectedResponse: &uibc.QueryParamsResponse{
 				Params: uibc.DefaultParams(),
 			},
+			ErrMsg: "",
 		},
 	}
 
@@ -39,11 +39,11 @@ func (s *IntegrationTests) TestGetQuota(t *testing.T) {
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			ExpectErr:    false,
 			ResponseType: &uibc.QueryOutflowsResponse{},
 			ExpectedResponse: &uibc.QueryOutflowsResponse{
 				Amount: sdk.NewDec(0),
 			},
+			ErrMsg: "",
 		},
 		{
 			Msg:     "Get ibc-transfer quota of denom umee",
@@ -52,11 +52,11 @@ func (s *IntegrationTests) TestGetQuota(t *testing.T) {
 				"uumee",
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			ExpectErr:    false,
 			ResponseType: &uibc.QueryOutflowsResponse{},
 			ExpectedResponse: &uibc.QueryOutflowsResponse{
 				Amount: sdk.NewDec(0),
 			},
+			ErrMsg: "",
 		},
 	}
 

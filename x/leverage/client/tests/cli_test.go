@@ -1,6 +1,3 @@
-//go:build norace
-// +build norace
-
 package tests
 
 import (
@@ -42,8 +39,7 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 	cfg.GenesisState[gravitytypes.ModuleName] = bz
 
-	s := NewIntegrationTestSuite(cfg)
-	s.Suite.SetT(t)
+	s := NewIntegrationTestSuite(cfg, t)
 	s.SetupSuite()
 
 	// queries

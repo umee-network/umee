@@ -49,8 +49,7 @@ func TestIntegrationSuite(t *testing.T) {
 	cfg.GenesisState[uibc.ModuleName] = bz
 
 	// init the integration test and start the network
-	s := NewIntegrationTestSuite(cfg)
-	s.Suite.SetT(t)
+	s := NewIntegrationTestSuite(cfg, t)
 	s.SetupSuite()
 
 	// test cli queries
