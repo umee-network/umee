@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
-	"github.com/stretchr/testify/suite"
 	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
@@ -43,5 +42,13 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 	cfg.GenesisState[gravitytypes.ModuleName] = bz
 
-	suite.Run(t, NewIntegrationTestSuite(cfg))
+	s := NewIntegrationTestSuite(cfg)
+	s.Suite.SetT(t)
+	s.SetupSuite()
+
+	// queries
+	s.TestInvalidQueries()
+	s.TestLeverageScenario()
+
+	s.TearDownSuite()
 }
