@@ -282,10 +282,12 @@ The workflow for every asset of each Index is as follows:
 The `x/metoken` module keeps the following objects in state:
 
 - Index Registry: `0x01 | index_name -> Index`
-- Transferred to `leverage` module Amount: `0x02 | denom -> sdk.Dec`
-- Module saved `fees` Amount: `0x03 | denom -> sdk.Dec`
-- Next Time (unix timestamp) for Reserves Re-balancing: `0x04 -> sdkmath.Int`
-- Total meToken Supply: `0x05 | denom -> sdk.Int`
+- Module Balances of every Index: `0x02 | metoken_denom -> Balance`, where `Balance` is:
+  - `metoken_supply`: total meToken Supply.
+  - `leveraged`: transferred to `leverage` module Amount.
+  - `reserved`: total `metoken` module reserves.
+  - `fees`: total `fees` saved in reserves.
+- Next Time (unix timestamp) for Reserves Re-balancing: `0x03 -> sdkmath.Int`
 
 The following serialization methods are used unless otherwise stated:
 
