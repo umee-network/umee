@@ -272,8 +272,8 @@ The workflow for every asset of each Index is as follows:
 - Get the amount of Token transferred to the `leverage` module, stored in `metoken` module [State](#state).
 - Get the amount of Token maintained in the `metoken` module balance and deduct it by the fee amount stored in
   `metoken` module [State](#state). The result is the amount of Token reserves.
-- Check if the portion of reserves is bellow the desired and transfer the missing amount from `leverage` module to
-  `metoken` reserves.
+- Check if the portion of reserves is below the desired and transfer the missing amount from `leverage` module to
+  `metoken` reserves, or vice versa if required.
 - Update `next_rebalancing`, stored in the `metoken` module [State](#state) adding the `rebalancing_frequency` to
   the previous value.
 
