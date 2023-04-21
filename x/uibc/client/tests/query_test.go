@@ -20,7 +20,7 @@ func (s *IntegrationTests) TestQueryParams(t *testing.T) {
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			ResponseType: &uibc.QueryParamsResponse{},
+			Response: &uibc.QueryParamsResponse{},
 			ExpectedResponse: &uibc.QueryParamsResponse{
 				Params: uibc.DefaultParams(),
 			},
@@ -39,7 +39,7 @@ func (s *IntegrationTests) TestGetQuota(t *testing.T) {
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			ResponseType: &uibc.QueryOutflowsResponse{},
+			Response: &uibc.QueryOutflowsResponse{},
 			ExpectedResponse: &uibc.QueryOutflowsResponse{
 				Amount: sdk.NewDec(0),
 			},
@@ -52,7 +52,7 @@ func (s *IntegrationTests) TestGetQuota(t *testing.T) {
 				"uumee",
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			ResponseType: &uibc.QueryOutflowsResponse{},
+			Response: &uibc.QueryOutflowsResponse{},
 			ExpectedResponse: &uibc.QueryOutflowsResponse{
 				Amount: sdk.NewDec(0),
 			},

@@ -18,7 +18,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 			Args: []string{
 				"abcd",
 			},
-			ResponseType:     nil,
+			Response:         nil,
 			ExpectedResponse: nil,
 			ErrMsg:           "not a registered Token",
 		},
@@ -28,7 +28,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 			Args: []string{
 				"xyz",
 			},
-			ResponseType:     nil,
+			Response:         nil,
 			ExpectedResponse: nil,
 			ErrMsg:           "invalid bech32",
 		},
@@ -38,7 +38,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 			Args: []string{
 				"xyz",
 			},
-			ResponseType:     nil,
+			Response:         nil,
 			ExpectedResponse: nil,
 			ErrMsg:           "invalid bech32",
 		},
@@ -49,7 +49,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 				"xyz",
 				"uumee",
 			},
-			ResponseType:     nil,
+			Response:         nil,
 			ExpectedResponse: nil,
 			ErrMsg:           "invalid bech32",
 		},
@@ -57,7 +57,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 			Name:             "query registered token - denom not registered",
 			Command:          cli.GetCmdQueryRegisteredTokens(),
 			Args:             []string{"umm"},
-			ResponseType:     nil,
+			Response:         nil,
 			ExpectedResponse: nil,
 			ErrMsg:           "not a registered Token",
 		},
@@ -74,20 +74,20 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	initialQueries := []itestsuite.TestQuery{
 		{
-			Name:         "query params",
-			Command:      cli.GetCmdQueryParams(),
-			Args:         []string{},
-			ResponseType: &types.QueryParamsResponse{},
+			Name:     "query params",
+			Command:  cli.GetCmdQueryParams(),
+			Args:     []string{},
+			Response: &types.QueryParamsResponse{},
 			ExpectedResponse: &types.QueryParamsResponse{
 				Params: types.DefaultParams(),
 			},
 			ErrMsg: "",
 		},
 		{
-			Name:         "query registered tokens",
-			Command:      cli.GetCmdQueryRegisteredTokens(),
-			Args:         []string{},
-			ResponseType: &types.QueryRegisteredTokensResponse{},
+			Name:     "query registered tokens",
+			Command:  cli.GetCmdQueryRegisteredTokens(),
+			Args:     []string{},
+			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
 					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
@@ -96,10 +96,10 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			ErrMsg: "",
 		},
 		{
-			Name:         "query registered token info by base_denom",
-			Command:      cli.GetCmdQueryRegisteredTokens(),
-			Args:         []string{appparams.BondDenom},
-			ResponseType: &types.QueryRegisteredTokensResponse{},
+			Name:     "query registered token info by base_denom",
+			Command:  cli.GetCmdQueryRegisteredTokens(),
+			Args:     []string{appparams.BondDenom},
+			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
 					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
@@ -113,7 +113,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Args: []string{
 				appparams.BondDenom,
 			},
-			ResponseType: &types.QueryMarketSummaryResponse{},
+			Response: &types.QueryMarketSummaryResponse{},
 			ExpectedResponse: &types.QueryMarketSummaryResponse{
 				SymbolDenom:         "UMEE",
 				Exponent:            6,
@@ -142,10 +142,10 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			},
 		},
 		{
-			Name:         "query bad debts",
-			Command:      cli.GetCmdQueryBadDebts(),
-			Args:         []string{},
-			ResponseType: &types.QueryBadDebtsResponse{},
+			Name:     "query bad debts",
+			Command:  cli.GetCmdQueryBadDebts(),
+			Args:     []string{},
+			Response: &types.QueryBadDebtsResponse{},
 			ExpectedResponse: &types.QueryBadDebtsResponse{
 				Targets: []types.BadDebt{},
 			},
@@ -158,7 +158,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				val.Address.String(),
 				"uumee",
 			},
-			ResponseType: &types.QueryMaxWithdrawResponse{},
+			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens:  sdk.NewCoins(),
 				UTokens: sdk.NewCoins(),
@@ -172,7 +172,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				val.Address.String(),
 				"uumee",
 			},
-			ResponseType: &types.QueryMaxBorrowResponse{},
+			Response: &types.QueryMaxBorrowResponse{},
 			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(),
 			},
@@ -281,7 +281,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Args: []string{
 				val.Address.String(),
 			},
-			ResponseType: &types.QueryAccountBalancesResponse{},
+			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(appparams.BondDenom, 1001),
@@ -301,7 +301,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Args: []string{
 				val.Address.String(),
 			},
-			ResponseType: &types.QueryAccountSummaryResponse{},
+			Response: &types.QueryAccountSummaryResponse{},
 			ExpectedResponse: &types.QueryAccountSummaryResponse{
 				// This result is umee's oracle exchange rate from
 				// app/test_helpers.go/IntegrationTestNetworkConfig
@@ -326,7 +326,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				val.Address.String(),
 				"uumee",
 			},
-			ResponseType: &types.QueryMaxWithdrawResponse{},
+			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens:  sdk.NewCoins(),
 				UTokens: sdk.NewCoins(),
@@ -340,7 +340,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				val.Address.String(),
 				"uumee",
 			},
-			ResponseType: &types.QueryMaxBorrowResponse{},
+			Response: &types.QueryMaxBorrowResponse{},
 			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(),
 			},
@@ -355,7 +355,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Args: []string{
 				val.Address.String(),
 			},
-			ResponseType: &types.QueryAccountBalancesResponse{},
+			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(appparams.BondDenom, 201), // slightly increased uToken exchange rate
@@ -374,7 +374,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				val.Address.String(),
 				"uumee",
 			},
-			ResponseType: &types.QueryMaxWithdrawResponse{},
+			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(201)),
@@ -392,7 +392,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				val.Address.String(),
 				"uumee",
 			},
-			ResponseType: &types.QueryMaxBorrowResponse{},
+			Response: &types.QueryMaxBorrowResponse{},
 			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(25)),
@@ -406,7 +406,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Args: []string{
 				val.Address.String(),
 			},
-			ResponseType: &types.QueryMaxWithdrawResponse{},
+			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(201)),
@@ -423,7 +423,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Args: []string{
 				val.Address.String(),
 			},
-			ResponseType: &types.QueryMaxBorrowResponse{},
+			Response: &types.QueryMaxBorrowResponse{},
 			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(25)),
@@ -440,7 +440,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Args: []string{
 				val.Address.String(),
 			},
-			ResponseType: &types.QueryAccountBalancesResponse{},
+			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied:   sdk.NewCoins(),
 				Collateral: sdk.NewCoins(),
@@ -456,7 +456,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				val.Address.String(),
 				"uumee",
 			},
-			ResponseType: &types.QueryMaxWithdrawResponse{},
+			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens:  sdk.NewCoins(),
 				UTokens: sdk.NewCoins(),

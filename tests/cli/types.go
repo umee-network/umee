@@ -1,4 +1,4 @@
-package cli_itest
+package itest
 
 import (
 	"cosmossdk.io/errors"
@@ -14,10 +14,11 @@ type TestTransaction struct {
 }
 
 type TestQuery struct {
-	Name             string
-	Command          *cobra.Command
-	Args             []string
-	ResponseType     proto.Message
+	Name    string
+	Command *cobra.Command
+	Args    []string
+	// object to decode response into
+	Response         proto.Message
 	ExpectedResponse proto.Message
 	ErrMsg           string
 }

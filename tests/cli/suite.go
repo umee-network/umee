@@ -1,4 +1,4 @@
-package cli_itest
+package itest
 
 import (
 	"fmt"
@@ -60,9 +60,9 @@ func (s *IntegrationTestSuite) RunQuery(tq TestQuery) {
 	} else {
 		assert.NilError(s.T, err, tq.Name)
 
-		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), tq.ResponseType)
+		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), tq.Response)
 		assert.NilError(s.T, err, tq.Name)
-		assert.Equal(s.T, tq.ExpectedResponse.String(), tq.ResponseType.String(), tq.Name)
+		assert.Equal(s.T, tq.ExpectedResponse.String(), tq.Response.String(), tq.Name)
 	}
 }
 
