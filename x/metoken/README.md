@@ -275,7 +275,7 @@ The workflow for every asset of each Index is as follows:
 - Check if the portion of reserves is below the desired and transfer the missing amount from `leverage` module to
   `metoken` reserves, or vice versa if required.
 - Update `next_rebalancing`, stored in the `metoken` module [State](#state) adding the `rebalancing_frequency` to
-  the previous value.
+  the current block time.
 
 ## State
 
