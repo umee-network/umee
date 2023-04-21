@@ -183,7 +183,7 @@ IST = 19.25781
 
 The user will receive 19.25781 IST. 0.74178 IST will be the total saved fee. 20 meUSD will be taken from the 
 user's account and burned.
-The total value to be withdrawn is 19.99959 IST and it will be splitted between the reserves and the liquidity from the
+The total value to be withdrawn is 19.99959 IST and it will be split between the reserves and the liquidity from the
 leverage module based on the reserve_portion.
 15.99967 will be taken from leverage module and 3.99992 from the reserves.
 ```
