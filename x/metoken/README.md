@@ -162,7 +162,7 @@ USD.
 meUSD = 10 * 0.998 * (1 - 0.14515)
 meUSD = 8.531403
 
-The user will receive 8.531403 meUSD. 1.4515 USDT will be the total saved fee and 8.5485 USDT will be splitted 
+The user will receive 8.531403 meUSD. 1.4515 USDT is the fee and 8.5485 USDT will be split 
 between the reserves and the liquidity for the leverage module based on the reserve_portion.
 6.8388 USDT will be transferred to the leverage module and 1.7097 USDT will be transferred to reserves.
 
