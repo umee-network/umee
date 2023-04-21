@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	itestsuite "github.com/umee-network/umee/v4/tests/integration_suite"
+	itestsuite "github.com/umee-network/umee/v4/tests/cli"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/client/cli"
 )
@@ -15,7 +15,7 @@ import (
 func (s *IntegrationTests) TestQueryParams(t *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
-			Msg:     "Query params",
+			Name:    "Query params",
 			Command: cli.GetCmdQueryParams(),
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
@@ -34,7 +34,7 @@ func (s *IntegrationTests) TestQueryParams(t *testing.T) {
 func (s *IntegrationTests) TestGetQuota(t *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
-			Msg:     "Get ibc-transfer quota of all denoms",
+			Name:    "Get ibc-transfer quota of all denoms",
 			Command: cli.GetOutflows(),
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
@@ -46,7 +46,7 @@ func (s *IntegrationTests) TestGetQuota(t *testing.T) {
 			ErrMsg: "",
 		},
 		{
-			Msg:     "Get ibc-transfer quota of denom umee",
+			Name:    "Get ibc-transfer quota of denom umee",
 			Command: cli.GetOutflows(),
 			Args: []string{
 				"uumee",
