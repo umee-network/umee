@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/x/incentive"
@@ -134,8 +132,7 @@ func (k Keeper) updatePrograms(ctx sdk.Context, blockTime int64) error {
 			newStatus := incentive.ProgramStatusOngoing
 			// or immediately cancel it if it was not funded
 			if !up.Funded {
-				panic(fmt.Sprintf("id %d start %d block %d", up.ID, up.StartTime, blockTime))
-				// newStatus = incentive.ProgramStatusCompleted
+				newStatus = incentive.ProgramStatusCompleted
 			}
 			// set the program's start time to current block time, ensuring that any programs which
 			// were set to start during a chain halt (or just between blocks) do not start distributing rewards

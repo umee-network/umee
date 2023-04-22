@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	UmeeDenom = "uumee"
 	// AtomDenom is an ibc denom to be used as ATOM's BaseDenom during testing. Matches mainnet.
 	AtomDenom = "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
 	// DaiDenom is an ibc denom to be used as DAI's BaseDenom during testing. Matches mainnet.
