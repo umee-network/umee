@@ -27,8 +27,8 @@ func (k *testKeeper) TestMsgBond() {
 	// which nonetheless has a uToken prefix. The incentive module will allow
 	// this to be bonded (though u/atom wounldn't be eligible for rewards unless
 	// a program was passed to incentivize it)
-	unknownSupplier := k.newAccount()
-	k.lk.setCollateral(unknownSupplier, uatom, 50)
+	atomSupplier := k.newAccount()
+	k.lk.setCollateral(atomSupplier, uatom, 50)
 
 	// create an account which has somehow managed to collateralize tokens (not uTokens).
 	// bonding these should not be possible
@@ -69,7 +69,7 @@ func (k *testKeeper) TestMsgBond() {
 
 	// attempt to bond 10 u/atom, which should work
 	msg = &incentive.MsgBond{
-		Account: unknownSupplier.String(),
+		Account: atomSupplier.String(),
 		UToken:  coin.New(uatom, 10),
 	}
 	_, err = k.msrv.Bond(k.ctx, msg)
@@ -77,7 +77,7 @@ func (k *testKeeper) TestMsgBond() {
 
 	// attempt to bond 10 u/uumee, from an account which has zero
 	msg = &incentive.MsgBond{
-		Account: unknownSupplier.String(),
+		Account: atomSupplier.String(),
 		UToken:  coin.New(uumee, 10),
 	}
 	_, err = k.msrv.Bond(k.ctx, msg)
@@ -109,9 +109,9 @@ func (k *testKeeper) TestMsgBeginUnbonding() {
 
 	// create an additional account which has supplied an unregistered denom
 	// which nonetheless has a uToken prefix. Bond those utokens.
-	unknownSupplier := k.newAccount()
-	k.lk.setCollateral(unknownSupplier, "u/unknown", 50)
-	k.mustBond(unknownSupplier, coin.New("u/unknown", 50))
+	atomSupplier := k.newAccount()
+	k.lk.setCollateral(atomSupplier, uatom, 50)
+	k.mustBond(atomSupplier, coin.New(uatom, 50))
 
 	// empty address
 	msg := &incentive.MsgBeginUnbonding{
@@ -146,18 +146,18 @@ func (k *testKeeper) TestMsgBeginUnbonding() {
 	require.ErrorIs(k.t, err, incentive.ErrInsufficientBonded, "begin unbonding 50")
 	// TODO: why was this passing at amount 40?
 
-	// attempt to begin unbonding 50 u/unknown but from the wrong account
+	// attempt to begin unbonding 50 u/atom but from the wrong account
 	msg = &incentive.MsgBeginUnbonding{
 		Account: umeeSupplier.String(),
-		UToken:  coin.New("u/unknown", 50),
+		UToken:  coin.New(uatom, 50),
 	}
 	_, err = k.msrv.BeginUnbonding(k.ctx, msg)
 	require.ErrorIs(k.t, err, incentive.ErrInsufficientBonded, "begin unbonding 50 unknown (wrong account)")
 
-	// attempt to begin unbonding 50 u/unknown but from the correct account
+	// attempt to begin unbonding 50 u/atom but from the correct account
 	msg = &incentive.MsgBeginUnbonding{
-		Account: unknownSupplier.String(),
-		UToken:  coin.New("u/unknown", 50),
+		Account: atomSupplier.String(),
+		UToken:  coin.New(uatom, 50),
 	}
 	_, err = k.msrv.BeginUnbonding(k.ctx, msg)
 	require.Nil(k.t, err, "begin unbonding 50 unknown")
@@ -204,9 +204,9 @@ func (k *testKeeper) TestMsgEmergencyUnbond() {
 
 	// create an additional account which has supplied an unregistered denom
 	// which nonetheless has a uToken prefix. Bond those utokens.
-	unknownSupplier := k.newAccount()
-	k.lk.setCollateral(unknownSupplier, "u/unknown", 50)
-	k.mustBond(unknownSupplier, coin.New("u/unknown", 50))
+	atomSupplier := k.newAccount()
+	k.lk.setCollateral(atomSupplier, uatom, 50)
+	k.mustBond(atomSupplier, coin.New(uatom, 50))
 
 	// empty address
 	msg := &incentive.MsgEmergencyUnbond{
@@ -240,18 +240,18 @@ func (k *testKeeper) TestMsgEmergencyUnbond() {
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.ErrorIs(k.t, err, incentive.ErrInsufficientBonded, "emergency unbond 50")
 
-	// attempt to emergency unbond 50 u/unknown but from the wrong account
+	// attempt to emergency unbond 50 u/atom but from the wrong account
 	msg = &incentive.MsgEmergencyUnbond{
 		Account: umeeSupplier.String(),
-		UToken:  coin.New("u/unknown", 50),
+		UToken:  coin.New(uatom, 50),
 	}
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.ErrorIs(k.t, err, incentive.ErrInsufficientBonded, "emergency unbond 50 unknown (wrong account)")
 
-	// attempt to emergency unbond 50 u/unknown but from the correct account
+	// attempt to emergency unbond 50 u/atom but from the correct account
 	msg = &incentive.MsgEmergencyUnbond{
-		Account: unknownSupplier.String(),
-		UToken:  coin.New("u/unknown", 50),
+		Account: atomSupplier.String(),
+		UToken:  coin.New(uatom, 50),
 	}
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.Nil(k.t, err, "emergency unbond 50 unknown")
@@ -276,9 +276,7 @@ func (k *testKeeper) TestMsgEmergencyUnbond() {
 func (k *testKeeper) TestMsgSponsor() {
 	const (
 		umee  = fixtures.UmeeDenom
-		atom  = fixtures.AtomDenom
 		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-		uatom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
 	)
 
 	sponsor := k.newAccount(sdk.NewInt64Coin(umee, 15_000000))
@@ -289,7 +287,7 @@ func (k *testKeeper) TestMsgSponsor() {
 		ID:               0,
 		StartTime:        100,
 		Duration:         100,
-		UToken:           "u/" + umee,
+		UToken:           uumee,
 		Funded:           false,
 		TotalRewards:     sdk.NewInt64Coin(umee, 10_000000),
 		RemainingRewards: coin.Zero(umee),
@@ -346,13 +344,6 @@ func (k *testKeeper) TestMsgSponsor() {
 }
 
 func (k *testKeeper) TestMsgGovSetParams() {
-	const (
-		umee  = fixtures.UmeeDenom
-		atom  = fixtures.AtomDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-		uatom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
-	)
-
 	govAccAddr := "govAcct"
 
 	// ensure that module is starting with default params
@@ -400,9 +391,7 @@ func (k *testKeeper) TestMsgGovSetParams() {
 func (k *testKeeper) TestMsgGovCreatePrograms() {
 	const (
 		umee  = fixtures.UmeeDenom
-		atom  = fixtures.AtomDenom
 		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-		uatom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
 	)
 
 	// create an account to use as community fund, with 15 UMEE
@@ -416,7 +405,7 @@ func (k *testKeeper) TestMsgGovCreatePrograms() {
 		ID:               0,
 		StartTime:        100,
 		Duration:         100,
-		UToken:           "u/" + umee,
+		UToken:           uumee,
 		Funded:           false,
 		TotalRewards:     sdk.NewInt64Coin(umee, 10_000000),
 		RemainingRewards: coin.Zero(umee),
