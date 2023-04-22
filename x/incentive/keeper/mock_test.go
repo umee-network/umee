@@ -113,7 +113,7 @@ func newMockLeverageKeeper() mockLeverageKeeper {
 }
 
 // GetCollateral implements the expected leverage keeper
-func (m *mockLeverageKeeper) GetCollateral(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+func (m *mockLeverageKeeper) GetCollateral(_ sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	collateral, ok := m.collateral[addr.String()]
 	if !ok {
 		return coin.Zero(denom)
@@ -130,7 +130,7 @@ func (m *mockLeverageKeeper) DonateCollateral(ctx sdk.Context, addr sdk.AccAddre
 }
 
 // getDonatedCollateral is used to test the effects of emergency unbondings
-func (m *mockLeverageKeeper) getDonatedCollateral(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+func (m *mockLeverageKeeper) getDonatedCollateral(_ sdk.Context, denom string) sdk.Coin {
 	return sdk.NewCoin(denom, m.donatedCollateral.AmountOf(denom))
 }
 
@@ -157,7 +157,7 @@ func (m *mockLeverageKeeper) setCollateral(addr sdk.AccAddress, denom string, am
 }
 
 // GetTokenSettings implements the expected leverage keeper, with UMEE, ATOM, and DAI registered.
-func (m *mockLeverageKeeper) GetTokenSettings(ctx sdk.Context, denom string) (leveragetypes.Token, error) {
+func (m *mockLeverageKeeper) GetTokenSettings(_ sdk.Context, denom string) (leveragetypes.Token, error) {
 	switch denom {
 	case leveragefixtures.UmeeDenom:
 		return leveragefixtures.Token(denom, "UMEE", 6), nil

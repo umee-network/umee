@@ -182,26 +182,26 @@ func (ip IncentiveProgram) Validate() error {
 
 // ValidateProposed runs IncentiveProgram.Validate and also checks additional requirements applying
 // to incentive programs which have not yet been funded or passed by governance
-func (program IncentiveProgram) ValidateProposed() error {
-	if program.ID != 0 {
-		return ErrInvalidProgramID.Wrapf("%d", program.ID)
+func (ip IncentiveProgram) ValidateProposed() error {
+	if ip.ID != 0 {
+		return ErrInvalidProgramID.Wrapf("%d", ip.ID)
 	}
-	if !program.RemainingRewards.IsZero() {
-		return ErrNonzeroRemainingRewards.Wrap(program.RemainingRewards.String())
+	if !ip.RemainingRewards.IsZero() {
+		return ErrNonzeroRemainingRewards.Wrap(ip.RemainingRewards.String())
 	}
-	if program.Funded {
+	if ip.Funded {
 		return ErrProposedFundedProgram
 	}
-	return program.Validate()
+	return ip.Validate()
 }
 
 // ValidatePassed runs IncentiveProgram.Validate and also checks additional requirements applying
 // to incentive programs which have already been passed by governance
-func (program IncentiveProgram) ValidatePassed() error {
-	if program.ID == 0 {
-		return ErrInvalidProgramID.Wrapf("%d", program.ID)
+func (ip IncentiveProgram) ValidatePassed() error {
+	if ip.ID == 0 {
+		return ErrInvalidProgramID.Wrapf("%d", ip.ID)
 	}
-	return program.Validate()
+	return ip.Validate()
 }
 
 // NewBond creates the Bond struct used in GenesisState
