@@ -26,5 +26,5 @@ type BondHooks interface {
 
 	// Used when liquidating an account, and collateral must be unbonded instantly until bonded amount
 	// is no greater than the account's remaining collateral uTokens.
-	ReduceBondTo(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error
+	ForceUnondTo(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error
 }

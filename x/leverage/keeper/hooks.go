@@ -47,7 +47,7 @@ func (k *Keeper) bondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom s
 // If multiple modules have registered bondHooks, applies this effect to each module independently of the others.
 func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, collateral sdk.Coin) error {
 	for _, h := range k.bondHooks {
-		err := h.ReduceBondTo(ctx, addr, collateral)
+		err := h.ForceUnondTo(ctx, addr, collateral)
 		if err != nil {
 			return err
 		}
