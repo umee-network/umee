@@ -124,11 +124,10 @@ func (msg MsgEmergencyUnbond) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgEmergencyUnbond) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32, asset sdk.Coin) *MsgSponsor {
+func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32) *MsgSponsor {
 	return &MsgSponsor{
 		Sponsor: sponsor.String(),
 		Program: programID,
-		Asset:   asset,
 	}
 }
 
@@ -136,7 +135,8 @@ func (msg MsgSponsor) ValidateBasic() error {
 	if msg.Program == 0 {
 		return ErrInvalidProgramID.Wrapf("%d", msg.Program)
 	}
-	return validateSenderAsset(msg.Sponsor, &msg.Asset)
+	_, err := sdk.AccAddressFromBech32(msg.Sponsor)
+	return err
 }
 
 func (msg MsgSponsor) GetSigners() []sdk.AccAddress {

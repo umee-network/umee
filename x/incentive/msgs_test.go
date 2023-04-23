@@ -29,7 +29,7 @@ func TestMsgs(t *testing.T) {
 		incentive.NewMsgBeginUnbonding(testAddr, uToken),
 		incentive.NewMsgEmergencyUnbond(testAddr, uToken),
 		incentive.NewMsgClaim(testAddr),
-		incentive.NewMsgSponsor(testAddr, 3, token),
+		incentive.NewMsgSponsor(testAddr, 3),
 	}
 
 	govMsgs := []sdk.Msg{
@@ -67,7 +67,7 @@ func TestRoutes(t *testing.T) {
 		*incentive.NewMsgBeginUnbonding(testAddr, uToken),
 		*incentive.NewMsgEmergencyUnbond(testAddr, uToken),
 		*incentive.NewMsgClaim(testAddr),
-		*incentive.NewMsgSponsor(testAddr, 3, token),
+		*incentive.NewMsgSponsor(testAddr, 3),
 		*incentive.NewMsgGovCreatePrograms(govAddr, "title", "desc", []incentive.IncentiveProgram{program}),
 		*incentive.NewMsgGovSetParams(govAddr, "title", "desc", incentive.DefaultParams()),
 	}

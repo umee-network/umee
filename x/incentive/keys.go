@@ -19,13 +19,14 @@ type (
 )
 
 const (
-	ProgramStatusUpcoming ProgramStatus = iota
+	ProgramStatusNotExist ProgramStatus = iota
+	ProgramStatusUpcoming
 	ProgramStatusOngoing
 	ProgramStatusCompleted
 )
 
 func (p ProgramStatus) Validate() error {
-	if p > ProgramStatusCompleted {
+	if p == ProgramStatusNotExist || p > ProgramStatusCompleted {
 		return ErrInvalidProgramStatus.Wrapf("%d", p)
 	}
 	return nil

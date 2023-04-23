@@ -116,16 +116,11 @@ func GetCmdBeginUnbonding() *cobra.Command {
 // transaction with a MsgSponsor message.
 func GetCmdSponsor() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "sponsor [program-id] [tokens]",
-		Args:  cobra.ExactArgs(2),
+		Use:   "sponsor [program-id]",
+		Args:  cobra.ExactArgs(1),
 		Short: "Fund a governance-approved, not yet funded incentive program with its exact total reward tokens",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			asset, err := sdk.ParseCoinNormalized(args[1])
 			if err != nil {
 				return err
 			}
@@ -135,7 +130,7 @@ func GetCmdSponsor() *cobra.Command {
 				return err
 			}
 
-			msg := incentive.NewMsgSponsor(clientCtx.GetFromAddress(), uint32(id), asset)
+			msg := incentive.NewMsgSponsor(clientCtx.GetFromAddress(), uint32(id))
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

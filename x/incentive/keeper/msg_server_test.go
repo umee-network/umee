@@ -309,30 +309,20 @@ func (k *testKeeper) TestMsgSponsor() {
 	require.Nil(k.t, err, "set valid programs")
 	require.Equal(k.t, uint32(3), k.getNextProgramID(k.ctx), "next Id after 2 programs passed")
 
-	wrongAssetSponsorMsg := &incentive.MsgSponsor{
-		Sponsor: sponsor.String(),
-		Program: 1,
-		Asset:   sdk.NewInt64Coin(umee, 5_000000),
-	}
 	wrongProgramSponsorMsg := &incentive.MsgSponsor{
 		Sponsor: sponsor.String(),
 		Program: 3,
-		Asset:   sdk.NewInt64Coin(umee, 10_000000),
 	}
 	validSponsorMsg := &incentive.MsgSponsor{
 		Sponsor: sponsor.String(),
 		Program: 1,
-		Asset:   sdk.NewInt64Coin(umee, 10_000000),
 	}
 	failSponsorMsg := &incentive.MsgSponsor{
 		Sponsor: sponsor.String(),
 		Program: 2,
-		Asset:   sdk.NewInt64Coin(umee, 10_000000),
 	}
 
 	// test cases
-	_, err = k.msrv.Sponsor(k.ctx, wrongAssetSponsorMsg)
-	require.ErrorIs(k.t, err, incentive.ErrSponsorInvalid, "sponsor without exact asset match")
 	_, err = k.msrv.Sponsor(k.ctx, wrongProgramSponsorMsg)
 	require.ErrorContains(k.t, err, "not found", "sponsor non-existing program")
 	_, err = k.msrv.Sponsor(k.ctx, validSponsorMsg)

@@ -139,15 +139,11 @@ func (k *testKeeper) addIncentiveProgram(uDenom string, start, duration int64, r
 
 // sponsor a program with tokens and require no errors. Use when setting up incentive scenarios.
 func (k *testKeeper) sponsor(addr sdk.AccAddress, programID uint32) {
-	program, _, err := k.getIncentiveProgram(k.ctx, programID)
-	require.NoError(k.t, err, "get program")
-
 	msg := &incentive.MsgSponsor{
 		Sponsor: addr.String(),
 		Program: programID,
-		Asset:   program.TotalRewards,
 	}
-	_, err = k.msrv.Sponsor(k.ctx, msg)
+	_, err := k.msrv.Sponsor(k.ctx, msg)
 	require.NoError(k.t, err, "sponsor program", programID)
 }
 

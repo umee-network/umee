@@ -168,43 +168,7 @@ func (s msgServer) Sponsor(
 		return nil, err
 	}
 
-	// Error messages that follow are designed to promote third party usability, so they are more
-	// verbose and situational than usual.
-	program, status, err := k.getIncentiveProgram(ctx, msg.Program)
-	if err != nil {
-		return nil, err
-	}
-	if status != incentive.ProgramStatusUpcoming {
-		return nil, incentive.ErrSponsorIneligible.Wrap("program exists but is not upcoming")
-	}
-	if program.Funded {
-		return nil, incentive.ErrSponsorIneligible.Wrap("program is already funded")
-	}
-	if program.TotalRewards.Denom != msg.Asset.Denom {
-		return nil, incentive.ErrSponsorInvalid.Wrap("reward denom mismatch")
-	}
-	if !program.TotalRewards.Amount.Equal(msg.Asset.Amount) {
-		return nil, incentive.ErrSponsorInvalid.Wrap("sponsor amount must match exact total rewards required")
-	}
-	spendable := k.bankKeeper.SpendableCoins(ctx, sponsor).AmountOf(program.TotalRewards.Denom)
-	if spendable.LT(program.TotalRewards.Amount) {
-		return nil, incentive.ErrSponsorInvalid.Wrapf("insufficient sponsor tokens: want %s, have %s",
-			program.TotalRewards, spendable)
-	}
-
-	// transfer rewards from sponsor to incentive module
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx,
-		sponsor,
-		incentive.ModuleName,
-		sdk.NewCoins(program.TotalRewards),
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	// update the program's funded amount in store
-	program.Funded = true
-	err = k.setIncentiveProgram(ctx, program, incentive.ProgramStatusUpcoming)
+	err = k.sponsorIncentiveProgram(ctx, sponsor, msg.Program)
 	return &incentive.MsgSponsorResponse{}, err
 }
 

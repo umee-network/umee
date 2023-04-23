@@ -92,6 +92,7 @@ func (k Keeper) updateRewards(ctx sdk.Context, prevTime, blockTime int64) error 
 		accumulator.Rewards = accumulator.Rewards.Add(sdk.NewDecCoinFromDec(rewardDenom, accumulatorIncrease))
 		p.RemainingRewards = p.RemainingRewards.Sub(thisBlockRewards)
 
+		// update program state and reward accumulator
 		if err := k.setIncentiveProgram(ctx, p, incentive.ProgramStatusOngoing); err != nil {
 			return err
 		}
@@ -115,8 +116,7 @@ func (k Keeper) updatePrograms(ctx sdk.Context, blockTime int64) error {
 	for _, op := range ongoingPrograms {
 		// if an ongoing program is ending, move it to completed programs without modifying any fields
 		if op.Duration+op.StartTime >= blockTime {
-			// setIncentiveProgram automatically clears the program from its ongoing status
-			if err := k.setIncentiveProgram(ctx, op, incentive.ProgramStatusCompleted); err != nil {
+			if err := k.moveIncentiveProgram(ctx, op.ID, incentive.ProgramStatusCompleted); err != nil {
 				return err
 			}
 		}
@@ -134,13 +134,7 @@ func (k Keeper) updatePrograms(ctx sdk.Context, blockTime int64) error {
 			if !up.Funded {
 				newStatus = incentive.ProgramStatusCompleted
 			}
-			// set the program's start time to current block time, ensuring that any programs which
-			// were set to start during a chain halt (or just between blocks) do not start distributing rewards
-			// until after the block they were created
-			up.StartTime = blockTime
-
-			// setIncentiveProgram automatically clears the program from its upcoming status
-			if err := k.setIncentiveProgram(ctx, up, newStatus); err != nil {
+			if err := k.moveIncentiveProgram(ctx, up.ID, newStatus); err != nil {
 				return err
 			}
 		}
