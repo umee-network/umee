@@ -130,7 +130,6 @@ func (s msgServer) EmergencyUnbond(
 		return nil, err
 	}
 
-	// get current account state for the requested uToken denom only
 	bonded, currentUnbonding, _ := k.BondSummary(ctx, addr, denom)
 
 	// reject emergency unbondings greater than maximum available amount
