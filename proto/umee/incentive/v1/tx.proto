@@ -9,8 +9,6 @@ import "umee/incentive/v1/incentive.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/incentive";
 
-option (gogoproto.messagename_all) = true;
-
 // Msg defines the x/incentive module's Msg service.
 service Msg {
   // Claim defines a method for claiming any pending incentive rewards.
