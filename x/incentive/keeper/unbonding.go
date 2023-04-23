@@ -107,11 +107,13 @@ func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral
 	amountToUnbond := bonded.Amount.Add(unbonding.Amount).Sub(newCollateral.Amount)
 	for _, u := range unbondings {
 		// for ongoing unbondings, starting with the oldest
-		if amountToUnbond.IsPositive() {
-			specificReduction := sdk.MinInt(amountToUnbond, u.UToken.Amount)
-			// reduce the in-progress unbonding amount, and the remaining instant unbond
-			u.UToken.Amount = u.UToken.Amount.Sub(specificReduction)
-			amountToUnbond = amountToUnbond.Sub(specificReduction)
+		specificReduction := sdk.MinInt(amountToUnbond, u.UToken.Amount)
+		// reduce the in-progress unbonding amount, and the remaining instant unbond
+		u.UToken.Amount = u.UToken.Amount.Sub(specificReduction)
+		amountToUnbond = amountToUnbond.Sub(specificReduction)
+		// if no more unbondings need to be reduced, break out of the loop early
+		if amountToUnbond.IsZero() {
+			break
 		}
 	}
 	// set new (reduced but not empty) list of unbondings
