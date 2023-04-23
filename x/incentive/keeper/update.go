@@ -28,9 +28,11 @@ func (k Keeper) UpdateAccount(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, 
 }
 
 // updateRewards updates any rewardAccumulators associated with ongoing incentive programs
-// based on the time elapsed between LastRewardTime and block time. It also decreases active
+// based on the time elapsed between LastRewardTime and block time. It decreases active
 // incentive programs' RemainingRewards by the amount of coins distributed.
-func (k Keeper) updateRewards(ctx sdk.Context, prevTime, blockTime int64) error {
+// Also sets module's LastRewardsTime to block time.
+func (k Keeper) updateRewards(ctx sdk.Context, blockTime int64) error {
+	prevTime := k.GetLastRewardsTime(ctx)
 	if prevTime > blockTime {
 		return incentive.ErrDecreaseLastRewardTime
 	}
@@ -107,15 +109,16 @@ func (k Keeper) updateRewards(ctx sdk.Context, prevTime, blockTime int64) error 
 
 // updatePrograms moves any incentive programs which have reached their end time from Ongoing to Completed,
 // and moves any funded programs which should start from Upcoming to Ongoing. Non-funded programs which
-// would start are moved to completed status instead.
-func (k Keeper) updatePrograms(ctx sdk.Context, blockTime int64) error {
+// would start are moved to completed status instead. Uses the current LastRewardsTime but does not update it.
+func (k Keeper) updatePrograms(ctx sdk.Context) error {
+	blockTime := k.GetLastRewardsTime(ctx)
 	ongoingPrograms, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
 	if err != nil {
 		return err
 	}
 	for _, op := range ongoingPrograms {
 		// if an ongoing program is ending, move it to completed programs without modifying any fields
-		if op.Duration+op.StartTime >= blockTime {
+		if blockTime >= op.Duration+op.StartTime {
 			if err := k.moveIncentiveProgram(ctx, op.ID, incentive.ProgramStatusCompleted); err != nil {
 				return err
 			}
@@ -127,7 +130,7 @@ func (k Keeper) updatePrograms(ctx sdk.Context, blockTime int64) error {
 	}
 	for _, up := range upcomingPrograms {
 		// if an upcoming program has reached its start time
-		if up.StartTime >= blockTime {
+		if blockTime >= up.StartTime {
 			// prepare to start the program
 			newStatus := incentive.ProgramStatusOngoing
 			// or immediately cancel it if it was not funded
@@ -142,8 +145,8 @@ func (k Keeper) updatePrograms(ctx sdk.Context, blockTime int64) error {
 
 	// Note that even if a program had a duration shorter than the time between blocks, this function's
 	// order of ending eligible ongoing programs before starting eligible upcoming ones ensures that each
-	// program will be active for updateRewards for at least one full block. The same program will not be
-	// started then ended in the same block.
+	// program will be active for updateRewards for at least one full block. (The same program will not be
+	// both started and ended in the same block._
 	return nil
 }
 
@@ -186,8 +189,8 @@ func (k Keeper) EndBlock(ctx sdk.Context) error {
 	// - if an incentive program completes this block, it distributes its remaining rewards before being completed
 	// - in the case of a chain halt which misses a program's start time, rewards before its late start are skipped
 	// - in the case of a chain halt which misses a program's end time, remaining rewards are correctly distributed
-	if err := k.updateRewards(ctx, prevTime, blockTime); err != nil {
+	if err := k.updateRewards(ctx, prevTime); err != nil {
 		return err
 	}
-	return k.updatePrograms(ctx, blockTime)
+	return k.updatePrograms(ctx)
 }

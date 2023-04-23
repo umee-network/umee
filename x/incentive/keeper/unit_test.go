@@ -147,29 +147,24 @@ func (k *testKeeper) sponsor(addr sdk.AccAddress, programID uint32) {
 	require.NoError(k.t, err, "sponsor program", programID)
 }
 
-// advanceTime runs the functions normally contained in EndBlocker with a fixed time elapsed.
-// requires nonzero lastRewardsTime and a positive duration. Requires no error.
+// advanceTime runs the functions normally contained in EndBlocker from the current rewards time
+// to a target time a fixed duration later. Requires non-negative duration and an initialized lastRewardsTime.
 func (k *testKeeper) advanceTime(duration int64) {
-	if duration <= 0 {
-		panic("advanceTime needs positive duration")
-	}
+	prevTime := k.GetLastRewardsTime(k.ctx)
+	k.advanceTimeTo(prevTime + duration)
+}
 
+// advanceTimeTo runs the functions normally contained in EndBlocker from the current rewards time
+// to a target time. Requires non-negative duration and an initialized lastRewardsTime.
+func (k *testKeeper) advanceTimeTo(blockTime int64) {
 	prevTime := k.GetLastRewardsTime(k.ctx)
 	if prevTime <= 0 {
 		panic("last rewards time not initialized")
 	}
 
-	// simulate new block time to target an exact time elapsed
-	blockTime := prevTime + duration
-	require.Nil(k.t, k.updateRewards(k.ctx, prevTime, blockTime), "update rewards")
-	require.Nil(k.t, k.updatePrograms(k.ctx, blockTime), "update programs")
-}
-
-// advanceTimeTo runs the functions normally contained in EndBlocker from the current rewards time
-// to a target time. Requires positive duration and an initialized lastRewardsTime.
-func (k *testKeeper) advanceTimeTo(end int64) {
-	prevTime := k.GetLastRewardsTime(k.ctx)
-	k.advanceTime(end - prevTime)
+	require.Nil(k.t, k.updateRewards(k.ctx, blockTime), "update rewards")
+	require.Nil(k.t, k.updatePrograms(k.ctx), "update programs")
+	require.Equal(k.t, blockTime, k.GetLastRewardsTime(k.ctx))
 }
 
 // getProgram gets an incentive program by ID and requires no error

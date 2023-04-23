@@ -41,12 +41,13 @@ func (k Keeper) incentiveProgramStatus(ctx sdk.Context, id uint32) (incentive.Pr
 	}
 
 	kvStore := k.KVStore(ctx)
-	found := 0
-	status := incentive.ProgramStatus(0)
 
-	// Looks for an incentive program with the specified ID in upcoming, ongoing, then completed program lists.
+	var found int
+	var status incentive.ProgramStatus
+
+	// Looks for an incentive program in upcoming, ongoing, then completed program lists.
 	for _, s := range statuses {
-		if kvStore.Has(keyIncentiveProgram(id, status)) {
+		if kvStore.Has(keyIncentiveProgram(id, s)) {
 			found++
 			status = s
 		}
@@ -55,7 +56,7 @@ func (k Keeper) incentiveProgramStatus(ctx sdk.Context, id uint32) (incentive.Pr
 	switch found {
 	case 0:
 		// If the program was not found in any of the three lists
-		return incentive.ProgramStatusNotExist, sdkerrors.ErrNotFound.Wrapf("incentive program %d", id)
+		return incentive.ProgramStatusNotExist, nil
 	case 1:
 		// If the program existed
 		return status, nil
@@ -99,7 +100,7 @@ func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 }
 
 // setIncentiveProgram stores an incentive program with a given status.
-// returns an error if program already exists.
+// this can overwrite existing programs, but will not move them to a new status.
 func (k Keeper) setIncentiveProgram(
 	ctx sdk.Context, program incentive.IncentiveProgram, status incentive.ProgramStatus,
 ) error {
@@ -110,7 +111,8 @@ func (k Keeper) setIncentiveProgram(
 	if err != nil {
 		return err
 	}
-	if s != incentive.ProgramStatusNotExist {
+	// error if program exists but not with intended status
+	if s != incentive.ProgramStatusNotExist && s != status {
 		return sdkerrors.ErrInvalidRequest.Wrapf("program %d already exists with status %d", program.ID, s)
 	}
 

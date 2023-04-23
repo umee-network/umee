@@ -47,13 +47,6 @@ func (k Keeper) createIncentiveProgram(
 	}
 
 	// Set program's ID to the next available value and store it in upcoming incentive programs
-	return k.addIncentiveProgram(ctx, program)
-}
-
-// addIncentiveProgram stores an incentive program in the upcoming program list.
-// returns an error if program already exists.
-func (k Keeper) addIncentiveProgram(ctx sdk.Context, program incentive.IncentiveProgram) error {
-	// Set program's ID to the next available value and store it in upcoming incentive programs
 	id := k.getNextProgramID(ctx)
 	if id == 0 {
 		return incentive.ErrInvalidProgramID.Wrap("next id was zero")
@@ -83,11 +76,11 @@ func (k Keeper) moveIncentiveProgram(ctx sdk.Context, id uint32, toStatus incent
 	case incentive.ProgramStatusCompleted:
 		return incentive.ErrInvalidProgramStatus.Wrap("cannot move program from completed status")
 	case incentive.ProgramStatusOngoing:
-		if toStatus != incentive.ProgramStatusOngoing {
+		if toStatus != incentive.ProgramStatusCompleted {
 			return incentive.ErrInvalidProgramStatus.Wrap("ongoing programs can only be moved to completed")
 		}
 	case incentive.ProgramStatusUpcoming:
-		if toStatus != incentive.ProgramStatusOngoing {
+		if toStatus != incentive.ProgramStatusOngoing && toStatus != incentive.ProgramStatusCompleted {
 			return incentive.ErrInvalidProgramStatus.Wrap("upcoming programs can be moved to ongoing or completed")
 		}
 	default:
