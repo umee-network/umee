@@ -20,7 +20,7 @@ var ten = sdk.MustNewDecFromStr("10")
 func (k Keeper) UpdateAccount(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, error) {
 	// unbondings have already been subtracted from bonded amounts when they are started,
 	// so it is fine to finish completed unbondings before claiming rewards.
-	if err := k.finishUnbondings(ctx, addr); err != nil {
+	if err := k.cleanupUnbondings(ctx, addr); err != nil {
 		return sdk.NewCoins(), err
 	}
 

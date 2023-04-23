@@ -36,8 +36,8 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 	return k.setUnbondings(ctx, unbondings)
 }
 
-// finishUnbondings finishes any unbondings on an account which have reached their end time
-func (k Keeper) finishUnbondings(ctx sdk.Context, addr sdk.AccAddress) error {
+// cleanupUnbondings finishes any unbondings on an account which have reached their end time
+func (k Keeper) cleanupUnbondings(ctx sdk.Context, addr sdk.AccAddress) error {
 	time := k.GetLastRewardsTime(ctx)
 	duration := k.GetParams(ctx).UnbondingDuration
 	bondedDenoms := k.getAllBondDenoms(ctx, addr)
