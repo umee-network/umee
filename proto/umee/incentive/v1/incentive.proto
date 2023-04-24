@@ -11,7 +11,7 @@ message Params {
   option (gogoproto.equal) = true;
 
   // max_unbondings is the maximum amount of concurrent unbondings an address can have
-  // of each bonded uToken denom.
+  // of each bonded uToken denom. Zero is interpreted as no limit.
   uint32 max_unbondings = 1;
 
   // unbonding_duration is the unbonding duration (in seconds).

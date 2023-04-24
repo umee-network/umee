@@ -93,8 +93,9 @@ func (s msgServer) BeginUnbonding(
 	// get current account state for the requested uToken denom only
 	bonded, currentUnbonding, unbondings := k.BondSummary(ctx, addr, denom)
 
-	// prevent unbonding spam
-	if len(unbondings) >= int(k.GetParams(ctx).MaxUnbondings) {
+	maxUnbondings := int(k.GetParams(ctx).MaxUnbondings)
+	if maxUnbondings > 0 && len(unbondings) >= maxUnbondings {
+		// reject concurrent unbondings that would exceed max unbondings - zero is unlimited
 		return nil, incentive.ErrMaxUnbondings.Wrapf("%d", len(unbondings))
 	}
 

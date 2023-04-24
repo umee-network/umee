@@ -12,10 +12,6 @@ func TestDefaultParams(t *testing.T) {
 	params := DefaultParams()
 	assert.NilError(t, params.Validate())
 
-	invalidMaxUnbondings := DefaultParams()
-	invalidMaxUnbondings.MaxUnbondings = 0
-	assert.ErrorContains(t, invalidMaxUnbondings.Validate(), "max unbondings cannot be zero")
-
 	invalidUnbondingDuration := DefaultParams()
 	invalidUnbondingDuration.UnbondingDuration = -1
 	assert.ErrorContains(t, invalidUnbondingDuration.Validate(), "invalid unbonding duration")

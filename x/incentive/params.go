@@ -48,11 +48,8 @@ func validateEmergencyUnbondFee(v sdk.Dec) error {
 	return nil
 }
 
-func validateMaxUnbondings(v uint32) error {
-	if v == 0 {
-		return fmt.Errorf("max unbondings cannot be zero")
-	}
-
+func validateMaxUnbondings(_ uint32) error {
+	// max unbondings can be any positive number, or zero for unlimited
 	return nil
 }
 
