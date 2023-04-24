@@ -10,7 +10,7 @@ import (
 
 var _ sdk.Msg = &MsgGovUpdateRegistry{}
 
-// NewMsgUpdateRegistry will creates a new MsgUpdateRegistry instance
+// NewMsgUpdateRegistry will create a new MsgUpdateRegistry instance
 func NewMsgUpdateRegistry(authority, title, description string, updateTokens, addTokens []Token) *MsgGovUpdateRegistry {
 	return &MsgGovUpdateRegistry{
 		Title:        title,
@@ -34,6 +34,10 @@ func (msg MsgGovUpdateRegistry) String() string {
 func (msg MsgGovUpdateRegistry) ValidateBasic() error {
 	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
 		return err
+	}
+
+	if len(msg.AddTokens) == 0 && len(msg.UpdateTokens) == 0 {
+		return ErrEmptyAddAndUpdateTokens
 	}
 
 	if err := validateRegistryTokenDenoms(msg.AddTokens); err != nil {

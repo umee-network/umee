@@ -10,6 +10,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
+	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -27,7 +28,7 @@ import (
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
-func NewRootCmd() (*cobra.Command, appparams.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, sdkparams.EncodingConfig) {
 	encodingConfig := umeeapp.MakeEncodingConfig()
 	moduleManager := umeeapp.ModuleBasics
 

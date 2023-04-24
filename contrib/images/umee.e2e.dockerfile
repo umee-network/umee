@@ -1,7 +1,7 @@
 # Docker for e2e testing
 # Creates dynamic binaries, by building from the latest version of umeed
 
-FROM golang:1.19-bullseye AS builder
+FROM golang:1.20-bullseye AS builder
 ARG EXPERIMENTAL=false
 
 ## Download go module dependencies for umeed

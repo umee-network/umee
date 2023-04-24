@@ -48,6 +48,21 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
+- [1993](https://github.com/umee-network/umee/pull/1993) Updated our Cosmos SDK fork to 0.46.12 and included an option to disable colored logs.
+
+### Improvements
+
+- [1989](https://github.com/umee-network/umee/pull/1989) Leverage: fix the duplicate symbol denoms issue on adding new tokens to registry.
+- [1989](https://github.com/umee-network/umee/pull/1989) Updated go version from 1.19 to 1.20
+### Fixes
+
+- .
+
+## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-5
+
+### Features
+
 - [1963](https://github.com/umee-network/umee/pull/1963) ICA Host integration.
 - [1953](https://github.com/umee-network/umee/pull/1953) IBC: accept only inflow of leverage registered tokens
 - [1967](https://github.com/umee-network/umee/pull/1967) Gravity Bridge phase out phase-2: disable Umee -> Ethereum transfers.
@@ -56,6 +71,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [1959](https://github.com/umee-network/umee/pull/1959) Update IBC to v6.1
+- [1962](https://github.com/umee-network/umee/pull/1962) Increasing unit test coverage for `x/leverage`, `x/oracle`
+  and `x/uibc`
 - [1913](https://github.com/umee-network/umee/pull/1913), [1974](https://github.com/umee-network/umee/pull/1974) uibc: quota status check.
 - [1973](https://github.com/umee-network/umee/pull/1973) UIBC: handle zero Quota Params.
 

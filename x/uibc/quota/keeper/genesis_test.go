@@ -22,6 +22,7 @@ func TestExportGenesis(t *testing.T) {
 	s := initKeeperTestSuite(t)
 	app, ctx := s.app, s.ctx
 	defaultGs := uibc.DefaultGenesisState()
+	defaultGs.Outflows = append(defaultGs.Outflows, sampleOutflow)
 	app.UIbcQuotaKeeper.InitGenesis(ctx, *defaultGs)
 	eGs := app.UIbcQuotaKeeper.ExportGenesis(ctx)
 	assert.DeepEqual(t, eGs, defaultGs)

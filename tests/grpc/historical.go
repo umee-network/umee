@@ -1,24 +1,23 @@
 package grpc
 
 import (
-	"context"
 	"errors"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/v4/tests/grpc/client"
+	"github.com/umee-network/umee/v4/client"
 )
 
 // MedianCheck waits for availability of all exchange rates from the denom accept list,
 // records historical stamp data based on the oracle params, computes the
 // median/median deviation and then compares that to the data in the
 // median/median deviation gRPC query
-func MedianCheck(val1Client *client.UmeeClient) error {
-	ctx, cancel := context.WithCancel(context.Background())
+func MedianCheck(umee client.Client) error {
+	ctx, cancel := umee.NewQCtxWithCancel()
 	defer cancel()
 
-	params, err := val1Client.QueryClient.QueryParams()
+	params, err := umee.QueryOracleParams()
 	if err != nil {
 		return err
 	}
@@ -28,14 +27,14 @@ func MedianCheck(val1Client *client.UmeeClient) error {
 		denomAcceptList = append(denomAcceptList, strings.ToUpper(acceptItem.SymbolDenom))
 	}
 
-	chainHeight, err := NewChainHeight(ctx, val1Client.TxClient.ClientContext.Client, zerolog.Nop())
+	chainHeight, err := umee.NewChainHeightListener(ctx, zerolog.Nop())
 	if err != nil {
 		return err
 	}
 
 	var exchangeRates sdk.DecCoins
 	for i := 0; i < 20; i++ {
-		exchangeRates, err = val1Client.QueryClient.QueryExchangeRates()
+		exchangeRates, err = umee.QueryExchangeRates()
 		if err == nil && len(exchangeRates) == len(denomAcceptList) {
 			break
 		}
@@ -49,7 +48,7 @@ func MedianCheck(val1Client *client.UmeeClient) error {
 		return errors.New("couldn't fetch exchange rates matching denom accept list")
 	}
 
-	priceStore, err := listenForPrices(val1Client, params, chainHeight)
+	priceStore, err := listenForPrices(umee, params, chainHeight)
 	if err != nil {
 		return err
 	}

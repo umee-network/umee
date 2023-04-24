@@ -9,13 +9,12 @@ import (
 // medians deviations are correct, updates the oracle params with
 // a gov prop, then checks the medians and median deviations again.
 func (s *IntegrationTestSuite) TestMedians() {
-	err := grpc.MedianCheck(s.umeeClient)
+	err := grpc.MedianCheck(s.umee)
 	s.Require().NoError(err)
 }
 
 func (s *IntegrationTestSuite) TestUpdateOracleParams() {
-	s.T().Skip("paused due to validator power threshold enforcing")
-	params, err := s.umeeClient.QueryClient.QueryParams()
+	params, err := s.umee.QueryOracleParams()
 	s.Require().NoError(err)
 
 	s.Require().Equal(uint64(5), params.HistoricStampPeriod)
@@ -23,12 +22,12 @@ func (s *IntegrationTestSuite) TestUpdateOracleParams() {
 	s.Require().Equal(uint64(20), params.MedianStampPeriod)
 
 	err = grpc.SubmitAndPassProposal(
-		s.umeeClient,
+		s.umee,
 		grpc.OracleParamChanges(10, 2, 20),
 	)
 	s.Require().NoError(err)
 
-	params, err = s.umeeClient.QueryClient.QueryParams()
+	params, err = s.umee.QueryOracleParams()
 	s.Require().NoError(err)
 
 	s.Require().Equal(uint64(10), params.HistoricStampPeriod)

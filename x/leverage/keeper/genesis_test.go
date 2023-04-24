@@ -13,6 +13,154 @@ const (
 	uDenom   = "u/umee"
 )
 
+func (s *IntegrationTestSuite) TestKeeper_InitGenesis() {
+	tcs := []struct {
+		name      string
+		g         types.GenesisState
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			"invalid token",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				Registry: []types.Token{
+					{},
+				},
+			},
+			true,
+			"invalid denom: ",
+		},
+		{
+			"invalid address for borrow",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				AdjustedBorrows: []types.AdjustedBorrow{
+					{
+						Address: "",
+					},
+				},
+			},
+			true,
+			"empty address string is not allowed",
+		},
+		{
+			"invalid coin for borrow",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				AdjustedBorrows: []types.AdjustedBorrow{
+					{
+						Address: testAddr,
+						Amount:  sdk.DecCoin{},
+					},
+				},
+			},
+			true,
+			"invalid denom: ",
+		},
+		{
+			"invalid address for collateral",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				Collateral: []types.Collateral{
+					{
+						Address: "",
+					},
+				},
+			},
+			true,
+			"empty address string is not allowed",
+		},
+		{
+			"invalid coin for collateral",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				Collateral: []types.Collateral{
+					{
+						Address: testAddr,
+						Amount:  sdk.Coin{},
+					},
+				},
+			},
+			true,
+			"invalid denom: ",
+		},
+		{
+			"invalid coin for reserves",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				Reserves: sdk.Coins{
+					sdk.Coin{
+						Denom: "",
+					},
+				},
+			},
+			true,
+			"invalid denom: ",
+		},
+		{
+			"invalid address for badDebt",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				BadDebts: []types.BadDebt{
+					{
+						Address: "",
+					},
+				},
+			},
+			true,
+			"empty address string is not allowed",
+		},
+		{
+			"invalid coin for badDebt",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				BadDebts: []types.BadDebt{
+					{
+						Address: testAddr,
+						Denom:   "",
+					},
+				},
+			},
+			true,
+			"invalid denom: ",
+		},
+		{
+			"invalid coin for interestScalars",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+				InterestScalars: []types.InterestScalar{
+					{
+						Denom: "",
+					},
+				},
+			},
+			true,
+			"invalid denom: ",
+		},
+		{
+			"valid",
+			types.GenesisState{
+				Params: types.DefaultParams(),
+			},
+			false,
+			"",
+		},
+	}
+
+	for _, tc := range tcs {
+		s.Run(
+			tc.name, func() {
+				if tc.expectErr {
+					s.Assertions.PanicsWithError(tc.errMsg, func() { s.app.LeverageKeeper.InitGenesis(s.ctx, tc.g) })
+				} else {
+					s.Assertions.NotPanics(func() { s.app.LeverageKeeper.InitGenesis(s.ctx, tc.g) })
+				}
+			},
+		)
+	}
+}
+
 func (s *IntegrationTestSuite) TestKeeper_ExportGenesis() {
 	borrows := []types.AdjustedBorrow{
 		{
