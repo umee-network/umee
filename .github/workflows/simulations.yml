@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v4
         with:
-          go-version: 1.19
+          go-version: "1.20"
 
       - name: Install runsim
         run: export GO111MODULE="on" && go install github.com/cosmos/tools/cmd/runsim@v1.0.0
@@ -36,7 +36,7 @@ jobs:
       - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
-          go-version: 1.19
+          go-version: "1.20"
           cache: true
       - name: Test application non-determinism
         if: env.GIT_DIFF
@@ -58,7 +58,7 @@ jobs:
       - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
-          go-version: 1.19
+          go-version: "1.20"
           cache: true
       - uses: actions/cache@v3
         if: env.GIT_DIFF
@@ -85,7 +85,7 @@ jobs:
       - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
-          go-version: 1.19
+          go-version: "1.20"
           cache: true
       - uses: actions/cache@v3
         if: env.GIT_DIFF
@@ -111,7 +111,7 @@ jobs:
       - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
-          go-version: 1.19
+          go-version: "1.20"
           cache: true
       - uses: actions/cache@v3
         if: env.GIT_DIFF

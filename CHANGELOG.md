@@ -54,7 +54,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [1989](https://github.com/umee-network/umee/pull/1989) Leverage: fix the duplicate symbol denoms issue on adding new tokens to registry.
-
+- [1989](https://github.com/umee-network/umee/pull/1989) Updated go version from 1.19 to 1.20
 ### Fixes
 
 - .
