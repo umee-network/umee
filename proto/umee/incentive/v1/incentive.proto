@@ -23,13 +23,6 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-
-  // community_fund_address is the address from which all incentive programs
-  // proposed with "from_community_fund = true" will receive their funding.
-  // Since funds are withdrawn automatically when an incentive program passes
-  // governance, this account should always contain sufficient balance to
-  // cover incentive programs which are being voted upon.
-  string community_fund_address = 4;
 }
 
 // IncentiveProgram defines a liquidity mining incentive program on a single

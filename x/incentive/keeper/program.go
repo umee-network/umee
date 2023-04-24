@@ -3,6 +3,9 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
+
 	"github.com/umee-network/umee/v4/x/incentive"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
@@ -21,29 +24,25 @@ func (k Keeper) createIncentiveProgram(
 		return err
 	}
 
-	addr := k.GetParams(ctx).CommunityFundAddress
+	// communityFund returns the amount of a given token held in the dist module account
+	distAddr := authtypes.NewModuleAddress(disttypes.ModuleName)
+	communityFund := k.bankKeeper.SpendableCoins(ctx, distAddr)
+
 	if fromCommunityFund {
-		if addr != "" {
-			communityAddress := sdk.MustAccAddressFromBech32(addr)
-			// If the module has set a community fund address and the proposal
-			// requested it, we can attempt to instantly fund the module when
-			// the proposal passes.
-			funds := k.bankKeeper.SpendableCoins(ctx, communityAddress)
-			rewards := sdk.NewCoins(program.TotalRewards)
-			if funds.IsAllGT(rewards) {
-				// Community fund has the required tokens to fund the program
-				err := k.bankKeeper.SendCoinsFromAccountToModule(ctx, communityAddress, incentive.ModuleName, rewards)
-				if err != nil {
-					return err
-				}
-				// Set program's funded and remaining rewards to the amount just funded
-				program.Funded = true
-				program.RemainingRewards = program.TotalRewards
-			} else {
-				ctx.Logger().Error("incentive community fund insufficient. proposal will revert to manual funding.")
+		// If the proposal requested it, we can attempt to instantly fund the program when
+		// the proposal passes.
+		rewards := sdk.NewCoins(program.TotalRewards)
+		if communityFund.IsAllGT(rewards) {
+			// Community fund has the required tokens to fund the program
+			err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, disttypes.ModuleName, incentive.ModuleName, rewards)
+			if err != nil {
+				return err
 			}
+			// Set program's funded and remaining rewards to the amount just funded
+			program.Funded = true
+			program.RemainingRewards = program.TotalRewards
 		} else {
-			ctx.Logger().Error("incentive community fund not set. proposal will revert to manual funding.")
+			ctx.Logger().Error("community fund insufficient. proposal will revert to manual funding.")
 		}
 	}
 

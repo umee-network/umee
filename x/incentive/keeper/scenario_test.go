@@ -24,7 +24,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	k := newTestKeeper(t)
 
 	// init a community fund with 1000 UMEE and 10 ATOM available for funding
-	_ = k.initCommunityFund(
+	k.initCommunityFund(
 		coin.New(umee, 1000_000000),
 		coin.New(atom, 10_000000),
 	)

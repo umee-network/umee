@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/require"
+	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
 	"github.com/umee-network/umee/v4/tests/tsdk"
 	"github.com/umee-network/umee/v4/util/coin"
@@ -84,27 +86,9 @@ func (k *testKeeper) mustBond(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
-// initCommunityFund creates and funds an account, then sets it as the module's community fund
-// newAccount creates a new account for testing, and funds it with any input tokens.
-func (k *testKeeper) initCommunityFund(funds ...sdk.Coin) sdk.AccAddress {
-	// create and fund account
-	addr := k.newAccount(funds...)
-
-	// change only the community fund address in params
-	params := k.GetParams(k.ctx)
-	params.CommunityFundAddress = addr.String()
-
-	// set params and expect no error
-	validMsg := &incentive.MsgGovSetParams{
-		Authority: "govAcct",
-		// Authority:   app.GovKeeper.GetGovernanceAccount(k.ctx).GetAddress().String(),
-		Title:       "Update Params",
-		Description: "New valid values",
-		Params:      params,
-	}
-	_, err := k.msrv.GovSetParams(k.ctx, validMsg)
-	require.Nil(k.t, err, "init community fund")
-	return addr
+// initCommunityFund funds the mock bank keeper's distribution module account with some tokens
+func (k *testKeeper) initCommunityFund(funds ...sdk.Coin) {
+	k.bk.FundModule(disttypes.ModuleName, funds)
 }
 
 // addIncentiveProgram used MsgGovCreateProgram to create and fund (if community funded) an incentive program.

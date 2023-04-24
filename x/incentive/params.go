@@ -11,10 +11,9 @@ const secondsPerDay = 86400
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
-		MaxUnbondings:        5,
-		UnbondingDuration:    secondsPerDay * 1,
-		EmergencyUnbondFee:   sdk.MustNewDecFromStr("0.01"),
-		CommunityFundAddress: "",
+		MaxUnbondings:      5,
+		UnbondingDuration:  secondsPerDay * 1,
+		EmergencyUnbondFee: sdk.MustNewDecFromStr("0.01"),
 	}
 }
 
@@ -26,10 +25,7 @@ func (p Params) Validate() error {
 	if err := validateUnbondingDuration(p.UnbondingDuration); err != nil {
 		return err
 	}
-	if err := validateEmergencyUnbondFee(p.EmergencyUnbondFee); err != nil {
-		return err
-	}
-	return validateCommunityFundAddress(p.CommunityFundAddress)
+	return validateEmergencyUnbondFee(p.EmergencyUnbondFee)
 }
 
 func validateUnbondingDuration(v int64) error {
@@ -50,17 +46,5 @@ func validateEmergencyUnbondFee(v sdk.Dec) error {
 
 func validateMaxUnbondings(_ uint32) error {
 	// max unbondings can be any positive number, or zero for unlimited
-	return nil
-}
-
-func validateCommunityFundAddress(addr string) error {
-	// Address must be either empty or fully valid
-	if addr != "" {
-		_, err := sdk.AccAddressFromBech32(addr)
-		if err != nil {
-			return err
-		}
-	}
-
 	return nil
 }

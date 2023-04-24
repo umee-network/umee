@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v4/util/coin"
 	leveragefixtures "github.com/umee-network/umee/v4/x/leverage/fixtures"
@@ -13,13 +14,11 @@ import (
 // mockBankKeeper mocks the bank keeper
 type mockBankKeeper struct {
 	spendableCoins map[string]sdk.Coins
-	moduleBalances map[string]sdk.Coins
 }
 
 func newMockBankKeeper() mockBankKeeper {
 	m := mockBankKeeper{
 		spendableCoins: map[string]sdk.Coins{},
-		moduleBalances: map[string]sdk.Coins{},
 	}
 	return m
 }
@@ -29,18 +28,19 @@ func newMockBankKeeper() mockBankKeeper {
 func (m *mockBankKeeper) SendCoinsFromModuleToAccount(
 	_ sdk.Context, fromModule string, toAddr sdk.AccAddress, coins sdk.Coins,
 ) error {
+	moduleAddr := authtypes.NewModuleAddress(fromModule)
 	spendable, ok := m.spendableCoins[toAddr.String()]
 	if !ok {
 		spendable = sdk.NewCoins()
 	}
-	moduleBalance, ok := m.moduleBalances[fromModule]
+	moduleBalance, ok := m.spendableCoins[moduleAddr.String()]
 	if !ok {
 		moduleBalance = sdk.NewCoins()
 	}
 	if coins.IsAnyGT(moduleBalance) {
 		return errors.New("mock bank: insufficient module balance")
 	}
-	m.moduleBalances[fromModule] = moduleBalance.Sub(coins...)
+	m.spendableCoins[moduleAddr.String()] = moduleBalance.Sub(coins...)
 	m.spendableCoins[toAddr.String()] = spendable.Add(coins...)
 	return nil
 }
@@ -50,11 +50,12 @@ func (m *mockBankKeeper) SendCoinsFromModuleToAccount(
 func (m *mockBankKeeper) SendCoinsFromAccountToModule(
 	_ sdk.Context, fromAddr sdk.AccAddress, toModule string, coins sdk.Coins,
 ) error {
+	moduleAddr := authtypes.NewModuleAddress(toModule)
 	spendable, ok := m.spendableCoins[fromAddr.String()]
 	if !ok {
 		spendable = sdk.NewCoins()
 	}
-	moduleBalance, ok := m.moduleBalances[toModule]
+	moduleBalance, ok := m.spendableCoins[moduleAddr.String()]
 	if !ok {
 		moduleBalance = sdk.NewCoins()
 	}
@@ -62,7 +63,28 @@ func (m *mockBankKeeper) SendCoinsFromAccountToModule(
 		return errors.New("mock bank: insufficient account balance")
 	}
 	m.spendableCoins[fromAddr.String()] = spendable.Sub(coins...)
-	m.moduleBalances[toModule] = moduleBalance.Add(coins...)
+	m.spendableCoins[moduleAddr.String()] = moduleBalance.Add(coins...)
+	return nil
+}
+
+// SendCoinsFromModuleToModule sends coins from one module balance to another.
+// Error on insufficient module balance.
+func (m *mockBankKeeper) SendCoinsFromModuleToModule(_ sdk.Context, fromModule, toModule string, coins sdk.Coins) error {
+	fromAddr := authtypes.NewModuleAddress(fromModule)
+	fromBalance, ok := m.spendableCoins[fromAddr.String()]
+	if !ok {
+		fromBalance = sdk.NewCoins()
+	}
+	toAddr := authtypes.NewModuleAddress(toModule)
+	toBalance, ok := m.spendableCoins[toAddr.String()]
+	if !ok {
+		toBalance = sdk.NewCoins()
+	}
+	if coins.IsAnyGT(fromBalance) {
+		return errors.New("mock bank: insufficient module balance")
+	}
+	m.spendableCoins[fromAddr.String()] = fromBalance.Sub(coins...)
+	m.spendableCoins[toAddr.String()] = toBalance.Add(coins...)
 	return nil
 }
 
@@ -88,11 +110,12 @@ func (m *mockBankKeeper) FundAccount(addr sdk.AccAddress, coins sdk.Coins) {
 // FundModule mints new coins and adds them to a module balance.
 func (m *mockBankKeeper) FundModule(module string, coins sdk.Coins) {
 	coins = sdk.NewCoins(coins...) // prevents panic: Wrong argument: coins must be sorted
-	balance, ok := m.moduleBalances[module]
+	moduleAddr := authtypes.NewModuleAddress(module)
+	balance, ok := m.spendableCoins[moduleAddr.String()]
 	if !ok {
 		balance = sdk.NewCoins()
 	}
-	m.moduleBalances[module] = balance.Add(coins...)
+	m.spendableCoins[moduleAddr.String()] = balance.Add(coins...)
 }
 
 // mockLeverageKeeper implements the methods called by the incentive module on the leverage module,

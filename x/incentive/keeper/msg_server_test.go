@@ -340,15 +340,11 @@ func (k *testKeeper) TestMsgGovSetParams() {
 	defaultParams := incentive.DefaultParams()
 	require.Equal(k.t, defaultParams, k.GetParams(k.ctx))
 
-	// create an account to use as community fund
-	communityFund := k.newAccount()
-
 	// create new set of params which is different (in every field) from default
 	newParams := incentive.Params{
-		MaxUnbondings:        defaultParams.MaxUnbondings + 1,
-		UnbondingDuration:    defaultParams.UnbondingDuration + 1,
-		EmergencyUnbondFee:   sdk.MustNewDecFromStr("0.99"),
-		CommunityFundAddress: communityFund.String(),
+		MaxUnbondings:      defaultParams.MaxUnbondings + 1,
+		UnbondingDuration:  defaultParams.UnbondingDuration + 1,
+		EmergencyUnbondFee: sdk.MustNewDecFromStr("0.99"),
 	}
 
 	// set params and expect no error
@@ -384,8 +380,8 @@ func (k *testKeeper) TestMsgGovCreatePrograms() {
 		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
 	)
 
-	// create an account to use as community fund, with 15 UMEE
-	_ = k.initCommunityFund(
+	// fund community fund with 15 UMEE
+	k.initCommunityFund(
 		sdk.NewInt64Coin(umee, 15_000000),
 	)
 

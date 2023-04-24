@@ -19,8 +19,4 @@ func TestDefaultParams(t *testing.T) {
 	invalidEmergencyUnbondFee := DefaultParams()
 	invalidEmergencyUnbondFee.EmergencyUnbondFee = sdk.OneDec()
 	assert.ErrorContains(t, invalidEmergencyUnbondFee.Validate(), "invalid emergency unbonding fee")
-
-	invalidCommunityFund := DefaultParams()
-	invalidCommunityFund.CommunityFundAddress = "abcdefgh"
-	assert.ErrorContains(t, invalidCommunityFund.Validate(), "decoding bech32 failed")
 }
