@@ -18,6 +18,7 @@ var ten = sdk.MustNewDecFromStr("10")
 // GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows(ctx sdk.Context) (sdk.DecCoins, error) {
 	var outflows sdk.DecCoins
+	// creating PrefixStore upfront will remove the prefix from the key when running the iterator.
 	store := k.PrefixStore(&ctx, uibc.KeyPrefixDenomOutflows)
 	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
