@@ -51,13 +51,14 @@ The Index will have the following parameters:
 - Fees: every fee is calculated and charged to the user in the asset that is used in the operation. The calculation
   will be explained below, the following values will be used as parameters for that calculation:
   - Min fee: the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
-    when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees. Valid values
-    `[0-∞]`.
+    when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees.
+    Valid values: `[0-1)`.
   - Balanced fee: the fee to be charged to the user when the index is balanced. It must be greater than Min fee and
     lower than Max fee, it cannot be 0.
+    Valid values: `[min_fee-1)`.
   - Max fee: the maximum fee to be charged to the user. The applied fee will tend to increase up to this value,
-    when the accepted asset is oversupplied in the index. It must be greater than Min and Balanced fee. If the value
-    is 0, no Max fee will be applied.
+    when the accepted asset is oversupplied in the index. It must be greater than Min and Balanced fee.
+    Valid values: `[0-1)`.
 - Accepted Assets: a list where each asset will have the following parameters:
   - Asset denom.
   - Reserve portion: the portion of swapped assets that will be transferred to `metoken` module as reserves, and the
