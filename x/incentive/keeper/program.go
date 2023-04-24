@@ -4,6 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 // createIncentiveProgram saves an incentive program to upcoming programs after it
@@ -43,6 +44,22 @@ func (k Keeper) createIncentiveProgram(
 			}
 		} else {
 			ctx.Logger().Error("incentive community fund not set. proposal will revert to manual funding.")
+		}
+	}
+
+	// If this is the first time this uToken has been incentivized, initialize its rewardAccumulator exponent.
+	// Note that this interprets Exponent == 0 as needing initialization, but if an asset actually had exponent zero,
+	// and had already been initialized, this would be a harmless no-op.
+	if ra := k.getRewardAccumulator(ctx, program.UToken); ra.Exponent == 0 {
+		token, err := k.leverageKeeper.GetTokenSettings(ctx, leveragetypes.ToTokenDenom(program.UToken))
+		if err != nil {
+			// unregistered tokens do not have uTokens, so they cannot be incentivized
+			return err
+		}
+		// Set exponent, preserving all other fields in the reward accumulator in case they are not zero
+		ra.Exponent = token.Exponent
+		if err = k.setRewardAccumulator(ctx, ra); err != nil {
+			return err
 		}
 	}
 
