@@ -147,7 +147,10 @@ func (q Querier) PendingRewards(
 	}
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
-	pending := k.calculateRewards(ctx, addr)
+	pending, err := k.calculateRewards(ctx, addr)
+	if err != nil {
+		return nil, err
+	}
 	return &incentive.QueryPendingRewardsResponse{Rewards: pending}, err
 }
 
@@ -172,7 +175,10 @@ func (q Querier) AccountBonds(
 	accountUnbondings := []incentive.Unbonding{}
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
-	denoms := k.getAllBondDenoms(ctx, addr)
+	denoms, err := k.getAllBondDenoms(ctx, addr)
+	if err != nil {
+		return nil, err
+	}
 	for _, denom := range denoms {
 		bonded, unbonding, unbondings := k.BondSummary(ctx, addr, denom)
 		totalBonded = totalBonded.Add(bonded)
@@ -201,7 +207,11 @@ func (q Querier) TotalBonded(
 	if req.Denom != "" {
 		total = sdk.NewCoins(k.getTotalBonded(ctx, req.Denom))
 	} else {
-		total = k.getAllTotalBonded(ctx)
+		var err error
+		total, err = k.getAllTotalBonded(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &incentive.QueryTotalBondedResponse{Bonded: total}, nil
@@ -221,7 +231,11 @@ func (q Querier) TotalUnbonding(
 	if req.Denom != "" {
 		total = sdk.NewCoins(k.getTotalUnbonding(ctx, req.Denom))
 	} else {
-		total = k.getAllTotalUnbonding(ctx)
+		var err error
+		total, err = k.getAllTotalUnbonding(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &incentive.QueryTotalUnbondingResponse{Unbonding: total}, nil

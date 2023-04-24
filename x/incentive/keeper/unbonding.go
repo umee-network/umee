@@ -40,7 +40,10 @@ func (k Keeper) addUnbonding(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Co
 func (k Keeper) cleanupUnbondings(ctx sdk.Context, addr sdk.AccAddress) error {
 	time := k.GetLastRewardsTime(ctx)
 	duration := k.GetParams(ctx).UnbondingDuration
-	bondedDenoms := k.getAllBondDenoms(ctx, addr)
+	bondedDenoms, err := k.getAllBondDenoms(ctx, addr)
+	if err != nil {
+		return err
+	}
 
 	for _, denom := range bondedDenoms {
 		storedUnbondings := k.getUnbondings(ctx, addr, denom)

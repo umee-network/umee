@@ -93,16 +93,20 @@ func TestBasicIncentivePrograms(t *testing.T) {
 
 	// From 100000 rewards distributed, 100% went to alice and 0% went to bob.
 	// Pending rewards round down.
+	rewards, err := k.calculateRewards(k.ctx, alice)
+	require.NoError(k.t, err)
 	require.Equal(
 		k.t,
 		sdk.NewCoins(sdk.NewInt64Coin(umee, 100000)),
-		k.calculateRewards(k.ctx, alice),
+		rewards,
 		"alice pending rewards at time 101",
 	)
+	rewards, err = k.calculateRewards(k.ctx, bob)
+	require.NoError(k.t, err)
 	require.Equal(
 		k.t,
 		sdk.NewCoins(),
-		k.calculateRewards(k.ctx, bob),
+		rewards,
 		"bob pending rewards at time 101",
 	)
 
@@ -121,16 +125,20 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	// since alice hasn't claimed rewards yet, these add to the previous block's rewards.
 	// rewards actually distributed rounded down a bit, and due to decimal remainders, their sum falls short
 	// of the amount that was removed from remainingRewards.
+	rewards, err = k.calculateRewards(k.ctx, alice)
+	require.NoError(k.t, err)
 	require.Equal(
 		k.t,
 		sdk.NewCoins(sdk.NewInt64Coin(umee, 179999)),
-		k.calculateRewards(k.ctx, alice),
+		rewards,
 		"alice pending rewards at time 102",
 	)
+	rewards, err = k.calculateRewards(k.ctx, bob)
+	require.NoError(k.t, err)
 	require.Equal(
 		k.t,
 		sdk.NewCoins(sdk.NewInt64Coin(umee, 19999)),
-		k.calculateRewards(k.ctx, bob),
+		rewards,
 		"bob pending rewards at time 102",
 	)
 
@@ -155,18 +163,22 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.Equal(k.t, sdk.ZeroInt(), program3.RemainingRewards.Amount, "0 percent of program 3 rewards remain")
 
 	// These are the final pending rewards observed.
+	rewards, err = k.calculateRewards(k.ctx, alice)
+	require.NoError(k.t, err)
 	require.Equal(
 		k.t,
 		// a small amount from before bob joined, then 80% of the rest of program 1, and 80% of program 3
 		sdk.NewCoins(sdk.NewInt64Coin(umee, 100000+7_920000+8_000000)),
-		k.calculateRewards(k.ctx, alice),
+		rewards,
 		"alice pending rewards at time 300",
 	)
+	rewards, err = k.calculateRewards(k.ctx, bob)
+	require.NoError(k.t, err)
 	require.Equal(
 		k.t,
 		// 20% of the rest of program 1 (missing the first block), and 20% of program 3
 		sdk.NewCoins(sdk.NewInt64Coin(umee, 1_980000+2_000000)),
-		k.calculateRewards(k.ctx, bob),
+		rewards,
 		"bob pending rewards at time 300",
 	)
 }

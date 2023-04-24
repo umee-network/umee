@@ -73,6 +73,22 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *incentive.GenesisState {
 	if err != nil {
 		panic(err)
 	}
+	bonds, err := k.getAllBonds(ctx)
+	if err != nil {
+		panic(err)
+	}
+	trackers, err := k.getAllRewardTrackers(ctx)
+	if err != nil {
+		panic(err)
+	}
+	accumulators, err := k.getAllRewardAccumulators(ctx)
+	if err != nil {
+		panic(err)
+	}
+	unbondings, err := k.getAllAccountUnbondings(ctx)
+	if err != nil {
+		panic(err)
+	}
 	return incentive.NewGenesisState(
 		k.GetParams(ctx),
 		completedPrograms,
@@ -80,9 +96,9 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *incentive.GenesisState {
 		upcomingPrograms,
 		k.getNextProgramID(ctx),
 		k.GetLastRewardsTime(ctx),
-		k.getAllBonds(ctx),
-		k.getAllRewardTrackers(ctx),
-		k.getAllRewardAccumulators(ctx),
-		k.getAllAccountUnbondings(ctx),
+		bonds,
+		trackers,
+		accumulators,
+		unbondings,
 	)
 }

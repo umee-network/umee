@@ -22,7 +22,10 @@ func (k Keeper) updateRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDe
 // claimRewards claims a single account's uToken's rewards for all bonded uToken denoms. Returns rewards claimed.
 func (k Keeper) claimRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, error) {
 	rewards := sdk.NewCoins()
-	bondedDenoms := k.getAllBondDenoms(ctx, addr)
+	bondedDenoms, err := k.getAllBondDenoms(ctx, addr)
+	if err != nil {
+		return sdk.NewCoins(), err
+	}
 	for _, bondDenom := range bondedDenoms {
 		tokens := k.calculateSingleReward(ctx, addr, bondDenom)
 
@@ -49,9 +52,12 @@ func (k Keeper) claimRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, e
 
 // calculateRewards calculates a single account's uToken's pending rewards for all bonded uToken denoms,
 // without claiming them or updating its reward trackers. Returns rewards pending.
-func (k Keeper) calculateRewards(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins {
+func (k Keeper) calculateRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, error) {
 	rewards := sdk.NewCoins()
-	bondedDenoms := k.getAllBondDenoms(ctx, addr)
+	bondedDenoms, err := k.getAllBondDenoms(ctx, addr)
+	if err != nil {
+		return sdk.NewCoins(), err
+	}
 	for _, bondDenom := range bondedDenoms {
 		tokens := k.calculateSingleReward(ctx, addr, bondDenom)
 		if !tokens.IsZero() {
@@ -59,7 +65,7 @@ func (k Keeper) calculateRewards(ctx sdk.Context, addr sdk.AccAddress) sdk.Coins
 			rewards = rewards.Add(tokens...)
 		}
 	}
-	return rewards
+	return rewards, nil
 }
 
 // calculateSingleReward calculates a single account's uToken's rewards for a single bonded uToken denom,
