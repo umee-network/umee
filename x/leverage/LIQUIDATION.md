@@ -14,6 +14,7 @@ This document contains notes on how to do these manually - a more sophisticated 
 Any wallet you control can be used as a liquidator, as long as it has a pool of assets and tokens for gas on the relevant chains.
 
 Here is an example setup:
+
 - `100 AXL-USDC` from axelar collateralized on [app.umee.cc](https://app.umee.cc/) with no active borrows
 - `1 UMEE` on Umee
 - `1 ATOM` on Cosmos Hub
@@ -25,8 +26,9 @@ The main collateral will allow you to borrow any tokens required during liquidat
 ## Querying for Eligible Liquidation Targets
 
 Umee provides a query to list addresses that are eligible for liquidation:
-* REST: `https://api.your.node.here/umee/leverage/v1/liquidation-targets`
-* CLI: `umeed q leverage liquidation-targets`
+
+- REST: `https://api.your.node.here/umee/leverage/v1/liquidation-targets`
+- CLI: `umeed q leverage liquidation-targets`
 
 There is also a courtesy endpoint at `https://api.mainnet.network.umee.cc/umee/leverage/v1/liquidation_targets` which provides a cached output for the query every 5 minutes when available.
 
@@ -120,6 +122,7 @@ Another option would have been to buy `ATOM` on an exchange, or have an initial 
 ### Liquidation Transaction
 
 In a liquidation transaction, you need to specify three things:
+
 - target address (`umee1l2jv...`)
 - repayment coin (`84000ibc/C4CFF...`, which is `0.084 ATOM`)
 - reward token (`ibc/49788...`, which is `USDC`)
@@ -145,6 +148,7 @@ Information on the parameters that determine partial liquidation can be found [h
 To lock in our profits, we should trade the liquidation rewards we received back into the token denom we repaid.
 
 In our case, we
+
 - Transfer `1.03 USDC` from UMEE to Axelar using IBC
 - Transfer `1.03 USDC` from Axelar to Osmosis using IBC (requires `AXL` gas)
 - Trade `1.03 USDC` for `0.088 ATOM` on Osmosis
@@ -159,6 +163,7 @@ For reference, the repayment looks like:
 ```
 
 The liquidator account has returned to its initial state, except:
+
 - An extra `0.004 ATOM` in its balance on Umee (profit)
 - Paid some `ATOM`, `OSMO`, `AXL`, `UMEE` in gas on their respective chains
 
