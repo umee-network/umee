@@ -4,117 +4,117 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v4/app/params"
+	itestsuite "github.com/umee-network/umee/v4/tests/cli"
 	"github.com/umee-network/umee/v4/x/leverage/client/cli"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
-func (s *IntegrationTestSuite) TestInvalidQueries() {
-	invalidQueries := []testQuery{
+func (s *IntegrationTests) TestInvalidQueries() {
+	invalidQueries := []itestsuite.TestQuery{
 		{
-			"query market summary - denom not registered",
-			cli.GetCmdQueryMarketSummary(),
-			[]string{
+			Name:    "query market summary - denom not registered",
+			Command: cli.GetCmdQueryMarketSummary(),
+			Args: []string{
 				"abcd",
 			},
-			true,
-			nil,
-			nil,
+			Response:         nil,
+			ExpectedResponse: nil,
+			ErrMsg:           "not a registered Token",
 		},
 		{
-			"query account balances - invalid address",
-			cli.GetCmdQueryAccountBalances(),
-			[]string{
+			Name:    "query account balances - invalid address",
+			Command: cli.GetCmdQueryAccountBalances(),
+			Args: []string{
 				"xyz",
 			},
-			true,
-			nil,
-			nil,
+			Response:         nil,
+			ExpectedResponse: nil,
+			ErrMsg:           "invalid bech32",
 		},
 		{
-			"query account summary - invalid address",
-			cli.GetCmdQueryAccountSummary(),
-			[]string{
+			Name:    "query account summary - invalid address",
+			Command: cli.GetCmdQueryAccountSummary(),
+			Args: []string{
 				"xyz",
 			},
-			true,
-			nil,
-			nil,
+			Response:         nil,
+			ExpectedResponse: nil,
+			ErrMsg:           "invalid bech32",
 		},
 		{
-			"query max withdraw - invalid address",
-			cli.GetCmdQueryMaxWithdraw(),
-			[]string{
+			Name:    "query max withdraw - invalid address",
+			Command: cli.GetCmdQueryMaxWithdraw(),
+			Args: []string{
 				"xyz",
 				"uumee",
 			},
-			true,
-			nil,
-			nil,
+			Response:         nil,
+			ExpectedResponse: nil,
+			ErrMsg:           "invalid bech32",
 		},
 		{
-			"query registered token - denom not registered",
-			cli.GetCmdQueryRegisteredTokens(),
-			[]string{"umm"},
-			true,
-			nil,
-			nil,
+			Name:             "query registered token - denom not registered",
+			Command:          cli.GetCmdQueryRegisteredTokens(),
+			Args:             []string{"umm"},
+			Response:         nil,
+			ExpectedResponse: nil,
+			ErrMsg:           "not a registered Token",
 		},
 	}
 
 	// These queries do not require any borrower setup because they contain invalid arguments
-	s.runTestQueries(invalidQueries...)
+	s.RunTestQueries(invalidQueries...)
 }
 
-func (s *IntegrationTestSuite) TestLeverageScenario() {
-	val := s.network.Validators[0]
+func (s *IntegrationTests) TestLeverageScenario() {
+	val := s.Network.Validators[0]
 
 	oracleSymbolPrice := sdk.MustNewDecFromStr("34.21")
 
-	initialQueries := []testQuery{
+	initialQueries := []itestsuite.TestQuery{
 		{
-			"query params",
-			cli.GetCmdQueryParams(),
-			[]string{},
-			false,
-			&types.QueryParamsResponse{},
-			&types.QueryParamsResponse{
+			Name:     "query params",
+			Command:  cli.GetCmdQueryParams(),
+			Args:     []string{},
+			Response: &types.QueryParamsResponse{},
+			ExpectedResponse: &types.QueryParamsResponse{
 				Params: types.DefaultParams(),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query registered tokens",
-			cli.GetCmdQueryRegisteredTokens(),
-			[]string{},
-			false,
-			&types.QueryRegisteredTokensResponse{},
-			&types.QueryRegisteredTokensResponse{
+			Name:     "query registered tokens",
+			Command:  cli.GetCmdQueryRegisteredTokens(),
+			Args:     []string{},
+			Response: &types.QueryRegisteredTokensResponse{},
+			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
 					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
 			},
+			ErrMsg: "",
 		},
 		{
-			"query registered token info by base_denom",
-			cli.GetCmdQueryRegisteredTokens(),
-			[]string{appparams.BondDenom},
-			false,
-			&types.QueryRegisteredTokensResponse{},
-			&types.QueryRegisteredTokensResponse{
+			Name:     "query registered token info by base_denom",
+			Command:  cli.GetCmdQueryRegisteredTokens(),
+			Args:     []string{appparams.BondDenom},
+			Response: &types.QueryRegisteredTokensResponse{},
+			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
 					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
 			},
+			ErrMsg: "",
 		},
 		{
-			"query market summary - zero supply",
-			cli.GetCmdQueryMarketSummary(),
-			[]string{
+			Name:    "query market summary - zero supply",
+			Command: cli.GetCmdQueryMarketSummary(),
+			Args: []string{
 				appparams.BondDenom,
 			},
-			false,
-			&types.QueryMarketSummaryResponse{},
-			&types.QueryMarketSummaryResponse{
+			Response: &types.QueryMarketSummaryResponse{},
+			ExpectedResponse: &types.QueryMarketSummaryResponse{
 				SymbolDenom:         "UMEE",
 				Exponent:            6,
 				OraclePrice:         &oracleSymbolPrice,
@@ -142,148 +142,147 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 			},
 		},
 		{
-			"query bad debts",
-			cli.GetCmdQueryBadDebts(),
-			[]string{},
-			false,
-			&types.QueryBadDebtsResponse{},
-			&types.QueryBadDebtsResponse{
+			Name:     "query bad debts",
+			Command:  cli.GetCmdQueryBadDebts(),
+			Args:     []string{},
+			Response: &types.QueryBadDebtsResponse{},
+			ExpectedResponse: &types.QueryBadDebtsResponse{
 				Targets: []types.BadDebt{},
 			},
+			ErrMsg: "",
 		},
 		{
-			"query max withdraw (zero)",
-			cli.GetCmdQueryMaxWithdraw(),
-			[]string{
+			Name:    "query max withdraw (zero)",
+			Command: cli.GetCmdQueryMaxWithdraw(),
+			Args: []string{
 				val.Address.String(),
 				"uumee",
 			},
-			false,
-			&types.QueryMaxWithdrawResponse{},
-			&types.QueryMaxWithdrawResponse{
+			Response: &types.QueryMaxWithdrawResponse{},
+			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens:  sdk.NewCoins(),
 				UTokens: sdk.NewCoins(),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query max borrow (zero)",
-			cli.GetCmdQueryMaxBorrow(),
-			[]string{
+			Name:    "query max borrow (zero)",
+			Command: cli.GetCmdQueryMaxBorrow(),
+			Args: []string{
 				val.Address.String(),
 				"uumee",
 			},
-			false,
-			&types.QueryMaxBorrowResponse{},
-			&types.QueryMaxBorrowResponse{
+			Response: &types.QueryMaxBorrowResponse{},
+			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(),
 			},
+			ErrMsg: "",
 		},
 	}
 
-	supply := testTransaction{
-		"supply",
-		cli.GetCmdSupply(),
-		[]string{
+	supply := itestsuite.TestTransaction{
+		Name:    "supply",
+		Command: cli.GetCmdSupply(),
+		Args: []string{
 			"700uumee",
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	addCollateral := testTransaction{
-		"add collateral",
-		cli.GetCmdCollateralize(),
-		[]string{
+	addCollateral := itestsuite.TestTransaction{
+		Name:    "add collateral",
+		Command: cli.GetCmdCollateralize(),
+		Args: []string{
 			"700u/uumee",
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	supplyCollateral := testTransaction{
-		"supply collateral",
-		cli.GetCmdSupplyCollateral(),
-		[]string{
+	supplyCollateral := itestsuite.TestTransaction{
+		Name:    "supply collateral",
+		Command: cli.GetCmdSupplyCollateral(),
+		Args: []string{
 			"300uumee",
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	borrow := testTransaction{
-		"borrow",
-		cli.GetCmdBorrow(),
-		[]string{
+	borrow := itestsuite.TestTransaction{
+		Name:    "borrow",
+		Command: cli.GetCmdBorrow(),
+		Args: []string{
 			"150uumee",
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	maxborrow := testTransaction{
-		"max-borrow",
-		cli.GetCmdMaxBorrow(),
-		[]string{
+	maxborrow := itestsuite.TestTransaction{
+		Name:    "max-borrow",
+		Command: cli.GetCmdMaxBorrow(),
+		Args: []string{
 			"uumee", // should borrow up to the max of 250 uumee, which will become 251 due to rounding
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	liquidate := testTransaction{
-		"liquidate",
-		cli.GetCmdLiquidate(),
-		[]string{
+	liquidate := itestsuite.TestTransaction{
+		Name:    "liquidate",
+		Command: cli.GetCmdLiquidate(),
+		Args: []string{
 			val.Address.String(),
 			"5uumee", // borrower attempts to liquidate itself, but is ineligible
 			"uumee",
 		},
-		types.ErrLiquidationIneligible,
+		ExpectedErr: types.ErrLiquidationIneligible,
 	}
 
-	repay := testTransaction{
-		"repay",
-		cli.GetCmdRepay(),
-		[]string{
+	repay := itestsuite.TestTransaction{
+		Name:    "repay",
+		Command: cli.GetCmdRepay(),
+		Args: []string{
 			"255uumee", // repays only the remaining borrowed balance, reduced automatically from 255
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	removeCollateral := testTransaction{
-		"remove collateral",
-		cli.GetCmdDecollateralize(),
-		[]string{
+	removeCollateral := itestsuite.TestTransaction{
+		Name:    "remove collateral",
+		Command: cli.GetCmdDecollateralize(),
+		Args: []string{
 			"900u/uumee", // 100 u/uumee will remain
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	withdraw := testTransaction{
-		"withdraw",
-		cli.GetCmdWithdraw(),
-		[]string{
+	withdraw := itestsuite.TestTransaction{
+		Name:    "withdraw",
+		Command: cli.GetCmdWithdraw(),
+		Args: []string{
 			"800u/uumee", // 200 u/uumee will remain
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
-	withdrawMax := testTransaction{
-		"withdraw max",
-		cli.GetCmdMaxWithdraw(),
-		[]string{
+	withdrawMax := itestsuite.TestTransaction{
+		Name:    "withdraw max",
+		Command: cli.GetCmdMaxWithdraw(),
+		Args: []string{
 			"uumee",
 		},
-		nil,
+		ExpectedErr: nil,
 	}
 
 	lt1 := sdk.MustNewDecFromStr("0.0089034946")
 
-	nonzeroQueries := []testQuery{
+	nonzeroQueries := []itestsuite.TestQuery{
 		{
-			"query account balances",
-			cli.GetCmdQueryAccountBalances(),
-			[]string{
+			Name:    "query account balances",
+			Command: cli.GetCmdQueryAccountBalances(),
+			Args: []string{
 				val.Address.String(),
 			},
-			false,
-			&types.QueryAccountBalancesResponse{},
-			&types.QueryAccountBalancesResponse{
+			Response: &types.QueryAccountBalancesResponse{},
+			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(appparams.BondDenom, 1001),
 				),
@@ -294,16 +293,16 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewInt64Coin(appparams.BondDenom, 251),
 				),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query account summary",
-			cli.GetCmdQueryAccountSummary(),
-			[]string{
+			Name:    "query account summary",
+			Command: cli.GetCmdQueryAccountSummary(),
+			Args: []string{
 				val.Address.String(),
 			},
-			false,
-			&types.QueryAccountSummaryResponse{},
-			&types.QueryAccountSummaryResponse{
+			Response: &types.QueryAccountSummaryResponse{},
+			ExpectedResponse: &types.QueryAccountSummaryResponse{
 				// This result is umee's oracle exchange rate from
 				// app/test_helpers.go/IntegrationTestNetworkConfig
 				// times the amount of umee, and then times params
@@ -318,46 +317,46 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				// (1001 / 1000000) * 0.26 * 34.21 = 0.008903494600000000
 				LiquidationThreshold: &lt1,
 			},
+			ErrMsg: "",
 		},
 		{
-			"query max withdraw (borrow limit reached)",
-			cli.GetCmdQueryMaxWithdraw(),
-			[]string{
+			Name:    "query max withdraw (borrow limit reached)",
+			Command: cli.GetCmdQueryMaxWithdraw(),
+			Args: []string{
 				val.Address.String(),
 				"uumee",
 			},
-			false,
-			&types.QueryMaxWithdrawResponse{},
-			&types.QueryMaxWithdrawResponse{
+			Response: &types.QueryMaxWithdrawResponse{},
+			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens:  sdk.NewCoins(),
 				UTokens: sdk.NewCoins(),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query max borrow (borrow limit reached)",
-			cli.GetCmdQueryMaxBorrow(),
-			[]string{
+			Name:    "query max borrow (borrow limit reached)",
+			Command: cli.GetCmdQueryMaxBorrow(),
+			Args: []string{
 				val.Address.String(),
 				"uumee",
 			},
-			false,
-			&types.QueryMaxBorrowResponse{},
-			&types.QueryMaxBorrowResponse{
+			Response: &types.QueryMaxBorrowResponse{},
+			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(),
 			},
+			ErrMsg: "",
 		},
 	}
 
-	postQueries := []testQuery{
+	postQueries := []itestsuite.TestQuery{
 		{
-			"query account balances",
-			cli.GetCmdQueryAccountBalances(),
-			[]string{
+			Name:    "query account balances",
+			Command: cli.GetCmdQueryAccountBalances(),
+			Args: []string{
 				val.Address.String(),
 			},
-			false,
-			&types.QueryAccountBalancesResponse{},
-			&types.QueryAccountBalancesResponse{
+			Response: &types.QueryAccountBalancesResponse{},
+			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
 					sdk.NewInt64Coin(appparams.BondDenom, 201), // slightly increased uToken exchange rate
 				),
@@ -366,17 +365,17 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 				),
 				Borrowed: sdk.NewCoins(),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query max withdraw (after repay)",
-			cli.GetCmdQueryMaxWithdraw(),
-			[]string{
+			Name:    "query max withdraw (after repay)",
+			Command: cli.GetCmdQueryMaxWithdraw(),
+			Args: []string{
 				val.Address.String(),
 				"uumee",
 			},
-			false,
-			&types.QueryMaxWithdrawResponse{},
-			&types.QueryMaxWithdrawResponse{
+			Response: &types.QueryMaxWithdrawResponse{},
+			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(201)),
 				),
@@ -384,31 +383,31 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewCoin("u/uumee", sdk.NewInt(200)),
 				),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query max borrow (after repay)",
-			cli.GetCmdQueryMaxBorrow(),
-			[]string{
+			Name:    "query max borrow (after repay)",
+			Command: cli.GetCmdQueryMaxBorrow(),
+			Args: []string{
 				val.Address.String(),
 				"uumee",
 			},
-			false,
-			&types.QueryMaxBorrowResponse{},
-			&types.QueryMaxBorrowResponse{
+			Response: &types.QueryMaxBorrowResponse{},
+			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(25)),
 				),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query all max withdraw (after repay)",
-			cli.GetCmdQueryMaxWithdraw(),
-			[]string{
+			Name:    "query all max withdraw (after repay)",
+			Command: cli.GetCmdQueryMaxWithdraw(),
+			Args: []string{
 				val.Address.String(),
 			},
-			false,
-			&types.QueryMaxWithdrawResponse{},
-			&types.QueryMaxWithdrawResponse{
+			Response: &types.QueryMaxWithdrawResponse{},
+			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(201)),
 				),
@@ -416,60 +415,61 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 					sdk.NewCoin("u/uumee", sdk.NewInt(200)),
 				),
 			},
+			ErrMsg: "",
 		},
 		{
-			"query all max borrow (after repay)",
-			cli.GetCmdQueryMaxBorrow(),
-			[]string{
+			Name:    "query all max borrow (after repay)",
+			Command: cli.GetCmdQueryMaxBorrow(),
+			Args: []string{
 				val.Address.String(),
 			},
-			false,
-			&types.QueryMaxBorrowResponse{},
-			&types.QueryMaxBorrowResponse{
+			Response: &types.QueryMaxBorrowResponse{},
+			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(
 					sdk.NewCoin("uumee", sdk.NewInt(25)),
 				),
 			},
+			ErrMsg: "",
 		},
 	}
 
-	lastQueries := []testQuery{
+	lastQueries := []itestsuite.TestQuery{
 		{
-			"query account balances (empty after withdraw max)",
-			cli.GetCmdQueryAccountBalances(),
-			[]string{
+			Name:    "query account balances (empty after withdraw max)",
+			Command: cli.GetCmdQueryAccountBalances(),
+			Args: []string{
 				val.Address.String(),
 			},
-			false,
-			&types.QueryAccountBalancesResponse{},
-			&types.QueryAccountBalancesResponse{
+			Response: &types.QueryAccountBalancesResponse{},
+			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied:   sdk.NewCoins(),
 				Collateral: sdk.NewCoins(),
 				Borrowed:   sdk.NewCoins(),
 			},
+			ErrMsg: "",
 		},
 
 		{
-			"query max withdraw (after withdraw max)",
-			cli.GetCmdQueryMaxWithdraw(),
-			[]string{
+			Name:    "query max withdraw (after withdraw max)",
+			Command: cli.GetCmdQueryMaxWithdraw(),
+			Args: []string{
 				val.Address.String(),
 				"uumee",
 			},
-			false,
-			&types.QueryMaxWithdrawResponse{},
-			&types.QueryMaxWithdrawResponse{
+			Response: &types.QueryMaxWithdrawResponse{},
+			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens:  sdk.NewCoins(),
 				UTokens: sdk.NewCoins(),
 			},
+			ErrMsg: "",
 		},
 	}
 
 	// These queries do not require any borrower setup
-	s.runTestQueries(initialQueries...)
+	s.RunTestQueries(initialQueries...)
 
 	// These transactions will set up nonzero leverage positions and allow nonzero query results
-	s.runTestTransactions(
+	s.RunTestTransactions(
 		supply,
 		addCollateral,
 		supplyCollateral,
@@ -478,10 +478,10 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 	)
 
 	// These queries run while the supplying and borrowing is active to produce nonzero output
-	s.runTestQueries(nonzeroQueries...)
+	s.RunTestQueries(nonzeroQueries...)
 
 	// These transactions run after nonzero queries are finished
-	s.runTestTransactions(
+	s.RunTestTransactions(
 		liquidate,
 		repay,
 		removeCollateral,
@@ -489,13 +489,13 @@ func (s *IntegrationTestSuite) TestLeverageScenario() {
 	)
 
 	// Confirm additional transaction effects
-	s.runTestQueries(postQueries...)
+	s.RunTestQueries(postQueries...)
 
 	// This transaction will run last
-	s.runTestTransactions(
+	s.RunTestTransactions(
 		withdrawMax,
 	)
 
 	// Confirm withdraw max transaction effects
-	s.runTestQueries(lastQueries...)
+	s.RunTestQueries(lastQueries...)
 }
