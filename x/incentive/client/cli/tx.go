@@ -27,6 +27,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdClaim(),
 		GetCmdBond(),
 		GetCmdBeginUnbonding(),
+		GetCmdEmergencyUnbond(),
 		GetCmdSponsor(),
 	)
 
@@ -103,6 +104,34 @@ func GetCmdBeginUnbonding() *cobra.Command {
 			}
 
 			msg := incentive.NewMsgBeginUnbonding(clientCtx.GetFromAddress(), asset)
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// transaction with a MsgmergencyUnbond message.
+func GetCmdEmergencyUnbond() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "emergency-unbond [utokens]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Instantly unbond some currently bonded or unbonding utokens, for a fee",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			asset, err := sdk.ParseCoinNormalized(args[0])
+			if err != nil {
+				return err
+			}
+
+			msg := incentive.NewMsgEmergencyUnbond(clientCtx.GetFromAddress(), asset)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
