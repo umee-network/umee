@@ -18,9 +18,11 @@ service Msg {
   rpc Bond(MsgBond) returns (MsgBondResponse);
 
   // BeginUnbonding defines a method for starting to unbond uToken collateral.
+  // Only max_unbondings unbondings can be active at per user, per denom, at once.
   rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
 
   // EmergencyUnbond defines a method for instantly unbonding uToken collateral in exchange for a fee.
+  // This can finish existing unbondings or unbond bonded tokens, and is not restricted by max_unbondings.
   rpc EmergencyUnbond(MsgEmergencyUnbond) returns (MsgEmergencyUnbondResponse);
 
   // Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.

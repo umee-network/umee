@@ -815,8 +815,10 @@ type MsgClient interface {
 	// Bond defines a method for bonding uToken collateral.
 	Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOption) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
+	// Only max_unbondings unbondings can be active at per user, per denom, at once.
 	BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error)
 	// EmergencyUnbond defines a method for instantly unbonding uToken collateral in exchange for a fee.
+	// This can finish existing unbondings or unbond bonded tokens, and is not restricted by max_unbondings.
 	EmergencyUnbond(ctx context.Context, in *MsgEmergencyUnbond, opts ...grpc.CallOption) (*MsgEmergencyUnbondResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
 	// The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
@@ -905,8 +907,10 @@ type MsgServer interface {
 	// Bond defines a method for bonding uToken collateral.
 	Bond(context.Context, *MsgBond) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
+	// Only max_unbondings unbondings can be active at per user, per denom, at once.
 	BeginUnbonding(context.Context, *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error)
 	// EmergencyUnbond defines a method for instantly unbonding uToken collateral in exchange for a fee.
+	// This can finish existing unbondings or unbond bonded tokens, and is not restricted by max_unbondings.
 	EmergencyUnbond(context.Context, *MsgEmergencyUnbond) (*MsgEmergencyUnbondResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
 	// The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
