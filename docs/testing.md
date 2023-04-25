@@ -4,7 +4,8 @@ Rules of thumb:
 
 1. Design packages to make it easy to unit-test.
    - Unit tests should represent majority of the test.
-   - Unit tests can be in the same package (to be able to test private methods) → no need to move unit tests to `_test` pacakge.
+   - Unit tests can be in the same package (to be able to test private methods) → no need to move
+     unit tests to `_test` pacakge.
 2. Integration tests should be in `_test` package.
 3. Reduce tight coupling (will make it ) in the software.
 4. Add benchmarks (std lib `BenchmarkXXX`) for all functions we are not sure about the complexity.
