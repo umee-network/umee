@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util"
+	"github.com/umee-network/umee/v4/util/keys"
 	"github.com/umee-network/umee/v4/util/store"
 	"github.com/umee-network/umee/v4/x/incentive"
 )
@@ -29,10 +29,7 @@ func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 
 	iterator := func(_, val []byte) error {
 		var p incentive.IncentiveProgram
-		if err := p.Unmarshal(val); err != nil {
-			// improperly marshaled IncentiveProgram should never happen
-			return err
-		}
+		k.cdc.MustUnmarshal(val, &p)
 
 		programs = append(programs, p)
 		return nil
@@ -40,66 +37,6 @@ func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 
 	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
 	return programs, err
-}
-
-// iterateAccountUnbondings iterates over all unbonding uTokens for an address
-func (k Keeper) iterateAccountUnbondings(ctx sdk.Context, addr sdk.AccAddress,
-	_ func(_ sdk.Context, _ incentive.AccountUnbondings) error,
-) error {
-	prefix := keyUnbondingsNoDenom(addr)
-
-	iterator := func(key, val []byte) error {
-		// TODO: implement (used for account updating and also queries)
-		return incentive.ErrNotImplemented
-	}
-
-	return store.Iterate(k.KVStore(ctx), prefix, iterator)
-}
-
-// IterateAccountBonds iterates over all bonded uTokens for an address by each individual
-// uToken denom and tier
-func (k Keeper) IterateAccountBonds(ctx sdk.Context, addr sdk.AccAddress,
-	_ func(ctx sdk.Context, addr sdk.AccAddress, _ incentive.BondTier, _ sdk.Coin) error,
-) error {
-	prefix := keyBondAmountNoDenom(addr)
-
-	iterator := func(key, val []byte) error {
-		// TODO: implement (used for reward claiming and also queries)
-		return incentive.ErrNotImplemented
-	}
-
-	return store.Iterate(k.KVStore(ctx), prefix, iterator)
-}
-
-// getFullRewardTracker combines all single-reward-denom reward trackers for a bonded uToken and tier
-func (k Keeper) getFullRewardTracker(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier,
-) sdk.DecCoins {
-	prefix := keyRewardTrackerNoReward(addr, denom, tier)
-
-	tracker := sdk.NewDecCoins()
-	iterator := func(key, val []byte) error {
-		// TODO: implement
-
-		return incentive.ErrNotImplemented
-	}
-
-	util.Panic(store.Iterate(k.KVStore(ctx), prefix, iterator))
-	return tracker
-}
-
-// getFullRewardAccumulator combines all single-reward-denom reward accumulators for a uToken denom and tier
-func (k Keeper) getFullRewardAccumulator(ctx sdk.Context, denom string, tier incentive.BondTier) sdk.DecCoins {
-	prefix := keyRewardAccumulatorNoReward(denom, tier)
-
-	accumulator := sdk.NewDecCoins()
-	iterator := func(key, val []byte) error {
-		// TODO: implement
-
-		return incentive.ErrNotImplemented
-	}
-
-	util.Panic(store.Iterate(k.KVStore(ctx), prefix, iterator))
-	return accumulator
 }
 
 // getPaginatedIncentivePrograms returns all incentive programs
@@ -125,10 +62,7 @@ func (k Keeper) getPaginatedIncentivePrograms(
 
 	iterator := func(_, val []byte) error {
 		var p incentive.IncentiveProgram
-		if err := p.Unmarshal(val); err != nil {
-			// improperly marshaled IncentiveProgram should never happen
-			return err
-		}
+		k.cdc.MustUnmarshal(val, &p)
 
 		programs = append(programs, p)
 		return nil
@@ -136,4 +70,132 @@ func (k Keeper) getPaginatedIncentivePrograms(
 
 	err := store.IteratePaginated(k.KVStore(ctx), prefix, uint(page), uint(limit), iterator)
 	return programs, err
+}
+
+// getAllBondDenoms gets all uToken denoms for which an account has nonzero bonded amounts.
+// useful for setting up queries which look at all of an account's bonds or unbondings.
+func (k Keeper) getAllBondDenoms(ctx sdk.Context, addr sdk.AccAddress) ([]string, error) {
+	prefix := keyBondAmountNoDenom(addr)
+	bonds := []string{}
+
+	iterator := func(key, val []byte) error {
+		_, denom, _, err := keys.ExtractAddressAndString(len(keyPrefixBondAmount), key)
+		if err != nil {
+			return err
+		}
+		bonds = append(bonds, denom)
+		return nil
+	}
+
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return bonds, err
+}
+
+// getAllBonds gets all bonds for all accounts (used during export genesis)
+func (k Keeper) getAllBonds(ctx sdk.Context) ([]incentive.Bond, error) {
+	prefix := keyPrefixBondAmount
+	bonds := []incentive.Bond{}
+
+	iterator := func(key, val []byte) error {
+		addr, denom, _, err := keys.ExtractAddressAndString(len(keyPrefixBondAmount), key)
+		if err != nil {
+			return err
+		}
+		amount := store.Int(val, "bond amount")
+		bonds = append(bonds, incentive.NewBond(
+			addr.String(),
+			sdk.NewCoin(denom, amount),
+		))
+
+		return nil
+	}
+
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return bonds, err
+}
+
+// getAllTotalBonded gets total bonded for all uTokens (used for a query)
+func (k Keeper) getAllTotalBonded(ctx sdk.Context) (sdk.Coins, error) {
+	prefix := keyPrefixTotalBonded
+	total := sdk.NewCoins()
+
+	iterator := func(key, val []byte) error {
+		denom, _, err := keys.ExtractString(len(keyPrefixTotalBonded), key)
+		if err != nil {
+			return err
+		}
+		amount := store.Int(val, "total bonded")
+		total = total.Add(sdk.NewCoin(denom, amount))
+		return nil
+	}
+
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return total, err
+}
+
+// getAllRewardTrackers gets all reward trackers for all accounts (used during export genesis)
+func (k Keeper) getAllRewardTrackers(ctx sdk.Context) ([]incentive.RewardTracker, error) {
+	prefix := keyPrefixRewardTracker
+	rewardTrackers := []incentive.RewardTracker{}
+
+	iterator := func(_, val []byte) error {
+		tracker := incentive.RewardTracker{}
+		k.cdc.MustUnmarshal(val, &tracker)
+		rewardTrackers = append(rewardTrackers, tracker)
+		return nil
+	}
+
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return rewardTrackers, err
+}
+
+// getAllRewardAccumulators gets all reward accumulators for all uTokens (used during export genesis)
+func (k Keeper) getAllRewardAccumulators(ctx sdk.Context) ([]incentive.RewardAccumulator, error) {
+	prefix := keyPrefixRewardAccumulator
+	rewardAccumulators := []incentive.RewardAccumulator{}
+
+	iterator := func(_, val []byte) error {
+		accumulator := incentive.RewardAccumulator{}
+		k.cdc.MustUnmarshal(val, &accumulator)
+		rewardAccumulators = append(rewardAccumulators, accumulator)
+		return nil
+	}
+
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return rewardAccumulators, err
+}
+
+// getAllAccountUnbondings gets all account unbondings for all accounts (used during export genesis)
+func (k Keeper) getAllAccountUnbondings(ctx sdk.Context) ([]incentive.AccountUnbondings, error) {
+	prefix := keyPrefixUnbondings
+	unbondings := []incentive.AccountUnbondings{}
+
+	iterator := func(key, val []byte) error {
+		au := incentive.AccountUnbondings{}
+		k.cdc.MustUnmarshal(val, &au)
+		unbondings = append(unbondings, au)
+		return nil
+	}
+
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return unbondings, err
+}
+
+// getAllTotalUnbonding gets total unbonding for all uTokens (used for a query)
+func (k Keeper) getAllTotalUnbonding(ctx sdk.Context) (sdk.Coins, error) {
+	prefix := keyPrefixTotalUnbonding
+	total := sdk.NewCoins()
+
+	iterator := func(key, val []byte) error {
+		denom, _, err := keys.ExtractString(len(keyPrefixTotalUnbonding), key)
+		if err != nil {
+			return err
+		}
+		amount := store.Int(val, "total unbonding")
+		total = total.Add(sdk.NewCoin(denom, amount))
+		return nil
+	}
+
+	err := store.Iterate(k.KVStore(ctx), prefix, iterator)
+	return total, err
 }

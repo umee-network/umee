@@ -22,6 +22,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
 	thisCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
 	otherCollateral := totalCollateral.Sub(thisCollateral)
+	unbondedCollateral := k.unbondedCollateral(ctx, addr, uDenom)
 
 	// calculate borrowed value for the account, using the higher of spot or historic prices for each token
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
@@ -38,7 +39,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 
 	// if no non-blacklisted tokens are borrowed, withdraw the maximum available amount
 	if borrowedValue.IsZero() {
-		withdrawAmount := walletUtokens.Add(totalCollateral.AmountOf(uDenom))
+		withdrawAmount := walletUtokens.Add(unbondedCollateral.Amount)
 		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
 	}
@@ -51,7 +52,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	}
 	// if their other collateral fully covers all borrows, withdraw the maximum available amount
 	if borrowedValue.LT(otherBorrowLimit) {
-		withdrawAmount := walletUtokens.Add(totalCollateral.AmountOf(uDenom))
+		withdrawAmount := walletUtokens.Add(unbondedCollateral.Amount)
 		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
 	}
@@ -83,6 +84,11 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	// if only a portion of collateral is unused, withdraw only that portion
 	unusedCollateralFraction := unusedBorrowLimit.Quo(specificBorrowLimit)
 	unusedCollateral := unusedCollateralFraction.MulInt(thisCollateral.Amount).TruncateInt()
+
+	// find the minimum of unused collateral (due to borrows) or unbonded collateral (incentive module)
+	if unbondedCollateral.Amount.LT(unusedCollateral) {
+		unusedCollateral = unbondedCollateral.Amount
+	}
 
 	// add wallet uTokens to the unused amount from collateral
 	withdrawAmount := unusedCollateral.Add(walletUtokens)
@@ -215,8 +221,9 @@ func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	//
 	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
 	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	moduleAvailableLiquidity :=
-		sdk.NewDec(liquidity.Int64()).Sub(minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)))
+	moduleAvailableLiquidity := sdk.NewDec(liquidity.Int64()).Sub(
+		minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)),
+	)
 
 	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
 }
