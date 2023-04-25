@@ -136,11 +136,6 @@ func (q Querier) PendingRewards(
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "empty address")
-	}
-
 	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
@@ -161,10 +156,6 @@ func (q Querier) AccountBonds(
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "empty address")
-	}
-
 	addr, err := sdk.AccAddressFromBech32(req.Address)
 	if err != nil {
 		return nil, err
