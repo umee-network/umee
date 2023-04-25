@@ -167,8 +167,8 @@ func (k *testKeeper) TestMsgBeginUnbonding() {
 		Account: umeeSupplier.String(),
 		UToken:  coin.New(uumee, 1),
 	}
-	// create 4 more unbondings of u/uumee on this account, to hit the default maximum of 5
-	for i := 1; i < 5; i++ {
+	// create 9 more unbondings of u/uumee on this account, to hit the default maximum of 10
+	for i := 1; i < 10; i++ {
 		_, err = k.msrv.BeginUnbonding(k.ctx, msg)
 		require.Nil(k.t, err, "repeat begin unbonding 1")
 	}
@@ -261,8 +261,8 @@ func (k *testKeeper) TestMsgEmergencyUnbond() {
 		Account: umeeSupplier.String(),
 		UToken:  coin.New(uumee, 1),
 	}
-	// 4 more emergency unbondings of u/uumee on this account, which would reach the default maximum of 5 if not instant
-	for i := 1; i < 5; i++ {
+	// 9 more emergency unbondings of u/uumee on this account, which would reach the default maximum of 10 if not instant
+	for i := 1; i < 10; i++ {
 		_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 		require.Nil(k.t, err, "repeat emergency unbond 1")
 	}
