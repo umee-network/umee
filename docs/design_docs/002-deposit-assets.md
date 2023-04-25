@@ -15,6 +15,7 @@ Implemented
 The `x/leverage` module allows users to supply and withdraw assets.
 
 The flow of events is as follows:
+
 - Lender supplies a token to the module
 - Module mints and sends uTokens to the lender
 - Lender redeems uTokens for original tokens plus interest after some time
@@ -48,15 +49,18 @@ If the full requested amount of tokens is not available for withdrawal, the tran
 ## Consequences
 
 ### Positive
-- [x/bank module]([Cosmos Bank Keeper](https://github.com/cosmos/cosmos-sdk/blob/v0.44.0/x/bank/spec/02_keepers.md)) provides the underlying functionality.
+
+- [x/bank module]([Cosmos Bank Keeper](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/x/bank/spec/02_keepers.md)) provides the underlying functionality.
 
 ### Negative
-- If tokens were to be sent unexpectedly to the `x/leverage` module account (see the warning on [this page](https://docs.cosmos.network/master/modules/bank/)), it would have the effect of donating said tokens to existing suppliers if the tokens were an accepted type. Otherwise, the tokens would remain inert.
+
+- If tokens were to be sent unexpectedly to the `x/leverage` module account (see the warning on [this page](https://docs.cosmos.network/main/modules/bank/)), it would have the effect of donating said tokens to existing suppliers if the tokens were an accepted type. Otherwise, the tokens would remain inert.
 - uToken value is not the same as the underlying Token - user confusion is possible and extra calculation (exchange rates) is required for all uToken operations
 
 ### Neutral
+
 - Requires an allow-list (Token Registry), to be implemented later
 
 ## References
 
-- [Cosmos Bank Keeper](https://github.com/cosmos/cosmos-sdk/blob/v0.44.0/x/bank/spec/02_keepers.md)
+- [Cosmos Bank Keeper](https://github.com/cosmos/cosmos-sdk/blob/v0.46.0/x/bank/spec/02_keepers.md)

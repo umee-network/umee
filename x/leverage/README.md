@@ -173,6 +173,7 @@ For tokens with hith historic prices enabled (indicated by a `HistoricMedians` p
 The leverage module also makes use of the oracle's historic prices to enforce an additional restriction on borrowing.
 
 The logic is:
+
 - For any `MsgBorrow`, `MsgMaxBorrow`, `MsgDecollateralize`, `MsgWithdraw`, or `MsgMaxWithdraw`
 - The borrower’s borrowed value must be less than their borrow limit, with borrowed value being computed using `PriceModeHigh`, i.e. the higher of either spot price or historic price is used.
 - Where historic prices are defined as the Median of the last `N` historic medians from the `oracle` module with `N = Token.HistoricMedians` in the leverage registry
@@ -301,12 +302,14 @@ See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/ume
 `Update-Registry` gov proposal will adds the new tokens to token registry or update the existing token with new settings.
 
 Under certain conditions, tokens will be automatically deleted:
+
 - The token has been blacklisted by a previous proposal or the current one
 - The token has not been supplied to the module, so there are no uTokens, borrows, or collateral associated with it.
 
 The conditions allow for mistakenly registered tokens which have never been used to be removed from the registry. It is not safe to remove a token with active supply or borrows, so those stay listed in the registry when blacklisted.
 
 ### CLI
+
 ```bash
 umeed tx gov submit-proposal [path-to-proposal-json] [flags]
 ```
@@ -324,60 +327,60 @@ where `proposal.json` contains:
 
 ```json
 {
-    "messages": [
+  "messages": [
+    {
+      "@type": "/umee.leverage.v1.MsgGovUpdateRegistry",
+      "authority": "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp",
+      "title": "Update the Leverage Token Registry",
+      "description": "Update the uumee token in the leverage registry.",
+      "add_tokens": [
         {
-            "@type": "/umee.leverage.v1.MsgGovUpdateRegistry",
-            "authority": "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp",
-            "title": "Update the Leverage Token Registry",
-            "description": "Update the uumee token in the leverage registry.",
-            "add_tokens": [
-                {
-                    "base_denom": "uumee",
-                    "reserve_factor": "0.100000000000000000",
-                    "collateral_weight": "0.050000000000000000",
-                    "liquidation_threshold": "0.050000000000000000",
-                    "base_borrow_rate": "0.020000000000000000",
-                    "kink_borrow_rate": "0.200000000000000000",
-                    "max_borrow_rate": "1.500000000000000000",
-                    "kink_utilization": "0.200000000000000000",
-                    "liquidation_incentive": "0.100000000000000000",
-                    "symbol_denom": "UMEE",
-                    "exponent": 6,
-                    "enable_msg_supply": true,
-                    "enable_msg_borrow": true,
-                    "blacklist": false,
-                    "max_collateral_share": "0.900000000000000000",
-                    "max_supply_utilization": "0.900000000000000000",
-                    "min_collateral_liquidity": "0.900000000000000000",
-                    "max_supply": "123123"
-                },
-            ],
-            "update_tokens": [
-                {
-                    "base_denom": "uatom",
-                    "reserve_factor": "0.100000000000000000",
-                    "collateral_weight": "0.050000000000000000",
-                    "liquidation_threshold": "0.050000000000000000",
-                    "base_borrow_rate": "0.020000000000000000",
-                    "kink_borrow_rate": "0.200000000000000000",
-                    "max_borrow_rate": "1.500000000000000000",
-                    "kink_utilization": "0.200000000000000000",
-                    "liquidation_incentive": "0.100000000000000000",
-                    "symbol_denom": "ATOM",
-                    "exponent": 6,
-                    "enable_msg_supply": true,
-                    "enable_msg_borrow": true,
-                    "blacklist": false,
-                    "max_collateral_share": "0.900000000000000000",
-                    "max_supply_utilization": "0.900000000000000000",
-                    "min_collateral_liquidity": "0.900000000000000000",
-                    "max_supply": "123123"
-                },
-            ]
+          "base_denom": "uumee",
+          "reserve_factor": "0.100000000000000000",
+          "collateral_weight": "0.050000000000000000",
+          "liquidation_threshold": "0.050000000000000000",
+          "base_borrow_rate": "0.020000000000000000",
+          "kink_borrow_rate": "0.200000000000000000",
+          "max_borrow_rate": "1.500000000000000000",
+          "kink_utilization": "0.200000000000000000",
+          "liquidation_incentive": "0.100000000000000000",
+          "symbol_denom": "UMEE",
+          "exponent": 6,
+          "enable_msg_supply": true,
+          "enable_msg_borrow": true,
+          "blacklist": false,
+          "max_collateral_share": "0.900000000000000000",
+          "max_supply_utilization": "0.900000000000000000",
+          "min_collateral_liquidity": "0.900000000000000000",
+          "max_supply": "123123"
         }
-    ],
-    "metadata": "AQ==",
-    "deposit": "100uumee"
+      ],
+      "update_tokens": [
+        {
+          "base_denom": "uatom",
+          "reserve_factor": "0.100000000000000000",
+          "collateral_weight": "0.050000000000000000",
+          "liquidation_threshold": "0.050000000000000000",
+          "base_borrow_rate": "0.020000000000000000",
+          "kink_borrow_rate": "0.200000000000000000",
+          "max_borrow_rate": "1.500000000000000000",
+          "kink_utilization": "0.200000000000000000",
+          "liquidation_incentive": "0.100000000000000000",
+          "symbol_denom": "ATOM",
+          "exponent": 6,
+          "enable_msg_supply": true,
+          "enable_msg_borrow": true,
+          "blacklist": false,
+          "max_collateral_share": "0.900000000000000000",
+          "max_supply_utilization": "0.900000000000000000",
+          "min_collateral_liquidity": "0.900000000000000000",
+          "max_supply": "123123"
+        }
+      ]
+    }
+  ],
+  "metadata": "AQ==",
+  "deposit": "100uumee"
 }
 ```
 
