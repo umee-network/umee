@@ -53,7 +53,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 // performs upgrade from v4.3 to v4.4
 func (app *UmeeApp) registerUpgrade4_4(upgradeInfo upgradetypes.Plan) {
-	const planName = "v4.4"
+	const planName = "v4.4-alpha1" // TODO: set correct name
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 		Added: []string{
