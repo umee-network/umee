@@ -12,13 +12,13 @@ import (
 	"gotest.tools/v3/assert"
 )
 
-type IntegrationTestSuite struct {
+type E2ESuite struct {
 	T       *testing.T
 	Cfg     network.Config
 	Network *network.Network
 }
 
-func (s *IntegrationTestSuite) SetupSuite() {
+func (s *E2ESuite) SetupSuite() {
 	s.T.Log("setting up integration test suite")
 
 	network, err := network.New(s.T, s.T.TempDir(), s.Cfg)
@@ -29,14 +29,14 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	assert.NilError(s.T, err)
 }
 
-func (s *IntegrationTestSuite) TearDownSuite() {
+func (s *E2ESuite) TearDownSuite() {
 	s.T.Log("tearing down integration test suite")
 
 	s.Network.Cleanup()
 }
 
 // runTestQuery
-func (s *IntegrationTestSuite) RunTestQueries(tqs ...TestQuery) {
+func (s *E2ESuite) RunTestQueries(tqs ...TestQuery) {
 	for _, tq := range tqs {
 		// since steps of this test suite depend on previous transactions, we want to stop
 		// on the first failure, rather than continue producing potentially inaccurate
@@ -48,7 +48,7 @@ func (s *IntegrationTestSuite) RunTestQueries(tqs ...TestQuery) {
 	}
 }
 
-func (s *IntegrationTestSuite) RunQuery(tq TestQuery) {
+func (s *E2ESuite) RunQuery(tq TestQuery) {
 	clientCtx := s.Network.Validators[0].ClientCtx
 	queryFlags := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
@@ -67,7 +67,7 @@ func (s *IntegrationTestSuite) RunQuery(tq TestQuery) {
 }
 
 // runTestCases runs test transactions or queries, stopping early if an error occurs
-func (s *IntegrationTestSuite) RunTestTransactions(txs ...TestTransaction) {
+func (s *E2ESuite) RunTestTransactions(txs ...TestTransaction) {
 	for _, tx := range txs {
 		// since steps of this test suite depend on previous transactions, we want to stop
 		// on the first failure, rather than continue producing potentially inaccurate
@@ -79,7 +79,7 @@ func (s *IntegrationTestSuite) RunTestTransactions(txs ...TestTransaction) {
 	}
 }
 
-func (s *IntegrationTestSuite) RunTransaction(tx TestTransaction) {
+func (s *E2ESuite) RunTransaction(tx TestTransaction) {
 	clientCtx := s.Network.Validators[0].ClientCtx
 	txFlags := []string{
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, s.Network.Validators[0].Address),

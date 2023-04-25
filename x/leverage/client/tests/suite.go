@@ -8,11 +8,11 @@ import (
 )
 
 type IntegrationTests struct {
-	*itestsuite.IntegrationTestSuite
+	*itestsuite.E2ESuite
 }
 
 func NewIntegrationTestSuite(cfg network.Config, t *testing.T) *IntegrationTests {
 	return &IntegrationTests{
-		&itestsuite.IntegrationTestSuite{Cfg: cfg, T: t},
+		&itestsuite.E2ESuite{Cfg: cfg, T: t},
 	}
 }
