@@ -1,5 +1,5 @@
 syntax = "proto3";
-package umeenetwork.umee.incentive.v1;
+package umee.incentive.v1;
 
 import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
@@ -14,11 +14,16 @@ service Msg {
   // Claim defines a method for claiming any pending incentive rewards.
   rpc Claim(MsgClaim) returns (MsgClaimResponse);
 
-  // Bond defines a method for bonding uToken collateral into reward tier.
+  // Bond defines a method for bonding uToken collateral.
   rpc Bond(MsgBond) returns (MsgBondResponse);
 
   // BeginUnbonding defines a method for starting to unbond uToken collateral.
+  // Only max_unbondings unbondings can be active at per user, per denom, at once.
   rpc BeginUnbonding(MsgBeginUnbonding) returns (MsgBeginUnbondingResponse);
+
+  // EmergencyUnbond defines a method for instantly unbonding uToken collateral in exchange for a fee.
+  // This can finish existing unbondings or unbond bonded tokens, and is not restricted by max_unbondings.
+  rpc EmergencyUnbond(MsgEmergencyUnbond) returns (MsgEmergencyUnbondResponse);
 
   // Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
   // The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
@@ -47,8 +52,7 @@ message MsgClaimResponse {
 // MsgBond represents a account's request to bond uToken collateral.
 message MsgBond {
   string                   account = 1;
-  uint32                   tier    = 2;
-  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin uToken  = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBondResponse defines the Msg/Lock response type.
@@ -57,21 +61,28 @@ message MsgBondResponse {}
 // MsgBeginUnbonding represents a account's request to begin unbonding uToken collateral.
 message MsgBeginUnbonding {
   string                   account = 1;
-  uint32                   tier    = 2;
-  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin uToken  = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBeginUnbondingResponse defines the Msg/BeginUnbonding response type.
 message MsgBeginUnbondingResponse {}
+
+// MsgEmergencyUnbond represents a account's request to instantly unbond uToken collateral for a fee.
+message MsgEmergencyUnbond {
+  string                   account = 1;
+  cosmos.base.v1beta1.Coin uToken  = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgEmergencyUnbondResponse defines the Msg/EmergencyUnbond response type.
+message MsgEmergencyUnbondResponse {}
 
 // MsgSponsor represents a sponsor's request to fund rewards for an incentive program.
 // The program must have been passed by governance, not yet started, and not yet funded.
 // Funded assets must be the full amount required by the program.
 message MsgSponsor {
   // Sponsor bech32 account address
-  string                   sponsor = 1;
-  uint32                   program = 2;
-  cosmos.base.v1beta1.Coin asset   = 3 [(gogoproto.nullable) = false];
+  string sponsor = 1;
+  uint32 program = 2;
 }
 
 // MsgSponsorResponse defines the Msg/Sponsor response type.
