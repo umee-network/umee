@@ -10,8 +10,6 @@ import (
 
 // EndBlocker implements EndBlock for the x/incentive module.
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
-	util.Panic(k.UpdateRewards(ctx))
-
-	// TODO #1749: Programs change in status, and reward distribution amounts are updated
+	util.Panic(k.EndBlock(ctx))
 	return []abci.ValidatorUpdate{}
 }
