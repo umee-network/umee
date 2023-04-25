@@ -22,23 +22,42 @@ import (
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gogotypes "github.com/gogo/protobuf/types"
 )
+
+// GetObject gets and unmarshals a structure from KVstore. Panics on failure to decode, and returns a boolean
+// indicating whether any data was found. If the return is false, the object might not be initialized with
+// valid zero values for its type.
+func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
+	if bz := store.Get(key); len(bz) > 0 {
+		err := cdc.Unmarshal(bz, object)
+		if err != nil {
+			panic(errField + " could not be unmarshaled: " + err.Error())
+		}
+		return true
+	}
+	// No stored bytes at key: return false
+	return false
+}
+
+// SetObject marshals and sets a structure in KVstore. Returns error on failure to encode.
+func SetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
+	bz, err := cdc.Marshal(object)
+	if err != nil {
+		return fmt.Errorf("failed to encode %s, %s", errField, err.Error())
+	}
+	store.Set(key, bz)
+	return nil
+}
 
 // GetInt retrieves an sdkmath.Int from a KVStore, or returns zero if no value is stored.
 // It panics if a stored value fails to unmarshal or is negative.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetInt(store sdk.KVStore, key []byte, errField string) sdkmath.Int {
 	if bz := store.Get(key); len(bz) > 0 {
-		val := sdk.ZeroInt()
-		if err := val.Unmarshal(bz); err != nil {
-			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
-		}
-		if val.IsNegative() {
-			panic(fmt.Sprintf("%s: retrieved negative %s", val, errField))
-		}
-		return val
+		return Int(bz, errField)
 	}
 	// No stored bytes at key: return zero
 	return sdk.ZeroInt()
@@ -68,14 +87,7 @@ func SetInt(store sdk.KVStore, key []byte, val sdkmath.Int, errField string) err
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetDec(store sdk.KVStore, key []byte, errField string) sdk.Dec {
 	if bz := store.Get(key); len(bz) > 0 {
-		val := sdk.ZeroDec()
-		if err := val.Unmarshal(bz); err != nil {
-			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
-		}
-		if val.IsNegative() {
-			panic(fmt.Sprintf("%s: retrieved negative %s", val, errField))
-		}
-		return val
+		return Dec(bz, errField)
 	}
 	// No stored bytes at key: return zero
 	return sdk.ZeroDec()
@@ -105,11 +117,7 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetUint32(store sdk.KVStore, key []byte, errField string) uint32 {
 	if bz := store.Get(key); len(bz) > 0 {
-		val := gogotypes.UInt32Value{}
-		if err := val.Unmarshal(bz); err != nil {
-			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
-		}
-		return val.Value
+		return Uint32(bz, errField)
 	}
 	// No stored bytes at key: return zero
 	return 0
@@ -137,17 +145,13 @@ func SetUint32(store sdk.KVStore, key []byte, val uint32, errField string) error
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetUint64(store sdk.KVStore, key []byte, errField string) uint64 {
 	if bz := store.Get(key); len(bz) > 0 {
-		val := gogotypes.UInt64Value{}
-		if err := val.Unmarshal(bz); err != nil {
-			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, val, err))
-		}
-		return val.Value
+		return Uint64(bz, errField)
 	}
 	// No stored bytes at key: return zero
 	return 0
 }
 
-// SetUint64 stores a uint32 in a KVStore, or clears if setting to zero.
+// SetUint64 stores a uint64 in a KVStore, or clears if setting to zero.
 // Uses gogoproto Uint64Value for marshaling, and returns an error on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
 func SetUint64(store sdk.KVStore, key []byte, val uint64, errField string) error {
@@ -155,6 +159,36 @@ func SetUint64(store sdk.KVStore, key []byte, val uint64, errField string) error
 		store.Delete(key)
 	} else {
 		v := &gogotypes.UInt64Value{Value: val}
+		bz, err := v.Marshal()
+		if err != nil {
+			return fmt.Errorf("error while setting %s: %s", errField, err)
+		}
+		store.Set(key, bz)
+	}
+	return nil
+}
+
+// GetInt64 retrieves an int64 from a KVStore, or returns zero if no value is stored.
+// Uses gogoproto Int64Value for unmarshaling, and panics if a stored value fails to unmarshal.
+// Accepts an additional string which should describe the field being retrieved in custom error messages.
+// Allows negative values.
+func GetInt64(store sdk.KVStore, key []byte, errField string) int64 {
+	if bz := store.Get(key); len(bz) > 0 {
+		return Int64(bz, errField)
+	}
+	// No stored bytes at key: return zero
+	return 0
+}
+
+// SetInt64 stores an int64 in a KVStore, or clears if setting to zero.
+// Uses gogoproto Int64Value for marshaling, and returns an error on failure to encode.
+// Accepts an additional string which should describe the field being set in custom error messages.
+// Allows negative values.
+func SetInt64(store sdk.KVStore, key []byte, val int64, errField string) error {
+	if val == 0 {
+		store.Delete(key)
+	} else {
+		v := &gogotypes.Int64Value{Value: val}
 		bz, err := v.Marshal()
 		if err != nil {
 			return fmt.Errorf("error while setting %s: %s", errField, err)

@@ -206,25 +206,23 @@ func (m *QueryPendingRewardsResponse) GetRewards() github_com_cosmos_cosmos_sdk_
 	return nil
 }
 
-// QueryBonded defines the request structure for the Bonded gRPC service handler.
-type QueryBonded struct {
+// QueryAccountBonds defines the request structure for the AccountBonds gRPC service handler.
+type QueryAccountBonds struct {
 	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	// denom is an optional field which causes the query to return the totals of only one uToken
-	Denom string `protobuf:"bytes,2,opt,name=denom,proto3" json:"denom,omitempty"`
 }
 
-func (m *QueryBonded) Reset()         { *m = QueryBonded{} }
-func (m *QueryBonded) String() string { return proto.CompactTextString(m) }
-func (*QueryBonded) ProtoMessage()    {}
-func (*QueryBonded) Descriptor() ([]byte, []int) {
+func (m *QueryAccountBonds) Reset()         { *m = QueryAccountBonds{} }
+func (m *QueryAccountBonds) String() string { return proto.CompactTextString(m) }
+func (*QueryAccountBonds) ProtoMessage()    {}
+func (*QueryAccountBonds) Descriptor() ([]byte, []int) {
 	return fileDescriptor_98af6650734ce845, []int{4}
 }
-func (m *QueryBonded) XXX_Unmarshal(b []byte) error {
+func (m *QueryAccountBonds) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBonded) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryAccountBonds) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBonded.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryAccountBonds.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -234,49 +232,44 @@ func (m *QueryBonded) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) 
 		return b[:n], nil
 	}
 }
-func (m *QueryBonded) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBonded.Merge(m, src)
+func (m *QueryAccountBonds) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAccountBonds.Merge(m, src)
 }
-func (m *QueryBonded) XXX_Size() int {
+func (m *QueryAccountBonds) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBonded) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBonded.DiscardUnknown(m)
+func (m *QueryAccountBonds) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAccountBonds.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBonded proto.InternalMessageInfo
+var xxx_messageInfo_QueryAccountBonds proto.InternalMessageInfo
 
-func (m *QueryBonded) GetAddress() string {
+func (m *QueryAccountBonds) GetAddress() string {
 	if m != nil {
 		return m.Address
 	}
 	return ""
 }
 
-func (m *QueryBonded) GetDenom() string {
-	if m != nil {
-		return m.Denom
-	}
-	return ""
+// QueryAccountBondsResponse defines the response structure for the AccountBonds gRPC service handler.
+type QueryAccountBondsResponse struct {
+	Bonded     github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=bonded,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"bonded"`
+	Unbonding  github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,2,rep,name=unbonding,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"unbonding"`
+	Unbondings []Unbonding                              `protobuf:"bytes,3,rep,name=unbondings,proto3" json:"unbondings"`
 }
 
-// QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
-type QueryBondedResponse struct {
-	Bonded []TotalBond `protobuf:"bytes,1,rep,name=bonded,proto3" json:"bonded"`
-}
-
-func (m *QueryBondedResponse) Reset()         { *m = QueryBondedResponse{} }
-func (m *QueryBondedResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryBondedResponse) ProtoMessage()    {}
-func (*QueryBondedResponse) Descriptor() ([]byte, []int) {
+func (m *QueryAccountBondsResponse) Reset()         { *m = QueryAccountBondsResponse{} }
+func (m *QueryAccountBondsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryAccountBondsResponse) ProtoMessage()    {}
+func (*QueryAccountBondsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_98af6650734ce845, []int{5}
 }
-func (m *QueryBondedResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryAccountBondsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryBondedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryAccountBondsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryBondedResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryAccountBondsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -286,109 +279,33 @@ func (m *QueryBondedResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return b[:n], nil
 	}
 }
-func (m *QueryBondedResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryBondedResponse.Merge(m, src)
+func (m *QueryAccountBondsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryAccountBondsResponse.Merge(m, src)
 }
-func (m *QueryBondedResponse) XXX_Size() int {
+func (m *QueryAccountBondsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryBondedResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryBondedResponse.DiscardUnknown(m)
+func (m *QueryAccountBondsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryAccountBondsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryBondedResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryAccountBondsResponse proto.InternalMessageInfo
 
-func (m *QueryBondedResponse) GetBonded() []TotalBond {
+func (m *QueryAccountBondsResponse) GetBonded() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
 		return m.Bonded
 	}
 	return nil
 }
 
-// QueryUnbondings defines the request structure for the Unbondings gRPC service handler.
-type QueryUnbondings struct {
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-}
-
-func (m *QueryUnbondings) Reset()         { *m = QueryUnbondings{} }
-func (m *QueryUnbondings) String() string { return proto.CompactTextString(m) }
-func (*QueryUnbondings) ProtoMessage()    {}
-func (*QueryUnbondings) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{6}
-}
-func (m *QueryUnbondings) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryUnbondings) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryUnbondings.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryUnbondings) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryUnbondings.Merge(m, src)
-}
-func (m *QueryUnbondings) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryUnbondings) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryUnbondings.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryUnbondings proto.InternalMessageInfo
-
-func (m *QueryUnbondings) GetAddress() string {
+func (m *QueryAccountBondsResponse) GetUnbonding() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
-		return m.Address
+		return m.Unbonding
 	}
-	return ""
+	return nil
 }
 
-// QueryUnbondingsResponse defines the response structure for the Unbondings gRPC service handler.
-type QueryUnbondingsResponse struct {
-	Unbondings []Unbonding `protobuf:"bytes,1,rep,name=unbondings,proto3" json:"unbondings"`
-}
-
-func (m *QueryUnbondingsResponse) Reset()         { *m = QueryUnbondingsResponse{} }
-func (m *QueryUnbondingsResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryUnbondingsResponse) ProtoMessage()    {}
-func (*QueryUnbondingsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{7}
-}
-func (m *QueryUnbondingsResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryUnbondingsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryUnbondingsResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryUnbondingsResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryUnbondingsResponse.Merge(m, src)
-}
-func (m *QueryUnbondingsResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryUnbondingsResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryUnbondingsResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryUnbondingsResponse proto.InternalMessageInfo
-
-func (m *QueryUnbondingsResponse) GetUnbondings() []Unbonding {
+func (m *QueryAccountBondsResponse) GetUnbondings() []Unbonding {
 	if m != nil {
 		return m.Unbondings
 	}
@@ -405,7 +322,7 @@ func (m *QueryTotalBonded) Reset()         { *m = QueryTotalBonded{} }
 func (m *QueryTotalBonded) String() string { return proto.CompactTextString(m) }
 func (*QueryTotalBonded) ProtoMessage()    {}
 func (*QueryTotalBonded) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{8}
+	return fileDescriptor_98af6650734ce845, []int{6}
 }
 func (m *QueryTotalBonded) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -443,14 +360,14 @@ func (m *QueryTotalBonded) GetDenom() string {
 
 // QueryTotalBondedResponse defines the response structure for the TotalBonded gRPC service handler.
 type QueryTotalBondedResponse struct {
-	Bonded []TotalBond `protobuf:"bytes,1,rep,name=bonded,proto3" json:"bonded"`
+	Bonded github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=bonded,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"bonded"`
 }
 
 func (m *QueryTotalBondedResponse) Reset()         { *m = QueryTotalBondedResponse{} }
 func (m *QueryTotalBondedResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryTotalBondedResponse) ProtoMessage()    {}
 func (*QueryTotalBondedResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{9}
+	return fileDescriptor_98af6650734ce845, []int{7}
 }
 func (m *QueryTotalBondedResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -479,7 +396,7 @@ func (m *QueryTotalBondedResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryTotalBondedResponse proto.InternalMessageInfo
 
-func (m *QueryTotalBondedResponse) GetBonded() []TotalBond {
+func (m *QueryTotalBondedResponse) GetBonded() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
 		return m.Bonded
 	}
@@ -496,7 +413,7 @@ func (m *QueryTotalUnbonding) Reset()         { *m = QueryTotalUnbonding{} }
 func (m *QueryTotalUnbonding) String() string { return proto.CompactTextString(m) }
 func (*QueryTotalUnbonding) ProtoMessage()    {}
 func (*QueryTotalUnbonding) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{10}
+	return fileDescriptor_98af6650734ce845, []int{8}
 }
 func (m *QueryTotalUnbonding) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -534,14 +451,14 @@ func (m *QueryTotalUnbonding) GetDenom() string {
 
 // QueryTotalUnbondingResponse defines the response structure for the TotalUnbonding gRPC service handler.
 type QueryTotalUnbondingResponse struct {
-	Unbonding []TotalBond `protobuf:"bytes,1,rep,name=unbonding,proto3" json:"unbonding"`
+	Unbonding github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=unbonding,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"unbonding"`
 }
 
 func (m *QueryTotalUnbondingResponse) Reset()         { *m = QueryTotalUnbondingResponse{} }
 func (m *QueryTotalUnbondingResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryTotalUnbondingResponse) ProtoMessage()    {}
 func (*QueryTotalUnbondingResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{11}
+	return fileDescriptor_98af6650734ce845, []int{9}
 }
 func (m *QueryTotalUnbondingResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -570,7 +487,7 @@ func (m *QueryTotalUnbondingResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryTotalUnbondingResponse proto.InternalMessageInfo
 
-func (m *QueryTotalUnbondingResponse) GetUnbonding() []TotalBond {
+func (m *QueryTotalUnbondingResponse) GetUnbonding() github_com_cosmos_cosmos_sdk_types.Coins {
 	if m != nil {
 		return m.Unbonding
 	}
@@ -586,7 +503,7 @@ func (m *QueryUpcomingIncentivePrograms) Reset()         { *m = QueryUpcomingInc
 func (m *QueryUpcomingIncentivePrograms) String() string { return proto.CompactTextString(m) }
 func (*QueryUpcomingIncentivePrograms) ProtoMessage()    {}
 func (*QueryUpcomingIncentivePrograms) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{12}
+	return fileDescriptor_98af6650734ce845, []int{10}
 }
 func (m *QueryUpcomingIncentivePrograms) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -627,7 +544,7 @@ func (m *QueryUpcomingIncentiveProgramsResponse) Reset() {
 func (m *QueryUpcomingIncentiveProgramsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryUpcomingIncentiveProgramsResponse) ProtoMessage()    {}
 func (*QueryUpcomingIncentiveProgramsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{13}
+	return fileDescriptor_98af6650734ce845, []int{11}
 }
 func (m *QueryUpcomingIncentiveProgramsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -672,7 +589,7 @@ func (m *QueryOngoingIncentivePrograms) Reset()         { *m = QueryOngoingIncen
 func (m *QueryOngoingIncentivePrograms) String() string { return proto.CompactTextString(m) }
 func (*QueryOngoingIncentivePrograms) ProtoMessage()    {}
 func (*QueryOngoingIncentivePrograms) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{14}
+	return fileDescriptor_98af6650734ce845, []int{12}
 }
 func (m *QueryOngoingIncentivePrograms) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -711,7 +628,7 @@ func (m *QueryOngoingIncentiveProgramsResponse) Reset()         { *m = QueryOngo
 func (m *QueryOngoingIncentiveProgramsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryOngoingIncentiveProgramsResponse) ProtoMessage()    {}
 func (*QueryOngoingIncentiveProgramsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{15}
+	return fileDescriptor_98af6650734ce845, []int{13}
 }
 func (m *QueryOngoingIncentiveProgramsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -758,7 +675,7 @@ func (m *QueryCompletedIncentivePrograms) Reset()         { *m = QueryCompletedI
 func (m *QueryCompletedIncentivePrograms) String() string { return proto.CompactTextString(m) }
 func (*QueryCompletedIncentivePrograms) ProtoMessage()    {}
 func (*QueryCompletedIncentivePrograms) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{16}
+	return fileDescriptor_98af6650734ce845, []int{14}
 }
 func (m *QueryCompletedIncentivePrograms) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -808,7 +725,7 @@ func (m *QueryCompletedIncentiveProgramsResponse) Reset() {
 func (m *QueryCompletedIncentiveProgramsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryCompletedIncentiveProgramsResponse) ProtoMessage()    {}
 func (*QueryCompletedIncentiveProgramsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{17}
+	return fileDescriptor_98af6650734ce845, []int{15}
 }
 func (m *QueryCompletedIncentiveProgramsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -862,7 +779,7 @@ func (m *QueryIncentiveProgram) Reset()         { *m = QueryIncentiveProgram{} }
 func (m *QueryIncentiveProgram) String() string { return proto.CompactTextString(m) }
 func (*QueryIncentiveProgram) ProtoMessage()    {}
 func (*QueryIncentiveProgram) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{18}
+	return fileDescriptor_98af6650734ce845, []int{16}
 }
 func (m *QueryIncentiveProgram) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -908,7 +825,7 @@ func (m *QueryIncentiveProgramResponse) Reset()         { *m = QueryIncentivePro
 func (m *QueryIncentiveProgramResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryIncentiveProgramResponse) ProtoMessage()    {}
 func (*QueryIncentiveProgramResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_98af6650734ce845, []int{19}
+	return fileDescriptor_98af6650734ce845, []int{17}
 }
 func (m *QueryIncentiveProgramResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -944,96 +861,205 @@ func (m *QueryIncentiveProgramResponse) GetProgram() IncentiveProgram {
 	return IncentiveProgram{}
 }
 
+// QueryCurrentRates defines the request structure for the CurrentRates gRPC service handler.
+type QueryCurrentRates struct {
+	// uToken is the uToken denomination whose current annual rate of rewards is being queried
+	UToken string `protobuf:"bytes,1,opt,name=uToken,proto3" json:"uToken,omitempty"`
+}
+
+func (m *QueryCurrentRates) Reset()         { *m = QueryCurrentRates{} }
+func (m *QueryCurrentRates) String() string { return proto.CompactTextString(m) }
+func (*QueryCurrentRates) ProtoMessage()    {}
+func (*QueryCurrentRates) Descriptor() ([]byte, []int) {
+	return fileDescriptor_98af6650734ce845, []int{18}
+}
+func (m *QueryCurrentRates) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCurrentRates) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCurrentRates.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCurrentRates) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCurrentRates.Merge(m, src)
+}
+func (m *QueryCurrentRates) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCurrentRates) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCurrentRates.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCurrentRates proto.InternalMessageInfo
+
+func (m *QueryCurrentRates) GetUToken() string {
+	if m != nil {
+		return m.UToken
+	}
+	return ""
+}
+
+// QueryCurrentRatesResponse defines the response structure for the CurrentRates gRPC service handler.
+type QueryCurrentRatesResponse struct {
+	// Reference Bond is an amount of bonded uTokens (usually 10^exponent) whose current rewards are being
+	// calculated. This amount can be used to compute an individual user's rewards: for example, if a user has
+	// 2.5x the reference amount currently bonded, then they would receive 2.5x the rewards below annually
+	// at current rates.
+	ReferenceBond types.Coin `protobuf:"bytes,1,opt,name=reference_bond,json=referenceBond,proto3" json:"reference_bond"`
+	// Rewards are the amount of base token rewards that the reference amount of bonded uTokens would earn
+	// if current rates continued for a full year.
+	Rewards github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,2,rep,name=rewards,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"rewards"`
+}
+
+func (m *QueryCurrentRatesResponse) Reset()         { *m = QueryCurrentRatesResponse{} }
+func (m *QueryCurrentRatesResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryCurrentRatesResponse) ProtoMessage()    {}
+func (*QueryCurrentRatesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_98af6650734ce845, []int{19}
+}
+func (m *QueryCurrentRatesResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryCurrentRatesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryCurrentRatesResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryCurrentRatesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryCurrentRatesResponse.Merge(m, src)
+}
+func (m *QueryCurrentRatesResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryCurrentRatesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryCurrentRatesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryCurrentRatesResponse proto.InternalMessageInfo
+
+func (m *QueryCurrentRatesResponse) GetReferenceBond() types.Coin {
+	if m != nil {
+		return m.ReferenceBond
+	}
+	return types.Coin{}
+}
+
+func (m *QueryCurrentRatesResponse) GetRewards() github_com_cosmos_cosmos_sdk_types.Coins {
+	if m != nil {
+		return m.Rewards
+	}
+	return nil
+}
+
 func init() {
-	proto.RegisterType((*QueryParams)(nil), "umeenetwork.umee.incentive.v1.QueryParams")
-	proto.RegisterType((*QueryParamsResponse)(nil), "umeenetwork.umee.incentive.v1.QueryParamsResponse")
-	proto.RegisterType((*QueryPendingRewards)(nil), "umeenetwork.umee.incentive.v1.QueryPendingRewards")
-	proto.RegisterType((*QueryPendingRewardsResponse)(nil), "umeenetwork.umee.incentive.v1.QueryPendingRewardsResponse")
-	proto.RegisterType((*QueryBonded)(nil), "umeenetwork.umee.incentive.v1.QueryBonded")
-	proto.RegisterType((*QueryBondedResponse)(nil), "umeenetwork.umee.incentive.v1.QueryBondedResponse")
-	proto.RegisterType((*QueryUnbondings)(nil), "umeenetwork.umee.incentive.v1.QueryUnbondings")
-	proto.RegisterType((*QueryUnbondingsResponse)(nil), "umeenetwork.umee.incentive.v1.QueryUnbondingsResponse")
-	proto.RegisterType((*QueryTotalBonded)(nil), "umeenetwork.umee.incentive.v1.QueryTotalBonded")
-	proto.RegisterType((*QueryTotalBondedResponse)(nil), "umeenetwork.umee.incentive.v1.QueryTotalBondedResponse")
-	proto.RegisterType((*QueryTotalUnbonding)(nil), "umeenetwork.umee.incentive.v1.QueryTotalUnbonding")
-	proto.RegisterType((*QueryTotalUnbondingResponse)(nil), "umeenetwork.umee.incentive.v1.QueryTotalUnbondingResponse")
-	proto.RegisterType((*QueryUpcomingIncentivePrograms)(nil), "umeenetwork.umee.incentive.v1.QueryUpcomingIncentivePrograms")
-	proto.RegisterType((*QueryUpcomingIncentiveProgramsResponse)(nil), "umeenetwork.umee.incentive.v1.QueryUpcomingIncentiveProgramsResponse")
-	proto.RegisterType((*QueryOngoingIncentivePrograms)(nil), "umeenetwork.umee.incentive.v1.QueryOngoingIncentivePrograms")
-	proto.RegisterType((*QueryOngoingIncentiveProgramsResponse)(nil), "umeenetwork.umee.incentive.v1.QueryOngoingIncentiveProgramsResponse")
-	proto.RegisterType((*QueryCompletedIncentivePrograms)(nil), "umeenetwork.umee.incentive.v1.QueryCompletedIncentivePrograms")
-	proto.RegisterType((*QueryCompletedIncentiveProgramsResponse)(nil), "umeenetwork.umee.incentive.v1.QueryCompletedIncentiveProgramsResponse")
-	proto.RegisterType((*QueryIncentiveProgram)(nil), "umeenetwork.umee.incentive.v1.QueryIncentiveProgram")
-	proto.RegisterType((*QueryIncentiveProgramResponse)(nil), "umeenetwork.umee.incentive.v1.QueryIncentiveProgramResponse")
+	proto.RegisterType((*QueryParams)(nil), "umee.incentive.v1.QueryParams")
+	proto.RegisterType((*QueryParamsResponse)(nil), "umee.incentive.v1.QueryParamsResponse")
+	proto.RegisterType((*QueryPendingRewards)(nil), "umee.incentive.v1.QueryPendingRewards")
+	proto.RegisterType((*QueryPendingRewardsResponse)(nil), "umee.incentive.v1.QueryPendingRewardsResponse")
+	proto.RegisterType((*QueryAccountBonds)(nil), "umee.incentive.v1.QueryAccountBonds")
+	proto.RegisterType((*QueryAccountBondsResponse)(nil), "umee.incentive.v1.QueryAccountBondsResponse")
+	proto.RegisterType((*QueryTotalBonded)(nil), "umee.incentive.v1.QueryTotalBonded")
+	proto.RegisterType((*QueryTotalBondedResponse)(nil), "umee.incentive.v1.QueryTotalBondedResponse")
+	proto.RegisterType((*QueryTotalUnbonding)(nil), "umee.incentive.v1.QueryTotalUnbonding")
+	proto.RegisterType((*QueryTotalUnbondingResponse)(nil), "umee.incentive.v1.QueryTotalUnbondingResponse")
+	proto.RegisterType((*QueryUpcomingIncentivePrograms)(nil), "umee.incentive.v1.QueryUpcomingIncentivePrograms")
+	proto.RegisterType((*QueryUpcomingIncentiveProgramsResponse)(nil), "umee.incentive.v1.QueryUpcomingIncentiveProgramsResponse")
+	proto.RegisterType((*QueryOngoingIncentivePrograms)(nil), "umee.incentive.v1.QueryOngoingIncentivePrograms")
+	proto.RegisterType((*QueryOngoingIncentiveProgramsResponse)(nil), "umee.incentive.v1.QueryOngoingIncentiveProgramsResponse")
+	proto.RegisterType((*QueryCompletedIncentivePrograms)(nil), "umee.incentive.v1.QueryCompletedIncentivePrograms")
+	proto.RegisterType((*QueryCompletedIncentiveProgramsResponse)(nil), "umee.incentive.v1.QueryCompletedIncentiveProgramsResponse")
+	proto.RegisterType((*QueryIncentiveProgram)(nil), "umee.incentive.v1.QueryIncentiveProgram")
+	proto.RegisterType((*QueryIncentiveProgramResponse)(nil), "umee.incentive.v1.QueryIncentiveProgramResponse")
+	proto.RegisterType((*QueryCurrentRates)(nil), "umee.incentive.v1.QueryCurrentRates")
+	proto.RegisterType((*QueryCurrentRatesResponse)(nil), "umee.incentive.v1.QueryCurrentRatesResponse")
 }
 
 func init() { proto.RegisterFile("umee/incentive/v1/query.proto", fileDescriptor_98af6650734ce845) }
 
 var fileDescriptor_98af6650734ce845 = []byte{
-	// 1006 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x97, 0xcf, 0x6f, 0xdc, 0x44,
-	0x14, 0xc7, 0x33, 0x0b, 0xdd, 0xd0, 0x17, 0x35, 0x54, 0xd3, 0x22, 0x36, 0x2e, 0xdd, 0x4d, 0x2d,
-	0xb5, 0xd9, 0x26, 0x8d, 0xa7, 0xbb, 0x0d, 0xad, 0x84, 0x5a, 0x0e, 0x09, 0x8d, 0x84, 0x84, 0x68,
-	0xba, 0x82, 0x4b, 0x25, 0x14, 0x79, 0xd7, 0x23, 0x63, 0x25, 0x3b, 0xe3, 0xae, 0xbd, 0x5b, 0x4a,
-	0x94, 0x0b, 0xe2, 0xc6, 0x05, 0x89, 0x33, 0x47, 0x24, 0xc4, 0x19, 0x21, 0x71, 0xe7, 0x90, 0x63,
-	0x24, 0x84, 0x04, 0x07, 0x7e, 0x28, 0xe1, 0x0f, 0xa9, 0x3c, 0x33, 0x1e, 0x3b, 0xde, 0x1f, 0x99,
-	0x24, 0xca, 0x29, 0xf6, 0xf8, 0x7d, 0xdf, 0xfb, 0x7c, 0x9f, 0xe3, 0x37, 0xb3, 0x70, 0xbd, 0xdf,
-	0xa5, 0x94, 0x04, 0xac, 0x43, 0x59, 0x1c, 0x0c, 0x28, 0x19, 0x34, 0xc8, 0xf3, 0x3e, 0xed, 0xbd,
-	0x74, 0xc2, 0x1e, 0x8f, 0x39, 0x16, 0x8f, 0x19, 0x8d, 0x5f, 0xf0, 0xde, 0x96, 0x93, 0x5c, 0x3b,
-	0x3a, 0xd4, 0x19, 0x34, 0xac, 0xc5, 0x0e, 0x8f, 0xba, 0x3c, 0x22, 0x6d, 0x37, 0xa2, 0x52, 0x47,
-	0x06, 0x8d, 0x36, 0x8d, 0xdd, 0x06, 0x09, 0x5d, 0x3f, 0x60, 0x6e, 0x1c, 0x70, 0x26, 0x53, 0x59,
-	0xef, 0xf8, 0x9c, 0xfb, 0xdb, 0x94, 0xb8, 0x61, 0x40, 0x5c, 0xc6, 0x78, 0x2c, 0x1e, 0x46, 0xea,
-	0xe9, 0x55, 0x9f, 0xfb, 0x5c, 0x5c, 0x92, 0xe4, 0x4a, 0xad, 0xde, 0x18, 0xa6, 0xcb, 0xea, 0xcb,
-	0x90, 0xda, 0x70, 0x88, 0x4f, 0x19, 0x8d, 0x82, 0x34, 0x73, 0x35, 0xcf, 0x98, 0xd2, 0x75, 0x78,
-	0xa0, 0xb8, 0xec, 0x4b, 0x30, 0xf3, 0x34, 0x21, 0xdf, 0x70, 0x7b, 0x6e, 0x37, 0xb2, 0x9f, 0xc1,
-	0x95, 0xdc, 0x6d, 0x8b, 0x46, 0x21, 0x67, 0x11, 0xc5, 0x6b, 0x50, 0x0e, 0xc5, 0x4a, 0x05, 0xcd,
-	0xa3, 0xfa, 0x4c, 0xf3, 0xa6, 0x33, 0xb1, 0x33, 0x8e, 0x94, 0xaf, 0xbe, 0xbe, 0xf7, 0x4f, 0x6d,
-	0xaa, 0xa5, 0xa4, 0x36, 0x49, 0x73, 0x53, 0xe6, 0x05, 0xcc, 0x6f, 0xd1, 0x17, 0x6e, 0xcf, 0x8b,
-	0x70, 0x05, 0xa6, 0x5d, 0xcf, 0xeb, 0xd1, 0x48, 0x26, 0xbf, 0xd8, 0x4a, 0x6f, 0xed, 0xaf, 0x11,
-	0x5c, 0x1b, 0xa1, 0xd0, 0x54, 0x14, 0xa6, 0x7b, 0x72, 0xa9, 0x82, 0xe6, 0x5f, 0xab, 0xcf, 0x34,
-	0xe7, 0x1c, 0xe9, 0xd6, 0x49, 0xdc, 0x3a, 0xca, 0xad, 0xb3, 0xc6, 0x03, 0xb6, 0x7a, 0x37, 0x41,
-	0xf9, 0xe9, 0xdf, 0x5a, 0xdd, 0x0f, 0xe2, 0xcf, 0xfb, 0x6d, 0xa7, 0xc3, 0xbb, 0x44, 0xb5, 0x46,
-	0xfe, 0x59, 0x8e, 0xbc, 0x2d, 0x12, 0xbf, 0x0c, 0x69, 0x24, 0x04, 0x51, 0x2b, 0xcd, 0x6d, 0x3f,
-	0x52, 0x2d, 0x5a, 0xe5, 0xcc, 0xa3, 0xde, 0x78, 0x5e, 0x7c, 0x15, 0x2e, 0x78, 0x94, 0xf1, 0x6e,
-	0xa5, 0x24, 0xd6, 0xe5, 0x8d, 0xfd, 0x99, 0xb2, 0x2d, 0xe5, 0x1a, 0x7e, 0x1d, 0xca, 0x6d, 0xb1,
-	0xa2, 0xd8, 0xeb, 0xc7, 0xb4, 0xf4, 0x13, 0x1e, 0xbb, 0xdb, 0x49, 0x8e, 0xb4, 0xab, 0x52, 0x6d,
-	0x2f, 0xc1, 0x9b, 0x22, 0xfd, 0xa7, 0x2c, 0x59, 0x08, 0x98, 0x3f, 0xa9, 0xa3, 0x01, 0xbc, 0x5d,
-	0x08, 0xd6, 0x3c, 0x1f, 0x03, 0xf4, 0xf5, 0xaa, 0x21, 0x93, 0x4e, 0xa3, 0x98, 0x72, 0x19, 0xec,
-	0x3a, 0x5c, 0x16, 0xa5, 0x34, 0x37, 0xf5, 0xb2, 0x06, 0xa1, 0x7c, 0x83, 0xda, 0x50, 0x29, 0x46,
-	0x9e, 0x43, 0x97, 0xae, 0x64, 0x35, 0x34, 0xf6, 0x18, 0xa0, 0x2d, 0xf5, 0x6f, 0x77, 0x34, 0x58,
-	0x33, 0x7d, 0x04, 0x17, 0xb5, 0xcf, 0x53, 0x62, 0x65, 0x09, 0xec, 0x79, 0xa8, 0xca, 0x57, 0x12,
-	0x76, 0x78, 0x37, 0x60, 0xfe, 0x87, 0xa9, 0x6e, 0xa3, 0xc7, 0x7d, 0xf1, 0xdd, 0xec, 0xc0, 0xad,
-	0xc9, 0x11, 0x9a, 0xec, 0x29, 0xbc, 0x11, 0xaa, 0x35, 0x05, 0x46, 0x8e, 0x01, 0x2b, 0xe6, 0x52,
-	0x7c, 0x3a, 0x8d, 0x5d, 0x83, 0xeb, 0xa2, 0xf8, 0x13, 0xe6, 0xf3, 0x91, 0x74, 0x5f, 0xc2, 0xcd,
-	0x89, 0x01, 0xe7, 0x09, 0x17, 0x40, 0x4d, 0xd4, 0x5e, 0xe3, 0xdd, 0x70, 0x9b, 0xc6, 0xd4, 0x1b,
-	0xaa, 0x8e, 0xd7, 0x01, 0xb2, 0x59, 0xac, 0xa6, 0xd7, 0xad, 0x23, 0x63, 0x42, 0x0e, 0xfc, 0x74,
-	0x58, 0x6c, 0xb8, 0x3e, 0x6d, 0xd1, 0xe7, 0x7d, 0x1a, 0xc5, 0xad, 0x9c, 0xd2, 0xfe, 0x0d, 0xc1,
-	0xc2, 0x31, 0xb5, 0xce, 0xd1, 0x69, 0xc1, 0x46, 0xe9, 0xd4, 0x36, 0x16, 0xe0, 0x2d, 0xe1, 0xa2,
-	0x58, 0x10, 0xcf, 0x42, 0x29, 0xf0, 0x44, 0x7f, 0x2e, 0xb5, 0x4a, 0x81, 0x67, 0x87, 0xea, 0xbd,
-	0x17, 0x03, 0xb5, 0xc9, 0x27, 0x30, 0xad, 0xe8, 0x54, 0x57, 0x4f, 0xe9, 0x31, 0xcd, 0xd2, 0xdc,
-	0x9b, 0x85, 0x0b, 0xa2, 0x24, 0xfe, 0x06, 0x41, 0x59, 0xee, 0x20, 0x78, 0xf1, 0x98, 0xa4, 0xb9,
-	0xcd, 0xca, 0x6a, 0x9a, 0xc7, 0xa6, 0x2e, 0xec, 0x1b, 0x5f, 0xfd, 0xfe, 0xff, 0x77, 0xa5, 0x6b,
-	0x78, 0x8e, 0x0c, 0x6f, 0xa4, 0x72, 0xdb, 0xc2, 0x3f, 0x22, 0x98, 0xc9, 0x0f, 0x31, 0x62, 0x52,
-	0x26, 0x27, 0xb0, 0x1e, 0x9c, 0x50, 0xa0, 0xe1, 0x88, 0x80, 0xbb, 0x8d, 0x17, 0x46, 0xc0, 0xc5,
-	0x49, 0xfc, 0xa6, 0x9c, 0x6e, 0x64, 0x47, 0xcc, 0xad, 0x5d, 0xfc, 0x33, 0x82, 0xd9, 0xc2, 0x84,
-	0x6b, 0x1a, 0x17, 0xd7, 0x1a, 0xeb, 0xbd, 0x93, 0x6b, 0x34, 0x73, 0x53, 0x30, 0xdf, 0xc1, 0x8b,
-	0x63, 0x99, 0xf5, 0xe8, 0xd3, 0xd8, 0xdf, 0x23, 0x28, 0xab, 0xe6, 0x1a, 0xbd, 0x6f, 0xd5, 0xd7,
-	0xa6, 0x79, 0xac, 0xc6, 0xbb, 0x27, 0xf0, 0x96, 0xf1, 0xd2, 0x08, 0xbc, 0xb4, 0x99, 0x6a, 0xb3,
-	0xdc, 0xd5, 0x7c, 0x3f, 0x20, 0x80, 0xdc, 0xf6, 0xea, 0x98, 0xd4, 0xcd, 0xe2, 0xad, 0xfb, 0x27,
-	0x8b, 0x37, 0x7a, 0xfd, 0xd9, 0x46, 0x9b, 0xf1, 0xe2, 0x5f, 0x10, 0xcc, 0x16, 0x0e, 0x57, 0x66,
-	0xdf, 0xc4, 0x11, 0x8d, 0xd9, 0xeb, 0x1f, 0x7d, 0x24, 0xb3, 0x57, 0x04, 0xb3, 0x83, 0xef, 0x8c,
-	0xfa, 0x9e, 0xa4, 0x64, 0x53, 0x9d, 0xab, 0x72, 0xe0, 0x7f, 0x23, 0xb0, 0x26, 0xcc, 0xf0, 0xf7,
-	0x4d, 0x80, 0xc6, 0xeb, 0xad, 0xf5, 0xb3, 0xe9, 0xb5, 0xb9, 0x07, 0xc2, 0x5c, 0x03, 0x13, 0x32,
-	0xe1, 0x60, 0xbe, 0x99, 0xce, 0x6c, 0xd2, 0x49, 0x33, 0xe2, 0x3f, 0x10, 0x54, 0xc6, 0xed, 0x8f,
-	0xf8, 0xa1, 0x09, 0xdd, 0x38, 0xb5, 0xf5, 0xc1, 0x59, 0xd4, 0xda, 0xd9, 0xbb, 0xc2, 0x19, 0xc1,
-	0xcb, 0x66, 0xce, 0xb8, 0xcc, 0x87, 0xff, 0x42, 0x30, 0x37, 0xf6, 0x54, 0x82, 0x1f, 0x19, 0xfd,
-	0xdf, 0x8f, 0x93, 0x5b, 0x8f, 0xcf, 0x24, 0xd7, 0xd6, 0xee, 0x0b, 0x6b, 0x77, 0xb1, 0x63, 0x66,
-	0xad, 0xaf, 0x12, 0xe2, 0x5f, 0x11, 0x5c, 0x1e, 0xda, 0x25, 0x57, 0x4c, 0x98, 0x8a, 0x2a, 0xeb,
-	0xe1, 0x69, 0x54, 0xda, 0x40, 0x43, 0x18, 0x58, 0xc2, 0xb7, 0x4d, 0x0c, 0x90, 0x9d, 0xc0, 0xdb,
-	0x5d, 0x7d, 0xbc, 0x77, 0x50, 0x45, 0xfb, 0x07, 0x55, 0xf4, 0xdf, 0x41, 0x15, 0x7d, 0x7b, 0x58,
-	0x9d, 0xda, 0x3f, 0xac, 0x4e, 0xfd, 0x79, 0x58, 0x9d, 0x7a, 0xb6, 0x94, 0xfb, 0xf9, 0x93, 0xa4,
-	0x5b, 0x56, 0x54, 0x32, 0xf7, 0x60, 0x85, 0x7c, 0x91, 0xe5, 0x6c, 0x97, 0xc5, 0x4f, 0xc4, 0x7b,
-	0xaf, 0x02, 0x00, 0x00, 0xff, 0xff, 0x07, 0xae, 0x4f, 0xff, 0x26, 0x0f, 0x00, 0x00,
+	// 1066 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x97, 0xcf, 0x6f, 0x1b, 0x45,
+	0x14, 0xc7, 0x33, 0x2e, 0x4d, 0xe8, 0xcb, 0x0f, 0xb5, 0x43, 0x41, 0xce, 0xb6, 0xb5, 0x93, 0x69,
+	0x49, 0x42, 0x9c, 0xec, 0xc4, 0xa1, 0x50, 0xe0, 0x86, 0xa3, 0x56, 0xe2, 0x02, 0xc1, 0x6a, 0x2f,
+	0x5c, 0xac, 0xf5, 0xee, 0xb0, 0xac, 0x12, 0xcf, 0xb8, 0xbb, 0x6b, 0x97, 0xaa, 0xaa, 0x90, 0x10,
+	0x87, 0x1e, 0x38, 0x20, 0x81, 0x38, 0x22, 0x71, 0xe5, 0xc2, 0x95, 0x0b, 0x07, 0x0e, 0x48, 0x15,
+	0xa7, 0x4a, 0x1c, 0xe0, 0x04, 0x28, 0xe1, 0x0f, 0x41, 0x3b, 0x33, 0x3b, 0x5e, 0xdb, 0xbb, 0xc6,
+	0x41, 0x09, 0xa7, 0x78, 0x77, 0xbe, 0xef, 0xbd, 0xcf, 0x7b, 0x33, 0xfb, 0xde, 0x04, 0xae, 0xf5,
+	0x3a, 0x8c, 0xd1, 0x80, 0xbb, 0x8c, 0xc7, 0x41, 0x9f, 0xd1, 0x7e, 0x9d, 0xde, 0xef, 0xb1, 0xf0,
+	0xa1, 0xdd, 0x0d, 0x45, 0x2c, 0xf0, 0xa5, 0x64, 0xd9, 0x36, 0xcb, 0x76, 0xbf, 0x6e, 0x6d, 0xba,
+	0x22, 0xea, 0x88, 0x88, 0xb6, 0x9d, 0x88, 0x29, 0x2d, 0xed, 0xd7, 0xdb, 0x2c, 0x76, 0xea, 0xb4,
+	0xeb, 0xf8, 0x01, 0x77, 0xe2, 0x40, 0x70, 0x65, 0x6e, 0x5d, 0xf5, 0x85, 0xf0, 0x0f, 0x19, 0x75,
+	0xba, 0x01, 0x75, 0x38, 0x17, 0xb1, 0x5c, 0x8c, 0xf4, 0xea, 0x65, 0x5f, 0xf8, 0x42, 0xfe, 0xa4,
+	0xc9, 0x2f, 0xfd, 0x76, 0x75, 0x9c, 0x68, 0x10, 0x5f, 0x49, 0xaa, 0xe3, 0x12, 0x9f, 0x71, 0x16,
+	0x05, 0xa9, 0xe7, 0x4a, 0x96, 0x31, 0xa5, 0x73, 0x45, 0xa0, 0xb9, 0xc8, 0x22, 0xcc, 0xbf, 0x9f,
+	0x90, 0xef, 0x3b, 0xa1, 0xd3, 0x89, 0xc8, 0xbb, 0xf0, 0x42, 0xe6, 0xb1, 0xc9, 0xa2, 0xae, 0xe0,
+	0x11, 0xc3, 0xb7, 0x60, 0xb6, 0x2b, 0xdf, 0x94, 0xd1, 0x0a, 0xda, 0x98, 0xdf, 0x5d, 0xb6, 0xc7,
+	0xaa, 0x61, 0x2b, 0x93, 0xc6, 0x73, 0x4f, 0xff, 0xa8, 0xce, 0x34, 0xb5, 0x9c, 0xd0, 0xd4, 0x1f,
+	0xe3, 0x5e, 0xc0, 0xfd, 0x26, 0x7b, 0xe0, 0x84, 0x5e, 0x84, 0xcb, 0x30, 0xe7, 0x78, 0x5e, 0xc8,
+	0x22, 0xe5, 0xf0, 0x42, 0x33, 0x7d, 0x24, 0x9f, 0x21, 0xb8, 0x92, 0x63, 0x61, 0x48, 0x18, 0xcc,
+	0x85, 0xea, 0x55, 0x19, 0xad, 0x9c, 0x93, 0x28, 0x2a, 0x43, 0x3b, 0xc9, 0xd0, 0xd6, 0x19, 0xda,
+	0x7b, 0x22, 0xe0, 0x8d, 0x9d, 0x04, 0xe5, 0xbb, 0x3f, 0xab, 0x1b, 0x7e, 0x10, 0x7f, 0xd4, 0x6b,
+	0xdb, 0xae, 0xe8, 0x50, 0x5d, 0x0e, 0xf5, 0x67, 0x3b, 0xf2, 0x0e, 0x68, 0xfc, 0xb0, 0xcb, 0x22,
+	0x69, 0x10, 0x35, 0x53, 0xdf, 0x64, 0x1b, 0x2e, 0x49, 0x8a, 0xb7, 0x5d, 0x57, 0xf4, 0x78, 0xdc,
+	0x10, 0x7c, 0x22, 0xf5, 0xf7, 0x25, 0x58, 0x1e, 0xd3, 0x1b, 0x66, 0x17, 0x66, 0xdb, 0x82, 0x7b,
+	0xcc, 0x3b, 0x0b, 0x64, 0xed, 0x1a, 0x07, 0x70, 0xa1, 0xc7, 0x93, 0xdf, 0x01, 0xf7, 0xcb, 0xa5,
+	0xd3, 0x8f, 0x33, 0xf0, 0x8e, 0x1b, 0x00, 0xe6, 0x21, 0x2a, 0x9f, 0x93, 0xb1, 0xae, 0xe6, 0x9c,
+	0x88, 0x7b, 0xa9, 0x48, 0x1f, 0x8a, 0x8c, 0x15, 0xd9, 0x80, 0x8b, 0xb2, 0x60, 0x77, 0x45, 0xec,
+	0x1c, 0x36, 0x54, 0x0a, 0x97, 0xe1, 0xbc, 0xc7, 0xb8, 0xe8, 0xe8, 0xea, 0xaa, 0x07, 0xf2, 0x09,
+	0x94, 0x47, 0x95, 0xff, 0x6b, 0x65, 0x49, 0x4d, 0x9f, 0x61, 0x09, 0x60, 0x72, 0x2a, 0xa0, 0x7d,
+	0x92, 0x9e, 0xdf, 0x61, 0xb5, 0x21, 0x1e, 0xda, 0x26, 0x74, 0x96, 0xdb, 0x44, 0x56, 0xa0, 0x22,
+	0x49, 0xee, 0x75, 0x5d, 0xd1, 0x09, 0xb8, 0xff, 0x4e, 0xba, 0x37, 0xfb, 0xa1, 0xf0, 0xe5, 0xd7,
+	0x29, 0x60, 0x6d, 0xb2, 0xc2, 0x60, 0xdf, 0x86, 0xe7, 0xbb, 0xfa, 0x9d, 0xa6, 0xbe, 0x9e, 0xb3,
+	0xe1, 0xa3, 0xf6, 0x7a, 0xdf, 0x8d, 0x29, 0xa9, 0xc2, 0x35, 0x19, 0xf0, 0x3d, 0xee, 0x8b, 0x5c,
+	0x22, 0x0e, 0x2f, 0x4f, 0x14, 0x9c, 0x36, 0x50, 0x00, 0x55, 0x19, 0x6f, 0x4f, 0x74, 0xba, 0x87,
+	0x2c, 0x66, 0xde, 0x58, 0x44, 0x7c, 0x07, 0x60, 0xd0, 0xcd, 0x75, 0xff, 0x5b, 0x1b, 0xda, 0x32,
+	0x35, 0x26, 0xd2, 0x8d, 0xdb, 0x77, 0x7c, 0xd6, 0x64, 0xf7, 0x7b, 0x2c, 0x8a, 0x9b, 0x19, 0x4b,
+	0xf2, 0x03, 0x82, 0xf5, 0x7f, 0x89, 0x75, 0xca, 0xd9, 0x8d, 0xa0, 0x97, 0xfe, 0x33, 0xfa, 0x3a,
+	0xbc, 0x28, 0xc9, 0x47, 0x03, 0xe2, 0x25, 0x28, 0x05, 0x9e, 0xac, 0xc9, 0x62, 0xb3, 0x14, 0x78,
+	0xc4, 0xd3, 0xfb, 0x3b, 0x2a, 0x34, 0x89, 0xed, 0xc1, 0x9c, 0xa6, 0xd3, 0x95, 0x3c, 0x41, 0x5e,
+	0xa9, 0x25, 0xa9, 0xe9, 0xe6, 0xbc, 0xd7, 0x0b, 0x43, 0xc6, 0xe3, 0xa6, 0x13, 0xb3, 0x08, 0xbf,
+	0x04, 0xb3, 0xbd, 0xbb, 0xe2, 0x80, 0x71, 0xfd, 0x3d, 0xea, 0x27, 0xf2, 0x0b, 0xd2, 0xad, 0x39,
+	0xab, 0x36, 0x3c, 0x77, 0x60, 0x29, 0x64, 0x1f, 0xb2, 0x90, 0x71, 0x97, 0xb5, 0x92, 0x0f, 0xc7,
+	0x0c, 0xb8, 0xc2, 0x6f, 0x52, 0xc1, 0x2c, 0x1a, 0xb3, 0xa4, 0x25, 0x65, 0xc7, 0x52, 0xe9, 0xec,
+	0xc6, 0xd2, 0xee, 0x6f, 0x0b, 0x70, 0x5e, 0x26, 0x83, 0x23, 0x98, 0x55, 0x03, 0x17, 0x57, 0x72,
+	0x2a, 0x98, 0x99, 0xe1, 0xd6, 0xda, 0xe4, 0xf5, 0xb4, 0x14, 0x64, 0xf5, 0xd3, 0x5f, 0xff, 0xfe,
+	0xb2, 0x74, 0x05, 0x2f, 0xd3, 0xf1, 0x3b, 0x85, 0x9a, 0xe6, 0xf8, 0x09, 0x82, 0xf9, 0x6c, 0xc3,
+	0xbe, 0x5e, 0xe4, 0x3a, 0x23, 0xb2, 0x6a, 0x53, 0x88, 0x0c, 0xc4, 0xba, 0x84, 0x58, 0xc5, 0xd5,
+	0x1c, 0x88, 0x38, 0xd1, 0xb7, 0xf4, 0xb8, 0xfb, 0x0a, 0xc1, 0xd2, 0x48, 0x43, 0x5e, 0x9b, 0x18,
+	0xc8, 0xe8, 0x2c, 0x7b, 0x3a, 0x9d, 0x61, 0xda, 0x94, 0x4c, 0x37, 0x30, 0x29, 0x64, 0x1a, 0x8c,
+	0xc6, 0xaf, 0x11, 0x2c, 0x0c, 0xdd, 0x19, 0x6e, 0x14, 0x05, 0xcb, 0xaa, 0xac, 0xad, 0x69, 0x54,
+	0x06, 0x68, 0x57, 0x02, 0x6d, 0xe1, 0xcd, 0x1c, 0x20, 0x47, 0x19, 0xc8, 0x32, 0x45, 0xf4, 0x91,
+	0xbe, 0xa0, 0x3c, 0xc6, 0xdf, 0x20, 0x58, 0x1a, 0xb9, 0x84, 0x15, 0x1f, 0x8c, 0x21, 0x5d, 0x71,
+	0xbd, 0xf2, 0xaf, 0x68, 0xe4, 0xa6, 0xc4, 0xb3, 0xf1, 0x56, 0xde, 0x41, 0x52, 0x26, 0x2d, 0x7d,
+	0xa0, 0x33, 0x80, 0x3f, 0x23, 0xb0, 0x26, 0x74, 0xe1, 0xdd, 0x22, 0x88, 0x62, 0x1b, 0xeb, 0xad,
+	0x93, 0xdb, 0x98, 0x24, 0x6e, 0xc9, 0x24, 0xea, 0x98, 0xd2, 0x09, 0x97, 0xf0, 0x56, 0xda, 0x69,
+	0xa9, 0x9b, 0x7a, 0xc4, 0x3f, 0x22, 0x28, 0x17, 0x4d, 0x2f, 0xbc, 0x53, 0x44, 0x54, 0x64, 0x61,
+	0xbd, 0x71, 0x52, 0x0b, 0x93, 0xc1, 0x6b, 0x32, 0x03, 0x8a, 0xb7, 0xa7, 0xcb, 0x40, 0x28, 0x7f,
+	0xf8, 0x27, 0x04, 0xcb, 0x85, 0xf7, 0x01, 0x5c, 0x2f, 0xc2, 0x29, 0x34, 0xb1, 0xde, 0x3c, 0xb1,
+	0x89, 0x49, 0xe1, 0x75, 0x99, 0xc2, 0x0e, 0xb6, 0xa7, 0x4b, 0xa1, 0xa7, 0x1d, 0xe2, 0x6f, 0x11,
+	0x5c, 0x1c, 0x9b, 0x55, 0x1b, 0x45, 0x1c, 0xa3, 0x4a, 0x6b, 0x67, 0x5a, 0xa5, 0x01, 0xad, 0x4b,
+	0xd0, 0x1a, 0x7e, 0x65, 0x1a, 0x50, 0xfa, 0x28, 0xf0, 0x1e, 0xe3, 0xcf, 0x11, 0x2c, 0x0c, 0x0d,
+	0xb0, 0xc2, 0x4e, 0x91, 0x55, 0x15, 0x77, 0x8a, 0xbc, 0xf1, 0x46, 0x36, 0x24, 0x17, 0xc1, 0x2b,
+	0x39, 0x5c, 0xae, 0x32, 0x68, 0x85, 0x89, 0x45, 0xe3, 0xf6, 0xd3, 0xa3, 0x0a, 0x7a, 0x76, 0x54,
+	0x41, 0x7f, 0x1d, 0x55, 0xd0, 0x17, 0xc7, 0x95, 0x99, 0x67, 0xc7, 0x95, 0x99, 0xdf, 0x8f, 0x2b,
+	0x33, 0x1f, 0xd4, 0x32, 0x63, 0x2a, 0xf1, 0xb2, 0xcd, 0x59, 0xfc, 0x40, 0x84, 0x07, 0xca, 0x65,
+	0xff, 0x26, 0xfd, 0x78, 0xe0, 0xb7, 0x3d, 0x2b, 0xff, 0xab, 0x7c, 0xf5, 0x9f, 0x00, 0x00, 0x00,
+	0xff, 0xff, 0x7d, 0xcc, 0x9e, 0x00, 0x4d, 0x0f, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1050,14 +1076,12 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// Params queries the parameters of the x/incentive module.
 	Params(ctx context.Context, in *QueryParams, opts ...grpc.CallOption) (*QueryParamsResponse, error)
-	// TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
+	// TotalBonded queries the sum of all bonded collateral uTokens.
 	TotalBonded(ctx context.Context, in *QueryTotalBonded, opts ...grpc.CallOption) (*QueryTotalBondedResponse, error)
-	// TotalUnbonding queries the sum of all unbonding collateral uTokens, separated by tier.
+	// TotalUnbonding queries the sum of all unbonding collateral uTokens.
 	TotalUnbonding(ctx context.Context, in *QueryTotalUnbonding, opts ...grpc.CallOption) (*QueryTotalUnbondingResponse, error)
-	// Bonded queries all bonded collateral uTokens associated with an account.
-	Bonded(ctx context.Context, in *QueryBonded, opts ...grpc.CallOption) (*QueryBondedResponse, error)
-	// Unbondings queries all current uToken unbondings associated with an account.
-	Unbondings(ctx context.Context, in *QueryUnbondings, opts ...grpc.CallOption) (*QueryUnbondingsResponse, error)
+	// AccountBonds queries all bonded collateral and unbondings associated with an account.
+	AccountBonds(ctx context.Context, in *QueryAccountBonds, opts ...grpc.CallOption) (*QueryAccountBondsResponse, error)
 	// PendingRewards queries unclaimed incentive rewards associated with an account.
 	PendingRewards(ctx context.Context, in *QueryPendingRewards, opts ...grpc.CallOption) (*QueryPendingRewardsResponse, error)
 	// CompletedIncentivePrograms queries for all incentives programs that have been passed
@@ -1071,6 +1095,10 @@ type QueryClient interface {
 	UpcomingIncentivePrograms(ctx context.Context, in *QueryUpcomingIncentivePrograms, opts ...grpc.CallOption) (*QueryUpcomingIncentiveProgramsResponse, error)
 	// IncentiveProgram queries a single incentive program by ID.
 	IncentiveProgram(ctx context.Context, in *QueryIncentiveProgram, opts ...grpc.CallOption) (*QueryIncentiveProgramResponse, error)
+	// CurrentRates queries the hypothetical return of a bonded uToken denomination
+	// if current incentive rewards continued for one year. The response is an sdk.Coins
+	// of base token rewards, per reference amount (usually 10^exponent of the uToken.)
+	CurrentRates(ctx context.Context, in *QueryCurrentRates, opts ...grpc.CallOption) (*QueryCurrentRatesResponse, error)
 }
 
 type queryClient struct {
@@ -1083,7 +1111,7 @@ func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 
 func (c *queryClient) Params(ctx context.Context, in *QueryParams, opts ...grpc.CallOption) (*QueryParamsResponse, error) {
 	out := new(QueryParamsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/Params", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/Params", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1092,7 +1120,7 @@ func (c *queryClient) Params(ctx context.Context, in *QueryParams, opts ...grpc.
 
 func (c *queryClient) TotalBonded(ctx context.Context, in *QueryTotalBonded, opts ...grpc.CallOption) (*QueryTotalBondedResponse, error) {
 	out := new(QueryTotalBondedResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/TotalBonded", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/TotalBonded", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1101,25 +1129,16 @@ func (c *queryClient) TotalBonded(ctx context.Context, in *QueryTotalBonded, opt
 
 func (c *queryClient) TotalUnbonding(ctx context.Context, in *QueryTotalUnbonding, opts ...grpc.CallOption) (*QueryTotalUnbondingResponse, error) {
 	out := new(QueryTotalUnbondingResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/TotalUnbonding", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/TotalUnbonding", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *queryClient) Bonded(ctx context.Context, in *QueryBonded, opts ...grpc.CallOption) (*QueryBondedResponse, error) {
-	out := new(QueryBondedResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/Bonded", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *queryClient) Unbondings(ctx context.Context, in *QueryUnbondings, opts ...grpc.CallOption) (*QueryUnbondingsResponse, error) {
-	out := new(QueryUnbondingsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/Unbondings", in, out, opts...)
+func (c *queryClient) AccountBonds(ctx context.Context, in *QueryAccountBonds, opts ...grpc.CallOption) (*QueryAccountBondsResponse, error) {
+	out := new(QueryAccountBondsResponse)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/AccountBonds", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1128,7 +1147,7 @@ func (c *queryClient) Unbondings(ctx context.Context, in *QueryUnbondings, opts 
 
 func (c *queryClient) PendingRewards(ctx context.Context, in *QueryPendingRewards, opts ...grpc.CallOption) (*QueryPendingRewardsResponse, error) {
 	out := new(QueryPendingRewardsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/PendingRewards", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/PendingRewards", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1137,7 +1156,7 @@ func (c *queryClient) PendingRewards(ctx context.Context, in *QueryPendingReward
 
 func (c *queryClient) CompletedIncentivePrograms(ctx context.Context, in *QueryCompletedIncentivePrograms, opts ...grpc.CallOption) (*QueryCompletedIncentiveProgramsResponse, error) {
 	out := new(QueryCompletedIncentiveProgramsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/CompletedIncentivePrograms", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/CompletedIncentivePrograms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1146,7 +1165,7 @@ func (c *queryClient) CompletedIncentivePrograms(ctx context.Context, in *QueryC
 
 func (c *queryClient) OngoingIncentivePrograms(ctx context.Context, in *QueryOngoingIncentivePrograms, opts ...grpc.CallOption) (*QueryOngoingIncentiveProgramsResponse, error) {
 	out := new(QueryOngoingIncentiveProgramsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/OngoingIncentivePrograms", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/OngoingIncentivePrograms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1155,7 +1174,7 @@ func (c *queryClient) OngoingIncentivePrograms(ctx context.Context, in *QueryOng
 
 func (c *queryClient) UpcomingIncentivePrograms(ctx context.Context, in *QueryUpcomingIncentivePrograms, opts ...grpc.CallOption) (*QueryUpcomingIncentiveProgramsResponse, error) {
 	out := new(QueryUpcomingIncentiveProgramsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/UpcomingIncentivePrograms", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/UpcomingIncentivePrograms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1164,7 +1183,16 @@ func (c *queryClient) UpcomingIncentivePrograms(ctx context.Context, in *QueryUp
 
 func (c *queryClient) IncentiveProgram(ctx context.Context, in *QueryIncentiveProgram, opts ...grpc.CallOption) (*QueryIncentiveProgramResponse, error) {
 	out := new(QueryIncentiveProgramResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Query/IncentiveProgram", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/IncentiveProgram", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) CurrentRates(ctx context.Context, in *QueryCurrentRates, opts ...grpc.CallOption) (*QueryCurrentRatesResponse, error) {
+	out := new(QueryCurrentRatesResponse)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Query/CurrentRates", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1175,14 +1203,12 @@ func (c *queryClient) IncentiveProgram(ctx context.Context, in *QueryIncentivePr
 type QueryServer interface {
 	// Params queries the parameters of the x/incentive module.
 	Params(context.Context, *QueryParams) (*QueryParamsResponse, error)
-	// TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
+	// TotalBonded queries the sum of all bonded collateral uTokens.
 	TotalBonded(context.Context, *QueryTotalBonded) (*QueryTotalBondedResponse, error)
-	// TotalUnbonding queries the sum of all unbonding collateral uTokens, separated by tier.
+	// TotalUnbonding queries the sum of all unbonding collateral uTokens.
 	TotalUnbonding(context.Context, *QueryTotalUnbonding) (*QueryTotalUnbondingResponse, error)
-	// Bonded queries all bonded collateral uTokens associated with an account.
-	Bonded(context.Context, *QueryBonded) (*QueryBondedResponse, error)
-	// Unbondings queries all current uToken unbondings associated with an account.
-	Unbondings(context.Context, *QueryUnbondings) (*QueryUnbondingsResponse, error)
+	// AccountBonds queries all bonded collateral and unbondings associated with an account.
+	AccountBonds(context.Context, *QueryAccountBonds) (*QueryAccountBondsResponse, error)
 	// PendingRewards queries unclaimed incentive rewards associated with an account.
 	PendingRewards(context.Context, *QueryPendingRewards) (*QueryPendingRewardsResponse, error)
 	// CompletedIncentivePrograms queries for all incentives programs that have been passed
@@ -1196,6 +1222,10 @@ type QueryServer interface {
 	UpcomingIncentivePrograms(context.Context, *QueryUpcomingIncentivePrograms) (*QueryUpcomingIncentiveProgramsResponse, error)
 	// IncentiveProgram queries a single incentive program by ID.
 	IncentiveProgram(context.Context, *QueryIncentiveProgram) (*QueryIncentiveProgramResponse, error)
+	// CurrentRates queries the hypothetical return of a bonded uToken denomination
+	// if current incentive rewards continued for one year. The response is an sdk.Coins
+	// of base token rewards, per reference amount (usually 10^exponent of the uToken.)
+	CurrentRates(context.Context, *QueryCurrentRates) (*QueryCurrentRatesResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -1211,11 +1241,8 @@ func (*UnimplementedQueryServer) TotalBonded(ctx context.Context, req *QueryTota
 func (*UnimplementedQueryServer) TotalUnbonding(ctx context.Context, req *QueryTotalUnbonding) (*QueryTotalUnbondingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TotalUnbonding not implemented")
 }
-func (*UnimplementedQueryServer) Bonded(ctx context.Context, req *QueryBonded) (*QueryBondedResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Bonded not implemented")
-}
-func (*UnimplementedQueryServer) Unbondings(ctx context.Context, req *QueryUnbondings) (*QueryUnbondingsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Unbondings not implemented")
+func (*UnimplementedQueryServer) AccountBonds(ctx context.Context, req *QueryAccountBonds) (*QueryAccountBondsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AccountBonds not implemented")
 }
 func (*UnimplementedQueryServer) PendingRewards(ctx context.Context, req *QueryPendingRewards) (*QueryPendingRewardsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PendingRewards not implemented")
@@ -1232,6 +1259,9 @@ func (*UnimplementedQueryServer) UpcomingIncentivePrograms(ctx context.Context, 
 func (*UnimplementedQueryServer) IncentiveProgram(ctx context.Context, req *QueryIncentiveProgram) (*QueryIncentiveProgramResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IncentiveProgram not implemented")
 }
+func (*UnimplementedQueryServer) CurrentRates(ctx context.Context, req *QueryCurrentRates) (*QueryCurrentRatesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CurrentRates not implemented")
+}
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
 	s.RegisterService(&_Query_serviceDesc, srv)
@@ -1247,7 +1277,7 @@ func _Query_Params_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/Params",
+		FullMethod: "/umee.incentive.v1.Query/Params",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).Params(ctx, req.(*QueryParams))
@@ -1265,7 +1295,7 @@ func _Query_TotalBonded_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/TotalBonded",
+		FullMethod: "/umee.incentive.v1.Query/TotalBonded",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).TotalBonded(ctx, req.(*QueryTotalBonded))
@@ -1283,7 +1313,7 @@ func _Query_TotalUnbonding_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/TotalUnbonding",
+		FullMethod: "/umee.incentive.v1.Query/TotalUnbonding",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).TotalUnbonding(ctx, req.(*QueryTotalUnbonding))
@@ -1291,38 +1321,20 @@ func _Query_TotalUnbonding_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_Bonded_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryBonded)
+func _Query_AccountBonds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryAccountBonds)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).Bonded(ctx, in)
+		return srv.(QueryServer).AccountBonds(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/Bonded",
+		FullMethod: "/umee.incentive.v1.Query/AccountBonds",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Bonded(ctx, req.(*QueryBonded))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Query_Unbondings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryUnbondings)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(QueryServer).Unbondings(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/Unbondings",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).Unbondings(ctx, req.(*QueryUnbondings))
+		return srv.(QueryServer).AccountBonds(ctx, req.(*QueryAccountBonds))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1337,7 +1349,7 @@ func _Query_PendingRewards_Handler(srv interface{}, ctx context.Context, dec fun
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/PendingRewards",
+		FullMethod: "/umee.incentive.v1.Query/PendingRewards",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).PendingRewards(ctx, req.(*QueryPendingRewards))
@@ -1355,7 +1367,7 @@ func _Query_CompletedIncentivePrograms_Handler(srv interface{}, ctx context.Cont
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/CompletedIncentivePrograms",
+		FullMethod: "/umee.incentive.v1.Query/CompletedIncentivePrograms",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).CompletedIncentivePrograms(ctx, req.(*QueryCompletedIncentivePrograms))
@@ -1373,7 +1385,7 @@ func _Query_OngoingIncentivePrograms_Handler(srv interface{}, ctx context.Contex
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/OngoingIncentivePrograms",
+		FullMethod: "/umee.incentive.v1.Query/OngoingIncentivePrograms",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).OngoingIncentivePrograms(ctx, req.(*QueryOngoingIncentivePrograms))
@@ -1391,7 +1403,7 @@ func _Query_UpcomingIncentivePrograms_Handler(srv interface{}, ctx context.Conte
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/UpcomingIncentivePrograms",
+		FullMethod: "/umee.incentive.v1.Query/UpcomingIncentivePrograms",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).UpcomingIncentivePrograms(ctx, req.(*QueryUpcomingIncentivePrograms))
@@ -1409,7 +1421,7 @@ func _Query_IncentiveProgram_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Query/IncentiveProgram",
+		FullMethod: "/umee.incentive.v1.Query/IncentiveProgram",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).IncentiveProgram(ctx, req.(*QueryIncentiveProgram))
@@ -1417,8 +1429,26 @@ func _Query_IncentiveProgram_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_CurrentRates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryCurrentRates)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).CurrentRates(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.incentive.v1.Query/CurrentRates",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).CurrentRates(ctx, req.(*QueryCurrentRates))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Query_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "umeenetwork.umee.incentive.v1.Query",
+	ServiceName: "umee.incentive.v1.Query",
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -1434,12 +1464,8 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_TotalUnbonding_Handler,
 		},
 		{
-			MethodName: "Bonded",
-			Handler:    _Query_Bonded_Handler,
-		},
-		{
-			MethodName: "Unbondings",
-			Handler:    _Query_Unbondings_Handler,
+			MethodName: "AccountBonds",
+			Handler:    _Query_AccountBonds_Handler,
 		},
 		{
 			MethodName: "PendingRewards",
@@ -1460,6 +1486,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IncentiveProgram",
 			Handler:    _Query_IncentiveProgram_Handler,
+		},
+		{
+			MethodName: "CurrentRates",
+			Handler:    _Query_CurrentRates_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1589,7 +1619,7 @@ func (m *QueryPendingRewardsResponse) MarshalToSizedBuffer(dAtA []byte) (int, er
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryBonded) Marshal() (dAtA []byte, err error) {
+func (m *QueryAccountBonds) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1599,86 +1629,12 @@ func (m *QueryBonded) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryBonded) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryAccountBonds) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryBonded) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryBondedResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryBondedResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryBondedResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if len(m.Bonded) > 0 {
-		for iNdEx := len(m.Bonded) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Bonded[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintQuery(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryUnbondings) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryUnbondings) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryUnbondings) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryAccountBonds) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1693,7 +1649,7 @@ func (m *QueryUnbondings) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryUnbondingsResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryAccountBondsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -1703,12 +1659,12 @@ func (m *QueryUnbondingsResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryUnbondingsResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryAccountBondsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryUnbondingsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryAccountBondsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -1717,6 +1673,34 @@ func (m *QueryUnbondingsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error)
 		for iNdEx := len(m.Unbondings) - 1; iNdEx >= 0; iNdEx-- {
 			{
 				size, err := m.Unbondings[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x1a
+		}
+	}
+	if len(m.Unbonding) > 0 {
+		for iNdEx := len(m.Unbonding) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Unbonding[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.Bonded) > 0 {
+		for iNdEx := len(m.Bonded) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Bonded[iNdEx].MarshalToSizedBuffer(dAtA[:i])
 				if err != nil {
 					return 0, err
 				}
@@ -2129,6 +2113,83 @@ func (m *QueryIncentiveProgramResponse) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
+func (m *QueryCurrentRates) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCurrentRates) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCurrentRates) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.UToken) > 0 {
+		i -= len(m.UToken)
+		copy(dAtA[i:], m.UToken)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.UToken)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryCurrentRatesResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryCurrentRatesResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryCurrentRatesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Rewards) > 0 {
+		for iNdEx := len(m.Rewards) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Rewards[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	{
+		size, err := m.ReferenceBond.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	offset -= sovQuery(v)
 	base := offset
@@ -2188,7 +2249,7 @@ func (m *QueryPendingRewardsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryBonded) Size() (n int) {
+func (m *QueryAccountBonds) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2198,14 +2259,10 @@ func (m *QueryBonded) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovQuery(uint64(l))
 	}
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
 	return n
 }
 
-func (m *QueryBondedResponse) Size() (n int) {
+func (m *QueryAccountBondsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -2217,28 +2274,12 @@ func (m *QueryBondedResponse) Size() (n int) {
 			n += 1 + l + sovQuery(uint64(l))
 		}
 	}
-	return n
-}
-
-func (m *QueryUnbondings) Size() (n int) {
-	if m == nil {
-		return 0
+	if len(m.Unbonding) > 0 {
+		for _, e := range m.Unbonding {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
 	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *QueryUnbondingsResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
 	if len(m.Unbondings) > 0 {
 		for _, e := range m.Unbondings {
 			l = e.Size()
@@ -2404,6 +2445,36 @@ func (m *QueryIncentiveProgramResponse) Size() (n int) {
 	_ = l
 	l = m.Program.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	return n
+}
+
+func (m *QueryCurrentRates) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.UToken)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryCurrentRatesResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = m.ReferenceBond.Size()
+	n += 1 + l + sovQuery(uint64(l))
+	if len(m.Rewards) > 0 {
+		for _, e := range m.Rewards {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -2712,7 +2783,7 @@ func (m *QueryPendingRewardsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBonded) Unmarshal(dAtA []byte) error {
+func (m *QueryAccountBonds) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2735,10 +2806,10 @@ func (m *QueryBonded) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBonded: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryAccountBonds: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBonded: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryAccountBonds: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2773,38 +2844,6 @@ func (m *QueryBonded) Unmarshal(dAtA []byte) error {
 			}
 			m.Address = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
@@ -2826,7 +2865,7 @@ func (m *QueryBonded) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryBondedResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryAccountBondsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -2849,10 +2888,10 @@ func (m *QueryBondedResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryBondedResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryAccountBondsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryBondedResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryAccountBondsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -2884,66 +2923,16 @@ func (m *QueryBondedResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Bonded = append(m.Bonded, TotalBond{})
+			m.Bonded = append(m.Bonded, types.Coin{})
 			if err := m.Bonded[len(m.Bonded)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryUnbondings) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryUnbondings: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryUnbondings: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
+		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Unbonding", wireType)
 			}
-			var stringLen uint64
+			var msglen int
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowQuery
@@ -2953,75 +2942,27 @@ func (m *QueryUnbondings) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				msglen |= int(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
+			if msglen < 0 {
 				return ErrInvalidLengthQuery
 			}
-			postIndex := iNdEx + intStringLen
+			postIndex := iNdEx + msglen
 			if postIndex < 0 {
 				return ErrInvalidLengthQuery
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
+			m.Unbonding = append(m.Unbonding, types.Coin{})
+			if err := m.Unbonding[len(m.Unbonding)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryUnbondingsResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryUnbondingsResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryUnbondingsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
+			iNdEx = postIndex
+		case 3:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Unbondings", wireType)
 			}
@@ -3216,7 +3157,7 @@ func (m *QueryTotalBondedResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Bonded = append(m.Bonded, TotalBond{})
+			m.Bonded = append(m.Bonded, types.Coin{})
 			if err := m.Bonded[len(m.Bonded)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -3382,7 +3323,7 @@ func (m *QueryTotalUnbondingResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Unbonding = append(m.Unbonding, TotalBond{})
+			m.Unbonding = append(m.Unbonding, types.Coin{})
 			if err := m.Unbonding[len(m.Unbonding)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
@@ -4010,6 +3951,205 @@ func (m *QueryIncentiveProgramResponse) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Program.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryCurrentRates) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCurrentRates: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCurrentRates: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UToken", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.UToken = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryCurrentRatesResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryCurrentRatesResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryCurrentRatesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ReferenceBond", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.ReferenceBond.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Rewards", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Rewards = append(m.Rewards, types.Coin{})
+			if err := m.Rewards[len(m.Rewards)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

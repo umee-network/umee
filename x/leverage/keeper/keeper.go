@@ -18,10 +18,12 @@ type Keeper struct {
 	cdc                    codec.Codec
 	storeKey               storetypes.StoreKey
 	paramSpace             paramtypes.Subspace
-	hooks                  types.Hooks
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
 	liquidatorQueryEnabled bool
+
+	tokenHooks []types.TokenHooks
+	bondHooks  []types.BondHooks
 }
 
 func NewKeeper(
@@ -51,15 +53,23 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
-// SetHooks sets the module's hooks. Note, hooks can only be set once.
-func (k *Keeper) SetHooks(h types.Hooks) *Keeper {
-	if k.hooks != nil {
-		panic("leverage hooks already set")
+// SetTokenHooks sets the module's token registry hooks. Token hooks can only be set once.
+func (k *Keeper) SetTokenHooks(h ...types.TokenHooks) {
+	if k.tokenHooks != nil {
+		panic("leverage token hooks already set")
 	}
 
-	k.hooks = h
+	k.tokenHooks = h
+}
 
-	return k
+// SetBondHooks sets the module's bonded amount and force unbonding hooks.
+// Panics if Bond hooks have been already set.
+func (k *Keeper) SetBondHooks(h ...types.BondHooks) {
+	if k.bondHooks != nil {
+		panic("leverage bond hooks already set")
+	}
+
+	k.bondHooks = h
 }
 
 // ModuleBalance returns the amount of a given token held in the x/leverage module account
@@ -143,10 +153,17 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		// Check for sufficient collateral
 		collateral := k.GetBorrowerCollateral(ctx, supplierAddr)
 		collateralAmount := collateral.AmountOf(uToken.Denom)
-		if collateral.AmountOf(uToken.Denom).LT(amountFromCollateral) {
+		if collateralAmount.LT(amountFromCollateral) {
 			return sdk.Coin{}, isFromCollateral, types.ErrInsufficientBalance.Wrapf(
 				"%s uToken balance + %s from collateral is less than %s to withdraw",
 				amountFromWallet, collateralAmount, uToken)
+		}
+
+		unbondedCollateral := k.unbondedCollateral(ctx, supplierAddr, uToken.Denom)
+		if unbondedCollateral.Amount.LT(amountFromCollateral) {
+			return sdk.Coin{}, isFromCollateral, types.ErrBondedCollateral.Wrapf(
+				"%s unbonded collateral is less than %s to withdraw from collateral",
+				unbondedCollateral, amountFromCollateral)
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
@@ -261,12 +278,19 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 
 	// Detect where sufficient collateral exists to disable
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	if collateral.AmountOf(uToken.Denom).LT(uToken.Amount) {
+	collateralAmount := collateral.AmountOf(uToken.Denom)
+	if collateralAmount.LT(uToken.Amount) {
 		return types.ErrInsufficientCollateral
 	}
 
-	// Disabling uTokens as collateral withdraws any stored collateral of the denom in question
-	// from the module account and returns it to the user
+	unbondedCollateral := k.unbondedCollateral(ctx, borrowerAddr, uToken.Denom)
+	if unbondedCollateral.Amount.LT(uToken.Amount) {
+		return types.ErrBondedCollateral.Wrapf(
+			"%s unbonded collateral uTokens are less than %s to decollateralize",
+			unbondedCollateral, uToken)
+	}
+
+	// Decollateralizing uTokens withdraws them from the module account and returns them to the user
 	newCollateralAmount := collateral.AmountOf(uToken.Denom).Sub(uToken.Amount)
 	if err := k.setCollateral(ctx, borrowerAddr, sdk.NewCoin(uToken.Denom, newCollateralAmount)); err != nil {
 		return err
@@ -333,6 +357,14 @@ func (k Keeper) Liquidate(
 
 	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
 	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// finally, force incentive module to update bond and unbonding amounts if required,
+	// by ending existing unbondings early or instantly unbonding some bonded tokens
+	// until bonded + unbonding for the account is not greater than its collateral amount
+	err = k.reduceBondTo(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
+	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
