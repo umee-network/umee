@@ -22,12 +22,15 @@ func (k Keeper) BondHooks() BondHooks {
 
 // GetBonded gets sum of bonded and unbonding uTokens of a given denom for an account.
 func (h BondHooks) GetBonded(ctx sdk.Context, addr sdk.AccAddress, uDenom string) sdkmath.Int {
-	bonded, unbonding, _ := h.k.BondSummary(ctx, addr, uDenom)
-	return bonded.Amount.Add(unbonding.Amount)
+	return h.k.restrictedCollateral(ctx, addr, uDenom).Amount
 }
 
-// ForceUnondTo instantly unbonds uTokens until an account's bonded amount of a given uToken
+// ForceUnbondTo instantly unbonds uTokens until an account's bonded amount of a given uToken
 // is no greater than a certain amount.
-func (h BondHooks) ForceUnondTo(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
-	return h.k.ForceUnondTo(ctx, addr, uToken)
+func (h BondHooks) ForceUnbondTo(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
+	// ensure rewards and unbondings are up to date when using liquidation hooks
+	if _, err := h.k.UpdateAccount(ctx, addr); err != nil {
+		return err
+	}
+	return h.k.reduceBondTo(ctx, addr, uToken)
 }

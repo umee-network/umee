@@ -131,15 +131,14 @@ func (s msgServer) EmergencyUnbond(
 		return nil, err
 	}
 
-	bonded, currentUnbonding, _ := k.BondSummary(ctx, addr, denom)
+	maxEmergencyUnbond := k.restrictedCollateral(ctx, addr, msg.UToken.Denom)
 
 	// reject emergency unbondings greater than maximum available amount
-	if msg.UToken.Amount.GT(bonded.Add(currentUnbonding).Amount) {
+	if msg.UToken.Amount.GT(maxEmergencyUnbond.Amount) {
 		return nil, incentive.ErrInsufficientBonded.Wrapf(
-			"bonded: %s, unbonding: %s, requested: %s",
-			bonded,
-			currentUnbonding,
+			"requested: %s, maximum: %s",
 			msg.UToken,
+			maxEmergencyUnbond,
 		)
 	}
 
@@ -151,7 +150,7 @@ func (s msgServer) EmergencyUnbond(
 	}
 
 	// reduce account's bonded and unbonding amounts, thus releasing the appropriate collateral.
-	newBondPlusUnbond := bonded.Add(currentUnbonding).Sub(msg.UToken)
+	newBondPlusUnbond := maxEmergencyUnbond.Sub(msg.UToken)
 	// besides the penalty fee, this is the same mechanism used to free collateral before liquidation.
 	err = k.reduceBondTo(ctx, addr, newBondPlusUnbond)
 	return &incentive.MsgEmergencyUnbondResponse{}, err

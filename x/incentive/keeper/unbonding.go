@@ -69,16 +69,6 @@ func (k Keeper) cleanupUnbondings(ctx sdk.Context, addr sdk.AccAddress) error {
 	return nil
 }
 
-// ForceUnondTo is used by leverage liquidation hooks. It updates an account's unbondings and
-// rewards then uses the same logic as MsgEmergencyUnbond to instantly unbond some collateral.
-func (k Keeper) ForceUnondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral sdk.Coin) error {
-	// ensure rewards and unbondings are up to date when using liquidation hooks
-	if _, err := k.UpdateAccount(ctx, addr); err != nil {
-		return err
-	}
-	return k.reduceBondTo(ctx, addr, newCollateral)
-}
-
 // reduceBondTo is used by MsgEmergencyUnbond and by liquidation hooks to immediately unbond collateral
 // which is bonded to or unbonding from an account. The uToken it accepts as input is the amount of
 // collateral which the borrower is left with: bonds and unbondings must be removed until they do not

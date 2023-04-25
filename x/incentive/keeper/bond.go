@@ -7,11 +7,10 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
-// RestrictedCollateral is used by leverage to see the amount of collateral an account has
-// which cannot be voluntarily withdrawn
-func (k Keeper) RestrictedCollateral(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	bonded, unbonding, _ := k.BondSummary(ctx, addr, denom)
-	return bonded.Add(unbonding)
+// restrictedCollateral is used by leverage to see the amount of collateral an account has
+// which cannot be voluntarily withdrawn. This is the sum of bonded and unbonding uTokens.
+func (k Keeper) restrictedCollateral(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	return k.GetBonded(ctx, addr, denom).Add(k.getUnbondingAmount(ctx, addr, denom))
 }
 
 // BondSummary gets the total bonded and unbonding for a given account, as well as a list of ongoing unbondings,
