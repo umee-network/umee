@@ -10,5 +10,4 @@
 *.md                @umee-network/core-docs
 
 # Oracle
-/price-feeder/**    @umee-network/core-oracle
 /x/oracle/**        @umee-network/core-oracle

@@ -2,7 +2,7 @@
 
 PACKAGES_NOSIMULATION=$(shell go list ./... | grep -v '/simulation')
 PACKAGES_SIMTEST=$(shell go list ./... | grep '/simulation')
-export VERSION := $(shell echo $(shell git describe --always --match "v*") | sed 's/^v//')
+export VERSION := $(shell echo $(shell git describe --tags --always --match "v*") | sed 's/^v//')
 export TMVERSION := $(shell go list -m github.com/tendermint/tendermint | sed 's:.* ::')
 export COMMIT := $(shell git log -1 --format='%H')
 LEDGER_ENABLED ?= true
@@ -335,7 +335,7 @@ proto-all: proto-format proto-lint proto-gen proto-swagger-gen
 proto-gen:
 	@echo "Generating Protobuf files"
 	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGen}$$"; then docker start -a $(containerProtoGen); else docker run --name $(containerProtoGen) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
-w		sh ./contrib/scripts/protocgen.sh; fi
+		sh ./contrib/scripts/protocgen.sh; fi
 
 proto-swagger-gen:
 	@echo "Generating Protobuf Swagger"

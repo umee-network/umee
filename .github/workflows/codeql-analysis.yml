@@ -2,6 +2,7 @@ name: "CodeQL"
 
 on:
   merge_group:
+    types: [checks_requested]
   pull_request:
     paths: ["**.go"]
     branches:
@@ -26,7 +27,7 @@ jobs:
         uses: actions/checkout@v3
       - uses: actions/setup-go@v4
         with:
-          go-version: 1.19
+          go-version: "1.20"
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
