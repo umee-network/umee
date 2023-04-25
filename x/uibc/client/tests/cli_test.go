@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	umeeapp "github.com/umee-network/umee/v4/app"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"gotest.tools/v3/assert"
@@ -28,12 +29,11 @@ func TestIntegrationSuite(t *testing.T) {
 	cfg.GenesisState[uibc.ModuleName] = bz
 
 	// init the integration test and start the network
-	s := initIntegrationTestSuite(cfg, t)
+	s := NewIntegrationTestSuite(cfg, t)
+	s.SetupSuite()
+	defer s.TearDownSuite()
 
 	// test cli queries
 	s.TestGetQuota(t)
 	s.TestQueryParams(t)
-
-	// tear down netowkr
-	tearDownSuite(s, t)
 }

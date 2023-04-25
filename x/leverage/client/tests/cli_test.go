@@ -1,17 +1,13 @@
-//go:build norace
-// +build norace
-
 package tests
 
 import (
 	"testing"
 
-	"github.com/stretchr/testify/suite"
-
 	umeeapp "github.com/umee-network/umee/v4/app"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {
+	t.Parallel()
 	cfg := umeeapp.IntegrationTestNetworkConfig()
 	cfg.NumValidators = 2
 	cfg.Mnemonics = []string{
@@ -19,5 +15,11 @@ func TestIntegrationTestSuite(t *testing.T) {
 		"clean target advice dirt onion correct original vibrant actor upon waste eternal color barely shrimp aspect fall material wait repeat bench demise length seven",
 	}
 
-	suite.Run(t, NewIntegrationTestSuite(cfg))
+	s := NewIntegrationTestSuite(cfg, t)
+	s.SetupSuite()
+	defer s.TearDownSuite()
+
+	// queries
+	s.TestInvalidQueries()
+	s.TestLeverageScenario()
 }
