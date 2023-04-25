@@ -56,6 +56,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1989](https://github.com/umee-network/umee/pull/1989) Leverage: fix the duplicate symbol denoms issue on adding new tokens to registry.
 - [1989](https://github.com/umee-network/umee/pull/1989) Updated go version from 1.19 to 1.20
 - [2009](https://github.com/umee-network/umee/pull/2009) Use DavidAnson/markdownlint action for Markdown linting.
+- [2010](https://github.com/umee-network/umee/pull/2010) New `util/store` generic functions to load all values from a store.
 
 ### Fixes
 
