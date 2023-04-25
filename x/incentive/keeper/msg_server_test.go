@@ -144,7 +144,6 @@ func (k *testKeeper) TestMsgBeginUnbonding() {
 	}
 	_, err = k.msrv.BeginUnbonding(k.ctx, msg)
 	require.ErrorIs(k.t, err, incentive.ErrInsufficientBonded, "begin unbonding 50")
-	// TODO: why was this passing at amount 40?
 
 	// attempt to begin unbonding 50 u/atom but from the wrong account
 	msg = &incentive.MsgBeginUnbonding{
