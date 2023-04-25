@@ -183,6 +183,7 @@ func (q Querier) AccountBonds(
 		bonded, unbonding, unbondings := k.BondSummary(ctx, addr, denom)
 		totalBonded = totalBonded.Add(bonded)
 		totalUnbonding = totalUnbonding.Add(unbonding)
+		// Only nonzero unbondings will be stored, so this list is already filtered
 		accountUnbondings = append(accountUnbondings, unbondings...)
 	}
 
