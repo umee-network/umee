@@ -67,6 +67,14 @@ service Query {
       returns (QueryIncentiveProgramResponse) {
     option (google.api.http).get = "/umee/incentive/v1/incentive_program/{id}";
   }
+
+  // CurrentRates queries the hypothetical return of a bonded uToken denomination
+  // if current incentive rewards continued for one year. The response is an sdk.Coins
+  // of base token rewards, per reference amount (usually 10^exponent of the uToken.)
+  rpc CurrentRates(QueryCurrentRates)
+      returns (QueryCurrentRatesResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/current_rates";
+  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -186,4 +194,27 @@ message QueryIncentiveProgram {
 // IncentiveProgram gRPC service handler.
 message QueryIncentiveProgramResponse {
   IncentiveProgram program = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryCurrentRates defines the request structure for the CurrentRates gRPC service handler.
+message QueryCurrentRates {
+  // uToken is the uToken denomination whose current annual rate of rewards is being queried
+  string uToken = 1;
+}
+
+// QueryCurrentRatesResponse defines the response structure for the CurrentRates gRPC service handler.
+message QueryCurrentRatesResponse {
+  // Reference Bond is an amount of bonded uTokens (usually 10^exponent) whose current rewards are being
+  // calculated. This amount can be used to compute an individual user's rewards: for example, if a user has
+  // 2.5x the reference amount currently bonded, then they would receive 2.5x the rewards below annually
+  // at current rates.
+  cosmos.base.v1beta1.Coin reference_bond = 1 [
+    (gogoproto.nullable) = false
+  ];
+  // Rewards are the amount of base token rewards that the reference amount of bonded uTokens would earn
+  // if current rates continued for a full year.
+  repeated cosmos.base.v1beta1.Coin rewards = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }

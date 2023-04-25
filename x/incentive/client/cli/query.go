@@ -30,6 +30,7 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdQueryParams(),
 		GetCmdQueryAccountBonds(),
+		GetCmdQueryCurrentRates(),
 		GetCmdQueryTotalBonded(),
 		GetCmdQueryTotalUnbonding(),
 		GetCmdQueryPendingRewards(),
@@ -102,6 +103,37 @@ func GetCmdQueryPendingRewards() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.PendingRewards(cmd.Context(), &incentive.QueryPendingRewards{Address: args[0]})
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryCurrentRates creates a Cobra command to query current annual rewards for a reference amount
+// of a given bonded uToken.
+func GetCmdQueryCurrentRates() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "current-rates[denom]",
+		Args:  cobra.RangeArgs(0, 1),
+		Short: "Query the current annual rewards for a reference amount of a given bonded uToken.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			denom := ""
+			if len(args) > 0 {
+				denom = args[0]
+			}
+
+			queryClient := incentive.NewQueryClient(clientCtx)
+			resp, err := queryClient.CurrentRates(cmd.Context(), &incentive.QueryCurrentRates{UToken: denom})
+			if err != nil {
+				return err
+			}
+
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

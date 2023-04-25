@@ -232,3 +232,48 @@ func (q Querier) TotalUnbonding(
 
 	return &incentive.QueryTotalUnbondingResponse{Unbonding: total}, nil
 }
+
+func (q Querier) CurrentRates(
+	goCtx context.Context,
+	req *incentive.QueryCurrentRates,
+) (*incentive.QueryCurrentRatesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+
+	programs, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	if err != nil {
+		return nil, err
+	}
+
+	// to compute the rewards a reference amount (10^exponent) of bonded uToken is currently earning,
+	// we need to divide the total rewards being distributed by all ongoing incentive programs targeting
+	// that uToken denom, by the ratio of the total bonded amount to the reference amount.
+	bonded := k.getTotalBonded(ctx, req.UToken)
+	rewards := sdk.NewCoins()
+	exponent := k.getRewardAccumulator(ctx, req.UToken).Exponent
+	for _, p := range programs {
+		if p.UToken == req.UToken {
+			// seconds per year / duration = programsPerYear (as this query assumes incentives will stay constant)
+			programsPerYear := sdk.MustNewDecFromStr("31557600").Quo(sdk.NewDec(p.Duration))
+			// reference amount / total bonded = rewardPortion (as the more uTokens bond, the fewer rewards each earns)
+			rewardPortion := ten.Power(uint64(exponent)).QuoInt(bonded.Amount)
+			// annual rewards for reference amount for this specific program, assuming current rates continue
+			rewardCoin := sdk.NewCoin(
+				p.TotalRewards.Denom,
+				programsPerYear.Mul(rewardPortion).MulInt(p.TotalRewards.Amount).TruncateInt(),
+			)
+			// add this program's annual rewards to the total for all programs incentivizing this uToken denom
+			rewards = rewards.Add(rewardCoin)
+		}
+	}
+	return &incentive.QueryCurrentRatesResponse{
+		ReferenceBond: sdk.NewCoin(
+			req.UToken,
+			ten.Power(uint64(exponent)).TruncateInt(),
+		),
+		Rewards: rewards,
+	}, nil
+}
