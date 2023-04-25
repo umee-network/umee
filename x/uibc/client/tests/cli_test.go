@@ -52,10 +52,10 @@ func TestIntegrationSuite(t *testing.T) {
 	// init the integration test and start the network
 	s := NewIntegrationTestSuite(cfg, t)
 	s.SetupSuite()
+	s.TearDownSuite()
 
 	// test cli queries
 	s.TestGetQuota(t)
 	s.TestQueryParams(t)
 
-	s.TearDownSuite()
 }

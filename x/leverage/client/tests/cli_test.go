@@ -41,10 +41,9 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 	s := NewIntegrationTestSuite(cfg, t)
 	s.SetupSuite()
+	defer s.TearDownSuite()
 
 	// queries
 	s.TestInvalidQueries()
 	s.TestLeverageScenario()
-
-	s.TearDownSuite()
 }
