@@ -38,6 +38,8 @@ When the user starts unbonding a uToken, the module's `UnbondingDuration` determ
 
 Unbonding uTokens are not eligible for incentive rewards while they unbond, but are still subject to the same restrictions on `leverage.MsgWithdraw` and `leverage.MsgDecollateralize` as bonded tokens.
 
+For example, if a user has `10u/UMEE` bonded and `3u/UMEE` more unbonding, out of a total of `20u/UMEE` collateral, then their current max withdraw is `7u/UMEE`, and they are earning incentive rewards on only `10u/UMEE` uTokens.
+
 The module parameter `MaxUnbondings` limits how many concurrent unbondings a user can have of the same uToken denom, to prevent spam.
 
 Additionally, `MsgEmergencyUnbond` can instantly unbond collateral, starting with in-progress unbondings then bonded tokens.
