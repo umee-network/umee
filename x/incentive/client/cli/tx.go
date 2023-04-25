@@ -114,7 +114,7 @@ func GetCmdBeginUnbonding() *cobra.Command {
 	return cmd
 }
 
-// transaction with a MsgmergencyUnbond message.
+// transaction with a MsgEmergencyUnbond message.
 func GetCmdEmergencyUnbond() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "emergency-unbond [utokens]",
