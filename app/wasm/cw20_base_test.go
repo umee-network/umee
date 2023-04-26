@@ -26,12 +26,14 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 	appparams "github.com/umee-network/umee/v4/app/params"
+	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
 const (
 	initialPower = int64(10000000000)
 	cw20Artifact = "../../tests/artifacts/cw20_base.wasm"
+	umeeArtifact = "../../tests/artifacts/umee_cosmwasm.wasm"
 	cw20Label    = "cw20InstanceTest"
 )
 
@@ -58,6 +60,9 @@ type cw20InitMsg struct {
 	Symbol          string    `json:"symbol"`
 	Decimals        uint8     `json:"decimals"`
 	InitialBalances []Balance `json:"initial_balances"`
+}
+
+type InstantiateMsg struct {
 }
 
 type Address struct {
@@ -88,6 +93,20 @@ type transferMsg struct {
 	Amount    uint64 `json:"amount,string"`
 }
 
+type CustomQuery struct {
+	Chain struct {
+		Custom struct {
+			AssignedQuery int `json:"assigned_query"`
+		} `json:"custom"`
+	} `json:"chain"`
+}
+
+func UmeeCwCustomQuery(q int) CustomQuery {
+	c := CustomQuery{}
+	c.Chain.Custom.AssignedQuery = q
+	return c
+}
+
 type IntegrationTestSuite struct {
 	T   *testing.T
 	ctx sdk.Context
@@ -96,6 +115,8 @@ type IntegrationTestSuite struct {
 	wasmMsgServer       wasmtypes.MsgServer
 	wasmQueryClient     wasmtypes.QueryClient
 	wasmProposalHandler govv1.Handler
+
+	codeID uint64
 }
 
 func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
@@ -137,18 +158,19 @@ func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey
 	return msg
 }
 
-func (s *IntegrationTestSuite) cw20StoreCode(sender sdk.AccAddress) (codeId uint64) {
-	cw20Code, err := os.ReadFile(cw20Artifact)
+func (s *IntegrationTestSuite) cw20StoreCode(sender sdk.AccAddress, cwArtifacePath string) (codeId uint64) {
+	cw20Code, err := os.ReadFile(cwArtifacePath)
 	assert.NilError(s.T, err)
 	storeCodeProposal := wasmtypes.StoreCodeProposal{
-		Title:                 "Store cw20",
-		Description:           "Store brand new contract",
+		Title:                 cwArtifacePath,
+		Description:           cwArtifacePath,
 		RunAs:                 sender.String(),
 		WASMByteCode:          cw20Code,
 		InstantiatePermission: &wasmtypes.AllowEverybody,
 	}
 
-	s.wasmProposalHandler(s.ctx, &storeCodeProposal)
+	err = s.wasmProposalHandler(s.ctx, &storeCodeProposal)
+	assert.NilError(s.T, err)
 
 	codes, err := s.wasmQueryClient.PinnedCodes(sdk.WrapSDKContext(s.ctx), &wasmtypes.QueryPinnedCodesRequest{})
 	assert.NilError(s.T, err)
@@ -196,10 +218,8 @@ func (s *IntegrationTestSuite) queryBalance(contracAddr string, address sdk.AccA
 	return bobBalanceUint
 }
 
-func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, addr2Amount uint64) (*wasmtypes.MsgInstantiateContractResponse, error) {
-	codeID := s.cw20StoreCode(addr)
-
-	init := cw20InitMsg{
+func intMsgCw20(addr2Amount uint64) cw20InitMsg {
+	return cw20InitMsg{
 		Name:     "Cw20TestToken",
 		Symbol:   "CashSymbol",
 		Decimals: 4,
@@ -218,13 +238,15 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, addr2Amou
 			},
 		},
 	}
+}
 
+func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, init interface{}) (*wasmtypes.MsgInstantiateContractResponse, error) {
 	initBz, err := json.Marshal(init)
 	assert.NilError(s.T, err)
 
 	initMsg := wasmtypes.MsgInstantiateContract{
 		Sender: sender.String(),
-		CodeID: codeID,
+		CodeID: s.codeID,
 		Label:  cw20Label,
 		Funds:  sdk.Coins{sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(10))},
 		Msg:    initBz,
@@ -234,33 +256,34 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, addr2Amou
 }
 
 func (s *IntegrationTestSuite) TestCw20Store() {
-	codeID := s.cw20StoreCode(addr)
+	codeID := s.cw20StoreCode(addr, cw20Artifact)
+	s.codeID = codeID
 	assert.Equal(s.T, uint64(1), codeID)
 }
 
 func (s *IntegrationTestSuite) TestCw20Instantiate() {
-	msgIntantiateResponse, err := s.cw20InitiateCode(addr, 200)
+	msgIntantiateResponse, err := s.cw20InitiateCode(addr, intMsgCw20(200))
 	assert.NilError(s.T, err)
-	assert.Equal(s.T, "umee1wug8sewp6cedgkmrmvhl3lf3tulagm9hnvy8p0rppz9yjw0g4wtqqpllkv", msgIntantiateResponse.Address)
+	assert.Equal(s.T, "umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx", msgIntantiateResponse.Address)
 }
 
 func (s *IntegrationTestSuite) TestCw20ContractInfo() {
 	sender := addr
-	msgIntantiateResponse, err := s.cw20InitiateCode(sender, 200)
+	msgIntantiateResponse, err := s.cw20InitiateCode(sender, intMsgCw20(200))
 	assert.NilError(s.T, err)
 
 	cw20ContractInfo, err := s.wasmQueryClient.ContractInfo(sdk.WrapSDKContext(s.ctx), &wasmtypes.QueryContractInfoRequest{Address: msgIntantiateResponse.Address})
 	assert.NilError(s.T, err)
-	assert.Equal(s.T, uint64(3), cw20ContractInfo.CodeID)
+	assert.Equal(s.T, uint64(1), cw20ContractInfo.CodeID)
 	assert.Equal(s.T, sender.String(), cw20ContractInfo.Admin)
 	assert.Equal(s.T, cw20Label, cw20ContractInfo.Label)
-	assert.Equal(s.T, "umee1qg5ega6dykkxc307y25pecuufrjkxkaggkkxh7nad0vhyhtuhw3shmlsys", cw20ContractInfo.Address)
+	assert.Equal(s.T, "umee1suhgf5svhu4usrurvxzlgn54ksxmn8gljarjtxqnapv8kjnp4nrs89p4g0", cw20ContractInfo.Address)
 }
 
 func (s *IntegrationTestSuite) TestCw20CheckBalance() {
 	sender, bobAddr, bobAmount := addr, addr2, uint64(2500)
 
-	msgIntantiateResponse, err := s.cw20InitiateCode(sender, bobAmount)
+	msgIntantiateResponse, err := s.cw20InitiateCode(sender, intMsgCw20(bobAmount))
 	assert.NilError(s.T, err)
 
 	bobBalanceUint := s.queryBalance(msgIntantiateResponse.Address, bobAddr)
@@ -270,7 +293,7 @@ func (s *IntegrationTestSuite) TestCw20CheckBalance() {
 func (s *IntegrationTestSuite) TestCw20Transfer() {
 	sender, bobAddr, bobAmount := addr, addr2, uint64(2500)
 
-	msgIntantiateResponse, err := s.cw20InitiateCode(sender, bobAmount)
+	msgIntantiateResponse, err := s.cw20InitiateCode(sender, intMsgCw20(bobAmount))
 	assert.NilError(s.T, err)
 
 	contracAddr := msgIntantiateResponse.Address
@@ -292,4 +315,61 @@ func TestCosmwasmCW20(t *testing.T) {
 	its.TestCw20ContractInfo()
 	its.TestCw20CheckBalance()
 	its.TestCw20Transfer()
+
+	// testing the umee cosmwasm queries
+	its.TestLeverageQueries()
+}
+
+func (s *IntegrationTestSuite) TestLeverageQueries() {
+	// umee cosmwasm contract upload
+	codeID := s.cw20StoreCode(addr2, umeeArtifact)
+	assert.Equal(s.T, uint64(2), codeID)
+	s.codeID = codeID
+
+	// initiate the umee cw contract
+	msgIntantiateResponse, err := s.cw20InitiateCode(addr2, new(InstantiateMsg))
+	assert.NilError(s.T, err)
+
+	genCustomQuery := func(qIndex int) []byte {
+		cq, err := json.Marshal(UmeeCwCustomQuery(qIndex))
+		assert.NilError(s.T, err)
+		return cq
+	}
+
+	tests := []struct {
+		Name          string
+		CQ            []byte
+		ResponseCheck func(data []byte)
+	}{
+		{
+			Name: "leverage query params",
+			CQ:   genCustomQuery(0),
+			ResponseCheck: func(data []byte) {
+				var rr lvtypes.QueryParamsResponse
+				err := json.Unmarshal(data, &rr)
+				assert.NilError(s.T, err)
+				assert.DeepEqual(s.T, rr.Params, lvtypes.DefaultParams())
+			},
+		},
+		{
+			Name: "leverage registered tokens",
+			CQ:   genCustomQuery(1),
+			ResponseCheck: func(data []byte) {
+				var rr lvtypes.QueryRegisteredTokensResponse
+				err := json.Unmarshal(data, &rr)
+				assert.NilError(s.T, err)
+				assert.Equal(s.T, true, len(rr.Registry) > 0)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.T.Run(tc.Name, func(t *testing.T) {
+			resp, err := s.wasmQueryClient.SmartContractState(sdk.WrapSDKContext(s.ctx), &wasmtypes.QuerySmartContractStateRequest{
+				Address: msgIntantiateResponse.Address, QueryData: tc.CQ,
+			})
+			assert.NilError(s.T, err)
+			tc.ResponseCheck(resp.Data)
+		})
+	}
 }
