@@ -9,7 +9,7 @@ during the swap of the Index accepted assets and burned to redeem any Index acce
 unique name for the meToken that represents it. Its price is determined by the average price of the assets in the Index.
 
 The `metoken` module allows users to swap and redeem accepted assets for an Index meToken. The Index meToken will
-maintain the parity between underlying assets given a specific configuration. The module transfers part of the 
+maintain the parity between underlying assets given a specific configuration. The module transfers part of the
 supplied assets to the `leverage` module in order to accrue interest.
 
 The `metoken` module depends directly on `x/leverage` for supplying and withdrawing assets, `x/oracle` for assets
@@ -93,7 +93,7 @@ metoken_price = 10000 USD
 ```
 
 #### Initial price
-The initial price for the first transaction will be determined by the average price of the underlying assets, 
+The initial price for the first transaction will be determined by the average price of the underlying assets,
 divided by the quantity of accepted assets in the Index, using the following formula:
 
 ``` yaml
@@ -315,8 +315,8 @@ The `metoken` module will have its own reserves to stabilize the processing of t
 every swap will be transferred to the reserves and a percentage of every withdrawal will be taken from the reserves.
 This portion is determined by the parameters of every asset in the Index.
 
-All the reserves will be saved to the `metoken` module balance along with all the fees and the claimed interest. The 
-amount of fees for every asset will be saved to the `metoken` module [State](#state) as well as the amount of the 
+All the reserves will be saved to the `metoken` module balance along with all the fees and the claimed interest. The
+amount of fees for every asset will be saved to the `metoken` module [State](#state) as well as the amount of the
 interests claimed from the `leverage` module. The reserves are equal to `balance - fee - interest` for every asset.
 
 #### Reserves Re-balancing
@@ -334,9 +334,9 @@ The workflow for every asset of each Index is as follows:
 
 ### Interest
 
-Every supply of liquidity to `leverage` module will produce interests. The interest will be accruing based on the 
+Every supply of liquidity to `leverage` module will produce interests. The interest will be accruing based on the
 settings of the supplied Token in the [Token Registry](https://github.com/umee-network/umee/tree/main/x/leverage#accepted-assets)
-and the [Supplying APY](https://github.com/umee-network/umee/tree/main/x/leverage#supplying-apy). Its usage will be 
+and the [Supplying APY](https://github.com/umee-network/umee/tree/main/x/leverage#supplying-apy). Its usage will be
 decided in future iterations.
 
 #### Claiming Interests
@@ -349,10 +349,10 @@ Every `claim_interests_frequency` a process that withdraws all the accrued inter
  2. Get the amount of Token transferred to the `leverage` module, stored in `metoken` module [State](#state).
  3. Calculate the delta 1) - 2), this will be the accrued interest.
  4. Withdraw accrued interest from `leverage` module.
- 5. If it's not possible to withdraw the entire accrued interest from the `leverage` module, given its own 
+ 5. If it's not possible to withdraw the entire accrued interest from the `leverage` module, given its own
     constraints, use the `MsgMaxWithdraw` function.
  6. Update the claimed interest in the `metoken` module [State](#state).
- 7. Update `next_interest_claiming_time`, stored in the `metoken` module [State](#state) adding the 
+ 7. Update `next_interest_claiming_time`, stored in the `metoken` module [State](#state) adding the
     `claim_interests_frequency` to the current block time.
 
 ## State
