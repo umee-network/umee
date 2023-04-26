@@ -126,6 +126,9 @@ import (
 	appparams "github.com/umee-network/umee/v4/app/params"
 	"github.com/umee-network/umee/v4/swagger"
 	"github.com/umee-network/umee/v4/util/genmap"
+	"github.com/umee-network/umee/v4/x/incentive"
+	incentivekeeper "github.com/umee-network/umee/v4/x/incentive/keeper"
+	incentivemodule "github.com/umee-network/umee/v4/x/incentive/module"
 	"github.com/umee-network/umee/v4/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
@@ -186,6 +189,7 @@ func init() {
 		// ibcfee.AppModuleBasic{},
 		gravity.AppModuleBasic{},
 		leverage.AppModuleBasic{},
+		incentivemodule.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
 		uibcmodule.AppModuleBasic{},
@@ -210,6 +214,7 @@ func init() {
 		icatypes.ModuleName:         nil,
 		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		incentive.ModuleName:        nil,
 		oracletypes.ModuleName:      nil,
 		uibc.ModuleName:             nil,
 	}
@@ -260,6 +265,7 @@ type UmeeApp struct {
 	ICAHostKeeper      icahostkeeper.Keeper
 	GravityKeeper      gravitykeeper.Keeper
 	LeverageKeeper     leveragekeeper.Keeper
+	IncentiveKeeper    incentivekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
 	UIbcQuotaKeeper    uibcquotakeeper.Keeper
@@ -324,8 +330,8 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		gravitytypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, bech32ibctypes.StoreKey,
-		uibc.StoreKey,
+		leveragetypes.StoreKey, incentive.StoreKey, oracletypes.StoreKey,
+		bech32ibctypes.StoreKey, uibc.StoreKey,
 	}
 	if Experimental {
 		storeKeys = append(storeKeys, wasm.StoreKey)
@@ -466,11 +472,14 @@ func New(
 		app.OracleKeeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
-	app.LeverageKeeper = *app.LeverageKeeper.SetHooks(
-		leveragetypes.NewMultiHooks(
-			app.OracleKeeper.Hooks(),
-		),
+	app.IncentiveKeeper = incentivekeeper.NewKeeper(
+		appCodec,
+		keys[incentive.StoreKey],
+		app.BankKeeper,
+		app.LeverageKeeper,
 	)
+	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
+	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
@@ -674,6 +683,7 @@ func New(
 		ica.NewAppModule(nil, &app.ICAHostKeeper),
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
+		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
@@ -703,6 +713,7 @@ func New(
 		paramstypes.ModuleName, vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentive.ModuleName,
 		oracletypes.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
@@ -721,6 +732,7 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentive.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
@@ -743,6 +755,7 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentive.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
@@ -758,6 +771,7 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
+		incentive.ModuleName,
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
@@ -794,10 +808,12 @@ func New(
 
 	simStateModules := genmap.Pick(
 		app.mm.Modules,
-		[]string{stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName,
-			ibchost.ModuleName},
+		[]string{
+			stakingtypes.ModuleName, authtypes.ModuleName, oracletypes.ModuleName,
+			ibchost.ModuleName,
+		},
 	)
-	// TODO: Ensure x/leverage implements simulator and add it here:
+	// TODO: Ensure x/leverage, x/incentive implement simulator and add it here:
 	simTestModules := genmap.Pick(simStateModules,
 		[]string{oracletypes.ModuleName, ibchost.ModuleName})
 

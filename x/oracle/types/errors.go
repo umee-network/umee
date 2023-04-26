@@ -25,7 +25,6 @@ var (
 	ErrNegativeOrZeroRate      = errors.Register(ModuleName, 14, "invalid exchange rate; should be positive")
 	ErrExistingPrevote         = errors.Register(ModuleName, 15, "prevote already submitted for this voting period")
 	ErrBallotNotSorted         = errors.Register(ModuleName, 16, "ballot must be sorted before this operation")
-	ErrNotImplemented          = errors.Register(ModuleName, 17, "function not implemented")
 	ErrNoHistoricPrice         = errors.Register(ModuleName, 18, "no historic price for this denom at this block")
 	ErrNoMedian                = errors.Register(ModuleName, 19, "no median for this denom at this block")
 	ErrNoMedianDeviation       = errors.Register(ModuleName, 20, "no median deviation for this denom at this block")

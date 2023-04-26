@@ -32,19 +32,24 @@ jobs:
           version: latest
           args: --timeout 8m
 
-  super-linter:
-    name: Run super-linter
+  markdown-lint:
+    name: markdown-lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Run super-linter
-        uses: github/super-linter@v5
-        env:
-          VALIDATE_ALL_CODEBASE: false
-          VALIDATE_MARKDOWN: true
-          DEFAULT_BRANCH: main
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      # lint only changed files
+      - uses: tj-actions/changed-files@v35
+        id: changed-files
+        with:
+          files: "**/*.md"
+          separator: ","
+      - uses: DavidAnson/markdownlint-cli2-action@v9
+        if: steps.changed-files.outputs.any_changed == 'true'
+        with:
+          globs: ${{ steps.changed-files.outputs.all_changed_files }}
+          separator: ","
 
   buf-lint:
     runs-on: ubuntu-latest

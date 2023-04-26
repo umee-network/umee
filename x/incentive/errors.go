@@ -7,19 +7,17 @@ import (
 )
 
 var (
-	// 0 = TODO
-	ErrNotImplemented = errors.Register(ModuleName, 0, "not implemented")
-
 	// 1XX = General
-	ErrInvalidProgramID     = errors.Register(ModuleName, 100, "invalid program ID")
-	ErrNilAsset             = errors.Register(ModuleName, 101, "nil asset")
-	ErrInvalidTier          = errors.Register(ModuleName, 102, "invalid unbonding tier")
-	ErrEmptyAddress         = errors.Register(ModuleName, 103, "empty address")
-	ErrInvalidProgramStatus = errors.Register(ModuleName, 104, "invalid program status")
-
-	// 2XX = Params
-	ErrUnbondingTierOrder   = errors.Register(ModuleName, 200, "unbonding tier lock durations out of order")
-	ErrUnbondingWeightOrder = errors.Register(ModuleName, 201, "unbonding tier weights out of order")
+	ErrInvalidProgramID        = errors.Register(ModuleName, 100, "invalid program ID")
+	ErrNilAsset                = errors.Register(ModuleName, 101, "nil asset")
+	ErrEmptyAddress            = errors.Register(ModuleName, 102, "empty address")
+	ErrInvalidProgramStatus    = errors.Register(ModuleName, 103, "invalid program status")
+	ErrInvalidProgramDuration  = errors.Register(ModuleName, 104, "invalid program duration")
+	ErrInvalidProgramStart     = errors.Register(ModuleName, 105, "invalid program start time")
+	ErrProgramRewardMismatch   = errors.Register(ModuleName, 106, "program total and remaining reward denoms mismatched")
+	ErrNonfundedProgramRewards = errors.Register(ModuleName, 107, "nonzero remaining rewards on a non-funded program")
+	ErrProgramWithoutRewards   = errors.Register(ModuleName, 108, "incentive program must have nonzero rewards")
+	ErrInvalidUnbonding        = errors.Register(ModuleName, 109, "invalid unbonding")
 
 	// 3XX = Gov Proposal
 	ErrNonzeroRemainingRewards = errors.Register(ModuleName, 300, "remaining rewards must be zero in proposal")
