@@ -59,8 +59,7 @@ type SetV[T any] interface {
 }
 
 func SetValue[s SetV[T], T any](store sdk.KVStore, key []byte, value T, errField string) error {
-	var c s = new(T)
-	c = &value
+	var c s = &value
 	bz, err := c.Marshal()
 	if err != nil {
 		return fmt.Errorf("error while setting %s: %s", errField, err)
