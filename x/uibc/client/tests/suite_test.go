@@ -4,25 +4,16 @@ import (
 	"testing"
 
 	"github.com/cosmos/cosmos-sdk/testutil/network"
-	"gotest.tools/v3/assert"
+
+	itestsuite "github.com/umee-network/umee/v4/tests/cli"
 )
 
-type IntegrationTestSuite struct {
-	cfg     network.Config
-	network *network.Network
+type IntegrationTests struct {
+	*itestsuite.E2ESuite
 }
 
-func initIntegrationTestSuite(cfg network.Config, t *testing.T) *IntegrationTestSuite {
-	var err error
-	t.Log("setting up integration test suite")
-	network, err := network.New(t, t.TempDir(), cfg)
-	assert.NilError(t, err)
-	_, err = network.WaitForHeight(1)
-	assert.NilError(t, err)
-	return &IntegrationTestSuite{cfg: cfg, network: network}
-}
-
-func tearDownSuite(s *IntegrationTestSuite, t *testing.T) {
-	t.Log("tearing down integration test suite")
-	s.network.Cleanup()
+func NewIntegrationTestSuite(cfg network.Config, t *testing.T) *IntegrationTests {
+	return &IntegrationTests{
+		&itestsuite.E2ESuite{Cfg: cfg, T: t},
+	}
 }

@@ -31,7 +31,7 @@ func (q Querier) Params(
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	params := k.getParams(ctx)
+	params := k.GetParams(ctx)
 
 	return &incentive.QueryParamsResponse{Params: params}, nil
 }
@@ -77,7 +77,7 @@ func (q Querier) UpcomingIncentivePrograms(
 		Programs: programs,
 	}
 
-	return resp, incentive.ErrNotImplemented
+	return resp, err
 }
 
 func (q Querier) OngoingIncentivePrograms(
@@ -130,76 +130,150 @@ func (q Querier) CompletedIncentivePrograms(
 }
 
 func (q Querier) PendingRewards(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryPendingRewards,
 ) (*incentive.QueryPendingRewardsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
 
-	// TODO: calculate, without modifying, rewards which would result from MsgClaim
-
-	return &incentive.QueryPendingRewardsResponse{}, incentive.ErrNotImplemented
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	pending, err := k.calculateRewards(ctx, addr)
+	if err != nil {
+		return nil, err
+	}
+	return &incentive.QueryPendingRewardsResponse{Rewards: pending}, err
 }
 
-func (q Querier) Bonded(
-	_ context.Context,
-	req *incentive.QueryBonded,
-) (*incentive.QueryBondedResponse, error) {
+func (q Querier) AccountBonds(
+	goCtx context.Context,
+	req *incentive.QueryAccountBonds,
+) (*incentive.QueryAccountBondsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
 
-	// TODO: get one or all denoms, all tiers bonded to this address
+	totalBonded := sdk.NewCoins()
+	totalUnbonding := sdk.NewCoins()
+	accountUnbondings := []incentive.Unbonding{}
 
-	return &incentive.QueryBondedResponse{}, incentive.ErrNotImplemented
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	denoms, err := k.getAllBondDenoms(ctx, addr)
+	if err != nil {
+		return nil, err
+	}
+	for _, denom := range denoms {
+		bonded, unbonding, unbondings := k.BondSummary(ctx, addr, denom)
+		totalBonded = totalBonded.Add(bonded)
+		totalUnbonding = totalUnbonding.Add(unbonding)
+		// Only nonzero unbondings will be stored, so this list is already filtered
+		accountUnbondings = append(accountUnbondings, unbondings...)
+	}
+
+	return &incentive.QueryAccountBondsResponse{
+		Bonded:     totalBonded,
+		Unbonding:  totalUnbonding,
+		Unbondings: accountUnbondings,
+	}, nil
 }
 
 func (q Querier) TotalBonded(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryTotalBonded,
 ) (*incentive.QueryTotalBondedResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: bonded uTokens across one or all denoms, all tiers
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	return &incentive.QueryTotalBondedResponse{}, incentive.ErrNotImplemented
+	var total sdk.Coins
+	if req.Denom != "" {
+		total = sdk.NewCoins(k.getTotalBonded(ctx, req.Denom))
+	} else {
+		var err error
+		total, err = k.getAllTotalBonded(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &incentive.QueryTotalBondedResponse{Bonded: total}, nil
 }
 
 func (q Querier) TotalUnbonding(
-	_ context.Context,
+	goCtx context.Context,
 	req *incentive.QueryTotalUnbonding,
 ) (*incentive.QueryTotalUnbondingResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	// TODO: unbonding uTokens across one or all denoms, all tiers
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	return &incentive.QueryTotalUnbondingResponse{}, incentive.ErrNotImplemented
+	var total sdk.Coins
+	if req.Denom != "" {
+		total = sdk.NewCoins(k.getTotalUnbonding(ctx, req.Denom))
+	} else {
+		var err error
+		total, err = k.getAllTotalUnbonding(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &incentive.QueryTotalUnbondingResponse{Unbonding: total}, nil
 }
 
-func (q Querier) Unbondings(
+func (q Querier) CurrentRates(
 	goCtx context.Context,
-	req *incentive.QueryUnbondings,
-) (*incentive.QueryUnbondingsResponse, error) {
+	req *incentive.QueryCurrentRates,
+) (*incentive.QueryCurrentRatesResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
-	addr, err := sdk.AccAddressFromBech32(req.Address)
+
+	programs, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
 	if err != nil {
 		return nil, err
 	}
 
-	unbondings := []incentive.Unbonding{}
-	err = k.iterateAccountUnbondings(ctx, addr, func(ctx sdk.Context, au incentive.AccountUnbondings) error {
-		unbondings = append(unbondings, au.Unbondings...)
-		return nil
-	})
-
-	return &incentive.QueryUnbondingsResponse{Unbondings: unbondings}, err
+	// to compute the rewards a reference amount (10^exponent) of bonded uToken is currently earning,
+	// we need to divide the total rewards being distributed by all ongoing incentive programs targeting
+	// that uToken denom, by the ratio of the total bonded amount to the reference amount.
+	bonded := k.getTotalBonded(ctx, req.UToken)
+	rewards := sdk.NewCoins()
+	exponent := k.getRewardAccumulator(ctx, req.UToken).Exponent
+	for _, p := range programs {
+		if p.UToken == req.UToken {
+			// seconds per year / duration = programsPerYear (as this query assumes incentives will stay constant)
+			programsPerYear := sdk.MustNewDecFromStr("31557600").Quo(sdk.NewDec(p.Duration))
+			// reference amount / total bonded = rewardPortion (as the more uTokens bond, the fewer rewards each earns)
+			rewardPortion := ten.Power(uint64(exponent)).QuoInt(bonded.Amount)
+			// annual rewards for reference amount for this specific program, assuming current rates continue
+			rewardCoin := sdk.NewCoin(
+				p.TotalRewards.Denom,
+				programsPerYear.Mul(rewardPortion).MulInt(p.TotalRewards.Amount).TruncateInt(),
+			)
+			// add this program's annual rewards to the total for all programs incentivizing this uToken denom
+			rewards = rewards.Add(rewardCoin)
+		}
+	}
+	return &incentive.QueryCurrentRatesResponse{
+		ReferenceBond: sdk.NewCoin(
+			req.UToken,
+			ten.Power(uint64(exponent)).TruncateInt(),
+		),
+		Rewards: rewards,
+	}, nil
 }

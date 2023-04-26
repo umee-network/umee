@@ -7,94 +7,73 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
-var bondTiers = []incentive.BondTier{incentive.BondTierLong, incentive.BondTierMiddle, incentive.BondTierShort}
-
-// bondTier converts from the uint32 used in message types to the enumeration, returning an error
-// if it is not valid. Does not allow incentive.BondTierUnspecified
-func bondTier(n uint32) (incentive.BondTier, error) {
-	if n == 0 || n > uint32(incentive.BondTierLong) {
-		return incentive.BondTierUnspecified, incentive.ErrInvalidTier.Wrapf("%d", n)
-	}
-	return incentive.BondTier(n), nil
+// restrictedCollateral is used by leverage to see the amount of collateral an account has
+// which cannot be voluntarily withdrawn. This is the sum of bonded and unbonding uTokens.
+func (k Keeper) restrictedCollateral(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
+	return k.GetBonded(ctx, addr, denom).Add(k.getUnbondingAmount(ctx, addr, denom))
 }
 
-// getAllBonded gets the total amount of a uToken bonded to an account across all three unbonding tiers.
-// This does not include tokens currently unbonding.
-func (k Keeper) getAllBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
-	bonded := coin.Zero(denom)
-	for _, tier := range bondTiers {
-		bonded = bonded.Add(k.getBonded(ctx, addr, denom, tier))
-	}
-	return bonded
-}
-
-// accountBonds gets the total bonded and unbonding for a given account, as well as a list of ongoing unbondings,
-// for a single bond tier and uToken denom. Using incentive.BondTierUnspecified returns all tiers instead.
-// It ignores completed unbondings without actually clearing those unbondings in state, so it is safe for
-// queries and any parts of Msg functions which are not intended to alter state.
-func (k Keeper) accountBonds(ctx sdk.Context, addr sdk.AccAddress, denom string, tier incentive.BondTier) (
+// BondSummary gets the total bonded and unbonding for a given account, as well as a list of ongoing unbondings,
+// for a single uToken denom. It ignores completed unbondings without actually clearing those unbondings in state,
+// so it is safe for use by queries and any parts of Msg functions which are not intended to alter state.
+func (k Keeper) BondSummary(ctx sdk.Context, addr sdk.AccAddress, denom string) (
 	bonded sdk.Coin, unbonding sdk.Coin, unbondings []incentive.Unbonding,
 ) {
-	bonded = coin.Zero(denom)
 	unbonding = coin.Zero(denom)
 	unbondings = []incentive.Unbonding{}
 
-	time := k.getLastRewardsTime(ctx)
+	time := k.GetLastRewardsTime(ctx)
+	duration := k.GetParams(ctx).UnbondingDuration
 
-	// sum all bonded and unbonding tokens for this denom, for the specified tier or across all tiers
-	for _, t := range bondTiers {
-		if tier == incentive.BondTierUnspecified || t == tier {
-			bonded = bonded.Add(k.getBonded(ctx, addr, denom, t))
+	// sum all bonded and unbonding tokens for this denom
+	bonded = k.GetBonded(ctx, addr, denom)
 
-			tierUnbondings := k.getUnbondings(ctx, addr, denom, t)
-			for _, u := range tierUnbondings {
-				if u.End > time {
-					// this unbonding is still ongoing, and can be counted normally
-					unbondings = append(unbondings, u)
-					unbonding = unbonding.Add(u.Amount)
-				}
-				// Otherwise, this unbonding is completed, and will be quietly cleared by the next state-altering message
-				// which is permitted to affect this account. For now, it is omitted from the returned unbonding total.
-			}
+	storedUnbondings := k.getUnbondings(ctx, addr, denom)
+	for _, u := range storedUnbondings {
+		if u.End > time && u.Start+duration > time {
+			// If unbonding has passed neither its original end time nor its dynamic end time based on parameters
+			// the unbonding is still ongoing, and can be counted normally.
+			// This logic allows a reduction in unbonding duration param to speed up existing unbondings.
+			unbondings = append(unbondings, u)
+			unbonding = unbonding.Add(u.UToken)
 		}
+		// Otherwise, this unbonding is completed, and will be quietly cleared by the next state-altering message
+		// which is permitted to affect this account. For now, it is omitted from the returned unbonding total.
 	}
 
 	// returned values reflect the real situation (after completed unbondings), not what is currently stored in state
 	return bonded, unbonding, unbondings
 }
 
-// increaseBond increases the bonded uToken amount for an account at a given tier, and updates the module's total.
+// increaseBond increases the bonded uToken amount for an account, and updates the module's total.
 // it also initializes the account's reward tracker if the bonded amount was zero. This function should only be
 // called during MsgBond.
-func (k Keeper) increaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, bond sdk.Coin) error {
+func (k Keeper) increaseBond(ctx sdk.Context, addr sdk.AccAddress, bond sdk.Coin) error {
 	// get bonded amount before adding the currently bonding tokens
-	bonded := k.getBonded(ctx, addr, bond.Denom, tier)
+	bonded := k.GetBonded(ctx, addr, bond.Denom)
 	// if bonded amount was zero, reward tracker must be initialized
 	if bonded.IsZero() {
-		if err := k.UpdateRewardTracker(ctx, addr, tier, bond.Denom); err != nil {
+		if err := k.updateRewardTracker(ctx, addr, bond.Denom); err != nil {
 			return err
 		}
 	}
 	// update bonded amount (also increases TotalBonded)
-	return k.setBonded(ctx, addr, bonded.Add(bond), tier)
+	return k.setBonded(ctx, addr, bonded.Add(bond))
 }
 
-// decreaseBond decreases the bonded uToken amount for an account at a given tier, and updates the module's total.
-// it also clears reward trackers for any bond tiers which have reached zero for the account, to save storage.
+// decreaseBond decreases the bonded uToken amount for an account, and updates the module's total.
+// it also clears reward trackers if bond amount reached zero for the account, to save storage.
 // This function must be called during MsgBeginUnbonding and when the leverage module forcefully liquidates bonded
 // (but not already unbonding) collateral.
-func (k Keeper) decreaseBond(ctx sdk.Context, addr sdk.AccAddress, tier incentive.BondTier, unbond sdk.Coin) error {
+func (k Keeper) decreaseBond(ctx sdk.Context, addr sdk.AccAddress, unbond sdk.Coin) error {
 	// calculate new bonded amount after subtracting the currently unbonding tokens
-	bonded := k.getBonded(ctx, addr, unbond.Denom, tier).Sub(unbond)
+	bonded := k.GetBonded(ctx, addr, unbond.Denom).Sub(unbond)
 
-	// if the new bond for this account + tier + denom has reached zero, it is safe to stop tracking rewards
+	// if the new bond for this account + denom has reached zero, it is safe to stop tracking rewards
 	if bonded.IsZero() {
-		err := k.clearRewardTracker(ctx, addr, tier, unbond.Denom)
-		if err != nil {
-			return err
-		}
+		k.clearRewardTracker(ctx, addr, unbond.Denom)
 	}
 
 	// update bonded amount (also decreases TotalBonded)
-	return k.setBonded(ctx, addr, bonded, tier)
+	return k.setBonded(ctx, addr, bonded)
 }

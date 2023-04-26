@@ -1,19 +1,16 @@
-//go:build norace
-// +build norace
-
 package tests
 
 import (
 	"testing"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
-	"github.com/stretchr/testify/suite"
 	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v4/app"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {
+	t.Parallel()
 	cfg := umeeapp.IntegrationTestNetworkConfig()
 	cfg.NumValidators = 2
 	cfg.Mnemonics = []string{
@@ -42,5 +39,11 @@ func TestIntegrationTestSuite(t *testing.T) {
 
 	cfg.GenesisState[gravitytypes.ModuleName] = bz
 
-	suite.Run(t, NewIntegrationTestSuite(cfg))
+	s := NewIntegrationTestSuite(cfg, t)
+	s.SetupSuite()
+	defer s.TearDownSuite()
+
+	// queries
+	s.TestInvalidQueries()
+	s.TestLeverageScenario()
 }

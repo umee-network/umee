@@ -32,6 +32,7 @@ var (
 	ErrInsufficientBalance    = errors.Register(ModuleName, 300, "insufficient balance")
 	ErrInsufficientCollateral = errors.Register(ModuleName, 301, "insufficient collateral")
 	ErrLiquidationRepayZero   = errors.Register(ModuleName, 303, "liquidation would repay zero tokens")
+	ErrBondedCollateral       = errors.Register(ModuleName, 304, "collateral is bonded to incentive module")
 
 	// 4XX = Price Sensitive
 	ErrBadValue              = errors.Register(ModuleName, 400, "bad USD value")
@@ -55,8 +56,8 @@ var (
 	ErrInvalidExchangeRate     = errors.Register(ModuleName, 604, "exchange rate less than one")
 	ErrInconsistentTotalBorrow = errors.Register(ModuleName, 605, "total adjusted borrow inconsistency")
 	ErrExcessiveTimeElapsed    = errors.Register(ModuleName, 606, "excessive time elapsed since last interest time")
+	ErrIncentiveKeeperNotSet   = errors.Register(ModuleName, 607, "incentive keeper not set")
 
 	// 7XX = Disabled Functionality
 	ErrNotLiquidatorNode = errors.Register(ModuleName, 700, "node has disabled liquidator queries")
-	ErrNotImplemented    = errors.Register(ModuleName, 701, "not implemented")
 )

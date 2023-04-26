@@ -23,6 +23,7 @@ import (
 
 	"github.com/umee-network/umee/v4/app/upgradev3"
 	"github.com/umee-network/umee/v4/app/upgradev3x3"
+	"github.com/umee-network/umee/v4/x/incentive"
 	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
@@ -47,6 +48,18 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade4_1(upgradeInfo)
 	app.registerUpgrade4_2(upgradeInfo)
 	app.registerUpgrade4_3(upgradeInfo)
+	app.registerUpgrade4_4(upgradeInfo)
+}
+
+// performs upgrade from v4.3 to v4.4
+func (app *UmeeApp) registerUpgrade4_4(upgradeInfo upgradetypes.Plan) {
+	const planName = "v4.4-alpha1" // TODO: set correct name
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{
+			incentive.ModuleName,
+		},
+	})
 }
 
 // performs upgrade from v4.2 to v4.3
@@ -97,7 +110,6 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 			icahosttypes.StoreKey,
 		},
 	})
-
 }
 
 // performs upgrade from v4.1 to v4.2

@@ -13,7 +13,7 @@ type Hooks struct {
 	k Keeper
 }
 
-var _ leveragetypes.Hooks = Hooks{}
+var _ leveragetypes.TokenHooks = Hooks{}
 
 // Hooks returns a new Hooks instance that wraps the x/oracle keeper.
 func (k Keeper) Hooks() Hooks {

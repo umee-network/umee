@@ -32,8 +32,8 @@ func (k Keeper) deleteTokenSettings(ctx sdk.Context, token types.Token) error {
 	store := ctx.KVStore(k.storeKey)
 	tokenKey := types.KeyRegisteredToken(token.BaseDenom)
 	store.Delete(tokenKey)
-	// call oracle hooks on deleted (not just blacklisted) token
-	k.hooks.AfterRegisteredTokenRemoved(ctx, token)
+	// call token hooks on deleted (not just blacklisted) token
+	k.afterRegisteredTokenRemoved(ctx, token)
 	return nil
 }
 
@@ -51,7 +51,7 @@ func (k Keeper) SetTokenSettings(ctx sdk.Context, token types.Token) error {
 		return err
 	}
 
-	k.hooks.AfterTokenRegistered(ctx, token)
+	k.afterTokenRegistered(ctx, token)
 	store.Set(tokenKey, bz)
 	return nil
 }
