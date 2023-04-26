@@ -147,16 +147,16 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchange
 // IterateExchangeRates iterates over all USD rates in the store.
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
 	store := ctx.KVStore(k.storeKey)
-
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
+	prefixLen := len(types.KeyPrefixExchangeRate)
 
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
-		denom := string(key[len(types.KeyPrefixExchangeRate) : len(key)-1]) // -1 to remove the null suffix
+		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
 		dp := sdk.DecProto{}
-
 		k.cdc.MustUnmarshal(iter.Value(), &dp)
+
 		if handler(denom, dp.Dec) {
 			break
 		}
@@ -202,7 +202,6 @@ type IterateFeederDelegationHandler func(delegator sdk.ValAddress, delegate sdk.
 // callback function.
 func (k Keeper) IterateFeederDelegations(ctx sdk.Context, handler IterateFeederDelegationHandler) {
 	store := ctx.KVStore(k.storeKey)
-
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixFeederDelegation)
 	defer iter.Close()
 
@@ -251,13 +250,11 @@ func (k Keeper) DeleteMissCounter(ctx sdk.Context, operator sdk.ValAddress) {
 // function.
 func (k Keeper) IterateMissCounters(ctx sdk.Context, handler func(sdk.ValAddress, uint64) bool) {
 	store := ctx.KVStore(k.storeKey)
-
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMissCounter)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
 		operator := sdk.ValAddress(iter.Key()[2:])
-
 		var missCounter gogotypes.UInt64Value
 		k.cdc.MustUnmarshal(iter.Value(), &missCounter)
 
@@ -301,7 +298,6 @@ func (k Keeper) SetAggregateExchangeRatePrevote(
 	prevote types.AggregateExchangeRatePrevote,
 ) {
 	store := ctx.KVStore(k.storeKey)
-
 	bz := k.cdc.MustMarshal(&prevote)
 	store.Set(types.KeyAggregateExchangeRatePrevote(voter), bz)
 }
@@ -318,13 +314,11 @@ func (k Keeper) IterateAggregateExchangeRatePrevotes(
 	handler func(sdk.ValAddress, types.AggregateExchangeRatePrevote) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
-
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRatePrevote)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
 		voterAddr := sdk.ValAddress(iter.Key()[2:])
-
 		var aggregatePrevote types.AggregateExchangeRatePrevote
 		k.cdc.MustUnmarshal(iter.Value(), &aggregatePrevote)
 
@@ -381,13 +375,11 @@ func (k Keeper) IterateAggregateExchangeRateVotes(
 	handler IterateExchangeRateVote,
 ) {
 	store := ctx.KVStore(k.storeKey)
-
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixAggregateExchangeRateVote)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
 		voterAddr := sdk.ValAddress(iter.Key()[2:])
-
 		var aggregateVote types.AggregateExchangeRateVote
 		k.cdc.MustUnmarshal(iter.Value(), &aggregateVote)
 
