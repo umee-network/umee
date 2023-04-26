@@ -349,7 +349,7 @@ Every `claim_interests_frequency` a process that withdraws all the accrued inter
  2. Get the amount of Token transferred to the `leverage` module, stored in `metoken` module [State](#state).
  3. Calculate the delta 1) - 2), this will be the accrued interest.
  4. Withdraw accrued interest from `leverage` module.
- 5. Execute `leverage` query `maxWithdraw` and if its result is less than the calculated interest, withdraw as much 
+ 5. Execute `leverage` query `maxWithdraw` and if its result is less than the calculated interest, withdraw as much
     as possible based on the query result. If not, withdraws the entire interest amount.
  6. Update the claimed interest in the `metoken` module [State](#state).
  7. Update `next_interest_claiming_time`, stored in the `metoken` module [State](#state) adding the
