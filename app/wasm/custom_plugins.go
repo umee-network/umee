@@ -20,9 +20,7 @@ func RegisterCustomPlugins(
 		Custom: wasmQueryPlugin.CustomQuerier(),
 	})
 
-	messagePluginOpt := wasmkeeper.WithMessageHandlerDecorator(func(old wasmkeeper.Messenger) wasmkeeper.Messenger {
-		return msg.NewMessagePlugin(leverageKeeper)
-	})
+	messagePluginOpt := wasmkeeper.WithMessageHandlerDecorator(msg.NewMessagePlugin(leverageKeeper))
 
 	return []wasm.Option{
 		queryPluginOpt,

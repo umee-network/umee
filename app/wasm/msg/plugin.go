@@ -18,9 +18,15 @@ type Plugin struct {
 	wrapped     wasmkeeper.Messenger
 }
 
-func NewMessagePlugin(leverageKeeper lvkeeper.Keeper) *Plugin {
-	return &Plugin{
-		lvMsgServer: lvkeeper.NewMsgServerImpl(leverageKeeper),
+var _ wasmkeeper.Messenger = (*Plugin)(nil)
+
+// CustomMessageDecorator returns decorator for custom CosmWasm bindings messages
+func NewMessagePlugin(leverageKeeper lvkeeper.Keeper) func(wasmkeeper.Messenger) wasmkeeper.Messenger {
+	return func(old wasmkeeper.Messenger) wasmkeeper.Messenger {
+		return &Plugin{
+			wrapped:     old,
+			lvMsgServer: lvkeeper.NewMsgServerImpl(leverageKeeper),
+		}
 	}
 }
 

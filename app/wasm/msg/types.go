@@ -56,5 +56,5 @@ type UmeeMsg struct {
 	// Used to do supply and collateralize their assets.
 	SupplyCollateral *lvtypes.MsgSupplyCollateral `json:"supply_collateralize,omitempty"`
 	// Used to do withdraw maximum assets by supplier.
-	AssignedMsgMaxWithdraw *lvtypes.MsgMaxWithdraw `json:"max_withdraw,omitempty"`
+	// AssignedMsgMaxWithdraw *lvtypes.MsgMaxWithdraw `json:"max_withdraw,omitempty"`
 }
