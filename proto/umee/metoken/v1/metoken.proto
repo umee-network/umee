@@ -1,0 +1,100 @@
+syntax = "proto3";
+package umeenetwork.umee.metoken.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/umee-network/umee/v4/x/metoken";
+
+// Params defines the parameters for the metoken module.
+message Params {
+  option (gogoproto.equal) = true;
+
+  // Reserves Re-balancing Frequency in seconds, determines how often the re-balancing of the module reserves will be
+  // triggered
+  int64 rebalancing_frequency = 1;
+
+  // Interest claiming frequency in seconds, determines how often metoken module will clamim accrued interest from
+  // leverage module
+  int64 claiming_frequency = 2;
+}
+
+// Index defines an index of assets that are allowed to swap and redeem for the Index's meToken,
+// along with its metadata and parameters.
+message Index {
+  option (gogoproto.equal) = true;
+
+  // MeToken Max Supply where:
+  // Denom is the denomination of the Index's meToken denom that will be given to user in exchange of accepted
+  // assets.
+  // Amount is the maximum amount of Index's meTokens can be minted.
+  // A swap that requires to mint more Index's meToken than this value will result in an error.
+  // Must be a non negative value. 0 means that there is no limit.
+  cosmos.base.v1beta1.Coin metoken_max_supply         = 1 [(gogoproto.nullable) = false];
+
+  // Fee contains fee parameters used for swap and redemption fee calculations for all underlying
+  // assets in this index.
+  Fee fee = 2 [(gogoproto.nullable) = false];
+
+  // Accepted Assets is the list of underlying Tokens that can be swapped and redeemed for the Index's meToken,
+  // along with their token-specific parameters.
+  repeated AcceptedAsset accepted_assets = 3 [(gogoproto.nullable) = false];
+}
+
+// Fee are the parameters used for the calculation of the fee to be applied for swaps and redemptions and charged to
+// the user. The usage of these parameters is explained here:
+// https://github.com/umee-network/umee/tree/main/x/metoken#dynamic-fee
+message Fee {
+  option (gogoproto.equal) = true;
+
+  // Min fee is the minimum fee to be charged to the user. The applied fee will tend to decrease down to this value,
+  // when the accepted asset is undersupplied in the index. It must be less than Balanced and Max fees.
+  // Valid values: 0-1.
+  string min_fee = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // Balanced fee is the fee to be charged to the user when the index is balanced. It must be greater than min_fee and
+  // lower than max_fee
+  // Valid values: 0-1.
+  string balanced_fee = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // Max fee is the maximum fee to be charged to the user. The applied fee will tend to increase up to this value,
+  // when the accepted asset is oversupplied in the index. It must be greater than Min and Balanced fee.
+  // Valid values: 0-1.
+  string max_fee = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// AcceptedAsset is an asset that is accepted to participate in the Index's swaps and redemptions, along with its
+// metadata and parameters
+message AcceptedAsset {
+  option (gogoproto.equal) = true;
+
+  // Asset Denom is the denomination of the underlying asset. Must be the base
+  // denom as registered in the Bank module (so IBC denom for IBC tokens).
+  string asset_denom = 1;
+
+  // Reserve portion is the portion of swapped assets that will be kept in the metoken module as reserves, 
+  // instead of supplied to the leverage module. It is also the
+  // portion that will be taken from metoken module reserves when a redemption occurs.
+  // Valid values: 0-1.
+  string reserve_portion = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // Target allocation is the portion of an accepted asset the Index is targeting to have. The sum of
+  // target allocations of every accepted asset in the Index should be equal to 1.
+  // Valid values: 0-1.
+  string target_allocation = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
