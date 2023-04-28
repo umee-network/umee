@@ -8,8 +8,9 @@ import (
 
 var (
 	_ sdk.Msg = &MsgClaim{}
-	_ sdk.Msg = &MsgBeginUnbonding{}
 	_ sdk.Msg = &MsgBond{}
+	_ sdk.Msg = &MsgBeginUnbonding{}
+	_ sdk.Msg = &MsgEmergencyUnbond{}
 	_ sdk.Msg = &MsgSponsor{}
 	_ sdk.Msg = &MsgGovSetParams{}
 	_ sdk.Msg = &MsgGovCreatePrograms{}
@@ -42,16 +43,15 @@ func (msg MsgClaim) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgClaim) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgBond(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBond {
+func NewMsgBond(account sdk.AccAddress, asset sdk.Coin) *MsgBond {
 	return &MsgBond{
 		Account: account.String(),
-		Tier:    tier,
-		Asset:   asset,
+		UToken:  asset,
 	}
 }
 
 func (msg MsgBond) ValidateBasic() error {
-	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
+	return validateSenderAsset(msg.Account, &msg.UToken)
 }
 
 func (msg MsgBond) GetSigners() []sdk.AccAddress {
@@ -70,16 +70,15 @@ func (msg MsgBond) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgBond) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgBeginUnbonding(account sdk.AccAddress, tier uint32, asset sdk.Coin) *MsgBeginUnbonding {
+func NewMsgBeginUnbonding(account sdk.AccAddress, asset sdk.Coin) *MsgBeginUnbonding {
 	return &MsgBeginUnbonding{
 		Account: account.String(),
-		Tier:    tier,
-		Asset:   asset,
+		UToken:  asset,
 	}
 }
 
 func (msg MsgBeginUnbonding) ValidateBasic() error {
-	return validateSenderAssetTier(msg.Account, msg.Tier, &msg.Asset)
+	return validateSenderAsset(msg.Account, &msg.UToken)
 }
 
 func (msg MsgBeginUnbonding) GetSigners() []sdk.AccAddress {
@@ -98,11 +97,37 @@ func (msg MsgBeginUnbonding) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgBeginUnbonding) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32, asset sdk.Coin) *MsgSponsor {
+func NewMsgEmergencyUnbond(account sdk.AccAddress, asset sdk.Coin) *MsgEmergencyUnbond {
+	return &MsgEmergencyUnbond{
+		Account: account.String(),
+		UToken:  asset,
+	}
+}
+
+func (msg MsgEmergencyUnbond) ValidateBasic() error {
+	return validateSenderAsset(msg.Account, &msg.UToken)
+}
+
+func (msg MsgEmergencyUnbond) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Account)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg MsgEmergencyUnbond) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// Route implements the sdk.Msg interface.
+func (msg MsgEmergencyUnbond) Route() string { return RouterKey }
+
+// Type implements the sdk.Msg interface.
+func (msg MsgEmergencyUnbond) Type() string { return sdk.MsgTypeURL(&msg) }
+
+func NewMsgSponsor(sponsor sdk.AccAddress, programID uint32) *MsgSponsor {
 	return &MsgSponsor{
 		Sponsor: sponsor.String(),
 		Program: programID,
-		Asset:   asset,
 	}
 }
 
@@ -110,7 +135,8 @@ func (msg MsgSponsor) ValidateBasic() error {
 	if msg.Program == 0 {
 		return ErrInvalidProgramID.Wrapf("%d", msg.Program)
 	}
-	return validateSenderAsset(msg.Sponsor, &msg.Asset)
+	_, err := sdk.AccAddressFromBech32(msg.Sponsor)
+	return err
 }
 
 func (msg MsgSponsor) GetSigners() []sdk.AccAddress {
@@ -179,7 +205,7 @@ func (msg MsgGovCreatePrograms) ValidateBasic() error {
 		return ErrEmptyProposal
 	}
 	for _, p := range msg.Programs {
-		if err := validateProposedIncentiveProgram(p); err != nil {
+		if err := p.ValidateProposed(); err != nil {
 			return err
 		}
 	}
@@ -212,14 +238,4 @@ func validateSenderAsset(sender string, asset *sdk.Coin) error {
 		return ErrNilAsset
 	}
 	return asset.Validate()
-}
-
-func validateSenderAssetTier(sender string, tier uint32, asset *sdk.Coin) error {
-	if err := validateSenderAsset(sender, asset); err != nil {
-		return err
-	}
-	if tier < 1 || tier > 3 {
-		return ErrInvalidTier.Wrapf("%d", tier)
-	}
-	return nil
 }

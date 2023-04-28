@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util"
+	"github.com/umee-network/umee/v4/util/store"
 	"github.com/umee-network/umee/v4/x/oracle/types"
 )
 
@@ -105,21 +106,8 @@ func (k AvgKeeper) latestIdxKey(denom string) []byte {
 }
 
 func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
-	avs := make([]types.AvgCounter, 0)
 	prefix := util.ConcatBytes(0, types.KeyPrefixAvgCounter, []byte(denom))
-
-	iter := sdk.KVStorePrefixIterator(k.store, prefix)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		var av types.AvgCounter
-		err := av.Unmarshal(iter.Value())
-		if err != nil {
-			panic(err)
-		}
-		avs = append(avs, av)
-	}
-
-	return avs
+	return store.MustLoadAll[*types.AvgCounter](k.store, prefix)
 }
 
 // setAvgCounters sets AllAvgCounter in the same order as in the slice.

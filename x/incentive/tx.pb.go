@@ -125,8 +125,7 @@ func (m *MsgClaimResponse) GetAmount() github_com_cosmos_cosmos_sdk_types.Coins 
 // MsgBond represents a account's request to bond uToken collateral.
 type MsgBond struct {
 	Account string     `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	Tier    uint32     `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
-	Asset   types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
+	UToken  types.Coin `protobuf:"bytes,2,opt,name=uToken,proto3" json:"uToken"`
 }
 
 func (m *MsgBond) Reset()         { *m = MsgBond{} }
@@ -169,16 +168,9 @@ func (m *MsgBond) GetAccount() string {
 	return ""
 }
 
-func (m *MsgBond) GetTier() uint32 {
+func (m *MsgBond) GetUToken() types.Coin {
 	if m != nil {
-		return m.Tier
-	}
-	return 0
-}
-
-func (m *MsgBond) GetAsset() types.Coin {
-	if m != nil {
-		return m.Asset
+		return m.UToken
 	}
 	return types.Coin{}
 }
@@ -223,8 +215,7 @@ var xxx_messageInfo_MsgBondResponse proto.InternalMessageInfo
 // MsgBeginUnbonding represents a account's request to begin unbonding uToken collateral.
 type MsgBeginUnbonding struct {
 	Account string     `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
-	Tier    uint32     `protobuf:"varint,2,opt,name=tier,proto3" json:"tier,omitempty"`
-	Asset   types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
+	UToken  types.Coin `protobuf:"bytes,2,opt,name=uToken,proto3" json:"uToken"`
 }
 
 func (m *MsgBeginUnbonding) Reset()         { *m = MsgBeginUnbonding{} }
@@ -267,16 +258,9 @@ func (m *MsgBeginUnbonding) GetAccount() string {
 	return ""
 }
 
-func (m *MsgBeginUnbonding) GetTier() uint32 {
+func (m *MsgBeginUnbonding) GetUToken() types.Coin {
 	if m != nil {
-		return m.Tier
-	}
-	return 0
-}
-
-func (m *MsgBeginUnbonding) GetAsset() types.Coin {
-	if m != nil {
-		return m.Asset
+		return m.UToken
 	}
 	return types.Coin{}
 }
@@ -318,21 +302,110 @@ func (m *MsgBeginUnbondingResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgBeginUnbondingResponse proto.InternalMessageInfo
 
+// MsgEmergencyUnbond represents a account's request to instantly unbond uToken collateral for a fee.
+type MsgEmergencyUnbond struct {
+	Account string     `protobuf:"bytes,1,opt,name=account,proto3" json:"account,omitempty"`
+	UToken  types.Coin `protobuf:"bytes,2,opt,name=uToken,proto3" json:"uToken"`
+}
+
+func (m *MsgEmergencyUnbond) Reset()         { *m = MsgEmergencyUnbond{} }
+func (m *MsgEmergencyUnbond) String() string { return proto.CompactTextString(m) }
+func (*MsgEmergencyUnbond) ProtoMessage()    {}
+func (*MsgEmergencyUnbond) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04c68bb9e1f6306, []int{6}
+}
+func (m *MsgEmergencyUnbond) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgEmergencyUnbond) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgEmergencyUnbond.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgEmergencyUnbond) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgEmergencyUnbond.Merge(m, src)
+}
+func (m *MsgEmergencyUnbond) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgEmergencyUnbond) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgEmergencyUnbond.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgEmergencyUnbond proto.InternalMessageInfo
+
+func (m *MsgEmergencyUnbond) GetAccount() string {
+	if m != nil {
+		return m.Account
+	}
+	return ""
+}
+
+func (m *MsgEmergencyUnbond) GetUToken() types.Coin {
+	if m != nil {
+		return m.UToken
+	}
+	return types.Coin{}
+}
+
+// MsgEmergencyUnbondResponse defines the Msg/EmergencyUnbond response type.
+type MsgEmergencyUnbondResponse struct {
+}
+
+func (m *MsgEmergencyUnbondResponse) Reset()         { *m = MsgEmergencyUnbondResponse{} }
+func (m *MsgEmergencyUnbondResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgEmergencyUnbondResponse) ProtoMessage()    {}
+func (*MsgEmergencyUnbondResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d04c68bb9e1f6306, []int{7}
+}
+func (m *MsgEmergencyUnbondResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgEmergencyUnbondResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgEmergencyUnbondResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgEmergencyUnbondResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgEmergencyUnbondResponse.Merge(m, src)
+}
+func (m *MsgEmergencyUnbondResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgEmergencyUnbondResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgEmergencyUnbondResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgEmergencyUnbondResponse proto.InternalMessageInfo
+
 // MsgSponsor represents a sponsor's request to fund rewards for an incentive program.
 // The program must have been passed by governance, not yet started, and not yet funded.
 // Funded assets must be the full amount required by the program.
 type MsgSponsor struct {
 	// Sponsor bech32 account address
-	Sponsor string     `protobuf:"bytes,1,opt,name=sponsor,proto3" json:"sponsor,omitempty"`
-	Program uint32     `protobuf:"varint,2,opt,name=program,proto3" json:"program,omitempty"`
-	Asset   types.Coin `protobuf:"bytes,3,opt,name=asset,proto3" json:"asset"`
+	Sponsor string `protobuf:"bytes,1,opt,name=sponsor,proto3" json:"sponsor,omitempty"`
+	Program uint32 `protobuf:"varint,2,opt,name=program,proto3" json:"program,omitempty"`
 }
 
 func (m *MsgSponsor) Reset()         { *m = MsgSponsor{} }
 func (m *MsgSponsor) String() string { return proto.CompactTextString(m) }
 func (*MsgSponsor) ProtoMessage()    {}
 func (*MsgSponsor) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04c68bb9e1f6306, []int{6}
+	return fileDescriptor_d04c68bb9e1f6306, []int{8}
 }
 func (m *MsgSponsor) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -375,13 +448,6 @@ func (m *MsgSponsor) GetProgram() uint32 {
 	return 0
 }
 
-func (m *MsgSponsor) GetAsset() types.Coin {
-	if m != nil {
-		return m.Asset
-	}
-	return types.Coin{}
-}
-
 // MsgSponsorResponse defines the Msg/Sponsor response type.
 type MsgSponsorResponse struct {
 }
@@ -390,7 +456,7 @@ func (m *MsgSponsorResponse) Reset()         { *m = MsgSponsorResponse{} }
 func (m *MsgSponsorResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgSponsorResponse) ProtoMessage()    {}
 func (*MsgSponsorResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04c68bb9e1f6306, []int{7}
+	return fileDescriptor_d04c68bb9e1f6306, []int{9}
 }
 func (m *MsgSponsorResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -432,7 +498,7 @@ func (m *MsgGovSetParams) Reset()         { *m = MsgGovSetParams{} }
 func (m *MsgGovSetParams) String() string { return proto.CompactTextString(m) }
 func (*MsgGovSetParams) ProtoMessage()    {}
 func (*MsgGovSetParams) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04c68bb9e1f6306, []int{8}
+	return fileDescriptor_d04c68bb9e1f6306, []int{10}
 }
 func (m *MsgGovSetParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -469,7 +535,7 @@ func (m *MsgGovSetParamsResponse) Reset()         { *m = MsgGovSetParamsResponse
 func (m *MsgGovSetParamsResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgGovSetParamsResponse) ProtoMessage()    {}
 func (*MsgGovSetParamsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04c68bb9e1f6306, []int{9}
+	return fileDescriptor_d04c68bb9e1f6306, []int{11}
 }
 func (m *MsgGovSetParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -520,7 +586,7 @@ func (m *MsgGovCreatePrograms) Reset()         { *m = MsgGovCreatePrograms{} }
 func (m *MsgGovCreatePrograms) String() string { return proto.CompactTextString(m) }
 func (*MsgGovCreatePrograms) ProtoMessage()    {}
 func (*MsgGovCreatePrograms) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04c68bb9e1f6306, []int{10}
+	return fileDescriptor_d04c68bb9e1f6306, []int{12}
 }
 func (m *MsgGovCreatePrograms) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -557,7 +623,7 @@ func (m *MsgGovCreateProgramsResponse) Reset()         { *m = MsgGovCreateProgra
 func (m *MsgGovCreateProgramsResponse) String() string { return proto.CompactTextString(m) }
 func (*MsgGovCreateProgramsResponse) ProtoMessage()    {}
 func (*MsgGovCreateProgramsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_d04c68bb9e1f6306, []int{11}
+	return fileDescriptor_d04c68bb9e1f6306, []int{13}
 }
 func (m *MsgGovCreateProgramsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -587,71 +653,74 @@ func (m *MsgGovCreateProgramsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgGovCreateProgramsResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*MsgClaim)(nil), "umeenetwork.umee.incentive.v1.MsgClaim")
-	proto.RegisterType((*MsgClaimResponse)(nil), "umeenetwork.umee.incentive.v1.MsgClaimResponse")
-	proto.RegisterType((*MsgBond)(nil), "umeenetwork.umee.incentive.v1.MsgBond")
-	proto.RegisterType((*MsgBondResponse)(nil), "umeenetwork.umee.incentive.v1.MsgBondResponse")
-	proto.RegisterType((*MsgBeginUnbonding)(nil), "umeenetwork.umee.incentive.v1.MsgBeginUnbonding")
-	proto.RegisterType((*MsgBeginUnbondingResponse)(nil), "umeenetwork.umee.incentive.v1.MsgBeginUnbondingResponse")
-	proto.RegisterType((*MsgSponsor)(nil), "umeenetwork.umee.incentive.v1.MsgSponsor")
-	proto.RegisterType((*MsgSponsorResponse)(nil), "umeenetwork.umee.incentive.v1.MsgSponsorResponse")
-	proto.RegisterType((*MsgGovSetParams)(nil), "umeenetwork.umee.incentive.v1.MsgGovSetParams")
-	proto.RegisterType((*MsgGovSetParamsResponse)(nil), "umeenetwork.umee.incentive.v1.MsgGovSetParamsResponse")
-	proto.RegisterType((*MsgGovCreatePrograms)(nil), "umeenetwork.umee.incentive.v1.MsgGovCreatePrograms")
-	proto.RegisterType((*MsgGovCreateProgramsResponse)(nil), "umeenetwork.umee.incentive.v1.MsgGovCreateProgramsResponse")
+	proto.RegisterType((*MsgClaim)(nil), "umee.incentive.v1.MsgClaim")
+	proto.RegisterType((*MsgClaimResponse)(nil), "umee.incentive.v1.MsgClaimResponse")
+	proto.RegisterType((*MsgBond)(nil), "umee.incentive.v1.MsgBond")
+	proto.RegisterType((*MsgBondResponse)(nil), "umee.incentive.v1.MsgBondResponse")
+	proto.RegisterType((*MsgBeginUnbonding)(nil), "umee.incentive.v1.MsgBeginUnbonding")
+	proto.RegisterType((*MsgBeginUnbondingResponse)(nil), "umee.incentive.v1.MsgBeginUnbondingResponse")
+	proto.RegisterType((*MsgEmergencyUnbond)(nil), "umee.incentive.v1.MsgEmergencyUnbond")
+	proto.RegisterType((*MsgEmergencyUnbondResponse)(nil), "umee.incentive.v1.MsgEmergencyUnbondResponse")
+	proto.RegisterType((*MsgSponsor)(nil), "umee.incentive.v1.MsgSponsor")
+	proto.RegisterType((*MsgSponsorResponse)(nil), "umee.incentive.v1.MsgSponsorResponse")
+	proto.RegisterType((*MsgGovSetParams)(nil), "umee.incentive.v1.MsgGovSetParams")
+	proto.RegisterType((*MsgGovSetParamsResponse)(nil), "umee.incentive.v1.MsgGovSetParamsResponse")
+	proto.RegisterType((*MsgGovCreatePrograms)(nil), "umee.incentive.v1.MsgGovCreatePrograms")
+	proto.RegisterType((*MsgGovCreateProgramsResponse)(nil), "umee.incentive.v1.MsgGovCreateProgramsResponse")
 }
 
 func init() { proto.RegisterFile("umee/incentive/v1/tx.proto", fileDescriptor_d04c68bb9e1f6306) }
 
 var fileDescriptor_d04c68bb9e1f6306 = []byte{
-	// 742 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x95, 0xcd, 0x6e, 0xd3, 0x40,
-	0x10, 0xc7, 0xe3, 0x36, 0x69, 0x9b, 0x29, 0x5f, 0x31, 0x11, 0x4d, 0x0c, 0x38, 0x21, 0xe2, 0x23,
-	0x80, 0x6a, 0x37, 0x2d, 0x54, 0x08, 0x4e, 0x24, 0x02, 0xc4, 0x21, 0x52, 0x71, 0xc5, 0x85, 0x03,
-	0x95, 0x63, 0x6f, 0xdd, 0x55, 0xeb, 0xdd, 0xc8, 0xbb, 0x49, 0x5b, 0x89, 0x13, 0x12, 0x12, 0x47,
-	0x1e, 0xa1, 0x5c, 0xb9, 0xc0, 0x81, 0x87, 0xe8, 0xb1, 0xe2, 0xc4, 0xa9, 0xa0, 0xf6, 0x00, 0x8f,
-	0x81, 0xd6, 0x5e, 0x3b, 0xfd, 0xa0, 0x4d, 0xda, 0x43, 0x4f, 0xd9, 0xf1, 0xfc, 0x67, 0xe6, 0x37,
-	0x13, 0xed, 0x2c, 0x68, 0x1d, 0x1f, 0x21, 0x13, 0x13, 0x07, 0x11, 0x8e, 0xbb, 0xc8, 0xec, 0xd6,
-	0x4c, 0xbe, 0x66, 0xb4, 0x03, 0xca, 0xa9, 0x7a, 0x5d, 0xf8, 0x08, 0xe2, 0xab, 0x34, 0x58, 0x36,
-	0xc4, 0xd9, 0x48, 0x74, 0x46, 0xb7, 0xa6, 0xe9, 0x0e, 0x65, 0x3e, 0x65, 0x66, 0xcb, 0x66, 0x22,
-	0xae, 0x85, 0xb8, 0x5d, 0x33, 0x1d, 0x8a, 0x49, 0x14, 0xae, 0x15, 0x23, 0xff, 0x42, 0x68, 0x99,
-	0x91, 0x21, 0x5d, 0x13, 0x32, 0xd4, 0x67, 0x9e, 0xa8, 0xe8, 0x33, 0x4f, 0x3a, 0xf2, 0x1e, 0xf5,
-	0x68, 0x14, 0x20, 0x4e, 0xf2, 0xeb, 0x8d, 0xc3, 0x90, 0x3d, 0x92, 0x50, 0x52, 0xb9, 0x09, 0x63,
-	0x4d, 0xe6, 0x35, 0x56, 0x6c, 0xec, 0xab, 0x05, 0x18, 0xb5, 0x1d, 0x87, 0x76, 0x08, 0x2f, 0x28,
-	0x65, 0xa5, 0x9a, 0xb5, 0x62, 0xb3, 0xb2, 0x0a, 0x97, 0x62, 0x95, 0x85, 0x58, 0x9b, 0x12, 0x86,
-	0x54, 0x07, 0x46, 0x6c, 0x5f, 0x8a, 0x87, 0xab, 0xe3, 0xd3, 0x45, 0x43, 0xa2, 0x8a, 0xbe, 0x0c,
-	0xd9, 0x97, 0xd1, 0xa0, 0x98, 0xd4, 0xa7, 0x36, 0xb7, 0x4b, 0xa9, 0x2f, 0xbf, 0x4a, 0x55, 0x0f,
-	0xf3, 0xa5, 0x4e, 0xcb, 0x70, 0xa8, 0x2f, 0xfb, 0x92, 0x3f, 0x93, 0xcc, 0x5d, 0x36, 0xf9, 0x7a,
-	0x1b, 0xb1, 0x30, 0x80, 0x59, 0x32, 0x75, 0x85, 0xc0, 0x68, 0x93, 0x79, 0x75, 0x4a, 0xdc, 0xa3,
-	0xe9, 0x54, 0x15, 0xd2, 0x1c, 0xa3, 0xa0, 0x30, 0x54, 0x56, 0xaa, 0xe7, 0xad, 0xf0, 0xac, 0x3e,
-	0x84, 0x8c, 0xcd, 0x18, 0xe2, 0x85, 0xe1, 0xb2, 0x72, 0x3c, 0x5c, 0x5a, 0xc0, 0x59, 0x91, 0xba,
-	0x92, 0x83, 0x8b, 0xb2, 0x5e, 0xdc, 0x67, 0x65, 0x0d, 0x72, 0xe2, 0x13, 0xf2, 0x30, 0x79, 0x4d,
-	0x5a, 0x94, 0xb8, 0x98, 0x78, 0x67, 0x03, 0x73, 0x15, 0x8a, 0x87, 0x2a, 0x27, 0x58, 0xab, 0x00,
-	0x4d, 0xe6, 0xcd, 0x0b, 0x83, 0x06, 0x82, 0x87, 0x45, 0xc7, 0x98, 0x87, 0xf5, 0x3c, 0xed, 0x80,
-	0x7a, 0x81, 0xed, 0x4b, 0xa4, 0xd8, 0x3c, 0x2d, 0x55, 0x1e, 0xd4, 0x5e, 0xe1, 0x04, 0x67, 0x5b,
-	0x09, 0x27, 0xf7, 0x82, 0x76, 0xe7, 0x11, 0x9f, 0xb3, 0x03, 0xdb, 0x67, 0xea, 0x2c, 0x64, 0xed,
-	0x0e, 0x5f, 0xa2, 0x01, 0xe6, 0xeb, 0x11, 0x56, 0xbd, 0xf0, 0xe3, 0xfb, 0x64, 0x5e, 0xd6, 0x79,
-	0xea, 0xba, 0x01, 0x62, 0x6c, 0x9e, 0x07, 0xa2, 0xaf, 0x9e, 0x54, 0xcd, 0x43, 0x86, 0x63, 0xbe,
-	0x82, 0x42, 0xe0, 0xac, 0x15, 0x19, 0x6a, 0x19, 0xc6, 0x5d, 0xc4, 0x9c, 0x00, 0xb7, 0x39, 0xa6,
-	0x24, 0x84, 0xce, 0x5a, 0x7b, 0x3f, 0xa9, 0x0d, 0x18, 0x69, 0x87, 0x95, 0x0b, 0xe9, 0xb0, 0xa3,
-	0x5b, 0xc6, 0xb1, 0x17, 0xd1, 0x88, 0x30, 0x65, 0x77, 0x32, 0xf4, 0xf1, 0x95, 0x8f, 0x1b, 0xa5,
-	0xd4, 0xdf, 0x8d, 0x92, 0xf2, 0xfe, 0xcf, 0xb7, 0x7b, 0x3d, 0xa8, 0x4a, 0x11, 0x26, 0x0e, 0xf4,
-	0x97, 0xf4, 0xfe, 0x79, 0x08, 0xf2, 0x91, 0xaf, 0x11, 0x20, 0x9b, 0xa3, 0xb9, 0x68, 0xc0, 0x67,
-	0x3f, 0x80, 0x57, 0x30, 0x26, 0xff, 0x5c, 0x31, 0x02, 0x71, 0x29, 0xcd, 0x3e, 0x23, 0x78, 0x19,
-	0x1b, 0x92, 0x59, 0x0e, 0x23, 0x49, 0xa3, 0x1a, 0x70, 0x79, 0x31, 0xa0, 0xfe, 0x82, 0x43, 0x7d,
-	0xbf, 0x43, 0x30, 0x5f, 0x5f, 0x58, 0xec, 0x10, 0xb7, 0x90, 0x29, 0x2b, 0xd5, 0x31, 0x2b, 0x27,
-	0x5c, 0x8d, 0xd8, 0xf3, 0xbc, 0x43, 0xdc, 0x23, 0xc7, 0xa7, 0xc3, 0xb5, 0xff, 0x8d, 0x28, 0x9e,
-	0xe1, 0xf4, 0xd7, 0x0c, 0x0c, 0x37, 0x99, 0xa7, 0xda, 0x90, 0x89, 0x96, 0xd1, 0x9d, 0x3e, 0xe4,
-	0xf1, 0x3e, 0xd2, 0xcc, 0x01, 0x85, 0xc9, 0xe2, 0x7a, 0x0b, 0xe9, 0x70, 0xa1, 0xdc, 0xee, 0x1f,
-	0x28, 0x74, 0x9a, 0x31, 0x98, 0x2e, 0xc9, 0xff, 0x0e, 0x2e, 0x1c, 0xd8, 0x16, 0x53, 0x03, 0x64,
-	0xd8, 0x17, 0xa1, 0x3d, 0x3a, 0x69, 0x44, 0x52, 0xdd, 0x83, 0xd1, 0x78, 0x29, 0xdc, 0xed, 0x9f,
-	0x44, 0x4a, 0xb5, 0xda, 0xc0, 0xd2, 0xa4, 0x50, 0x17, 0xce, 0xed, 0xbb, 0xed, 0x03, 0x8c, 0x69,
-	0xaf, 0x5e, 0x9b, 0x3d, 0x99, 0x3e, 0xa9, 0xfb, 0x41, 0x81, 0xdc, 0xe1, 0xab, 0x36, 0x33, 0x50,
-	0xb6, 0xfd, 0x41, 0xda, 0x93, 0x53, 0x04, 0xc5, 0x1c, 0xf5, 0x67, 0x9b, 0x3b, 0xba, 0xb2, 0xb5,
-	0xa3, 0x2b, 0xbf, 0x77, 0x74, 0xe5, 0xd3, 0xae, 0x9e, 0xda, 0xda, 0xd5, 0x53, 0x3f, 0x77, 0xf5,
-	0xd4, 0x9b, 0xfb, 0x7b, 0x9e, 0x39, 0x91, 0x74, 0x52, 0x56, 0x08, 0x0d, 0xb3, 0xfb, 0xc0, 0x5c,
-	0xeb, 0x3d, 0xc3, 0xad, 0x91, 0xf0, 0x1d, 0x9e, 0xf9, 0x17, 0x00, 0x00, 0xff, 0xff, 0x86, 0xa6,
-	0x35, 0xbf, 0x51, 0x08, 0x00, 0x00,
+	// 761 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xbc, 0x55, 0xcf, 0x4f, 0xdb, 0x48,
+	0x14, 0x8e, 0x81, 0xf0, 0xe3, 0xb1, 0xbb, 0x6c, 0xbc, 0xd1, 0x92, 0x18, 0xd6, 0xc9, 0x1a, 0xd0,
+	0x46, 0xec, 0xc6, 0x5e, 0xd8, 0xd5, 0xae, 0xb4, 0xa7, 0x6d, 0x22, 0xa8, 0x38, 0x44, 0x45, 0xa1,
+	0xbd, 0x54, 0x55, 0x91, 0x63, 0x0f, 0x83, 0x05, 0x9e, 0x89, 0x3c, 0xe3, 0x40, 0xae, 0xbd, 0xb4,
+	0xc7, 0x5e, 0x7a, 0xe7, 0xdc, 0x53, 0x0f, 0xfd, 0x23, 0x38, 0x22, 0x4e, 0x3d, 0xb5, 0x15, 0x1c,
+	0xda, 0x3f, 0xa3, 0x1a, 0x7b, 0xec, 0x40, 0x7e, 0x50, 0x2e, 0xf4, 0x14, 0xbf, 0xf9, 0xbe, 0xf7,
+	0xbe, 0xef, 0xbd, 0x68, 0xde, 0x80, 0x16, 0xfa, 0x08, 0x59, 0x1e, 0x71, 0x10, 0xe1, 0x5e, 0x07,
+	0x59, 0x9d, 0x35, 0x8b, 0x1f, 0x9b, 0xed, 0x80, 0x72, 0xaa, 0xe6, 0x04, 0x66, 0xa6, 0x98, 0xd9,
+	0x59, 0xd3, 0x74, 0x87, 0x32, 0x9f, 0x32, 0xab, 0x65, 0x33, 0xc1, 0x6d, 0x21, 0x6e, 0xaf, 0x59,
+	0x0e, 0xf5, 0x48, 0x9c, 0xa2, 0x15, 0x63, 0x7c, 0x37, 0x8a, 0xac, 0x38, 0x90, 0xd0, 0xbc, 0x4c,
+	0xf5, 0x19, 0x16, 0x2a, 0x3e, 0xc3, 0x12, 0xc8, 0x63, 0x8a, 0x69, 0x9c, 0x20, 0xbe, 0xe4, 0xe9,
+	0xaf, 0x83, 0xc6, 0x7a, 0x4e, 0x22, 0x8a, 0xb1, 0x0c, 0xd3, 0x0d, 0x86, 0xeb, 0x87, 0xb6, 0xe7,
+	0xab, 0x05, 0x98, 0xb2, 0x1d, 0x87, 0x86, 0x84, 0x17, 0x94, 0xb2, 0x52, 0x99, 0x69, 0x26, 0xa1,
+	0x71, 0x04, 0x3f, 0x26, 0xac, 0x26, 0x62, 0x6d, 0x4a, 0x18, 0x52, 0x1d, 0x98, 0xb4, 0x7d, 0x49,
+	0x1e, 0xaf, 0xcc, 0xae, 0x17, 0x4d, 0x69, 0x55, 0xf4, 0x65, 0xca, 0xbe, 0xcc, 0x3a, 0xf5, 0x48,
+	0xed, 0xcf, 0xd3, 0xf7, 0xa5, 0xcc, 0xeb, 0x0f, 0xa5, 0x0a, 0xf6, 0xf8, 0x7e, 0xd8, 0x32, 0x1d,
+	0xea, 0xcb, 0xbe, 0xe4, 0x4f, 0x95, 0xb9, 0x07, 0x16, 0xef, 0xb6, 0x11, 0x8b, 0x12, 0x58, 0x53,
+	0x96, 0x36, 0x9e, 0xc0, 0x54, 0x83, 0xe1, 0x1a, 0x25, 0xee, 0x68, 0x77, 0xea, 0xbf, 0x30, 0x19,
+	0x3e, 0xa4, 0x07, 0x88, 0x14, 0xc6, 0xca, 0xca, 0xcd, 0x4e, 0x26, 0x84, 0x93, 0xa6, 0xa4, 0x1b,
+	0x39, 0x98, 0x93, 0xd5, 0x93, 0xae, 0x8c, 0x3d, 0xc8, 0x89, 0x23, 0x84, 0x3d, 0xf2, 0x88, 0xb4,
+	0x28, 0x71, 0x3d, 0x82, 0xef, 0x42, 0x7a, 0x01, 0x8a, 0x03, 0x3a, 0xa9, 0x09, 0x0c, 0x6a, 0x83,
+	0xe1, 0x0d, 0x1f, 0x05, 0x18, 0x11, 0xa7, 0x1b, 0x13, 0xee, 0xc2, 0xc5, 0x22, 0x68, 0x83, 0x42,
+	0xa9, 0x8d, 0xff, 0x01, 0x1a, 0x0c, 0xef, 0x88, 0x80, 0x06, 0x42, 0x9e, 0xc5, 0x9f, 0x89, 0x3c,
+	0xeb, 0x21, 0xed, 0x80, 0xe2, 0xc0, 0xf6, 0x23, 0xfd, 0xef, 0x9b, 0x49, 0x68, 0xe4, 0xa3, 0x46,
+	0x64, 0x85, 0xb4, 0xee, 0xb9, 0x12, 0xcd, 0xfd, 0x3e, 0xed, 0xec, 0x20, 0xbe, 0x6d, 0x07, 0xb6,
+	0xcf, 0xd4, 0x7f, 0x60, 0xc6, 0x0e, 0xf9, 0x3e, 0x0d, 0x3c, 0xde, 0x8d, 0xeb, 0xd7, 0x0a, 0xe7,
+	0x6f, 0xab, 0x79, 0xd9, 0xc8, 0x3d, 0xd7, 0x0d, 0x10, 0x63, 0x3b, 0x3c, 0x10, 0x73, 0xea, 0x51,
+	0xd5, 0x3c, 0x64, 0xb9, 0xc7, 0x0f, 0x51, 0xa4, 0x3c, 0xd3, 0x8c, 0x03, 0xb5, 0x0c, 0xb3, 0x2e,
+	0x62, 0x4e, 0xe0, 0xb5, 0xb9, 0x47, 0x49, 0x61, 0x3c, 0xc2, 0xae, 0x1e, 0x89, 0x91, 0xb5, 0x23,
+	0xe5, 0xc2, 0x84, 0x1c, 0xd9, 0xc0, 0x45, 0x35, 0x63, 0x6b, 0xc9, 0xc8, 0x62, 0xfa, 0x7f, 0x3f,
+	0xbf, 0x38, 0x29, 0x65, 0x3e, 0x9f, 0x94, 0x94, 0x67, 0x9f, 0xde, 0xac, 0xf6, 0x8c, 0x18, 0x45,
+	0x98, 0xef, 0xeb, 0x29, 0xed, 0xf7, 0xd5, 0x18, 0xe4, 0x63, 0xac, 0x1e, 0x20, 0x9b, 0xa3, 0xed,
+	0x78, 0x3a, 0xdf, 0xbe, 0xe9, 0x0d, 0x98, 0x96, 0xff, 0x8c, 0x68, 0x5b, 0x5c, 0xda, 0xa5, 0x21,
+	0x6d, 0x6f, 0x25, 0x81, 0xf4, 0x29, 0x07, 0x90, 0xa6, 0xaa, 0x26, 0xfc, 0xb4, 0x17, 0x50, 0x7f,
+	0xd7, 0xa1, 0xbe, 0x1f, 0x12, 0x8f, 0x77, 0x77, 0xf7, 0x42, 0xe2, 0x16, 0xb2, 0x65, 0xa5, 0x32,
+	0xdd, 0xcc, 0x09, 0xa8, 0x9e, 0x20, 0x9b, 0x21, 0x71, 0x47, 0x8e, 0x4c, 0x87, 0xc5, 0x61, 0x63,
+	0x49, 0xe6, 0xb6, 0xfe, 0x3c, 0x0b, 0xe3, 0x0d, 0x86, 0xd5, 0x2d, 0xc8, 0xc6, 0x0b, 0x6a, 0x61,
+	0x88, 0xdb, 0x64, 0x2f, 0x69, 0x4b, 0x37, 0x80, 0xe9, 0xd2, 0xda, 0x84, 0x89, 0x68, 0x99, 0x68,
+	0xc3, 0xc9, 0x02, 0xd3, 0x8c, 0xd1, 0x58, 0x5a, 0xc7, 0x85, 0x1f, 0xfa, 0x76, 0xc4, 0xf2, 0x88,
+	0xac, 0x6b, 0x2c, 0xed, 0x8f, 0xdb, 0xb0, 0x52, 0x15, 0x0c, 0x73, 0xfd, 0x4b, 0x60, 0x65, 0x78,
+	0x81, 0x3e, 0x9a, 0x56, 0xbd, 0x15, 0x2d, 0x15, 0x7a, 0x00, 0x53, 0xc9, 0x35, 0xff, 0x65, 0x78,
+	0xa6, 0x84, 0xb5, 0x95, 0x1b, 0xe1, 0xb4, 0xe0, 0x53, 0xf8, 0xee, 0xda, 0xf5, 0x1e, 0x31, 0xd3,
+	0xab, 0x1c, 0x6d, 0xf5, 0xeb, 0x9c, 0xb4, 0xbe, 0x0f, 0xb9, 0xc1, 0xeb, 0xf4, 0xdb, 0xc8, 0x02,
+	0xd7, 0x89, 0x9a, 0x75, 0x4b, 0x62, 0x22, 0x57, 0xdb, 0x38, 0xbd, 0xd0, 0x95, 0xb3, 0x0b, 0x5d,
+	0xf9, 0x78, 0xa1, 0x2b, 0x2f, 0x2f, 0xf5, 0xcc, 0xd9, 0xa5, 0x9e, 0x79, 0x77, 0xa9, 0x67, 0x1e,
+	0xff, 0x7e, 0xe5, 0x49, 0x13, 0x45, 0xab, 0x04, 0xf1, 0x23, 0x1a, 0x1c, 0x44, 0x81, 0xd5, 0xf9,
+	0xdb, 0x3a, 0xee, 0x3d, 0xb9, 0xad, 0xc9, 0xe8, 0xcd, 0xfd, 0xeb, 0x4b, 0x00, 0x00, 0x00, 0xff,
+	0xff, 0xf3, 0x44, 0x62, 0x9a, 0x31, 0x08, 0x00, 0x00,
 }
 
 func (this *MsgGovSetParams) Equal(that interface{}) bool {
@@ -743,10 +812,14 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// Claim defines a method for claiming any pending incentive rewards.
 	Claim(ctx context.Context, in *MsgClaim, opts ...grpc.CallOption) (*MsgClaimResponse, error)
-	// Bond defines a method for bonding uToken collateral into reward tier.
+	// Bond defines a method for bonding uToken collateral.
 	Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOption) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
+	// Only max_unbondings unbondings can be active at per user, per denom, at once.
 	BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error)
+	// EmergencyUnbond defines a method for instantly unbonding uToken collateral in exchange for a fee.
+	// This can finish existing unbondings or unbond bonded tokens, and is not restricted by max_unbondings.
+	EmergencyUnbond(ctx context.Context, in *MsgEmergencyUnbond, opts ...grpc.CallOption) (*MsgEmergencyUnbondResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
 	// The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
 	Sponsor(ctx context.Context, in *MsgSponsor, opts ...grpc.CallOption) (*MsgSponsorResponse, error)
@@ -766,7 +839,7 @@ func NewMsgClient(cc grpc1.ClientConn) MsgClient {
 
 func (c *msgClient) Claim(ctx context.Context, in *MsgClaim, opts ...grpc.CallOption) (*MsgClaimResponse, error) {
 	out := new(MsgClaimResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/Claim", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Msg/Claim", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -775,7 +848,7 @@ func (c *msgClient) Claim(ctx context.Context, in *MsgClaim, opts ...grpc.CallOp
 
 func (c *msgClient) Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOption) (*MsgBondResponse, error) {
 	out := new(MsgBondResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/Bond", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Msg/Bond", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -784,7 +857,16 @@ func (c *msgClient) Bond(ctx context.Context, in *MsgBond, opts ...grpc.CallOpti
 
 func (c *msgClient) BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, opts ...grpc.CallOption) (*MsgBeginUnbondingResponse, error) {
 	out := new(MsgBeginUnbondingResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/BeginUnbonding", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Msg/BeginUnbonding", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *msgClient) EmergencyUnbond(ctx context.Context, in *MsgEmergencyUnbond, opts ...grpc.CallOption) (*MsgEmergencyUnbondResponse, error) {
+	out := new(MsgEmergencyUnbondResponse)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Msg/EmergencyUnbond", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -793,7 +875,7 @@ func (c *msgClient) BeginUnbonding(ctx context.Context, in *MsgBeginUnbonding, o
 
 func (c *msgClient) Sponsor(ctx context.Context, in *MsgSponsor, opts ...grpc.CallOption) (*MsgSponsorResponse, error) {
 	out := new(MsgSponsorResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/Sponsor", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Msg/Sponsor", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -802,7 +884,7 @@ func (c *msgClient) Sponsor(ctx context.Context, in *MsgSponsor, opts ...grpc.Ca
 
 func (c *msgClient) GovSetParams(ctx context.Context, in *MsgGovSetParams, opts ...grpc.CallOption) (*MsgGovSetParamsResponse, error) {
 	out := new(MsgGovSetParamsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/GovSetParams", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Msg/GovSetParams", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -811,7 +893,7 @@ func (c *msgClient) GovSetParams(ctx context.Context, in *MsgGovSetParams, opts 
 
 func (c *msgClient) GovCreatePrograms(ctx context.Context, in *MsgGovCreatePrograms, opts ...grpc.CallOption) (*MsgGovCreateProgramsResponse, error) {
 	out := new(MsgGovCreateProgramsResponse)
-	err := c.cc.Invoke(ctx, "/umeenetwork.umee.incentive.v1.Msg/GovCreatePrograms", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/umee.incentive.v1.Msg/GovCreatePrograms", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -822,10 +904,14 @@ func (c *msgClient) GovCreatePrograms(ctx context.Context, in *MsgGovCreateProgr
 type MsgServer interface {
 	// Claim defines a method for claiming any pending incentive rewards.
 	Claim(context.Context, *MsgClaim) (*MsgClaimResponse, error)
-	// Bond defines a method for bonding uToken collateral into reward tier.
+	// Bond defines a method for bonding uToken collateral.
 	Bond(context.Context, *MsgBond) (*MsgBondResponse, error)
 	// BeginUnbonding defines a method for starting to unbond uToken collateral.
+	// Only max_unbondings unbondings can be active at per user, per denom, at once.
 	BeginUnbonding(context.Context, *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error)
+	// EmergencyUnbond defines a method for instantly unbonding uToken collateral in exchange for a fee.
+	// This can finish existing unbondings or unbond bonded tokens, and is not restricted by max_unbondings.
+	EmergencyUnbond(context.Context, *MsgEmergencyUnbond) (*MsgEmergencyUnbondResponse, error)
 	// Sponsor defines a permissionless method for sponsoring an upcoming, not yet funded incentive program.
 	// The sponsor must be a single account and the MsgSponsor must fully cover the expected program rewards.
 	Sponsor(context.Context, *MsgSponsor) (*MsgSponsorResponse, error)
@@ -847,6 +933,9 @@ func (*UnimplementedMsgServer) Bond(ctx context.Context, req *MsgBond) (*MsgBond
 }
 func (*UnimplementedMsgServer) BeginUnbonding(ctx context.Context, req *MsgBeginUnbonding) (*MsgBeginUnbondingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method BeginUnbonding not implemented")
+}
+func (*UnimplementedMsgServer) EmergencyUnbond(ctx context.Context, req *MsgEmergencyUnbond) (*MsgEmergencyUnbondResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EmergencyUnbond not implemented")
 }
 func (*UnimplementedMsgServer) Sponsor(ctx context.Context, req *MsgSponsor) (*MsgSponsorResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sponsor not implemented")
@@ -872,7 +961,7 @@ func _Msg_Claim_Handler(srv interface{}, ctx context.Context, dec func(interface
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/Claim",
+		FullMethod: "/umee.incentive.v1.Msg/Claim",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).Claim(ctx, req.(*MsgClaim))
@@ -890,7 +979,7 @@ func _Msg_Bond_Handler(srv interface{}, ctx context.Context, dec func(interface{
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/Bond",
+		FullMethod: "/umee.incentive.v1.Msg/Bond",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).Bond(ctx, req.(*MsgBond))
@@ -908,10 +997,28 @@ func _Msg_BeginUnbonding_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/BeginUnbonding",
+		FullMethod: "/umee.incentive.v1.Msg/BeginUnbonding",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).BeginUnbonding(ctx, req.(*MsgBeginUnbonding))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_EmergencyUnbond_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgEmergencyUnbond)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).EmergencyUnbond(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/umee.incentive.v1.Msg/EmergencyUnbond",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).EmergencyUnbond(ctx, req.(*MsgEmergencyUnbond))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -926,7 +1033,7 @@ func _Msg_Sponsor_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/Sponsor",
+		FullMethod: "/umee.incentive.v1.Msg/Sponsor",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).Sponsor(ctx, req.(*MsgSponsor))
@@ -944,7 +1051,7 @@ func _Msg_GovSetParams_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/GovSetParams",
+		FullMethod: "/umee.incentive.v1.Msg/GovSetParams",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).GovSetParams(ctx, req.(*MsgGovSetParams))
@@ -962,7 +1069,7 @@ func _Msg_GovCreatePrograms_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umeenetwork.umee.incentive.v1.Msg/GovCreatePrograms",
+		FullMethod: "/umee.incentive.v1.Msg/GovCreatePrograms",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MsgServer).GovCreatePrograms(ctx, req.(*MsgGovCreatePrograms))
@@ -971,7 +1078,7 @@ func _Msg_GovCreatePrograms_Handler(srv interface{}, ctx context.Context, dec fu
 }
 
 var _Msg_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "umeenetwork.umee.incentive.v1.Msg",
+	ServiceName: "umee.incentive.v1.Msg",
 	HandlerType: (*MsgServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -985,6 +1092,10 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "BeginUnbonding",
 			Handler:    _Msg_BeginUnbonding_Handler,
+		},
+		{
+			MethodName: "EmergencyUnbond",
+			Handler:    _Msg_EmergencyUnbond_Handler,
 		},
 		{
 			MethodName: "Sponsor",
@@ -1091,7 +1202,7 @@ func (m *MsgBond) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Asset.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.UToken.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1099,12 +1210,7 @@ func (m *MsgBond) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintTx(dAtA, i, uint64(size))
 	}
 	i--
-	dAtA[i] = 0x1a
-	if m.Tier != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Tier))
-		i--
-		dAtA[i] = 0x10
-	}
+	dAtA[i] = 0x12
 	if len(m.Account) > 0 {
 		i -= len(m.Account)
 		copy(dAtA[i:], m.Account)
@@ -1159,7 +1265,7 @@ func (m *MsgBeginUnbonding) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	var l int
 	_ = l
 	{
-		size, err := m.Asset.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.UToken.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -1167,12 +1273,7 @@ func (m *MsgBeginUnbonding) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i = encodeVarintTx(dAtA, i, uint64(size))
 	}
 	i--
-	dAtA[i] = 0x1a
-	if m.Tier != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Tier))
-		i--
-		dAtA[i] = 0x10
-	}
+	dAtA[i] = 0x12
 	if len(m.Account) > 0 {
 		i -= len(m.Account)
 		copy(dAtA[i:], m.Account)
@@ -1206,6 +1307,69 @@ func (m *MsgBeginUnbondingResponse) MarshalToSizedBuffer(dAtA []byte) (int, erro
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgEmergencyUnbond) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgEmergencyUnbond) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgEmergencyUnbond) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.UToken.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTx(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	if len(m.Account) > 0 {
+		i -= len(m.Account)
+		copy(dAtA[i:], m.Account)
+		i = encodeVarintTx(dAtA, i, uint64(len(m.Account)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgEmergencyUnbondResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgEmergencyUnbondResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgEmergencyUnbondResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func (m *MsgSponsor) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -1226,16 +1390,6 @@ func (m *MsgSponsor) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	{
-		size, err := m.Asset.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintTx(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0x1a
 	if m.Program != 0 {
 		i = encodeVarintTx(dAtA, i, uint64(m.Program))
 		i--
@@ -1491,10 +1645,7 @@ func (m *MsgBond) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.Tier != 0 {
-		n += 1 + sovTx(uint64(m.Tier))
-	}
-	l = m.Asset.Size()
+	l = m.UToken.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
@@ -1518,15 +1669,36 @@ func (m *MsgBeginUnbonding) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	if m.Tier != 0 {
-		n += 1 + sovTx(uint64(m.Tier))
-	}
-	l = m.Asset.Size()
+	l = m.UToken.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
 func (m *MsgBeginUnbondingResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
+func (m *MsgEmergencyUnbond) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Account)
+	if l > 0 {
+		n += 1 + l + sovTx(uint64(l))
+	}
+	l = m.UToken.Size()
+	n += 1 + l + sovTx(uint64(l))
+	return n
+}
+
+func (m *MsgEmergencyUnbondResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1548,8 +1720,6 @@ func (m *MsgSponsor) Size() (n int) {
 	if m.Program != 0 {
 		n += 1 + sovTx(uint64(m.Program))
 	}
-	l = m.Asset.Size()
-	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
@@ -1867,27 +2037,8 @@ func (m *MsgBond) Unmarshal(dAtA []byte) error {
 			m.Account = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tier", wireType)
-			}
-			m.Tier = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tier |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Asset", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field UToken", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1914,7 +2065,7 @@ func (m *MsgBond) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Asset.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.UToken.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2051,27 +2202,8 @@ func (m *MsgBeginUnbonding) Unmarshal(dAtA []byte) error {
 			m.Account = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Tier", wireType)
-			}
-			m.Tier = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Tier |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Asset", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field UToken", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -2098,7 +2230,7 @@ func (m *MsgBeginUnbonding) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Asset.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.UToken.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2150,6 +2282,171 @@ func (m *MsgBeginUnbondingResponse) Unmarshal(dAtA []byte) error {
 		}
 		if fieldNum <= 0 {
 			return fmt.Errorf("proto: MsgBeginUnbondingResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgEmergencyUnbond) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgEmergencyUnbond: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgEmergencyUnbond: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Account", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Account = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field UToken", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTx
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTx
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTx
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.UToken.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgEmergencyUnbondResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgEmergencyUnbondResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgEmergencyUnbondResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -2253,39 +2550,6 @@ func (m *MsgSponsor) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 3:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Asset", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.Asset.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

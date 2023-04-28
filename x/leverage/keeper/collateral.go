@@ -7,6 +7,15 @@ import (
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
+// unbondedCollateral returns the collateral an account has which is neither bonded nor currently unbonding.
+// This collateral is available for immediate decollateralizing or withdrawal.
+func (k Keeper) unbondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom string) sdk.Coin {
+	collateralAmount := k.GetBorrowerCollateral(ctx, addr).AmountOf(uDenom)
+	unavailable := k.bondedCollateral(ctx, addr, uDenom)
+	available := sdk.MaxInt(collateralAmount.Sub(unavailable.Amount), sdk.ZeroInt())
+	return sdk.NewCoin(uDenom, available)
+}
+
 // liquidateCollateral burns uToken collateral and sends the base token reward to the liquidator.
 // This occurs during direct liquidation.
 func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.AccAddress, uToken, token sdk.Coin,
@@ -18,7 +27,7 @@ func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.Ac
 }
 
 // burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
-// during liquidations.
+// during direct liquidations and during donateCollateral.
 func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
 	err := k.setCollateral(ctx, addr, k.GetCollateral(ctx, addr, uToken.Denom).Sub(uToken))
 	if err != nil {
@@ -262,12 +271,11 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	//
 	// module_available_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity
 	//									* module_collateral) / (1 - min_collateral_liquidity)
-	moduleAvailableCollateral :=
-		(sdk.NewDec(liquidity.Sub(spendableUTokens.Amount).Int64()).Sub(
-			minCollateralLiquidity.MulInt(
-				totalTokenCollateral.AmountOf(denom),
-			),
-		)).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
+	moduleAvailableCollateral := (sdk.NewDec(liquidity.Sub(spendableUTokens.Amount).Int64()).Sub(
+		minCollateralLiquidity.MulInt(
+			totalTokenCollateral.AmountOf(denom),
+		),
+	)).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
 
 	// Adding (user_spendable_utokens + module_available_collateral) we obtain the max uTokens the account can
 	// withdraw from the module.

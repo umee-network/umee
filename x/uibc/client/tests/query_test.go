@@ -4,75 +4,61 @@ import (
 	"fmt"
 	"testing"
 
-	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
-	"gotest.tools/v3/assert"
 
+	itestsuite "github.com/umee-network/umee/v4/tests/cli"
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/client/cli"
 )
 
-func (s *IntegrationTestSuite) TestQueryParams(t *testing.T) {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
-
-	args := []string{
-		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
-	}
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), args)
-	assert.NilError(t, err)
-
-	var res uibc.QueryParamsResponse
-	assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-	assert.DeepEqual(t, res.Params, uibc.DefaultParams())
-}
-
-func (s *IntegrationTestSuite) TestGetQuota(t *testing.T) {
-	val := s.network.Validators[0]
-	clientCtx := val.ClientCtx
-
-	tests := []struct {
-		name   string
-		args   []string
-		errMsg string
-	}{
+func (s *IntegrationTests) TestQueryParams(t *testing.T) {
+	queries := []itestsuite.TestQuery{
 		{
-			name: "Get ibc-transfer quota of all denoms",
-			args: []string{
+			Name:    "Query params",
+			Command: cli.GetCmdQueryParams(),
+			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			errMsg: "",
+			Response: &uibc.QueryParamsResponse{},
+			ExpectedResponse: &uibc.QueryParamsResponse{
+				Params: uibc.DefaultParams(),
+			},
+			ErrMsg: "",
+		},
+	}
+
+	s.RunTestQueries(queries...)
+}
+
+func (s *IntegrationTests) TestGetQuota(t *testing.T) {
+	queries := []itestsuite.TestQuery{
+		{
+			Name:    "Get ibc-transfer quota of all denoms",
+			Command: cli.GetOutflows(),
+			Args: []string{
+				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			},
+			Response: &uibc.QueryOutflowsResponse{},
+			ExpectedResponse: &uibc.QueryOutflowsResponse{
+				Amount: sdk.NewDec(0),
+			},
+			ErrMsg: "",
 		},
 		{
-			name: "Get ibc-transfer quota of denom umee",
-			args: []string{
+			Name:    "Get ibc-transfer quota of denom umee",
+			Command: cli.GetOutflows(),
+			Args: []string{
 				"uumee",
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},
-			errMsg: "",
-		},
-		/* {
-			name: "Get ibc-transfer quota of dummy denom ",
-			args: []string{
-				"dummy",
-				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
+			Response: &uibc.QueryOutflowsResponse{},
+			ExpectedResponse: &uibc.QueryOutflowsResponse{
+				Amount: sdk.NewDec(0),
 			},
-			errMsg:      "no quota for ibc denom",
-			noOfRecords: 0,
-		}, */
+			ErrMsg: "",
+		},
 	}
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetOutflows(), tc.args)
-			if tc.errMsg == "" {
-				var res uibc.QueryOutflowsResponse
-				assert.NilError(t, clientCtx.Codec.UnmarshalJSON(out.Bytes(), &res))
-				assert.DeepEqual(t, res.Amount, sdk.NewDec(0))
-			} else {
-				assert.ErrorContains(t, err, tc.errMsg)
-			}
-		})
-	}
+	s.RunTestQueries(queries...)
 }

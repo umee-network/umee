@@ -1,5 +1,5 @@
 syntax = "proto3";
-package umeenetwork.umee.incentive.v1;
+package umee.incentive.v1;
 
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "google/api/annotations.proto";
@@ -17,28 +17,22 @@ service Query {
     option (google.api.http).get = "/umee/incentive/v1/params";
   }
 
-  // TotalBonded queries the sum of all bonded collateral uTokens, separated by tier.
+  // TotalBonded queries the sum of all bonded collateral uTokens.
   rpc TotalBonded(QueryTotalBonded)
       returns (QueryTotalBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/total_bonded/{denom}";
+    option (google.api.http).get = "/umee/incentive/v1/total_bonded";
   }
 
-  // TotalUnbonding queries the sum of all unbonding collateral uTokens, separated by tier.
+  // TotalUnbonding queries the sum of all unbonding collateral uTokens.
   rpc TotalUnbonding(QueryTotalUnbonding)
       returns (QueryTotalUnbondingResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/total_unbonding/{denom}";
+    option (google.api.http).get = "/umee/incentive/v1/total_unbonding";
   }
 
-  // Bonded queries all bonded collateral uTokens associated with an account.
-  rpc Bonded(QueryBonded)
-      returns (QueryBondedResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/bonded/{address}/{denom}";
-  }
-
-  // Unbondings queries all current uToken unbondings associated with an account.
-  rpc Unbondings(QueryUnbondings)
-      returns (QueryUnbondingsResponse) {
-    option (google.api.http).get = "/umee/incentive/v1/unbondings/{address}";
+  // AccountBonds queries all bonded collateral and unbondings associated with an account.
+  rpc AccountBonds(QueryAccountBonds)
+      returns (QueryAccountBondsResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/account_bonds/{address}";
   }
 
   // PendingRewards queries unclaimed incentive rewards associated with an account.
@@ -73,6 +67,14 @@ service Query {
       returns (QueryIncentiveProgramResponse) {
     option (google.api.http).get = "/umee/incentive/v1/incentive_program/{id}";
   }
+
+  // CurrentRates queries the hypothetical return of a bonded uToken denomination
+  // if current incentive rewards continued for one year. The response is an sdk.Coins
+  // of base token rewards, per reference amount (usually 10^exponent of the uToken.)
+  rpc CurrentRates(QueryCurrentRates)
+      returns (QueryCurrentRatesResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/current_rates";
+  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -98,26 +100,22 @@ message QueryPendingRewardsResponse {
   ];
 }
 
-// QueryBonded defines the request structure for the Bonded gRPC service handler.
-message QueryBonded {
-  string address = 1;
-  // denom is an optional field which causes the query to return the totals of only one uToken
-  string denom = 2;
-}
-
-// QueryBondedResponse defines the response structure for the Bonded gRPC service handler.
-message QueryBondedResponse {
-  repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
-}
-
-// QueryUnbondings defines the request structure for the Unbondings gRPC service handler.
-message QueryUnbondings {
+// QueryAccountBonds defines the request structure for the AccountBonds gRPC service handler.
+message QueryAccountBonds {
   string address = 1;
 }
 
-// QueryUnbondingsResponse defines the response structure for the Unbondings gRPC service handler.
-message QueryUnbondingsResponse {
-  repeated Unbonding unbondings = 1 [(gogoproto.nullable) = false];
+// QueryAccountBondsResponse defines the response structure for the AccountBonds gRPC service handler.
+message QueryAccountBondsResponse {
+  repeated cosmos.base.v1beta1.Coin bonded = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  repeated cosmos.base.v1beta1.Coin unbonding = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  repeated Unbonding unbondings = 3 [(gogoproto.nullable) = false];
 }
 
 // QueryTotalBonded defines the request structure for the TotalBonded gRPC service handler.
@@ -128,7 +126,10 @@ message QueryTotalBonded {
 
 // QueryTotalBondedResponse defines the response structure for the TotalBonded gRPC service handler.
 message QueryTotalBondedResponse {
-  repeated TotalBond bonded = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin bonded = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
 
 // QueryTotalUnbonding defines the request structure for the TotalUnbonding gRPC service handler.
@@ -139,7 +140,10 @@ message QueryTotalUnbonding {
 
 // QueryTotalUnbondingResponse defines the response structure for the TotalUnbonding gRPC service handler.
 message QueryTotalUnbondingResponse {
-  repeated TotalBond unbonding = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin unbonding = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
 
 // QueryUpcomingIncentivePrograms defines the request structure for the
@@ -190,4 +194,27 @@ message QueryIncentiveProgram {
 // IncentiveProgram gRPC service handler.
 message QueryIncentiveProgramResponse {
   IncentiveProgram program = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryCurrentRates defines the request structure for the CurrentRates gRPC service handler.
+message QueryCurrentRates {
+  // uToken is the uToken denomination whose current annual rate of rewards is being queried
+  string uToken = 1;
+}
+
+// QueryCurrentRatesResponse defines the response structure for the CurrentRates gRPC service handler.
+message QueryCurrentRatesResponse {
+  // Reference Bond is an amount of bonded uTokens (usually 10^exponent) whose current rewards are being
+  // calculated. This amount can be used to compute an individual user's rewards: for example, if a user has
+  // 2.5x the reference amount currently bonded, then they would receive 2.5x the rewards below annually
+  // at current rates.
+  cosmos.base.v1beta1.Coin reference_bond = 1 [
+    (gogoproto.nullable) = false
+  ];
+  // Rewards are the amount of base token rewards that the reference amount of bonded uTokens would earn
+  // if current rates continued for a full year.
+  repeated cosmos.base.v1beta1.Coin rewards = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
 }
