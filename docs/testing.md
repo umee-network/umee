@@ -4,7 +4,8 @@ Rules of thumb:
 
 1. Design packages to make it easy to unit-test.
    - Unit tests should represent majority of the test.
-   - Unit tests can be in the same package (to be able to test private methods) → no need to move unit tests to `_test` pacakge.
+   - Unit tests can be in the same package (to be able to test private methods) → no need to move
+     unit tests to `_test` package.
 2. Integration tests should be in `_test` package.
 3. Reduce tight coupling (will make it ) in the software.
 4. Add benchmarks (std lib `BenchmarkXXX`) for all functions we are not sure about the complexity.
@@ -16,12 +17,12 @@ Testing libraries:
    - Use `t.Skip` to skip long or not stable tests.
      **NOTE**: We should always run all tests before release. So the idea is that long tests won't impact daily CI, but we can make rule that this will be run only once a day and before release.
 1. Use [gotest.tools](https://pkg.go.dev/gotest.tools/assert) instead of `stretchr/testify/suite`.
-1. Use [gomock](github.com/golang/mock/mockgen) to generate mock interfaces.
+1. Use [gomock](https://github.com/golang/mock) to generate mock interfaces.
 1. Use [rapid](https://github.com/flyingmutant/rapid) for fuzzy testing (especially in unit tests).
 1. Use module fixtures. Example in [x/leverage/fixtures](../x/leverage/fixtures)
 
 Our CI should use all tests (unit, integration, e2e) except those which are very long or not stable.
-Long tests should be used periodically (eg once every second day) instead, to not significatly decrease the pull request experience.
+Long tests should be used periodically (eg once every second day) instead, to not significantly decrease the pull request experience.
 
 Finally all tests (including QA) must be run on release tag (including `beta` and `rc`).
 
