@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 			CQ: s.genCustomQuery(wq.UmeeQuery{
 				AssignedQuery: wq.AssignedQueryRegisteredTokens,
 				RegisteredTokens: &lvtypes.QueryRegisteredTokens{
-					BaseDenom: "uumee",
+					BaseDenom: appparams.BondDenom,
 				},
 			}),
 			ResponseCheck: func(data []byte) {
@@ -57,8 +57,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 				err := json.Unmarshal(data, &rr)
 				assert.NilError(s.T, err)
 				assert.Equal(s.T, true, len(rr.Registry) > 0)
-				assert.Equal(s.T, "uumee", rr.Registry[0].BaseDenom)
-
+				assert.Equal(s.T, appparams.BondDenom, rr.Registry[0].BaseDenom)
 			},
 		},
 		{
@@ -66,7 +65,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 			CQ: s.genCustomQuery(wq.UmeeQuery{
 				AssignedQuery: wq.AssignedQueryMarketSummary,
 				MarketSummary: &lvtypes.QueryMarketSummary{
-					Denom: "uumee",
+					Denom: appparams.BondDenom,
 				},
 			}),
 			ResponseCheck: func(data []byte) {
@@ -74,6 +73,52 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 				err := json.Unmarshal(data, &rr)
 				assert.NilError(s.T, err)
 				assert.Equal(s.T, "UMEE", rr.SymbolDenom)
+			},
+		},
+		{
+			Name: "query bad debts",
+			CQ: s.genCustomQuery(wq.UmeeQuery{
+				AssignedQuery: wq.AssignedQueryBadDebts,
+				BadDebts:      &lvtypes.QueryBadDebts{},
+			}),
+			ResponseCheck: func(data []byte) {
+				var rr lvtypes.QueryBadDebtsResponse
+				err := json.Unmarshal(data, &rr)
+				assert.NilError(s.T, err)
+				assert.Equal(s.T, true, len(rr.Targets) == 0)
+			},
+		},
+		{
+			Name: "query max withdraw (zero)",
+			CQ: s.genCustomQuery(wq.UmeeQuery{
+				AssignedQuery: wq.AssignedQueryMaxWithdraw,
+				MaxWithdraw: &lvtypes.QueryMaxWithdraw{
+					Address: addr.String(),
+					Denom:   appparams.BondDenom,
+				},
+			}),
+			ResponseCheck: func(data []byte) {
+				var rr lvtypes.QueryMaxWithdrawResponse
+				err := json.Unmarshal(data, &rr)
+				assert.NilError(s.T, err)
+				assert.Equal(s.T, true, len(rr.Tokens) == 0)
+				assert.Equal(s.T, true, len(rr.UTokens) == 0)
+			},
+		},
+		{
+			Name: "query max borrow (zero)",
+			CQ: s.genCustomQuery(wq.UmeeQuery{
+				AssignedQuery: wq.AssignedQueryMaxBorrow,
+				MaxBorrow: &lvtypes.QueryMaxBorrow{
+					Address: addr.String(),
+					Denom:   appparams.BondDenom,
+				},
+			}),
+			ResponseCheck: func(data []byte) {
+				var rr lvtypes.QueryMaxBorrowResponse
+				err := json.Unmarshal(data, &rr)
+				assert.NilError(s.T, err)
+				assert.Equal(s.T, true, len(rr.Tokens) == 0)
 			},
 		},
 	}
@@ -131,14 +176,44 @@ func (s *IntegrationTestSuite) TestOracleQueries() {
 }
 
 func (s *IntegrationTestSuite) TestLeverageTxs() {
-	msg := s.genCustomTx(wm.UmeeMsg{
-		AssignedMsg: wm.AssignedMsgSupply,
-		Supply: &lvtypes.MsgSupply{
-			Supplier: addr2.String(),
-			Asset:    sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100000)),
+	txTests := []struct {
+		Name string
+		Msg  []byte
+	}{
+		{
+			Name: "supply",
+			Msg: s.genCustomTx(wm.UmeeMsg{
+				Supply: &lvtypes.MsgSupply{
+					Supplier: addr2.String(),
+					Asset:    sdk.NewCoin(appparams.BondDenom, sdk.NewInt(700)),
+				},
+			}),
 		},
-	})
-	s.execContract(addr2, msg)
+		{
+			Name: "add collateral",
+			Msg: s.genCustomTx(wm.UmeeMsg{
+				Collateralize: &lvtypes.MsgCollateralize{
+					Borrower: addr2.String(),
+					Asset:    sdk.NewCoin("u/uumee", sdk.NewInt(700)),
+				},
+			}),
+		},
+		// {
+		// 	Name: "borrow",
+		// 	Msg: s.genCustomTx(wm.UmeeMsg{
+		// 		Borrow: &lvtypes.MsgBorrow{
+		// 			Borrower: addr2.String(),
+		// 			Asset:    sdk.NewCoin(appparams.BondDenom, sdk.NewInt(150)),
+		// 		},
+		// 	}),
+		// },
+	}
+
+	for _, tc := range txTests {
+		s.T.Run(tc.Name, func(t *testing.T) {
+			s.execContract(addr2, tc.Msg)
+		})
+	}
 
 	query := s.genCustomQuery(wq.UmeeQuery{
 		AssignedQuery: wq.AssignedQueryAccountSummary,

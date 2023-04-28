@@ -40,25 +40,27 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 	var err error
 	sdkCtx := sdk.WrapSDKContext(ctx)
 
-	switch smartcontractMessage.AssignedMsg {
-	case AssignedMsgSupply:
+	if smartcontractMessage.Supply != nil {
 		_, err = smartcontractMessage.HandleSupply(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgWithdraw:
+	} else if smartcontractMessage.Withdraw != nil {
 		_, err = smartcontractMessage.HandleWithdraw(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgCollateralize:
+	} else if smartcontractMessage.MaxWithdraw != nil {
+		_, err = smartcontractMessage.HandleMaxWithdraw(sdkCtx, plugin.lvMsgServer)
+	} else if smartcontractMessage.Collateralize != nil {
 		_, err = smartcontractMessage.HandleCollateralize(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgDecollateralize:
+	} else if smartcontractMessage.Decollateralize != nil {
 		_, err = smartcontractMessage.HandleDecollateralize(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgBorrow:
+	} else if smartcontractMessage.Borrow != nil {
 		_, err = smartcontractMessage.HandleBorrow(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgRepay:
+	} else if smartcontractMessage.MaxBorrow != nil {
+		_, err = smartcontractMessage.HandleMaxBorrow(sdkCtx, plugin.lvMsgServer)
+	} else if smartcontractMessage.Repay != nil {
 		_, err = smartcontractMessage.HandleRepay(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgLiquidate:
+	} else if smartcontractMessage.Liquidate != nil {
 		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgSupplyCollateral:
+	} else if smartcontractMessage.SupplyCollateral != nil {
 		_, err = smartcontractMessage.HandleSupplyCollateral(sdkCtx, plugin.lvMsgServer)
-
-	default:
+	} else {
 		err = wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
 	}
 

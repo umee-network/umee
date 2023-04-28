@@ -17,6 +17,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/simapp"
+	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
@@ -34,7 +35,7 @@ import (
 const (
 	initialPower = int64(10000000000)
 	cw20Artifact = "../../../tests/artifacts/cw20_base.wasm"
-	umeeArtifact = "../../../tests/artifacts/umee_cosmwasm.wasm"
+	umeeArtifact = "../../../tests/artifacts/umee_cosmwasm-aarch64.wasm"
 	cw20Label    = "cw20InstanceTest"
 )
 
@@ -101,11 +102,9 @@ type CustomQuery struct {
 }
 
 type ExecuteMsg struct {
-	// Chain struct {
-	// 	CustomMsg wm.UmeeMsg `json:"custom_msg"`
-	// } `json:"chain"`
-
-	Chain wm.UmeeMsg `json:"chain"`
+	Umee struct {
+		Leverage wm.UmeeMsg `json:"leverage"`
+	} `json:"umee"`
 }
 
 func UmeeCwCustomQuery(umeeCWQuery wq.UmeeQuery) CustomQuery {
@@ -116,7 +115,7 @@ func UmeeCwCustomQuery(umeeCWQuery wq.UmeeQuery) CustomQuery {
 
 func UmeeCwCustomTx(customMsg wm.UmeeMsg) ExecuteMsg {
 	c := ExecuteMsg{}
-	c.Chain = customMsg
+	c.Umee.Leverage = customMsg
 	return c
 }
 
@@ -131,6 +130,7 @@ type IntegrationTestSuite struct {
 
 	codeID       uint64
 	contractAddr string
+	encfg        params.EncodingConfig
 }
 
 func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
@@ -146,7 +146,6 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
-
 	s.T = t
 	s.app = app
 	s.ctx = ctx
@@ -159,6 +158,7 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	wasmtypes.RegisterQueryServer(queryHelper, grpc)
 	s.wasmQueryClient = wasmtypes.NewQueryClient(queryHelper)
 	s.wasmProposalHandler = wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, umeeapp.GetWasmEnabledProposals())
+	s.encfg = umeeapp.MakeEncodingConfig()
 }
 
 // NewTestMsgCreateValidator test msg creator
