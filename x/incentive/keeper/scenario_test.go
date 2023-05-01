@@ -190,8 +190,6 @@ func TestZeroBonded(t *testing.T) {
 	)
 
 	k := newTestKeeper(t)
-
-	// init a community fund with 1000 UMEE and 10 ATOM available for funding
 	k.initCommunityFund(
 		coin.New(umee, 1000_000000),
 	)
