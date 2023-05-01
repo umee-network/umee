@@ -9,12 +9,11 @@ import "gogoproto/gogo.proto";
 option go_package = "github.com/umee-network/umee/v4/x/ugov";
 
 option (gogoproto.goproto_getters_all) = false;
-// option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/ugov module's Msg service.
 service Msg {
   // GovUpdateMinFees sets protocol controlled tx min fees.
-  rpc GovMinFees(MsgGovUpdateMinFees) returns (MsgGovUpdateMinFeesResponse);
+  rpc GovUpdateMinFees(MsgGovUpdateMinFees) returns (MsgGovUpdateMinFeesResponse);
 }
 
 // MsgGovUpdateMinFees is a request type for the Msg/GovUpdateMinFees.
