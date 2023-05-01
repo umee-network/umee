@@ -22,6 +22,7 @@ const (
 	AssignedQueryLiquidationTargets
 	AssignedQueryBadDebts
 	AssignedQueryMaxWithdraw
+	AssignedQueryMaxBorrow
 
 	//  oracle queries
 	AssignedQueryFeederDelegation
@@ -57,9 +58,11 @@ type UmeeQuery struct {
 	// request to return a list of borrower addresses eligible for liquidation.
 	LiquidationTargets *lvtypes.QueryLiquidationTargets `json:"liquidation_targets,omitempty"`
 	// requet to returns list of bad debts
-	BadDebts *lvtypes.QueryBadDebts `json:"bad_debts,omitempty"`
+	BadDebts *lvtypes.QueryBadDebts `json:"bad_debts_params,omitempty"`
 	// request to returns max withdraw
-	MaxWithdraw *lvtypes.QueryMaxWithdraw `json:"max_withdraw,omitempty"`
+	MaxWithdraw *lvtypes.QueryMaxWithdraw `json:"max_withdraw_params,omitempty"`
+	// request to get max borrows
+	MaxBorrow *lvtypes.QueryMaxBorrow `json:"max_borrow_params,omitempty"`
 
 	//  oracle queries
 	// Used to get all feeder delegation of a validator.

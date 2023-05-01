@@ -75,3 +75,12 @@ func (q UmeeQuery) HandleMaxWithdraw(
 	req := &lvtypes.QueryMaxWithdraw{Address: q.MaxWithdraw.Address, Denom: q.MaxWithdraw.Denom}
 	return qs.MaxWithdraw(ctx, req)
 }
+
+// HandleMaxBorrow queries max borrow.
+func (q UmeeQuery) HandleMaxBorrow(
+	ctx context.Context,
+	qs lvtypes.QueryServer,
+) (proto.Message, error) {
+	req := &lvtypes.QueryMaxBorrow{Address: q.MaxBorrow.Address, Denom: q.MaxBorrow.Address}
+	return qs.MaxBorrow(ctx, req)
+}

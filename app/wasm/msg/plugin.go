@@ -18,9 +18,15 @@ type Plugin struct {
 	wrapped     wasmkeeper.Messenger
 }
 
-func NewMessagePlugin(leverageKeeper lvkeeper.Keeper) *Plugin {
-	return &Plugin{
-		lvMsgServer: lvkeeper.NewMsgServerImpl(leverageKeeper),
+var _ wasmkeeper.Messenger = (*Plugin)(nil)
+
+// CustomMessageDecorator returns decorator for custom CosmWasm bindings messages
+func NewMessagePlugin(leverageKeeper lvkeeper.Keeper) func(wasmkeeper.Messenger) wasmkeeper.Messenger {
+	return func(old wasmkeeper.Messenger) wasmkeeper.Messenger {
+		return &Plugin{
+			wrapped:     old,
+			lvMsgServer: lvkeeper.NewMsgServerImpl(leverageKeeper),
+		}
 	}
 }
 
@@ -34,24 +40,27 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage)
 	var err error
 	sdkCtx := sdk.WrapSDKContext(ctx)
 
-	switch smartcontractMessage.AssignedMsg {
-	case AssignedMsgSupply:
+	switch {
+	case smartcontractMessage.Supply != nil:
 		_, err = smartcontractMessage.HandleSupply(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgWithdraw:
+	case smartcontractMessage.Withdraw != nil:
 		_, err = smartcontractMessage.HandleWithdraw(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgCollateralize:
+	case smartcontractMessage.MaxWithdraw != nil:
+		_, err = smartcontractMessage.HandleMaxWithdraw(sdkCtx, plugin.lvMsgServer)
+	case smartcontractMessage.Collateralize != nil:
 		_, err = smartcontractMessage.HandleCollateralize(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgDecollateralize:
+	case smartcontractMessage.Decollateralize != nil:
 		_, err = smartcontractMessage.HandleDecollateralize(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgBorrow:
+	case smartcontractMessage.Borrow != nil:
 		_, err = smartcontractMessage.HandleBorrow(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgRepay:
+	case smartcontractMessage.MaxBorrow != nil:
+		_, err = smartcontractMessage.HandleMaxBorrow(sdkCtx, plugin.lvMsgServer)
+	case smartcontractMessage.Repay != nil:
 		_, err = smartcontractMessage.HandleRepay(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgLiquidate:
+	case smartcontractMessage.Liquidate != nil:
 		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, plugin.lvMsgServer)
-	case AssignedMsgSupplyCollateral:
+	case smartcontractMessage.SupplyCollateral != nil:
 		_, err = smartcontractMessage.HandleSupplyCollateral(sdkCtx, plugin.lvMsgServer)
-
 	default:
 		err = wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
 	}

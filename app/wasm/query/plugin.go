@@ -60,6 +60,8 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			resp, err = smartcontractQuery.HandleBadDebts(ctx, plugin.lvQueryServer)
 		case AssignedQueryMaxWithdraw:
 			resp, err = smartcontractQuery.HandleMaxWithdraw(ctx, plugin.lvQueryServer)
+		case AssignedQueryMaxBorrow:
+			resp, err = smartcontractQuery.HandleMaxBorrow(ctx, plugin.lvQueryServer)
 
 		case AssignedQueryFeederDelegation:
 			resp, err = smartcontractQuery.HandleFeederDelegation(ctx, plugin.ocQueryServer)

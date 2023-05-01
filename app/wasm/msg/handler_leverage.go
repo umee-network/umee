@@ -26,6 +26,15 @@ func (m UmeeMsg) HandleWithdraw(
 	return s.Withdraw(ctx, req)
 }
 
+// HandleMaxWithdraw handles the maximum withdraw value of an address.
+func (m UmeeMsg) HandleMaxWithdraw(
+	ctx context.Context,
+	s lvtypes.MsgServer,
+) (proto.Message, error) {
+	req := &lvtypes.MsgMaxWithdraw{Supplier: m.MaxWithdraw.Supplier, Denom: m.MaxWithdraw.Denom}
+	return s.MaxWithdraw(ctx, req)
+}
+
 // HandleCollateralize handles the enable selected uTokens as collateral.
 func (m UmeeMsg) HandleCollateralize(
 	ctx context.Context,
@@ -52,6 +61,15 @@ func (m UmeeMsg) HandleBorrow(
 ) (proto.Message, error) {
 	req := &lvtypes.MsgBorrow{Borrower: m.Borrow.Borrower, Asset: m.Borrow.Asset}
 	return s.Borrow(ctx, req)
+}
+
+// HandleMaxBorrow handles the borrowing maximum coins from the capital facility.
+func (m UmeeMsg) HandleMaxBorrow(
+	ctx context.Context,
+	s lvtypes.MsgServer,
+) (proto.Message, error) {
+	req := &lvtypes.MsgMaxBorrow{Borrower: m.MaxBorrow.Borrower, Denom: m.MaxWithdraw.Denom}
+	return s.MaxBorrow(ctx, req)
 }
 
 // HandleRepay handles repaying borrowed coins to the capital facility.
