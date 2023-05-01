@@ -1,0 +1,27 @@
+syntax = "proto3";
+package umee.ugov.v1;
+
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/umee-network/umee/v4/x/ugov";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Query defines the gRPC querier service.
+service Query {
+  // MinTxFees returns minimum transaction fees.
+  rpc MinTxFees(QueryMinTxFees) returns (QueryMinTxFeesResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/min-tx-fees";
+  }
+}
+
+// QueryMinTxFees is a request type.
+message QueryMinTxFees {}
+
+// QueryMinTxFeesResponse response type.
+message QueryMinTxFeesResponse {
+  repeated cosmos.base.v1beta1.Coin min_tx_fees = 1
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+}
