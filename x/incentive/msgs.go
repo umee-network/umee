@@ -188,8 +188,8 @@ func (msg MsgGovSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
 
 func NewMsgGovCreatePrograms(authority string, programs []IncentiveProgram) *MsgGovCreatePrograms {
 	return &MsgGovCreatePrograms{
-		Programs:  programs,
 		Authority: authority,
+		Programs:  programs,
 	}
 }
 

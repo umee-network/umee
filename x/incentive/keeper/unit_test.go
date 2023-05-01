@@ -108,15 +108,11 @@ func (k *testKeeper) addIncentiveProgram(uDenom string, start, duration int64, r
 		RemainingRewards: coin.Zero(reward.Denom),
 	}
 
-	// add program and expect no error
 	validMsg := &incentive.MsgGovCreatePrograms{
 		Authority:         govAccAddr,
-		Title:             "Add valid program",
-		Description:       "using addIncentiveProgram helper function",
 		Programs:          []incentive.IncentiveProgram{program},
 		FromCommunityFund: fromCommunity,
 	}
-	// pass and optionally fund the program from community fund
 	_, err := k.msrv.GovCreatePrograms(k.ctx, validMsg)
 	require.Nil(k.t, err, "addIncentiveProgram")
 }
