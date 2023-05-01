@@ -25,8 +25,8 @@ func init() {
 
 const minProposalTitleLen = 3
 
-// ValidateProposal checks the format of the title, description, and authority of a gov message.
-func ValidateProposal(title, description, authority string) error {
+// IsGovAuthority errors is the authority is the gov module address
+func IsGovAuthority(authority string) error {
 	if govModuleAddr == "" {
 		return sdkerrors.ErrLogic.Wrap("govModuleAddrs in the checkers package must be set before using this function")
 	}
@@ -36,7 +36,14 @@ func ValidateProposal(title, description, authority string) error {
 			govModuleAddr, authority,
 		)
 	}
+	return nil
+}
 
+// ValidateProposal checks the format of the title, description, and authority of a gov message.
+func ValidateProposal(title, description, authority string) error {
+	if err := IsGovAuthority(authority); err != nil {
+		return err
+	}
 	if len(strings.TrimSpace(title)) < minProposalTitleLen {
 		return fmt.Errorf("proposal title must be at least %d of non blank characters",
 			minProposalTitleLen)

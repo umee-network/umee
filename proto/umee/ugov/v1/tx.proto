@@ -1,0 +1,30 @@
+syntax = "proto3";
+package umee.ugov.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/umee-network/umee/v4/x/ugov";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Msg defines the x/ugov module's Msg service.
+service Msg {
+  // GovUpdateMinFees sets protocol controlled tx min fees.
+  rpc GovUpdateMinFees(MsgGovUpdateMinFees) returns (MsgGovUpdateMinFeesResponse);
+}
+
+// MsgGovUpdateMinFees is a request type for the Msg/GovUpdateMinFees.
+message MsgGovUpdateMinFees {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority must be the address of the governance account.
+  string   authority                            = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  repeated cosmos.base.v1beta1.Coin min_tx_fees = 2
+      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+}
+
+// MsgGovUpdateMinFeesResponse is a response type for the Msg/GovUpdateMinFees.
+message MsgGovUpdateMinFeesResponse {};
