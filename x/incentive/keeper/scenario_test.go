@@ -188,30 +188,24 @@ func TestZeroBonded(t *testing.T) {
 		coin.New(umee, 1000_000000),
 	)
 
+	// In this test case, an incentive program is started but no uTokens of the incentivized denom are
+	// bonded during its first half of runtime. during this time, it must not distribute rewards.
+	// During the remaining half of the program, all rewards must be distributed (spread evenly over
+	// the remaining time.)
+
 	programStart := int64(100)
-	// create incentive program and fund from community
 	k.addIncentiveProgram(u_umee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
-
-	// Advance last rewards time to 100, thus starting the program
-	k.advanceTimeTo(programStart)
-	require.Equal(k.t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 100)")
-
-	// Advance last rewards time to 150, which would distribute 50 blocks (50%) of the program's rewards.
-	// Since no uTokens are bonded though, the rewards are not distributed.
+	k.advanceTimeTo(programStart) // starts program, but does not attempt rewards. Do not combine with next line.
 	k.advanceTimeTo(programStart + 50)
 	require.Equal(k.t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 150)")
-	// 10UMEE of the original 10 UMEE remain
 	program := k.getProgram(1)
 	require.Equal(k.t, program.TotalRewards, program.RemainingRewards, "all of program's rewards remain (no bonds)")
 
-	// init a supplier with bonded uTokens
+	// now create a supplier with bonded tokens, halfway through the program
 	k.newBondedAccount(
 		coin.New(u_umee, 100_000000),
 	)
-
-	// Advance last rewards time to 175, which would originally distribute another 25% of the program's rewards
-	// for a total of 75%, but now distributes 50% since the first 50 blocks were skipped due to no bonded uTokens.
 	k.advanceTimeTo(programStart + 75)
 	program = k.getProgram(1)
-	require.Equal(k.t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "all of program's rewards (10 UMEE) should remain (no bonds)")
+	require.Equal(k.t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
 }
