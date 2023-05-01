@@ -210,7 +210,7 @@ func TestZeroBonded(t *testing.T) {
 	require.Equal(k.t, program.TotalRewards, program.RemainingRewards, "all of program's rewards remain (no bonds)")
 
 	// init a supplier with bonded uTokens
-	_ = k.newBondedAccount(
+	k.newBondedAccount(
 		coin.New("u/"+fixtures.UmeeDenom, 100_000000),
 	)
 
