@@ -48,6 +48,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [20XX](https://github.com/umee-network/umee/pull/20XX) Fix reward distribution when zero bonded uTokens.
+- [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module
 - [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
 - [1993](https://github.com/umee-network/umee/pull/1993) Updated our Cosmos SDK fork to 0.46.12 and included an option to disable colored logs.
 

@@ -182,3 +182,44 @@ func TestBasicIncentivePrograms(t *testing.T) {
 		"bob pending rewards at time 300",
 	)
 }
+
+func TestZeroBonded(t *testing.T) {
+	const (
+		umee  = fixtures.UmeeDenom
+		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
+	)
+
+	k := newTestKeeper(t)
+
+	// init a community fund with 1000 UMEE and 10 ATOM available for funding
+	k.initCommunityFund(
+		coin.New(umee, 1000_000000),
+	)
+
+	// create incentive program and fund from community
+	k.addIncentiveProgram(uumee, 100, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+
+	// Advance last rewards time to 100, thus starting the program
+	k.advanceTimeTo(100)
+	require.Equal(k.t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 100)")
+
+	// Advance last rewards time to 150, which would distribute 50 blocks (50%) of the program's rewards.
+	// Since no uTokens are bonded though, the rewards are not distributed.
+	k.advanceTimeTo(150)
+	require.Equal(k.t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 150)")
+	// 10UMEE of the original 10 UMEE remain
+	program := k.getProgram(1)
+	require.Equal(k.t, program.TotalRewards, program.RemainingRewards, "all of program's rewards remain (no bonds)")
+
+	// init a supplier with bonded uTokens
+	_ = k.newBondedAccount(
+		coin.New("u/"+fixtures.UmeeDenom, 100_000000),
+	)
+
+	// Advance last rewards time to 175, which would originally distribute another 25% of the program's rewards
+	// for a total of 75%, but now distributes 50% since the first 50 blocks were skipped due to no bonded uTokens.
+	k.advanceTimeTo(175)
+	// 5UMEE of the original 5 UMEE remain
+	program = k.getProgram(1)
+	require.Equal(k.t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "all of program's rewards remain (no bonds)")
+}
