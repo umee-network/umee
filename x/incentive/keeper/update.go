@@ -47,6 +47,10 @@ func (k Keeper) updateRewards(ctx sdk.Context, blockTime int64) error {
 	for _, p := range ongoingPrograms {
 		bondedDenom := p.UToken
 		bonded := k.getTotalBonded(ctx, bondedDenom)
+		if bonded.IsZero() {
+			// If no uTokens are bonded in the incentivized denom, nothing happens with rewards
+			continue
+		}
 
 		// calculate the amount of time (in seconds) that remained on the incentive
 		// program after the previous calculation.
