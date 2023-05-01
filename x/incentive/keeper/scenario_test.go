@@ -212,7 +212,6 @@ func TestZeroBonded(t *testing.T) {
 	// Advance last rewards time to 175, which would originally distribute another 25% of the program's rewards
 	// for a total of 75%, but now distributes 50% since the first 50 blocks were skipped due to no bonded uTokens.
 	k.advanceTimeTo(programStart + 75)
-	// 5UMEE of the original 5 UMEE remain
 	program = k.getProgram(1)
-	require.Equal(k.t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "all of program's rewards remain (no bonds)")
+	require.Equal(k.t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "all of program's rewards (10 UMEE) should remain (no bonds)")
 }
