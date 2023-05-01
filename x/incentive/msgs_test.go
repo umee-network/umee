@@ -34,7 +34,7 @@ func TestMsgs(t *testing.T) {
 
 	govMsgs := []sdk.Msg{
 		incentive.NewMsgGovCreatePrograms(govAddr, "title", "desc", []incentive.IncentiveProgram{program}),
-		incentive.NewMsgGovSetParams(govAddr, "title", "desc", incentive.DefaultParams()),
+		incentive.NewMsgGovSetParams(govAddr, incentive.DefaultParams()),
 	}
 
 	for _, msg := range userMsgs {

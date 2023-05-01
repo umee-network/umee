@@ -295,11 +295,9 @@ func (k *testKeeper) TestMsgSponsor() {
 	// require that NextProgramID starts at the correct value
 	require.Equal(k.t, uint32(1), k.getNextProgramID(k.ctx), "initial next ID")
 
-	// add program and expect no error
+	// add program, with manual funding
 	validMsg := &incentive.MsgGovCreatePrograms{
 		Authority:         govAccAddr,
-		Title:             "Add two valid program",
-		Description:       "Both will require manual funding",
 		Programs:          []incentive.IncentiveProgram{validProgram, validProgram},
 		FromCommunityFund: true,
 	}
@@ -348,10 +346,8 @@ func (k *testKeeper) TestMsgGovSetParams() {
 
 	// set params and expect no error
 	validMsg := &incentive.MsgGovSetParams{
-		Authority:   govAccAddr,
-		Title:       "Update Params",
-		Description: "New valid values",
-		Params:      newParams,
+		Authority: govAccAddr,
+		Params:    newParams,
 	}
 	_, err := k.msrv.GovSetParams(k.ctx, validMsg)
 	require.Nil(k.t, err, "set valid params")
@@ -361,10 +357,8 @@ func (k *testKeeper) TestMsgGovSetParams() {
 
 	// create an invalid message
 	invalidMsg := &incentive.MsgGovSetParams{
-		Authority:   "",
-		Title:       "",
-		Description: "",
-		Params:      incentive.Params{},
+		Authority: "",
+		Params:    incentive.Params{},
 	}
 	_, err = k.msrv.GovSetParams(k.ctx, invalidMsg)
 	// error comes from params validate
@@ -399,11 +393,9 @@ func (k *testKeeper) TestMsgGovCreatePrograms() {
 	// require that NextProgramID starts at the correct value
 	require.Equal(k.t, uint32(1), k.getNextProgramID(k.ctx), "initial next ID")
 
-	// add program and expect no error
+	// Awards 10 UMEE to u/UMEE suppliers over 100 blocks"
 	validMsg := &incentive.MsgGovCreatePrograms{
 		Authority:         govAccAddr,
-		Title:             "Add valid program",
-		Description:       "Awards 10 UMEE to u/UMEE suppliers over 100 blocks",
 		Programs:          []incentive.IncentiveProgram{validProgram},
 		FromCommunityFund: true,
 	}
@@ -420,9 +412,7 @@ func (k *testKeeper) TestMsgGovCreatePrograms() {
 	invalidProgram := validProgram
 	invalidProgram.ID = 1
 	invalidMsg := &incentive.MsgGovCreatePrograms{
-		Authority:         govAccAddr,
-		Title:             "Add invalid program",
-		Description:       "",
+		Authority:         "",
 		Programs:          []incentive.IncentiveProgram{invalidProgram},
 		FromCommunityFund: true,
 	}

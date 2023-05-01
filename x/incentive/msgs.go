@@ -155,17 +155,15 @@ func (msg MsgSponsor) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgSponsor) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgGovSetParams(authority, title, description string, params Params) *MsgGovSetParams {
+func NewMsgGovSetParams(authority string, params Params) *MsgGovSetParams {
 	return &MsgGovSetParams{
-		Title:       title,
-		Description: description,
-		Params:      params,
-		Authority:   authority,
+		Params:    params,
+		Authority: authority,
 	}
 }
 
 func (msg MsgGovSetParams) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 	return msg.Params.Validate()
@@ -188,17 +186,15 @@ func (msg MsgGovSetParams) Route() string { return RouterKey }
 // Type implements the sdk.Msg interface.
 func (msg MsgGovSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
 
-func NewMsgGovCreatePrograms(authority, title, description string, programs []IncentiveProgram) *MsgGovCreatePrograms {
+func NewMsgGovCreatePrograms(authority string, programs []IncentiveProgram) *MsgGovCreatePrograms {
 	return &MsgGovCreatePrograms{
-		Title:       title,
-		Description: description,
-		Programs:    programs,
-		Authority:   authority,
+		Programs:  programs,
+		Authority: authority,
 	}
 }
 
 func (msg MsgGovCreatePrograms) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 	if len(msg.Programs) == 0 {
