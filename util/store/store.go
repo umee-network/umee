@@ -213,7 +213,9 @@ func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress, errField stri
 	return nil
 }
 
-func getInteger[Num constraints.Integer, TPtr gogoInteger[T, Num], T any](store sdk.KVStore, key []byte, errField string) Num {
+func getInteger[Num constraints.Integer, TPtr gogoInteger[T, Num], T any](
+	store sdk.KVStore, key []byte, errField string) Num {
+
 	v := GetValue[TPtr](store, key, errField)
 	if v == nil {
 		// No stored bytes at key: return zero
@@ -223,7 +225,9 @@ func getInteger[Num constraints.Integer, TPtr gogoInteger[T, Num], T any](store 
 	return v.GetValue()
 }
 
-func setInteger[Num constraints.Integer, TPtr gogoInteger[T, Num], T any](store sdk.KVStore, key []byte, v TPtr, errField string) error {
+func setInteger[Num constraints.Integer, TPtr gogoInteger[T, Num], T any](
+	store sdk.KVStore, key []byte, v TPtr, errField string) error {
+
 	if v.GetValue() == 0 {
 		store.Delete(key)
 		return nil
