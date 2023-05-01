@@ -5,22 +5,21 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/v4/x/incentive"
 
 	"github.com/umee-network/umee/v4/util/coin"
-	//"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v4/x/incentive"
 	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
-func TestBasicIncentivePrograms(t *testing.T) {
-	const (
-		umee  = fixtures.UmeeDenom
-		atom  = fixtures.AtomDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-		uatom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
-	)
+const (
+	umee   = fixtures.UmeeDenom
+	atom   = fixtures.AtomDenom
+	u_umee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
+	u_atom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
+)
 
+func TestBasicIncentivePrograms(t *testing.T) {
 	k := newTestKeeper(t)
 
 	// init a community fund with 1000 UMEE and 10 ATOM available for funding
@@ -43,9 +42,9 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	// create three separate programs for 10UMEE, which will run for 100 seconds
 	// one is funded by the community fund, and two are not. The non-community ones are start later than the first.
 	// The first non-community-funded program will not be sponsored, and should thus be cancelled and create no rewards.
-	k.addIncentiveProgram(uumee, 100, 100, sdk.NewInt64Coin(umee, 10_000000), true)
-	k.addIncentiveProgram(uumee, 120, 120, sdk.NewInt64Coin(umee, 10_000000), false)
-	k.addIncentiveProgram(uumee, 120, 120, sdk.NewInt64Coin(umee, 10_000000), false)
+	k.addIncentiveProgram(u_umee, 100, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(u_umee, 120, 120, sdk.NewInt64Coin(umee, 10_000000), false)
+	k.addIncentiveProgram(u_umee, 120, 120, sdk.NewInt64Coin(umee, 10_000000), false)
 
 	// verify all 3 programs added
 	programs, err := k.getAllIncentivePrograms(k.ctx, incentive.ProgramStatusUpcoming)
@@ -87,8 +86,8 @@ func TestBasicIncentivePrograms(t *testing.T) {
 
 	// init a second supplier with bonded uTokens - but he was not present during updateRewards
 	bob := k.newBondedAccount(
-		coin.New("u/"+fixtures.UmeeDenom, 25_000000),
-		coin.New("u/"+fixtures.AtomDenom, 8_000000),
+		coin.New(u_umee, 25_000000),
+		coin.New(u_atom, 8_000000),
 	)
 
 	// From 100000 rewards distributed, 100% went to alice and 0% went to bob.
@@ -184,18 +183,13 @@ func TestBasicIncentivePrograms(t *testing.T) {
 }
 
 func TestZeroBonded(t *testing.T) {
-	const (
-		umee  = fixtures.UmeeDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-	)
-
 	k := newTestKeeper(t)
 	k.initCommunityFund(
 		coin.New(umee, 1000_000000),
 	)
 
 	// create incentive program and fund from community
-	k.addIncentiveProgram(uumee, 100, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(u_umee, 100, 100, sdk.NewInt64Coin(umee, 10_000000), true)
 
 	// Advance last rewards time to 100, thus starting the program
 	k.advanceTimeTo(100)
@@ -211,7 +205,7 @@ func TestZeroBonded(t *testing.T) {
 
 	// init a supplier with bonded uTokens
 	k.newBondedAccount(
-		coin.New("u/"+fixtures.UmeeDenom, 100_000000),
+		coin.New(u_umee, 100_000000),
 	)
 
 	// Advance last rewards time to 175, which would originally distribute another 25% of the program's rewards
