@@ -1,7 +1,6 @@
 package store
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/umee-network/umee/v4/util"
 
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -64,7 +63,13 @@ func MustLoadAll[TPtr PtrProtoMarshalable[T], T any](s storetypes.KVStore, prefi
 	return ls
 }
 
+type Marshalable interface {
+	Marshal() ([]byte, error)
+	MarshalTo(data []byte) (n int, err error)
+	Unmarshal(data []byte) error
+}
+
 type PtrProtoMarshalable[T any] interface {
-	codec.ProtoMarshaler
+	Marshalable
 	*T
 }
