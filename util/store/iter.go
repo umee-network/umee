@@ -1,7 +1,6 @@
 package store
 
 import (
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/umee-network/umee/v4/util"
 
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -42,7 +41,7 @@ func iterate(iter db.Iterator, cb func(key, val []byte) error) error {
 }
 
 // LoadAll iterates over all records in the prefix store and unmarshals value into the list.
-func LoadAll[TPtr PtrProtoMarshalable[T], T any](s storetypes.KVStore, prefix []byte) ([]T, error) {
+func LoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []byte) ([]T, error) {
 	iter := sdk.KVStorePrefixIterator(s, prefix)
 	defer iter.Close()
 	var out = make([]T, 0)
@@ -58,13 +57,8 @@ func LoadAll[TPtr PtrProtoMarshalable[T], T any](s storetypes.KVStore, prefix []
 }
 
 // MustLoadAll executes LoadAll and panics on error
-func MustLoadAll[TPtr PtrProtoMarshalable[T], T any](s storetypes.KVStore, prefix []byte) []T {
+func MustLoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []byte) []T {
 	ls, err := LoadAll[TPtr, T](s, prefix)
 	util.Panic(err)
 	return ls
-}
-
-type PtrProtoMarshalable[T any] interface {
-	codec.ProtoMarshaler
-	*T
 }
