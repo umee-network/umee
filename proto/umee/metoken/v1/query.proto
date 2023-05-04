@@ -66,8 +66,8 @@ message QueryIndexesResponse {
 
 // QuerySwapFee defines the request structure for the SwapFee gRPC service handler.
 message QuerySwapFee {
-  cosmos.base.v1beta1.Coin asset = 1 [(gogoproto.nullable) = false];
-  string metoken_denom           = 2;
+  cosmos.base.v1beta1.Coin asset         = 1 [(gogoproto.nullable) = false];
+  string                   metoken_denom = 2;
 }
 
 // QuerySwapFeeResponse defines the response structure for the SwapFee gRPC service handler.
@@ -77,8 +77,8 @@ message QuerySwapFeeResponse {
 
 // QueryRedeemFee defines the request structure for the RedeemFee gRPC service handler.
 message QueryRedeemFee {
-  cosmos.base.v1beta1.Coin metoken = 1 [(gogoproto.nullable) = false];
-  string asset_denom               = 2;
+  cosmos.base.v1beta1.Coin metoken     = 1 [(gogoproto.nullable) = false];
+  string                   asset_denom = 2;
 }
 
 // QueryRedeemFeeResponse defines the response structure for the RedeemFee gRPC service handler.

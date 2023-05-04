@@ -43,13 +43,13 @@ message EventRebalancing {
 message RebalancingResult {
   string metoken_denom = 1;
   //Initial balance of an asset in the Index before re-balancing.
-  repeated cosmos.base.v1beta1.Coin initial_balance  = 2 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin initial_balance = 2 [(gogoproto.nullable) = false];
   // Result balance of an asset in the Index after re-balancing.
-  repeated cosmos.base.v1beta1.Coin result_balance  = 3 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin result_balance = 3 [(gogoproto.nullable) = false];
 }
 
 // EventInterestClaim is emitted when the accrued interest was claimed from x/leverage
 message EventInterestClaim {
   // The denom and amount of successfully claimed interest
-  repeated cosmos.base.v1beta1.Coin claimed_asset  = 1 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin claimed_asset = 1 [(gogoproto.nullable) = false];
 }

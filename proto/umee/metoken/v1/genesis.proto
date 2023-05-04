@@ -9,11 +9,11 @@ option go_package = "github.com/umee-network/umee/v4/x/metoken";
 
 // GenesisState defines the x/metoken module's genesis state.
 message GenesisState {
-  Params         params             = 1 [(gogoproto.nullable) = false];
-  repeated Index registry           = 2 [(gogoproto.nullable) = false];
-  repeated IndexBalance balances    = 3 [(gogoproto.nullable) = false];
-  int64    next_rebalancing_time    = 4;
-  int64    next_interest_claim_time = 5;
+  Params                params                   = 1 [(gogoproto.nullable) = false];
+  repeated Index        registry                 = 2 [(gogoproto.nullable) = false];
+  repeated IndexBalance balances                 = 3 [(gogoproto.nullable) = false];
+  int64                 next_rebalancing_time    = 4;
+  int64                 next_interest_claim_time = 5;
 }
 
 // IndexBalance is the state of an Index, containing its meToken supply and all underlying asset balances.
