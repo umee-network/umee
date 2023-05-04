@@ -170,13 +170,13 @@ func (k Keeper) getExchangePrice(ctx sdk.Context, denom string, amount sdkmath.I
 
 	// convert to base asset if it is `uToken`
 	if ltypes.HasUTokenPrefix(denom) {
-		transferCoin, err = k.leverageKeeper.ExchangeUToken(ctx, transferCoin)
+		transferCoin, err = k.leverage.ExchangeUToken(ctx, transferCoin)
 		if err != nil {
 			return sdk.Dec{}, err
 		}
 	}
 
-	ts, err := k.leverageKeeper.GetTokenSettings(ctx, transferCoin.Denom)
+	ts, err := k.leverage.GetTokenSettings(ctx, transferCoin.Denom)
 	if err != nil {
 		return sdk.Dec{}, err
 	}

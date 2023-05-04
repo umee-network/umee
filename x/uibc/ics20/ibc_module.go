@@ -17,14 +17,14 @@ import (
 // IBCModule wraps ICS-20 IBC module to limit token transfer inflows.
 type IBCModule struct {
 	// leverage keeper
-	lkeeper uibc.LeverageKeeper
+	lkeeper uibc.Leverage
 	// embed the ICS-20 transfer's AppModule: ibctransfer.IBCModule
 	ibcporttypes.IBCModule
 
 	keeper keeper.Keeper
 }
 
-func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
+func NewIBCModule(leverageKeeper uibc.Leverage, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
 	return IBCModule{
 		lkeeper:   leverageKeeper,
 		IBCModule: am,
@@ -66,7 +66,7 @@ func (am IBCModule) OnRecvPacket(
 
 func CheckIBCInflow(ctx sdk.Context,
 	packet channeltypes.Packet,
-	lkeeper uibc.LeverageKeeper,
+	lkeeper uibc.Leverage,
 	dataDenom string, isSourceChain bool,
 ) ibcexported.Acknowledgement {
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to

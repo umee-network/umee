@@ -101,11 +101,11 @@ func initFullKeeper(
 	t *testing.T,
 	cdc codec.BinaryCodec,
 	ics4Wrapper porttypes.ICS4Wrapper,
-	leverageKeeper uibc.LeverageKeeper,
-	oracleKeeper uibc.Oracle,
+	leverage uibc.Leverage,
+	oracle uibc.Oracle,
 ) (sdk.Context, keeper.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
-	k := keeper.NewKeeper(cdc, storeKey, ics4Wrapper, leverageKeeper, oracleKeeper)
+	k := keeper.NewKeeper(cdc, storeKey, ics4Wrapper, leverage, oracle)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return ctx, k
 }

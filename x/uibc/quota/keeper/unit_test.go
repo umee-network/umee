@@ -18,7 +18,7 @@ const (
 )
 
 // creates keeper without external dependencies (app, leverage etc...)
-func initKeeper(t *testing.T, l uibc.LeverageKeeper, o uibc.Oracle) TestKeeper {
+func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
 	cdc := codec.NewProtoCodec(nil)
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	k := NewKeeper(cdc, storeKey, nil, l, o)
