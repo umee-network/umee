@@ -49,17 +49,24 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade4_2(upgradeInfo)
 	app.registerUpgrade4_3(upgradeInfo)
 	app.registerUpgrade4_4(upgradeInfo)
+	app.registerUpgrade4_5(upgradeInfo)
 }
 
-// performs upgrade from v4.3 to v4.4
-func (app *UmeeApp) registerUpgrade4_4(upgradeInfo upgradetypes.Plan) {
-	const planName = "v4.4-alpha1" // TODO: set correct name
+// performs upgrade from v4.4 to v4.5
+func (app *UmeeApp) registerUpgrade4_5(upgradeInfo upgradetypes.Plan) {
+	const planName = "v4.5-alpha1" // TODO: set correct name
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 		Added: []string{
 			incentive.ModuleName,
 		},
 	})
+}
+
+// performs upgrade from v4.3 to v4.4
+func (app *UmeeApp) registerUpgrade4_4(upgradeInfo upgradetypes.Plan) {
+	const planName = "v4.4"
+	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
 
 // performs upgrade from v4.2 to v4.3
