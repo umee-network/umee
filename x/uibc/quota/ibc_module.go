@@ -23,16 +23,16 @@ var _ porttypes.Middleware = ICS20Middleware{}
 // quota update on acknowledgement error or timeout.
 type ICS20Middleware struct {
 	porttypes.IBCModule
-	keeper keeper.Keeper
-	cdc    codec.JSONCodec
+	kb  keeper.KeeperBuilder
+	cdc codec.JSONCodec
 }
 
 // NewICS20Middleware is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Middleware(app porttypes.IBCModule, k keeper.Keeper, cdc codec.JSONCodec) ICS20Middleware {
+func NewICS20Middleware(app porttypes.IBCModule, k keeper.KeeperBuilder, cdc codec.JSONCodec) ICS20Middleware {
 	return ICS20Middleware{
 		IBCModule: app,
-		keeper:    k,
+		kb:        k,
 		cdc:       cdc,
 	}
 }
@@ -46,7 +46,7 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
-		params := im.keeper.GetParams(ctx)
+		params := im.kb.Keeper(&ctx).GetParams()
 		if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
 			err := im.RevertQuotaUpdate(ctx, packet.Data)
 			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
@@ -80,7 +80,7 @@ func (im ICS20Middleware) RevertQuotaUpdate(
 		return sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", data.Amount)
 	}
 
-	return im.keeper.UndoUpdateQuota(ctx, data.Denom, amount)
+	return im.kb.Keeper(&ctx).UndoUpdateQuota(data.Denom, amount)
 }
 
 func ValidateReceiverAddress(packet channeltypes.Packet) error {
