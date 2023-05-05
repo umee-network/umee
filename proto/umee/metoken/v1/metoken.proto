@@ -30,7 +30,7 @@ message Index {
   // Amount is the maximum amount of Index's meTokens can be minted.
   // A swap that requires to mint more Index's meToken than this value will result in an error.
   // Must be a non negative value. 0 means that there is no limit.
-  cosmos.base.v1beta1.Coin metoken_max_supply         = 1 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin metoken_max_supply = 1 [(gogoproto.nullable) = false];
 
   // Fee contains fee parameters used for swap and redemption fee calculations for all underlying
   // assets in this index.
@@ -81,7 +81,7 @@ message AcceptedAsset {
   // denom as registered in the Bank module (so IBC denom for IBC tokens).
   string asset_denom = 1;
 
-  // Reserve portion is the portion of swapped assets that will be kept in the metoken module as reserves, 
+  // Reserve portion is the portion of swapped assets that will be kept in the metoken module as reserves,
   // instead of supplied to the leverage module. It is also the
   // portion that will be taken from metoken module reserves when a redemption occurs.
   // Valid values: 0-1.
