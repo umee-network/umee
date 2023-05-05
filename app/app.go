@@ -268,7 +268,7 @@ type UmeeApp struct {
 	IncentiveKeeper    incentivekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
-	UIbcQuotaKeeperB   uibcquotakeeper.KeeperBuilder
+	UIbcQuotaKeeperB   uibcquotakeeper.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper

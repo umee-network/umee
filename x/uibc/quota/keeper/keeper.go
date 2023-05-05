@@ -13,7 +13,8 @@ import (
 	"github.com/umee-network/umee/v4/x/uibc"
 )
 
-type KeeperBuilder struct {
+// Builder constructs Keeper by perparing all related dependencies (notably the store).
+type Builder struct {
 	storeKey    storetypes.StoreKey
 	cdc         codec.BinaryCodec
 	leverage    uibc.Leverage
@@ -24,8 +25,8 @@ type KeeperBuilder struct {
 func NewKeeperBuilder(
 	cdc codec.BinaryCodec, key storetypes.StoreKey, ics4Wrapper porttypes.ICS4Wrapper, leverage uibc.Leverage,
 	oracle uibc.Oracle,
-) KeeperBuilder {
-	return KeeperBuilder{
+) Builder {
+	return Builder{
 		cdc:         cdc,
 		storeKey:    key,
 		ics4Wrapper: ics4Wrapper,
@@ -34,7 +35,7 @@ func NewKeeperBuilder(
 	}
 }
 
-func (kb KeeperBuilder) Keeper(ctx *sdk.Context) Keeper {
+func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
 	return Keeper{
 		store:     ctx.KVStore(kb.storeKey),
 		leverage:  kb.leverage,

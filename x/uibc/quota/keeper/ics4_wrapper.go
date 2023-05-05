@@ -19,7 +19,7 @@ import (
 // TODO: use new structure for ICS4Wrapper
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
-func (kb KeeperBuilder) SendPacket(ctx sdk.Context,
+func (kb Builder) SendPacket(ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	sourcePort string,
 	sourceChannel string,
@@ -48,7 +48,7 @@ func (kb KeeperBuilder) SendPacket(ctx sdk.Context,
 
 // WriteAcknowledgement wraps IBC ChannelKeeper's WriteAcknowledgement function
 // ICS29 WriteAcknowledgement is used for asynchronous acknowledgements
-func (kb KeeperBuilder) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
+func (kb Builder) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
 	packet ibcexported.PacketI, acknowledgement ibcexported.Acknowledgement,
 ) error {
 	// ics4Wrapper may be core IBC or higher-level middleware
@@ -56,6 +56,6 @@ func (kb KeeperBuilder) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilit
 }
 
 // GetAppVersion returns the underlying application version.
-func (kb KeeperBuilder) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
+func (kb Builder) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
 	return kb.ics4Wrapper.GetAppVersion(ctx, portID, channelID)
 }

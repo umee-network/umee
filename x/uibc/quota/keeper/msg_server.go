@@ -10,12 +10,12 @@ import (
 var _ uibc.MsgServer = msgServer{}
 
 type msgServer struct {
-	kb KeeperBuilder
+	kb Builder
 }
 
 // NewMsgServerImpl returns an implementation of MsgServer for the x/uibc
 // module.
-func NewMsgServerImpl(kb KeeperBuilder) uibc.MsgServer {
+func NewMsgServerImpl(kb Builder) uibc.MsgServer {
 	return &msgServer{kb: kb}
 }
 

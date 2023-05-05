@@ -23,13 +23,13 @@ var _ porttypes.Middleware = ICS20Middleware{}
 // quota update on acknowledgement error or timeout.
 type ICS20Middleware struct {
 	porttypes.IBCModule
-	kb  keeper.KeeperBuilder
+	kb  keeper.Builder
 	cdc codec.JSONCodec
 }
 
 // NewICS20Middleware is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Middleware(app porttypes.IBCModule, k keeper.KeeperBuilder, cdc codec.JSONCodec) ICS20Middleware {
+func NewICS20Middleware(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSONCodec) ICS20Middleware {
 	return ICS20Middleware{
 		IBCModule: app,
 		kb:        k,
