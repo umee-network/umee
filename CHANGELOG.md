@@ -22,13 +22,13 @@ the Github PR referenced in the following format:
 
 Types of changes (Stanzas):
 
+State Machine Breaking: for any changes that result in a divergent application state.
 Features: for new features.
 Improvements: for changes in existing functionality.
 Deprecated: for soon-to-be removed features.
 Bug Fixes: for any bug fixes.
 Client Breaking: for breaking Protobuf, CLI, gRPC and REST routes used by clients.
 API Breaking: for breaking exported Go APIs used by developers.
-State Machine Breaking: for any changes that result in a divergent application state.
 
 To release a new version, ensure an appropriate release branch exists. Add a
 release version and date to the existing Unreleased section which takes the form
@@ -63,7 +63,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - .
 
-## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-5
+## [v4.4.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-05-05
+
+### State Machine Breaking
+
+- [2022](https://github.com/umee-network/umee/pull/2022) Disable IBC ICS-20 inflow of only x/leverage registered tokens.
+
+## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-05
 
 ### Features
 
