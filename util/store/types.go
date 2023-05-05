@@ -17,3 +17,13 @@ type gogoInteger[T any, Num constraints.Integer] interface {
 	PtrMarshalable[T]
 	GetValue() Num
 }
+
+type BinMarshalable interface {
+	MarshalBinary() ([]byte, error)
+	UnmarshalBinary(data []byte) error
+}
+
+type PtrBinMarshalable[T any] interface {
+	BinMarshalable
+	*T
+}

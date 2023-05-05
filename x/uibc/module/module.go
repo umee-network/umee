@@ -83,19 +83,19 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingCo
 // AppModule represents the AppModule for this module
 type AppModule struct {
 	AppModuleBasic
-	keeper keeper.Keeper
+	kb keeper.Builder
 }
 
-func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
+func NewAppModule(cdc codec.Codec, kb keeper.Builder) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
-		keeper:         keeper,
+		kb:             kb,
 	}
 }
 
 // ExportGenesis implements module.AppModule
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	genState := am.keeper.ExportGenesis(ctx)
+	genState := am.kb.ExportGenesis(ctx)
 	return cdc.MustMarshalJSON(genState)
 }
 
@@ -103,7 +103,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genState ibctransfer.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	am.keeper.InitGenesis(ctx, genState)
+	am.kb.InitGenesis(ctx, genState)
 
 	return []abci.ValidatorUpdate{}
 }
@@ -126,8 +126,8 @@ func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
 // RegisterServices implements module.AppModule
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	ibctransfer.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	ibctransfer.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
+	ibctransfer.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.kb))
+	ibctransfer.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.kb))
 }
 
 // Route implements module.AppModule
@@ -137,11 +137,11 @@ func (AppModule) Route() sdk.Route {
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
 func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
-	BeginBlock(ctx, am.keeper)
+	BeginBlock(ctx, am.kb.Keeper(&ctx))
 }
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/uibc module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return EndBlocker(ctx, am.keeper)
+func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	return EndBlocker()
 }

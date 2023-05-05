@@ -14,7 +14,7 @@ type BankKeeper interface {
 	IterateAllDenomMetaData(ctx sdk.Context, cb func(types.Metadata) bool)
 }
 
-type LeverageKeeper interface {
+type Leverage interface {
 	GetTokenSettings(ctx sdk.Context, baseDenom string) (ltypes.Token, error)
 	ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
 	DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec

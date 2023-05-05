@@ -28,6 +28,7 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+// GetValue loads value from the store using default Unmarshaler
 func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errField string) TPtr {
 	if bz := store.Get(key); len(bz) > 0 {
 		var c TPtr = new(T)
@@ -40,13 +41,37 @@ func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errF
 	return nil
 }
 
+// SetValue saves value in the store using default Marshaler
 func SetValue[T Marshalable](store sdk.KVStore, key []byte, value T, errField string) error {
 	bz, err := value.Marshal()
 	if err != nil {
 		return fmt.Errorf("can't marshal %s: %s", errField, err)
 	}
 	store.Set(key, bz)
+	return nil
+}
 
+// GetBinValue is similar to GetValue (loads value in the store),
+// but uses UnmarshalBinary interface instead of protobuf
+func GetBinValue[TPtr PtrBinMarshalable[T], T any](store sdk.KVStore, key []byte, errField string) (TPtr, error) {
+	if bz := store.Get(key); len(bz) > 0 {
+		var c TPtr = new(T)
+		if err := c.UnmarshalBinary(bz); err != nil {
+			return nil, fmt.Errorf("error unmarshaling %s into %T: %s", errField, c, err)
+		}
+		return c, nil
+	}
+	return nil, nil
+}
+
+// SetBinValue is similar to SetValue (stores value in the store),
+// but uses UnmarshalBinary interface instead of protobuf
+func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errField string) error {
+	bz, err := value.MarshalBinary()
+	if err != nil {
+		return fmt.Errorf("can't marshal %s: %s", errField, err)
+	}
+	store.Set(key, bz)
 	return nil
 }
 
@@ -135,7 +160,6 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 	if val.IsNegative() {
 		return fmt.Errorf("%s: cannot set negative %s", val, errField)
 	}
-
 	return SetValue(store, key, &val, errField)
 }
 

@@ -8,21 +8,19 @@ import (
 )
 
 // SetParams sets the x/uibc module's parameters.
-func (k Keeper) SetParams(ctx sdk.Context, params uibc.Params) error {
-	store := ctx.KVStore(k.storeKey)
+func (k Keeper) SetParams(params uibc.Params) error {
 	bz, err := k.cdc.Marshal(&params)
 	if err != nil {
 		return err
 	}
-	store.Set(uibc.KeyPrefixParams, bz)
+	k.store.Set(uibc.KeyPrefixParams, bz)
 
 	return nil
 }
 
 // GetParams gets the x/uibc module's parameters.
-func (k Keeper) GetParams(ctx sdk.Context) (params uibc.Params) {
-	store := ctx.KVStore(k.storeKey)
-	bz := store.Get(uibc.KeyPrefixParams)
+func (k Keeper) GetParams() (params uibc.Params) {
+	bz := k.store.Get(uibc.KeyPrefixParams)
 	if bz == nil {
 		return params
 	}
@@ -32,20 +30,20 @@ func (k Keeper) GetParams(ctx sdk.Context) (params uibc.Params) {
 }
 
 // UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
-func (k Keeper) UpdateQuotaParams(ctx sdk.Context, totalQuota, quotaPerDenom sdk.Dec, quotaDuration time.Duration,
+func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom sdk.Dec, quotaDuration time.Duration,
 ) error {
-	params := k.GetParams(ctx)
+	params := k.GetParams()
 	params.TotalQuota = totalQuota
 	params.QuotaDuration = quotaDuration
 	params.TokenQuota = quotaPerDenom
 
-	return k.SetParams(ctx, params)
+	return k.SetParams(params)
 }
 
 // SetIBCStatus update the ibc pause status in module params.
-func (k Keeper) SetIBCStatus(ctx sdk.Context, ibcStatus uibc.IBCTransferStatus) error {
-	params := k.GetParams(ctx)
+func (k Keeper) SetIBCStatus(ibcStatus uibc.IBCTransferStatus) error {
+	params := k.GetParams()
 	params.IbcStatus = ibcStatus
 
-	return k.SetParams(ctx, params)
+	return k.SetParams(params)
 }
