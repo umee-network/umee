@@ -68,7 +68,7 @@ func (m UmeeMsg) HandleMaxBorrow(
 	ctx context.Context,
 	s lvtypes.MsgServer,
 ) (proto.Message, error) {
-	req := &lvtypes.MsgMaxBorrow{Borrower: m.MaxBorrow.Borrower, Denom: m.MaxWithdraw.Denom}
+	req := &lvtypes.MsgMaxBorrow{Borrower: m.MaxBorrow.Borrower, Denom: m.MaxBorrow.Denom}
 	return s.MaxBorrow(ctx, req)
 }
 
@@ -101,6 +101,6 @@ func (m UmeeMsg) HandleSupplyCollateral(
 	ctx context.Context,
 	s lvtypes.MsgServer,
 ) (proto.Message, error) {
-	req := &lvtypes.MsgSupplyCollateral{Supplier: m.SupplyCollateral.Supplier, Asset: m.Supply.Asset}
+	req := &lvtypes.MsgSupplyCollateral{Supplier: m.SupplyCollateral.Supplier, Asset: m.SupplyCollateral.Asset}
 	return s.SupplyCollateral(ctx, req)
 }
