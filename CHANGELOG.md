@@ -58,6 +58,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1989](https://github.com/umee-network/umee/pull/1989) Updated go version from 1.19 to 1.20
 - [2009](https://github.com/umee-network/umee/pull/2009) Use DavidAnson/markdownlint action for Markdown linting.
 - [2010](https://github.com/umee-network/umee/pull/2010) New `util/store` generic functions to load all values from a store.
+- [2021](https://github.com/umee-network/umee/pull/2021) `quota/keeper` unit test refactor.
 
 ### Fixes
 
