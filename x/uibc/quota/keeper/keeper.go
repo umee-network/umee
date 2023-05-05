@@ -34,12 +34,12 @@ func NewKeeperBuilder(
 	}
 }
 
-func (k KeeperBuilder) Keeper(ctx *sdk.Context) Keeper {
+func (kb KeeperBuilder) Keeper(ctx *sdk.Context) Keeper {
 	return Keeper{
-		store:     ctx.KVStore(k.storeKey),
-		leverage:  k.leverage,
-		oracle:    k.oracle,
-		cdc:       k.cdc,
+		store:     ctx.KVStore(kb.storeKey),
+		leverage:  kb.leverage,
+		oracle:    kb.oracle,
+		cdc:       kb.cdc,
 		blockTime: ctx.BlockTime(),
 
 		ctx: ctx,

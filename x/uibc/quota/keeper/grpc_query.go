@@ -14,8 +14,8 @@ type Querier struct {
 	KeeperBuilder
 }
 
-func NewQuerier(k KeeperBuilder) Querier {
-	return Querier{KeeperBuilder: k}
+func NewQuerier(kb KeeperBuilder) Querier {
+	return Querier{KeeperBuilder: kb}
 }
 
 // Params returns params of the x/uibc module.

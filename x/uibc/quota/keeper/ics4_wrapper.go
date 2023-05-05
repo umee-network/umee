@@ -39,7 +39,7 @@ func (kb KeeperBuilder) SendPacket(ctx sdk.Context,
 	}
 	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
 		if err := k.CheckAndUpdateQuota(denom, funds); err != nil {
-			return 0, errors.Wrap(err, "SendPacket over the IBC Quota")
+			return 0, errors.Wrap(err, "sendPacket over the IBC Quota")
 		}
 	}
 
@@ -48,14 +48,14 @@ func (kb KeeperBuilder) SendPacket(ctx sdk.Context,
 
 // WriteAcknowledgement wraps IBC ChannelKeeper's WriteAcknowledgement function
 // ICS29 WriteAcknowledgement is used for asynchronous acknowledgements
-func (k KeeperBuilder) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet ibcexported.PacketI,
-	acknowledgement ibcexported.Acknowledgement,
+func (kb KeeperBuilder) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
+	packet ibcexported.PacketI, acknowledgement ibcexported.Acknowledgement,
 ) error {
 	// ics4Wrapper may be core IBC or higher-level middleware
-	return k.ics4Wrapper.WriteAcknowledgement(ctx, chanCap, packet, acknowledgement)
+	return kb.ics4Wrapper.WriteAcknowledgement(ctx, chanCap, packet, acknowledgement)
 }
 
 // GetAppVersion returns the underlying application version.
-func (k KeeperBuilder) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
-	return k.ics4Wrapper.GetAppVersion(ctx, portID, channelID)
+func (kb KeeperBuilder) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
+	return kb.ics4Wrapper.GetAppVersion(ctx, portID, channelID)
 }
