@@ -6,6 +6,14 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v4.4.0
+
+This is a small, intermediate release.
+
+For the Stride onboarding process, we decided to disable the IBC ICS-20 inflow limit of x/leverage registered tokens only. That means, now all tokens will be available for inflow transfers. Outflows quota will still hold: unregistered tokens can be transferred out without any limit and x/leverage registered tokens are limited to the daily quota.
+
+See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.4.0/CHANGELOG.md) for a full list of changes.
+
 ## v4.3.0
 
 Highlights:
@@ -19,7 +27,7 @@ See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.3.0/CHANGELOG.md) f
 
 ### Validators
 
-### libwasmvm update
+#### libwasmvm update
 
 Our dependencies have been updated. Now the binary requires `libwasmvm v1.2.1`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
 
@@ -28,7 +36,7 @@ Our dependencies have been updated. Now the binary requires `libwasmvm v1.2.1`. 
 
 You don't need to do anything if you are using our Docker image.
 
-### Min Gas Prices
+#### Min Gas Prices
 
 Same as with v4.2 release. We request all validators set a `minimum-gas-prices` setting (in app `config/app.toml` file, general settings). We recommend `0.1uumee` which is equal the current Keplr _average_ setting:
 
