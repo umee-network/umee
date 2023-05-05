@@ -1,6 +1,7 @@
 package coin
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -25,4 +26,12 @@ func Normalize(cs sdk.Coins) sdk.Coins {
 // New creates a Coin with a given base denom and amount
 func New(denom string, amount int64) sdk.Coin {
 	return sdk.NewInt64Coin(denom, amount)
+}
+
+// Negative1 creates a Coin with amount = -1
+func Negative1(denom string) sdk.Coin {
+	return sdk.Coin{
+		Denom:  denom,
+		Amount: sdkmath.NewInt(-1),
+	}
 }
