@@ -83,9 +83,9 @@ func CheckIBCInflow(ctx sdk.Context,
 		if err != nil {
 			if ltypes.ErrNotRegisteredToken.Is(err) {
 				return channeltypes.NewErrorAcknowledgement(err)
-			} else {
-				ctx.Logger().Error("IBC inflows: can't load token registry", "err", err)
 			}
+			// other leverage keeper error -> log the error  and allow the inflow transfer.
+			ctx.Logger().Error("IBC inflows: can't load token registry", "err", err)
 		}
 	}
 
