@@ -1,18 +1,21 @@
 version: 2
-updates:
-  - package-ecosystem: github-actions
-    directory: "/"
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
+# TODO: reenable before merging metoken -> main
+# https://linear.app/umee/issue/UMEE-597/metoken-upstream-merge
+#
+# updates:
+#   - package-ecosystem: github-actions
+#     directory: "/"
+#     schedule:
+#       interval: daily
+#     open-pull-requests-limit: 10
 
-  - package-ecosystem: gomod
-    directory: "/"
-    schedule:
-      interval: daily
-    open-pull-requests-limit: 10
-    reviewers:
-      - umee-network/core-devs
-    labels:
-      - "A:Automerge"
-      - "T:Dependencies"
+#   - package-ecosystem: gomod
+#     directory: "/"
+#     schedule:
+#       interval: daily
+#     open-pull-requests-limit: 10
+#     reviewers:
+#       - umee-network/core-devs
+#     labels:
+#       - "A:Automerge"
+#       - "T:Dependencies"
