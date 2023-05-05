@@ -99,7 +99,7 @@ func (k Keeper) ResetAllQuotas() error {
 	return nil
 }
 
-// CheckAndUpdateQuota checks if adding a newOutflow is doesn't exceed the max quota and
+// CheckAndUpdateQuota checks if adding a newOutflow doesn't exceed the max quota and
 // updates the current quota metrics.
 func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error {
 	params := k.GetParams()

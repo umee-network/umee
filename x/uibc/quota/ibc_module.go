@@ -48,7 +48,7 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
 		params := im.kb.Keeper(&ctx).GetParams()
 		if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
-			err := im.RevertQuotaUpdate(ctx, packet.Data)
+			err := im.revertQuotaUpdate(ctx, packet.Data)
 			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
 		}
 	}
@@ -58,14 +58,14 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 
 // OnTimeoutPacket implements types.Middleware
 func (im ICS20Middleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
-	err := im.RevertQuotaUpdate(ctx, packet.Data)
+	err := im.revertQuotaUpdate(ctx, packet.Data)
 	emitOnRevertQuota(&ctx, "timeout", packet.Data, err)
 
 	return im.IBCModule.OnTimeoutPacket(ctx, packet, relayer)
 }
 
-// RevertQuotaUpdate Notifies the contract that a sent packet wasn't properly received
-func (im ICS20Middleware) RevertQuotaUpdate(
+// revertQuotaUpdate must be called on packet acknnowledgemenet error to revert necessary changes.
+func (im ICS20Middleware) revertQuotaUpdate(
 	ctx sdk.Context,
 	packetData []byte,
 ) error {

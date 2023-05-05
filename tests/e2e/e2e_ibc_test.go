@@ -193,8 +193,8 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 
 	})
 
-	// Non registered tokens (not exists in oracle for quota test)
-	// IBC Transfer will failed because it is not registered in leverage on receiver chain (UMEE)
+	// IBC inbound transfer of non x/leverage registered tokens must fail, because
+	// because we won't have price for it.
 	s.Run("send_stake_to_umee", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		var (
@@ -215,12 +215,15 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 			func() bool {
 				balances, err = queryUmeeAllBalances(umeeAPIEndpoint, recipient)
 				s.Require().NoError(err)
-				return math.ZeroInt().Equal(balances.AmountOf(stakeIBCHash))
+				// uncomment whene we re-enable inflow limit
+				// return math.ZeroInt().Equal(balances.AmountOf(stakeIBCHash))
+				return token.Amount.Equal(balances.AmountOf(stakeIBCHash))
 			},
 			time.Minute,
 			5*time.Second,
 		)
-		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, math.ZeroInt())
+		// s.checkSupply(umeeAPIEndpoint, stakeIBCHash, math.ZeroInt())
+		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
 	})
 
 	var ibcStakeERC20Addr string

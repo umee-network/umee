@@ -16,8 +16,6 @@ import (
  * Implementation of ICS4Wrapper interface
  ******/
 
-// TODO: use new structure for ICS4Wrapper
-
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
 func (kb Builder) SendPacket(ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
