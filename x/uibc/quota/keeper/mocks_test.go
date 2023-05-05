@@ -1,3 +1,5 @@
+// Simple mocks for unit tests
+
 package keeper
 
 import (

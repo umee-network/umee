@@ -16,8 +16,10 @@ import (
  * Implementation of ICS4Wrapper interface
  ******/
 
+// TODO: use new structure for ICS4Wrapper
+
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
-func (k Keeper) SendPacket(ctx sdk.Context,
+func (kb KeeperBuilder) SendPacket(ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	sourcePort string,
 	sourceChannel string,
@@ -25,7 +27,8 @@ func (k Keeper) SendPacket(ctx sdk.Context,
 	timeoutTimestamp uint64,
 	data []byte) (uint64, error) {
 
-	params := k.GetParams(ctx)
+	k := kb.Keeper(&ctx)
+	params := k.GetParams()
 	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED {
 		return 0, ics20types.ErrSendDisabled
 	}
@@ -35,17 +38,17 @@ func (k Keeper) SendPacket(ctx sdk.Context,
 		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
-		if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
+		if err := k.CheckAndUpdateQuota(denom, funds); err != nil {
 			return 0, errors.Wrap(err, "SendPacket over the IBC Quota")
 		}
 	}
 
-	return k.ics4Wrapper.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
+	return kb.ics4Wrapper.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
 }
 
 // WriteAcknowledgement wraps IBC ChannelKeeper's WriteAcknowledgement function
 // ICS29 WriteAcknowledgement is used for asynchronous acknowledgements
-func (k Keeper) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet ibcexported.PacketI,
+func (k KeeperBuilder) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet ibcexported.PacketI,
 	acknowledgement ibcexported.Acknowledgement,
 ) error {
 	// ics4Wrapper may be core IBC or higher-level middleware
@@ -53,6 +56,6 @@ func (k Keeper) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.C
 }
 
 // GetAppVersion returns the underlying application version.
-func (k Keeper) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
+func (k KeeperBuilder) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
 	return k.ics4Wrapper.GetAppVersion(ctx, portID, channelID)
 }
