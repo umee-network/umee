@@ -16,7 +16,7 @@ import (
  * Implementation of ICS4Wrapper interface
  ******/
 
-// SendPacket wraps IBC ChannelKeeper's SendPacket function
+// SendPacket wraps IBC ChannelKeeper's SendPacket function to record quota outflows.
 func (k Keeper) SendPacket(ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	sourcePort string,

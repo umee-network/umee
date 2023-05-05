@@ -46,11 +46,12 @@ func (am IBCModule) OnRecvPacket(
 	}
 
 	// Allowing only registered token for ibc transfer
-	isSourceChain := ibctransfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
-	ackErr := CheckIBCInflow(ctx, packet, am.lkeeper, data.Denom, isSourceChain)
-	if ackErr != nil {
-		return ackErr
-	}
+	// TODO: re-enable inflow checks
+	// isSourceChain := ibctransfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+	// ackErr := CheckIBCInflow(ctx, packet, am.lkeeper, data.Denom, isSourceChain)
+	// if ackErr != nil {
+	// 	return ackErr
+	// }
 
 	ack := am.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	if ack.Success() {
@@ -79,8 +80,12 @@ func CheckIBCInflow(ctx sdk.Context,
 		// construct the denomination trace from the full raw denomination and get the ibc_denom
 		ibcDenom := ibctransfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
 		_, err := lkeeper.GetTokenSettings(ctx, ibcDenom)
-		if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
-			return channeltypes.NewErrorAcknowledgement(err)
+		if err != nil {
+			if ltypes.ErrNotRegisteredToken.Is(err) {
+				return channeltypes.NewErrorAcknowledgement(err)
+			} else {
+				ctx.Logger().Error("IBC inflows: can't load token registry", "err", err)
+			}
 		}
 	}
 
