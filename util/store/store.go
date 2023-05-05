@@ -25,25 +25,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	gogotypes "github.com/gogo/protobuf/types"
+	"golang.org/x/exp/constraints"
 )
 
-// cosmossdk.io/math/proto.go
-// ref: https://github.com/cosmos/gogoproto/blob/master/custom_types.md
-type customProtobufType interface {
-	Marshal() ([]byte, error)
-	MarshalTo(data []byte) (n int, err error)
-	Unmarshal(data []byte) error
-	Size() int
-}
-
-type GetV[T any] interface {
-	customProtobufType
-	*T
-}
-
-func GetValue[m GetV[T], T any](store sdk.KVStore, key []byte, errField string) m {
+func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errField string) TPtr {
 	if bz := store.Get(key); len(bz) > 0 {
-		var c m = new(T)
+		var c TPtr = new(T)
 		if err := c.Unmarshal(bz); err != nil {
 			panic(fmt.Sprintf("error unmarshaling %s into %T: %s", errField, c, err))
 		}
@@ -53,18 +40,11 @@ func GetValue[m GetV[T], T any](store sdk.KVStore, key []byte, errField string) 
 	return nil
 }
 
-type SetV[T any] interface {
-	customProtobufType
-	*T
-}
-
-func SetValue[s SetV[T], T any](store sdk.KVStore, key []byte, value T, errField string) error {
-	var c s = &value
-	bz, err := c.Marshal()
+func SetValue[T Marshalable](store sdk.KVStore, key []byte, value T, errField string) error {
+	bz, err := value.Marshal()
 	if err != nil {
-		return fmt.Errorf("error while setting %s: %s", errField, err)
+		return fmt.Errorf("can't marshal %s: %s", errField, err)
 	}
-
 	store.Set(key, bz)
 
 	return nil
@@ -124,7 +104,7 @@ func SetInt(store sdk.KVStore, key []byte, val sdkmath.Int, errField string) err
 		return fmt.Errorf("%s: cannot set negative %s", val, errField)
 	}
 
-	return SetValue(store, key, val, errField)
+	return SetValue(store, key, &val, errField)
 }
 
 // GetDec retrieves an sdk.Dec from a KVStore, or returns zero if no value is stored.
@@ -156,59 +136,35 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 		return fmt.Errorf("%s: cannot set negative %s", val, errField)
 	}
 
-	return SetValue(store, key, val, errField)
+	return SetValue(store, key, &val, errField)
 }
 
 // GetUint32 retrieves a uint32 from a KVStore, or returns zero if no value is stored.
 // Uses gogoproto Uint32Value for unmarshaling, and panics if a stored value fails to unmarshal.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetUint32(store sdk.KVStore, key []byte, errField string) uint32 {
-	v := GetValue[*gogotypes.UInt32Value](store, key, errField)
-	if v == nil {
-		// No stored bytes at key: return zero
-		return 0
-	}
-
-	return v.Value
+	return getInteger[uint32, *gogotypes.UInt32Value](store, key, errField)
 }
 
 // SetUint32 stores a uint32 in a KVStore, or clears if setting to zero.
 // Uses gogoproto Uint32Value for marshaling, and returns an error on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
 func SetUint32(store sdk.KVStore, key []byte, val uint32, errField string) error {
-	if val == 0 {
-		store.Delete(key)
-	} else {
-		v := gogotypes.UInt32Value{Value: val}
-		return SetValue(store, key, v, errField)
-	}
-	return nil
+	return setInteger[uint32](store, key, &gogotypes.UInt32Value{Value: val}, errField)
 }
 
 // GetUint64 retrieves a uint64 from a KVStore, or returns zero if no value is stored.
 // Uses gogoproto Uint64Value for unmarshaling, and panics if a stored value fails to unmarshal.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetUint64(store sdk.KVStore, key []byte, errField string) uint64 {
-	v := GetValue[*gogotypes.UInt64Value](store, key, errField)
-	if v == nil {
-		// No stored bytes at key: return zero
-		return 0
-	}
-
-	return v.Value
+	return getInteger[uint64, *gogotypes.UInt64Value](store, key, errField)
 }
 
 // SetUint64 stores a uint64 in a KVStore, or clears if setting to zero.
 // Uses gogoproto Uint64Value for marshaling, and returns an error on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
 func SetUint64(store sdk.KVStore, key []byte, val uint64, errField string) error {
-	if val == 0 {
-		store.Delete(key)
-	} else {
-		v := gogotypes.UInt64Value{Value: val}
-		return SetValue(store, key, v, errField)
-	}
-	return nil
+	return setInteger[uint64](store, key, &gogotypes.UInt64Value{Value: val}, errField)
 }
 
 // GetInt64 retrieves an int64 from a KVStore, or returns zero if no value is stored.
@@ -216,13 +172,7 @@ func SetUint64(store sdk.KVStore, key []byte, val uint64, errField string) error
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 // Allows negative values.
 func GetInt64(store sdk.KVStore, key []byte, errField string) int64 {
-	v := GetValue[*gogotypes.Int64Value](store, key, errField)
-	if v == nil {
-		// No stored bytes at key: return zero
-		return 0
-	}
-
-	return v.Value
+	return getInteger[int64, *gogotypes.Int64Value](store, key, errField)
 }
 
 // SetInt64 stores an int64 in a KVStore, or clears if setting to zero.
@@ -230,13 +180,7 @@ func GetInt64(store sdk.KVStore, key []byte, errField string) int64 {
 // Accepts an additional string which should describe the field being set in custom error messages.
 // Allows negative values.
 func SetInt64(store sdk.KVStore, key []byte, val int64, errField string) error {
-	if val == 0 {
-		store.Delete(key)
-	} else {
-		v := gogotypes.Int64Value{Value: val}
-		return SetValue(store, key, v, errField)
-	}
-	return nil
+	return setInteger[int64](store, key, &gogotypes.Int64Value{Value: val}, errField)
 }
 
 // GetAddress retrieves an sdk.AccAddress from a KVStore, or an empty address if no value is stored.
@@ -248,7 +192,6 @@ func GetAddress(store sdk.KVStore, key []byte, errField string) sdk.AccAddress {
 		if err := sdk.VerifyAddressFormat(addr); err != nil {
 			panic(fmt.Sprintf("%s is not valid: %s", errField, err))
 		}
-		// Returns valid address
 		return addr
 	}
 	// No stored bytes at key: return empty address
@@ -268,4 +211,26 @@ func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress, errField stri
 	}
 	store.Set(key, val)
 	return nil
+}
+
+func getInteger[Num constraints.Integer, TPtr gogoInteger[T, Num], T any](
+	store sdk.KVStore, key []byte, errField string) Num {
+
+	v := GetValue[TPtr](store, key, errField)
+	if v == nil {
+		// No stored bytes at key: return zero
+		return 0
+	}
+
+	return v.GetValue()
+}
+
+func setInteger[Num constraints.Integer, TPtr gogoInteger[T, Num], T any](
+	store sdk.KVStore, key []byte, v TPtr, errField string) error {
+
+	if v.GetValue() == 0 {
+		store.Delete(key)
+		return nil
+	}
+	return SetValue(store, key, v, errField)
 }
