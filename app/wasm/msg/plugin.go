@@ -31,36 +31,36 @@ func NewMessagePlugin(leverageKeeper lvkeeper.Keeper) func(wasmkeeper.Messenger)
 }
 
 // DispatchCustomMsg responsible for handling custom messages (umee native messages).
-func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, rawMsg json.RawMessage) error {
+func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, contractAddr sdk.AccAddress, rawMsg json.RawMessage) error {
 	var smartcontractMessage UmeeMsg
 	if err := json.Unmarshal(rawMsg, &smartcontractMessage); err != nil {
-		return sdkerrors.Wrap(err, "umee custom msg")
+		return sdkerrors.Wrap(err, "invalid umee custom msg")
 	}
 
+	sender := contractAddr.String()
 	var err error
 	sdkCtx := sdk.WrapSDKContext(ctx)
-
 	switch {
 	case smartcontractMessage.Supply != nil:
-		_, err = smartcontractMessage.HandleSupply(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleSupply(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Withdraw != nil:
-		_, err = smartcontractMessage.HandleWithdraw(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleWithdraw(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.MaxWithdraw != nil:
-		_, err = smartcontractMessage.HandleMaxWithdraw(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleMaxWithdraw(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Collateralize != nil:
-		_, err = smartcontractMessage.HandleCollateralize(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleCollateralize(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Decollateralize != nil:
-		_, err = smartcontractMessage.HandleDecollateralize(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleDecollateralize(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Borrow != nil:
-		_, err = smartcontractMessage.HandleBorrow(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleBorrow(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.MaxBorrow != nil:
-		_, err = smartcontractMessage.HandleMaxBorrow(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleMaxBorrow(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Repay != nil:
-		_, err = smartcontractMessage.HandleRepay(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleRepay(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Liquidate != nil:
-		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.SupplyCollateral != nil:
-		_, err = smartcontractMessage.HandleSupplyCollateral(sdkCtx, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleSupplyCollateral(sdkCtx, sender, plugin.lvMsgServer)
 	default:
 		err = wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
 	}
@@ -76,7 +76,7 @@ func (plugin *Plugin) DispatchMsg(
 	msg wasmvmtypes.CosmosMsg,
 ) (events []sdk.Event, data [][]byte, err error) {
 	if msg.Custom != nil {
-		return nil, nil, plugin.DispatchCustomMsg(ctx, msg.Custom)
+		return nil, nil, plugin.DispatchCustomMsg(ctx, contractAddr, msg.Custom)
 	}
 	return plugin.wrapped.DispatchMsg(ctx, contractAddr, contractIBCPortID, msg)
 }
