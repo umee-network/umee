@@ -64,7 +64,7 @@ func (app *UmeeApp) registerUpgrade4_5(upgradeInfo upgradetypes.Plan) {
 }
 
 // performs upgrade from v4.3 to v4.4
-func (app *UmeeApp) registerUpgrade4_4(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade4_4(_ upgradetypes.Plan) {
 	const planName = "v4.4"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 }
