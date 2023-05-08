@@ -78,7 +78,7 @@ service Query {
 
   // ActualRates queries the hypothetical return of a bonded uToken denomination
   // if current incentive rewards continued for one year. The response is an sdk.Dec
-  // representing an oracle-adjusted APY)
+  // representing an oracle-adjusted APY.
   rpc ActualRates(QueryActualRates)
       returns (QueryActualRatesResponse) {
     option (google.api.http).get = "/umee/incentive/v1/actual_rates";
