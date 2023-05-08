@@ -12,8 +12,7 @@ import (
 )
 
 func TestMsgServer_GovUpdateQuota(t *testing.T) {
-	s := initKeeperTestSuite(t)
-	ctx := s.ctx
+	s := initTestSuite(t)
 
 	tests := []struct {
 		name   string
@@ -71,11 +70,11 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := s.msgServer.GovUpdateQuota(ctx, &tc.msg)
+			_, err := s.msgServer.GovUpdateQuota(s.ctx, &tc.msg)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				// check the update quota params
-				paramsRes, err := s.queryClient.Params(ctx, &uibc.QueryParams{})
+				paramsRes, err := s.queryClient.Params(s.ctx, &uibc.QueryParams{})
 				assert.NilError(t, err)
 				assert.Equal(t, paramsRes.Params.QuotaDuration, tc.msg.QuotaDuration)
 				assert.DeepEqual(t, paramsRes.Params.TokenQuota, tc.msg.PerDenom)
@@ -88,8 +87,7 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 }
 
 func TestMsgServer_GovSetIBCStatus(t *testing.T) {
-	s := initKeeperTestSuite(t)
-	ctx := s.ctx
+	s := initTestSuite(t)
 
 	tests := []struct {
 		name   string
@@ -128,11 +126,11 @@ func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := s.msgServer.GovSetIBCStatus(ctx, &tc.msg)
+			_, err := s.msgServer.GovSetIBCStatus(s.ctx, &tc.msg)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				// check the update ibc-transfer pause status
-				params, err := s.queryClient.Params(ctx, &uibc.QueryParams{})
+				params, err := s.queryClient.Params(s.ctx, &uibc.QueryParams{})
 				assert.NilError(t, err)
 				assert.Equal(t, params.Params.IbcStatus, tc.msg.IbcStatus)
 			} else {

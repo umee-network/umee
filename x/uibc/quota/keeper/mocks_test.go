@@ -1,3 +1,5 @@
+// Simple mocks for unit tests
+
 package keeper
 
 import (
@@ -12,17 +14,17 @@ type LeverageKeeper struct {
 	tokenSettings map[string]ltypes.Token
 }
 
-func (k LeverageKeeper) GetTokenSettings(ctx sdk.Context, baseDenom string) (ltypes.Token, error) {
+func (k LeverageKeeper) GetTokenSettings(_ sdk.Context, baseDenom string) (ltypes.Token, error) {
 	ts, ok := k.tokenSettings[baseDenom]
 	if !ok {
 		return ts, errors.New("token settings not found")
 	}
 	return ts, nil
 }
-func (k LeverageKeeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+func (k LeverageKeeper) ExchangeUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
-func (k LeverageKeeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
+func (k LeverageKeeper) DeriveExchangeRate(_ sdk.Context, _ string) sdk.Dec {
 	panic("not implemented")
 }
 
@@ -41,7 +43,7 @@ type Oracle struct {
 	prices map[string]sdk.Dec
 }
 
-func (o Oracle) Price(ctx sdk.Context, denom string) (sdk.Dec, error) {
+func (o Oracle) Price(_ sdk.Context, denom string) (sdk.Dec, error) {
 	p, ok := o.prices[denom]
 	if !ok {
 		return p, ltypes.ErrNotRegisteredToken.Wrap(denom)

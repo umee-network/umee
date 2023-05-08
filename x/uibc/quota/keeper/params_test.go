@@ -1,23 +1,28 @@
-package keeper_test
+package keeper
 
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 	"github.com/umee-network/umee/v4/x/uibc"
-	"gotest.tools/v3/assert"
 )
 
-func TestParams(t *testing.T) {
-	s := initKeeperTestSuite(t)
-	app, ctx := s.app, s.ctx
-	params := app.UIbcQuotaKeeper.GetParams(ctx)
-	defaultParams := uibc.DefaultParams()
-	assert.DeepEqual(t, params, defaultParams)
+func TestUnitParams(t *testing.T) {
+	require := require.New(t)
+	k := initKeeperSimpleMock(t).Keeper
+
+	// unit test doesn't setup params, so we should get zeroParams at the beginning
+	params := k.GetParams()
+	zeroParams := uibc.Params{}
+	require.Equal(zeroParams, params)
 	// update params
 	params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
-	err := app.UIbcQuotaKeeper.SetParams(ctx, params)
-	assert.NilError(t, err)
-	// check the update param
-	params = app.UIbcQuotaKeeper.GetParams(ctx)
-	assert.Equal(t, params.IbcStatus, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED)
+	params.TokenQuota = sdk.MustNewDecFromStr("12.23")
+	params.TotalQuota = sdk.MustNewDecFromStr("3.4321")
+	err := k.SetParams(params)
+	require.NoError(err)
+	// check the updated params
+	params2 := k.GetParams()
+	require.Equal(params, params2)
 }

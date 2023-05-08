@@ -52,16 +52,16 @@ var (
 	sampleOutflow = sdk.NewDecCoin("utest", sdk.NewInt(1111))
 )
 
-type KeeperTestSuite struct {
+type IntTestSuite struct {
 	ctx         sdk.Context
 	app         *umeeapp.UmeeApp
 	queryClient uibc.QueryClient
 	msgServer   uibc.MsgServer
 }
 
-func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
+func initTestSuite(t *testing.T) *IntTestSuite {
 	t.Parallel()
-	s := &KeeperTestSuite{}
+	s := &IntTestSuite{}
 	isCheckTx := false
 	app := umeeapp.Setup(t)
 	ctx := app.NewContext(isCheckTx, tmproto.Header{
@@ -70,7 +70,7 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	})
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
-	uibc.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.UIbcQuotaKeeper))
+	uibc.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.UIbcQuotaKeeperB))
 
 	sh := teststaking.NewHelper(t, ctx, *app.StakingKeeper)
 	sh.Denom = bondDenom
@@ -81,7 +81,8 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
-	app.UIbcQuotaKeeper.SetTokenOutflow(ctx, sampleOutflow)
+	k := app.UIbcQuotaKeeperB.Keeper(&ctx)
+	k.SetTokenOutflow(sampleOutflow)
 
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
@@ -91,21 +92,21 @@ func initKeeperTestSuite(t *testing.T) *KeeperTestSuite {
 	s.app = app
 	s.ctx = ctx
 	s.queryClient = uibc.NewQueryClient(queryHelper)
-	s.msgServer = keeper.NewMsgServerImpl(app.UIbcQuotaKeeper)
+	s.msgServer = keeper.NewMsgServerImpl(app.UIbcQuotaKeeperB)
 
 	return s
 }
 
 // creates keeper with all external dependencies (app, leverage etc...)
-func initFullKeeper(
+func initKeeper(
 	t *testing.T,
 	cdc codec.BinaryCodec,
 	ics4Wrapper porttypes.ICS4Wrapper,
-	leverageKeeper uibc.LeverageKeeper,
-	oracleKeeper uibc.Oracle,
+	leverage uibc.Leverage,
+	oracle uibc.Oracle,
 ) (sdk.Context, keeper.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
-	k := keeper.NewKeeper(cdc, storeKey, ics4Wrapper, leverageKeeper, oracleKeeper)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	return ctx, k
+	kb := keeper.NewKeeperBuilder(cdc, storeKey, ics4Wrapper, leverage, oracle)
+	return ctx, kb.Keeper(&ctx)
 }
