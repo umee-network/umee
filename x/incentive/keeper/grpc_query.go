@@ -278,7 +278,9 @@ func (q Querier) ActualRates(
 		return nil, err
 	}
 
-	referenceBondValue, err := k.leverageKeeper.TotalTokenValue(ctx, sdk.NewCoins(referenceToken), leveragetypes.PriceModeSpot)
+	referenceBondValue, err := k.leverageKeeper.TotalTokenValue(
+		ctx, sdk.NewCoins(referenceToken), leveragetypes.PriceModeSpot,
+	)
 	if err != nil {
 		return nil, err
 	}
