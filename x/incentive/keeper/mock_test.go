@@ -194,9 +194,8 @@ func (m *mockLeverageKeeper) GetTokenSettings(_ sdk.Context, denom string) (leve
 
 // TotalTokenValue implements the expected leverage keeper, with UMEE, ATOM, and DAI registered.
 func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ leveragetypes.PriceMode) (sdk.Dec, error) {
-	total := sdk.ZeroDec()
-
 	var (
+		total = sdk.ZeroDec()
 		umeePrice = sdk.MustNewDecFromStr("4.21")
 		atomPrice = sdk.MustNewDecFromStr("39.38")
 		daiPrice  = sdk.MustNewDecFromStr("1.00")
