@@ -150,7 +150,7 @@ func (k Keeper) updatePrograms(ctx sdk.Context) error {
 	// Note that even if a program had a duration shorter than the time between blocks, this function's
 	// order of ending eligible ongoing programs before starting eligible upcoming ones ensures that each
 	// program will be active for updateRewards for at least one full block. (The same program will not be
-	// both started and ended in the same block._
+	// both started and ended in the same block.)
 	return nil
 }
 

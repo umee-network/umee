@@ -75,6 +75,20 @@ service Query {
       returns (QueryCurrentRatesResponse) {
     option (google.api.http).get = "/umee/incentive/v1/current_rates";
   }
+
+  // ActualRates queries the hypothetical return of a bonded uToken denomination
+  // if current incentive rewards continued for one year. The response is an sdk.Dec
+  // representing an oracle-adjusted APY)
+  rpc ActualRates(QueryActualRates)
+      returns (QueryActualRatesResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/actual_rates";
+  }
+
+  // LastRewardTime queries the last block time at which incentive rewards were calculated.
+  rpc LastRewardTime(QueryLastRewardTime)
+      returns (QueryLastRewardTimeResponse) {
+    option (google.api.http).get = "/umee/incentive/v1/last_reward_time";
+  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -216,5 +230,30 @@ message QueryCurrentRatesResponse {
   repeated cosmos.base.v1beta1.Coin rewards = 2 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// QueryLastRewardTime defines the request structure for the LastRewardTime gRPC service
+// handler.
+message QueryLastRewardTime {}
+
+// QueryLastRewardTimeResponse defines the response structure for the LastRewardTime gRPC
+// service handler.
+message QueryLastRewardTimeResponse {
+  int64 time = 1;
+}
+
+// QueryActualRates defines the request structure for the ActualRates gRPC service handler.
+message QueryActualRates {
+  // uToken is the uToken denomination whose current annual rate of rewards is being queried
+  string uToken = 1;
+}
+
+// QueryActualRatesResponse defines the response structure for the ActualRates gRPC service handler.
+message QueryActualRatesResponse {
+  // APY is the oracle price-adjusted APY of the bonded uToken.
+  string APY = 1 [
+    (gogoproto.nullable)   = false,
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
   ];
 }

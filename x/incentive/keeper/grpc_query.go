@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/umee-network/umee/v4/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 var _ incentive.QueryServer = Querier{}
@@ -275,5 +276,79 @@ func (q Querier) CurrentRates(
 			ten.Power(uint64(exponent)).TruncateInt(),
 		),
 		Rewards: rewards,
+	}, nil
+}
+
+func (q Querier) ActualRates(
+	goCtx context.Context,
+	req *incentive.QueryActualRates,
+) (*incentive.QueryActualRatesResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+
+	programs, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	if err != nil {
+		return nil, err
+	}
+
+	// to compute the rewards a reference amount (10^exponent) of bonded uToken is currently earning,
+	// we need to divide the total rewards being distributed by all ongoing incentive programs targeting
+	// that uToken denom, by the ratio of the total bonded amount to the reference amount.
+	bonded := k.getTotalBonded(ctx, req.UToken)
+	rewards := sdk.NewCoins()
+	exponent := k.getRewardAccumulator(ctx, req.UToken).Exponent
+	for _, p := range programs {
+		if p.UToken == req.UToken {
+			// seconds per year / duration = programsPerYear (as this query assumes incentives will stay constant)
+			programsPerYear := sdk.MustNewDecFromStr("31557600").Quo(sdk.NewDec(p.Duration))
+			// reference amount / total bonded = rewardPortion (as the more uTokens bond, the fewer rewards each earns)
+			rewardPortion := ten.Power(uint64(exponent)).QuoInt(bonded.Amount)
+			// annual rewards for reference amount for this specific program, assuming current rates continue
+			rewardCoin := sdk.NewCoin(
+				p.TotalRewards.Denom,
+				programsPerYear.Mul(rewardPortion).MulInt(p.TotalRewards.Amount).TruncateInt(),
+			)
+			// add this program's annual rewards to the total for all programs incentivizing this uToken denom
+			rewards = rewards.Add(rewardCoin)
+		}
+	}
+
+	// compute oracle price ratio of rewards to reference bond amount
+	referenceUToken := sdk.NewCoin(req.UToken, ten.Power(uint64(exponent)).TruncateInt())
+	referenceToken, err := k.leverageKeeper.ExchangeUToken(ctx, referenceUToken)
+	if err != nil {
+		return nil, err
+	}
+
+	referenceBondValue, err := k.leverageKeeper.TotalTokenValue(ctx, sdk.NewCoins(referenceToken), leveragetypes.PriceModeSpot)
+	if err != nil {
+		return nil, err
+	}
+	referenceRewardValue, err := k.leverageKeeper.TotalTokenValue(ctx, rewards, leveragetypes.PriceModeSpot)
+	if err != nil {
+		return nil, err
+	}
+	if referenceBondValue.IsZero() {
+		return nil, leveragetypes.ErrInvalidOraclePrice.Wrap(referenceToken.Denom)
+	}
+
+	return &incentive.QueryActualRatesResponse{
+		APY: referenceRewardValue.Quo(referenceBondValue),
+	}, nil
+}
+
+func (q Querier) LastRewardTime(
+	goCtx context.Context,
+	req *incentive.QueryLastRewardTime,
+) (*incentive.QueryLastRewardTimeResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	return &incentive.QueryLastRewardTimeResponse{
+		Time: q.Keeper.GetLastRewardsTime(sdk.UnwrapSDKContext(goCtx)),
 	}, nil
 }

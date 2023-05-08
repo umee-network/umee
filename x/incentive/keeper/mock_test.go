@@ -191,3 +191,44 @@ func (m *mockLeverageKeeper) GetTokenSettings(_ sdk.Context, denom string) (leve
 	}
 	return leveragetypes.Token{}, leveragetypes.ErrNotRegisteredToken
 }
+
+// TotalTokenValue implements the expected leverage keeper, with UMEE, ATOM, and DAI registered.
+func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ leveragetypes.PriceMode) (sdk.Dec, error) {
+	total := sdk.ZeroDec()
+
+	var (
+		umeePrice = sdk.MustNewDecFromStr("4.21")
+		atomPrice = sdk.MustNewDecFromStr("39.38")
+		daiPrice  = sdk.MustNewDecFromStr("1.00")
+	)
+
+	for _, coin := range coins {
+		switch coin.Denom {
+		case leveragefixtures.UmeeDenom:
+			total = total.Add(
+				umeePrice.MulInt(coin.Amount).QuoInt64(1_000000),
+			)
+
+		case leveragefixtures.AtomDenom:
+			total = total.Add(
+				atomPrice.MulInt(coin.Amount).QuoInt64(1_000000),
+			)
+		case leveragefixtures.DaiDenom:
+			total = total.Add(
+				daiPrice.MulInt(coin.Amount).QuoInt64(1_000000_000000_000000),
+			)
+		}
+	}
+	return total, nil
+}
+
+// ExchangeUToken implements the expected leverage keeper, with uToken exchange rates always equal to 1
+func (m *mockLeverageKeeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+	if !leveragetypes.HasUTokenPrefix(uToken.Denom) {
+		return uToken, leveragetypes.ErrUToken
+	}
+	return sdk.NewCoin(
+		leveragetypes.ToTokenDenom(uToken.Denom),
+		uToken.Amount,
+	), nil
+}
