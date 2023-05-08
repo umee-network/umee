@@ -206,17 +206,13 @@ func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ l
 		switch coin.Denom {
 		case leveragefixtures.UmeeDenom:
 			total = total.Add(
-				umeePrice.MulInt(coin.Amount).QuoInt64(1_000000),
-			)
-
+				umeePrice.MulInt(coin.Amount).QuoInt64(1_000000))
 		case leveragefixtures.AtomDenom:
 			total = total.Add(
-				atomPrice.MulInt(coin.Amount).QuoInt64(1_000000),
-			)
+				atomPrice.MulInt(coin.Amount).QuoInt64(1_000000))
 		case leveragefixtures.DaiDenom:
 			total = total.Add(
-				daiPrice.MulInt(coin.Amount).QuoInt64(1_000000_000000_000000),
-			)
+				daiPrice.MulInt(coin.Amount).QuoInt64(1_000000_000000_000000))
 		}
 	}
 	return total, nil
