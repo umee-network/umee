@@ -7,7 +7,7 @@ import (
 )
 
 // Dec creates a DecCoin with a given base denom and amount
-func Dec(denom string, amount string) sdk.DecCoin {
+func Dec(denom, amount string) sdk.DecCoin {
 	return sdk.NewDecCoinFromDec(denom, sdk.MustNewDecFromStr(amount))
 }
 
