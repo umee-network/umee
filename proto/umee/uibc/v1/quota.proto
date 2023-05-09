@@ -40,9 +40,9 @@ enum IBCTransferStatus {
   IBC_TRANSFER_STATUS_QUOTA_DISABLED = 1;
   // ENABLED: all quota checks are enabled.
   IBC_TRANSFER_STATUS_QUOTA_ENABLED = 2;
-  // DISABLED OUT: quota outflow checks are disabled.
+  // DISABLED OUT: quota outflow checks are disabled and inflows are enabled.
   IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED = 3;
-  // DISABLED IN: quota inflow checks are disabled.
+  // DISABLED IN: quota inflow checks are disabled and outflows are enabled.
   IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED = 4;
   // PAUSED: all IBC transfers are paused.
   IBC_TRANSFER_STATUS_TRANSFERS_PAUSED = 5;
