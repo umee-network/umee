@@ -159,9 +159,9 @@ func (k Keeper) updatePrograms(ctx sdk.Context) error {
 func (k Keeper) EndBlock(ctx sdk.Context) error {
 	blockTime := ctx.BlockTime().Unix()
 	if blockTime < 0 {
-		k.Logger(ctx).With("Negative").Error(
+		k.Logger(ctx).Error(
 			incentive.ErrDecreaseLastRewardTime.Error(),
-			"block time", blockTime,
+			"negative block time", blockTime,
 		)
 		return nil
 	}
@@ -172,12 +172,17 @@ func (k Keeper) EndBlock(ctx sdk.Context) error {
 		// modified intentionally. In either case, proceed as if 0 seconds have passed since the last block,
 		// thus accruing no rewards and setting the current BlockTime as the new starting point.
 		prevTime = blockTime
+		k.Logger(ctx).Error(
+			"incentive module LastRewardTime was not initialized",
+			"prev", prevTime,
+		)
+		return k.setLastRewardsTime(ctx, blockTime)
 	}
 
 	if blockTime <= prevTime {
 		// Avoids this and related issues: https://github.com/tendermint/tendermint/issues/8773
-		k.Logger(ctx).With("EndBlocker will wait for block time > prevRewardTime").Error(
-			incentive.ErrDecreaseLastRewardTime.Error(),
+		k.Logger(ctx).Error(
+			"incentive module will wait for block time > prevRewardTime",
 			"current", blockTime,
 			"prev", prevTime,
 		)
