@@ -6,10 +6,17 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-func NewDecFromFloat(f float64) (sdk.Dec, error) {
-	return sdk.NewDecFromStr(strconv.FormatFloat(f, 'f', -1, 64))
+// Dec creates a DecCoin with a given base denom and amount
+func Dec(denom string, amount string) sdk.DecCoin {
+	return sdk.NewDecCoinFromDec(denom, sdk.MustNewDecFromStr(amount))
 }
 
-func MustNewDecFromFloat(f float64) sdk.Dec {
-	return sdk.MustNewDecFromStr(strconv.FormatFloat(f, 'f', -1, 64))
+// NewInt creates a DecCoin with a given base denom and integer amount
+func DecInt(denom string, amount int64) sdk.DecCoin {
+	return sdk.NewInt64DecCoin(denom, amount)
+}
+
+func DecFloat(denom string, amount float64) sdk.DecCoin {
+	d := sdk.MustNewDecFromStr(strconv.FormatFloat(amount, 'f', -1, 64))
+	return sdk.NewDecCoinFromDec(denom, d)
 }
