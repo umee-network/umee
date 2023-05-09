@@ -22,6 +22,5 @@ message QueryMinGasPrice {}
 
 // QueryMinGasPriceResponse response type.
 message QueryMinGasPriceResponse {
-  cosmos.base.v1beta1.DecCoin min_gas_price = 1
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoin"];
+  cosmos.base.v1beta1.DecCoin min_gas_price = 1 [(gogoproto.nullable) = false];
 }
