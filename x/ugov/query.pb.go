@@ -6,7 +6,6 @@ package ugov
 import (
 	context "context"
 	fmt "fmt"
-	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
 	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	grpc1 "github.com/gogo/protobuf/grpc"
@@ -31,22 +30,22 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// QueryMinTxFees is a request type.
-type QueryMinTxFees struct {
+// QueryMinGasPrice is a request type.
+type QueryMinGasPrice struct {
 }
 
-func (m *QueryMinTxFees) Reset()         { *m = QueryMinTxFees{} }
-func (m *QueryMinTxFees) String() string { return proto.CompactTextString(m) }
-func (*QueryMinTxFees) ProtoMessage()    {}
-func (*QueryMinTxFees) Descriptor() ([]byte, []int) {
+func (m *QueryMinGasPrice) Reset()         { *m = QueryMinGasPrice{} }
+func (m *QueryMinGasPrice) String() string { return proto.CompactTextString(m) }
+func (*QueryMinGasPrice) ProtoMessage()    {}
+func (*QueryMinGasPrice) Descriptor() ([]byte, []int) {
 	return fileDescriptor_25fa04679024a47d, []int{0}
 }
-func (m *QueryMinTxFees) XXX_Unmarshal(b []byte) error {
+func (m *QueryMinGasPrice) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryMinTxFees) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryMinGasPrice) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryMinTxFees.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryMinGasPrice.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -56,35 +55,35 @@ func (m *QueryMinTxFees) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return b[:n], nil
 	}
 }
-func (m *QueryMinTxFees) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryMinTxFees.Merge(m, src)
+func (m *QueryMinGasPrice) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMinGasPrice.Merge(m, src)
 }
-func (m *QueryMinTxFees) XXX_Size() int {
+func (m *QueryMinGasPrice) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryMinTxFees) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryMinTxFees.DiscardUnknown(m)
+func (m *QueryMinGasPrice) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMinGasPrice.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryMinTxFees proto.InternalMessageInfo
+var xxx_messageInfo_QueryMinGasPrice proto.InternalMessageInfo
 
-// QueryMinTxFeesResponse response type.
-type QueryMinTxFeesResponse struct {
-	MinTxFees github_com_cosmos_cosmos_sdk_types.Coins `protobuf:"bytes,1,rep,name=min_tx_fees,json=minTxFees,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.Coins" json:"min_tx_fees"`
+// QueryMinGasPriceResponse response type.
+type QueryMinGasPriceResponse struct {
+	MinGasPrice types.DecCoin `protobuf:"bytes,1,opt,name=min_gas_price,json=minGasPrice,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoin" json:"min_gas_price"`
 }
 
-func (m *QueryMinTxFeesResponse) Reset()         { *m = QueryMinTxFeesResponse{} }
-func (m *QueryMinTxFeesResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryMinTxFeesResponse) ProtoMessage()    {}
-func (*QueryMinTxFeesResponse) Descriptor() ([]byte, []int) {
+func (m *QueryMinGasPriceResponse) Reset()         { *m = QueryMinGasPriceResponse{} }
+func (m *QueryMinGasPriceResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryMinGasPriceResponse) ProtoMessage()    {}
+func (*QueryMinGasPriceResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_25fa04679024a47d, []int{1}
 }
-func (m *QueryMinTxFeesResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryMinGasPriceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryMinTxFeesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryMinGasPriceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryMinTxFeesResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryMinGasPriceResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -94,49 +93,49 @@ func (m *QueryMinTxFeesResponse) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *QueryMinTxFeesResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryMinTxFeesResponse.Merge(m, src)
+func (m *QueryMinGasPriceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryMinGasPriceResponse.Merge(m, src)
 }
-func (m *QueryMinTxFeesResponse) XXX_Size() int {
+func (m *QueryMinGasPriceResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryMinTxFeesResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryMinTxFeesResponse.DiscardUnknown(m)
+func (m *QueryMinGasPriceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryMinGasPriceResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryMinTxFeesResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryMinGasPriceResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*QueryMinTxFees)(nil), "umee.ugov.v1.QueryMinTxFees")
-	proto.RegisterType((*QueryMinTxFeesResponse)(nil), "umee.ugov.v1.QueryMinTxFeesResponse")
+	proto.RegisterType((*QueryMinGasPrice)(nil), "umee.ugov.v1.QueryMinGasPrice")
+	proto.RegisterType((*QueryMinGasPriceResponse)(nil), "umee.ugov.v1.QueryMinGasPriceResponse")
 }
 
 func init() { proto.RegisterFile("umee/ugov/v1/query.proto", fileDescriptor_25fa04679024a47d) }
 
 var fileDescriptor_25fa04679024a47d = []byte{
-	// 342 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x50, 0xcd, 0x4a, 0xeb, 0x40,
-	0x14, 0x4e, 0xee, 0xe5, 0x5e, 0x68, 0x2a, 0x22, 0x41, 0xa4, 0xad, 0x65, 0xaa, 0x45, 0xa4, 0x9b,
-	0xcc, 0x98, 0xea, 0x13, 0x54, 0x71, 0xe7, 0xc2, 0xe2, 0xca, 0x4d, 0x49, 0xea, 0x31, 0x0e, 0x35,
-	0x73, 0x62, 0x66, 0x12, 0x53, 0xdc, 0x09, 0xee, 0x05, 0xdf, 0xc2, 0x27, 0xe9, 0xb2, 0xe0, 0xc6,
-	0x95, 0x3f, 0xad, 0x0f, 0x22, 0x93, 0xb4, 0xd2, 0x6e, 0x5c, 0xcd, 0xe1, 0x7c, 0x73, 0xbe, 0x3f,
-	0xab, 0x92, 0x84, 0x00, 0x2c, 0x09, 0x30, 0x65, 0xa9, 0xcb, 0x6e, 0x12, 0x88, 0x87, 0x34, 0x8a,
-	0x51, 0xa1, 0xbd, 0xa2, 0x11, 0xaa, 0x11, 0x9a, 0xba, 0xb5, 0x7a, 0x80, 0x18, 0x5c, 0x03, 0xf3,
-	0x22, 0xce, 0x3c, 0x21, 0x50, 0x79, 0x8a, 0xa3, 0x90, 0xc5, 0xdf, 0xda, 0x7a, 0x80, 0x01, 0xe6,
-	0x23, 0xd3, 0xd3, 0x6c, 0x4b, 0xfa, 0x28, 0x43, 0x94, 0xcc, 0xf7, 0x24, 0xb0, 0xd4, 0xf5, 0x41,
-	0x79, 0x2e, 0xeb, 0x23, 0x17, 0x05, 0xde, 0x5c, 0xb3, 0x56, 0x4f, 0xb5, 0xe0, 0x09, 0x17, 0x67,
-	0xd9, 0x31, 0x80, 0x6c, 0x3e, 0x98, 0xd6, 0xc6, 0xf2, 0xaa, 0x0b, 0x32, 0x42, 0x21, 0xc1, 0x1e,
-	0x58, 0xe5, 0x90, 0x8b, 0x9e, 0xca, 0x7a, 0x97, 0x00, 0xb2, 0x62, 0x6e, 0xfd, 0x6d, 0x95, 0xdb,
-	0x55, 0x5a, 0x48, 0x50, 0x2d, 0x41, 0x67, 0x12, 0xf4, 0x10, 0xb9, 0xe8, 0xec, 0x8d, 0xde, 0x1a,
-	0xc6, 0xf3, 0x7b, 0xa3, 0x15, 0x70, 0x75, 0x95, 0xf8, 0xb4, 0x8f, 0x21, 0x9b, 0xf9, 0x29, 0x1e,
-	0x47, 0x5e, 0x0c, 0x98, 0x1a, 0x46, 0x20, 0xf3, 0x03, 0xd9, 0x2d, 0x85, 0x73, 0xd1, 0xf6, 0x9d,
-	0xf5, 0x2f, 0xb7, 0x61, 0xc7, 0x56, 0xe9, 0xc7, 0x8a, 0x5d, 0xa7, 0x8b, 0x95, 0xd0, 0x65, 0xa3,
-	0xb5, 0x9d, 0xdf, 0xd0, 0x79, 0x8c, 0xe6, 0xf6, 0xfd, 0xcb, 0xd7, 0xd3, 0x9f, 0x4d, 0xbb, 0xca,
-	0x96, 0x8a, 0x0f, 0xb9, 0x70, 0x54, 0xe6, 0xe8, 0x68, 0x9d, 0xa3, 0xd1, 0x27, 0x31, 0x46, 0x13,
-	0x62, 0x8e, 0x27, 0xc4, 0xfc, 0x98, 0x10, 0xf3, 0x71, 0x4a, 0x8c, 0xf1, 0x94, 0x18, 0xaf, 0x53,
-	0x62, 0x9c, 0xef, 0x2e, 0xe4, 0xd1, 0x14, 0x8e, 0x00, 0x75, 0x8b, 0xf1, 0xa0, 0xe0, 0x4b, 0x0f,
-	0x58, 0x96, 0x93, 0xfa, 0xff, 0xf3, 0x8e, 0xf7, 0xbf, 0x03, 0x00, 0x00, 0xff, 0xff, 0xe5, 0x7a,
-	0xe5, 0xf8, 0xe1, 0x01, 0x00, 0x00,
+	// 347 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x91, 0xcf, 0x4a, 0x33, 0x31,
+	0x14, 0xc5, 0x27, 0x1f, 0x7c, 0x2e, 0xa6, 0x0a, 0x32, 0xb8, 0x28, 0xb5, 0xa6, 0x52, 0xa1, 0x88,
+	0x30, 0x09, 0x53, 0x7d, 0x82, 0x5a, 0x70, 0x25, 0x68, 0x97, 0x6e, 0x4a, 0x66, 0x0c, 0x31, 0xd4,
+	0xc9, 0x1d, 0x27, 0x99, 0xd1, 0xba, 0xd4, 0x17, 0x28, 0xf8, 0x16, 0x3e, 0x49, 0x97, 0x05, 0x37,
+	0xae, 0xfc, 0xd3, 0xfa, 0x20, 0x92, 0x99, 0x16, 0x6b, 0x17, 0xae, 0x72, 0xb9, 0x27, 0xb9, 0xbf,
+	0x73, 0x6e, 0xdc, 0x6a, 0x16, 0x73, 0x4e, 0x33, 0x01, 0x39, 0xcd, 0x03, 0x7a, 0x93, 0xf1, 0x74,
+	0x48, 0x92, 0x14, 0x0c, 0x78, 0xeb, 0x56, 0x21, 0x56, 0x21, 0x79, 0x50, 0xab, 0x0b, 0x00, 0x71,
+	0xcd, 0x29, 0x4b, 0x24, 0x65, 0x4a, 0x81, 0x61, 0x46, 0x82, 0xd2, 0xe5, 0xdd, 0xda, 0x96, 0x00,
+	0x01, 0x45, 0x49, 0x6d, 0x35, 0xef, 0xe2, 0x08, 0x74, 0x0c, 0x9a, 0x86, 0x4c, 0x73, 0x9a, 0x07,
+	0x21, 0x37, 0x2c, 0xa0, 0x11, 0x48, 0x55, 0xea, 0x4d, 0xcf, 0xdd, 0x3c, 0xb7, 0xc0, 0x53, 0xa9,
+	0x4e, 0x98, 0x3e, 0x4b, 0x65, 0xc4, 0x9b, 0x23, 0xe4, 0x56, 0x57, 0x9b, 0x3d, 0xae, 0x13, 0x50,
+	0x9a, 0x7b, 0xc6, 0xdd, 0x88, 0xa5, 0xea, 0x0b, 0xa6, 0xfb, 0x89, 0x15, 0xaa, 0x68, 0x17, 0xed,
+	0x57, 0xda, 0x75, 0x52, 0x82, 0x88, 0x05, 0x91, 0x39, 0x88, 0x74, 0x79, 0x74, 0x0c, 0x52, 0x75,
+	0xda, 0xe3, 0xb7, 0x86, 0xf3, 0xfc, 0xde, 0x38, 0x10, 0xd2, 0x5c, 0x65, 0x21, 0x89, 0x20, 0xa6,
+	0x73, 0x63, 0xe5, 0xe1, 0xeb, 0xcb, 0x01, 0x35, 0xc3, 0x84, 0xeb, 0xc5, 0x9b, 0x5e, 0x25, 0xfe,
+	0xa1, 0xb7, 0x1f, 0x91, 0xfb, 0xbf, 0xb0, 0xe4, 0xdd, 0xbb, 0x95, 0x25, 0x5b, 0x1e, 0x26, 0xcb,
+	0x2b, 0x22, 0xab, 0xb6, 0x6b, 0xad, 0xbf, 0xf5, 0x45, 0xac, 0xe6, 0xde, 0xc3, 0xcb, 0xd7, 0xd3,
+	0xbf, 0x1d, 0x6f, 0x9b, 0xfe, 0xfa, 0x8c, 0x58, 0x2a, 0x5f, 0x30, 0xed, 0x17, 0x51, 0x3b, 0xdd,
+	0xf1, 0x27, 0x76, 0xc6, 0x53, 0x8c, 0x26, 0x53, 0x8c, 0x3e, 0xa6, 0x18, 0x8d, 0x66, 0xd8, 0x99,
+	0xcc, 0xb0, 0xf3, 0x3a, 0xc3, 0xce, 0x45, 0x6b, 0x29, 0x9c, 0x1d, 0xe2, 0x2b, 0x6e, 0x6e, 0x21,
+	0x1d, 0x94, 0x13, 0xf3, 0x23, 0x7a, 0x57, 0x8c, 0x0d, 0xd7, 0x8a, 0xcd, 0x1f, 0x7e, 0x07, 0x00,
+	0x00, 0xff, 0xff, 0x7d, 0x0d, 0xee, 0x8e, 0xf7, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -151,8 +150,8 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
-	// MinTxFees returns minimum transaction fees.
-	MinTxFees(ctx context.Context, in *QueryMinTxFees, opts ...grpc.CallOption) (*QueryMinTxFeesResponse, error)
+	// MinGasPrice returns minimum transaction fees.
+	MinGasPrice(ctx context.Context, in *QueryMinGasPrice, opts ...grpc.CallOption) (*QueryMinGasPriceResponse, error)
 }
 
 type queryClient struct {
@@ -163,9 +162,9 @@ func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 	return &queryClient{cc}
 }
 
-func (c *queryClient) MinTxFees(ctx context.Context, in *QueryMinTxFees, opts ...grpc.CallOption) (*QueryMinTxFeesResponse, error) {
-	out := new(QueryMinTxFeesResponse)
-	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Query/MinTxFees", in, out, opts...)
+func (c *queryClient) MinGasPrice(ctx context.Context, in *QueryMinGasPrice, opts ...grpc.CallOption) (*QueryMinGasPriceResponse, error) {
+	out := new(QueryMinGasPriceResponse)
+	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Query/MinGasPrice", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -174,36 +173,36 @@ func (c *queryClient) MinTxFees(ctx context.Context, in *QueryMinTxFees, opts ..
 
 // QueryServer is the server API for Query service.
 type QueryServer interface {
-	// MinTxFees returns minimum transaction fees.
-	MinTxFees(context.Context, *QueryMinTxFees) (*QueryMinTxFeesResponse, error)
+	// MinGasPrice returns minimum transaction fees.
+	MinGasPrice(context.Context, *QueryMinGasPrice) (*QueryMinGasPriceResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
 type UnimplementedQueryServer struct {
 }
 
-func (*UnimplementedQueryServer) MinTxFees(ctx context.Context, req *QueryMinTxFees) (*QueryMinTxFeesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method MinTxFees not implemented")
+func (*UnimplementedQueryServer) MinGasPrice(ctx context.Context, req *QueryMinGasPrice) (*QueryMinGasPriceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method MinGasPrice not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
 	s.RegisterService(&_Query_serviceDesc, srv)
 }
 
-func _Query_MinTxFees_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryMinTxFees)
+func _Query_MinGasPrice_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryMinGasPrice)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).MinTxFees(ctx, in)
+		return srv.(QueryServer).MinGasPrice(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.ugov.v1.Query/MinTxFees",
+		FullMethod: "/umee.ugov.v1.Query/MinGasPrice",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).MinTxFees(ctx, req.(*QueryMinTxFees))
+		return srv.(QueryServer).MinGasPrice(ctx, req.(*QueryMinGasPrice))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -213,15 +212,15 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*QueryServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "MinTxFees",
-			Handler:    _Query_MinTxFees_Handler,
+			MethodName: "MinGasPrice",
+			Handler:    _Query_MinGasPrice_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "umee/ugov/v1/query.proto",
 }
 
-func (m *QueryMinTxFees) Marshal() (dAtA []byte, err error) {
+func (m *QueryMinGasPrice) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -231,12 +230,12 @@ func (m *QueryMinTxFees) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryMinTxFees) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryMinGasPrice) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryMinTxFees) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryMinGasPrice) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -244,7 +243,7 @@ func (m *QueryMinTxFees) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryMinTxFeesResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryMinGasPriceResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -254,30 +253,26 @@ func (m *QueryMinTxFeesResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryMinTxFeesResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryMinGasPriceResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryMinTxFeesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryMinGasPriceResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.MinTxFees) > 0 {
-		for iNdEx := len(m.MinTxFees) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.MinTxFees[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintQuery(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
+	{
+		size, err := m.MinGasPrice.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
 		}
+		i -= size
+		i = encodeVarintQuery(dAtA, i, uint64(size))
 	}
+	i--
+	dAtA[i] = 0xa
 	return len(dAtA) - i, nil
 }
 
@@ -292,7 +287,7 @@ func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *QueryMinTxFees) Size() (n int) {
+func (m *QueryMinGasPrice) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -301,18 +296,14 @@ func (m *QueryMinTxFees) Size() (n int) {
 	return n
 }
 
-func (m *QueryMinTxFeesResponse) Size() (n int) {
+func (m *QueryMinGasPriceResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.MinTxFees) > 0 {
-		for _, e := range m.MinTxFees {
-			l = e.Size()
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
+	l = m.MinGasPrice.Size()
+	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
 
@@ -322,7 +313,7 @@ func sovQuery(x uint64) (n int) {
 func sozQuery(x uint64) (n int) {
 	return sovQuery(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *QueryMinTxFees) Unmarshal(dAtA []byte) error {
+func (m *QueryMinGasPrice) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -345,10 +336,10 @@ func (m *QueryMinTxFees) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryMinTxFees: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryMinGasPrice: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryMinTxFees: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryMinGasPrice: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -372,7 +363,7 @@ func (m *QueryMinTxFees) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryMinTxFeesResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryMinGasPriceResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -395,15 +386,15 @@ func (m *QueryMinTxFeesResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryMinTxFeesResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryMinGasPriceResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryMinTxFeesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryMinGasPriceResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field MinTxFees", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field MinGasPrice", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -430,8 +421,7 @@ func (m *QueryMinTxFeesResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.MinTxFees = append(m.MinTxFees, types.Coin{})
-			if err := m.MinTxFees[len(m.MinTxFees)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.MinGasPrice.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
