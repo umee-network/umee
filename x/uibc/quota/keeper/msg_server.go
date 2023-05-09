@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	context "context"
+	"context"
 
 	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/uibc"
@@ -13,22 +13,21 @@ type msgServer struct {
 	kb Builder
 }
 
-// NewMsgServerImpl returns an implementation of MsgServer for the x/uibc
-// module.
+// NewMsgServerImpl returns an implementation of uibc.MsgServer
 func NewMsgServerImpl(kb Builder) uibc.MsgServer {
 	return &msgServer{kb: kb}
 }
 
 // GovUpdateQuota implements types.MsgServer
-func (m msgServer) GovUpdateQuota(goCtx context.Context, msg *uibc.MsgGovUpdateQuota) (
+func (m msgServer) GovUpdateQuota(ctx context.Context, msg *uibc.MsgGovUpdateQuota) (
 	*uibc.MsgGovUpdateQuotaResponse, error,
 ) {
-	ctx, err := sdkutil.StartMsg(goCtx, msg)
+	sdkCtx, err := sdkutil.StartMsg(ctx, msg)
 	if err != nil {
 		return nil, err
 	}
 
-	k := m.kb.Keeper(&ctx)
+	k := m.kb.Keeper(&sdkCtx)
 	if err := k.UpdateQuotaParams(msg.Total, msg.PerDenom, msg.QuotaDuration); err != nil {
 		return nil, err
 	}
@@ -37,18 +36,18 @@ func (m msgServer) GovUpdateQuota(goCtx context.Context, msg *uibc.MsgGovUpdateQ
 
 // GovSetIBCStatus implements types.MsgServer
 func (m msgServer) GovSetIBCStatus(
-	goCtx context.Context, msg *uibc.MsgGovSetIBCStatus,
+	ctx context.Context, msg *uibc.MsgGovSetIBCStatus,
 ) (*uibc.MsgGovSetIBCStatusResponse, error) {
-	ctx, err := sdkutil.StartMsg(goCtx, msg)
+	sdkCtx, err := sdkutil.StartMsg(ctx, msg)
 	if err != nil {
 		return nil, err
 	}
 
-	k := m.kb.Keeper(&ctx)
+	k := m.kb.Keeper(&sdkCtx)
 	if err := k.SetIBCStatus(msg.IbcStatus); err != nil {
 		return &uibc.MsgGovSetIBCStatusResponse{}, err
 	}
-	sdkutil.Emit(&ctx, &uibc.EventIBCTransferStatus{
+	sdkutil.Emit(&sdkCtx, &uibc.EventIBCTransferStatus{
 		Status: msg.IbcStatus,
 	})
 
