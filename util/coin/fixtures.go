@@ -7,40 +7,42 @@ import (
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
+const umee = appparams.BondDenom
+
 // common coins used in tests
 var (
-	UumeeDenom = leveragetypes.ToUTokenDenom(appparams.BondDenom)
-	Umee1      = New(appparams.BondDenom, 1)
-	Umee10k    = New(appparams.BondDenom, 10_000)
-	UUmee1     = UUmee(1)
+	UumeeDenom = leveragetypes.ToUTokenDenom(umee)
+	Umee1      = New(umee, 1)
+	Umee10k    = New(umee, 10_000)
+	UUmee1     = Utoken(umee, 1)
 
-	Umee1dec = DecFloat(appparams.BondDenom, 1)
+	Umee1dec = DecF(umee, 1)
 
-	Atom    = "atom"
+	Atom    = "uatom"
 	Atom1   = New(Atom, 1)
 	Atom10k = New(Atom, 10_000)
 	UAtom1  = Utoken(Atom, 1)
 
-	Atom1dec    = DecFloat(Atom, 1)
-	Atom1_25dec = DecFloat(Atom, 1.25)
+	Atom1dec    = DecF(Atom, 1)
+	Atom1_25dec = DecF(Atom, 1.25)
 )
 
-// UUmee creates a uToken UMEE with given amount
+// UmeeDec creates a Umee (uumee) DecCoin with given amount
 func UmeeDec(amount float64) sdk.DecCoin {
-	return DecFloat(appparams.BondDenom, amount)
+	return DecF(appparams.BondDenom, amount)
 }
 
-// UUmee creates a uToken UMEE with given amount
-func UUmee(amount int64) sdk.Coin {
-	return New(UumeeDenom, amount)
-}
-
-// UUmee creates a uToken UMEE with given amount
-func UUmeeDec(amount float64) sdk.DecCoin {
-	return DecFloat(UumeeDenom, amount)
-}
-
-// Utoken creates a uToken with given base denom and amount
+// Utoken creates a uToken coin.
 func Utoken(denom string, amount int64) sdk.Coin {
 	return New(leveragetypes.ToUTokenDenom(denom), amount)
+}
+
+// UtokenDec creates a uToken DecCoin.
+func UtokenDec(denom string, amount string) sdk.DecCoin {
+	return Dec(leveragetypes.ToUTokenDenom(denom), amount)
+}
+
+// UtokenDec creates a uToken DecCoin.
+func UtokenDecF(denom string, amount float64) sdk.DecCoin {
+	return DecF(leveragetypes.ToUTokenDenom(denom), amount)
 }
