@@ -14,14 +14,14 @@ var (
 	Umee10k    = New(appparams.BondDenom, 10_000)
 	UUmee1     = UUmee(1)
 
-	Umee1dec = DecInt(appparams.BondDenom, 1)
+	Umee1dec = DecFloat(appparams.BondDenom, 1)
 
 	Atom    = "atom"
 	Atom1   = New(Atom, 1)
 	Atom10k = New(Atom, 10_000)
 	UAtom1  = Utoken(Atom, 1)
 
-	Atom1dec    = DecInt(Atom, 1)
+	Atom1dec    = DecFloat(Atom, 1)
 	Atom1_25dec = DecFloat(Atom, 1.25)
 )
 
