@@ -18,13 +18,14 @@ var (
 
 	Umee1dec = DecF(umee, 1)
 
-	Atom    = "uatom"
-	Atom1   = New(Atom, 1)
-	Atom10k = New(Atom, 10_000)
-	UAtom1  = Utoken(Atom, 1)
+	Atom   = "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
+	Atom1  = New(Atom, 1)
+	UAtom1 = Utoken(Atom, 1)
 
 	Atom1dec    = DecF(Atom, 1)
 	Atom1_25dec = DecF(Atom, 1.25)
+
+	Dollar = "dollar"
 )
 
 // UmeeDec creates a Umee (uumee) DecCoin with given amount
