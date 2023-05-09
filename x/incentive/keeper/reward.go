@@ -5,6 +5,8 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
+var secondsPerYear = sdk.MustNewDecFromStr("31557600") // 365.25 * 3600 * 24
+
 // calculateReferenceAPY is used for APY queries. For a given bonded uToken denom, returns a reference amount
 // of that uToken (10^exponent from the uToken's reward accumulator) and the estimated rewards that bond
 // would earn if they continued at the current rate computed at the time of query.
@@ -24,6 +26,9 @@ func (k Keeper) calculateReferenceAPY(ctx sdk.Context, denom string) (sdk.Coin, 
 		return bond, sdk.NewCoins(), nil
 	}
 
+	// reference amount / total bonded = rewardPortion (as the more uTokens bond, the fewer rewards each earns)
+	rewardPortion := ten.Power(uint64(exponent)).QuoInt(bonded.Amount)
+
 	// to compute the rewards a reference amount (10^exponent) of bonded uToken is currently earning,
 	// we need to divide the total rewards being distributed by all ongoing incentive programs targeting
 	// that uToken denom, by the ratio of the total bonded amount to the reference amount.
@@ -31,9 +36,8 @@ func (k Keeper) calculateReferenceAPY(ctx sdk.Context, denom string) (sdk.Coin, 
 	for _, p := range programs {
 		if p.UToken == denom {
 			// seconds per year / duration = programsPerYear (as this query assumes incentives will stay constant)
-			programsPerYear := sdk.MustNewDecFromStr("31557600").Quo(sdk.NewDec(p.Duration))
-			// reference amount / total bonded = rewardPortion (as the more uTokens bond, the fewer rewards each earns)
-			rewardPortion := ten.Power(uint64(exponent)).QuoInt(bonded.Amount)
+			programsPerYear := secondsPerYear.Quo(sdk.NewDec(p.Duration))
+
 			// annual rewards for reference amount for this specific program, assuming current rates continue
 			rewardCoin := sdk.NewCoin(
 				p.TotalRewards.Denom,
