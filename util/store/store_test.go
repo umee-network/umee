@@ -65,6 +65,6 @@ func TestSetAndGetAddress(t *testing.T) {
 	err := SetAddress(store, key, val, "no error")
 	assert.NilError(t, err)
 
-	v := GetAddress(store, key, "no error")
+	v := GetAddress(store, key)
 	assert.DeepEqual(t, v, val)
 }

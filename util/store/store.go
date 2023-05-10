@@ -147,7 +147,7 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 // GetAddress retrieves an sdk.AccAddress from a KVStore, or an empty address if no value is stored.
 // Panics if a non-empty address fails sdk.VerifyAddressFormat, so non-empty returns are always valid.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func GetAddress(store sdk.KVStore, key []byte, errField string) sdk.AccAddress {
+func GetAddress(store sdk.KVStore, key []byte) sdk.AccAddress {
 	if bz := store.Get(key); len(bz) > 0 {
 		addr := sdk.AccAddress(bz)
 		return addr
@@ -208,8 +208,4 @@ func GetInteger[Num Integer](store sdk.KVStore, key []byte) Num {
 		return Num(bz[0])
 	}
 	panic("not possible!")
-}
-
-type Integer interface {
-	~int32 | ~int64 | ~uint32 | ~uint64 | byte
 }
