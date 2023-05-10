@@ -24,8 +24,6 @@ func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
 	return Keeper{
 		store: ctx.KVStore(kb.storeKey),
 		cdc:   kb.cdc,
-
-		ctx: ctx,
 	}
 }
 
@@ -33,7 +31,4 @@ func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
 type Keeper struct {
 	store sdk.KVStore
 	cdc   codec.BinaryCodec
-
-	// TODO: ctx should be removed when we migrate leverage and oracle
-	ctx *sdk.Context
 }

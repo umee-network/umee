@@ -20,7 +20,8 @@ var (
 	// 1u/uumee Coin
 	UUmee1 = Utoken(umee, 1)
 
-	// 1uumee DecCoin
+	// Xuumee DecCoin
+	Umee0dec = DecF(umee, 0)
 	Umee1dec = DecF(umee, 1)
 
 	Atom = "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
@@ -37,9 +38,9 @@ var (
 	Dollar = "dollar"
 )
 
-// UmeeDec creates a Umee (uumee) DecCoin with given amount
-func UmeeDec(amount float64) sdk.DecCoin {
-	return DecF(appparams.BondDenom, amount)
+// UmeeDecF creates a Umee (uumee) DecCoin with given amount
+func UmeeDec(amount string) sdk.DecCoin {
+	return Dec(appparams.BondDenom, amount)
 }
 
 // Utoken creates a uToken DecCoin.

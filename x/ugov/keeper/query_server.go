@@ -15,9 +15,8 @@ type Querier struct {
 }
 
 // MinTxFees returns minimum transaction fees.
-func (q Builder) MinTxFees(ctx context.Context, _ *ugov.QueryMinTxFees) (*ugov.QueryMinTxFeesResponse, error) {
+func (q Builder) MinGasPrice(ctx context.Context, _ *ugov.QueryMinGasPrice) (*ugov.QueryMinGasPriceResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	fees := q.Keeper(&sdkCtx).GetFees()
-
-	return &ugov.QueryMinTxFeesResponse{MinTxFees: fees}, nil
+	p := q.Keeper(&sdkCtx).MinGasPrice()
+	return &ugov.QueryMinGasPriceResponse{MinGasPrice: *p}, nil
 }
