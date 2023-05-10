@@ -112,22 +112,17 @@ func GetInt(store sdk.KVStore, key []byte, errField string) sdkmath.Int {
 }
 
 // SetInt stores an sdkmath.Int in a KVStore, or clears if setting to zero or nil.
-// Returns an error on attempting to store negative value or on failure to encode.
+// Returns an error on serialization error.
 // Accepts an additional string which should describe the field being set in custom error messages.
 func SetInt(store sdk.KVStore, key []byte, val sdkmath.Int, errField string) error {
 	if val.IsNil() || val.IsZero() {
 		store.Delete(key)
 		return nil
 	}
-	if val.IsNegative() {
-		return fmt.Errorf("%s: cannot set negative %s", val, errField)
-	}
-
 	return SetValue(store, key, &val, errField)
 }
 
 // GetDec retrieves an sdk.Dec from a KVStore, or returns zero if no value is stored.
-// It panics if a stored value fails to unmarshal or is negative.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetDec(store sdk.KVStore, key []byte, errField string) sdk.Dec {
 	val := GetValue[*sdk.Dec](store, key, errField)
@@ -139,15 +134,12 @@ func GetDec(store sdk.KVStore, key []byte, errField string) sdk.Dec {
 }
 
 // SetDec stores an sdk.Dec in a KVStore, or clears if setting to zero or nil.
-// Returns an error on attempting to store negative value or on failure to encode.
+// Returns an error serialization failure.
 // Accepts an additional string which should describe the field being set in custom error messages.
 func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 	if val.IsNil() || val.IsZero() {
 		store.Delete(key)
 		return nil
-	}
-	if val.IsNegative() {
-		return fmt.Errorf("%s: cannot set negative %s", val, errField)
 	}
 	return SetValue(store, key, &val, errField)
 }
