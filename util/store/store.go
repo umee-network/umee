@@ -1,21 +1,12 @@
 // Package store implements KVStore getters and setters for various types.
 //
-// The methods in this package are made to be resistant to bugs introduced through the following pathways:
-//   - Manually edited genesis state (bad input will appear in SetX during ImportGenesis)
-//   - Bug in code (bad input could appear in SetX at any time)
-//   - Incomplete migration (bad data will be unmarshaled by GetX after the migration)
-//   - Incorrect binary swap (same vectors as incomplete migration)
-//
-// Setters return errors on bad input. For getters (which should only see bad data in exotic cases)
-// panics are used instead for simpler function signatures.
-//
 // Numerical getters and setters have a minimum value of zero, which will be interpreted as follows:
-//   - Setters reject negative input, and clear a KVStore entry when setting to exactly zero.
-//   - Getters panic on unmarshaling a negative value, and interpret empty data as zero.
+//   - Setters clear a KVStore entry when setting to exactly zero.
+//   - Getters panic on unmarshaling, and interpret empty data as zero.
 //
-// All functions require an errField parameter which is used when creating error messages. For example,
-// the errField "balance" could appear in errors like "-12: cannot set negative balance". These errFields
-// are cosmetic and do not affect the stored data (key or value) in any way.
+// All functions which can fail require an errField parameter which is used when creating error messages.
+// For example, the errField "balance" could appear in errors like "-12: cannot set negative balance".
+// These errFields are cosmetic and do not affect the stored data (key or value) in any way.
 package store
 
 import (
