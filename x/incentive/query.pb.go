@@ -1282,7 +1282,7 @@ type QueryClient interface {
 	CurrentRates(ctx context.Context, in *QueryCurrentRates, opts ...grpc.CallOption) (*QueryCurrentRatesResponse, error)
 	// ActualRates queries the hypothetical return of a bonded uToken denomination
 	// if current incentive rewards continued for one year. The response is an sdk.Dec
-	// representing an oracle-adjusted APY)
+	// representing an oracle-adjusted APY.
 	ActualRates(ctx context.Context, in *QueryActualRates, opts ...grpc.CallOption) (*QueryActualRatesResponse, error)
 	// LastRewardTime queries the last block time at which incentive rewards were calculated.
 	LastRewardTime(ctx context.Context, in *QueryLastRewardTime, opts ...grpc.CallOption) (*QueryLastRewardTimeResponse, error)
@@ -1433,7 +1433,7 @@ type QueryServer interface {
 	CurrentRates(context.Context, *QueryCurrentRates) (*QueryCurrentRatesResponse, error)
 	// ActualRates queries the hypothetical return of a bonded uToken denomination
 	// if current incentive rewards continued for one year. The response is an sdk.Dec
-	// representing an oracle-adjusted APY)
+	// representing an oracle-adjusted APY.
 	ActualRates(context.Context, *QueryActualRates) (*QueryActualRatesResponse, error)
 	// LastRewardTime queries the last block time at which incentive rewards were calculated.
 	LastRewardTime(context.Context, *QueryLastRewardTime) (*QueryLastRewardTimeResponse, error)

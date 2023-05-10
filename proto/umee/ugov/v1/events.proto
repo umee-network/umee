@@ -9,6 +9,5 @@ option (gogoproto.goproto_getters_all) = false;
 
 // EventMinTxFees is emitted when MsgGovUpdateMinFees is correctly executed.
 message EventMinTxFees {
-  repeated cosmos.base.v1beta1.Coin min_tx_fees = 1
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+  repeated cosmos.base.v1beta1.DecCoin min_tx_fees = 1 [(gogoproto.nullable) = false];
 }
