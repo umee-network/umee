@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/util/sdkutil"
 	"github.com/umee-network/umee/v4/x/ugov"
 )
@@ -25,5 +26,9 @@ func (m msgServer) GovUpdateMinGasPrice(ctx context.Context, msg *ugov.MsgGovUpd
 
 	k := m.kb.Keeper(&sdkCtx)
 	k.SetMinGasPrice(&msg.MinGasPrice)
+	sdkutil.Emit(&sdkCtx, &ugov.EventMinTxFees{
+		MinTxFees: sdk.NewDecCoins(msg.MinGasPrice),
+	})
+
 	return &ugov.MsgGovUpdateMinGasPriceResponse{}, nil
 }
