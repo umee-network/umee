@@ -11,17 +11,16 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Query defines the gRPC querier service.
 service Query {
-  // MinTxFees returns minimum transaction fees.
-  rpc MinTxFees(QueryMinTxFees) returns (QueryMinTxFeesResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/min-tx-fees";
+  // MinGasPrice returns minimum transaction fees.
+  rpc MinGasPrice(QueryMinGasPrice) returns (QueryMinGasPriceResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/min-gas-price";
   }
 }
 
-// QueryMinTxFees is a request type.
-message QueryMinTxFees {}
+// QueryMinGasPrice is a request type.
+message QueryMinGasPrice {}
 
-// QueryMinTxFeesResponse response type.
-message QueryMinTxFeesResponse {
-  repeated cosmos.base.v1beta1.Coin min_tx_fees = 1
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+// QueryMinGasPriceResponse response type.
+message QueryMinGasPriceResponse {
+  cosmos.base.v1beta1.DecCoin min_gas_price = 1 [(gogoproto.nullable) = false];
 }
