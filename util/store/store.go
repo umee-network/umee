@@ -145,7 +145,6 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 }
 
 // GetAddress retrieves an sdk.AccAddress from a KVStore, or an empty address if no value is stored.
-// Panics if a non-empty address fails sdk.VerifyAddressFormat, so non-empty returns are always valid.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetAddress(store sdk.KVStore, key []byte) sdk.AccAddress {
 	if bz := store.Get(key); len(bz) > 0 {
@@ -157,18 +156,13 @@ func GetAddress(store sdk.KVStore, key []byte) sdk.AccAddress {
 }
 
 // SetAddress stores an sdk.AccAddress in a KVStore, or clears if setting to an empty or nil address.
-// Returns an error on attempting to store a non-empty address that fails sdk.VerifyAddressFormat.
 // Accepts an additional string which should describe the field being set in custom error messages.
-func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress, errField string) error {
+func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress) {
 	if val == nil || val.Empty() {
 		store.Delete(key)
-		return nil
-	}
-	if err := sdk.VerifyAddressFormat(val); err != nil {
-		return fmt.Errorf("%s is not a valid address: %s", errField, err)
+		return
 	}
 	store.Set(key, val)
-	return nil
 }
 
 func SetInteger[Num Integer](store sdk.KVStore, key []byte, v Num) {
