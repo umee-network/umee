@@ -38,7 +38,7 @@ var (
 	Dollar = "dollar"
 )
 
-// UmeeDecF creates a Umee (uumee) DecCoin with given amount
+// UmeeDec creates a Umee (uumee) DecCoin with given amount
 func UmeeDec(amount string) sdk.DecCoin {
 	return Dec(appparams.BondDenom, amount)
 }
@@ -53,7 +53,7 @@ func UtokenDec(denom string, amount string) sdk.DecCoin {
 	return Dec(leveragetypes.ToUTokenDenom(denom), amount)
 }
 
-// UtokenDec creates a uToken DecCoin.
+// UtokenDecF creates a uToken DecCoin.
 func UtokenDecF(denom string, amount float64) sdk.DecCoin {
 	return DecF(leveragetypes.ToUTokenDenom(denom), amount)
 }
