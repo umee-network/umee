@@ -18,7 +18,8 @@ func NewMsgServer(kb Builder) ugov.MsgServer {
 }
 
 // GovUpdateMinFees sets protocol controlled tx min fees.
-func (m msgServer) GovUpdateMinGasPrice(ctx context.Context, msg *ugov.MsgGovUpdateMinGasPrice) (*ugov.MsgGovUpdateMinGasPriceResponse, error) {
+func (m msgServer) GovUpdateMinGasPrice(ctx context.Context, msg *ugov.MsgGovUpdateMinGasPrice,
+) (*ugov.MsgGovUpdateMinGasPriceResponse, error) {
 	sdkCtx, err := sdkutil.StartMsg(ctx, msg)
 	if err != nil {
 		return nil, err
