@@ -156,7 +156,7 @@ func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress) {
 	store.Set(key, val)
 }
 
-func SetInteger[Num Integer](store sdk.KVStore, key []byte, v Num) {
+func SetInteger[T Integer](store sdk.KVStore, key []byte, v T) {
 	var bz []byte
 	switch v := any(v).(type) {
 	case int64:
@@ -177,20 +177,20 @@ func SetInteger[Num Integer](store sdk.KVStore, key []byte, v Num) {
 	store.Set(key, bz)
 }
 
-func GetInteger[Num Integer](store sdk.KVStore, key []byte) Num {
+func GetInteger[T Integer](store sdk.KVStore, key []byte) T {
 	bz := store.Get(key)
 	if bz == nil {
 		return 0
 	}
-	var v Num
+	var v T
 	switch any(v).(type) {
 	case int64, uint64:
 		v2 := binary.LittleEndian.Uint64(bz)
-		return Num(v2)
+		return T(v2)
 	case int32, uint32:
-		return Num(binary.LittleEndian.Uint32(bz))
+		return T(binary.LittleEndian.Uint32(bz))
 	case byte:
-		return Num(bz[0])
+		return T(bz[0])
 	}
-	panic("not possible!")
+	panic("not possible: all types must be covered above")
 }
