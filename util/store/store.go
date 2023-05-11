@@ -2,7 +2,7 @@
 //
 // Numerical getters and setters have a minimum value of zero, which will be interpreted as follows:
 //   - Setters clear a KVStore entry when setting to exactly zero.
-//   - Getters panic on unmarshaling, and interpret empty data as zero.
+//   - Getters panic on unmarshal error, and interpret empty data as zero.
 //
 // All functions which can fail require an errField parameter which is used when creating error messages.
 // For example, the errField "balance" could appear in errors like "-12: cannot set negative balance".
@@ -166,10 +166,10 @@ func SetInteger[Num Integer](store sdk.KVStore, key []byte, v Num) {
 		bz = make([]byte, 8)
 		binary.LittleEndian.PutUint64(bz, v)
 	case int32:
-		bz = make([]byte, 8)
+		bz = make([]byte, 4)
 		binary.LittleEndian.PutUint32(bz, uint32(v))
 	case uint32:
-		bz = make([]byte, 8)
+		bz = make([]byte, 4)
 		binary.LittleEndian.PutUint32(bz, v)
 	case byte:
 		bz = []byte{v}
