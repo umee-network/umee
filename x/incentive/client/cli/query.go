@@ -206,7 +206,7 @@ func GetCmdQueryUpcomingIncentivePrograms() *cobra.Command {
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.UpcomingIncentivePrograms(cmd.Context(),
 				&incentive.QueryUpcomingIncentivePrograms{})
-			return cli.PrintOrErr(resp proto.Message, err error, cctx client.Context) rr(resp, err, clientCtx)
+	return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
