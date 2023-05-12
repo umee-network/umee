@@ -33,8 +33,8 @@ func TestMsgs(t *testing.T) {
 	}
 
 	govMsgs := []sdk.Msg{
-		incentive.NewMsgGovCreatePrograms(govAddr, "title", "desc", []incentive.IncentiveProgram{program}),
-		incentive.NewMsgGovSetParams(govAddr, "title", "desc", incentive.DefaultParams()),
+		incentive.NewMsgGovCreatePrograms(govAddr, []incentive.IncentiveProgram{program}),
+		incentive.NewMsgGovSetParams(govAddr, incentive.DefaultParams()),
 	}
 
 	for _, msg := range userMsgs {
@@ -68,8 +68,8 @@ func TestRoutes(t *testing.T) {
 		*incentive.NewMsgEmergencyUnbond(testAddr, uToken),
 		*incentive.NewMsgClaim(testAddr),
 		*incentive.NewMsgSponsor(testAddr, 3),
-		*incentive.NewMsgGovCreatePrograms(govAddr, "title", "desc", []incentive.IncentiveProgram{program}),
-		*incentive.NewMsgGovSetParams(govAddr, "title", "desc", incentive.DefaultParams()),
+		*incentive.NewMsgGovCreatePrograms(govAddr, []incentive.IncentiveProgram{program}),
+		*incentive.NewMsgGovSetParams(govAddr, incentive.DefaultParams()),
 	}
 
 	for _, msg := range msgs {

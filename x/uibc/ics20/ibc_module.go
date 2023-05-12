@@ -17,14 +17,14 @@ import (
 // IBCModule wraps ICS-20 IBC module to limit token transfer inflows.
 type IBCModule struct {
 	// leverage keeper
-	lkeeper uibc.LeverageKeeper
+	lkeeper uibc.Leverage
 	// embed the ICS-20 transfer's AppModule: ibctransfer.IBCModule
 	ibcporttypes.IBCModule
 
 	keeper keeper.Keeper
 }
 
-func NewIBCModule(leverageKeeper uibc.LeverageKeeper, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
+func NewIBCModule(leverageKeeper uibc.Leverage, am ibctransfer.IBCModule, k keeper.Keeper) IBCModule {
 	return IBCModule{
 		lkeeper:   leverageKeeper,
 		IBCModule: am,
@@ -46,11 +46,12 @@ func (am IBCModule) OnRecvPacket(
 	}
 
 	// Allowing only registered token for ibc transfer
-	isSourceChain := ibctransfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
-	ackErr := CheckIBCInflow(ctx, packet, am.lkeeper, data.Denom, isSourceChain)
-	if ackErr != nil {
-		return ackErr
-	}
+	// TODO: re-enable inflow checks
+	// isSourceChain := ibctransfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+	// ackErr := CheckIBCInflow(ctx, packet, am.lkeeper, data.Denom, isSourceChain)
+	// if ackErr != nil {
+	// 	return ackErr
+	// }
 
 	ack := am.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	if ack.Success() {
@@ -66,7 +67,7 @@ func (am IBCModule) OnRecvPacket(
 
 func CheckIBCInflow(ctx sdk.Context,
 	packet channeltypes.Packet,
-	lkeeper uibc.LeverageKeeper,
+	lkeeper uibc.Leverage,
 	dataDenom string, isSourceChain bool,
 ) ibcexported.Acknowledgement {
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
@@ -79,8 +80,12 @@ func CheckIBCInflow(ctx sdk.Context,
 		// construct the denomination trace from the full raw denomination and get the ibc_denom
 		ibcDenom := ibctransfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
 		_, err := lkeeper.GetTokenSettings(ctx, ibcDenom)
-		if err != nil && ltypes.ErrNotRegisteredToken.Is(err) {
-			return channeltypes.NewErrorAcknowledgement(err)
+		if err != nil {
+			if ltypes.ErrNotRegisteredToken.Is(err) {
+				return channeltypes.NewErrorAcknowledgement(err)
+			}
+			// other leverage keeper error -> log the error  and allow the inflow transfer.
+			ctx.Logger().Error("IBC inflows: can't load token registry", "err", err)
 		}
 	}
 
