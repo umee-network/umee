@@ -166,13 +166,13 @@ func (s *IntegrationTestSuite) TestIBCTokenTransfer() {
 		// Make gov proposal to disable the quota check on ibc-transfer
 		err = grpc.UIBCIBCTransferSatusUpdate(
 			s.umee,
-			uibc.IBCTransferQuotaStatus_QUOTA_DISABLED,
+			uibc.IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_DISABLED,
 		)
 		s.Require().NoError(err)
 		// Get the uibc params for quota checking
 		uibcParams, err := s.umee.QueryUIBCParams()
 		s.Require().NoError(err)
-		s.Require().Equal(uibcParams.QuotaStatus, uibc.IBCTransferQuotaStatus_QUOTA_DISABLED)
+		s.Require().Equal(uibcParams.QuotaStatus, uibc.IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_DISABLED)
 		token = sdk.NewInt64Coin("uumee", 100000000) // 100 Umee
 		// sending the umee tokens
 		s.sendIBC(s.chain.id, gaiaChainID, "", token)

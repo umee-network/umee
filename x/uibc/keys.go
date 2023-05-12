@@ -29,20 +29,28 @@ func KeyTotalOutflows(ibcDenom string) []byte {
 	return util.ConcatBytes(0, KeyPrefixDenomOutflows, []byte(ibcDenom))
 }
 
-// UIBCInflowQuotaEnabled
-func UIBCInflowQuotaEnabled(status IBCTransferQuotaStatus) bool {
+// InflowQuotaEnabled
+func InflowQuotaEnabled(status IBCTransferQuotaStatus) bool {
 	// outflow disabled means inflow check enabled
-	if status == IBCTransferQuotaStatus_QUOTA_ENABLED || status == IBCTransferQuotaStatus_QUOTA_OUT_DISABLED {
+	switch status {
+	case IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_ENABLED:
 		return true
+	case IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_OUT_DISABLED:
+		return true
+	default:
+		return false
 	}
-	return false
 }
 
-// UIBCOutflowQuotaEnabled
-func UIBCOutflowQuotaEnabled(status IBCTransferQuotaStatus) bool {
+// OutflowQuotaEnabled
+func OutflowQuotaEnabled(status IBCTransferQuotaStatus) bool {
 	// inflow disabled means outflow check enabled
-	if status == IBCTransferQuotaStatus_QUOTA_ENABLED || status == IBCTransferQuotaStatus_QUOTA_IN_DISABLED {
+	switch status {
+	case IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_ENABLED:
 		return true
+	case IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_IN_DISABLED:
+		return true
+	default:
+		return false
 	}
-	return false
 }

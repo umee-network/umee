@@ -35,13 +35,13 @@ message Params {
 // QuotaStatus status of ibc-transfer quota check for inflow and outflow
 enum IBCTransferQuotaStatus {
   // UNSPECIFIED  defines a no-op status.
-  STATUS_UNSPECIFIED = 0;
+  IBC_TRANSFER_QUOTA_STATUS_UNSPECIFIED = 0;
   // DISABLED: all quota checks are disabled.
-  QUOTA_DISABLED = 1;
+  IBC_TRANSFER_QUOTA_STATUS_DISABLED = 1;
   // ENABLED: all quota checks are enabled.
-  QUOTA_ENABLED = 2;
+  IBC_TRANSFER_QUOTA_STATUS_ENABLED = 2;
   // DISABLED OUT: quota outflow checks are disabled and inflows are enabled.
-  QUOTA_OUT_DISABLED = 3;
+  IBC_TRANSFER_QUOTA_STATUS_OUT_DISABLED = 3;
   // DISABLED IN: quota inflow checks are disabled and outflows are enabled.
-  QUOTA_IN_DISABLED = 4;
+  IBC_TRANSFER_QUOTA_STATUS_IN_DISABLED = 4;
 }

@@ -39,7 +39,8 @@ func NewICS20Middleware(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSO
 }
 
 // OnRecvPacket implements types.Middleware
-func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) exported.Acknowledgement {
+func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
+) exported.Acknowledgement {
 	// TODO: needs to implement inflow quota check
 	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 }
@@ -54,7 +55,7 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
 		params := im.kb.Keeper(&ctx).GetParams()
-		if uibc.UIBCOutflowQuotaEnabled(params.QuotaStatus) {
+		if uibc.OutflowQuotaEnabled(params.QuotaStatus) {
 			err := im.revertQuotaUpdate(ctx, packet.Data)
 			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
 		}

@@ -32,7 +32,7 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
-	if uibc.UIBCOutflowQuotaEnabled(params.QuotaStatus) {
+	if uibc.OutflowQuotaEnabled(params.QuotaStatus) {
 		if err := k.CheckAndUpdateQuota(denom, funds); err != nil {
 			return 0, errors.Wrap(err, "sendPacket over the IBC Quota")
 		}
