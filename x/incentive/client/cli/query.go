@@ -130,10 +130,6 @@ func GetCmdQueryCurrentRates() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.CurrentRates(cmd.Context(), &incentive.QueryCurrentRates{UToken: denom})
-			if err != nil {
-				return err
-			}
-
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -160,10 +156,6 @@ func GetCmdQueryTotalBonded() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.TotalBonded(cmd.Context(), &incentive.QueryTotalBonded{Denom: denom})
-			if err != nil {
-				return err
-			}
-
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -190,10 +182,6 @@ func GetCmdQueryTotalUnbonding() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.TotalUnbonding(cmd.Context(), &incentive.QueryTotalUnbonding{Denom: denom})
-			if err != nil {
-				return err
-			}
-
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -218,7 +206,7 @@ func GetCmdQueryUpcomingIncentivePrograms() *cobra.Command {
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.UpcomingIncentivePrograms(cmd.Context(),
 				&incentive.QueryUpcomingIncentivePrograms{})
-			return cli.PrintOrErr(resp, err, clientCtx)
+			return cli.PrintOrErr(resp proto.Message, err error, cctx client.Context) rr(resp, err, clientCtx)
 		},
 	}
 
