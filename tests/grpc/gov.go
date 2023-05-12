@@ -57,12 +57,12 @@ func OracleParamChanges(
 	}
 }
 
-func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransferStatus) error {
-	msg := uibc.MsgGovSetIBCStatus{
+func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransferQuotaStatus) error {
+	msg := uibc.MsgGovSetIBCSQuotaStatus{
 		Authority:   authtypes.NewModuleAddress(gtypes.ModuleName).String(),
 		Title:       "Update the ibc transfer status",
 		Description: "Update the ibc transfer status",
-		IbcStatus:   status,
+		QuotaStatus: status,
 	}
 
 	var err error

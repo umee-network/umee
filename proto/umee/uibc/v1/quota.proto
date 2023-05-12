@@ -9,8 +9,8 @@ option go_package = "github.com/umee-network/umee/v4/x/uibc";
 
 // Params of x/uibc module
 message Params {
-  // ibc_status defines the wethever ibc-transfer enabled, disbaled or paused
-  IBCTransferStatus ibc_status = 1;
+  // quota_status defines the wethever quota check enabled, disbaled for inflow and outlfow.
+  IBCTransferQuotaStatus quota_status = 1;
   // total_quota defines the total outflow limit of ibc-transfer in USD
   string total_quota = 2 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
@@ -32,18 +32,16 @@ message Params {
   ];
 }
 
-// IBCTransferStatus status of ibc-transfer
-enum IBCTransferStatus {
+// QuotaStatus status of ibc-transfer quota check for inflow and outflow
+enum IBCTransferQuotaStatus {
   // UNSPECIFIED  defines a no-op status.
-  IBC_TRANSFER_STATUS_UNSPECIFIED = 0;
+  STATUS_UNSPECIFIED = 0;
   // DISABLED: all quota checks are disabled.
-  IBC_TRANSFER_STATUS_QUOTA_DISABLED = 1;
+  QUOTA_DISABLED = 1;
   // ENABLED: all quota checks are enabled.
-  IBC_TRANSFER_STATUS_QUOTA_ENABLED = 2;
+  QUOTA_ENABLED = 2;
   // DISABLED OUT: quota outflow checks are disabled and inflows are enabled.
-  IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED = 3;
+  QUOTA_OUT_DISABLED = 3;
   // DISABLED IN: quota inflow checks are disabled and outflows are enabled.
-  IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED = 4;
-  // PAUSED: all IBC transfers are paused.
-  IBC_TRANSFER_STATUS_TRANSFERS_PAUSED = 5;
+  QUOTA_IN_DISABLED = 4;
 }

@@ -34,22 +34,22 @@ func (m msgServer) GovUpdateQuota(ctx context.Context, msg *uibc.MsgGovUpdateQuo
 	return &uibc.MsgGovUpdateQuotaResponse{}, nil
 }
 
-// GovSetIBCStatus implements types.MsgServer
-func (m msgServer) GovSetIBCStatus(
-	ctx context.Context, msg *uibc.MsgGovSetIBCStatus,
-) (*uibc.MsgGovSetIBCStatusResponse, error) {
+// GovSetIBCQuotaStatus implements types.MsgServer
+func (m msgServer) GovSetIBCQuotaStatus(
+	ctx context.Context, msg *uibc.MsgGovSetIBCSQuotaStatus,
+) (*uibc.MsgGovSetIBCQuotaStatusResponse, error) {
 	sdkCtx, err := sdkutil.StartMsg(ctx, msg)
 	if err != nil {
 		return nil, err
 	}
 
 	k := m.kb.Keeper(&sdkCtx)
-	if err := k.SetIBCStatus(msg.IbcStatus); err != nil {
-		return &uibc.MsgGovSetIBCStatusResponse{}, err
+	if err := k.SetIBCTransferQuotaStatus(msg.QuotaStatus); err != nil {
+		return &uibc.MsgGovSetIBCQuotaStatusResponse{}, err
 	}
-	sdkutil.Emit(&sdkCtx, &uibc.EventIBCTransferStatus{
-		Status: msg.IbcStatus,
+	sdkutil.Emit(&sdkCtx, &uibc.EventIBCTransferQuotaStatus{
+		Status: msg.QuotaStatus,
 	})
 
-	return &uibc.MsgGovSetIBCStatusResponse{}, nil
+	return &uibc.MsgGovSetIBCQuotaStatusResponse{}, nil
 }

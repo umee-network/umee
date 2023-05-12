@@ -14,7 +14,7 @@ func TestGenesis(t *testing.T) {
 
 	genesis := uibc.DefaultGenesisState()
 	genesis.Outflows = append(genesis.Outflows, sampleOutflow)
-	require.Equal(uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED, genesis.Params.IbcStatus)
+	require.Equal(uibc.IBCTransferQuotaStatus_QUOTA_ENABLED, genesis.Params.QuotaStatus)
 	kb.InitGenesis(s.ctx, *genesis)
 
 	// verify params
@@ -29,8 +29,8 @@ func TestGenesis(t *testing.T) {
 	require.Equal(exported, genesis)
 
 	// update params in genesis state
-	genesis.Params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED
+	genesis.Params.QuotaStatus = uibc.IBCTransferQuotaStatus_QUOTA_DISABLED
 	kb.InitGenesis(s.ctx, *genesis)
 	exported = kb.ExportGenesis(s.ctx)
-	require.Equal(genesis.Params.IbcStatus, exported.Params.IbcStatus)
+	require.Equal(genesis.Params.QuotaStatus, exported.Params.QuotaStatus)
 }

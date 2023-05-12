@@ -15,7 +15,7 @@ message EventBadRevert {
   string packet = 2;
 }
 
-// EventIBCTransferStatus is emitted on quota tracking pause status change.
-message EventIBCTransferStatus {
-  IBCTransferStatus status = 1;
+// EventIBCTransferQuotaStatus is emitted on quota tracking pause status change.
+message EventIBCTransferQuotaStatus {
+  IBCTransferQuotaStatus status = 1;
 }
