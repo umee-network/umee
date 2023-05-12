@@ -25,7 +25,7 @@ func TestMsgGovUpdateMinGasPrice(t *testing.T) {
 	require.NoError(msg.ValidateBasic())
 
 	// TODO: probably we should use Dec string
-	require.Equal(`authority:"umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp" min_gas_price:<denom:"atom" amount:"1250000000000000000" > `, msg.String())
+	require.Equal(`authority:"umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp" min_gas_price:<denom:"ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9" amount:"1250000000000000000" > `, msg.String())
 
 	signers := msg.GetSigners()
 	require.Len(signers, 1)

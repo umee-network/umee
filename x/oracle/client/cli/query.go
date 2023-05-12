@@ -163,7 +163,6 @@ $ umeed query oracle exchange-rates
 				return err
 			}
 			queryClient := types.NewQueryClient(clientCtx)
-
 			res, err := queryClient.ExchangeRates(cmd.Context(), &types.QueryExchangeRates{})
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
