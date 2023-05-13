@@ -20,6 +20,9 @@ CMD ["umeed"]
 # Run umeed by default, omit entrypoint to ease using container with CLI
 STOPSIGNAL SIGTERM
 
-RUN apt-get update && apt-get install ca-certificates -y
+RUN apt-get update && apt-get install ca-certificates -y \
+    && addgroup --gid 1000 umee \
+    && useradd -u 1000 -g umee -m umee
+
 COPY --from=builder /go/bin/umeed /usr/local/bin/
 COPY --from=builder /go/pkg/mod/github.com/\!cosm\!wasm/wasmvm\@v*/internal/api/libwasmvm.*.so /usr/lib/
