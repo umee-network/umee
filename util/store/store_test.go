@@ -12,7 +12,7 @@ import (
 
 func TestGetAndSetDec(t *testing.T) {
 	t.Parallel()
-	store := tsdk.NewKVStore(t)
+	store := tsdk.KVStore(t)
 	key := []byte("decKey")
 	val := sdk.MustNewDecFromStr("1234")
 	err := SetDec(store, key, val, "no error")
@@ -24,7 +24,7 @@ func TestGetAndSetDec(t *testing.T) {
 
 func TestGetAndSetInt(t *testing.T) {
 	t.Parallel()
-	store := tsdk.NewKVStore(t)
+	store := tsdk.KVStore(t)
 	key := []byte("intKey")
 	val, ok := sdk.NewIntFromString("1234")
 	assert.Equal(t, true, ok)
@@ -43,7 +43,7 @@ func checkStoreNumber[T Integer](name string, val T, store sdk.KVStore, key []by
 
 func TestStoreNumber(t *testing.T) {
 	t.Parallel()
-	store := tsdk.NewKVStore(t)
+	store := tsdk.KVStore(t)
 	key := []byte("integer")
 
 	checkStoreNumber("int32-0", int32(0), store, key, t)
@@ -59,7 +59,7 @@ func TestStoreNumber(t *testing.T) {
 }
 
 func TestSetAndGetAddress(t *testing.T) {
-	store := tsdk.NewKVStore(t)
+	store := tsdk.KVStore(t)
 	key := []byte("uint32")
 	val := sdk.AccAddress("1234")
 

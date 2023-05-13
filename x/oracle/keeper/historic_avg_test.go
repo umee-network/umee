@@ -32,7 +32,7 @@ type AvgKeeperSuite struct {
 }
 
 func (s AvgKeeperSuite) newAvgKeeper(t *testing.T, period, shift time.Duration) AvgKeeper {
-	db := tsdk.NewKVStore(t)
+	db := tsdk.KVStore(t)
 	return AvgKeeper{store: db, period: period, shift: shift}
 }
 
