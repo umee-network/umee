@@ -13,6 +13,19 @@ import (
 	dbm "github.com/tendermint/tm-db"
 )
 
+// NewCtx creates new context with store and mounted store keys and transient store keys.
+func NewCtx(t *testing.T, keys []types.StoreKey, tkeys []types.StoreKey) (sdk.Context, types.CommitMultiStore) {
+	cms := NewCommitMultiStore(t, keys, tkeys)
+	ctx := sdk.NewContext(cms, tmproto.Header{}, false, log.NewNopLogger())
+
+	return ctx, cms
+}
+
+// NewCtxOneStore creates new context with only one store key
+func NewCtxOneStore(t *testing.T, keys types.StoreKey) (sdk.Context, types.CommitMultiStore) {
+	return NewCtx(t, []types.StoreKey{keys}, nil)
+}
+
 // NewCommitMultiStore creats SDK Multistore
 func NewCommitMultiStore(t *testing.T, keys []types.StoreKey, tkeys []types.StoreKey) types.CommitMultiStore {
 	db := dbm.NewMemDB()
@@ -26,19 +39,6 @@ func NewCommitMultiStore(t *testing.T, keys []types.StoreKey, tkeys []types.Stor
 	err := cms.LoadLatestVersion()
 	assert.NoError(t, err)
 	return cms
-}
-
-// NewCtx creates new context with store and mounted store keys and transient store keys.
-func NewCtx(t *testing.T, keys []types.StoreKey, tkeys []types.StoreKey) (sdk.Context, types.CommitMultiStore) {
-	cms := NewCommitMultiStore(t, keys, tkeys)
-	ctx := sdk.NewContext(cms, tmproto.Header{}, false, log.NewNopLogger())
-
-	return ctx, cms
-}
-
-// NewCtxq creates new context with only one store key
-func NewCtxOneStore(t *testing.T, keys types.StoreKey) (sdk.Context, types.CommitMultiStore) {
-	return NewCtx(t, []types.StoreKey{keys}, nil)
 }
 
 // NewKVStore creates a memory based kv store without commit / wrapping functionality
