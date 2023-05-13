@@ -42,7 +42,7 @@ func NewCommitMultiStore(t *testing.T, keys []types.StoreKey, tkeys []types.Stor
 }
 
 // KVStore creates a memory based kv store without commit / wrapping functionality.
-// Usefull when sdk.Context is not needed for tests.
+// Useful when sdk.Context is not needed for tests.
 func KVStore(t *testing.T) types.KVStore {
 	db := dbm.NewMemDB()
 	return kvStoreDB{db, t}
