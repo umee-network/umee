@@ -168,11 +168,14 @@ go.sum: go.mod
 ##                                  Docker                                   ##
 ###############################################################################
 
-docker-build:
+docker-build-e2e:
 	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
-docker-build-experimental:
+docker-build-e2e-experimental:
 	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true .
+
+docker-build:
+	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
@@ -194,13 +197,13 @@ TEST_COVERAGE_PROFILE=coverage.txt
 UNIT_TEST_TAGS = norace
 TEST_RACE_TAGS = ""
 TEST_E2E_TAGS = "e2e"
-TEST_E2E_DEPS = docker-build
+TEST_E2E_DEPS = docker-build-e2e
 
 ifeq ($(EXPERIMENTAL),true)
 	UNIT_TEST_TAGS += experimental
 	TEST_RACE_TAGS += experimental
 	TEST_E2E_TAGS += experimental
-	TEST_E2E_DEPS = docker-build-experimental
+	TEST_E2E_DEPS = docker-build-e2e-experimental
 endif
 
 test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
@@ -226,8 +229,7 @@ cover-html: test-unit-cover
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
 
-# NOTE: when building locally, we need to run: $(MAKE) docker-build
-# however we should be able to optimize it:
+# we should be able to optimize docker build:
 # https://linear.app/umee/issue/UMEE-463/fix-docker-login-problem-when-running-e2e-tests
 test-e2e: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'

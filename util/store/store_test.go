@@ -1,6 +1,7 @@
 package store
 
 import (
+	"math"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -10,6 +11,7 @@ import (
 )
 
 func TestGetAndSetDec(t *testing.T) {
+	t.Parallel()
 	store := util.KVStore(t)
 	key := []byte("decKey")
 	val := sdk.MustNewDecFromStr("1234")
@@ -21,6 +23,7 @@ func TestGetAndSetDec(t *testing.T) {
 }
 
 func TestGetAndSetInt(t *testing.T) {
+	t.Parallel()
 	store := util.KVStore(t)
 	key := []byte("intKey")
 	val, ok := sdk.NewIntFromString("1234")
@@ -32,35 +35,34 @@ func TestGetAndSetInt(t *testing.T) {
 	assert.DeepEqual(t, v, val)
 }
 
-func TestGetAndSetUint32(t *testing.T) {
-	store := util.KVStore(t)
-	key := []byte("uint32")
-	val := uint32(1234)
-	err := SetUint32(store, key, val, "no error")
-	assert.NilError(t, err)
-
-	v := GetUint32(store, key, "no error")
-	assert.DeepEqual(t, v, val)
+func checkStoreNumber[T Integer](name string, val T, store sdk.KVStore, key []byte, t *testing.T) {
+	SetInteger(store, key, val)
+	vOut := GetInteger[T](store, key)
+	assert.DeepEqual(t, val, vOut)
 }
 
-func TestGetAndSetUint64(t *testing.T) {
+func TestStoreNumber(t *testing.T) {
+	t.Parallel()
 	store := util.KVStore(t)
-	key := []byte("uint64")
-	val := uint64(1234)
-	err := SetUint64(store, key, val, "no error")
-	assert.NilError(t, err)
+	key := []byte("integer")
 
-	v := GetUint64(store, key, "no error")
-	assert.DeepEqual(t, v, val)
+	checkStoreNumber("int32-0", int32(0), store, key, t)
+	checkStoreNumber("int32-min", int32(math.MinInt32), store, key, t)
+	checkStoreNumber("int32-max", int32(math.MaxInt32), store, key, t)
+	checkStoreNumber("uint32-0", uint32(0), store, key, t)
+	checkStoreNumber("uint32-max", uint32(math.MaxUint32), store, key, t)
+	checkStoreNumber("int64-0", int64(0), store, key, t)
+	checkStoreNumber("int64-min", int64(math.MinInt64), store, key, t)
+	checkStoreNumber("int64-max", int64(math.MaxInt64), store, key, t)
+	checkStoreNumber("uint64-0", uint64(0), store, key, t)
+	checkStoreNumber("uint64-max", uint64(math.MaxUint64), store, key, t)
 }
 
 func TestSetAndGetAddress(t *testing.T) {
 	store := util.KVStore(t)
 	key := []byte("uint32")
 	val := sdk.AccAddress("1234")
-	err := SetAddress(store, key, val, "no error")
-	assert.NilError(t, err)
 
-	v := GetAddress(store, key, "no error")
-	assert.DeepEqual(t, v, val)
+	SetAddress(store, key, val)
+	assert.DeepEqual(t, val, GetAddress(store, key))
 }
