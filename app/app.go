@@ -541,7 +541,7 @@ func New(
 	// since fee middleware will wrap the IBCKeeper for underlying application.
 	app.IBCTransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper, // ISC4 Wrapper: fee IBC middleware
+		app.UIbcQuotaKeeperB, // ISC4 Wrapper: fee IBC middleware
 		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
 	)
