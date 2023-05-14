@@ -158,10 +158,6 @@ func GetCmdQueryActualRates() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.ActualRates(cmd.Context(), &incentive.QueryActualRates{UToken: denom})
-			if err != nil {
-				return err
-			}
-
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
