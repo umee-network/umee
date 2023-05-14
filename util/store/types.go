@@ -1,7 +1,5 @@
 package store
 
-import "golang.org/x/exp/constraints"
-
 type Marshalable interface {
 	Marshal() ([]byte, error)
 	MarshalTo(data []byte) (n int, err error)
@@ -13,11 +11,6 @@ type PtrMarshalable[T any] interface {
 	*T
 }
 
-type gogoInteger[T any, Num constraints.Integer] interface {
-	PtrMarshalable[T]
-	GetValue() Num
-}
-
 type BinMarshalable interface {
 	MarshalBinary() ([]byte, error)
 	UnmarshalBinary(data []byte) error
@@ -26,4 +19,8 @@ type BinMarshalable interface {
 type PtrBinMarshalable[T any] interface {
 	BinMarshalable
 	*T
+}
+
+type Integer interface {
+	~int32 | ~int64 | ~uint32 | ~uint64 | byte
 }
