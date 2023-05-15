@@ -8,7 +8,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	ics20types "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
@@ -44,7 +43,7 @@ func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Pack
 ) exported.Acknowledgement {
 	params := im.kb.Keeper(&ctx).GetParams()
 	if !uibc.IBCTransferEnabled(params.IbcStatus) {
-		return channeltypes.NewErrorAcknowledgement(ics20types.ErrReceiveDisabled)
+		return channeltypes.NewErrorAcknowledgement(transfertypes.ErrReceiveDisabled)
 	}
 
 	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
