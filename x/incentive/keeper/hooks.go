@@ -28,6 +28,9 @@ func (h BondHooks) GetBonded(ctx sdk.Context, addr sdk.AccAddress, uDenom string
 // ForceUnbondTo instantly unbonds uTokens until an account's bonded amount of a given uToken
 // is no greater than a certain amount.
 func (h BondHooks) ForceUnbondTo(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
+	if err := uToken.Validate(); err != nil {
+		return err
+	}
 	// ensure rewards and unbondings are up to date when using liquidation hooks
 	if _, err := h.k.UpdateAccount(ctx, addr); err != nil {
 		return err
