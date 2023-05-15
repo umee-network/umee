@@ -10,7 +10,7 @@ import (
 // DefaultParams returns default genesis params
 func DefaultParams() Params {
 	return Params{
-		QuotaStatus:   IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_ENABLED,
+		IbcStatus:     IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED,
 		TotalQuota:    sdk.NewDec(1_000_000),
 		TokenQuota:    sdk.NewDec(600_000),
 		QuotaDuration: time.Second * 60 * 60 * 24, // 24h
@@ -18,7 +18,7 @@ func DefaultParams() Params {
 }
 
 func (p Params) Validate() error {
-	if err := validateIBCQuotaStatus(p.QuotaStatus); err != nil {
+	if err := validateIBCQuotaStatus(p.IbcStatus); err != nil {
 		return err
 	}
 	if err := validateQuotaDuration(p.QuotaDuration); err != nil {
@@ -37,11 +37,12 @@ func (p Params) Validate() error {
 	return nil
 }
 
-func validateIBCQuotaStatus(status IBCTransferQuotaStatus) error {
-	if status == IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_DISABLED ||
-		status == IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_ENABLED ||
-		status == IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_IN_DISABLED ||
-		status == IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_OUT_DISABLED {
+func validateIBCQuotaStatus(status IBCTransferStatus) error {
+	if status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED ||
+		status == IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED {
 		return nil
 	}
 

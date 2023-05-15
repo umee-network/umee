@@ -4,11 +4,12 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	ics20types "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
-	"github.com/umee-network/umee/v4/x/uibc"
 
 	ibcutil "github.com/umee-network/umee/v4/util/ibc"
+	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 /******
@@ -27,12 +28,16 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 	k := kb.Keeper(&ctx)
 	params := k.GetParams()
 
+	if !uibc.IBCTransferEnabled(params.IbcStatus) {
+		return 0, ics20types.ErrSendDisabled
+	}
+
 	funds, denom, err := ibcutil.GetFundsFromPacket(data)
 	if err != nil {
 		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
-	if uibc.OutflowQuotaEnabled(params.QuotaStatus) {
+	if uibc.OutflowQuotaEnabled(params.IbcStatus) {
 		if err := k.CheckAndUpdateQuota(denom, funds); err != nil {
 			return 0, errors.Wrap(err, "sendPacket over the IBC Quota")
 		}

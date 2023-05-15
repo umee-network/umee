@@ -28,14 +28,14 @@ func init() {
 // Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgGovUpdateQuota{}, "umee/uibc/MsgGovUpdateQuota", nil)
-	cdc.RegisterConcrete(&MsgGovSetIBCSQuotaStatus{}, "umee/uibc/MsgGovSetIBCSQuotaStatus", nil)
+	cdc.RegisterConcrete(&MsgGovSetIBCStatus{}, "umee/uibc/MsgGovSetIBCStatus", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	registry.RegisterImplementations(
 		(*sdk.Msg)(nil),
 		&MsgGovUpdateQuota{},
-		&MsgGovSetIBCSQuotaStatus{},
+		&MsgGovSetIBCStatus{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

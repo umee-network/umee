@@ -17,7 +17,7 @@ func TestUnitParams(t *testing.T) {
 	zeroParams := uibc.Params{}
 	require.Equal(zeroParams, params)
 	// update params
-	params.QuotaStatus = uibc.IBCTransferQuotaStatus_IBC_TRANSFER_QUOTA_STATUS_DISABLED
+	params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED
 	params.TokenQuota = sdk.MustNewDecFromStr("12.23")
 	params.TotalQuota = sdk.MustNewDecFromStr("3.4321")
 	err := k.SetParams(params)

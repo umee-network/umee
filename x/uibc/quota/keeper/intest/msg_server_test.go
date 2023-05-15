@@ -91,34 +91,34 @@ func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 
 	tests := []struct {
 		name   string
-		msg    uibc.MsgGovSetIBCSQuotaStatus
+		msg    uibc.MsgGovSetIBCStatus
 		errMsg string
 	}{
 		{
 			name: "invalid authority address in msg",
-			msg: uibc.MsgGovSetIBCSQuotaStatus{
+			msg: uibc.MsgGovSetIBCStatus{
 				Title:       "title",
 				Description: "desc",
 				Authority:   authtypes.NewModuleAddress("govv").String(),
-				QuotaStatus: 1,
+				IbcStatus:   1,
 			},
 			errMsg: "expected gov account as only signer for proposal message",
 		}, {
 			name: "invalid ibc-transfer status in msg",
-			msg: uibc.MsgGovSetIBCSQuotaStatus{
+			msg: uibc.MsgGovSetIBCStatus{
 				Title:       "title",
 				Description: "desc",
 				Authority:   authtypes.NewModuleAddress("gov").String(),
-				QuotaStatus: 5,
+				IbcStatus:   10,
 			},
 			errMsg: "invalid ibc-transfer status",
 		}, {
 			name: "valid in msg <enable the ibc-transfer pause",
-			msg: uibc.MsgGovSetIBCSQuotaStatus{
+			msg: uibc.MsgGovSetIBCStatus{
 				Title:       "title",
 				Description: "desc",
 				Authority:   authtypes.NewModuleAddress("gov").String(),
-				QuotaStatus: 2,
+				IbcStatus:   2,
 			},
 			errMsg: "",
 		},
@@ -126,13 +126,13 @@ func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := s.msgServer.GovSetIBCQuotaStatus(s.ctx, &tc.msg)
+			_, err := s.msgServer.GovSetIBCStatus(s.ctx, &tc.msg)
 			if tc.errMsg == "" {
 				assert.NilError(t, err)
 				// check the update ibc-transfer pause status
 				params, err := s.queryClient.Params(s.ctx, &uibc.QueryParams{})
 				assert.NilError(t, err)
-				assert.Equal(t, params.Params.QuotaStatus, tc.msg.QuotaStatus)
+				assert.Equal(t, params.Params.IbcStatus, tc.msg.IbcStatus)
 			} else {
 				assert.ErrorContains(t, err, tc.errMsg)
 			}
