@@ -2,7 +2,9 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v4/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
 var secondsPerYear = sdk.MustNewDecFromStr("31557600") // 365.25 * 3600 * 24
@@ -11,6 +13,10 @@ var secondsPerYear = sdk.MustNewDecFromStr("31557600") // 365.25 * 3600 * 24
 // of that uToken (10^exponent from the uToken's reward accumulator) and the estimated rewards that bond
 // would earn if they continued at the current rate computed at the time of query.
 func (k Keeper) calculateReferenceAPY(ctx sdk.Context, denom string) (sdk.Coin, sdk.Coins, error) {
+	if !leveragetypes.HasUTokenPrefix(denom) {
+		return sdk.Coin{}, sdk.Coins{}, leveragetypes.ErrNotUToken.Wrap(denom)
+	}
+
 	// bonded uToken of 10^exponent for rewards calculation
 	exponent := k.getRewardAccumulator(ctx, denom).Exponent
 	bond := sdk.NewCoin(denom, ten.Power(uint64(exponent)).TruncateInt())
