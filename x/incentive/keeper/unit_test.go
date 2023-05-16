@@ -28,9 +28,12 @@ func newTestKeeper(t *testing.T) testKeeper {
 	bk := newMockBankKeeper()
 	k := NewKeeper(cdc, storeKey, &bk, &lk)
 	msrv := NewMsgServerImpl(k)
-	// modify genesis if necessary
+	// modify genesis
 	gen := incentive.DefaultGenesis()
 	gen.LastRewardsTime = 1 // initializes last reward time
+	gen.Params.MaxUnbondings = 10
+	gen.Params.UnbondingDuration = 86400
+	gen.Params.EmergencyUnbondFee = sdk.MustNewDecFromStr("0.01")
 	k.InitGenesis(ctx, *gen)
 	return testKeeper{k, bk, lk, t, ctx, sdk.ZeroInt(), msrv}
 }
