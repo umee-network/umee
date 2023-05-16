@@ -1,4 +1,4 @@
-package e2e
+package e2esetup
 
 import (
 	"encoding/json"
@@ -59,7 +59,7 @@ func addGenesisAccount(path, moniker, amountStr string, accAddr sdk.AccAddress) 
 		return fmt.Errorf("failed to unmarshal genesis state: %w", err)
 	}
 
-	authGenState := authtypes.GetGenesisStateFromAppState(cdc, appState)
+	authGenState := authtypes.GetGenesisStateFromAppState(Cdc, appState)
 
 	accs, err := authtypes.UnpackAccounts(authGenState.Accounts)
 	if err != nil {
@@ -82,18 +82,18 @@ func addGenesisAccount(path, moniker, amountStr string, accAddr sdk.AccAddress) 
 
 	authGenState.Accounts = genAccs
 
-	authGenStateBz, err := cdc.MarshalJSON(&authGenState)
+	authGenStateBz, err := Cdc.MarshalJSON(&authGenState)
 	if err != nil {
 		return fmt.Errorf("failed to marshal auth genesis state: %w", err)
 	}
 
 	appState[authtypes.ModuleName] = authGenStateBz
 
-	bankGenState := banktypes.GetGenesisStateFromAppState(cdc, appState)
+	bankGenState := banktypes.GetGenesisStateFromAppState(Cdc, appState)
 	bankGenState.Balances = append(bankGenState.Balances, balances)
 	bankGenState.Balances = banktypes.SanitizeGenesisBalances(bankGenState.Balances)
 
-	bankGenStateBz, err := cdc.MarshalJSON(bankGenState)
+	bankGenStateBz, err := Cdc.MarshalJSON(bankGenState)
 	if err != nil {
 		return fmt.Errorf("failed to marshal bank genesis state: %w", err)
 	}

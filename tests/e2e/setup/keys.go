@@ -1,10 +1,33 @@
-package e2e
+package e2esetup
 
 import (
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
+	appparams "github.com/umee-network/umee/v4/app/params"
+)
+
+const (
+	PhotonDenom    = "photon"
+	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom
+	GaiaChainID    = "test-gaia-chain"
+
+	EthChainID uint = 15
+	EthMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
+
+	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
+	PriceFeederServerPort     = "7171/tcp"
+	PriceFeederMaxStartupTime = 20 // seconds
+)
+
+var (
+	minGasPrice     = appparams.ProtocolMinGasPrice.String()
+	stakeAmount, _  = sdk.NewIntFromString("100000000000")
+	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
+
+	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
+	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
 
 var (
@@ -42,7 +65,7 @@ func createMemoryKey() (mnemonic string, info *keyring.Record, err error) {
 }
 
 func createMemoryKeyFromMnemonic(mnemonic string) (*keyring.Record, error) {
-	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, cdc)
+	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, Cdc)
 	if err != nil {
 		return nil, err
 	}

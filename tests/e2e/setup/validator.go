@@ -1,4 +1,4 @@
-package e2e
+package e2esetup
 
 import (
 	"encoding/json"
@@ -34,7 +34,7 @@ type validator struct {
 	index        int
 	moniker      string
 	mnemonic     string
-	keyInfo      keyring.Record
+	KeyInfo      keyring.Record
 	privateKey   cryptotypes.PrivKey
 	consensusKey privval.FilePVKey
 	nodeKey      p2p.NodeKey
@@ -69,12 +69,12 @@ func (v *validator) init() error {
 		return err
 	}
 
-	appState, err := json.MarshalIndent(umeeapp.ModuleBasics.DefaultGenesis(cdc), "", " ")
+	appState, err := json.MarshalIndent(umeeapp.ModuleBasics.DefaultGenesis(Cdc), "", " ")
 	if err != nil {
 		return fmt.Errorf("failed to JSON encode app genesis state: %w", err)
 	}
 
-	genDoc.ChainID = v.chain.id
+	genDoc.ChainID = v.chain.ID
 	genDoc.Validators = nil
 	genDoc.AppState = appState
 
@@ -126,7 +126,7 @@ func (v *validator) createConsensusKey() error {
 }
 
 func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
-	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, cdc)
+	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, Cdc)
 	if err != nil {
 		return err
 	}
@@ -152,7 +152,7 @@ func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
 		return err
 	}
 
-	v.keyInfo = *info
+	v.KeyInfo = *info
 	v.mnemonic = mnemonic
 	v.privateKey = privKey
 
@@ -183,7 +183,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
-	valAddr, err := v.keyInfo.GetAddress()
+	valAddr, err := v.KeyInfo.GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +203,7 @@ func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string
 	if err != nil {
 		return nil, err
 	}
-	valAddr, err := v.keyInfo.GetAddress()
+	valAddr, err := v.KeyInfo.GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	txBuilder.SetGasLimit(appparams.DefaultGasLimit)
 
 	signerData := authsigning.SignerData{
-		ChainID:       v.chain.id,
+		ChainID:       v.chain.ID,
 		AccountNumber: 0,
 		Sequence:      0,
 	}
@@ -240,7 +240,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	// Note: This line is not needed for SIGN_MODE_LEGACY_AMINO, but putting it
 	// also doesn't affect its generated sign bytes, so for code's simplicity
 	// sake, we put it here.
-	pubKey, err := v.keyInfo.GetPubKey()
+	pubKey, err := v.KeyInfo.GetPubKey()
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package e2e
+package e2esetup
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ const (
 
 var (
 	encodingConfig sdkparams.EncodingConfig
-	cdc            codec.Codec
+	Cdc            codec.Codec
 )
 
 func init() {
@@ -39,15 +39,15 @@ func init() {
 		&ed25519.PubKey{},
 	)
 
-	cdc = encodingConfig.Codec
+	Cdc = encodingConfig.Codec
 }
 
 type chain struct {
 	dataDir        string
-	id             string
-	validators     []*validator
-	orchestrators  []*orchestrator
-	gaiaValidators []*gaiaValidator
+	ID             string
+	Validators     []*validator
+	Orchestrators  []*orchestrator
+	GaiaValidators []*gaiaValidator
 }
 
 func newChain() (*chain, error) {
@@ -57,13 +57,13 @@ func newChain() (*chain, error) {
 	}
 
 	return &chain{
-		id:      "chain-" + tmrand.NewRand().Str(6),
+		ID:      "chain-" + tmrand.NewRand().Str(6),
 		dataDir: tmpDir,
 	}, nil
 }
 
 func (c *chain) configDir() string {
-	return fmt.Sprintf("%s/%s", c.dataDir, c.id)
+	return fmt.Sprintf("%s/%s", c.dataDir, c.ID)
 }
 
 func (c *chain) createAndInitValidators(count int) error {
@@ -75,7 +75,7 @@ func (c *chain) createAndInitValidators(count int) error {
 			return err
 		}
 
-		c.validators = append(c.validators, node)
+		c.Validators = append(c.Validators, node)
 
 		// create keys
 		if err := node.createKey("val"); err != nil {
@@ -105,7 +105,7 @@ func (c *chain) createAndInitGaiaValidator() error {
 	gaiaVal.keyInfo = *info
 	gaiaVal.mnemonic = mnemonic
 
-	c.gaiaValidators = append(c.gaiaValidators, gaiaVal)
+	c.GaiaValidators = append(c.GaiaValidators, gaiaVal)
 
 	return nil
 }
@@ -125,7 +125,7 @@ func (c *chain) createAndInitOrchestrators(count int) error {
 			return err
 		}
 
-		c.orchestrators = append(c.orchestrators, orchestrator)
+		c.Orchestrators = append(c.Orchestrators, orchestrator)
 	}
 
 	return nil
@@ -141,7 +141,7 @@ func (c *chain) createValidator(index int) *validator {
 
 func (c *chain) createOrchestrator(index int) *orchestrator {
 	return &orchestrator{
-		index: index,
+		Index: index,
 	}
 }
 
