@@ -5,7 +5,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/umee-network/umee/v4/tests/accs"
 	"github.com/umee-network/umee/v4/util/coin"
 )
 
@@ -20,7 +23,6 @@ func TestMsgGovUpdateMinGasPrice(t *testing.T) {
 	t.Parallel()
 	require := require.New(t)
 
-	// TODO: add more tests in other PR
 	msg := validMsgGovUpdateMinGasPrice()
 	require.NoError(msg.ValidateBasic())
 
@@ -35,8 +37,14 @@ func TestMsgGovUpdateMinGasPrice(t *testing.T) {
 	msg.MinGasPrice.Amount = sdk.MustNewDecFromStr("0.0000123")
 	require.NoError(msg.ValidateBasic(), "fractional amount should be allowed")
 
+	msg.MinGasPrice.Amount = sdk.NewDec(0)
+	require.NoError(msg.ValidateBasic(), "zero amount should be allowed")
+
 	// error cases
 	msg.MinGasPrice.Amount = sdk.NewDec(-1)
 	require.Error(msg.ValidateBasic(), "must error on negative amount")
 
+	msg = validMsgGovUpdateMinGasPrice()
+	msg.Authority = accs.Alice.String()
+	require.ErrorIs(msg.ValidateBasic(), govtypes.ErrInvalidSigner, "must fail on a non gov account")
 }
