@@ -39,39 +39,6 @@ func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 	return programs, err
 }
 
-// getPaginatedIncentivePrograms returns all incentive programs
-// that have been passed by governance and have a particular status.
-// The status of an incentive program is either Upcoming, Ongoing, or Completed.
-// Accepts pagination parameters which specify the length of a page and which page to fetch.
-func (k Keeper) getPaginatedIncentivePrograms(
-	ctx sdk.Context, status incentive.ProgramStatus, page, limit uint64,
-) ([]incentive.IncentiveProgram, error) {
-	programs := []incentive.IncentiveProgram{}
-
-	var prefix []byte
-	switch status {
-	case incentive.ProgramStatusUpcoming:
-		prefix = keyPrefixUpcomingIncentiveProgram
-	case incentive.ProgramStatusOngoing:
-		prefix = keyPrefixOngoingIncentiveProgram
-	case incentive.ProgramStatusCompleted:
-		prefix = keyPrefixCompletedIncentiveProgram
-	default:
-		return []incentive.IncentiveProgram{}, incentive.ErrInvalidProgramStatus
-	}
-
-	iterator := func(_, val []byte) error {
-		var p incentive.IncentiveProgram
-		k.cdc.MustUnmarshal(val, &p)
-
-		programs = append(programs, p)
-		return nil
-	}
-
-	err := store.IteratePaginated(k.KVStore(ctx), prefix, uint(page), uint(limit), iterator)
-	return programs, err
-}
-
 // getAllBondDenoms gets all uToken denoms for which an account has nonzero bonded amounts.
 // useful for setting up queries which look at all of an account's bonds or unbondings.
 func (k Keeper) getAllBondDenoms(ctx sdk.Context, addr sdk.AccAddress) ([]string, error) {
