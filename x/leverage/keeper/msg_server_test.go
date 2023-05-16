@@ -46,7 +46,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			true,
-			"invalid authority",
+			"expected gov account",
 		}, {
 			"already registered token",
 			&types.MsgGovUpdateRegistry{
@@ -142,7 +142,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				},
 			},
 			true,
-			"invalid authority",
+			"expected gov account",
 		}, {
 			"valid authority and valid update token registry",
 			&types.MsgGovUpdateRegistry{

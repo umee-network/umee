@@ -14,7 +14,7 @@ var (
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateMinGasPrice) ValidateBasic() error {
-	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 
