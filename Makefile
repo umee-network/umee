@@ -12,7 +12,6 @@ DIST_DIR ?= $(CURDIR)/dist
 MOCKS_DIR = $(CURDIR)/tests/mocks
 HTTPS_GIT := https://github.com/umee-network/umee.git
 DOCKER := $(shell which docker)
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.0.0-rc8
 PROJECT_NAME := umee
 
 # RocksDB is a native dependency, so we don't assume the library is installed.
@@ -323,10 +322,9 @@ lint-fix:
 ##                                 Protobuf                                  ##
 ###############################################################################
 
-DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf:1.8.0
-
-protoVer=v0.7
-protoImageName=tendermintdev/sdk-proto-gen:$(protoVer)
+protoVer=0.13.0
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
 containerProtoGen=$(PROJECT_NAME)-proto-gen-$(protoVer)
 containerProtoGenSwagger=$(PROJECT_NAME)-proto-gen-swagger-$(protoVer)
 containerProtoFmt=$(PROJECT_NAME)-proto-fmt-$(protoVer)
@@ -356,3 +354,9 @@ proto-lint:
 proto-check-breaking:
 	@echo "Checking for breaking changes"
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
+
+proto-format:
+	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
+
+proto-lint:
+	@$(protoImage) buf lint --error-format=json
