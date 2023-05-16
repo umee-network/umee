@@ -62,7 +62,7 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 	}
 }
 
-func validMsgGovSetIBCQuotaStatus() MsgGovSetIBCStatus {
+func validMsgGovSetIBCStatus() MsgGovSetIBCStatus {
 	return MsgGovSetIBCStatus{
 		Title:       "title",
 		Authority:   authtypes.NewModuleAddress("gov").String(),
@@ -73,7 +73,7 @@ func validMsgGovSetIBCQuotaStatus() MsgGovSetIBCStatus {
 
 func TestMsgGovSetIBCStatus(t *testing.T) {
 	t.Parallel()
-	validMsg := validMsgGovSetIBCQuotaStatus()
+	validMsg := validMsgGovSetIBCStatus()
 
 	invalidAuthority := validMsg
 	invalidAuthority.Authority = authtypes.NewModuleAddress("govv").String()

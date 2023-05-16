@@ -18,7 +18,7 @@ service Msg {
   // updates the quota for existed ibc denoms.
   rpc GovUpdateQuota(MsgGovUpdateQuota) returns (MsgGovUpdateQuotaResponse);
 
-  // GovSetIBCStatus update the status of ibc-transfer or ibc-transfer quota status
+  // GovSetIBCStatus sets IBC ICS20 status. Must be called by x/gov.
   rpc GovSetIBCStatus(MsgGovSetIBCStatus) returns (MsgGovSetIBCStatusResponse);
 }
 

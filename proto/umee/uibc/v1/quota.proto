@@ -9,7 +9,7 @@ option go_package = "github.com/umee-network/umee/v4/x/uibc";
 
 // Params of x/uibc module
 message Params {
-  // ibc_status defines the wethever ibc-transfer paused or not and quota check enabled,disbaled for inflow and outlfow.
+  // ibc_status defines the IBC ICS20 status (transfer quota or transfers disabled).
   IBCTransferStatus ibc_status = 1;
   // total_quota defines the total outflow limit of ibc-transfer in USD
   string total_quota = 2 [

@@ -75,7 +75,7 @@ func (IBCTransferStatus) EnumDescriptor() ([]byte, []int) {
 
 // Params of x/uibc module
 type Params struct {
-	// ibc_status defines the wethever ibc-transfer paused or not and quota check enabled,disbaled for inflow and outlfow.
+	// ibc_status defines the IBC ICS20 status (transfer quota or transfers disabled).
 	IbcStatus IBCTransferStatus `protobuf:"varint,1,opt,name=ibc_status,json=ibcStatus,proto3,enum=umee.uibc.v1.IBCTransferStatus" json:"ibc_status,omitempty"`
 	// total_quota defines the total outflow limit of ibc-transfer in USD
 	TotalQuota github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=total_quota,json=totalQuota,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"total_quota"`

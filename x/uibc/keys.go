@@ -30,17 +30,15 @@ func KeyTotalOutflows(ibcDenom string) []byte {
 }
 
 // IBCTransferEnabled returns true if the ibc-transfer is enabled for both inflow and outflow."
-func IBCTransferEnabled(status IBCTransferStatus) bool {
+func (status IBCTransferStatus) IBCTransferEnabled() bool {
 	return status != IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
 }
 
 // InflowQuotaEnabled returns true if inflow quota check is enabled.
-func InflowQuotaEnabled(status IBCTransferStatus) bool {
+func (status IBCTransferStatus) InflowQuotaEnabled() bool {
 	// outflow disabled means inflow check enabled
 	switch status {
-	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED:
-		return true
-	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED:
+	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED, IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED:
 		return true
 	default:
 		return false
@@ -48,12 +46,10 @@ func InflowQuotaEnabled(status IBCTransferStatus) bool {
 }
 
 // OutflowQuotaEnabled returns true if outflow quota check is enabled.
-func OutflowQuotaEnabled(status IBCTransferStatus) bool {
+func (status IBCTransferStatus) OutflowQuotaEnabled() bool {
 	// inflow disabled means outflow check enabled
 	switch status {
-	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED:
-		return true
-	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED:
+	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED, IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED:
 		return true
 	default:
 		return false

@@ -9,7 +9,6 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
 
 	ibcutil "github.com/umee-network/umee/v4/util/ibc"
-	"github.com/umee-network/umee/v4/x/uibc"
 )
 
 /******
@@ -28,7 +27,7 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 	k := kb.Keeper(&ctx)
 	params := k.GetParams()
 
-	if !uibc.IBCTransferEnabled(params.IbcStatus) {
+	if !params.IbcStatus.IBCTransferEnabled() {
 		return 0, ics20types.ErrSendDisabled
 	}
 
@@ -37,7 +36,7 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
 
-	if uibc.OutflowQuotaEnabled(params.IbcStatus) {
+	if params.IbcStatus.OutflowQuotaEnabled() {
 		if err := k.CheckAndUpdateQuota(denom, funds); err != nil {
 			return 0, errors.Wrap(err, "sendPacket over the IBC Quota")
 		}

@@ -42,7 +42,7 @@ func NewICS20Middleware(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSO
 func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
 	params := im.kb.Keeper(&ctx).GetParams()
-	if !uibc.IBCTransferEnabled(params.IbcStatus) {
+	if !params.IbcStatus.IBCTransferEnabled() {
 		return channeltypes.NewErrorAcknowledgement(transfertypes.ErrReceiveDisabled)
 	}
 
@@ -59,7 +59,7 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
 		params := im.kb.Keeper(&ctx).GetParams()
-		if uibc.OutflowQuotaEnabled(params.IbcStatus) {
+		if params.IbcStatus.OutflowQuotaEnabled() {
 			err := im.revertQuotaUpdate(ctx, packet.Data)
 			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
 		}

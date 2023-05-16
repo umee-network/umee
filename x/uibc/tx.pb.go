@@ -277,7 +277,7 @@ type MsgClient interface {
 	// GovUpdateQuota adds new quota for ibc denoms or
 	// updates the quota for existed ibc denoms.
 	GovUpdateQuota(ctx context.Context, in *MsgGovUpdateQuota, opts ...grpc.CallOption) (*MsgGovUpdateQuotaResponse, error)
-	// GovSetIBCStatus update the status of ibc-transfer or ibc-transfer quota status
+	// GovSetIBCStatus sets IBC ICS20 status. Must be called by x/gov.
 	GovSetIBCStatus(ctx context.Context, in *MsgGovSetIBCStatus, opts ...grpc.CallOption) (*MsgGovSetIBCStatusResponse, error)
 }
 
@@ -312,7 +312,7 @@ type MsgServer interface {
 	// GovUpdateQuota adds new quota for ibc denoms or
 	// updates the quota for existed ibc denoms.
 	GovUpdateQuota(context.Context, *MsgGovUpdateQuota) (*MsgGovUpdateQuotaResponse, error)
-	// GovSetIBCStatus update the status of ibc-transfer or ibc-transfer quota status
+	// GovSetIBCStatus sets IBC ICS20 status. Must be called by x/gov.
 	GovSetIBCStatus(context.Context, *MsgGovSetIBCStatus) (*MsgGovSetIBCStatusResponse, error)
 }
 
