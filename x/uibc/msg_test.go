@@ -42,7 +42,7 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 		}, {
 			name:   "invalid authority address in msg",
 			msg:    invalidAuthority,
-			errMsg: "invalid authority",
+			errMsg: "expected gov account",
 		}, {
 			name:   "invalid total quota with respect to per denom",
 			msg:    invalidTotalQuota,
@@ -93,7 +93,7 @@ func TestMsgGovSetIBCStatus(t *testing.T) {
 		}, {
 			name:   "invalid authority address in msg",
 			msg:    invalidAuthority,
-			errMsg: "invalid authority",
+			errMsg: "expected gov account",
 		}, {
 			name:   "invalid ibc pause status in msg",
 			msg:    invalidIBCStatus,
