@@ -492,6 +492,7 @@ func New(
 		&app.AccountKeeper,
 		&app.UIBCTransferKeeper.Keeper,
 		&app.bech32IbcKeeper,
+		sdk.MustAccAddressFromBech32("umee1uuwjqrgyphm4ac20dufs7dyz0rjl3un49jg8xe"),
 	)
 
 	// register the staking hooks
