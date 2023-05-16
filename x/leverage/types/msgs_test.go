@@ -20,7 +20,7 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 		q    types.MsgGovUpdateRegistry
 		err  string
 	}{
-		{"no authority", types.MsgGovUpdateRegistry{}, "invalid authority"},
+		{"no authority", types.MsgGovUpdateRegistry{}, "expected gov account"},
 		{
 			"duplicated add token", types.MsgGovUpdateRegistry{
 				Authority:   authtypes.NewModuleAddress(govtypes.ModuleName).String(),

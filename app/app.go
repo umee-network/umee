@@ -268,7 +268,7 @@ type UmeeApp struct {
 	IncentiveKeeper    incentivekeeper.Keeper
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
-	UIbcQuotaKeeper    uibcquotakeeper.Keeper
+	UIbcQuotaKeeperB   uibcquotakeeper.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -531,7 +531,7 @@ func New(
 	)
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
-	app.UIbcQuotaKeeper = uibcquotakeeper.NewKeeper(
+	app.UIbcQuotaKeeperB = uibcquotakeeper.NewKeeperBuilder(
 		appCodec,
 		keys[uibc.StoreKey],
 		app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
@@ -544,7 +544,7 @@ func New(
 		appCodec,
 		keys[ibctransfertypes.StoreKey],
 		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.UIbcQuotaKeeper, // ISC4 Wrapper: IBC Rate Limit middleware
+		app.UIbcQuotaKeeperB, // ISC4 Wrapper: IBC Rate Limit middleware
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
 		app.AccountKeeper,
@@ -573,7 +573,7 @@ func New(
 		app.UIBCTransferKeeper,
 	)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
-	transferStack = uibcquota.NewICS20Middleware(transferStack, app.UIbcQuotaKeeper, appCodec)
+	transferStack = uibcquota.NewICS20Middleware(transferStack, app.UIbcQuotaKeeperB, appCodec)
 
 	// Create Interchain Accounts Stack
 	// SendPacket, since it is originating from the application to core IBC:
@@ -686,7 +686,7 @@ func New(
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
-		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeper),
+		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
 	}
 	if Experimental {
 		appModules = append(
@@ -1026,7 +1026,7 @@ func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 
 // RegisterTxService implements the Application.RegisterTxService method.
 func (app *UmeeApp) RegisterTxService(clientCtx client.Context) {
-	authtx.RegisterTxService(app.BaseApp.GRPCQueryRouter(), clientCtx, app.BaseApp.Simulate, app.interfaceRegistry)
+	authtx.RegisterTxService(app.GRPCQueryRouter(), clientCtx, app.Simulate, app.interfaceRegistry)
 }
 
 // RegisterTendermintService implements the Application.RegisterTendermintService method.

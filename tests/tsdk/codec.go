@@ -1,4 +1,4 @@
-package util
+package tsdk
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"

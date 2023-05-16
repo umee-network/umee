@@ -32,7 +32,7 @@ func (k Keeper) createIncentiveProgram(
 		// If the proposal requested it, we can attempt to instantly fund the program when
 		// the proposal passes.
 		rewards := sdk.NewCoins(program.TotalRewards)
-		if communityFund.IsAllGT(rewards) {
+		if communityFund.IsAllGTE(rewards) {
 			// Community fund has the required tokens to fund the program
 			err := k.bankKeeper.SendCoinsFromModuleToModule(ctx, disttypes.ModuleName, incentive.ModuleName, rewards)
 			if err != nil {

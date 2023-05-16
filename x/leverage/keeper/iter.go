@@ -5,6 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util"
+	"github.com/umee-network/umee/v4/util/store"
 	"github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -12,20 +13,7 @@ import (
 // If the provided function returns an error, iteration stops and the error
 // is returned.
 func (k Keeper) iterate(ctx sdk.Context, prefix []byte, cb func(key, val []byte) error) error {
-	store := ctx.KVStore(k.storeKey)
-
-	iter := sdk.KVStorePrefixIterator(store, prefix)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		key, val := iter.Key(), iter.Value()
-
-		if err := cb(key, val); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return store.Iterate(ctx.KVStore(k.storeKey), prefix, cb)
 }
 
 // getAllBadDebts gets bad debt instances across all borrowers.
@@ -37,7 +25,6 @@ func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 		badDebts = append(badDebts, types.NewBadDebt(addr.String(), denom))
-
 		return nil
 	}
 
@@ -49,22 +36,7 @@ func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
 // GetAllRegisteredTokens returns all the registered tokens from the x/leverage
 // module's KVStore.
 func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
-	tokens := []types.Token{}
-
-	iterator := func(_, val []byte) error {
-		var t types.Token
-		if err := t.Unmarshal(val); err != nil {
-			// improperly marshaled Token should never happen
-			return err
-		}
-
-		tokens = append(tokens, t)
-		return nil
-	}
-
-	util.Panic(k.iterate(ctx, types.KeyPrefixRegisteredToken, iterator))
-
-	return tokens
+	return store.MustLoadAll[*types.Token](ctx.KVStore(k.storeKey), types.KeyPrefixRegisteredToken)
 }
 
 // GetAllReserves returns all reserves.
@@ -74,7 +46,6 @@ func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
 
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
-
 		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled reserve amount should never happen
@@ -97,10 +68,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 	totalBorrowed := sdk.NewCoins()
 
 	iterator := func(key, val []byte) error {
-		// get borrow denom from key
-		denom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
-
-		// get borrowed amount
+		borrowDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
 		var adjustedAmount sdk.Dec
 		if err := adjustedAmount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
@@ -108,10 +76,8 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 		}
 
 		// apply interest scalar
-		amount := adjustedAmount.Mul(k.getInterestScalar(ctx, denom)).Ceil().TruncateInt()
-
-		// add to totalBorrowed
-		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(denom, amount))
+		amount := adjustedAmount.Mul(k.getInterestScalar(ctx, borrowDenom)).Ceil().TruncateInt()
+		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(borrowDenom, amount))
 		return nil
 	}
 
@@ -126,17 +92,14 @@ func (k Keeper) GetBorrowerCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddre
 	totalCollateral := sdk.NewCoins()
 
 	iterator := func(key, val []byte) error {
-		// get borrow denom from key
-		denom := types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralAmount)
-
-		// get collateral amount
+		borrowDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixCollateralAmount)
 		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled amount should never happen
 			return err
 		}
 
-		totalCollateral = totalCollateral.Add(sdk.NewCoin(denom, amount))
+		totalCollateral = totalCollateral.Add(sdk.NewCoin(borrowDenom, amount))
 		return nil
 	}
 
@@ -152,20 +115,19 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 	checkedAddrs := map[string]struct{}{}
 
 	iterator := func(key, _ []byte) error {
-		// get borrower address from key
-		addr := types.AddressFromKey(key, prefix)
+		borrowerAddr := types.AddressFromKey(key, prefix)
 
 		// if the address is already checked, do not check again
-		if _, ok := checkedAddrs[addr.String()]; ok {
+		if _, ok := checkedAddrs[borrowerAddr.String()]; ok {
 			return nil
 		}
-		checkedAddrs[addr.String()] = struct{}{}
+		checkedAddrs[borrowerAddr.String()] = struct{}{}
 
 		// get borrower's total borrowed
-		borrowed := k.GetBorrowerBorrows(ctx, addr)
+		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 
 		// get borrower's total collateral
-		collateral := k.GetBorrowerCollateral(ctx, addr)
+		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 
 		// use oracle helper functions to find total borrowed value in USD
 		// skips denoms without prices
@@ -181,7 +143,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		if err == nil && liquidationLimit.LT(borrowValue) {
 			// If liquidation limit is smaller than borrowed value then the
 			// address is eligible for liquidation.
-			liquidationTargets = append(liquidationTargets, addr)
+			liquidationTargets = append(liquidationTargets, borrowerAddr)
 		}
 		// Non-price errors will cause the query itself to fail
 		if nonOracleError(err) {
@@ -240,7 +202,6 @@ func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
 
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
-
 		var amount sdkmath.Int
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled utoken supply should never happen

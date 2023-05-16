@@ -9,7 +9,7 @@ import (
 )
 
 func TestGRPCQueryParams(t *testing.T) {
-	s := initKeeperTestSuite(t)
+	s := initTestSuite(t)
 	ctx, client := s.ctx, s.queryClient
 	tests := []struct {
 		name        string
@@ -34,7 +34,7 @@ func TestGRPCQueryParams(t *testing.T) {
 }
 
 func TestGRPCQueryOutflows(t *testing.T) {
-	suite := initKeeperTestSuite(t)
+	suite := initTestSuite(t)
 	ctx, client := suite.ctx, suite.queryClient
 	tests := []struct {
 		name          string
