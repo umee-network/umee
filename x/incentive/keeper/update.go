@@ -158,14 +158,14 @@ func (k Keeper) updatePrograms(ctx sdk.Context) error {
 // to the current block time. Also protects against negative time elapsed (without causing chain halt).
 // In addition to regular error, returns a boolean indicating whether the main logic was skipped due
 // to a blockTime issue. These situations are accompanied by error logs.
-func (k Keeper) EndBlock(ctx sdk.Context) (err error, skipped bool) {
+func (k Keeper) EndBlock(ctx sdk.Context) (skipped bool, err error) {
 	blockTime := ctx.BlockTime().Unix()
 	if blockTime < 0 {
 		k.Logger(ctx).Error(
 			incentive.ErrDecreaseLastRewardTime.Error(),
 			"negative block time", blockTime,
 		)
-		return nil, true
+		return true, nil
 	}
 
 	prevTime := k.GetLastRewardsTime(ctx)
@@ -179,7 +179,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) (err error, skipped bool) {
 			"blockTime", blockTime,
 		)
 		if err := k.setLastRewardsTime(ctx, blockTime); err != nil {
-			return err, true
+			return true, err
 		}
 		prevTime = blockTime
 	}
@@ -195,7 +195,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) (err error, skipped bool) {
 		// if LastRewardTime appears to be in the future, do nothing (besides logging) and leave
 		// LastRewardTime at its stored value. This will repeat every block until BlockTime exceeds
 		// LastRewardTime.
-		return nil, true
+		return true, nil
 	}
 
 	// Implications of updating reward accumulators and PrevRewardTime before starting/completing incentive programs:
@@ -204,7 +204,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) (err error, skipped bool) {
 	// - in the case of a chain halt which misses a program's start time, rewards before its late start are skipped
 	// - in the case of a chain halt which misses a program's end time, remaining rewards are correctly distributed
 	if err := k.updateRewards(ctx, blockTime); err != nil {
-		return err, false
+		return false, err
 	}
-	return k.updatePrograms(ctx), false
+	return false, k.updatePrograms(ctx)
 }

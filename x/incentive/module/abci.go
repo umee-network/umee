@@ -10,7 +10,7 @@ import (
 
 // EndBlocker implements EndBlock for the x/incentive module.
 func EndBlocker(ctx sdk.Context, k keeper.Keeper) []abci.ValidatorUpdate {
-	err, _ := k.EndBlock(ctx)
+	_, err := k.EndBlock(ctx)
 	util.Panic(err)
 	return []abci.ValidatorUpdate{}
 }

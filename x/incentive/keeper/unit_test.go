@@ -149,7 +149,7 @@ func (k *testKeeper) advanceTimeTo(blockTime int64) {
 	k.ctx = k.ctx.WithBlockTime(utcTime)
 
 	// ensure that last rewards time has actually updated without errors
-	err, skipped := k.EndBlock(k.ctx)
+	skipped, err := k.EndBlock(k.ctx)
 	require.Nil(k.t, err, "endBlock")
 	require.False(k.t, skipped, "endBlock skipped")
 	require.Equal(k.t, blockTime, k.GetLastRewardsTime(k.ctx))
