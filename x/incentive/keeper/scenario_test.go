@@ -161,22 +161,47 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.Equal(t, sdk.ZeroInt(), program2.RemainingRewards.Amount, "0 percent of program 2 rewards remain")
 	require.Equal(t, sdk.ZeroInt(), program3.RemainingRewards.Amount, "0 percent of program 3 rewards remain")
 
+	// verify all 3 programs ended
+	programs, err = k.getAllIncentivePrograms(k.ctx, incentive.ProgramStatusCompleted)
+	require.NoError(k.t, err)
+	require.Equal(k.t, 3, len(programs))
+	programs, err = k.getAllIncentivePrograms(k.ctx, incentive.ProgramStatusOngoing)
+	require.NoError(k.t, err)
+	require.Equal(k.t, 0, len(programs))
+
+	// a small amount from before bob joined, then 80% of the rest of program 1, and 80% of program 3
+	aliceRewards := int64(100000 + 7_920000 + 8_000000)
+	// 20% of the rest of program 1 (missing the first block), and 20% of program 3
+	bobRewards := int64(1_980000 + 2_000000)
+
 	// These are the final pending rewards observed.
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
 	require.Equal(
 		t,
-		// a small amount from before bob joined, then 80% of the rest of program 1, and 80% of program 3
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 100000+7_920000+8_000000)),
+		sdk.NewCoins(sdk.NewInt64Coin(umee, aliceRewards)),
 		rewards,
 		"alice pending rewards at time 300",
 	)
+	// actually claim the rewards (same amount)
+	rewards, err = k.UpdateAccount(k.ctx, alice)
+	require.NoError(k.t, err)
+	require.Equal(
+		k.t,
+		sdk.NewCoins(sdk.NewInt64Coin(umee, aliceRewards)),
+		rewards,
+		"alice claimed rewards at time 300",
+	)
+	// no more pending rewards after claiming
+	rewards, err = k.calculateRewards(k.ctx, alice)
+	require.NoError(k.t, err)
+	require.Equal(k.t, sdk.NewCoins(), rewards, "alice pending rewards after claim")
+
 	rewards, err = k.calculateRewards(k.ctx, bob)
 	require.NoError(t, err)
 	require.Equal(
 		t,
-		// 20% of the rest of program 1 (missing the first block), and 20% of program 3
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 1_980000+2_000000)),
+		sdk.NewCoins(sdk.NewInt64Coin(umee, bobRewards)),
 		rewards,
 		"bob pending rewards at time 300",
 	)
