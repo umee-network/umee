@@ -169,13 +169,17 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.NoError(k.t, err)
 	require.Equal(k.t, 0, len(programs))
 
+	// a small amount from before bob joined, then 80% of the rest of program 1, and 80% of program 3
+	aliceRewards := int64(100000 + 7_920000 + 8_000000)
+	// 20% of the rest of program 1 (missing the first block), and 20% of program 3
+	bobRewards := int64(1_980000 + 2_000000)
+
 	// These are the final pending rewards observed.
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
 	require.Equal(
 		t,
-		// a small amount from before bob joined, then 80% of the rest of program 1, and 80% of program 3
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 100000+7_920000+8_000000)),
+		sdk.NewCoins(sdk.NewInt64Coin(umee, aliceRewards)),
 		rewards,
 		"alice pending rewards at time 300",
 	)
@@ -184,7 +188,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.NoError(k.t, err)
 	require.Equal(
 		k.t,
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 100000+7_920000+8_000000)),
+		sdk.NewCoins(sdk.NewInt64Coin(umee, aliceRewards)),
 		rewards,
 		"alice claimed rewards at time 300",
 	)
@@ -197,8 +201,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(
 		t,
-		// 20% of the rest of program 1 (missing the first block), and 20% of program 3
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 1_980000+2_000000)),
+		sdk.NewCoins(sdk.NewInt64Coin(umee, bobRewards)),
 		rewards,
 		"bob pending rewards at time 300",
 	)
