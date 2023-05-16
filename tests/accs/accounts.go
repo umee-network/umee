@@ -7,6 +7,8 @@ import (
 )
 
 // Test user accounts
+//
+//nolint:lll
 var (
 	Alice         = sdk.MustAccAddressFromBech32("umee1yesmdu06f7strl67kjvg2w7t5kacc97taczr47")
 	AliceMenmonic = "paper intact wine brother wrist sniff cheese garbage differ save chase hospital wine sock lobster scene border height gas dad tornado wrist tone pause"
