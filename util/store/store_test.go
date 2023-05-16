@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v4/tests/tsdk"
@@ -38,7 +39,7 @@ func TestGetAndSetInt(t *testing.T) {
 func checkStoreNumber[T Integer](name string, val T, store sdk.KVStore, key []byte, t *testing.T) {
 	SetInteger(store, key, val)
 	vOut := GetInteger[T](store, key)
-	assert.DeepEqual(t, val, vOut)
+	require.Equal(t, val, vOut, name)
 }
 
 func TestStoreNumber(t *testing.T) {
