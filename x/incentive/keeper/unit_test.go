@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -140,13 +141,20 @@ func (k *testKeeper) advanceTime(duration int64) {
 // advanceTimeTo runs the functions normally contained in EndBlocker from the current rewards time
 // to a target time. Requires non-negative duration and an initialized lastRewardsTime.
 func (k *testKeeper) advanceTimeTo(blockTime int64) {
+	// ensure initialized
 	prevTime := k.GetLastRewardsTime(k.ctx)
 	if prevTime <= 0 {
 		panic("last rewards time not initialized")
 	}
 
-	require.Nil(k.t, k.updateRewards(k.ctx, blockTime), "update rewards")
-	require.Nil(k.t, k.updatePrograms(k.ctx), "update programs")
+	// update block time in testkeeper's context, so endBlock will read it
+	utcTime := time.Unix(blockTime, 0)
+	k.ctx = k.ctx.WithBlockTime(utcTime)
+
+	// ensure that last rewards time has actually updated without errors
+	skipped, err := k.EndBlock(k.ctx)
+	require.Nil(k.t, err, "endBlock")
+	require.False(k.t, skipped, "endBlock skipped")
 	require.Equal(k.t, blockTime, k.GetLastRewardsTime(k.ctx))
 }
 
