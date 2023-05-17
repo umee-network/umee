@@ -9,6 +9,5 @@ option (gogoproto.goproto_getters_all) = false;
 
 // GenesisState of the ugov module.
 message GenesisState {
-  repeated cosmos.base.v1beta1.Coin min_tx_fees = 1
-      [(gogoproto.nullable) = false, (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"];
+  cosmos.base.v1beta1.DecCoin min_gas_price = 1 [(gogoproto.nullable) = false];
 }
