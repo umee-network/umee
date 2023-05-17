@@ -8,8 +8,8 @@ These parameters can be used in various places of the Umee app (other modules or
 
 ## Content
 
-- [Design][#design]
-- [Services][#services]
+- [Design](#design)
+- [Services](#services)
   - [Messages](#messages)
   - [Queries](#queries)
   - [Events](#events)
