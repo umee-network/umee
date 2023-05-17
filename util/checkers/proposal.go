@@ -32,9 +32,7 @@ func IsGovAuthority(authority string) error {
 	}
 	if authority != govModuleAddr {
 		return govtypes.ErrInvalidSigner.Wrapf(
-			"invalid authority: expected %s, got %s",
-			govModuleAddr, authority,
-		)
+			"expected %s, got %s", govModuleAddr, authority)
 	}
 	return nil
 }
