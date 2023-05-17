@@ -104,7 +104,8 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genState ugov.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	am.kb.Keeper(&ctx).InitGenesis(&genState)
+	util.Panic(
+		am.kb.Keeper(&ctx).InitGenesis(&genState))
 
 	return []abci.ValidatorUpdate{}
 }
@@ -137,7 +138,7 @@ func (AppModule) Route() sdk.Route {
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
-func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/uibc module.
 // It returns no validator updates.
