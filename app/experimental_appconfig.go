@@ -73,7 +73,7 @@ func (app *UmeeApp) customKeepers(
 
 	// The last arguments can contain custom message handlers, and custom query handlers,
 	// if we want to allow any custom callbacks
-	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1"
+	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,umee"
 	app.WasmKeeper = wasm.NewKeeper(
 		appCodec,
 		keys[wasm.StoreKey],

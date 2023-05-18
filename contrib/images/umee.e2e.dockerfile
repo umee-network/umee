@@ -15,6 +15,7 @@ RUN go mod download
 ## Build umeed
 ## optimization: we move setting experimental flag here.
 ENV EXPERIMENTAL $EXPERIMENTAL
+RUN export EXPERIMENTAL $EXPERIMENTAL
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
