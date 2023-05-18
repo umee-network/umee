@@ -85,7 +85,7 @@ func (t Token) Validate() error {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
 	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GTE(one) {
-		return fmt.Errorf("liquidation threshold cannot be less than collateral weight, got: %s", t.LiquidationThreshold)
+		return fmt.Errorf("liquidation threshold must be bigger or equal than collateral weight, got: %s", t.LiquidationThreshold)
 	}
 
 	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
