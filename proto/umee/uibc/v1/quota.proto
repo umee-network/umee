@@ -32,7 +32,7 @@ message Params {
   ];
 }
 
-// QuotaStatus status of ibc-transfer quota check for inflow and outflow
+// IBCTransferStatus status of ibc-transfer quota check for inflow and outflow
 enum IBCTransferStatus {
   // UNSPECIFIED  defines a no-op status.
   IBC_TRANSFER_STATUS_UNSPECIFIED = 0;

@@ -29,7 +29,7 @@ var _ = time.Kitchen
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// QuotaStatus status of ibc-transfer quota check for inflow and outflow
+// IBCTransferStatus status of ibc-transfer quota check for inflow and outflow
 type IBCTransferStatus int32
 
 const (
