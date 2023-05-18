@@ -87,7 +87,7 @@ func (msg *MsgGovSetIBCStatus) ValidateBasic() error {
 		return err
 	}
 
-	if err := validateIBCQuotaStatus(msg.IbcStatus); err != nil {
+	if err := validateIBCTransferStatus(msg.IbcStatus); err != nil {
 		return err
 	}
 

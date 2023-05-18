@@ -18,7 +18,7 @@ func DefaultParams() Params {
 }
 
 func (p Params) Validate() error {
-	if err := validateIBCQuotaStatus(p.IbcStatus); err != nil {
+	if err := validateIBCTransferStatus(p.IbcStatus); err != nil {
 		return err
 	}
 	if err := validateQuotaDuration(p.QuotaDuration); err != nil {
@@ -37,7 +37,7 @@ func (p Params) Validate() error {
 	return nil
 }
 
-func validateIBCQuotaStatus(status IBCTransferStatus) error {
+func validateIBCTransferStatus(status IBCTransferStatus) error {
 	if status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED ||
 		status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED ||
 		status == IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED ||
@@ -62,4 +62,31 @@ func validateQuota(q sdk.Dec, typ string) error {
 		return fmt.Errorf("%s must be not negative: %s", typ, q)
 	}
 	return nil
+}
+
+// IBCTransferEnabled returns true if the ibc-transfer is enabled for both inflow and outflow."
+func (status IBCTransferStatus) IBCTransferEnabled() bool {
+	return status != IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
+}
+
+// InflowQuotaEnabled returns true if inflow quota check is enabled.
+func (status IBCTransferStatus) InflowQuotaEnabled() bool {
+	// outflow disabled means inflow check enabled
+	switch status {
+	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED, IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED:
+		return true
+	default:
+		return false
+	}
+}
+
+// OutflowQuotaEnabled returns true if outflow quota check is enabled.
+func (status IBCTransferStatus) OutflowQuotaEnabled() bool {
+	// inflow disabled means outflow check enabled
+	switch status {
+	case IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED, IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED:
+		return true
+	default:
+		return false
+	}
 }

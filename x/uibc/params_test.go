@@ -8,9 +8,9 @@ import (
 )
 
 func TestValidateIBCTransferStatus(t *testing.T) {
-	err := validateIBCQuotaStatus(10)
+	err := validateIBCTransferStatus(10)
 	assert.ErrorContains(t, err, "invalid ibc-transfer status")
-	err = validateIBCQuotaStatus(2)
+	err = validateIBCTransferStatus(2)
 	assert.NilError(t, err)
 }
 
