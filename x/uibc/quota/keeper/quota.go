@@ -6,6 +6,9 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	"github.com/cosmos/ibc-go/v6/modules/core/exported"
 
 	"github.com/umee-network/umee/v4/util"
 	"github.com/umee-network/umee/v4/util/store"
@@ -181,5 +184,31 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 
 	totalOutflowSum := k.GetTotalOutflow()
 	k.SetTotalOutflowSum(totalOutflowSum.Sub(exchangePrice))
+	return nil
+}
+
+// CheckIBCInflow will restrict the non-registered tokens
+func (k Keeper) CheckIBCInflow(ctx sdk.Context,
+	packet channeltypes.Packet, dataDenom string, isSourceChain bool,
+) exported.Acknowledgement {
+	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
+	// check ibc_denom is exists in leverage token registry
+	if isSourceChain {
+		// since SendPacket did not prefix the denomination, we must prefix denomination here
+		sourcePrefix := transfertypes.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
+		// NOTE: sourcePrefix contains the trailing "/"
+		prefixedDenom := sourcePrefix + dataDenom
+		// construct the denomination trace from the full raw denomination and get the ibc_denom
+		ibcDenom := transfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
+		_, err := k.leverage.GetTokenSettings(ctx, ibcDenom)
+		if err != nil {
+			if ltypes.ErrNotRegisteredToken.Is(err) {
+				return channeltypes.NewErrorAcknowledgement(err)
+			}
+			// other leverage keeper error -> log the error  and allow the inflow transfer.
+			ctx.Logger().Error("IBC inflows: can't load token registry", "err", err)
+		}
+	}
+
 	return nil
 }

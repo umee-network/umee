@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/ibc-go/v6/modules/core/exported"
 
 	"github.com/umee-network/umee/v4/util/sdkutil"
+
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
@@ -45,6 +46,21 @@ func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Pack
 	if !params.IbcStatus.IBCTransferEnabled() {
 		return channeltypes.NewErrorAcknowledgement(transfertypes.ErrReceiveDisabled)
 	}
+
+	// TODO: re-enable inflow checks
+	// if params.IbcStatus.InflowQuotaEnabled() {
+	// 	var data transfertypes.FungibleTokenPacketData
+	// 	if err := transfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+	// 		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
+	// 		return channeltypes.NewErrorAcknowledgement(ackErr)
+	// 	}
+
+	// 	isSourceChain := transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+	// 	ackErr := im.kb.Keeper(&ctx).CheckIBCInflow(ctx, packet, data.Denom, isSourceChain)
+	// 	if ackErr != nil {
+	// 		return ackErr
+	// 	}
+	// }
 
 	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 }
