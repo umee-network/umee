@@ -144,6 +144,9 @@ import (
 	uibcoracle "github.com/umee-network/umee/v4/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v4/x/uibc/quota"
 	uibcquotakeeper "github.com/umee-network/umee/v4/x/uibc/quota/keeper"
+
+	// unnamed import of statik for swagger UI support
+	_ "github.com/umee-network/umee/v4/swagger/statik"
 )
 
 var (
