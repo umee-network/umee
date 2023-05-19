@@ -135,6 +135,9 @@ import (
 	"github.com/umee-network/umee/v4/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/ugov"
+	ugovkeeper "github.com/umee-network/umee/v4/x/ugov/keeper"
+	ugovmodule "github.com/umee-network/umee/v4/x/ugov/module"
 
 	// umee ibc-transfer and quota for ibc-transfer
 	"github.com/umee-network/umee/v4/x/uibc"
@@ -193,6 +196,7 @@ func init() {
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
 		uibcmodule.AppModuleBasic{},
+		ugovmodule.AppModuleBasic{},
 	}
 
 	if Experimental {
@@ -217,6 +221,7 @@ func init() {
 		incentive.ModuleName:        nil,
 		oracletypes.ModuleName:      nil,
 		uibc.ModuleName:             nil,
+		ugov.ModuleName:             nil,
 	}
 
 	if Experimental {
@@ -269,6 +274,7 @@ type UmeeApp struct {
 	OracleKeeper       oraclekeeper.Keeper
 	bech32IbcKeeper    bech32ibckeeper.Keeper
 	UIbcQuotaKeeperB   uibcquotakeeper.Builder
+	UGovKeeperB        ugovkeeper.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -331,7 +337,7 @@ func New(
 		ibchost.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		gravitytypes.StoreKey,
 		leveragetypes.StoreKey, incentive.StoreKey, oracletypes.StoreKey,
-		bech32ibctypes.StoreKey, uibc.StoreKey,
+		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 	}
 	if Experimental {
 		storeKeys = append(storeKeys, wasm.StoreKey)
@@ -480,6 +486,8 @@ func New(
 	)
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
+
+	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
 
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
@@ -687,6 +695,7 @@ func New(
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
+		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 	}
 	if Experimental {
 		appModules = append(
@@ -718,6 +727,7 @@ func New(
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
 	}
 
 	endBlockers := []string{
@@ -736,6 +746,7 @@ func New(
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -759,6 +770,7 @@ func New(
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
 	}
 
 	orderMigrations := []string{
@@ -775,6 +787,7 @@ func New(
 		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
 	}
 
 	if Experimental {
