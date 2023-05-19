@@ -62,7 +62,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
-- .
+- [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
 
 ## [v4.4.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-05-05
 
