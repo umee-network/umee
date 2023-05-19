@@ -2016,22 +2016,21 @@ paths:
                 type: object
                 properties:
                   ibc_status:
-                    title: >-
-                      ibc_status defines the wethever ibc-transfer enabled,
-                      disbaled or paused
+                    description: >-
+                      ibc_status defines the IBC ICS20 status (transfer quota or
+                      transfers disabled).
                     type: string
                     enum:
                       - IBC_TRANSFER_STATUS_UNSPECIFIED
                       - IBC_TRANSFER_STATUS_QUOTA_DISABLED
                       - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+                      - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+                      - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
                       - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
                     default: IBC_TRANSFER_STATUS_UNSPECIFIED
-                    description: >-
-                      - IBC_TRANSFER_STATUS_UNSPECIFIED: UNSPECIFIED  defines a
-                      no-op status.
-                       - IBC_TRANSFER_STATUS_QUOTA_DISABLED: DISABLED: quota checks are disabled.
-                       - IBC_TRANSFER_STATUS_QUOTA_ENABLED: ENABLED: quota checks are enabled.
-                       - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED: PAUSED: all IBC transfers are paused.
+                    title: >-
+                      IBCTransferStatus status of ibc-transfer quota check for
+                      inflow and outflow
                   total_quota:
                     type: string
                     title: >-
@@ -4753,34 +4752,39 @@ definitions:
       - IBC_TRANSFER_STATUS_UNSPECIFIED
       - IBC_TRANSFER_STATUS_QUOTA_DISABLED
       - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+      - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+      - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
       - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
     default: IBC_TRANSFER_STATUS_UNSPECIFIED
     description: |-
       - IBC_TRANSFER_STATUS_UNSPECIFIED: UNSPECIFIED  defines a no-op status.
-       - IBC_TRANSFER_STATUS_QUOTA_DISABLED: DISABLED: quota checks are disabled.
-       - IBC_TRANSFER_STATUS_QUOTA_ENABLED: ENABLED: quota checks are enabled.
+       - IBC_TRANSFER_STATUS_QUOTA_DISABLED: DISABLED: all inflow and outflow quota checks are disabled.
+       - IBC_TRANSFER_STATUS_QUOTA_ENABLED: ENABLED: all inflow and outflow quota checks are enabled.
+       - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED: DISABLED OUT: outflow quota check is disabled, while the inflow quota check is enabled.
+       - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED: DISABLED IN: inflow quota check is disabled, while the outflow quota check is enabled.
        - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED: PAUSED: all IBC transfers are paused.
-    title: IBCTransferStatus status of ibc-transfer
+    title: >-
+      IBCTransferStatus status of ibc-transfer quota check for inflow and
+      outflow
   umee.uibc.v1.Params:
     type: object
     properties:
       ibc_status:
-        title: >-
-          ibc_status defines the wethever ibc-transfer enabled, disbaled or
-          paused
+        description: >-
+          ibc_status defines the IBC ICS20 status (transfer quota or transfers
+          disabled).
         type: string
         enum:
           - IBC_TRANSFER_STATUS_UNSPECIFIED
           - IBC_TRANSFER_STATUS_QUOTA_DISABLED
           - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+          - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+          - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
           - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
         default: IBC_TRANSFER_STATUS_UNSPECIFIED
-        description: >-
-          - IBC_TRANSFER_STATUS_UNSPECIFIED: UNSPECIFIED  defines a no-op
-          status.
-           - IBC_TRANSFER_STATUS_QUOTA_DISABLED: DISABLED: quota checks are disabled.
-           - IBC_TRANSFER_STATUS_QUOTA_ENABLED: ENABLED: quota checks are enabled.
-           - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED: PAUSED: all IBC transfers are paused.
+        title: >-
+          IBCTransferStatus status of ibc-transfer quota check for inflow and
+          outflow
       total_quota:
         type: string
         title: total_quota defines the total outflow limit of ibc-transfer in USD
@@ -4824,22 +4828,21 @@ definitions:
         type: object
         properties:
           ibc_status:
-            title: >-
-              ibc_status defines the wethever ibc-transfer enabled, disbaled or
-              paused
+            description: >-
+              ibc_status defines the IBC ICS20 status (transfer quota or
+              transfers disabled).
             type: string
             enum:
               - IBC_TRANSFER_STATUS_UNSPECIFIED
               - IBC_TRANSFER_STATUS_QUOTA_DISABLED
               - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+              - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+              - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
               - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
             default: IBC_TRANSFER_STATUS_UNSPECIFIED
-            description: >-
-              - IBC_TRANSFER_STATUS_UNSPECIFIED: UNSPECIFIED  defines a no-op
-              status.
-               - IBC_TRANSFER_STATUS_QUOTA_DISABLED: DISABLED: quota checks are disabled.
-               - IBC_TRANSFER_STATUS_QUOTA_ENABLED: ENABLED: quota checks are enabled.
-               - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED: PAUSED: all IBC transfers are paused.
+            title: >-
+              IBCTransferStatus status of ibc-transfer quota check for inflow
+              and outflow
           total_quota:
             type: string
             title: total_quota defines the total outflow limit of ibc-transfer in USD

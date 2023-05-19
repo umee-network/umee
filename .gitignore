@@ -41,9 +41,15 @@ dist/
 # e2e test keychain folder
 tests/e2e/keyring-test
 
-
 # private files
 private*
 
 #IntelliJ
 .idea/
+
+#Vscode 
+.vscode
+
+# Swagger UI 
+swagger/statik/statik.go
+umee/swagger/swagger-ui
