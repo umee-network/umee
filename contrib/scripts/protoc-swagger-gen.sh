@@ -23,19 +23,20 @@ done
 
 cd ..
 
-SDK_VERSION=$(go list -m -f '{{ .Version }}' github.com/cosmos/cosmos-sdk)
-IBC_VERSION=$(go list -m -f '{{ .Version }}' github.com/cosmos/ibc-go/v6)
+# TODO: needs to fix merge issue of cosmos swagger and ibc-go swagger
+# SDK_VERSION=$(go list -m -f '{{ .Version }}' github.com/cosmos/cosmos-sdk)
+# IBC_VERSION=$(go list -m -f '{{ .Version }}' github.com/cosmos/ibc-go/v6)
 
-SDK_RAW_URL=https://raw.githubusercontent.com/cosmos/cosmos-sdk/${SDK_VERSION}/client/docs/swagger-ui/swagger.yaml
-IBC_RAW_URL=https://raw.githubusercontent.com/cosmos/ibc-go/${IBC_VERSION}/docs/client/swagger-ui/swagger.yaml
+# SDK_RAW_URL=https://raw.githubusercontent.com/cosmos/cosmos-sdk/${SDK_VERSION}/client/docs/swagger-ui/swagger.yaml
+# IBC_RAW_URL=https://raw.githubusercontent.com/cosmos/ibc-go/${IBC_VERSION}/docs/client/swagger-ui/swagger.yaml
 
-# download Cosmos SDK swagger yaml file
-echo "SDK version ${SDK_VERSION}"
-wget "${SDK_RAW_URL}" -O ./tmp-swagger-gen/cosmos-sdk-swagger.yaml
+# # download Cosmos SDK swagger yaml file
+# echo "SDK version ${SDK_VERSION}"
+# wget "${SDK_RAW_URL}" -O ./tmp-swagger-gen/cosmos-sdk-swagger.yaml
 
-# download IBC swagger yaml file
-echo "IBC version ${IBC_VERSION}"
-wget "${IBC_RAW_URL}" -O ./tmp-swagger-gen/ibc-go-swagger.yaml
+# # download IBC swagger yaml file
+# echo "IBC version ${IBC_VERSION}"
+# wget "${IBC_RAW_URL}" -O ./tmp-swagger-gen/ibc-go-swagger.yaml
 
 # combine swagger files
 # uses nodejs package `swagger-combine`.
@@ -45,7 +46,7 @@ swagger-combine ./swagger/proto-config-gen.json -o ./swagger/swagger.yaml -f yam
 # clean swagger files
 rm -rf ./tmp-swagger-gen
 
-SWAGGER_UI_VERSION=5.0.0-alpha.13
+SWAGGER_UI_VERSION=4.18.3
 SWAGGER_UI_DOWNLOAD_URL=https://github.com/swagger-api/swagger-ui/archive/refs/tags/v${SWAGGER_UI_VERSION}.zip
 SWAGGER_UI_PACKAGE_NAME=${SWAGGER_DIR}/swagger-ui-${SWAGGER_UI_VERSION}
 

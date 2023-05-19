@@ -7,17 +7,6 @@
   },
   "apis": [
     {
-      "url": "./tmp-swagger-gen/cosmos-sdk-swagger.yaml"
-    },
-    {
-      "url": "./tmp-swagger-gen/ibc-go-swagger.yaml",
-      "operationIds": {
-        "rename": {
-          "UpgradedConsensusState": "IBCUpgradedConsensusState"
-        }
-      }
-    },
-    {
       "url": "./tmp-swagger-gen/umee/leverage/v1/query.swagger.json",
       "operationIds": {
         "rename": {
