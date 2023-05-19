@@ -138,8 +138,6 @@ import (
 
 	// umee ibc-transfer and quota for ibc-transfer
 	"github.com/umee-network/umee/v4/x/uibc"
-	uics20transfer "github.com/umee-network/umee/v4/x/uibc/ics20"
-	uibctransferkeeper "github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
 	uibcmodule "github.com/umee-network/umee/v4/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v4/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v4/x/uibc/quota"
@@ -260,15 +258,15 @@ type UmeeApp struct {
 	NFTKeeper        nftkeeper.Keeper
 	WasmKeeper       wasm.Keeper
 
-	UIBCTransferKeeper uibctransferkeeper.Keeper
-	IBCKeeper          *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	ICAHostKeeper      icahostkeeper.Keeper
-	GravityKeeper      gravitykeeper.Keeper
-	LeverageKeeper     leveragekeeper.Keeper
-	IncentiveKeeper    incentivekeeper.Keeper
-	OracleKeeper       oraclekeeper.Keeper
-	bech32IbcKeeper    bech32ibckeeper.Keeper
-	UIbcQuotaKeeperB   uibcquotakeeper.Builder
+	IBCTransferKeeper ibctransferkeeper.Keeper
+	IBCKeeper         *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
+	ICAHostKeeper     icahostkeeper.Keeper
+	GravityKeeper     gravitykeeper.Keeper
+	LeverageKeeper    leveragekeeper.Keeper
+	IncentiveKeeper   incentivekeeper.Keeper
+	OracleKeeper      oraclekeeper.Keeper
+	bech32IbcKeeper   bech32ibckeeper.Keeper
+	UIbcQuotaKeeperB  uibcquotakeeper.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -490,7 +488,7 @@ func New(
 		&app.SlashingKeeper,
 		&app.DistrKeeper,
 		&app.AccountKeeper,
-		&app.UIBCTransferKeeper.Keeper,
+		&app.IBCTransferKeeper,
 		&app.bech32IbcKeeper,
 	)
 
@@ -538,21 +536,15 @@ func New(
 	)
 
 	// Middleware Stacks
-	// Create an original ICS-20 transfer keeper and AppModule and then use it to
-	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
-	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
-		appCodec,
-		keys[ibctransfertypes.StoreKey],
-		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.UIbcQuotaKeeperB, // ISC4 Wrapper: IBC Rate Limit middleware
-		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper,
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.ScopedTransferKeeper,
-	)
 
-	app.UIBCTransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
+	// Create Transfer Keeper and pass IBCFeeKeeper as expected Channel and PortKeeper
+	// since fee middleware will wrap the IBCKeeper for underlying application.
+	app.IBCTransferKeeper = ibctransferkeeper.NewKeeper(
+		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
+		app.UIbcQuotaKeeperB, // ISC4 Wrapper: fee IBC middleware
+		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
+		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
+	)
 
 	// Create Transfer Stack
 	// SendPacket, originates from the application to an IBC channel:
@@ -567,11 +559,7 @@ func New(
 
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
-	transferStack = uics20transfer.NewIBCModule(
-		app.LeverageKeeper,
-		ibctransfer.NewIBCModule(ibcTransferKeeper),
-		app.UIBCTransferKeeper,
-	)
+	transferStack = ibctransfer.NewIBCModule(app.IBCTransferKeeper)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
 	transferStack = uibcquota.NewICS20Middleware(transferStack, app.UIbcQuotaKeeperB, appCodec)
 
@@ -606,7 +594,7 @@ func New(
 
 	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
 		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		app.UIBCTransferKeeper,
+		app.IBCTransferKeeper,
 	)
 
 	// Register the proposal types
@@ -678,7 +666,7 @@ func New(
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 
-		ibctransfer.NewAppModule(ibcTransferKeeper),
+		ibctransfer.NewAppModule(app.IBCTransferKeeper),
 		// ibcfee.NewAppModule(app.IBCFeeKeeper),
 		ica.NewAppModule(nil, &app.ICAHostKeeper),
 		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
