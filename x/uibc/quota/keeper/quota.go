@@ -187,7 +187,7 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 	return nil
 }
 
-// CheckIBCInflow will restrict the non-registered tokens
+// CheckIBCInflow validates if inflow token is registered in x/leverage
 func (k Keeper) CheckIBCInflow(ctx sdk.Context,
 	packet channeltypes.Packet, dataDenom string, isSourceChain bool,
 ) exported.Acknowledgement {

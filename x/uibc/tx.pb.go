@@ -132,7 +132,7 @@ type MsgGovSetIBCStatus struct {
 	Authority   string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// ibc_status defines ibc transfer quota status
+	// ibc_status defines status for ibc transfers
 	IbcStatus IBCTransferStatus `protobuf:"varint,4,opt,name=ibc_status,json=ibcStatus,proto3,enum=umee.uibc.v1.IBCTransferStatus" json:"ibc_status,omitempty"`
 }
 
