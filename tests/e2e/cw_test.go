@@ -2,7 +2,6 @@ package e2e
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"testing"
 
@@ -21,28 +20,29 @@ func TestCosmwasmSuite(t *testing.T) {
 	suite.Run(t, new(TestCosmwasm))
 }
 
-func (cw *TestCosmwasm) TestCW20() {
-	// TODO: needs to add contracts
-	accAddr, err := cw.chain.validators[0].keyInfo.GetAddress()
-	cw.Require().NoError(err)
-	cw.Sender = accAddr.String()
+// TODO: re-enable this tests when we do dockernet integration
+// func (cw *TestCosmwasm) TestCW20() {
+// 	// TODO: needs to add contracts
+// 	accAddr, err := cw.chain.validators[0].keyInfo.GetAddress()
+// 	cw.Require().NoError(err)
+// 	cw.Sender = accAddr.String()
 
-	// path := ""
-	path := "/Users/gsk967/Projects/umee-network/umee-cosmwasm/artifacts/umee_cosmwasm-aarch64.wasm"
-	cw.DeployWasmContract(path)
+// 	// path := ""
+// 	path := "/Users/gsk967/Projects/umee-network/umee-cosmwasm/artifacts/umee_cosmwasm-aarch64.wasm"
+// 	cw.DeployWasmContract(path)
 
-	// InstantiateContract
-	cw.InstantiateContract()
+// 	// InstantiateContract
+// 	cw.InstantiateContract()
 
-	// execute contract
-	tx := "{\"umee\":{\"leverage\":{\"supply_collateral\":{\"supplier\":\"umee19ppq83qzzy3f0fftdp2p3t5eyp44nm33we37n3\",\"asset\":{\"amount\":\"1000\",\"denom\":\"uumee\"}}}}}"
-	cw.CWExecute(tx)
+// 	// execute contract
+// 	tx := "{\"umee\":{\"leverage\":{\"supply_collateral\":{\"supplier\":\"umee19ppq83qzzy3f0fftdp2p3t5eyp44nm33we37n3\",\"asset\":{\"amount\":\"1000\",\"denom\":\"uumee\"}}}}}"
+// 	cw.CWExecute(tx)
 
-	// query the contract
-	query := "{\"chain\":{\"custom\":{\"leverage_params\":{},\"assigned_query\":\"0\"}}}"
-	cw.CWQuery(query)
-	cw.Require().False(true)
-}
+// 	// query the contract
+// 	query := "{\"chain\":{\"custom\":{\"leverage_params\":{},\"assigned_query\":\"0\"}}}"
+// 	cw.CWQuery(query)
+// 	cw.Require().False(true)
+// }
 
 func (cw *TestCosmwasm) DeployWasmContract(path string) {
 	resp, err := cw.umee.Tx.TxSubmitWasmContract(path)
@@ -65,15 +65,13 @@ func (cw *TestCosmwasm) InstantiateContract() {
 }
 
 func (cw *TestCosmwasm) CWQuery(query string) {
-	resp, err := cw.umee.Query.QueryContract(cw.ContractAddr, query)
+	_, err := cw.umee.QueryContract(cw.ContractAddr, cw.Sender)
 	cw.Require().NoError(err)
-	fmt.Println("resp", resp, err)
 }
 
 func (cw *TestCosmwasm) CWExecute(execMsg string) {
-	resp, err := cw.umee.Tx.WasmExecuteContract(cw.ContractAddr, execMsg)
+	_, err := cw.umee.Tx.WasmExecuteContract(cw.ContractAddr, execMsg)
 	cw.Require().NoError(err)
-	fmt.Println("resp code ", resp.Code)
 }
 
 func (cw *TestCosmwasm) GetAttributeValue(resp sdk.TxResponse, eventName, attrKey string) string {
