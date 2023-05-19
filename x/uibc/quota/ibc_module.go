@@ -11,8 +11,10 @@ import (
 	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+	"github.com/cosmos/ibc-go/v6/modules/core/exported"
 
 	"github.com/umee-network/umee/v4/util/sdkutil"
+
 	"github.com/umee-network/umee/v4/x/uibc"
 	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
 )
@@ -37,6 +39,32 @@ func NewICS20Middleware(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSO
 	}
 }
 
+// OnRecvPacket implements types.Middleware
+func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
+) exported.Acknowledgement {
+	params := im.kb.Keeper(&ctx).GetParams()
+	if !params.IbcStatus.IBCTransferEnabled() {
+		return channeltypes.NewErrorAcknowledgement(transfertypes.ErrReceiveDisabled)
+	}
+
+	// TODO: re-enable inflow checks
+	// if params.IbcStatus.InflowQuotaEnabled() {
+	// 	var data transfertypes.FungibleTokenPacketData
+	// 	if err := transfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+	// 		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
+	// 		return channeltypes.NewErrorAcknowledgement(ackErr)
+	// 	}
+
+	// 	isSourceChain := transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+	// 	ackErr := im.kb.Keeper(&ctx).CheckIBCInflow(ctx, packet, data.Denom, isSourceChain)
+	// 	if ackErr != nil {
+	// 		return ackErr
+	// 	}
+	// }
+
+	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
+}
+
 // OnAcknowledgementPacket implements types.Middleware
 func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
 	relayer sdk.AccAddress,
@@ -47,7 +75,7 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
 		params := im.kb.Keeper(&ctx).GetParams()
-		if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
+		if params.IbcStatus.OutflowQuotaEnabled() {
 			err := im.revertQuotaUpdate(ctx, packet.Data)
 			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
 		}

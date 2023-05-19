@@ -126,13 +126,13 @@ func (*MsgGovUpdateQuotaResponse) XXX_MessageName() string {
 	return "umee.uibc.v1.MsgGovUpdateQuotaResponse"
 }
 
-// MsgGovSetIbcstatus defines request type for UpdateIBCTransferStatus
+// MsgGovSetIBCStatus defines the request type for setting the IBC quota status.
 type MsgGovSetIBCStatus struct {
 	// authority is the address of the governance account.
 	Authority   string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
 	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
 	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	// ibc_status defines ibc transfer pause status
+	// ibc_status defines status for ibc transfers
 	IbcStatus IBCTransferStatus `protobuf:"varint,4,opt,name=ibc_status,json=ibcStatus,proto3,enum=umee.uibc.v1.IBCTransferStatus" json:"ibc_status,omitempty"`
 }
 
@@ -172,7 +172,7 @@ func (*MsgGovSetIBCStatus) XXX_MessageName() string {
 	return "umee.uibc.v1.MsgGovSetIBCStatus"
 }
 
-// MsgGovSetIbcstatusResponse definesresponse type for Msg/MsgGovSetIbcstatus for with x/gov proposals.
+// MsgGovSetIBCStatusResponse define the response type for Msg/MsgGovSetIBCStatus with x/gov proposals.
 type MsgGovSetIBCStatusResponse struct {
 }
 
@@ -277,7 +277,7 @@ type MsgClient interface {
 	// GovUpdateQuota adds new quota for ibc denoms or
 	// updates the quota for existed ibc denoms.
 	GovUpdateQuota(ctx context.Context, in *MsgGovUpdateQuota, opts ...grpc.CallOption) (*MsgGovUpdateQuotaResponse, error)
-	// GovSetIBCStatus update the status of ibc-transfer
+	// GovSetIBCStatus sets IBC ICS20 status. Must be called by x/gov.
 	GovSetIBCStatus(ctx context.Context, in *MsgGovSetIBCStatus, opts ...grpc.CallOption) (*MsgGovSetIBCStatusResponse, error)
 }
 
@@ -312,7 +312,7 @@ type MsgServer interface {
 	// GovUpdateQuota adds new quota for ibc denoms or
 	// updates the quota for existed ibc denoms.
 	GovUpdateQuota(context.Context, *MsgGovUpdateQuota) (*MsgGovUpdateQuotaResponse, error)
-	// GovSetIBCStatus update the status of ibc-transfer
+	// GovSetIBCStatus sets IBC ICS20 status. Must be called by x/gov.
 	GovSetIBCStatus(context.Context, *MsgGovSetIBCStatus) (*MsgGovSetIBCStatusResponse, error)
 }
 
