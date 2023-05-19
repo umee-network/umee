@@ -84,8 +84,8 @@ func (app *UmeeApp) customKeepers(
 		app.DistrKeeper,
 		app.IBCKeeper.ChannelKeeper,
 		&app.IBCKeeper.PortKeeper,
-		app.ScopedWasmKeeper,           // capabilities
-		&app.UIBCTransferKeeper.Keeper, // ICS20TransferPortSource
+		app.ScopedWasmKeeper, // capabilities
+		&app.IBCTransferKeeper,
 		app.MsgServiceRouter(),
 		wasmDir,
 		wasmConfig,
