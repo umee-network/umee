@@ -224,8 +224,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/toml v1.2.1 h1:9F2/+DoOYIOksmaJFPw1tGFy1eDnIJXg+UHjuD8lTak=
 github.com/BurntSushi/toml v1.2.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
-github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d h1:nalkkPQcITbvhmL4+C4cKA87NW0tfm3Kl9VXRoPywFg=
-github.com/ChainSafe/go-schnorrkel v0.0.0-20200405005733-88cbf1b4c40d/go.mod h1:URdX5+vg25ts3aCh8H5IFZybJYKWhJHYMTnf+ULtoC4=
+github.com/ChainSafe/go-schnorrkel v1.0.0 h1:3aDA67lAykLaG1y3AOjs88dMxC88PgUuHRrLeDnvGIM=
+github.com/ChainSafe/go-schnorrkel v1.0.0/go.mod h1:dpzHYVxLZcp8pjlV+O+UR8K0Hp/z7vcchBSbMBEhCw4=
 github.com/CosmWasm/wasmvm v1.2.3 h1:OKYlobwmVGbl0eSn0mXoAAjE5hIuXnQCLPjbNd91sVY=
 github.com/CosmWasm/wasmvm v1.2.3/go.mod h1:vW/E3h8j9xBQs9bCoijDuawKo9kCtxOaS8N8J7KFtkc=
 github.com/DATA-DOG/go-sqlmock v1.3.3/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
@@ -1152,8 +1152,8 @@ github.com/nishanths/exhaustive v0.9.5 h1:TzssWan6orBiLYVqewCG8faud9qlFntJE30ACp
 github.com/nishanths/exhaustive v0.9.5/go.mod h1:IbwrGdVMizvDcIxPYGVdQn5BqWJaOwpCvg4RGb8r/TA=
 github.com/nishanths/predeclared v0.2.2 h1:V2EPdZPliZymNAn79T8RkNApBjMmVKh5XRpLm/w98Vk=
 github.com/nishanths/predeclared v0.2.2/go.mod h1:RROzoN6TnGQupbC+lqggsOlcgysk3LMK/HI84Mp280c=
-github.com/notional-labs/wasmd v0.30.1-0.20230510044538-a84982c78bf3 h1:rEKqpmhYNuWNJ2yKVA+zOJfgP/OrkUe884pu98+hNLY=
-github.com/notional-labs/wasmd v0.30.1-0.20230510044538-a84982c78bf3/go.mod h1:xAdy3QFIH6CUcs7M+Fx61CN+yI5mjaco4hv+n4ur0Bc=
+github.com/notional-labs/wasmd v0.31.0-umee.46 h1:wsEWfXhsTw39gtIhLdMNRKVe023LZz0gO0UQS0b1t7E=
+github.com/notional-labs/wasmd v0.31.0-umee.46/go.mod h1:S5TjKrcwxj/h4cnAiX4z2yxYox0JgUzzADo28W52uK8=
 github.com/nunnatsa/ginkgolinter v0.9.0 h1:Sm0zX5QfjJzkeCjEp+t6d3Ha0jwvoDjleP9XCsrEzOA=
 github.com/nunnatsa/ginkgolinter v0.9.0/go.mod h1:FHaMLURXP7qImeH6bvxWJUpyH+2tuqe5j4rW1gxJRmI=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
