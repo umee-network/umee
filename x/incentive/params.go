@@ -6,13 +6,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-const secondsPerDay = 86400
-
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
 	return Params{
 		MaxUnbondings:      10,
-		UnbondingDuration:  secondsPerDay * 1,
+		UnbondingDuration:  0,
 		EmergencyUnbondFee: sdk.MustNewDecFromStr("0.01"),
 	}
 }
