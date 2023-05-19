@@ -12,7 +12,7 @@ import (
 )
 
 func (c *Client) TxSubmitWasmContract(contractPath string) (*sdk.TxResponse, error) {
-	fromAddr, err := c.keyringRecord[0].GetAddress()
+	fromAddr, err := c.KeyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +25,8 @@ func (c *Client) TxSubmitWasmContract(contractPath string) (*sdk.TxResponse, err
 	return c.BroadcastTx(&msg)
 }
 
-func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg string) (*sdk.TxResponse, error) {
-	fromAddr, err := c.keyringRecord[0].GetAddress()
+func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg []byte) (*sdk.TxResponse, error) {
+	fromAddr, err := c.KeyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg string) (*sdk
 		CodeID: storeCode,
 		Label:  "label",
 		Funds:  amount,
-		Msg:    []byte(initMsg),
+		Msg:    initMsg,
 		Admin:  "",
 	}
 
@@ -44,7 +44,7 @@ func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg string) (*sdk
 }
 
 func (c *Client) WasmExecuteContract(contractAddr, execMsg string) (*sdk.TxResponse, error) {
-	fromAddr, err := c.keyringRecord[0].GetAddress()
+	fromAddr, err := c.KeyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}

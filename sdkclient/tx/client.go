@@ -24,7 +24,7 @@ type Client struct {
 	gasAdjustment float64
 
 	keyringKeyring keyring.Keyring
-	keyringRecord  []*keyring.Record
+	KeyringRecord  []*keyring.Record
 	txFactory      *tx.Factory
 	encCfg         sdkparams.EncodingConfig
 }
@@ -53,7 +53,7 @@ func NewClient(
 
 	for index, menomic := range mnemonics {
 		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic)
-		c.keyringRecord = append(c.keyringRecord, kr)
+		c.KeyringRecord = append(c.KeyringRecord, kr)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func NewClient(
 }
 
 func (c *Client) initClientCtx() error {
-	fromAddress, _ := c.keyringRecord[0].GetAddress()
+	fromAddress, _ := c.KeyringRecord[0].GetAddress()
 
 	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(c.TMRPCEndpoint)
 	if err != nil {
@@ -94,8 +94,8 @@ func (c *Client) initClientCtx() error {
 		Client:            tmRPCClient,
 		Keyring:           c.keyringKeyring,
 		FromAddress:       fromAddress,
-		FromName:          c.keyringRecord[0].Name,
-		From:              c.keyringRecord[0].Name,
+		FromName:          c.KeyringRecord[0].Name,
+		From:              c.KeyringRecord[0].Name,
 		OutputFormat:      "json",
 		UseLedger:         false,
 		Simulate:          false,
@@ -114,13 +114,15 @@ func (c *Client) initTxFactory() {
 		WithGasAdjustment(c.gasAdjustment).
 		WithKeybase(c.ClientContext.Keyring).
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
-		WithSimulateAndExecute(true)
+		WithSimulateAndExecute(true).
+		WithFees("20000000uumee").
+		WithGas(0)
 	c.txFactory = &f
 }
 
 func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
-	c.ClientContext.From = c.keyringRecord[0].Name
-	c.ClientContext.FromName = c.keyringRecord[0].Name
-	c.ClientContext.FromAddress, _ = c.keyringRecord[0].GetAddress()
+	c.ClientContext.From = c.KeyringRecord[0].Name
+	c.ClientContext.FromName = c.KeyringRecord[0].Name
+	c.ClientContext.FromAddress, _ = c.KeyringRecord[0].GetAddress()
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
 }

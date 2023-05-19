@@ -59,13 +59,13 @@ func (cw *TestCosmwasm) MarshalAny(any interface{}) []byte {
 }
 
 func (cw *TestCosmwasm) InstantiateContract() {
-	resp, err := cw.umee.Tx.WasmInstantiateContract(cw.StoreCode, "{}")
+	resp, err := cw.umee.Tx.WasmInstantiateContract(cw.StoreCode, []byte("{}"))
 	cw.ContractAddr = cw.GetAttributeValue(*resp, "wasm", "_contract_address")
 	cw.Require().NoError(err)
 }
 
 func (cw *TestCosmwasm) CWQuery(query string) {
-	_, err := cw.umee.QueryContract(cw.ContractAddr, cw.Sender)
+	_, err := cw.umee.QueryContract(cw.ContractAddr, []byte(query))
 	cw.Require().NoError(err)
 }
 
