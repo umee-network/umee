@@ -28,7 +28,7 @@ type HandlerOptions struct {
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
 // numbers, checks signatures & account numbers, and deducts fees from the first
 // signer.
-func NewAnteHandler(options HandlerOptions, experimental bool) (sdk.AnteHandler, error) {
+func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 	if options.AccountKeeper == nil {
 		return nil, sdkerrors.ErrLogic.Wrap("account keeper is required for ante builder")
 	}
@@ -42,42 +42,22 @@ func NewAnteHandler(options HandlerOptions, experimental bool) (sdk.AnteHandler,
 		return nil, sdkerrors.ErrLogic.Wrap("sign mode handler is required for ante builder")
 	}
 
-	if experimental {
-		// cosmwasm ante decorators
-		return sdk.ChainAnteDecorators(
-			cosmosante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
-			wasmkeeper.NewLimitSimulationGasDecorator(
-				options.WasmConfig.SimulationGasLimit,
-			), // after setup context to enforce limits early
-			wasmkeeper.NewCountTXDecorator(options.TXCounterStoreKey),
-			cosmosante.NewExtensionOptionsDecorator(nil),     // nil=reject extensions
-			NewSpamPreventionDecorator(options.OracleKeeper), // spam prevention
-			cosmosante.NewValidateBasicDecorator(),
-			cosmosante.NewTxTimeoutHeightDecorator(),
-			cosmosante.NewValidateMemoDecorator(options.AccountKeeper),
-			cosmosante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
-			cosmosante.NewDeductFeeDecorator(options.AccountKeeper,
-				options.BankKeeper, options.FeegrantKeeper, FeeAndPriority,
-			),
-			// SetPubKeyDecorator must be called before all signature verification decorators
-			cosmosante.NewSetPubKeyDecorator(options.AccountKeeper),
-			cosmosante.NewValidateSigCountDecorator(options.AccountKeeper),
-			cosmosante.NewSigGasConsumeDecorator(options.AccountKeeper, options.SigGasConsumer),
-			cosmosante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),
-			cosmosante.NewIncrementSequenceDecorator(options.AccountKeeper),
-			ibcante.NewRedundantRelayDecorator(options.IBCKeeper),
-		), nil
-	}
-
+	// cosmwasm ante decorators
 	return sdk.ChainAnteDecorators(
-		cosmosante.NewSetUpContextDecorator(),            // outermost AnteDecorator. SetUpContext must be called first
+		cosmosante.NewSetUpContextDecorator(), // outermost AnteDecorator. SetUpContext must be called first
+		wasmkeeper.NewLimitSimulationGasDecorator(
+			options.WasmConfig.SimulationGasLimit,
+		), // after setup context to enforce limits early
+		wasmkeeper.NewCountTXDecorator(options.TXCounterStoreKey),
 		cosmosante.NewExtensionOptionsDecorator(nil),     // nil=reject extensions
 		NewSpamPreventionDecorator(options.OracleKeeper), // spam prevention
 		cosmosante.NewValidateBasicDecorator(),
 		cosmosante.NewTxTimeoutHeightDecorator(),
 		cosmosante.NewValidateMemoDecorator(options.AccountKeeper),
 		cosmosante.NewConsumeGasForTxSizeDecorator(options.AccountKeeper),
-		cosmosante.NewDeductFeeDecorator(options.AccountKeeper, options.BankKeeper, options.FeegrantKeeper, FeeAndPriority),
+		cosmosante.NewDeductFeeDecorator(options.AccountKeeper,
+			options.BankKeeper, options.FeegrantKeeper, FeeAndPriority,
+		),
 		// SetPubKeyDecorator must be called before all signature verification decorators
 		cosmosante.NewSetPubKeyDecorator(options.AccountKeeper),
 		cosmosante.NewValidateSigCountDecorator(options.AccountKeeper),

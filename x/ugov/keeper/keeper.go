@@ -9,13 +9,13 @@ import (
 // Builder constructs Keeper by perparing all related dependencies (notably the store).
 type Builder struct {
 	storeKey storetypes.StoreKey
-	cdc      codec.BinaryCodec
+	Cdc      codec.BinaryCodec
 }
 
 func NewKeeperBuilder(
 	cdc codec.BinaryCodec, key storetypes.StoreKey) Builder {
 	return Builder{
-		cdc:      cdc,
+		Cdc:      cdc,
 		storeKey: key,
 	}
 }
@@ -23,7 +23,7 @@ func NewKeeperBuilder(
 func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
 	return Keeper{
 		store: ctx.KVStore(kb.storeKey),
-		cdc:   kb.cdc,
+		cdc:   kb.Cdc,
 	}
 }
 
