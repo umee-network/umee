@@ -38,9 +38,9 @@ func (msg MsgClaim) GetSignBytes() []byte {
 }
 
 // Route implements the sdk.Msg interface.
-func (msg MsgClaim) Route() string { return RouterKey }
+func (msg MsgClaim) Route() string { return "" }
 
-// Type implements the sdk.Msg interface.
+// Type implements the LegacyMsg interface.
 func (msg MsgClaim) Type() string { return sdk.MsgTypeURL(&msg) }
 
 func NewMsgBond(account sdk.AccAddress, asset sdk.Coin) *MsgBond {
@@ -64,8 +64,8 @@ func (msg MsgBond) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgBond) Route() string { return RouterKey }
+// Route implements the LegacyMsg interface.
+func (msg MsgBond) Route() string { return "" }
 
 // Type implements the sdk.Msg interface.
 func (msg MsgBond) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -91,8 +91,8 @@ func (msg MsgBeginUnbonding) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgBeginUnbonding) Route() string { return RouterKey }
+// Route implements the LegacyMsg interface.
+func (msg MsgBeginUnbonding) Route() string { return "" }
 
 // Type implements the sdk.Msg interface.
 func (msg MsgBeginUnbonding) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -118,8 +118,8 @@ func (msg MsgEmergencyUnbond) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgEmergencyUnbond) Route() string { return RouterKey }
+// Route implements the LegacyMsg interface.
+func (msg MsgEmergencyUnbond) Route() string { return "" }
 
 // Type implements the sdk.Msg interface.
 func (msg MsgEmergencyUnbond) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -149,8 +149,8 @@ func (msg MsgSponsor) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgSponsor) Route() string { return RouterKey }
+// Route implements the LegacyMsg interface.
+func (msg MsgSponsor) Route() string { return "" }
 
 // Type implements the sdk.Msg interface.
 func (msg MsgSponsor) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -180,8 +180,8 @@ func (msg MsgGovSetParams) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgGovSetParams) Route() string { return RouterKey }
+// Route implements the LegacyMsg interface.
+func (msg MsgGovSetParams) Route() string { return "" }
 
 // Type implements the sdk.Msg interface.
 func (msg MsgGovSetParams) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -219,8 +219,8 @@ func (msg MsgGovCreatePrograms) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-// Route implements the sdk.Msg interface.
-func (msg MsgGovCreatePrograms) Route() string { return RouterKey }
+// Route implements the LegacyMsg interface.
+func (msg MsgGovCreatePrograms) Route() string { return "" }
 
 // Type implements the sdk.Msg interface.
 func (msg MsgGovCreatePrograms) Type() string { return sdk.MsgTypeURL(&msg) }
