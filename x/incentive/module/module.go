@@ -122,21 +122,6 @@ func (AppModule) ConsensusVersion() uint64 {
 	return 1
 }
 
-// Deprecated: Route returns the message routing key for the x/incentive module.
-func (am AppModule) Route() sdk.Route {
-	return sdk.Route{}
-}
-
-// QuerierRoute returns the x/incentive module's query routing key.
-func (AppModule) QuerierRoute() string { return incentive.QuerierRoute }
-
-// LegacyQuerierHandler returns a no-op legacy querier.
-func (am AppModule) LegacyQuerierHandler(_ *codec.LegacyAmino) sdk.Querier {
-	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
-		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", incentive.ModuleName)
-	}
-}
-
 // RegisterServices registers gRPC services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	incentive.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
@@ -173,3 +158,9 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return EndBlocker(ctx, am.keeper)
 }
+
+// DEPRECATED
+
+func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier { return nil }
+func (AppModule) QuerierRoute() string                                { return "" }
+func (AppModule) Route() sdk.Route                                    { return sdk.Route{} }

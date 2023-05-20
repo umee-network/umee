@@ -28,7 +28,7 @@ func NewMsgAggregateExchangeRatePrevote(
 }
 
 // Route implements LegacyMsg interface
-func (msg MsgAggregateExchangeRatePrevote) Route() string { return RouterKey }
+func (msg MsgAggregateExchangeRatePrevote) Route() string { return "" }
 
 // Type implements LegacyMsg interface
 func (msg MsgAggregateExchangeRatePrevote) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -83,7 +83,7 @@ func NewMsgAggregateExchangeRateVote(
 }
 
 // Route implements LegacyMsg interface
-func (msg MsgAggregateExchangeRateVote) Route() string { return RouterKey }
+func (msg MsgAggregateExchangeRateVote) Route() string { return "" }
 
 // Type implements LegacyMsg interface
 func (msg MsgAggregateExchangeRateVote) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -148,7 +148,7 @@ func NewMsgDelegateFeedConsent(operatorAddress sdk.ValAddress, feederAddress sdk
 }
 
 // Route implements LegacyMsg interface
-func (msg MsgDelegateFeedConsent) Route() string { return RouterKey }
+func (msg MsgDelegateFeedConsent) Route() string { return "" }
 
 // Type implements LegacyMsg interface
 func (msg MsgDelegateFeedConsent) Type() string { return sdk.MsgTypeURL(&msg) }
