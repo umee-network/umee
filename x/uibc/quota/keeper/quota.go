@@ -39,7 +39,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
 func (k Keeper) GetTokenOutflows(denom string) sdk.DecCoin {
-	amount := store.GetDec(k.store, uibc.KeyTotalOutflows(denom), "total_outflow")
+	amount := store.GetDec(k.store, KeyTotalOutflows(denom), "total_outflow")
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 
@@ -53,7 +53,7 @@ func (k Keeper) SetTokenOutflows(outflows sdk.DecCoins) {
 
 // SetTokenOutflow save the outflows of denom into store.
 func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
-	key := uibc.KeyTotalOutflows(outflow.Denom)
+	key := KeyTotalOutflows(outflow.Denom)
 	err := store.SetDec(k.store, key, outflow.Amount, "total_outflow")
 	util.Panic(err)
 }

@@ -21,7 +21,7 @@ func (msg *MsgGovUpdateQuota) GetTitle() string { return msg.Title }
 func (msg *MsgGovUpdateQuota) GetDescription() string { return msg.Description }
 
 // Route implements Msg
-func (msg MsgGovUpdateQuota) Route() string { return RouterKey }
+func (msg MsgGovUpdateQuota) Route() string { return "" }
 
 // Type implements Msg
 func (msg MsgGovUpdateQuota) Type() string { return sdk.MsgTypeURL(&msg) }
@@ -70,7 +70,7 @@ func (msg *MsgGovSetIBCStatus) GetTitle() string { return msg.Title }
 func (msg *MsgGovSetIBCStatus) GetDescription() string { return msg.Description }
 
 // Route implements Msg
-func (msg MsgGovSetIBCStatus) Route() string { return RouterKey }
+func (msg MsgGovSetIBCStatus) Route() string { return "" }
 
 // Type implements Msg
 func (msg MsgGovSetIBCStatus) Type() string { return sdk.MsgTypeURL(&msg) }
