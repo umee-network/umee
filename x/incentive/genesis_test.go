@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v4/util/coin"
 	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
 )
 
@@ -54,15 +55,7 @@ func TestValidateGenesis(t *testing.T) {
 	assert.ErrorContains(t, duplicateRewardAccumulator.Validate(), "duplicate reward accumulators")
 
 	invalidProgram := IncentiveProgram{}
-	validProgram := IncentiveProgram{
-		ID:               1,
-		StartTime:        1,
-		Duration:         1,
-		UToken:           "u/uumee",
-		Funded:           false,
-		TotalRewards:     sdk.NewInt64Coin("uumee", 1),
-		RemainingRewards: sdk.NewInt64Coin("uumee", 0),
-	}
+	validProgram := NewIncentiveProgram(1, 1, 1, "u/uumee", sdk.NewInt64Coin("uumee", 1), coin.Zero("uumee"), false)
 
 	invalidUpcomingProgram := DefaultGenesis()
 	invalidUpcomingProgram.UpcomingPrograms = []IncentiveProgram{invalidProgram}
