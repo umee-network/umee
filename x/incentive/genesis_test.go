@@ -44,7 +44,7 @@ func TestValidateGenesis(t *testing.T) {
 
 	invalidRewardAccumulator := DefaultGenesis()
 	invalidRewardAccumulator.RewardAccumulators = []RewardAccumulator{{}}
-	assert.ErrorIs(t, invalidRewardAccumulator.Validate(), leveragetypes.ErrNotUToken)
+	assert.ErrorContains(t, invalidRewardAccumulator.Validate(), "invalid denom")
 
 	ra := RewardAccumulator{
 		UToken:  "u/uumee",
@@ -172,4 +172,109 @@ func TestValidateIncentiveProgram(t *testing.T) {
 	assert.NilError(t, validProgram.ValidatePassed())
 	assert.ErrorIs(t, validProposed.ValidatePassed(), ErrInvalidProgramID, "passed program with zero ID")
 	assert.ErrorIs(t, invalidStartTime.ValidatePassed(), ErrInvalidProgramStart, "passed invalid program")
+}
+
+func TestValidateStructs(t *testing.T) {
+	validAddr := "umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm"
+	validBond := NewBond(validAddr, coin.New("u/uumee", 1))
+	assert.NilError(t, validBond.Validate())
+
+	invalidBond := validBond
+	invalidBond.Account = ""
+	assert.ErrorContains(t, invalidBond.Validate(), "empty address string is not allowed")
+
+	invalidBond = validBond
+	invalidBond.UToken = sdk.Coin{}
+	assert.ErrorContains(t, invalidBond.Validate(), "invalid denom")
+
+	invalidBond = validBond
+	invalidBond.UToken.Denom = "uumee"
+	assert.ErrorIs(t, invalidBond.Validate(), leveragetypes.ErrNotUToken)
+
+	validTracker := NewRewardTracker(validAddr, "u/uumee", sdk.NewDecCoins(
+		sdk.NewDecCoin("uumee", sdk.OneInt()),
+	))
+	assert.NilError(t, validTracker.Validate())
+
+	invalidTracker := validTracker
+	invalidTracker.UToken = ""
+	assert.ErrorContains(t, invalidTracker.Validate(), "invalid denom")
+
+	invalidTracker.UToken = "uumee"
+	assert.ErrorIs(t, invalidTracker.Validate(), leveragetypes.ErrNotUToken)
+
+	invalidTracker = validTracker
+	invalidTracker.Account = ""
+	assert.ErrorContains(t, invalidTracker.Validate(), "empty address string is not allowed")
+
+	invalidTracker = validTracker
+	invalidTracker.Rewards[0].Denom = ""
+	assert.ErrorContains(t, invalidTracker.Validate(), "invalid denom")
+
+	invalidTracker = validTracker
+	invalidTracker.Rewards[0].Denom = "u/uumee"
+	assert.ErrorIs(t, invalidTracker.Validate(), leveragetypes.ErrUToken)
+
+	validAccumulator := NewRewardAccumulator("u/uumee", 6, sdk.NewDecCoins(
+		sdk.NewDecCoin("uumee", sdk.OneInt()),
+	))
+	assert.NilError(t, validAccumulator.Validate())
+
+	invalidAccumulator := validAccumulator
+	invalidAccumulator.UToken = ""
+	assert.ErrorContains(t, invalidAccumulator.Validate(), "invalid denom")
+
+	invalidAccumulator.UToken = "uumee"
+	assert.ErrorIs(t, invalidAccumulator.Validate(), leveragetypes.ErrNotUToken)
+
+	invalidAccumulator = validAccumulator
+	invalidAccumulator.Rewards[0].Denom = ""
+	assert.ErrorContains(t, invalidAccumulator.Validate(), "invalid denom")
+
+	invalidAccumulator = validAccumulator
+	invalidAccumulator.Rewards[0].Denom = "u/uumee"
+	assert.ErrorIs(t, invalidAccumulator.Validate(), leveragetypes.ErrUToken)
+
+	validUnbonding := NewUnbonding(1, 1, coin.New("u/uumee", 1))
+	assert.NilError(t, validUnbonding.Validate())
+
+	invalidUnbonding := validUnbonding
+	invalidUnbonding.End = 0
+	assert.ErrorIs(t, invalidUnbonding.Validate(), ErrInvalidUnbonding)
+
+	invalidUnbonding = validUnbonding
+	invalidUnbonding.UToken.Denom = "uumee"
+	assert.ErrorIs(t, invalidUnbonding.Validate(), leveragetypes.ErrNotUToken)
+
+	invalidUnbonding = validUnbonding
+	invalidUnbonding.UToken = sdk.Coin{Denom: "u/uumee", Amount: sdk.NewInt(-1)}
+	assert.ErrorContains(t, invalidUnbonding.Validate(), "negative coin amount")
+
+	validAccountUnbondings := NewAccountUnbondings(validAddr, "u/uumee", []Unbonding{validUnbonding})
+	assert.NilError(t, validAccountUnbondings.Validate())
+
+	invalidAccountUnbondings := validAccountUnbondings
+	invalidAccountUnbondings.Account = ""
+	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "empty address")
+
+	invalidAccountUnbondings = validAccountUnbondings
+	invalidAccountUnbondings.UToken = ""
+	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "invalid denom")
+
+	invalidAccountUnbondings = validAccountUnbondings
+	invalidAccountUnbondings.UToken = "uumee"
+	assert.ErrorIs(t, invalidAccountUnbondings.Validate(), leveragetypes.ErrNotUToken)
+
+	invalidAccountUnbondings = validAccountUnbondings
+	invalidAccountUnbondings.Unbondings[0].UToken.Denom = "uumee"
+	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "does not match")
+
+	invalidAccountUnbondings = validAccountUnbondings
+	invalidAccountUnbondings.Unbondings[0].End = 0
+	assert.ErrorIs(t, invalidAccountUnbondings.Validate(), ErrInvalidUnbonding)
+	invalidAccountUnbondings.Unbondings[0] = validUnbonding // the value in validAccountUnbondings was modified
+
+	invalidAccountUnbondings = validAccountUnbondings
+	invalidAccountUnbondings.Unbondings[0].UToken = sdk.Coin{Denom: "u/uumee", Amount: sdk.NewInt(-1)}
+	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "negative coin amount")
 }

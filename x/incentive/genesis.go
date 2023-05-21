@@ -283,6 +283,9 @@ func (rt RewardTracker) Validate() error {
 	if _, err := sdk.AccAddressFromBech32(rt.Account); err != nil {
 		return err
 	}
+	if err := sdk.ValidateDenom(rt.UToken); err != nil {
+		return err
+	}
 	if !leveragetypes.HasUTokenPrefix(rt.UToken) {
 		return leveragetypes.ErrNotUToken.Wrap(rt.UToken)
 	}
@@ -307,6 +310,9 @@ func NewRewardAccumulator(uDenom string, exponent uint32, coins sdk.DecCoins) Re
 }
 
 func (ra RewardAccumulator) Validate() error {
+	if err := sdk.ValidateDenom(ra.UToken); err != nil {
+		return err
+	}
 	if !leveragetypes.HasUTokenPrefix(ra.UToken) {
 		return leveragetypes.ErrNotUToken.Wrap(ra.UToken)
 	}
@@ -334,6 +340,9 @@ func (u Unbonding) Validate() error {
 	if u.End < u.Start {
 		return ErrInvalidUnbonding.Wrap("start time > end time")
 	}
+	if !leveragetypes.HasUTokenPrefix(u.UToken.Denom) {
+		return leveragetypes.ErrNotUToken.Wrap(u.UToken.Denom)
+	}
 	return u.UToken.Validate()
 }
 
@@ -348,6 +357,9 @@ func NewAccountUnbondings(addr, uDenom string, unbondings []Unbonding) AccountUn
 
 func (au AccountUnbondings) Validate() error {
 	if _, err := sdk.AccAddressFromBech32(au.Account); err != nil {
+		return err
+	}
+	if err := sdk.ValidateDenom(au.UToken); err != nil {
 		return err
 	}
 	if !leveragetypes.HasUTokenPrefix(au.UToken) {
