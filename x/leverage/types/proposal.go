@@ -20,7 +20,7 @@ func (msg *MsgGovUpdateRegistry) GetTitle() string { return msg.Title }
 func (msg *MsgGovUpdateRegistry) GetDescription() string { return msg.Description }
 
 // GetDescription returns the routing key of a community pool spend proposal.
-func (msg *MsgGovUpdateRegistry) ProposalRoute() string { return RouterKey }
+func (msg *MsgGovUpdateRegistry) ProposalRoute() string { return ModuleName }
 
 // ProposalType returns the type of a community pool spend proposal.
 func (msg *MsgGovUpdateRegistry) ProposalType() string { return proposalTypeMsgGovUpdateRegistry }

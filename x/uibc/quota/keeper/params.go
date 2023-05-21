@@ -13,14 +13,14 @@ func (k Keeper) SetParams(params uibc.Params) error {
 	if err != nil {
 		return err
 	}
-	k.store.Set(uibc.KeyPrefixParams, bz)
+	k.store.Set(keyParams, bz)
 
 	return nil
 }
 
 // GetParams gets the x/uibc module's parameters.
 func (k Keeper) GetParams() (params uibc.Params) {
-	bz := k.store.Get(uibc.KeyPrefixParams)
+	bz := k.store.Get(keyParams)
 	if bz == nil {
 		return params
 	}
