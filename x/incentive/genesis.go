@@ -2,6 +2,7 @@ package incentive
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -58,51 +59,95 @@ func (gs GenesisState) Validate() error {
 		return ErrDecreaseLastRewardTime.Wrap("last reward time must not be negative")
 	}
 
-	// TODO: enforce no duplicate (account,denom)
+	m := map[string]bool{}
 	for _, rt := range gs.RewardTrackers {
+		// enforce no duplicate (account,denom)
+		s := rt.Account + rt.UToken
+		if err := noDuplicateString(m, s, "reward trackers"); err != nil {
+			return err
+		}
 		if err := rt.Validate(); err != nil {
 			return err
 		}
 	}
 
-	// TODO: enforce no duplicate denoms
+	m = map[string]bool{}
 	for _, ra := range gs.RewardAccumulators {
+		// enforce no duplicate denoms
+		s := ra.UToken
+		if err := noDuplicateString(m, s, "reward accumulators"); err != nil {
+			return err
+		}
 		if err := ra.Validate(); err != nil {
 			return err
 		}
 	}
 
-	// TODO: enforce no duplicate program IDs
+	m = map[string]bool{}
+	// enforce no duplicate program IDs
 	for _, up := range gs.UpcomingPrograms {
+		s := fmt.Sprintf("%d", up.ID)
+		if err := noDuplicateString(m, s, "upcoming program ID"); err != nil {
+			return err
+		}
 		if err := up.ValidatePassed(); err != nil {
 			return err
 		}
 	}
 	for _, op := range gs.OngoingPrograms {
+		s := fmt.Sprintf("%d", op.ID)
+		if err := noDuplicateString(m, s, "ongoing program ID"); err != nil {
+			return err
+		}
 		if err := op.ValidatePassed(); err != nil {
 			return err
 		}
 	}
 	for _, cp := range gs.CompletedPrograms {
+		s := fmt.Sprintf("%d", cp.ID)
+		if err := noDuplicateString(m, s, "completed program ID"); err != nil {
+			return err
+		}
 		if err := cp.ValidatePassed(); err != nil {
 			return err
 		}
 	}
 
-	// TODO: enforce no duplicate (account,denom)
+	m = map[string]bool{}
 	for _, b := range gs.Bonds {
+		// enforce no duplicate (account,denom)
+		s := b.Account + b.UToken.Denom
+		if err := noDuplicateString(m, s, "bonds"); err != nil {
+			return err
+		}
 		if err := b.Validate(); err != nil {
 			return err
 		}
 	}
 
-	// TODO: enforce no duplicate (account,denom)
+	m = map[string]bool{}
 	for _, au := range gs.AccountUnbondings {
+		// enforce no duplicate (account,denom)
+		s := au.Account + au.UToken
+		if err := noDuplicateString(m, s, "account unbondings"); err != nil {
+			return err
+		}
 		if err := au.Validate(); err != nil {
 			return err
 		}
 	}
 
+	return nil
+}
+
+// noDuplicateString checks to see if a string is already present in a map
+// and then adds it to the map. If it was already present, an error is returned.
+// used to check all uniqueness requirements in genesis state.
+func noDuplicateString(m map[string]bool, s, errMsg string) error {
+	if _, ok := m[s]; !ok {
+		return fmt.Errorf("duplicaate %s: %s", errMsg, s)
+	}
+	m[s] = true
 	return nil
 }
 
