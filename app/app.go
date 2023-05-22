@@ -222,6 +222,7 @@ func init() {
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasm.ModuleName:          {authtypes.Burner},
 
+		incentive.ModuleName:   nil,
 		oracletypes.ModuleName: nil,
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
