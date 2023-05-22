@@ -10,6 +10,7 @@ import (
 // Client sdkclient.Client and provides umee chain specific transactions and queries.
 type Client struct {
 	sdkclient.Client
+	encCfg sdkparams.EncodingConfig
 }
 
 // NewClient constructs Client object.
@@ -29,6 +30,7 @@ func NewClient(
 	}
 	return Client{
 		Client: c,
+		encCfg: encCfg,
 	}, nil
 }
 

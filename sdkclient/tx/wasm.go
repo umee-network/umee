@@ -43,7 +43,7 @@ func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg []byte) (*sdk
 	return c.BroadcastTx(&msg)
 }
 
-func (c *Client) WasmExecuteContract(contractAddr, execMsg string) (*sdk.TxResponse, error) {
+func (c *Client) WasmExecuteContractByAccSeq(contractAddr string, execMsg []byte, accSeq uint64) (*sdk.TxResponse, error) {
 	fromAddr, err := c.KeyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
@@ -53,10 +53,16 @@ func (c *Client) WasmExecuteContract(contractAddr, execMsg string) (*sdk.TxRespo
 		Sender:   fromAddr.String(),
 		Contract: contractAddr,
 		Funds:    amount,
-		Msg:      []byte(execMsg),
+		Msg:      execMsg,
 	}
+	if accSeq != 0 {
+		return c.BroadcastTxWithAccSeq(accSeq).BroadcastTxWithAsyncBlock().BroadcastTx(&msg)
+	}
+	return c.BroadcastTxWithAsyncBlock().BroadcastTx(&msg)
+}
 
-	return c.BroadcastTx(&msg)
+func (c *Client) WasmExecuteContract(contractAddr string, execMsg []byte) (*sdk.TxResponse, error) {
+	return c.WasmExecuteContractByAccSeq(contractAddr, execMsg, 0)
 }
 
 // Prepares MsgStoreCode object from flags with gzipped wasm byte code field

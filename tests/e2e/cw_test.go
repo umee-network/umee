@@ -1,24 +1,17 @@
 package e2e
 
-import (
-	"encoding/json"
-	"strconv"
-	"testing"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/stretchr/testify/suite"
-)
+import "github.com/umee-network/umee/v4/tests/util"
 
 type TestCosmwasm struct {
 	IntegrationTestSuite
-	StoreCode    uint64
-	ContractAddr string
-	Sender       string
+	util.Cosmwasm
 }
 
-func TestCosmwasmSuite(t *testing.T) {
-	suite.Run(t, new(TestCosmwasm))
-}
+// TODO : needs to setup live network with dockernet
+
+// func TestCosmwasmSuite(t *testing.T) {
+// 	suite.Run(t, new(TestCosmwasm))
+// }
 
 // TODO: re-enable this tests when we do dockernet integration
 // func (cw *TestCosmwasm) TestCW20() {
@@ -43,47 +36,3 @@ func TestCosmwasmSuite(t *testing.T) {
 // 	cw.CWQuery(query)
 // 	cw.Require().False(true)
 // }
-
-func (cw *TestCosmwasm) DeployWasmContract(path string) {
-	resp, err := cw.umee.Tx.TxSubmitWasmContract(path)
-	cw.Require().NoError(err)
-	storeCode := cw.GetAttributeValue(*resp, "store_code", "code_id")
-	cw.StoreCode, err = strconv.ParseUint(storeCode, 10, 64)
-	cw.Require().NoError(err)
-}
-
-func (cw *TestCosmwasm) MarshalAny(any interface{}) []byte {
-	data, err := json.Marshal(any)
-	cw.Require().NoError(err)
-	return data
-}
-
-func (cw *TestCosmwasm) InstantiateContract() {
-	resp, err := cw.umee.Tx.WasmInstantiateContract(cw.StoreCode, []byte("{}"))
-	cw.ContractAddr = cw.GetAttributeValue(*resp, "wasm", "_contract_address")
-	cw.Require().NoError(err)
-}
-
-func (cw *TestCosmwasm) CWQuery(query string) {
-	_, err := cw.umee.QueryContract(cw.ContractAddr, []byte(query))
-	cw.Require().NoError(err)
-}
-
-func (cw *TestCosmwasm) CWExecute(execMsg string) {
-	_, err := cw.umee.Tx.WasmExecuteContract(cw.ContractAddr, execMsg)
-	cw.Require().NoError(err)
-}
-
-func (cw *TestCosmwasm) GetAttributeValue(resp sdk.TxResponse, eventName, attrKey string) string {
-	var attrVal string
-	for _, event := range resp.Logs[0].Events {
-		if event.Type == eventName {
-			for _, attribute := range event.Attributes {
-				if attribute.Key == attrKey {
-					attrVal = attribute.Value
-				}
-			}
-		}
-	}
-	return attrVal
-}

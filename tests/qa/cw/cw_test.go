@@ -1,10 +1,16 @@
-package cw_test
+//go:build qa
+// +build qa
+
+package cw
 
 import (
 	"encoding/json"
+	"math/rand"
 	"os"
-	"strconv"
+	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"gotest.tools/v3/assert"
@@ -12,52 +18,52 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v4/app"
 	"github.com/umee-network/umee/v4/client"
-	"github.com/umee-network/umee/v4/tests/qa/cw"
+	cwutil "github.com/umee-network/umee/v4/tests/util"
 )
 
 const (
-	cwBaseTransferPath = "../../artifacts/cw4_group-aarch64.wasm"
+	cwGroupPath = "../../artifacts/cw4_group-aarch64.wasm"
 )
 
 var (
-	SucceessRespCode = uint32(0)
-	TotalAccs        = 1000
+	SucceessRespCode   = uint32(0)
+	TotalAccs          = 1000
+	TotalTxsExec       = 100
+	cwGroupMsgExecFunc func(msg CWGroupExecMsg, wg *sync.WaitGroup, accSeq uint64)
 )
 
-func TestCWTransfer(t *testing.T) {
-	privateKeys := make([]*secp256k1.PrivKey, 0)
+func TestCWPlusGroup(t *testing.T) {
+	cw := &cwutil.Cosmwasm{}
+	cw.SetTestingF(t)
+
 	accAddrs := make([]sdk.AccAddress, 0)
 	for i := 0; i < TotalAccs; i++ {
 		privateKey := secp256k1.GenPrivKey()
-		privateKeys = append(privateKeys, privateKey)
 		pubKey := privateKey.PubKey()
 		accAddrs = append(accAddrs, sdk.AccAddress(pubKey.Address()))
 	}
+
 	// remove if old keyring exists for testing
 	os.RemoveAll("./keyring-test")
 	encConfig := app.MakeEncodingConfig()
-	cc, err := cw.ReadConfig("./config_example.yaml")
+	cc, err := ReadConfig("./config_example.yaml")
 	assert.NilError(t, err)
+	// umee client
 	client, err := client.NewClient(cc.ChainID, cc.RPC, cc.GRPC, cc.Mnemonics, 1.5, encConfig)
 	assert.NilError(t, err)
-
-	resp, err := client.Tx.TxSubmitWasmContract(cwBaseTransferPath)
-	assert.NilError(t, err)
-	assert.Equal(t, SucceessRespCode, resp.Code)
-	respStoreCode := cw.GetAttributeValue(*resp, "store_code", "code_id")
-	assert.Equal(t, uint32(0), resp.Code)
-	storeCode, err := strconv.ParseUint(respStoreCode, 10, 64)
-	assert.NilError(t, err)
+	cw.SetUmeeClient(client)
+	cw.DeployWasmContract(cwGroupPath)
 
 	admin, err := client.Tx.KeyringRecord[0].GetAddress()
 	assert.NilError(t, err)
 
 	// instantiate Contract
-	initMsg := InitMsg{
+	initMsg := CwGroupInitMsg{
 		Admin:   admin.String(),
-		Members: []Member{{Addr: admin.String(), Weight: 1}},
+		Members: make([]Member, 0),
 	}
 
+	initMsg.Members = append(initMsg.Members, Member{Addr: admin.String(), Weight: 1})
 	for i := 0; i < TotalAccs; i++ {
 		initMsg.Members = append(initMsg.Members, Member{
 			Addr:   accAddrs[i].String(),
@@ -65,23 +71,91 @@ func TestCWTransfer(t *testing.T) {
 		})
 	}
 
-	msg, err := json.Marshal(initMsg)
+	msg, err := initMsg.Marshal()
 	assert.NilError(t, err)
-	initResp, err := client.Tx.WasmInstantiateContract(storeCode, msg)
-	assert.NilError(t, err)
-	assert.Equal(t, SucceessRespCode, initResp.Code)
-	contractAddr := cw.GetAttributeValue(*initResp, "instantiate", "_contract_address")
+
+	cw.InstantiateContract(msg)
 
 	// query the contract
 	cwGroupQuery := CWGroupQuery{
-		Admin:       nil,
-		Hooks:       nil,
-		ListMembers: &ListMembers{},
+		ListMembers: &ListMembers{Limit: 30},
 	}
-
 	queryMsg, err := json.Marshal(cwGroupQuery)
 	assert.NilError(t, err)
-	_, err = client.QueryContract(contractAddr, queryMsg)
+
+	queryResp := cw.CWQuery(queryMsg)
+	var listResp ListMembersResponse
+	err = json.Unmarshal([]byte(queryResp.Data), &listResp)
 	assert.NilError(t, err)
-	// assert.Equal(t, true, false)
+	assert.Equal(t, 30, len(listResp.Members))
+
+	// doing random txs to flood the cosmwasm network
+	var wg sync.WaitGroup
+	accSeq, err := client.GetAuthSeq(admin.String())
+	assert.NilError(t, err)
+	total := 0
+
+	cwGroupMsgExecFunc = func(msg CWGroupExecMsg, wg *sync.WaitGroup, accSeq uint64) {
+		execMsg, err := msg.Marshal()
+		assert.NilError(t, err)
+		txResp, err := cw.CWExecuteWithSeqAndAsyncResp(execMsg, accSeq)
+		if err != nil && strings.Contains(err.Error(), "account sequence") {
+			time.Sleep(time.Second * 1)
+			cwGroupMsgExecFunc(msg, wg, accSeq)
+		}
+		if txResp == nil || (txResp != nil && txResp.Code != SucceessRespCode) {
+			time.Sleep(time.Second * 1)
+			cwGroupMsgExecFunc(msg, wg, accSeq)
+		}
+		if txResp != nil && txResp.Code == SucceessRespCode {
+			total = total + 1
+			t.Log("total txs successfully executed =", total)
+			wg.Done()
+		}
+	}
+
+	for i := 0; i < TotalTxsExec; i++ {
+		wg.Add(1)
+		index := rand.Intn(1000)
+		updateMembers := CWGroupExecMsg{
+			UpdateMembers: &UpdateMembers{
+				Remove: []string{},
+				Add: []Member{
+					{
+						Addr:   accAddrs[index].String(),
+						Weight: 1,
+					},
+				},
+			},
+		}
+		accSeq = accSeq + 1
+		go cwGroupMsgExecFunc(updateMembers, &wg, accSeq)
+	}
+
+	// updating the admin...
+	wg.Add(1)
+	updateAdmin := CWGroupExecMsg{
+		UpdateAdmin: &UpdateAdmin{
+			Admin: accAddrs[1].String(),
+		},
+	}
+	go func(accSeq uint64) {
+		defer wg.Done()
+		cwGroupMsgExecFunc(updateAdmin, &wg, accSeq)
+	}(accSeq + 1)
+
+	// waiting
+	wg.Wait()
+
+	// query the update admin info
+	cwGroupQuery = CWGroupQuery{
+		Admin: &Admin{},
+	}
+	queryMsg, err = json.Marshal(cwGroupQuery)
+	assert.NilError(t, err)
+	queryResp = cw.CWQuery(queryMsg)
+	var adminQuery AdminResp
+	err = json.Unmarshal([]byte(queryResp.Data), &adminQuery)
+	assert.NilError(t, err)
+	assert.Equal(t, updateAdmin.UpdateAdmin.Admin, adminQuery.Admin)
 }
