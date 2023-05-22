@@ -205,3 +205,37 @@ func (k *testKeeper) programFunded(programID uint32) bool {
 	}
 	return program.Funded
 }
+
+// initScenario1 creates a scenario with upcoming, ongoing, and completed incentive
+// programs as well as a bonded account with ongoing unbondings and both claimed
+// and pending rewards. Creates a complex state for genesis and query tests.
+func (k *testKeeper) initScenario1() sdk.AccAddress {
+	// init a community fund with 1000 UMEE and 10 ATOM available for funding
+	k.initCommunityFund(
+		coin.New(umee, 1000_000000),
+		coin.New(atom, 100_000000),
+	)
+
+	// init a supplier with bonded uTokens
+	alice := k.newBondedAccount(
+		coin.New(u_umee, 100_000000),
+		coin.New(u_atom, 50_000000),
+	)
+	// create some in-progress unbondings
+	k.advanceTimeTo(90)
+	k.mustBeginUnbond(alice, coin.New(u_umee, 5_000000))
+	k.mustBeginUnbond(alice, coin.New(u_umee, 5_000000))
+	k.mustBeginUnbond(alice, coin.New(u_atom, 5_000000))
+
+	// create three separate programs, designed to be upcoming, ongoing, and completed at t=100
+	k.addIncentiveProgram(u_umee, 10, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(u_umee, 90, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(u_umee, 140, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+
+	// start programs and claim some rewards to set nonzero reward trackers
+	k.advanceTimeTo(95)
+	k.mustClaim(alice)
+	k.advanceTimeTo(100)
+
+	return alice
+}

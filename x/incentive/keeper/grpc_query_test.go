@@ -10,6 +10,149 @@ import (
 	"github.com/umee-network/umee/v4/x/incentive"
 )
 
+func TestQueries(t *testing.T) {
+	k := newTestKeeper(t)
+	q := Querier{k.Keeper}
+
+	alice := k.initScenario1()
+
+	expect1 := &incentive.QueryAccountBondsResponse{
+		Bonded: sdk.NewCoins(
+			coin.New(u_umee, 90_000000),
+			coin.New(u_atom, 45_000000),
+		),
+		Unbonding: sdk.NewCoins(
+			coin.New(u_umee, 10_000000),
+			coin.New(u_atom, 5_000000),
+		),
+		Unbondings: []incentive.Unbonding{
+			{
+				Start:  90,
+				End:    86490,
+				UToken: coin.New(u_atom, 5_000000),
+			},
+			{
+				Start:  90,
+				End:    86490,
+				UToken: coin.New(u_umee, 5_000000),
+			},
+			{
+				Start:  90,
+				End:    86490,
+				UToken: coin.New(u_umee, 5_000000),
+			},
+		},
+	}
+	resp1, err := q.AccountBonds(k.ctx, &incentive.QueryAccountBonds{
+		Address: alice.String(),
+	})
+	require.NoError(t, err)
+	require.Equal(t, expect1, resp1, "account bonds query")
+
+	expect2 := &incentive.QueryPendingRewardsResponse{
+		Rewards: sdk.NewCoins(
+			coin.New(umee, 13_333332),
+		),
+	}
+	resp2, err := q.PendingRewards(k.ctx, &incentive.QueryPendingRewards{
+		Address: alice.String(),
+	})
+	require.NoError(t, err)
+	require.Equal(t, expect2, resp2, "pending rewards query")
+
+	expect3 := &incentive.QueryTotalBondedResponse{
+		Bonded: sdk.NewCoins(
+			coin.New(u_umee, 90_000000),
+			coin.New(u_atom, 45_000000),
+		),
+	}
+	resp3, err := q.TotalBonded(k.ctx, &incentive.QueryTotalBonded{})
+	require.NoError(t, err)
+	require.Equal(t, expect3, resp3, "total bonded query (all denoms)")
+
+	expect4 := &incentive.QueryTotalBondedResponse{
+		Bonded: sdk.NewCoins(
+			coin.New(u_umee, 90_000000),
+		),
+	}
+	resp4, err := q.TotalBonded(k.ctx, &incentive.QueryTotalBonded{
+		Denom: u_umee,
+	})
+	require.NoError(t, err)
+	require.Equal(t, expect4, resp4, "total bonded query (one denom)")
+
+	expect5 := &incentive.QueryTotalUnbondingResponse{
+		Unbonding: sdk.NewCoins(
+			coin.New(u_umee, 10_000000),
+			coin.New(u_atom, 5_000000),
+		),
+	}
+	resp5, err := q.TotalUnbonding(k.ctx, &incentive.QueryTotalUnbonding{})
+	require.NoError(t, err)
+	require.Equal(t, expect5, resp5, "total unbonding query (all denoms)")
+
+	expect6 := &incentive.QueryTotalUnbondingResponse{
+		Unbonding: sdk.NewCoins(
+			coin.New(u_umee, 10_000000),
+		),
+	}
+	resp6, err := q.TotalUnbonding(k.ctx, &incentive.QueryTotalUnbonding{
+		Denom: u_umee,
+	})
+	require.NoError(t, err)
+	require.Equal(t, expect6, resp6, "total unbonding query (one denom)")
+
+	expect7 := &incentive.QueryLastRewardTimeResponse{
+		Time: 100,
+	}
+	resp7, err := q.LastRewardTime(k.ctx, &incentive.QueryLastRewardTime{})
+	require.NoError(t, err)
+	require.Equal(t, expect7, resp7, "last reward time query")
+
+	expect8 := &incentive.QueryParamsResponse{
+		Params: k.GetParams(k.ctx),
+	}
+	resp8, err := q.Params(k.ctx, &incentive.QueryParams{})
+	require.NoError(t, err)
+	require.Equal(t, expect8, resp8, "params query")
+
+	programs, err := k.getAllIncentivePrograms(k.ctx, incentive.ProgramStatusUpcoming)
+	require.NoError(t, err)
+	expect9 := &incentive.QueryUpcomingIncentiveProgramsResponse{
+		Programs: programs,
+	}
+	resp9, err := q.UpcomingIncentivePrograms(k.ctx, &incentive.QueryUpcomingIncentivePrograms{})
+	require.NoError(t, err)
+	require.Equal(t, expect9, resp9, "upcoming programs query")
+
+	programs, err = k.getAllIncentivePrograms(k.ctx, incentive.ProgramStatusOngoing)
+	require.NoError(t, err)
+	expect10 := &incentive.QueryOngoingIncentiveProgramsResponse{
+		Programs: programs,
+	}
+	resp10, err := q.OngoingIncentivePrograms(k.ctx, &incentive.QueryOngoingIncentivePrograms{})
+	require.NoError(t, err)
+	require.Equal(t, expect10, resp10, "ongoing programs query")
+
+	programs, err = k.getAllIncentivePrograms(k.ctx, incentive.ProgramStatusCompleted)
+	require.NoError(t, err)
+	expect11 := &incentive.QueryCompletedIncentiveProgramsResponse{
+		Programs: programs,
+	}
+	resp11, err := q.CompletedIncentivePrograms(k.ctx, &incentive.QueryCompletedIncentivePrograms{})
+	require.NoError(t, err)
+	require.Equal(t, expect11, resp11, "completed programs query")
+
+	program, _, err := k.getIncentiveProgram(k.ctx, 1)
+	require.NoError(t, err)
+	expect12 := &incentive.QueryIncentiveProgramResponse{
+		Program: program,
+	}
+	resp12, err := q.IncentiveProgram(k.ctx, &incentive.QueryIncentiveProgram{Id: 1})
+	require.NoError(t, err)
+	require.Equal(t, expect12, resp12, "incentive program query")
+}
+
 func TestAPYQuery(t *testing.T) {
 	k := newTestKeeper(t)
 	q := Querier{k.Keeper}
