@@ -90,6 +90,15 @@ func (k *testKeeper) mustBond(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
+// mustClaim claims rewards for an account and requires no errors. Use when setting up incentive scenarios.
+func (k *testKeeper) mustClaim(addr sdk.AccAddress) {
+	msg := &incentive.MsgClaim{
+		Account: addr.String(),
+	}
+	_, err := k.msrv.Claim(k.ctx, msg)
+	require.NoError(k.t, err, "claim")
+}
+
 // mustBeginUnbond unbonds utokens from an account and requires no errors. Use when setting up incentive scenarios.
 func (k *testKeeper) mustBeginUnbond(addr sdk.AccAddress, coins ...sdk.Coin) {
 	for _, coin := range coins {
