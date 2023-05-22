@@ -52,4 +52,4 @@ private*
 
 # Swagger UI 
 swagger/statik/statik.go
-umee/swagger/swagger-ui
+swagger/swagger-ui
