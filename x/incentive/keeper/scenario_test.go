@@ -36,7 +36,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 
 	// init a supplier with bonded uTokens
 	alice := k.newBondedAccount(
-		coin.New("u/"+fixtures.UmeeDenom, 100_000000),
+		coin.New(u_umee, 100_000000),
 	)
 
 	// create three separate programs for 10UMEE, which will run for 100 seconds

@@ -90,6 +90,18 @@ func (k *testKeeper) mustBond(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
+// mustBeginUnbond unbonds utokens from an account and requires no errors. Use when setting up incentive scenarios.
+func (k *testKeeper) mustBeginUnbond(addr sdk.AccAddress, coins ...sdk.Coin) {
+	for _, coin := range coins {
+		msg := &incentive.MsgBeginUnbonding{
+			Account: addr.String(),
+			UToken:  coin,
+		}
+		_, err := k.msrv.BeginUnbonding(k.ctx, msg)
+		require.NoError(k.t, err, "begin unbonding")
+	}
+}
+
 // initCommunityFund funds the mock bank keeper's distribution module account with some tokens
 func (k *testKeeper) initCommunityFund(funds ...sdk.Coin) {
 	k.bk.FundModule(disttypes.ModuleName, funds)

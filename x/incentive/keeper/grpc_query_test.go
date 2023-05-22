@@ -8,7 +8,6 @@ import (
 
 	"github.com/umee-network/umee/v4/util/coin"
 	"github.com/umee-network/umee/v4/x/incentive"
-	"github.com/umee-network/umee/v4/x/leverage/fixtures"
 )
 
 func TestAPYQuery(t *testing.T) {
@@ -21,7 +20,7 @@ func TestAPYQuery(t *testing.T) {
 
 	// init a supplier with bonded uTokens
 	_ = k.newBondedAccount(
-		coin.New("u/"+fixtures.UmeeDenom, 100_000000),
+		coin.New(u_umee, 100_000000),
 	)
 
 	// create three incentive programs, each of which will run for half a year but which will
