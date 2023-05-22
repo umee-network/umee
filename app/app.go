@@ -214,18 +214,12 @@ func init() {
 
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		icatypes.ModuleName:         nil,
-		gravitytypes.ModuleName:     {authtypes.Minter, authtypes.Burner},
-		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		incentive.ModuleName:        nil,
-		oracletypes.ModuleName:      nil,
-		uibc.ModuleName:             nil,
-		ugov.ModuleName:             nil,
-	}
 
 		gravitytypes.ModuleName:  {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasm.ModuleName:          {authtypes.Burner},
 
+		incentive.ModuleName:   nil,
 		oracletypes.ModuleName: nil,
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
