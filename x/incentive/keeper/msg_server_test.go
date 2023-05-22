@@ -425,7 +425,7 @@ func TestMsgGovCreatePrograms(t *testing.T) {
 	invalidProgram := validProgram
 	invalidProgram.ID = 1
 	invalidMsg := &incentive.MsgGovCreatePrograms{
-		Authority:         "",
+		Authority:         govAccAddr,
 		Programs:          []incentive.IncentiveProgram{invalidProgram},
 		FromCommunityFund: true,
 	}
@@ -434,6 +434,13 @@ func TestMsgGovCreatePrograms(t *testing.T) {
 	require.ErrorIs(t, err, incentive.ErrInvalidProgramID, "set invalid program")
 	require.Equal(t, uint32(3), k.getNextProgramID(k.ctx), "next ID after 2 programs passed an 1 failed")
 
-	// TODO: messages with multiple programs, including partially invalid
-	// and checking exact equality with upcoming programs set
+	// a message with both valid and invalid programs
+	complexMsg := &incentive.MsgGovCreatePrograms{
+		Authority:         govAccAddr,
+		Programs:          []incentive.IncentiveProgram{validProgram, invalidProgram},
+		FromCommunityFund: true,
+	}
+	// program should fail to be added, and nextID is unchanged
+	_, err = k.msrv.GovCreatePrograms(k.ctx, complexMsg)
+	require.ErrorIs(t, err, incentive.ErrInvalidProgramID, "set valid and invalid program")
 }

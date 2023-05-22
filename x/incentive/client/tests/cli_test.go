@@ -44,7 +44,6 @@ func TestIntegrationTestSuite(t *testing.T) {
 	defer s.TearDownSuite()
 
 	// queries
-	// TODO: comment back in. I believe experimental flag is causing this to fail.
-	// s.TestInvalidQueries()
-	// s.TestIncentiveScenario()
+	s.TestInvalidQueries()
+	s.TestIncentiveScenario()
 }
