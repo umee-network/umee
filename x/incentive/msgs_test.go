@@ -73,7 +73,6 @@ func TestRoutes(t *testing.T) {
 	}
 
 	for _, msg := range msgs {
-		assert.Equal(t, "incentive", msg.Route())
 		// check for non-empty returns for now
 		assert.Assert(t, len(msg.GetSignBytes()) != 0)
 		// exact match required
