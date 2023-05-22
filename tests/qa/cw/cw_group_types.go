@@ -8,12 +8,12 @@ type Member struct {
 }
 
 // init msg
-type CwGroupInitMsg struct {
+type GroupInitMsg struct {
 	Admin   string   `json:"admin,omitempty"`
 	Members []Member `json:"members"`
 }
 
-func (msg CwGroupInitMsg) Marshal() ([]byte, error) {
+func (msg GroupInitMsg) Marshal() ([]byte, error) {
 	return json.Marshal(msg)
 }
 
@@ -39,7 +39,7 @@ type MemberRequest struct {
 	Addr     string `json:"addr"`
 	AtHeight uint64 `json:"at_height,omitempty"`
 }
-type CWGroupQuery struct {
+type GroupQuery struct {
 	Admin       *Admin         `json:"admin,omitempty"`
 	Hooks       *Admin         `json:"hooks,omitempty"`
 	ListMembers *ListMembers   `json:"list_members,omitempty"`
@@ -47,12 +47,12 @@ type CWGroupQuery struct {
 }
 
 // Transaction msgs
-type CWGroupExecMsg struct {
+type GroupExecMsg struct {
 	UpdateAdmin   *UpdateAdmin   `json:"update_admin,omitempty"`
 	UpdateMembers *UpdateMembers `json:"update_members,omitempty"`
 }
 
-func (msg CWGroupExecMsg) Marshal() ([]byte, error) {
+func (msg GroupExecMsg) Marshal() ([]byte, error) {
 	return json.Marshal(msg)
 }
 

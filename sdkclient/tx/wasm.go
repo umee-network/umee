@@ -43,7 +43,8 @@ func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg []byte) (*sdk
 	return c.BroadcastTx(&msg)
 }
 
-func (c *Client) WasmExecuteContractByAccSeq(contractAddr string, execMsg []byte, accSeq uint64) (*sdk.TxResponse, error) {
+func (c *Client) WasmExecuteContractByAccSeq(contractAddr string, execMsg []byte,
+	accSeq uint64) (*sdk.TxResponse, error) {
 	fromAddr, err := c.KeyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err

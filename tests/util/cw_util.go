@@ -65,7 +65,7 @@ func (cw *Cosmwasm) CWQuery(query []byte) wasmtypes.QuerySmartContractStateRespo
 }
 
 func (cw *Cosmwasm) CWExecute(execMsg []byte) {
-	resp, err := cw.umee.Tx.WasmExecuteContract(cw.ContractAddr, []byte(execMsg))
+	resp, err := cw.umee.Tx.WasmExecuteContract(cw.ContractAddr, execMsg)
 	assert.NilError(cw.T, err)
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
 }
