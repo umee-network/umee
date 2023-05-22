@@ -10,7 +10,7 @@ import (
 	"github.com/umee-network/umee/v4/x/ugov"
 )
 
-// GetQueryCmd returns the CLI query commands for the x/ugov module.
+// GetQueryCmd returns the CLI query commands for the x/uibc module.
 func GetQueryCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        ugov.ModuleName,
@@ -21,18 +21,18 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetMinGasPrice(),
+		QueryMinGasPrice(),
 	)
 
 	return cmd
 }
 
-// GetMinGasPrice creates a Cobra command to query for the x/ugov min gas price
-func GetMinGasPrice() *cobra.Command {
+// QueryMinGasPrice creates the Msg/QueryMinGasPrice CLI.
+func QueryMinGasPrice() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "min-gas-price",
 		Args:  cobra.NoArgs,
-		Short: "Query the minimum gas price",
+		Short: "Query the tx minimum gas price",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
