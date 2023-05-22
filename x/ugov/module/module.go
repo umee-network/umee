@@ -115,14 +115,6 @@ func (AppModule) ConsensusVersion() uint64 {
 	return 1
 }
 
-// LegacyQuerierHandler implements module.AppModule
-func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier {
-	return nil
-}
-
-// QuerierRoute implements module.AppModule
-func (AppModule) QuerierRoute() string { return "" }
-
 // RegisterInvariants implements module.AppModule
 func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
@@ -130,11 +122,6 @@ func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	ugov.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServer(am.kb))
 	ugov.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.kb))
-}
-
-// Route implements module.AppModule
-func (AppModule) Route() sdk.Route {
-	return sdk.Route{}
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
@@ -145,3 +132,9 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return nil
 }
+
+// DEPRECATED
+
+func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier { return nil }
+func (AppModule) QuerierRoute() string                                { return "" }
+func (AppModule) Route() sdk.Route                                    { return sdk.Route{} }
