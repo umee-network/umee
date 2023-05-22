@@ -109,7 +109,7 @@ func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 				Title:       "title",
 				Description: "desc",
 				Authority:   authtypes.NewModuleAddress("gov").String(),
-				IbcStatus:   5,
+				IbcStatus:   10,
 			},
 			errMsg: "invalid ibc-transfer status",
 		}, {

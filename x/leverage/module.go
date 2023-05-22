@@ -12,7 +12,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
@@ -76,10 +75,6 @@ func (AppModuleBasic) ValidateGenesis(
 	return genState.Validate()
 }
 
-// Deprecated: RegisterRESTRoutes performs a no-op. Querying is delegated to the
-// gRPC service.
-func (AppModuleBasic) RegisterRESTRoutes(_ client.Context, _ *mux.Router) {}
-
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/leverage
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
@@ -123,21 +118,6 @@ func (am AppModule) Name() string {
 
 func (AppModule) ConsensusVersion() uint64 {
 	return 1
-}
-
-// Deprecated: Route returns the message routing key for the x/leverage module.
-func (am AppModule) Route() sdk.Route {
-	return sdk.Route{}
-}
-
-// QuerierRoute returns the x/leverage module's query routing key.
-func (AppModule) QuerierRoute() string { return types.QuerierRoute }
-
-// LegacyQuerierHandler returns a no-op legacy querier.
-func (am AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier {
-	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
-		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
-	}
 }
 
 // RegisterServices registers gRPC services.
@@ -188,3 +168,9 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 func AddModuleInitFlags(startCmd *cobra.Command) {
 	startCmd.Flags().BoolP(types.FlagEnableLiquidatorQuery, "l", false, "enable liquidator query")
 }
+
+// DEPRECATED
+
+func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier { return nil }
+func (AppModule) QuerierRoute() string                                { return "" }
+func (AppModule) Route() sdk.Route                                    { return sdk.Route{} }
