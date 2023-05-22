@@ -483,8 +483,6 @@ func New(
 
 	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
 
-	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
-
 	app.GravityKeeper = gravitykeeper.NewKeeper(
 		keys[gravitytypes.StoreKey],
 		app.GetSubspace(gravitytypes.ModuleName),
