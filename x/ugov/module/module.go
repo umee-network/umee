@@ -15,8 +15,8 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/umee-network/umee/v4/util"
-	// "github.com/umee-network/umee/v4/x/ugov/client/cli"
 	"github.com/umee-network/umee/v4/x/ugov"
+	"github.com/umee-network/umee/v4/x/ugov/client/cli"
 	"github.com/umee-network/umee/v4/x/ugov/keeper"
 )
 
@@ -41,12 +41,12 @@ func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 
 // GetQueryCmd implements module.AppModuleBasic
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	return nil // TODO cli.GetQueryCmd()
+	return cli.GetQueryCmd()
 }
 
 // GetTxCmd implements module.AppModuleBasic
 func (AppModuleBasic) GetTxCmd() *cobra.Command {
-	return nil // TODO cli.GetTxCmd()
+	return nil // there are no tx for the moment.
 }
 
 // Name implements module.AppModuleBasic
