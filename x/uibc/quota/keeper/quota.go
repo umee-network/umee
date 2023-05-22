@@ -22,7 +22,7 @@ var ten = sdk.MustNewDecFromStr("10")
 func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 	var outflows sdk.DecCoins
 	// creating PrefixStore upfront will remove the prefix from the key when running the iterator.
-	store := k.PrefixStore(uibc.KeyPrefixDenomOutflows)
+	store := k.PrefixStore(keyPrefixDenomOutflows)
 	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 
@@ -39,7 +39,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
 func (k Keeper) GetTokenOutflows(denom string) sdk.DecCoin {
-	amount := store.GetDec(k.store, uibc.KeyTotalOutflows(denom), "total_outflow")
+	amount := store.GetDec(k.store, KeyTotalOutflows(denom), "total_outflow")
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 
@@ -53,7 +53,7 @@ func (k Keeper) SetTokenOutflows(outflows sdk.DecCoins) {
 
 // SetTokenOutflow save the outflows of denom into store.
 func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
-	key := uibc.KeyTotalOutflows(outflow.Denom)
+	key := KeyTotalOutflows(outflow.Denom)
 	err := store.SetDec(k.store, key, outflow.Amount, "total_outflow")
 	util.Panic(err)
 }
@@ -61,23 +61,23 @@ func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
 // GetTotalOutflow returns the total outflow of ibc-transfer amount.
 func (k Keeper) GetTotalOutflow() sdk.Dec {
 	// TODO: use store.Get/SetDec
-	bz := k.store.Get(uibc.KeyPrefixTotalOutflows)
+	bz := k.store.Get(keyTotalOutflows)
 	return sdk.MustNewDecFromStr(string(bz))
 }
 
 // SetTotalOutflowSum save the total outflow of ibc-transfer amount.
 func (k Keeper) SetTotalOutflowSum(amount sdk.Dec) {
-	k.store.Set(uibc.KeyPrefixTotalOutflows, []byte(amount.String()))
+	k.store.Set(keyTotalOutflows, []byte(amount.String()))
 }
 
 // SetExpire save the quota expire time of ibc denom into.
 func (k Keeper) SetExpire(expires time.Time) error {
-	return store.SetBinValue(k.store, uibc.KeyPrefixQuotaExpires, &expires, "expire")
+	return store.SetBinValue(k.store, keyQuotaExpires, &expires, "expire")
 }
 
 // GetExpire returns ibc-transfer quota expires time.
 func (k Keeper) GetExpire() (*time.Time, error) {
-	return store.GetBinValue[*time.Time](k.store, uibc.KeyPrefixQuotaExpires, "expire")
+	return store.GetBinValue[*time.Time](k.store, keyQuotaExpires, "expire")
 }
 
 // ResetAllQuotas will zero the ibc-transfer quotas
@@ -93,7 +93,7 @@ func (k Keeper) ResetAllQuotas() error {
 		return err
 	}
 	k.SetTotalOutflowSum(zero)
-	store := k.PrefixStore(uibc.KeyPrefixDenomOutflows)
+	store := k.PrefixStore(keyPrefixDenomOutflows)
 	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
