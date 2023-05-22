@@ -11,6 +11,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -112,45 +113,45 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
-	// s.runPriceFeeder()
-	// s.runGaiaNetwork()
-	// s.runIBCRelayer()
+	s.runPriceFeeder()
+	s.runGaiaNetwork()
+	s.runIBCRelayer()
 	// s.runContractDeployment()
 	// s.runOrchestrators()
 	s.initUmeeClient()
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	// if str := os.Getenv("UMEE_E2E_SKIP_CLEANUP"); len(str) > 0 {
-	// 	skipCleanup, err := strconv.ParseBool(str)
-	// 	s.Require().NoError(err)
+	if str := os.Getenv("UMEE_E2E_SKIP_CLEANUP"); len(str) > 0 {
+		skipCleanup, err := strconv.ParseBool(str)
+		s.Require().NoError(err)
 
-	// 	if skipCleanup {
-	// 		return
-	// 	}
+		if skipCleanup {
+			return
+		}
+	}
+
+	s.T().Log("tearing down e2e integration test suite...")
+
+	// s.Require().NoError(s.dkrPool.Purge(s.ethResource))
+	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
+	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
+	s.Require().NoError(s.dkrPool.Purge(s.priceFeederResource))
+
+	for _, vc := range s.valResources {
+		s.Require().NoError(s.dkrPool.Purge(vc))
+	}
+
+	// for _, oc := range s.orchResources {
+	// 	s.Require().NoError(s.dkrPool.Purge(oc))
 	// }
 
-	// s.T().Log("tearing down e2e integration test suite...")
+	s.Require().NoError(s.dkrPool.RemoveNetwork(s.dkrNet))
 
-	// // s.Require().NoError(s.dkrPool.Purge(s.ethResource))
-	// s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
-	// s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
-	// s.Require().NoError(s.dkrPool.Purge(s.priceFeederResource))
-
-	// for _, vc := range s.valResources {
-	// 	s.Require().NoError(s.dkrPool.Purge(vc))
-	// }
-
-	// // for _, oc := range s.orchResources {
-	// // 	s.Require().NoError(s.dkrPool.Purge(oc))
-	// // }
-
-	// s.Require().NoError(s.dkrPool.RemoveNetwork(s.dkrNet))
-
-	// os.RemoveAll(s.chain.dataDir)
-	// for _, td := range s.tmpDirs {
-	// 	os.RemoveAll(td)
-	// }
+	os.RemoveAll(s.chain.dataDir)
+	for _, td := range s.tmpDirs {
+		os.RemoveAll(td)
+	}
 }
 
 func (s *IntegrationTestSuite) initNodes() {
