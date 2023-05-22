@@ -131,7 +131,7 @@ func (s msgServer) EmergencyUnbond(
 		return nil, err
 	}
 
-	maxEmergencyUnbond := k.restrictedCollateral(ctx, addr, msg.UToken.Denom)
+	maxEmergencyUnbond := k.restrictedCollateral(ctx, addr, denom)
 
 	// reject emergency unbondings greater than maximum available amount
 	if msg.UToken.Amount.GT(maxEmergencyUnbond.Amount) {
