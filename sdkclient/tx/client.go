@@ -24,7 +24,7 @@ type Client struct {
 	gasAdjustment float64
 
 	keyringKeyring keyring.Keyring
-	KeyringRecord  []*keyring.Record
+	keyringRecord  []*keyring.Record
 	txFactory      *tx.Factory
 	encCfg         sdkparams.EncodingConfig
 }
@@ -53,7 +53,7 @@ func NewClient(
 
 	for index, menomic := range mnemonics {
 		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic)
-		c.KeyringRecord = append(c.KeyringRecord, kr)
+		c.keyringRecord = append(c.keyringRecord, kr)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func NewClient(
 }
 
 func (c *Client) initClientCtx() error {
-	fromAddress, _ := c.KeyringRecord[0].GetAddress()
+	fromAddress, _ := c.keyringRecord[0].GetAddress()
 
 	tmHTTPClient, err := tmjsonclient.DefaultHTTPClient(c.TMRPCEndpoint)
 	if err != nil {
@@ -94,8 +94,8 @@ func (c *Client) initClientCtx() error {
 		Client:            tmRPCClient,
 		Keyring:           c.keyringKeyring,
 		FromAddress:       fromAddress,
-		FromName:          c.KeyringRecord[0].Name,
-		From:              c.KeyringRecord[0].Name,
+		FromName:          c.keyringRecord[0].Name,
+		From:              c.keyringRecord[0].Name,
 		OutputFormat:      "json",
 		UseLedger:         false,
 		Simulate:          false,
@@ -121,9 +121,9 @@ func (c *Client) initTxFactory() {
 }
 
 func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
-	c.ClientContext.From = c.KeyringRecord[0].Name
-	c.ClientContext.FromName = c.KeyringRecord[0].Name
-	c.ClientContext.FromAddress, _ = c.KeyringRecord[0].GetAddress()
+	c.ClientContext.From = c.keyringRecord[0].Name
+	c.ClientContext.FromName = c.keyringRecord[0].Name
+	c.ClientContext.FromAddress, _ = c.keyringRecord[0].GetAddress()
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
 }
 
@@ -135,4 +135,9 @@ func (c *Client) BroadcastTxWithAccSeq(seq uint64) *Client {
 func (c *Client) BroadcastTxWithAsyncBlock() *Client {
 	c.ClientContext.BroadcastMode = flags.BroadcastAsync
 	return c
+}
+
+func (c *Client) SenderAddr() sdk.AccAddress {
+	addr, _ := c.keyringRecord[0].GetAddress()
+	return addr
 }

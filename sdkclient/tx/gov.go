@@ -12,7 +12,7 @@ import (
 func (c *Client) GovParamChange(title, description string, changes []proposal.ParamChange, deposit sdk.Coins,
 ) (*sdk.TxResponse, error) {
 	content := proposal.NewParameterChangeProposal(title, description, changes)
-	fromAddr, err := c.KeyringRecord[0].GetAddress()
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (c *Client) GovSubmitProposal(changes []proposal.ParamChange, deposit sdk.C
 		changes,
 	)
 
-	fromAddr, err := c.KeyringRecord[0].GetAddress()
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (c *Client) TxSubmitProposalWithMsg(msgs []sdk.Msg) (*sdk.TxResponse, error
 		return nil, err
 	}
 
-	fromAddr, err := c.KeyringRecord[0].GetAddress()
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -64,8 +64,8 @@ func (c *Client) TxSubmitProposalWithMsg(msgs []sdk.Msg) (*sdk.TxResponse, error
 
 // TxGovVoteYesAll creates transactions (one for each registered account) to approve a given proposal.
 func (c *Client) TxGovVoteYesAll(proposalID uint64) error {
-	for index := range c.KeyringRecord {
-		voter, err := c.KeyringRecord[index].GetAddress()
+	for index := range c.keyringRecord {
+		voter, err := c.keyringRecord[index].GetAddress()
 		if err != nil {
 			return err
 		}
@@ -81,9 +81,9 @@ func (c *Client) TxGovVoteYesAll(proposalID uint64) error {
 			voteType,
 		)
 
-		c.ClientContext.From = c.KeyringRecord[index].Name
-		c.ClientContext.FromName = c.KeyringRecord[index].Name
-		c.ClientContext.FromAddress, _ = c.KeyringRecord[index].GetAddress()
+		c.ClientContext.From = c.keyringRecord[index].Name
+		c.ClientContext.FromName = c.keyringRecord[index].Name
+		c.ClientContext.FromAddress, _ = c.keyringRecord[index].GetAddress()
 
 		for retry := 0; retry < 5; retry++ {
 			// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending

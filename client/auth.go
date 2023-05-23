@@ -8,7 +8,7 @@ func (c Client) AuthQClient() authtypes.QueryClient {
 	return authtypes.NewQueryClient(c.Query.GrpcConn)
 }
 
-func (c Client) GetAuthSeq(accAddr string) (uint64, error) {
+func (c Client) QueryAuthSeq(accAddr string) (uint64, error) {
 	ctx, cancel := c.NewQCtx()
 	defer cancel()
 

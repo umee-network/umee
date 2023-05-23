@@ -50,7 +50,7 @@ func (cw *Cosmwasm) MarshalAny(any interface{}) []byte {
 
 func (cw *Cosmwasm) InstantiateContract(initMsg []byte) {
 	cw.T.Log("ℹ️ smart contract is instantiating...")
-	resp, err := cw.umee.Tx.WasmInstantiateContract(cw.StoreCode, initMsg)
+	resp, err := cw.umee.Tx.TxWasmInstantiateContract(cw.StoreCode, initMsg)
 	cw.ContractAddr = cw.GetAttributeValue(*resp, "instantiate", "_contract_address")
 	assert.NilError(cw.T, err)
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
@@ -65,19 +65,19 @@ func (cw *Cosmwasm) CWQuery(query []byte) wasmtypes.QuerySmartContractStateRespo
 }
 
 func (cw *Cosmwasm) CWExecute(execMsg []byte) {
-	resp, err := cw.umee.Tx.WasmExecuteContract(cw.ContractAddr, execMsg)
+	resp, err := cw.umee.Tx.TxWasmExecuteContract(cw.ContractAddr, execMsg)
 	assert.NilError(cw.T, err)
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
 }
 
 func (cw *Cosmwasm) CWExecuteWithSeqAndAsync(execMsg []byte, accSeq uint64) {
-	resp, err := cw.umee.Tx.WasmExecuteContractByAccSeq(cw.ContractAddr, execMsg, accSeq)
+	resp, err := cw.umee.Tx.TxWasmExecuteContractByAccSeq(cw.ContractAddr, execMsg, accSeq)
 	assert.NilError(cw.T, err)
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
 }
 
 func (cw *Cosmwasm) CWExecuteWithSeqAndAsyncResp(execMsg []byte, accSeq uint64) (*sdk.TxResponse, error) {
-	return cw.umee.Tx.WasmExecuteContractByAccSeq(cw.ContractAddr, execMsg, accSeq)
+	return cw.umee.Tx.TxWasmExecuteContractByAccSeq(cw.ContractAddr, execMsg, accSeq)
 }
 
 func (cw *Cosmwasm) GetAttributeValue(resp sdk.TxResponse, eventName, attrKey string) string {

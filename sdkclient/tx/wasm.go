@@ -12,12 +12,12 @@ import (
 )
 
 func (c *Client) TxSubmitWasmContract(contractPath string) (*sdk.TxResponse, error) {
-	fromAddr, err := c.KeyringRecord[0].GetAddress()
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
 
-	msg, err := parseStoreCodeArgs(contractPath, fromAddr)
+	msg, err := readWasmCode(contractPath, fromAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -25,8 +25,8 @@ func (c *Client) TxSubmitWasmContract(contractPath string) (*sdk.TxResponse, err
 	return c.BroadcastTx(&msg)
 }
 
-func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg []byte) (*sdk.TxResponse, error) {
-	fromAddr, err := c.KeyringRecord[0].GetAddress()
+func (c *Client) TxWasmInstantiateContract(storeCode uint64, initMsg []byte) (*sdk.TxResponse, error) {
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -43,9 +43,9 @@ func (c *Client) WasmInstantiateContract(storeCode uint64, initMsg []byte) (*sdk
 	return c.BroadcastTx(&msg)
 }
 
-func (c *Client) WasmExecuteContractByAccSeq(contractAddr string, execMsg []byte,
+func (c *Client) TxWasmExecuteContractByAccSeq(contractAddr string, execMsg []byte,
 	accSeq uint64) (*sdk.TxResponse, error) {
-	fromAddr, err := c.KeyringRecord[0].GetAddress()
+	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -62,12 +62,12 @@ func (c *Client) WasmExecuteContractByAccSeq(contractAddr string, execMsg []byte
 	return c.BroadcastTxWithAsyncBlock().BroadcastTx(&msg)
 }
 
-func (c *Client) WasmExecuteContract(contractAddr string, execMsg []byte) (*sdk.TxResponse, error) {
-	return c.WasmExecuteContractByAccSeq(contractAddr, execMsg, 0)
+func (c *Client) TxWasmExecuteContract(contractAddr string, execMsg []byte) (*sdk.TxResponse, error) {
+	return c.TxWasmExecuteContractByAccSeq(contractAddr, execMsg, 0)
 }
 
 // Prepares MsgStoreCode object from flags with gzipped wasm byte code field
-func parseStoreCodeArgs(file string, sender sdk.AccAddress) (types.MsgStoreCode, error) {
+func readWasmCode(file string, sender sdk.AccAddress) (types.MsgStoreCode, error) {
 	wasm, err := os.ReadFile(file)
 	if err != nil {
 		return types.MsgStoreCode{}, err
