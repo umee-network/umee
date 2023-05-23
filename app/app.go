@@ -333,9 +333,13 @@ func New(
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		gravitytypes.StoreKey,
-		leveragetypes.StoreKey, incentive.StoreKey, oracletypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey,
 		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
+	}
+
+	if Experimental {
+		storeKeys = append(storeKeys, incentive.StoreKey)
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -470,14 +474,16 @@ func New(
 		app.OracleKeeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
-	app.IncentiveKeeper = incentivekeeper.NewKeeper(
-		appCodec,
-		keys[incentive.StoreKey],
-		app.BankKeeper,
-		app.LeverageKeeper,
-	)
+
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
+
 	if Experimental {
+		app.IncentiveKeeper = incentivekeeper.NewKeeper(
+			appCodec,
+			keys[incentive.StoreKey],
+			app.BankKeeper,
+			app.LeverageKeeper,
+		)
 		app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 	}
 

@@ -2,6 +2,7 @@ package app
 
 import (
 	"cosmossdk.io/errors"
+	"github.com/CosmWasm/wasmd/x/wasm"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -50,7 +51,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v4.2", upgradeInfo, uibc.ModuleName)
 	app.registerUpgrade4_3(upgradeInfo)
 	app.registerUpgrade("v4.4", upgradeInfo)
-	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName)
+	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	if Experimental {
 		app.registerUpgrade("v4.5-alpha1", upgradeInfo, incentive.ModuleName) // TODO: set correct name
 	}
