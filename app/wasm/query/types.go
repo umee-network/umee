@@ -9,44 +9,11 @@ import (
 	octypes "github.com/umee-network/umee/v4/x/oracle/types"
 )
 
-// AssignedQuery defines the query to be called.
-type AssignedQuery uint16
-
-const (
-	// leverage queries
-	AssignedQueryLeverageParams AssignedQuery = iota + 0
-	AssignedQueryRegisteredTokens
-	AssignedQueryMarketSummary
-	AssignedQueryAccountBalances
-	AssignedQueryAccountSummary
-	AssignedQueryLiquidationTargets
-	AssignedQueryBadDebts
-	AssignedQueryMaxWithdraw
-	AssignedQueryMaxBorrow
-
-	//  oracle queries
-	AssignedQueryFeederDelegation
-	AssignedQueryMissCounter
-	AssignedQuerySlashWindow
-	AssignedQueryAggregatePrevote
-	AssignedQueryAggregatePrevotes
-	AssignedQueryAggregateVote
-	AssignedQueryAggregateVotes
-	AssignedQueryOracleParams
-	AssignedQueryExchangeRates
-	AssignedQueryActiveExchangeRates
-	AssignedQueryMedians
-	AssignedQueryMedianDeviations
-)
-
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts.
 type UmeeQuery struct {
-	// Mandatory field to determine which query to call.
-	AssignedQuery AssignedQuery `json:"assigned_query"`
-
 	// Leverage queries
 	// Used to query the x/leverage module's parameters.
-	LeverageParams *lvtypes.QueryParams `json:"leverage_params,omitempty"`
+	LeverageParameters *lvtypes.QueryParams `json:"leverage_parameters,omitempty"`
 	// Used to query all the registered tokens.
 	RegisteredTokens *lvtypes.QueryRegisteredTokens `json:"registered_tokens,omitempty"`
 	// Used to get the summary data of an denom.

@@ -43,53 +43,53 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 		var resp proto.Message
 		var err error
 
-		switch smartcontractQuery.AssignedQuery {
-		case AssignedQueryLeverageParams:
+		switch {
+		case smartcontractQuery.LeverageParameters != nil:
 			resp, err = smartcontractQuery.HandleLeverageParams(ctx, plugin.lvQueryServer)
-		case AssignedQueryRegisteredTokens:
+		case smartcontractQuery.RegisteredTokens != nil:
 			resp, err = smartcontractQuery.HandleRegisteredTokens(ctx, plugin.lvQueryServer)
-		case AssignedQueryMarketSummary:
+		case smartcontractQuery.MarketSummary != nil:
 			resp, err = smartcontractQuery.HandleMarketSummary(ctx, plugin.lvQueryServer)
-		case AssignedQueryAccountBalances:
+		case smartcontractQuery.AccountBalances != nil:
 			resp, err = smartcontractQuery.HandleAccountBalances(ctx, plugin.lvQueryServer)
-		case AssignedQueryAccountSummary:
+		case smartcontractQuery.AccountSummary != nil:
 			resp, err = smartcontractQuery.HandleAccountSummary(ctx, plugin.lvQueryServer)
-		case AssignedQueryLiquidationTargets:
+		case smartcontractQuery.LiquidationTargets != nil:
 			resp, err = smartcontractQuery.HandleLiquidationTargets(ctx, plugin.lvQueryServer)
-		case AssignedQueryBadDebts:
+		case smartcontractQuery.BadDebts != nil:
 			resp, err = smartcontractQuery.HandleBadDebts(ctx, plugin.lvQueryServer)
-		case AssignedQueryMaxWithdraw:
+		case smartcontractQuery.MaxWithdraw != nil:
 			resp, err = smartcontractQuery.HandleMaxWithdraw(ctx, plugin.lvQueryServer)
-		case AssignedQueryMaxBorrow:
+		case smartcontractQuery.MaxBorrow != nil:
 			resp, err = smartcontractQuery.HandleMaxBorrow(ctx, plugin.lvQueryServer)
 
-		case AssignedQueryFeederDelegation:
+		case smartcontractQuery.FeederDelegation != nil:
 			resp, err = smartcontractQuery.HandleFeederDelegation(ctx, plugin.ocQueryServer)
-		case AssignedQueryMissCounter:
+		case smartcontractQuery.MissCounter != nil:
 			resp, err = smartcontractQuery.HandleMissCounter(ctx, plugin.ocQueryServer)
-		case AssignedQuerySlashWindow:
+		case smartcontractQuery.SlashWindow != nil:
 			resp, err = smartcontractQuery.HandleSlashWindow(ctx, plugin.ocQueryServer)
-		case AssignedQueryAggregatePrevote:
+		case smartcontractQuery.AggregatePrevote != nil:
 			resp, err = smartcontractQuery.HandleAggregatePrevote(ctx, plugin.ocQueryServer)
-		case AssignedQueryAggregatePrevotes:
+		case smartcontractQuery.AggregatePrevotes != nil:
 			resp, err = smartcontractQuery.HandleAggregatePrevotes(ctx, plugin.ocQueryServer)
-		case AssignedQueryAggregateVote:
+		case smartcontractQuery.AggregateVote != nil:
 			resp, err = smartcontractQuery.HandleAggregateVote(ctx, plugin.ocQueryServer)
-		case AssignedQueryAggregateVotes:
+		case smartcontractQuery.AggregateVotes != nil:
 			resp, err = smartcontractQuery.HandleAggregateVotes(ctx, plugin.ocQueryServer)
-		case AssignedQueryOracleParams:
+		case smartcontractQuery.OracleParams != nil:
 			resp, err = smartcontractQuery.HandleOracleParams(ctx, plugin.ocQueryServer)
-		case AssignedQueryExchangeRates:
+		case smartcontractQuery.ExchangeRates != nil:
 			resp, err = smartcontractQuery.HandleExchangeRates(ctx, plugin.ocQueryServer)
-		case AssignedQueryActiveExchangeRates:
+		case smartcontractQuery.ActiveExchangeRates != nil:
 			resp, err = smartcontractQuery.HandleActiveExchangeRates(ctx, plugin.ocQueryServer)
-		case AssignedQueryMedians:
+		case smartcontractQuery.Medians != nil:
 			resp, err = smartcontractQuery.HandleMedians(ctx, plugin.ocQueryServer)
-		case AssignedQueryMedianDeviations:
+		case smartcontractQuery.MedianDeviations != nil:
 			resp, err = smartcontractQuery.HandleMedianDeviations(ctx, plugin.ocQueryServer)
 
 		default:
-			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee query"}
+			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid umee query"}
 		}
 
 		if err != nil {

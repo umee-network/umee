@@ -6,6 +6,7 @@ import (
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	appparams "github.com/umee-network/umee/v4/app/params"
 	wm "github.com/umee-network/umee/v4/app/wasm/msg"
 	wq "github.com/umee-network/umee/v4/app/wasm/query"
@@ -23,7 +24,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 		{
 			Name: "leverage query params",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryLeverageParams,
+				LeverageParameters: &lvtypes.QueryParams{},
 			}),
 			ResponseCheck: func(data []byte) {
 				var rr lvtypes.QueryParamsResponse
@@ -35,7 +36,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 		{
 			Name: "query all registered tokens",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryRegisteredTokens,
+				RegisteredTokens: &lvtypes.QueryRegisteredTokens{},
 			}),
 			ResponseCheck: func(data []byte) {
 				var rr lvtypes.QueryRegisteredTokensResponse
@@ -47,7 +48,6 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 		{
 			Name: "query registered token",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryRegisteredTokens,
 				RegisteredTokens: &lvtypes.QueryRegisteredTokens{
 					BaseDenom: appparams.BondDenom,
 				},
@@ -63,7 +63,6 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 		{
 			Name: "market summary",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryMarketSummary,
 				MarketSummary: &lvtypes.QueryMarketSummary{
 					Denom: appparams.BondDenom,
 				},
@@ -78,8 +77,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 		{
 			Name: "query bad debts",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryBadDebts,
-				BadDebts:      &lvtypes.QueryBadDebts{},
+				BadDebts: &lvtypes.QueryBadDebts{},
 			}),
 			ResponseCheck: func(data []byte) {
 				var rr lvtypes.QueryBadDebtsResponse
@@ -91,7 +89,6 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 		{
 			Name: "query max withdraw (zero)",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryMaxWithdraw,
 				MaxWithdraw: &lvtypes.QueryMaxWithdraw{
 					Address: addr.String(),
 					Denom:   appparams.BondDenom,
@@ -108,7 +105,6 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 		{
 			Name: "query max borrow (zero)",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryMaxBorrow,
 				MaxBorrow: &lvtypes.QueryMaxBorrow{
 					Address: addr.String(),
 					Denom:   appparams.BondDenom,
@@ -143,8 +139,7 @@ func (s *IntegrationTestSuite) TestOracleQueries() {
 		{
 			Name: "oracle query params",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQueryOracleParams,
-				OracleParams:  &types.QueryParams{},
+				OracleParams: &types.QueryParams{},
 			}),
 			ResponseCheck: func(data []byte) {
 				var rr types.QueryParamsResponse
@@ -156,8 +151,7 @@ func (s *IntegrationTestSuite) TestOracleQueries() {
 		{
 			Name: "oracle slash window",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				AssignedQuery: wq.AssignedQuerySlashWindow,
-				SlashWindow:   &types.QuerySlashWindow{},
+				SlashWindow: &types.QuerySlashWindow{},
 			}),
 			ResponseCheck: func(data []byte) {
 				var rr types.QuerySlashWindowResponse
@@ -176,6 +170,9 @@ func (s *IntegrationTestSuite) TestOracleQueries() {
 }
 
 func (s *IntegrationTestSuite) TestLeverageTxs() {
+	accAddr := sdk.MustAccAddressFromBech32(s.contractAddr)
+	err := s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, accAddr, sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100000))))
+	assert.NilError(s.T, err)
 	txTests := []struct {
 		Name string
 		Msg  []byte
@@ -184,7 +181,7 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 			Name: "supply",
 			Msg: s.genCustomTx(wm.UmeeMsg{
 				Supply: &lvtypes.MsgSupply{
-					Supplier: addr2.String(),
+					Supplier: s.contractAddr,
 					Asset:    sdk.NewCoin(appparams.BondDenom, sdk.NewInt(700)),
 				},
 			}),
@@ -193,7 +190,7 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 			Name: "add collateral",
 			Msg: s.genCustomTx(wm.UmeeMsg{
 				Collateralize: &lvtypes.MsgCollateralize{
-					Borrower: addr2.String(),
+					Borrower: s.contractAddr,
 					Asset:    sdk.NewCoin("u/uumee", sdk.NewInt(700)),
 				},
 			}),
@@ -216,7 +213,6 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 	}
 
 	query := s.genCustomQuery(wq.UmeeQuery{
-		AssignedQuery: wq.AssignedQueryAccountSummary,
 		AccountSummary: &lvtypes.QueryAccountSummary{
 			Address: addr2.String(),
 		},
@@ -224,6 +220,6 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 
 	resp := s.queryContract(query)
 	var rr lvtypes.QueryAccountSummaryResponse
-	err := json.Unmarshal(resp.Data, &rr)
+	err = json.Unmarshal(resp.Data, &rr)
 	assert.NilError(s.T, err)
 }

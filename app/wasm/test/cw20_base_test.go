@@ -33,7 +33,7 @@ import (
 )
 
 const (
-	initialPower = int64(10000000000)
+	initialPower = int64(10000000000000)
 	cw20Artifact = "../../../tests/artifacts/cw20_base.wasm"
 	umeeArtifact = "../../../tests/artifacts/umee_cosmwasm-aarch64.wasm"
 	cw20Label    = "cw20InstanceTest"
@@ -142,7 +142,7 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	})
 
 	// mint and send coins to addrs
-	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
+	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewInt(10))))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
@@ -289,7 +289,7 @@ func (s *IntegrationTestSuite) TestCw20Store() {
 }
 
 func (s *IntegrationTestSuite) TestCw20Instantiate() {
-	intantiateResp, err := s.cw20InitiateCode(addr, intMsgCw20(200))
+	intantiateResp, err := s.cw20InitiateCode(addr, intMsgCw20(200000))
 	assert.NilError(s.T, err)
 	assert.Equal(s.T, "umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx", intantiateResp.Address)
 	s.contractAddr = intantiateResp.Address
@@ -345,8 +345,8 @@ func (s *IntegrationTestSuite) InitiateUmeeCosmwasm() {
 	s.contractAddr = intantiateResp.Address
 }
 
-func (s *IntegrationTestSuite) genCustomQuery(qIndex wq.UmeeQuery) []byte {
-	cq, err := json.Marshal(UmeeCwCustomQuery(qIndex))
+func (s *IntegrationTestSuite) genCustomQuery(umeeQuery wq.UmeeQuery) []byte {
+	cq, err := json.Marshal(UmeeCwCustomQuery(umeeQuery))
 	assert.NilError(s.T, err)
 	return cq
 }

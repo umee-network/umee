@@ -21,6 +21,11 @@ func (q UmeeQuery) HandleRegisteredTokens(
 	ctx context.Context,
 	qs lvtypes.QueryServer,
 ) (proto.Message, error) {
+	if len(q.RegisteredTokens.BaseDenom) != 0 {
+		return qs.RegisteredTokens(ctx, &lvtypes.QueryRegisteredTokens{
+			BaseDenom: q.RegisteredTokens.BaseDenom,
+		})
+	}
 	return qs.RegisteredTokens(ctx, &lvtypes.QueryRegisteredTokens{})
 }
 
