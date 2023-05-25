@@ -113,11 +113,9 @@ func (q Querier) CompletedIncentivePrograms(
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
-	programs, err := k.getPaginatedIncentivePrograms(
+	programs, err := k.getAllIncentivePrograms(
 		ctx,
 		incentive.ProgramStatusCompleted,
-		req.Pagination.Offset,
-		req.Pagination.Limit,
 	)
 	if err != nil {
 		return nil, err

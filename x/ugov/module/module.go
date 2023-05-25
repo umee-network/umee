@@ -13,10 +13,11 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
+
 	"github.com/umee-network/umee/v4/util"
-	ibctransfer "github.com/umee-network/umee/v4/x/uibc"
-	"github.com/umee-network/umee/v4/x/uibc/client/cli"
-	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v4/x/ugov"
+	"github.com/umee-network/umee/v4/x/ugov/client/cli"
+	"github.com/umee-network/umee/v4/x/ugov/keeper"
 )
 
 var (
@@ -35,7 +36,7 @@ func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
 
 // DefaultGenesis implements module.AppModuleBasic
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(ibctransfer.DefaultGenesisState())
+	return cdc.MustMarshalJSON(ugov.DefaultGenesis())
 }
 
 // GetQueryCmd implements module.AppModuleBasic
@@ -45,36 +46,36 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 
 // GetTxCmd implements module.AppModuleBasic
 func (AppModuleBasic) GetTxCmd() *cobra.Command {
-	return cli.GetTxCmd()
+	return nil // there are no tx for the moment.
 }
 
 // Name implements module.AppModuleBasic
 func (AppModuleBasic) Name() string {
-	return ibctransfer.ModuleName
+	return ugov.ModuleName
 }
 
 // RegisterGRPCGatewayRoutes implements module.AppModuleBasic
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	err := ibctransfer.RegisterQueryHandlerClient(
-		context.Background(), mux, ibctransfer.NewQueryClient(clientCtx))
+	err := ugov.RegisterQueryHandlerClient(
+		context.Background(), mux, ugov.NewQueryClient(clientCtx))
 	util.Panic(err)
 }
 
 // RegisterInterfaces implements module.AppModuleBasic
 func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) {
-	ibctransfer.RegisterInterfaces(registry)
+	ugov.RegisterInterfaces(registry)
 }
 
 // RegisterLegacyAminoCodec implements module.AppModuleBasic
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	ibctransfer.RegisterLegacyAminoCodec(cdc)
+	ugov.RegisterLegacyAminoCodec(cdc)
 }
 
 // ValidateGenesis implements module.AppModuleBasic
 func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
-	var gs ibctransfer.GenesisState
+	var gs ugov.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &gs); err != nil {
-		return fmt.Errorf("failed to unmarshal %s genesis state: %w", ibctransfer.ModuleName, err)
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", ugov.ModuleName, err)
 	}
 
 	return gs.Validate()
@@ -95,15 +96,16 @@ func NewAppModule(cdc codec.Codec, kb keeper.Builder) AppModule {
 
 // ExportGenesis implements module.AppModule
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	genState := am.kb.ExportGenesis(ctx)
+	genState := am.kb.Keeper(&ctx).ExportGenesis()
 	return cdc.MustMarshalJSON(genState)
 }
 
 // InitGenesis implements module.AppModule
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
-	var genState ibctransfer.GenesisState
+	var genState ugov.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	am.kb.InitGenesis(ctx, genState)
+	util.Panic(
+		am.kb.Keeper(&ctx).InitGenesis(&genState))
 
 	return []abci.ValidatorUpdate{}
 }
@@ -118,19 +120,17 @@ func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
 // RegisterServices implements module.AppModule
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	ibctransfer.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.kb))
-	ibctransfer.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.kb))
+	ugov.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServer(am.kb))
+	ugov.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.kb))
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
-func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
-	BeginBlock(ctx, am.kb.Keeper(&ctx))
-}
+func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/uibc module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
-	return EndBlocker()
+	return nil
 }
 
 // DEPRECATED

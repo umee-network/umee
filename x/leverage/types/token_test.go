@@ -119,7 +119,7 @@ func TestToken_Validate(t *testing.T) {
 	invalidCollateralWeight2.CollateralWeight = sdk.OneDec()
 
 	invalidLiquidationThreshold := validToken()
-	invalidLiquidationThreshold.LiquidationThreshold = invalidLiquidationThreshold.CollateralWeight
+	invalidLiquidationThreshold.LiquidationThreshold = sdk.MustNewDecFromStr("-0.25")
 
 	invalidLiquidationThreshold2 := validToken()
 	invalidLiquidationThreshold2.LiquidationThreshold = sdk.OneDec()
