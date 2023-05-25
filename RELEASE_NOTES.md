@@ -6,6 +6,10 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v4.4.1
+
+Patch release updating `ibc-go` to the most recent patch release.
+
 ## v4.4.0
 
 This is a small, intermediate release.
