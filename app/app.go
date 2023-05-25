@@ -140,6 +140,7 @@ import (
 	ugovmodule "github.com/umee-network/umee/v4/x/ugov/module"
 
 	// umee ibc-transfer and quota for ibc-transfer
+	uwasm "github.com/umee-network/umee/v4/app/wasm"
 	"github.com/umee-network/umee/v4/x/uibc"
 	uibcmodule "github.com/umee-network/umee/v4/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v4/x/uibc/oracle"
@@ -648,6 +649,10 @@ func New(
 	// The last arguments can contain custom message handlers, and custom query handlers,
 	// if we want to allow any custom callbacks
 	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,umee"
+
+	// Register umee custom plugin to wasm
+	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper), wasmOpts...)
+
 	app.WasmKeeper = wasm.NewKeeper(
 		appCodec,
 		keys[wasm.StoreKey],
