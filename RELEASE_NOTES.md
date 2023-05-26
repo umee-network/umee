@@ -35,6 +35,10 @@ You can use Cosmovisor → see [instructions](https://github.com/umee-network/um
 
 Docker images are available in [ghcr.io umee-network](https://github.com/umee-network/umee/pkgs/container/umeed) repository.
 
+## v4.4.1
+
+Patch release updating `ibc-go` to the most recent patch release.
+
 ## v4.4.0
 
 This is a small, intermediate release.
