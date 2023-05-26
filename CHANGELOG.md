@@ -64,7 +64,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
 
-## [v4.4.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-05-05
+## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
+
+### Improvements
+
+- [2064](https://github.com/umee-network/umee/pull/2064) Bump `ibc-go` to v6.1.1.
+
+## [v4.4.0](https://github.com/umee-network/umee/releases/tag/v4.4.0) - 2023-05-05
 
 ### State Machine Breaking
 
