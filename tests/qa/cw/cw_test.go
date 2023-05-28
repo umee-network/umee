@@ -1,3 +1,6 @@
+//go:build test_qa
+// +build test_qa
+
 package cw
 
 import (
