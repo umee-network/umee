@@ -41,8 +41,10 @@ func init() {
 
 	// distribution
 	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/Params", &distributiontypes.QueryParamsResponse{})
-	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/DelegatorWithdrawAddress", &distributiontypes.QueryDelegatorWithdrawAddressResponse{})
-	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/ValidatorCommission", &distributiontypes.QueryValidatorCommissionResponse{})
+	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/DelegatorWithdrawAddress",
+		&distributiontypes.QueryDelegatorWithdrawAddressResponse{})
+	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/ValidatorCommission",
+		&distributiontypes.QueryValidatorCommissionResponse{})
 
 	// gov
 	setWhitelistedQuery("/cosmos.gov.v1beta1.Query/Deposit", &govtypes.QueryDepositResponse{})

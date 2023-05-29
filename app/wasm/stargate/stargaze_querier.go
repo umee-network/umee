@@ -10,8 +10,11 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 )
 
-// StargateQuerier dispatches whitelisted stargate queries
-func StargateQuerier(queryRouter baseapp.GRPCQueryRouter, cdc codec.Codec) func(ctx sdk.Context, request *wasmvmtypes.StargateQuery) ([]byte, error) {
+// Querier dispatches whitelisted stargate queries
+func Querier(
+	queryRouter baseapp.GRPCQueryRouter,
+	cdc codec.Codec,
+) func(ctx sdk.Context, request *wasmvmtypes.StargateQuery) ([]byte, error) {
 	return func(ctx sdk.Context, request *wasmvmtypes.StargateQuery) ([]byte, error) {
 		protoResponseType, err := GetWhitelistedQuery(request.Path)
 		if err != nil {
@@ -42,7 +45,7 @@ func StargateQuerier(queryRouter baseapp.GRPCQueryRouter, cdc codec.Codec) func(
 
 // ConvertProtoToJsonMarshal  unmarshals the given bytes into a proto message and then marshals it to json.
 // This is done so that clients calling stargate queries do not need to define their own proto unmarshalers,
-// being able to use response directly by json marshalling, which is supported in cosmwasm.
+// being able to use response directly by json `marshaling, which is supported in cosmwasm.
 func ConvertProtoToJSONMarshal(protoResponseType codec.ProtoMarshaler, bz []byte, cdc codec.Codec) ([]byte, error) {
 	// unmarshal binary into stargate response data structure
 	err := cdc.Unmarshal(bz, protoResponseType)
