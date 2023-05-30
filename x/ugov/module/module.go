@@ -14,10 +14,10 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/v4/util"
-	"github.com/umee-network/umee/v4/x/ugov"
-	"github.com/umee-network/umee/v4/x/ugov/client/cli"
-	"github.com/umee-network/umee/v4/x/ugov/keeper"
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v5/x/ugov/client/cli"
+	"github.com/umee-network/umee/v5/x/ugov/keeper"
 )
 
 var (

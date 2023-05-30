@@ -6,9 +6,9 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // MaxOracleGasUsage defines the maximum gas allowed for an oracle transaction.

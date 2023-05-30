@@ -25,11 +25,11 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"gotest.tools/v3/assert"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	wm "github.com/umee-network/umee/v4/app/wasm/msg"
-	wq "github.com/umee-network/umee/v4/app/wasm/query"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	wm "github.com/umee-network/umee/v5/app/wasm/msg"
+	wq "github.com/umee-network/umee/v5/app/wasm/query"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 const (

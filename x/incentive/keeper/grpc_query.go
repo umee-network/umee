@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v4/x/incentive"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 var _ incentive.QueryServer = Querier{}

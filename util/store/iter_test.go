@@ -3,7 +3,7 @@ package store
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v4/tests/tsdk"
+	"github.com/umee-network/umee/v5/tests/tsdk"
 	"gotest.tools/v3/assert"
 )
 

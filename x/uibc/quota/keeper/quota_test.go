@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	ibcutil "github.com/umee-network/umee/v4/util/ibc"
+	ibcutil "github.com/umee-network/umee/v5/util/ibc"
 )
 
 func TestUnitGetQuotas(t *testing.T) {

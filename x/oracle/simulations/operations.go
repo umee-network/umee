@@ -14,10 +14,10 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	umeesim "github.com/umee-network/umee/v4/util/sim"
-	"github.com/umee-network/umee/v4/x/oracle/keeper"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	umeesim "github.com/umee-network/umee/v5/util/sim"
+	"github.com/umee-network/umee/v5/x/oracle/keeper"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // Simulation operation weights constants

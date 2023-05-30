@@ -8,8 +8,8 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v4/tests/accs"
-	"github.com/umee-network/umee/v4/util/coin"
+	"github.com/umee-network/umee/v5/tests/accs"
+	"github.com/umee-network/umee/v5/util/coin"
 )
 
 func validMsgGovUpdateMinGasPrice() MsgGovUpdateMinGasPrice {

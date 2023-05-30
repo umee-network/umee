@@ -8,7 +8,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 type Keeper struct {
