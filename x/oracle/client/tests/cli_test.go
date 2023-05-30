@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
+	umeeapp "github.com/umee-network/umee/v5/app"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {

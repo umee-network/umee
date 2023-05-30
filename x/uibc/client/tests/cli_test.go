@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	"github.com/umee-network/umee/v4/x/uibc"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	"github.com/umee-network/umee/v5/x/uibc"
 	"gotest.tools/v3/assert"
 )
 

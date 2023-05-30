@@ -4,10 +4,10 @@ import (
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 
-	"github.com/umee-network/umee/v4/app/wasm/msg"
-	"github.com/umee-network/umee/v4/app/wasm/query"
-	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
-	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
+	"github.com/umee-network/umee/v5/app/wasm/msg"
+	"github.com/umee-network/umee/v5/app/wasm/query"
+	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
+	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
 )
 
 // RegisterCustomPlugins expose the queries and msgs of native modules to wasm.

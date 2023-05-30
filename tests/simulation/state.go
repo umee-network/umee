@@ -32,8 +32,8 @@ import (
 	dbm "github.com/tendermint/tm-db"
 	"gotest.tools/v3/assert"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 // GenesisState of the blockchain is represented here as a map of raw json

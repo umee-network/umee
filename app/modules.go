@@ -20,7 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
+	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 // Cosmos SDK module wrappers

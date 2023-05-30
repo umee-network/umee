@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
-	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
-	octypes "github.com/umee-network/umee/v4/x/oracle/types"
+	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	octypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts.

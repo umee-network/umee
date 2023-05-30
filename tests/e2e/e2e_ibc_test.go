@@ -6,9 +6,9 @@ import (
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/tests/grpc"
-	"github.com/umee-network/umee/v4/x/uibc"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/tests/grpc"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 var powerReduction = sdk.MustNewDecFromStr("10").Power(6)

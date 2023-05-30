@@ -1,7 +1,7 @@
 package e2e
 
 import (
-	"github.com/umee-network/umee/v4/tests/grpc"
+	"github.com/umee-network/umee/v5/tests/grpc"
 )
 
 // TestMedians queries for the oracle params, collects historical
