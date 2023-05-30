@@ -221,7 +221,7 @@ func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	//
 	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
 	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	moduleAvailableLiquidity := sdk.NewDec(liquidity.Int64()).Sub(
+	moduleAvailableLiquidity := sdk.NewDecFromInt(liquidity).Sub(
 		minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)),
 	)
 

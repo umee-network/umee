@@ -63,6 +63,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Fixes
 
 - [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
+- [XXXX](https://github.com/umee-network/umee/pull/XXXX) Fix an int64 overflow when computing moduel liquidity for high-exponent assets.
 
 ## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
 

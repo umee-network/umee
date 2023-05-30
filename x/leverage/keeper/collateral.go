@@ -271,7 +271,7 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	//
 	// module_available_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity
 	//									* module_collateral) / (1 - min_collateral_liquidity)
-	moduleAvailableCollateral := (sdk.NewDec(liquidity.Sub(spendableUTokens.Amount).Int64()).Sub(
+	moduleAvailableCollateral := (sdk.NewDecFromInt(liquidity.Sub(spendableUTokens.Amount)).Sub(
 		minCollateralLiquidity.MulInt(
 			totalTokenCollateral.AmountOf(denom),
 		),
