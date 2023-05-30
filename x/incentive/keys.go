@@ -6,12 +6,6 @@ const (
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
-
-	// StoreKey defines the query route
-	QuerierRoute = ModuleName
-
-	// RouterKey is the message route
-	RouterKey = ModuleName
 )
 
 type (

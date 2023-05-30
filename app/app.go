@@ -132,11 +132,13 @@ import (
 	"github.com/umee-network/umee/v4/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v4/x/ugov"
+	ugovkeeper "github.com/umee-network/umee/v4/x/ugov/keeper"
+	ugovmodule "github.com/umee-network/umee/v4/x/ugov/module"
 
 	// umee ibc-transfer and quota for ibc-transfer
+	uwasm "github.com/umee-network/umee/v4/app/wasm"
 	"github.com/umee-network/umee/v4/x/uibc"
-	uics20transfer "github.com/umee-network/umee/v4/x/uibc/ics20"
-	uibctransferkeeper "github.com/umee-network/umee/v4/x/uibc/ics20/keeper"
 	uibcmodule "github.com/umee-network/umee/v4/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v4/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v4/x/uibc/quota"
@@ -185,14 +187,15 @@ func init() {
 		// intertx.AppModuleBasic{},
 		// ibcfee.AppModuleBasic{},
 		leverage.AppModuleBasic{},
-		incentivemodule.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
 		uibcmodule.AppModuleBasic{},
+		ugovmodule.AppModuleBasic{},
+		wasm.AppModuleBasic{},
 	}
 
 	if Experimental {
-		moduleBasics = append(moduleBasics, wasm.AppModuleBasic{})
+		moduleBasics = append(moduleBasics, incentivemodule.AppModuleBasic{})
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -208,14 +211,14 @@ func init() {
 
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		icatypes.ModuleName:         nil,
-		leveragetypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
-		incentive.ModuleName:        nil,
-		oracletypes.ModuleName:      nil,
-		uibc.ModuleName:             nil,
-	}
 
-	if Experimental {
-		maccPerms[wasm.ModuleName] = []string{authtypes.Burner}
+		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
+		wasm.ModuleName:          {authtypes.Burner},
+
+		incentive.ModuleName:   nil,
+		oracletypes.ModuleName: nil,
+		uibc.ModuleName:        nil,
+		ugov.ModuleName:        nil,
 	}
 }
 
@@ -255,14 +258,15 @@ type UmeeApp struct {
 	NFTKeeper        nftkeeper.Keeper
 	WasmKeeper       wasm.Keeper
 
-	UIBCTransferKeeper uibctransferkeeper.Keeper
-	IBCKeeper          *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	ICAHostKeeper      icahostkeeper.Keeper
-	LeverageKeeper     leveragekeeper.Keeper
-	IncentiveKeeper    incentivekeeper.Keeper
-	OracleKeeper       oraclekeeper.Keeper
-	bech32IbcKeeper    bech32ibckeeper.Keeper
-	UIbcQuotaKeeperB   uibcquotakeeper.Builder
+	IBCTransferKeeper ibctransferkeeper.Keeper
+	IBCKeeper         *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
+	ICAHostKeeper     icahostkeeper.Keeper
+	LeverageKeeper    leveragekeeper.Keeper
+	IncentiveKeeper   incentivekeeper.Keeper
+	OracleKeeper      oraclekeeper.Keeper
+	bech32IbcKeeper   bech32ibckeeper.Keeper
+	UIbcQuotaKeeperB  uibcquotakeeper.Builder
+	UGovKeeperB       ugovkeeper.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -323,11 +327,13 @@ func New(
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
-		leveragetypes.StoreKey, incentive.StoreKey, oracletypes.StoreKey,
-		bech32ibctypes.StoreKey, uibc.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey,
+		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
+		wasm.StoreKey,
 	}
+
 	if Experimental {
-		storeKeys = append(storeKeys, wasm.StoreKey)
+		storeKeys = append(storeKeys, incentive.StoreKey)
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -373,10 +379,7 @@ func New(
 	app.ScopedIBCKeeper = app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	app.ScopedTransferKeeper = app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
-
-	if Experimental {
-		app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
-	}
+	app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
 
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
@@ -465,14 +468,20 @@ func New(
 		app.OracleKeeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
-	app.IncentiveKeeper = incentivekeeper.NewKeeper(
-		appCodec,
-		keys[incentive.StoreKey],
-		app.BankKeeper,
-		app.LeverageKeeper,
-	)
+
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
-	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
+
+	if Experimental {
+		app.IncentiveKeeper = incentivekeeper.NewKeeper(
+			appCodec,
+			keys[incentive.StoreKey],
+			app.BankKeeper,
+			app.LeverageKeeper,
+		)
+		app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
+	}
+
+	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
@@ -517,21 +526,15 @@ func New(
 	)
 
 	// Middleware Stacks
-	// Create an original ICS-20 transfer keeper and AppModule and then use it to
-	// created an Umee wrapped ICS-20 transfer keeper and AppModule.
-	ibcTransferKeeper := ibctransferkeeper.NewKeeper(
-		appCodec,
-		keys[ibctransfertypes.StoreKey],
-		app.GetSubspace(ibctransfertypes.ModuleName),
-		app.UIbcQuotaKeeperB, // ISC4 Wrapper: IBC Rate Limit middleware
-		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper,
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.ScopedTransferKeeper,
-	)
 
-	app.UIBCTransferKeeper = uibctransferkeeper.New(ibcTransferKeeper, app.BankKeeper)
+	// Create Transfer Keeper and pass IBCFeeKeeper as expected Channel and PortKeeper
+	// since fee middleware will wrap the IBCKeeper for underlying application.
+	app.IBCTransferKeeper = ibctransferkeeper.NewKeeper(
+		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
+		app.UIbcQuotaKeeperB, // ISC4 Wrapper: fee IBC middleware
+		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
+		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
+	)
 
 	// Create Transfer Stack
 	// SendPacket, originates from the application to an IBC channel:
@@ -546,11 +549,7 @@ func New(
 
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
-	transferStack = uics20transfer.NewIBCModule(
-		app.LeverageKeeper,
-		ibctransfer.NewIBCModule(ibcTransferKeeper),
-		app.UIBCTransferKeeper,
-	)
+	transferStack = ibctransfer.NewIBCModule(app.IBCTransferKeeper)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
 	transferStack = uibcquota.NewICS20Middleware(transferStack, app.UIbcQuotaKeeperB, appCodec)
 
@@ -585,7 +584,7 @@ func New(
 
 	app.bech32IbcKeeper = *bech32ibckeeper.NewKeeper(
 		app.IBCKeeper.ChannelKeeper, appCodec, keys[bech32ibctypes.StoreKey],
-		app.UIBCTransferKeeper,
+		app.IBCTransferKeeper,
 	)
 
 	// Register the proposal types
@@ -602,7 +601,7 @@ func New(
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
 	// The wasm gov proposal types can be individually enabled
-	if Experimental && len(wasmEnabledProposals) != 0 {
+	if len(wasmEnabledProposals) != 0 {
 		govRouter.AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, wasmEnabledProposals))
 	}
 
@@ -618,7 +617,38 @@ func New(
 		),
 	)
 
-	app.customKeepers(bApp, keys, appCodec, govRouter, homePath, appOpts, wasmOpts)
+	var err error
+	wasmDir := filepath.Join(homePath, "wasm")
+	app.wasmCfg, err = wasm.ReadWasmConfig(appOpts)
+	if err != nil {
+		panic(fmt.Sprintf("error while reading wasm config: %s", err))
+	}
+
+	// The last arguments can contain custom message handlers, and custom query handlers,
+	// if we want to allow any custom callbacks
+	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,umee"
+
+	// Register umee custom plugin to wasm
+	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper), wasmOpts...)
+
+	app.WasmKeeper = wasm.NewKeeper(
+		appCodec,
+		keys[wasm.StoreKey],
+		app.GetSubspace(wasm.ModuleName),
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.StakingKeeper,
+		app.DistrKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.ScopedWasmKeeper,   // capabilities
+		&app.IBCTransferKeeper, // ICS20TransferPortSource
+		app.MsgServiceRouter(),
+		wasmDir,
+		app.wasmCfg,
+		availableCapabilities,
+		wasmOpts...,
+	)
 
 	/****  Module Options ****/
 
@@ -656,19 +686,20 @@ func New(
 		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 
-		ibctransfer.NewAppModule(ibcTransferKeeper),
+		ibctransfer.NewAppModule(app.IBCTransferKeeper),
 		// ibcfee.NewAppModule(app.IBCFeeKeeper),
 		ica.NewAppModule(nil, &app.ICAHostKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
-		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
+		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
+		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 	}
 	if Experimental {
 		appModules = append(
 			appModules,
-			wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
+			incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		)
 	}
 
@@ -690,10 +721,11 @@ func New(
 		paramstypes.ModuleName, vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentive.ModuleName,
 		oracletypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
+		wasm.ModuleName,
 	}
 
 	endBlockers := []string{
@@ -708,9 +740,10 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentive.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
+		wasm.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -730,9 +763,10 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentive.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
+		wasm.ModuleName,
 	}
 
 	orderMigrations := []string{
@@ -745,16 +779,17 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
-		incentive.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
+		ugov.ModuleName,
+		wasm.ModuleName,
 	}
 
 	if Experimental {
-		beginBlockers = append(beginBlockers, wasm.ModuleName)
-		endBlockers = append(endBlockers, wasm.ModuleName)
-		initGenesis = append(initGenesis, wasm.ModuleName)
-		orderMigrations = append(orderMigrations, wasm.ModuleName)
+		beginBlockers = append(beginBlockers, incentive.ModuleName)
+		endBlockers = append(endBlockers, incentive.ModuleName)
+		initGenesis = append(initGenesis, incentive.ModuleName)
+		orderMigrations = append(orderMigrations, incentive.ModuleName)
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
@@ -820,13 +855,11 @@ func New(
 	// upgrade.
 	app.setPostHandler()
 
-	if Experimental {
-		if manager := app.SnapshotManager(); manager != nil {
-			err := manager.RegisterExtensions(
-				wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper))
-			if err != nil {
-				panic(fmt.Errorf("failed to register snapshot extension: %s", err))
-			}
+	if manager := app.SnapshotManager(); manager != nil {
+		err := manager.RegisterExtensions(
+			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper))
+		if err != nil {
+			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
 		}
 	}
 
@@ -835,12 +868,10 @@ func New(
 			tmos.Exit(fmt.Sprintf("failed to load latest version: %s", err))
 		}
 
-		if Experimental {
-			// Initialize pinned codes in wasmvm as they are not persisted there
-			ctx := app.NewUncachedContext(true, tmproto.Header{})
-			if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
-				tmos.Exit(fmt.Sprintf("failed initialize pinned codes %s", err))
-			}
+		// Initialize pinned codes in wasmvm as they are not persisted there
+		ctx := app.NewUncachedContext(true, tmproto.Header{})
+		if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
+			tmos.Exit(fmt.Sprintf("failed initialize pinned codes %s", err))
 		}
 	}
 
@@ -861,9 +892,7 @@ func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig,
 			SigGasConsumer:    ante.DefaultSigVerificationGasConsumer,
 			WasmConfig:        wasmConfig,
 			TXCounterStoreKey: wasmStoreKey,
-		},
-		Experimental,
-	)
+		})
 	if err != nil {
 		panic(err)
 	}
@@ -1073,9 +1102,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
-	if Experimental {
-		paramsKeeper.Subspace(wasm.ModuleName)
-	}
+	paramsKeeper.Subspace(wasm.ModuleName)
 
 	return paramsKeeper
 }
@@ -1089,9 +1116,7 @@ func getGovProposalHandlers() []govclient.ProposalHandler {
 		ibcclientclient.UpdateClientProposalHandler,
 		ibcclientclient.UpgradeProposalHandler,
 	}
-	if Experimental {
-		handlers = append(handlers, wasmclient.ProposalHandlers...)
-	}
+	handlers = append(handlers, wasmclient.ProposalHandlers...)
 
 	return handlers
 }

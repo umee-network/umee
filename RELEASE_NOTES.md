@@ -10,13 +10,32 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 Highlights:
 
-- TODO
+- Updated to the latest Cosmos SDK v0.46.12
 
-<!-- TODO: See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.3.0/CHANGELOG.md) for a full list of changes. -->
+<!-- TODO: See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.4.0/CHANGELOG.md) for a full list of changes. -->
 
 ### Validators
 
 We changed our GitHub release configuration, and now provide binaries in `.tar.gz` tarball.
+
+#### libwasmvm update
+
+Related to CosmWasm security patch, the binary requires `libwasmvm v1.2.3`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+
+- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.2.3/internal/api/libwasmvm.$(uname -m).so`
+- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.2.3/internal/api/libwasmvm.$(uname -m).so -O /usr/lib/libwasmvm.$(uname -m).so`
+
+You don't need to do anything if you are using our Docker image.
+
+#### Min Gas Prices
+
+Since v4.2 release we request all validators set a `minimum-gas-prices` setting (in app `config/app.toml` file, general settings). We recommend `0.1uumee` which is equal the current Keplr _average_ setting:
+
+```
+minimum-gas-prices = "0.1uumee"
+```
+
+You MUST also set the related parameter when starting Peggo `--cosmos-gas-prices="0.1uumee"`
 
 ### Upgrade instructions
 
@@ -34,6 +53,10 @@ You can use Cosmovisor → see [instructions](https://github.com/umee-network/um
 #### Docker
 
 Docker images are available in [ghcr.io umee-network](https://github.com/umee-network/umee/pkgs/container/umeed) repository.
+
+## v4.4.1
+
+Patch release updating `ibc-go` to the most recent patch release.
 
 ## v4.4.0
 
