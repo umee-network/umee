@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/client"
+	"github.com/umee-network/umee/v5/client"
 )
 
 const (

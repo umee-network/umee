@@ -1,6 +1,6 @@
 package e2e
 
-import "github.com/umee-network/umee/v4/tests/util"
+import "github.com/umee-network/umee/v5/tests/util"
 
 type TestCosmwasm struct {
 	IntegrationTestSuite

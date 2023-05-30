@@ -5,7 +5,7 @@ import (
 	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/suite"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	"github.com/umee-network/umee/v4/client"
+	"github.com/umee-network/umee/v5/client"
 )
 
 type IntegrationTestSuite struct {

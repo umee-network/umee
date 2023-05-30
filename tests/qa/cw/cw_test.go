@@ -16,9 +16,9 @@ import (
 	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/app"
-	"github.com/umee-network/umee/v4/client"
-	cwutil "github.com/umee-network/umee/v4/tests/util"
+	"github.com/umee-network/umee/v5/app"
+	"github.com/umee-network/umee/v5/client"
+	cwutil "github.com/umee-network/umee/v5/tests/util"
 )
 
 const (

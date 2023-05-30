@@ -8,7 +8,7 @@ import (
 	"github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
+	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 func (c *Client) TxSubmitWasmContract(contractPath string) (*sdk.TxResponse, error) {
