@@ -502,6 +502,7 @@ func New(
 		&app.IBCTransferKeeper,
 		&app.bech32IbcKeeper,
 	)
+	app.GravityKeeper.BurnValset(true)
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
