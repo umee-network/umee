@@ -3,8 +3,8 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/util/coin"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/util/coin"
 )
 
 func (s *IntegrationTestSuite) TestAccrueZeroInterest() {

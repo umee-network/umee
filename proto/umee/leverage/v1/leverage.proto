@@ -3,7 +3,7 @@ package umee.leverage.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v5/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 

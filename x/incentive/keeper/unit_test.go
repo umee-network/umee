@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -12,9 +13,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"github.com/umee-network/umee/v4/tests/tsdk"
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // creates keeper with mock leverage keeper
@@ -28,9 +29,12 @@ func newTestKeeper(t *testing.T) testKeeper {
 	bk := newMockBankKeeper()
 	k := NewKeeper(cdc, storeKey, &bk, &lk)
 	msrv := NewMsgServerImpl(k)
-	// modify genesis if necessary
+	// modify genesis
 	gen := incentive.DefaultGenesis()
 	gen.LastRewardsTime = 1 // initializes last reward time
+	gen.Params.MaxUnbondings = 10
+	gen.Params.UnbondingDuration = 86400
+	gen.Params.EmergencyUnbondFee = sdk.MustNewDecFromStr("0.01")
 	k.InitGenesis(ctx, *gen)
 	return testKeeper{k, bk, lk, t, ctx, sdk.ZeroInt(), msrv}
 }
@@ -108,15 +112,11 @@ func (k *testKeeper) addIncentiveProgram(uDenom string, start, duration int64, r
 		RemainingRewards: coin.Zero(reward.Denom),
 	}
 
-	// add program and expect no error
 	validMsg := &incentive.MsgGovCreatePrograms{
 		Authority:         govAccAddr,
-		Title:             "Add valid program",
-		Description:       "using addIncentiveProgram helper function",
 		Programs:          []incentive.IncentiveProgram{program},
 		FromCommunityFund: fromCommunity,
 	}
-	// pass and optionally fund the program from community fund
 	_, err := k.msrv.GovCreatePrograms(k.ctx, validMsg)
 	require.Nil(k.t, err, "addIncentiveProgram")
 }
@@ -141,13 +141,20 @@ func (k *testKeeper) advanceTime(duration int64) {
 // advanceTimeTo runs the functions normally contained in EndBlocker from the current rewards time
 // to a target time. Requires non-negative duration and an initialized lastRewardsTime.
 func (k *testKeeper) advanceTimeTo(blockTime int64) {
+	// ensure initialized
 	prevTime := k.GetLastRewardsTime(k.ctx)
 	if prevTime <= 0 {
 		panic("last rewards time not initialized")
 	}
 
-	require.Nil(k.t, k.updateRewards(k.ctx, blockTime), "update rewards")
-	require.Nil(k.t, k.updatePrograms(k.ctx), "update programs")
+	// update block time in testkeeper's context, so endBlock will read it
+	utcTime := time.Unix(blockTime, 0)
+	k.ctx = k.ctx.WithBlockTime(utcTime)
+
+	// ensure that last rewards time has actually updated without errors
+	skipped, err := k.EndBlock(k.ctx)
+	require.Nil(k.t, err, "endBlock")
+	require.False(k.t, skipped, "endBlock skipped")
 	require.Equal(k.t, blockTime, k.GetLastRewardsTime(k.ctx))
 }
 

@@ -3,7 +3,7 @@ package store
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v4/tests/tsdk"
+	"github.com/umee-network/umee/v5/tests/tsdk"
 	"gotest.tools/v3/assert"
 )
 
@@ -22,7 +22,7 @@ func TestIterate(t *testing.T) {
 		{[]byte{2, 4}, []byte{1}},
 	}
 
-	db := tsdk.NewKVStore(t)
+	db := tsdk.KVStore(t)
 	db.Set(pairs[0].K, pairs[0].V)
 	db.Set(pairs[4].K, pairs[4].V)
 	db.Set(pairs[3].K, pairs[3].V)

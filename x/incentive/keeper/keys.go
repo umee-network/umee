@@ -6,8 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 
-	"github.com/umee-network/umee/v4/util"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // KVStore key prefixes
@@ -16,8 +16,8 @@ var (
 	keyPrefixUpcomingIncentiveProgram  = []byte{0x02}
 	keyPrefixOngoingIncentiveProgram   = []byte{0x03}
 	keyPrefixCompletedIncentiveProgram = []byte{0x04}
-	keyPrefixNextProgramID             = []byte{0x05}
-	keyPrefixLastRewardsTime           = []byte{0x06}
+	keyNextProgramID                   = []byte{0x05}
+	keyLastRewardsTime                 = []byte{0x06}
 	keyPrefixRewardTracker             = []byte{0x07}
 	keyPrefixRewardAccumulator         = []byte{0x08}
 	keyPrefixUnbondings                = []byte{0x09}

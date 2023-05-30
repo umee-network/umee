@@ -8,8 +8,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 const (
@@ -33,8 +33,8 @@ func TestMsgs(t *testing.T) {
 	}
 
 	govMsgs := []sdk.Msg{
-		incentive.NewMsgGovCreatePrograms(govAddr, "title", "desc", []incentive.IncentiveProgram{program}),
-		incentive.NewMsgGovSetParams(govAddr, "title", "desc", incentive.DefaultParams()),
+		incentive.NewMsgGovCreatePrograms(govAddr, []incentive.IncentiveProgram{program}),
+		incentive.NewMsgGovSetParams(govAddr, incentive.DefaultParams()),
 	}
 
 	for _, msg := range userMsgs {
@@ -68,12 +68,11 @@ func TestRoutes(t *testing.T) {
 		*incentive.NewMsgEmergencyUnbond(testAddr, uToken),
 		*incentive.NewMsgClaim(testAddr),
 		*incentive.NewMsgSponsor(testAddr, 3),
-		*incentive.NewMsgGovCreatePrograms(govAddr, "title", "desc", []incentive.IncentiveProgram{program}),
-		*incentive.NewMsgGovSetParams(govAddr, "title", "desc", incentive.DefaultParams()),
+		*incentive.NewMsgGovCreatePrograms(govAddr, []incentive.IncentiveProgram{program}),
+		*incentive.NewMsgGovSetParams(govAddr, incentive.DefaultParams()),
 	}
 
 	for _, msg := range msgs {
-		assert.Equal(t, "incentive", msg.Route())
 		// check for non-empty returns for now
 		assert.Assert(t, len(msg.GetSignBytes()) != 0)
 		// exact match required

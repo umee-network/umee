@@ -22,13 +22,13 @@ the Github PR referenced in the following format:
 
 Types of changes (Stanzas):
 
+State Machine Breaking: for any changes that result in a divergent application state.
 Features: for new features.
 Improvements: for changes in existing functionality.
 Deprecated: for soon-to-be removed features.
 Bug Fixes: for any bug fixes.
 Client Breaking: for breaking Protobuf, CLI, gRPC and REST routes used by clients.
 API Breaking: for breaking exported Go APIs used by developers.
-State Machine Breaking: for any changes that result in a divergent application state.
 
 To release a new version, ensure an appropriate release branch exists. Add a
 release version and date to the existing Unreleased section which takes the form
@@ -48,6 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module
 - [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
 - [1993](https://github.com/umee-network/umee/pull/1993) Updated our Cosmos SDK fork to 0.46.12 and included an option to disable colored logs.
 
@@ -57,12 +58,25 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1989](https://github.com/umee-network/umee/pull/1989) Updated go version from 1.19 to 1.20
 - [2009](https://github.com/umee-network/umee/pull/2009) Use DavidAnson/markdownlint action for Markdown linting.
 - [2010](https://github.com/umee-network/umee/pull/2010) New `util/store` generic functions to load all values from a store.
+- [2021](https://github.com/umee-network/umee/pull/2021) `quota/keeper` unit test refactor.
 
 ### Fixes
 
-- .
+- [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
 
-## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-5
+## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
+
+### Improvements
+
+- [2064](https://github.com/umee-network/umee/pull/2064) Bump `ibc-go` to v6.1.1.
+
+## [v4.4.0](https://github.com/umee-network/umee/releases/tag/v4.4.0) - 2023-05-05
+
+### State Machine Breaking
+
+- [2022](https://github.com/umee-network/umee/pull/2022) Disable IBC ICS-20 inflow of only x/leverage registered tokens.
+
+## [v4.3.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-04-05
 
 ### Features
 

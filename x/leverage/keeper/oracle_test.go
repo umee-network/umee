@@ -5,10 +5,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 type mockOracleKeeper struct {

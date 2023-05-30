@@ -6,9 +6,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/leverage/fixtures"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/leverage/fixtures"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
@@ -46,7 +46,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			true,
-			"invalid authority",
+			"expected gov account",
 		}, {
 			"already registered token",
 			&types.MsgGovUpdateRegistry{
@@ -142,7 +142,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				},
 			},
 			true,
-			"invalid authority",
+			"expected gov account",
 		}, {
 			"valid authority and valid update token registry",
 			&types.MsgGovUpdateRegistry{

@@ -8,8 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v4/util/cli"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/util/cli"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // Flag constants
@@ -31,6 +31,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryParams(),
 		GetCmdQueryAccountBonds(),
 		GetCmdQueryCurrentRates(),
+		GetCmdQueryActualRates(),
 		GetCmdQueryTotalBonded(),
 		GetCmdQueryTotalUnbonding(),
 		GetCmdQueryPendingRewards(),
@@ -115,7 +116,7 @@ func GetCmdQueryPendingRewards() *cobra.Command {
 // of a given bonded uToken.
 func GetCmdQueryCurrentRates() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "current-rates[denom]",
+		Use:   "current-rates [denom]",
 		Args:  cobra.RangeArgs(0, 1),
 		Short: "Query the current annual rewards for a reference amount of a given bonded uToken.",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -130,10 +131,33 @@ func GetCmdQueryCurrentRates() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.CurrentRates(cmd.Context(), &incentive.QueryCurrentRates{UToken: denom})
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdQueryActualRates creates a Cobra command to query current annual rewards for a reference amount
+// of a given bonded uToken.
+func GetCmdQueryActualRates() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "actual-rates [denom]",
+		Args:  cobra.RangeArgs(0, 1),
+		Short: "Query the current annual rewards (as an APY) given bonded uToken.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
 				return err
 			}
+			denom := ""
+			if len(args) > 0 {
+				denom = args[0]
+			}
 
+			queryClient := incentive.NewQueryClient(clientCtx)
+			resp, err := queryClient.ActualRates(cmd.Context(), &incentive.QueryActualRates{UToken: denom})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -160,10 +184,6 @@ func GetCmdQueryTotalBonded() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.TotalBonded(cmd.Context(), &incentive.QueryTotalBonded{Denom: denom})
-			if err != nil {
-				return err
-			}
-
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -190,10 +210,6 @@ func GetCmdQueryTotalUnbonding() *cobra.Command {
 
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.TotalUnbonding(cmd.Context(), &incentive.QueryTotalUnbonding{Denom: denom})
-			if err != nil {
-				return err
-			}
-
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -263,16 +279,9 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 				return err
 			}
 
-			pageReq, err := client.ReadPageRequest(cmd.Flags())
-			if err != nil {
-				return err
-			}
-
 			queryClient := incentive.NewQueryClient(clientCtx)
 			resp, err := queryClient.CompletedIncentivePrograms(cmd.Context(),
-				&incentive.QueryCompletedIncentivePrograms{
-					Pagination: pageReq,
-				})
+				&incentive.QueryCompletedIncentivePrograms{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
@@ -286,7 +295,7 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 // by its ID.
 func GetCmdQueryIncentiveProgram() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "incentive-program [id]",
+		Use:   "program [id]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Query a single incentive program by its ID",
 		RunE: func(cmd *cobra.Command, args []string) error {

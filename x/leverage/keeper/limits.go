@@ -3,7 +3,7 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // userMaxWithdraw calculates the maximum amount of uTokens an account can currently withdraw and the amount of

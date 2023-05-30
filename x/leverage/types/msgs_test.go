@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -20,7 +20,7 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 		q    types.MsgGovUpdateRegistry
 		err  string
 	}{
-		{"no authority", types.MsgGovUpdateRegistry{}, "invalid authority"},
+		{"no authority", types.MsgGovUpdateRegistry{}, "expected gov account"},
 		{
 			"duplicated add token", types.MsgGovUpdateRegistry{
 				Authority:   authtypes.NewModuleAddress(govtypes.ModuleName).String(),

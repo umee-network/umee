@@ -4,18 +4,18 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 var _ uibc.QueryServer = Querier{}
 
 // Querier implements a QueryServer for the x/uibc module.
 type Querier struct {
-	Keeper
+	Builder
 }
 
-func NewQuerier(k Keeper) Querier {
-	return Querier{Keeper: k}
+func NewQuerier(kb Builder) Querier {
+	return Querier{Builder: kb}
 }
 
 // Params returns params of the x/uibc module.
@@ -23,7 +23,7 @@ func (q Querier) Params(goCtx context.Context, _ *uibc.QueryParams) (
 	*uibc.QueryParamsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := q.GetParams(ctx)
+	params := q.Keeper(&ctx).GetParams()
 
 	return &uibc.QueryParamsResponse{Params: params}, nil
 }
@@ -34,14 +34,12 @@ func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 	*uibc.QueryOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	k := q.Keeper(&ctx)
 	var o sdk.Dec
 	if len(req.Denom) == 0 {
-		o = q.GetTotalOutflow(ctx)
+		o = k.GetTotalOutflow()
 	} else {
-		d, err := q.GetTokenOutflows(ctx, req.Denom)
-		if err != nil {
-			return nil, err
-		}
+		d := k.GetTokenOutflows(req.Denom)
 		o = d.Amount
 	}
 
@@ -53,7 +51,7 @@ func (q Querier) AllOutflows(goCtx context.Context, _ *uibc.QueryAllOutflows) (
 	*uibc.QueryAllOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	o, err := q.GetAllOutflows(ctx)
+	o, err := q.Keeper(&ctx).GetAllOutflows()
 	if err != nil {
 		return nil, err
 	}

@@ -6,13 +6,13 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
-// MaxMsgGasUsage defines the maximum gas allowed for an oracle transaction.
-const MaxMsgGasUsage = uint64(140_000)
+// MaxOracleGasUsage defines the maximum gas allowed for an oracle transaction.
+const MaxOracleGasUsage = uint64(140_000)
 
 // FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
 // to early remove transactions from the mempool without enough attached fee.
@@ -30,7 +30,7 @@ func FeeAndPriority(ctx sdk.Context, tx sdk.Tx) (sdk.Coins, int64, error) {
 	msgs := feeTx.GetMsgs()
 	isOracleOrGravity := IsOracleOrGravityTx(msgs)
 	priority := getTxPriority(isOracleOrGravity, msgs)
-	chargeFees := !isOracleOrGravity || gasLimit > uint64(len(msgs))*MaxMsgGasUsage
+	chargeFees := !isOracleOrGravity || gasLimit > uint64(len(msgs))*MaxOracleGasUsage
 	// we also don't charge transaction fees for the first block, for the genesis transactions.
 	if !chargeFees || ctx.BlockHeight() == 0 {
 		return sdk.Coins{}, priority, nil

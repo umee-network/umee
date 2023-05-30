@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 
-	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
+	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // BankKeeper defines the expected x/bank keeper interface.
@@ -14,7 +14,7 @@ type BankKeeper interface {
 	IterateAllDenomMetaData(ctx sdk.Context, cb func(types.Metadata) bool)
 }
 
-type LeverageKeeper interface {
+type Leverage interface {
 	GetTokenSettings(ctx sdk.Context, baseDenom string) (ltypes.Token, error)
 	ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
 	DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec

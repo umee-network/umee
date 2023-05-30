@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/tests/util"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 func TestAvgKeeper(t *testing.T) {
@@ -32,7 +32,7 @@ type AvgKeeperSuite struct {
 }
 
 func (s AvgKeeperSuite) newAvgKeeper(t *testing.T, period, shift time.Duration) AvgKeeper {
-	db := util.KVStore(t)
+	db := tsdk.KVStore(t)
 	return AvgKeeper{store: db, period: period, shift: shift}
 }
 
