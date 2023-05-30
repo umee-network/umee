@@ -48,7 +48,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module
+- [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module.
+- [2050](https://github.com/umee-network/umee/pull/2050) Add `x/ugov` module.
+
+## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-30
+
+### Features
+
 - [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
 - [1993](https://github.com/umee-network/umee/pull/1993) Updated our Cosmos SDK fork to 0.46.12 and included an option to disable colored logs.
 
@@ -62,6 +68,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
+- [1982](https://github.com/umee-network/umee/pull/1982) Fix the build version (`umeed version`).
 - [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
 
 ## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
