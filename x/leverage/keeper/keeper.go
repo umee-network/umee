@@ -374,3 +374,81 @@ func (k Keeper) Liquidate(
 	}
 	return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
 }
+
+// Liquidate attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange for
+// some of the borrower's uToken collateral or associated base tokens. If the borrower is not over their
+// liquidation limit, or the repayment or reward denominations are invalid, an error is returned. If the
+// attempted repayment is greater than the amount owed or the maximum that can be repaid due to parameters
+// or available balances, then a partial liquidation, equal to the maximum valid amount, is performed.
+// Because partial liquidation is possible and exchange rates vary, Liquidate returns the actual amount of
+// tokens repaid, collateral liquidated, and base tokens or uTokens rewarded.
+func (k Keeper) FlashLiquidate(
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
+) (repaid sdk.Coin, reward sdk.Coin, err error) {
+	// if err := k.validateAcceptedDenom(ctx, repayDenom); err != nil {
+	return sdk.Coin{}, sdk.Coin{}, err
+	//}
+	/*
+		// detect if the user selected a base token reward instead of a uToken
+		directLiquidation := !types.HasUTokenPrefix(rewardDenom)
+		if !directLiquidation {
+			// convert rewardDenom to base token
+			rewardDenom = types.ToTokenDenom(rewardDenom)
+		}
+		// ensure that base reward is a registered token
+		if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
+
+		tokenRepay, uTokenLiquidate, tokenReward, err := k.getLiquidationAmounts(
+			ctx,
+			liquidatorAddr,
+			borrowerAddr,
+			requestedRepay,
+			rewardDenom,
+			directLiquidation,
+		)
+		if err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
+		if tokenRepay.IsZero() {
+			// Zero repay amount returned from liquidation computation means the target was eligible for liquidation
+			// but the proposed reward and repayment would have zero effect.
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationRepayZero
+		}
+
+		// repay some of the borrower's debt using the liquidator's balance
+		if err = k.repayBorrow(ctx, liquidatorAddr, borrowerAddr, tokenRepay); err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
+
+		if directLiquidation {
+			err = k.liquidateCollateral(ctx, borrowerAddr, liquidatorAddr, uTokenLiquidate, tokenReward)
+		} else {
+			// send uTokens from borrower collateral to liquidator's account
+			err = k.decollateralize(ctx, borrowerAddr, liquidatorAddr, uTokenLiquidate)
+		}
+		if err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
+
+		// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
+		if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
+
+		// finally, force incentive module to update bond and unbonding amounts if required,
+		// by ending existing unbondings early or instantly unbonding some bonded tokens
+		// until bonded + unbonding for the account is not greater than its collateral amount
+		err = k.reduceBondTo(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
+		if err != nil {
+			return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		}
+
+		// the last return value is the liquidator's selected reward
+		if directLiquidation {
+			return tokenRepay, uTokenLiquidate, tokenReward, nil
+		}
+		return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
+	*/
+}

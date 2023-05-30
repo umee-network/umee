@@ -493,6 +493,51 @@ func (s msgServer) Liquidate(
 	}, nil
 }
 
+func (s msgServer) FlashLiquidate(
+	goCtx context.Context,
+	msg *types.MsgFlashLiquidate,
+) (*types.MsgFlashLiquidateResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	liquidator, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	if err != nil {
+		return nil, err
+	}
+	borrower, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	repaid, reward, err := s.keeper.FlashLiquidate(ctx, liquidator, borrower, msg.RepayDenom, msg.RewardDenom)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fail here if liquidator ends up over their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the liquidator's collateral can cover all borrows
+	err = s.keeper.assertBorrowerHealth(ctx, liquidator)
+	if err != nil {
+		return nil, err
+	}
+
+	s.keeper.Logger(ctx).Debug(
+		"unhealthy borrower flash-liquidated",
+		"liquidator", msg.Liquidator,
+		"borrower", msg.Borrower,
+		"repaid", repaid.String(),
+		"reward", reward.String(),
+	)
+	sdkutil.Emit(&ctx, &types.EventLiquidate{
+		Liquidator: msg.Liquidator,
+		Borrower:   msg.Borrower,
+		Liquidated: reward,
+	})
+	return &types.MsgFlashLiquidateResponse{
+		Repaid: repaid,
+		Reward: reward,
+	}, nil
+}
+
 // GovUpdateRegistry updates existing tokens with new settings
 // or adds the new tokens to registry.
 func (s msgServer) GovUpdateRegistry(

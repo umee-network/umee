@@ -34,6 +34,7 @@ func TestTxs(t *testing.T) {
 		types.NewMsgMaxBorrow(testAddr, denom),
 		types.NewMsgRepay(testAddr, token),
 		types.NewMsgLiquidate(testAddr, testAddr, token, uDenom),
+		types.NewMsgFlashLiquidate(testAddr, testAddr, token.Denom, uDenom),
 	}
 
 	for _, tx := range txs {
@@ -64,6 +65,7 @@ func TestRoutes(t *testing.T) {
 		types.NewMsgMaxBorrow(testAddr, denom),
 		types.NewMsgRepay(testAddr, token),
 		types.NewMsgLiquidate(testAddr, testAddr, token, uDenom),
+		types.NewMsgFlashLiquidate(testAddr, testAddr, token.Denom, uDenom),
 	}
 
 	for _, tx := range txs {

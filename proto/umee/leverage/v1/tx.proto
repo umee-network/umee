@@ -48,6 +48,11 @@ service Msg {
   // of the target's collateral.
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 
+  // FlashLiquidate allows a user to repay a different user's borrowed coins in exchange for some
+  // of the target's collateral. For flash liquidations, the tokens to repay are borrowed instead of
+  // being taken from the liquidator's wallet.
+  rpc FlashLiquidate(MsgFlashLiquidate) returns (MsgFlashLiquidateResponse);
+
   // SupplyCollateral combines the Supply and Collateralize actions.
   rpc SupplyCollateral(MsgSupplyCollateral) returns (MsgSupplyCollateralResponse);
 
@@ -140,6 +145,21 @@ message MsgLiquidate {
   string reward_denom = 4;
 }
 
+// MsgFlashLiquidate is the request structure for the FlashLiquidate RPC.
+message MsgFlashLiquidate {
+  // Liquidator is the account address performing a liquidation and the signer
+  // of the message.
+  string liquidator = 1;
+  // Borrower is the account whose borrow is being repaid, and collateral consumed,
+  // by the liquidation. It does not sign the message.
+  string borrower = 2;
+  // RepayDenom is the base token that the liquidator will borrow and repay on behalf of
+  // the borrower.
+  string repay_denom = 3;
+  // RewardDenom is the uToken denom that the liquidator will receive as a liquidation reward.
+  string reward_denom = 4;
+}
+
 // MsgSupplyCollateral represents a user's request to supply and collateralize assets to the module.
 message MsgSupplyCollateral {
   // Supplier is the account address supplying assets and the signer of the message.
@@ -199,6 +219,16 @@ message MsgLiquidateResponse {
   // Reward is the amount of base tokens that the liquidator received from
   // the module as reward for the liquidation.
   cosmos.base.v1beta1.Coin reward = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgFlashLiquidateResponse defines the Msg/FlashLiquidate response type.
+message MsgFlashLiquidateResponse {
+  // Repaid is the amount of base tokens that the liquidator borrowed and repaid
+  // to the module on behalf of the borrower.
+  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
+  // Reward is the amount of collateral that the liquidator gained
+  // as reward for the liquidation.
+  cosmos.base.v1beta1.Coin reward = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgSupplyCollateralResponse defines the Msg/SupplyCollateral response type.
