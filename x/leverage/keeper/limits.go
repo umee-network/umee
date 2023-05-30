@@ -197,9 +197,9 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 	return sdk.MinInt(k.GetUTokenSupply(ctx, denom).Amount, maxUTokens.Amount), nil
 }
 
-// moduleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
+// ModuleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
 // respecting the MinCollateralLiquidity set for given Token.
-func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
+func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// Get module liquidity for the Token
 	liquidity := k.AvailableLiquidity(ctx, denom)
 

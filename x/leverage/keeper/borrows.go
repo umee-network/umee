@@ -226,7 +226,7 @@ func (k Keeper) checkSupplyUtilization(ctx sdk.Context, denom string) error {
 // selected, given that the min_collateral_liquidity and max_supply_utilization are both limiting factors.
 func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// Get the module_available_liquidity
-	moduleAvailableLiquidity, err := k.moduleAvailableLiquidity(ctx, denom)
+	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}

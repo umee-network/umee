@@ -223,7 +223,7 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	denom := types.ToTokenDenom(spendableUTokens.Denom)
 
 	// Get the module_available_liquidity
-	moduleAvailableLiquidity, err := k.moduleAvailableLiquidity(ctx, denom)
+	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
