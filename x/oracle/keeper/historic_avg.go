@@ -5,9 +5,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util"
-	"github.com/umee-network/umee/v4/util/store"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/util/store"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 type AvgKeeper struct {

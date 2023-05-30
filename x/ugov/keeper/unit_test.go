@@ -8,8 +8,8 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/tests/tsdk"
-	"github.com/umee-network/umee/v4/x/ugov"
+	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v5/x/ugov"
 )
 
 // creates keeper without external dependencies (app, leverage etc...)

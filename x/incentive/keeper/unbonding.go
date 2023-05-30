@@ -2,7 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // addUnbonding creates an unbonding and adds it to the account's current unbondings in the store.

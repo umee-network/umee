@@ -6,7 +6,7 @@ import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/ugov";
+option go_package = "github.com/umee-network/umee/v5/x/ugov";
 
 option (gogoproto.goproto_getters_all) = false;
 

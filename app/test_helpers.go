@@ -32,10 +32,10 @@ import (
 	dbm "github.com/tendermint/tm-db"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/x/leverage/fixtures"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // DefaultConsensusParams defines the default Tendermint consensus params used

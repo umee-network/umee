@@ -4,7 +4,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 // SetParams sets the x/uibc module's parameters.

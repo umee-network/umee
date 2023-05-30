@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/x/incentive"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 var _ incentive.MsgServer = msgServer{}
