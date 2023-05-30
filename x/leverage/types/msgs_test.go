@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 

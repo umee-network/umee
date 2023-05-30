@@ -6,7 +6,7 @@ import (
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"gotest.tools/v3/assert"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
+	umeeapp "github.com/umee-network/umee/v5/app"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {

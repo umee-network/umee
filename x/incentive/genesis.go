@@ -8,7 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // NewGenesisState creates a new GenesisState object

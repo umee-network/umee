@@ -6,9 +6,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/umee-network/umee/v4/util/coin"
-	leveragefixtures "github.com/umee-network/umee/v4/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/util/coin"
+	leveragefixtures "github.com/umee-network/umee/v5/x/leverage/fixtures"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // mockBankKeeper mocks the bank keeper

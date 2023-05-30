@@ -6,9 +6,9 @@ import (
 	"cosmossdk.io/errors"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/util/decmath"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/util/decmath"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 func TestErrorMatching(t *testing.T) {

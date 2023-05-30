@@ -3,9 +3,9 @@ package grpc
 import (
 	"fmt"
 
-	"github.com/umee-network/umee/v4/client"
-	sdkclient "github.com/umee-network/umee/v4/sdkclient"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/client"
+	sdkclient "github.com/umee-network/umee/v5/sdkclient"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 func listenForPrices(
