@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/incentive module.

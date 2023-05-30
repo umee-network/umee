@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // VotePeriod returns the number of blocks during which voting takes place.

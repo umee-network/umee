@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // ExchangeToken converts an sdk.Coin containing a base asset to its value as a

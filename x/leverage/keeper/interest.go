@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/sdkutil"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/util/sdkutil"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // DeriveBorrowAPY derives the current borrow interest rate on a token denom

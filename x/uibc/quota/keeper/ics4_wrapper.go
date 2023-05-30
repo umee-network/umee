@@ -8,7 +8,7 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
 
-	ibcutil "github.com/umee-network/umee/v4/util/ibc"
+	ibcutil "github.com/umee-network/umee/v5/util/ibc"
 )
 
 /******

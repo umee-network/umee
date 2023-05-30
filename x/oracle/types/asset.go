@@ -3,7 +3,7 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
+	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 const (

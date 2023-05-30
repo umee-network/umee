@@ -4,7 +4,7 @@ import (
 	"context"
 
 	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
-	"github.com/umee-network/umee/v4/sdkclient"
+	"github.com/umee-network/umee/v5/sdkclient"
 )
 
 // Client sdkclient.Client and provides umee chain specific transactions and queries.

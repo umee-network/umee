@@ -1,7 +1,7 @@
 package msg
 
 import (
-	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
+	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // UmeeMsg wraps all the messages availables for cosmwasm smartcontracts.
