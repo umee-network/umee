@@ -9,11 +9,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
-	lfixtures "github.com/umee-network/umee/v4/x/leverage/fixtures"
-	ltypes "github.com/umee-network/umee/v4/x/leverage/types"
-	"github.com/umee-network/umee/v4/x/oracle/types"
-	"github.com/umee-network/umee/v4/x/uibc"
-	"github.com/umee-network/umee/v4/x/uibc/mocks"
+	lfixtures "github.com/umee-network/umee/v5/x/leverage/fixtures"
+	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc/mocks"
 )
 
 func TestResetQuota(t *testing.T) {

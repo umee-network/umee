@@ -19,11 +19,11 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"gotest.tools/v3/assert"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/tests/tsdk"
-	"github.com/umee-network/umee/v4/x/uibc"
-	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
 )
 
 const (

@@ -19,10 +19,10 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/x/oracle/keeper"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/x/oracle/keeper"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // BondHooks defines a structure around the x/incentive Keeper that implements various

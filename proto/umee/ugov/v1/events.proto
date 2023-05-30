@@ -4,7 +4,7 @@ package umee.ugov.v1;
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-option go_package                      = "github.com/umee-network/umee/v4/x/ugov";
+option go_package                      = "github.com/umee-network/umee/v5/x/ugov";
 option (gogoproto.goproto_getters_all) = false;
 
 // EventMinTxFees is emitted when MsgGovUpdateMinFees is correctly executed.

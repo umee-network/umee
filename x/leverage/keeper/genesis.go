@@ -4,8 +4,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // InitGenesis initializes the x/leverage module state from a provided genesis state.

@@ -15,9 +15,9 @@ import (
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/v4/x/incentive"
-	"github.com/umee-network/umee/v4/x/incentive/client/cli"
-	"github.com/umee-network/umee/v4/x/incentive/keeper"
+	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive/client/cli"
+	"github.com/umee-network/umee/v5/x/incentive/keeper"
 )
 
 var (

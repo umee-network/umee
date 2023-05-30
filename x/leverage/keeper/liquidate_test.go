@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/x/leverage/keeper"
+	"github.com/umee-network/umee/v5/x/leverage/keeper"
 )
 
 func TestComputeLiquidation(t *testing.T) {

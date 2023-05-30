@@ -7,11 +7,11 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	wm "github.com/umee-network/umee/v4/app/wasm/msg"
-	wq "github.com/umee-network/umee/v4/app/wasm/query"
-	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	wm "github.com/umee-network/umee/v5/app/wasm/msg"
+	wq "github.com/umee-network/umee/v5/app/wasm/query"
+	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 	"gotest.tools/v3/assert"
 )
 
