@@ -11,6 +11,10 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 Highlights:
 
 - Updated to the latest Cosmos SDK v0.46.12
+- Gravity Bridge phase-3: shutdown of the transfers. In this release we introduce valset burn mechanism,
+  which will block the Ethereum smart contract for processing any further transactions, as well
+  as sending transfers back to Ethereum. This follows the plan approved through in the
+  [prop-67](https://www.mintscan.io/umee/proposals/67).
 
 <!-- TODO: See [CHANGELOG](https://github.com/umee-network/umee/blob/v4.4.0/CHANGELOG.md) for a full list of changes. -->
 
@@ -45,7 +49,7 @@ You MUST also set the related parameter when starting Peggo `--cosmos-gas-prices
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Swap binaries.
 - Ensure latest Peggo (v1.4.0) is running
-- Ensure latest Price Feeder (v2.1.1) is running and check your price feeder config is up to date. Price Feeder was moved to the new repository: [ojo-network/price-feeder](https://github.com/ojo-network/price-feeder/tree/umee).
+- Ensure latest Price Feeder (see [compatibility matrix](https://github.com/umee-network/umee/#release-compatibility-matrix)) is running and check your price feeder config is up to date.
 - Restart the chain.
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
