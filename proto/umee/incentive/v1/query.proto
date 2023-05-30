@@ -7,7 +7,7 @@ import "umee/incentive/v1/incentive.proto";
 import "umee/incentive/v1/genesis.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/incentive";
+option go_package = "github.com/umee-network/umee/v5/x/incentive";
 
 // Query defines the gRPC querier service.
 service Query {

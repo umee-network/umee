@@ -3,9 +3,9 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/keys"
-	"github.com/umee-network/umee/v4/util/store"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/util/keys"
+	"github.com/umee-network/umee/v5/util/store"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // getAllIncentivePrograms returns all incentive programs

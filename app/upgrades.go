@@ -22,15 +22,15 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
-	"github.com/umee-network/umee/v4/app/upgradev3"
-	"github.com/umee-network/umee/v4/app/upgradev3x3"
-	"github.com/umee-network/umee/v4/x/incentive"
-	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
-	"github.com/umee-network/umee/v4/x/ugov"
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/app/upgradev3"
+	"github.com/umee-network/umee/v5/app/upgradev3x3"
+	"github.com/umee-network/umee/v5/x/incentive"
+	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.

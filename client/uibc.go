@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 func (c Client) UIBCQueryClient() uibc.QueryClient {
