@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/util/coin"
 )
 
 func (c *Client) TxSubmitWasmContract(contractPath string) (*sdk.TxResponse, error) {
@@ -49,7 +50,7 @@ func (c *Client) TxWasmExecuteContractByAccSeq(contractAddr string, execMsg []by
 	if err != nil {
 		return nil, err
 	}
-	amount := sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1)))
+	amount := sdk.NewCoins(coin.Umee1)
 	msg := types.MsgExecuteContract{
 		Sender:   fromAddr.String(),
 		Contract: contractAddr,
@@ -57,9 +58,9 @@ func (c *Client) TxWasmExecuteContractByAccSeq(contractAddr string, execMsg []by
 		Msg:      execMsg,
 	}
 	if accSeq != 0 {
-		return c.BroadcastTxWithAccSeq(accSeq).BroadcastTxWithAsyncBlock().BroadcastTx(&msg)
+		return c.WithAccSeq(accSeq).WithAsyncBlock().BroadcastTx(&msg)
 	}
-	return c.BroadcastTxWithAsyncBlock().BroadcastTx(&msg)
+	return c.WithAsyncBlock().BroadcastTx(&msg)
 }
 
 func (c *Client) TxWasmExecuteContract(contractAddr string, execMsg []byte) (*sdk.TxResponse, error) {

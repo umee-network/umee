@@ -12,10 +12,8 @@ func (c Client) QueryContract(contractAddr string, query []byte) (*wasmtypes.Que
 	ctx, cancel := c.NewQCtx()
 	defer cancel()
 
-	resp, err := c.WasmClient().SmartContractState(ctx, &wasmtypes.QuerySmartContractStateRequest{
+	return c.WasmClient().SmartContractState(ctx, &wasmtypes.QuerySmartContractStateRequest{
 		Address:   contractAddr,
 		QueryData: query,
 	})
-
-	return resp, err
 }

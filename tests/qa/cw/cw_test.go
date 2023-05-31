@@ -13,9 +13,10 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v5/app"
 	"github.com/umee-network/umee/v5/client"
 	cwutil "github.com/umee-network/umee/v5/tests/util"
@@ -33,9 +34,6 @@ var (
 )
 
 func TestCWPlusGroup(t *testing.T) {
-	cw := &cwutil.Cosmwasm{}
-	cw.SetTestingF(t)
-
 	accAddrs := make([]sdk.AccAddress, 0)
 	for i := 0; i < TotalAccs; i++ {
 		privateKey := secp256k1.GenPrivKey()
@@ -49,11 +47,13 @@ func TestCWPlusGroup(t *testing.T) {
 	cc, err := ReadConfig("./config_example.yaml")
 	assert.NilError(t, err)
 	// umee client
-	client, err := client.NewClient(cc.ChainID, cc.RPC, cc.GRPC, cc.Mnemonics, 1.5, encConfig)
+	client, err := UmeeClient(cc, encConfig)
 	assert.NilError(t, err)
-	cw.SetUmeeClient(client)
+
+	cw := cwutil.NewCosmwasmTestSuite(t, client)
 	cw.DeployWasmContract(cwGroupPath)
 
+	// sender is intital account
 	admin := client.Tx.SenderAddr()
 	// instantiate Contract
 	initMsg := GroupInitMsg{
@@ -139,15 +139,15 @@ func TestCWPlusGroup(t *testing.T) {
 			Admin: accAddrs[1].String(),
 		},
 	}
+
 	wg.Add(1)
 	go func(wg *sync.WaitGroup, accSeq uint64) {
 		cwGroupMsgExecFunc("update_admin", updateAdmin, wg, accSeq)
 	}(wg, accSeq+1)
 
-	// waiting for go routine to finish
+	// waiting for all go routines to finish
 	wg.Wait()
 
-	time.Sleep(time.Second * 6)
 	// query the update admin info
 	cwGroupQuery = GroupQuery{
 		Admin: &Admin{},
@@ -159,4 +159,8 @@ func TestCWPlusGroup(t *testing.T) {
 	err = json.Unmarshal([]byte(queryResp.Data), &adminQuery)
 	assert.NilError(t, err)
 	assert.Equal(t, updateAdmin.UpdateAdmin.Admin, adminQuery.Admin)
+}
+
+func UmeeClient(cc *ChainConfig, encConfig sdkparams.EncodingConfig) (client.Client, error) {
+	return client.NewClient(cc.ChainID, cc.RPC, cc.GRPC, cc.Mnemonics, 1.5, encConfig)
 }

@@ -24,12 +24,11 @@ type Cosmwasm struct {
 	umee         client.Client
 }
 
-func (cw *Cosmwasm) SetTestingF(t *testing.T) {
-	cw.T = t
-}
-
-func (cw *Cosmwasm) SetUmeeClient(c client.Client) {
-	cw.umee = c
+func NewCosmwasmTestSuite(t *testing.T, umee client.Client) *Cosmwasm {
+	return &Cosmwasm{
+		T:    t,
+		umee: umee,
+	}
 }
 
 func (cw *Cosmwasm) DeployWasmContract(path string) {
@@ -51,8 +50,8 @@ func (cw *Cosmwasm) MarshalAny(any interface{}) []byte {
 func (cw *Cosmwasm) InstantiateContract(initMsg []byte) {
 	cw.T.Log("ℹ️ smart contract is instantiating...")
 	resp, err := cw.umee.Tx.TxWasmInstantiateContract(cw.StoreCode, initMsg)
-	cw.ContractAddr = cw.GetAttributeValue(*resp, "instantiate", "_contract_address")
 	assert.NilError(cw.T, err)
+	cw.ContractAddr = cw.GetAttributeValue(*resp, "instantiate", "_contract_address")
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
 	cw.T.Log("✅ smart contract is instantiating is done.")
 	cw.T.Logf("smart contract address is %s", cw.ContractAddr)

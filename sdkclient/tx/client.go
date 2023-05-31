@@ -127,12 +127,12 @@ func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
 }
 
-func (c *Client) BroadcastTxWithAccSeq(seq uint64) *Client {
+func (c *Client) WithAccSeq(seq uint64) *Client {
 	c.txFactory.WithSequence(seq)
 	return c
 }
 
-func (c *Client) BroadcastTxWithAsyncBlock() *Client {
+func (c *Client) WithAsyncBlock() *Client {
 	c.ClientContext.BroadcastMode = flags.BroadcastAsync
 	return c
 }
