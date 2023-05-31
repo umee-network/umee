@@ -10,14 +10,17 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 Highlights:
 
-- Updated to the latest Cosmos SDK v0.46.12
+- Cosmwasm integration.
 - Gravity Bridge phase-3: shutdown of the transfers. In this release we introduce valset burn mechanism,
   which will block the Ethereum smart contract for processing any further transactions, as well
   as sending transfers back to Ethereum. This follows the plan approved through in the
   [prop-67](https://www.mintscan.io/umee/proposals/67).
   NOTE: All validators must continue to use Peggo to not get slashed.
+- Updated to the latest Cosmos SDK v0.46.12
 
 See [CHANGELOG](https://github.com/umee-network/umee/blob/v5.0.0-rc1/CHANGELOG.md)
+
+### Validators
 
 #### Min Gas Prices
 
