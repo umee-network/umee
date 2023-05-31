@@ -51,7 +51,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module.
 - [2015](https://github.com/umee-network/umee/pull/2015), [2050](https://github.com/umee-network/umee/pull/2050) Add `x/ugov` module.
 
-## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
+## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0) - 2023-06-01
+
+### Improvements
+
+- [2076](https://github.com/umee-network/umee/pull/2076) Cosmwasm: registering `cosmwasm_1_2` capability.
+
+## [v5.0.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
 
 ### Features
 
