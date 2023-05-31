@@ -11,7 +11,7 @@
 
 ## Allowed native module queries
 
-!ueries for all native Umee modules:
+Queries for all native Umee modules:
 
 - [ugov](https://github.com/umee-network/umee/blob/main/proto/umee/ugov/v1/query.proto)
 - [leverage](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/query.proto)
@@ -37,7 +37,7 @@ $ umeed q wasm contract-state smart umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmst
 
 ## Allowed native module transactions
 
-Only [leverage module transactions](https:github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto) are allowed. Example JSON input for umee native module:
+Only [leverage module transactions](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto) are allowed. Example JSON input for Umee native module:
 
 ```json
 {
