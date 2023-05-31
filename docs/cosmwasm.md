@@ -1,5 +1,9 @@
 # Cosmwasm
 
+## Example smart contract to interact with umee native modules (leverage and oracle)
+  - [umee-cosmwasm](https://github.com/umee-network/umee-cosmwasm)
+
+
 ## Cosmwasm Built-in capabilities
    - [Built-in capabilities](https://github.com/CosmWasm/cosmwasm/blob/main/docs/CAPABILITIES-BUILT-IN.md) - iterator, staking, stargate, cosmwasm_1_1, cosmwasm_1_2
    - Custom capability of umee chain
@@ -31,7 +35,7 @@ $ umeed q wasm contract-state smart umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmst
 ```
 
 ## Allowed native module transactions
-Allowed only [leverage module transactions](https:github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto)
+Allowed only [leverage module transactions](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto)
 
 ```
 
@@ -57,3 +61,4 @@ Example command to execute the transaction:
 $ umeed tx wasm execute ${contract_id} ${json_input}
 $ umeed tx wasm execute umee14hj2tavq8fpesdwxxcu44rty3hh90vhujrvcmstl4zr3txmfvw9scsdqqx '{"umee":{"leverage":{"supply_collateral":{"supplier":"umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm","asset":{"denom":"uumee","amount":"1234"}}}}}'
 ```
+
