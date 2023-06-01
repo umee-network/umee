@@ -27,7 +27,6 @@ import (
 // thread safe sync.Map.
 var stargateWhitelist sync.Map
 
-// TODO: needs to finalize the which queries should allow
 func init() {
 	// ibc queries
 	setWhitelistedQuery("/ibc.applications.transfer.v1.Query/DenomTrace", &ibctransfertypes.QueryDenomTraceResponse{})
