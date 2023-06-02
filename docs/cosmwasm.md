@@ -18,8 +18,7 @@ Queries for all native Umee modules:
 - [oracle](https://github.com/umee-network/umee/blob/main/proto/umee/oracle/v1/query.proto)
 - [uibc](https://github.com/umee-network/umee/blob/main/proto/umee/uibc/v1/quota.proto)
 
-
-JSON input for query the native modules with custom query
+JSON input to query the native modules with custom query
 ```json
 {
   "chain": {
@@ -30,7 +29,7 @@ JSON input for query the native modules with custom query
 }
 ```
 
-JSON input for query the all modules with stargate queries
+JSON input to query the all modules with stargate queries
 > You will find more about stargate queries [here](https://github.com/CosmWasm/wasmvm/blob/v1.2.3/types/queries.go#L339-L350)
 ```json
 {
@@ -41,6 +40,7 @@ JSON input for query the all modules with stargate queries
     }
   }
 }
+```
 
 Example command to execute a query:
 
