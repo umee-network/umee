@@ -57,7 +57,16 @@ issues:
       source: "https://"
   max-same-issues: 50
 
-linters-settings:
+# linters-settings:
+#   depguard:
+#     rules:
+#       main:
+#         files:
+#           - $all 
+#           - "!$test"
+#         allow:
+#           - $gostd
+
   dogsled:
     max-blank-identifiers: 3
   misspell:
