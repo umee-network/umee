@@ -27,78 +27,94 @@ import (
 // thread safe sync.Map.
 var stargateWhitelist sync.Map
 
+const (
+	ibcBaseQueryPath      = "/ibc.applications.transfer.v1.Query/"
+	authBaseQueryPath     = "/cosmos.auth.v1beta1.Query/"
+	bankBaseQueryPath     = "/cosmos.bank.v1beta1.Query/"
+	distrBaseQueryPath    = "/cosmos.distribution.v1beta1.Query/"
+	govBaseQueryPath      = "/cosmos.gov.v1beta1.Query/"
+	slashingBaseQueryPath = "/cosmos.slashing.v1beta1.Query/"
+	stakingQueryPath      = "/cosmos.staking.v1beta1.Query/"
+
+	// umee
+	ugovBaseQueryPath     = "/umee.ugov.v1.Query/M"
+	leverageBaseQueryPath = "/umee.leverage.v1.Query/"
+	oracleBaseQueryPath   = "/umee.oracle.v1.Query/"
+	uibcBaseQueryPath     = "/umee.uibc.v1.Query/"
+)
+
 func init() {
 	// ibc queries
-	setWhitelistedQuery("/ibc.applications.transfer.v1.Query/DenomTrace", &ibctransfertypes.QueryDenomTraceResponse{})
+	setWhitelistedQuery(ibcBaseQueryPath+"DenomTrace", &ibctransfertypes.QueryDenomTraceResponse{})
 
 	// cosmos-sdk queries
 
 	// auth
-	setWhitelistedQuery("/cosmos.auth.v1beta1.Query/Account", &authtypes.QueryAccountResponse{})
-	setWhitelistedQuery("/cosmos.auth.v1beta1.Query/Params", &authtypes.QueryParamsResponse{})
+	setWhitelistedQuery(authBaseQueryPath+"Account", &authtypes.QueryAccountResponse{})
+	setWhitelistedQuery(authBaseQueryPath+"Params", &authtypes.QueryParamsResponse{})
 
 	// bank
-	setWhitelistedQuery("/cosmos.bank.v1beta1.Query/Balance", &banktypes.QueryBalanceResponse{})
-	setWhitelistedQuery("/cosmos.bank.v1beta1.Query/DenomMetadata", &banktypes.QueryDenomsMetadataResponse{})
-	setWhitelistedQuery("/cosmos.bank.v1beta1.Query/Params", &banktypes.QueryParamsResponse{})
-	setWhitelistedQuery("/cosmos.bank.v1beta1.Query/SupplyOf", &banktypes.QuerySupplyOfResponse{})
+	setWhitelistedQuery(bankBaseQueryPath+"Balance", &banktypes.QueryBalanceResponse{})
+	setWhitelistedQuery(bankBaseQueryPath+"DenomMetadata", &banktypes.QueryDenomsMetadataResponse{})
+	setWhitelistedQuery(bankBaseQueryPath+"Params", &banktypes.QueryParamsResponse{})
+	setWhitelistedQuery(bankBaseQueryPath+"SupplyOf", &banktypes.QuerySupplyOfResponse{})
 
 	// distribution
-	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/Params", &distributiontypes.QueryParamsResponse{})
-	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/DelegatorWithdrawAddress",
+	setWhitelistedQuery(distrBaseQueryPath+"Params", &distributiontypes.QueryParamsResponse{})
+	setWhitelistedQuery(distrBaseQueryPath+"DelegatorWithdrawAddress",
 		&distributiontypes.QueryDelegatorWithdrawAddressResponse{})
-	setWhitelistedQuery("/cosmos.distribution.v1beta1.Query/ValidatorCommission",
+	setWhitelistedQuery(distrBaseQueryPath+"ValidatorCommission",
 		&distributiontypes.QueryValidatorCommissionResponse{})
 
 	// gov
-	setWhitelistedQuery("/cosmos.gov.v1beta1.Query/Deposit", &govtypes.QueryDepositResponse{})
-	setWhitelistedQuery("/cosmos.gov.v1beta1.Query/Params", &govtypes.QueryParamsResponse{})
-	setWhitelistedQuery("/cosmos.gov.v1beta1.Query/Vote", &govtypes.QueryVoteResponse{})
+	setWhitelistedQuery(govBaseQueryPath+"Deposit", &govtypes.QueryDepositResponse{})
+	setWhitelistedQuery(govBaseQueryPath+"Params", &govtypes.QueryParamsResponse{})
+	setWhitelistedQuery(govBaseQueryPath+"Vote", &govtypes.QueryVoteResponse{})
 
 	// slashing
-	setWhitelistedQuery("/cosmos.slashing.v1beta1.Query/Params", &slashingtypes.QueryParamsResponse{})
-	setWhitelistedQuery("/cosmos.slashing.v1beta1.Query/SigningInfo", &slashingtypes.QuerySigningInfoResponse{})
+	setWhitelistedQuery(slashingBaseQueryPath+"Params", &slashingtypes.QueryParamsResponse{})
+	setWhitelistedQuery(slashingBaseQueryPath+"SigningInfo", &slashingtypes.QuerySigningInfoResponse{})
 
 	// staking
-	setWhitelistedQuery("/cosmos.staking.v1beta1.Query/Delegation", &stakingtypes.QueryDelegationResponse{})
-	setWhitelistedQuery("/cosmos.staking.v1beta1.Query/Params", &stakingtypes.QueryParamsResponse{})
-	setWhitelistedQuery("/cosmos.staking.v1beta1.Query/Validator", &stakingtypes.QueryValidatorResponse{})
+	setWhitelistedQuery(stakingQueryPath+"Delegation", &stakingtypes.QueryDelegationResponse{})
+	setWhitelistedQuery(stakingQueryPath+"Params", &stakingtypes.QueryParamsResponse{})
+	setWhitelistedQuery(stakingQueryPath+"Validator", &stakingtypes.QueryValidatorResponse{})
 
 	// umee native module queries
 
 	// ugov
-	setWhitelistedQuery("/umee.ugov.v1.Query/MinGasPrice", &ugovtypes.QueryMinGasPriceResponse{})
+	setWhitelistedQuery(ugovBaseQueryPath+"MinGasPrice", &ugovtypes.QueryMinGasPriceResponse{})
 
 	// leverage
-	setWhitelistedQuery("/umee.leverage.v1.Query/Params", &ltypes.QueryParamsResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/RegisteredTokens", &ltypes.QueryRegisteredTokensResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/MarketSummary", &ltypes.QueryMarketSummaryResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/AccountBalances", &ltypes.QueryAccountBalancesResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/AccountSummary", &ltypes.QueryAccountSummaryResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/LiquidationTargets", &ltypes.QueryLiquidationTargetsResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/BadDebts", &ltypes.QueryBadDebtsResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/MaxWithdraw", &ltypes.QueryMaxWithdrawResponse{})
-	setWhitelistedQuery("/umee.leverage.v1.Query/MaxBorrow", &ltypes.QueryMaxBorrowResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"Params", &ltypes.QueryParamsResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"RegisteredTokens", &ltypes.QueryRegisteredTokensResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"MarketSummary", &ltypes.QueryMarketSummaryResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"AccountBalances", &ltypes.QueryAccountBalancesResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"AccountSummary", &ltypes.QueryAccountSummaryResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"LiquidationTargets", &ltypes.QueryLiquidationTargetsResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"BadDebts", &ltypes.QueryBadDebtsResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"MaxWithdraw", &ltypes.QueryMaxWithdrawResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+"MaxBorrow", &ltypes.QueryMaxBorrowResponse{})
 
 	// oracle
-	setWhitelistedQuery("/umee.oracle.v1.Query/ExchangeRates", &otypes.QueryExchangeRatesResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/ActiveExchangeRates", &otypes.QueryActiveExchangeRatesResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/FeederDelegation", &otypes.QueryFeederDelegationResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/MissCounter", &otypes.QueryMissCounterResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/SlashWindow", &otypes.QuerySlashWindowResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/AggregatePrevote", &otypes.QueryAggregatePrevoteResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/AggregatePrevotes", &otypes.QueryAggregatePrevotesResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/AggregateVote", &otypes.QueryAggregateVoteResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/AggregateVotes", &otypes.QueryAggregateVotesResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/Params", &otypes.QueryParamsResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/Medians", &otypes.QueryMediansResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/MedianDeviations", &otypes.QueryMedianDeviationsResponse{})
-	setWhitelistedQuery("/umee.oracle.v1.Query/AvgPrice", &otypes.QueryAvgPriceResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"ExchangeRates", &otypes.QueryExchangeRatesResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"ActiveExchangeRates", &otypes.QueryActiveExchangeRatesResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"FeederDelegation", &otypes.QueryFeederDelegationResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"MissCounter", &otypes.QueryMissCounterResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"SlashWindow", &otypes.QuerySlashWindowResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"AggregatePrevote", &otypes.QueryAggregatePrevoteResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"AggregatePrevotes", &otypes.QueryAggregatePrevotesResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"AggregateVote", &otypes.QueryAggregateVoteResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"AggregateVotes", &otypes.QueryAggregateVotesResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"Params", &otypes.QueryParamsResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"Medians", &otypes.QueryMediansResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"MedianDeviations", &otypes.QueryMedianDeviationsResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+"AvgPrice", &otypes.QueryAvgPriceResponse{})
 
 	// uibc
-	setWhitelistedQuery("/umee.uibc.v1.Query/Params", &uibctypes.QueryParamsResponse{})
-	setWhitelistedQuery("/umee.uibc.v1.Query/Outflows", &uibctypes.QueryOutflowsResponse{})
-	setWhitelistedQuery("/umee.uibc.v1.Query/AllOutflows", &uibctypes.QueryAllOutflowsResponse{})
+	setWhitelistedQuery(uibcBaseQueryPath+"Params", &uibctypes.QueryParamsResponse{})
+	setWhitelistedQuery(uibcBaseQueryPath+"Outflows", &uibctypes.QueryOutflowsResponse{})
+	setWhitelistedQuery(uibcBaseQueryPath+"AllOutflows", &uibctypes.QueryAllOutflowsResponse{})
 }
 
 // GetWhitelistedQuery returns the whitelisted query at the provided path.
