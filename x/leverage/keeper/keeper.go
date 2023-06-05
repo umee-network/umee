@@ -375,13 +375,7 @@ func (k Keeper) Liquidate(
 	return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
 }
 
-// Liquidate attempts to repay one of an eligible borrower's borrows (in part or in full) in exchange for
-// some of the borrower's uToken collateral or associated base tokens. If the borrower is not over their
-// liquidation limit, or the repayment or reward denominations are invalid, an error is returned. If the
-// attempted repayment is greater than the amount owed or the maximum that can be repaid due to parameters
-// or available balances, then a partial liquidation, equal to the maximum valid amount, is performed.
-// Because partial liquidation is possible and exchange rates vary, Liquidate returns the actual amount of
-// tokens repaid, collateral liquidated, and base tokens or uTokens rewarded.
+// FlashLiquidate
 func (k Keeper) FlashLiquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
