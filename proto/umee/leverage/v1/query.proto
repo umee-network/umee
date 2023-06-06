@@ -7,6 +7,8 @@ import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
+import "umee/leverage/v1/inspector.proto";
+
 option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
@@ -64,6 +66,26 @@ service Query {
   rpc MaxBorrow(QueryMaxBorrow)
       returns (QueryMaxBorrowResponse) {
     option (google.api.http).get = "/umee/leverage/v1/max_borrow";
+  }
+
+  // Inspect is the customizable inspector query.
+  rpc Inspect(QueryInspect)
+      returns (QueryInspectResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/inspect";
+  }
+
+  // InspectNeat is the inspector query, with a different response structure
+  // optimized for human readability on the CLI.
+  rpc InspectNeat(QueryInspectNeat)
+      returns (QueryInspectNeatResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/inspect_neat";
+  }
+
+  // RiskData returns filtered and sorted account balances by symbol
+  // denom for all qualifying accounts.
+  rpc RiskData(QueryRiskData)
+      returns (QueryRiskDataResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/risk_data";
   }
 }
 
