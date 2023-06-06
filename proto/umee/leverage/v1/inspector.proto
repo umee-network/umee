@@ -10,19 +10,6 @@ option (gogoproto.goproto_getters_all) = false;
 
 // QueryInspect defines the request structure for the Inspect gRPC service handler.
 message QueryInspect {
-  InspectOptions opts = 1;
-}
-
-// QueryInspectNeat defines the request structure for the InspectNeat gRPC service handler.
-message QueryInspectNeat {
-  InspectOptions opts = 1;
-}
-
-// QueryRiskData defines the request structure for the RiskData gRPC service handler.
-message QueryRiskData {}
-
-// InspectOptions is used by the various inspector queries to filter and sort accounts.
-message InspectOptions {
   // Mode is a string which selects the logic behind the inspector query.
   string mode = 1;
   // Symbol optionally selects a symbol denom for query modes that allow one to be specified.
@@ -43,6 +30,32 @@ message InspectOptions {
     (gogoproto.nullable)   = false
   ];
 }
+
+// QueryInspectNeat defines the request structure for the InspectNeat gRPC service handler.
+message QueryInspectNeat {
+  // Mode is a string which selects the logic behind the inspector query.
+  string mode = 1;
+  // Symbol optionally selects a symbol denom for query modes that allow one to be specified.
+  string symbol = 2;
+  // Sort is an optional string which controls how accounts are sorted.
+  string sort = 3;
+  // Mode minimum is the mode value below which accounts will be filtered. For example,
+  // in collateral mode this is the minimum collateral value an account must have to
+  // be displayed.
+  string mode_min = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Sort minimum is the sorted value below which accounts will be filtered. For example,
+  // in risk mode this is the minimum LTV an account must have to be displayed.
+  string sort_min = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// QueryRiskData defines the request structure for the RiskData gRPC service handler.
+message QueryRiskData {}
 
 // QueryInspectResponse defines the response structure for the Inspect gRPC service handler.
 message QueryInspectResponse {

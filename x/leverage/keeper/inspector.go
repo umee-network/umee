@@ -32,51 +32,51 @@ func (q Querier) Inspect(
 	var sorting inspectorSort
 
 	// The "all" symbol denom is converted to empty symbol denom
-	if strings.EqualFold(req.Opts.Symbol, "all") {
-		req.Opts.Symbol = ""
+	if strings.EqualFold(req.Symbol, "all") {
+		req.Symbol = ""
 	}
-	if req.Opts.ModeMin.IsNil() {
-		req.Opts.ModeMin = sdk.ZeroDec()
+	if req.ModeMin.IsNil() {
+		req.ModeMin = sdk.ZeroDec()
 	}
-	if req.Opts.SortMin.IsNil() {
-		req.Opts.SortMin = sdk.ZeroDec()
+	if req.SortMin.IsNil() {
+		req.SortMin = sdk.ZeroDec()
 	}
-	specific := req.Opts.Symbol != ""
+	specific := req.Symbol != ""
 
-	switch strings.ToLower(req.Opts.Mode) {
+	switch strings.ToLower(req.Mode) {
 	case "borrowed":
-		filters = append(filters, withMinBorrowedValue(req.Opts.ModeMin, specific))
+		filters = append(filters, withMinBorrowedValue(req.ModeMin, specific))
 	case "collateral":
-		filters = append(filters, withMinCollateralValue(req.Opts.ModeMin, specific))
+		filters = append(filters, withMinCollateralValue(req.ModeMin, specific))
 	case "danger":
-		filters = append(filters, withMinDanger(req.Opts.ModeMin))
+		filters = append(filters, withMinDanger(req.ModeMin))
 	case "ltv":
-		filters = append(filters, withMinLTV(req.Opts.ModeMin))
+		filters = append(filters, withMinLTV(req.ModeMin))
 	case "zeroes":
 		filters = append(filters, withZeroes())
 	default:
-		return &types.QueryInspectResponse{}, status.Error(codes.InvalidArgument, "unknown inspector mode: "+req.Opts.Mode)
+		return &types.QueryInspectResponse{}, status.Error(codes.InvalidArgument, "unknown inspector mode: "+req.Mode)
 	}
-	switch strings.ToLower(req.Opts.Sort) {
+	switch strings.ToLower(req.Sort) {
 	case "borrowed":
 		sorting = moreBorrowed(specific)
-		if req.Opts.SortMin.IsPositive() {
-			filters = append(filters, withMinBorrowedValue(req.Opts.SortMin, false))
+		if req.SortMin.IsPositive() {
+			filters = append(filters, withMinBorrowedValue(req.SortMin, false))
 		}
 	case "collateral":
 		sorting = moreCollateral(specific)
-		if req.Opts.SortMin.IsPositive() {
-			filters = append(filters, withMinCollateralValue(req.Opts.SortMin, false))
+		if req.SortMin.IsPositive() {
+			filters = append(filters, withMinCollateralValue(req.SortMin, false))
 		}
 	case "danger":
 		sorting = moreDanger()
-		if req.Opts.SortMin.IsPositive() {
-			filters = append(filters, withMinDanger(req.Opts.SortMin))
+		if req.SortMin.IsPositive() {
+			filters = append(filters, withMinDanger(req.SortMin))
 		}
 	case "ltv":
 		sorting = moreLTV()
-		if req.Opts.SortMin.IsPositive() {
-			filters = append(filters, withMinLTV(req.Opts.SortMin))
+		if req.SortMin.IsPositive() {
+			filters = append(filters, withMinLTV(req.SortMin))
 		}
 	default:
 		// if no sort mode is specified, return all borrowers sorted by total collateral value
@@ -86,7 +86,7 @@ func (q Querier) Inspect(
 	borrowers, err := k.filteredSortedBorrowers(ctx,
 		filters,
 		sorting,
-		req.Opts.Symbol,
+		req.Symbol,
 	)
 	if err != nil {
 		return nil, err
@@ -105,12 +105,16 @@ func (q Querier) InspectNeat(
 	}
 
 	// The "all" symbol denom is converted to empty symbol denom
-	if strings.EqualFold(req.Opts.Symbol, "all") {
-		req.Opts.Symbol = ""
+	if strings.EqualFold(req.Symbol, "all") {
+		req.Symbol = ""
 	}
 
 	req2 := types.QueryInspect{
-		Opts: req.Opts,
+		Symbol:  req.Symbol,
+		Mode:    req.Mode,
+		Sort:    req.Sort,
+		ModeMin: req.ModeMin,
+		SortMin: req.SortMin,
 	}
 
 	resp2, err := q.Inspect(goCtx, &req2)
@@ -122,7 +126,7 @@ func (q Querier) InspectNeat(
 	for _, b := range resp2.Borrowers {
 		if b.SuppliedValue.IsPositive() {
 			borrowed := b.BorrowedValue
-			if req.Opts.Symbol != "" {
+			if req.Symbol != "" {
 				borrowed = b.SpecificBorrowValue
 			}
 			neat := types.BorrowerSummaryNeat{
