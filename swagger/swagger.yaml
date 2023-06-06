@@ -266,7 +266,7 @@ paths:
                       format: byte
       tags:
         - Query
-  /umee/leverage/v1/inspect/{flavor}/{symbol}:
+  /umee/leverage/v1/inspect/{mode}:
     get:
       summary: Inspect is the customizable inspector query.
       operationId: Inspect
@@ -348,30 +348,52 @@ paths:
                       type: string
                       format: byte
       parameters:
-        - name: flavor
-          description: >-
-            Flavor is a simple string which selects the logic behind the
-            inspector query.
+        - name: mode
+          description: Mode is a string which selects the logic behind the inspector query.
           in: path
           required: true
           type: string
         - name: symbol
           description: >-
-            Symbol optionally selects a symbol denom for query flavors that
-            allow one to be specified.
-          in: path
-          required: true
+            Symbol optionally selects a symbol denom for query modes that allow
+            one to be specified.
+          in: query
+          required: false
           type: string
-        - name: value
-          description: Value is the optional value parameter, usually a minimum value.
+        - name: sort
+          description: Sort is an optional string which controls how accounts are sorted.
+          in: query
+          required: false
+          type: string
+        - name: mode_min
+          description: >-
+            Mode minimum is the mode value below which accounts will be
+            filtered. For example,
+
+            in collateral mode this is the minimum collateral value an account
+            must have to
+
+            be displayed.
+          in: query
+          required: false
+          type: string
+        - name: sort_min
+          description: >-
+            Sort minimum is the sorted value below which accounts will be
+            filtered. For example,
+
+            in risk mode this is the minimum LTV an account must have to be
+            displayed.
           in: query
           required: false
           type: string
       tags:
         - Query
-  /umee/leverage/v1/inspect_neat/{flavor}/{symbol}:
+  /umee/leverage/v1/inspect_neat/{mode}:
     get:
-      summary: InspectNeat is a neater customizable inspector query.
+      summary: |-
+        InspectNeat is the inspector query, with a different response structure
+        optimized for human readability on the CLI.
       operationId: InspectNeat
       responses:
         '200':
@@ -396,11 +418,11 @@ paths:
                       type: number
                       format: double
                       description: L is borrowed value as a portion of borrow limit.
-                    Q:
+                    T:
                       type: number
                       format: double
                       description: >-
-                        Q is borrowed value as a portion of liquidation
+                        T is borrowed value as a portion of liquidation
                         threshold.
                     V:
                       type: number
@@ -411,12 +433,6 @@ paths:
                   title: >-
                     BorrowerSummaryNeat defines a borrower's address and account
                     health without requiring sdk.Dec formatting
-              skipped:
-                type: integer
-                format: int32
-                description: >-
-                  Skipped is how many account had to be skipped due to zero
-                  supplied value.
             description: >-
               QueryInspectNeatResponse defines the response structure for the
               InspectNeat gRPC service handler.
@@ -443,22 +459,42 @@ paths:
                       type: string
                       format: byte
       parameters:
-        - name: flavor
-          description: >-
-            Flavor is a simple string which selects the logic behind the
-            inspector query.
+        - name: mode
+          description: Mode is a string which selects the logic behind the inspector query.
           in: path
           required: true
           type: string
         - name: symbol
           description: >-
-            Symbol optionally selects a symbol denom for query flavors that
-            allow one to be specified.
-          in: path
-          required: true
+            Symbol optionally selects a symbol denom for query modes that allow
+            one to be specified.
+          in: query
+          required: false
           type: string
-        - name: value
-          description: Value is the optional value parameter, usually a minimum value.
+        - name: sort
+          description: Sort is an optional string which controls how accounts are sorted.
+          in: query
+          required: false
+          type: string
+        - name: mode_min
+          description: >-
+            Mode minimum is the mode value below which accounts will be
+            filtered. For example,
+
+            in collateral mode this is the minimum collateral value an account
+            must have to
+
+            be displayed.
+          in: query
+          required: false
+          type: string
+        - name: sort_min
+          description: >-
+            Sort minimum is the sorted value below which accounts will be
+            filtered. For example,
+
+            in risk mode this is the minimum LTV an account must have to be
+            displayed.
           in: query
           required: false
           type: string
@@ -2145,10 +2181,10 @@ definitions:
         type: number
         format: double
         description: L is borrowed value as a portion of borrow limit.
-      Q:
+      T:
         type: number
         format: double
-        description: Q is borrowed value as a portion of liquidation threshold.
+        description: T is borrowed value as a portion of liquidation threshold.
       V:
         type: number
         format: double
@@ -2399,10 +2435,10 @@ definitions:
               type: number
               format: double
               description: L is borrowed value as a portion of borrow limit.
-            Q:
+            T:
               type: number
               format: double
-              description: Q is borrowed value as a portion of liquidation threshold.
+              description: T is borrowed value as a portion of liquidation threshold.
             V:
               type: number
               format: double
@@ -2410,12 +2446,6 @@ definitions:
           title: >-
             BorrowerSummaryNeat defines a borrower's address and account health
             without requiring sdk.Dec formatting
-      skipped:
-        type: integer
-        format: int32
-        description: >-
-          Skipped is how many account had to be skipped due to zero supplied
-          value.
     description: >-
       QueryInspectNeatResponse defines the response structure for the
       InspectNeat gRPC service handler.

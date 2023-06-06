@@ -7,15 +7,47 @@ option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
-// QueryInspect defines the request structure for the
-// Inspect gRPC service handler.
+// QueryInspect defines the request structure for the Inspect gRPC service handler.
 message QueryInspect {
-  // Flavor is a simple string which selects the logic behind the inspector query.
-  string flavor = 1;
-  // Symbol optionally selects a symbol denom for query flavors that allow one to be specified.
+  // Mode is a string which selects the logic behind the inspector query.
+  string mode = 1;
+  // Symbol optionally selects a symbol denom for query modes that allow one to be specified.
   string symbol = 2;
-  // Value is the optional value parameter, usually a minimum value.
-  string value = 3 [
+  // Sort is an optional string which controls how accounts are sorted.
+  string sort = 3;
+  // Mode minimum is the mode value below which accounts will be filtered. For example,
+  // in collateral mode this is the minimum collateral value an account must have to
+  // be displayed.
+  string mode_min = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Sort minimum is the sorted value below which accounts will be filtered. For example,
+  // in risk mode this is the minimum LTV an account must have to be displayed.
+  string sort_min = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}
+
+// QueryInspectNeat defines the request structure for the InspectNeat gRPC service handler.
+message QueryInspectNeat {
+  // Mode is a string which selects the logic behind the inspector query.
+  string mode = 1;
+  // Symbol optionally selects a symbol denom for query modes that allow one to be specified.
+  string symbol = 2;
+  // Sort is an optional string which controls how accounts are sorted.
+  string sort = 3;
+  // Mode minimum is the mode value below which accounts will be filtered. For example,
+  // in collateral mode this is the minimum collateral value an account must have to
+  // be displayed.
+  string mode_min = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Sort minimum is the sorted value below which accounts will be filtered. For example,
+  // in risk mode this is the minimum LTV an account must have to be displayed.
+  string sort_min = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
@@ -28,27 +60,11 @@ message QueryInspectResponse {
   ];
 }
 
-// QueryInspectNeat defines the request structure for the
-// InspectNeat gRPC service handler.
-message QueryInspectNeat {
-  // Flavor is a simple string which selects the logic behind the inspector query.
-  string flavor = 1;
-  // Symbol optionally selects a symbol denom for query flavors that allow one to be specified.
-  string symbol = 2;
-  // Value is the optional value parameter, usually a minimum value.
-  string value = 3 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-}
-
 // QueryInspectNeatResponse defines the response structure for the InspectNeat gRPC service handler.
 message QueryInspectNeatResponse {
   repeated BorrowerSummaryNeat borrowers = 1 [
     (gogoproto.nullable) = false
   ];
-  // Skipped is how many account had to be skipped due to zero supplied value.
-  int32 skipped = 2;
 }
 
 // BorrowerSummary defines a borrower's address and account health.
@@ -100,8 +116,8 @@ message BorrowerSummaryNeat {
   double Borrowed = 2;
   // L is borrowed value as a portion of borrow limit.
   double L = 3;
-  // Q is borrowed value as a portion of liquidation threshold.
-  double Q = 4;
+  // T is borrowed value as a portion of liquidation threshold.
+  double T = 4;
   // V is the borrowed value as a portion of collateral value.
   double V = 5;
 }

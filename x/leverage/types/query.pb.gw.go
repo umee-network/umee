@@ -286,7 +286,7 @@ func local_request_Query_MaxBorrow_0(ctx context.Context, marshaler runtime.Mars
 }
 
 var (
-	filter_Query_Inspect_0 = &utilities.DoubleArray{Encoding: map[string]int{"flavor": 0, "symbol": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+	filter_Query_Inspect_0 = &utilities.DoubleArray{Encoding: map[string]int{"mode": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 )
 
 func request_Query_Inspect_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -300,26 +300,15 @@ func request_Query_Inspect_0(ctx context.Context, marshaler runtime.Marshaler, c
 		_   = err
 	)
 
-	val, ok = pathParams["flavor"]
+	val, ok = pathParams["mode"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "flavor")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "mode")
 	}
 
-	protoReq.Flavor, err = runtime.String(val)
+	protoReq.Mode, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "flavor", err)
-	}
-
-	val, ok = pathParams["symbol"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "symbol")
-	}
-
-	protoReq.Symbol, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "symbol", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "mode", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -345,26 +334,15 @@ func local_request_Query_Inspect_0(ctx context.Context, marshaler runtime.Marsha
 		_   = err
 	)
 
-	val, ok = pathParams["flavor"]
+	val, ok = pathParams["mode"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "flavor")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "mode")
 	}
 
-	protoReq.Flavor, err = runtime.String(val)
+	protoReq.Mode, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "flavor", err)
-	}
-
-	val, ok = pathParams["symbol"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "symbol")
-	}
-
-	protoReq.Symbol, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "symbol", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "mode", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -380,7 +358,7 @@ func local_request_Query_Inspect_0(ctx context.Context, marshaler runtime.Marsha
 }
 
 var (
-	filter_Query_InspectNeat_0 = &utilities.DoubleArray{Encoding: map[string]int{"flavor": 0, "symbol": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
+	filter_Query_InspectNeat_0 = &utilities.DoubleArray{Encoding: map[string]int{"mode": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 )
 
 func request_Query_InspectNeat_0(ctx context.Context, marshaler runtime.Marshaler, client QueryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -394,26 +372,15 @@ func request_Query_InspectNeat_0(ctx context.Context, marshaler runtime.Marshale
 		_   = err
 	)
 
-	val, ok = pathParams["flavor"]
+	val, ok = pathParams["mode"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "flavor")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "mode")
 	}
 
-	protoReq.Flavor, err = runtime.String(val)
+	protoReq.Mode, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "flavor", err)
-	}
-
-	val, ok = pathParams["symbol"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "symbol")
-	}
-
-	protoReq.Symbol, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "symbol", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "mode", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -439,26 +406,15 @@ func local_request_Query_InspectNeat_0(ctx context.Context, marshaler runtime.Ma
 		_   = err
 	)
 
-	val, ok = pathParams["flavor"]
+	val, ok = pathParams["mode"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "flavor")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "mode")
 	}
 
-	protoReq.Flavor, err = runtime.String(val)
+	protoReq.Mode, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "flavor", err)
-	}
-
-	val, ok = pathParams["symbol"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "symbol")
-	}
-
-	protoReq.Symbol, err = runtime.String(val)
-
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "symbol", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "mode", err)
 	}
 
 	if err := req.ParseForm(); err != nil {
@@ -1015,9 +971,9 @@ var (
 
 	pattern_Query_MaxBorrow_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "leverage", "v1", "max_borrow"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_Inspect_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"umee", "leverage", "v1", "inspect", "flavor", "symbol"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_Inspect_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "inspect", "mode"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_InspectNeat_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 1, 0, 4, 1, 5, 5}, []string{"umee", "leverage", "v1", "inspect_neat", "flavor", "symbol"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_InspectNeat_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"umee", "leverage", "v1", "inspect_neat", "mode"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

@@ -13,10 +13,10 @@ import (
 // GetCmdQueryInspect creates a Cobra command to query for the inspector command.
 func GetCmdQueryInspect() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "inspect [flavor] [denom] [value]",
-		Args:    cobra.ExactArgs(3),
+		Use:     "inspect [symbol] [mode] [mode-min] [sort] [sort-min]",
+		Args:    cobra.MinimumNArgs(3),
 		Short:   "Inspect accounts with the leverage module.",
-		Example: "umeed q leverage inspect danger-by-borrowed all 0.95",
+		Example: "umeed q leverage inspect OSMO LTV 0.75 collateral 100",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -25,9 +25,15 @@ func GetCmdQueryInspect() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspect{
-				Flavor: args[0],
-				Symbol: args[1],
-				Value:  sdk.MustNewDecFromStr(args[2]),
+				Symbol:  args[0],
+				Mode:    args[1],
+				ModeMin: sdk.MustNewDecFromStr(args[2]),
+			}
+			if len(args) >= 4 {
+				req.Sort = args[3]
+			}
+			if len(args) >= 5 {
+				req.SortMin = sdk.MustNewDecFromStr(args[4])
 			}
 			resp, err := queryClient.Inspect(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
@@ -42,10 +48,10 @@ func GetCmdQueryInspect() *cobra.Command {
 // GetCmdQueryInspectNeat creates a Cobra command to query for the inspector command.
 func GetCmdQueryInspectNeat() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "inspect-neat [flavor] [denom] [value]",
-		Args:    cobra.ExactArgs(3),
+		Use:     "inspect-neat [symbol] [mode] [mode-min] [sort] [sort-min]",
+		Args:    cobra.MinimumNArgs(3),
 		Short:   "Inspect accounts with the leverage module.",
-		Example: "umeed q leverage inspect-neat danger-by-borrowed all 0.95",
+		Example: "umeed q leverage inspect-neat ALL borrowed 100 danger 0.5",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -54,9 +60,15 @@ func GetCmdQueryInspectNeat() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspectNeat{
-				Flavor: args[0],
-				Symbol: args[1],
-				Value:  sdk.MustNewDecFromStr(args[2]),
+				Symbol:  args[0],
+				Mode:    args[1],
+				ModeMin: sdk.MustNewDecFromStr(args[2]),
+			}
+			if len(args) >= 4 {
+				req.Sort = args[3]
+			}
+			if len(args) >= 5 {
+				req.SortMin = sdk.MustNewDecFromStr(args[4])
 			}
 			resp, err := queryClient.InspectNeat(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)

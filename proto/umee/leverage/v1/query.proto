@@ -71,13 +71,14 @@ service Query {
   // Inspect is the customizable inspector query.
   rpc Inspect(QueryInspect)
       returns (QueryInspectResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/inspect/{flavor}/{symbol}";
+    option (google.api.http).get = "/umee/leverage/v1/inspect/{mode}";
   }
 
-  // InspectNeat is a neater customizable inspector query.
+  // InspectNeat is the inspector query, with a different response structure
+  // optimized for human readability on the CLI.
   rpc InspectNeat(QueryInspectNeat)
       returns (QueryInspectNeatResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/inspect_neat/{flavor}/{symbol}";
+    option (google.api.http).get = "/umee/leverage/v1/inspect_neat/{mode}";
   }
 }
 
