@@ -32,51 +32,51 @@ func (q Querier) Inspect(
 	var sorting inspectorSort
 
 	// The "all" symbol denom is converted to empty symbol denom
-	if strings.EqualFold(req.Symbol, "all") {
-		req.Symbol = ""
+	if strings.EqualFold(req.Opts.Symbol, "all") {
+		req.Opts.Symbol = ""
 	}
-	if req.ModeMin.IsNil() {
-		req.ModeMin = sdk.ZeroDec()
+	if req.Opts.ModeMin.IsNil() {
+		req.Opts.ModeMin = sdk.ZeroDec()
 	}
-	if req.SortMin.IsNil() {
-		req.SortMin = sdk.ZeroDec()
+	if req.Opts.SortMin.IsNil() {
+		req.Opts.SortMin = sdk.ZeroDec()
 	}
-	specific := req.Symbol != ""
+	specific := req.Opts.Symbol != ""
 
-	switch strings.ToLower(req.Mode) {
+	switch strings.ToLower(req.Opts.Mode) {
 	case "borrowed":
-		filters = append(filters, withMinBorrowedValue(req.ModeMin, specific))
+		filters = append(filters, withMinBorrowedValue(req.Opts.ModeMin, specific))
 	case "collateral":
-		filters = append(filters, withMinCollateralValue(req.ModeMin, specific))
+		filters = append(filters, withMinCollateralValue(req.Opts.ModeMin, specific))
 	case "danger":
-		filters = append(filters, withMinDanger(req.ModeMin))
+		filters = append(filters, withMinDanger(req.Opts.ModeMin))
 	case "ltv":
-		filters = append(filters, withMinLTV(req.ModeMin))
+		filters = append(filters, withMinLTV(req.Opts.ModeMin))
 	case "zeroes":
 		filters = append(filters, withZeroes())
 	default:
-		return &types.QueryInspectResponse{}, status.Error(codes.InvalidArgument, "unknown inspector mode: "+req.Mode)
+		return &types.QueryInspectResponse{}, status.Error(codes.InvalidArgument, "unknown inspector mode: "+req.Opts.Mode)
 	}
-	switch strings.ToLower(req.Sort) {
+	switch strings.ToLower(req.Opts.Sort) {
 	case "borrowed":
 		sorting = moreBorrowed(specific)
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinBorrowedValue(req.SortMin, false))
+		if req.Opts.SortMin.IsPositive() {
+			filters = append(filters, withMinBorrowedValue(req.Opts.SortMin, false))
 		}
 	case "collateral":
 		sorting = moreCollateral(specific)
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinCollateralValue(req.SortMin, false))
+		if req.Opts.SortMin.IsPositive() {
+			filters = append(filters, withMinCollateralValue(req.Opts.SortMin, false))
 		}
 	case "danger":
 		sorting = moreDanger()
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinDanger(req.SortMin))
+		if req.Opts.SortMin.IsPositive() {
+			filters = append(filters, withMinDanger(req.Opts.SortMin))
 		}
 	case "ltv":
 		sorting = moreLTV()
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinLTV(req.SortMin))
+		if req.Opts.SortMin.IsPositive() {
+			filters = append(filters, withMinLTV(req.Opts.SortMin))
 		}
 	default:
 		// if no sort mode is specified, return all borrowers sorted by total collateral value
@@ -86,7 +86,7 @@ func (q Querier) Inspect(
 	borrowers, err := k.filteredSortedBorrowers(ctx,
 		filters,
 		sorting,
-		req.Symbol,
+		req.Opts.Symbol,
 	)
 	if err != nil {
 		return nil, err
@@ -105,16 +105,12 @@ func (q Querier) InspectNeat(
 	}
 
 	// The "all" symbol denom is converted to empty symbol denom
-	if strings.EqualFold(req.Symbol, "all") {
-		req.Symbol = ""
+	if strings.EqualFold(req.Opts.Symbol, "all") {
+		req.Opts.Symbol = ""
 	}
 
 	req2 := types.QueryInspect{
-		Symbol:  req.Symbol,
-		Mode:    req.Mode,
-		Sort:    req.Sort,
-		ModeMin: req.ModeMin,
-		SortMin: req.SortMin,
+		Opts: req.Opts,
 	}
 
 	resp2, err := q.Inspect(goCtx, &req2)
@@ -126,21 +122,40 @@ func (q Querier) InspectNeat(
 	for _, b := range resp2.Borrowers {
 		if b.SuppliedValue.IsPositive() {
 			borrowed := b.BorrowedValue
-			if req.Symbol != "" {
+			if req.Opts.Symbol != "" {
 				borrowed = b.SpecificBorrowValue
 			}
 			neat := types.BorrowerSummaryNeat{
 				Account:  b.Address,
 				Borrowed: neat(borrowed),
-				L:        neat(b.BorrowedValue.Quo(b.BorrowLimit)),
-				T:        neat(b.BorrowedValue.Quo(b.LiquidationThreshold)),
-				V:        neat(b.BorrowedValue.Quo(b.CollateralValue)),
+				X:        neat(b.BorrowedValue.Quo(b.BorrowLimit)),
+				Y:        neat(b.BorrowedValue.Quo(b.LiquidationThreshold)),
+				Z:        neat(b.BorrowedValue.Quo(b.CollateralValue)),
 			}
 			borrowers = append(borrowers, neat)
 		}
 	}
 
 	return &types.QueryInspectNeatResponse{Borrowers: borrowers}, nil
+}
+
+// Separated from grpc_query.go
+func (q Querier) RiskData(
+	goCtx context.Context,
+	req *types.QueryRiskData,
+) (*types.QueryRiskDataResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	// This query is also disabled by default as a safety measure. Enable with liquidator queries.
+	if !q.Keeper.liquidatorQueryEnabled {
+		return nil, types.ErrNotLiquidatorNode
+	}
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	borrowers := k.riskData(ctx)
+
+	return &types.QueryRiskDataResponse{Borrowers: borrowers}, nil
 }
 
 // neat truncates an sdk.Dec to a common-sense precision based on its size and converts it to float.
@@ -267,4 +282,84 @@ func (k Keeper) unsortedBorrowers(ctx sdk.Context, symbol string) []*types.Borro
 	// collect all borrower summaries (unsorted)
 	_ = k.iterate(ctx, prefix, iterator)
 	return borrowers
+}
+
+// riskData
+func (k Keeper) riskData(ctx sdk.Context) []types.AccountSymbolBalances {
+	tokens := k.GetAllRegisteredTokens(ctx)
+	symbols := map[string]string{}
+	exponents := map[string]uint32{}
+	exchangeRates := map[string]sdk.Dec{}
+	for _, t := range tokens {
+		symbols[t.BaseDenom] = t.SymbolDenom
+		exponents[t.BaseDenom] = t.Exponent
+		exchangeRates[t.BaseDenom] = k.DeriveExchangeRate(ctx, t.BaseDenom)
+	}
+
+	// which addresses have already been checked
+	accounts := []types.AccountSymbolBalances{}
+	checkedAddrs := map[string]interface{}{}
+
+	prefix := types.KeyPrefixAdjustedBorrow
+	iterator := func(key, _ []byte) error {
+		// get borrower address from key
+		addr := types.AddressFromKey(key, prefix)
+
+		// if the address is already checked, do not check again
+		if _, ok := checkedAddrs[addr.String()]; ok {
+			return nil
+		}
+		checkedAddrs[addr.String()] = struct{}{}
+
+		borrowed := k.GetBorrowerBorrows(ctx, addr)
+		supplied, _ := k.GetAllSupplied(ctx, addr)
+		collateral := k.GetBorrowerCollateral(ctx, addr)
+
+		symbolBorrowed := symbolDecCoins(borrowed, symbols, exponents, exchangeRates)
+		symbolSupplied := symbolDecCoins(supplied, symbols, exponents, exchangeRates)
+		symbolCollateral := symbolDecCoins(collateral, symbols, exponents, exchangeRates)
+
+		accounts = append(accounts, types.AccountSymbolBalances{
+			Supplied:   symbolSupplied,
+			Collateral: symbolCollateral,
+			Borrowed:   symbolBorrowed,
+		})
+
+		return nil
+	}
+
+	// collect all account symbol balances (unsorted)
+	_ = k.iterate(ctx, prefix, iterator)
+	return accounts
+}
+
+// symbolDecCoins converts an sdk.Coins containing base tokens or uTokens into an sdk.DecCoins containing symbol denom
+// base tokens. for example, 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
+func symbolDecCoins(
+	coins sdk.Coins,
+	symbols map[string]string,
+	exponents map[string]uint32,
+	exchangeRates map[string]sdk.Dec,
+) sdk.DecCoins {
+	symbolCoins := sdk.NewDecCoins()
+
+	for _, c := range coins {
+		if _, ok := symbols[c.Denom]; !ok {
+			// unregistered tokens cannot be converted, but can be returned as base denom
+			symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
+			continue
+		}
+
+		exchangeRate := sdk.OneDec()
+		if types.HasUTokenPrefix(c.Denom) {
+			c.Denom = types.ToTokenDenom(c.Denom)
+			exchangeRate = exchangeRates[c.Denom]
+		}
+		exponentMultiplier := ten.Power(uint64(exponents[c.Denom]))
+		denom := symbols[c.Denom]
+		amount := exchangeRate.MulInt(c.Amount).Mul(exponentMultiplier)
+		symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(denom, amount))
+	}
+
+	return symbolCoins
 }

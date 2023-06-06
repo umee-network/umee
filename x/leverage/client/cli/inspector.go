@@ -25,15 +25,17 @@ func GetCmdQueryInspect() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspect{
-				Symbol:  args[0],
-				Mode:    args[1],
-				ModeMin: sdk.MustNewDecFromStr(args[2]),
+				Opts: &types.InspectOptions{
+					Symbol:  args[0],
+					Mode:    args[1],
+					ModeMin: sdk.MustNewDecFromStr(args[2]),
+				},
 			}
 			if len(args) >= 4 {
-				req.Sort = args[3]
+				req.Opts.Sort = args[3]
 			}
 			if len(args) >= 5 {
-				req.SortMin = sdk.MustNewDecFromStr(args[4])
+				req.Opts.SortMin = sdk.MustNewDecFromStr(args[4])
 			}
 			resp, err := queryClient.Inspect(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
@@ -60,17 +62,44 @@ func GetCmdQueryInspectNeat() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspectNeat{
-				Symbol:  args[0],
-				Mode:    args[1],
-				ModeMin: sdk.MustNewDecFromStr(args[2]),
+				Opts: &types.InspectOptions{
+					Symbol:  args[0],
+					Mode:    args[1],
+					ModeMin: sdk.MustNewDecFromStr(args[2]),
+				},
 			}
 			if len(args) >= 4 {
-				req.Sort = args[3]
+				req.Opts.Sort = args[3]
 			}
 			if len(args) >= 5 {
-				req.SortMin = sdk.MustNewDecFromStr(args[4])
+				req.Opts.SortMin = sdk.MustNewDecFromStr(args[4])
 			}
 			resp, err := queryClient.InspectNeat(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryRiskData creates a Cobra command to query for the risk data command.
+func GetCmdQueryRiskData() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "risk-data",
+		Args:    cobra.ExactArgs(0),
+		Short:   "Inspect accounts with the leverage module.",
+		Example: "umeed q leverage risk-data",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryRiskData{}
+			resp, err := queryClient.RiskData(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

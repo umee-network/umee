@@ -2,6 +2,7 @@ syntax = "proto3";
 package umee.leverage.v1;
 
 import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
 
 option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
 
@@ -9,29 +10,19 @@ option (gogoproto.goproto_getters_all) = false;
 
 // QueryInspect defines the request structure for the Inspect gRPC service handler.
 message QueryInspect {
-  // Mode is a string which selects the logic behind the inspector query.
-  string mode = 1;
-  // Symbol optionally selects a symbol denom for query modes that allow one to be specified.
-  string symbol = 2;
-  // Sort is an optional string which controls how accounts are sorted.
-  string sort = 3;
-  // Mode minimum is the mode value below which accounts will be filtered. For example,
-  // in collateral mode this is the minimum collateral value an account must have to
-  // be displayed.
-  string mode_min = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
-  // Sort minimum is the sorted value below which accounts will be filtered. For example,
-  // in risk mode this is the minimum LTV an account must have to be displayed.
-  string sort_min = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  InspectOptions opts = 1;
 }
 
 // QueryInspectNeat defines the request structure for the InspectNeat gRPC service handler.
 message QueryInspectNeat {
+  InspectOptions opts = 1;
+}
+
+// QueryRiskData defines the request structure for the RiskData gRPC service handler.
+message QueryRiskData {}
+
+// InspectOptions is used by the various inspector queries to filter and sort accounts.
+message InspectOptions {
   // Mode is a string which selects the logic behind the inspector query.
   string mode = 1;
   // Symbol optionally selects a symbol denom for query modes that allow one to be specified.
@@ -67,9 +58,15 @@ message QueryInspectNeatResponse {
   ];
 }
 
+// QueryRiskDataResponse defines the response structure for the RiskData gRPC service handler.
+message QueryRiskDataResponse {
+  repeated AccountSymbolBalances borrowers = 1 [
+    (gogoproto.nullable) = false
+  ];
+}
+
 // BorrowerSummary defines a borrower's address and account health.
 message BorrowerSummary {
-  option (gogoproto.equal) = true;
   string address           = 1;
   // Supplied Value is the total USD value of all tokens the account has supplied, includng interest earned.
   string supplied_value = 2 [
@@ -110,14 +107,33 @@ message BorrowerSummary {
 
 // BorrowerSummaryNeat defines a borrower's address and account health without requiring sdk.Dec formatting
 message BorrowerSummaryNeat {
-  option (gogoproto.equal) = true;
   string Account           = 1;
   // Borrowed is account's borrowed value, either in total or just a specified denom.
   double Borrowed = 2;
-  // L is borrowed value as a portion of borrow limit.
-  double L = 3;
-  // T is borrowed value as a portion of liquidation threshold.
-  double T = 4;
-  // V is the borrowed value as a portion of collateral value.
-  double V = 5;
+  // X is borrowed value as a portion of borrow limit.
+  double X = 3;
+  // Y is borrowed value as a portion of liquidation threshold.
+  double Y = 4;
+  // Z is the borrowed value as a portion of collateral value.
+  double Z = 5;
+}
+
+// AccountSymbolBalances contains an account's position denoted in symbol denom tokens.
+message AccountSymbolBalances {
+  string Account = 1;
+  // Supplied contains all tokens the account has supplied, including interest earned.
+  repeated cosmos.base.v1beta1.DecCoin supplied = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  ];
+  // Collateral contains all uTokens the account has collateralized. It has been converted from uTokens to tokens.
+  repeated cosmos.base.v1beta1.DecCoin collateral = 3 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  ];
+  // Borrowed contains all tokens the account has borrowed, including interest owed.
+  repeated cosmos.base.v1beta1.DecCoin borrowed = 4 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  ];
 }
