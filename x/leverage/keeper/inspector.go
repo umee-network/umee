@@ -83,15 +83,11 @@ func (q Querier) Inspect(
 		sorting = moreCollateral(false)
 	}
 
-	borrowers, err := k.filteredSortedBorrowers(ctx,
+	borrowers := k.filteredSortedBorrowers(ctx,
 		filters,
 		sorting,
 		req.Symbol,
 	)
-	if err != nil {
-		return nil, err
-	}
-
 	return &types.QueryInspectResponse{Borrowers: borrowers}, nil
 }
 
@@ -190,8 +186,9 @@ func neat(num sdk.Dec) float64 {
 // filteredSortedBorrowers returns a list of borrower addresses and their account summaries sorted and filtered
 // by selected methods. Sorting is ascending in X if the sort function provided is "less X", and descending in
 // X if the function provided is "more X"
-func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filters []inspectorFilter, sorting inspectorSort, symbol string,
-) ([]types.BorrowerSummary, error) {
+func (k Keeper) filteredSortedBorrowers(
+	ctx sdk.Context, filters []inspectorFilter, sorting inspectorSort, symbol string,
+) []types.BorrowerSummary {
 	borrowers := k.unsortedBorrowers(ctx, symbol)
 
 	// filters the borrowers
@@ -220,7 +217,7 @@ func (k Keeper) filteredSortedBorrowers(ctx sdk.Context, filters []inspectorFilt
 		sortedBorrowers = append(sortedBorrowers, *b)
 	}
 
-	return sortedBorrowers, nil
+	return sortedBorrowers
 }
 
 // unsortedBorrowers returns a list of borrower addresses and their account summaries, without filters or sorting.
