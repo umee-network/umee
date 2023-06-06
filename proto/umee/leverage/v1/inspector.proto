@@ -19,16 +19,10 @@ message QueryInspect {
   // Mode minimum is the mode value below which accounts will be filtered. For example,
   // in collateral mode this is the minimum collateral value an account must have to
   // be displayed.
-  string mode_min = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double mode_min = 4;
   // Sort minimum is the sorted value below which accounts will be filtered. For example,
   // in risk mode this is the minimum LTV an account must have to be displayed.
-  string sort_min = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double sort_min = 5;
 }
 
 // QueryInspectNeat defines the request structure for the InspectNeat gRPC service handler.
@@ -42,16 +36,10 @@ message QueryInspectNeat {
   // Mode minimum is the mode value below which accounts will be filtered. For example,
   // in collateral mode this is the minimum collateral value an account must have to
   // be displayed.
-  string mode_min = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double mode_min = 4;
   // Sort minimum is the sorted value below which accounts will be filtered. For example,
   // in risk mode this is the minimum LTV an account must have to be displayed.
-  string sort_min = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double sort_min = 5;
 }
 
 // QueryRiskData defines the request structure for the RiskData gRPC service handler.

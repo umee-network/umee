@@ -376,7 +376,8 @@ paths:
             be displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
         - name: sort_min
           description: >-
             Sort minimum is the sorted value below which accounts will be
@@ -386,7 +387,8 @@ paths:
             displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
       tags:
         - Query
   /umee/leverage/v1/inspect_neat:
@@ -487,7 +489,8 @@ paths:
             be displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
         - name: sort_min
           description: >-
             Sort minimum is the sorted value below which accounts will be
@@ -497,7 +500,8 @@ paths:
             displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
       tags:
         - Query
   /umee/leverage/v1/liquidation_targets:

@@ -1,9 +1,10 @@
 package cli
 
 import (
+	"strconv"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
 	"github.com/umee-network/umee/v4/util/cli"
@@ -23,17 +24,27 @@ func GetCmdQueryInspect() *cobra.Command {
 				return err
 			}
 
+			modemin, err := strconv.ParseFloat(args[2], 64)
+			if err != nil {
+				return err
+			}
+
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspect{
 				Symbol:  args[0],
 				Mode:    args[1],
-				ModeMin: sdk.MustNewDecFromStr(args[2]),
+				ModeMin: modemin,
 			}
 			if len(args) >= 4 {
 				req.Sort = args[3]
 			}
 			if len(args) >= 5 {
-				req.SortMin = sdk.MustNewDecFromStr(args[4])
+				sortmin, err := strconv.ParseFloat(args[4], 64)
+				if err != nil {
+					return err
+				}
+
+				req.SortMin = sortmin
 			}
 			resp, err := queryClient.Inspect(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
@@ -58,17 +69,27 @@ func GetCmdQueryInspectNeat() *cobra.Command {
 				return err
 			}
 
+			modemin, err := strconv.ParseFloat(args[2], 64)
+			if err != nil {
+				return err
+			}
+
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspectNeat{
 				Symbol:  args[0],
 				Mode:    args[1],
-				ModeMin: sdk.MustNewDecFromStr(args[2]),
+				ModeMin: modemin,
 			}
 			if len(args) >= 4 {
 				req.Sort = args[3]
 			}
 			if len(args) >= 5 {
-				req.SortMin = sdk.MustNewDecFromStr(args[4])
+				sortmin, err := strconv.ParseFloat(args[4], 64)
+				if err != nil {
+					return err
+				}
+
+				req.SortMin = sortmin
 			}
 			resp, err := queryClient.InspectNeat(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
