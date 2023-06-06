@@ -20,7 +20,7 @@ func (c Client) QueryAuthSeq(accAddr string) (uint64, error) {
 	}
 
 	var baseAccount authtypes.AccountI
-	err = c.encCfg.Codec.UnpackAny(queryResponse.Account, &baseAccount)
+	err = c.codec.UnpackAny(queryResponse.Account, &baseAccount)
 	if err != nil {
 		return 0, err
 	}
