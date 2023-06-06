@@ -25,15 +25,17 @@ func GetCmdQueryInspect() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspect{
-				Symbol:  args[0],
-				Mode:    args[1],
-				ModeMin: sdk.MustNewDecFromStr(args[2]),
+				Opts: &types.InspectOptions{
+					Symbol:  args[0],
+					Mode:    args[1],
+					ModeMin: sdk.MustNewDecFromStr(args[2]),
+				},
 			}
 			if len(args) >= 4 {
-				req.Sort = args[3]
+				req.Opts.Sort = args[3]
 			}
 			if len(args) >= 5 {
-				req.SortMin = sdk.MustNewDecFromStr(args[4])
+				req.Opts.SortMin = sdk.MustNewDecFromStr(args[4])
 			}
 			resp, err := queryClient.Inspect(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
@@ -60,15 +62,17 @@ func GetCmdQueryInspectNeat() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QueryInspectNeat{
-				Symbol:  args[0],
-				Mode:    args[1],
-				ModeMin: sdk.MustNewDecFromStr(args[2]),
+				Opts: &types.InspectOptions{
+					Symbol:  args[0],
+					Mode:    args[1],
+					ModeMin: sdk.MustNewDecFromStr(args[2]),
+				},
 			}
 			if len(args) >= 4 {
-				req.Sort = args[3]
+				req.Opts.Sort = args[3]
 			}
 			if len(args) >= 5 {
-				req.SortMin = sdk.MustNewDecFromStr(args[4])
+				req.Opts.SortMin = sdk.MustNewDecFromStr(args[4])
 			}
 			resp, err := queryClient.InspectNeat(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)

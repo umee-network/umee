@@ -348,24 +348,24 @@ paths:
                       type: string
                       format: byte
       parameters:
-        - name: mode
+        - name: opts.mode
           description: Mode is a string which selects the logic behind the inspector query.
           in: query
           required: false
           type: string
-        - name: symbol
+        - name: opts.symbol
           description: >-
             Symbol optionally selects a symbol denom for query modes that allow
             one to be specified.
           in: query
           required: false
           type: string
-        - name: sort
+        - name: opts.sort
           description: Sort is an optional string which controls how accounts are sorted.
           in: query
           required: false
           type: string
-        - name: mode_min
+        - name: opts.mode_min
           description: >-
             Mode minimum is the mode value below which accounts will be
             filtered. For example,
@@ -377,7 +377,7 @@ paths:
           in: query
           required: false
           type: string
-        - name: sort_min
+        - name: opts.sort_min
           description: >-
             Sort minimum is the sorted value below which accounts will be
             filtered. For example,
@@ -459,24 +459,24 @@ paths:
                       type: string
                       format: byte
       parameters:
-        - name: mode
+        - name: opts.mode
           description: Mode is a string which selects the logic behind the inspector query.
           in: query
           required: false
           type: string
-        - name: symbol
+        - name: opts.symbol
           description: >-
             Symbol optionally selects a symbol denom for query modes that allow
             one to be specified.
           in: query
           required: false
           type: string
-        - name: sort
+        - name: opts.sort
           description: Sort is an optional string which controls how accounts are sorted.
           in: query
           required: false
           type: string
-        - name: mode_min
+        - name: opts.mode_min
           description: >-
             Mode minimum is the mode value below which accounts will be
             filtered. For example,
@@ -488,7 +488,7 @@ paths:
           in: query
           required: false
           type: string
-        - name: sort_min
+        - name: opts.sort_min
           description: >-
             Sort minimum is the sorted value below which accounts will be
             filtered. For example,
@@ -2439,6 +2439,41 @@ definitions:
     title: >-
       BorrowerSummaryNeat defines a borrower's address and account health
       without requiring sdk.Dec formatting
+  umee.leverage.v1.InspectOptions:
+    type: object
+    properties:
+      mode:
+        type: string
+        description: Mode is a string which selects the logic behind the inspector query.
+      symbol:
+        type: string
+        description: >-
+          Symbol optionally selects a symbol denom for query modes that allow
+          one to be specified.
+      sort:
+        type: string
+        description: Sort is an optional string which controls how accounts are sorted.
+      mode_min:
+        type: string
+        description: >-
+          Mode minimum is the mode value below which accounts will be filtered.
+          For example,
+
+          in collateral mode this is the minimum collateral value an account
+          must have to
+
+          be displayed.
+      sort_min:
+        type: string
+        description: >-
+          Sort minimum is the sorted value below which accounts will be
+          filtered. For example,
+
+          in risk mode this is the minimum LTV an account must have to be
+          displayed.
+    description: >-
+      InspectOptions is used by the various inspector queries to filter and sort
+      accounts.
   umee.leverage.v1.Params:
     type: object
     properties:
