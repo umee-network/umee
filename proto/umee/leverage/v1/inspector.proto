@@ -19,16 +19,10 @@ message QueryInspect {
   // Mode minimum is the mode value below which accounts will be filtered. For example,
   // in collateral mode this is the minimum collateral value an account must have to
   // be displayed.
-  string mode_min = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double mode_min = 4;
   // Sort minimum is the sorted value below which accounts will be filtered. For example,
   // in risk mode this is the minimum LTV an account must have to be displayed.
-  string sort_min = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double sort_min = 5;
 }
 
 // QueryInspectNeat defines the request structure for the InspectNeat gRPC service handler.
@@ -42,16 +36,10 @@ message QueryInspectNeat {
   // Mode minimum is the mode value below which accounts will be filtered. For example,
   // in collateral mode this is the minimum collateral value an account must have to
   // be displayed.
-  string mode_min = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double mode_min = 4;
   // Sort minimum is the sorted value below which accounts will be filtered. For example,
   // in risk mode this is the minimum LTV an account must have to be displayed.
-  string sort_min = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
-  ];
+  double sort_min = 5;
 }
 
 // QueryRiskData defines the request structure for the RiskData gRPC service handler.
@@ -123,12 +111,12 @@ message BorrowerSummaryNeat {
   string Account = 1;
   // Borrowed is account's borrowed value, either in total or just a specified denom.
   double Borrowed = 2;
-  // X is borrowed value as a portion of borrow limit.
-  double X = 3;
-  // Y is borrowed value as a portion of liquidation threshold.
-  double Y = 4;
-  // Z is the borrowed value as a portion of collateral value.
-  double Z = 5;
+  // LTB is borrowed value as a portion of borrow limit.
+  double LTB = 3;
+  // LTL is borrowed value as a portion of liquidation threshold.
+  double LTL = 4;
+  // LTV is the borrowed value as a portion of collateral value.
+  double LTV = 5;
 }
 
 // AccountSymbolBalances contains an account's position denoted in symbol denom tokens.

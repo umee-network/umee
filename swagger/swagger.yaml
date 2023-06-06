@@ -376,7 +376,8 @@ paths:
             be displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
         - name: sort_min
           description: >-
             Sort minimum is the sorted value below which accounts will be
@@ -386,7 +387,8 @@ paths:
             displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
       tags:
         - Query
   /umee/leverage/v1/inspect_neat:
@@ -414,21 +416,21 @@ paths:
                       description: >-
                         Borrowed is account's borrowed value, either in total or
                         just a specified denom.
-                    X:
+                    LTB:
                       type: number
                       format: double
-                      description: X is borrowed value as a portion of borrow limit.
-                    'Y':
+                      description: LTB is borrowed value as a portion of borrow limit.
+                    LTL:
                       type: number
                       format: double
                       description: >-
-                        Y is borrowed value as a portion of liquidation
+                        LTL is borrowed value as a portion of liquidation
                         threshold.
-                    Z:
+                    LTV:
                       type: number
                       format: double
                       description: >-
-                        Z is the borrowed value as a portion of collateral
+                        LTV is the borrowed value as a portion of collateral
                         value.
                   title: >-
                     BorrowerSummaryNeat defines a borrower's address and account
@@ -487,7 +489,8 @@ paths:
             be displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
         - name: sort_min
           description: >-
             Sort minimum is the sorted value below which accounts will be
@@ -497,7 +500,8 @@ paths:
             displayed.
           in: query
           required: false
-          type: string
+          type: number
+          format: double
       tags:
         - Query
   /umee/leverage/v1/liquidation_targets:
@@ -2424,18 +2428,18 @@ definitions:
         description: >-
           Borrowed is account's borrowed value, either in total or just a
           specified denom.
-      X:
+      LTB:
         type: number
         format: double
-        description: X is borrowed value as a portion of borrow limit.
-      'Y':
+        description: LTB is borrowed value as a portion of borrow limit.
+      LTL:
         type: number
         format: double
-        description: Y is borrowed value as a portion of liquidation threshold.
-      Z:
+        description: LTL is borrowed value as a portion of liquidation threshold.
+      LTV:
         type: number
         format: double
-        description: Z is the borrowed value as a portion of collateral value.
+        description: LTV is the borrowed value as a portion of collateral value.
     title: >-
       BorrowerSummaryNeat defines a borrower's address and account health
       without requiring sdk.Dec formatting
@@ -2678,18 +2682,18 @@ definitions:
               description: >-
                 Borrowed is account's borrowed value, either in total or just a
                 specified denom.
-            X:
+            LTB:
               type: number
               format: double
-              description: X is borrowed value as a portion of borrow limit.
-            'Y':
+              description: LTB is borrowed value as a portion of borrow limit.
+            LTL:
               type: number
               format: double
-              description: Y is borrowed value as a portion of liquidation threshold.
-            Z:
+              description: LTL is borrowed value as a portion of liquidation threshold.
+            LTV:
               type: number
               format: double
-              description: Z is the borrowed value as a portion of collateral value.
+              description: LTV is the borrowed value as a portion of collateral value.
           title: >-
             BorrowerSummaryNeat defines a borrower's address and account health
             without requiring sdk.Dec formatting

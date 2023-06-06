@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -35,23 +36,19 @@ func (q Querier) Inspect(
 	if strings.EqualFold(req.Symbol, "all") {
 		req.Symbol = ""
 	}
-	if req.ModeMin.IsNil() {
-		req.ModeMin = sdk.ZeroDec()
-	}
-	if req.SortMin.IsNil() {
-		req.SortMin = sdk.ZeroDec()
-	}
+	modeMin := sdk.MustNewDecFromStr(fmt.Sprintf("%f", req.ModeMin))
+	sortMin := sdk.MustNewDecFromStr(fmt.Sprintf("%f", req.SortMin))
 	specific := req.Symbol != ""
 
 	switch strings.ToLower(req.Mode) {
 	case "borrowed":
-		filters = append(filters, withMinBorrowedValue(req.ModeMin, specific))
+		filters = append(filters, withMinBorrowedValue(modeMin, specific))
 	case "collateral":
-		filters = append(filters, withMinCollateralValue(req.ModeMin, specific))
+		filters = append(filters, withMinCollateralValue(modeMin, specific))
 	case "danger":
-		filters = append(filters, withMinDanger(req.ModeMin))
+		filters = append(filters, withMinDanger(modeMin))
 	case "ltv":
-		filters = append(filters, withMinLTV(req.ModeMin))
+		filters = append(filters, withMinLTV(modeMin))
 	case "zeroes":
 		filters = append(filters, withZeroes())
 	default:
@@ -60,23 +57,23 @@ func (q Querier) Inspect(
 	switch strings.ToLower(req.Sort) {
 	case "borrowed":
 		sorting = moreBorrowed(specific)
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinBorrowedValue(req.SortMin, false))
+		if sortMin.IsPositive() {
+			filters = append(filters, withMinBorrowedValue(sortMin, specific))
 		}
 	case "collateral":
 		sorting = moreCollateral(specific)
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinCollateralValue(req.SortMin, false))
+		if sortMin.IsPositive() {
+			filters = append(filters, withMinCollateralValue(sortMin, specific))
 		}
 	case "danger":
 		sorting = moreDanger()
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinDanger(req.SortMin))
+		if sortMin.IsPositive() {
+			filters = append(filters, withMinDanger(sortMin))
 		}
 	case "ltv":
 		sorting = moreLTV()
-		if req.SortMin.IsPositive() {
-			filters = append(filters, withMinLTV(req.SortMin))
+		if sortMin.IsPositive() {
+			filters = append(filters, withMinLTV(sortMin))
 		}
 	default:
 		// if no sort mode is specified, return all borrowers sorted by total collateral value
@@ -128,9 +125,9 @@ func (q Querier) InspectNeat(
 			neat := types.BorrowerSummaryNeat{
 				Account:  b.Address,
 				Borrowed: neat(borrowed),
-				X:        neat(b.BorrowedValue.Quo(b.BorrowLimit)),
-				Y:        neat(b.BorrowedValue.Quo(b.LiquidationThreshold)),
-				Z:        neat(b.BorrowedValue.Quo(b.CollateralValue)),
+				LTB:      neat(b.BorrowedValue.Quo(b.BorrowLimit)),
+				LTL:      neat(b.BorrowedValue.Quo(b.LiquidationThreshold)),
+				LTV:      neat(b.BorrowedValue.Quo(b.CollateralValue)),
 			}
 			borrowers = append(borrowers, neat)
 		}
