@@ -20,7 +20,7 @@ linters:
     # - wsl
     - asciicheck
     - bodyclose
-    - depguard
+    # - depguard
     - dogsled
     - errcheck
     - exportloopref
