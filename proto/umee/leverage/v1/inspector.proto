@@ -61,7 +61,7 @@ message QueryInspectNeatResponse {
 
 // QueryRiskDataResponse defines the response structure for the RiskData gRPC service handler.
 message QueryRiskDataResponse {
-  repeated AccountSymbolBalances borrowers = 1 [
+  repeated AccountDecBalances borrowers = 1 [
     (gogoproto.nullable) = false
   ];
 }
@@ -119,8 +119,8 @@ message BorrowerSummaryNeat {
   double LTV = 5;
 }
 
-// AccountSymbolBalances contains an account's position denoted in symbol denom tokens.
-message AccountSymbolBalances {
+// AccountDecBalances contains an account's position denoted in symbol denom tokens.
+message AccountDecBalances {
   string Account = 1;
   // Supplied contains all tokens the account has supplied, including interest earned.
   repeated cosmos.base.v1beta1.DecCoin supplied = 2 [

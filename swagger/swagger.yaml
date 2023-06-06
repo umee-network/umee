@@ -1426,8 +1426,8 @@ paths:
                         Borrowed contains all tokens the account has borrowed,
                         including interest owed.
                   description: >-
-                    AccountSymbolBalances contains an account's position denoted
-                    in symbol denom tokens.
+                    AccountDecBalances contains an account's position denoted in
+                    symbol denom tokens.
             description: >-
               QueryRiskDataResponse defines the response structure for the
               RiskData gRPC service handler.
@@ -2309,7 +2309,7 @@ definitions:
             value:
               type: string
               format: byte
-  umee.leverage.v1.AccountSymbolBalances:
+  umee.leverage.v1.AccountDecBalances:
     type: object
     properties:
       Account:
@@ -2366,8 +2366,8 @@ definitions:
           Borrowed contains all tokens the account has borrowed, including
           interest owed.
     description: >-
-      AccountSymbolBalances contains an account's position denoted in symbol
-      denom tokens.
+      AccountDecBalances contains an account's position denoted in symbol denom
+      tokens.
   umee.leverage.v1.BadDebt:
     type: object
     properties:
@@ -3380,8 +3380,8 @@ definitions:
                 Borrowed contains all tokens the account has borrowed, including
                 interest owed.
           description: >-
-            AccountSymbolBalances contains an account's position denoted in
-            symbol denom tokens.
+            AccountDecBalances contains an account's position denoted in symbol
+            denom tokens.
     description: >-
       QueryRiskDataResponse defines the response structure for the RiskData gRPC
       service handler.

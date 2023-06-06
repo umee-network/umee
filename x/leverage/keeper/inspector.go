@@ -283,7 +283,7 @@ func (k Keeper) unsortedBorrowers(ctx sdk.Context, symbol string) []*types.Borro
 }
 
 // riskData
-func (k Keeper) riskData(ctx sdk.Context) []types.AccountSymbolBalances {
+func (k Keeper) riskData(ctx sdk.Context) []types.AccountDecBalances {
 	tokens := k.GetAllRegisteredTokens(ctx)
 	symbols := map[string]string{}
 	exponents := map[string]uint32{}
@@ -295,7 +295,7 @@ func (k Keeper) riskData(ctx sdk.Context) []types.AccountSymbolBalances {
 	}
 
 	// which addresses have already been checked
-	accounts := []types.AccountSymbolBalances{}
+	accounts := []types.AccountDecBalances{}
 	checkedAddrs := map[string]interface{}{}
 
 	prefix := types.KeyPrefixAdjustedBorrow
@@ -317,7 +317,7 @@ func (k Keeper) riskData(ctx sdk.Context) []types.AccountSymbolBalances {
 		symbolSupplied := symbolDecCoins(supplied, symbols, exponents, exchangeRates)
 		symbolCollateral := symbolDecCoins(collateral, symbols, exponents, exchangeRates)
 
-		accounts = append(accounts, types.AccountSymbolBalances{
+		accounts = append(accounts, types.AccountDecBalances{
 			Supplied:   symbolSupplied,
 			Collateral: symbolCollateral,
 			Borrowed:   symbolBorrowed,
