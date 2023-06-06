@@ -1,17 +1,9 @@
-# Main:
-#   files:
-#   - $all
-#   - "!$test"
-#   allow:
-#   - $gostd
-#   - github.com/***
-#   deny:
-#     reflect: Please don't use reflect package
-# Test:
-#   files:
-#   - $test
-#   allow:
-#   - $gostd
-#   - github.com/stretchr/testify
-#   deny:
-#     reflect: Please don't use reflect package
+Main:
+  files:
+  - $all
+  - "!$test"
+  allow:
+  - $gostd
+  - github.com/cosmos/**
+  - github.com/tendermin/**
+  - github.com/cosmos/cosmos-sdk
