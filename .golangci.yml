@@ -20,7 +20,8 @@ linters:
     # - wsl
     - asciicheck
     - bodyclose
-    - depguard
+    # TODO; we need re-enable this linter once golangci-lint or .depguard.yaml is done
+    # - depguard
     - dogsled
     - errcheck
     - exportloopref
@@ -57,16 +58,7 @@ issues:
       source: "https://"
   max-same-issues: 50
 
-# linters-settings:
-#   depguard:
-#     rules:
-#       main:
-#         files:
-#           - $all 
-#           - "!$test"
-#         allow:
-#           - $gostd
-
+linters-settings:
   dogsled:
     max-blank-identifiers: 3
   misspell:
