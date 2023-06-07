@@ -66,25 +66,6 @@ var (
 	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
 
-type IntegrationTestSuite struct {
-	suite.Suite
-
-	tmpDirs             []string
-	chain               *chain
-	ethClient           *ethclient.Client
-	gaiaRPC             *rpchttp.HTTP
-	dkrPool             *dockertest.Pool
-	dkrNet              *dockertest.Network
-	ethResource         *dockertest.Resource
-	gaiaResource        *dockertest.Resource
-	hermesResource      *dockertest.Resource
-	priceFeederResource *dockertest.Resource
-	valResources        []*dockertest.Resource
-	orchResources       []*dockertest.Resource
-	gravityContractAddr string
-	umee                client.Client
-}
-
 func TestIntegrationTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }

@@ -241,6 +241,9 @@ test-e2e-clean:
 	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 
+test-qa: 
+	@go test ./tests/qa/... -timeout 30m -v -tags='test_qa'
+
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
 mocks: $(MOCKS_DIR)
