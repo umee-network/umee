@@ -50,12 +50,18 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module.
 - [2015](https://github.com/umee-network/umee/pull/2015), [2050](https://github.com/umee-network/umee/pull/2050) Add `x/ugov` module.
+- [2078](https://github.com/umee-network/umee/pull/2078) Upgrade `ibc-go` to v6.2.
 
-## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0) - 2023-06-01
+### Improvements
+
+- [2057](https://github.com/umee-network/umee/pull/2057) Cosmwasm QA tests.
+
+## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0) - 2023-06-07
 
 ### Improvements
 
 - [2076](https://github.com/umee-network/umee/pull/2076) Cosmwasm: registering `cosmwasm_1_2` capability.
+- [2083](https://github.com/umee-network/umee/pull/2083) Update `wasmvm` to 1.2.4.
 
 ## [v5.0.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
 
