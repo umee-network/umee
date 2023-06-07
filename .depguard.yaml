@@ -5,5 +5,5 @@ Main:
   allow:
   - $gostd
   - github.com/cosmos/**
-  - github.com/tendermin/**
+  - github.com/tendermint/**
   - github.com/cosmos/cosmos-sdk

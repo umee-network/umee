@@ -1,2 +1,2 @@
-// Package tsdk provides the test utilities related to Cosmos SDK
+// Package tsdk provides test utilities related to Cosmos SDK
 package tsdk
