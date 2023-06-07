@@ -10,17 +10,27 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 Highlights:
 
-- Cosmwasm integration.
+- Cosmwasm integration (v0.31).
 - Gravity Bridge phase-3: shutdown of the transfers. In this release we introduce valset burn mechanism,
   which will block the Ethereum smart contract for processing any further transactions, as well
   as sending transfers back to Ethereum. This follows the plan approved through in the
   [prop-67](https://www.mintscan.io/umee/proposals/67).
   NOTE: All validators must continue to use Peggo to not get slashed.
 - Updated to the latest Cosmos SDK v0.46.12
+- New generic functions for storage management: `util/store`.
 
-See [CHANGELOG](https://github.com/umee-network/umee/blob/v5.0.0-rc1/CHANGELOG.md)
+See [CHANGELOG](https://github.com/umee-network/umee/blob/v5.0.0/CHANGELOG.md).
 
 ### Validators
+
+#### libwasmvm update
+
+Our dependencies have been updated. Now the binary requires `libwasmvm v1.2.4`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+
+- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.2.4/internal/api/libwasmvm.$(uname -m).so`
+- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.2.4/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
+
+You don't need to do anything if you are using our Docker image.
 
 #### Min Gas Prices
 

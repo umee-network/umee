@@ -20,6 +20,7 @@ linters:
     # - wsl
     - asciicheck
     - bodyclose
+    # TODO; we need re-enable this linter once golangci-lint or .depguard.yaml is done
     # - depguard
     - dogsled
     - errcheck
