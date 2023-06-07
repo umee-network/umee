@@ -110,14 +110,17 @@ db_backend = "rocksdb"
 
 ### Swagger
 
-- To update the latest swagger docs, follow these steps:
-1. Generate the latest swagger:
-   ```bash
+- To update the latest swagger docs, follow these steps
+
+Generate the latest swagger:
+
+  ```bash
    $ make proto-swagger-gen
    $ make proto-update-swagger-docs
    ```
 
-2. Build the new binary or install the new binary with the latest swagger docs:
+Build the new binary or install the new binary with the latest swagger docs:
+
    ```bash
    $ make build
    # or
@@ -125,6 +128,7 @@ db_backend = "rocksdb"
    ```
 
 Make sure to execute these commands whenever you want to update the swagger documentation.
+
 - To enable it, modify the node config at `$UMEE_HOME/config/app.toml` to `api.swagger` `true`
 - Run the node normally `umeed start`
 - Enter the swagger docs `http://localhost:1317/swagger/`
