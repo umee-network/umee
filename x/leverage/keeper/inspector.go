@@ -193,9 +193,7 @@ func (k Keeper) filteredSortedBorrowers(
 	for _, bs := range borrowers {
 		ok := true
 		for _, f := range filters {
-			if !f(bs) {
-				ok = false
-			}
+			ok = ok && f(bs)
 		}
 		if ok {
 			filteredBorrowers = append(filteredBorrowers, bs)
