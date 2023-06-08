@@ -63,6 +63,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2076](https://github.com/umee-network/umee/pull/2076) Cosmwasm: registering `cosmwasm_1_2` capability.
 - [2083](https://github.com/umee-network/umee/pull/2083) Update `wasmvm` to 1.2.4.
 
+### Fixes
+
+- [2089](https://github.com/umee-network/umee/pull/2089) MsgSupplyCollateral no longer fails when market is below MinCollateralLiquidity.
+
 ## [v5.0.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
 
 ### Features

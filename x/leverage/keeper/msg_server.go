@@ -241,11 +241,6 @@ func (s msgServer) SupplyCollateral(
 		return nil, err
 	}
 
-	// Fail here if collateral liquidity restrictions are violated
-	if err := s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
-		return nil, err
-	}
-
 	// Fail here if collateral share restrictions are violated,
 	// based on only collateral with known oracle prices
 	if err := s.keeper.checkCollateralShare(ctx, uToken.Denom); err != nil {
