@@ -6,6 +6,10 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v4.4.2
+
+Patch release: Cosmos SDK updated related to the barberry advisory.
+
 ## v4.4.1
 
 Patch release updating `ibc-go` to the most recent patch release.
