@@ -48,7 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v4.4.2](https://github.com/umee-network/umee/releases/tag/v4.4.2) - 2023-06-08
 
-- [...](https://github.com/umee-network/umee/pull/) Bump Cosmos SDK to v0.46.13
+- [2090](https://github.com/umee-network/umee/pull/2090) Bump Cosmos SDK to v0.46.13
 
 ## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
 
