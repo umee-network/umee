@@ -94,6 +94,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
 - [2072](https://github.com/umee-network/umee/pull/2072) Fix an int64 overflow when computing module liquidity for high-exponent assets.
 
+## [v4.4.2](https://github.com/umee-network/umee/releases/tag/v4.4.2) - 2023-06-08
+
+- [2090](https://github.com/umee-network/umee/pull/2090) Bump Cosmos SDK to v0.46.13 and CometBFT to v0.34.28 and IAVL to v0.19.6.
+
 ## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
 
 ### Improvements
