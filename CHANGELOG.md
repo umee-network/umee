@@ -65,7 +65,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Fixes
 
-- [XXXX](https://github.com/umee-network/umee/pull/XXXX) MsgSupplyCollateral no longer fails when market is below MinCollateralLiquidity.
+- [2089](https://github.com/umee-network/umee/pull/2089) MsgSupplyCollateral no longer fails when market is below MinCollateralLiquidity.
 
 ## [v5.0.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
 
