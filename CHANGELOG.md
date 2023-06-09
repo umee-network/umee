@@ -50,8 +50,24 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module.
 - [2015](https://github.com/umee-network/umee/pull/2015), [2050](https://github.com/umee-network/umee/pull/2050) Add `x/ugov` module.
+- [2078](https://github.com/umee-network/umee/pull/2078) Upgrade `ibc-go` to v6.2.
 
-## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
+### Improvements
+
+- [2057](https://github.com/umee-network/umee/pull/2057) Cosmwasm QA tests.
+
+## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0) - 2023-06-07
+
+### Improvements
+
+- [2076](https://github.com/umee-network/umee/pull/2076) Cosmwasm: registering `cosmwasm_1_2` capability.
+- [2083](https://github.com/umee-network/umee/pull/2083) Update `wasmvm` to 1.2.4.
+
+### Fixes
+
+- [2089](https://github.com/umee-network/umee/pull/2089) MsgSupplyCollateral no longer fails when market is below MinCollateralLiquidity.
+
+## [v5.0.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
 
 ### Features
 
@@ -77,6 +93,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [1982](https://github.com/umee-network/umee/pull/1982) Fix the build version (`umeed version`).
 - [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
 - [2072](https://github.com/umee-network/umee/pull/2072) Fix an int64 overflow when computing module liquidity for high-exponent assets.
+
+## [v4.4.2](https://github.com/umee-network/umee/releases/tag/v4.4.2) - 2023-06-08
+
+- [2090](https://github.com/umee-network/umee/pull/2090) Bump Cosmos SDK to v0.46.13 and CometBFT to v0.34.28 and IAVL to v0.19.6.
 
 ## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
 

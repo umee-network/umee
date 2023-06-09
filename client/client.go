@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/umee-network/umee/v5/sdkclient"
 )
@@ -10,6 +11,7 @@ import (
 // Client sdkclient.Client and provides umee chain specific transactions and queries.
 type Client struct {
 	sdkclient.Client
+	codec codec.Codec
 }
 
 // NewClient constructs Client object.
@@ -29,6 +31,7 @@ func NewClient(
 	}
 	return Client{
 		Client: c,
+		codec:  encCfg.Codec,
 	}, nil
 }
 
