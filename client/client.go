@@ -21,7 +21,7 @@ func NewClient(
 	chainID,
 	tmrpcEndpoint,
 	grpcEndpoint string,
-	mnemonics []string,
+	mnemonics map[string]string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (Client, error) {
