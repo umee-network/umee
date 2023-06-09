@@ -46,9 +46,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v5.0.1](https://github.com/umee-network/umee/releases/tag/v5.0.0) - 2023-06-09
+## [v5.0.1](https://github.com/umee-network/umee/releases/tag/v5.0.1) - 2023-06-09
 
-- [](https://github.com/umee-network/umee/pull/) Bump Cosmos SDK to v0.46.13 and IAVL to v0.19.6 for Umee v5.0.x release series.
+- [2092](https://github.com/umee-network/umee/pull/2092) Bump Cosmos SDK to v0.46.13 and IAVL to v0.19.6 for Umee v5.0.x release series.
 
 ## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0) - 2023-06-07
 
