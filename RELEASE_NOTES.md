@@ -6,6 +6,10 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v5.0.1
+
+Patch release: Cosmos SDK updated related to the barberry advisory.
+
 ## v5.0.0
 
 Highlights:
