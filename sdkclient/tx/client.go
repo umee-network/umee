@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -35,7 +34,7 @@ type Client struct {
 func NewClient(
 	chainID string,
 	tmrpcEndpoint string,
-	mnemonics []string,
+	mnemonics map[string]string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (c *Client, err error) {
@@ -51,8 +50,8 @@ func NewClient(
 		return nil, err
 	}
 
-	for index, menomic := range mnemonics {
-		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic)
+	for accKey, menomic := range mnemonics {
+		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, accKey, menomic)
 		c.keyringRecord = append(c.keyringRecord, kr)
 		if err != nil {
 			return nil, err
