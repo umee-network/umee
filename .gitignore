@@ -47,5 +47,10 @@ private*
 #IntelliJ
 .idea/
 
-#VsCode 
+#Vscode 
 .vscode
+
+# Swagger UI 
+swagger/statik/statik.go
+swagger/swagger-ui
+

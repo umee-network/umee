@@ -21,6 +21,30 @@
           "Params": "OracleParams"
         }
       }
+    },
+    {
+      "url": "./tmp-swagger-gen/umee/uibc/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "UIBCParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/umee/ugov/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "UGovParams"
+        }
+      }
+    },
+    {
+      "url": "./tmp-swagger-gen/umee/incentive/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "IncentiveParams"
+        }
+      }
     }
   ]
 }
