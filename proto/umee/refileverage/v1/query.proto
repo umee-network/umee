@@ -1,0 +1,322 @@
+syntax = "proto3";
+package umee.refileverage.v1;
+
+import "google/api/annotations.proto";
+import "umee/refileverage/v1/genesis.proto";
+import "umee/refileverage/v1/leverage.proto";
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/umee-network/umee/v5/x/refileverage/types";
+
+option (gogoproto.goproto_getters_all) = false;
+
+// Query defines the gRPC querier service.
+service Query {
+  // Params queries the parameters of the x/refileverage module.
+  rpc Params(QueryParams) returns (QueryParamsResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/params";
+  }
+
+  // RegisteredTokens queries for all the registered tokens.
+  rpc RegisteredTokens(QueryRegisteredTokens)
+      returns (QueryRegisteredTokensResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/registered_tokens";
+  }
+
+  // MarketSummary queries a base asset's current borrowing and supplying conditions.
+  rpc MarketSummary(QueryMarketSummary)
+      returns (QueryMarketSummaryResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/market_summary";
+  }
+
+  // AccountBalances queries an account's current supply, collateral, and borrow positions.
+  rpc AccountBalances(QueryAccountBalances)
+      returns (QueryAccountBalancesResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/account_balances";
+  }
+
+  // AccountSummary queries USD values representing an account's total positions and borrowing limits. It requires oracle prices to return successfully.
+  rpc AccountSummary(QueryAccountSummary)
+      returns (QueryAccountSummaryResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/account_summary";
+  }
+
+  // LiquidationTargets queries a list of all borrower account addresses eligible for liquidation.
+  rpc LiquidationTargets(QueryLiquidationTargets)
+      returns (QueryLiquidationTargetsResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/liquidation_targets";
+  }
+
+  // BadDebts queries a list of borrow positions that have been marked for bad debt repayment.
+  rpc BadDebts(QueryBadDebts)
+      returns (QueryBadDebtsResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/bad_debts";
+  }
+
+  // MaxWithdraw queries the maximum amount of a given token an address can withdraw.
+  rpc MaxWithdraw(QueryMaxWithdraw)
+      returns (QueryMaxWithdrawResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/max_withdraw";
+  }
+
+  // MaxBorrow queries the maximum amount of a given token an address can borrow.
+  rpc MaxBorrow(QueryMaxBorrow)
+      returns (QueryMaxBorrowResponse) {
+    option (google.api.http).get = "/umee/refileverage/v1/max_borrow";
+  }
+}
+
+// QueryParams defines the request structure for the Params gRPC service
+// handler.
+message QueryParams {}
+
+// QueryParamsResponse defines the response structure for the Params gRPC
+// service handler.
+message QueryParamsResponse {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryRegisteredTokens defines the request structure for the RegisteredTokens
+// gRPC service handler.
+message QueryRegisteredTokens {
+  string base_denom = 1;
+}
+
+// QueryRegisteredTokensResponse defines the response structure for the
+// RegisteredTokens gRPC service handler.
+message QueryRegisteredTokensResponse {
+  repeated Token registry = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryMarketSummary defines the request structure for the MarketSummary gRPC service handler.
+message QueryMarketSummary {
+  string denom = 1;
+}
+
+// QueryMarketSummaryResponse defines the response structure for the MarketSummary gRPC service handler.
+message QueryMarketSummaryResponse {
+  // Symbol Denom is the human-readable representation of a token denom, for example "UMEE" or "ATOM".
+  string symbol_denom = 1;
+  // Exponent is the power of ten required to get from base denom to symbol denom. For example, an exponent of 6 means 10^6 uumee = 1 UMEE.
+  uint32 exponent = 2;
+  // Oracle Price is the current USD value of a token. Oracle price is nil when the oracle is down.
+  string oracle_price = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = true
+  ];
+  // uToken Exchange Rate is the amount of base tokens received when withdrawing 1 uToken. For example, a uToken exchange rate of 1.5 means a supplier receives 3 uumee for every 2 u/uumee they wish to withdraw. The same applies in reverse: supplying 3 uumee would award 2 u/uumee at that time.
+  string uToken_exchange_rate = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "utoken_exchange_rate"
+  ];
+  // Supply APY is the current interest rate suppliers are receiving for their deposits. For example, 0.11 would mean 11% APY. Supply APY is always less than borrow APY.
+  string supply_APY = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "supply_apy"
+  ];
+  // Borrow APY is the current interest rate borrowers are being charged on their loans. For example, 0.2 would mean 20% APY.
+  string borrow_APY = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "borrow_apy"
+  ];
+  // Supplied is the total amount of tokens supplied to the the system by all suppliers, including any interest earned. This includes that tokens which have been borrowed out or enabled as collateral, but excludes reserves. Supplied is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+  string supplied = 7 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Reserved is the total amount of tokens held in reserve by the module for emergencies. Reserves are always excluded from total supply, borrow, collateral, and liqduidity queries. Reserves are denominated in base tokens, so exponent must be applied to convert to symbol denom.
+  string reserved = 8 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Collateral is the total amount of uTokens collateralized by all borrowers. Collateral is denominated in uTokenso, so both uToken exchange rate and exponent must also be applied to convert to symbol denom. For example, if collateral is 4000000 u/uumee and uToken exchange rate is 1.2, then 5 UMEE have been collateralized.
+  string collateral = 9 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Borrowed is the total amount of debt in this token held across all borrowers. It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+  string borrowed = 10 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Liquidity is the amount of a token that has been supplied but not yet borrowed or reserved. It is denominated in base tokens, so exponent must be applied to convert to symbol denom.
+  string liquidity = 11 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Maximum Borrow is the amount of a token that is available for borrowing, including that which has already been borrowed out. This amount is less than total supply due to safety limits. It is denominated in base tokens, so exponent must be applied to convert to symbol denom. For example, if borrowed is 3000000 uumee and maximum borrow is 4000000 uumee, then 1 UMEE is currently available for borrowing.
+  string maximum_borrow = 12 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Maximum Collateral is the amount of a token that can be collateralized, including that which is already collateral. This amount is less than total supply due to safety limits. It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. For example, if collateral is 4000000 u/uumee, uToken exchange rate is 1.2, and maximum borrow is 7000000 uumee, then a maximum of 2 additional UMEE is permitted to be collateralized.
+  string maximum_collateral = 13 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Minimum Liquidity is the minimum amount of liquidity in the module required by safety limits, based on the current collateral. It is denominated in base tokens, so exponent must be applied to convert to symbol denom. For example, if liquidity is 9000000 uumee and minimum liquidity is 8000000 uumee, then a maximum of 1 additional UMEE is currently available for borrowing or withdrawal.
+  string minimum_liquidity = 14 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // uToken Supply is the total amount of a base token's associated uToken in circulation.
+  string uToken_supply = 15 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false,
+    (gogoproto.jsontag)    = "utoken_supply"
+  ];
+  // Available Borrow is the maximum additional amount of base tokens than can be borrowed based on current liquidity and system safety limits. It can also be calculated by MIN(maximum_borrow - borrowed, liquidity - minimum_liquidity). It is denominated in base tokens, so exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and borrowing is temporarily unavailable.
+  string available_borrow = 16 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Available Withdraw is the maximum amount of uTokens than can currently be withdrawn based on liquidity and system safety limits. It can also be calculated by (liquidity - minimum_liquidity). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and withdrawal is temporarily unavailable.
+  string available_withdraw = 17 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Available Collateralize is the maximum additional amount of uTokens than can be collateralized based on current liquidity and system safety limits. It can also be calculated by (maximum_collateral, - collateral). It is denominated in uTokens, so both uToken exchange rate and exponent must be applied to convert to symbol denom. A negative availability means safety limits have been exceeded and additional collateral cannot be created until more liquidity is present.
+  string available_collateralize = 18 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable)   = false
+  ];
+  // Oracle Historic Price is the historic USD value of a token. Historic price is defined as the median of the last N historic median prices from the oracle module, with N being this token's HistoricMedians in the refileverage registry. Current price is used if required medians is zero. Price is nil when the oracle is down or insufficient historic medians are available.
+  string oracle_historic_price = 19 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = true
+  ];
+  string errors = 20;
+}
+
+// QueryAccountBalances defines the request structure for the AccountBalances gRPC service handler.
+message QueryAccountBalances {
+  string address = 1;
+}
+
+// QueryAccountBalancesResponse defines the response structure for the AccountBalances gRPC service handler.
+message QueryAccountBalancesResponse {
+  // Supplied contains all tokens the account has supplied, including interest earned. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
+  repeated cosmos.base.v1beta1.Coin supplied = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // Collateral contains all uTokens the account has collateralized. It is denominated in uTokens, so both exponent and uToken exchange rate from each coin's market_summary must be applied to convert to base token symbol denom.
+  repeated cosmos.base.v1beta1.Coin collateral = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // Borrowed contains all tokens the account has borrowed, including interest owed. It is denominated in base tokens, so exponent from each coin's registered_tokens entry must be applied to convert to symbol denom.
+  repeated cosmos.base.v1beta1.Coin borrowed = 3 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// QueryAccountSummary defines the request structure for the AccountSummary gRPC service handler.
+message QueryAccountSummary {
+  string address = 1;
+}
+
+// QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
+message QueryAccountSummaryResponse {
+  // Supplied Value is the sum of the USD value of all tokens the account has supplied, including interest earned.
+  // Computation skips assets which are missing oracle prices, potentially resulting in a lower supplied
+  // value than if prices were all available.
+  string supplied_value = 1 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Collateral Value is the sum of the USD value of all uTokens the account has collateralized.
+  // Computation skips collateral which is missing an oracle price, potentially resulting in a lower collateral
+  // value than if prices were all available.
+  string collateral_value = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Borrowed Value is the sum of the USD value of all tokens the account has borrowed, including interest owed.
+  // It always uses spot prices.
+  // Computation skips borrows which are missing oracle prices, potentially resulting in a lower borrowed
+  // value than if prices were all available.
+  string borrowed_value = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
+  // The lower of spot or historic price for each collateral token is used when calculating borrow limits.
+  // Computation skips collateral which is missing an oracle price, potentially resulting in a lower borrow
+  // limit than if prices were all available.
+  string borrow_limit = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Liquidation Threshold is the Borrowed Value at which the account becomes eligible for liquidation.
+  // Will be null if an oracle price required for computation is missing.
+  string liquidation_threshold = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = true
+  ];
+}
+
+// QueryLiquidationTargets defines the request structure for the LiquidationTargets gRPC service handler.
+message QueryLiquidationTargets {}
+
+// QueryLiquidationTargetsResponse defines the response structure for the LiquidationTargets gRPC service handler.
+message QueryLiquidationTargetsResponse {
+  // Targets are the addresses of borrowers eligible for liquidation.
+  repeated string targets = 1;
+}
+
+// QueryBadDebts defines the request structure for the
+// BedDebts gRPC service handler.
+message QueryBadDebts {}
+
+// QueryBadDebtsResponse defines the response structure for the BedDebts gRPC service handler.
+message QueryBadDebtsResponse {
+  // Targets are borrow positions currently marked for bad debt repayment. Each contains an Address and a Denom.
+  repeated BadDebt targets = 1 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryMaxWithdraw defines the request structure for the MaxWithdraw gRPC service handler.
+message QueryMaxWithdraw {
+  string address = 1;
+  // denom is the base token denom associated with the uToken to withdraw.
+  // empty denom will query all registered tokens.
+  string denom = 2;
+}
+
+// QueryMaxWithdrawResponse defines the response structure for the MaxWithdraw gRPC service handler.
+message QueryMaxWithdrawResponse {
+  // uTokens is the maximum amount of uTokens that can be withdrawn
+  repeated cosmos.base.v1beta1.Coin uTokens = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+  // Tokens is the equivalent of max uTokens converted to base tokens
+  repeated cosmos.base.v1beta1.Coin tokens = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// QueryMaxBorrow defines the request structure for the MaxBorrow gRPC service handler.
+message QueryMaxBorrow {
+  string address = 1;
+  // denom is the base token denom to borrow.
+  // empty denom will query all registered tokens.
+  string denom = 2;
+}
+
+// QueryMaxBorrowResponse defines the response structure for the MaxBorrow gRPC service handler.
+message QueryMaxBorrowResponse {
+  // Tokens is the maximum amount of tokens that can be borrowed
+  repeated cosmos.base.v1beta1.Coin tokens = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
