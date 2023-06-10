@@ -24,75 +24,14 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdSupply(),
-		GetCmdWithdraw(),
-		GetCmdMaxWithdraw(),
-		GetCmdCollateralize(),
+		GetCmdSupplyCollateral(),
 		GetCmdDecollateralize(),
+		GetCmdMaxWithdraw(),
 		GetCmdBorrow(),
 		GetCmdMaxBorrow(),
 		GetCmdRepay(),
 		GetCmdLiquidate(),
-		GetCmdSupplyCollateral(),
 	)
-
-	return cmd
-}
-
-// GetCmdSupply creates a Cobra command to generate or broadcast a
-// transaction with a MsgSupply message.
-func GetCmdSupply() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "supply [amount]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Supply a specified amount of a supported asset",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			asset, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
-			}
-
-			msg := types.NewMsgSupply(clientCtx.GetFromAddress(), asset)
-
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
-		},
-	}
-
-	flags.AddTxFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdWithdraw creates a Cobra command to generate or broadcast a
-// transaction with a MsgWithdraw message.
-func GetCmdWithdraw() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "withdraw [amount]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Withdraw a specified amount of a supplied asset",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			asset, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
-			}
-
-			msg := types.NewMsgWithdraw(clientCtx.GetFromAddress(), asset)
-
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
-		},
-	}
-
-	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -113,37 +52,6 @@ func GetCmdMaxWithdraw() *cobra.Command {
 			denom := args[0]
 
 			msg := types.NewMsgMaxWithdraw(clientCtx.GetFromAddress(), denom)
-
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
-		},
-	}
-
-	flags.AddTxFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdCollateralize creates a Cobra command to generate or broadcast a
-// transaction with a MsgCollateralize message.
-func GetCmdCollateralize() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "collateralize [coin]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Add uTokens as collateral",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			coin, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
-			}
-			msg := types.NewMsgCollateralize(clientCtx.GetFromAddress(), coin)
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

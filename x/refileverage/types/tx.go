@@ -6,54 +6,6 @@ import (
 	"github.com/umee-network/umee/v5/util/checkers"
 )
 
-func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
-	return &MsgSupply{
-		Supplier: supplier.String(),
-		Asset:    asset,
-	}
-}
-
-func (msg MsgSupply) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgSupply) Type() string  { return sdk.MsgTypeURL(&msg) }
-
-func (msg *MsgSupply) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
-}
-
-func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Supplier)
-}
-
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgSupply) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
-}
-
-func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
-	return &MsgWithdraw{
-		Supplier: supplier.String(),
-		Asset:    asset,
-	}
-}
-
-func (msg MsgWithdraw) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
-
-func (msg *MsgWithdraw) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
-}
-
-func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Supplier)
-}
-
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgWithdraw) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
-}
-
 func NewMsgMaxWithdraw(supplier sdk.AccAddress, denom string) *MsgMaxWithdraw {
 	return &MsgMaxWithdraw{
 		Supplier: supplier.String(),
@@ -74,30 +26,6 @@ func (msg *MsgMaxWithdraw) GetSigners() []sdk.AccAddress {
 
 // GetSignBytes get the bytes for the message signer to sign on
 func (msg *MsgMaxWithdraw) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
-}
-
-func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateralize {
-	return &MsgCollateralize{
-		Borrower: borrower.String(),
-		Asset:    asset,
-	}
-}
-
-func (msg MsgCollateralize) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgCollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
-
-func (msg *MsgCollateralize) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
-}
-
-func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Borrower)
-}
-
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgCollateralize) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }

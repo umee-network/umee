@@ -23,77 +23,6 @@ func NewMsgServerImpl(keeper Keeper) types.MsgServer {
 	return &msgServer{keeper: keeper}
 }
 
-func (s msgServer) Supply(
-	goCtx context.Context,
-	msg *types.MsgSupply,
-) (*types.MsgSupplyResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
-	if err != nil {
-		return nil, err
-	}
-	received, err := s.keeper.Supply(ctx, supplierAddr, msg.Asset)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fail here if MaxSupply is exceeded
-	if err = s.keeper.checkMaxSupply(ctx, msg.Asset.Denom); err != nil {
-		return nil, err
-	}
-
-	s.keeper.Logger(ctx).Debug(
-		"assets supplied",
-		"supplier", msg.Supplier,
-		"supplied", msg.Asset.String(),
-		"received", received.String(),
-	)
-	sdkutil.Emit(&ctx, &types.EventSupply{
-		Supplier: msg.Supplier,
-		Asset:    msg.Asset,
-		Utoken:   received,
-	})
-	return &types.MsgSupplyResponse{
-		Received: received,
-	}, nil
-}
-
-func (s msgServer) Withdraw(
-	goCtx context.Context,
-	msg *types.MsgWithdraw,
-) (*types.MsgWithdrawResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	supplierAddr, err := sdk.AccAddressFromBech32(msg.Supplier)
-	if err != nil {
-		return nil, err
-	}
-	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, msg.Asset)
-	if err != nil {
-		return nil, err
-	}
-
-	// Fail here if supplier ends up over their borrow limit under current or historic prices
-	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	if isFromCollateral {
-		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// Ensure MinCollateralLiquidity is still satisfied after the transaction
-	if err = s.keeper.checkCollateralLiquidity(ctx, received.Denom); err != nil {
-		return nil, err
-	}
-
-	s.logWithdrawal(ctx, msg.Supplier, msg.Asset, received, "supplied assets withdrawn")
-	return &types.MsgWithdrawResponse{
-		Received: received,
-	}, nil
-}
-
 func (s msgServer) MaxWithdraw(
 	goCtx context.Context,
 	msg *types.MsgMaxWithdraw,
@@ -156,11 +85,6 @@ func (s msgServer) MaxWithdraw(
 		}
 	}
 
-	// Ensure MinCollateralLiquidity is still satisfied after the transaction
-	if err = s.keeper.checkCollateralLiquidity(ctx, received.Denom); err != nil {
-		return nil, err
-	}
-
 	s.logWithdrawal(ctx, msg.Supplier, uToken, received, "maximum supplied assets withdrawn")
 	return &types.MsgMaxWithdrawResponse{
 		Withdrawn: uToken,
@@ -180,42 +104,6 @@ func (s msgServer) logWithdrawal(ctx sdk.Context, supplier string, redeemed, rec
 		Utoken:   redeemed,
 		Asset:    received,
 	})
-}
-
-func (s msgServer) Collateralize(
-	goCtx context.Context,
-	msg *types.MsgCollateralize,
-) (*types.MsgCollateralizeResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
-	if err != nil {
-		return nil, err
-	}
-	if err := s.keeper.Collateralize(ctx, borrowerAddr, msg.Asset); err != nil {
-		return nil, err
-	}
-
-	if err := s.keeper.checkCollateralLiquidity(ctx, types.ToTokenDenom(msg.Asset.Denom)); err != nil {
-		return nil, err
-	}
-
-	// Fail here if collateral share restrictions are violated,
-	// based on only collateral with known oracle prices
-	if err := s.keeper.checkCollateralShare(ctx, msg.Asset.Denom); err != nil {
-		return nil, err
-	}
-
-	s.keeper.Logger(ctx).Debug(
-		"collateral added",
-		"borrower", msg.Borrower,
-		"amount", msg.Asset.String(),
-	)
-	sdkutil.Emit(&ctx, &types.EventCollaterize{
-		Borrower: msg.Borrower,
-		Utoken:   msg.Asset,
-	})
-	return &types.MsgCollateralizeResponse{}, nil
 }
 
 func (s msgServer) SupplyCollateral(
@@ -286,6 +174,11 @@ func (s msgServer) Decollateralize(
 		return nil, err
 	}
 
+	received, _, err := s.keeper.Withdraw(ctx, borrowerAddr, msg.Asset)
+	if err != nil {
+		return nil, err
+	}
+
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
@@ -298,11 +191,15 @@ func (s msgServer) Decollateralize(
 		"borrower", msg.Borrower,
 		"amount", msg.Asset.String(),
 	)
+	s.logWithdrawal(ctx, msg.Borrower, msg.Asset, received, "supplied assets withdrawn")
+
 	sdkutil.Emit(&ctx, &types.EventDecollaterize{
 		Borrower: msg.Borrower,
 		Utoken:   msg.Asset,
 	})
-	return &types.MsgDecollateralizeResponse{}, nil
+	return &types.MsgDecollateralizeResponse{
+		// TODO: Received: received,
+	}, nil
 }
 
 func (s msgServer) Borrow(
@@ -328,11 +225,6 @@ func (s msgServer) Borrow(
 
 	// Check MaxSupplyUtilization after transaction
 	if err = s.keeper.checkSupplyUtilization(ctx, msg.Asset.Denom); err != nil {
-		return nil, err
-	}
-
-	// Check MinCollateralLiquidity is still satisfied after the transaction
-	if err = s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
 
@@ -397,11 +289,6 @@ func (s msgServer) MaxBorrow(
 
 	// Check MaxSupplyUtilization after transaction
 	if err = s.keeper.checkSupplyUtilization(ctx, userMaxBorrow.Denom); err != nil {
-		return nil, err
-	}
-
-	// Check MinCollateralLiquidity is still satisfied after the transaction
-	if err = s.keeper.checkCollateralLiquidity(ctx, userMaxBorrow.Denom); err != nil {
 		return nil, err
 	}
 
