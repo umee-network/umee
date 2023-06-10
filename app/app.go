@@ -136,6 +136,10 @@ import (
 	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
 	ugovmodule "github.com/umee-network/umee/v5/x/ugov/module"
 
+	"github.com/umee-network/umee/v5/x/refileverage"
+	refileveragekeeper "github.com/umee-network/umee/v5/x/refileverage/keeper"
+	refileveragetypes "github.com/umee-network/umee/v5/x/refileverage/types"
+
 	// umee ibc-transfer and quota for ibc-transfer
 	uwasm "github.com/umee-network/umee/v5/app/wasm"
 	"github.com/umee-network/umee/v5/x/uibc"
@@ -192,6 +196,8 @@ func init() {
 		uibcmodule.AppModuleBasic{},
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
+
+		refileverage.AppModuleBasic{},
 	}
 
 	if Experimental {
@@ -214,6 +220,8 @@ func init() {
 
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasm.ModuleName:          {authtypes.Burner},
+
+		refileveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 
 		incentive.ModuleName:   nil,
 		oracletypes.ModuleName: nil,
@@ -267,6 +275,8 @@ type UmeeApp struct {
 	bech32IbcKeeper   bech32ibckeeper.Keeper
 	UIbcQuotaKeeperB  uibcquotakeeper.Builder
 	UGovKeeperB       ugovkeeper.Builder
+
+	RefiLeverageKeeper refileveragekeeper.Keeper
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -330,6 +340,7 @@ func New(
 		leveragetypes.StoreKey, oracletypes.StoreKey,
 		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
+		refileveragetypes.StoreKey,
 	}
 
 	if Experimental {
@@ -469,7 +480,17 @@ func New(
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 	)
 
+	app.RefiLeverageKeeper = refileveragekeeper.NewKeeper(
+		appCodec,
+		keys[leveragetypes.ModuleName],
+		app.GetSubspace(leveragetypes.ModuleName),
+		app.BankKeeper,
+		app.OracleKeeper,
+		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
+	)
+
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
+	// TODO: may need to add ReFi hooks
 
 	if Experimental {
 		app.IncentiveKeeper = incentivekeeper.NewKeeper(
@@ -697,6 +718,8 @@ func New(
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
+
+		refileverage.NewAppModule(appCodec, app.RefiLeverageKeeper, app.AccountKeeper, app.BankKeeper),
 	}
 	if Experimental {
 		appModules = append(
@@ -723,6 +746,7 @@ func New(
 		paramstypes.ModuleName, vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
+		refileveragetypes.ModuleName,
 		oracletypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
@@ -742,6 +766,7 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
+		refileveragetypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
@@ -765,6 +790,7 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
+		refileveragetypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
@@ -781,6 +807,8 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
+		refileveragetypes.ModuleName,
+
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
@@ -1103,6 +1131,7 @@ func initParamsKeeper(
 	// paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
+	paramsKeeper.Subspace(refileveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(wasm.ModuleName)
 
