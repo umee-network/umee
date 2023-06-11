@@ -172,7 +172,7 @@ $coins_user,"20001${SCALE_FACTOR}SCC","30001${SCALE_FACTOR}MilkyWay","10001${SCA
 
   echo "--- Modifying config..."
   perl -i -pe 's|addr_book_strict = true|addr_book_strict = false|g' $n0cfg
-  perl -i -pe 's|external_address = ""|external_address = "tcp://127.0.0.1:26657"|g' $n0cfg
+  perl -i -pe 's|external_address = ""|external_address = "tcp://0.0.0.0:26657"|g' $n0cfg
   perl -i -pe 's|"tcp://127.0.0.1:26657"|"tcp://0.0.0.0:26657"|g' $n0cfg
   perl -i -pe 's|allow_duplicate_ip = false|allow_duplicate_ip = true|g' $n0cfg
   perl -i -pe 's|log_level = "info"|log_level = "'$LOG_LEVEL'"|g' $n0cfg
@@ -208,4 +208,4 @@ echo "  * $NODE_BIN --home $hdir $kbt $cid tx "
 # ./umeed --home ./node-data/umeetest-1/n0 --keyring-backend test --chain-id umeetest-1 tx
 
 
-$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=false --log_level info > $log_path 2>&1
+$NODE_BIN $home0 start --api.enable true --grpc.address="0.0.0.0:9090" --grpc-web.enable=true --log_level info > $log_path 2>&1
