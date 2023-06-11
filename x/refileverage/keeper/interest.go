@@ -68,19 +68,15 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		}
 
 		// interest is accrued by continuous compound interest on each denom's Interest Scalar
-		scalar := k.getInterestScalar(ctx)
-		// calculate e^(APY*time)
-		exponential := ApproxExponential(k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed))
-		// TODO
+		scalar := k.getInterestScalar(ctx, token.BaseDenom)
+
 		// multiply interest scalar by e^(APY*time)
-		// if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(exponential)); err != nil {
-		// 	return err
-		// }
+		exponential := ApproxExponential(k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed))
+		if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(exponential)); err != nil {
+			return err
+		}
 
-		// apply (pre-accural) interest scalar to borrows to get total borrowed before interest accrued
 		prevTotalBorrowed := k.getAdjustedTotalBorrowed(ctx).Mul(scalar)
-
-		// calculate total interest accrued for this denom
 		interestAccrued := prevTotalBorrowed.Mul(exponential.Sub(sdk.OneDec()))
 		totalInterest = totalInterest.Add(sdk.NewCoin(
 			token.BaseDenom,

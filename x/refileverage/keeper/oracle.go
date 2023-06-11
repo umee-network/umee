@@ -11,6 +11,12 @@ import (
 
 var ten = sdk.MustNewDecFromStr("10")
 
+var prices = map[string]sdk.Dec{
+	"SCC":      sdk.MustNewDecFromStr("300"),
+	"MilkyWay": sdk.MustNewDecFromStr("200"),
+	"FucSEC":   sdk.MustNewDecFromStr("100"),
+}
+
 // TokenPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`).
 // Note, the input denom must still be the base denomination, e.g. uumee. When error is nil, price is
 // guaranteed to be positive. Also returns the token's exponent to reduce redundant registry reads.
@@ -21,6 +27,10 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 	}
 	if t.Blacklist {
 		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
+	}
+
+	if p, ok := prices[baseDenom]; ok {
+		return p, 6, nil
 	}
 
 	// if a token is exempt from historic pricing, all price modes return Spot price

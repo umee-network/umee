@@ -31,7 +31,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 // GetBorrow returns an sdk.Int representing how much $$$ given borrower currently owes.
 func (k Keeper) GetBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Int {
 	adjustedAmount := k.getAdjustedBorrow(ctx, borrowerAddr)
-	return adjustedAmount.Mul(k.getInterestScalar(ctx)).Ceil().TruncateInt()
+	return adjustedAmount.Mul(k.getInterestScalar(ctx, types.Gho)).Ceil().TruncateInt()
 }
 
 // repayBorrow repays tokens borrowed by borrowAddr by sending coins in fromAddr to the module. This
@@ -45,7 +45,7 @@ func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress
 // If the amount is zero, any stored value is cleared.
 func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Int) error {
 	// Apply interest scalar to determine adjusted amount
-	newAdjustedAmount := toDec(borrow).Quo(k.getInterestScalar(ctx))
+	newAdjustedAmount := toDec(borrow).Quo(k.getInterestScalar(ctx, types.Gho))
 
 	return k.setAdjustedBorrow(ctx, borrowerAddr, newAdjustedAmount)
 }
@@ -54,7 +54,7 @@ func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow s
 func (k Keeper) GetTotalBorrowed(ctx sdk.Context) sdk.Int {
 	adjustedTotal := k.getAdjustedTotalBorrowed(ctx)
 
-	return adjustedTotal.Mul(k.getInterestScalar(ctx)).Ceil().TruncateInt()
+	return adjustedTotal.Mul(k.getInterestScalar(ctx, types.Gho)).Ceil().TruncateInt()
 }
 
 // CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by

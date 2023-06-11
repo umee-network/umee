@@ -214,12 +214,10 @@ func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom st
 
 // getInterestScalar gets the interest scalar for a given base token
 // denom. Returns 1.0 if no value is stored.
-func (k Keeper) getInterestScalar(ctx sdk.Context) sdk.Dec {
-	return sdk.MustNewDecFromStr("0.01")
-
+func (k Keeper) getInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
 	// TODO: we can make it a param
-	// key := types.KeyInterestScalar(denom)
-	// return k.getStoredDec(ctx, key, sdk.OneDec(), "interest scalar")
+	key := types.KeyInterestScalar(denom)
+	return k.getStoredDec(ctx, key, sdk.OneDec(), "interest scalar")
 }
 
 // setInterestScalar sets the interest scalar for a given base token denom.
