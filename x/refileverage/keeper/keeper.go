@@ -199,7 +199,7 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, amount sdk.
 
 	// minting and transfer is happening at Aave
 
-	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr).Ceil().TruncateInt()
+	borrowed := k.GetBorrowed(ctx, borrowerAddr)
 	return k.setBorrow(ctx, borrowerAddr, borrowed.Add(amount))
 }
 

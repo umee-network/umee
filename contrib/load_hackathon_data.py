@@ -12,6 +12,7 @@ with open("./registered_tokens.json") as f:
     registry = json.load(f)
 
 genesis["app_state"]["leverage"]["registry"] = registry
+genesis["app_state"]["refileverage"]["registry"] = registry
 
 
 with open(genesis_path, "w") as f:

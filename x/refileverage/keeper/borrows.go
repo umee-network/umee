@@ -14,16 +14,16 @@ import (
 // This should be checked in msg_server.go at the end of any transaction which is restricted
 // by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
 func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
-	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+	borrowedVal := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 
 	limit, err := k.VisibleBorrowLimit(ctx, collateral)
 	if err != nil {
 		return err
 	}
-	if borrowed.GT(limit) {
+	if borrowedVal.GT(limit) {
 		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s", borrowed, limit.String())
+			"borrowed: %s, limit: %s", borrowedVal, limit.String())
 	}
 	return nil
 }
@@ -45,8 +45,8 @@ func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress
 // If the amount is zero, any stored value is cleared.
 func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Int) error {
 	// Apply interest scalar to determine adjusted amount
-	newAdjustedAmount := toDec(borrow).Quo(k.getInterestScalar(ctx, types.Gho))
-
+	scalar := k.getInterestScalar(ctx, types.Gho)
+	newAdjustedAmount := toDec(borrow).Quo(scalar)
 	return k.setAdjustedBorrow(ctx, borrowerAddr, newAdjustedAmount)
 }
 

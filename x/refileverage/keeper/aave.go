@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"crypto/ecdsa"
 
 	"fmt"
 	"math/big"
@@ -14,6 +15,19 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
+var facilitatorAddr = common.HexToAddress("0x88cd7D0C712f912C4f88b6f89516dFF7F434fD95")
+var key *ecdsa.PrivateKey
+var e18 = big.NewInt(1000000000000000000)
+
+func init() {
+	var err error
+	// pubkey: 0x610a34ed4f715f62faa86ba5a20a7602a63bc98a
+	key, err = crypto.HexToECDSA("e93cf48f1b161895893f61a482bdad21a557255773ef084850ead61d4cb0d044")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func ToAaave(ctx context.Context, ghoAmount sdk.Int, recipient common.Address) error {
 	backend, err := ethereum.CreateDialedBackend(ctx, "https://opt-goerli.g.alchemy.com/v2/euAaBF09KINxu0q4nEtfEVEtrK1BmotU")
 	if err != nil {
@@ -21,12 +35,7 @@ func ToAaave(ctx context.Context, ghoAmount sdk.Int, recipient common.Address) e
 	}
 	defer backend.Close()
 
-	privateKey, err := crypto.HexToECDSA("e93cf48f1b161895893f61a482bdad21a557255773ef084850ead61d4cb0d044")
-	if err != nil {
-		return err
-	}
-
-	clt, err := ethereum.NewClient(backend, privateKey)
+	clt, err := ethereum.NewClient(backend, key)
 	if err != nil {
 		return err
 	}
@@ -43,10 +52,10 @@ func ToAaave(ctx context.Context, ghoAmount sdk.Int, recipient common.Address) e
 
 	// =========================================================================
 
-	facilitatorAddr := common.HexToAddress("0x5E9464a09F301af854c546c3aEE3762f7146d683")
-	//recipient := common.HexToAddress("0x610A34ed4F715F62faa86BA5A20a7602A63bc98a")
 	facilitator, err := NewReFiFacilitator(facilitatorAddr, backend)
-	tx, err := facilitator.OnAxelarGmp(tranOpts, recipient, big.NewInt(100))
+	i := ghoAmount.BigInt()
+	// i = i.Mul(i, e18)
+	tx, err := facilitator.OnAxelarGmp(tranOpts, recipient, i)
 	if err != nil {
 		return err
 	}

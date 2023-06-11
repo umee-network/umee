@@ -81,11 +81,13 @@ func (msg *MsgDecollateralize) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBorrow(borrower sdk.AccAddress, amount sdk.Int) *MsgBorrow {
-	return &MsgBorrow{
-		Borrower: borrower.String(),
-		Amount:   amount,
+func NewMsgBorrow(borrower sdk.AccAddress, amount sdk.Int, recipient string) (*MsgBorrow, error) {
+	msg := &MsgBorrow{
+		Borrower:     borrower.String(),
+		Amount:       amount,
+		EthRecipient: recipient,
 	}
+	return msg, msg.ValidateBasic()
 }
 
 func (msg MsgBorrow) Route() string { return sdk.MsgTypeURL(&msg) }

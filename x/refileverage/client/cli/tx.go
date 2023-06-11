@@ -69,8 +69,8 @@ func GetCmdDecollateralize() *cobra.Command {
 // transaction with a MsgBorrow message.
 func GetCmdBorrow() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "borrow [amount]",
-		Args:  cobra.ExactArgs(1),
+		Use:   "borrow [amount] [eth recipient]",
+		Args:  cobra.ExactArgs(2),
 		Short: "Borrow a specified amount of a supported asset",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientTxContext(cmd)
@@ -83,8 +83,10 @@ func GetCmdBorrow() *cobra.Command {
 				return fmt.Errorf("amount must be a positive integer")
 			}
 
-			msg := types.NewMsgBorrow(clientCtx.GetFromAddress(), amount)
-
+			msg, err := types.NewMsgBorrow(clientCtx.GetFromAddress(), amount, args[1])
+			if err != nil {
+				return err
+			}
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}

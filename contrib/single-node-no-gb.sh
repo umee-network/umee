@@ -136,7 +136,10 @@ if [[ ! -d "$hdir" ]]; then
   $NODE_BIN $home0 keys show $VAL0_KEY -a --bech val $kbt
   $NODE_BIN $home0 keys show $USER_KEY -a $kbt
   $NODE_BIN $home0 add-genesis-account $($NODE_BIN $home0 keys show $VAL0_KEY -a $kbt) $coins &>/dev/null
-  $NODE_BIN $home0 add-genesis-account $USER_ADDR $coins_user &>/dev/null
+
+  $NODE_BIN $home0 add-genesis-account $USER_ADDR \
+$coins_user,"20001${SCALE_FACTOR}SCC","30001${SCALE_FACTOR}MilkyWay","10001${SCALE_FACTOR}FucSEC" \
+&>/dev/null
 
 
   echo "--- Patching genesis..."

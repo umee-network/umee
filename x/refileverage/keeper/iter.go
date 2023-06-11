@@ -64,13 +64,14 @@ func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
 // GetBorrowerBorrows returns an amount of $$$ value borrowed
 func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Dec {
 	key := types.KeyAdjustedBorrow(borrowerAddr)
-	return GhoIntToDec(store.GetInt(ctx.KVStore(k.storeKey), key, "borrows"))
+	d := store.GetDec(ctx.KVStore(k.storeKey), key, "borrows")
+	return d.Mul(k.getInterestScalar(ctx, types.Gho))
+
 }
 
 // GetBorrowed returns an amount of $$$ coins borrowed
 func (k Keeper) GetBorrowed(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Int {
-	key := types.KeyAdjustedBorrow(borrowerAddr)
-	return store.GetInt(ctx.KVStore(k.storeKey), key, "borrows")
+	return k.GetBorrowerBorrows(ctx, borrowerAddr).Ceil().TruncateInt()
 }
 
 // GetBorrowerCollateral returns an sdk.Coins containing all of a borrower's collateral.
