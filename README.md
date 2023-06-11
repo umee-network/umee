@@ -15,6 +15,37 @@ Changes:
 - Mock the [Axelar](https://axelar.network/) bridge with the General Message Passing interface - light client based cross chain bridge connecting all major EVM chains and IBC chains.
 - Go bindings for our [Aave Gho Facilitator](https://github.com/ReFi-DeFi-hack-ethprague-2023/gho-refi-faciliator).
 
+### Demo
+
+Start chain:
+
+```bash
+make build
+cd contrib
+./single-node-no-gb.sh  ../build/umeed
+```
+
+Make transactions:
+
+```bash
+export UMEED_CHAIN_ID=umeetest-1
+user=umee1usr9g5a4s2qrwl63sdjtrs2qd4a7huh6cuuhrc
+
+umeed q bank balances $user
+
+umeed tx refileverage supply-collateral 2000000MilkyWay --from user --gas 300000 --fees 30000uumee -y
+umeed tx refileverage supply-collateral 1000000SCC --from user --gas 300000 --fees 30000uumee -y
+umeed tx refileverage supply-collateral 1000000FucSEC --from user --gas 300000 --fees 30000uumee -y
+
+umeed q bank balances $user
+umeed q refileverage account-summary $user
+
+recipient=0xe7Fc68CAea4BA48Ae4d80C132A6187727a2b35eC
+./umeed tx refileverage borrow 4 $recipient --from user --fees 30000uumee -b block -y
+```
+
+Visit [Facilitator-optimism](https://goerli-optimism.etherscan.io/address/0x610a34ed4f715f62faa86ba5a20a7602a63bc98a) for transactions.
+
 ## About Umee
 
 Umee is a Universal Capital Facility that can collateralize assets on one blockchain
