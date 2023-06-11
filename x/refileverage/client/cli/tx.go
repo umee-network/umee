@@ -26,38 +26,10 @@ func GetTxCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdSupplyCollateral(),
 		GetCmdDecollateralize(),
-		GetCmdMaxWithdraw(),
 		GetCmdBorrow(),
-		GetCmdMaxBorrow(),
 		GetCmdRepay(),
 		GetCmdLiquidate(),
 	)
-
-	return cmd
-}
-
-// GetCmdMaxWithdraw creates a Cobra command to generate or broadcast a
-// transaction with a MsgMaxWithdraw message.
-func GetCmdMaxWithdraw() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "withdraw-max [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Withdraw the maximum valid amount of a supplied asset",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			denom := args[0]
-
-			msg := types.NewMsgMaxWithdraw(clientCtx.GetFromAddress(), denom)
-
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
-		},
-	}
-
-	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }
@@ -106,36 +78,12 @@ func GetCmdBorrow() *cobra.Command {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
+			amount, ok := sdk.NewIntFromString(args[0])
+			if !ok {
+				return fmt.Errorf("amount must be a positive integer")
 			}
 
-			msg := types.NewMsgBorrow(clientCtx.GetFromAddress(), asset)
-
-			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
-		},
-	}
-
-	flags.AddTxFlagsToCmd(cmd)
-
-	return cmd
-}
-
-// GetCmdMaxBorrow creates a Cobra command to generate or broadcast a
-// transaction with a MsgBorrow message.
-func GetCmdMaxBorrow() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "max-borrow [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Borrow the maximum acceptable amount of a supported asset",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientTxContext(cmd)
-			if err != nil {
-				return err
-			}
-
-			msg := types.NewMsgMaxBorrow(clientCtx.GetFromAddress(), args[0])
+			msg := types.NewMsgBorrow(clientCtx.GetFromAddress(), amount)
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -159,13 +107,12 @@ func GetCmdRepay() *cobra.Command {
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
+			amount, ok := sdk.NewIntFromString(args[0])
+			if !ok || !amount.IsPositive() {
+				return fmt.Errorf("amount must be a integer number")
 			}
 
-			msg := types.NewMsgRepay(clientCtx.GetFromAddress(), asset)
-
+			msg := types.NewMsgRepay(clientCtx.GetFromAddress(), amount)
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
@@ -203,14 +150,14 @@ $ umeed tx refileverage liquidate %s  50000000uumee u/uumee --from mykey`,
 				return err
 			}
 
-			asset, err := sdk.ParseCoinNormalized(args[1])
-			if err != nil {
-				return err
+			amount, ok := sdk.NewIntFromString(args[0])
+			if !ok || !amount.IsPositive() {
+				return fmt.Errorf("amount must be a integer number")
 			}
 
 			rewardDenom := args[2]
 
-			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
+			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, amount, rewardDenom)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}

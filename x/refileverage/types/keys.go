@@ -35,16 +35,9 @@ func KeyRegisteredToken(baseTokenDenom string) []byte {
 
 // KeyAdjustedBorrow returns a KVStore key for getting and setting an
 // adjusted borrow for a denom and borrower address.
-func KeyAdjustedBorrow(borrowerAddr sdk.AccAddress, tokenDenom string) []byte {
-	// borrowprefix | lengthprefixed(borrowerAddr) | denom | 0x00 for null-termination
-	return util.ConcatBytes(1, KeyAdjustedBorrowNoDenom(borrowerAddr), []byte(tokenDenom))
-}
-
-// KeyAdjustedBorrowNoDenom returns the common prefix used by all borrows
-// associated with a given borrower address.
-func KeyAdjustedBorrowNoDenom(borrower sdk.AccAddress) []byte {
+func KeyAdjustedBorrow(borrowerAddr sdk.AccAddress) []byte {
 	// borrowprefix | lengthprefixed(borrowerAddr)
-	return util.ConcatBytes(0, KeyPrefixAdjustedBorrow, address.MustLengthPrefix(borrower))
+	return util.ConcatBytes(0, KeyPrefixAdjustedBorrow, address.MustLengthPrefix(borrowerAddr))
 }
 
 // KeyCollateralAmount returns a KVStore key for getting and setting the amount of
@@ -82,9 +75,9 @@ func KeyInterestScalar(tokenDenom string) []byte {
 
 // KeyAdjustedTotalBorrow returns a KVStore key for getting and setting the total ajdusted borrows for
 // a given token.
-func KeyAdjustedTotalBorrow(tokenDenom string) []byte {
+func KeyAdjustedTotalBorrow() []byte {
 	// totalBorrowedPrefix | denom | 0x00 for null-termination
-	return util.ConcatBytes(1, KeyPrefixAdjustedTotalBorrow, []byte(tokenDenom))
+	return util.ConcatBytes(1, KeyPrefixAdjustedTotalBorrow, []byte(Gho))
 }
 
 // KeyUTokenSupply returns a KVStore key for getting and setting a utoken's total supply.

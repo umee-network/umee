@@ -9,16 +9,6 @@ option go_package = "github.com/umee-network/umee/v5/x/refileverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
-// EventSupply is emitted on Msg/Supply
-message EventSupply {
-  // Liquidity supplier bech32 address.
-  string supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // Liquidity provided to the module.
-  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
-  // uToken received by the supplier in exchange for the provided liquidity.
-  cosmos.base.v1beta1.Coin utoken = 3 [(gogoproto.nullable) = false];
-}
-
 // EventWithdraw is emitted on Msg/Withdraw
 message EventWithdraw {
   // Liquidity supplier bech32 address.
@@ -50,7 +40,7 @@ message EventBorrow {
   // Borrower bech32 address.
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Asset borrowed.
-  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+  string amount = 2 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 // EventRepay is emitted on Msg/Repay
@@ -58,7 +48,7 @@ message EventRepay {
   // Borrower bech32 address.
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Asset repaid
-  cosmos.base.v1beta1.Coin repaid = 2 [(gogoproto.nullable) = false];
+  string repaid = 2 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 // EventLiquidate is emitted on Msg/Liquidate
@@ -87,7 +77,7 @@ message EventRepayBadDebt {
   // Borrower bech32 address.
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Asset repaid
-  cosmos.base.v1beta1.Coin asset = 2 [(gogoproto.nullable) = false];
+  string repaid = 2 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 // EventReservesExhausted is emitted when the module reserves are exhausted
@@ -96,11 +86,11 @@ message EventReservesExhausted {
   // Borrower bech32 address.
   string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Outstanding bad debt
-  cosmos.base.v1beta1.Coin outstanding_debt = 2 [(gogoproto.nullable) = false];
+  string outstanding_debt = 2 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
   // Module balance remaining
   cosmos.base.v1beta1.Coin module_balance = 3 [(gogoproto.nullable) = false];
-  // Reserves remaining
-  cosmos.base.v1beta1.Coin reserves = 4 [(gogoproto.nullable) = false];
+  // remaining $$$ reserves
+  string reserves = 4 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 // EventFundOracle is emitted when sending rewards to oracle module

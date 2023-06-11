@@ -13,6 +13,7 @@ import (
 const (
 	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
 	UTokenPrefix = "u/"
+	Gho          = "gho"
 )
 
 // HasUTokenPrefix detects the uToken prefix on a denom.

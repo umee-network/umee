@@ -19,7 +19,8 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	for _, borrow := range genState.AdjustedBorrows {
 		borrower, err := sdk.AccAddressFromBech32(borrow.Address)
 		util.Panic(err)
-		util.Panic(k.setAdjustedBorrow(ctx, borrower, borrow.Amount))
+		// TODO support other tokens
+		util.Panic(k.setAdjustedBorrow(ctx, borrower, borrow.Amount.Amount))
 	}
 
 	for _, collateral := range genState.Collateral {

@@ -61,29 +61,16 @@ func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
 	return reserves
 }
 
-// GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
-// associated with an address.
-func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
-	prefix := types.KeyAdjustedBorrowNoDenom(borrowerAddr)
-	totalBorrowed := sdk.NewCoins()
+// GetBorrowerBorrows returns an amount of $$$ value borrowed
+func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Dec {
+	key := types.KeyAdjustedBorrow(borrowerAddr)
+	return GhoIntToDec(store.GetInt(ctx.KVStore(k.storeKey), key, "borrows"))
+}
 
-	iterator := func(key, val []byte) error {
-		borrowDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
-		var adjustedAmount sdk.Dec
-		if err := adjustedAmount.Unmarshal(val); err != nil {
-			// improperly marshaled borrow amount should never happen
-			return err
-		}
-
-		// apply interest scalar
-		amount := adjustedAmount.Mul(k.getInterestScalar(ctx, borrowDenom)).Ceil().TruncateInt()
-		totalBorrowed = totalBorrowed.Add(sdk.NewCoin(borrowDenom, amount))
-		return nil
-	}
-
-	util.Panic(k.iterate(ctx, prefix, iterator))
-
-	return totalBorrowed
+// GetBorrowed returns an amount of $$$ coins borrowed
+func (k Keeper) GetBorrowed(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Int {
+	key := types.KeyAdjustedBorrow(borrowerAddr)
+	return store.GetInt(ctx.KVStore(k.storeKey), key, "borrows")
 }
 
 // GetBorrowerCollateral returns an sdk.Coins containing all of a borrower's collateral.
@@ -123,24 +110,14 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		}
 		checkedAddrs[borrowerAddr.String()] = struct{}{}
 
-		// get borrower's total borrowed
 		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-
-		// get borrower's total collateral
 		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-
-		// use oracle helper functions to find total borrowed value in USD
-		// skips denoms without prices
-		borrowValue, err := k.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
-		if err != nil {
-			return err
-		}
 
 		// compute liquidation threshold from enabled collateral
 		// in this case, we can't reasonably skip missing prices but can move on
 		// to the next borrower instead of stopping the entire query
 		liquidationLimit, err := k.CalculateLiquidationThreshold(ctx, collateral)
-		if err == nil && liquidationLimit.LT(borrowValue) {
+		if err == nil && liquidationLimit.LT(borrowed) {
 			// If liquidation limit is smaller than borrowed value then the
 			// address is eligible for liquidation.
 			liquidationTargets = append(liquidationTargets, borrowerAddr)
@@ -168,6 +145,11 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
+		if denom != types.Gho {
+			// TODO: make it more efficient
+			return nil
+		}
+
 		// clear blacklisted collateral while checking for any remaining (valid) collateral
 		done, err := k.clearBlacklistedCollateral(ctx, addr)
 		if err != nil {
@@ -177,7 +159,7 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 		// if remaining collateral is zero, attempt to repay this bad debt
 		if !done {
 			var err error
-			done, err = k.RepayBadDebt(ctx, addr, denom)
+			done, err = k.RepayBadDebt(ctx, addr)
 			if err != nil {
 				return err
 			}

@@ -6,9 +6,7 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/sdkutil"
 	"github.com/umee-network/umee/v5/x/refileverage/types"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
@@ -172,54 +170,4 @@ func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mo
 	uTokenAmount := sdk.NewDecFromInt(token.Amount).Quo(uTokenExchangeRate).TruncateInt()
 
 	return sdk.NewCoin(denom, uTokenAmount), nil
-}
-
-// PriceRatio computes the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).
-// Will return an error if either token price is not positive, and guarantees a positive output.
-// Computation uses price of token's symbol denom to avoid rounding errors for exponent >= 18 tokens,
-// but returns in terms of base tokens. Uses the same price mode for both token denoms involved.
-func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode types.PriceMode) (sdk.Dec, error) {
-	p1, e1, err := k.TokenPrice(ctx, fromDenom, mode)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-	p2, e2, err := k.TokenPrice(ctx, toDenom, mode)
-	if err != nil {
-		return sdk.ZeroDec(), err
-	}
-	// If tokens have different exponents, the symbol price ratio must be adjusted
-	// to obtain the base token price ratio. If fromDenom has a higher exponent, then
-	// the ratio p1/p2 must be adjusted lower.
-	powerDifference := int32(e2) - int32(e1)
-	// Price ratio > 1 if fromDenom is worth more than toDenom.
-	return exponent(p1, powerDifference).Quo(p2), nil
-}
-
-// FundOracle transfers requested coins to the oracle module account, as
-// long as the refileverage module account has sufficient unreserved assets.
-func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
-	rewards := sdk.Coins{}
-
-	// reduce rewards if they exceed unreserved module balance
-	for _, coin := range requested {
-		amountToTransfer := sdk.MinInt(coin.Amount, k.AvailableLiquidity(ctx, coin.Denom))
-
-		if amountToTransfer.IsPositive() {
-			rewards = rewards.Add(sdk.NewCoin(coin.Denom, amountToTransfer))
-		}
-	}
-
-	// This action is not caused by a message so we need to make an event here
-	k.Logger(ctx).Debug(
-		"funded oracle",
-		"amount", rewards,
-	)
-	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: rewards})
-
-	// Send rewards
-	if !rewards.IsZero() {
-		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, rewards)
-	}
-
-	return nil
 }

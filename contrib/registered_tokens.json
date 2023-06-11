@@ -42,7 +42,7 @@
     "historic_medians": 1
   },
   {
-    "base_denom": "Fuc*SEC",
+    "base_denom": "FucSEC",
     "reserve_factor": "0.5",
     "collateral_weight": "0.7",
     "liquidation_threshold": "0.8",
@@ -51,7 +51,7 @@
     "max_borrow_rate": "1.0",
     "kink_utilization": "0.5",
     "liquidation_incentive": "0.06",
-    "symbol_denom": "Fuc*SEC",
+    "symbol_denom": "FucSEC",
     "exponent": 6,
     "enable_msg_supply": true,
     "enable_msg_borrow": true,

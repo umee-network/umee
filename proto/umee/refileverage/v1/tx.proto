@@ -29,10 +29,6 @@ service Msg {
   // Borrow allows a user to borrow tokens from the module if they have sufficient collateral.
   rpc Borrow(MsgBorrow) returns (MsgBorrowResponse);
 
-  // MaxBorrow allows a user to borrow the maximum amount of tokens their collateral will allow.
-  // Zero is returned if no more can be borrowed.
-  rpc MaxBorrow(MsgMaxBorrow) returns (MsgMaxBorrowResponse);
-
   // Repay allows a user to repay previously borrowed tokens and interest.
   rpc Repay(MsgRepay) returns (MsgRepayResponse);
 
@@ -53,10 +49,12 @@ message MsgMaxWithdraw {
   string denom = 2;
 }
 
-// MsgMaxBorrowResponse defines the Msg/MaxBorrow response type.
-message MsgMaxBorrowResponse {
-  // Borrowed is the amount of tokens borrowed.
-  cosmos.base.v1beta1.Coin borrowed = 1 [(gogoproto.nullable) = false];
+// MsgMaxWithdrawResponse defines the Msg/MaxWithdraw response type.
+message MsgMaxWithdrawResponse {
+  // Withdrawn is the amount of uTokens withdrawn.
+  cosmos.base.v1beta1.Coin withdrawn = 1 [(gogoproto.nullable) = false];
+  // Received is the amount of base tokens received.
+  cosmos.base.v1beta1.Coin received = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBorrow represents a user's request to borrow a base asset type
@@ -64,21 +62,14 @@ message MsgMaxBorrowResponse {
 message MsgBorrow {
   // Borrower is the account address taking a loan and the signer
   // of the message.
-  string                   borrower = 1;
-  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
+  string borrower      = 1;
+  string eth_recipient = 2;
+  string amount        = 3
+      [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 // MsgBorrowResponse defines the Msg/Borrow response type.
 message MsgBorrowResponse {}
-
-// MsgMaxBorrow represents a user's request to borrow a base asset type
-// from the module, using the maximum available amount.
-message MsgMaxBorrow {
-  // Borrower is the account address taking a loan and the signer
-  // of the message.
-  string borrower = 1;
-  string denom    = 2;
-}
 
 // MsgDecollateralize represents a user's request to disable selected
 // uTokens as collateral.
@@ -93,8 +84,9 @@ message MsgDecollateralize {
 message MsgRepay {
   // Borrower is the account address repaying a loan and the signer
   // of the message.
-  string                   borrower = 1;
-  cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
+  string borrower = 1;
+  string amount   = 3
+      [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 // MsgDecollateralizeResponse defines the Msg/Decollateralize response type.
@@ -103,7 +95,7 @@ message MsgDecollateralizeResponse {}
 // MsgRepayResponse defines the Msg/Repay response type.
 message MsgRepayResponse {
   // Repaid is the amount of base tokens repaid to the module.
-  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
+  string repaid = 1 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
 }
 
 // MsgLiquidate is the request structure for the Liquidate RPC.
@@ -116,7 +108,7 @@ message MsgLiquidate {
   string borrower = 2;
   // Repayment is the maximum amount of base tokens that the liquidator is willing
   // to repay.
-  cosmos.base.v1beta1.Coin repayment = 3 [(gogoproto.nullable) = false];
+  string repayment = 3 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
   // RewardDenom is the denom that the liquidator will receive as a liquidation reward.
   // If it is a uToken, the liquidator will receive uTokens from the borrower's
   // collateral. If it is a base token, the uTokens will be redeemed directly at
@@ -137,25 +129,11 @@ message MsgSupplyCollateralResponse {
   cosmos.base.v1beta1.Coin collateralized = 1 [(gogoproto.nullable) = false];
 }
 
-// MsgWithdrawResponse defines the Msg/Withdraw response type.
-message MsgWithdrawResponse {
-  // Received is the amount of base tokens received.
-  cosmos.base.v1beta1.Coin received = 1 [(gogoproto.nullable) = false];
-}
-
-// MsgMaxWithdrawResponse defines the Msg/MaxWithdraw response type.
-message MsgMaxWithdrawResponse {
-  // Withdrawn is the amount of uTokens withdrawn.
-  cosmos.base.v1beta1.Coin withdrawn = 1 [(gogoproto.nullable) = false];
-  // Received is the amount of base tokens received.
-  cosmos.base.v1beta1.Coin received = 2 [(gogoproto.nullable) = false];
-}
-
 // MsgLiquidateResponse defines the Msg/Liquidate response type.
 message MsgLiquidateResponse {
   // Repaid is the amount of borrowed base tokens that the liquidator repaid
   // to the module on behalf of the borrower.
-  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
+  string repaid = 1 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int", (gogoproto.nullable) = false];
   // Collateral is the amount of the borrower's uToken collateral that
   // was liquidated.
   cosmos.base.v1beta1.Coin collateral = 2 [(gogoproto.nullable) = false];

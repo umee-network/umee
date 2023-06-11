@@ -40,18 +40,6 @@ func (k Keeper) validateSupply(ctx sdk.Context, coin sdk.Coin) error {
 	return token.AssertSupplyEnabled()
 }
 
-// validateBorrow validates an sdk.Coin and ensures its Denom is a Token with EnableMsgBorrow
-func (k Keeper) validateBorrow(ctx sdk.Context, borrow sdk.Coin) error {
-	if err := validateBaseToken(borrow); err != nil {
-		return err
-	}
-	token, err := k.GetTokenSettings(ctx, borrow.Denom)
-	if err != nil {
-		return err
-	}
-	return token.AssertBorrowEnabled()
-}
-
 // validateCollateralize validates an sdk.Coin and ensures it is a uToken of an accepted
 // Token with EnableMsgSupply and CollateralWeight > 0
 func (k Keeper) validateCollateralize(ctx sdk.Context, collateral sdk.Coin) error {

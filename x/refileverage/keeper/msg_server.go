@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/sdkutil"
@@ -44,7 +45,7 @@ func (s msgServer) MaxWithdraw(
 	// but not this uToken or any of their borrows, error
 	// will be nil and the resulting value will be what
 	// can safely be withdrawn even with missing prices.
-	uToken, userSpendableUtokens, err := s.keeper.userMaxWithdraw(ctx, supplierAddr, msg.Denom)
+	uToken, _, err := s.keeper.userMaxWithdraw(ctx, supplierAddr, msg.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -53,22 +54,6 @@ func (s msgServer) MaxWithdraw(
 		zeroCoin := coin.Zero(msg.Denom)
 		return &types.MsgMaxWithdrawResponse{Withdrawn: uToken, Received: zeroCoin}, nil
 	}
-
-	// Get the total available for uToken to prevent withdraws above this limit.
-	uTokenTotalAvailable, err := s.keeper.moduleMaxWithdraw(ctx, userSpendableUtokens)
-	if err != nil {
-		return nil, err
-	}
-
-	// If zero uTokens are available from liquidity and collateral, nothing can be withdrawn.
-	if uTokenTotalAvailable.IsZero() {
-		zeroCoin := coin.Zero(msg.Denom)
-		zeroUcoin := coin.Zero(uToken.Denom)
-		return &types.MsgMaxWithdrawResponse{Withdrawn: zeroUcoin, Received: zeroCoin}, nil
-	}
-
-	// Use the minimum of the user's max withdraw based on borrows and the module's max withdraw based on liquidity
-	uToken.Amount = sdk.MinInt(uToken.Amount, uTokenTotalAvailable)
 
 	// Proceed to withdraw.
 	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
@@ -146,11 +131,6 @@ func (s msgServer) SupplyCollateral(
 		"borrower", msg.Supplier,
 		"amount", uToken.String(),
 	)
-	sdkutil.Emit(&ctx, &types.EventSupply{
-		Supplier: msg.Supplier,
-		Asset:    msg.Asset,
-		Utoken:   uToken,
-	})
 	sdkutil.Emit(&ctx, &types.EventCollaterize{
 		Borrower: msg.Supplier,
 		Utoken:   uToken,
@@ -212,7 +192,7 @@ func (s msgServer) Borrow(
 	if err != nil {
 		return nil, err
 	}
-	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Asset); err != nil {
+	if err := s.keeper.Borrow(ctx, borrowerAddr, msg.Amount); err != nil {
 		return nil, err
 	}
 
@@ -223,87 +203,23 @@ func (s msgServer) Borrow(
 		return nil, err
 	}
 
-	// Check MaxSupplyUtilization after transaction
-	if err = s.keeper.checkSupplyUtilization(ctx, msg.Asset.Denom); err != nil {
+	// probably would make sense to check collateral utilization
+
+	recipeint := common.HexToAddress(msg.EthRecipient)
+	if err = ToAaave(goCtx, msg.Amount, recipeint); err != nil {
 		return nil, err
 	}
 
 	s.keeper.Logger(ctx).Debug(
 		"assets borrowed",
 		"borrower", msg.Borrower,
-		"amount", msg.Asset.String(),
+		"amount", msg.Amount.String(),
 	)
 	sdkutil.Emit(&ctx, &types.EventBorrow{
 		Borrower: msg.Borrower,
-		Asset:    msg.Asset,
+		Amount:   msg.Amount,
 	})
 	return &types.MsgBorrowResponse{}, nil
-}
-
-func (s msgServer) MaxBorrow(
-	goCtx context.Context,
-	msg *types.MsgMaxBorrow,
-) (*types.MsgMaxBorrowResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	borrowerAddr, err := sdk.AccAddressFromBech32(msg.Borrower)
-	if err != nil {
-		return nil, err
-	}
-
-	// If a price is missing for the borrower's collateral,
-	// but not this token or any of their borrows, error
-	// will be nil and the resulting value will be what
-	// can safely be borrowed even with missing prices.
-	userMaxBorrow, err := s.keeper.userMaxBorrow(ctx, borrowerAddr, msg.Denom)
-	if err != nil {
-		return nil, err
-	}
-	if userMaxBorrow.IsZero() {
-		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
-	}
-
-	// Get the max available to borrow from the module
-	moduleMaxBorrow, err := s.keeper.moduleMaxBorrow(ctx, msg.Denom)
-	if err != nil {
-		return nil, err
-	}
-	if moduleMaxBorrow.IsZero() {
-		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
-	}
-
-	// Select the minimum between user_max_borrow and module_max_borrow
-	userMaxBorrow.Amount = sdk.MinInt(userMaxBorrow.Amount, moduleMaxBorrow)
-
-	// Proceed to borrow
-	if err := s.keeper.Borrow(ctx, borrowerAddr, userMaxBorrow); err != nil {
-		return nil, err
-	}
-
-	// Fail here if borrower ends up over their borrow limit under current or historic prices
-	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check MaxSupplyUtilization after transaction
-	if err = s.keeper.checkSupplyUtilization(ctx, userMaxBorrow.Denom); err != nil {
-		return nil, err
-	}
-
-	s.keeper.Logger(ctx).Debug(
-		"assets borrowed",
-		"borrower", msg.Borrower,
-		"amount", moduleMaxBorrow.String(),
-	)
-	sdkutil.Emit(&ctx, &types.EventBorrow{
-		Borrower: msg.Borrower,
-		Asset:    userMaxBorrow,
-	})
-	return &types.MsgMaxBorrowResponse{
-		Borrowed: userMaxBorrow,
-	}, nil
 }
 
 func (s msgServer) Repay(
@@ -315,7 +231,7 @@ func (s msgServer) Repay(
 	if err != nil {
 		return nil, err
 	}
-	repaid, err := s.keeper.Repay(ctx, borrowerAddr, msg.Asset)
+	repaid, err := s.keeper.Repay(ctx, borrowerAddr, msg.Amount)
 	if err != nil {
 		return nil, err
 	}
@@ -323,7 +239,7 @@ func (s msgServer) Repay(
 	s.keeper.Logger(ctx).Debug(
 		"borrowed assets repaid",
 		"borrower", msg.Borrower,
-		"attempted", msg.Asset.String(),
+		"attempted", msg.Amount.String(),
 		"repaid", repaid.String(),
 	)
 	sdkutil.Emit(&ctx, &types.EventRepay{

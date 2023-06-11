@@ -83,15 +83,15 @@ func (k Keeper) setStoredInt(ctx sdk.Context, key []byte, val sdkmath.Int, desc 
 
 // getAdjustedBorrow gets the adjusted amount borrowed by an address in a given denom.
 // Returned value is non-negative.
-func (k Keeper) getAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Dec {
-	key := types.KeyAdjustedBorrow(addr, denom)
+func (k Keeper) getAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress) sdk.Dec {
+	key := types.KeyAdjustedBorrow(addr)
 	return k.getStoredDec(ctx, key, sdk.ZeroDec(), "adjusted borrow")
 }
 
 // getAdjustedTotalBorrowed gets the total amount borrowed across all borrowers for a given denom.
 // Returned value is non-negative.
-func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context, denom string) sdk.Dec {
-	key := types.KeyAdjustedTotalBorrow(denom)
+func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context) sdk.Dec {
+	key := types.KeyAdjustedTotalBorrow()
 	return k.getStoredDec(ctx, key, sdk.ZeroDec(), "adjusted total borrow")
 }
 
@@ -99,28 +99,24 @@ func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context, denom string) sdk.Dec 
 // of computing it from real borrowed amount. Should only be used by genesis and setBorrow, as other
 // functions set actual borrowed amount using setBorrow. Also updates AdjustedTotalBorrowed by the
 // resulting change in borrowed amount. Value must always be non-negative.
-func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, adjustedBorrow sdk.DecCoin) error {
-	if err := types.ValidateBaseDenom(adjustedBorrow.Denom); err != nil {
-		return err
-	}
+func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, adjustedBorrow sdk.Dec) error {
 	if addr.Empty() {
 		return types.ErrEmptyAddress
 	}
 
-	// Determine the increase or decrease in total borrowed. A decrease is negative.
-	delta := adjustedBorrow.Amount.Sub(k.getAdjustedBorrow(ctx, addr, adjustedBorrow.Denom))
+	delta := adjustedBorrow.Sub(k.getAdjustedBorrow(ctx, addr))
 
 	// Update total adjusted borrow
-	key := types.KeyAdjustedTotalBorrow(adjustedBorrow.Denom)
-	newTotal := k.getAdjustedTotalBorrowed(ctx, adjustedBorrow.Denom).Add(delta)
+	key := types.KeyAdjustedTotalBorrow()
+	newTotal := k.getAdjustedTotalBorrowed(ctx).Add(delta)
 	err := k.setStoredDec(ctx, key, newTotal, sdk.ZeroDec(), "total adjusted borrow")
 	if err != nil {
 		return err
 	}
 
 	// Set new adjusted borrow
-	key = types.KeyAdjustedBorrow(addr, adjustedBorrow.Denom)
-	return k.setStoredDec(ctx, key, adjustedBorrow.Amount, sdk.ZeroDec(), "adjusted borrow")
+	key = types.KeyAdjustedBorrow(addr)
+	return k.setStoredDec(ctx, key, adjustedBorrow, sdk.ZeroDec(), "adjusted borrow")
 }
 
 // GetCollateral returns an sdk.Coin representing how much of a given denom the
@@ -155,10 +151,6 @@ func (k Keeper) GetReserves(ctx sdk.Context, denom string) sdk.Coin {
 
 // setReserves sets the reserved amount of a specified token.
 func (k Keeper) setReserves(ctx sdk.Context, reserves sdk.Coin) error {
-	if err := validateBaseToken(reserves); err != nil {
-		return err
-	}
-
 	key := types.KeyReserveAmount(reserves.Denom)
 	return k.setStoredInt(ctx, key, reserves.Amount, "reserves")
 }
@@ -222,9 +214,12 @@ func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom st
 
 // getInterestScalar gets the interest scalar for a given base token
 // denom. Returns 1.0 if no value is stored.
-func (k Keeper) getInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
-	key := types.KeyInterestScalar(denom)
-	return k.getStoredDec(ctx, key, sdk.OneDec(), "interest scalar")
+func (k Keeper) getInterestScalar(ctx sdk.Context) sdk.Dec {
+	return sdk.MustNewDecFromStr("0.01")
+
+	// TODO: we can make it a param
+	// key := types.KeyInterestScalar(denom)
+	// return k.getStoredDec(ctx, key, sdk.OneDec(), "interest scalar")
 }
 
 // setInterestScalar sets the interest scalar for a given base token denom.

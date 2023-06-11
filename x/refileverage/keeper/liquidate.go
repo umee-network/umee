@@ -14,52 +14,39 @@ func (k Keeper) getLiquidationAmounts(
 	ctx sdk.Context,
 	liquidatorAddr,
 	targetAddr sdk.AccAddress,
-	requestedRepay sdk.Coin,
+	repay sdk.Int,
 	rewardDenom string,
 	directLiquidation bool,
-) (tokenRepay sdk.Coin, collateralLiquidate sdk.Coin, tokenReward sdk.Coin, err error) {
-	repayDenom := requestedRepay.Denom
-	collateralDenom := types.ToUTokenDenom(rewardDenom)
-
+) (tokenRepay sdk.Int, collateralLiquidate sdk.Coin, tokenReward sdk.Coin, err error) {
 	// get relevant liquidator, borrower, and module balances
 	borrowerCollateral := k.GetBorrowerCollateral(ctx, targetAddr)
-	totalBorrowed := k.GetBorrowerBorrows(ctx, targetAddr)
-	availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
-	repayDenomBorrowed := sdk.NewCoin(repayDenom, totalBorrowed.AmountOf(repayDenom))
+	borrowedAmount := k.GetBorrowed(ctx, targetAddr)
+	borrowedVal := GhoIntToDec(borrowedAmount)
 
-	// calculate borrower health in USD values, using spot prices only (no historic)
-	// borrowed value will skip borrowed tokens with unknown oracle prices, treating them as zero value
-	borrowedValue, err := k.VisibleTokenValue(ctx, totalBorrowed, types.PriceModeSpot)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
 	collateralValue, err := k.CalculateCollateralValue(ctx, borrowerCollateral)
 	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		return sdk.Int{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 	liquidationThreshold, err := k.CalculateLiquidationThreshold(ctx, borrowerCollateral)
 	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		return sdk.Int{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	if borrowedValue.LT(liquidationThreshold) {
+	if borrowedVal.LT(liquidationThreshold) {
 		// borrower is healthy and cannot be liquidated
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible
-	}
-	repayDenomBorrowedValue, err := k.TokenValue(ctx, repayDenomBorrowed, types.PriceModeSpot)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		return sdk.Int{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible
 	}
 
 	// get liquidation incentive
 	ts, err := k.GetTokenSettings(ctx, rewardDenom)
 	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		return sdk.Int{}, sdk.Coin{}, sdk.Coin{}, err
 	}
+	repayVal := GhoIntToDec(repay)
 
 	// get dynamic close factor
 	params := k.GetParams(ctx)
 	closeFactor := ComputeCloseFactor(
-		borrowedValue,
+		borrowedVal,
 		collateralValue,
 		liquidationThreshold,
 		params.SmallLiquidationSize,
@@ -67,18 +54,17 @@ func (k Keeper) getLiquidationAmounts(
 		params.CompleteLiquidationThreshold,
 	)
 	// maximum USD value that can be repaid
-	maxRepayValue := borrowedValue.Mul(closeFactor)
+	maxRepayValue := borrowedVal.Mul(closeFactor)
 	// determine fraction of borrowed repayDenom which can be repaid after close factor
-	maxRepayAfterCloseFactor := totalBorrowed.AmountOf(repayDenom)
-	if maxRepayValue.LT(repayDenomBorrowedValue) {
-		maxRepayRatio := maxRepayValue.Quo(repayDenomBorrowedValue)
-		maxRepayAfterCloseFactor = maxRepayRatio.MulInt(totalBorrowed.AmountOf(repayDenom)).RoundInt()
+	maxRepayAfterCloseFactor := borrowedAmount
+	if maxRepayValue.LT(repayVal) {
+		maxRepayRatio := maxRepayValue.Quo(repayVal)
+		maxRepayAfterCloseFactor = maxRepayRatio.MulInt(borrowedAmount).RoundInt()
 	}
 
-	// get precise (less rounding at high exponent) price ratio
-	priceRatio, err := k.PriceRatio(ctx, repayDenom, rewardDenom, types.PriceModeSpot)
+	rewardPrice, _, err := k.TokenPrice(ctx, rewardDenom, types.PriceModeSpot)
 	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
+		return sdk.Int{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
 	// get collateral uToken exchange rate
@@ -92,23 +78,24 @@ func (k Keeper) getLiquidationAmounts(
 		liqudationIncentive = liqudationIncentive.Mul(sdk.OneDec().Sub(params.DirectLiquidationFee))
 	}
 
-	// max repayment amount is limited by a number of factors
-	maxRepay := requestedRepay.Amount                                   // maximum allowed by liquidator
-	maxRepay = sdk.MinInt(maxRepay, availableRepay)                     // liquidator account balance
-	maxRepay = sdk.MinInt(maxRepay, totalBorrowed.AmountOf(repayDenom)) // borrower position
-	maxRepay = sdk.MinInt(maxRepay, maxRepayAfterCloseFactor)           // close factor
+	maxRepay := repay // maximum allowed by liquidator
+	// TODO reconcillate repay bank
+	// availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
 
-	// compute final liquidation amounts
+	// TODO: maxRepay = sdk.MinInt(maxRepay, availableRepay)           // liquidator account balance
+	maxRepay = sdk.MinInt(maxRepay, borrowedAmount)           // borrower position
+	maxRepay = sdk.MinInt(maxRepay, maxRepayAfterCloseFactor) // close factor
+
+	collateralDenom := types.ToUTokenDenom(rewardDenom)
 	repay, burn, reward := ComputeLiquidation(
 		maxRepay,
 		borrowerCollateral.AmountOf(collateralDenom),
-		k.AvailableLiquidity(ctx, rewardDenom),
-		priceRatio,
+		rewardPrice,
 		exchangeRate,
 		liqudationIncentive,
 	)
 
-	return sdk.NewCoin(repayDenom, repay), sdk.NewCoin(collateralDenom, burn), sdk.NewCoin(rewardDenom, reward), nil
+	return repay, sdk.NewCoin(collateralDenom, burn), sdk.NewCoin(rewardDenom, reward), nil
 }
 
 // ComputeLiquidation takes the conditions preceding a liquidation and outputs the amounts
@@ -116,21 +103,19 @@ func (k Keeper) getLiquidationAmounts(
 // as a result of the transaction, after accounting for limiting factors with as little
 // rounding as possible. Inputs are as follows:
 // - availableRepay: The lowest (in repay denom) of either liquidator balance, max repayment, or borrowed amount.
-// - availableCollateral: The amount of the reward uToken denom which borrower has as collateral
-// - availableReward: The amount of unreserved reward tokens in the module balance
+// - availableRewardUtokens: The amount of the reward uToken denom which borrower has as collateral
 // - priceRatio: The ratio of repayPrice / rewardPrice, which is used when computing rewards
 // - uTokenExchangeRate: The uToken exchange rate from collateral uToken denom to reward base denom
 // - liquidationIncentive: The liquidation incentive of the token reward denomination
 func ComputeLiquidation(
 	availableRepay,
-	availableCollateral,
-	availableReward sdkmath.Int,
-	priceRatio,
+	availableRewardUtokens sdkmath.Int,
+	rewardPrice,
 	uTokenExchangeRate,
 	liquidationIncentive sdk.Dec,
 ) (tokenRepay sdkmath.Int, collateralBurn sdkmath.Int, tokenReward sdkmath.Int) {
 	// Prevent division by zero
-	if uTokenExchangeRate.IsZero() || priceRatio.IsZero() {
+	if uTokenExchangeRate.IsZero() || rewardPrice.IsZero() {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt()
 	}
 
@@ -138,7 +123,7 @@ func ComputeLiquidation(
 	maxRepay := toDec(availableRepay)
 	// Determine the base maxReward amount that would result from maximum repayment
 
-	maxReward := maxRepay.Mul(priceRatio).Mul(sdk.OneDec().Add(liquidationIncentive))
+	maxReward := maxRepay.Quo(rewardPrice).Mul(sdk.OneDec().Add(liquidationIncentive))
 	// Determine the maxCollateral burn amount that corresponds to base reward amount
 	maxCollateral := maxReward.Quo(uTokenExchangeRate)
 
@@ -154,41 +139,16 @@ func ComputeLiquidation(
 
 	// Collateral burned cannot exceed borrower's collateral
 	ratio = sdk.MinDec(ratio,
-		toDec(availableCollateral).Quo(maxCollateral),
-	)
-	// Base token reward cannot exceed available unreserved module balance
-	ratio = sdk.MinDec(ratio,
-		toDec(availableReward).Quo(maxReward),
+		toDec(availableRewardUtokens).Quo(maxCollateral),
 	)
 	// Catch edge cases
 	ratio = sdk.MaxDec(ratio, sdk.ZeroDec())
 
-	// Reduce repay and collateral limits by the most severe limiting factor encountered
 	maxRepay = maxRepay.Mul(ratio)
 	maxCollateral = maxCollateral.Mul(ratio)
 
-	// No rounding has occurred yet, but both values are now within the
-	// limits defined by available balances and module parameters.
-
-	// First, the amount of borrowed token the liquidator must repay is rounded up.
-	// This is a slight disadvantage to the liquidator in favor of the borrower and
-	// the module. It also ensures borrow dust is always eliminated when encountered.
 	tokenRepay = maxRepay.Ceil().RoundInt()
-
-	// Next, the amount of collateral uToken the borrower will lose is rounded down.
-	// This is favors the borrower over the liquidator, and also protects the module.
 	collateralBurn = maxCollateral.TruncateInt()
-
-	// One danger to rounding collateral burn down is that of collateral dust. This
-	// can be considered in two scenarios:
-	// 1) If collateral was the limiting factor above, then it will have already been
-	// an integer amount and truncating is a no-op.
-	// 2) If collateral was not the limiting factor, then there will be a non-dust
-	// quantity left over anyway.
-
-	// Finally, the base token reward amount is derived directly from the collateral
-	// to burn. This will round down identically to MsgWithdraw, favoring the module
-	// over the liquidator.
 	tokenReward = toDec(collateralBurn).Mul(uTokenExchangeRate).TruncateInt()
 
 	return tokenRepay, collateralBurn, tokenReward

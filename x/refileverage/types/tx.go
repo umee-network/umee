@@ -1,7 +1,10 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ethereum/go-ethereum/common"
 
 	"github.com/umee-network/umee/v5/util/checkers"
 )
@@ -78,10 +81,10 @@ func (msg *MsgDecollateralize) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
+func NewMsgBorrow(borrower sdk.AccAddress, amount sdk.Int) *MsgBorrow {
 	return &MsgBorrow{
 		Borrower: borrower.String(),
-		Asset:    asset,
+		Amount:   amount,
 	}
 }
 
@@ -89,7 +92,10 @@ func (msg MsgBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgBorrow) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
+	if !common.IsHexAddress(msg.EthRecipient) {
+		return fmt.Errorf("EthRecipient is not a valid Eth address")
+	}
+	return validateSenderAndAmount(msg.Borrower, msg.Amount)
 }
 
 func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
@@ -102,34 +108,10 @@ func (msg *MsgBorrow) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgMaxBorrow(borrower sdk.AccAddress, denom string) *MsgMaxBorrow {
-	return &MsgMaxBorrow{
-		Borrower: borrower.String(),
-		Denom:    denom,
-	}
-}
-
-func (msg MsgMaxBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgMaxBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
-
-func (msg *MsgMaxBorrow) ValidateBasic() error {
-	return validateSenderAndDenom(msg.Borrower, msg.Denom)
-}
-
-func (msg *MsgMaxBorrow) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Borrower)
-}
-
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgMaxBorrow) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
-}
-
-func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
+func NewMsgRepay(borrower sdk.AccAddress, amount sdk.Int) *MsgRepay {
 	return &MsgRepay{
 		Borrower: borrower.String(),
-		Asset:    asset,
+		Amount:   amount,
 	}
 }
 
@@ -137,7 +119,7 @@ func (msg MsgRepay) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgRepay) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgRepay) ValidateBasic() error {
-	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
+	return validateSenderAndAmount(msg.Borrower, msg.Amount)
 }
 
 func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
@@ -150,7 +132,7 @@ func (msg *MsgRepay) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, rewardDenom string) *MsgLiquidate {
+func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Int, rewardDenom string) *MsgLiquidate {
 	return &MsgLiquidate{
 		Liquidator:  liquidator.String(),
 		Borrower:    borrower.String(),
@@ -163,7 +145,7 @@ func (msg MsgLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
-	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
+	if err := validateSenderAndAmount(msg.Borrower, msg.Repayment); err != nil {
 		return err
 	}
 	if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
@@ -181,6 +163,17 @@ func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
 func (msg *MsgLiquidate) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
+}
+
+func validateSenderAndAmount(sender string, amount sdk.Int) error {
+	_, err := sdk.AccAddressFromBech32(sender)
+	if err != nil {
+		return err
+	}
+	if !amount.IsPositive() {
+		return fmt.Errorf("amount must be a positive decimal number")
+	}
+	return nil
 }
 
 func validateSenderAndAsset(sender string, asset *sdk.Coin) error {

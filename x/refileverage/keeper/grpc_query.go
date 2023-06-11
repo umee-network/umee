@@ -80,42 +80,19 @@ func (q Querier) MarketSummary(
 	}
 
 	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
-	supplyAPY := q.Keeper.DeriveSupplyAPY(ctx, req.Denom)
 	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
 
 	supplied, _ := q.Keeper.GetTotalSupply(ctx, req.Denom)
 	balance := q.Keeper.ModuleBalance(ctx, req.Denom).Amount
 	reserved := q.Keeper.GetReserves(ctx, req.Denom).Amount
-	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
-	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
+	borrowed := q.Keeper.GetTotalBorrowed(ctx)
 
 	uDenom := types.ToUTokenDenom(req.Denom)
 	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
 	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
 
-	// maxBorrow is based on MaxSupplyUtilization
-	maxBorrow := token.MaxSupplyUtilization.MulInt(supplied.Amount).TruncateInt()
-
-	// minimum liquidity respects both MaxSupplyUtilization and MinCollateralLiquidity
-	minLiquidityFromSupply := supplied.Amount.Sub(maxBorrow)
-	minLiquidityFromCollateral := token.MinCollateralLiquidity.Mul(rate.MulInt(uCollateral.Amount)).TruncateInt()
-	minLiquidity := sdk.MinInt(minLiquidityFromCollateral, minLiquidityFromSupply)
-
-	// availableBorrow respects both maxBorrow and minLiquidity
-	availableBorrow := liquidity.Sub(minLiquidity)
-	availableBorrow = sdk.MinInt(availableBorrow, maxBorrow.Sub(borrowed.Amount))
-	availableBorrow = sdk.MaxInt(availableBorrow, sdk.ZeroInt())
-
-	// availableWithdraw is based on minLiquidity
-	availableWithdraw := liquidity.Sub(minLiquidity)
-	availableWithdraw = sdk.MaxInt(availableWithdraw, sdk.ZeroInt())
-
 	// availableCollateralize respects both MaxCollateralShare and MinCollateralLiquidity
 	maxCollateral, _ := q.Keeper.maxCollateralFromShare(ctx, uDenom)
-	if token.MinCollateralLiquidity.IsPositive() {
-		maxCollateralFromLiquidity := toDec(liquidity).Quo(token.MinCollateralLiquidity).TruncateInt()
-		maxCollateral = sdk.MinInt(maxCollateral, maxCollateralFromLiquidity)
-	}
 	availableCollateralize := maxCollateral.Sub(uCollateral.Amount)
 	availableCollateralize = sdk.MaxInt(availableCollateralize, sdk.ZeroInt())
 
@@ -123,19 +100,14 @@ func (q Querier) MarketSummary(
 		SymbolDenom:            token.SymbolDenom,
 		Exponent:               token.Exponent,
 		UTokenExchangeRate:     rate,
-		Supply_APY:             supplyAPY,
 		Borrow_APY:             borrowAPY,
 		Supplied:               supplied.Amount,
 		Reserved:               reserved,
 		Collateral:             uCollateral.Amount,
-		Borrowed:               borrowed.Amount,
+		Borrowed:               borrowed,
 		Liquidity:              balance.Sub(reserved),
-		MaximumBorrow:          maxBorrow,
 		MaximumCollateral:      maxCollateral,
-		MinimumLiquidity:       minLiquidity,
 		UTokenSupply:           uSupply.Amount,
-		AvailableBorrow:        availableBorrow,
-		AvailableWithdraw:      availableWithdraw,
 		AvailableCollateralize: availableCollateralize,
 	}
 
@@ -178,13 +150,11 @@ func (q Querier) AccountBalances(
 	if err != nil {
 		return nil, err
 	}
-	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
-	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
 	return &types.QueryAccountBalancesResponse{
 		Supplied:   supplied,
-		Collateral: collateral,
-		Borrowed:   borrowed,
+		Collateral: q.Keeper.GetBorrowerCollateral(ctx, addr),
+		Borrowed:   q.Keeper.GetBorrowerBorrows(ctx, addr),
 	}, nil
 }
 
@@ -206,26 +176,12 @@ func (q Querier) AccountSummary(
 		return nil, err
 	}
 
-	supplied, err := q.Keeper.GetAllSupplied(ctx, addr)
-	if err != nil {
-		return nil, err
-	}
+	// supplied, err := q.Keeper.GetAllSupplied(ctx, addr)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
-
-	// supplied value always uses spot prices, and skips supplied assets that are missing prices
-	suppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeSpot)
-	if err != nil {
-		return nil, err
-	}
-
-	// borrowed value uses spot prices here, but refileverage logic instead uses
-	// the higher of spot or historic prices for each borrowed token when comparing it
-	// to borrow limit. This line also skips borrowed assets that are missing prices.
-	borrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
-	if err != nil {
-		return nil, err
-	}
 
 	// collateral value always uses spot prices, and this line skips assets that are missing prices
 	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral)
@@ -242,9 +198,8 @@ func (q Querier) AccountSummary(
 	}
 
 	resp := &types.QueryAccountSummaryResponse{
-		SuppliedValue:   suppliedValue,
 		CollateralValue: collateralValue,
-		BorrowedValue:   borrowedValue,
+		BorrowedValue:   borrowed,
 		BorrowLimit:     borrowLimit,
 	}
 

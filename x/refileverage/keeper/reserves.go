@@ -47,9 +47,10 @@ func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error
 
 	// mark bad debt if collateral is completely exhausted
 	if !hasCollateral {
-		for _, coin := range k.GetBorrowerBorrows(ctx, borrowerAddr) {
+		b := k.GetBorrowerBorrows(ctx, borrowerAddr)
+		if !b.IsZero() {
 			// set a bad debt flag for each borrowed denom
-			if err := k.setBadDebtAddress(ctx, borrowerAddr, coin.Denom, true); err != nil {
+			if err := k.setBadDebtAddress(ctx, borrowerAddr, types.Gho, true); err != nil {
 				return err
 			}
 		}
@@ -62,39 +63,37 @@ func (k Keeper) checkBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) error
 // It returns a boolean representing whether full repayment was achieved.
 // This function assumes the borrower has already been verified to have
 // no collateral remaining.
-func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) (bool, error) {
-	borrowed := k.GetBorrow(ctx, borrowerAddr, denom)
+func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress) (bool, error) {
+	borrowed := k.GetBorrow(ctx, borrowerAddr)
 	borrower := borrowerAddr.String()
-	reserved := k.GetReserves(ctx, denom).Amount
+	reserved := k.GetReserves(ctx, types.Gho).Amount
 
-	amountToRepay := sdk.MinInt(borrowed.Amount, reserved)
-	amountToRepay = sdk.MinInt(amountToRepay, k.ModuleBalance(ctx, denom).Amount)
+	amountToRepay := sdk.MinInt(borrowed, reserved)
+	amountToRepay = sdk.MinInt(amountToRepay, k.ModuleBalance(ctx, types.Gho).Amount)
 
-	newBorrowed := borrowed.SubAmount(amountToRepay)
-	newReserved := sdk.NewCoin(denom, reserved.Sub(amountToRepay))
+	newBorrowed := borrowed.Sub(amountToRepay)
+	newReserved := reserved.Sub(amountToRepay)
 
 	if amountToRepay.IsPositive() {
 		if err := k.setBorrow(ctx, borrowerAddr, newBorrowed); err != nil {
 			return false, err
 		}
 
-		if err := k.setReserves(ctx, newReserved); err != nil {
+		if err := k.setReserves(ctx, sdk.NewCoin(types.Gho, newReserved)); err != nil {
 			return false, err
 		}
 
-		// This action is not caused by a message so we need to make an event here
-		asset := sdk.NewCoin(denom, amountToRepay)
 		k.Logger(ctx).Debug(
 			"bad debt repaid",
 			"borrower", borrower,
-			"asset", asset,
+			"amount", amountToRepay,
 		)
 		sdkutil.Emit(&ctx, &types.EventRepayBadDebt{
-			Borrower: borrower, Asset: asset,
+			Borrower: borrower, Repaid: amountToRepay,
 		})
 	}
 
-	newModuleBalance := k.ModuleBalance(ctx, denom)
+	newModuleBalance := k.ModuleBalance(ctx, types.Gho)
 
 	// Reserve exhaustion logs track any bad debts that were not repaid
 	if newBorrowed.IsPositive() {

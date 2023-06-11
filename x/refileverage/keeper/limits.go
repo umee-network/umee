@@ -12,36 +12,18 @@ import (
 // the collateral whose prices are known.
 func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
-	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
-	availableUTokens, err := k.ExchangeToken(ctx, availableTokens)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
-	}
-	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
-	walletUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
+	borrowed := k.GetBorrowerBorrows(ctx, addr)
+	walletUtokenAmount := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
+	walletUCoins := sdk.NewCoin(uDenom, walletUtokenAmount)
 	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
 	thisCollateral := sdk.NewCoin(uDenom, totalCollateral.AmountOf(uDenom))
 	otherCollateral := totalCollateral.Sub(thisCollateral)
 	unbondedCollateral := k.unbondedCollateral(ctx, addr, uDenom)
 
-	// calculate borrowed value for the account, using the higher of spot or historic prices for each token
-	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
-	if nonOracleError(err) {
-		// for errors besides a missing price, the whole transaction fails
-		return sdk.Coin{}, sdk.Coin{}, err
-	}
-	if err != nil {
-		// for missing prices on borrowed assets, we can't withdraw any collateral
-		// but can withdraw non-collateral uTokens
-		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
-		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
-	}
-
 	// if no non-blacklisted tokens are borrowed, withdraw the maximum available amount
-	if borrowedValue.IsZero() {
-		withdrawAmount := walletUtokens.Add(unbondedCollateral.Amount)
-		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
-		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
+	if borrowed.IsZero() {
+		withdrawAmount := walletUtokenAmount.Add(unbondedCollateral.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), walletUCoins, nil
 	}
 
 	// compute the borrower's borrow limit using all their collateral
@@ -51,10 +33,9 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
 	// if their other collateral fully covers all borrows, withdraw the maximum available amount
-	if borrowedValue.LT(otherBorrowLimit) {
-		withdrawAmount := walletUtokens.Add(unbondedCollateral.Amount)
-		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
-		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
+	if borrowed.LT(otherBorrowLimit) {
+		withdrawAmount := walletUtokenAmount.Add(unbondedCollateral.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), walletUCoins, nil
 	}
 
 	// for nonzero borrows, calculations are based on unused borrow limit
@@ -65,13 +46,11 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
 	// borrowers above their borrow limit cannot withdraw collateral, but can withdraw wallet uTokens
-	if borrowLimit.LTE(borrowedValue) {
-		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
-		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
+	if borrowLimit.LTE(borrowed) {
+		return walletUCoins, walletUCoins, nil
 	}
 
-	// determine the USD amount of borrow limit that is currently unused
-	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
+	unusedBorrowLimit := borrowLimit.Sub(borrowed)
 
 	// calculate the contribution to borrow limit made by only the type of collateral being withdrawn
 	// this WILL error on a missing price, since the cases where we know other collateral is sufficient
@@ -91,12 +70,9 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	}
 
 	// add wallet uTokens to the unused amount from collateral
-	withdrawAmount := unusedCollateral.Add(walletUtokens)
+	withdrawAmount := unusedCollateral.Add(walletUtokenAmount)
 
-	// reduce amount to withdraw if it exceeds available liquidity
-	withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
-
-	return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
+	return sdk.NewCoin(uDenom, withdrawAmount), walletUCoins, nil
 }
 
 // userMaxBorrow calculates the maximum amount of a given token an account can currently borrow.
@@ -106,21 +82,9 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 	if types.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
 	}
-	availableTokens := k.AvailableLiquidity(ctx, denom)
 
-	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
+	borrowed := k.GetBorrowerBorrows(ctx, addr)
 	totalCollateral := k.GetBorrowerCollateral(ctx, addr)
-
-	// calculate borrowed value for the account, using the higher of spot or historic prices
-	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
-	if nonOracleError(err) {
-		// non-oracle errors fail the transaction (or query)
-		return sdk.Coin{}, err
-	}
-	if err != nil {
-		// oracle errors cause max borrow to be zero
-		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
-	}
 
 	// calculate borrow limit for the account, using only collateral whose price is known
 	borrowLimit, err := k.VisibleBorrowLimit(ctx, totalCollateral)
@@ -128,12 +92,12 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 		return sdk.Coin{}, err
 	}
 	// borrowers above their borrow limit cannot borrow
-	if borrowLimit.LTE(borrowedValue) {
+	if borrowLimit.LTE(borrowed) {
 		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
 
 	// determine the USD amount of borrow limit that is currently unused
-	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
+	unusedBorrowLimit := borrowLimit.Sub(borrowed)
 
 	// determine max borrow, using the higher of spot or historic prices for the token to borrow
 	maxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, types.PriceModeHigh)
@@ -145,9 +109,6 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 		// oracle errors cause max borrow to be zero
 		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
-
-	// also cap borrow amount at available liquidity
-	maxBorrow.Amount = sdk.MinInt(maxBorrow.Amount, availableTokens)
 
 	return maxBorrow, nil
 }
@@ -195,35 +156,4 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 
 	// return the computed maximum or the current uToken supply, whichever is smaller
 	return sdk.MinInt(k.GetUTokenSupply(ctx, denom).Amount, maxUTokens.Amount), nil
-}
-
-// ModuleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
-// respecting the MinCollateralLiquidity set for given Token.
-func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
-	// Get module liquidity for the Token
-	liquidity := k.AvailableLiquidity(ctx, denom)
-
-	// Get module collateral for the associated uToken
-	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
-	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
-	if err != nil {
-		return sdkmath.Int{}, err
-	}
-
-	// Get min_collateral_liquidity for the denom
-	token, err := k.GetTokenSettings(ctx, denom)
-	if err != nil {
-		return sdkmath.Int{}, err
-	}
-	minCollateralLiquidity := token.MinCollateralLiquidity
-
-	// The formula to calculate the module_available_liquidity is as follows:
-	//
-	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
-	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	moduleAvailableLiquidity := sdk.NewDecFromInt(liquidity).Sub(
-		minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)),
-	)
-
-	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
 }

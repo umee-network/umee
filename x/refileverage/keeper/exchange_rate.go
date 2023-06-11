@@ -70,7 +70,7 @@ func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
 	// Get relevant quantities
 	moduleBalance := toDec(k.ModuleBalance(ctx, denom).Amount)
 	reserveAmount := toDec(k.GetReserves(ctx, denom).Amount)
-	totalBorrowed := k.getAdjustedTotalBorrowed(ctx, denom).Mul(k.getInterestScalar(ctx, denom))
+	totalBorrowed := k.getAdjustedTotalBorrowed(ctx).Mul(k.getInterestScalar(ctx))
 	uTokenSupply := k.GetUTokenSupply(ctx, types.ToUTokenDenom(denom)).Amount
 
 	// Derive effective token supply
