@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD041 -->
 <!-- markdownlint-disable MD013 -->
 
-# ReFiUmee
+# ReFi Leverage
 
 This is a fork of [Umee](https://github.com/umee-network/umee/) blockchain (a Cosmos native Money Market) for the EthPrague hackathon.
 
