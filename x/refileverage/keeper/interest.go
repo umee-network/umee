@@ -71,10 +71,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		scalar := k.getInterestScalar(ctx)
 		// calculate e^(APY*time)
 		exponential := ApproxExponential(k.DeriveBorrowAPY(ctx, token.BaseDenom).Mul(yearsElapsed))
+		// TODO
 		// multiply interest scalar by e^(APY*time)
-		if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(exponential)); err != nil {
-			return err
-		}
+		// if err := k.setInterestScalar(ctx, token.BaseDenom, scalar.Mul(exponential)); err != nil {
+		// 	return err
+		// }
 
 		// apply (pre-accural) interest scalar to borrows to get total borrowed before interest accrued
 		prevTotalBorrowed := k.getAdjustedTotalBorrowed(ctx).Mul(scalar)
