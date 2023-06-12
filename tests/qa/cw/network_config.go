@@ -7,11 +7,11 @@ import (
 )
 
 type ChainConfig struct {
-	RPC       string   `yaml:"rpc"`
-	GRPC      string   `yaml:"grpc"`
-	API       string   `yaml:"api"`
-	ChainID   string   `yaml:"chain_id"`
-	Mnemonics []string `yaml:"mnemonics"`
+	RPC       string            `yaml:"rpc"`
+	GRPC      string            `yaml:"grpc"`
+	API       string            `yaml:"api"`
+	ChainID   string            `yaml:"chain_id"`
+	Mnemonics map[string]string `yaml:"mnemonics"`
 }
 
 func ReadConfig(configFile string) (*ChainConfig, error) {
