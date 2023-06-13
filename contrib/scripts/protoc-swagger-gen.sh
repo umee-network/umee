@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-
 set -eo pipefail
 
-if ! [ -x "$(command -v swagger-combine )" ]; then
+if ! [ -x "$(command -v swagger-combine)" ]; then
   echo 'Error: swagger-combine is not installed. Install with $~ npm i -g swagger-combine' >&2
   exit 1
 fi
@@ -19,6 +18,7 @@ for dir in $proto_dirs; do
 done
 
 cd ..
+
 # combine swagger files
 # uses nodejs package `swagger-combine`.
 # all the individual swagger files need to be configured in `config.json` for merging
