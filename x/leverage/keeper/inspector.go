@@ -132,7 +132,7 @@ func symbolDecCoins(
 		}
 		exponentMultiplier := ten.Power(uint64(exponents[c.Denom]))
 		denom := symbols[c.Denom]
-		amount := exchangeRate.MulInt(c.Amount).Mul(exponentMultiplier)
+		amount := exchangeRate.MulInt(c.Amount).Quo(exponentMultiplier)
 		symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(denom, amount))
 	}
 
