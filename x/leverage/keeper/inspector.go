@@ -141,20 +141,17 @@ func symbolDecCoins(
 }
 
 // neat truncates an sdk.Dec to a common-sense precision based on its size and converts it to float.
-// This makes a big difference in readability when using the CLI.
+// This greatly improves readability when viewing balances.
 func neat(num sdk.Dec) float64 {
 	n := num.MustFloat64()
-	precision := 3 // Round to thousandths if 0.001 <= n <= 10
-	if n > 10 {
-		precision = 1 // above $10: Round to dime
-	}
-	if n > 1000 {
-		precision = 0 // above $1000: Round to dollar
+	precision := 2 // Round to cents if 0.01 <= n <= 100
+	if n > 100 {
+		precision = 0 // above $100: Round to dollar
 	}
 	if n > 1_000_000 {
 		precision = -3 // above $1000000: Round to thousand
 	}
-	if n < 0.001 {
+	if n < 0.01 {
 		precision = 6 // round to millionths
 	}
 	if n < 0.000001 {
