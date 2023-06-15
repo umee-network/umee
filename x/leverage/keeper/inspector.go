@@ -66,12 +66,12 @@ func (q Querier) Inspect(
 			filters = append(filters, withMinCollateralValue(sortMin, specific))
 		}
 	case "danger":
-		sorting = moreDanger()
+		sorting = moreDanger
 		if sortMin.IsPositive() {
 			filters = append(filters, withMinDanger(sortMin))
 		}
 	case "ltv":
-		sorting = moreLTV()
+		sorting = moreLTV
 		if sortMin.IsPositive() {
 			filters = append(filters, withMinLTV(sortMin))
 		}
