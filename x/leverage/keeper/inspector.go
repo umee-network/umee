@@ -280,7 +280,8 @@ func (k Keeper) unsortedBorrowers(ctx sdk.Context, symbol string) []*types.Borro
 	return borrowers
 }
 
-// riskData
+// riskData returns a summary of supplied, collateralized, and borrowed tokens for all accounts
+// on-chain that have nonzero borrows. Tokens are presented in symbol denom, not base or ibc denom, for clarity.
 func (k Keeper) riskData(ctx sdk.Context) []types.AccountDecBalances {
 	tokens := k.GetAllRegisteredTokens(ctx)
 	symbols := map[string]string{}
