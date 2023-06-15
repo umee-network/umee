@@ -120,16 +120,15 @@ func symbolDecCoins(
 	symbolCoins := sdk.NewDecCoins()
 
 	for _, c := range coins {
-		if _, ok := symbols[c.Denom]; !ok {
-			// unregistered tokens cannot be converted, but can be returned as base denom
-			symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
-			continue
-		}
-
 		exchangeRate := sdk.OneDec()
 		if types.HasUTokenPrefix(c.Denom) {
 			c.Denom = types.ToTokenDenom(c.Denom)
 			exchangeRate = exchangeRates[c.Denom]
+		}
+		if _, ok := symbols[c.Denom]; !ok {
+			// unregistered tokens cannot be converted, but can be returned as base denom
+			symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
+			continue
 		}
 		exponentMultiplier := ten.Power(uint64(exponents[c.Denom]))
 		denom := symbols[c.Denom]
