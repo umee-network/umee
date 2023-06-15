@@ -144,17 +144,18 @@ func symbolDecCoins(
 // This greatly improves readability when viewing balances.
 func neat(num sdk.Dec) float64 {
 	n := num.MustFloat64()
+	a := math.Abs(n)
 	precision := 2 // Round to cents if 0.01 <= n <= 100
-	if n > 100 {
+	if a > 100 {
 		precision = 0 // above $100: Round to dollar
 	}
-	if n > 1_000_000 {
+	if a > 1_000_000 {
 		precision = -3 // above $1000000: Round to thousand
 	}
-	if n < 0.01 {
+	if a < 0.01 {
 		precision = 6 // round to millionths
 	}
-	if n < 0.000001 {
+	if a < 0.000001 {
 		return n // tiny: maximum precision
 	}
 	// Truncate the float at a certain precision (can be negative)
