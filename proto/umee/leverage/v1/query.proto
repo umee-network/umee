@@ -7,8 +7,6 @@ import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-import "umee/leverage/v1/inspector.proto";
-
 option go_package = "github.com/umee-network/umee/v5/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
@@ -72,20 +70,6 @@ service Query {
   rpc Inspect(QueryInspect)
       returns (QueryInspectResponse) {
     option (google.api.http).get = "/umee/leverage/v1/inspect";
-  }
-
-  // InspectNeat is the inspector query, with a different response structure
-  // optimized for human readability on the CLI.
-  rpc InspectNeat(QueryInspectNeat)
-      returns (QueryInspectNeatResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/inspect_neat";
-  }
-
-  // RiskData returns filtered and sorted account balances by symbol
-  // denom for all qualifying accounts.
-  rpc RiskData(QueryRiskData)
-      returns (QueryRiskDataResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/risk_data";
   }
 }
 
@@ -340,5 +324,58 @@ message QueryMaxBorrowResponse {
   repeated cosmos.base.v1beta1.Coin tokens = 1 [
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
+  ];
+}
+
+// QueryInspect defines the request structure for the Inspect gRPC service handler.
+message QueryInspect {
+  // Symbol selects a symbol denom to sort accounts by borrowed value. Use "all" to ignore.
+  string symbol = 1;
+  // Borrowed is the minimum USD value an account must have borrowed to show. Use 0 to ignore.
+  double borrowed = 2;
+  // Collateral is the minimum USD value of collateral an account must have to show. Use 0 to ignore.
+  double collateral = 3;
+  // Danger is the minimum progress toward liquidation an account must have to show. Use 0 to ignore.
+  // Measured as the ratio (borrowed value / liquidation threshold), where > 1 is liquidation-eligible.
+  double danger = 4;
+  // LTV is the minimum ratio (borrowed value / collateral value) an account must have to show. Use 0 to ignore.
+  double ltv = 5;
+}
+
+// QueryInspectResponse defines the response structure for the Inspect gRPC service handler.
+message QueryInspectResponse {
+  repeated InspectAccount borrowers = 1 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// InspectAccount contains risk and balance info for a single account for the inspector query.
+message InspectAccount {
+  string      address  = 1;
+  RiskInfo    analysis = 2;
+  DecBalances position = 3;
+}
+
+// RiskInfo defines a borrower's account health without requiring sdk.Dec formatting.
+message RiskInfo {
+  // Borrowed is account's borrowed value in USD.
+  double Borrowed = 1;
+  // Liquidation is account's liquidation threshold in USD.
+  double Liquidation = 2;
+  // Value is account's collateral value in USD.
+  double Value = 3;
+}
+
+// DecBalances contains an account's position denoted in symbol denom tokens.
+message DecBalances {
+  // Collateral contains all uTokens the account has collateralized. It has been converted from uTokens to tokens.
+  repeated cosmos.base.v1beta1.DecCoin collateral = 1 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  ];
+  // Borrowed contains all tokens the account has borrowed, including interest owed.
+  repeated cosmos.base.v1beta1.DecCoin borrowed = 2 [
+    (gogoproto.nullable)     = false,
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
   ];
 }

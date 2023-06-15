@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"context"
-	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -29,210 +28,26 @@ func (q Querier) Inspect(
 	}
 
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
-	var filters []inspectorFilter
-	var sorting inspectorSort
 
-	// The "all" symbol denom is converted to empty symbol denom
-	if strings.EqualFold(req.Symbol, "all") {
-		req.Symbol = ""
-	}
-	modeMin := sdk.MustNewDecFromStr(fmt.Sprintf("%f", req.ModeMin))
-	sortMin := sdk.MustNewDecFromStr(fmt.Sprintf("%f", req.SortMin))
-	specific := req.Symbol != ""
-
-	switch strings.ToLower(req.Mode) {
-	case "borrowed":
-		filters = append(filters, withMinBorrowedValue(modeMin, specific))
-	case "collateral":
-		filters = append(filters, withMinCollateralValue(modeMin, specific))
-	case "danger":
-		filters = append(filters, withMinDanger(modeMin))
-	case "ltv":
-		filters = append(filters, withMinLTV(modeMin))
-	case "zeroes":
-		filters = append(filters, withZeroes())
-	default:
-		return &types.QueryInspectResponse{}, status.Error(codes.InvalidArgument, "unknown inspector mode: "+req.Mode)
-	}
-	switch strings.ToLower(req.Sort) {
-	case "borrowed":
-		sorting = moreBorrowed(specific)
-		if sortMin.IsPositive() {
-			filters = append(filters, withMinBorrowedValue(sortMin, specific))
-		}
-	case "collateral":
-		sorting = moreCollateral(specific)
-		if sortMin.IsPositive() {
-			filters = append(filters, withMinCollateralValue(sortMin, specific))
-		}
-	case "danger":
-		sorting = moreDanger
-		if sortMin.IsPositive() {
-			filters = append(filters, withMinDanger(sortMin))
-		}
-	case "ltv":
-		sorting = moreLTV
-		if sortMin.IsPositive() {
-			filters = append(filters, withMinLTV(sortMin))
-		}
-	default:
-		// if no sort mode is specified, return all borrowers sorted by total collateral value
-		sorting = moreCollateral(false)
-	}
-
-	borrowers := k.filteredSortedBorrowers(ctx,
-		filters,
-		sorting,
-		req.Symbol,
-	)
-	return &types.QueryInspectResponse{Borrowers: borrowers}, nil
-}
-
-// Separated from grpc_query.go
-func (q Querier) InspectNeat(
-	goCtx context.Context,
-	req *types.QueryInspectNeat,
-) (*types.QueryInspectNeatResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	// The "all" symbol denom is converted to empty symbol denom
-	if strings.EqualFold(req.Symbol, "all") {
-		req.Symbol = ""
-	}
-
-	req2 := types.QueryInspect{
-		Symbol:  req.Symbol,
-		Mode:    req.Mode,
-		Sort:    req.Sort,
-		ModeMin: req.ModeMin,
-		SortMin: req.SortMin,
-	}
-
-	resp2, err := q.Inspect(goCtx, &req2)
-	if err != nil {
-		return nil, err
-	}
-
-	borrowers := []types.BorrowerSummaryNeat{}
-	for _, b := range resp2.Borrowers {
-		if b.SuppliedValue.IsPositive() {
-			borrowed := b.BorrowedValue
-			if req.Symbol != "" {
-				borrowed = b.SpecificBorrowValue
-			}
-			neat := types.BorrowerSummaryNeat{
-				Account:  b.Address,
-				Borrowed: neat(borrowed),
-				LTB:      neat(b.BorrowedValue.Quo(b.BorrowLimit)),
-				LTL:      neat(b.BorrowedValue.Quo(b.LiquidationThreshold)),
-				LTV:      neat(b.BorrowedValue.Quo(b.CollateralValue)),
-			}
-			borrowers = append(borrowers, neat)
-		}
-	}
-
-	return &types.QueryInspectNeatResponse{Borrowers: borrowers}, nil
-}
-
-// Separated from grpc_query.go
-func (q Querier) RiskData(
-	goCtx context.Context,
-	req *types.QueryRiskData,
-) (*types.QueryRiskDataResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-
-	// This query is also disabled by default as a safety measure. Enable with liquidator queries.
-	if !q.Keeper.liquidatorQueryEnabled {
-		return nil, types.ErrNotLiquidatorNode
-	}
-	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
-	borrowers := k.riskData(ctx)
-
-	return &types.QueryRiskDataResponse{Borrowers: borrowers}, nil
-}
-
-// neat truncates an sdk.Dec to a common-sense precision based on its size and converts it to float.
-// This makes a big difference in readability when using the CLI.
-func neat(num sdk.Dec) float64 {
-	n := num.MustFloat64()
-	precision := 3 // Round to thousandths if 0.001 <= n <= 10
-	if n > 10 {
-		precision = 1 // above $10: Round to dime
-	}
-	if n > 1000 {
-		precision = 0 // above $1000: Round to dollar
-	}
-	if n > 1_000_000 {
-		precision = -3 // above $1000000: Round to thousand
-	}
-	if n < 0.001 {
-		precision = 6 // round to millionths
-	}
-	if n < 0.000001 {
-		return n // tiny: maximum precision
-	}
-	// Truncate the float at a certain precision (can be negative)
-	x := math.Pow(10, float64(precision))
-	return float64(int(n*x)) / x
-}
-
-// filteredSortedBorrowers returns a list of borrower addresses and their account summaries sorted and filtered
-// by selected methods. Sorting is ascending in X if the sort function provided is "less X", and descending in
-// X if the function provided is "more X"
-func (k Keeper) filteredSortedBorrowers(
-	ctx sdk.Context, filters []inspectorFilter, sorting inspectorSort, symbol string,
-) []types.BorrowerSummary {
-	borrowers := k.unsortedBorrowers(ctx, symbol)
-
-	// filters the borrowers
-	filteredBorrowers := []*types.BorrowerSummary{}
-	for _, bs := range borrowers {
-		ok := true
-		for _, f := range filters {
-			ok = ok && f(bs)
-		}
-		if ok {
-			filteredBorrowers = append(filteredBorrowers, bs)
-		}
-	}
-
-	// sorts the borrowers
-	sort.Sort(byCustom{
-		bs:   filteredBorrowers,
-		less: sorting,
-	})
-	sortedBorrowers := []types.BorrowerSummary{}
-
-	// convert from pointers
-	for _, b := range filteredBorrowers {
-		sortedBorrowers = append(sortedBorrowers, *b)
-	}
-
-	return sortedBorrowers
-}
-
-// unsortedBorrowers returns a list of borrower addresses and their account summaries, without filters or sorting.
-// Also accepts a symbol denom to use for the SpecificBorrowValue and SpecificCollateralValue fields.
-func (k Keeper) unsortedBorrowers(ctx sdk.Context, symbol string) []*types.BorrowerSummary {
-	prefix := types.KeyPrefixAdjustedBorrow
-
-	denom, uDenom := "", ""
 	tokens := k.GetAllRegisteredTokens(ctx)
+	symbols := map[string]string{}
+	exponents := map[string]uint32{}
+	exchangeRates := map[string]sdk.Dec{}
 	for _, t := range tokens {
-		if strings.EqualFold(t.SymbolDenom, symbol) {
-			denom = t.BaseDenom
-			uDenom = types.ToUTokenDenom(denom)
+		symbols[t.BaseDenom] = t.SymbolDenom
+		exponents[t.BaseDenom] = t.Exponent
+		exchangeRates[t.BaseDenom] = k.DeriveExchangeRate(ctx, t.BaseDenom)
+		if strings.EqualFold(t.SymbolDenom, req.Symbol) {
+			// convert request to match the case of token registry symbol denom
+			req.Symbol = t.SymbolDenom
 		}
 	}
 
-	// which addresses have already been checked
-	borrowers := []*types.BorrowerSummary{}
+	// inspect every borrower only once
+	borrowers := []*types.InspectAccount{}
 	checkedAddrs := map[string]interface{}{}
 
+	prefix := types.KeyPrefixAdjustedBorrow
 	iterator := func(key, _ []byte) error {
 		// get borrower address from key
 		addr := types.AddressFromKey(key, prefix)
@@ -245,89 +60,53 @@ func (k Keeper) unsortedBorrowers(ctx sdk.Context, symbol string) []*types.Borro
 
 		borrowed := k.GetBorrowerBorrows(ctx, addr)
 		borrowedValue, _ := k.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
-		supplied, _ := k.GetAllSupplied(ctx, addr)
 		collateral := k.GetBorrowerCollateral(ctx, addr)
-		suppliedValue, _ := k.TotalTokenValue(ctx, supplied, types.PriceModeSpot)
 		collateralValue, _ := k.CalculateCollateralValue(ctx, collateral)
-		borrowLimit, _ := k.CalculateBorrowLimit(ctx, collateral)
 		liquidationThreshold, _ := k.CalculateLiquidationThreshold(ctx, collateral)
 
-		specificBorrowedValue := sdk.ZeroDec()
-		specificCollateralValue := sdk.ZeroDec()
-		if denom != "" {
-			specificBorrowed := sdk.NewCoin(denom, borrowed.AmountOf(denom))
-			specificCollateral := sdk.NewCoin(uDenom, collateral.AmountOf(uDenom))
-			specificBorrowedValue, _ = k.VisibleTokenValue(ctx, sdk.NewCoins(specificBorrowed), types.PriceModeSpot)
-			specificCollateralValue, _ = k.VisibleTokenValue(ctx, sdk.NewCoins(specificCollateral), types.PriceModeSpot)
-		}
-
-		summary := types.BorrowerSummary{
-			Address:                 addr.String(),
-			SuppliedValue:           suppliedValue,
-			CollateralValue:         collateralValue,
-			BorrowedValue:           borrowedValue,
-			BorrowLimit:             borrowLimit,
-			LiquidationThreshold:    liquidationThreshold,
-			SpecificCollateralValue: specificBorrowedValue,
-			SpecificBorrowValue:     specificCollateralValue,
+		summary := types.InspectAccount{
+			Address: addr.String(),
+			Analysis: &types.RiskInfo{
+				Borrowed:    neat(borrowedValue),
+				Liquidation: neat(liquidationThreshold),
+				Value:       neat(collateralValue),
+			},
+			Position: &types.DecBalances{
+				Collateral: symbolDecCoins(collateral, symbols, exponents, exchangeRates),
+				Borrowed:   symbolDecCoins(borrowed, symbols, exponents, exchangeRates),
+			},
 		}
 		borrowers = append(borrowers, &summary)
 		return nil
 	}
 
-	// collect all borrower summaries (unsorted)
+	// collect all accounts (unsorted)
 	_ = k.iterate(ctx, prefix, iterator)
-	return borrowers
-}
 
-// riskData returns a summary of supplied, collateralized, and borrowed tokens for all accounts
-// on-chain that have nonzero borrows. Tokens are presented in symbol denom, not base or ibc denom, for clarity.
-func (k Keeper) riskData(ctx sdk.Context) []types.AccountDecBalances {
-	tokens := k.GetAllRegisteredTokens(ctx)
-	symbols := map[string]string{}
-	exponents := map[string]uint32{}
-	exchangeRates := map[string]sdk.Dec{}
-	for _, t := range tokens {
-		symbols[t.BaseDenom] = t.SymbolDenom
-		exponents[t.BaseDenom] = t.Exponent
-		exchangeRates[t.BaseDenom] = k.DeriveExchangeRate(ctx, t.BaseDenom)
-	}
-
-	// which addresses have already been checked
-	accounts := []types.AccountDecBalances{}
-	checkedAddrs := map[string]interface{}{}
-
-	prefix := types.KeyPrefixAdjustedBorrow
-	iterator := func(key, _ []byte) error {
-		// get borrower address from key
-		addr := types.AddressFromKey(key, prefix)
-
-		// if the address is already checked, do not check again
-		if _, ok := checkedAddrs[addr.String()]; ok {
-			return nil
+	// filters the borrowers
+	filteredBorrowers := []*types.InspectAccount{}
+	for _, account := range borrowers {
+		ok := account.Analysis.Borrowed > req.Borrowed
+		ok = ok && account.Analysis.Value > req.Collateral
+		ok = ok && account.Analysis.Liquidation > req.Danger
+		ok = ok && account.Analysis.Borrowed/account.Analysis.Value > req.Ltv
+		if ok {
+			filteredBorrowers = append(filteredBorrowers, account)
 		}
-		checkedAddrs[addr.String()] = struct{}{}
-
-		borrowed := k.GetBorrowerBorrows(ctx, addr)
-		supplied, _ := k.GetAllSupplied(ctx, addr)
-		collateral := k.GetBorrowerCollateral(ctx, addr)
-
-		symbolBorrowed := symbolDecCoins(borrowed, symbols, exponents, exchangeRates)
-		symbolSupplied := symbolDecCoins(supplied, symbols, exponents, exchangeRates)
-		symbolCollateral := symbolDecCoins(collateral, symbols, exponents, exchangeRates)
-
-		accounts = append(accounts, types.AccountDecBalances{
-			Supplied:   symbolSupplied,
-			Collateral: symbolCollateral,
-			Borrowed:   symbolBorrowed,
-		})
-
-		return nil
 	}
 
-	// collect all account symbol balances (unsorted)
-	_ = k.iterate(ctx, prefix, iterator)
-	return accounts
+	// sorts the borrowers
+	sort.Sort(byCustom{
+		bs:   filteredBorrowers,
+		less: moreBorrowed(req.Symbol),
+	})
+
+	// convert from pointers
+	sortedBorrowers := []types.InspectAccount{}
+	for _, b := range filteredBorrowers {
+		sortedBorrowers = append(sortedBorrowers, *b)
+	}
+	return &types.QueryInspectResponse{Borrowers: sortedBorrowers}, nil
 }
 
 // symbolDecCoins converts an sdk.Coins containing base tokens or uTokens into an sdk.DecCoins containing symbol denom
@@ -359,4 +138,57 @@ func symbolDecCoins(
 	}
 
 	return symbolCoins
+}
+
+// neat truncates an sdk.Dec to a common-sense precision based on its size and converts it to float.
+// This makes a big difference in readability when using the CLI.
+func neat(num sdk.Dec) float64 {
+	n := num.MustFloat64()
+	precision := 3 // Round to thousandths if 0.001 <= n <= 10
+	if n > 10 {
+		precision = 1 // above $10: Round to dime
+	}
+	if n > 1000 {
+		precision = 0 // above $1000: Round to dollar
+	}
+	if n > 1_000_000 {
+		precision = -3 // above $1000000: Round to thousand
+	}
+	if n < 0.001 {
+		precision = 6 // round to millionths
+	}
+	if n < 0.000001 {
+		return n // tiny: maximum precision
+	}
+	// Truncate the float at a certain precision (can be negative)
+	x := math.Pow(10, float64(precision))
+	return float64(int(n*x)) / x
+}
+
+// byCustom implements sort.Interface by providing Less and using the Len and
+// Swap methods of the embedded bsums value.
+type byCustom struct {
+	bs   []*types.InspectAccount
+	less inspectorSort
+}
+
+func (s byCustom) Len() int           { return len(s.bs) }
+func (s byCustom) Swap(i, j int)      { s.bs[i], s.bs[j] = s.bs[j], s.bs[i] }
+func (s byCustom) Less(i, j int) bool { return s.less(s.bs[i], s.bs[j]) }
+
+// inspectorSort defines a Less function for sorting inspected borrower summaries,
+// which must return true if a should come before b using custom logic for sorts.
+type inspectorSort func(a, b *types.InspectAccount) bool
+
+// moreBorrowed sorts accounts by borrowed amount of a given symbol denom, or
+// borrowed USD value if no symbol denom is provided
+func moreBorrowed(symbol string) inspectorSort {
+	if symbol != "" {
+		return func(a, b *types.InspectAccount) bool {
+			return a.Position.Borrowed.AmountOf(symbol).GTE(b.Position.Borrowed.AmountOf(symbol))
+		}
+	}
+	return func(a, b *types.InspectAccount) bool {
+		return a.Analysis.Borrowed >= b.Analysis.Borrowed
+	}
 }
