@@ -88,7 +88,7 @@ func (q Querier) Inspect(
 	for _, account := range borrowers {
 		ok := account.Analysis.Borrowed > req.Borrowed
 		ok = ok && account.Analysis.Value > req.Collateral
-		ok = ok && account.Analysis.Liquidation > req.Danger
+		ok = ok && account.Analysis.Borrowed/account.Analysis.Liquidation > req.Danger
 		ok = ok && account.Analysis.Borrowed/account.Analysis.Value > req.Ltv
 		if ok {
 			filteredBorrowers = append(filteredBorrowers, account)
