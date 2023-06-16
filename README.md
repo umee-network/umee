@@ -87,6 +87,18 @@ To install the `umeed` binary:
 $ make build
 ```
 
+### Docker build
+
+```bash
+docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
+
+# start bash
+docker run -it --name umeed umee-network/umeed bash
+
+# or start the start the node if you already have a node directory setup
+docker run -it --name umeed umee-network/umeed umeed start
+```
+
 ### Recommended Database Backend
 
 We recommend to use RocksDB. It requires to install `rocksdb` system libraries.
@@ -114,18 +126,18 @@ db_backend = "rocksdb"
 
 Generate the latest swagger:
 
-  ```bash
-   $ make proto-swagger-gen
-   $ make proto-update-swagger-docs
-   ```
+```bash
+ $ make proto-swagger-gen
+ $ make proto-update-swagger-docs
+```
 
 Build the new binary or install the new binary with the latest swagger docs:
 
-   ```bash
-   $ make build
-   # or
-   $ make install
-   ```
+```bash
+$ make build
+# or
+$ make install
+```
 
 Make sure to execute these commands whenever you want to update the swagger documentation.
 
