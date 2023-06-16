@@ -66,25 +66,6 @@ var (
 	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
 
-type IntegrationTestSuite struct {
-	suite.Suite
-
-	tmpDirs             []string
-	chain               *chain
-	ethClient           *ethclient.Client
-	gaiaRPC             *rpchttp.HTTP
-	dkrPool             *dockertest.Pool
-	dkrNet              *dockertest.Network
-	ethResource         *dockertest.Resource
-	gaiaResource        *dockertest.Resource
-	hermesResource      *dockertest.Resource
-	priceFeederResource *dockertest.Resource
-	valResources        []*dockertest.Resource
-	orchResources       []*dockertest.Resource
-	gravityContractAddr string
-	umee                client.Client
-}
-
 func TestIntegrationTestSuite(t *testing.T) {
 	suite.Run(t, new(IntegrationTestSuite))
 }
@@ -1079,9 +1060,9 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 
 func (s *IntegrationTestSuite) initUmeeClient() {
 	var err error
-	mnemonics := make([]string, 0)
-	for _, v := range s.chain.validators {
-		mnemonics = append(mnemonics, v.mnemonic)
+	accMnemonics := make(map[string]string)
+	for index, v := range s.chain.validators {
+		accMnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
 	}
 	ecfg := app.MakeEncodingConfig()
 
@@ -1089,7 +1070,7 @@ func (s *IntegrationTestSuite) initUmeeClient() {
 		s.chain.id,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
-		mnemonics,
+		accMnemonics,
 		1,
 		ecfg,
 	)

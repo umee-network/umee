@@ -241,6 +241,9 @@ test-e2e-clean:
 	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 
+test-qa: 
+	@go test ./tests/qa/... -timeout 30m -v -tags='test_qa'
+
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
 mocks: $(MOCKS_DIR)
@@ -356,3 +359,8 @@ proto-lint:
 proto-check-breaking:
 	@echo "Checking for breaking changes"
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
+
+proto-update-swagger-docs:
+	@echo "Updating Protobuf Swagger Docs"
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
+		sh ./contrib/scripts/protoc-update-swagger-docs.sh; fi
