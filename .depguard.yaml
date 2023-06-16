@@ -1,0 +1,9 @@
+Main:
+  files:
+  - $all
+  - "!$test"
+  allow:
+  - $gostd
+  - github.com/cosmos/**
+  - github.com/tendermint/**
+  - github.com/cosmos/cosmos-sdk
