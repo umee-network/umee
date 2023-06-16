@@ -4,7 +4,7 @@
 
 FROM ghcr.io/umee-network/peggo:latest-1.4 as peggo
 
-FROM golang:1.20-bullseye AS builder
+FROM golang:1.20-bookworm AS builder
 ARG EXPERIMENTAL=false
 
 ## Download go module dependencies for umeed
