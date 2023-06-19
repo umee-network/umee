@@ -1,21 +1,21 @@
 version: 2
-# TODO: reenable before merging metoken -> main
+# TODO: reenable before merging metoken -> main by setting open-pull-requests-limit back to 10 in both categories
 # https://linear.app/umee/issue/UMEE-597/metoken-upstream-merge
-#
-# updates:
-#   - package-ecosystem: github-actions
-#     directory: "/"
-#     schedule:
-#       interval: daily
-#     open-pull-requests-limit: 10
 
-#   - package-ecosystem: gomod
-#     directory: "/"
-#     schedule:
-#       interval: daily
-#     open-pull-requests-limit: 10
-#     reviewers:
-#       - umee-network/core-devs
-#     labels:
-#       - "A:Automerge"
-#       - "T:Dependencies"
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: gomod
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 0
+    reviewers:
+      - umee-network/core-devs
+    labels:
+      - "A:Automerge"
+      - "T:Dependencies"
