@@ -168,4 +168,3 @@ Governance controlled:
 
 - `MsgGovSetParams` Sets module parameters
 - `MsgGovCreatePrograms` Creates one or more incentive programs. These programs can be set for community funding or manual funding in the proposal.
-
