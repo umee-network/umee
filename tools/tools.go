@@ -13,5 +13,5 @@ import (
 	_ "mvdan.cc/gofumpt"
 
 	// unnamed import of statik for swagger UI support
-	_ "github.com/umee-network/umee/v4/swagger/statik"
+	_ "github.com/umee-network/umee/v5/swagger/statik"
 )

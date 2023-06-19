@@ -8,7 +8,6 @@ import (
 
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/incentive"
-	"github.com/umee-network/umee/v5/x/leverage/fixtures"
 )
 
 func TestQueries(t *testing.T) {
