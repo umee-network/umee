@@ -13,13 +13,14 @@ import (
 )
 
 const (
+	uumee   = "uumee"
 	govAddr = "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp"
 )
 
 var (
 	testAddr, _ = sdk.AccAddressFromBech32("umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm")
 	uToken      = sdk.NewInt64Coin(coin.UumeeDenom, 10)
-	token       = sdk.NewInt64Coin("uumee", 10)
+	token       = sdk.NewInt64Coin(uumee, 10)
 	program     = incentive.NewIncentiveProgram(0, 4, 5, uToken.Denom, token, coin.Zero(token.Denom), false)
 )
 

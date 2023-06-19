@@ -10,6 +10,8 @@ import (
 	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
+const uumee = "uumee"
+
 func TestValidateGenesis(t *testing.T) {
 	validAddr := "umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm"
 
@@ -54,7 +56,7 @@ func TestValidateGenesis(t *testing.T) {
 	assert.ErrorContains(t, duplicateRewardAccumulator.Validate(), "duplicate reward accumulators")
 
 	invalidProgram := IncentiveProgram{}
-	validProgram := NewIncentiveProgram(1, 1, 1, coin.UumeeDenom, coin.Umee1, coin.Zero("uumee"), false)
+	validProgram := NewIncentiveProgram(1, 1, 1, coin.UumeeDenom, coin.Umee1, coin.Zero(uumee), false)
 
 	invalidUpcomingProgram := DefaultGenesis()
 	invalidUpcomingProgram.UpcomingPrograms = []IncentiveProgram{invalidProgram}
@@ -110,14 +112,14 @@ func TestValidateGenesis(t *testing.T) {
 }
 
 func TestValidateIncentiveProgram(t *testing.T) {
-	validProgram := NewIncentiveProgram(1, 1, 1, coin.UumeeDenom, coin.Umee1, coin.Zero("uumee"), false)
+	validProgram := NewIncentiveProgram(1, 1, 1, coin.UumeeDenom, coin.Umee1, coin.Zero(uumee), false)
 	assert.NilError(t, validProgram.Validate())
 
 	invalidUToken := validProgram
 	invalidUToken.UToken = ""
 	assert.ErrorContains(t, invalidUToken.Validate(), "invalid denom")
 
-	invalidUToken.UToken = "uumee"
+	invalidUToken.UToken = uumee
 	assert.ErrorIs(t, invalidUToken.Validate(), leveragetypes.ErrNotUToken)
 
 	invalidTotalRewards := validProgram
@@ -127,7 +129,7 @@ func TestValidateIncentiveProgram(t *testing.T) {
 	invalidTotalRewards.TotalRewards = coin.New(coin.UumeeDenom, 100)
 	assert.ErrorIs(t, invalidTotalRewards.Validate(), leveragetypes.ErrUToken)
 
-	invalidTotalRewards.TotalRewards = coin.Zero("uumee")
+	invalidTotalRewards.TotalRewards = coin.Zero(uumee)
 	assert.ErrorIs(t, invalidTotalRewards.Validate(), ErrProgramWithoutRewards)
 
 	invalidRemainingRewards := validProgram
@@ -187,11 +189,11 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorContains(t, invalidBond.Validate(), "invalid denom")
 
 	invalidBond = validBond
-	invalidBond.UToken.Denom = "uumee"
+	invalidBond.UToken.Denom = uumee
 	assert.ErrorIs(t, invalidBond.Validate(), leveragetypes.ErrNotUToken)
 
 	validTracker := NewRewardTracker(validAddr, coin.UumeeDenom, sdk.NewDecCoins(
-		sdk.NewDecCoin("uumee", sdk.OneInt()),
+		sdk.NewDecCoin(uumee, sdk.OneInt()),
 	))
 	assert.NilError(t, validTracker.Validate())
 
@@ -199,7 +201,7 @@ func TestValidateStructs(t *testing.T) {
 	invalidTracker.UToken = ""
 	assert.ErrorContains(t, invalidTracker.Validate(), "invalid denom")
 
-	invalidTracker.UToken = "uumee"
+	invalidTracker.UToken = uumee
 	assert.ErrorIs(t, invalidTracker.Validate(), leveragetypes.ErrNotUToken)
 
 	invalidTracker = validTracker
@@ -215,7 +217,7 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorIs(t, invalidTracker.Validate(), leveragetypes.ErrUToken)
 
 	validAccumulator := NewRewardAccumulator(coin.UumeeDenom, 6, sdk.NewDecCoins(
-		sdk.NewDecCoin("uumee", sdk.OneInt()),
+		sdk.NewDecCoin(uumee, sdk.OneInt()),
 	))
 	assert.NilError(t, validAccumulator.Validate())
 
@@ -223,7 +225,7 @@ func TestValidateStructs(t *testing.T) {
 	invalidAccumulator.UToken = ""
 	assert.ErrorContains(t, invalidAccumulator.Validate(), "invalid denom")
 
-	invalidAccumulator.UToken = "uumee"
+	invalidAccumulator.UToken = uumee
 	assert.ErrorIs(t, invalidAccumulator.Validate(), leveragetypes.ErrNotUToken)
 
 	invalidAccumulator = validAccumulator
@@ -242,7 +244,7 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorIs(t, invalidUnbonding.Validate(), ErrInvalidUnbonding)
 
 	invalidUnbonding = validUnbonding
-	invalidUnbonding.UToken.Denom = "uumee"
+	invalidUnbonding.UToken.Denom = uumee
 	assert.ErrorIs(t, invalidUnbonding.Validate(), leveragetypes.ErrNotUToken)
 
 	invalidUnbonding = validUnbonding
@@ -261,11 +263,11 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "invalid denom")
 
 	invalidAccountUnbondings = validAccountUnbondings
-	invalidAccountUnbondings.UToken = "uumee"
+	invalidAccountUnbondings.UToken = uumee
 	assert.ErrorIs(t, invalidAccountUnbondings.Validate(), leveragetypes.ErrNotUToken)
 
 	invalidAccountUnbondings = validAccountUnbondings
-	invalidAccountUnbondings.Unbondings[0].UToken.Denom = "uumee"
+	invalidAccountUnbondings.Unbondings[0].UToken.Denom = uumee
 	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "does not match")
 
 	invalidAccountUnbondings = validAccountUnbondings
