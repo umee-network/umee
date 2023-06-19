@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"gotest.tools/v3/assert"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v4/util/coin"
