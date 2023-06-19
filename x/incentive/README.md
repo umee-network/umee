@@ -20,7 +20,7 @@ There are also a few more advanced interactions, such as instantly unbonding col
    - [Reward Accumulators](#reward-accumulators)
    - [Reward Trackers](#reward-trackers)
 2. **[State](#state)**
-2. **[Messages](#messages)**
+3. **[Messages](#messages)**
 
 ## Concepts
 
@@ -61,6 +61,7 @@ ip := IncentiveProgram {
 ```
 
 Reward distribution math is
+
 - **Constant Rate:** Regardless of how much `u/uumee` is bonded to the incentive module at any given block, the program distributes the fraction `blockTime / duration` of its total rewards across users every block it is active (with some corrective rounding).
 - **Weighted by Amount:** A user with `200u/uumee` bonded received twice as many rewards on a given block as a user with `100u/uumee` bonded.
 
@@ -71,6 +72,7 @@ When multiple incentive programs are active simultaneously, they compute their r
 A user can claim rewards for all of their bonded uTokens at once using `MsgClaim`. When a user claims rewards, an appropriate amount of tokens are sent from the `x/incentive` module account to their wallet.
 
 There are also times where rewards must be claimed automatically to maintain rewards-tracking math. These times are:
+
 - On `MsgBond`
 - On `MsgBeginUnbonding`
 - When a `leverage.MsgLiquidate` forcefully reduces the user's bonded collateral
@@ -143,6 +145,7 @@ The incentive module stores the following in its KVStore and genesis state:
 - All unbondings in progress for each account
 
 Additionally, some mathematically redundant information is maintained in `KVStore` but not genesis state for efficient operations:
+
 - `TotalBonded` for every bonded uToken denom (total excludes unbondings).
 - `TotalUnbonding` for every bonded uToken denom.
 - `AmountUnbonding` for each account with one or more unbondings in progress.
@@ -154,6 +157,7 @@ These totals are kept in sync with the values they track by the functions in `ke
 See [proto](https://github.com/umee-network/umee/blob/main/proto/umee/incentive/v1/tx.proto) for detailed fields.
 
 Permissionless:
+
 - `MsgClaim` Claims any pending rewards for all bonded uTokens
 - `MsgBond` Bonds uToken collateral (and claims pending rewarda)
 - `MsgBeginUnbonding` Starts unbonding uToken collateral (and claims pending rewards)
@@ -161,6 +165,7 @@ Permissionless:
 - `MsgSponsor` Funds an entire incentive program with rewards, if it has been passed by governance but not yet funded.
 
 Governance controlled:
+
 - `MsgGovSetParams` Sets module parameters
 - `MsgGovCreatePrograms` Creates one or more incentive programs. These programs can be set for community funding or manual funding in the proposal.
 
