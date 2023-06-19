@@ -218,19 +218,19 @@ func (k *testKeeper) initScenario1() sdk.AccAddress {
 
 	// init a supplier with bonded uTokens
 	alice := k.newBondedAccount(
-		coin.New(u_umee, 100_000000),
-		coin.New(u_atom, 50_000000),
+		coin.New(uUmee, 100_000000),
+		coin.New(uAtom, 50_000000),
 	)
 	// create some in-progress unbondings
 	k.advanceTimeTo(90)
-	k.mustBeginUnbond(alice, coin.New(u_umee, 5_000000))
-	k.mustBeginUnbond(alice, coin.New(u_umee, 5_000000))
-	k.mustBeginUnbond(alice, coin.New(u_atom, 5_000000))
+	k.mustBeginUnbond(alice, coin.New(uUmee, 5_000000))
+	k.mustBeginUnbond(alice, coin.New(uUmee, 5_000000))
+	k.mustBeginUnbond(alice, coin.New(uAtom, 5_000000))
 
 	// create three separate programs, designed to be upcoming, ongoing, and completed at t=100
-	k.addIncentiveProgram(u_umee, 10, 20, sdk.NewInt64Coin(umee, 10_000000), true)
-	k.addIncentiveProgram(u_umee, 90, 20, sdk.NewInt64Coin(umee, 10_000000), true)
-	k.addIncentiveProgram(u_umee, 140, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(uUmee, 10, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(uUmee, 90, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(uUmee, 140, 20, sdk.NewInt64Coin(umee, 10_000000), true)
 
 	// start programs and claim some rewards to set nonzero reward trackers
 	k.advanceTimeTo(95)

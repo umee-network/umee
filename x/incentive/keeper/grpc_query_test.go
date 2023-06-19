@@ -19,28 +19,28 @@ func TestQueries(t *testing.T) {
 
 	expect1 := &incentive.QueryAccountBondsResponse{
 		Bonded: sdk.NewCoins(
-			coin.New(u_umee, 90_000000),
-			coin.New(u_atom, 45_000000),
+			coin.New(uUmee, 90_000000),
+			coin.New(uAtom, 45_000000),
 		),
 		Unbonding: sdk.NewCoins(
-			coin.New(u_umee, 10_000000),
-			coin.New(u_atom, 5_000000),
+			coin.New(uUmee, 10_000000),
+			coin.New(uAtom, 5_000000),
 		),
 		Unbondings: []incentive.Unbonding{
 			{
 				Start:  90,
 				End:    86490,
-				UToken: coin.New(u_atom, 5_000000),
+				UToken: coin.New(uAtom, 5_000000),
 			},
 			{
 				Start:  90,
 				End:    86490,
-				UToken: coin.New(u_umee, 5_000000),
+				UToken: coin.New(uUmee, 5_000000),
 			},
 			{
 				Start:  90,
 				End:    86490,
-				UToken: coin.New(u_umee, 5_000000),
+				UToken: coin.New(uUmee, 5_000000),
 			},
 		},
 	}
@@ -63,8 +63,8 @@ func TestQueries(t *testing.T) {
 
 	expect3 := &incentive.QueryTotalBondedResponse{
 		Bonded: sdk.NewCoins(
-			coin.New(u_umee, 90_000000),
-			coin.New(u_atom, 45_000000),
+			coin.New(uUmee, 90_000000),
+			coin.New(uAtom, 45_000000),
 		),
 	}
 	resp3, err := q.TotalBonded(k.ctx, &incentive.QueryTotalBonded{})
@@ -73,19 +73,19 @@ func TestQueries(t *testing.T) {
 
 	expect4 := &incentive.QueryTotalBondedResponse{
 		Bonded: sdk.NewCoins(
-			coin.New(u_umee, 90_000000),
+			coin.New(uUmee, 90_000000),
 		),
 	}
 	resp4, err := q.TotalBonded(k.ctx, &incentive.QueryTotalBonded{
-		Denom: u_umee,
+		Denom: uUmee,
 	})
 	require.NoError(t, err)
 	require.Equal(t, expect4, resp4, "total bonded query (one denom)")
 
 	expect5 := &incentive.QueryTotalUnbondingResponse{
 		Unbonding: sdk.NewCoins(
-			coin.New(u_umee, 10_000000),
-			coin.New(u_atom, 5_000000),
+			coin.New(uUmee, 10_000000),
+			coin.New(uAtom, 5_000000),
 		),
 	}
 	resp5, err := q.TotalUnbonding(k.ctx, &incentive.QueryTotalUnbonding{})
@@ -94,11 +94,11 @@ func TestQueries(t *testing.T) {
 
 	expect6 := &incentive.QueryTotalUnbondingResponse{
 		Unbonding: sdk.NewCoins(
-			coin.New(u_umee, 10_000000),
+			coin.New(uUmee, 10_000000),
 		),
 	}
 	resp6, err := q.TotalUnbonding(k.ctx, &incentive.QueryTotalUnbonding{
-		Denom: u_umee,
+		Denom: uUmee,
 	})
 	require.NoError(t, err)
 	require.Equal(t, expect6, resp6, "total unbonding query (one denom)")
@@ -165,28 +165,28 @@ func TestAPYQuery(t *testing.T) {
 
 	// init a supplier with bonded uTokens
 	_ = k.newBondedAccount(
-		coin.New(u_umee, 100_000000),
+		coin.New(uUmee, 100_000000),
 	)
 
 	// create three incentive programs, each of which will run for half a year but which will
 	// start at slightly different times so we can test each one's contribution to total APY
-	k.addIncentiveProgram(u_umee, 100, 15778800, sdk.NewInt64Coin(umee, 10_000000), true)
-	k.addIncentiveProgram(u_umee, 120, 15778800, sdk.NewInt64Coin(umee, 30_000000), true)
-	k.addIncentiveProgram(u_umee, 140, 15778800, sdk.NewInt64Coin(atom, 10_000000), true)
+	k.addIncentiveProgram(uUmee, 100, 15778800, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(uUmee, 120, 15778800, sdk.NewInt64Coin(umee, 30_000000), true)
+	k.addIncentiveProgram(uUmee, 140, 15778800, sdk.NewInt64Coin(atom, 10_000000), true)
 
 	// Advance last rewards time to 100, thus starting the first program
 	k.advanceTimeTo(100)
 
-	req1 := incentive.QueryCurrentRates{UToken: u_atom}
+	req1 := incentive.QueryCurrentRates{UToken: uAtom}
 	expect1 := &incentive.QueryCurrentRatesResponse{
-		ReferenceBond: coin.New(u_atom, 1), // zero exponent because this asset has never been incentivized
+		ReferenceBond: coin.New(uAtom, 1), // zero exponent because this asset has never been incentivized
 		Rewards:       sdk.NewCoins(),
 	}
 	resp1, err := q.CurrentRates(k.ctx, &req1)
 	require.NoError(t, err)
 	require.Equal(t, expect1, resp1, "zero token rates for bonded atom")
 
-	req2 := incentive.QueryActualRates{UToken: u_atom}
+	req2 := incentive.QueryActualRates{UToken: uAtom}
 	expect2 := &incentive.QueryActualRatesResponse{
 		APY: sdk.ZeroDec(),
 	}
@@ -194,9 +194,9 @@ func TestAPYQuery(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expect2, resp2, "zero USD rates for bonded atom")
 
-	req3 := incentive.QueryCurrentRates{UToken: u_umee}
+	req3 := incentive.QueryCurrentRates{UToken: uUmee}
 	expect3 := &incentive.QueryCurrentRatesResponse{
-		ReferenceBond: coin.New(u_umee, 1_000000), // exponent = 6 due to proper initialization
+		ReferenceBond: coin.New(uUmee, 1_000000), // exponent = 6 due to proper initialization
 		Rewards: sdk.NewCoins(
 			coin.New(umee, 200_000), // 10 UMEE per 100 u/UMEE bonded, per half year, is 20% per year
 		),
@@ -205,7 +205,7 @@ func TestAPYQuery(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expect3, resp3, "nonzero token rates for bonded umee")
 
-	req4 := incentive.QueryActualRates{UToken: u_umee}
+	req4 := incentive.QueryActualRates{UToken: uUmee}
 	expect4 := &incentive.QueryActualRatesResponse{
 		APY: sdk.MustNewDecFromStr("0.2"),
 	}
@@ -216,9 +216,9 @@ func TestAPYQuery(t *testing.T) {
 	// Advance last rewards time to 120, thus starting the second program and quadrupling APY
 	k.advanceTimeTo(120)
 
-	req5 := incentive.QueryCurrentRates{UToken: u_umee}
+	req5 := incentive.QueryCurrentRates{UToken: uUmee}
 	expect5 := &incentive.QueryCurrentRatesResponse{
-		ReferenceBond: coin.New(u_umee, 1_000000),
+		ReferenceBond: coin.New(uUmee, 1_000000),
 		Rewards: sdk.NewCoins(
 			coin.New(umee, 800_000), // 40 UMEE per 100 u/UMEE bonded, per half year, is 80% per year
 		),
@@ -227,7 +227,7 @@ func TestAPYQuery(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expect5, resp5, "increased token rates for bonded umee")
 
-	req6 := incentive.QueryActualRates{UToken: u_umee}
+	req6 := incentive.QueryActualRates{UToken: uUmee}
 	expect6 := &incentive.QueryActualRatesResponse{
 		APY: sdk.MustNewDecFromStr("0.8"),
 	}
@@ -239,9 +239,9 @@ func TestAPYQuery(t *testing.T) {
 	// the ratio of umee and atom prices (very high) to the existing APY
 	k.advanceTimeTo(140)
 
-	req7 := incentive.QueryCurrentRates{UToken: u_umee}
+	req7 := incentive.QueryCurrentRates{UToken: uUmee}
 	expect7 := &incentive.QueryCurrentRatesResponse{
-		ReferenceBond: coin.New(u_umee, 1_000000),
+		ReferenceBond: coin.New(uUmee, 1_000000),
 		Rewards: sdk.NewCoins(
 			coin.New(umee, 800_000), // 40 UMEE per 100 u/UMEE bonded, per half year, is 80% per year
 			coin.New(atom, 200_000), // 10 ATOM per 100 u/UMEE bonded, per half year
@@ -251,7 +251,7 @@ func TestAPYQuery(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, expect7, resp7, "multi-token rates for bonded umee")
 
-	req8 := incentive.QueryActualRates{UToken: u_umee}
+	req8 := incentive.QueryActualRates{UToken: uUmee}
 	expect8 := &incentive.QueryActualRatesResponse{
 		APY: sdk.MustNewDecFromStr("2.670783847980997625"), // a large but complicated APY due to price ratio
 	}

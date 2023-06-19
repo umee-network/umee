@@ -281,7 +281,7 @@ func TestMsgEmergencyUnbond(t *testing.T) {
 	require.Nil(t, err, "emergency unbond does is not restricted by max unbondings")
 
 	// verify that the fees were actually donated
-	require.Equal(t, coin.New(u_umee, 200000), k.lk.getDonatedCollateral(k.ctx, u_umee))
+	require.Equal(t, coin.New(uUmee, 200000), k.lk.getDonatedCollateral(k.ctx, uUmee))
 }
 
 func TestMsgSponsor(t *testing.T) {
