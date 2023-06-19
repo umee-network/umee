@@ -219,7 +219,7 @@ func (ip IncentiveProgram) Validate() error {
 		return errors.Wrapf(ErrInvalidProgramDuration, "%d", ip.Duration)
 	}
 	if ip.StartTime <= 0 {
-		return errors.Wrapf(ErrInvalidProgramStart, "%d", ip.StartTime)
+		return ErrInvalidProgramStart.Wrapf("%d", ip.StartTime)
 	}
 
 	return nil
