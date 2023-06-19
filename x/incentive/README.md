@@ -151,7 +151,7 @@ These totals are kept in sync with the values they track by the functions in `ke
 
 ## Messages
 
-See proto for detailed fields.
+See [proto](https://github.com/umee-network/umee/blob/main/proto/umee/incentive/v1/tx.proto) for detailed fields.
 
 Permissionless:
 - `MsgClaim` Claims any pending rewards for all bonded uTokens
