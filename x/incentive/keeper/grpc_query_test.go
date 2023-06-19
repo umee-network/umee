@@ -11,6 +11,7 @@ import (
 )
 
 func TestQueries(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 	q := Querier{k.Keeper}
 
@@ -154,6 +155,7 @@ func TestQueries(t *testing.T) {
 }
 
 func TestAPYQuery(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 	q := Querier{k.Keeper}
 	k.initCommunityFund(

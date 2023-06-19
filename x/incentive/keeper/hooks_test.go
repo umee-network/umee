@@ -12,6 +12,7 @@ import (
 )
 
 func TestHooks(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 	require := require.New(t)
 

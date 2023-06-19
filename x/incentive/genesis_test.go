@@ -114,6 +114,8 @@ func TestValidateGenesis(t *testing.T) {
 }
 
 func TestValidateIncentiveProgram(t *testing.T) {
+	t.Parallel()
+
 	validProgram := NewIncentiveProgram(1, 1, 1, coin.UumeeDenom, coin.Umee1, coin.Zero(uumee), false)
 	assert.NilError(t, validProgram.Validate())
 

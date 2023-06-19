@@ -65,6 +65,8 @@ type sdkmsg interface {
 }
 
 func TestRoutes(t *testing.T) {
+	t.Parallel()
+
 	msgs := []sdkmsg{
 		*incentive.NewMsgBond(testAddr, uToken),
 		*incentive.NewMsgBeginUnbonding(testAddr, uToken),

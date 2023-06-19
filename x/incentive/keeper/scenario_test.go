@@ -20,6 +20,7 @@ const (
 )
 
 func TestBasicIncentivePrograms(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	// init a community fund with 1000 UMEE and 10 ATOM available for funding
@@ -208,6 +209,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 }
 
 func TestZeroBonded(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 	k.initCommunityFund(
 		coin.New(umee, 1000_000000),

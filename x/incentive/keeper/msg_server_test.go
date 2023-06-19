@@ -13,6 +13,7 @@ import (
 )
 
 func TestMsgBond(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -97,6 +98,7 @@ func TestMsgBond(t *testing.T) {
 }
 
 func TestMsgBeginUnbonding(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -193,6 +195,7 @@ func TestMsgBeginUnbonding(t *testing.T) {
 }
 
 func TestMsgEmergencyUnbond(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -282,6 +285,7 @@ func TestMsgEmergencyUnbond(t *testing.T) {
 }
 
 func TestMsgSponsor(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -342,6 +346,7 @@ func TestMsgSponsor(t *testing.T) {
 }
 
 func TestMsgGovSetParams(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	govAccAddr := "govAcct"
@@ -379,6 +384,7 @@ func TestMsgGovSetParams(t *testing.T) {
 }
 
 func TestMsgGovCreatePrograms(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (

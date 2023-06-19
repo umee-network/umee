@@ -9,6 +9,7 @@ import (
 )
 
 func TestBonds(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 	ctx := k.ctx
 	require := require.New(t)

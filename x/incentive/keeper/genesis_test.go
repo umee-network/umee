@@ -7,6 +7,7 @@ import (
 )
 
 func TestGenesis(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	// create a complex genesis state by running transactions
