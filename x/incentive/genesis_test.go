@@ -13,6 +13,8 @@ import (
 const uumee = "uumee"
 
 func TestValidateGenesis(t *testing.T) {
+	t.Parallel()
+
 	validAddr := "umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm"
 
 	genesis := DefaultGenesis()

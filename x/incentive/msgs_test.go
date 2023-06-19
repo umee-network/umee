@@ -25,6 +25,8 @@ var (
 )
 
 func TestMsgs(t *testing.T) {
+	t.Parallel()
+
 	userMsgs := []sdk.Msg{
 		incentive.NewMsgBond(testAddr, uToken),
 		incentive.NewMsgBeginUnbonding(testAddr, uToken),
