@@ -95,7 +95,7 @@ func (k Keeper) getAllTotalUnbonding(ctx sdk.Context) (sdk.Coins, error) {
 	return k.sumCoins(ctx, keyPrefixTotalUnbonding)
 }
 
-// getAllTotalUnbonding gets total unbonding for all uTokens (used for a query)
+// sumCoins gets an sdk.Coins by adding together all coins stored as prefix | denom | 0x00 => amount
 func (k Keeper) sumCoins(ctx sdk.Context, prefix []byte) (sdk.Coins, error) {
 	total := sdk.NewCoins()
 	iterator := func(key, val []byte) error {
