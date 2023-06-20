@@ -13,6 +13,12 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
+type tokenExchangeRate struct {
+	symbol       string
+	exponent     uint32
+	exchangeRate sdk.Dec
+}
+
 // Separated from grpc_query.go
 func (q Querier) Inspect(
 	goCtx context.Context,
@@ -30,13 +36,14 @@ func (q Querier) Inspect(
 	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
 
 	tokens := k.GetAllRegisteredTokens(ctx)
-	symbols := map[string]string{}
-	exponents := map[string]uint32{}
-	exchangeRates := map[string]sdk.Dec{}
+
+	exchangeRates := map[string]tokenExchangeRate{}
 	for _, t := range tokens {
-		symbols[t.BaseDenom] = t.SymbolDenom
-		exponents[t.BaseDenom] = t.Exponent
-		exchangeRates[t.BaseDenom] = k.DeriveExchangeRate(ctx, t.BaseDenom)
+		exchangeRates[t.BaseDenom] = tokenExchangeRate{
+			symbol:       t.SymbolDenom,
+			exponent:     t.Exponent,
+			exchangeRate: k.DeriveExchangeRate(ctx, t.BaseDenom),
+		}
 		if strings.EqualFold(t.SymbolDenom, req.Symbol) {
 			// convert request to match the case of token registry symbol denom
 			req.Symbol = t.SymbolDenom
@@ -72,8 +79,8 @@ func (q Querier) Inspect(
 				Value:       neat(collateralValue),
 			},
 			Position: &types.DecBalances{
-				Collateral: symbolDecCoins(collateral, symbols, exponents, exchangeRates),
-				Borrowed:   symbolDecCoins(borrowed, symbols, exponents, exchangeRates),
+				Collateral: symbolDecCoins(collateral, exchangeRates),
+				Borrowed:   symbolDecCoins(borrowed, exchangeRates),
 			},
 		}
 		ok := account.Analysis.Borrowed > req.Borrowed
@@ -112,27 +119,26 @@ func (q Querier) Inspect(
 // base tokens. for example, 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
 func symbolDecCoins(
 	coins sdk.Coins,
-	symbols map[string]string,
-	exponents map[string]uint32,
-	exchangeRates map[string]sdk.Dec,
+	tokens map[string]tokenExchangeRate,
 ) sdk.DecCoins {
 	symbolCoins := sdk.NewDecCoins()
 
 	for _, c := range coins {
 		exchangeRate := sdk.OneDec()
-		if types.HasUTokenPrefix(c.Denom) {
-			c.Denom = types.ToTokenDenom(c.Denom)
-			exchangeRate = exchangeRates[c.Denom]
-		}
-		if _, ok := symbols[c.Denom]; !ok {
+		t, ok := tokens[c.Denom]
+		if !ok {
 			// unregistered tokens cannot be converted, but can be returned as base denom
 			symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
 			continue
 		}
-		exponentMultiplier := ten.Power(uint64(exponents[c.Denom]))
-		denom := symbols[c.Denom]
+		if types.HasUTokenPrefix(c.Denom) {
+			// uTokens will be converted to base tokens
+			c.Denom = types.ToTokenDenom(c.Denom)
+			exchangeRate = t.exchangeRate
+		}
+		exponentMultiplier := ten.Power(uint64(t.exponent))
 		amount := exchangeRate.MulInt(c.Amount).Quo(exponentMultiplier)
-		symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(denom, amount))
+		symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(t.symbol, amount))
 	}
 
 	return symbolCoins
