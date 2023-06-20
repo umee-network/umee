@@ -1175,7 +1175,12 @@ type QueryClient interface {
 	MaxWithdraw(ctx context.Context, in *QueryMaxWithdraw, opts ...grpc.CallOption) (*QueryMaxWithdrawResponse, error)
 	// MaxBorrow queries the maximum amount of a given token an address can borrow.
 	MaxBorrow(ctx context.Context, in *QueryMaxBorrow, opts ...grpc.CallOption) (*QueryMaxBorrowResponse, error)
-	// Inspect is the customizable inspector query.
+	// Inspect is the customizable inspector query. It returns a list of all borrowers,
+	// starting from the highest borrowed value, filtered by any combination of: minimum
+	// borrowed value (optionally of a specified token), minimum collateral value, minimum
+	// progress toward liquidation threshold, and minimum LTV. Each account is displayed
+	// with its address and borrowed/liquidation/collateral USD values, as well as its
+	// actual token positions in human-readable symbol denoms instead of uTokens or ibc denoms.
 	Inspect(ctx context.Context, in *QueryInspect, opts ...grpc.CallOption) (*QueryInspectResponse, error)
 }
 
@@ -1297,7 +1302,12 @@ type QueryServer interface {
 	MaxWithdraw(context.Context, *QueryMaxWithdraw) (*QueryMaxWithdrawResponse, error)
 	// MaxBorrow queries the maximum amount of a given token an address can borrow.
 	MaxBorrow(context.Context, *QueryMaxBorrow) (*QueryMaxBorrowResponse, error)
-	// Inspect is the customizable inspector query.
+	// Inspect is the customizable inspector query. It returns a list of all borrowers,
+	// starting from the highest borrowed value, filtered by any combination of: minimum
+	// borrowed value (optionally of a specified token), minimum collateral value, minimum
+	// progress toward liquidation threshold, and minimum LTV. Each account is displayed
+	// with its address and borrowed/liquidation/collateral USD values, as well as its
+	// actual token positions in human-readable symbol denoms instead of uTokens or ibc denoms.
 	Inspect(context.Context, *QueryInspect) (*QueryInspectResponse, error)
 }
 

@@ -66,7 +66,12 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/max_borrow";
   }
 
-  // Inspect is the customizable inspector query.
+  // Inspect is the customizable inspector query. It returns a list of all borrowers,
+  // starting from the highest borrowed value, filtered by any combination of: minimum
+  // borrowed value (optionally of a specified token), minimum collateral value, minimum
+  // progress toward liquidation threshold, and minimum LTV. Each account is displayed
+  // with its address and borrowed/liquidation/collateral USD values, as well as its
+  // actual token positions in human-readable symbol denoms instead of uTokens or ibc denoms.
   rpc Inspect(QueryInspect)
       returns (QueryInspectResponse) {
     option (google.api.http).get = "/umee/leverage/v1/inspect";
