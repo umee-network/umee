@@ -306,31 +306,27 @@ func GetCmdQueryInspect() *cobra.Command {
 			req := &types.QueryInspect{
 				Symbol: args[0],
 			}
-			a2, err := strconv.ParseFloat(args[1], 64)
+			req.Borrowed, err = strconv.ParseFloat(args[1], 64)
 			if err != nil {
 				return err
 			}
-			req.Borrowed = a2
 			if len(args) >= 3 {
-				a3, err := strconv.ParseFloat(args[2], 64)
+				req.Collateral, err = strconv.ParseFloat(args[2], 64)
 				if err != nil {
 					return err
 				}
-				req.Collateral = a3
 			}
 			if len(args) >= 4 {
-				a4, err := strconv.ParseFloat(args[3], 64)
+				req.Danger, err = strconv.ParseFloat(args[3], 64)
 				if err != nil {
 					return err
 				}
-				req.Danger = a4
 			}
 			if len(args) >= 5 {
-				a5, err := strconv.ParseFloat(args[4], 64)
+				req.Ltv, err = strconv.ParseFloat(args[4], 64)
 				if err != nil {
 					return err
 				}
-				req.Ltv = a5
 			}
 			resp, err := queryClient.Inspect(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
