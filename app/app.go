@@ -646,6 +646,8 @@ func New(
 
 	// Register umee custom plugin to wasm
 	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper), wasmOpts...)
+	// Register stargate queries
+	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
 
 	app.WasmKeeper = wasm.NewKeeper(
 		appCodec,
