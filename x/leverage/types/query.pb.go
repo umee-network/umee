@@ -795,16 +795,16 @@ var xxx_messageInfo_QueryMaxBorrowResponse proto.InternalMessageInfo
 
 // QueryInspect defines the request structure for the Inspect gRPC service handler.
 type QueryInspect struct {
-	// Symbol selects a symbol denom to sort accounts by borrowed value. Use "all" to ignore.
+	// Symbol selects a symbol denom to sort accounts by borrowed value. Use "all" or empty string to show all.
 	Symbol string `protobuf:"bytes,1,opt,name=symbol,proto3" json:"symbol,omitempty"`
-	// Borrowed is the minimum USD value an account must have borrowed to show. Use 0 to ignore.
+	// Borrowed is the minimum USD value an account must have borrowed to show. Use 0 to show all.
 	Borrowed float64 `protobuf:"fixed64,2,opt,name=borrowed,proto3" json:"borrowed,omitempty"`
-	// Collateral is the minimum USD value of collateral an account must have to show. Use 0 to ignore.
+	// Collateral is the minimum USD value of collateral an account must have to show. Use 0 to show all.
 	Collateral float64 `protobuf:"fixed64,3,opt,name=collateral,proto3" json:"collateral,omitempty"`
-	// Danger is the minimum progress toward liquidation an account must have to show. Use 0 to ignore.
+	// Danger is the minimum progress toward liquidation an account must have to show. Use 0 to show all.
 	// Measured as the ratio (borrowed value / liquidation threshold), where > 1 is liquidation-eligible.
 	Danger float64 `protobuf:"fixed64,4,opt,name=danger,proto3" json:"danger,omitempty"`
-	// LTV is the minimum ratio (borrowed value / collateral value) an account must have to show. Use 0 to ignore.
+	// LTV is the minimum ratio (borrowed value / collateral value) an account must have to show. Use 0 to show all.
 	Ltv float64 `protobuf:"fixed64,5,opt,name=ltv,proto3" json:"ltv,omitempty"`
 }
 
@@ -881,8 +881,11 @@ var xxx_messageInfo_QueryInspectResponse proto.InternalMessageInfo
 
 // InspectAccount contains risk and balance info for a single account for the inspector query.
 type InspectAccount struct {
-	Address  string       `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	Analysis *RiskInfo    `protobuf:"bytes,2,opt,name=analysis,proto3" json:"analysis,omitempty"`
+	// Address of a borrower
+	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	// USD totals of borrower's collateral, debt, and liquidation threshold.
+	Analysis *RiskInfo `protobuf:"bytes,2,opt,name=analysis,proto3" json:"analysis,omitempty"`
+	// Collateral and borrowed tokens, denoted in human-readable symbol denom instead of ibc denom.
 	Position *DecBalances `protobuf:"bytes,3,opt,name=position,proto3" json:"position,omitempty"`
 }
 

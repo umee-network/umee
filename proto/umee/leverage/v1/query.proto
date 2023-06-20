@@ -329,16 +329,16 @@ message QueryMaxBorrowResponse {
 
 // QueryInspect defines the request structure for the Inspect gRPC service handler.
 message QueryInspect {
-  // Symbol selects a symbol denom to sort accounts by borrowed value. Use "all" to ignore.
+  // Symbol selects a symbol denom to sort accounts by borrowed value. Use "all" or empty string to show all.
   string symbol = 1;
-  // Borrowed is the minimum USD value an account must have borrowed to show. Use 0 to ignore.
+  // Borrowed is the minimum USD value an account must have borrowed to show. Use 0 to show all.
   double borrowed = 2;
-  // Collateral is the minimum USD value of collateral an account must have to show. Use 0 to ignore.
+  // Collateral is the minimum USD value of collateral an account must have to show. Use 0 to show all.
   double collateral = 3;
-  // Danger is the minimum progress toward liquidation an account must have to show. Use 0 to ignore.
+  // Danger is the minimum progress toward liquidation an account must have to show. Use 0 to show all.
   // Measured as the ratio (borrowed value / liquidation threshold), where > 1 is liquidation-eligible.
   double danger = 4;
-  // LTV is the minimum ratio (borrowed value / collateral value) an account must have to show. Use 0 to ignore.
+  // LTV is the minimum ratio (borrowed value / collateral value) an account must have to show. Use 0 to show all.
   double ltv = 5;
 }
 
@@ -351,8 +351,11 @@ message QueryInspectResponse {
 
 // InspectAccount contains risk and balance info for a single account for the inspector query.
 message InspectAccount {
-  string      address  = 1;
-  RiskInfo    analysis = 2;
+  // Address of a borrower
+  string address = 1;
+  // USD totals of borrower's collateral, debt, and liquidation threshold.
+  RiskInfo analysis = 2;
+  // Collateral and borrowed tokens, denoted in human-readable symbol denom instead of ibc denom.
   DecBalances position = 3;
 }
 

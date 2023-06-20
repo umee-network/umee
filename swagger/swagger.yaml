@@ -283,7 +283,11 @@ paths:
                   properties:
                     address:
                       type: string
+                      title: Address of a borrower
                     analysis:
+                      description: >-
+                        USD totals of borrower's collateral, debt, and
+                        liquidation threshold.
                       type: object
                       properties:
                         Borrowed:
@@ -300,10 +304,10 @@ paths:
                           type: number
                           format: double
                           description: Value is account's collateral value in USD.
-                      description: >-
-                        RiskInfo defines a borrower's account health without
-                        requiring sdk.Dec formatting.
                     position:
+                      description: >-
+                        Collateral and borrowed tokens, denoted in
+                        human-readable symbol denom instead of ibc denom.
                       type: object
                       properties:
                         collateral:
@@ -349,9 +353,6 @@ paths:
                           description: >-
                             Borrowed contains all tokens the account has
                             borrowed, including interest owed.
-                      description: >-
-                        DecBalances contains an account's position denoted in
-                        symbol denom tokens.
                   description: >-
                     InspectAccount contains risk and balance info for a single
                     account for the inspector query.
@@ -384,14 +385,14 @@ paths:
         - name: symbol
           description: >-
             Symbol selects a symbol denom to sort accounts by borrowed value.
-            Use "all" to ignore.
+            Use "all" or empty string to show all.
           in: query
           required: false
           type: string
         - name: borrowed
           description: >-
             Borrowed is the minimum USD value an account must have borrowed to
-            show. Use 0 to ignore.
+            show. Use 0 to show all.
           in: query
           required: false
           type: number
@@ -399,7 +400,7 @@ paths:
         - name: collateral
           description: >-
             Collateral is the minimum USD value of collateral an account must
-            have to show. Use 0 to ignore.
+            have to show. Use 0 to show all.
           in: query
           required: false
           type: number
@@ -407,7 +408,7 @@ paths:
         - name: danger
           description: >-
             Danger is the minimum progress toward liquidation an account must
-            have to show. Use 0 to ignore.
+            have to show. Use 0 to show all.
 
             Measured as the ratio (borrowed value / liquidation threshold),
             where > 1 is liquidation-eligible.
@@ -418,7 +419,7 @@ paths:
         - name: ltv
           description: >-
             LTV is the minimum ratio (borrowed value / collateral value) an
-            account must have to show. Use 0 to ignore.
+            account must have to show. Use 0 to show all.
           in: query
           required: false
           type: number
@@ -3497,7 +3498,9 @@ definitions:
     properties:
       address:
         type: string
+        title: Address of a borrower
       analysis:
+        description: USD totals of borrower's collateral, debt, and liquidation threshold.
         type: object
         properties:
           Borrowed:
@@ -3512,10 +3515,10 @@ definitions:
             type: number
             format: double
             description: Value is account's collateral value in USD.
-        description: >-
-          RiskInfo defines a borrower's account health without requiring sdk.Dec
-          formatting.
       position:
+        description: >-
+          Collateral and borrowed tokens, denoted in human-readable symbol denom
+          instead of ibc denom.
         type: object
         properties:
           collateral:
@@ -3560,9 +3563,6 @@ definitions:
             description: >-
               Borrowed contains all tokens the account has borrowed, including
               interest owed.
-        description: >-
-          DecBalances contains an account's position denoted in symbol denom
-          tokens.
     description: >-
       InspectAccount contains risk and balance info for a single account for the
       inspector query.
@@ -3799,7 +3799,11 @@ definitions:
           properties:
             address:
               type: string
+              title: Address of a borrower
             analysis:
+              description: >-
+                USD totals of borrower's collateral, debt, and liquidation
+                threshold.
               type: object
               properties:
                 Borrowed:
@@ -3814,10 +3818,10 @@ definitions:
                   type: number
                   format: double
                   description: Value is account's collateral value in USD.
-              description: >-
-                RiskInfo defines a borrower's account health without requiring
-                sdk.Dec formatting.
             position:
+              description: >-
+                Collateral and borrowed tokens, denoted in human-readable symbol
+                denom instead of ibc denom.
               type: object
               properties:
                 collateral:
@@ -3863,9 +3867,6 @@ definitions:
                   description: >-
                     Borrowed contains all tokens the account has borrowed,
                     including interest owed.
-              description: >-
-                DecBalances contains an account's position denoted in symbol
-                denom tokens.
           description: >-
             InspectAccount contains risk and balance info for a single account
             for the inspector query.
