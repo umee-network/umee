@@ -62,3 +62,24 @@ func MustLoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []b
 	util.Panic(err)
 	return ls
 }
+
+// SumCoins aggregates all coins saved as (denom: Int) pairs in store with the given prefix.
+func SumCoins(s storetypes.KVStore, prefix []byte, f StrExtractor) (sdk.Coins, error) {
+	total := sdk.NewCoins()
+	iterator := func(key, val []byte) error {
+		denom, err := f(key)
+		if err != nil {
+			return err
+		}
+		amount := Int(val, "amount")
+		total = total.Add(sdk.NewCoin(denom, amount))
+		return nil
+	}
+
+	err := Iterate(s, prefix, iterator)
+	return total, err
+}
+
+// StrExtractor is a function type which will take a bytes string value and extracts
+// string out of it.
+type StrExtractor func([]byte) (string, error)
