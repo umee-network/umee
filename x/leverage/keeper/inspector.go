@@ -90,10 +90,15 @@ func (q Querier) Inspect(
 	_ = k.iterate(ctx, prefix, iterator)
 
 	// sorts the borrowers
-	sort.Sort(byCustom{
-		bs:   borrowers,
-		less: moreBorrowed(req.Symbol),
-	})
+	sort.SliceStable(borrowers, func(i, j int) bool {
+		if req.Symbol != "" {
+			// for non-empty symbol denom, sorts by borrowed amount (descending) of that token
+			return borrowers[i].Position.Borrowed.AmountOf(req.Symbol).GTE(borrowers[j].Position.Borrowed.AmountOf(req.Symbol))
+		}
+		// otherwise, sorts by borrowed value (descending)
+		return borrowers[i].Analysis.Borrowed > borrowers[j].Analysis.Borrowed
+	},
+	)
 
 	// convert from pointers
 	sortedBorrowers := []types.InspectAccount{}
@@ -154,32 +159,4 @@ func neat(num sdk.Dec) float64 {
 	// Truncate the float at a certain precision (can be negative)
 	x := math.Pow(10, float64(precision))
 	return float64(int(n*x)) / x
-}
-
-// byCustom implements sort.Interface by providing Less and using the Len and
-// Swap methods of the embedded bsums value.
-type byCustom struct {
-	bs   []*types.InspectAccount
-	less inspectorSort
-}
-
-func (s byCustom) Len() int           { return len(s.bs) }
-func (s byCustom) Swap(i, j int)      { s.bs[i], s.bs[j] = s.bs[j], s.bs[i] }
-func (s byCustom) Less(i, j int) bool { return s.less(s.bs[i], s.bs[j]) }
-
-// inspectorSort defines a Less function for sorting inspected borrower summaries,
-// which must return true if a should come before b using custom logic for sorts.
-type inspectorSort func(a, b *types.InspectAccount) bool
-
-// moreBorrowed sorts accounts by borrowed amount of a given symbol denom, or
-// borrowed USD value if no symbol denom is provided
-func moreBorrowed(symbol string) inspectorSort {
-	if symbol != "" {
-		return func(a, b *types.InspectAccount) bool {
-			return a.Position.Borrowed.AmountOf(symbol).GTE(b.Position.Borrowed.AmountOf(symbol))
-		}
-	}
-	return func(a, b *types.InspectAccount) bool {
-		return a.Analysis.Borrowed >= b.Analysis.Borrowed
-	}
 }
