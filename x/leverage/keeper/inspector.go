@@ -64,7 +64,7 @@ func (q Querier) Inspect(
 		collateralValue, _ := k.CalculateCollateralValue(ctx, collateral)
 		liquidationThreshold, _ := k.CalculateLiquidationThreshold(ctx, collateral)
 
-		summary := types.InspectAccount{
+		account := types.InspectAccount{
 			Address: addr.String(),
 			Analysis: &types.RiskInfo{
 				Borrowed:    neat(borrowedValue),
@@ -76,34 +76,28 @@ func (q Querier) Inspect(
 				Borrowed:   symbolDecCoins(borrowed, symbols, exponents, exchangeRates),
 			},
 		}
-		borrowers = append(borrowers, &summary)
-		return nil
-	}
-
-	// collect all accounts (unsorted)
-	_ = k.iterate(ctx, prefix, iterator)
-
-	// filters the borrowers
-	filteredBorrowers := []*types.InspectAccount{}
-	for _, account := range borrowers {
 		ok := account.Analysis.Borrowed > req.Borrowed
 		ok = ok && account.Analysis.Value > req.Collateral
 		ok = ok && account.Analysis.Borrowed/account.Analysis.Liquidation > req.Danger
 		ok = ok && account.Analysis.Borrowed/account.Analysis.Value > req.Ltv
 		if ok {
-			filteredBorrowers = append(filteredBorrowers, account)
+			borrowers = append(borrowers, &account)
 		}
+		return nil
 	}
+
+	// collect all accounts (filtered but unsorted)
+	_ = k.iterate(ctx, prefix, iterator)
 
 	// sorts the borrowers
 	sort.Sort(byCustom{
-		bs:   filteredBorrowers,
+		bs:   borrowers,
 		less: moreBorrowed(req.Symbol),
 	})
 
 	// convert from pointers
 	sortedBorrowers := []types.InspectAccount{}
-	for _, b := range filteredBorrowers {
+	for _, b := range borrowers {
 		sortedBorrowers = append(sortedBorrowers, *b)
 	}
 	return &types.QueryInspectResponse{Borrowers: sortedBorrowers}, nil
