@@ -9,6 +9,8 @@ import (
 )
 
 func TestDefaultParams(t *testing.T) {
+	t.Parallel()
+
 	params := DefaultParams()
 	assert.NilError(t, params.Validate())
 
