@@ -52,9 +52,8 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade4_3(upgradeInfo)
 	app.registerUpgrade("v4.4", upgradeInfo)
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
-	if Experimental {
-		app.registerUpgrade("v4.5-alpha1", upgradeInfo, incentive.ModuleName) // TODO: set correct name
-	}
+	app.registerUpgrade("v5.1-alpha1", upgradeInfo, incentive.ModuleName)
+	// TODO: set correct 5.1 name and add borrowFactor migration
 }
 
 // performs upgrade from v4.2 to v4.3
@@ -260,6 +259,7 @@ func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Pl
 
 	if len(newStores) > 0 {
 		app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-			Added: newStores})
+			Added: newStores,
+		})
 	}
 }

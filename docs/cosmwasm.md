@@ -18,11 +18,27 @@ Queries for all native Umee modules:
 - [oracle](https://github.com/umee-network/umee/blob/main/proto/umee/oracle/v1/query.proto)
 - [uibc](https://github.com/umee-network/umee/blob/main/proto/umee/uibc/v1/quota.proto)
 
+JSON input to query the native modules with custom query
+
 ```json
 {
   "chain": {
     "custom": {
       "leverage_parameters": {}
+    }
+  }
+}
+```
+
+JSON input to query the all modules with stargate queries
+> You will find more about stargate queries [here](https://github.com/CosmWasm/wasmvm/blob/v1.2.3/types/queries.go#L339-L350)
+
+```json
+{
+  "chain":{
+    "stargate":{
+      "path":"/umee.leverage.v1.Query/Params",
+      "data": ""
     }
   }
 }

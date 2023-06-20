@@ -124,13 +124,14 @@ type mockLeverageKeeper struct {
 	// collateral[address] = coins
 	collateral map[string]sdk.Coins
 	// to test emergency unbondings
-	donatedCollateral sdk.Coins
+	donatedCollateral *sdk.Coins
 }
 
 func newMockLeverageKeeper() mockLeverageKeeper {
+	c := sdk.NewCoins()
 	m := mockLeverageKeeper{
 		collateral:        map[string]sdk.Coins{},
-		donatedCollateral: sdk.NewCoins(),
+		donatedCollateral: &c,
 	}
 	return m
 }
@@ -148,7 +149,7 @@ func (m *mockLeverageKeeper) GetCollateral(_ sdk.Context, addr sdk.AccAddress, d
 func (m *mockLeverageKeeper) DonateCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
 	newCollateral := m.GetCollateral(ctx, addr, uToken.Denom).Sub(uToken).Amount.Int64()
 	m.setCollateral(addr, uToken.Denom, newCollateral)
-	m.donatedCollateral = m.donatedCollateral.Add(uToken)
+	*m.donatedCollateral = m.donatedCollateral.Add(uToken)
 	return nil
 }
 
@@ -195,7 +196,7 @@ func (m *mockLeverageKeeper) GetTokenSettings(_ sdk.Context, denom string) (leve
 // TotalTokenValue implements the expected leverage keeper, with UMEE, ATOM, and DAI registered.
 func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ leveragetypes.PriceMode) (sdk.Dec, error) {
 	var (
-		total = sdk.ZeroDec()
+		total     = sdk.ZeroDec()
 		umeePrice = sdk.MustNewDecFromStr("4.21")
 		atomPrice = sdk.MustNewDecFromStr("39.38")
 		daiPrice  = sdk.MustNewDecFromStr("1.00")
