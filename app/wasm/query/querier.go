@@ -1,4 +1,4 @@
-package stargate
+package query
 
 import (
 	"fmt"
@@ -13,8 +13,8 @@ import (
 	"github.com/umee-network/umee/v5/client"
 )
 
-// Querier dispatches whitelisted stargate queries
-func Querier(
+// StargateQuerier dispatches whitelisted stargate queries
+func StargateQuerier(
 	queryRouter baseapp.GRPCQueryRouter,
 	cdc codec.Codec,
 ) func(ctx sdk.Context, request *wasmvmtypes.StargateQuery) ([]byte, error) {

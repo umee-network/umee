@@ -1,6 +1,7 @@
 package client
 
 import (
+	sdkerrors "cosmossdk.io/errors"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,12 +14,12 @@ func ConvertProtoToJSONMarshal(protoResponseType codec.ProtoMarshaler, bz []byte
 	// unmarshal binary into stargate response data structure
 	err := cdc.Unmarshal(bz, protoResponseType)
 	if err != nil {
-		return nil, wasmvmtypes.Unknown{}
+		return nil, sdkerrors.Wrap(err, "failed to unmarshal")
 	}
 
 	bz, err = cdc.MarshalJSON(protoResponseType)
 	if err != nil {
-		return nil, wasmvmtypes.Unknown{}
+		return nil, sdkerrors.Wrap(err, "failed to marshal")
 	}
 
 	protoResponseType.Reset()

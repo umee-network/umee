@@ -8,7 +8,6 @@ import (
 
 	"github.com/umee-network/umee/v5/app/wasm/msg"
 	"github.com/umee-network/umee/v5/app/wasm/query"
-	stargate "github.com/umee-network/umee/v5/app/wasm/stargate"
 	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
 	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
 )
@@ -34,7 +33,7 @@ func RegisterCustomPlugins(
 // RegisterStargateQueries expose the stargate queries
 func RegisterStargateQueries(queryRouter baseapp.GRPCQueryRouter, codec codec.Codec) []wasmkeeper.Option {
 	queryPluginOpt := wasmkeeper.WithQueryPlugins(&wasmkeeper.QueryPlugins{
-		Stargate: stargate.Querier(queryRouter, codec),
+		Stargate: query.StargateQuerier(queryRouter, codec),
 	})
 
 	return []wasmkeeper.Option{

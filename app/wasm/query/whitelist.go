@@ -1,4 +1,4 @@
-package stargate
+package query
 
 import (
 	"fmt"
