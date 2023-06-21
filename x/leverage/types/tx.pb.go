@@ -1296,7 +1296,11 @@ type MsgClient interface {
 	Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grpc.CallOption) (*MsgLiquidateResponse, error)
 	// FlashLiquidate allows a user to repay a different user's borrowed coins in exchange for some
 	// of the target's collateral. For flash liquidations, the tokens to repay are borrowed instead of
-	// being taken from the liquidator's wallet.
+	// being taken from the liquidator's wallet, and the reward is immediately collateralized. Borrow
+	// limit checks for the liquidator are deferred until after the reward is collateralized, allowing
+	// this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
+	// of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
+	// repay and reward token denoms.
 	FlashLiquidate(ctx context.Context, in *MsgFlashLiquidate, opts ...grpc.CallOption) (*MsgFlashLiquidateResponse, error)
 	// SupplyCollateral combines the Supply and Collateralize actions.
 	SupplyCollateral(ctx context.Context, in *MsgSupplyCollateral, opts ...grpc.CallOption) (*MsgSupplyCollateralResponse, error)
@@ -1450,7 +1454,11 @@ type MsgServer interface {
 	Liquidate(context.Context, *MsgLiquidate) (*MsgLiquidateResponse, error)
 	// FlashLiquidate allows a user to repay a different user's borrowed coins in exchange for some
 	// of the target's collateral. For flash liquidations, the tokens to repay are borrowed instead of
-	// being taken from the liquidator's wallet.
+	// being taken from the liquidator's wallet, and the reward is immediately collateralized. Borrow
+	// limit checks for the liquidator are deferred until after the reward is collateralized, allowing
+	// this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
+	// of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
+	// repay and reward token denoms.
 	FlashLiquidate(context.Context, *MsgFlashLiquidate) (*MsgFlashLiquidateResponse, error)
 	// SupplyCollateral combines the Supply and Collateralize actions.
 	SupplyCollateral(context.Context, *MsgSupplyCollateral) (*MsgSupplyCollateralResponse, error)
