@@ -25,8 +25,8 @@ import (
 	p2p "github.com/tendermint/tendermint/p2p"
 	"github.com/tendermint/tendermint/privval"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 type validator struct {

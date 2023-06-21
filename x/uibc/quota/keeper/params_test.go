@@ -5,7 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 func TestUnitParams(t *testing.T) {
@@ -17,7 +17,7 @@ func TestUnitParams(t *testing.T) {
 	zeroParams := uibc.Params{}
 	require.Equal(zeroParams, params)
 	// update params
-	params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
+	params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED
 	params.TokenQuota = sdk.MustNewDecFromStr("12.23")
 	params.TotalQuota = sdk.MustNewDecFromStr("3.4321")
 	err := k.SetParams(params)

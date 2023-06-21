@@ -4,7 +4,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // unbondedCollateral returns the collateral an account has which is neither bonded nor currently unbonding.
@@ -223,7 +223,7 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	denom := types.ToTokenDenom(spendableUTokens.Denom)
 
 	// Get the module_available_liquidity
-	moduleAvailableLiquidity, err := k.moduleAvailableLiquidity(ctx, denom)
+	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -271,7 +271,7 @@ func (k Keeper) moduleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	//
 	// module_available_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity
 	//									* module_collateral) / (1 - min_collateral_liquidity)
-	moduleAvailableCollateral := (sdk.NewDec(liquidity.Sub(spendableUTokens.Amount).Int64()).Sub(
+	moduleAvailableCollateral := (sdk.NewDecFromInt(liquidity.Sub(spendableUTokens.Amount)).Sub(
 		minCollateralLiquidity.MulInt(
 			totalTokenCollateral.AmountOf(denom),
 		),

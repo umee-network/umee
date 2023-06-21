@@ -12,17 +12,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
-	"github.com/umee-network/umee/v4/util"
-	"github.com/umee-network/umee/v4/x/oracle/client/cli"
-	"github.com/umee-network/umee/v4/x/oracle/keeper"
-	simulation "github.com/umee-network/umee/v4/x/oracle/simulations"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/x/oracle/client/cli"
+	"github.com/umee-network/umee/v5/x/oracle/keeper"
+	simulation "github.com/umee-network/umee/v5/x/oracle/simulations"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 var (
@@ -77,10 +76,6 @@ func (AppModuleBasic) ValidateGenesis(
 	return nil
 }
 
-// Deprecated: RegisterRESTRoutes performs a no-op. Querying is delegated to the
-// gRPC service.
-func (AppModuleBasic) RegisterRESTRoutes(client.Context, *mux.Router) {}
-
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the x/oracle
 // module.
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
@@ -124,21 +119,6 @@ func NewAppModule(
 // Name returns the x/oracle module's name.
 func (am AppModule) Name() string {
 	return am.AppModuleBasic.Name()
-}
-
-// Deprecated: Route returns the message routing key for the x/oracle module.
-func (am AppModule) Route() sdk.Route {
-	return sdk.Route{}
-}
-
-// QuerierRoute returns the x/oracle module's query routing key.
-func (AppModule) QuerierRoute() string { return types.QuerierRoute }
-
-// LegacyQuerierHandler returns a no-op legacy querier.
-func (am AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier {
-	return func(sdk.Context, []string, abci.RequestQuery) ([]byte, error) {
-		return nil, fmt.Errorf("legacy querier not supported for the x/%s module", types.ModuleName)
-	}
 }
 
 // RegisterServices registers gRPC services.
@@ -213,3 +193,9 @@ func (AppModule) RandomizedParams(*rand.Rand) []simtypes.ParamChange {
 func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
 	sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
 }
+
+// DEPRECATED
+
+func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier { return nil }
+func (AppModule) QuerierRoute() string                                { return "" }
+func (AppModule) Route() sdk.Route                                    { return sdk.Route{} }

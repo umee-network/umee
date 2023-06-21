@@ -8,7 +8,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 func TestMsgServer_GovUpdateQuota(t *testing.T) {
@@ -109,7 +109,7 @@ func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 				Title:       "title",
 				Description: "desc",
 				Authority:   authtypes.NewModuleAddress("gov").String(),
-				IbcStatus:   5,
+				IbcStatus:   10,
 			},
 			errMsg: "invalid ibc-transfer status",
 		}, {

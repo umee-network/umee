@@ -7,9 +7,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	setup "github.com/umee-network/umee/v4/tests/e2e/setup"
-	"github.com/umee-network/umee/v4/tests/grpc"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	setup "github.com/umee-network/umee/v5/tests/e2e/setup"
+	"github.com/umee-network/umee/v5/tests/grpc"
 )
 
 type E2ETest struct {

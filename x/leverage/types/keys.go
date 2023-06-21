@@ -3,7 +3,7 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
-	"github.com/umee-network/umee/v4/util"
+	"github.com/umee-network/umee/v5/util"
 )
 
 const (
@@ -12,12 +12,6 @@ const (
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName
-
-	// RouterKey is the message route
-	RouterKey = ModuleName
-
-	// QuerierRoute defines the module's query routing key
-	QuerierRoute = ModuleName
 )
 
 // KVStore key prefixes

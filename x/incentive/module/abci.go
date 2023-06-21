@@ -4,8 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/v4/util"
-	"github.com/umee-network/umee/v4/x/incentive/keeper"
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/x/incentive/keeper"
 )
 
 // EndBlocker implements EndBlock for the x/incentive module.

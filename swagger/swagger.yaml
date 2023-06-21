@@ -1905,6 +1905,1333 @@ paths:
           type: string
       tags:
         - Query
+  /umee/uibc/v1/all-outflows:
+    get:
+      summary: AllOutflow returns outflows for each denom in the current quota period.
+      operationId: AllOutflows
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              outflows:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            title: QueryOutflowResponse defines response type of Query/Outflow
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/uibc/v1/outflows:
+    get:
+      summary: |-
+        Outflow returns IBC denom outflows in the current quota period.
+        If denom is not specified, returns sum of all registered outflows.
+      operationId: Outflows
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              amount:
+                type: string
+            title: QueryOutflowResponse defines response type of Query/Outflow
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/uibc/v1/params:
+    get:
+      summary: Params queries the parameters of the x/uibc module.
+      operationId: UIBCParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                type: object
+                properties:
+                  ibc_status:
+                    description: >-
+                      ibc_status defines the IBC ICS20 status (transfer quota or
+                      transfers disabled).
+                    type: string
+                    enum:
+                      - IBC_TRANSFER_STATUS_UNSPECIFIED
+                      - IBC_TRANSFER_STATUS_QUOTA_DISABLED
+                      - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+                      - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+                      - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
+                      - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
+                    default: IBC_TRANSFER_STATUS_UNSPECIFIED
+                    title: >-
+                      IBCTransferStatus status of ibc-transfer quota check for
+                      inflow and outflow
+                  total_quota:
+                    type: string
+                    title: >-
+                      total_quota defines the total outflow limit of
+                      ibc-transfer in USD
+                  token_quota:
+                    type: string
+                    title: token_quota defines the outflow limit per token in USD
+                  quota_duration:
+                    type: string
+                    title: >-
+                      quota_duration defines quota expires for each ibc-transfer
+                      denom in seconds
+                title: Params of x/uibc module
+            description: >-
+              QueryParamsResponse defines the response structure for the Params
+              gRPC
+
+              service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/ugov/v1/min-gas-price:
+    get:
+      summary: MinGasPrice returns minimum transaction fees.
+      operationId: MinGasPrice
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              min_gas_price:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  DecCoin defines a token with a denomination and a decimal
+                  amount.
+
+
+                  NOTE: The amount field is an Dec which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+            description: QueryMinGasPriceResponse response type.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/incentive/v1/account_bonds/{address}:
+    get:
+      summary: >-
+        AccountBonds queries all bonded collateral and unbondings associated
+        with an account.
+      operationId: AccountBonds
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              bonded:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+              unbonding:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+              unbondings:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    start:
+                      type: string
+                      format: int64
+                    end:
+                      type: string
+                      format: int64
+                    uToken:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                  description: >-
+                    Unbonding is a structure that tracks an in-progress token
+                    unbonding.
+
+                    It tracks both its start time and end time, so that if the
+                    module's
+
+                    unbonding time changes, the unbonding can complete at the
+                    earlier of
+
+                    its original end time or its new one based on the new
+                    parameter.
+            description: >-
+              QueryAccountBondsResponse defines the response structure for the
+              AccountBonds gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
+  /umee/incentive/v1/actual_rates:
+    get:
+      summary: >-
+        ActualRates queries the hypothetical return of a bonded uToken
+        denomination
+
+        if current incentive rewards continued for one year. The response is an
+        sdk.Dec
+
+        representing an oracle-adjusted APY.
+      operationId: ActualRates
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              APY:
+                type: string
+                description: APY is the oracle price-adjusted APY of the bonded uToken.
+            description: >-
+              QueryActualRatesResponse defines the response structure for the
+              ActualRates gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: uToken
+          description: >-
+            uToken is the uToken denomination whose current annual rate of
+            rewards is being queried.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/incentive/v1/current_rates:
+    get:
+      summary: >-
+        CurrentRates queries the hypothetical return of a bonded uToken
+        denomination
+
+        if current incentive rewards continued for one year. The response is an
+        sdk.Coins
+
+        of base token rewards, per reference amount (usually 10^exponent of the
+        uToken.)
+      operationId: CurrentRates
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              reference_bond:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+              rewards:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: >-
+                  Rewards are the amount of base token rewards that the
+                  reference amount of bonded uTokens would earn
+
+                  if current rates continued for a full year.
+            description: >-
+              QueryCurrentRatesResponse defines the response structure for the
+              CurrentRates gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: uToken
+          description: >-
+            uToken is the uToken denomination whose current annual rate of
+            rewards is being queried.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/incentive/v1/last_reward_time:
+    get:
+      summary: >-
+        LastRewardTime queries the last block time at which incentive rewards
+        were calculated.
+      operationId: LastRewardTime
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              time:
+                type: string
+                format: int64
+            description: >-
+              QueryLastRewardTimeResponse defines the response structure for the
+              LastRewardTime gRPC
+
+              service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/incentive/v1/params:
+    get:
+      summary: Params queries the parameters of the x/incentive module.
+      operationId: IncentiveParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                type: object
+                properties:
+                  max_unbondings:
+                    type: integer
+                    format: int64
+                    description: >-
+                      max_unbondings is the maximum amount of concurrent
+                      unbondings an address can have
+
+                      of each bonded uToken denom. Zero is interpreted as no
+                      limit.
+                  unbonding_duration:
+                    type: string
+                    format: int64
+                    description: unbonding_duration is the unbonding duration (in seconds).
+                  emergency_unbond_fee:
+                    type: string
+                    description: >-
+                      emergency_unbond_fee is the portion of a bond that is paid
+                      when it is instantly
+
+                      released using MsgEmergencyUnbond. For example, 0.01 is a
+                      1% fee. Ranges 0-1.
+                description: Params defines the parameters for the incentive module.
+            description: >-
+              QueryParamsResponse defines the response structure for the Params
+              gRPC
+
+              service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/incentive/v1/pending_rewards/{address}:
+    get:
+      summary: >-
+        PendingRewards queries unclaimed incentive rewards associated with an
+        account.
+      operationId: PendingRewards
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              rewards:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            description: >-
+              QueryPendingRewardsResponse defines the response structure for the
+              PendingRewards gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
+  /umee/incentive/v1/program/{id}:
+    get:
+      summary: IncentiveProgram queries a single incentive program by ID.
+      operationId: IncentiveProgram
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              program:
+                type: object
+                properties:
+                  ID:
+                    type: integer
+                    format: int64
+                    description: >-
+                      ID uniquely identifies the incentive program after it has
+                      been created.
+
+                      It is zero when the program is being proposed by
+                      governance, and is set
+
+                      to its final value when the proposal passes.
+                  start_time:
+                    type: string
+                    format: int64
+                    description: >-
+                      start_time is the unix time (in seconds) at which the
+                      incentives begin.
+
+                      If a program is passed after its intended start time, its
+                      start time
+
+                      will be increased to the current time, with program
+                      duration unchanged.
+                  duration:
+                    type: string
+                    format: int64
+                    description: >-
+                      duration is the length of the incentive program from start
+                      time to
+
+                      completion in seconds.
+                  uToken:
+                    type: string
+                    description: >-
+                      uToken is the incentivized uToken collateral denom.
+                      Suppliers who collateralize
+
+                      this asset then bond it to the incentive module are
+                      eligible for this program's
+
+                      rewards.
+                  funded:
+                    type: boolean
+                    description: >-
+                      funded indicates whether a program bas been funded. This
+                      can happen when
+
+                      a program passes if funding from community fund, or any
+                      time before the
+
+                      program's start time if funding with MsgSponsor. A program
+                      that reaches
+
+                      its start time without being funded is cancelled.
+                  total_rewards:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  remaining_rewards:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      Coin defines a token with a denomination and an amount.
+
+
+                      NOTE: The amount field is an Int which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                description: >-
+                  IncentiveProgram defines a liquidity mining incentive program
+                  on a single
+
+                  locked uToken denom that will run for a set amount of time.
+            description: >-
+              QueryIncentivePrograResponse defines the response structure for
+              the
+
+              IncentiveProgram gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: id
+          description: ID specifies which program to query for
+          in: path
+          required: true
+          type: integer
+          format: int64
+      tags:
+        - Query
+  /umee/incentive/v1/programs/completed:
+    get:
+      summary: >-
+        CompletedIncentivePrograms queries for all incentives programs that have
+        been passed
+
+        by governance, and either run to completion or expired immediately due
+        to not being funded.
+      operationId: CompletedIncentivePrograms
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              programs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ID:
+                      type: integer
+                      format: int64
+                      description: >-
+                        ID uniquely identifies the incentive program after it
+                        has been created.
+
+                        It is zero when the program is being proposed by
+                        governance, and is set
+
+                        to its final value when the proposal passes.
+                    start_time:
+                      type: string
+                      format: int64
+                      description: >-
+                        start_time is the unix time (in seconds) at which the
+                        incentives begin.
+
+                        If a program is passed after its intended start time,
+                        its start time
+
+                        will be increased to the current time, with program
+                        duration unchanged.
+                    duration:
+                      type: string
+                      format: int64
+                      description: >-
+                        duration is the length of the incentive program from
+                        start time to
+
+                        completion in seconds.
+                    uToken:
+                      type: string
+                      description: >-
+                        uToken is the incentivized uToken collateral denom.
+                        Suppliers who collateralize
+
+                        this asset then bond it to the incentive module are
+                        eligible for this program's
+
+                        rewards.
+                    funded:
+                      type: boolean
+                      description: >-
+                        funded indicates whether a program bas been funded. This
+                        can happen when
+
+                        a program passes if funding from community fund, or any
+                        time before the
+
+                        program's start time if funding with MsgSponsor. A
+                        program that reaches
+
+                        its start time without being funded is cancelled.
+                    total_rewards:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    remaining_rewards:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                  description: >-
+                    IncentiveProgram defines a liquidity mining incentive
+                    program on a single
+
+                    locked uToken denom that will run for a set amount of time.
+            description: >-
+              QueryCompletedIncentiveProgramsResponse defines the response
+              structure for the
+
+              CompletedIncentivePrograms gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/incentive/v1/programs/ongoing:
+    get:
+      summary: >-
+        OngoingIncentivePrograms queries for all incentives programs that have
+        been passed
+
+        by governance, funded, and started but not yet completed.
+      operationId: OngoingIncentivePrograms
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              programs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ID:
+                      type: integer
+                      format: int64
+                      description: >-
+                        ID uniquely identifies the incentive program after it
+                        has been created.
+
+                        It is zero when the program is being proposed by
+                        governance, and is set
+
+                        to its final value when the proposal passes.
+                    start_time:
+                      type: string
+                      format: int64
+                      description: >-
+                        start_time is the unix time (in seconds) at which the
+                        incentives begin.
+
+                        If a program is passed after its intended start time,
+                        its start time
+
+                        will be increased to the current time, with program
+                        duration unchanged.
+                    duration:
+                      type: string
+                      format: int64
+                      description: >-
+                        duration is the length of the incentive program from
+                        start time to
+
+                        completion in seconds.
+                    uToken:
+                      type: string
+                      description: >-
+                        uToken is the incentivized uToken collateral denom.
+                        Suppliers who collateralize
+
+                        this asset then bond it to the incentive module are
+                        eligible for this program's
+
+                        rewards.
+                    funded:
+                      type: boolean
+                      description: >-
+                        funded indicates whether a program bas been funded. This
+                        can happen when
+
+                        a program passes if funding from community fund, or any
+                        time before the
+
+                        program's start time if funding with MsgSponsor. A
+                        program that reaches
+
+                        its start time without being funded is cancelled.
+                    total_rewards:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    remaining_rewards:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                  description: >-
+                    IncentiveProgram defines a liquidity mining incentive
+                    program on a single
+
+                    locked uToken denom that will run for a set amount of time.
+            description: >-
+              QueryOngoingIncentiveProgramsResponse defines the response
+              structure for the
+
+              OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC
+              service handlers.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/incentive/v1/programs/upcoming:
+    get:
+      summary: >-
+        UpcomingIncentivePrograms queries for all incentives programs that have
+        been passed
+
+        by governance, but not yet started. They may or may not have been
+        funded.
+      operationId: UpcomingIncentivePrograms
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              programs:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ID:
+                      type: integer
+                      format: int64
+                      description: >-
+                        ID uniquely identifies the incentive program after it
+                        has been created.
+
+                        It is zero when the program is being proposed by
+                        governance, and is set
+
+                        to its final value when the proposal passes.
+                    start_time:
+                      type: string
+                      format: int64
+                      description: >-
+                        start_time is the unix time (in seconds) at which the
+                        incentives begin.
+
+                        If a program is passed after its intended start time,
+                        its start time
+
+                        will be increased to the current time, with program
+                        duration unchanged.
+                    duration:
+                      type: string
+                      format: int64
+                      description: >-
+                        duration is the length of the incentive program from
+                        start time to
+
+                        completion in seconds.
+                    uToken:
+                      type: string
+                      description: >-
+                        uToken is the incentivized uToken collateral denom.
+                        Suppliers who collateralize
+
+                        this asset then bond it to the incentive module are
+                        eligible for this program's
+
+                        rewards.
+                    funded:
+                      type: boolean
+                      description: >-
+                        funded indicates whether a program bas been funded. This
+                        can happen when
+
+                        a program passes if funding from community fund, or any
+                        time before the
+
+                        program's start time if funding with MsgSponsor. A
+                        program that reaches
+
+                        its start time without being funded is cancelled.
+                    total_rewards:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    remaining_rewards:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                  description: >-
+                    IncentiveProgram defines a liquidity mining incentive
+                    program on a single
+
+                    locked uToken denom that will run for a set amount of time.
+            description: >-
+              QueryUpcomingIncentiveProgramsResponse defines the response
+              structure for the
+
+              OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC
+              service handlers.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/incentive/v1/total_bonded:
+    get:
+      summary: TotalBonded queries the sum of all bonded collateral uTokens.
+      operationId: TotalBonded
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              bonded:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            description: >-
+              QueryTotalBondedResponse defines the response structure for the
+              TotalBonded gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: >-
+            denom is an optional field which causes the query to return the
+            totals of only one uToken.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/incentive/v1/total_unbonding:
+    get:
+      summary: TotalUnbonding queries the sum of all unbonding collateral uTokens.
+      operationId: TotalUnbonding
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              unbonding:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    Coin defines a token with a denomination and an amount.
+
+
+                    NOTE: The amount field is an Int which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            description: >-
+              QueryTotalUnbondingResponse defines the response structure for the
+              TotalUnbonding gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: >-
+            denom is an optional field which causes the query to return the
+            totals of only one uToken.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
 definitions:
   cosmos.base.v1beta1.Coin:
     type: object
@@ -3419,3 +4746,878 @@ definitions:
     description: |-
       QuerySlashWindowResponse is response type for the
       Query/SlashWindow RPC method.
+  umee.uibc.v1.IBCTransferStatus:
+    type: string
+    enum:
+      - IBC_TRANSFER_STATUS_UNSPECIFIED
+      - IBC_TRANSFER_STATUS_QUOTA_DISABLED
+      - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+      - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+      - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
+      - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
+    default: IBC_TRANSFER_STATUS_UNSPECIFIED
+    description: |-
+      - IBC_TRANSFER_STATUS_UNSPECIFIED: UNSPECIFIED  defines a no-op status.
+       - IBC_TRANSFER_STATUS_QUOTA_DISABLED: DISABLED: all inflow and outflow quota checks are disabled.
+       - IBC_TRANSFER_STATUS_QUOTA_ENABLED: ENABLED: all inflow and outflow quota checks are enabled.
+       - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED: DISABLED OUT: outflow quota check is disabled, while the inflow quota check is enabled.
+       - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED: DISABLED IN: inflow quota check is disabled, while the outflow quota check is enabled.
+       - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED: PAUSED: all IBC transfers are paused.
+    title: >-
+      IBCTransferStatus status of ibc-transfer quota check for inflow and
+      outflow
+  umee.uibc.v1.Params:
+    type: object
+    properties:
+      ibc_status:
+        description: >-
+          ibc_status defines the IBC ICS20 status (transfer quota or transfers
+          disabled).
+        type: string
+        enum:
+          - IBC_TRANSFER_STATUS_UNSPECIFIED
+          - IBC_TRANSFER_STATUS_QUOTA_DISABLED
+          - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+          - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+          - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
+          - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
+        default: IBC_TRANSFER_STATUS_UNSPECIFIED
+        title: >-
+          IBCTransferStatus status of ibc-transfer quota check for inflow and
+          outflow
+      total_quota:
+        type: string
+        title: total_quota defines the total outflow limit of ibc-transfer in USD
+      token_quota:
+        type: string
+        title: token_quota defines the outflow limit per token in USD
+      quota_duration:
+        type: string
+        title: >-
+          quota_duration defines quota expires for each ibc-transfer denom in
+          seconds
+    title: Params of x/uibc module
+  umee.uibc.v1.QueryAllOutflowsResponse:
+    type: object
+    properties:
+      outflows:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+    title: QueryOutflowResponse defines response type of Query/Outflow
+  umee.uibc.v1.QueryOutflowsResponse:
+    type: object
+    properties:
+      amount:
+        type: string
+    title: QueryOutflowResponse defines response type of Query/Outflow
+  umee.uibc.v1.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        type: object
+        properties:
+          ibc_status:
+            description: >-
+              ibc_status defines the IBC ICS20 status (transfer quota or
+              transfers disabled).
+            type: string
+            enum:
+              - IBC_TRANSFER_STATUS_UNSPECIFIED
+              - IBC_TRANSFER_STATUS_QUOTA_DISABLED
+              - IBC_TRANSFER_STATUS_QUOTA_ENABLED
+              - IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED
+              - IBC_TRANSFER_STATUS_QUOTA_IN_DISABLED
+              - IBC_TRANSFER_STATUS_TRANSFERS_PAUSED
+            default: IBC_TRANSFER_STATUS_UNSPECIFIED
+            title: >-
+              IBCTransferStatus status of ibc-transfer quota check for inflow
+              and outflow
+          total_quota:
+            type: string
+            title: total_quota defines the total outflow limit of ibc-transfer in USD
+          token_quota:
+            type: string
+            title: token_quota defines the outflow limit per token in USD
+          quota_duration:
+            type: string
+            title: >-
+              quota_duration defines quota expires for each ibc-transfer denom
+              in seconds
+        title: Params of x/uibc module
+    description: |-
+      QueryParamsResponse defines the response structure for the Params gRPC
+      service handler.
+  umee.ugov.v1.QueryMinGasPriceResponse:
+    type: object
+    properties:
+      min_gas_price:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          DecCoin defines a token with a denomination and a decimal amount.
+
+          NOTE: The amount field is an Dec which implements the custom method
+          signatures required by gogoproto.
+    description: QueryMinGasPriceResponse response type.
+  umee.incentive.v1.IncentiveProgram:
+    type: object
+    properties:
+      ID:
+        type: integer
+        format: int64
+        description: >-
+          ID uniquely identifies the incentive program after it has been
+          created.
+
+          It is zero when the program is being proposed by governance, and is
+          set
+
+          to its final value when the proposal passes.
+      start_time:
+        type: string
+        format: int64
+        description: >-
+          start_time is the unix time (in seconds) at which the incentives
+          begin.
+
+          If a program is passed after its intended start time, its start time
+
+          will be increased to the current time, with program duration
+          unchanged.
+      duration:
+        type: string
+        format: int64
+        description: |-
+          duration is the length of the incentive program from start time to
+          completion in seconds.
+      uToken:
+        type: string
+        description: >-
+          uToken is the incentivized uToken collateral denom. Suppliers who
+          collateralize
+
+          this asset then bond it to the incentive module are eligible for this
+          program's
+
+          rewards.
+      funded:
+        type: boolean
+        description: >-
+          funded indicates whether a program bas been funded. This can happen
+          when
+
+          a program passes if funding from community fund, or any time before
+          the
+
+          program's start time if funding with MsgSponsor. A program that
+          reaches
+
+          its start time without being funded is cancelled.
+      total_rewards:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+      remaining_rewards:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+    description: |-
+      IncentiveProgram defines a liquidity mining incentive program on a single
+      locked uToken denom that will run for a set amount of time.
+  umee.incentive.v1.Params:
+    type: object
+    properties:
+      max_unbondings:
+        type: integer
+        format: int64
+        description: >-
+          max_unbondings is the maximum amount of concurrent unbondings an
+          address can have
+
+          of each bonded uToken denom. Zero is interpreted as no limit.
+      unbonding_duration:
+        type: string
+        format: int64
+        description: unbonding_duration is the unbonding duration (in seconds).
+      emergency_unbond_fee:
+        type: string
+        description: >-
+          emergency_unbond_fee is the portion of a bond that is paid when it is
+          instantly
+
+          released using MsgEmergencyUnbond. For example, 0.01 is a 1% fee.
+          Ranges 0-1.
+    description: Params defines the parameters for the incentive module.
+  umee.incentive.v1.QueryAccountBondsResponse:
+    type: object
+    properties:
+      bonded:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+      unbonding:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+      unbondings:
+        type: array
+        items:
+          type: object
+          properties:
+            start:
+              type: string
+              format: int64
+            end:
+              type: string
+              format: int64
+            uToken:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+          description: |-
+            Unbonding is a structure that tracks an in-progress token unbonding.
+            It tracks both its start time and end time, so that if the module's
+            unbonding time changes, the unbonding can complete at the earlier of
+            its original end time or its new one based on the new parameter.
+    description: >-
+      QueryAccountBondsResponse defines the response structure for the
+      AccountBonds gRPC service handler.
+  umee.incentive.v1.QueryActualRatesResponse:
+    type: object
+    properties:
+      APY:
+        type: string
+        description: APY is the oracle price-adjusted APY of the bonded uToken.
+    description: >-
+      QueryActualRatesResponse defines the response structure for the
+      ActualRates gRPC service handler.
+  umee.incentive.v1.QueryCompletedIncentiveProgramsResponse:
+    type: object
+    properties:
+      programs:
+        type: array
+        items:
+          type: object
+          properties:
+            ID:
+              type: integer
+              format: int64
+              description: >-
+                ID uniquely identifies the incentive program after it has been
+                created.
+
+                It is zero when the program is being proposed by governance, and
+                is set
+
+                to its final value when the proposal passes.
+            start_time:
+              type: string
+              format: int64
+              description: >-
+                start_time is the unix time (in seconds) at which the incentives
+                begin.
+
+                If a program is passed after its intended start time, its start
+                time
+
+                will be increased to the current time, with program duration
+                unchanged.
+            duration:
+              type: string
+              format: int64
+              description: >-
+                duration is the length of the incentive program from start time
+                to
+
+                completion in seconds.
+            uToken:
+              type: string
+              description: >-
+                uToken is the incentivized uToken collateral denom. Suppliers
+                who collateralize
+
+                this asset then bond it to the incentive module are eligible for
+                this program's
+
+                rewards.
+            funded:
+              type: boolean
+              description: >-
+                funded indicates whether a program bas been funded. This can
+                happen when
+
+                a program passes if funding from community fund, or any time
+                before the
+
+                program's start time if funding with MsgSponsor. A program that
+                reaches
+
+                its start time without being funded is cancelled.
+            total_rewards:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            remaining_rewards:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+          description: >-
+            IncentiveProgram defines a liquidity mining incentive program on a
+            single
+
+            locked uToken denom that will run for a set amount of time.
+    description: >-
+      QueryCompletedIncentiveProgramsResponse defines the response structure for
+      the
+
+      CompletedIncentivePrograms gRPC service handler.
+  umee.incentive.v1.QueryCurrentRatesResponse:
+    type: object
+    properties:
+      reference_bond:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+      rewards:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+        description: >-
+          Rewards are the amount of base token rewards that the reference amount
+          of bonded uTokens would earn
+
+          if current rates continued for a full year.
+    description: >-
+      QueryCurrentRatesResponse defines the response structure for the
+      CurrentRates gRPC service handler.
+  umee.incentive.v1.QueryIncentiveProgramResponse:
+    type: object
+    properties:
+      program:
+        type: object
+        properties:
+          ID:
+            type: integer
+            format: int64
+            description: >-
+              ID uniquely identifies the incentive program after it has been
+              created.
+
+              It is zero when the program is being proposed by governance, and
+              is set
+
+              to its final value when the proposal passes.
+          start_time:
+            type: string
+            format: int64
+            description: >-
+              start_time is the unix time (in seconds) at which the incentives
+              begin.
+
+              If a program is passed after its intended start time, its start
+              time
+
+              will be increased to the current time, with program duration
+              unchanged.
+          duration:
+            type: string
+            format: int64
+            description: |-
+              duration is the length of the incentive program from start time to
+              completion in seconds.
+          uToken:
+            type: string
+            description: >-
+              uToken is the incentivized uToken collateral denom. Suppliers who
+              collateralize
+
+              this asset then bond it to the incentive module are eligible for
+              this program's
+
+              rewards.
+          funded:
+            type: boolean
+            description: >-
+              funded indicates whether a program bas been funded. This can
+              happen when
+
+              a program passes if funding from community fund, or any time
+              before the
+
+              program's start time if funding with MsgSponsor. A program that
+              reaches
+
+              its start time without being funded is cancelled.
+          total_rewards:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
+          remaining_rewards:
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+            description: >-
+              Coin defines a token with a denomination and an amount.
+
+
+              NOTE: The amount field is an Int which implements the custom
+              method
+
+              signatures required by gogoproto.
+        description: >-
+          IncentiveProgram defines a liquidity mining incentive program on a
+          single
+
+          locked uToken denom that will run for a set amount of time.
+    description: |-
+      QueryIncentivePrograResponse defines the response structure for the
+      IncentiveProgram gRPC service handler.
+  umee.incentive.v1.QueryLastRewardTimeResponse:
+    type: object
+    properties:
+      time:
+        type: string
+        format: int64
+    description: >-
+      QueryLastRewardTimeResponse defines the response structure for the
+      LastRewardTime gRPC
+
+      service handler.
+  umee.incentive.v1.QueryOngoingIncentiveProgramsResponse:
+    type: object
+    properties:
+      programs:
+        type: array
+        items:
+          type: object
+          properties:
+            ID:
+              type: integer
+              format: int64
+              description: >-
+                ID uniquely identifies the incentive program after it has been
+                created.
+
+                It is zero when the program is being proposed by governance, and
+                is set
+
+                to its final value when the proposal passes.
+            start_time:
+              type: string
+              format: int64
+              description: >-
+                start_time is the unix time (in seconds) at which the incentives
+                begin.
+
+                If a program is passed after its intended start time, its start
+                time
+
+                will be increased to the current time, with program duration
+                unchanged.
+            duration:
+              type: string
+              format: int64
+              description: >-
+                duration is the length of the incentive program from start time
+                to
+
+                completion in seconds.
+            uToken:
+              type: string
+              description: >-
+                uToken is the incentivized uToken collateral denom. Suppliers
+                who collateralize
+
+                this asset then bond it to the incentive module are eligible for
+                this program's
+
+                rewards.
+            funded:
+              type: boolean
+              description: >-
+                funded indicates whether a program bas been funded. This can
+                happen when
+
+                a program passes if funding from community fund, or any time
+                before the
+
+                program's start time if funding with MsgSponsor. A program that
+                reaches
+
+                its start time without being funded is cancelled.
+            total_rewards:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            remaining_rewards:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+          description: >-
+            IncentiveProgram defines a liquidity mining incentive program on a
+            single
+
+            locked uToken denom that will run for a set amount of time.
+    description: >-
+      QueryOngoingIncentiveProgramsResponse defines the response structure for
+      the
+
+      OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service
+      handlers.
+  umee.incentive.v1.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        type: object
+        properties:
+          max_unbondings:
+            type: integer
+            format: int64
+            description: >-
+              max_unbondings is the maximum amount of concurrent unbondings an
+              address can have
+
+              of each bonded uToken denom. Zero is interpreted as no limit.
+          unbonding_duration:
+            type: string
+            format: int64
+            description: unbonding_duration is the unbonding duration (in seconds).
+          emergency_unbond_fee:
+            type: string
+            description: >-
+              emergency_unbond_fee is the portion of a bond that is paid when it
+              is instantly
+
+              released using MsgEmergencyUnbond. For example, 0.01 is a 1% fee.
+              Ranges 0-1.
+        description: Params defines the parameters for the incentive module.
+    description: |-
+      QueryParamsResponse defines the response structure for the Params gRPC
+      service handler.
+  umee.incentive.v1.QueryPendingRewardsResponse:
+    type: object
+    properties:
+      rewards:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+    description: >-
+      QueryPendingRewardsResponse defines the response structure for the
+      PendingRewards gRPC service handler.
+  umee.incentive.v1.QueryTotalBondedResponse:
+    type: object
+    properties:
+      bonded:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+    description: >-
+      QueryTotalBondedResponse defines the response structure for the
+      TotalBonded gRPC service handler.
+  umee.incentive.v1.QueryTotalUnbondingResponse:
+    type: object
+    properties:
+      unbonding:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            Coin defines a token with a denomination and an amount.
+
+            NOTE: The amount field is an Int which implements the custom method
+            signatures required by gogoproto.
+    description: >-
+      QueryTotalUnbondingResponse defines the response structure for the
+      TotalUnbonding gRPC service handler.
+  umee.incentive.v1.QueryUpcomingIncentiveProgramsResponse:
+    type: object
+    properties:
+      programs:
+        type: array
+        items:
+          type: object
+          properties:
+            ID:
+              type: integer
+              format: int64
+              description: >-
+                ID uniquely identifies the incentive program after it has been
+                created.
+
+                It is zero when the program is being proposed by governance, and
+                is set
+
+                to its final value when the proposal passes.
+            start_time:
+              type: string
+              format: int64
+              description: >-
+                start_time is the unix time (in seconds) at which the incentives
+                begin.
+
+                If a program is passed after its intended start time, its start
+                time
+
+                will be increased to the current time, with program duration
+                unchanged.
+            duration:
+              type: string
+              format: int64
+              description: >-
+                duration is the length of the incentive program from start time
+                to
+
+                completion in seconds.
+            uToken:
+              type: string
+              description: >-
+                uToken is the incentivized uToken collateral denom. Suppliers
+                who collateralize
+
+                this asset then bond it to the incentive module are eligible for
+                this program's
+
+                rewards.
+            funded:
+              type: boolean
+              description: >-
+                funded indicates whether a program bas been funded. This can
+                happen when
+
+                a program passes if funding from community fund, or any time
+                before the
+
+                program's start time if funding with MsgSponsor. A program that
+                reaches
+
+                its start time without being funded is cancelled.
+            total_rewards:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            remaining_rewards:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+          description: >-
+            IncentiveProgram defines a liquidity mining incentive program on a
+            single
+
+            locked uToken denom that will run for a set amount of time.
+    description: >-
+      QueryUpcomingIncentiveProgramsResponse defines the response structure for
+      the
+
+      OngoingIncentivePrograms and UpcomingIncentivePrograms gRPC service
+      handlers.
+  umee.incentive.v1.Unbonding:
+    type: object
+    properties:
+      start:
+        type: string
+        format: int64
+      end:
+        type: string
+        format: int64
+      uToken:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+    description: |-
+      Unbonding is a structure that tracks an in-progress token unbonding.
+      It tracks both its start time and end time, so that if the module's
+      unbonding time changes, the unbonding can complete at the earlier of
+      its original end time or its new one based on the new parameter.

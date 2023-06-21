@@ -4,11 +4,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	itestsuite "github.com/umee-network/umee/v4/tests/cli"
-	"github.com/umee-network/umee/v4/x/incentive"
-	"github.com/umee-network/umee/v4/x/incentive/client/cli"
-	leveragecli "github.com/umee-network/umee/v4/x/leverage/client/cli"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	itestsuite "github.com/umee-network/umee/v5/tests/cli"
+	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive/client/cli"
+	leveragecli "github.com/umee-network/umee/v5/x/leverage/client/cli"
 )
 
 func (s *IntegrationTests) TestInvalidQueries() {

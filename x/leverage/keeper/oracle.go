@@ -6,9 +6,9 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/sdkutil"
-	"github.com/umee-network/umee/v4/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/util/sdkutil"
+	"github.com/umee-network/umee/v5/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")

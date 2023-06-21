@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 	"gotest.tools/v3/assert"
 )
 

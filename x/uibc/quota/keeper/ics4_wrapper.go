@@ -7,9 +7,8 @@ import (
 	ics20types "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
-	"github.com/umee-network/umee/v4/x/uibc"
 
-	ibcutil "github.com/umee-network/umee/v4/util/ibc"
+	ibcutil "github.com/umee-network/umee/v5/util/ibc"
 )
 
 /******
@@ -27,7 +26,8 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 
 	k := kb.Keeper(&ctx)
 	params := k.GetParams()
-	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED {
+
+	if !params.IbcStatus.IBCTransferEnabled() {
 		return 0, ics20types.ErrSendDisabled
 	}
 
@@ -35,7 +35,8 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 	if err != nil {
 		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
-	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
+
+	if params.IbcStatus.OutflowQuotaEnabled() {
 		if err := k.CheckAndUpdateQuota(denom, funds); err != nil {
 			return 0, errors.Wrap(err, "sendPacket over the IBC Quota")
 		}

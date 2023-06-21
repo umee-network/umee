@@ -4,8 +4,8 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/util/sdkutil"
-	"github.com/umee-network/umee/v4/x/ugov"
+	"github.com/umee-network/umee/v5/util/sdkutil"
+	"github.com/umee-network/umee/v5/x/ugov"
 )
 
 type msgServer struct {
@@ -26,7 +26,7 @@ func (m msgServer) GovUpdateMinGasPrice(ctx context.Context, msg *ugov.MsgGovUpd
 	}
 
 	k := m.kb.Keeper(&sdkCtx)
-	if err := k.SetMinGasPrice(&msg.MinGasPrice); err != nil {
+	if err := k.SetMinGasPrice(msg.MinGasPrice); err != nil {
 		return nil, err
 	}
 	sdkutil.Emit(&sdkCtx, &ugov.EventMinTxFees{
