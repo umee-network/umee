@@ -16,7 +16,7 @@ type E2ETest struct {
 	setup.E2ETestSuite
 }
 
-func TestE2ETesrtSuite(t *testing.T) {
+func TestE2ETestSuite(t *testing.T) {
 	suite.Run(t, new(E2ETest))
 }
 

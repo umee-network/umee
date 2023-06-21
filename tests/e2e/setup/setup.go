@@ -1,4 +1,4 @@
-package e2esetup
+package setup
 
 import (
 	"bytes"
@@ -16,6 +16,7 @@ import (
 	"time"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -34,13 +35,13 @@ import (
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	"github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/client"
-	"github.com/umee-network/umee/v4/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/client"
+	"github.com/umee-network/umee/v5/x/leverage/fixtures"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 type E2ETestSuite struct {
@@ -60,12 +61,16 @@ type E2ETestSuite struct {
 	OrchResources       []*dockertest.Resource
 	GravityContractAddr string
 	Umee                client.Client
+	cdc                 codec.Codec
 }
 
 func (s *E2ETestSuite) SetupSuite() {
+	var err error
 	s.T().Log("setting up e2e integration test suite...")
 
-	var err error
+	// codec
+	s.cdc = encodingConfig.Codec
+
 	s.Chain, err = newChain()
 	s.Require().NoError(err)
 
@@ -147,9 +152,9 @@ func (s *E2ETestSuite) TearDownSuite() {
 }
 
 func (s *E2ETestSuite) initNodes() {
-	s.Require().NoError(s.Chain.createAndInitValidators(3))
-	s.Require().NoError(s.Chain.createAndInitOrchestrators(3))
-	s.Require().NoError(s.Chain.createAndInitGaiaValidator())
+	s.Require().NoError(s.Chain.createAndInitValidators(s.cdc, 3))
+	s.Require().NoError(s.Chain.createAndInitOrchestrators(s.cdc, 3))
+	s.Require().NoError(s.Chain.createAndInitGaiaValidator(s.cdc))
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := s.Chain.Validators[0].configDir()
@@ -157,7 +162,7 @@ func (s *E2ETestSuite) initNodes() {
 		valAddr, err := val.KeyInfo.GetAddress()
 		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", InitBalanceStr, valAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, valAddr),
 		)
 	}
 
@@ -167,7 +172,7 @@ func (s *E2ETestSuite) initNodes() {
 		s.Require().NoError(err)
 
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", InitBalanceStr, orchAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, orchAddr),
 		)
 	}
 
@@ -220,40 +225,40 @@ func (s *E2ETestSuite) initGenesis() {
 
 	// Gravity Bridge
 	var gravityGenState gravitytypes.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 
 	gravityGenState.Params.BridgeChainId = uint64(EthChainID)
 
-	bz, err := Cdc.MarshalJSON(&gravityGenState)
+	bz, err := s.cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
 	appGenState[gravitytypes.ModuleName] = bz
 
 	var bech32GenState bech32ibctypes.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
 
 	// bech32
 	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
 
-	bz, err = Cdc.MarshalJSON(&bech32GenState)
+	bz, err = s.cdc.MarshalJSON(&bech32GenState)
 	s.Require().NoError(err)
 	appGenState[bech32ibctypes.ModuleName] = bz
 
 	// Leverage
 	var leverageGenState leveragetypes.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry,
 		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 		fixtures.Token(ATOMBaseDenom, ATOM, uint32(ATOMExponent)),
 	)
 
-	bz, err = Cdc.MarshalJSON(&leverageGenState)
+	bz, err = s.cdc.MarshalJSON(&leverageGenState)
 	s.Require().NoError(err)
 	appGenState[leveragetypes.ModuleName] = bz
 
 	// Oracle
 	var oracleGenState oracletypes.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
 
 	oracleGenState.Params.HistoricStampPeriod = 5
 	oracleGenState.Params.MaximumPriceStamps = 4
@@ -266,25 +271,25 @@ func (s *E2ETestSuite) initGenesis() {
 		Exponent:    uint32(ATOMExponent),
 	})
 
-	bz, err = Cdc.MarshalJSON(&oracleGenState)
+	bz, err = s.cdc.MarshalJSON(&oracleGenState)
 	s.Require().NoError(err)
 	appGenState[oracletypes.ModuleName] = bz
 
 	// Gov
 	var govGenState govtypesv1.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	votingPeroid := 5 * time.Second
 	govGenState.VotingParams.VotingPeriod = &votingPeroid
 	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
-	bz, err = Cdc.MarshalJSON(&govGenState)
+	bz, err = s.cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)
 	appGenState[govtypes.ModuleName] = bz
 
 	// Bank
 	var bankGenState banktypes.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
 
 	bankGenState.DenomMetadata = append(bankGenState.DenomMetadata, banktypes.Metadata{
 		Description: "An example stable token",
@@ -300,13 +305,13 @@ func (s *E2ETestSuite) initGenesis() {
 		},
 	})
 
-	bz, err = Cdc.MarshalJSON(&bankGenState)
+	bz, err = s.cdc.MarshalJSON(&bankGenState)
 	s.Require().NoError(err)
 	appGenState[banktypes.ModuleName] = bz
 
 	// uibc (ibc quota)
 	var uibcGenState uibc.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[uibc.ModuleName], &uibcGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[uibc.ModuleName], &uibcGenState))
 
 	// 100$ for each token
 	uibcGenState.Params.TokenQuota = sdk.NewDec(100)
@@ -315,12 +320,12 @@ func (s *E2ETestSuite) initGenesis() {
 	// quotas will reset every 300 seconds
 	uibcGenState.Params.QuotaDuration = time.Second * 300
 
-	bz, err = Cdc.MarshalJSON(&uibcGenState)
+	bz, err = s.cdc.MarshalJSON(&uibcGenState)
 	s.Require().NoError(err)
 	appGenState[uibc.ModuleName] = bz
 
 	var genUtilGenState genutiltypes.GenesisState
-	s.Require().NoError(Cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
 
 	// generate genesis txs
 	genTxs := make([]json.RawMessage, len(s.Chain.Validators))
@@ -339,10 +344,10 @@ func (s *E2ETestSuite) initGenesis() {
 		delKeysMsg, err := val.buildDelegateKeysMsg(orchAddr, s.Chain.Orchestrators[i].EthereumKey.Address)
 		s.Require().NoError(err)
 
-		signedTx, err := val.signMsg(createValmsg, delKeysMsg)
+		signedTx, err := val.signMsg(s.cdc, createValmsg, delKeysMsg)
 		s.Require().NoError(err)
 
-		txRaw, err := Cdc.MarshalJSON(signedTx)
+		txRaw, err := s.cdc.MarshalJSON(signedTx)
 		s.Require().NoError(err)
 
 		genTxs[i] = txRaw
@@ -350,7 +355,7 @@ func (s *E2ETestSuite) initGenesis() {
 
 	genUtilGenState.GenTxs = genTxs
 
-	bz, err = Cdc.MarshalJSON(&genUtilGenState)
+	bz, err = s.cdc.MarshalJSON(&genUtilGenState)
 	s.Require().NoError(err)
 	appGenState[genutiltypes.ModuleName] = bz
 
@@ -1052,9 +1057,9 @@ func (s *E2ETestSuite) runPriceFeeder() {
 
 func (s *E2ETestSuite) initUmeeClient() {
 	var err error
-	mnemonics := make([]string, 0)
-	for _, v := range s.Chain.Validators {
-		mnemonics = append(mnemonics, v.mnemonic)
+	mnemonics := make(map[string]string)
+	for index, v := range s.Chain.Validators {
+		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
 	}
 	ecfg := app.MakeEncodingConfig()
 

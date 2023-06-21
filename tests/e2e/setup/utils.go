@@ -1,4 +1,4 @@
-package e2esetup
+package setup
 
 import (
 	"bytes"
@@ -14,6 +14,7 @@ import (
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
@@ -430,7 +431,7 @@ func (s *E2ETestSuite) QueryREST(endpoint string, valPtr interface{}) error {
 		if err != nil {
 			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
 		}
-		if err = Cdc.UnmarshalJSON(bz, valProto); err != nil {
+		if err = s.cdc.UnmarshalJSON(bz, valProto); err != nil {
 			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
 		}
 	} else {
@@ -604,7 +605,7 @@ func (s *E2ETestSuite) QueryUmeeEthBalance(
 	return umeeBalance, ethBalance, umeeAddr, ethAddr
 }
 
-func decodeTx(txBytes []byte) (*sdktx.Tx, error) {
+func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
 	var raw sdktx.TxRaw
 
 	// reject all unknown proto fields in the root TxRaw
@@ -613,12 +614,12 @@ func decodeTx(txBytes []byte) (*sdktx.Tx, error) {
 		return nil, fmt.Errorf("failed to reject unknown fields: %w", err)
 	}
 
-	if err := Cdc.Unmarshal(txBytes, &raw); err != nil {
+	if err := cdc.Unmarshal(txBytes, &raw); err != nil {
 		return nil, err
 	}
 
 	var body sdktx.TxBody
-	if err := Cdc.Unmarshal(raw.BodyBytes, &body); err != nil {
+	if err := cdc.Unmarshal(raw.BodyBytes, &body); err != nil {
 		return nil, fmt.Errorf("failed to decode tx: %w", err)
 	}
 
@@ -630,7 +631,7 @@ func decodeTx(txBytes []byte) (*sdktx.Tx, error) {
 		return nil, fmt.Errorf("failed to reject unknown fields: %w", err)
 	}
 
-	if err := Cdc.Unmarshal(raw.AuthInfoBytes, &authInfo); err != nil {
+	if err := cdc.Unmarshal(raw.AuthInfoBytes, &authInfo); err != nil {
 		return nil, fmt.Errorf("failed to decode auth info: %w", err)
 	}
 

@@ -1,4 +1,4 @@
-package e2esetup
+package setup
 
 import (
 	"github.com/ethereum/go-ethereum/accounts/abi"

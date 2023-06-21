@@ -1,11 +1,12 @@
-package e2esetup
+package setup
 
 import (
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
-	appparams "github.com/umee-network/umee/v4/app/params"
+	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 const (
@@ -50,13 +51,13 @@ func createMnemonic() (string, error) {
 	return mnemonic, nil
 }
 
-func createMemoryKey() (mnemonic string, info *keyring.Record, err error) {
+func createMemoryKey(cdc codec.Codec) (mnemonic string, info *keyring.Record, err error) {
 	mnemonic, err = createMnemonic()
 	if err != nil {
 		return "", nil, err
 	}
 
-	account, err := createMemoryKeyFromMnemonic(mnemonic)
+	account, err := createMemoryKeyFromMnemonic(cdc, mnemonic)
 	if err != nil {
 		return "", nil, err
 	}
@@ -64,8 +65,8 @@ func createMemoryKey() (mnemonic string, info *keyring.Record, err error) {
 	return mnemonic, account, nil
 }
 
-func createMemoryKeyFromMnemonic(mnemonic string) (*keyring.Record, error) {
-	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, Cdc)
+func createMemoryKeyFromMnemonic(cdc codec.Codec, mnemonic string) (*keyring.Record, error) {
+	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
 		return nil, err
 	}

@@ -1,4 +1,4 @@
-package e2esetup
+package setup
 
 import (
 	"fmt"
@@ -23,7 +23,6 @@ const (
 
 var (
 	encodingConfig sdkparams.EncodingConfig
-	Cdc            codec.Codec
 )
 
 func init() {
@@ -38,8 +37,6 @@ func init() {
 		&secp256k1.PubKey{},
 		&ed25519.PubKey{},
 	)
-
-	Cdc = encodingConfig.Codec
 }
 
 type chain struct {
@@ -66,19 +63,19 @@ func (c *chain) configDir() string {
 	return fmt.Sprintf("%s/%s", c.dataDir, c.ID)
 }
 
-func (c *chain) createAndInitValidators(count int) error {
+func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
 	for i := 0; i < count; i++ {
 		node := c.createValidator(i)
 
 		// generate genesis files
-		if err := node.init(); err != nil {
+		if err := node.init(cdc); err != nil {
 			return err
 		}
 
 		c.Validators = append(c.Validators, node)
 
 		// create keys
-		if err := node.createKey("val"); err != nil {
+		if err := node.createKey(cdc, "val"); err != nil {
 			return err
 		}
 		if err := node.createNodeKey(); err != nil {
@@ -92,12 +89,12 @@ func (c *chain) createAndInitValidators(count int) error {
 	return nil
 }
 
-func (c *chain) createAndInitGaiaValidator() error {
+func (c *chain) createAndInitGaiaValidator(cdc codec.Codec) error {
 	// create gaia validator
 	gaiaVal := c.createGaiaValidator(0)
 
 	// create keys
-	mnemonic, info, err := createMemoryKey()
+	mnemonic, info, err := createMemoryKey(cdc)
 	if err != nil {
 		return err
 	}
@@ -110,12 +107,12 @@ func (c *chain) createAndInitGaiaValidator() error {
 	return nil
 }
 
-func (c *chain) createAndInitOrchestrators(count int) error {
+func (c *chain) createAndInitOrchestrators(cdc codec.Codec, count int) error {
 	for i := 0; i < count; i++ {
 		// create orchestrator
 		orchestrator := c.createOrchestrator(i)
 
-		err := orchestrator.createKey("orch")
+		err := orchestrator.createKey(cdc, "orch")
 		if err != nil {
 			return err
 		}

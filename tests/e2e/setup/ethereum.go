@@ -1,4 +1,4 @@
-package e2esetup
+package setup
 
 type EthereumConfig struct {
 	ChainID             uint `json:"chainId"`

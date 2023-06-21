@@ -1,9 +1,10 @@
-package e2esetup
+package setup
 
 import (
 	"crypto/ecdsa"
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -56,17 +57,17 @@ func (o *orchestrator) generateEthereumKey() error {
 	return nil
 }
 
-func (o *orchestrator) createKey(name string) error {
+func (o *orchestrator) createKey(cdc codec.Codec, name string) error {
 	mnemonic, err := createMnemonic()
 	if err != nil {
 		return err
 	}
 
-	return o.createKeyFromMnemonic(name, mnemonic)
+	return o.createKeyFromMnemonic(cdc, name, mnemonic)
 }
 
-func (o *orchestrator) createKeyFromMnemonic(name, mnemonic string) error {
-	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil, Cdc)
+func (o *orchestrator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string) error {
+	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
 		return err
 	}
