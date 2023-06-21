@@ -266,6 +266,183 @@ paths:
                       format: byte
       tags:
         - Query
+  /umee/leverage/v1/inspect:
+    get:
+      summary: >-
+        Inspect is the customizable inspector query. It returns a list of all
+        borrowers,
+
+        starting from the highest borrowed value, filtered by any combination
+        of: minimum
+
+        borrowed value (optionally of a specified token), minimum collateral
+        value, minimum
+
+        progress toward liquidation threshold, and minimum LTV. Each account is
+        displayed
+
+        with its address and borrowed/liquidation/collateral USD values, as well
+        as its
+
+        actual token positions in human-readable symbol denoms instead of
+        uTokens or ibc denoms.
+      operationId: Inspect
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              borrowers:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    address:
+                      type: string
+                      title: Address of a borrower
+                    analysis:
+                      description: >-
+                        USD totals of borrower's collateral, debt, and
+                        liquidation threshold.
+                      type: object
+                      properties:
+                        Borrowed:
+                          type: number
+                          format: double
+                          description: Borrowed is account's borrowed value in USD.
+                        Liquidation:
+                          type: number
+                          format: double
+                          description: >-
+                            Liquidation is account's liquidation threshold in
+                            USD.
+                        Value:
+                          type: number
+                          format: double
+                          description: Value is account's collateral value in USD.
+                    position:
+                      description: >-
+                        Collateral and borrowed tokens, denoted in
+                        human-readable symbol denom instead of ibc denom.
+                      type: object
+                      properties:
+                        collateral:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              denom:
+                                type: string
+                              amount:
+                                type: string
+                            description: >-
+                              DecCoin defines a token with a denomination and a
+                              decimal amount.
+
+
+                              NOTE: The amount field is an Dec which implements
+                              the custom method
+
+                              signatures required by gogoproto.
+                          description: >-
+                            Collateral contains all uTokens the account has
+                            collateralized. It has been converted from uTokens
+                            to tokens.
+                        borrowed:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              denom:
+                                type: string
+                              amount:
+                                type: string
+                            description: >-
+                              DecCoin defines a token with a denomination and a
+                              decimal amount.
+
+
+                              NOTE: The amount field is an Dec which implements
+                              the custom method
+
+                              signatures required by gogoproto.
+                          description: >-
+                            Borrowed contains all tokens the account has
+                            borrowed, including interest owed.
+                  description: >-
+                    InspectAccount contains risk and balance info for a single
+                    account for the inspector query.
+            description: >-
+              QueryInspectResponse defines the response structure for the
+              Inspect gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: symbol
+          description: >-
+            Symbol selects a symbol denom to sort accounts by borrowed value.
+            Use "all" or empty string to show all.
+          in: query
+          required: false
+          type: string
+        - name: borrowed
+          description: >-
+            Borrowed is the minimum USD value an account must have borrowed to
+            show. Use 0 to show all.
+          in: query
+          required: false
+          type: number
+          format: double
+        - name: collateral
+          description: >-
+            Collateral is the minimum USD value of collateral an account must
+            have to show. Use 0 to show all.
+          in: query
+          required: false
+          type: number
+          format: double
+        - name: danger
+          description: >-
+            Danger is the minimum progress toward liquidation an account must
+            have to show. Use 0 to show all.
+
+            Measured as the ratio (borrowed value / liquidation threshold),
+            where > 1 is liquidation-eligible.
+          in: query
+          required: false
+          type: number
+          format: double
+        - name: ltv
+          description: >-
+            LTV is the minimum ratio (borrowed value / collateral value) an
+            account must have to show. Use 0 to show all.
+          in: query
+          required: false
+          type: number
+          format: double
+      tags:
+        - Query
   /umee/leverage/v1/liquidation_targets:
     get:
       summary: >-
@@ -3245,6 +3422,18 @@ definitions:
 
       NOTE: The amount field is an Int which implements the custom method
       signatures required by gogoproto.
+  cosmos.base.v1beta1.DecCoin:
+    type: object
+    properties:
+      denom:
+        type: string
+      amount:
+        type: string
+    description: |-
+      DecCoin defines a token with a denomination and a decimal amount.
+
+      NOTE: The amount field is an Dec which implements the custom method
+      signatures required by gogoproto.
   google.protobuf.Any:
     type: object
     properties:
@@ -3283,6 +3472,117 @@ definitions:
     description: >-
       BadDebt is a bad debt instance used in the leverage module's genesis
       state.
+  umee.leverage.v1.DecBalances:
+    type: object
+    properties:
+      collateral:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+        description: >-
+          Collateral contains all uTokens the account has collateralized. It has
+          been converted from uTokens to tokens.
+      borrowed:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+        description: >-
+          Borrowed contains all tokens the account has borrowed, including
+          interest owed.
+    description: DecBalances contains an account's position denoted in symbol denom tokens.
+  umee.leverage.v1.InspectAccount:
+    type: object
+    properties:
+      address:
+        type: string
+        title: Address of a borrower
+      analysis:
+        description: USD totals of borrower's collateral, debt, and liquidation threshold.
+        type: object
+        properties:
+          Borrowed:
+            type: number
+            format: double
+            description: Borrowed is account's borrowed value in USD.
+          Liquidation:
+            type: number
+            format: double
+            description: Liquidation is account's liquidation threshold in USD.
+          Value:
+            type: number
+            format: double
+            description: Value is account's collateral value in USD.
+      position:
+        description: >-
+          Collateral and borrowed tokens, denoted in human-readable symbol denom
+          instead of ibc denom.
+        type: object
+        properties:
+          collateral:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                DecCoin defines a token with a denomination and a decimal
+                amount.
+
+
+                NOTE: The amount field is an Dec which implements the custom
+                method
+
+                signatures required by gogoproto.
+            description: >-
+              Collateral contains all uTokens the account has collateralized. It
+              has been converted from uTokens to tokens.
+          borrowed:
+            type: array
+            items:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                DecCoin defines a token with a denomination and a decimal
+                amount.
+
+
+                NOTE: The amount field is an Dec which implements the custom
+                method
+
+                signatures required by gogoproto.
+            description: >-
+              Borrowed contains all tokens the account has borrowed, including
+              interest owed.
+    description: >-
+      InspectAccount contains risk and balance info for a single account for the
+      inspector query.
   umee.leverage.v1.Params:
     type: object
     properties:
@@ -3505,6 +3805,90 @@ definitions:
           Each contains an Address and a Denom.
     description: >-
       QueryBadDebtsResponse defines the response structure for the BedDebts gRPC
+      service handler.
+  umee.leverage.v1.QueryInspectResponse:
+    type: object
+    properties:
+      borrowers:
+        type: array
+        items:
+          type: object
+          properties:
+            address:
+              type: string
+              title: Address of a borrower
+            analysis:
+              description: >-
+                USD totals of borrower's collateral, debt, and liquidation
+                threshold.
+              type: object
+              properties:
+                Borrowed:
+                  type: number
+                  format: double
+                  description: Borrowed is account's borrowed value in USD.
+                Liquidation:
+                  type: number
+                  format: double
+                  description: Liquidation is account's liquidation threshold in USD.
+                Value:
+                  type: number
+                  format: double
+                  description: Value is account's collateral value in USD.
+            position:
+              description: >-
+                Collateral and borrowed tokens, denoted in human-readable symbol
+                denom instead of ibc denom.
+              type: object
+              properties:
+                collateral:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      DecCoin defines a token with a denomination and a decimal
+                      amount.
+
+
+                      NOTE: The amount field is an Dec which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  description: >-
+                    Collateral contains all uTokens the account has
+                    collateralized. It has been converted from uTokens to
+                    tokens.
+                borrowed:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                    description: >-
+                      DecCoin defines a token with a denomination and a decimal
+                      amount.
+
+
+                      NOTE: The amount field is an Dec which implements the
+                      custom method
+
+                      signatures required by gogoproto.
+                  description: >-
+                    Borrowed contains all tokens the account has borrowed,
+                    including interest owed.
+          description: >-
+            InspectAccount contains risk and balance info for a single account
+            for the inspector query.
+    description: >-
+      QueryInspectResponse defines the response structure for the Inspect gRPC
       service handler.
   umee.leverage.v1.QueryLiquidationTargetsResponse:
     type: object
@@ -4063,6 +4447,24 @@ definitions:
     description: |-
       QueryRegisteredTokensResponse defines the response structure for the
       RegisteredTokens gRPC service handler.
+  umee.leverage.v1.RiskInfo:
+    type: object
+    properties:
+      Borrowed:
+        type: number
+        format: double
+        description: Borrowed is account's borrowed value in USD.
+      Liquidation:
+        type: number
+        format: double
+        description: Liquidation is account's liquidation threshold in USD.
+      Value:
+        type: number
+        format: double
+        description: Value is account's collateral value in USD.
+    description: >-
+      RiskInfo defines a borrower's account health without requiring sdk.Dec
+      formatting.
   umee.leverage.v1.Token:
     type: object
     properties:
@@ -4282,18 +4684,6 @@ definitions:
       https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
 
       for more details.
-  cosmos.base.v1beta1.DecCoin:
-    type: object
-    properties:
-      denom:
-        type: string
-      amount:
-        type: string
-    description: |-
-      DecCoin defines a token with a denomination and a decimal amount.
-
-      NOTE: The amount field is an Dec which implements the custom method
-      signatures required by gogoproto.
   umee.oracle.v1.AggregateExchangeRatePrevote:
     type: object
     properties:
