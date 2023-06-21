@@ -3,7 +3,7 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // userMaxWithdraw calculates the maximum amount of uTokens an account can currently withdraw and the amount of
@@ -197,9 +197,9 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 	return sdk.MinInt(k.GetUTokenSupply(ctx, denom).Amount, maxUTokens.Amount), nil
 }
 
-// moduleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
+// ModuleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
 // respecting the MinCollateralLiquidity set for given Token.
-func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
+func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// Get module liquidity for the Token
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
@@ -221,7 +221,7 @@ func (k Keeper) moduleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	//
 	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
 	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	moduleAvailableLiquidity := sdk.NewDec(liquidity.Int64()).Sub(
+	moduleAvailableLiquidity := sdk.NewDecFromInt(liquidity).Sub(
 		minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)),
 	)
 

@@ -122,30 +122,30 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
-	customante "github.com/umee-network/umee/v4/ante"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/swagger"
-	"github.com/umee-network/umee/v4/util/genmap"
-	"github.com/umee-network/umee/v4/x/incentive"
-	incentivekeeper "github.com/umee-network/umee/v4/x/incentive/keeper"
-	incentivemodule "github.com/umee-network/umee/v4/x/incentive/module"
-	"github.com/umee-network/umee/v4/x/leverage"
-	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	"github.com/umee-network/umee/v4/x/oracle"
-	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
-	"github.com/umee-network/umee/v4/x/ugov"
-	ugovkeeper "github.com/umee-network/umee/v4/x/ugov/keeper"
-	ugovmodule "github.com/umee-network/umee/v4/x/ugov/module"
+	customante "github.com/umee-network/umee/v5/ante"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/swagger"
+	"github.com/umee-network/umee/v5/util/genmap"
+	"github.com/umee-network/umee/v5/x/incentive"
+	incentivekeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
+	incentivemodule "github.com/umee-network/umee/v5/x/incentive/module"
+	"github.com/umee-network/umee/v5/x/leverage"
+	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v5/x/ugov"
+	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
+	ugovmodule "github.com/umee-network/umee/v5/x/ugov/module"
 
 	// umee ibc-transfer and quota for ibc-transfer
-	uwasm "github.com/umee-network/umee/v4/app/wasm"
-	"github.com/umee-network/umee/v4/x/uibc"
-	uibcmodule "github.com/umee-network/umee/v4/x/uibc/module"
-	uibcoracle "github.com/umee-network/umee/v4/x/uibc/oracle"
-	uibcquota "github.com/umee-network/umee/v4/x/uibc/quota"
-	uibcquotakeeper "github.com/umee-network/umee/v4/x/uibc/quota/keeper"
+	uwasm "github.com/umee-network/umee/v5/app/wasm"
+	"github.com/umee-network/umee/v5/x/uibc"
+	uibcmodule "github.com/umee-network/umee/v5/x/uibc/module"
+	uibcoracle "github.com/umee-network/umee/v5/x/uibc/oracle"
+	uibcquota "github.com/umee-network/umee/v5/x/uibc/quota"
+	uibcquotakeeper "github.com/umee-network/umee/v5/x/uibc/quota/keeper"
 )
 
 var (
@@ -196,10 +196,7 @@ func init() {
 		uibcmodule.AppModuleBasic{},
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
-	}
-
-	if Experimental {
-		moduleBasics = append(moduleBasics, incentivemodule.AppModuleBasic{})
+		incentivemodule.AppModuleBasic{},
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -337,10 +334,7 @@ func New(
 		leveragetypes.StoreKey, oracletypes.StoreKey,
 		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
-	}
-
-	if Experimental {
-		storeKeys = append(storeKeys, incentive.StoreKey)
+		incentive.StoreKey,
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -478,15 +472,13 @@ func New(
 
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
 
-	if Experimental {
-		app.IncentiveKeeper = incentivekeeper.NewKeeper(
-			appCodec,
-			keys[incentive.StoreKey],
-			app.BankKeeper,
-			app.LeverageKeeper,
-		)
-		app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
-	}
+	app.IncentiveKeeper = incentivekeeper.NewKeeper(
+		appCodec,
+		keys[incentive.StoreKey],
+		app.BankKeeper,
+		app.LeverageKeeper,
+	)
+	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
 	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
 
@@ -502,6 +494,7 @@ func New(
 		&app.IBCTransferKeeper,
 		&app.bech32IbcKeeper,
 	)
+	app.GravityKeeper.BurnValset(true)
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
@@ -648,10 +641,13 @@ func New(
 
 	// The last arguments can contain custom message handlers, and custom query handlers,
 	// if we want to allow any custom callbacks
-	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,umee"
+	// default available capabilities https://github.com/CosmWasm/cosmwasm/blob/main/docs/CAPABILITIES-BUILT-IN.md
+	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,cosmwasm_1_2,umee"
 
 	// Register umee custom plugin to wasm
 	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper), wasmOpts...)
+	// Register stargate queries
+	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
 
 	app.WasmKeeper = wasm.NewKeeper(
 		appCodec,
@@ -718,12 +714,7 @@ func New(
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-	}
-	if Experimental {
-		appModules = append(
-			appModules,
-			incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
-		)
+		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 	}
 
 	app.mm = module.NewManager(appModules...)
@@ -750,6 +741,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
+		incentive.ModuleName,
 	}
 
 	endBlockers := []string{
@@ -769,6 +761,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
+		incentive.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -793,6 +786,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
+		incentive.ModuleName,
 	}
 
 	orderMigrations := []string{
@@ -810,13 +804,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
-	}
-
-	if Experimental {
-		beginBlockers = append(beginBlockers, incentive.ModuleName)
-		endBlockers = append(endBlockers, incentive.ModuleName)
-		initGenesis = append(initGenesis, incentive.ModuleName)
-		orderMigrations = append(orderMigrations, incentive.ModuleName)
+		incentive.ModuleName,
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)

@@ -7,6 +7,8 @@ import (
 )
 
 func TestValidateProgramStatus(t *testing.T) {
+	t.Parallel()
+
 	cases := []struct {
 		desc        string
 		status      ProgramStatus

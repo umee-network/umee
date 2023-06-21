@@ -8,22 +8,25 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 const (
+	uumee   = "uumee"
 	govAddr = "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp"
 )
 
 var (
 	testAddr, _ = sdk.AccAddressFromBech32("umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm")
-	uToken      = sdk.NewInt64Coin("u/uumee", 10)
-	token       = sdk.NewInt64Coin("uumee", 10)
+	uToken      = sdk.NewInt64Coin(coin.UumeeDenom, 10)
+	token       = sdk.NewInt64Coin(uumee, 10)
 	program     = incentive.NewIncentiveProgram(0, 4, 5, uToken.Denom, token, coin.Zero(token.Denom), false)
 )
 
 func TestMsgs(t *testing.T) {
+	t.Parallel()
+
 	userMsgs := []sdk.Msg{
 		incentive.NewMsgBond(testAddr, uToken),
 		incentive.NewMsgBeginUnbonding(testAddr, uToken),
@@ -62,6 +65,8 @@ type sdkmsg interface {
 }
 
 func TestRoutes(t *testing.T) {
+	t.Parallel()
+
 	msgs := []sdkmsg{
 		*incentive.NewMsgBond(testAddr, uToken),
 		*incentive.NewMsgBeginUnbonding(testAddr, uToken),

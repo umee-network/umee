@@ -6,9 +6,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/util/sdkutil"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/util/sdkutil"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 var _ types.MsgServer = msgServer{}
@@ -238,11 +238,6 @@ func (s msgServer) SupplyCollateral(
 
 	// Fail here if MaxSupply is exceeded
 	if err = s.keeper.checkMaxSupply(ctx, msg.Asset.Denom); err != nil {
-		return nil, err
-	}
-
-	// Fail here if collateral liquidity restrictions are violated
-	if err := s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
 		return nil, err
 	}
 

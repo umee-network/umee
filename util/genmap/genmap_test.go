@@ -20,6 +20,9 @@ func TestPick(t *testing.T) {
 	m2 = Pick(m, []string{"one", "three"})
 	assert.DeepEqual(t, map[string]int{"one": 1, "three": 3}, m2)
 
+	m2 = Pick(m, []string{"one", "three", "two"})
+	assert.DeepEqual(t, map[string]int{"one": 1, "two": 2, "three": 3}, m2)
+
 	m2 = Pick(m, []string{})
 	assert.DeepEqual(t, map[string]int{}, m2)
 

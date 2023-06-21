@@ -22,15 +22,15 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
-	"github.com/umee-network/umee/v4/app/upgradev3"
-	"github.com/umee-network/umee/v4/app/upgradev3x3"
-	"github.com/umee-network/umee/v4/x/incentive"
-	leveragekeeper "github.com/umee-network/umee/v4/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
-	oraclekeeper "github.com/umee-network/umee/v4/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v4/x/oracle/types"
-	"github.com/umee-network/umee/v4/x/ugov"
-	"github.com/umee-network/umee/v4/x/uibc"
+	"github.com/umee-network/umee/v5/app/upgradev3"
+	"github.com/umee-network/umee/v5/app/upgradev3x3"
+	"github.com/umee-network/umee/v5/x/incentive"
+	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v5/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
@@ -52,9 +52,8 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade4_3(upgradeInfo)
 	app.registerUpgrade("v4.4", upgradeInfo)
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
-	if Experimental {
-		app.registerUpgrade("v4.5-alpha1", upgradeInfo, incentive.ModuleName) // TODO: set correct name
-	}
+	app.registerUpgrade("v5.1-alpha1", upgradeInfo, incentive.ModuleName)
+	// TODO: set correct 5.1 name and add borrowFactor migration
 }
 
 // performs upgrade from v4.2 to v4.3
@@ -260,6 +259,7 @@ func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Pl
 
 	if len(newStores) > 0 {
 		app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-			Added: newStores})
+			Added: newStores,
+		})
 	}
 }

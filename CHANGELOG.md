@@ -48,23 +48,64 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module
+- [2085](https://github.com/umee-network/umee/pull/2085) Add `inspect` query to leverage module, which msut be enabled on a node by running with `-l` liquidator query flag.
+- [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module.
+- [2015](https://github.com/umee-network/umee/pull/2015), [2050](https://github.com/umee-network/umee/pull/2050) Add `x/ugov` module.
+- [2078](https://github.com/umee-network/umee/pull/2078) Upgrade `ibc-go` to v6.2.
+
+### Improvements
+
+- [2057](https://github.com/umee-network/umee/pull/2057) Cosmwasm QA tests.
+
+## [v5.0.0](https://github.com/umee-network/umee/releases/tag/v5.0.0) - 2023-06-07
+
+### Improvements
+
+- [2076](https://github.com/umee-network/umee/pull/2076) Cosmwasm: registering `cosmwasm_1_2` capability.
+- [2083](https://github.com/umee-network/umee/pull/2083) Update `wasmvm` to 1.2.4.
+
+### Fixes
+
+- [2089](https://github.com/umee-network/umee/pull/2089) MsgSupplyCollateral no longer fails when market is below MinCollateralLiquidity.
+
+## [v5.0.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-05-31
+
+### Features
+
 - [1888](https://github.com/umee-network/umee/pull/1888) Created `/sdkclient` and `/client` (umee client) packages to easy the E2E tests and external tools. Essentially, you can import that client and broadcast transactions easily.
 - [1993](https://github.com/umee-network/umee/pull/1993) Updated our Cosmos SDK fork to 0.46.12 and included an option to disable colored logs.
+- [2071](https://github.com/umee-network/umee/pull/2071) Update GB and enable Valset Burn mechanism.
+- [1547](https://github.com/umee-network/umee/pull/1547), [1997](https://github.com/umee-network/umee/pull/1997), [2058](https://github.com/umee-network/umee/pull/2058), [2063](https://github.com/umee-network/umee/pull/2063) Cosmwasm integration.
 
 ### Improvements
 
 - [1989](https://github.com/umee-network/umee/pull/1989) Leverage: fix the duplicate symbol denoms issue on adding new tokens to registry.
 - [1989](https://github.com/umee-network/umee/pull/1989) Updated go version from 1.19 to 1.20
+- [2001](https://github.com/umee-network/umee/pull/2001) Refactoring CLI integration test suite.
 - [2009](https://github.com/umee-network/umee/pull/2009) Use DavidAnson/markdownlint action for Markdown linting.
 - [2010](https://github.com/umee-network/umee/pull/2010) New `util/store` generic functions to load all values from a store.
-- [2021](https://github.com/umee-network/umee/pull/2021) `quota/keeper` unit test refactor.
+- [2021](https://github.com/umee-network/umee/pull/2021) `uibc/quota/keeper` unit test refactor.
+- [2024](https://github.com/umee-network/umee/pull/2024) New upgrade registration methods.
+- [2037](https://github.com/umee-network/umee/pull/2037) Speedup e2e by removing docker cache.
+- [2038](https://github.com/umee-network/umee/pull/2038) Unify util tsdk and store packages.
 
 ### Fixes
 
+- [1982](https://github.com/umee-network/umee/pull/1982) Fix the build version (`umeed version`).
 - [2052](https://github.com/umee-network/umee/pull/2052) Allow liquidation threshold == collateral weight in token validation.
+- [2072](https://github.com/umee-network/umee/pull/2072) Fix an int64 overflow when computing module liquidity for high-exponent assets.
 
-## [v4.4.0](https://github.com/umee-network/umee/releases/tag/v4.3.0) - 2023-05-05
+## [v4.4.2](https://github.com/umee-network/umee/releases/tag/v4.4.2) - 2023-06-08
+
+- [2090](https://github.com/umee-network/umee/pull/2090) Bump Cosmos SDK to v0.46.13 and CometBFT to v0.34.28 and IAVL to v0.19.6.
+
+## [v4.4.1](https://github.com/umee-network/umee/releases/tag/v4.4.1) - 2023-05-25
+
+### Improvements
+
+- [2064](https://github.com/umee-network/umee/pull/2064) Bump `ibc-go` to v6.1.1.
+
+## [v4.4.0](https://github.com/umee-network/umee/releases/tag/v4.4.0) - 2023-05-05
 
 ### State Machine Breaking
 

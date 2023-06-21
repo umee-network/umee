@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/x/incentive"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 var _ incentive.MsgServer = msgServer{}
@@ -131,7 +131,7 @@ func (s msgServer) EmergencyUnbond(
 		return nil, err
 	}
 
-	maxEmergencyUnbond := k.restrictedCollateral(ctx, addr, msg.UToken.Denom)
+	maxEmergencyUnbond := k.restrictedCollateral(ctx, addr, denom)
 
 	// reject emergency unbondings greater than maximum available amount
 	if msg.UToken.Amount.GT(maxEmergencyUnbond.Amount) {

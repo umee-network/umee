@@ -6,13 +6,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/incentive"
-	"github.com/umee-network/umee/v4/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v5/x/leverage/fixtures"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 func TestMsgBond(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -97,6 +98,7 @@ func TestMsgBond(t *testing.T) {
 }
 
 func TestMsgBeginUnbonding(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -193,6 +195,7 @@ func TestMsgBeginUnbonding(t *testing.T) {
 }
 
 func TestMsgEmergencyUnbond(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -206,8 +209,8 @@ func TestMsgEmergencyUnbond(t *testing.T) {
 	// having 50u/uumee collateral. No tokens ot uTokens are actually minted.
 	// bond those uTokens.
 	umeeSupplier := k.newAccount()
-	k.lk.setCollateral(umeeSupplier, uumee, 50)
-	k.mustBond(umeeSupplier, coin.New(uumee, 50))
+	k.lk.setCollateral(umeeSupplier, uumee, 50_000000)
+	k.mustBond(umeeSupplier, coin.New(uumee, 50_000000))
 
 	// create an additional account which has supplied an unregistered denom
 	// which nonetheless has a uToken prefix. Bond those utokens.
@@ -231,23 +234,23 @@ func TestMsgEmergencyUnbond(t *testing.T) {
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.ErrorIs(t, err, leveragetypes.ErrNotUToken)
 
-	// attempt to emergency unbond 10 u/uumee out of 50 available
+	// attempt to emergency unbond 10 u/UMEE out of 50 available
 	msg = &incentive.MsgEmergencyUnbond{
 		Account: umeeSupplier.String(),
-		UToken:  coin.New(uumee, 10),
+		UToken:  coin.New(uumee, 10_000000),
 	}
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.Nil(t, err, "emergency unbond 10")
 
-	// attempt to emergency unbond 50 u/uumee more (only 40 available)
+	// attempt to emergency unbond 50 u/UMEE more (only 40 available)
 	msg = &incentive.MsgEmergencyUnbond{
 		Account: umeeSupplier.String(),
-		UToken:  coin.New(uumee, 50),
+		UToken:  coin.New(uumee, 50_000000),
 	}
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.ErrorIs(t, err, incentive.ErrInsufficientBonded, "emergency unbond 50")
 
-	// attempt to emergency unbond 50 u/atom but from the wrong account
+	// attempt to emergency unbond 50 u/uatom but from the wrong account
 	msg = &incentive.MsgEmergencyUnbond{
 		Account: umeeSupplier.String(),
 		UToken:  coin.New(uatom, 50),
@@ -255,7 +258,7 @@ func TestMsgEmergencyUnbond(t *testing.T) {
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.ErrorIs(t, err, incentive.ErrInsufficientBonded, "emergency unbond 50 unknown (wrong account)")
 
-	// attempt to emergency unbond 50 u/atom but from the correct account
+	// attempt to emergency unbond 50 u/uatom but from the correct account
 	msg = &incentive.MsgEmergencyUnbond{
 		Account: atomSupplier.String(),
 		UToken:  coin.New(uatom, 50),
@@ -266,21 +269,23 @@ func TestMsgEmergencyUnbond(t *testing.T) {
 	// attempt a large number of emergency unbondings which would hit MaxUnbondings if they were not instant
 	msg = &incentive.MsgEmergencyUnbond{
 		Account: umeeSupplier.String(),
-		UToken:  coin.New(uumee, 1),
+		UToken:  coin.New(uumee, 1_000000),
 	}
 	// 9 more emergency unbondings of u/uumee on this account, which would reach the default maximum of 10 if not instant
 	for i := 1; i < 10; i++ {
 		_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 		require.Nil(t, err, "repeat emergency unbond 1")
 	}
-	// this would exceed max unbondings, but because the unbondings are instant, it does not
+	// this would exceed max unbondings, but because emergency unbondings are instant, it does not
 	_, err = k.msrv.EmergencyUnbond(k.ctx, msg)
 	require.Nil(t, err, "emergency unbond does is not restricted by max unbondings")
 
-	// TODO: confirm donated collateral amounts using mock leverage keeper
+	// verify that the fees were actually donated
+	require.Equal(t, coin.New(uUmee, 200000), k.lk.getDonatedCollateral(k.ctx, uUmee))
 }
 
 func TestMsgSponsor(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -341,6 +346,7 @@ func TestMsgSponsor(t *testing.T) {
 }
 
 func TestMsgGovSetParams(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	govAccAddr := "govAcct"
@@ -378,6 +384,7 @@ func TestMsgGovSetParams(t *testing.T) {
 }
 
 func TestMsgGovCreatePrograms(t *testing.T) {
+	t.Parallel()
 	k := newTestKeeper(t)
 
 	const (
@@ -424,7 +431,7 @@ func TestMsgGovCreatePrograms(t *testing.T) {
 	invalidProgram := validProgram
 	invalidProgram.ID = 1
 	invalidMsg := &incentive.MsgGovCreatePrograms{
-		Authority:         "",
+		Authority:         govAccAddr,
 		Programs:          []incentive.IncentiveProgram{invalidProgram},
 		FromCommunityFund: true,
 	}
@@ -433,6 +440,13 @@ func TestMsgGovCreatePrograms(t *testing.T) {
 	require.ErrorIs(t, err, incentive.ErrInvalidProgramID, "set invalid program")
 	require.Equal(t, uint32(3), k.getNextProgramID(k.ctx), "next ID after 2 programs passed an 1 failed")
 
-	// TODO: messages with multiple programs, including partially invalid
-	// and checking exact equality with upcoming programs set
+	// a message with both valid and invalid programs
+	complexMsg := &incentive.MsgGovCreatePrograms{
+		Authority:         govAccAddr,
+		Programs:          []incentive.IncentiveProgram{validProgram, invalidProgram},
+		FromCommunityFund: true,
+	}
+	// program should fail to be added, and nextID is unchanged
+	_, err = k.msrv.GovCreatePrograms(k.ctx, complexMsg)
+	require.ErrorIs(t, err, incentive.ErrInvalidProgramID, "set valid and invalid program")
 }

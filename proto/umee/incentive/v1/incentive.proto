@@ -4,7 +4,7 @@ package umee.incentive.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/incentive";
+option go_package = "github.com/umee-network/umee/v5/x/incentive";
 
 // Params defines the parameters for the incentive module.
 message Params {

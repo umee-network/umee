@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	wm "github.com/umee-network/umee/v4/app/wasm/msg"
-	wq "github.com/umee-network/umee/v4/app/wasm/query"
-	lvtypes "github.com/umee-network/umee/v4/x/leverage/types"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	wm "github.com/umee-network/umee/v5/app/wasm/msg"
+	wq "github.com/umee-network/umee/v5/app/wasm/query"
+	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 	"gotest.tools/v3/assert"
 )
 
@@ -128,6 +129,30 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 			tc.ResponseCheck(resp.Data)
 		})
 	}
+}
+
+func (s *IntegrationTestSuite) TestStargateQueries() {
+	data := lvtypes.QueryMarketSummary{
+		Denom: appparams.BondDenom,
+	}
+	d, err := data.Marshal()
+	assert.NilError(s.T, err)
+	sq := StargateQuery{}
+	sq.Chain.Stargate = wasmvmtypes.StargateQuery{
+		Path: "/umee.leverage.v1.Query/MarketSummary",
+		Data: d,
+	}
+
+	cq, err := json.Marshal(sq)
+	assert.NilError(s.T, err)
+	resp, err := s.wasmQueryClient.SmartContractState(sdk.WrapSDKContext(s.ctx), &wasmtypes.QuerySmartContractStateRequest{
+		Address: s.contractAddr, QueryData: cq,
+	})
+	assert.NilError(s.T, err)
+	var rr lvtypes.QueryMarketSummaryResponse
+	err = s.encfg.Codec.UnmarshalJSON(resp.Data, &rr)
+	assert.NilError(s.T, err)
+	assert.Equal(s.T, "UMEE", rr.SymbolDenom)
 }
 
 func (s *IntegrationTestSuite) TestOracleQueries() {

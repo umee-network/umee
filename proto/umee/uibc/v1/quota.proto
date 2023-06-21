@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/duration.proto";
 import "cosmos_proto/cosmos.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/uibc";
+option go_package = "github.com/umee-network/umee/v5/x/uibc";
 
 // Params of x/uibc module
 message Params {

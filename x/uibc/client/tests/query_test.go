@@ -7,9 +7,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	itestsuite "github.com/umee-network/umee/v4/tests/cli"
-	"github.com/umee-network/umee/v4/x/uibc"
-	"github.com/umee-network/umee/v4/x/uibc/client/cli"
+	itestsuite "github.com/umee-network/umee/v5/tests/cli"
+	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc/client/cli"
 )
 
 func (s *IntegrationTests) TestQueryParams(_ *testing.T) {

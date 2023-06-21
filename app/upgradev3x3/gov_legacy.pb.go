@@ -11,7 +11,7 @@ import (
 	math "math"
 	math_bits "math/bits"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.

@@ -8,11 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"gotest.tools/v3/assert"
-
 	"cosmossdk.io/math"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -24,12 +23,13 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"gotest.tools/v3/assert"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	wm "github.com/umee-network/umee/v4/app/wasm/msg"
-	wq "github.com/umee-network/umee/v4/app/wasm/query"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	wm "github.com/umee-network/umee/v5/app/wasm/msg"
+	wq "github.com/umee-network/umee/v5/app/wasm/query"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 const (
@@ -98,6 +98,12 @@ type transferMsg struct {
 type CustomQuery struct {
 	Chain struct {
 		Custom wq.UmeeQuery `json:"custom"`
+	} `json:"chain"`
+}
+
+type StargateQuery struct {
+	Chain struct {
+		Stargate wasmvmtypes.StargateQuery `json:"stargate"`
 	} `json:"chain"`
 }
 

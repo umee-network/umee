@@ -4,7 +4,7 @@ package umee.oracle.v1;
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/oracle/types";
+option go_package = "github.com/umee-network/umee/v5/x/oracle/types";
 
 option (gogoproto.goproto_getters_all) = false;
 

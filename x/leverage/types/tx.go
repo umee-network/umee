@@ -3,7 +3,7 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/checkers"
+	"github.com/umee-network/umee/v5/util/checkers"
 )
 
 func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {

@@ -2,7 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // addUnbonding creates an unbonding and adds it to the account's current unbondings in the store.
@@ -98,11 +98,11 @@ func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral
 	// if we have not returned yet, the only some in-progress unbondings will be
 	// instantly unbonded.
 	amountToUnbond := bonded.Amount.Add(unbonding.Amount).Sub(newCollateral.Amount)
-	for _, u := range unbondings {
+	for i, u := range unbondings {
 		// for ongoing unbondings, starting with the oldest
 		specificReduction := sdk.MinInt(amountToUnbond, u.UToken.Amount)
 		// reduce the in-progress unbonding amount, and the remaining instant unbond
-		u.UToken.Amount = u.UToken.Amount.Sub(specificReduction)
+		unbondings[i].UToken.Amount = u.UToken.Amount.Sub(specificReduction)
 		amountToUnbond = amountToUnbond.Sub(specificReduction)
 		// if no more unbondings need to be reduced, break out of the loop early
 		if amountToUnbond.IsZero() {

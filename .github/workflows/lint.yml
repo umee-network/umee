@@ -40,12 +40,12 @@ jobs:
         with:
           fetch-depth: 0
       # lint only changed files
-      - uses: tj-actions/changed-files@v35
+      - uses: tj-actions/changed-files@v36
         id: changed-files
         with:
           files: "**/*.md"
           separator: ","
-      - uses: DavidAnson/markdownlint-cli2-action@v10
+      - uses: DavidAnson/markdownlint-cli2-action@v11
         if: steps.changed-files.outputs.any_changed == 'true'
         with:
           globs: ${{ steps.changed-files.outputs.all_changed_files }}

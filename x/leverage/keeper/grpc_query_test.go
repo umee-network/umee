@@ -6,10 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/leverage/fixtures"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/leverage/fixtures"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
@@ -152,6 +152,69 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		LiquidationThreshold: &lt,
 	}
 
+	require.Equal(expected, *resp)
+}
+
+func (s *IntegrationTestSuite) TestQuerier_Inspect() {
+	ctx, require := s.ctx, s.Require()
+
+	// creates accounts
+	addr1 := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(addr1, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(addr1, coin.New("u/"+umeeDenom, 1000_000000))
+	s.borrow(addr1, coin.New(umeeDenom, 10_500000))
+	addr2 := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(addr2, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(addr2, coin.New("u/"+umeeDenom, 60_000000))
+	s.borrow(addr2, coin.New(umeeDenom, 1_500000))
+	addr3 := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(addr3, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(addr3, coin.New("u/"+umeeDenom, 600_000000))
+	s.borrow(addr3, coin.New(umeeDenom, 15_000000))
+
+	resp, err := s.queryClient.Inspect(ctx.Context(), &types.QueryInspect{})
+	require.NoError(err)
+
+	expected := types.QueryInspectResponse{
+		Borrowers: []types.InspectAccount{
+			{
+				Address: addr3.String(),
+				Analysis: &types.RiskInfo{
+					Borrowed:    63.15,
+					Liquidation: 656,
+					Value:       2526,
+				},
+				Position: &types.DecBalances{
+					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "600")),
+					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "15")),
+				},
+			},
+			{
+				Address: addr1.String(),
+				Analysis: &types.RiskInfo{
+					Borrowed:    44.2,
+					Liquidation: 1094,
+					Value:       4210,
+				},
+				Position: &types.DecBalances{
+					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "1000")),
+					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "10.5")),
+				},
+			},
+			{
+				Address: addr2.String(),
+				Analysis: &types.RiskInfo{
+					Borrowed:    6.31,
+					Liquidation: 65.67,
+					Value:       252,
+				},
+				Position: &types.DecBalances{
+					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "60")),
+					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "1.5")),
+				},
+			},
+		},
+	}
 	require.Equal(expected, *resp)
 }
 

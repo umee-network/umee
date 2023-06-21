@@ -5,8 +5,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/genmap"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/util/genmap"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // prependUmeeIfUnique pushs `uumee` denom to the front of the list, if it is not yet included.

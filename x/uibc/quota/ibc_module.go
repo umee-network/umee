@@ -13,10 +13,10 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v6/modules/core/exported"
 
-	"github.com/umee-network/umee/v4/util/sdkutil"
+	"github.com/umee-network/umee/v5/util/sdkutil"
 
-	"github.com/umee-network/umee/v4/x/uibc"
-	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
 )
 
 var _ porttypes.Middleware = ICS20Middleware{}
