@@ -255,6 +255,39 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func NewMsgFastLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, rewardDenom string) *MsgFastLiquidate {
+	return &MsgFastLiquidate{
+		Liquidator:  liquidator.String(),
+		Borrower:    borrower.String(),
+		RepayDenom:  repayDenom,
+		RewardDenom: rewardDenom,
+	}
+}
+
+func (msg MsgFastLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgFastLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
+
+func (msg *MsgFastLiquidate) ValidateBasic() error {
+	if err := validateSenderAndDenom(msg.Borrower, msg.RewardDenom); err != nil {
+		return err
+	}
+	if err := sdk.ValidateDenom(msg.RepayDenom); err != nil {
+		return err
+	}
+	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	return err
+}
+
+func (msg *MsgFastLiquidate) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Liquidator)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgFastLiquidate) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
 func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 	_, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
