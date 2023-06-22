@@ -1,4 +1,4 @@
-package e2e
+package setup
 
 import (
 	"encoding/json"
@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -34,7 +35,7 @@ type validator struct {
 	index        int
 	moniker      string
 	mnemonic     string
-	keyInfo      keyring.Record
+	KeyInfo      keyring.Record
 	privateKey   cryptotypes.PrivKey
 	consensusKey privval.FilePVKey
 	nodeKey      p2p.NodeKey
@@ -53,7 +54,7 @@ func (v *validator) createConfig() error {
 	return os.MkdirAll(p, 0o755)
 }
 
-func (v *validator) init() error {
+func (v *validator) init(cdc codec.Codec) error {
 	if err := v.createConfig(); err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func (v *validator) init() error {
 		return fmt.Errorf("failed to JSON encode app genesis state: %w", err)
 	}
 
-	genDoc.ChainID = v.chain.id
+	genDoc.ChainID = v.chain.ID
 	genDoc.Validators = nil
 	genDoc.AppState = appState
 
@@ -125,7 +126,7 @@ func (v *validator) createConsensusKey() error {
 	return nil
 }
 
-func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
+func (v *validator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string) error {
 	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, cdc)
 	if err != nil {
 		return err
@@ -152,20 +153,20 @@ func (v *validator) createKeyFromMnemonic(name, mnemonic string) error {
 		return err
 	}
 
-	v.keyInfo = *info
+	v.KeyInfo = *info
 	v.mnemonic = mnemonic
 	v.privateKey = privKey
 
 	return nil
 }
 
-func (v *validator) createKey(name string) error {
+func (v *validator) createKey(cdc codec.Codec, name string) error {
 	mnemonic, err := createMnemonic()
 	if err != nil {
 		return err
 	}
 
-	return v.createKeyFromMnemonic(name, mnemonic)
+	return v.createKeyFromMnemonic(cdc, name, mnemonic)
 }
 
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
@@ -183,7 +184,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	if err != nil {
 		return nil, err
 	}
-	valAddr, err := v.keyInfo.GetAddress()
+	valAddr, err := v.KeyInfo.GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -203,7 +204,7 @@ func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string
 	if err != nil {
 		return nil, err
 	}
-	valAddr, err := v.keyInfo.GetAddress()
+	valAddr, err := v.KeyInfo.GetAddress()
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +216,7 @@ func (v *validator) buildDelegateKeysMsg(orchAddr sdk.AccAddress, ethAddr string
 	), nil
 }
 
-func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
+func (v *validator) signMsg(cdc codec.Codec, msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	txBuilder := encodingConfig.TxConfig.NewTxBuilder()
 
 	if err := txBuilder.SetMsgs(msgs...); err != nil {
@@ -227,7 +228,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	txBuilder.SetGasLimit(appparams.DefaultGasLimit)
 
 	signerData := authsigning.SignerData{
-		ChainID:       v.chain.id,
+		ChainID:       v.chain.ID,
 		AccountNumber: 0,
 		Sequence:      0,
 	}
@@ -240,7 +241,7 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 	// Note: This line is not needed for SIGN_MODE_LEGACY_AMINO, but putting it
 	// also doesn't affect its generated sign bytes, so for code's simplicity
 	// sake, we put it here.
-	pubKey, err := v.keyInfo.GetPubKey()
+	pubKey, err := v.KeyInfo.GetPubKey()
 	if err != nil {
 		return nil, err
 	}
@@ -289,5 +290,5 @@ func (v *validator) signMsg(msgs ...sdk.Msg) (*sdktx.Tx, error) {
 		return nil, err
 	}
 
-	return decodeTx(bz)
+	return decodeTx(cdc, bz)
 }

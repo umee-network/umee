@@ -1,11 +1,9 @@
 package e2e
 
-import "github.com/umee-network/umee/v5/tests/util"
-
-type TestCosmwasm struct {
-	IntegrationTestSuite
-	util.Cosmwasm
-}
+// type TestCosmwasm struct {
+// 	IntegrationTestSuite
+// 	util.Cosmwasm
+// }
 
 /*
 // TODO : needs to setup live network with dockernet
