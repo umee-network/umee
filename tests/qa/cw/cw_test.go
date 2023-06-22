@@ -13,12 +13,10 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/suite"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/app"
-	"github.com/umee-network/umee/v5/client"
 	cwutil "github.com/umee-network/umee/v5/tests/util"
 )
 
@@ -33,7 +31,14 @@ var (
 	cwGroupMsgExecFunc func(name string, msg GroupExecMsg, wg *sync.WaitGroup, accSeq uint64)
 )
 
-func TestCWPlusGroup(t *testing.T) {
+func TestQA(t *testing.T) {
+	os.Setenv("TEST_QA", "true")
+	t.Log("Running qa test...")
+	suite.Run(t, new(QATest))
+}
+
+func (qaTest *QATest) TestCWPlusGroup() {
+	t := qaTest.T()
 	accAddrs := make([]sdk.AccAddress, 0)
 	for i := 0; i < TotalAccs; i++ {
 		privateKey := secp256k1.GenPrivKey()
@@ -41,20 +46,11 @@ func TestCWPlusGroup(t *testing.T) {
 		accAddrs = append(accAddrs, sdk.AccAddress(pubKey.Address()))
 	}
 
-	// remove if old keyring exists for testing
-	os.RemoveAll("./keyring-test")
-	encConfig := app.MakeEncodingConfig()
-	cc, err := ReadConfig("./config_example.yaml")
-	assert.NilError(t, err)
-	// umee client
-	client, err := UmeeClient(cc, encConfig)
-	assert.NilError(t, err)
-
-	cw := cwutil.NewCosmwasmTestSuite(t, client)
+	cw := cwutil.NewCosmwasmTestSuite(qaTest.T(), qaTest.Umee)
 	cw.DeployWasmContract(cwGroupPath)
 
 	// sender is intital account
-	admin := client.Tx.SenderAddr()
+	admin := qaTest.Umee.Tx.SenderAddr()
 	// instantiate Contract
 	initMsg := GroupInitMsg{
 		Admin:   admin.String(),
@@ -89,7 +85,7 @@ func TestCWPlusGroup(t *testing.T) {
 
 	// doing random txs to flood the cosmwasm network
 	wg := &sync.WaitGroup{}
-	accSeq, err := client.QueryAuthSeq(admin.String())
+	accSeq, err := qaTest.Umee.QueryAuthSeq(admin.String())
 	assert.NilError(t, err)
 	total := 0
 
@@ -159,8 +155,4 @@ func TestCWPlusGroup(t *testing.T) {
 	err = json.Unmarshal([]byte(queryResp.Data), &adminQuery)
 	assert.NilError(t, err)
 	assert.Equal(t, updateAdmin.UpdateAdmin.Admin, adminQuery.Admin)
-}
-
-func UmeeClient(cc *ChainConfig, encConfig sdkparams.EncodingConfig) (client.Client, error) {
-	return client.NewClient(cc.ChainID, cc.RPC, cc.GRPC, cc.Mnemonics, 1.5, encConfig)
 }

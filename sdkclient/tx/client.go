@@ -32,6 +32,7 @@ type Client struct {
 // signing and broadcasting transactions
 // Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
+	chainDataDir,
 	chainID string,
 	tmrpcEndpoint string,
 	mnemonics map[string]string,
@@ -45,7 +46,7 @@ func NewClient(
 		encCfg:        encCfg,
 	}
 
-	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, "", nil, encCfg.Codec)
+	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, chainDataDir, nil, encCfg.Codec)
 	if err != nil {
 		return nil, err
 	}

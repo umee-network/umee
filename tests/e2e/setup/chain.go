@@ -40,7 +40,7 @@ func init() {
 }
 
 type chain struct {
-	dataDir        string
+	DataDir        string
 	ID             string
 	Validators     []*validator
 	Orchestrators  []*orchestrator
@@ -55,12 +55,12 @@ func newChain() (*chain, error) {
 
 	return &chain{
 		ID:      "chain-" + tmrand.NewRand().Str(6),
-		dataDir: tmpDir,
+		DataDir: tmpDir,
 	}, nil
 }
 
 func (c *chain) configDir() string {
-	return fmt.Sprintf("%s/%s", c.dataDir, c.ID)
+	return fmt.Sprintf("%s/%s", c.DataDir, c.ID)
 }
 
 func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {

@@ -74,7 +74,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.Chain, err = newChain()
 	s.Require().NoError(err)
 
-	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.Chain.ID, s.Chain.dataDir)
+	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.Chain.ID, s.Chain.DataDir)
 
 	s.DkrPool, err = dockertest.NewPool("")
 	s.Require().NoError(err)
@@ -110,9 +110,11 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
-	s.runPriceFeeder()
-	s.runGaiaNetwork()
-	s.runIBCRelayer()
+	if str := os.Getenv("TEST_QA"); len(str) == 0 {
+		s.runPriceFeeder()
+		s.runGaiaNetwork()
+		s.runIBCRelayer()
+	}
 	// s.runContractDeployment()
 	// s.runOrchestrators()
 	s.initUmeeClient()
@@ -145,7 +147,7 @@ func (s *E2ETestSuite) TearDownSuite() {
 
 	s.Require().NoError(s.DkrPool.RemoveNetwork(s.DkrNet))
 
-	os.RemoveAll(s.Chain.dataDir)
+	os.RemoveAll(s.Chain.DataDir)
 	for _, td := range s.tmpDirs {
 		os.RemoveAll(td)
 	}
@@ -1062,8 +1064,8 @@ func (s *E2ETestSuite) initUmeeClient() {
 		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
 	}
 	ecfg := app.MakeEncodingConfig()
-
 	s.Umee, err = client.NewClient(
+		s.Chain.DataDir,
 		s.Chain.ID,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
