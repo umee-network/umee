@@ -77,7 +77,7 @@ func (s msgServer) Withdraw(
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	if isFromCollateral {
-		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdk.OneDec())
 		if err != nil {
 			return nil, err
 		}
@@ -150,7 +150,7 @@ func (s msgServer) MaxWithdraw(
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	if isFromCollateral {
-		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdk.OneDec())
 		if err != nil {
 			return nil, err
 		}
@@ -288,7 +288,7 @@ func (s msgServer) Decollateralize(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +321,7 @@ func (s msgServer) Borrow(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +390,7 @@ func (s msgServer) MaxBorrow(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -510,7 +510,7 @@ func (s msgServer) FastLiquidate(
 
 	// Fail here if liquidator ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the liquidator's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, liquidator)
+	err = s.keeper.assertBorrowerHealth(ctx, liquidator, sdk.MustNewDecFromStr("0.9"))
 	if err != nil {
 		return nil, err
 	}
