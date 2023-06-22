@@ -43,7 +43,7 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 
 // GetAllReserves returns all reserves.
 func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
-	return k.sumCoins(ctx, types.KeyPrefixReserveAmount)
+	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixReserveAmount), store.NoLastByte)
 }
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
@@ -182,21 +182,7 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 
 // GetAllUTokenSupply returns total supply of all uToken denoms.
 func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
-	return k.sumCoins(ctx, types.KeyPrefixUtokenSupply)
-}
-
-// getAllTotalUnbonding gets total unbonding for all uTokens (used for a query)
-func (k Keeper) sumCoins(ctx sdk.Context, prefix []byte) sdk.Coins {
-	total := sdk.NewCoins()
-	iterator := func(key, val []byte) error {
-		denom := types.DenomFromKey(key, prefix)
-		amount := store.Int(val, "amount")
-		total = total.Add(sdk.NewCoin(denom, amount))
-		return nil
-	}
-
-	util.Panic(store.Iterate(ctx.KVStore(k.storeKey), prefix, iterator))
-	return total
+	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixUtokenSupply), store.NoLastByte)
 }
 
 func (k Keeper) prefixStore(ctx sdk.Context, p []byte) storetypes.KVStore {

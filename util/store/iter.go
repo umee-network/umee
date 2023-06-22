@@ -63,27 +63,26 @@ func MustLoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []b
 	return ls
 }
 
-// SumCoins aggregates all coins saved as (denom: Int) pairs in store with the given prefix.
-func SumCoins(s storetypes.KVStore, prefix []byte, f StrExtractor) (sdk.Coins, error) {
+// SumCoins aggregates all coins saved as (denom: Int) pairs in store. Use store/prefix.NewStore
+// to create a prefix store which will automatically look only at the given prefix.
+func SumCoins(s storetypes.KVStore, f StrExtractor) sdk.Coins {
 	total := sdk.NewCoins()
-	iterator := func(key, val []byte) error {
-		denom, err := f(key)
-		if err != nil {
-			return err
-		}
-		amount := Int(val, "amount")
+	iter := sdk.KVStorePrefixIterator(s, nil)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		denom := f(iter.Key())
+		amount := Int(iter.Value(), "amount")
 		total = total.Add(sdk.NewCoin(denom, amount))
-		return nil
 	}
-
-	err := Iterate(s, prefix, iterator)
-	return total, err
+	return total
 }
 
 // StrExtractor is a function type which will take a bytes string value and extracts
 // string out of it.
-type StrExtractor func([]byte) (string, error)
+type StrExtractor func([]byte) string
 
 // NoLastByte returns sub-slice of the key without the last byte.
 // Panics if length of key is zero.
-func NoLastByte(key []byte) []byte { return key[:len(key)-1] }
+func NoLastByte(key []byte) string {
+	return string(key[:len(key)-1])
+}
