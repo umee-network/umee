@@ -198,11 +198,7 @@ func (q Querier) TotalBonded(
 	if req.Denom != "" {
 		total = sdk.NewCoins(k.getTotalBonded(ctx, req.Denom))
 	} else {
-		var err error
-		total, err = k.getAllTotalBonded(ctx)
-		if err != nil {
-			return nil, err
-		}
+		total = k.getAllTotalBonded(ctx)
 	}
 
 	return &incentive.QueryTotalBondedResponse{Bonded: total}, nil
@@ -222,11 +218,7 @@ func (q Querier) TotalUnbonding(
 	if req.Denom != "" {
 		total = sdk.NewCoins(k.getTotalUnbonding(ctx, req.Denom))
 	} else {
-		var err error
-		total, err = k.getAllTotalUnbonding(ctx)
-		if err != nil {
-			return nil, err
-		}
+		total = k.getAllTotalUnbonding(ctx)
 	}
 
 	return &incentive.QueryTotalUnbondingResponse{Unbonding: total}, nil

@@ -2,6 +2,8 @@ package keeper
 
 import (
 	sdkmath "cosmossdk.io/math"
+	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/util"
@@ -37,28 +39,6 @@ func (k Keeper) getAllBadDebts(ctx sdk.Context) []types.BadDebt {
 // module's KVStore.
 func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 	return store.MustLoadAll[*types.Token](ctx.KVStore(k.storeKey), types.KeyPrefixRegisteredToken)
-}
-
-// GetAllReserves returns all reserves.
-func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
-	prefix := types.KeyPrefixReserveAmount
-	reserves := sdk.NewCoins()
-
-	iterator := func(key, val []byte) error {
-		denom := types.DenomFromKey(key, prefix)
-		var amount sdkmath.Int
-		if err := amount.Unmarshal(val); err != nil {
-			// improperly marshaled reserve amount should never happen
-			return err
-		}
-
-		reserves = reserves.Add(sdk.NewCoin(denom, amount))
-		return nil
-	}
-
-	util.Panic(k.iterate(ctx, prefix, iterator))
-
-	return reserves
 }
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
@@ -197,22 +177,14 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 
 // GetAllUTokenSupply returns total supply of all uToken denoms.
 func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
-	prefix := types.KeyPrefixUtokenSupply
-	supplies := sdk.NewCoins()
+	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixUtokenSupply), store.NoLastByte)
+}
 
-	iterator := func(key, val []byte) error {
-		denom := types.DenomFromKey(key, prefix)
-		var amount sdkmath.Int
-		if err := amount.Unmarshal(val); err != nil {
-			// improperly marshaled utoken supply should never happen
-			return err
-		}
+// GetAllReserves returns all reserves.
+func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
+	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixReserveAmount), store.NoLastByte)
+}
 
-		supplies = supplies.Add(sdk.NewCoin(denom, amount))
-		return nil
-	}
-
-	util.Panic(k.iterate(ctx, prefix, iterator))
-
-	return supplies
+func (k Keeper) prefixStore(ctx sdk.Context, p []byte) storetypes.KVStore {
+	return prefixstore.NewStore(ctx.KVStore(k.storeKey), p)
 }

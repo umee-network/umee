@@ -3,8 +3,11 @@ package store
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
+	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
+
+	"github.com/umee-network/umee/v5/tests/tsdk"
 )
 
 func TestIterate(t *testing.T) {
@@ -37,4 +40,41 @@ func TestIterate(t *testing.T) {
 	Iterate(db, []byte{1}, collect)
 
 	assert.DeepEqual(t, pairs[1:4], collected)
+}
+
+func TestSumCoins(t *testing.T) {
+	// test SumCoins using the Prefix Store, which will automatically strip the prefix from
+	// keys
+
+	prefix := "p1"
+	pairs := []struct {
+		K string
+		V uint64
+	}{
+		{"atom", 1},
+		{"umee", 8},
+		{"atom", 8}, // we overwrite
+		{"ato", 2},
+		{"atoma", 3},
+	}
+	expected := sdk.NewCoins(
+		sdk.NewInt64Coin("ato", 2),
+		sdk.NewInt64Coin("atom", 8),
+		sdk.NewInt64Coin("atoma", 3),
+		sdk.NewInt64Coin("umee", 8))
+
+	withPrefixAnNull := func(s string) []byte {
+		return append([]byte(prefix+s), 0)
+	}
+
+	db := tsdk.KVStore(t)
+	for i, p := range pairs {
+		err := SetInt(db, withPrefixAnNull(p.K), sdk.NewIntFromUint64(p.V), "amount")
+		assert.NilError(t, err, "pairs[%d]", i)
+	}
+
+	pdb := prefixstore.NewStore(db, []byte(prefix))
+	sum := SumCoins(pdb, NoLastByte)
+	sum.Sort()
+	assert.DeepEqual(t, expected, sum)
 }
