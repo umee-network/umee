@@ -3,6 +3,13 @@ package app
 import (
 	"cosmossdk.io/errors"
 	"github.com/CosmWasm/wasmd/x/wasm"
+	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
+	icagenesis "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/genesis/types"
+	icahosttypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -15,12 +22,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
-	icagenesis "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/genesis/types"
-	icahosttypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host/types"
-	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
 	"github.com/umee-network/umee/v5/app/upgradev3"
 	"github.com/umee-network/umee/v5/app/upgradev3x3"
@@ -53,7 +54,15 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v4.4", upgradeInfo)
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	app.registerUpgrade("v5.1-alpha1", upgradeInfo, incentive.ModuleName)
+	app.registerUpgrade5_1(upgradeInfo)
 	// TODO: set correct 5.1 name and add borrowFactor migration
+}
+
+func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
+	app.UpgradeKeeper.SetUpgradeHandler(upgradeInfo.Name,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			return fromVM, app.GravityKeeper.MigrateFundsToDrainAccount(ctx, sdk.MustAccAddressFromBech32("the_drain_account"))
+		})
 }
 
 // performs upgrade from v4.2 to v4.3
