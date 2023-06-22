@@ -377,7 +377,29 @@ func (k Keeper) Liquidate(
 
 // FastLiquidate
 func (k Keeper) FastLiquidate(
-	_ sdk.Context, _, _ sdk.AccAddress, _, _ string,
+	ctx sdk.Context, _, borrowerAddr sdk.AccAddress, _, rewardDenom string,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
+	// ensure that reward is registered base token
+	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	uRewardDenom := types.ToUTokenDenom(rewardDenom)
+
+	//
+	//	TODO: borrow + liquidate + collateralize logic
+	//
+
+	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
+	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// finally, force incentive module to update bond and unbonding amounts if required,
+	// by ending existing unbondings early or instantly unbonding some bonded tokens
+	// until bonded + unbonding for the account is not greater than its collateral amount
+	err = k.reduceBondTo(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uRewardDenom))
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
 	return sdk.Coin{}, sdk.Coin{}, err
 }
