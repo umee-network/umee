@@ -41,11 +41,6 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 	return store.MustLoadAll[*types.Token](ctx.KVStore(k.storeKey), types.KeyPrefixRegisteredToken)
 }
 
-// GetAllReserves returns all reserves.
-func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
-	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixReserveAmount), store.NoLastByte)
-}
-
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
 // associated with an address.
 func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
@@ -183,6 +178,11 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 // GetAllUTokenSupply returns total supply of all uToken denoms.
 func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
 	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixUtokenSupply), store.NoLastByte)
+}
+
+// GetAllReserves returns all reserves.
+func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
+	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixReserveAmount), store.NoLastByte)
 }
 
 func (k Keeper) prefixStore(ctx sdk.Context, p []byte) storetypes.KVStore {
