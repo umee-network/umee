@@ -374,3 +374,10 @@ func (k Keeper) Liquidate(
 	}
 	return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
 }
+
+// FastLiquidate
+func (k Keeper) FastLiquidate(
+	_ sdk.Context, _, _ sdk.AccAddress, _, _ string,
+) (repaid sdk.Coin, reward sdk.Coin, err error) {
+	return sdk.Coin{}, sdk.Coin{}, err
+}

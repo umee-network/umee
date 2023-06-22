@@ -1,9 +1,10 @@
-package e2e
+package setup
 
 import (
 	"crypto/ecdsa"
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -14,21 +15,21 @@ import (
 )
 
 type orchestrator struct {
-	index       int
-	mnemonic    string
+	Index       int
+	Mnemonic    string
 	keyInfo     keyring.Record
-	privateKey  cryptotypes.PrivKey
-	ethereumKey ethereumKey
+	PrivateKey  cryptotypes.PrivKey
+	EthereumKey ethereumKey
 }
 
 type ethereumKey struct {
-	publicKey  string
-	privateKey string
-	address    string
+	PublicKey  string
+	PrivateKey string
+	Address    string
 }
 
 func (o *orchestrator) instanceName() string {
-	return fmt.Sprintf("orchestrator%d", o.index)
+	return fmt.Sprintf("orchestrator%d", o.Index)
 }
 
 func (o *orchestrator) generateEthereumKey() error {
@@ -47,25 +48,25 @@ func (o *orchestrator) generateEthereumKey() error {
 
 	publicKeyBytes := crypto.FromECDSAPub(publicKeyECDSA)
 
-	o.ethereumKey = ethereumKey{
-		privateKey: hexutil.Encode(privateKeyBytes),
-		publicKey:  hexutil.Encode(publicKeyBytes),
-		address:    crypto.PubkeyToAddress(*publicKeyECDSA).Hex(),
+	o.EthereumKey = ethereumKey{
+		PrivateKey: hexutil.Encode(privateKeyBytes),
+		PublicKey:  hexutil.Encode(publicKeyBytes),
+		Address:    crypto.PubkeyToAddress(*publicKeyECDSA).Hex(),
 	}
 
 	return nil
 }
 
-func (o *orchestrator) createKey(name string) error {
+func (o *orchestrator) createKey(cdc codec.Codec, name string) error {
 	mnemonic, err := createMnemonic()
 	if err != nil {
 		return err
 	}
 
-	return o.createKeyFromMnemonic(name, mnemonic)
+	return o.createKeyFromMnemonic(cdc, name, mnemonic)
 }
 
-func (o *orchestrator) createKeyFromMnemonic(name, mnemonic string) error {
+func (o *orchestrator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string) error {
 	kb, err := keyring.New(keyringAppName, keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
 		return err
@@ -93,8 +94,8 @@ func (o *orchestrator) createKeyFromMnemonic(name, mnemonic string) error {
 	}
 
 	o.keyInfo = *info
-	o.mnemonic = mnemonic
-	o.privateKey = privKey
+	o.Mnemonic = mnemonic
+	o.PrivateKey = privKey
 
 	return nil
 }

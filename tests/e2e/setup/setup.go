@@ -1,4 +1,4 @@
-package e2e
+package setup
 
 import (
 	"bytes"
@@ -13,10 +13,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"testing"
 	"time"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -44,45 +44,42 @@ import (
 	"github.com/umee-network/umee/v5/x/uibc"
 )
 
-const (
-	photonDenom    = "photon"
-	initBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + photonDenom
-	gaiaChainID    = "test-gaia-chain"
+type E2ETestSuite struct {
+	suite.Suite
 
-	ethChainID uint = 15
-	ethMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
-
-	priceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
-	priceFeederServerPort     = "7171/tcp"
-	priceFeederMaxStartupTime = 20 // seconds
-)
-
-var (
-	minGasPrice     = appparams.ProtocolMinGasPrice.String()
-	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
-
-	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
-	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
-)
-
-func TestIntegrationTestSuite(t *testing.T) {
-	suite.Run(t, new(IntegrationTestSuite))
+	tmpDirs             []string
+	Chain               *chain
+	EthClient           *ethclient.Client
+	gaiaRPC             *rpchttp.HTTP
+	DkrPool             *dockertest.Pool
+	DkrNet              *dockertest.Network
+	EthResource         *dockertest.Resource
+	GaiaResource        *dockertest.Resource
+	HermesResource      *dockertest.Resource
+	priceFeederResource *dockertest.Resource
+	ValResources        []*dockertest.Resource
+	OrchResources       []*dockertest.Resource
+	GravityContractAddr string
+	Umee                client.Client
+	cdc                 codec.Codec
 }
 
-func (s *IntegrationTestSuite) SetupSuite() {
+func (s *E2ETestSuite) SetupSuite() {
+	var err error
 	s.T().Log("setting up e2e integration test suite...")
 
-	var err error
-	s.chain, err = newChain()
+	// codec
+	s.cdc = encodingConfig.Codec
+
+	s.Chain, err = newChain()
 	s.Require().NoError(err)
 
-	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.chain.id, s.chain.dataDir)
+	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.Chain.ID, s.Chain.dataDir)
 
-	s.dkrPool, err = dockertest.NewPool("")
+	s.DkrPool, err = dockertest.NewPool("")
 	s.Require().NoError(err)
 
-	s.dkrNet, err = s.dkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.chain.id))
+	s.DkrNet, err = s.DkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.Chain.ID))
 	s.Require().NoError(err)
 
 	s.T().Logf("Ethereum and peggo are disable due to Ethereum PoS migration and PoW fork")
@@ -121,7 +118,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.initUmeeClient()
 }
 
-func (s *IntegrationTestSuite) TearDownSuite() {
+func (s *E2ETestSuite) TearDownSuite() {
 	if str := os.Getenv("UMEE_E2E_SKIP_CLEANUP"); len(str) > 0 {
 		skipCleanup, err := strconv.ParseBool(str)
 		s.Require().NoError(err)
@@ -133,54 +130,54 @@ func (s *IntegrationTestSuite) TearDownSuite() {
 
 	s.T().Log("tearing down e2e integration test suite...")
 
-	// s.Require().NoError(s.dkrPool.Purge(s.ethResource))
-	s.Require().NoError(s.dkrPool.Purge(s.gaiaResource))
-	s.Require().NoError(s.dkrPool.Purge(s.hermesResource))
-	s.Require().NoError(s.dkrPool.Purge(s.priceFeederResource))
+	// s.Require().NoError(s.DkrPool.Purge(s.ethResource))
+	s.Require().NoError(s.DkrPool.Purge(s.GaiaResource))
+	s.Require().NoError(s.DkrPool.Purge(s.HermesResource))
+	s.Require().NoError(s.DkrPool.Purge(s.priceFeederResource))
 
-	for _, vc := range s.valResources {
-		s.Require().NoError(s.dkrPool.Purge(vc))
+	for _, vc := range s.ValResources {
+		s.Require().NoError(s.DkrPool.Purge(vc))
 	}
 
-	// for _, oc := range s.orchResources {
-	// 	s.Require().NoError(s.dkrPool.Purge(oc))
+	// for _, oc := range s.OrchResources {
+	// 	s.Require().NoError(s.DkrPool.Purge(oc))
 	// }
 
-	s.Require().NoError(s.dkrPool.RemoveNetwork(s.dkrNet))
+	s.Require().NoError(s.DkrPool.RemoveNetwork(s.DkrNet))
 
-	os.RemoveAll(s.chain.dataDir)
+	os.RemoveAll(s.Chain.dataDir)
 	for _, td := range s.tmpDirs {
 		os.RemoveAll(td)
 	}
 }
 
-func (s *IntegrationTestSuite) initNodes() {
-	s.Require().NoError(s.chain.createAndInitValidators(3))
-	s.Require().NoError(s.chain.createAndInitOrchestrators(3))
-	s.Require().NoError(s.chain.createAndInitGaiaValidator())
+func (s *E2ETestSuite) initNodes() {
+	s.Require().NoError(s.Chain.createAndInitValidators(s.cdc, 3))
+	s.Require().NoError(s.Chain.createAndInitOrchestrators(s.cdc, 3))
+	s.Require().NoError(s.Chain.createAndInitGaiaValidator(s.cdc))
 
 	// initialize a genesis file for the first validator
-	val0ConfigDir := s.chain.validators[0].configDir()
-	for _, val := range s.chain.validators {
-		valAddr, err := val.keyInfo.GetAddress()
+	val0ConfigDir := s.Chain.Validators[0].configDir()
+	for _, val := range s.Chain.Validators {
+		valAddr, err := val.KeyInfo.GetAddress()
 		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, valAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, valAddr),
 		)
 	}
 
 	// add orchestrator accounts to genesis file
-	for _, orch := range s.chain.orchestrators {
+	for _, orch := range s.Chain.Orchestrators {
 		orchAddr, err := orch.keyInfo.GetAddress()
 		s.Require().NoError(err)
 
 		s.Require().NoError(
-			addGenesisAccount(val0ConfigDir, "", initBalanceStr, orchAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, orchAddr),
 		)
 	}
 
 	// copy the genesis file to the remaining validators
-	for _, val := range s.chain.validators[1:] {
+	for _, val := range s.Chain.Validators[1:] {
 		_, err := copyFile(
 			filepath.Join(val0ConfigDir, "config", "genesis.json"),
 			filepath.Join(val.configDir(), "config", "genesis.json"),
@@ -189,13 +186,13 @@ func (s *IntegrationTestSuite) initNodes() {
 	}
 }
 
-func (s *IntegrationTestSuite) initEthereum() {
+func (s *E2ETestSuite) initEthereum() {
 	// generate ethereum keys for validators add them to the ethereum genesis
 	ethGenesis := EthereumGenesis{
 		Difficulty: "0x400",
 		GasLimit:   "0xB71B00",
-		Config:     EthereumConfig{ChainID: ethChainID},
-		Alloc:      make(map[string]Allocation, len(s.chain.validators)+1),
+		Config:     EthereumConfig{ChainID: EthChainID},
+		Alloc:      make(map[string]Allocation, len(s.Chain.Validators)+1),
 	}
 
 	alloc := Allocation{
@@ -203,23 +200,23 @@ func (s *IntegrationTestSuite) initEthereum() {
 	}
 
 	ethGenesis.Alloc["0xBf660843528035a5A4921534E156a27e64B231fE"] = alloc
-	for _, orch := range s.chain.orchestrators {
+	for _, orch := range s.Chain.Orchestrators {
 		s.Require().NoError(orch.generateEthereumKey())
-		ethGenesis.Alloc[orch.ethereumKey.address] = alloc
+		ethGenesis.Alloc[orch.EthereumKey.Address] = alloc
 	}
 	ethGenBz, err := json.MarshalIndent(ethGenesis, "", "  ")
 	s.Require().NoError(err)
 
 	// write out the genesis file
-	s.Require().NoError(writeFile(filepath.Join(s.chain.configDir(), "eth_genesis.json"), ethGenBz))
+	s.Require().NoError(writeFile(filepath.Join(s.Chain.configDir(), "eth_genesis.json"), ethGenBz))
 }
 
-func (s *IntegrationTestSuite) initGenesis() {
+func (s *E2ETestSuite) initGenesis() {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
 
-	config.SetRoot(s.chain.validators[0].configDir())
-	config.Moniker = s.chain.validators[0].moniker
+	config.SetRoot(s.Chain.Validators[0].configDir())
+	config.Moniker = s.Chain.Validators[0].moniker
 
 	genFilePath := config.GenesisFile()
 	s.T().Log("starting e2e infrastructure; validator_0 config:", genFilePath)
@@ -228,40 +225,40 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	// Gravity Bridge
 	var gravityGenState gravitytypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 
-	gravityGenState.Params.BridgeChainId = uint64(ethChainID)
+	gravityGenState.Params.BridgeChainId = uint64(EthChainID)
 
-	bz, err := cdc.MarshalJSON(&gravityGenState)
+	bz, err := s.cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
 	appGenState[gravitytypes.ModuleName] = bz
 
 	var bech32GenState bech32ibctypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
 
 	// bech32
 	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
 
-	bz, err = cdc.MarshalJSON(&bech32GenState)
+	bz, err = s.cdc.MarshalJSON(&bech32GenState)
 	s.Require().NoError(err)
 	appGenState[bech32ibctypes.ModuleName] = bz
 
 	// Leverage
 	var leverageGenState leveragetypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry,
 		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 		fixtures.Token(ATOMBaseDenom, ATOM, uint32(ATOMExponent)),
 	)
 
-	bz, err = cdc.MarshalJSON(&leverageGenState)
+	bz, err = s.cdc.MarshalJSON(&leverageGenState)
 	s.Require().NoError(err)
 	appGenState[leveragetypes.ModuleName] = bz
 
 	// Oracle
 	var oracleGenState oracletypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[oracletypes.ModuleName], &oracleGenState))
 
 	oracleGenState.Params.HistoricStampPeriod = 5
 	oracleGenState.Params.MaximumPriceStamps = 4
@@ -274,47 +271,47 @@ func (s *IntegrationTestSuite) initGenesis() {
 		Exponent:    uint32(ATOMExponent),
 	})
 
-	bz, err = cdc.MarshalJSON(&oracleGenState)
+	bz, err = s.cdc.MarshalJSON(&oracleGenState)
 	s.Require().NoError(err)
 	appGenState[oracletypes.ModuleName] = bz
 
 	// Gov
 	var govGenState govtypesv1.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	votingPeroid := 5 * time.Second
 	govGenState.VotingParams.VotingPeriod = &votingPeroid
 	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
-	bz, err = cdc.MarshalJSON(&govGenState)
+	bz, err = s.cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)
 	appGenState[govtypes.ModuleName] = bz
 
 	// Bank
 	var bankGenState banktypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[banktypes.ModuleName], &bankGenState))
 
 	bankGenState.DenomMetadata = append(bankGenState.DenomMetadata, banktypes.Metadata{
 		Description: "An example stable token",
-		Display:     photonDenom,
-		Base:        photonDenom,
-		Symbol:      photonDenom,
-		Name:        photonDenom,
+		Display:     PhotonDenom,
+		Base:        PhotonDenom,
+		Symbol:      PhotonDenom,
+		Name:        PhotonDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
-				Denom:    photonDenom,
+				Denom:    PhotonDenom,
 				Exponent: 0,
 			},
 		},
 	})
 
-	bz, err = cdc.MarshalJSON(&bankGenState)
+	bz, err = s.cdc.MarshalJSON(&bankGenState)
 	s.Require().NoError(err)
 	appGenState[banktypes.ModuleName] = bz
 
 	// uibc (ibc quota)
 	var uibcGenState uibc.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[uibc.ModuleName], &uibcGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[uibc.ModuleName], &uibcGenState))
 
 	// 100$ for each token
 	uibcGenState.Params.TokenQuota = sdk.NewDec(100)
@@ -323,16 +320,16 @@ func (s *IntegrationTestSuite) initGenesis() {
 	// quotas will reset every 300 seconds
 	uibcGenState.Params.QuotaDuration = time.Second * 300
 
-	bz, err = cdc.MarshalJSON(&uibcGenState)
+	bz, err = s.cdc.MarshalJSON(&uibcGenState)
 	s.Require().NoError(err)
 	appGenState[uibc.ModuleName] = bz
 
 	var genUtilGenState genutiltypes.GenesisState
-	s.Require().NoError(cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
+	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
 
 	// generate genesis txs
-	genTxs := make([]json.RawMessage, len(s.chain.validators))
-	for i, val := range s.chain.validators {
+	genTxs := make([]json.RawMessage, len(s.Chain.Validators))
+	for i, val := range s.Chain.Validators {
 		var createValmsg sdk.Msg
 		if i == 2 {
 			createValmsg, err = val.buildCreateValidatorMsg(stakeAmountCoin2)
@@ -341,16 +338,16 @@ func (s *IntegrationTestSuite) initGenesis() {
 		}
 		s.Require().NoError(err)
 
-		orchAddr, err := s.chain.orchestrators[i].keyInfo.GetAddress()
+		orchAddr, err := s.Chain.Orchestrators[i].keyInfo.GetAddress()
 		s.Require().NoError(err)
 
-		delKeysMsg, err := val.buildDelegateKeysMsg(orchAddr, s.chain.orchestrators[i].ethereumKey.address)
+		delKeysMsg, err := val.buildDelegateKeysMsg(orchAddr, s.Chain.Orchestrators[i].EthereumKey.Address)
 		s.Require().NoError(err)
 
-		signedTx, err := val.signMsg(createValmsg, delKeysMsg)
+		signedTx, err := val.signMsg(s.cdc, createValmsg, delKeysMsg)
 		s.Require().NoError(err)
 
-		txRaw, err := cdc.MarshalJSON(signedTx)
+		txRaw, err := s.cdc.MarshalJSON(signedTx)
 		s.Require().NoError(err)
 
 		genTxs[i] = txRaw
@@ -358,7 +355,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 
 	genUtilGenState.GenTxs = genTxs
 
-	bz, err = cdc.MarshalJSON(&genUtilGenState)
+	bz, err = s.cdc.MarshalJSON(&genUtilGenState)
 	s.Require().NoError(err)
 	appGenState[genutiltypes.ModuleName] = bz
 
@@ -371,13 +368,13 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(err)
 
 	// write the updated genesis file to each validator
-	for _, val := range s.chain.validators {
+	for _, val := range s.Chain.Validators {
 		writeFile(filepath.Join(val.configDir(), "config", "genesis.json"), bz)
 	}
 }
 
-func (s *IntegrationTestSuite) initValidatorConfigs() {
-	for i, val := range s.chain.validators {
+func (s *E2ETestSuite) initValidatorConfigs() {
+	for i, val := range s.Chain.Validators {
 		tmCfgPath := filepath.Join(val.configDir(), "config", "config.toml")
 
 		vpr := viper.New()
@@ -396,12 +393,12 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 
 		var peers []string
 
-		for j := 0; j < len(s.chain.validators); j++ {
+		for j := 0; j < len(s.Chain.Validators); j++ {
 			if i == j {
 				continue
 			}
 
-			peer := s.chain.validators[j]
+			peer := s.Chain.Validators[j]
 			peerID := fmt.Sprintf("%s@%s%d:26656", peer.nodeKey.ID(), peer.moniker, j)
 			peers = append(peers, peerID)
 		}
@@ -421,7 +418,7 @@ func (s *IntegrationTestSuite) initValidatorConfigs() {
 	}
 }
 
-func (s *IntegrationTestSuite) runGanacheContainer() {
+func (s *E2ETestSuite) runGanacheContainer() {
 	s.T().Log("starting Ganache container...")
 
 	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
@@ -443,19 +440,19 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 	}
 
 	entrypoint = append(entrypoint, "--account", "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7,0x3635C9ADC5DEA00000")
-	for _, orch := range s.chain.orchestrators {
+	for _, orch := range s.Chain.Orchestrators {
 		s.Require().NoError(orch.generateEthereumKey())
-		entrypoint = append(entrypoint, "--account", orch.ethereumKey.privateKey+",0x3635C9ADC5DEA00000")
+		entrypoint = append(entrypoint, "--account", orch.EthereumKey.PrivateKey+",0x3635C9ADC5DEA00000")
 	}
 
-	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+	s.EthResource, err = s.DkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "ganache.Dockerfile",
 			ContextDir: tmpDir,
 		},
 		&dockertest.RunOptions{
 			Name:         "ganache",
-			NetworkID:    s.dkrNet.Network.ID,
+			NetworkID:    s.DkrNet.Network.ID,
 			ExposedPorts: []string{"8545"},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"8545/tcp": {{HostIP: "", HostPort: "8545"}},
@@ -467,7 +464,7 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 	)
 	s.Require().NoError(err)
 
-	s.ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.EthClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.EthResource.GetHostPort("8545/tcp")))
 	s.Require().NoError(err)
 
 	match := "Listening on 0.0.0.0:8545"
@@ -480,9 +477,9 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 	// Wait for Ganache to start running.
 	s.Require().Eventually(
 		func() bool {
-			err := s.dkrPool.Client.Logs(
+			err := s.DkrPool.Client.Logs(
 				docker.LogsOptions{
-					Container:    s.ethResource.Container.ID,
+					Container:    s.EthResource.Container.ID,
 					OutputStream: &outBuf,
 					ErrorStream:  &errBuf,
 					Stdout:       true,
@@ -499,17 +496,17 @@ func (s *IntegrationTestSuite) runGanacheContainer() {
 		5*time.Second,
 		"ganache node failed to start",
 	)
-	s.T().Logf("started Ganache container: %s", s.ethResource.Container.ID)
+	s.T().Logf("started Ganache container: %s", s.EthResource.Container.ID)
 }
 
-func (s *IntegrationTestSuite) runEthContainer() {
+func (s *E2ETestSuite) runEthContainer() {
 	s.T().Log("starting Ethereum container...")
 	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-eth-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
 	_, err = copyFile(
-		filepath.Join(s.chain.configDir(), "eth_genesis.json"),
+		filepath.Join(s.Chain.configDir(), "eth_genesis.json"),
 		filepath.Join(tmpDir, "eth_genesis.json"),
 	)
 	s.Require().NoError(err)
@@ -520,14 +517,14 @@ func (s *IntegrationTestSuite) runEthContainer() {
 	)
 	s.Require().NoError(err)
 
-	s.ethResource, err = s.dkrPool.BuildAndRunWithBuildOptions(
+	s.EthResource, err = s.DkrPool.BuildAndRunWithBuildOptions(
 		&dockertest.BuildOptions{
 			Dockerfile: "eth.Dockerfile",
 			ContextDir: tmpDir,
 		},
 		&dockertest.RunOptions{
 			Name:      "ethereum",
-			NetworkID: s.dkrNet.Network.ID,
+			NetworkID: s.DkrNet.Network.ID,
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"8545/tcp": {{HostIP: "", HostPort: "8545"}},
 			},
@@ -537,7 +534,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 	)
 	s.Require().NoError(err)
 
-	s.ethClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	s.EthClient, err = ethclient.Dial(fmt.Sprintf("http://%s", s.EthResource.GetHostPort("8545/tcp")))
 	s.Require().NoError(err)
 
 	// Wait for the Ethereum node to start producing blocks; DAG completion takes
@@ -547,7 +544,7 @@ func (s *IntegrationTestSuite) runEthContainer() {
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
 
-			height, err := s.ethClient.BlockNumber(ctx)
+			height, err := s.EthClient.BlockNumber(ctx)
 			if err != nil {
 				return false
 			}
@@ -559,17 +556,17 @@ func (s *IntegrationTestSuite) runEthContainer() {
 		"geth node failed to produce a block",
 	)
 
-	s.T().Logf("started Ethereum container: %s", s.ethResource.Container.ID)
+	s.T().Logf("started Ethereum container: %s", s.EthResource.Container.ID)
 }
 
-func (s *IntegrationTestSuite) runValidators() {
+func (s *E2ETestSuite) runValidators() {
 	s.T().Log("starting Umee validator containers...")
 
-	s.valResources = make([]*dockertest.Resource, len(s.chain.validators))
-	for i, val := range s.chain.validators {
+	s.ValResources = make([]*dockertest.Resource, len(s.Chain.Validators))
+	for i, val := range s.Chain.Validators {
 		runOpts := &dockertest.RunOptions{
 			Name:      val.instanceName(),
-			NetworkID: s.dkrNet.Network.ID,
+			NetworkID: s.DkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.umee", val.configDir()),
 			},
@@ -592,10 +589,10 @@ func (s *IntegrationTestSuite) runValidators() {
 			}
 		}
 
-		resource, err := s.dkrPool.RunWithOptions(runOpts, noRestart)
+		resource, err := s.DkrPool.RunWithOptions(runOpts, noRestart)
 		s.Require().NoError(err)
 
-		s.valResources[i] = resource
+		s.ValResources[i] = resource
 		s.T().Logf("started Umee validator container: %s", resource.Container.ID)
 	}
 
@@ -625,14 +622,14 @@ func (s *IntegrationTestSuite) runValidators() {
 	)
 }
 
-func (s *IntegrationTestSuite) runGaiaNetwork() {
+func (s *E2ETestSuite) runGaiaNetwork() {
 	s.T().Log("starting Gaia network container...")
 
 	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-gaia-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
-	gaiaVal := s.chain.gaiaValidators[0]
+	gaiaVal := s.Chain.GaiaValidators[0]
 
 	gaiaCfgPath := path.Join(tmpDir, "cfg")
 	s.Require().NoError(os.MkdirAll(gaiaCfgPath, 0o755))
@@ -643,12 +640,12 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	)
 	s.Require().NoError(err)
 
-	s.gaiaResource, err = s.dkrPool.RunWithOptions(
+	s.GaiaResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       gaiaVal.instanceName(),
 			Repository: "ghcr.io/umee-network/gaia-e2e",
 			Tag:        "latest",
-			NetworkID:  s.dkrNet.Network.ID,
+			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.gaia", tmpDir),
 			},
@@ -659,7 +656,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 				"26657/tcp": {{HostIP: "", HostPort: "27657"}},
 			},
 			Env: []string{
-				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", gaiaChainID),
+				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", GaiaChainID),
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 			},
 			Entrypoint: []string{
@@ -672,7 +669,7 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 	)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("tcp://%s", s.gaiaResource.GetHostPort("26657/tcp"))
+	endpoint := fmt.Sprintf("tcp://%s", s.GaiaResource.GetHostPort("26657/tcp"))
 	s.gaiaRPC, err = rpchttp.New(endpoint, "/websocket")
 	s.Require().NoError(err)
 
@@ -698,20 +695,20 @@ func (s *IntegrationTestSuite) runGaiaNetwork() {
 		"gaia node failed to produce blocks",
 	)
 
-	s.T().Logf("started Gaia network container: %s", s.gaiaResource.Container.ID)
+	s.T().Logf("started Gaia network container: %s", s.GaiaResource.Container.ID)
 }
 
-func (s *IntegrationTestSuite) runIBCRelayer() {
+func (s *E2ETestSuite) runIBCRelayer() {
 	s.T().Log("starting Hermes relayer container...")
 
 	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-hermes-")
 	s.Require().NoError(err)
 	s.tmpDirs = append(s.tmpDirs, tmpDir)
 
-	gaiaVal := s.chain.gaiaValidators[0]
+	gaiaVal := s.Chain.GaiaValidators[0]
 	// umeeVal for the relayer needs to be a different account
 	// than what we use for runPriceFeeder.
-	umeeVal := s.chain.validators[1]
+	umeeVal := s.Chain.Validators[1]
 	hermesCfgPath := path.Join(tmpDir, "hermes")
 
 	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0o755))
@@ -721,12 +718,12 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	)
 	s.Require().NoError(err)
 
-	s.hermesResource, err = s.dkrPool.RunWithOptions(
+	s.HermesResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-gaia-relayer",
 			Repository: "ghcr.io/umee-network/hermes-e2e",
 			Tag:        "latest",
-			NetworkID:  s.dkrNet.Network.ID,
+			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
 			},
@@ -735,12 +732,12 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
 			},
 			Env: []string{
-				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", gaiaChainID),
-				fmt.Sprintf("UMEE_E2E_UMEE_CHAIN_ID=%s", s.chain.id),
+				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", GaiaChainID),
+				fmt.Sprintf("UMEE_E2E_UMEE_CHAIN_ID=%s", s.Chain.ID),
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
-				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.gaiaResource.Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.valResources[1].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.GaiaResource.Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.ValResources[1].Container.Name[1:]),
 			},
 			Entrypoint: []string{
 				"sh",
@@ -752,7 +749,7 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 	)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("http://%s/state", s.hermesResource.GetHostPort("3031/tcp"))
+	endpoint := fmt.Sprintf("http://%s/state", s.HermesResource.GetHostPort("3031/tcp"))
 	s.Require().Eventually(
 		func() bool {
 			resp, err := http.Get(endpoint)
@@ -782,32 +779,32 @@ func (s *IntegrationTestSuite) runIBCRelayer() {
 		"hermes relayer not healthy",
 	)
 
-	s.T().Logf("started Hermes relayer container: %s", s.hermesResource.Container.ID)
+	s.T().Logf("started Hermes relayer container: %s", s.HermesResource.Container.ID)
 
 	// create the client, connection and channel between the Umee and Gaia chains
 	s.connectIBCChains()
 }
 
-func (s *IntegrationTestSuite) runContractDeployment() {
+func (s *E2ETestSuite) runContractDeployment() {
 	s.T().Log("starting Gravity Bridge contract deployer container...")
 
-	resource, err := s.dkrPool.RunWithOptions(
+	resource, err := s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "gravity-contract-deployer",
-			NetworkID:  s.dkrNet.Network.ID,
+			NetworkID:  s.DkrNet.Network.ID,
 			Repository: "umee-network/umeed-e2e",
 			// NOTE: container names are prefixed with '/'
-			Env: []string{"PEGGO_ETH_PK=" + ethMinerPK},
+			Env: []string{"PEGGO_ETH_PK=" + EthMinerPK},
 			Entrypoint: []string{
 				"peggo",
 				"bridge",
 				"deploy-gravity",
 				"--eth-rpc",
-				fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+				fmt.Sprintf("http://%s:8545", s.EthResource.Container.Name[1:]),
 				"--cosmos-grpc",
-				fmt.Sprintf("tcp://%s:9090", s.valResources[0].Container.Name[1:]),
+				fmt.Sprintf("tcp://%s:9090", s.ValResources[0].Container.Name[1:]),
 				"--tendermint-rpc",
-				fmt.Sprintf("http://%s:26657", s.valResources[0].Container.Name[1:]),
+				fmt.Sprintf("http://%s:26657", s.ValResources[0].Container.Name[1:]),
 			},
 		},
 		noRestart,
@@ -821,7 +818,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 	for container.State.Running {
 		time.Sleep(10 * time.Second)
 
-		container, err = s.dkrPool.Client.InspectContainer(resource.Container.ID)
+		container, err = s.DkrPool.Client.InspectContainer(resource.Container.ID)
 		s.Require().NoError(err)
 	}
 
@@ -830,7 +827,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 		errBuf bytes.Buffer
 	)
 
-	s.Require().NoErrorf(s.dkrPool.Client.Logs(
+	s.Require().NoErrorf(s.DkrPool.Client.Logs(
 		docker.LogsOptions{
 			Container:    resource.Container.ID,
 			OutputStream: &outBuf,
@@ -862,7 +859,7 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
 
-			if err := queryEthTx(ctx, s.ethClient, txHash); err != nil {
+			if err := s.QueryEthTx(ctx, s.EthClient, txHash); err != nil {
 				return false
 			}
 
@@ -873,36 +870,36 @@ func (s *IntegrationTestSuite) runContractDeployment() {
 		"failed to confirm Peggy contract deployment transaction",
 	)
 
-	s.Require().NoError(s.dkrPool.RemoveContainerByName(container.Name))
+	s.Require().NoError(s.DkrPool.RemoveContainerByName(container.Name))
 
 	s.T().Logf("deployed Gravity Bridge contract: %s", gravityContractAddr)
-	s.gravityContractAddr = gravityContractAddr
+	s.GravityContractAddr = gravityContractAddr
 }
 
-func (s *IntegrationTestSuite) runOrchestrators() {
+func (s *E2ETestSuite) runOrchestrators() {
 	s.T().Log("starting orchestrator containers...")
 
-	s.orchResources = make([]*dockertest.Resource, len(s.chain.validators))
-	for i, orch := range s.chain.orchestrators {
-		resource, err := s.dkrPool.RunWithOptions(
+	s.OrchResources = make([]*dockertest.Resource, len(s.Chain.Validators))
+	for i, orch := range s.Chain.Orchestrators {
+		resource, err := s.DkrPool.RunWithOptions(
 			&dockertest.RunOptions{
-				Name:       s.chain.orchestrators[i].instanceName(),
-				NetworkID:  s.dkrNet.Network.ID,
+				Name:       s.Chain.Orchestrators[i].instanceName(),
+				NetworkID:  s.DkrNet.Network.ID,
 				Repository: "umee-network/umeed-e2e",
-				Env:        []string{"PEGGO_ETH_PK=" + orch.ethereumKey.privateKey},
+				Env:        []string{"PEGGO_ETH_PK=" + orch.EthereumKey.PrivateKey},
 				// NOTE: container names are prefixed with '/'
 				Entrypoint: []string{
 					"peggo",
 					"orchestrator",
-					s.gravityContractAddr,
+					s.GravityContractAddr,
 					"--eth-rpc",
-					fmt.Sprintf("http://%s:8545", s.ethResource.Container.Name[1:]),
+					fmt.Sprintf("http://%s:8545", s.EthResource.Container.Name[1:]),
 					"--cosmos-chain-id",
-					s.chain.id,
+					s.Chain.ID,
 					"--cosmos-grpc",
-					fmt.Sprintf("tcp://%s:9090", s.valResources[i].Container.Name[1:]),
+					fmt.Sprintf("tcp://%s:9090", s.ValResources[i].Container.Name[1:]),
 					"--tendermint-rpc",
-					fmt.Sprintf("http://%s:26657", s.valResources[i].Container.Name[1:]),
+					fmt.Sprintf("http://%s:26657", s.ValResources[i].Container.Name[1:]),
 					"--cosmos-gas-prices",
 					minGasPrice,
 					"--cosmos-from",
@@ -914,19 +911,19 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 					"--relayer-loop-multiplier=1.0",
 					"--requester-loop-multiplier=1.0",
 					"--cosmos-pk",
-					hexutil.Encode(s.chain.orchestrators[i].privateKey.Bytes()),
+					hexutil.Encode(s.Chain.Orchestrators[i].PrivateKey.Bytes()),
 				},
 			},
 			noRestart,
 		)
 		s.Require().NoError(err)
 
-		s.orchResources[i] = resource
+		s.OrchResources[i] = resource
 		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
 	}
 
 	match := "oracle sent set of claims successfully"
-	for _, resource := range s.orchResources {
+	for _, resource := range s.OrchResources {
 		s.T().Logf("waiting for orchestrator to be healthy: %s", resource.Container.ID)
 
 		var (
@@ -936,7 +933,7 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 
 		s.Require().Eventuallyf(
 			func() bool {
-				err := s.dkrPool.Client.Logs(
+				err := s.DkrPool.Client.Logs(
 					docker.LogsOptions{
 						Container:    resource.Container.ID,
 						OutputStream: &outBuf,
@@ -959,33 +956,33 @@ func (s *IntegrationTestSuite) runOrchestrators() {
 	}
 }
 
-func (s *IntegrationTestSuite) runPriceFeeder() {
+func (s *E2ETestSuite) runPriceFeeder() {
 	s.T().Log("starting price-feeder container...")
 
-	umeeVal := s.chain.validators[2]
-	umeeValAddr, err := umeeVal.keyInfo.GetAddress()
+	umeeVal := s.Chain.Validators[2]
+	umeeValAddr, err := umeeVal.KeyInfo.GetAddress()
 	s.Require().NoError(err)
 
 	grpcEndpoint := fmt.Sprintf("tcp://%s:%s", umeeVal.instanceName(), "9090")
 	tmrpcEndpoint := fmt.Sprintf("http://%s:%s", umeeVal.instanceName(), "26657")
 
-	s.priceFeederResource, err = s.dkrPool.RunWithOptions(
+	s.priceFeederResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-price-feeder",
-			NetworkID:  s.dkrNet.Network.ID,
-			Repository: priceFeederContainerRepo,
+			NetworkID:  s.DkrNet.Network.ID,
+			Repository: PriceFeederContainerRepo,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/root/.umee", umeeVal.configDir()),
 			},
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				priceFeederServerPort: {{HostIP: "", HostPort: "7171"}},
+				PriceFeederServerPort: {{HostIP: "", HostPort: "7171"}},
 			},
 			Env: []string{
 				fmt.Sprintf("PRICE_FEEDER_PASS=%s", keyringPassphrase),
 				fmt.Sprintf("ACCOUNT_ADDRESS=%s", umeeValAddr),
 				fmt.Sprintf("ACCOUNT_VALIDATOR=%s", sdk.ValAddress(umeeValAddr)),
 				fmt.Sprintf("KEYRING_DIR=%s", "/root/.umee"),
-				fmt.Sprintf("ACCOUNT_CHAIN_ID=%s", s.chain.id),
+				fmt.Sprintf("ACCOUNT_CHAIN_ID=%s", s.Chain.ID),
 				fmt.Sprintf("RPC_GRPC_ENDPOINT=%s", grpcEndpoint),
 				fmt.Sprintf("RPC_TMRPC_ENDPOINT=%s", tmrpcEndpoint),
 			},
@@ -998,7 +995,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort(priceFeederServerPort))
+	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort(PriceFeederServerPort))
 
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
@@ -1031,7 +1028,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	}
 
 	isHealthy := false
-	for i := 0; i < priceFeederMaxStartupTime; i++ {
+	for i := 0; i < PriceFeederMaxStartupTime; i++ {
 		isHealthy = checkHealth()
 		if isHealthy {
 			break
@@ -1040,7 +1037,7 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	}
 
 	if !isHealthy {
-		err := s.dkrPool.Client.Logs(docker.LogsOptions{
+		err := s.DkrPool.Client.Logs(docker.LogsOptions{
 			Container:    s.priceFeederResource.Container.ID,
 			OutputStream: os.Stdout,
 			ErrorStream:  os.Stderr,
@@ -1058,23 +1055,72 @@ func (s *IntegrationTestSuite) runPriceFeeder() {
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
 }
 
-func (s *IntegrationTestSuite) initUmeeClient() {
+func (s *E2ETestSuite) initUmeeClient() {
 	var err error
-	accMnemonics := make(map[string]string)
-	for index, v := range s.chain.validators {
-		accMnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
+	mnemonics := make(map[string]string)
+	for index, v := range s.Chain.Validators {
+		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
 	}
 	ecfg := app.MakeEncodingConfig()
 
-	s.umee, err = client.NewClient(
-		s.chain.id,
+	s.Umee, err = client.NewClient(
+		s.Chain.ID,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
-		accMnemonics,
+		mnemonics,
 		1,
 		ecfg,
 	)
 	s.Require().NoError(err)
+}
+
+func (s *E2ETestSuite) connectIBCChains() {
+	s.T().Logf("connecting %s and %s chains via IBC", s.Chain.ID, GaiaChainID)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+
+	exec, err := s.DkrPool.Client.CreateExec(docker.CreateExecOptions{
+		Context:      ctx,
+		AttachStdout: true,
+		AttachStderr: true,
+		Container:    s.HermesResource.Container.ID,
+		User:         "root",
+		Cmd: []string{
+			"hermes",
+			"create",
+			"channel",
+			s.Chain.ID,
+			GaiaChainID,
+			"--port-a=transfer",
+			"--port-b=transfer",
+		},
+	})
+	s.Require().NoError(err)
+
+	var (
+		outBuf bytes.Buffer
+		errBuf bytes.Buffer
+	)
+
+	err = s.DkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+		Context:      ctx,
+		Detach:       false,
+		OutputStream: &outBuf,
+		ErrorStream:  &errBuf,
+	})
+	s.Require().NoErrorf(
+		err,
+		"failed connect chains; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
+	)
+
+	s.Require().Containsf(
+		errBuf.String(),
+		"successfully opened init channel",
+		"failed to connect chains via IBC: %s", errBuf.String(),
+	)
+
+	s.T().Logf("connected %s and %s chains via IBC", s.Chain.ID, GaiaChainID)
 }
 
 func noRestart(config *docker.HostConfig) {

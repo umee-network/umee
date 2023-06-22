@@ -1480,8 +1480,8 @@ github.com/ultraware/funlen v0.0.3 h1:5ylVWm8wsNwH5aWo9438pwvsK0QiqVuUrt9bn7S/iL
 github.com/ultraware/funlen v0.0.3/go.mod h1:Dp4UiAus7Wdb9KUZsYWZEWiRzGuM2kXM1lPbfaF6xhA=
 github.com/ultraware/whitespace v0.0.5 h1:hh+/cpIcopyMYbZNVov9iSxvJU3OYQg78Sfaqzi/CzI=
 github.com/ultraware/whitespace v0.0.5/go.mod h1:aVMh/gQve5Maj9hQ/hg+F75lr/X5A89uZnzAmWSineA=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-8 h1:wTu1bGrlgGtBKoWT4+K3Snr9X1x0b/ydyBwF1rtPl04=
-github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-8/go.mod h1:NR6UwQPZUoLckpOtCxgROWNEDzepe2JhxQ2u9cL+pbo=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-9 h1:uo8+3gFo/EhQtjbiP7AfN0Pqx6ddFf9iWcvlfeChNsY=
+github.com/umee-network/Gravity-Bridge/module v1.5.3-umee-9/go.mod h1:NR6UwQPZUoLckpOtCxgROWNEDzepe2JhxQ2u9cL+pbo=
 github.com/umee-network/bech32-ibc v0.3.3 h1:wUX5uSYZl8yiFdttOvunfRihsE4miYmzl7pK2FEUs+U=
 github.com/umee-network/bech32-ibc v0.3.3/go.mod h1:UbhzCKN+Z7RoUdCkAanmIy+wufwQ/aQJrDEoVORhC2Y=
 github.com/umee-network/cosmos-sdk v0.46.13-umee h1:EeSalZHGoWdkKkCNhNd80jzRMNEQWLyDPUU5aUJQpIs=
@@ -2236,8 +2236,8 @@ google.golang.org/grpc v1.48.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACu
 google.golang.org/grpc v1.49.0/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
 google.golang.org/grpc v1.50.0/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
 google.golang.org/grpc v1.50.1/go.mod h1:ZgQEeidpAuNRZ8iRrlBKXZQP1ghovWIVhdJRyCDK+GI=
-google.golang.org/grpc v1.56.0 h1:+y7Bs8rtMd07LeXmL3NxcTLn7mUkbKZqEpPhMNkwJEE=
-google.golang.org/grpc v1.56.0/go.mod h1:I9bI3vqKfayGqPUAwGdOSu7kt6oIJLixfffKrpXqQ9s=
+google.golang.org/grpc v1.56.1 h1:z0dNfjIl0VpaZ9iSVjA6daGatAYwPGstTjt5vkRMFkQ=
+google.golang.org/grpc v1.56.1/go.mod h1:I9bI3vqKfayGqPUAwGdOSu7kt6oIJLixfffKrpXqQ9s=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.1.0/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
 google.golang.org/protobuf v0.0.0-20200109180630-ec00e32a8dfd/go.mod h1:DFci5gLYBciE7Vtevhsrf46CRTquxDuWsQurQQe4oz8=
 google.golang.org/protobuf v0.0.0-20200221191635-4d8936d0db64/go.mod h1:kwYJMbMJ01Woi6D6+Kah6886xMZcty6N08ah7+eCXa0=
