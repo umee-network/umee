@@ -375,8 +375,8 @@ func (k Keeper) Liquidate(
 	return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
 }
 
-// FlashLiquidate
-func (k Keeper) FlashLiquidate(
+// FastLiquidate
+func (k Keeper) FastLiquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
 	return sdk.Coin{}, sdk.Coin{}, err

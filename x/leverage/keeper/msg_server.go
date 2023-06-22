@@ -488,10 +488,10 @@ func (s msgServer) Liquidate(
 	}, nil
 }
 
-func (s msgServer) FlashLiquidate(
+func (s msgServer) FastLiquidate(
 	goCtx context.Context,
-	msg *types.MsgFlashLiquidate,
-) (*types.MsgFlashLiquidateResponse, error) {
+	msg *types.MsgFastLiquidate,
+) (*types.MsgFastLiquidateResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	liquidator, err := sdk.AccAddressFromBech32(msg.Liquidator)
@@ -503,7 +503,7 @@ func (s msgServer) FlashLiquidate(
 		return nil, err
 	}
 
-	repaid, reward, err := s.keeper.FlashLiquidate(ctx, liquidator, borrower, msg.RepayDenom, msg.RewardDenom)
+	repaid, reward, err := s.keeper.FastLiquidate(ctx, liquidator, borrower, msg.RepayDenom, msg.RewardDenom)
 	if err != nil {
 		return nil, err
 	}
@@ -516,7 +516,7 @@ func (s msgServer) FlashLiquidate(
 	}
 
 	s.keeper.Logger(ctx).Debug(
-		"unhealthy borrower flash-liquidated",
+		"unhealthy borrower fast-liquidated",
 		"liquidator", msg.Liquidator,
 		"borrower", msg.Borrower,
 		"repaid", repaid.String(),
@@ -527,7 +527,7 @@ func (s msgServer) FlashLiquidate(
 		Borrower:   msg.Borrower,
 		Liquidated: reward,
 	})
-	return &types.MsgFlashLiquidateResponse{
+	return &types.MsgFastLiquidateResponse{
 		Repaid: repaid,
 		Reward: reward,
 	}, nil
