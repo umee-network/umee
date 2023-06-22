@@ -377,7 +377,7 @@ func (k Keeper) Liquidate(
 
 // FastLiquidate
 func (k Keeper) FastLiquidate(
-	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
+	_ sdk.Context, _, _ sdk.AccAddress, _, _ string,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
 	return sdk.Coin{}, sdk.Coin{}, err
 }
