@@ -83,3 +83,7 @@ func SumCoins(s storetypes.KVStore, prefix []byte, f StrExtractor) (sdk.Coins, e
 // StrExtractor is a function type which will take a bytes string value and extracts
 // string out of it.
 type StrExtractor func([]byte) (string, error)
+
+// NoLastByte returns sub-slice of the key without the last byte.
+// Panics if length of key is zero.
+func NoLastByte(key []byte) []byte { return key[:len(key)-1] }

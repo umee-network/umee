@@ -2,6 +2,8 @@ package keeper
 
 import (
 	sdkmath "cosmossdk.io/math"
+	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/util"
@@ -195,4 +197,8 @@ func (k Keeper) sumCoins(ctx sdk.Context, prefix []byte) sdk.Coins {
 
 	util.Panic(store.Iterate(ctx.KVStore(k.storeKey), prefix, iterator))
 	return total
+}
+
+func (k Keeper) prefixStore(ctx sdk.Context, p []byte) storetypes.KVStore {
+	return prefixstore.NewStore(ctx.KVStore(k.storeKey), p)
 }
