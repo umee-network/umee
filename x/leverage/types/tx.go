@@ -264,7 +264,7 @@ func NewMsgFastLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, reward
 	}
 }
 
-func (msg MsgFastLiquidate) Route() string { return "" }
+func (msg MsgFastLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgFastLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgFastLiquidate) ValidateBasic() error {
