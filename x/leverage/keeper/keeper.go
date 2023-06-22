@@ -355,16 +355,8 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
-	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
-
-	// finally, force incentive module to update bond and unbonding amounts if required,
-	// by ending existing unbondings early or instantly unbonding some bonded tokens
-	// until bonded + unbonding for the account is not greater than its collateral amount
-	err = k.reduceBondTo(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
-	if err != nil {
+	// check for bad debt and trigger forced unbond hooks
+	if err := k.postLiquidate(ctx, borrowerAddr, uTokenLiquidate.Denom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
@@ -389,16 +381,8 @@ func (k Keeper) FastLiquidate(
 	//	TODO: borrow + liquidate + collateralize logic
 	//
 
-	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
-	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
-	}
-
-	// finally, force incentive module to update bond and unbonding amounts if required,
-	// by ending existing unbondings early or instantly unbonding some bonded tokens
-	// until bonded + unbonding for the account is not greater than its collateral amount
-	err = k.reduceBondTo(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uRewardDenom))
-	if err != nil {
+	// check for bad debt and trigger forced unbond hooks
+	if err := k.postLiquidate(ctx, borrowerAddr, uRewardDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
 	return sdk.Coin{}, sdk.Coin{}, err
