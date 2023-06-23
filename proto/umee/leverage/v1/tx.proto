@@ -49,7 +49,7 @@ service Msg {
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
 
   // LeveragedLiquidate allows a user to repay a different user's borrowed coins in exchange for some
-  // of the target's collateral. For flash liquidations, the tokens to repay are borrowed instead of
+  // of the target's collateral. For leveraged liquidations, the tokens to repay are borrowed instead of
   // being taken from the liquidator's wallet, and the reward is immediately collateralized. Borrow
   // limit checks for the liquidator are deferred until after the reward is collateralized, allowing
   // this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
