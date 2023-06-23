@@ -326,10 +326,10 @@ func GetCmdFastLiquidate() *cobra.Command {
 		Short: "Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`
-Liquidate the maximum elegible amount of a borrower's debt in a chosen repay token for a chosen reward token.
+Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.
 
 Example:
-$ umeed tx leverage liquidate %s uumee uumee --from mykey`,
+$ umeed tx leverage fast-liquidate %s uumee uumee --from mykey`,
 				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",
 			),
 		),
