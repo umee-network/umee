@@ -235,7 +235,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		ExpectedErr: types.ErrLiquidationIneligible,
 	}
-	fastLiquidate := itestsuite.TestTransaction{
+	leveragedLiquidate := itestsuite.TestTransaction{
 		Name:    "liquidate",
 		Command: cli.GetCmdLeveragedLiquidate(),
 		Args: []string{
@@ -493,7 +493,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	// These transactions run after nonzero queries are finished
 	s.RunTestTransactions(
 		liquidate,
-		fastLiquidate,
+		leveragedLiquidate,
 		repay,
 		removeCollateral,
 		withdraw,

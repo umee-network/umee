@@ -1297,12 +1297,13 @@ type MsgClient interface {
 	// of the target's collateral.
 	Liquidate(ctx context.Context, in *MsgLiquidate, opts ...grpc.CallOption) (*MsgLiquidateResponse, error)
 	// LeveragedLiquidate allows a user to repay a different user's borrowed coins in exchange for some
-	// of the target's collateral. For flash liquidations, the tokens to repay are borrowed instead of
+	// of the target's collateral. For leveraged liquidations, the tokens to repay are borrowed instead of
 	// being taken from the liquidator's wallet, and the reward is immediately collateralized. Borrow
 	// limit checks for the liquidator are deferred until after the reward is collateralized, allowing
 	// this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
 	// of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
-	// repay and reward token denoms.
+	// repay and reward token denoms. For safety, the liquidator cannot exceed 80% of their borrow limit when
+	// executing this transaction, instead of the regular 100%.
 	LeveragedLiquidate(ctx context.Context, in *MsgLeveragedLiquidate, opts ...grpc.CallOption) (*MsgLeveragedLiquidateResponse, error)
 	// SupplyCollateral combines the Supply and Collateralize actions.
 	SupplyCollateral(ctx context.Context, in *MsgSupplyCollateral, opts ...grpc.CallOption) (*MsgSupplyCollateralResponse, error)
@@ -1455,12 +1456,13 @@ type MsgServer interface {
 	// of the target's collateral.
 	Liquidate(context.Context, *MsgLiquidate) (*MsgLiquidateResponse, error)
 	// LeveragedLiquidate allows a user to repay a different user's borrowed coins in exchange for some
-	// of the target's collateral. For flash liquidations, the tokens to repay are borrowed instead of
+	// of the target's collateral. For leveraged liquidations, the tokens to repay are borrowed instead of
 	// being taken from the liquidator's wallet, and the reward is immediately collateralized. Borrow
 	// limit checks for the liquidator are deferred until after the reward is collateralized, allowing
 	// this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
 	// of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
-	// repay and reward token denoms.
+	// repay and reward token denoms. For safety, the liquidator cannot exceed 80% of their borrow limit when
+	// executing this transaction, instead of the regular 100%.
 	LeveragedLiquidate(context.Context, *MsgLeveragedLiquidate) (*MsgLeveragedLiquidateResponse, error)
 	// SupplyCollateral combines the Supply and Collateralize actions.
 	SupplyCollateral(context.Context, *MsgSupplyCollateral) (*MsgSupplyCollateralResponse, error)
