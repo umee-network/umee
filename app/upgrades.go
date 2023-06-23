@@ -3,7 +3,6 @@ package app
 import (
 	"cosmossdk.io/errors"
 	"github.com/CosmWasm/wasmd/x/wasm"
-
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
