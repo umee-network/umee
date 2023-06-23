@@ -14,15 +14,14 @@ RUN LEDGER_ENABLED=false BUILD_TAGS=badgerdb make install
 
 # Stage-2: copy binary and required artifacts to a fresh image
 # we need to use debian compatible system.
-FROM ubuntu:rolling
+FROM ubuntu:23.04
 EXPOSE 26656 26657 1317 9090
-CMD ["umeed"]
 # Run umeed by default, omit entrypoint to ease using container with CLI
+CMD ["umeed"]
 STOPSIGNAL SIGTERM
 
 RUN apt-get update && apt-get install ca-certificates -y \
-    && addgroup --gid 1000 umee \
-    && useradd -u 1000 -g umee -m umee
+    && groupadd umee && useradd -g umee -m umee
 
 COPY --from=builder /go/bin/umeed /usr/local/bin/
 COPY --from=builder /go/pkg/mod/github.com/\!cosm\!wasm/wasmvm\@v*/internal/api/libwasmvm.*.so /usr/lib/
