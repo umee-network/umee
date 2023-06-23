@@ -87,10 +87,10 @@ func (k Keeper) getAllAccountUnbondings(ctx sdk.Context) ([]incentive.AccountUnb
 
 // getAllTotalUnbonding gets total unbonding for all uTokens (used for a query)
 func (k Keeper) getAllTotalUnbonding(ctx sdk.Context) sdk.Coins {
-	return store.SumCoins(k.prefixStore(ctx, keyPrefixTotalUnbonding), store.NoLastByte)
+	return store.SumCoins(k.prefixStore(ctx, keyPrefixTotalUnbonding), keys.ToStr)
 }
 
 // getAllTotalBonded gets total bonded for all uTokens (used for a query)
 func (k Keeper) getAllTotalBonded(ctx sdk.Context) sdk.Coins {
-	return store.SumCoins(k.prefixStore(ctx, keyPrefixTotalBonded), store.NoLastByte)
+	return store.SumCoins(k.prefixStore(ctx, keyPrefixTotalBonded), keys.NoLastByte)
 }

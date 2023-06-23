@@ -8,6 +8,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v5/util/keys"
 )
 
 func TestIterate(t *testing.T) {
@@ -74,7 +75,7 @@ func TestSumCoins(t *testing.T) {
 	}
 
 	pdb := prefixstore.NewStore(db, []byte(prefix))
-	sum := SumCoins(pdb, NoLastByte)
+	sum := SumCoins(pdb, keys.NoLastByte)
 	sum.Sort()
 	assert.DeepEqual(t, expected, sum)
 }

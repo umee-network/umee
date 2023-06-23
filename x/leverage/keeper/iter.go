@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/util/keys"
 	"github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
@@ -177,12 +178,12 @@ func (k Keeper) SweepBadDebts(ctx sdk.Context) error {
 
 // GetAllUTokenSupply returns total supply of all uToken denoms.
 func (k Keeper) GetAllUTokenSupply(ctx sdk.Context) sdk.Coins {
-	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixUtokenSupply), store.NoLastByte)
+	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixUtokenSupply), keys.NoLastByte)
 }
 
 // GetAllReserves returns all reserves.
 func (k Keeper) GetAllReserves(ctx sdk.Context) sdk.Coins {
-	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixReserveAmount), store.NoLastByte)
+	return store.SumCoins(k.prefixStore(ctx, types.KeyPrefixReserveAmount), keys.NoLastByte)
 }
 
 func (k Keeper) prefixStore(ctx sdk.Context, p []byte) storetypes.KVStore {
