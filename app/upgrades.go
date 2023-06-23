@@ -59,9 +59,13 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 }
 
 func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
-	app.UpgradeKeeper.SetUpgradeHandler(upgradeInfo.Name,
+	planName := "v5.1"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			return fromVM, app.GravityKeeper.MigrateFundsToDrainAccount(ctx, sdk.MustAccAddressFromBech32("the_drain_account"))
+			if err := app.GravityKeeper.MigrateFundsToDrainAccount(ctx, sdk.MustAccAddressFromBech32("the_drain_account")); err != nil {
+				return nil, err
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		})
 }
 
