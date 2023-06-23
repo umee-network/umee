@@ -33,6 +33,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdMaxBorrow(),
 		GetCmdRepay(),
 		GetCmdLiquidate(),
+		GetCmdFastLiquidate(),
 		GetCmdSupplyCollateral(),
 	)
 
@@ -303,6 +304,51 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 			rewardDenom := args[2]
 
 			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdFastLiquidate creates a Cobra command to generate or broadcast a
+// transaction with a MsgFastLiquidate message.
+func GetCmdFastLiquidate() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "fast-liquidate [borrower] [repay-denom] [reward-denom]",
+		Args:  cobra.ExactArgs(3),
+		Short: "Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`
+Liquidate the maximum elegible amount of a borrower's debt in a chosen repay token for a chosen reward token.
+
+Example:
+$ umeed tx leverage liquidate %s uumee uumee --from mykey`,
+				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",
+			),
+		),
+
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			borrowerAddr, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			repayDenom := args[1]
+			rewardDenom := args[2]
+
+			msg := types.NewMsgFastLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}

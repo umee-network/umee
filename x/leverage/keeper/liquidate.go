@@ -260,7 +260,7 @@ func ComputeCloseFactor(
 }
 
 // postLiquidate flags any bad debt and informs incentive module of any changes to an account's
-// uToken collateral after a liquidation has occured.
+// uToken collateral after a liquidation has occurred.
 func (k Keeper) postLiquidate(ctx sdk.Context, borrowerAddr sdk.AccAddress, uDenom string) error {
 	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
 	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
