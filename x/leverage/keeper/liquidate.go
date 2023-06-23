@@ -17,7 +17,7 @@ func (k Keeper) getLiquidationAmounts(
 	requestedRepay sdk.Coin,
 	rewardDenom string,
 	directLiquidation bool,
-	fastLiquidate bool,
+	leveragedLiquidate bool,
 ) (tokenRepay sdk.Coin, collateralLiquidate sdk.Coin, tokenReward sdk.Coin, err error) {
 	repayDenom := requestedRepay.Denom
 	collateralDenom := types.ToUTokenDenom(rewardDenom)
@@ -94,7 +94,7 @@ func (k Keeper) getLiquidationAmounts(
 
 	// max repayment amount is limited by a number of factors
 	maxRepay := totalBorrowed.AmountOf(repayDenom) // borrower position
-	if !fastLiquidate {
+	if !leveragedLiquidate {
 		// for traditional liquidations, liquidator account balance limits repayment
 		availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
 		maxRepay = sdk.MinInt(maxRepay, availableRepay)
