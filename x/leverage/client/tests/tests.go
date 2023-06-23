@@ -237,7 +237,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	}
 	fastLiquidate := itestsuite.TestTransaction{
 		Name:    "liquidate",
-		Command: cli.GetCmdFastLiquidate(),
+		Command: cli.GetCmdLeveragedLiquidate(),
 		Args: []string{
 			val.Address.String(),
 			"uumee", // borrower attempts to liquidate itself, but is ineligible

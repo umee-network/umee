@@ -368,8 +368,8 @@ func (k Keeper) Liquidate(
 	return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
 }
 
-// FastLiquidate
-func (k Keeper) FastLiquidate(
+// LeveragedLiquidate
+func (k Keeper) LeveragedLiquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
 	if err := k.validateAcceptedDenom(ctx, repayDenom); err != nil {
@@ -384,7 +384,7 @@ func (k Keeper) FastLiquidate(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
-		sdk.NewCoin(repayDenom, sdk.OneInt()), // amount is ignored for FastLiquidate
+		sdk.NewCoin(repayDenom, sdk.OneInt()), // amount is ignored for LeveragedLiquidate
 		rewardDenom,
 		false,
 		true,

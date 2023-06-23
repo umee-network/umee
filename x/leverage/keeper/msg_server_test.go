@@ -2031,7 +2031,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 	}
 }
 
-func (s *IntegrationTestSuite) TestMsgFastLiquidate() {
+func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a liquidator which supplies plenty of UMEE and ATOM to the module
@@ -2177,14 +2177,14 @@ func (s *IntegrationTestSuite) TestMsgFastLiquidate() {
 	}
 
 	for _, tc := range tcs {
-		msg := &types.MsgFastLiquidate{
+		msg := &types.MsgLeveragedLiquidate{
 			Liquidator:  tc.liquidator.String(),
 			Borrower:    tc.borrower.String(),
 			RepayDenom:  tc.repayDenom,
 			RewardDenom: tc.rewardDenom,
 		}
 		if tc.err != nil {
-			_, err := srv.FastLiquidate(ctx, msg)
+			_, err := srv.LeveragedLiquidate(ctx, msg)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
 			baseRewardDenom := types.ToTokenDenom(tc.expectedReward.Denom)
@@ -2208,7 +2208,7 @@ func (s *IntegrationTestSuite) TestMsgFastLiquidate() {
 			liBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.liquidator)
 
 			// verify the output of fast-liquidate function
-			resp, err := srv.FastLiquidate(ctx, msg)
+			resp, err := srv.LeveragedLiquidate(ctx, msg)
 			require.NoError(err, tc.msg)
 			require.Equal(tc.expectedRepay.String(), resp.Repaid.String(), tc.msg)
 			require.Equal(tc.expectedReward.String(), resp.Reward.String(), tc.msg)

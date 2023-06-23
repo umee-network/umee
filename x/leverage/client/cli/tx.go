@@ -33,7 +33,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdMaxBorrow(),
 		GetCmdRepay(),
 		GetCmdLiquidate(),
-		GetCmdFastLiquidate(),
+		GetCmdLeveragedLiquidate(),
 		GetCmdSupplyCollateral(),
 	)
 
@@ -317,11 +317,11 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 	return cmd
 }
 
-// GetCmdFastLiquidate creates a Cobra command to generate or broadcast a
-// transaction with a MsgFastLiquidate message.
-func GetCmdFastLiquidate() *cobra.Command {
+// GetCmdLeveragedLiquidate creates a Cobra command to generate or broadcast a
+// transaction with a MsgLeveragedLiquidate message.
+func GetCmdLeveragedLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "fast-liquidate [borrower] [repay-denom] [reward-denom]",
+		Use:   "lev-liquidate [borrower] [repay-denom] [reward-denom]",
 		Args:  cobra.ExactArgs(3),
 		Short: "Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.",
 		Long: strings.TrimSpace(
@@ -333,7 +333,7 @@ Will attempt to repay the maximum amount allowed by the targeted borrower's debt
 The transaction will fail if the liquidator, with new borrow and collateral positions, would be above 0.8 borrow limit.
 
 Example:
-$ umeed tx leverage fast-liquidate %s uumee uumee --from mykey`,
+$ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
 				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",
 			),
 		),
@@ -352,7 +352,7 @@ $ umeed tx leverage fast-liquidate %s uumee uumee --from mykey`,
 			repayDenom := args[1]
 			rewardDenom := args[2]
 
-			msg := types.NewMsgFastLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom)
+			msg := types.NewMsgLeveragedLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
