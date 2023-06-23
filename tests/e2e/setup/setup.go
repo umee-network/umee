@@ -62,6 +62,8 @@ type E2ETestSuite struct {
 	GravityContractAddr string
 	Umee                client.Client
 	cdc                 codec.Codec
+	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
+
 }
 
 func (s *E2ETestSuite) SetupSuite() {
@@ -74,7 +76,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.Chain, err = newChain()
 	s.Require().NoError(err)
 
-	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.Chain.ID, s.Chain.DataDir)
+	s.T().Logf("starting e2e infrastructure; chain-id: %s; datadir: %s", s.Chain.ID, s.Chain.dataDir)
 
 	s.DkrPool, err = dockertest.NewPool("")
 	s.Require().NoError(err)
@@ -110,10 +112,12 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
-	if str := os.Getenv("TEST_QA"); len(str) == 0 {
+	if !s.MinNetwork {
 		s.runPriceFeeder()
 		s.runGaiaNetwork()
 		s.runIBCRelayer()
+	} else {
+		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
 	}
 	// s.runContractDeployment()
 	// s.runOrchestrators()
@@ -133,9 +137,11 @@ func (s *E2ETestSuite) TearDownSuite() {
 	s.T().Log("tearing down e2e integration test suite...")
 
 	// s.Require().NoError(s.DkrPool.Purge(s.ethResource))
-	s.Require().NoError(s.DkrPool.Purge(s.GaiaResource))
-	s.Require().NoError(s.DkrPool.Purge(s.HermesResource))
-	s.Require().NoError(s.DkrPool.Purge(s.priceFeederResource))
+	if !s.MinNetwork {
+		s.Require().NoError(s.DkrPool.Purge(s.GaiaResource))
+		s.Require().NoError(s.DkrPool.Purge(s.HermesResource))
+		s.Require().NoError(s.DkrPool.Purge(s.priceFeederResource))
+	}
 
 	for _, vc := range s.ValResources {
 		s.Require().NoError(s.DkrPool.Purge(vc))
@@ -147,7 +153,7 @@ func (s *E2ETestSuite) TearDownSuite() {
 
 	s.Require().NoError(s.DkrPool.RemoveNetwork(s.DkrNet))
 
-	os.RemoveAll(s.Chain.DataDir)
+	os.RemoveAll(s.Chain.dataDir)
 	for _, td := range s.tmpDirs {
 		os.RemoveAll(td)
 	}
@@ -1065,7 +1071,7 @@ func (s *E2ETestSuite) initUmeeClient() {
 	}
 	ecfg := app.MakeEncodingConfig()
 	s.Umee, err = client.NewClient(
-		s.Chain.DataDir,
+		s.Chain.dataDir,
 		s.Chain.ID,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",

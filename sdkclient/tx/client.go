@@ -29,11 +29,11 @@ type Client struct {
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
-// signing and broadcasting transactions
+// signing and broadcasting transactions by passing chainDataDir and remaining func arguments
 // Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
 	chainDataDir,
-	chainID string,
+	chainID,
 	tmrpcEndpoint string,
 	mnemonics map[string]string,
 	gasAdjustment float64,

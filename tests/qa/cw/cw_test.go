@@ -6,7 +6,6 @@ package cw
 import (
 	"encoding/json"
 	"math/rand"
-	"os"
 	"strings"
 	"sync"
 	"testing"
@@ -32,9 +31,10 @@ var (
 )
 
 func TestQA(t *testing.T) {
-	os.Setenv("TEST_QA", "true")
 	t.Log("Running qa test...")
-	suite.Run(t, new(QATest))
+	qaTest := new(QATest)
+	qaTest.MinNetwork = true
+	suite.Run(t, qaTest)
 }
 
 func (qaTest *QATest) TestCWPlusGroup() {
