@@ -407,8 +407,5 @@ func (k Keeper) FastLiquidate(
 	}
 
 	// check for bad debt and trigger forced unbond hooks
-	if err := k.postLiquidate(ctx, borrowerAddr, uRewardDenom); err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
-	}
-	return sdk.Coin{}, sdk.Coin{}, err
+	return tokenRepay, uTokenReward, k.postLiquidate(ctx, borrowerAddr, uRewardDenom)
 }
