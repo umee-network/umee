@@ -328,6 +328,10 @@ func GetCmdFastLiquidate() *cobra.Command {
 			fmt.Sprintf(`
 Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.
 
+Will attempt to repay the maximum amount allowed by the targeted borrower's debt and collateral positions.
+
+The transaction will fail if the liquidator, with new borrow and collateral positions, would be above 0.8 borrow limit.
+
 Example:
 $ umeed tx leverage fast-liquidate %s uumee uumee --from mykey`,
 				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",

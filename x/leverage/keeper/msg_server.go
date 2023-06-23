@@ -508,9 +508,9 @@ func (s msgServer) FastLiquidate(
 		return nil, err
 	}
 
-	// Fail here if liquidator ends up over 90% their borrow limit under current or historic prices
+	// Fail here if liquidator ends up over 80% their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the liquidator's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, liquidator, sdk.MustNewDecFromStr("0.9"))
+	err = s.keeper.assertBorrowerHealth(ctx, liquidator, sdk.MustNewDecFromStr("0.8"))
 	if err != nil {
 		return nil, err
 	}
