@@ -53,13 +53,13 @@ func TestSumCoins(t *testing.T) {
 	}{
 		{"atom", 1},
 		{"umee", 8},
-		{"atom", 8}, // we overwrite
+		{"atom", 7}, // overwrite the previous value
 		{"ato", 2},
 		{"atoma", 3},
 	}
 	expected := sdk.NewCoins(
 		sdk.NewInt64Coin("ato", 2),
-		sdk.NewInt64Coin("atom", 8),
+		sdk.NewInt64Coin("atom", 7),
 		sdk.NewInt64Coin("atoma", 3),
 		sdk.NewInt64Coin("umee", 8))
 
