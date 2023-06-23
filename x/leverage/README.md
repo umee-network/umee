@@ -295,7 +295,30 @@ umeed start
 
 ## Messages
 
-See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto#L11) for list of supported messages.
+See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto#L11) for full documentation of supported messages.
+
+Here are their basic functions:
+
+### Supplying
+
+- `MsgSupply`: Supplies base tokens to the module and receives uTokens in exchange. UTokens can later be used to withdraw.
+- `MsgWithdraw`: Exchanges uTokens for the base tokens originally supplied, plus interest. UTokens withdrawn can be any combination of wallet uTokens (from supply) or collateral uTokens. When withdrawing collateral, borrow limit cannot be exceeded or the withdrawal will fail.
+- `MsgMaxWithdraw`: Withdraws the maximum allowed amount of uTokens, respecting the user's borrow limit and the module's liquidity requirements, if any.
+
+### Collateralizing
+- `MsgCollateralize`: Sends uTokens to the module as the collateral. Collateral increases a user's borrow limit, but can be siezed in a liquidation if borrowed value exceeds a certain threshold above borrow limit due to price movements or interest owed. Collateral tokens still earn supply interest while collateralized.
+- `MsgSupplyCollateral`: Combines `MsgSupply` and `MsgCollateralize`.
+- `MsgDecollateralize`: Returns some collateral uTokens to wallet balance, without withdrawing base tokens. Borrow limit cannot be exceeded or the decollateralize will fail.
+
+### Borrowing
+- `MsgBorrow` Borrows base tokens from the module. Borrow limit cannot be exceeded or the transaction will fail.
+- `MsgRepay` Repays borrowed tokens to the module, plus interest owed.
+
+### Liquidation
+- `MsgLiquidate` Liquidates a borrower whose borrowed value has exceeded their liquidation threshold (which is a certain amount above their borrow limit). The liquidator repays a portion of their debt using base tokens, and receives uTokens from the target's collateral, or the equivalent base tokens. The maximum liquidation amount is restricted by both the liquidator's specified amount and the borrower's liquidation eligibility, which may be partial.
+- `MsgLeveragedLiquidate` Liquidates a borrower, but instead of repaying with base tokens from wallet balance, borrows those tokens immediately before using them. Receives uTokens from the target's collateral, and immediately collateralizes them for the liquidator instead.
+This transaction will succeed even if the liquidator could not afford to borrow the initial tokens (due to borrow limit), as long as they are below 80% usage of their new borrow limit after the reward collateral is added.
+The liquidator is left with a new borrow that they must pay off, and new collateral which can eventually be withdrawn.
 
 ## Update Registry Proposal
 

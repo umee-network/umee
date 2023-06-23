@@ -255,7 +255,8 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLeveragedLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, rewardDenom string) *MsgLeveragedLiquidate {
+func NewMsgLeveragedLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, rewardDenom string,
+) *MsgLeveragedLiquidate {
 	return &MsgLeveragedLiquidate{
 		Liquidator:  liquidator.String(),
 		Borrower:    borrower.String(),
