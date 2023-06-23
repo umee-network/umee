@@ -17,6 +17,7 @@ func (k Keeper) getLiquidationAmounts(
 	requestedRepay sdk.Coin,
 	rewardDenom string,
 	directLiquidation bool,
+	fastLiquidate bool,
 ) (tokenRepay sdk.Coin, collateralLiquidate sdk.Coin, tokenReward sdk.Coin, err error) {
 	repayDenom := requestedRepay.Denom
 	collateralDenom := types.ToUTokenDenom(rewardDenom)
@@ -24,7 +25,6 @@ func (k Keeper) getLiquidationAmounts(
 	// get relevant liquidator, borrower, and module balances
 	borrowerCollateral := k.GetBorrowerCollateral(ctx, targetAddr)
 	totalBorrowed := k.GetBorrowerBorrows(ctx, targetAddr)
-	availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
 	repayDenomBorrowed := sdk.NewCoin(repayDenom, totalBorrowed.AmountOf(repayDenom))
 
 	// calculate borrower health in USD values, using spot prices only (no historic)
@@ -93,10 +93,15 @@ func (k Keeper) getLiquidationAmounts(
 	}
 
 	// max repayment amount is limited by a number of factors
-	maxRepay := requestedRepay.Amount                                   // maximum allowed by liquidator
-	maxRepay = sdk.MinInt(maxRepay, availableRepay)                     // liquidator account balance
-	maxRepay = sdk.MinInt(maxRepay, totalBorrowed.AmountOf(repayDenom)) // borrower position
-	maxRepay = sdk.MinInt(maxRepay, maxRepayAfterCloseFactor)           // close factor
+	maxRepay := totalBorrowed.AmountOf(repayDenom) // borrower position
+	if !fastLiquidate {
+		// for traditional liquidations, liquidator account balance limits repayment
+		availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
+		maxRepay = sdk.MinInt(maxRepay, availableRepay)
+		// maximum requested by liquidator
+		maxRepay = sdk.MinInt(maxRepay, requestedRepay.Amount)
+	}
+	maxRepay = sdk.MinInt(maxRepay, maxRepayAfterCloseFactor) // close factor
 
 	// compute final liquidation amounts
 	repay, burn, reward := ComputeLiquidation(
@@ -137,7 +142,6 @@ func ComputeLiquidation(
 	// Start with the maximum possible repayment amount, as a decimal
 	maxRepay := toDec(availableRepay)
 	// Determine the base maxReward amount that would result from maximum repayment
-
 	maxReward := maxRepay.Mul(priceRatio).Mul(sdk.OneDec().Add(liquidationIncentive))
 	// Determine the maxCollateral burn amount that corresponds to base reward amount
 	maxCollateral := maxReward.Quo(uTokenExchangeRate)
@@ -161,7 +165,9 @@ func ComputeLiquidation(
 		toDec(availableReward).Quo(maxReward),
 	)
 	// Catch edge cases
-	ratio = sdk.MaxDec(ratio, sdk.ZeroDec())
+	if !ratio.IsPositive() {
+		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
+	}
 
 	// Reduce repay and collateral limits by the most severe limiting factor encountered
 	maxRepay = maxRepay.Mul(ratio)
@@ -175,16 +181,11 @@ func ComputeLiquidation(
 	// the module. It also ensures borrow dust is always eliminated when encountered.
 	tokenRepay = maxRepay.Ceil().RoundInt()
 
-	// Next, the amount of collateral uToken the borrower will lose is rounded down.
-	// This is favors the borrower over the liquidator, and also protects the module.
-	collateralBurn = maxCollateral.TruncateInt()
-
-	// One danger to rounding collateral burn down is that of collateral dust. This
-	// can be considered in two scenarios:
-	// 1) If collateral was the limiting factor above, then it will have already been
-	// an integer amount and truncating is a no-op.
-	// 2) If collateral was not the limiting factor, then there will be a non-dust
-	// quantity left over anyway.
+	// Next, the amount of collateral uToken the borrower will lose is rounded up.
+	// This also eliminates dust, but favors the liquidator over the module slightly.
+	// This is safe as long as the gas price of a transaction is greater than the value
+	// of the smallest possible unit of the collateral token.
+	collateralBurn = maxCollateral.Ceil().RoundInt()
 
 	// Finally, the base token reward amount is derived directly from the collateral
 	// to burn. This will round down identically to MsgWithdraw, favoring the module
@@ -215,11 +216,11 @@ func ComputeLiquidation(
 // Finally, if borrowedValue is less than smallLiquidationSize,
 // closeFactor will always be 1 as long as the borrower is eligible for liquidation.
 func ComputeCloseFactor(
-	borrowedValue sdk.Dec,
-	collateralValue sdk.Dec,
-	liquidationThreshold sdk.Dec,
-	smallLiquidationSize sdk.Dec,
-	minimumCloseFactor sdk.Dec,
+	borrowedValue,
+	collateralValue,
+	liquidationThreshold,
+	smallLiquidationSize,
+	minimumCloseFactor,
 	completeLiquidationThreshold sdk.Dec,
 ) (closeFactor sdk.Dec) {
 	if borrowedValue.LT(liquidationThreshold) {

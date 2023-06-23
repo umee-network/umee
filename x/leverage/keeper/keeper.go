@@ -330,6 +330,7 @@ func (k Keeper) Liquidate(
 		requestedRepay,
 		rewardDenom,
 		directLiquidation,
+		false,
 	)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
@@ -369,17 +370,41 @@ func (k Keeper) Liquidate(
 
 // FastLiquidate
 func (k Keeper) FastLiquidate(
-	ctx sdk.Context, _, borrowerAddr sdk.AccAddress, _, rewardDenom string,
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
-	// ensure that reward is registered base token
+	if err := k.validateAcceptedDenom(ctx, repayDenom); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
 	uRewardDenom := types.ToUTokenDenom(rewardDenom)
 
-	//
-	//	TODO: borrow + liquidate + collateralize logic
-	//
+	tokenRepay, uTokenReward, _, err := k.getLiquidationAmounts(
+		ctx,
+		liquidatorAddr,
+		borrowerAddr,
+		sdk.NewCoin(repayDenom, sdk.OneInt()), // amount is ignored for FastLiquidate
+		rewardDenom,
+		false,
+		true,
+	)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	if tokenRepay.IsZero() || uTokenReward.IsZero() {
+		return sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationRepayZero
+	}
+
+	// directly move debt from borrower to liquidator without transferring any tokens between accounts
+	if err := k.moveBorrow(ctx, borrowerAddr, liquidatorAddr, tokenRepay); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// directly move collateral from borrower to liquidator while keeping it collateralized
+	if err := k.moveCollateral(ctx, borrowerAddr, liquidatorAddr, uTokenReward); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
 
 	// check for bad debt and trigger forced unbond hooks
 	if err := k.postLiquidate(ctx, borrowerAddr, uRewardDenom); err != nil {

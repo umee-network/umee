@@ -55,6 +55,16 @@ func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress
 	return k.setBorrow(ctx, borrowAddr, k.GetBorrow(ctx, borrowAddr, repay.Denom).Sub(repay))
 }
 
+// moveBorrow transfers a debt from fromAddr to toAddr without moving any tokens. This occurs during
+// fast liquidations, where a liquidator takes on a borrower's debt.
+func (k Keeper) moveBorrow(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, repay sdk.Coin) error {
+	err := k.setBorrow(ctx, fromAddr, k.GetBorrow(ctx, fromAddr, repay.Denom).Sub(repay))
+	if err != nil {
+		return err
+	}
+	return k.setBorrow(ctx, toAddr, k.GetBorrow(ctx, toAddr, repay.Denom).Add(repay))
+}
+
 // setBorrow sets the amount borrowed by an address in a given denom.
 // If the amount is zero, any stored value is cleared.
 func (k Keeper) setBorrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.Coin) error {

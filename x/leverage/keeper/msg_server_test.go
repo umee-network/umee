@@ -1921,8 +1921,8 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			coin.New(umeeDenom, 200_000000),
 			"u/" + atomDenom,
 			coin.New(umeeDenom, 30_000000),
-			coin.New("u/"+atomDenom, 3_527932),
-			coin.New("u/"+atomDenom, 3_527932),
+			coin.New("u/"+atomDenom, 3_527933),
+			coin.New("u/"+atomDenom, 3_527933),
 			nil,
 		}, {
 			"close factor < 1",
@@ -1931,8 +1931,8 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			coin.New(umeeDenom, 200_000000),
 			"u/" + umeeDenom,
 			coin.New(umeeDenom, 8_150541),
-			coin.New("u/"+umeeDenom, 8_965595),
-			coin.New("u/"+umeeDenom, 8_965595),
+			coin.New("u/"+umeeDenom, 8_965596),
+			coin.New("u/"+umeeDenom, 8_965596),
 			nil,
 		},
 	}
