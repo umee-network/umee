@@ -54,7 +54,8 @@ service Msg {
   // limit checks for the liquidator are deferred until after the reward is collateralized, allowing
   // this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
   // of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
-  // repay and reward token denoms.
+  // repay and reward token denoms. For safety, the liquidator cannot exceed 80% of their borrow limit when
+  // executing this transaction, instead of the regular 100%.
   rpc LeveragedLiquidate(MsgLeveragedLiquidate) returns (MsgLeveragedLiquidateResponse);
 
   // SupplyCollateral combines the Supply and Collateralize actions.
