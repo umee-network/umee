@@ -7,7 +7,7 @@ import (
 )
 
 // userMaxWithdraw calculates the maximum amount of uTokens an account can currently withdraw and the amount of
-// these uTokens is non-collateral. Input denom should be a base token. If oracle prices are missing for some of the
+// these uTokens which are non-collateral. Input denom should be a base token. If oracle prices are missing for some of the
 // borrower's collateral (other than the denom being withdrawn), computes the maximum safe withdraw allowed by only
 // the collateral whose prices are known.
 func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
@@ -37,6 +37,27 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
 	}
 
+	// calculate collateral value for the account, using the lower of spot or historic prices for each token
+	// will count collateral with missing prices as zero value without returning an error
+	collateralValue, err := k.VisibleCollateralValue(ctx, totalCollateral, types.PriceModeLow)
+	if err != nil {
+		// for errors besides a missing price, the whole transaction fails
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// calculate weighted borrowed value - used by the borrow factor limit
+	weightedBorrowValue, err := k.WeightedBorrowValue(ctx, totalBorrowed, types.PriceModeHigh)
+	if nonOracleError(err) {
+		// for errors besides a missing price, the whole transaction fails
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	if err != nil {
+		// for missing prices on borrowed assets, we can't withdraw any collateral
+		// but can withdraw non-collateral uTokens
+		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
+	}
+
 	// if no non-blacklisted tokens are borrowed, withdraw the maximum available amount
 	if borrowedValue.IsZero() {
 		withdrawAmount := walletUtokens.Add(unbondedCollateral.Amount)
@@ -46,15 +67,24 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 
 	// compute the borrower's borrow limit using all their collateral
 	// except the denom being withdrawn (also excluding collateral missing oracle prices)
-	otherBorrowLimit, err := k.VisibleBorrowLimit(ctx, otherCollateral)
+	otherCollateralBorrowLimit, err := k.VisibleBorrowLimit(ctx, otherCollateral)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
 	// if their other collateral fully covers all borrows, withdraw the maximum available amount
-	if borrowedValue.LT(otherBorrowLimit) {
-		withdrawAmount := walletUtokens.Add(unbondedCollateral.Amount)
-		withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
-		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
+	if borrowedValue.LT(otherCollateralBorrowLimit) {
+		// also check collateral value vs weighted borrow (borrow factor limit)
+		otherCollateralValue, err := k.VisibleCollateralValue(ctx, otherCollateral, types.PriceModeLow)
+		if err != nil {
+			return sdk.Coin{}, sdk.Coin{}, err
+		}
+		// if weighted borrow does not exceed other collateral value, this collateral can be fully withdrawn
+		if otherCollateralValue.GTE(weightedBorrowValue) {
+			// in this case, both borrow limits will not be exceeded even if all collateral is withdrawn
+			withdrawAmount := walletUtokens.Add(unbondedCollateral.Amount)
+			withdrawAmount = sdk.MinInt(withdrawAmount, availableUTokens.Amount)
+			return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
+		}
 	}
 
 	// for nonzero borrows, calculations are based on unused borrow limit
@@ -64,8 +94,8 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
-	// borrowers above their borrow limit cannot withdraw collateral, but can withdraw wallet uTokens
-	if borrowLimit.LTE(borrowedValue) {
+	// borrowers above either of their borrow limits cannot withdraw collateral, but can withdraw wallet uTokens
+	if borrowLimit.LTE(borrowedValue) || collateralValue.LTE(weightedBorrowValue) {
 		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, walletUtokens), nil
 	}
@@ -81,8 +111,19 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// if only a portion of collateral is unused, withdraw only that portion
+	// if only a portion of collateral is unused, withdraw only that portion (regular borrow limit)
 	unusedCollateralFraction := unusedBorrowLimit.Quo(specificBorrowLimit)
+
+	// calculate value of this collateral specifically, which is used in borrow factor's borrow limit
+	specificCollateralValue, err := k.CalculateCollateralValue(ctx, sdk.NewCoins(thisCollateral), types.PriceModeLow)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	unusedCollateralValue := collateralValue.Sub(weightedBorrowValue)
+	// Find the more restrictive of either borrow factor limit or borrow limit
+	unusedCollateralFraction = sdk.MinDec(unusedCollateralFraction, unusedCollateralValue.Quo(specificCollateralValue))
+
+	// Both borrow limits are satisfied by this withdrawl amount. The restrictions below relate to neither.
 	unusedCollateral := unusedCollateralFraction.MulInt(thisCollateral.Amount).TruncateInt()
 
 	// find the minimum of unused collateral (due to borrows) or unbonded collateral (incentive module)
@@ -177,7 +218,11 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 	thisDenomCollateral := sdk.NewCoin(denom, systemCollateral.AmountOf(denom))
 
 	// get USD collateral value for all other denoms, skipping those which are missing oracle prices
-	otherDenomsValue, err := k.VisibleCollateralValue(ctx, systemCollateral.Sub(thisDenomCollateral))
+	otherDenomsValue, err := k.VisibleCollateralValue(
+		ctx,
+		systemCollateral.Sub(thisDenomCollateral),
+		types.PriceModeSpot,
+	)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
