@@ -142,11 +142,16 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 
 // userMaxBorrow calculates the maximum amount of a given token an account can currently borrow.
 // input denom should be a base token. If oracle prices are missing for some of the borrower's
-// collateral, computes the maximum safe borrow allowed by only the collateral whose prices are known
+// collateral, computes the maximum safe borrow allowed by only the collateral whose prices are known.
 func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if types.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
 	}
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
 	availableTokens := k.AvailableLiquidity(ctx, denom)
 
 	totalBorrowed := k.GetBorrowerBorrows(ctx, addr)
@@ -154,6 +159,17 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 
 	// calculate borrowed value for the account, using the higher of spot or historic prices
 	borrowedValue, err := k.TotalTokenValue(ctx, totalBorrowed, types.PriceModeHigh)
+	if nonOracleError(err) {
+		// non-oracle errors fail the transaction (or query)
+		return sdk.Coin{}, err
+	}
+	if err != nil {
+		// oracle errors cause max borrow to be zero
+		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
+	}
+
+	// calculate weighted borrowed value for the account, using the higher of spot or historic prices
+	weightedBorrowedValue, err := k.WeightedBorrowValue(ctx, totalBorrowed, types.PriceModeHigh)
 	if nonOracleError(err) {
 		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, err
@@ -173,11 +189,27 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
 
+	// calculate collateral value limit for the account, using only collateral whose price is known
+	collateralValue, err := k.VisibleCollateralValue(ctx, totalCollateral, types.PriceModeLow)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+	// borrowers above their borrow factor borrow limit cannot borrow
+	if collateralValue.LTE(weightedBorrowedValue) {
+		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
+	}
+
 	// determine the USD amount of borrow limit that is currently unused
 	unusedBorrowLimit := borrowLimit.Sub(borrowedValue)
 
+	// determine the USD amount that can be borrowed according to borrow factor limit
+	maxBorrowValueIncrease := collateralValue.Sub(weightedBorrowedValue).Quo(token.BorrowFactor())
+
+	// finds the most restrictive of regular borrow limit and borrow factor limit
+	valueToBorrow := sdk.MinDec(unusedBorrowLimit, maxBorrowValueIncrease)
+
 	// determine max borrow, using the higher of spot or historic prices for the token to borrow
-	maxBorrow, err := k.TokenWithValue(ctx, denom, unusedBorrowLimit, types.PriceModeHigh)
+	maxBorrow, err := k.TokenWithValue(ctx, denom, valueToBorrow, types.PriceModeHigh)
 	if nonOracleError(err) {
 		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, err
