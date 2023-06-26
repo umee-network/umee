@@ -7,9 +7,9 @@ import (
 )
 
 // userMaxWithdraw calculates the maximum amount of uTokens an account can currently withdraw and the amount of
-// these uTokens which are non-collateral. Input denom should be a base token. If oracle prices are missing for some of the
-// borrower's collateral (other than the denom being withdrawn), computes the maximum safe withdraw allowed by only
-// the collateral whose prices are known.
+// these uTokens which are non-collateral. Input denom should be a base token. If oracle prices are missing for
+// some of the borrower's collateral (other than the denom being withdrawn), computes the maximum safe withdraw
+// allowed by only the collateral whose prices are known.
 func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
@@ -123,7 +123,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	// Find the more restrictive of either borrow factor limit or borrow limit
 	unusedCollateralFraction = sdk.MinDec(unusedCollateralFraction, unusedCollateralValue.Quo(specificCollateralValue))
 
-	// Both borrow limits are satisfied by this withdrawl amount. The restrictions below relate to neither.
+	// Both borrow limits are satisfied by this withdrawal amount. The restrictions below relate to neither.
 	unusedCollateral := unusedCollateralFraction.MulInt(thisCollateral.Amount).TruncateInt()
 
 	// find the minimum of unused collateral (due to borrows) or unbonded collateral (incentive module)
