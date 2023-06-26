@@ -319,7 +319,7 @@ Here are their basic functions:
 ### Liquidation
 
 - `MsgLiquidate` Liquidates a borrower whose borrowed value has exceeded their liquidation threshold (which is a certain amount above their borrow limit). The liquidator repays a portion of their debt using base tokens, and receives uTokens from the target's collateral, or the equivalent base tokens. The maximum liquidation amount is restricted by both the liquidator's specified amount and the borrower's liquidation eligibility, which may be partial.
-- `MsgLeveragedLiquidate` Liquidates a borrower, but instead of repaying with base tokens from wallet balance, borrows those tokens immediately before using them. Receives uTokens from the target's collateral, and immediately collateralizes them for the liquidator instead.
+- `MsgLeveragedLiquidate` Liquidates a borrower, but instead of repaying with base tokens from the liquidator wallet balance, moves the debt from the borrower to the liquidator and creates a new borrow position for the liquidator. Liquidator receives uTokens from the bororwer's collateral, and immediately collateralizes them to secure the liquidator positoin.
 
 This transaction will succeed even if the liquidator could not afford to borrow the initial tokens (thanks to the new collateral position acquired from the borrower), as long as they are below 80% usage of their new borrow limit after the reward collateral is added.
 The liquidator is left with a new borrow that they must pay off, and new collateral which can eventually be withdrawn.
