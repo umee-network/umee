@@ -255,8 +255,9 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgFastLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, rewardDenom string) *MsgFastLiquidate {
-	return &MsgFastLiquidate{
+func NewMsgLeveragedLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, rewardDenom string,
+) *MsgLeveragedLiquidate {
+	return &MsgLeveragedLiquidate{
 		Liquidator:  liquidator.String(),
 		Borrower:    borrower.String(),
 		RepayDenom:  repayDenom,
@@ -264,10 +265,10 @@ func NewMsgFastLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, reward
 	}
 }
 
-func (msg MsgFastLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgFastLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgLeveragedLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgLeveragedLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
-func (msg *MsgFastLiquidate) ValidateBasic() error {
+func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
 	if err := validateSenderAndDenom(msg.Borrower, msg.RewardDenom); err != nil {
 		return err
 	}
@@ -278,12 +279,12 @@ func (msg *MsgFastLiquidate) ValidateBasic() error {
 	return err
 }
 
-func (msg *MsgFastLiquidate) GetSigners() []sdk.AccAddress {
+func (msg *MsgLeveragedLiquidate) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Liquidator)
 }
 
 // GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgFastLiquidate) GetSignBytes() []byte {
+func (msg *MsgLeveragedLiquidate) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }

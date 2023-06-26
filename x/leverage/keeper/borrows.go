@@ -14,7 +14,10 @@ import (
 // unless the remaining collateral is enough to cover all borrows.
 // This should be checked in msg_server.go at the end of any transaction which is restricted
 // by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
-func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+// MaxUsage sets the maximum percent of a user's borrow limit that can be in use: set to 1
+// to allow up to 100% borrow limit, or a lower value (e.g. 0.9) if a transaction should fail
+// if a safety margin is desired (e.g. <90% borrow limit).
+func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdk.Dec) error {
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 
@@ -26,9 +29,9 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	if err != nil {
 		return err
 	}
-	if value.GT(limit) {
+	if value.GT(limit.Mul(maxUsage)) {
 		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s", value, limit)
+			"borrowed: %s, limit: %s, max usage %s", value, limit, maxUsage)
 	}
 	return nil
 }
@@ -50,6 +53,16 @@ func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress
 		return err
 	}
 	return k.setBorrow(ctx, borrowAddr, k.GetBorrow(ctx, borrowAddr, repay.Denom).Sub(repay))
+}
+
+// moveBorrow transfers a debt from fromAddr to toAddr without moving any tokens. This occurs during
+// fast liquidations, where a liquidator takes on a borrower's debt.
+func (k Keeper) moveBorrow(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, repay sdk.Coin) error {
+	err := k.setBorrow(ctx, fromAddr, k.GetBorrow(ctx, fromAddr, repay.Denom).Sub(repay))
+	if err != nil {
+		return err
+	}
+	return k.setBorrow(ctx, toAddr, k.GetBorrow(ctx, toAddr, repay.Denom).Add(repay))
 }
 
 // setBorrow sets the amount borrowed by an address in a given denom.

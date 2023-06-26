@@ -50,6 +50,16 @@ func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(uToken))
 }
 
+// moveCollateral moves collateral from one address to another while keeping the uTokens in the module.
+// It occurs during fast liquidations.
+func (k Keeper) moveCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, uToken sdk.Coin) error {
+	err := k.setCollateral(ctx, fromAddr, k.GetCollateral(ctx, fromAddr, uToken.Denom).Sub(uToken))
+	if err != nil {
+		return err
+	}
+	return k.setCollateral(ctx, toAddr, k.GetCollateral(ctx, toAddr, uToken.Denom).Add(uToken))
+}
+
 // GetTotalCollateral returns an sdk.Coin representing how much of a given uToken
 // the x/leverage module account currently holds as collateral. Non-uTokens return zero.
 func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
