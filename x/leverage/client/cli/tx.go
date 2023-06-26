@@ -323,7 +323,7 @@ func GetCmdLeveragedLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lev-liquidate [borrower] [repay-denom] [reward-denom]",
 		Args:  cobra.ExactArgs(3),
-		Short: "Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.",
+		Short: "Liquidates by moving borrower debt to the liquidator and immediately collateralizes the reward.",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`
 Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.
