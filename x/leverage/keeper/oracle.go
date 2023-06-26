@@ -162,6 +162,21 @@ func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.P
 	return total, nil
 }
 
+// VisibleUTokenValue converts uTokens to tokens and calls VisibleTokenValue. Errors on non-uTokens.
+func (k Keeper) VisibleUTokenValue(ctx sdk.Context, uTokens sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+	tokens := sdk.NewCoins()
+
+	for _, u := range uTokens {
+		t, err := k.ExchangeUToken(ctx, u)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+		tokens = tokens.Add(t)
+	}
+
+	return k.VisibleTokenValue(ctx, tokens, mode)
+}
+
 // TokenWithValue creates a token of a given denom with an given USD value.
 // Returns an error on invalid price or denom. Rounds down, i.e. the
 // value of the token returned may be slightly less than the requested value.

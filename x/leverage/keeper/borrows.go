@@ -38,7 +38,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	if err != nil {
 		return err
 	}
-	collateralValue, err := k.VisibleTokenValue(ctx, collateral, types.PriceModeLow)
+	collateralValue, err := k.VisibleUTokenValue(ctx, collateral, types.PriceModeLow)
 	if err != nil {
 		return err
 	}
