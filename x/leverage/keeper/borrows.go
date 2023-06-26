@@ -8,7 +8,8 @@ import (
 )
 
 // assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
-// under either recent (historic median) or current prices. It returns an error if
+// under either recent (historic median) or current prices. Checks using borrow limit based
+// on collateral weight, then check separately for borrow limit using borrow factor. Error if
 // borrowed asset prices cannot be calculated, but will try to treat collateral whose prices are
 // unavailable as having zero value. This can still result in a borrow limit being too low,
 // unless the remaining collateral is enough to cover all borrows.
@@ -18,18 +19,34 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 
-	value, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeHigh)
+	// check health using collateral weight
+	borrowValue, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeHigh)
 	if err != nil {
 		return err
 	}
-	limit, err := k.VisibleBorrowLimit(ctx, collateral)
+	borrowLimit, err := k.VisibleBorrowLimit(ctx, collateral)
 	if err != nil {
 		return err
 	}
-	if value.GT(limit) {
+	if borrowValue.GT(borrowLimit) {
 		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s", value, limit)
+			"borrowed: %s, limit: %s", borrowValue, borrowLimit)
 	}
+
+	// check health using borrow factor
+	weightedBorrowValue, err := k.WeightedBorrowValue(ctx, borrowed, types.PriceModeHigh)
+	if err != nil {
+		return err
+	}
+	collateralValue, err := k.VisibleTokenValue(ctx, collateral, types.PriceModeLow)
+	if err != nil {
+		return err
+	}
+	if weightedBorrowValue.GT(collateralValue) {
+		return types.ErrUndercollaterized.Wrapf(
+			"weighted borrow: %s, collateral value: %s", weightedBorrowValue, collateralValue)
+	}
+
 	return nil
 }
 
