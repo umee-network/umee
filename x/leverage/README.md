@@ -20,6 +20,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [uToken Exchange Rate](#utoken-exchange-rate)
      - [Supply Utilization](#supply-utilization)
      - [Borrow Limit](#borrow-limit)
+     - [Borrow Factor](#borrow-factor)
      - [Liquidation Threshold](#liquidation-threshold)
      - [Borrow APY](#borrow-apy)
      - [Supplying APY](#supplying-apy)
@@ -167,6 +168,20 @@ A user's borrow limit is the sum of the contributions from each denomination of 
 ```
 
 For tokens with hith historic prices enabled (indicated by a `HistoricMedians` parameter greater than zero), each collateral `TokenValue` is computed with `PriceModeLow`, i.e. the lower of either spot price or historic price is used.
+
+#### Borrow Factor
+
+Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
+
+An implied parameter `BorrowFactor` is derived from `CollateralWeight` - specifically, it is the minimum of `2.0` and `1/CollateralWeight`.
+
+When a user is borrowing, their borrow limit is whichever is more restrictive of these two rules:
+
+- Borrowed value must be less than collateral value times the weighted average of collateral assets' `CollateralWeight`
+- Borrowed value times the weighted average of borrowed assets' `BorrowFactor` must be less than collateral value.
+
+This means that when the original borrow limit based on collateral weight would allow a higher quality collateral to borrow a risky asset with a small margin of safety, the user's effective collateral weight is reduced to that of the riskier asset.
+(Or `0.5` at the minimum.)
 
 #### Historic Borrow Limit, Value
 
