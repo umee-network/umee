@@ -350,6 +350,13 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
 
+	// create an UMEE borrower using STABLE collateral
+	stableUmeeBorrower := s.newAccount(coin.New(stableDenom, 100_000000))
+	s.supply(stableUmeeBorrower, coin.New(stableDenom, 100_000000))
+	s.collateralize(stableUmeeBorrower, coin.New("u/"+stableDenom, 100_000000))
+	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
+	// UMEE and STABLE have the same price but different collateral weights
+
 	tcs := []struct {
 		msg                  string
 		addr                 sdk.AccAddress
@@ -451,6 +458,14 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			"borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
 			coin.New("u/"+dumpDenom, 20_000000),
+			nil,
+			nil,
+			sdk.Coin{},
+			types.ErrUndercollaterized,
+		}, {
+			"borrow limit (undercollateralized due to borrow factor but not collateral weight)",
+			stableUmeeBorrower,
+			coin.New("u/"+stableDenom, 50_000000),
 			nil,
 			nil,
 			sdk.Coin{},
