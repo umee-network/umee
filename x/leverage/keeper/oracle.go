@@ -119,11 +119,11 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.Pri
 	return total, nil
 }
 
-// WeightedBorrowValue returns the total value of all input tokens, each multiplied
+// ValueWithBorrowFactor returns the total value of all input tokens, each multiplied
 // by borrow factor (which is the minimum of 2.0 and 1/collateral weight). It
 // ignores unregistered and blacklisted tokens instead of returning an error, but
 // will error on unavailable prices.
-func (k Keeper) WeightedBorrowValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
 	for _, c := range coins {

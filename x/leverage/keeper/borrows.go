@@ -37,7 +37,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	}
 
 	// check health using borrow factor
-	weightedBorrowValue, err := k.WeightedBorrowValue(ctx, borrowed, types.PriceModeHigh)
+	weightedBorrowValue, err := k.ValueWithBorrowFactor(ctx, borrowed, types.PriceModeHigh)
 	if err != nil {
 		return err
 	}

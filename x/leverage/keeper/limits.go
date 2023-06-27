@@ -46,7 +46,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	}
 
 	// calculate weighted borrowed value - used by the borrow factor limit
-	weightedBorrowValue, err := k.WeightedBorrowValue(ctx, totalBorrowed, types.PriceModeHigh)
+	weightedBorrowValue, err := k.ValueWithBorrowFactor(ctx, totalBorrowed, types.PriceModeHigh)
 	if nonOracleError(err) {
 		// for errors besides a missing price, the whole transaction fails
 		return sdk.Coin{}, sdk.Coin{}, err
@@ -169,7 +169,7 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 	}
 
 	// calculate weighted borrowed value for the account, using the higher of spot or historic prices
-	weightedBorrowedValue, err := k.WeightedBorrowValue(ctx, totalBorrowed, types.PriceModeHigh)
+	weightedBorrowedValue, err := k.ValueWithBorrowFactor(ctx, totalBorrowed, types.PriceModeHigh)
 	if nonOracleError(err) {
 		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, err

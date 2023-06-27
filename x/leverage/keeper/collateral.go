@@ -91,7 +91,7 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, 
 			return sdk.ZeroDec(), err
 		}
 
-		// add each collateral coin's weighted value to borrow limit
+		// add each collateral coin's value to borrow limit
 		total = total.Add(v)
 	}
 
