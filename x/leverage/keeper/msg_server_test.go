@@ -555,6 +555,13 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
 
+	// create an UMEE borrower using STABLE collateral
+	stableUmeeBorrower := s.newAccount(coin.New(stableDenom, 100_000000))
+	s.supply(stableUmeeBorrower, coin.New(stableDenom, 100_000000))
+	s.collateralize(stableUmeeBorrower, coin.New("u/"+stableDenom, 100_000000))
+	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
+	// UMEE and STABLE have the same price but different collateral weights
+
 	zeroUmee := coin.Zero(umeeDenom)
 	zeroUUmee := coin.New("u/"+umeeDenom, 0)
 	tcs := []struct {
@@ -574,7 +581,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
-		}, {
+		},
+		{
 			"can't borrow uToken",
 			supplier,
 			"u/" + umeeDenom,
@@ -582,7 +590,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
-		}, {
+		},
+		{
 			"max withdraw umee",
 			supplier,
 			umeeDenom,
@@ -590,7 +599,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+umeeDenom, 75_000000),
 			coin.New(umeeDenom, 100_000000),
 			nil,
-		}, {
+		},
+		{
 			"duplicate max withdraw umee",
 			supplier,
 			umeeDenom,
@@ -598,7 +608,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			zeroUUmee,
 			zeroUmee,
 			nil,
-		}, {
+		},
+		{
 			"max withdraw with borrow",
 			other,
 			umeeDenom,
@@ -606,7 +617,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+umeeDenom, 60_000000),
 			coin.New(umeeDenom, 60_000000),
 			nil,
-		}, {
+		},
+		{
 			"max withdrawal (dump borrower)",
 			dumpborrower,
 			pumpDenom,
@@ -614,13 +626,23 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+pumpDenom, 20_000000),
 			coin.New(pumpDenom, 20_000000),
 			nil,
-		}, {
+		},
+		{
 			"max withdrawal (pump borrower)",
 			pumpborrower,
 			dumpDenom,
 			coin.New("u/"+dumpDenom, 20_000000),
 			coin.New("u/"+dumpDenom, 20_000000),
 			coin.New(dumpDenom, 20_000000),
+			nil,
+		},
+		{
+			"max withdrawal (borrow factor 2 with stablecoin collateral)",
+			stableUmeeBorrower,
+			stableDenom,
+			coin.New("u/"+stableDenom, 40_000000),
+			coin.New("u/"+stableDenom, 40_000000),
+			coin.New(stableDenom, 40_000000),
 			nil,
 		},
 	}
