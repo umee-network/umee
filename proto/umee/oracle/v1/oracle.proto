@@ -60,13 +60,15 @@ message Params {
   google.protobuf.Duration avg_period = 13 [
     (gogoproto.nullable)    = false,
     (gogoproto.stdduration) = true,
-    (gogoproto.moretags)    = "json:\"avg_period\""
+    (gogoproto.jsontag)     = "avg_period,omitempty",
+    (gogoproto.moretags)    = "yaml:\"avg_period\""
   ];
   // avg shift
   google.protobuf.Duration avg_shift = 14 [
     (gogoproto.nullable)    = false,
     (gogoproto.stdduration) = true,
-    (gogoproto.moretags)    = "json:\"avg_shift\""
+    (gogoproto.jsontag)     = "avg_shift,omitempty",
+    (gogoproto.moretags)    = "yaml:\"avg_shift\""
   ];
 }
 

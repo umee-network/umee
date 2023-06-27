@@ -277,5 +277,5 @@ func TestValidateVotingThreshold(t *testing.T) {
 
 func TestParams_ParamSetPairs(t *testing.T) {
 	params := DefaultParams()
-	assert.Equal(t, 12, len(params.ParamSetPairs()))
+	assert.Equal(t, 14, len(params.ParamSetPairs()))
 }

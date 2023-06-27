@@ -382,7 +382,7 @@ func validateAvgPeriod(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if v.Seconds() == 0 {
+	if v.Seconds() <= 0 {
 		return fmt.Errorf("avg period must be positive: %d", v)
 	}
 
@@ -395,7 +395,7 @@ func validateAvgShift(i interface{}) error {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
 
-	if v.Seconds() == 0 {
+	if v.Seconds() <= 0 {
 		return fmt.Errorf("avg shift must be positive: %d", v)
 	}
 
