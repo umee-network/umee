@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/x/oracle/types"
@@ -135,4 +137,14 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 // SetParams sets the total set of oracle parameters.
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSpace.SetParamSet(ctx, &params)
+}
+
+// SetAvgPeriod sets the avg shift time duration
+func (k Keeper) SetAvgPeriod(ctx sdk.Context, avgPeriod time.Duration) {
+	k.paramSpace.Set(ctx, types.KeyAvgPeriod, &avgPeriod)
+}
+
+// SetAvgShift sets the avg shift time duration
+func (k Keeper) SetAvgShift(ctx sdk.Context, avgShift time.Duration) {
+	k.paramSpace.Set(ctx, types.KeyAvgShift, &avgShift)
 }

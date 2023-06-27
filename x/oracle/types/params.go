@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	time "time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -16,8 +17,10 @@ var (
 
 // maxium number of decimals allowed for VoteThreshold
 const (
-	MaxVoteThresholdPrecision  = 2
-	MaxVoteThresholdMultiplier = 100 // must be 10^MaxVoteThresholdPrecision
+	MaxVoteThresholdPrecision                = 2
+	MaxVoteThresholdMultiplier               = 100 // must be 10^MaxVoteThresholdPrecision
+	DefaultAvgPeriod           time.Duration = time.Hour * 16
+	DefaultAvgShift            time.Duration = time.Hour * 2
 )
 
 // Parameter keys
@@ -34,6 +37,8 @@ var (
 	KeyMedianStampPeriod        = []byte("MedianStampPeriod")
 	KeyMaximumPriceStamps       = []byte("MaximumPriceStamps")
 	KeyMaximumMedianStamps      = []byte("MedianStampAmount")
+	KeyAvgPeriod                = []byte("AvgPeriod")
+	KeyAvgShift                 = []byte("AvgShift")
 )
 
 var _ paramstypes.ParamSet = &Params{}
@@ -61,6 +66,8 @@ func DefaultParams() Params {
 		MedianStampPeriod:        BlocksPerHour * 3,        // 3h
 		MaximumPriceStamps:       36,                       // 3h
 		MaximumMedianStamps:      24,                       // 3 days
+		AvgPeriod:                DefaultAvgPeriod,         // 16 hours
+		AvgShift:                 DefaultAvgShift,          // 12 hours
 	}
 }
 
@@ -132,6 +139,16 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			KeyMaximumMedianStamps,
 			&p.MaximumMedianStamps,
 			validateMaximumMedianStamps,
+		),
+		paramstypes.NewParamSetPair(
+			KeyAvgPeriod,
+			&p.AvgPeriod,
+			validateAvgPeriod,
+		),
+		paramstypes.NewParamSetPair(
+			KeyAvgShift,
+			&p.AvgShift,
+			validateAvgShift,
 		),
 	}
 }
@@ -354,6 +371,32 @@ func validateMaximumMedianStamps(i interface{}) error {
 
 	if v < 1 {
 		return fmt.Errorf("maximum median stamps must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateAvgPeriod(i interface{}) error {
+	v, ok := i.(time.Duration)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("avg period must be positive: %d", v)
+	}
+
+	return nil
+}
+
+func validateAvgShift(i interface{}) error {
+	v, ok := i.(time.Duration)
+	if !ok {
+		return fmt.Errorf("invalid parameter type: %T", i)
+	}
+
+	if v < 1 {
+		return fmt.Errorf("avg shift must be positive: %d", v)
 	}
 
 	return nil
