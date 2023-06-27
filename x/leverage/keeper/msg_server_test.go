@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 6)
+				s.Require().Len(tokens, 7)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, ntA.BaseDenom)
 				s.Require().NoError(err)
@@ -170,7 +170,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 5)
+				s.Require().Len(tokens, 6)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uumee")
 				s.Require().NoError(err)
