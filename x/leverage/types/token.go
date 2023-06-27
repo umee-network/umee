@@ -15,6 +15,8 @@ const (
 	UTokenPrefix = "u/"
 )
 
+var halfDec = sdk.MustNewDecFromStr("0.5")
+
 // HasUTokenPrefix detects the uToken prefix on a denom.
 func HasUTokenPrefix(denom string) bool {
 	return strings.HasPrefix(denom, UTokenPrefix)
@@ -169,7 +171,7 @@ func (t Token) AssertNotBlacklisted() error {
 
 // BorrowFactor returns the minimum of 2.0 or 1 / collateralWeight.
 func (t Token) BorrowFactor() sdk.Dec {
-	if t.CollateralWeight.LTE(sdk.MustNewDecFromStr("0.5")) {
+	if t.CollateralWeight.LTE(halfDec) {
 		return sdk.MustNewDecFromStr("2.0")
 	}
 	return sdk.OneDec().Quo(t.CollateralWeight)
