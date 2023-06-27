@@ -162,8 +162,8 @@ func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.P
 	return total, nil
 }
 
-// VisibleUTokenValue converts uTokens to tokens and calls VisibleTokenValue. Errors on non-uTokens.
-func (k Keeper) VisibleUTokenValue(ctx sdk.Context, uTokens sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+// VisibleUTokensValue converts uTokens to tokens and calls VisibleTokenValue. Errors on non-uTokens.
+func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
 	tokens := sdk.NewCoins()
 
 	for _, u := range uTokens {
