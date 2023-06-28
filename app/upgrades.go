@@ -65,7 +65,10 @@ func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 			})
 
 			// TODO: set the correct drain account. This will panic if executed.
-			if err := app.GravityKeeper.MigrateFundsToDrainAccount(ctx, sdk.MustAccAddressFromBech32("the_drain_account")); err != nil {
+			if err := app.GravityKeeper.MigrateFundsToDrainAccount(
+				ctx,
+				sdk.MustAccAddressFromBech32("the_drain_account"),
+			); err != nil {
 				return nil, err
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
