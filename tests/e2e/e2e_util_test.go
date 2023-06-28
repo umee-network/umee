@@ -125,8 +125,8 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 		"failed to send IBC tokens; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
 	)
 	s.T().Log("successfully sent IBC tokens")
-	s.T().Log("Waiting for 12 seconds to make sure trasaction is processed or include in the block")
-	time.Sleep(time.Second * 12)
+	s.T().Log("Waiting for 4 seconds to make sure trasaction is processed or include in the block")
+	time.Sleep(time.Second * 4)
 }
 
 // queryREST make http query to grpc-web endpoint and tries to decode valPtr using proto-JSON

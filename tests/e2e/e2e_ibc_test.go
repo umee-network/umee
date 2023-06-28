@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) checkSupply(endpoint, ibcDenom string, amount mat
 			return supply.AmountOf(ibcDenom).Equal(amount)
 		},
 		time.Minute,
-		5*time.Second,
+		2*time.Second,
 	)
 }
 
