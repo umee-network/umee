@@ -57,3 +57,14 @@ func ExtractAddressAndString(startIndex int, key []byte) (addr sdk.AccAddress, s
 	s, nextIndex, err = ExtractString(nextIndex, key)
 	return addr, s, nextIndex, err
 }
+
+// ToStr takes the full key and converts it to a string
+func ToStr(key []byte) string {
+	return string(key)
+}
+
+// NoLastByte returns sub-slice of the key without the last byte.
+// Panics if length of key is zero.
+func NoLastByte(key []byte) string {
+	return string(key[:len(key)-1])
+}
