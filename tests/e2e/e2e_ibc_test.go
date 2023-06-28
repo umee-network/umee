@@ -56,7 +56,6 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 
 func (s *E2ETest) TestIBCTokenTransfer() {
 	// s.T().Parallel()
-	var ibcStakeDenom string
 
 	s.Run("ibc_transfer_quota", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
@@ -225,34 +224,5 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		)
 		// s.checkSupply(umeeAPIEndpoint, stakeIBCHash, math.ZeroInt())
 		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
-	})
-
-	var ibcStakeERC20Addr string
-	s.Run("deploy_stake_erc20 ibcStakeERC20Addr", func() {
-		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
-		s.Require().NotEmpty(ibcStakeDenom)
-		ibcStakeERC20Addr = s.DeployERC20Token(ibcStakeDenom)
-	})
-
-	// send 300 stake tokens from Umee to Ethereum
-	s.Run("send_stake_tokens_to_eth", func() {
-		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
-		umeeValIdxSender := 0
-		orchestratorIdxReceiver := 1
-		amount := sdk.NewCoin(ibcStakeDenom, math.NewInt(300))
-		umeeFee := sdk.NewCoin(appparams.BondDenom, math.NewInt(10000))
-		gravityFee := sdk.NewCoin(ibcStakeDenom, math.NewInt(7))
-
-		s.SendFromUmeeToEthCheck(umeeValIdxSender, orchestratorIdxReceiver, ibcStakeERC20Addr, amount, umeeFee, gravityFee)
-	})
-
-	// send 300 stake tokens from Ethereum back to Umee
-	s.Run("send_stake_tokens_from_eth", func() {
-		s.T().Skip("paused due to Ethereum PoS migration and PoW fork")
-		umeeValIdxReceiver := 0
-		orchestratorIdxSender := 1
-		amount := uint64(300)
-
-		s.SendFromEthToUmeeCheck(orchestratorIdxSender, umeeValIdxReceiver, ibcStakeERC20Addr, ibcStakeDenom, amount)
 	})
 }

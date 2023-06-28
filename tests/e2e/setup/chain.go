@@ -43,7 +43,6 @@ type chain struct {
 	dataDir        string
 	ID             string
 	Validators     []*validator
-	Orchestrators  []*orchestrator
 	GaiaValidators []*gaiaValidator
 }
 
@@ -107,38 +106,11 @@ func (c *chain) createAndInitGaiaValidator(cdc codec.Codec) error {
 	return nil
 }
 
-func (c *chain) createAndInitOrchestrators(cdc codec.Codec, count int) error {
-	for i := 0; i < count; i++ {
-		// create orchestrator
-		orchestrator := c.createOrchestrator(i)
-
-		err := orchestrator.createKey(cdc, "orch")
-		if err != nil {
-			return err
-		}
-
-		err = orchestrator.generateEthereumKey()
-		if err != nil {
-			return err
-		}
-
-		c.Orchestrators = append(c.Orchestrators, orchestrator)
-	}
-
-	return nil
-}
-
 func (c *chain) createValidator(index int) *validator {
 	return &validator{
 		chain:   c,
 		index:   index,
 		moniker: "umee",
-	}
-}
-
-func (c *chain) createOrchestrator(index int) *orchestrator {
-	return &orchestrator{
-		Index: index,
 	}
 }
 
