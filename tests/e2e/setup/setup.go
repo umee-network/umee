@@ -57,6 +57,8 @@ type E2ETestSuite struct {
 	GravityContractAddr string
 	Umee                client.Client
 	cdc                 codec.Codec
+	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
+
 }
 
 func (s *E2ETestSuite) SetupSuite() {
@@ -81,10 +83,14 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initGenesis()
 	s.initValidatorConfigs()
 	s.runValidators()
-	s.runPriceFeeder()
-	s.runGaiaNetwork()
-	s.runIBCRelayer()
-	s.initUmeeClient() // chain client
+	if !s.MinNetwork {
+		s.runPriceFeeder()
+		s.runGaiaNetwork()
+		s.runIBCRelayer()
+	} else {
+		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
+	}
+	s.initUmeeClient()
 }
 
 func (s *E2ETestSuite) TearDownSuite() {
@@ -99,17 +105,15 @@ func (s *E2ETestSuite) TearDownSuite() {
 
 	s.T().Log("tearing down e2e integration test suite...")
 
-	s.Require().NoError(s.DkrPool.Purge(s.GaiaResource))
-	s.Require().NoError(s.DkrPool.Purge(s.HermesResource))
-	s.Require().NoError(s.DkrPool.Purge(s.priceFeederResource))
+	if !s.MinNetwork {
+		s.Require().NoError(s.DkrPool.Purge(s.GaiaResource))
+		s.Require().NoError(s.DkrPool.Purge(s.HermesResource))
+		s.Require().NoError(s.DkrPool.Purge(s.priceFeederResource))
+	}
 
 	for _, vc := range s.ValResources {
 		s.Require().NoError(s.DkrPool.Purge(vc))
 	}
-
-	// for _, oc := range s.OrchResources {
-	// 	s.Require().NoError(s.DkrPool.Purge(oc))
-	// }
 
 	s.Require().NoError(s.DkrPool.RemoveNetwork(s.DkrNet))
 
@@ -676,8 +680,8 @@ func (s *E2ETestSuite) initUmeeClient() {
 		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
 	}
 	ecfg := app.MakeEncodingConfig()
-
 	s.Umee, err = client.NewClient(
+		s.Chain.dataDir,
 		s.Chain.ID,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",

@@ -29,10 +29,11 @@ type Client struct {
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
-// signing and broadcasting transactions
+// signing and broadcasting transactions by passing chainDataDir and remaining func arguments
 // Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
-	chainID string,
+	chainDataDir,
+	chainID,
 	tmrpcEndpoint string,
 	mnemonics map[string]string,
 	gasAdjustment float64,
@@ -45,7 +46,7 @@ func NewClient(
 		encCfg:        encCfg,
 	}
 
-	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, "", nil, encCfg.Codec)
+	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, chainDataDir, nil, encCfg.Codec)
 	if err != nil {
 		return nil, err
 	}

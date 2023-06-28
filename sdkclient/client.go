@@ -23,6 +23,7 @@ type Client struct {
 }
 
 func NewClient(
+	chainDataDir,
 	chainID,
 	tmrpcEndpoint,
 	grpcEndpoint string,
@@ -35,7 +36,7 @@ func NewClient(
 	if err != nil {
 		return Client{}, err
 	}
-	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
+	uc.Tx, err = tx.NewClient(chainDataDir, chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	return uc, err
 }
 

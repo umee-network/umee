@@ -119,6 +119,29 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.Pri
 	return total, nil
 }
 
+// ValueWithBorrowFactor returns the total value of all input tokens, each multiplied
+// by borrow factor (which is the minimum of 2.0 and 1/collateral weight). It
+// ignores unregistered and blacklisted tokens instead of returning an error, but
+// will error on unavailable prices.
+func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+	total := sdk.ZeroDec()
+
+	for _, c := range coins {
+		token, err := k.GetTokenSettings(ctx, c.Denom)
+		if err != nil {
+			continue
+		}
+		v, err := k.TokenValue(ctx, c, mode)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+
+		total = total.Add(v.Mul(token.BorrowFactor()))
+	}
+
+	return total, nil
+}
+
 // VisibleTokenValue functions like TotalTokenValue, but interprets missing oracle prices
 // as zero value instead of returning an error.
 func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
@@ -137,6 +160,21 @@ func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.P
 	}
 
 	return total, nil
+}
+
+// VisibleUTokensValue converts uTokens to tokens and calls VisibleTokenValue. Errors on non-uTokens.
+func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+	tokens := sdk.NewCoins()
+
+	for _, u := range uTokens {
+		t, err := k.ExchangeUToken(ctx, u)
+		if err != nil {
+			return sdk.ZeroDec(), err
+		}
+		tokens = tokens.Add(t)
+	}
+
+	return k.VisibleTokenValue(ctx, tokens, mode)
 }
 
 // TokenWithValue creates a token of a given denom with an given USD value.

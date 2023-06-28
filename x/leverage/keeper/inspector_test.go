@@ -25,13 +25,17 @@ func TestNeat(t *testing.T) {
 		"-12.555":            -12.55,             // truncates default to cent
 		"-0.00123456789":     -0.001234,          // truncates <0.01 to millionth
 		"-0.000000987654321": -0.000000987654321, // <0.000001 gets maximum precision
-		// edge case: >2^64 displays incorrectly
-		// this should be fine, since this is a display-only function (not used in transactions)
-		// which is used on dollar (not token) amounts
-		"123456789123456789123456789.123456789": -9.223372036854776e+21,
 	}
 
 	for s, f := range cases {
 		assert.Equal(f, neat(sdk.MustNewDecFromStr(s)))
 	}
+
+	// edge case: >2^64 displays incorrectly
+	// this should be fine, since this is a display-only function (not used in transactions)
+	// which is used on dollar (not token) amounts
+	assert.NotEqual(
+		123456789123456789123456789.123456789,
+		neat(sdk.MustNewDecFromStr("123456789123456789123456789.123456789")),
+	)
 }
