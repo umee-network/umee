@@ -8,28 +8,48 @@ import (
 )
 
 // assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
-// under either recent (historic median) or current prices. It returns an error if
+// under either recent (historic median) or current prices. Checks using borrow limit based
+// on collateral weight, then check separately for borrow limit using borrow factor. Error if
 // borrowed asset prices cannot be calculated, but will try to treat collateral whose prices are
 // unavailable as having zero value. This can still result in a borrow limit being too low,
 // unless the remaining collateral is enough to cover all borrows.
 // This should be checked in msg_server.go at the end of any transaction which is restricted
 // by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
-func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress) error {
+// MaxUsage sets the maximum percent of a user's borrow limit that can be in use: set to 1
+// to allow up to 100% borrow limit, or a lower value (e.g. 0.9) if a transaction should fail
+// if a safety margin is desired (e.g. <90% borrow limit).
+func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdk.Dec) error {
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 
-	value, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeHigh)
+	// check health using collateral weight
+	borrowValue, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeHigh)
 	if err != nil {
 		return err
 	}
-	limit, err := k.VisibleBorrowLimit(ctx, collateral)
+	borrowLimit, err := k.VisibleBorrowLimit(ctx, collateral)
 	if err != nil {
 		return err
 	}
-	if value.GT(limit) {
+	if borrowValue.GT(borrowLimit.Mul(maxUsage)) {
 		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s", value, limit)
+			"borrowed: %s, limit: %s, max usage %s", borrowValue, borrowLimit, maxUsage)
 	}
+
+	// check health using borrow factor
+	weightedBorrowValue, err := k.ValueWithBorrowFactor(ctx, borrowed, types.PriceModeHigh)
+	if err != nil {
+		return err
+	}
+	collateralValue, err := k.VisibleUTokensValue(ctx, collateral, types.PriceModeLow)
+	if err != nil {
+		return err
+	}
+	if weightedBorrowValue.GT(collateralValue.Mul(maxUsage)) {
+		return types.ErrUndercollaterized.Wrapf(
+			"weighted borrow: %s, collateral value: %s, max usage %s", weightedBorrowValue, collateralValue, maxUsage)
+	}
+
 	return nil
 }
 
@@ -50,6 +70,16 @@ func (k Keeper) repayBorrow(ctx sdk.Context, fromAddr, borrowAddr sdk.AccAddress
 		return err
 	}
 	return k.setBorrow(ctx, borrowAddr, k.GetBorrow(ctx, borrowAddr, repay.Denom).Sub(repay))
+}
+
+// moveBorrow transfers a debt from fromAddr to toAddr without moving any tokens. This occurs during
+// fast liquidations, where a liquidator takes on a borrower's debt.
+func (k Keeper) moveBorrow(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, repay sdk.Coin) error {
+	err := k.setBorrow(ctx, fromAddr, k.GetBorrow(ctx, fromAddr, repay.Denom).Sub(repay))
+	if err != nil {
+		return err
+	}
+	return k.setBorrow(ctx, toAddr, k.GetBorrow(ctx, toAddr, repay.Denom).Add(repay))
 }
 
 // setBorrow sets the amount borrowed by an address in a given denom.
