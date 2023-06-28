@@ -33,7 +33,7 @@ func (k Keeper) getLiquidationAmounts(
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	collateralValue, err := k.CalculateCollateralValue(ctx, borrowerCollateral)
+	collateralValue, err := k.CalculateCollateralValue(ctx, borrowerCollateral, types.PriceModeSpot)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}

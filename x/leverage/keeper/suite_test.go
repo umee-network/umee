@@ -22,11 +22,12 @@ import (
 )
 
 const (
-	umeeDenom = appparams.BondDenom
-	atomDenom = fixtures.AtomDenom
-	daiDenom  = fixtures.DaiDenom
-	pumpDenom = "upump"
-	dumpDenom = "udump"
+	umeeDenom   = appparams.BondDenom
+	atomDenom   = fixtures.AtomDenom
+	daiDenom    = fixtures.DaiDenom
+	pumpDenom   = "upump"
+	dumpDenom   = "udump"
+	stableDenom = "stable"
 )
 
 type IntegrationTestSuite struct {
@@ -82,6 +83,11 @@ func (s *IntegrationTestSuite) SetupTest() {
 	// additional tokens for historacle testing
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(dumpDenom, "DUMP", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pumpDenom, "PUMP", 6)))
+	// additional tokens for borrow factor testing
+	stable := newToken(stableDenom, "STABLE", 6)
+	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
+	stable.LiquidationThreshold = sdk.MustNewDecFromStr("0.9")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, stable))
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())
