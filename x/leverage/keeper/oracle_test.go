@@ -62,18 +62,20 @@ func (m *mockOracleKeeper) Clear(denom string) {
 // Reset restores the mock oracle's prices to its default values.
 func (m *mockOracleKeeper) Reset() {
 	m.symbolExchangeRates = map[string]sdk.Dec{
-		"UMEE": sdk.MustNewDecFromStr("4.21"),
-		"ATOM": sdk.MustNewDecFromStr("39.38"),
-		"DAI":  sdk.MustNewDecFromStr("1.00"),
-		"DUMP": sdk.MustNewDecFromStr("0.50"), // A token which has recently halved in price
-		"PUMP": sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
+		"UMEE":   sdk.MustNewDecFromStr("4.21"),
+		"ATOM":   sdk.MustNewDecFromStr("39.38"),
+		"DAI":    sdk.MustNewDecFromStr("1.00"),
+		"DUMP":   sdk.MustNewDecFromStr("0.50"), // A token which has recently halved in price
+		"PUMP":   sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
+		"STABLE": sdk.MustNewDecFromStr("4.21"), // Same price as umee
 	}
 	m.historicExchangeRates = map[string]sdk.Dec{
-		"UMEE": sdk.MustNewDecFromStr("4.21"),
-		"ATOM": sdk.MustNewDecFromStr("39.38"),
-		"DAI":  sdk.MustNewDecFromStr("1.00"),
-		"DUMP": sdk.MustNewDecFromStr("1.00"),
-		"PUMP": sdk.MustNewDecFromStr("1.00"),
+		"UMEE":   sdk.MustNewDecFromStr("4.21"),
+		"ATOM":   sdk.MustNewDecFromStr("39.38"),
+		"DAI":    sdk.MustNewDecFromStr("1.00"),
+		"DUMP":   sdk.MustNewDecFromStr("1.00"),
+		"PUMP":   sdk.MustNewDecFromStr("1.00"),
+		"STABLE": sdk.MustNewDecFromStr("4.21"),
 	}
 }
 

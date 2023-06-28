@@ -68,7 +68,7 @@ func (q Querier) Inspect(
 		borrowed := k.GetBorrowerBorrows(ctx, addr)
 		borrowedValue, _ := k.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
 		collateral := k.GetBorrowerCollateral(ctx, addr)
-		collateralValue, _ := k.CalculateCollateralValue(ctx, collateral)
+		collateralValue, _ := k.CalculateCollateralValue(ctx, collateral, types.PriceModeSpot)
 		liquidationThreshold, _ := k.CalculateLiquidationThreshold(ctx, collateral)
 
 		account := types.InspectAccount{
