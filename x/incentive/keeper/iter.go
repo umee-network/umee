@@ -92,5 +92,5 @@ func (k Keeper) getAllTotalUnbonding(ctx sdk.Context) sdk.Coins {
 
 // getAllTotalBonded gets total bonded for all uTokens (used for a query)
 func (k Keeper) getAllTotalBonded(ctx sdk.Context) sdk.Coins {
-	return store.SumCoins(k.prefixStore(ctx, keyPrefixTotalBonded), keys.NoLastByte)
+	return store.SumCoins(k.prefixStore(ctx, keyPrefixTotalBonded), keys.ToStr)
 }
