@@ -61,6 +61,7 @@ func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 	planName := "v5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			// TODO: set the correct drain account. This will panic if executed.
 			if err := app.GravityKeeper.MigrateFundsToDrainAccount(ctx, sdk.MustAccAddressFromBech32("the_drain_account")); err != nil {
 				return nil, err
 			}
