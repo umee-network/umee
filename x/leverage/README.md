@@ -175,7 +175,7 @@ Each token in the `Token Registry` has a parameter called `CollateralWeight`, al
 
 An implied parameter `BorrowFactor` is derived from `CollateralWeight` - specifically, it is the minimum of `2.0` and `1/CollateralWeight`.
 
-When a user is borrowing, their borrow limit is whichever is more restrictive of these two rules:
+When a user is borrowing, their borrow limit is whichever is more restrictive of the following two rules:
 
 - Borrowed value must be less than collateral value times the weighted average of collateral assets' `CollateralWeight`
 - Borrowed value times the weighted average of borrowed assets' `BorrowFactor` must be less than collateral value.
