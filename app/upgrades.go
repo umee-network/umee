@@ -57,17 +57,16 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 }
 
 func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
-	planName := "v5.1"
+	planName := "v5.1-beta" // TODO: decide about the final release
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 				Added: []string{incentive.ModuleName},
 			})
 
-			// TODO: set the correct drain account. This will panic if executed.
 			if err := app.GravityKeeper.MigrateFundsToDrainAccount(
 				ctx,
-				sdk.MustAccAddressFromBech32("the_drain_account"),
+				sdk.MustAccAddressFromBech32("umee1gx9svenfs6ktvajje2wgqau3gk5mznwnyghq4l"),
 			); err != nil {
 				return nil, err
 			}
