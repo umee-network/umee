@@ -190,8 +190,10 @@ func RandomizedGenState(simState *module.SimulationState) {
 		MedianStampPeriod:   medianStampPeriod,
 		MaximumPriceStamps:  historicStampPeriod,
 		MaximumMedianStamps: historicStampPeriod,
-		AvgPeriod:           avgPeriod,
-		AvgShift:            avgShift,
+		AvgCounterParams: types.AvgCounterParams{
+			AvgPeriod: avgPeriod,
+			AvgShift:  avgShift,
+		},
 	}
 
 	bz, err := json.MarshalIndent(&oracleGenesis.Params, "", " ")
