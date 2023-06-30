@@ -354,7 +354,7 @@ $ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
 				repayDenom = args[1]
 			}
 
-			if len(args) > 1 {
+			if len(args) > 2 {
 				rewardDenom = args[2]
 			}
 
