@@ -98,7 +98,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 6)
+				s.Require().Len(tokens, 7)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, ntA.BaseDenom)
 				s.Require().NoError(err)
@@ -170,7 +170,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 5)
+				s.Require().Len(tokens, 6)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uumee")
 				s.Require().NoError(err)
@@ -350,6 +350,13 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
 
+	// create an UMEE borrower using STABLE collateral
+	stableUmeeBorrower := s.newAccount(coin.New(stableDenom, 100_000000))
+	s.supply(stableUmeeBorrower, coin.New(stableDenom, 100_000000))
+	s.collateralize(stableUmeeBorrower, coin.New("u/"+stableDenom, 100_000000))
+	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
+	// UMEE and STABLE have the same price but different collateral weights
+
 	tcs := []struct {
 		msg                  string
 		addr                 sdk.AccAddress
@@ -455,6 +462,14 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			sdk.Coin{},
 			types.ErrUndercollaterized,
+		}, {
+			"borrow limit (undercollateralized due to borrow factor but not collateral weight)",
+			stableUmeeBorrower,
+			coin.New("u/"+stableDenom, 50_000000),
+			nil,
+			nil,
+			sdk.Coin{},
+			types.ErrUndercollaterized,
 		},
 	}
 
@@ -555,6 +570,13 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	// borrowed value is $10 (current) or $5 (historic)
 	// collateral weights are always 0.25 in testing
 
+	// create an UMEE borrower using STABLE collateral
+	stableUmeeBorrower := s.newAccount(coin.New(stableDenom, 100_000000))
+	s.supply(stableUmeeBorrower, coin.New(stableDenom, 100_000000))
+	s.collateralize(stableUmeeBorrower, coin.New("u/"+stableDenom, 100_000000))
+	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
+	// UMEE and STABLE have the same price but different collateral weights
+
 	zeroUmee := coin.Zero(umeeDenom)
 	zeroUUmee := coin.New("u/"+umeeDenom, 0)
 	tcs := []struct {
@@ -574,7 +596,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
-		}, {
+		},
+		{
 			"can't borrow uToken",
 			supplier,
 			"u/" + umeeDenom,
@@ -582,7 +605,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
-		}, {
+		},
+		{
 			"max withdraw umee",
 			supplier,
 			umeeDenom,
@@ -590,7 +614,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+umeeDenom, 75_000000),
 			coin.New(umeeDenom, 100_000000),
 			nil,
-		}, {
+		},
+		{
 			"duplicate max withdraw umee",
 			supplier,
 			umeeDenom,
@@ -598,7 +623,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			zeroUUmee,
 			zeroUmee,
 			nil,
-		}, {
+		},
+		{
 			"max withdraw with borrow",
 			other,
 			umeeDenom,
@@ -606,7 +632,8 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+umeeDenom, 60_000000),
 			coin.New(umeeDenom, 60_000000),
 			nil,
-		}, {
+		},
+		{
 			"max withdrawal (dump borrower)",
 			dumpborrower,
 			pumpDenom,
@@ -614,13 +641,23 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+pumpDenom, 20_000000),
 			coin.New(pumpDenom, 20_000000),
 			nil,
-		}, {
+		},
+		{
 			"max withdrawal (pump borrower)",
 			pumpborrower,
 			dumpDenom,
 			coin.New("u/"+dumpDenom, 20_000000),
 			coin.New("u/"+dumpDenom, 20_000000),
 			coin.New(dumpDenom, 20_000000),
+			nil,
+		},
+		{
+			"max withdrawal (borrow factor 2 with stablecoin collateral)",
+			stableUmeeBorrower,
+			stableDenom,
+			coin.New("u/"+stableDenom, 40_000000),
+			coin.New("u/"+stableDenom, 40_000000),
+			coin.New(stableDenom, 40_000000),
 			nil,
 		},
 	}
@@ -1273,6 +1310,13 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 	// collateral value is $50 (current) or $100 (historic)
 	// collateral weights are always 0.25 in testing
 
+	// create an UMEE borrower using STABLE collateral
+	stableUmeeBorrower := s.newAccount(coin.New(stableDenom, 40_000000))
+	s.supply(stableUmeeBorrower, coin.New(stableDenom, 40_000000))
+	s.collateralize(stableUmeeBorrower, coin.New("u/"+stableDenom, 40_000000))
+	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 3_000000))
+	// UMEE and STABLE have the same price but different collateral weights
+
 	tcs := []testCase{
 		{
 			"uToken",
@@ -1295,14 +1339,19 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			coin.New(umeeDenom, 70_000000),
 			nil,
 		}, {
-			"additional borrow",
-			borrower,
-			coin.New(umeeDenom, 20_000000),
+			"stable umee borrower (acceptable)",
+			stableUmeeBorrower,
+			coin.New(umeeDenom, 17_000000),
 			nil,
+		}, {
+			"stable umee borrower (borrow factor limit)",
+			stableUmeeBorrower,
+			coin.New(umeeDenom, 1_000000),
+			types.ErrUndercollaterized,
 		}, {
 			"max supply utilization",
 			borrower,
-			coin.New(umeeDenom, 10_000000),
+			coin.New(umeeDenom, 9_000000),
 			types.ErrMaxSupplyUtilization,
 		}, {
 			"atom borrow",
@@ -1420,6 +1469,13 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 	// collateral value is $50 (current) or $100 (historic)
 	// collateral weights are always 0.25 in testing
 
+	// create an UMEE borrower using STABLE collateral
+	stableUmeeBorrower := s.newAccount(coin.New(stableDenom, 100_000000))
+	s.supply(stableUmeeBorrower, coin.New(stableDenom, 100_000000))
+	s.collateralize(stableUmeeBorrower, coin.New("u/"+stableDenom, 100_000000))
+	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
+	// UMEE and STABLE have the same price but different collateral weights
+
 	tcs := []struct {
 		msg  string
 		addr sdk.AccAddress
@@ -1460,6 +1516,11 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 			"pump borrower",
 			pumpborrower,
 			coin.New(pumpDenom, 6_250000),
+			nil,
+		}, {
+			"stable umee borrower",
+			stableUmeeBorrower,
+			coin.New(umeeDenom, 20_000000),
 			nil,
 		},
 	}
@@ -2165,11 +2226,11 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			coin.New("u/"+atomDenom, 3_527933),
 			nil,
 		}, {
-			"close factor < 1",
+			"close factor < 1 with auto-selected repay and reward denoms",
 			liquidator,
 			closeBorrower,
-			umeeDenom,
-			umeeDenom,
+			"",
+			"",
 			coin.New(umeeDenom, 8_150541),
 			coin.New("u/"+umeeDenom, 8_965596),
 			nil,
@@ -2187,7 +2248,22 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			_, err := srv.LeveragedLiquidate(ctx, msg)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
-			baseRewardDenom := types.ToTokenDenom(tc.expectedReward.Denom)
+			// borrower initial state
+			biBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)
+			biCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.borrower)
+			biBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.borrower)
+
+			// adjust test case in empty-input scenarios, while preserving the msg
+			if msg.RepayDenom == "" {
+				if !biBorrowed.IsZero() {
+					tc.repayDenom = biBorrowed[0].Denom
+				}
+			}
+			if msg.RewardDenom == "" {
+				if !biCollateral.IsZero() {
+					tc.rewardDenom = types.ToTokenDenom(biCollateral[0].Denom)
+				}
+			}
 
 			// initial state (borrowed denom)
 			biUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
@@ -2195,12 +2271,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 
 			// initial state (liquidated denom)
 			liUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
-			liExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, baseRewardDenom)
-
-			// borrower initial state
-			biBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)
-			biCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.borrower)
-			biBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.borrower)
+			liExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.rewardDenom)
 
 			// liquidator initial state
 			liBalance := app.BankKeeper.GetAllBalances(ctx, tc.liquidator)
@@ -2215,7 +2286,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 
 			// final state (liquidated denom)
 			lfUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
-			lfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, baseRewardDenom)
+			lfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.rewardDenom)
 
 			// borrower final state
 			bfBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)

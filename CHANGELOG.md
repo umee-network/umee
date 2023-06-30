@@ -48,6 +48,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [2121](https://github.com/umee-network/umee/pull/2121) Allow `MsgLeveragedLiquidate` to auto-select repay and reward denoms if request fields left blank.
+- [2114](https://github.com/umee-network/umee/pull/2114) Add borrow factor to `x/leverage`
 - [2102](https://github.com/umee-network/umee/pull/2102) and [2106](https://github.com/umee-network/umee/pull/2106) Add `MsgLeveragedLiquidate` to `x/leverage`
 - [2085](https://github.com/umee-network/umee/pull/2085) Add `inspect` query to leverage module, which msut be enabled on a node by running with `-l` liquidator query flag.
 - [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module.

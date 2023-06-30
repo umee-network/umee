@@ -55,7 +55,9 @@ service Msg {
   // this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
   // of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
   // repay and reward token denoms. For safety, the liquidator cannot exceed 80% of their borrow limit when
-  // executing this transaction, instead of the regular 100%.
+  // executing this transaction, instead of the regular 100%. Also allows repayment and reward denoms to
+  // be left blank - if not specified, the module will automatically select the first (alphabetically by denom)
+  // borrow and/or collateral on the target account and the proceed normally.
   rpc LeveragedLiquidate(MsgLeveragedLiquidate) returns (MsgLeveragedLiquidateResponse);
 
   // SupplyCollateral combines the Supply and Collateralize actions.

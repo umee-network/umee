@@ -1303,7 +1303,9 @@ type MsgClient interface {
 	// this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
 	// of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
 	// repay and reward token denoms. For safety, the liquidator cannot exceed 80% of their borrow limit when
-	// executing this transaction, instead of the regular 100%.
+	// executing this transaction, instead of the regular 100%. Also allows repayment and reward denoms to
+	// be left blank - if not specified, the module will automatically select the first (alphabetically by denom)
+	// borrow and/or collateral on the target account and the proceed normally.
 	LeveragedLiquidate(ctx context.Context, in *MsgLeveragedLiquidate, opts ...grpc.CallOption) (*MsgLeveragedLiquidateResponse, error)
 	// SupplyCollateral combines the Supply and Collateralize actions.
 	SupplyCollateral(ctx context.Context, in *MsgSupplyCollateral, opts ...grpc.CallOption) (*MsgSupplyCollateralResponse, error)
@@ -1462,7 +1464,9 @@ type MsgServer interface {
 	// this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
 	// of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
 	// repay and reward token denoms. For safety, the liquidator cannot exceed 80% of their borrow limit when
-	// executing this transaction, instead of the regular 100%.
+	// executing this transaction, instead of the regular 100%. Also allows repayment and reward denoms to
+	// be left blank - if not specified, the module will automatically select the first (alphabetically by denom)
+	// borrow and/or collateral on the target account and the proceed normally.
 	LeveragedLiquidate(context.Context, *MsgLeveragedLiquidate) (*MsgLeveragedLiquidateResponse, error)
 	// SupplyCollateral combines the Supply and Collateralize actions.
 	SupplyCollateral(context.Context, *MsgSupplyCollateral) (*MsgSupplyCollateralResponse, error)
