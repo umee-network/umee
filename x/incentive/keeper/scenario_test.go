@@ -216,7 +216,7 @@ func TestZeroBonded(t *testing.T) {
 	)
 
 	// In this test case, an incentive program is started but no uTokens of the incentivized denom are
-	// bonded during its first half of runtime. during this time, it must not distribute rewards.
+	// bonded during its first half of runtime. During this time, it must not distribute rewards.
 	// During the remaining half of the program, all rewards must be distributed (spread evenly over
 	// the remaining time.)
 
@@ -224,17 +224,56 @@ func TestZeroBonded(t *testing.T) {
 	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
 	k.advanceTimeTo(programStart) // starts program, but does not attempt rewards. Do not combine with next line.
 	k.advanceTimeTo(programStart + 50)
-	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 150)")
 	program := k.getProgram(1)
+	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 150)")
 	require.Equal(t, program.TotalRewards, program.RemainingRewards, "all of program's rewards remain (no bonds)")
 
 	// now create a supplier with bonded tokens, halfway through the program
-	k.newBondedAccount(
+	alice := k.newBondedAccount(
 		coin.New(uUmee, 100_000000),
 	)
 	k.advanceTimeTo(programStart + 75)
 	program = k.getProgram(1)
+	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 175)")
 	require.Equal(t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
+
+	// finish the program with user still bonded
+	k.advanceTimeTo(programStart + 100)
+	program = k.getProgram(1)
+	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status (time 200)")
+	require.Equal(t, sdk.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
+
+	// measure pending rewards (even though program has ended, user has not yet claimed)
+	rewards, err := k.calculateRewards(k.ctx, alice)
+	require.NoError(t, err)
+	require.Equal(
+		t,
+		sdk.NewCoins(sdk.NewInt64Coin(umee, 10_000000)),
+		rewards,
+		"alice pending rewards at time 200",
+	)
+
+	// advance time further past program end
+	k.advanceTimeTo(programStart + 120)
+
+	// measure pending rewards (unchanged, as user has not yet claimed)
+	rewards, err = k.calculateRewards(k.ctx, alice)
+	require.NoError(t, err)
+	require.Equal(
+		t,
+		sdk.NewCoins(sdk.NewInt64Coin(umee, 10_000000)),
+		rewards,
+		"alice pending rewards at time 220",
+	)
+	// actually claim the rewards (same amount)
+	rewards, err = k.UpdateAccount(k.ctx, alice)
+	require.NoError(k.t, err)
+	require.Equal(
+		k.t,
+		sdk.NewCoins(sdk.NewInt64Coin(umee, 10_000000)),
+		rewards,
+		"alice claimed rewards at time 220",
+	)
 }
 
 func TestZeroBondedAtProgramEnd(t *testing.T) {
