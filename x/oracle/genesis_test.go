@@ -200,6 +200,7 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 			BlockNum: 0,
 		},
 	}
+	hacp := types.DefaultAvgCounterParams()
 
 	genesisState := types.GenesisState{
 		Params:                        params,
@@ -211,6 +212,7 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 		Medians:                       medians,
 		HistoricPrices:                historicPrices,
 		MedianDeviations:              medianDeviations,
+		AvgCounterParams:              hacp,
 	}
 
 	oracle.InitGenesis(ctx, keeper, genesisState)
@@ -225,4 +227,5 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 	assert.DeepEqual(s.T(), medians, result.Medians)
 	assert.DeepEqual(s.T(), historicPrices, result.HistoricPrices)
 	assert.DeepEqual(s.T(), medianDeviations, result.MedianDeviations)
+	assert.DeepEqual(s.T(), hacp, result.AvgCounterParams)
 }

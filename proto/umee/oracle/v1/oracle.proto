@@ -56,11 +56,6 @@ message Params {
   // Maximum Median Stamps represents the maximum amount of medians the
   // oracle module will store before pruning via FIFO.
   uint64 maximum_median_stamps = 12;
-  // Historic Avg Counter params
-  AvgCounterParams avg_counter_params = 13 [
-    (gogoproto.moretags) = "yaml:\"avg_counter_params\"",
-    (gogoproto.nullable) = false
-  ];
 }
 
 // AvgCounterParams - Historic avg counter params

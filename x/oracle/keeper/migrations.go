@@ -38,8 +38,7 @@ func (m Migrator) HistoracleParams3x4(ctx sdk.Context) error {
 // SetAvgPeriodAndShift updates the avg shift and period params
 func (m Migrator) SetAvgPeriodAndShift(ctx sdk.Context) error {
 	p := types.DefaultAvgCounterParams()
-	m.keeper.SetHistoricAvgCounterParams(ctx, *p)
-	return nil
+	return m.keeper.SetHistoricAvgCounterParams(ctx, p)
 }
 
 // MigrateBNB fixes the BNB base denom for the 4.1 upgrade without using leverage hooks

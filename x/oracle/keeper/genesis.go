@@ -111,3 +111,26 @@ func (k Keeper) AllMedianDeviationPrices(ctx sdk.Context) types.Prices {
 	})
 	return prices
 }
+
+// SetAvgPeSetHistoricAvgCounterParams sets avg period and avg shift time duration
+func (k Keeper) SetHistoricAvgCounterParams(ctx sdk.Context, acp types.AvgCounterParams) error {
+	store := ctx.KVStore(k.storeKey)
+	bz, err := acp.Marshal()
+	if err != nil {
+		return err
+	}
+	store.Set(types.KeyHistoricAvgCounterParams, bz)
+	return nil
+}
+
+// GetHistoricAvgCounterParams gets the avg period and avg shift time duration from store
+func (k Keeper) GetHistoricAvgCounterParams(ctx sdk.Context) (types.AvgCounterParams, error) {
+	store := ctx.KVStore(k.storeKey)
+	bz := store.Get(types.KeyHistoricAvgCounterParams)
+	var acp types.AvgCounterParams
+	err := acp.Unmarshal(bz)
+	if err != nil {
+		return types.AvgCounterParams{}, err
+	}
+	return acp, nil
+}

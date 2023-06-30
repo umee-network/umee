@@ -136,8 +136,3 @@ func (k Keeper) GetParams(ctx sdk.Context) (params types.Params) {
 func (k Keeper) SetParams(ctx sdk.Context, params types.Params) {
 	k.paramSpace.SetParamSet(ctx, &params)
 }
-
-// SetAvgPeSetHistoricAvgCounterParams sets avg period and avg shift time duration
-func (k Keeper) SetHistoricAvgCounterParams(ctx sdk.Context, acp types.AvgCounterParams) {
-	k.paramSpace.Set(ctx, types.KeyHistoricAvgCounterParams, &acp)
-}

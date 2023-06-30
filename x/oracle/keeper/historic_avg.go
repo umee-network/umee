@@ -17,7 +17,8 @@ type AvgKeeper struct {
 }
 
 func (k Keeper) AvgKeeper(ctx sdk.Context) AvgKeeper {
-	p := k.GetParams(ctx).AvgCounterParams
+	p, err := k.GetHistoricAvgCounterParams(ctx)
+	util.Panic(err)
 	return AvgKeeper{store: ctx.KVStore(k.storeKey), period: p.AvgPeriod, shift: p.AvgShift}
 }
 

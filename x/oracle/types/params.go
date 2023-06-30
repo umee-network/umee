@@ -65,7 +65,6 @@ func DefaultParams() Params {
 		MedianStampPeriod:        BlocksPerHour * 3,        // 3h
 		MaximumPriceStamps:       36,                       // 3h
 		MaximumMedianStamps:      24,                       // 3 days
-		AvgCounterParams:         *DefaultAvgCounterParams(),
 	}
 }
 
@@ -137,11 +136,6 @@ func (p *Params) ParamSetPairs() paramstypes.ParamSetPairs {
 			KeyMaximumMedianStamps,
 			&p.MaximumMedianStamps,
 			validateMaximumMedianStamps,
-		),
-		paramstypes.NewParamSetPair(
-			KeyHistoricAvgCounterParams,
-			&p.AvgCounterParams,
-			validateAvgCounterParams,
 		),
 	}
 }
@@ -369,23 +363,6 @@ func validateMaximumMedianStamps(i interface{}) error {
 	return nil
 }
 
-func validateAvgCounterParams(i interface{}) error {
-	v, ok := i.(AvgCounterParams)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
-	if v.AvgPeriod.Seconds() <= 0 {
-		return fmt.Errorf("avg period must be positive: %d", v)
-	}
-
-	if v.AvgShift.Seconds() <= 0 {
-		return fmt.Errorf("avg shift must be positive: %d", v)
-	}
-
-	return nil
-}
-
 // ValidateVoteThreshold validates oracle exchange rates power vote threshold.
 // Must be
 // * a decimal value > 0.33 and <= 1.
@@ -400,15 +377,4 @@ func ValidateVoteThreshold(x sdk.Dec) error {
 		return sdkerrors.ErrInvalidRequest.Wrap("threshold precision must be maximum 2 decimals")
 	}
 	return nil
-}
-
-func DefaultAvgCounterParams() *AvgCounterParams {
-	return &AvgCounterParams{
-		AvgPeriod: DefaultAvgPeriod, // 16 hours
-		AvgShift:  DefaultAvgShift,  // 12 hours
-	}
-}
-
-func (acp *AvgCounterParams) Equal(other *AvgCounterParams) bool {
-	return acp.AvgPeriod == other.AvgPeriod && acp.AvgShift == other.AvgShift
 }
