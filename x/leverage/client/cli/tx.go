@@ -322,7 +322,7 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 func GetCmdLeveragedLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lev-liquidate [borrower] [repay-denom] [reward-denom]",
-		Args:  cobra.ExactArgs(3),
+		Args:  cobra.RangeArgs(1, 3),
 		Short: "Liquidates by moving borrower debt to the liquidator and immediately collateralizes the reward.",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`
@@ -349,8 +349,14 @@ $ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
 				return err
 			}
 
-			repayDenom := args[1]
-			rewardDenom := args[2]
+			var repayDenom, rewardDenom string
+			if len(args) > 1 {
+				repayDenom = args[1]
+			}
+
+			if len(args) > 2 {
+				rewardDenom = args[2]
+			}
 
 			msg := types.NewMsgLeveragedLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom)
 			if err = msg.ValidateBasic(); err != nil {

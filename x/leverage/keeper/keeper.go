@@ -372,6 +372,21 @@ func (k Keeper) Liquidate(
 func (k Keeper) LeveragedLiquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
+	// If the message did not specify repay or reward denoms, select one arbitrarily (first in
+	// denom alphabetical order) from borrower position. Then proceed normally with the transaction.
+	if repayDenom == "" {
+		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+		if !borrowed.IsZero() {
+			repayDenom = borrowed[0].Denom
+		}
+	}
+	if rewardDenom == "" {
+		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+		if !collateral.IsZero() {
+			rewardDenom = types.ToTokenDenom(collateral[0].Denom)
+		}
+	}
+
 	if err := k.validateAcceptedDenom(ctx, repayDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}

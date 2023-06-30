@@ -2226,11 +2226,11 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			coin.New("u/"+atomDenom, 3_527933),
 			nil,
 		}, {
-			"close factor < 1",
+			"close factor < 1 with auto-selected repay and reward denoms",
 			liquidator,
 			closeBorrower,
-			umeeDenom,
-			umeeDenom,
+			"",
+			"",
 			coin.New(umeeDenom, 8_150541),
 			coin.New("u/"+umeeDenom, 8_965596),
 			nil,
@@ -2248,7 +2248,22 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			_, err := srv.LeveragedLiquidate(ctx, msg)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
-			baseRewardDenom := types.ToTokenDenom(tc.expectedReward.Denom)
+			// borrower initial state
+			biBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)
+			biCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.borrower)
+			biBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.borrower)
+
+			// adjust test case in empty-input scenarios, while preserving the msg
+			if msg.RepayDenom == "" {
+				if !biBorrowed.IsZero() {
+					tc.repayDenom = biBorrowed[0].Denom
+				}
+			}
+			if msg.RewardDenom == "" {
+				if !biCollateral.IsZero() {
+					tc.rewardDenom = types.ToTokenDenom(biCollateral[0].Denom)
+				}
+			}
 
 			// initial state (borrowed denom)
 			biUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
@@ -2256,12 +2271,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 
 			// initial state (liquidated denom)
 			liUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
-			liExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, baseRewardDenom)
-
-			// borrower initial state
-			biBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)
-			biCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.borrower)
-			biBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.borrower)
+			liExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.rewardDenom)
 
 			// liquidator initial state
 			liBalance := app.BankKeeper.GetAllBalances(ctx, tc.liquidator)
@@ -2276,7 +2286,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 
 			// final state (liquidated denom)
 			lfUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
-			lfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, baseRewardDenom)
+			lfExchangeRate := app.LeverageKeeper.DeriveExchangeRate(ctx, tc.rewardDenom)
 
 			// borrower final state
 			bfBalance := app.BankKeeper.GetAllBalances(ctx, tc.borrower)
