@@ -53,11 +53,10 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v4.4", upgradeInfo)
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	app.registerUpgrade5_1(upgradeInfo)
-	// TODO: set correct 5.1 name and add borrowFactor migration
 }
 
 func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
-	planName := "v5.1-beta" // TODO: decide about the final release
+	planName := "v5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
