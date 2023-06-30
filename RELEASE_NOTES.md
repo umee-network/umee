@@ -6,7 +6,7 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v5.0.0
+## v5.1.0
 
 Highlights:
 
@@ -15,7 +15,7 @@ Highlights:
 - new x/leverage [`MsgLeveragedLiquidate`](proto/umee/leverage/v1/tx.proto#L59) was added. Allows suppliers to use their active collateral to absorb unhealthy debts. See [Liquidation](x/leverage/README.md#liquidation) for more details.
 - Gravity Bridge phase-4: the GB valset was correctly burned. Slashing is removed and there is no need to run Peggo any more.
 
-[v5.1 CHANGELOG](https://github.com/umee-network/umee/blob/v5.1.0/CHANGELOG.md).
+[v5.1.0-rc1 CHANGELOG](https://github.com/umee-network/umee/blob/v5.1.0-rc1/CHANGELOG.md).
 
 ### Validators
 

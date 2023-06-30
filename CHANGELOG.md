@@ -46,6 +46,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v5.1.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-06-30
+
 ### Features
 
 - [2121](https://github.com/umee-network/umee/pull/2121) Allow `MsgLeveragedLiquidate` to auto-select repay and reward denoms if request fields left blank.
