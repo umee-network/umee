@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 var ten = sdk.MustNewDecFromStr("10")
@@ -44,6 +44,7 @@ func (k Keeper) updateRewards(ctx sdk.Context, blockTime int64) error {
 	if err != nil {
 		return err
 	}
+
 	for _, p := range ongoingPrograms {
 		bondedDenom := p.UToken
 		bonded := k.getTotalBonded(ctx, bondedDenom)
@@ -106,7 +107,6 @@ func (k Keeper) updateRewards(ctx sdk.Context, blockTime int64) error {
 			return err
 		}
 	}
-
 	// After updates, module's LastRewardTime increases to current block time
 	return k.setLastRewardsTime(ctx, blockTime)
 }
@@ -150,20 +150,22 @@ func (k Keeper) updatePrograms(ctx sdk.Context) error {
 	// Note that even if a program had a duration shorter than the time between blocks, this function's
 	// order of ending eligible ongoing programs before starting eligible upcoming ones ensures that each
 	// program will be active for updateRewards for at least one full block. (The same program will not be
-	// both started and ended in the same block._
+	// both started and ended in the same block.)
 	return nil
 }
 
 // EndBlock updates incentive programs and reward accumulators, then sets LastRewardTime
 // to the current block time. Also protects against negative time elapsed (without causing chain halt).
-func (k Keeper) EndBlock(ctx sdk.Context) error {
+// In addition to regular error, returns a boolean indicating whether the main logic was skipped due
+// to a blockTime issue. These situations are accompanied by error logs.
+func (k Keeper) EndBlock(ctx sdk.Context) (skipped bool, err error) {
 	blockTime := ctx.BlockTime().Unix()
 	if blockTime < 0 {
-		k.Logger(ctx).With("Negative").Error(
+		k.Logger(ctx).Error(
 			incentive.ErrDecreaseLastRewardTime.Error(),
-			"block time", blockTime,
+			"negative block time", blockTime,
 		)
-		return nil
+		return true, nil
 	}
 
 	prevTime := k.GetLastRewardsTime(ctx)
@@ -171,13 +173,21 @@ func (k Keeper) EndBlock(ctx sdk.Context) error {
 		// if stored LastRewardTime is zero (or negative), either the chain has just started or the genesis file has been
 		// modified intentionally. In either case, proceed as if 0 seconds have passed since the last block,
 		// thus accruing no rewards and setting the current BlockTime as the new starting point.
+		k.Logger(ctx).Error(
+			"incentive module LastRewardTime was not initialized",
+			"prev", prevTime,
+			"blockTime", blockTime,
+		)
+		if err := k.setLastRewardsTime(ctx, blockTime); err != nil {
+			return true, err
+		}
 		prevTime = blockTime
 	}
 
 	if blockTime <= prevTime {
 		// Avoids this and related issues: https://github.com/tendermint/tendermint/issues/8773
-		k.Logger(ctx).With("EndBlocker will wait for block time > prevRewardTime").Error(
-			incentive.ErrDecreaseLastRewardTime.Error(),
+		k.Logger(ctx).Error(
+			"incentive module will wait for block time > prevRewardTime",
 			"current", blockTime,
 			"prev", prevTime,
 		)
@@ -185,7 +195,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) error {
 		// if LastRewardTime appears to be in the future, do nothing (besides logging) and leave
 		// LastRewardTime at its stored value. This will repeat every block until BlockTime exceeds
 		// LastRewardTime.
-		return nil
+		return true, nil
 	}
 
 	// Implications of updating reward accumulators and PrevRewardTime before starting/completing incentive programs:
@@ -193,8 +203,8 @@ func (k Keeper) EndBlock(ctx sdk.Context) error {
 	// - if an incentive program completes this block, it distributes its remaining rewards before being completed
 	// - in the case of a chain halt which misses a program's start time, rewards before its late start are skipped
 	// - in the case of a chain halt which misses a program's end time, remaining rewards are correctly distributed
-	if err := k.updateRewards(ctx, prevTime); err != nil {
-		return err
+	if err := k.updateRewards(ctx, blockTime); err != nil {
+		return false, err
 	}
-	return k.updatePrograms(ctx)
+	return false, k.updatePrograms(ctx)
 }

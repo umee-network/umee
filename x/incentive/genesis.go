@@ -2,12 +2,13 @@ package incentive
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	leveragetypes "github.com/umee-network/umee/v4/x/leverage/types"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // NewGenesisState creates a new GenesisState object
@@ -58,23 +59,38 @@ func (gs GenesisState) Validate() error {
 		return ErrDecreaseLastRewardTime.Wrap("last reward time must not be negative")
 	}
 
-	// TODO: enforce no duplicate (account,denom)
+	m := map[string]bool{}
 	for _, rt := range gs.RewardTrackers {
+		// enforce no duplicate (account,denom)
+		s := rt.Account + rt.UToken
+		if err := noDuplicateString(m, s, "reward trackers"); err != nil {
+			return err
+		}
 		if err := rt.Validate(); err != nil {
 			return err
 		}
 	}
 
-	// TODO: enforce no duplicate denoms
+	m = map[string]bool{}
 	for _, ra := range gs.RewardAccumulators {
 		if err := ra.Validate(); err != nil {
 			return err
 		}
+		// enforce no duplicate denoms
+		s := ra.UToken
+		if err := noDuplicateString(m, s, "reward accumulators"); err != nil {
+			return err
+		}
 	}
 
-	// TODO: enforce no duplicate program IDs
+	m = map[string]bool{}
+	// enforce no duplicate program IDs
 	for _, up := range gs.UpcomingPrograms {
 		if err := up.ValidatePassed(); err != nil {
+			return err
+		}
+		s := fmt.Sprintf("%d", up.ID)
+		if err := noDuplicateString(m, s, "upcoming program ID"); err != nil {
 			return err
 		}
 	}
@@ -82,27 +98,56 @@ func (gs GenesisState) Validate() error {
 		if err := op.ValidatePassed(); err != nil {
 			return err
 		}
+		s := fmt.Sprintf("%d", op.ID)
+		if err := noDuplicateString(m, s, "ongoing program ID"); err != nil {
+			return err
+		}
 	}
 	for _, cp := range gs.CompletedPrograms {
 		if err := cp.ValidatePassed(); err != nil {
 			return err
 		}
+		s := fmt.Sprintf("%d", cp.ID)
+		if err := noDuplicateString(m, s, "completed program ID"); err != nil {
+			return err
+		}
 	}
 
-	// TODO: enforce no duplicate (account,denom)
+	m = map[string]bool{}
 	for _, b := range gs.Bonds {
 		if err := b.Validate(); err != nil {
 			return err
 		}
-	}
-
-	// TODO: enforce no duplicate (account,denom)
-	for _, au := range gs.AccountUnbondings {
-		if err := au.Validate(); err != nil {
+		// enforce no duplicate (account,denom)
+		s := b.Account + b.UToken.Denom
+		if err := noDuplicateString(m, s, "bonds"); err != nil {
 			return err
 		}
 	}
 
+	m = map[string]bool{}
+	for _, au := range gs.AccountUnbondings {
+		if err := au.Validate(); err != nil {
+			return err
+		}
+		// enforce no duplicate (account,denom)
+		s := au.Account + au.UToken
+		if err := noDuplicateString(m, s, "account unbondings"); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// noDuplicateString checks to see if a string is already present in a map
+// and then adds it to the map. If it was already present, an error is returned.
+// used to check all uniqueness requirements in genesis state.
+func noDuplicateString(m map[string]bool, s, errMsg string) error {
+	if _, found := m[s]; found {
+		return fmt.Errorf("duplicate %s: %s", errMsg, s)
+	}
+	m[s] = true
 	return nil
 }
 
@@ -174,7 +219,7 @@ func (ip IncentiveProgram) Validate() error {
 		return errors.Wrapf(ErrInvalidProgramDuration, "%d", ip.Duration)
 	}
 	if ip.StartTime <= 0 {
-		return errors.Wrapf(ErrInvalidProgramStart, "%d", ip.Duration)
+		return ErrInvalidProgramStart.Wrapf("%d", ip.StartTime)
 	}
 
 	return nil
@@ -238,6 +283,9 @@ func (rt RewardTracker) Validate() error {
 	if _, err := sdk.AccAddressFromBech32(rt.Account); err != nil {
 		return err
 	}
+	if err := sdk.ValidateDenom(rt.UToken); err != nil {
+		return err
+	}
 	if !leveragetypes.HasUTokenPrefix(rt.UToken) {
 		return leveragetypes.ErrNotUToken.Wrap(rt.UToken)
 	}
@@ -262,6 +310,9 @@ func NewRewardAccumulator(uDenom string, exponent uint32, coins sdk.DecCoins) Re
 }
 
 func (ra RewardAccumulator) Validate() error {
+	if err := sdk.ValidateDenom(ra.UToken); err != nil {
+		return err
+	}
 	if !leveragetypes.HasUTokenPrefix(ra.UToken) {
 		return leveragetypes.ErrNotUToken.Wrap(ra.UToken)
 	}
@@ -289,6 +340,9 @@ func (u Unbonding) Validate() error {
 	if u.End < u.Start {
 		return ErrInvalidUnbonding.Wrap("start time > end time")
 	}
+	if !leveragetypes.HasUTokenPrefix(u.UToken.Denom) {
+		return leveragetypes.ErrNotUToken.Wrap(u.UToken.Denom)
+	}
 	return u.UToken.Validate()
 }
 
@@ -303,6 +357,9 @@ func NewAccountUnbondings(addr, uDenom string, unbondings []Unbonding) AccountUn
 
 func (au AccountUnbondings) Validate() error {
 	if _, err := sdk.AccAddressFromBech32(au.Account); err != nil {
+		return err
+	}
+	if err := sdk.ValidateDenom(au.UToken); err != nil {
 		return err
 	}
 	if !leveragetypes.HasUTokenPrefix(au.UToken) {

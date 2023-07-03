@@ -11,10 +11,12 @@ import (
 	transfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+	"github.com/cosmos/ibc-go/v6/modules/core/exported"
 
-	"github.com/umee-network/umee/v4/util/sdkutil"
-	"github.com/umee-network/umee/v4/x/uibc"
-	"github.com/umee-network/umee/v4/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v5/util/sdkutil"
+
+	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
 )
 
 var _ porttypes.Middleware = ICS20Middleware{}
@@ -23,18 +25,44 @@ var _ porttypes.Middleware = ICS20Middleware{}
 // quota update on acknowledgement error or timeout.
 type ICS20Middleware struct {
 	porttypes.IBCModule
-	keeper keeper.Keeper
-	cdc    codec.JSONCodec
+	kb  keeper.Builder
+	cdc codec.JSONCodec
 }
 
 // NewICS20Middleware is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Middleware(app porttypes.IBCModule, k keeper.Keeper, cdc codec.JSONCodec) ICS20Middleware {
+func NewICS20Middleware(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSONCodec) ICS20Middleware {
 	return ICS20Middleware{
 		IBCModule: app,
-		keeper:    k,
+		kb:        k,
 		cdc:       cdc,
 	}
+}
+
+// OnRecvPacket implements types.Middleware
+func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
+) exported.Acknowledgement {
+	params := im.kb.Keeper(&ctx).GetParams()
+	if !params.IbcStatus.IBCTransferEnabled() {
+		return channeltypes.NewErrorAcknowledgement(transfertypes.ErrReceiveDisabled)
+	}
+
+	// TODO: re-enable inflow checks
+	// if params.IbcStatus.InflowQuotaEnabled() {
+	// 	var data transfertypes.FungibleTokenPacketData
+	// 	if err := transfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+	// 		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
+	// 		return channeltypes.NewErrorAcknowledgement(ackErr)
+	// 	}
+
+	// 	isSourceChain := transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+	// 	ackErr := im.kb.Keeper(&ctx).CheckIBCInflow(ctx, packet, data.Denom, isSourceChain)
+	// 	if ackErr != nil {
+	// 		return ackErr
+	// 	}
+	// }
+
+	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 }
 
 // OnAcknowledgementPacket implements types.Middleware
@@ -46,9 +74,9 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, ok := ack.Response.(*channeltypes.Acknowledgement_Error); ok {
-		params := im.keeper.GetParams(ctx)
-		if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
-			err := im.RevertQuotaUpdate(ctx, packet.Data)
+		params := im.kb.Keeper(&ctx).GetParams()
+		if params.IbcStatus.OutflowQuotaEnabled() {
+			err := im.revertQuotaUpdate(ctx, packet.Data)
 			emitOnRevertQuota(&ctx, "acknowledgement", packet.Data, err)
 		}
 	}
@@ -58,14 +86,14 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 
 // OnTimeoutPacket implements types.Middleware
 func (im ICS20Middleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
-	err := im.RevertQuotaUpdate(ctx, packet.Data)
+	err := im.revertQuotaUpdate(ctx, packet.Data)
 	emitOnRevertQuota(&ctx, "timeout", packet.Data, err)
 
 	return im.IBCModule.OnTimeoutPacket(ctx, packet, relayer)
 }
 
-// RevertQuotaUpdate Notifies the contract that a sent packet wasn't properly received
-func (im ICS20Middleware) RevertQuotaUpdate(
+// revertQuotaUpdate must be called on packet acknnowledgemenet error to revert necessary changes.
+func (im ICS20Middleware) revertQuotaUpdate(
 	ctx sdk.Context,
 	packetData []byte,
 ) error {
@@ -80,7 +108,7 @@ func (im ICS20Middleware) RevertQuotaUpdate(
 		return sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", data.Amount)
 	}
 
-	return im.keeper.UndoUpdateQuota(ctx, data.Denom, amount)
+	return im.kb.Keeper(&ctx).UndoUpdateQuota(data.Denom, amount)
 }
 
 func ValidateReceiverAddress(packet channeltypes.Packet) error {

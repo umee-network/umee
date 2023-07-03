@@ -7,9 +7,8 @@ import (
 	ics20types "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
-	"github.com/umee-network/umee/v4/x/uibc"
 
-	ibcutil "github.com/umee-network/umee/v4/util/ibc"
+	ibcutil "github.com/umee-network/umee/v5/util/ibc"
 )
 
 /******
@@ -17,7 +16,7 @@ import (
  ******/
 
 // SendPacket wraps IBC ChannelKeeper's SendPacket function
-func (k Keeper) SendPacket(ctx sdk.Context,
+func (kb Builder) SendPacket(ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	sourcePort string,
 	sourceChannel string,
@@ -25,8 +24,10 @@ func (k Keeper) SendPacket(ctx sdk.Context,
 	timeoutTimestamp uint64,
 	data []byte) (uint64, error) {
 
-	params := k.GetParams(ctx)
-	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_TRANSFERS_PAUSED {
+	k := kb.Keeper(&ctx)
+	params := k.GetParams()
+
+	if !params.IbcStatus.IBCTransferEnabled() {
 		return 0, ics20types.ErrSendDisabled
 	}
 
@@ -34,25 +35,26 @@ func (k Keeper) SendPacket(ctx sdk.Context,
 	if err != nil {
 		return 0, errors.Wrap(err, "bad packet in rate limit's SendPacket")
 	}
-	if params.IbcStatus == uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED {
-		if err := k.CheckAndUpdateQuota(ctx, denom, funds); err != nil {
-			return 0, errors.Wrap(err, "SendPacket over the IBC Quota")
+
+	if params.IbcStatus.OutflowQuotaEnabled() {
+		if err := k.CheckAndUpdateQuota(denom, funds); err != nil {
+			return 0, errors.Wrap(err, "sendPacket over the IBC Quota")
 		}
 	}
 
-	return k.ics4Wrapper.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
+	return kb.ics4Wrapper.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
 }
 
 // WriteAcknowledgement wraps IBC ChannelKeeper's WriteAcknowledgement function
 // ICS29 WriteAcknowledgement is used for asynchronous acknowledgements
-func (k Keeper) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability, packet ibcexported.PacketI,
-	acknowledgement ibcexported.Acknowledgement,
+func (kb Builder) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
+	packet ibcexported.PacketI, acknowledgement ibcexported.Acknowledgement,
 ) error {
 	// ics4Wrapper may be core IBC or higher-level middleware
-	return k.ics4Wrapper.WriteAcknowledgement(ctx, chanCap, packet, acknowledgement)
+	return kb.ics4Wrapper.WriteAcknowledgement(ctx, chanCap, packet, acknowledgement)
 }
 
 // GetAppVersion returns the underlying application version.
-func (k Keeper) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
-	return k.ics4Wrapper.GetAppVersion(ctx, portID, channelID)
+func (kb Builder) GetAppVersion(ctx sdk.Context, portID, channelID string) (string, bool) {
+	return kb.ics4Wrapper.GetAppVersion(ctx, portID, channelID)
 }

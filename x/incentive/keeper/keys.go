@@ -6,8 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 
-	"github.com/umee-network/umee/v4/util"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // KVStore key prefixes
@@ -16,8 +16,8 @@ var (
 	keyPrefixUpcomingIncentiveProgram  = []byte{0x02}
 	keyPrefixOngoingIncentiveProgram   = []byte{0x03}
 	keyPrefixCompletedIncentiveProgram = []byte{0x04}
-	keyPrefixNextProgramID             = []byte{0x05}
-	keyPrefixLastRewardsTime           = []byte{0x06}
+	keyNextProgramID                   = []byte{0x05}
+	keyLastRewardsTime                 = []byte{0x06}
 	keyPrefixRewardTracker             = []byte{0x07}
 	keyPrefixRewardAccumulator         = []byte{0x08}
 	keyPrefixUnbondings                = []byte{0x09}
@@ -48,14 +48,14 @@ func keyIncentiveProgram(id uint32, status incentive.ProgramStatus) []byte {
 
 // keyTotalBonded returns a KVStore key for total bonded uTokens of a given denom.
 func keyTotalBonded(denom string) []byte {
-	// totalBondedPrefix | denom | 0x00
-	return util.ConcatBytes(1, keyPrefixTotalBonded, []byte(denom))
+	// totalBondedPrefix | denom
+	return util.ConcatBytes(0, keyPrefixTotalBonded, []byte(denom))
 }
 
 // keyTotalUnbonding returns a KVStore key for total unbonding uTokens of a given denom.
 func keyTotalUnbonding(denom string) []byte {
-	// totalUnbondingPrefix | denom | 0x00
-	return util.ConcatBytes(1, keyPrefixTotalUnbonding, []byte(denom))
+	// totalUnbondingPrefix | denom
+	return util.ConcatBytes(0, keyPrefixTotalUnbonding, []byte(denom))
 }
 
 // keyBondAmount returns a KVStore key for bonded amounts for a uToken denom and account.

@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 var _ types.QueryServer = Querier{}
@@ -228,7 +228,7 @@ func (q Querier) AccountSummary(
 	}
 
 	// collateral value always uses spot prices, and this line skips assets that are missing prices
-	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral)
+	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeSpot)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/x/leverage/keeper"
+	"github.com/umee-network/umee/v5/x/leverage/keeper"
 )
 
 func TestComputeLiquidation(t *testing.T) {
@@ -125,7 +125,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveBorrowDustDown.repayTokenPrice = sdk.MustNewDecFromStr("39.9")
 	expensiveBorrowDustDown.rewardTokenPrice = sdk.MustNewDecFromStr("2")
 	expensiveBorrowDustDown.liquidationIncentive = sdk.MustNewDecFromStr("0")
-	runTestCase(expensiveBorrowDustDown, 1, 19, 19, "expensive borrow dust with price down")
+	runTestCase(expensiveBorrowDustDown, 1, 20, 20, "expensive borrow dust with price down")
 
 	// borrow dust case, with high borrowed token value rounds collateral burn up
 	expensiveBorrowDustUp := baseCase()
@@ -133,7 +133,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveBorrowDustUp.repayTokenPrice = sdk.MustNewDecFromStr("40.1")
 	expensiveBorrowDustUp.rewardTokenPrice = sdk.MustNewDecFromStr("2")
 	expensiveBorrowDustUp.liquidationIncentive = sdk.MustNewDecFromStr("0")
-	runTestCase(expensiveBorrowDustUp, 1, 20, 20, "expensive borrow dust with price up")
+	runTestCase(expensiveBorrowDustUp, 1, 21, 21, "expensive borrow dust with price up")
 
 	// borrow dust case, with low borrowed token value rounds collateral burn and reward to zero
 	cheapBorrowDust := baseCase()
@@ -141,7 +141,7 @@ func TestComputeLiquidation(t *testing.T) {
 	cheapBorrowDust.repayTokenPrice = sdk.MustNewDecFromStr("2")
 	cheapBorrowDust.rewardTokenPrice = sdk.MustNewDecFromStr("40")
 	cheapBorrowDust.liquidationIncentive = sdk.MustNewDecFromStr("0")
-	runTestCase(cheapBorrowDust, 1, 0, 0, "cheap borrow dust")
+	runTestCase(cheapBorrowDust, 1, 1, 1, "cheap borrow dust")
 
 	// collateral dust case, with high collateral token value and no rounding
 	expensiveCollateralDust := baseCase()
@@ -157,7 +157,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustUp.repayTokenPrice = sdk.MustNewDecFromStr("2")
 	expensiveCollateralDustUp.rewardTokenPrice = sdk.MustNewDecFromStr("40.1")
 	expensiveCollateralDustUp.liquidationIncentive = sdk.MustNewDecFromStr("0")
-	runTestCase(expensiveCollateralDustUp, 21, 0, 0, "expensive collateral dust with price up")
+	runTestCase(expensiveCollateralDustUp, 21, 1, 1, "expensive collateral dust with price up")
 
 	// collateral dust case, with high collateral token value rounds required repayment up
 	expensiveCollateralDustDown := baseCase()
@@ -165,7 +165,7 @@ func TestComputeLiquidation(t *testing.T) {
 	expensiveCollateralDustDown.repayTokenPrice = sdk.MustNewDecFromStr("2")
 	expensiveCollateralDustDown.rewardTokenPrice = sdk.MustNewDecFromStr("39.9")
 	expensiveCollateralDustDown.liquidationIncentive = sdk.MustNewDecFromStr("0")
-	runTestCase(expensiveCollateralDustDown, 20, 0, 0, "expensive collateral dust with price down")
+	runTestCase(expensiveCollateralDustDown, 20, 1, 1, "expensive collateral dust with price down")
 
 	// collateral dust case, with low collateral token value rounds required repayment up
 	cheapCollateralDust := baseCase()

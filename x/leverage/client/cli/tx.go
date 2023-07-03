@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/leverage module.
@@ -33,6 +33,7 @@ func GetTxCmd() *cobra.Command {
 		GetCmdMaxBorrow(),
 		GetCmdRepay(),
 		GetCmdLiquidate(),
+		GetCmdLeveragedLiquidate(),
 		GetCmdSupplyCollateral(),
 	)
 
@@ -303,6 +304,61 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 			rewardDenom := args[2]
 
 			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
+			if err = msg.ValidateBasic(); err != nil {
+				return err
+			}
+
+			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		},
+	}
+
+	flags.AddTxFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdLeveragedLiquidate creates a Cobra command to generate or broadcast a
+// transaction with a MsgLeveragedLiquidate message.
+func GetCmdLeveragedLiquidate() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "lev-liquidate [borrower] [repay-denom] [reward-denom]",
+		Args:  cobra.RangeArgs(1, 3),
+		Short: "Liquidates by moving borrower debt to the liquidator and immediately collateralizes the reward.",
+		Long: strings.TrimSpace(
+			fmt.Sprintf(`
+Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.
+
+Will attempt to repay the maximum amount allowed by the targeted borrower's debt and collateral positions.
+
+The transaction will fail if the liquidator, with new borrow and collateral positions, would be above 0.8 borrow limit.
+
+Example:
+$ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
+				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",
+			),
+		),
+
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientTxContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			borrowerAddr, err := sdk.AccAddressFromBech32(args[0])
+			if err != nil {
+				return err
+			}
+
+			var repayDenom, rewardDenom string
+			if len(args) > 1 {
+				repayDenom = args[1]
+			}
+
+			if len(args) > 2 {
+				rewardDenom = args[2]
+			}
+
+			msg := types.NewMsgLeveragedLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}

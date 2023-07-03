@@ -6,13 +6,16 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	appparams "github.com/umee-network/umee/v4/app/params"
+
+	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 const (
 	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
 	UTokenPrefix = "u/"
 )
+
+var halfDec = sdk.MustNewDecFromStr("0.5")
 
 // HasUTokenPrefix detects the uToken prefix on a denom.
 func HasUTokenPrefix(denom string) bool {
@@ -83,8 +86,11 @@ func (t Token) Validate() error {
 	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GTE(one) {
 		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
 	}
-	if !t.LiquidationThreshold.GT(t.CollateralWeight) || t.LiquidationThreshold.GTE(one) {
-		return fmt.Errorf("liquidation threshold must be bigger than collateral weight, got: %s", t.LiquidationThreshold)
+	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GTE(one) {
+		return fmt.Errorf(
+			"liquidation threshold must be bigger or equal than collateral weight, got: %s",
+			t.LiquidationThreshold,
+		)
 	}
 
 	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
@@ -161,6 +167,14 @@ func (t Token) AssertNotBlacklisted() error {
 		return ErrBlacklisted.Wrap(t.BaseDenom)
 	}
 	return nil
+}
+
+// BorrowFactor returns the minimum of 2.0 or 1 / collateralWeight.
+func (t Token) BorrowFactor() sdk.Dec {
+	if t.CollateralWeight.LTE(halfDec) {
+		return sdk.MustNewDecFromStr("2.0")
+	}
+	return sdk.OneDec().Quo(t.CollateralWeight)
 }
 
 func defaultUmeeToken() Token {

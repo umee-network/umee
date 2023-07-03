@@ -13,20 +13,21 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v4/app"
-	appparams "github.com/umee-network/umee/v4/app/params"
-	"github.com/umee-network/umee/v4/x/leverage"
-	"github.com/umee-network/umee/v4/x/leverage/fixtures"
-	"github.com/umee-network/umee/v4/x/leverage/keeper"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/x/leverage"
+	"github.com/umee-network/umee/v5/x/leverage/fixtures"
+	"github.com/umee-network/umee/v5/x/leverage/keeper"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 const (
-	umeeDenom = appparams.BondDenom
-	atomDenom = fixtures.AtomDenom
-	daiDenom  = fixtures.DaiDenom
-	pumpDenom = "upump"
-	dumpDenom = "udump"
+	umeeDenom   = appparams.BondDenom
+	atomDenom   = fixtures.AtomDenom
+	daiDenom    = fixtures.DaiDenom
+	pumpDenom   = "upump"
+	dumpDenom   = "udump"
+	stableDenom = "stable"
 )
 
 type IntegrationTestSuite struct {
@@ -82,6 +83,11 @@ func (s *IntegrationTestSuite) SetupTest() {
 	// additional tokens for historacle testing
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(dumpDenom, "DUMP", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pumpDenom, "PUMP", 6)))
+	// additional tokens for borrow factor testing
+	stable := newToken(stableDenom, "STABLE", 6)
+	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
+	stable.LiquidationThreshold = sdk.MustNewDecFromStr("0.9")
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, stable))
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())

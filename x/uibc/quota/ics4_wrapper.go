@@ -9,7 +9,7 @@ import (
 
 // GetAppVersion implements types.Middleware
 func (im ICS20Middleware) GetAppVersion(ctx sdk.Context, portID string, channelID string) (string, bool) {
-	return im.keeper.GetAppVersion(ctx, portID, channelID)
+	return im.kb.GetAppVersion(ctx, portID, channelID)
 }
 
 // SendPacket implements types.Middleware
@@ -22,12 +22,12 @@ func (im ICS20Middleware) SendPacket(
 	timeoutTimestamp uint64,
 	data []byte,
 ) (uint64, error) {
-	return im.keeper.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
+	return im.kb.SendPacket(ctx, chanCap, sourcePort, sourceChannel, timeoutHeight, timeoutTimestamp, data)
 }
 
 // WriteAcknowledgement implements types.Middleware
 func (im ICS20Middleware) WriteAcknowledgement(ctx sdk.Context, chanCap *capabilitytypes.Capability,
 	packet exported.PacketI, ack exported.Acknowledgement,
 ) error {
-	return im.keeper.WriteAcknowledgement(ctx, chanCap, packet, ack)
+	return im.kb.WriteAcknowledgement(ctx, chanCap, packet, ack)
 }

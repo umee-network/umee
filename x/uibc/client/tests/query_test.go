@@ -7,12 +7,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	itestsuite "github.com/umee-network/umee/v4/tests/cli"
-	"github.com/umee-network/umee/v4/x/uibc"
-	"github.com/umee-network/umee/v4/x/uibc/client/cli"
+	itestsuite "github.com/umee-network/umee/v5/tests/cli"
+	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v5/x/uibc/client/cli"
 )
 
-func (s *IntegrationTests) TestQueryParams(t *testing.T) {
+func (s *IntegrationTests) TestQueryParams(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Query params",
@@ -31,7 +31,7 @@ func (s *IntegrationTests) TestQueryParams(t *testing.T) {
 	s.RunTestQueries(queries...)
 }
 
-func (s *IntegrationTests) TestGetQuota(t *testing.T) {
+func (s *IntegrationTests) TestGetQuota(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Get ibc-transfer quota of all denoms",

@@ -2,8 +2,59 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v4/x/incentive"
+
+	"github.com/umee-network/umee/v5/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
+
+var secondsPerYear = sdk.MustNewDecFromStr("31557600") // 365.25 * 3600 * 24
+
+// calculateReferenceAPY is used for APY queries. For a given bonded uToken denom, returns a reference amount
+// of that uToken (10^exponent from the uToken's reward accumulator) and the estimated rewards that bond
+// would earn if they continued at the current rate computed at the time of query.
+func (k Keeper) calculateReferenceAPY(ctx sdk.Context, denom string) (sdk.Coin, sdk.Coins, error) {
+	if !leveragetypes.HasUTokenPrefix(denom) {
+		return sdk.Coin{}, sdk.Coins{}, leveragetypes.ErrNotUToken.Wrap(denom)
+	}
+
+	// bonded uToken of 10^exponent for rewards calculation
+	exponent := k.getRewardAccumulator(ctx, denom).Exponent
+	bond := sdk.NewCoin(denom, ten.Power(uint64(exponent)).TruncateInt())
+
+	programs, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coins{}, err
+	}
+
+	// cannot compute APY when no uTokens are bonded - but we can interpret this as zero rewards
+	bonded := k.getTotalBonded(ctx, denom)
+	if bonded.IsZero() {
+		return bond, sdk.NewCoins(), nil
+	}
+
+	// reference amount / total bonded = rewardPortion (as the more uTokens bond, the fewer rewards each earns)
+	rewardPortion := ten.Power(uint64(exponent)).QuoInt(bonded.Amount)
+
+	// to compute the rewards a reference amount (10^exponent) of bonded uToken is currently earning,
+	// we need to divide the total rewards being distributed by all ongoing incentive programs targeting
+	// that uToken denom, by the ratio of the total bonded amount to the reference amount.
+	rewards := sdk.NewCoins()
+	for _, p := range programs {
+		if p.UToken == denom {
+			// seconds per year / duration = programsPerYear (as this query assumes incentives will stay constant)
+			programsPerYear := secondsPerYear.Quo(sdk.NewDec(p.Duration))
+
+			// annual rewards for reference amount for this specific program, assuming current rates continue
+			rewardCoin := sdk.NewCoin(
+				p.TotalRewards.Denom,
+				programsPerYear.Mul(rewardPortion).MulInt(p.TotalRewards.Amount).TruncateInt(),
+			)
+			// add this program's annual rewards to the total for all programs incentivizing this uToken denom
+			rewards = rewards.Add(rewardCoin)
+		}
+	}
+	return bond, rewards, nil
+}
 
 // updateRewardTracker updates the reward tracker matching a specific account + bonded uToken denom
 // by setting it to the current value of that uToken denom's reward accumulator. Used after claiming

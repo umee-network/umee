@@ -6,9 +6,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/util/sdkutil"
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/util/sdkutil"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 var _ types.MsgServer = msgServer{}
@@ -77,7 +77,7 @@ func (s msgServer) Withdraw(
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	if isFromCollateral {
-		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdk.OneDec())
 		if err != nil {
 			return nil, err
 		}
@@ -150,7 +150,7 @@ func (s msgServer) MaxWithdraw(
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	if isFromCollateral {
-		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr)
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdk.OneDec())
 		if err != nil {
 			return nil, err
 		}
@@ -241,11 +241,6 @@ func (s msgServer) SupplyCollateral(
 		return nil, err
 	}
 
-	// Fail here if collateral liquidity restrictions are violated
-	if err := s.keeper.checkCollateralLiquidity(ctx, msg.Asset.Denom); err != nil {
-		return nil, err
-	}
-
 	// Fail here if collateral share restrictions are violated,
 	// based on only collateral with known oracle prices
 	if err := s.keeper.checkCollateralShare(ctx, uToken.Denom); err != nil {
@@ -293,7 +288,7 @@ func (s msgServer) Decollateralize(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +321,7 @@ func (s msgServer) Borrow(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -395,7 +390,7 @@ func (s msgServer) MaxBorrow(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr)
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -490,6 +485,51 @@ func (s msgServer) Liquidate(
 		Repaid:     repaid,
 		Collateral: liquidated,
 		Reward:     reward,
+	}, nil
+}
+
+func (s msgServer) LeveragedLiquidate(
+	goCtx context.Context,
+	msg *types.MsgLeveragedLiquidate,
+) (*types.MsgLeveragedLiquidateResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	liquidator, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	if err != nil {
+		return nil, err
+	}
+	borrower, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
+		return nil, err
+	}
+
+	repaid, reward, err := s.keeper.LeveragedLiquidate(ctx, liquidator, borrower, msg.RepayDenom, msg.RewardDenom)
+	if err != nil {
+		return nil, err
+	}
+
+	// Fail here if liquidator ends up over 80% their borrow limit under current or historic prices
+	// Tolerates missing collateral prices if the rest of the liquidator's collateral can cover all borrows
+	err = s.keeper.assertBorrowerHealth(ctx, liquidator, sdk.MustNewDecFromStr("0.8"))
+	if err != nil {
+		return nil, err
+	}
+
+	s.keeper.Logger(ctx).Debug(
+		"unhealthy borrower leverage-liquidated",
+		"liquidator", msg.Liquidator,
+		"borrower", msg.Borrower,
+		"repaid", repaid.String(),
+		"reward", reward.String(),
+	)
+	sdkutil.Emit(&ctx, &types.EventLiquidate{
+		Liquidator: msg.Liquidator,
+		Borrower:   msg.Borrower,
+		Liquidated: reward,
+	})
+	return &types.MsgLeveragedLiquidateResponse{
+		Repaid: repaid,
+		Reward: reward,
 	}, nil
 }
 

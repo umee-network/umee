@@ -3,6 +3,7 @@ on:
   merge_group:
     types: [checks_requested]
   pull_request:
+    types: [opened, synchronize, reopened, labeled]
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
@@ -24,6 +25,8 @@ jobs:
           key: ${{ runner.os }}-go-runsim-binary
 
   test-app-non-determinism:
+    # skip the non determinim simulation test when `skip-e2e-test` label is present on pull request
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-e2e-test') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -44,6 +47,8 @@ jobs:
           make test-app-non-determinism
 
   test-app-import-export:
+    # skip the genesis import and export simulation test when `skip-e2e-test` label is present on pull request
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-e2e-test') }}
     runs-on: ubuntu-latest
     needs: install-dependencies
     timeout-minutes: 60
@@ -71,6 +76,8 @@ jobs:
           make test-app-import-export
 
   test-app-after-import:
+    # skip the genesis import simulation test when `skip-e2e-test` label is present on pull request
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-e2e-test') }}
     runs-on: ubuntu-latest
     needs: install-dependencies
     timeout-minutes: 60
@@ -98,6 +105,8 @@ jobs:
           make test-app-after-import
 
   test-app-multi-seed-short:
+    # skip this simulation test when `skip-e2e-test` label is present on pull request
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-e2e-test') }}
     runs-on: ubuntu-latest
     needs: install-dependencies
     steps:

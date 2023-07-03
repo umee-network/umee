@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -12,9 +13,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"github.com/umee-network/umee/v4/tests/tsdk"
-	"github.com/umee-network/umee/v4/util/coin"
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 // creates keeper with mock leverage keeper
@@ -28,9 +29,12 @@ func newTestKeeper(t *testing.T) testKeeper {
 	bk := newMockBankKeeper()
 	k := NewKeeper(cdc, storeKey, &bk, &lk)
 	msrv := NewMsgServerImpl(k)
-	// modify genesis if necessary
+	// modify genesis
 	gen := incentive.DefaultGenesis()
 	gen.LastRewardsTime = 1 // initializes last reward time
+	gen.Params.MaxUnbondings = 10
+	gen.Params.UnbondingDuration = 86400
+	gen.Params.EmergencyUnbondFee = sdk.MustNewDecFromStr("0.01")
 	k.InitGenesis(ctx, *gen)
 	return testKeeper{k, bk, lk, t, ctx, sdk.ZeroInt(), msrv}
 }
@@ -86,6 +90,27 @@ func (k *testKeeper) mustBond(addr sdk.AccAddress, coins ...sdk.Coin) {
 	}
 }
 
+// mustClaim claims rewards for an account and requires no errors. Use when setting up incentive scenarios.
+func (k *testKeeper) mustClaim(addr sdk.AccAddress) {
+	msg := &incentive.MsgClaim{
+		Account: addr.String(),
+	}
+	_, err := k.msrv.Claim(k.ctx, msg)
+	require.NoError(k.t, err, "claim")
+}
+
+// mustBeginUnbond unbonds utokens from an account and requires no errors. Use when setting up incentive scenarios.
+func (k *testKeeper) mustBeginUnbond(addr sdk.AccAddress, coins ...sdk.Coin) {
+	for _, coin := range coins {
+		msg := &incentive.MsgBeginUnbonding{
+			Account: addr.String(),
+			UToken:  coin,
+		}
+		_, err := k.msrv.BeginUnbonding(k.ctx, msg)
+		require.NoError(k.t, err, "begin unbonding")
+	}
+}
+
 // initCommunityFund funds the mock bank keeper's distribution module account with some tokens
 func (k *testKeeper) initCommunityFund(funds ...sdk.Coin) {
 	k.bk.FundModule(disttypes.ModuleName, funds)
@@ -137,13 +162,20 @@ func (k *testKeeper) advanceTime(duration int64) {
 // advanceTimeTo runs the functions normally contained in EndBlocker from the current rewards time
 // to a target time. Requires non-negative duration and an initialized lastRewardsTime.
 func (k *testKeeper) advanceTimeTo(blockTime int64) {
+	// ensure initialized
 	prevTime := k.GetLastRewardsTime(k.ctx)
 	if prevTime <= 0 {
 		panic("last rewards time not initialized")
 	}
 
-	require.Nil(k.t, k.updateRewards(k.ctx, blockTime), "update rewards")
-	require.Nil(k.t, k.updatePrograms(k.ctx), "update programs")
+	// update block time in testkeeper's context, so endBlock will read it
+	utcTime := time.Unix(blockTime, 0)
+	k.ctx = k.ctx.WithBlockTime(utcTime)
+
+	// ensure that last rewards time has actually updated without errors
+	skipped, err := k.EndBlock(k.ctx)
+	require.Nil(k.t, err, "endBlock")
+	require.False(k.t, skipped, "endBlock skipped")
 	require.Equal(k.t, blockTime, k.GetLastRewardsTime(k.ctx))
 }
 
@@ -172,4 +204,38 @@ func (k *testKeeper) programFunded(programID uint32) bool {
 			"non-funded must have zero remaining rewards. program id", programID)
 	}
 	return program.Funded
+}
+
+// initScenario1 creates a scenario with upcoming, ongoing, and completed incentive
+// programs as well as a bonded account with ongoing unbondings and both claimed
+// and pending rewards. Creates a complex state for genesis and query tests.
+func (k *testKeeper) initScenario1() sdk.AccAddress {
+	// init a community fund with 1000 UMEE and 10 ATOM available for funding
+	k.initCommunityFund(
+		coin.New(umee, 1000_000000),
+		coin.New(atom, 100_000000),
+	)
+
+	// init a supplier with bonded uTokens
+	alice := k.newBondedAccount(
+		coin.New(uUmee, 100_000000),
+		coin.New(uAtom, 50_000000),
+	)
+	// create some in-progress unbondings
+	k.advanceTimeTo(90)
+	k.mustBeginUnbond(alice, coin.New(uUmee, 5_000000))
+	k.mustBeginUnbond(alice, coin.New(uUmee, 5_000000))
+	k.mustBeginUnbond(alice, coin.New(uAtom, 5_000000))
+
+	// create three separate programs, designed to be upcoming, ongoing, and completed at t=100
+	k.addIncentiveProgram(uUmee, 10, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(uUmee, 90, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+	k.addIncentiveProgram(uUmee, 140, 20, sdk.NewInt64Coin(umee, 10_000000), true)
+
+	// start programs and claim some rewards to set nonzero reward trackers
+	k.advanceTimeTo(95)
+	k.mustClaim(alice)
+	k.advanceTimeTo(100)
+
+	return alice
 }

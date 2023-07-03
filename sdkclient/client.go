@@ -7,8 +7,8 @@ import (
 	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/rs/zerolog"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
-	"github.com/umee-network/umee/v4/sdkclient/query"
-	"github.com/umee-network/umee/v4/sdkclient/tx"
+	"github.com/umee-network/umee/v5/sdkclient/query"
+	"github.com/umee-network/umee/v5/sdkclient/tx"
 )
 
 // Client provides basic capabilities to connect to a Cosmos SDK based chain and execute
@@ -23,10 +23,11 @@ type Client struct {
 }
 
 func NewClient(
+	chainDataDir,
 	chainID,
 	tmrpcEndpoint,
 	grpcEndpoint string,
-	mnemonics []string,
+	mnemonics map[string]string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (uc Client, err error) {
@@ -35,7 +36,7 @@ func NewClient(
 	if err != nil {
 		return Client{}, err
 	}
-	uc.Tx, err = tx.NewClient(chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
+	uc.Tx, err = tx.NewClient(chainDataDir, chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	return uc, err
 }
 

@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -30,12 +29,13 @@ type Client struct {
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
-// signing and broadcasting transactions
+// signing and broadcasting transactions by passing chainDataDir and remaining func arguments
 // Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
-	chainID string,
+	chainDataDir,
+	chainID,
 	tmrpcEndpoint string,
-	mnemonics []string,
+	mnemonics map[string]string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (c *Client, err error) {
@@ -46,13 +46,13 @@ func NewClient(
 		encCfg:        encCfg,
 	}
 
-	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, "", nil, encCfg.Codec)
+	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, chainDataDir, nil, encCfg.Codec)
 	if err != nil {
 		return nil, err
 	}
 
-	for index, menomic := range mnemonics {
-		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic)
+	for accKey, menomic := range mnemonics {
+		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, accKey, menomic)
 		c.keyringRecord = append(c.keyringRecord, kr)
 		if err != nil {
 			return nil, err
@@ -114,7 +114,9 @@ func (c *Client) initTxFactory() {
 		WithGasAdjustment(c.gasAdjustment).
 		WithKeybase(c.ClientContext.Keyring).
 		WithSignMode(signing.SignMode_SIGN_MODE_DIRECT).
-		WithSimulateAndExecute(true)
+		WithSimulateAndExecute(true).
+		WithFees("20000000uumee").
+		WithGas(0)
 	c.txFactory = &f
 }
 
@@ -123,4 +125,19 @@ func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 	c.ClientContext.FromName = c.keyringRecord[0].Name
 	c.ClientContext.FromAddress, _ = c.keyringRecord[0].GetAddress()
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
+}
+
+func (c *Client) WithAccSeq(seq uint64) *Client {
+	c.txFactory.WithSequence(seq)
+	return c
+}
+
+func (c *Client) WithAsyncBlock() *Client {
+	c.ClientContext.BroadcastMode = flags.BroadcastAsync
+	return c
+}
+
+func (c *Client) SenderAddr() sdk.AccAddress {
+	addr, _ := c.keyringRecord[0].GetAddress()
+	return addr
 }

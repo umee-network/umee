@@ -4,7 +4,7 @@
 
 FROM ghcr.io/umee-network/peggo:latest-1.4 as peggo
 
-FROM golang:1.20-bullseye AS builder
+FROM golang:1.20-bookworm AS builder
 ARG EXPERIMENTAL=false
 
 ## Download go module dependencies for umeed
@@ -21,7 +21,7 @@ RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";
 RUN BUILD_TAGS=badgerdb make install
 
 ## Prepare the final clear binary
-FROM ubuntu:rolling
+FROM ubuntu:23.04
 EXPOSE 26656 26657 1317 9090 7171
 ENTRYPOINT ["umeed", "start"]
 

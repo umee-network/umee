@@ -2,13 +2,13 @@ package keeper
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/v4/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 )
 
 type Keeper struct {
@@ -45,4 +45,8 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Coin {
 // KVStore returns the module's KVStore
 func (k Keeper) KVStore(ctx sdk.Context) sdk.KVStore {
 	return ctx.KVStore(k.storeKey)
+}
+
+func (k Keeper) prefixStore(ctx sdk.Context, prefix []byte) sdk.KVStore {
+	return prefixstore.NewStore(ctx.KVStore(k.storeKey), prefix)
 }

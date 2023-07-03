@@ -7,6 +7,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/stretchr/testify/require"
+	"github.com/umee-network/umee/v5/tests/accs"
 )
 
 func TestIsGovAuthority(t *testing.T) {
@@ -21,13 +22,14 @@ func TestIsGovAuthority(t *testing.T) {
 	}{
 		{"validAddr", expectedGovAddr, false},
 		{"invalid: empty addr", "", true},
-		{"invalid: empty addr", bankAddr, true},
+		{"invalid: addr", bankAddr, true},
+		{"invalid: addr", accs.Bob.String(), true},
 	}
 
 	for i, tc := range tcs {
 		err := IsGovAuthority(tc.auth)
 		if tc.isErr {
-			require.ErrorContains(err, "invalid authority", "[test: %d] expected error", i)
+			require.ErrorIs(err, govtypes.ErrInvalidSigner, "[test: %d] expected error", i)
 		} else {
 			require.NoError(err, "[test: %d] expected error", i)
 		}

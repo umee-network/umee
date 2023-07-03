@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -34,6 +34,7 @@ func TestTxs(t *testing.T) {
 		types.NewMsgMaxBorrow(testAddr, denom),
 		types.NewMsgRepay(testAddr, token),
 		types.NewMsgLiquidate(testAddr, testAddr, token, uDenom),
+		types.NewMsgLeveragedLiquidate(testAddr, testAddr, token.Denom, uDenom),
 	}
 
 	for _, tx := range txs {
@@ -64,6 +65,7 @@ func TestRoutes(t *testing.T) {
 		types.NewMsgMaxBorrow(testAddr, denom),
 		types.NewMsgRepay(testAddr, token),
 		types.NewMsgLiquidate(testAddr, testAddr, token, uDenom),
+		types.NewMsgLeveragedLiquidate(testAddr, testAddr, token.Denom, uDenom),
 	}
 
 	for _, tx := range txs {

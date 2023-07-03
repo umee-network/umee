@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v4/util/cli"
-	"github.com/umee-network/umee/v4/x/oracle/types"
+	"github.com/umee-network/umee/v5/util/cli"
+	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // GetQueryCmd returns the CLI query commands for the x/oracle module.
@@ -163,7 +163,6 @@ $ umeed query oracle exchange-rates
 				return err
 			}
 			queryClient := types.NewQueryClient(clientCtx)
-
 			res, err := queryClient.ExchangeRates(cmd.Context(), &types.QueryExchangeRates{})
 			return cli.PrintOrErr(res, err, clientCtx)
 		},

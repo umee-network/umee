@@ -1,18 +1,22 @@
 package swagger
 
 import (
-	"embed"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/ignite/cli/ignite/pkg/openapiconsole"
-)
+	"github.com/rakyll/statik/fs"
 
-//go:embed swagger.yaml
-var Docs embed.FS
+	// unnamed import of statik for swagger UI support
+	_ "github.com/umee-network/umee/v5/swagger/statik"
+)
 
 // RegisterSwaggerAPI registers swagger route with API Server
 func RegisterSwaggerAPI(rtr *mux.Router) {
-	rtr.Handle("/swagger.yaml", http.FileServer(http.FS(Docs)))
-	rtr.HandleFunc("/swagger/", openapiconsole.Handler("umee", "/swagger.yaml"))
+	statikFS, err := fs.New()
+	if err != nil {
+		panic(err)
+	}
+
+	staticServer := http.FileServer(statikFS)
+	rtr.PathPrefix("/swagger/").Handler(http.StripPrefix("/swagger/", staticServer))
 }

@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v4/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
 func TestToTokenDenom(t *testing.T) {
@@ -119,7 +119,7 @@ func TestToken_Validate(t *testing.T) {
 	invalidCollateralWeight2.CollateralWeight = sdk.OneDec()
 
 	invalidLiquidationThreshold := validToken()
-	invalidLiquidationThreshold.LiquidationThreshold = invalidLiquidationThreshold.CollateralWeight
+	invalidLiquidationThreshold.LiquidationThreshold = sdk.MustNewDecFromStr("-0.25")
 
 	invalidLiquidationThreshold2 := validToken()
 	invalidLiquidationThreshold2.LiquidationThreshold = sdk.OneDec()

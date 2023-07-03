@@ -7,7 +7,7 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "umee/leverage/v1/leverage.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v5/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 option (gogoproto.messagename_all)     = true;
@@ -47,6 +47,18 @@ service Msg {
   // Liquidate allows a user to repay a different user's borrowed coins in exchange for some
   // of the target's collateral.
   rpc Liquidate(MsgLiquidate) returns (MsgLiquidateResponse);
+
+  // LeveragedLiquidate allows a user to repay a different user's borrowed coins in exchange for some
+  // of the target's collateral. For leveraged liquidations, the tokens to repay are borrowed instead of
+  // being taken from the liquidator's wallet, and the reward is immediately collateralized. Borrow
+  // limit checks for the liquidator are deferred until after the reward is collateralized, allowing
+  // this initial borrow to exceed the liquidator's borrow limit as long as it is healthy by the end
+  // of the transaction. Repay amount is calculated automatically, so the liquidator only specifies
+  // repay and reward token denoms. For safety, the liquidator cannot exceed 80% of their borrow limit when
+  // executing this transaction, instead of the regular 100%. Also allows repayment and reward denoms to
+  // be left blank - if not specified, the module will automatically select the first (alphabetically by denom)
+  // borrow and/or collateral on the target account and the proceed normally.
+  rpc LeveragedLiquidate(MsgLeveragedLiquidate) returns (MsgLeveragedLiquidateResponse);
 
   // SupplyCollateral combines the Supply and Collateralize actions.
   rpc SupplyCollateral(MsgSupplyCollateral) returns (MsgSupplyCollateralResponse);
@@ -140,6 +152,22 @@ message MsgLiquidate {
   string reward_denom = 4;
 }
 
+// MsgLeveragedLiquidate is the request structure for the LeveragedLiquidate RPC.
+message MsgLeveragedLiquidate {
+  // Liquidator is the account address performing a liquidation and the signer
+  // of the message.
+  string liquidator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Borrower is the account whose borrow is being repaid, and collateral consumed,
+  // by the liquidation. It does not sign the message.
+  string borrower = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // RepayDenom is the base token that the liquidator will borrow in order to repay on behalf of
+  // the borrower.
+  string repay_denom = 3;
+  // RewardDenom is the uToken denom that the liquidator will receive as a liquidation reward
+  // and immediately collateralize.
+  string reward_denom = 4;
+}
+
 // MsgSupplyCollateral represents a user's request to supply and collateralize assets to the module.
 message MsgSupplyCollateral {
   // Supplier is the account address supplying assets and the signer of the message.
@@ -199,6 +227,16 @@ message MsgLiquidateResponse {
   // Reward is the amount of base tokens that the liquidator received from
   // the module as reward for the liquidation.
   cosmos.base.v1beta1.Coin reward = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgLeveragedLiquidateResponse defines the Msg/LeveragedLiquidate response type.
+message MsgLeveragedLiquidateResponse {
+  // Repaid is the amount of base tokens that the liquidator borrowed and repaid
+  // to the module on behalf of the borrower.
+  cosmos.base.v1beta1.Coin repaid = 1 [(gogoproto.nullable) = false];
+  // Reward is the amount of collateral that the liquidator gained
+  // as reward for the liquidation.
+  cosmos.base.v1beta1.Coin reward = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgSupplyCollateralResponse defines the Msg/SupplyCollateral response type.

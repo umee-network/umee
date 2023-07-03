@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/umee-network/umee/v4/util"
+	"github.com/umee-network/umee/v5/util"
 
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -62,3 +62,21 @@ func MustLoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []b
 	util.Panic(err)
 	return ls
 }
+
+// SumCoins aggregates all coins saved as (denom: Int) pairs in store. Use store/prefix.NewStore
+// to create a prefix store which will automatically look only at the given prefix.
+func SumCoins(s storetypes.KVStore, f StrExtractor) sdk.Coins {
+	total := sdk.NewCoins()
+	iter := sdk.KVStorePrefixIterator(s, nil)
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		denom := f(iter.Key())
+		amount := Int(iter.Value(), "amount")
+		total = total.Add(sdk.NewCoin(denom, amount))
+	}
+	return total
+}
+
+// StrExtractor is a function type which will take a bytes string value and extracts
+// string out of it.
+type StrExtractor func([]byte) string

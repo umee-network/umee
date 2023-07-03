@@ -168,11 +168,14 @@ go.sum: go.mod
 ##                                  Docker                                   ##
 ###############################################################################
 
-docker-build:
+docker-build-e2e:
 	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
 
-docker-build-experimental:
+docker-build-e2e-experimental:
 	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true .
+
+docker-build:
+	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
 
 docker-push-hermes:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
@@ -194,13 +197,13 @@ TEST_COVERAGE_PROFILE=coverage.txt
 UNIT_TEST_TAGS = norace
 TEST_RACE_TAGS = ""
 TEST_E2E_TAGS = "e2e"
-TEST_E2E_DEPS = docker-build
+TEST_E2E_DEPS = docker-build-e2e
 
 ifeq ($(EXPERIMENTAL),true)
 	UNIT_TEST_TAGS += experimental
 	TEST_RACE_TAGS += experimental
 	TEST_E2E_TAGS += experimental
-	TEST_E2E_DEPS = docker-build-experimental
+	TEST_E2E_DEPS = docker-build-e2e-experimental
 endif
 
 test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
@@ -226,8 +229,7 @@ cover-html: test-unit-cover
 
 .PHONY: cover-html run-tests $(TEST_TARGETS)
 
-# NOTE: when building locally, we need to run: $(MAKE) docker-build
-# however we should be able to optimize it:
+# we should be able to optimize docker build:
 # https://linear.app/umee/issue/UMEE-463/fix-docker-login-problem-when-running-e2e-tests
 test-e2e: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
@@ -238,6 +240,9 @@ test-e2e-cov: $(TEST_E2E_DEPS)
 test-e2e-clean:
 	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
+
+test-qa: 
+	@go test ./tests/qa/... -timeout 30m -v -tags='test_qa'
 
 $(MOCKS_DIR):
 	mkdir -p $(MOCKS_DIR)
@@ -354,3 +359,8 @@ proto-lint:
 proto-check-breaking:
 	@echo "Checking for breaking changes"
 	@$(DOCKER_BUF) breaking --against $(HTTPS_GIT)#branch=main
+
+proto-update-swagger-docs:
+	@echo "Updating Protobuf Swagger Docs"
+	@if docker ps -a --format '{{.Names}}' | grep -Eq "^${containerProtoGenSwagger}$$"; then docker start -a $(containerProtoGenSwagger); else docker run --name $(containerProtoGenSwagger) -v $(CURDIR):/workspace --workdir /workspace $(protoImageName) \
+		sh ./contrib/scripts/protoc-update-swagger-docs.sh; fi
