@@ -58,7 +58,6 @@ type E2ETestSuite struct {
 	Umee                client.Client
 	cdc                 codec.Codec
 	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
-
 }
 
 func (s *E2ETestSuite) SetupSuite() {
@@ -215,8 +214,8 @@ func (s *E2ETestSuite) initGenesis() {
 	var govGenState govtypesv1.GenesisState
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
-	votingPeroid := 5 * time.Second
-	govGenState.VotingParams.VotingPeriod = &votingPeroid
+	votingPeriod := 6 * time.Second
+	govGenState.VotingParams.VotingPeriod = &votingPeriod
 	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
 	bz, err = s.cdc.MarshalJSON(&govGenState)
@@ -312,6 +311,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		s.Require().NoError(vpr.ReadInConfig())
 
 		valConfig := tmconfig.DefaultConfig()
+		valConfig.Consensus.TimeoutCommit = 1500 * time.Millisecond
 		s.Require().NoError(vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = "tcp://0.0.0.0:26656"

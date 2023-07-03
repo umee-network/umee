@@ -231,7 +231,7 @@ cover-html: test-unit-cover
 
 # we should be able to optimize docker build:
 # https://linear.app/umee/issue/UMEE-463/fix-docker-login-problem-when-running-e2e-tests
-test-e2e: $(TEST_E2E_DEPS)
+test-e2e: #$(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
 
 test-e2e-cov: $(TEST_E2E_DEPS)

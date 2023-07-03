@@ -37,7 +37,7 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 			return true
 		},
 		time.Minute,
-		5*time.Second,
+		2*time.Second,
 	)
 }
 
@@ -50,7 +50,7 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 			return supply.AmountOf(ibcDenom).Equal(amount)
 		},
 		time.Minute,
-		5*time.Second,
+		2*time.Second,
 	)
 }
 
@@ -156,7 +156,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 				return false
 			},
 			5*time.Minute,
-			5*time.Second,
+			2*time.Second,
 		)
 
 		/****
@@ -185,12 +185,11 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 				return a.Equal(sdk.ZeroDec())
 			},
 			time.Minute,
-			5*time.Second,
+			2*time.Second,
 		)
 		// resend the umee token from gaia to umee
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewInt64Coin(umeeIBCHash, token.Amount.Int64()))
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdk.ZeroInt())
-
 	})
 
 	// IBC inbound transfer of non x/leverage registered tokens must fail, because
@@ -220,7 +219,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 				return token.Amount.Equal(balances.AmountOf(stakeIBCHash))
 			},
 			time.Minute,
-			5*time.Second,
+			2*time.Second,
 		)
 		// s.checkSupply(umeeAPIEndpoint, stakeIBCHash, math.ZeroInt())
 		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
