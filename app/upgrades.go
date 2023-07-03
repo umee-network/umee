@@ -59,9 +59,6 @@ func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 	planName := "v5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-				Added: []string{incentive.ModuleName},
-			})
 
 			if err := app.GravityKeeper.MigrateFundsToDrainAccount(
 				ctx,
@@ -70,7 +67,12 @@ func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 				return nil, err
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		})
+		},
+	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{incentive.ModuleName},
+	})
 }
 
 // performs upgrade from v4.2 to v4.3
