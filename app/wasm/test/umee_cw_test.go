@@ -8,12 +8,14 @@ import (
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	"gotest.tools/v3/assert"
+
 	appparams "github.com/umee-network/umee/v5/app/params"
 	wm "github.com/umee-network/umee/v5/app/wasm/msg"
 	wq "github.com/umee-network/umee/v5/app/wasm/query"
+	inctypes "github.com/umee-network/umee/v5/x/incentive"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
 	"github.com/umee-network/umee/v5/x/oracle/types"
-	"gotest.tools/v3/assert"
 )
 
 func (s *IntegrationTestSuite) TestLeverageQueries() {
@@ -247,4 +249,32 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 	var rr lvtypes.QueryAccountSummaryResponse
 	err = json.Unmarshal(resp.Data, &rr)
 	assert.NilError(s.T, err)
+}
+
+func (s *IntegrationTestSuite) TestIncentiveQueries() {
+	tests := []struct {
+		Name          string
+		CQ            []byte
+		ResponseCheck func(data []byte)
+	}{
+		{
+			Name: "incentive query params",
+			CQ: s.genCustomQuery(wq.UmeeQuery{
+				IncentiveParams: &inctypes.QueryParams{},
+			}),
+			ResponseCheck: func(data []byte) {
+				var rr inctypes.QueryParamsResponse
+				err := json.Unmarshal(data, &rr)
+				assert.NilError(s.T, err)
+				assert.DeepEqual(s.T, rr.Params, inctypes.DefaultParams())
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.T.Run(tc.Name, func(t *testing.T) {
+			resp := s.queryContract(tc.CQ)
+			tc.ResponseCheck(resp.Data)
+		})
+	}
 }

@@ -9,6 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 
+	inctypes "github.com/umee-network/umee/v5/x/incentive"
+	inckeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
 	lvkeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
 	ockeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
@@ -17,18 +19,21 @@ import (
 
 // Plugin wraps the query plugin with queriers.
 type Plugin struct {
-	lvQueryServer lvtypes.QueryServer
-	ocQueryServer ocpes.QueryServer
+	lvQueryServer  lvtypes.QueryServer
+	ocQueryServer  ocpes.QueryServer
+	incQueryServer inctypes.QueryServer
 }
 
 // NewQueryPlugin creates a plugin to query native modules.
 func NewQueryPlugin(
 	leverageKeeper lvkeeper.Keeper,
 	oracleKeeper ockeeper.Keeper,
+	incentiveKeeper inckeeper.Keeper,
 ) *Plugin {
 	return &Plugin{
-		lvQueryServer: lvkeeper.NewQuerier(leverageKeeper),
-		ocQueryServer: ockeeper.NewQuerier(oracleKeeper),
+		lvQueryServer:  lvkeeper.NewQuerier(leverageKeeper),
+		ocQueryServer:  ockeeper.NewQuerier(oracleKeeper),
+		incQueryServer: inckeeper.NewQuerier(incentiveKeeper),
 	}
 }
 
@@ -87,6 +92,32 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			resp, err = smartcontractQuery.HandleMedians(ctx, plugin.ocQueryServer)
 		case smartcontractQuery.MedianDeviations != nil:
 			resp, err = smartcontractQuery.HandleMedianDeviations(ctx, plugin.ocQueryServer)
+
+		// incentive
+		case smartcontractQuery.IncentiveParams != nil:
+			resp, err = smartcontractQuery.HandleIncentiveParams(ctx, plugin.incQueryServer)
+		case smartcontractQuery.TotalBonded != nil:
+			resp, err = smartcontractQuery.HandleTotalBonded(ctx, plugin.incQueryServer)
+		case smartcontractQuery.TotalUnbonding != nil:
+			resp, err = smartcontractQuery.HandleTotalUnbonding(ctx, plugin.incQueryServer)
+		case smartcontractQuery.AccountBonds != nil:
+			resp, err = smartcontractQuery.HandleAccountBonds(ctx, plugin.incQueryServer)
+		case smartcontractQuery.PendingRewards != nil:
+			resp, err = smartcontractQuery.HandlePendingRewards(ctx, plugin.incQueryServer)
+		case smartcontractQuery.CompletedIncentivePrograms != nil:
+			resp, err = smartcontractQuery.HandleCompletedIncentivePrograms(ctx, plugin.incQueryServer)
+		case smartcontractQuery.UpcomingIncentivePrograms != nil:
+			resp, err = smartcontractQuery.HandleUpcomingIncentivePrograms(ctx, plugin.incQueryServer)
+		case smartcontractQuery.OngoingIncentivePrograms != nil:
+			resp, err = smartcontractQuery.HandleOngoingIncentivePrograms(ctx, plugin.incQueryServer)
+		case smartcontractQuery.IncentiveProgram != nil:
+			resp, err = smartcontractQuery.HandleIncentiveParams(ctx, plugin.incQueryServer)
+		case smartcontractQuery.CurrentRates != nil:
+			resp, err = smartcontractQuery.HandleCurrentRates(ctx, plugin.incQueryServer)
+		case smartcontractQuery.ActualRates != nil:
+			resp, err = smartcontractQuery.HandleActualRates(ctx, plugin.incQueryServer)
+		case smartcontractQuery.LastRewardTime != nil:
+			resp, err = smartcontractQuery.HandleLastRewardTime(ctx, plugin.incQueryServer)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid umee query"}
