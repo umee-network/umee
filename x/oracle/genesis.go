@@ -132,8 +132,7 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	historicPrices := keeper.AllHistoricPrices(ctx)
 	medianPrices := keeper.AllMedianPrices(ctx)
 	medianDeviationPrices := keeper.AllMedianDeviationPrices(ctx)
-	hacp, err := keeper.GetHistoricAvgCounterParams(ctx)
-	util.Panic(err)
+	hacp := keeper.GetHistoricAvgCounterParams(ctx)
 
 	return types.NewGenesisState(
 		params,

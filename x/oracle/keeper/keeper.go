@@ -20,7 +20,7 @@ var ten = sdk.MustNewDecFromStr("10")
 
 // Keeper of the oracle store
 type Keeper struct {
-	cdc        codec.BinaryCodec
+	cdc        codec.Codec
 	storeKey   storetypes.StoreKey
 	paramSpace paramstypes.Subspace
 
@@ -34,7 +34,7 @@ type Keeper struct {
 
 // NewKeeper constructs a new keeper for oracle
 func NewKeeper(
-	cdc codec.BinaryCodec,
+	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	paramspace paramstypes.Subspace,
 	accountKeeper types.AccountKeeper,
