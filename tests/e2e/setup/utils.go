@@ -10,13 +10,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gogo/protobuf/proto"
+	"github.com/ory/dockertest/v3/docker"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/gogo/protobuf/proto"
-	"github.com/ory/dockertest/v3/docker"
 
 	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 	"github.com/umee-network/umee/v5/x/uibc"
@@ -79,8 +80,8 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 		"failed to send IBC tokens; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
 	)
 	s.T().Log("successfully sent IBC tokens")
-	s.T().Log("Waiting for 6 seconds to make sure trasaction is processed or include in the block")
-	time.Sleep(time.Second * 6)
+	s.T().Log("Waiting for 1 second to make sure transaction is processed or include in the block")
+	time.Sleep(time.Second * 2)
 }
 
 // QueryREST make http query to grpc-web endpoint and tries to decode valPtr using proto-JSON

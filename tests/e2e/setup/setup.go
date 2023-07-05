@@ -15,12 +15,6 @@ import (
 	"time"
 
 	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/server"
-	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
@@ -30,8 +24,13 @@ import (
 	tmjson "github.com/tendermint/tendermint/libs/json"
 	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/server"
+	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+
 	"github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/client"
@@ -39,6 +38,9 @@ import (
 	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 	"github.com/umee-network/umee/v5/x/uibc"
+
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 )
 
 type E2ETestSuite struct {
@@ -85,6 +87,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	if !s.MinNetwork {
 		s.runPriceFeeder()
 		s.runGaiaNetwork()
+		time.Sleep(5 * time.Second)
 		s.runIBCRelayer()
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
@@ -311,7 +314,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		s.Require().NoError(vpr.ReadInConfig())
 
 		valConfig := tmconfig.DefaultConfig()
-		valConfig.Consensus.TimeoutCommit = 1500 * time.Millisecond
+		valConfig.Consensus.TimeoutCommit = 400 * time.Millisecond
 		s.Require().NoError(vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = "tcp://0.0.0.0:26656"
@@ -343,6 +346,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
 		appConfig.MinGasPrices = minGasPrice
+		appConfig.Pruning = "nothing"
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}

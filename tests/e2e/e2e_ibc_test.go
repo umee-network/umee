@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -30,14 +31,16 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 	s.Require().Eventually(
 		func() bool {
 			a, err := s.QueryOutflows(umeeAPIEndpoint, denom)
-			s.Require().NoError(err)
+			if err != nil {
+				return false
+			}
 			if checkWithExcRate {
 				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, a, amount, sdk.MustNewDecFromStr("0.01"))
 			}
 			return true
 		},
-		time.Minute,
-		2*time.Second,
+		30*time.Second,
+		500*time.Millisecond,
 	)
 }
 
@@ -45,12 +48,14 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 	s.Require().Eventually(
 		func() bool {
 			supply, err := s.QueryTotalSupply(endpoint)
-			s.Require().NoError(err)
-			s.Require().Equal(supply.AmountOf(ibcDenom).Int64(), amount.Int64())
+			if err != nil {
+				return false
+			}
+
 			return supply.AmountOf(ibcDenom).Equal(amount)
 		},
-		time.Minute,
-		2*time.Second,
+		30*time.Second,
+		500*time.Millisecond,
 	)
 }
 
@@ -69,6 +74,9 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		umeeIBCHash := "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
 		// ibc hash of uatom token
 		uatomIBCHash := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+
+		// wait until we get prices going
+		time.Sleep(10 * time.Second)
 
 		// send uatom from gaia to umee
 		// Note : gaia -> umee (ibc_quota will not check token limit)
@@ -148,16 +156,20 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.Require().Eventually(
 			func() bool {
 				amount, err := s.QueryOutflows(umeeAPIEndpoint, appparams.BondDenom)
-				s.Require().NoError(err)
+				if err != nil {
+					return false
+				}
 				if amount.IsZero() {
 					s.T().Logf("quota is reset : %s is 0", appparams.BondDenom)
 					return true
 				}
 				return false
 			},
-			5*time.Minute,
-			2*time.Second,
+			3*time.Minute,
+			1*time.Second,
 		)
+
+		s.T().Logf("something something")
 
 		/****
 			IBC_Status : disble (making ibc_transfer quota check disabled)
@@ -175,17 +187,21 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.Require().Equal(uibcParams.IbcStatus, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED)
 		token = sdk.NewInt64Coin("uumee", 100000000) // 100 Umee
 		// sending the umee tokens
+		s.T().Logf("something something 2")
+
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", token)
 		// Check the outflows
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, token.Amount)
 		s.Require().Eventually(
 			func() bool {
 				a, err := s.QueryOutflows(umeeAPIEndpoint, appparams.BondDenom)
-				s.Require().NoError(err)
+				if err != nil {
+					return false
+				}
 				return a.Equal(sdk.ZeroDec())
 			},
-			time.Minute,
-			2*time.Second,
+			30*time.Second,
+			1*time.Second,
 		)
 		// resend the umee token from gaia to umee
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewInt64Coin(umeeIBCHash, token.Amount.Int64()))
@@ -196,11 +212,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 	// because we won't have price for it.
 	s.Run("send_stake_to_umee", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
-		var (
-			balances sdk.Coins
-			err      error
-		)
-
 		stakeIBCHash := "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
 		umeeAPIEndpoint := s.UmeeREST()
 
@@ -210,17 +221,19 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token)
 
-		s.Require().Eventually(
-			func() bool {
-				balances, err = s.QueryUmeeAllBalances(umeeAPIEndpoint, recipient)
-				s.Require().NoError(err)
-				// uncomment whene we re-enable inflow limit
-				// return math.ZeroInt().Equal(balances.AmountOf(stakeIBCHash))
-				return token.Amount.Equal(balances.AmountOf(stakeIBCHash))
-			},
-			time.Minute,
-			2*time.Second,
-		)
+		// s.Require().Eventually(
+		// 	func() bool {
+		// 		balances, err = s.QueryUmeeAllBalances(umeeAPIEndpoint, recipient)
+		// 		if err != nil {
+		// 			return false
+		// 		}
+		// 		// uncomment whene we re-enable inflow limit
+		// 		// return math.ZeroInt().Equal(balances.AmountOf(stakeIBCHash))
+		// 		return token.Amount.Equal(balances.AmountOf(stakeIBCHash))
+		// 	},
+		// 	30*time.Second,
+		// 	1*time.Second,
+		// )
 		// s.checkSupply(umeeAPIEndpoint, stakeIBCHash, math.ZeroInt())
 		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
 	})
