@@ -60,7 +60,7 @@ type UmeeQuery struct {
 
 	// incentive queries
 	// Incentive module params .
-	IncentiveParams *inctypes.QueryParams `json:"incentive_params,omitempty"`
+	IncentiveParameters *inctypes.QueryParams `json:"incentive_parameters,omitempty"`
 	// TotalBonded queries the sum of all bonded collateral uTokens.
 	TotalBonded *inctypes.QueryTotalBonded `json:"total_bonded,omitempty"`
 	// TotalUnbonding queries the sum of all unbonding collateral uTokens.
@@ -71,15 +71,15 @@ type UmeeQuery struct {
 	PendingRewards *inctypes.QueryPendingRewards `json:"pending_rewards,omitempty"`
 	// CompletedIncentivePrograms queries for all incentives programs that have been passed
 	// by governance,
-	CompletedIncentivePrograms *inctypes.QueryCompletedIncentivePrograms `json:"completed,omitempty"`
+	CompletedIncentivePrograms *inctypes.QueryCompletedIncentivePrograms `json:"completed_incentive_programs,omitempty"`
 	// OngoingIncentivePrograms queries for all incentives programs that have been passed
 	// by governance, funded, and started but not yet completed.
-	OngoingIncentivePrograms *inctypes.QueryOngoingIncentivePrograms `json:"ongoing,omitempty"`
+	OngoingIncentivePrograms *inctypes.QueryOngoingIncentivePrograms `json:"ongoing_incentive_programs,omitempty"`
 	// UpcomingIncentivePrograms queries for all incentives programs that have been passed
 	// by governance, but not yet started. They may or may not have been funded.
-	UpcomingIncentivePrograms *inctypes.QueryUpcomingIncentivePrograms `json:"upcoming,omitempty"`
+	UpcomingIncentivePrograms *inctypes.QueryUpcomingIncentivePrograms `json:"upcoming_incentive_programs,omitempty"`
 	// IncentiveProgram queries a single incentive program by ID.
-	IncentiveProgram *inctypes.QueryIncentiveProgram `json:"program,omitempty"`
+	IncentiveProgram *inctypes.QueryIncentiveProgram `json:"incentive_program,omitempty"`
 	// CurrentRates queries the hypothetical return of a bonded uToken denomination
 	// if current incentive rewards continued for one year. The response is an sdk.Coins
 	// of base token rewards, per reference amount (usually 10^exponent of the uToken.)

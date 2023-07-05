@@ -94,7 +94,7 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			resp, err = smartcontractQuery.HandleMedianDeviations(ctx, plugin.ocQueryServer)
 
 		// incentive
-		case smartcontractQuery.IncentiveParams != nil:
+		case smartcontractQuery.IncentiveParameters != nil:
 			resp, err = smartcontractQuery.HandleIncentiveParams(ctx, plugin.incQueryServer)
 		case smartcontractQuery.TotalBonded != nil:
 			resp, err = smartcontractQuery.HandleTotalBonded(ctx, plugin.incQueryServer)

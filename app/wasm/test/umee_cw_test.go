@@ -260,7 +260,7 @@ func (s *IntegrationTestSuite) TestIncentiveQueries() {
 		{
 			Name: "incentive query params",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				IncentiveParams: &inctypes.QueryParams{},
+				IncentiveParameters: &inctypes.QueryParams{},
 			}),
 			ResponseCheck: func(data []byte) {
 				var rr inctypes.QueryParamsResponse
