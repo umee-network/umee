@@ -284,11 +284,12 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	)
 
 	// In this test case, an incentive program is started but no uTokens of the incentivized denom are
-	// bonded during its first quarter nor last quarter of the program. It must not distribute rewards when no tokens are bonded.
-	// During the remaining half of the program, 2/3 rewards must be distributed (spread evenly over
-	// the remaining time.) It is 2/3 instead of 3/4 because upon reaching 25% duration with no bonds, the
-	// program can adapt to award 1/3 rewards every remaining 25% duration. However, once all users unbond
-	// after 75% duration and never return, the program is left with some rewards it cannot distribute.
+	// bonded during its first quarter nor last quarter of the program. It must not distribute rewards
+	// when no tokens are bonded. During the remaining half of the program, 2/3 rewards must be distributed
+	// (spread evenly over the remaining time.) It is 2/3 instead of 3/4 because upon reaching 25% duration
+	// with no bonds, the program can adapt to award 1/3 rewards every remaining 25% duration. However,
+	// once all users unbond after 75% duration and never return, the program is left with some rewards
+	// it cannot distribute.
 
 	programStart := int64(100)
 	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
