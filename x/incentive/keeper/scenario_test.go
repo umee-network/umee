@@ -246,12 +246,8 @@ func TestZeroBonded(t *testing.T) {
 	// measure pending rewards (even though program has ended, user has not yet claimed)
 	rewards, err := k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
-	require.Equal(
-		t,
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 10_000000)),
-		rewards,
-		"alice pending rewards at time 200",
-	)
+	aliceRewards := sdk.NewCoins(sdk.NewInt64Coin(umee, 10_000000))
+	require.Equal(t, aliceRewards, rewards, "alice pending rewards at time 200")
 
 	// advance time further past program end
 	k.advanceTimeTo(programStart + 120)
@@ -259,21 +255,21 @@ func TestZeroBonded(t *testing.T) {
 	// measure pending rewards (unchanged, as user has not yet claimed)
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
-	require.Equal(
-		t,
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 10_000000)),
-		rewards,
-		"alice pending rewards at time 220",
-	)
+	require.Equal(t, aliceRewards, rewards, "alice pending rewards at time 220")
 	// actually claim the rewards (same amount)
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(
-		k.t,
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 10_000000)),
-		rewards,
-		"alice claimed rewards at time 220",
-	)
+	require.Equal(k.t, aliceRewards, rewards, "alice claimed rewards at time 220")
+
+	// no more pending rewards after claiming
+	rewards, err = k.calculateRewards(k.ctx, alice)
+	require.NoError(k.t, err)
+	require.Equal(k.t, sdk.NewCoins(), rewards, "alice pending rewards after claim")
+
+	// actually claim the rewards (same amount)
+	rewards, err = k.UpdateAccount(k.ctx, alice)
+	require.NoError(k.t, err)
+	require.Equal(k.t, sdk.NewCoins(), rewards, "alice claimed rewards after claim")
 }
 
 func TestZeroBondedAtProgramEnd(t *testing.T) {
