@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 
-	inctypes "github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 	inckeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
 	lvkeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
@@ -21,7 +21,7 @@ import (
 type Plugin struct {
 	lvQueryServer  lvtypes.QueryServer
 	ocQueryServer  ocpes.QueryServer
-	incQueryServer inctypes.QueryServer
+	incQueryServer incentive.QueryServer
 }
 
 // NewQueryPlugin creates a plugin to query native modules.

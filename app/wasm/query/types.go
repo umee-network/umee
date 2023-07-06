@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
-	inctypes "github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
 	octypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
@@ -60,36 +60,36 @@ type UmeeQuery struct {
 
 	// incentive queries
 	// Incentive module params .
-	IncentiveParameters *inctypes.QueryParams `json:"incentive_parameters,omitempty"`
+	IncentiveParameters *incentive.QueryParams `json:"incentive_parameters,omitempty"`
 	// TotalBonded queries the sum of all bonded collateral uTokens.
-	TotalBonded *inctypes.QueryTotalBonded `json:"total_bonded,omitempty"`
+	TotalBonded *incentive.QueryTotalBonded `json:"total_bonded,omitempty"`
 	// TotalUnbonding queries the sum of all unbonding collateral uTokens.
-	TotalUnbonding *inctypes.QueryTotalUnbonding `json:"total_unbonding,omitempty"`
+	TotalUnbonding *incentive.QueryTotalUnbonding `json:"total_unbonding,omitempty"`
 	// AccountBonds queries all bonded collateral and unbondings associated with an account.
-	AccountBonds *inctypes.QueryAccountBonds `json:"account_bonds,omitempty"`
+	AccountBonds *incentive.QueryAccountBonds `json:"account_bonds,omitempty"`
 	// PendingRewards queries unclaimed incentive rewards associated with an account.
-	PendingRewards *inctypes.QueryPendingRewards `json:"pending_rewards,omitempty"`
+	PendingRewards *incentive.QueryPendingRewards `json:"pending_rewards,omitempty"`
 	// CompletedIncentivePrograms queries for all incentives programs that have been passed
 	// by governance,
-	CompletedIncentivePrograms *inctypes.QueryCompletedIncentivePrograms `json:"completed_incentive_programs,omitempty"`
+	CompletedIncentivePrograms *incentive.QueryCompletedIncentivePrograms `json:"completed_incentive_programs,omitempty"`
 	// OngoingIncentivePrograms queries for all incentives programs that have been passed
 	// by governance, funded, and started but not yet completed.
-	OngoingIncentivePrograms *inctypes.QueryOngoingIncentivePrograms `json:"ongoing_incentive_programs,omitempty"`
+	OngoingIncentivePrograms *incentive.QueryOngoingIncentivePrograms `json:"ongoing_incentive_programs,omitempty"`
 	// UpcomingIncentivePrograms queries for all incentives programs that have been passed
 	// by governance, but not yet started. They may or may not have been funded.
-	UpcomingIncentivePrograms *inctypes.QueryUpcomingIncentivePrograms `json:"upcoming_incentive_programs,omitempty"`
+	UpcomingIncentivePrograms *incentive.QueryUpcomingIncentivePrograms `json:"upcoming_incentive_programs,omitempty"`
 	// IncentiveProgram queries a single incentive program by ID.
-	IncentiveProgram *inctypes.QueryIncentiveProgram `json:"incentive_program,omitempty"`
+	IncentiveProgram *incentive.QueryIncentiveProgram `json:"incentive_program,omitempty"`
 	// CurrentRates queries the hypothetical return of a bonded uToken denomination
 	// if current incentive rewards continued for one year. The response is an sdk.Coins
 	// of base token rewards, per reference amount (usually 10^exponent of the uToken.)
-	CurrentRates *inctypes.QueryCurrentRates `json:"current_rates,omitempty"`
+	CurrentRates *incentive.QueryCurrentRates `json:"current_rates,omitempty"`
 	// ActualRates queries the hypothetical return of a bonded uToken denomination
 	// if current incentive rewards continued for one year. The response is an sdk.Dec
 	// representing an oracle-adjusted APY.
-	ActualRates *inctypes.QueryActualRates `json:"actual_rates,omitempty"`
+	ActualRates *incentive.QueryActualRates `json:"actual_rates,omitempty"`
 	// LastRewardTime queries the last block time at which incentive rewards were calculated.
-	LastRewardTime *inctypes.QueryLastRewardTime `json:"last_reward_time,omitempty"`
+	LastRewardTime *incentive.QueryLastRewardTime `json:"last_reward_time,omitempty"`
 }
 
 // MarshalResponse marshals any response.

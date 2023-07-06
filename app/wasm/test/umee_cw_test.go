@@ -13,7 +13,7 @@ import (
 	appparams "github.com/umee-network/umee/v5/app/params"
 	wm "github.com/umee-network/umee/v5/app/wasm/msg"
 	wq "github.com/umee-network/umee/v5/app/wasm/query"
-	inctypes "github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
 	"github.com/umee-network/umee/v5/x/oracle/types"
 )
@@ -260,13 +260,13 @@ func (s *IntegrationTestSuite) TestIncentiveQueries() {
 		{
 			Name: "incentive query params",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
-				IncentiveParameters: &inctypes.QueryParams{},
+				IncentiveParameters: &incentive.QueryParams{},
 			}),
 			ResponseCheck: func(data []byte) {
-				var rr inctypes.QueryParamsResponse
+				var rr incentive.QueryParamsResponse
 				err := json.Unmarshal(data, &rr)
 				assert.NilError(s.T, err)
-				assert.DeepEqual(s.T, rr.Params, inctypes.DefaultParams())
+				assert.DeepEqual(s.T, rr.Params, incentive.DefaultParams())
 			},
 		},
 	}

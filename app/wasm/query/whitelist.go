@@ -14,7 +14,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 
-	inctypes "github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v5/x/incentive"
 	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
 	otypes "github.com/umee-network/umee/v5/x/oracle/types"
 	ugovtypes "github.com/umee-network/umee/v5/x/ugov"
@@ -119,21 +119,21 @@ func init() {
 	setWhitelistedQuery(uibcBaseQueryPath+"AllOutflows", &uibctypes.QueryAllOutflowsResponse{})
 
 	// incentive
-	setWhitelistedQuery(incentiveBaseQueryPath+"Params", &inctypes.QueryParamsResponse{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"TotalBonded", &inctypes.QueryTotalBondedResponse{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"TotalUnbonding", &inctypes.QueryTotalUnbondingResponse{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"AccountBonds", &inctypes.QueryAccountBondsResponse{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"PendingRewards", &inctypes.QueryPendingRewardsResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"Params", &incentive.QueryParamsResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"TotalBonded", &incentive.QueryTotalBondedResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"TotalUnbonding", &incentive.QueryTotalUnbondingResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"AccountBonds", &incentive.QueryAccountBondsResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"PendingRewards", &incentive.QueryPendingRewardsResponse{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"CompletedIncentivePrograms",
-		&inctypes.QueryCompletedIncentiveProgramsResponse{})
+		&incentive.QueryCompletedIncentiveProgramsResponse{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"OngoingIncentivePrograms",
-		&inctypes.QueryOngoingIncentiveProgramsResponse{})
+		&incentive.QueryOngoingIncentiveProgramsResponse{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"UpcomingIncentivePrograms",
-		&inctypes.QueryUpcomingIncentiveProgramsResponse{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"IncentiveProgram", &inctypes.QueryIncentiveProgramResponse{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"CurrentRates", &inctypes.QueryCurrentRatesResponse{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"ActualRates", &inctypes.QueryActualRates{})
-	setWhitelistedQuery(incentiveBaseQueryPath+"LastRewardTime", &inctypes.QueryLastRewardTimeResponse{})
+		&incentive.QueryUpcomingIncentiveProgramsResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"IncentiveProgram", &incentive.QueryIncentiveProgramResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"CurrentRates", &incentive.QueryCurrentRatesResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"ActualRates", &incentive.QueryActualRates{})
+	setWhitelistedQuery(incentiveBaseQueryPath+"LastRewardTime", &incentive.QueryLastRewardTimeResponse{})
 }
 
 // GetWhitelistedQuery returns the whitelisted query at the provided path.
