@@ -36,7 +36,7 @@ func (m msgServer) GovUpdateMinGasPrice(ctx context.Context, msg *ugov.MsgGovUpd
 	return &ugov.MsgGovUpdateMinGasPriceResponse{}, nil
 }
 
-func (m msgServer) GovSetEmergencyGroup(ctx context.Context, msg *ugov.MsgGovSetEmergencyGroup,
+func (m msgServer) GovSetEmergencyGroup(_ context.Context, _ *ugov.MsgGovSetEmergencyGroup,
 ) (*ugov.MsgGovSetEmergencyGroupResponse, error) {
 	panic("not implemented")
 }
