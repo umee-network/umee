@@ -24,3 +24,7 @@ func (q Querier) MinGasPrice(ctx context.Context, _ *ugov.QueryMinGasPrice) (*ug
 	return &ugov.QueryMinGasPriceResponse{MinGasPrice: q.Keeper(&sdkCtx).MinGasPrice()},
 		nil
 }
+
+func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup) (*ugov.QueryEmergencyGroupResponse, error) {
+	panic("not implemented")
+}
