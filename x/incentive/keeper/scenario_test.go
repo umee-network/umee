@@ -308,23 +308,14 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(t, sdk.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
 
 	// measure pending rewards
+	aliceReward := sdk.NewCoins(sdk.NewInt64Coin(umee, 6_666666))
 	rewards, err := k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
-	require.Equal(
-		t,
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 6_666666)),
-		rewards,
-		"alice pending rewards at time 175",
-	)
+	require.Equal(t, aliceReward, rewards, "alice pending rewards at time 175")
 	// actually claim the rewards (same amount)
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(
-		k.t,
-		sdk.NewCoins(sdk.NewInt64Coin(umee, 6_666666)),
-		rewards,
-		"alice claimed rewards at time 175",
-	)
+	require.Equal(k.t, aliceReward, rewards, "alice claimed rewards at time 175")
 	// begin unbonding user at 75%, making her ineligible future rewards unless she bonds again
 	k.mustBeginUnbond(alice, coin.New(uUmee, 100_000000))
 
@@ -335,23 +326,14 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(t, sdk.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
 
 	// measure pending rewards (zero)
+	noRewards := sdk.NewCoins()
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
-	require.Equal(
-		t,
-		sdk.NewCoins(),
-		rewards,
-		"alice pending rewards at time 200",
-	)
+	require.Equal(t, noRewards, rewards, "alice pending rewards at time 200")
 	// actually claim the rewards (same amount)
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(
-		k.t,
-		sdk.NewCoins(),
-		rewards,
-		"alice claimed rewards at time 200",
-	)
+	require.Equal(k.t, noRewards, rewards, "alice claimed rewards at time 200")
 }
 
 func TestUserSupplyBeforeAndDuring(t *testing.T) {
