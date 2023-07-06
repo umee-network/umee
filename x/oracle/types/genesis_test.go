@@ -67,6 +67,7 @@ func TestGetGenesisStateFromAppState(t *testing.T) {
 		MissCounters:                  []MissCounter{},
 		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},
 		AggregateExchangeRateVotes:    []AggregateExchangeRateVote{},
+		AvgCounterParams:              AvgCounterParams{},
 	}
 
 	bz, err := json.Marshal(emptyGenesis)

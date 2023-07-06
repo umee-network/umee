@@ -53,26 +53,26 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v4.4", upgradeInfo)
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	app.registerUpgrade5_1(upgradeInfo)
-	// TODO: set correct 5.1 name and add borrowFactor migration
 }
 
 func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 	planName := "v5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-				Added: []string{incentive.ModuleName},
-			})
 
-			// TODO: set the correct drain account. This will panic if executed.
 			if err := app.GravityKeeper.MigrateFundsToDrainAccount(
 				ctx,
-				sdk.MustAccAddressFromBech32("the_drain_account"),
+				sdk.MustAccAddressFromBech32("umee1gx9svenfs6ktvajje2wgqau3gk5mznwnyghq4l"),
 			); err != nil {
 				return nil, err
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		})
+		},
+	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{incentive.ModuleName},
+	})
 }
 
 // performs upgrade from v4.2 to v4.3

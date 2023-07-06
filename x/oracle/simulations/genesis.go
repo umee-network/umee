@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/cosmos/cosmos-sdk/types/simulation"
 	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
@@ -23,11 +25,23 @@ const (
 	medianStampPeriodKey        = "median_stamp_period"
 	maximumPriceStampsKey       = "maximum_price_stamps"
 	maximumMedianStampsKey      = "maximum_median_stamps"
+	avgPeriodKey                = "avg_period"
+	avgShiftKey                 = "avg_shift"
 )
 
 // GenVotePeriod produces a randomized VotePeriod in the range of [5, 100]
 func GenVotePeriod(r *rand.Rand) uint64 {
 	return uint64(5 + r.Intn(100))
+}
+
+// GetAvgPeriod produces a randomized AvgPeriod in the range of 1 second to 1 day
+func GetAvgPeriod(r *rand.Rand) time.Duration {
+	return time.Duration(simulation.RandIntBetween(r, 1, 60*60*24)) * time.Second
+}
+
+// GetAvgShift produces a randomized AvgShift in the range of 1 second to 5 hours
+func GetAvgShift(r *rand.Rand) time.Duration {
+	return time.Duration(simulation.RandIntBetween(r, 1, 60*60*5)) * time.Second
 }
 
 // GenVoteThreshold produces a randomized VoteThreshold in the range of [0.34, 0.67]
@@ -148,7 +162,23 @@ func RandomizedGenState(simState *module.SimulationState) {
 		func(r *rand.Rand) { maximumMedianStamps = GenMaximumMedianStamps(r) },
 	)
 
+	var avgShift time.Duration
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, avgShiftKey, &avgShift, simState.Rand,
+		func(r *rand.Rand) { avgShift = GetAvgShift(r) },
+	)
+
+	var avgPeriod time.Duration
+	simState.AppParams.GetOrGenerate(
+		simState.Cdc, avgPeriodKey, &avgPeriod, simState.Rand,
+		func(r *rand.Rand) { avgPeriod = GetAvgPeriod(r) },
+	)
+
 	oracleGenesis := types.DefaultGenesisState()
+	oracleGenesis.AvgCounterParams = types.AvgCounterParams{
+		AvgPeriod: avgPeriod,
+		AvgShift:  avgShift,
+	}
 	oracleGenesis.Params = types.Params{
 		VotePeriod:               votePeriod,
 		VoteThreshold:            voteThreshold,
