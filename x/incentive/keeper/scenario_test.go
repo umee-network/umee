@@ -19,6 +19,12 @@ const (
 	uAtom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
 )
 
+// TestBasicIncentivePrograms runs an incentive program test scenario.
+// In this scenario, three separate incentive programs with varying start times
+// and funding amounts are run, with two users bonding at various times.
+// Actual reward amounts are compared to expected values, and the status of
+// the programs and their remaining rewards are tracked from creation to after
+// their end times.
 func TestBasicIncentivePrograms(t *testing.T) {
 	t.Parallel()
 	k := newTestKeeper(t)
@@ -201,17 +207,17 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.Equal(k.t, sdk.NewCoins(), rewards, "bob pending rewards after claim")
 }
 
+// TestZeroBonded runs an incentive program test scenario.
+// In this test case, an incentive program is started but no uTokens of the incentivized denom are
+// bonded during its first half of runtime. During this time, it must not distribute rewards.
+// During the remaining half of the program, all rewards must be distributed (spread evenly over
+// the remaining time.)
 func TestZeroBonded(t *testing.T) {
 	t.Parallel()
 	k := newTestKeeper(t)
 	k.initCommunityFund(
 		coin.New(umee, 1000_000000),
 	)
-
-	// In this test case, an incentive program is started but no uTokens of the incentivized denom are
-	// bonded during its first half of runtime. During this time, it must not distribute rewards.
-	// During the remaining half of the program, all rewards must be distributed (spread evenly over
-	// the remaining time.)
 
 	programStart := int64(100)
 	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
@@ -266,20 +272,20 @@ func TestZeroBonded(t *testing.T) {
 	require.Equal(k.t, sdk.NewCoins(), rewards, "alice claimed rewards after claim")
 }
 
+// TestZeroBondedAtProgramEnd runs an incentive program test scenario.
+// In this test case, an incentive program is started but no uTokens of the incentivized denom are
+// bonded during its first quarter nor last quarter of the program. It must not distribute rewards
+// when no tokens are bonded. During the remaining half of the program, 2/3 rewards must be distributed
+// (spread evenly over the remaining time.) It is 2/3 instead of 3/4 because upon reaching 25% duration
+// with no bonds, the program can adapt to award 1/3 rewards every remaining 25% duration. However,
+// once all users unbond after 75% duration and never return, the program is left with some rewards
+// it cannot distribute.
 func TestZeroBondedAtProgramEnd(t *testing.T) {
 	t.Parallel()
 	k := newTestKeeper(t)
 	k.initCommunityFund(
 		coin.New(umee, 1000_000000),
 	)
-
-	// In this test case, an incentive program is started but no uTokens of the incentivized denom are
-	// bonded during its first quarter nor last quarter of the program. It must not distribute rewards
-	// when no tokens are bonded. During the remaining half of the program, 2/3 rewards must be distributed
-	// (spread evenly over the remaining time.) It is 2/3 instead of 3/4 because upon reaching 25% duration
-	// with no bonds, the program can adapt to award 1/3 rewards every remaining 25% duration. However,
-	// once all users unbond after 75% duration and never return, the program is left with some rewards
-	// it cannot distribute.
 
 	programStart := int64(100)
 	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
@@ -330,15 +336,15 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(k.t, noRewards, rewards, "alice claimed rewards at time 200")
 }
 
+// TestUserSupplyBeforeAndDuring runs an incentive program test scenario.
+// In this test case, A user supplies and bonds uUmee before the incentive program starts
+// and another user supplies half way through the incentive program.
 func TestUserSupplyBeforeAndDuring(t *testing.T) {
 	t.Parallel()
 	k := newTestKeeper(t)
 	k.initCommunityFund(
 		coin.New(umee, 1000_000000),
 	)
-
-	// In this test case, A user supplies and bonds uUmee before the incentive program starts
-	// and another user supplies half way through the incentive program
 
 	programStart := int64(100)
 	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
@@ -407,16 +413,16 @@ func TestUserSupplyBeforeAndDuring(t *testing.T) {
 	require.Equal(k.t, bobRewards, rewards, "bob claimed rewards at time 220")
 }
 
+// TestPartialWithdraw runs an incentive program test scenario.
+// In this test case, A user supplies and bonds uUmee before the incentive program starts
+// and another user supplies half way through the incentive program. The second user then
+// withdraws ~3/4 into the incentive program.
 func TestPartialWithdraw(t *testing.T) {
 	t.Parallel()
 	k := newTestKeeper(t)
 	k.initCommunityFund(
 		coin.New(umee, 1000_000000),
 	)
-
-	// In this test case, A user supplies and bonds uUmee before the incentive program starts
-	// and another user supplies half way through the incentive program. The second user then
-	// withdraws ~3/4 into the incentive program.
 
 	programStart := int64(100)
 	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
