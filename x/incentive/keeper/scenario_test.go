@@ -261,12 +261,10 @@ func TestZeroBonded(t *testing.T) {
 	require.NoError(k.t, err)
 	require.Equal(k.t, aliceRewards, rewards, "alice claimed rewards at time 220")
 
-	// no more pending rewards after claiming
+	// try to make another claim. The rewards should be zero
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(k.t, err)
 	require.Equal(k.t, sdk.NewCoins(), rewards, "alice pending rewards after claim")
-
-	// actually claim the rewards (same amount)
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
 	require.Equal(k.t, sdk.NewCoins(), rewards, "alice claimed rewards after claim")
