@@ -30,7 +30,7 @@ A user can bond their `x/leverage` collaterized `uTokens` in a `x/incentive` mod
 
 Bonding prevents the user from using any `leverage.MsgDecollateralize` or `leverage.MsgWithdraw` which would reduce the user's collateral below the bonded amount.
 
-**Example:** a user has `100 u/UMEE` and `50 u/UMEE` collateral in the leverage module. `40 u/UMEE` from that `50 u/UMEE` is bonded in the incentive module. Their maximum `leverage.MsgDecollateralize` allowed by their bond is `10 u/UMEE` and their maximum `leverage.MsgWithdraw` is `110u/UMEE`.
+**Example:** a user has `100 u/UMEE` in their wallet and `50 u/UMEE` collateral in the leverage module. `40 u/UMEE` from that `50 u/UMEE` is bonded in the incentive module. Their maximum `leverage.MsgDecollateralize` allowed by their bond is `10 u/UMEE` and their maximum `leverage.MsgWithdraw` is `110u/UMEE`.
 
 Bonded collateral is eligible for incentive program rewards as long as it is not currently unbonding.
 
@@ -66,6 +66,12 @@ Reward distribution math is
 - **Weighted by Amount:** A user with `200u/uumee` bonded received twice as many rewards on a given block as a user with `100u/uumee` bonded.
 
 When multiple incentive programs are active simultaneously, they compute their rewards independently.
+
+Additionally, when no users are eligible for an incentive program's rewards while it is active, it refrains from distributing any rewards until eligible bonds exist.
+
+For example, an incentive program which saw no bonded users for the first 25% of its duration would distribute 100% of its rewards over the remaining 75% duration.
+
+If no users are bonded at the end of an incentive program, it will end with nonzero `RemainingRewards` and those rewards will stay in the module balance.
 
 ### Claiming Rewards
 
