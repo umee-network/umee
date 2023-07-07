@@ -38,6 +38,11 @@ var (
 	Dollar = "dollar"
 )
 
+// UmeeCoins creates an Umee (uumee) sdk.Coins with given amount
+func UmeeCoins(amount int64) sdk.Coins {
+	return sdk.NewCoins(sdk.NewInt64Coin(appparams.BondDenom, amount))
+}
+
 // UmeeDec creates a Umee (uumee) DecCoin with given amount
 func UmeeDec(amount string) sdk.DecCoin {
 	return Dec(appparams.BondDenom, amount)
