@@ -498,3 +498,71 @@ func TestPartialWithdraw(t *testing.T) {
 	require.NoError(k.t, err)
 	require.Equal(k.t, bobRewards, rewards, "bob claimed rewards at time 220")
 }
+
+// TestRejoinScenario runs a scenario whe
+func TestRejoinScenario(t *testing.T) {
+	t.Parallel()
+	k := newTestKeeper(t)
+	k.initCommunityFund(
+		coin.New(umee, 1000_000000),
+	)
+
+	// an incentive program with 10 UMEE rewards will run from t=100 to t=200
+	programStart := int64(100)
+	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+
+	// create two bonded accounts before the program starts. Alice bonds 3x what bob does.
+	k.advanceTimeTo(80)
+	alice := k.newBondedAccount(
+		coin.New(uUmee, 30_000000),
+	)
+	bob := k.newBondedAccount(
+		coin.New(uUmee, 10_000000),
+	)
+
+	k.advanceTimeTo(programStart)      // starts program,
+	k.advanceTimeTo(programStart + 20) // time passed 20%
+
+	// alice unbonds, losing reward eligibility
+	k.mustBeginUnbond(alice, coin.New(uUmee, 30_000000))
+
+	k.advanceTimeTo(programStart + 30) // time passed 30%
+
+	// bob unbonds, losing reward eligibility
+	k.mustBeginUnbond(bob, coin.New(uUmee, 10_000000))
+
+	k.advanceTimeTo(programStart + 50) // time passed 50%
+
+	// bob bonds once more at 50% time elapsed
+	k.mustBond(bob, coin.New(uUmee, 10_000000))
+
+	k.advanceTimeTo(programStart + 100) // time passed 100%
+
+	// confirm program ended
+	program := k.getProgram(1)
+	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status (time 200)")
+	require.Equal(t, sdk.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
+
+	// measure pending rewards and wallet balance (alice claimed rewards, as part of the beginUnbonding transaction)
+	rewards, err := k.calculateRewards(k.ctx, alice)
+	require.NoError(t, err)
+	aliceBalance := coin.UmeeCoins(1_500000)
+	require.Equal(t, sdk.NewCoins(), rewards, "alice pending rewards at time 200")
+	require.Equal(t, aliceBalance, k.bankKeeper.SpendableCoins(k.ctx, alice), "alice balance at time 200")
+
+	// measure pending rewards (bob claimed his rewards from before unbond, but not after second bond)
+	rewards, err = k.calculateRewards(k.ctx, bob)
+	require.NoError(t, err)
+	bobRewards := coin.UmeeCoins(7_000000)
+	bobBalance := coin.UmeeCoins(1_500000)
+	require.Equal(t, bobRewards, rewards, "bob pending rewards at time 200")
+	require.Equal(t, bobBalance, k.bankKeeper.SpendableCoins(k.ctx, bob), "bob balance at time 200")
+
+	// claim the rewards (same amounts)
+	rewards, err = k.UpdateAccount(k.ctx, alice)
+	require.NoError(k.t, err)
+	require.Equal(k.t, sdk.NewCoins(), rewards, "alice claimed rewards at time 200")
+	rewards, err = k.UpdateAccount(k.ctx, bob)
+	require.NoError(k.t, err)
+	require.Equal(k.t, bobRewards, rewards, "bob claimed rewards at time 200")
+}
