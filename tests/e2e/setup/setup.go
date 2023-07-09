@@ -217,7 +217,7 @@ func (s *E2ETestSuite) initGenesis() {
 	var govGenState govtypesv1.GenesisState
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
-	votingPeriod := 6 * time.Second
+	votingPeriod := 5 * time.Second
 	govGenState.VotingParams.VotingPeriod = &votingPeriod
 	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
@@ -314,7 +314,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		s.Require().NoError(vpr.ReadInConfig())
 
 		valConfig := tmconfig.DefaultConfig()
-		valConfig.Consensus.TimeoutCommit = 400 * time.Millisecond
+		valConfig.Consensus.TimeoutCommit = 800 * time.Millisecond
 		s.Require().NoError(vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = "tcp://0.0.0.0:26656"

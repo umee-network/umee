@@ -41,7 +41,6 @@ func (s *E2ETest) TestUpdateOracleParams() {
 			s.Umee,
 			grpc.OracleParamChanges(10, 2, 20),
 		)
-		s.T().Log("submit and pass proposal ", err)
 		if err == nil {
 			break
 		}
@@ -49,7 +48,7 @@ func (s *E2ETest) TestUpdateOracleParams() {
 		time.Sleep(1 * time.Second)
 	}
 
-	s.Require().NoError(err)
+	s.Require().NoError(err, "submit and pass proposal")
 
 	params, err = s.Umee.QueryOracleParams()
 	s.Require().NoError(err)
