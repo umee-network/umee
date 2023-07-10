@@ -23,7 +23,7 @@ var (
 	FooModule = authtypes.NewModuleAddress("foomodule")
 )
 
-// MkAddress creats an address from the given seed string
-func MkAddress(seed string) sdk.AccAddress {
+// GenerateAddr creates an address from the given name, without access to public / secret key.
+func GenerateAddr(seed string) sdk.AccAddress {
 	return sdk.AccAddress(crypto.AddressHash([]byte(seed)))
 }
