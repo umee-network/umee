@@ -55,8 +55,8 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 			s.T().Log("is equal? ", supply.AmountOf(ibcDenom).String(), amount.String(), supply.AmountOf(ibcDenom).Equal(amount), supply.String())
 			return supply.AmountOf(ibcDenom).Equal(amount)
 		},
-		60*time.Second,
-		500*time.Millisecond,
+		2*time.Minute,
+		time.Second,
 	)
 }
 
@@ -83,25 +83,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false)
 
 		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
-		// s.Require().Eventually(
-		// 	func() bool {
-		// 		balances, err := s.QueryUmeeAllBalances(umeeAPIEndpoint, recipient)
-		// 		if err != nil {
-		// 			s.T().Log("error here", err)
-		// 			return false
-		// 		}
-
-		// 		s.T().Log("tokens here", balances.String())
-		// 		// uncomment when we re-enable inflow limit
-		// 		// return math.ZeroInt().Equal(balances.AmountOf(stakeIBCHash))
-		// 		return token.Amount.Equal(balances.AmountOf(stakeIBCHash))
-		// 	},
-		// 	2*time.Minute,
-		// 	1000*time.Millisecond,
-		// )
-
-		// e2e_ibc_test.go:55: is equal?  0 3300000000 false
-		// s.T().Log("is equal? ", supply.AmountOf(ibcDenom).String(), amount.String(), supply.AmountOf(ibcDenom).Equal(amount))
 	})
 
 	s.Run("ibc_transfer_quota", func() {
@@ -116,9 +97,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		umeeIBCHash := "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
 		// ibc hash of uatom token
 		uatomIBCHash := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
-
-		// wait until we get prices going
-		time.Sleep(10 * time.Second)
 
 		// send uatom from gaia to umee
 		// Note : gaia -> umee (ibc_quota will not check token limit)
