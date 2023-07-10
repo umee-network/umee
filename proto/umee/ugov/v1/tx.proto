@@ -15,7 +15,7 @@ service Msg {
   // GovUpdateMinGasPrice sets protocol controlled tx min fees.
   rpc GovUpdateMinGasPrice(MsgGovUpdateMinGasPrice) returns (MsgGovUpdateMinGasPriceResponse);
 
-  // GovSetEmergencyGroup sets protocol controlled tx min fees.
+  // GovSetEmergencyGroup sets emergency group address.
   rpc GovSetEmergencyGroup(MsgGovSetEmergencyGroup) returns (MsgGovSetEmergencyGroupResponse);
 }
 
