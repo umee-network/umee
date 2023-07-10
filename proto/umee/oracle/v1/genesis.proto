@@ -25,6 +25,11 @@ message GenesisState {
   repeated Price medians          = 7 [(gogoproto.nullable) = false];
   repeated Price historic_prices  = 8 [(gogoproto.nullable) = false];
   repeated Price medianDeviations = 9 [(gogoproto.nullable) = false];
+  // Historic Avg Counter params
+  AvgCounterParams avg_counter_params = 10 [
+    (gogoproto.moretags) = "yaml:\"avg_counter_params\"",
+    (gogoproto.nullable) = false
+  ];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	storeutil "github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
@@ -110,4 +111,21 @@ func (k Keeper) AllMedianDeviationPrices(ctx sdk.Context) types.Prices {
 		return false
 	})
 	return prices
+}
+
+// SetAvgPeSetHistoricAvgCounterParams sets avg period and avg shift time duration
+func (k Keeper) SetHistoricAvgCounterParams(ctx sdk.Context, acp types.AvgCounterParams) error {
+	kvs := ctx.KVStore(k.storeKey)
+	return storeutil.SetObject(kvs, k.cdc, types.KeyHistoricAvgCounterParams, &acp, "historic avg counter params")
+}
+
+// GetHistoricAvgCounterParams gets the avg period and avg shift time duration from store
+func (k Keeper) GetHistoricAvgCounterParams(ctx sdk.Context) types.AvgCounterParams {
+	kvs := ctx.KVStore(k.storeKey)
+	var acp types.AvgCounterParams
+	ok := storeutil.GetObject(kvs, k.cdc, types.KeyHistoricAvgCounterParams, &acp, "historic avg counter params")
+	if ok {
+		return acp
+	}
+	return types.AvgCounterParams{}
 }

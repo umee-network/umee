@@ -8,6 +8,7 @@ import (
 
 	"github.com/umee-network/umee/v5/app/wasm/msg"
 	"github.com/umee-network/umee/v5/app/wasm/query"
+	inckeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
 	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
 	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
 )
@@ -16,8 +17,9 @@ import (
 func RegisterCustomPlugins(
 	leverageKeeper leveragekeeper.Keeper,
 	oracleKeeper oraclekeeper.Keeper,
+	incentiveKeeper inckeeper.Keeper,
 ) []wasmkeeper.Option {
-	wasmQueryPlugin := query.NewQueryPlugin(leverageKeeper, oracleKeeper)
+	wasmQueryPlugin := query.NewQueryPlugin(leverageKeeper, oracleKeeper, incentiveKeeper)
 	queryPluginOpt := wasmkeeper.WithQueryPlugins(&wasmkeeper.QueryPlugins{
 		Custom: wasmQueryPlugin.CustomQuerier(),
 	})
