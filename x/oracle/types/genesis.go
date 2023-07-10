@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 )
@@ -17,6 +18,7 @@ func NewGenesisState(
 	historicPrices []Price,
 	medianPrices []Price,
 	medianDeviationPrices []Price,
+	acp AvgCounterParams,
 ) *GenesisState {
 	return &GenesisState{
 		Params:                        params,
@@ -28,6 +30,7 @@ func NewGenesisState(
 		HistoricPrices:                historicPrices,
 		Medians:                       medianPrices,
 		MedianDeviations:              medianDeviationPrices,
+		AvgCounterParams:              acp,
 	}
 }
 
@@ -44,12 +47,17 @@ func DefaultGenesisState() *GenesisState {
 		HistoricPrices:                []Price{},
 		Medians:                       []Price{},
 		MedianDeviations:              []Price{},
+		AvgCounterParams:              DefaultAvgCounterParams(),
 	}
 }
 
 // ValidateGenesis validates the oracle genesis state.
 func ValidateGenesis(data *GenesisState) error {
-	return data.Params.Validate()
+	if err := data.Params.Validate(); err != nil {
+		return err
+	}
+
+	return data.AvgCounterParams.Validate()
 }
 
 // GetGenesisStateFromAppState returns x/oracle GenesisState given raw application
@@ -62,4 +70,27 @@ func GetGenesisStateFromAppState(cdc codec.JSONCodec, appState map[string]json.R
 	}
 
 	return &genesisState
+}
+
+func DefaultAvgCounterParams() AvgCounterParams {
+	return AvgCounterParams{
+		AvgPeriod: DefaultAvgPeriod, // 16 hours
+		AvgShift:  DefaultAvgShift,  // 12 hours
+	}
+}
+
+func (acp AvgCounterParams) Equal(other *AvgCounterParams) bool {
+	return acp.AvgPeriod == other.AvgPeriod && acp.AvgShift == other.AvgShift
+}
+
+func (acp AvgCounterParams) Validate() error {
+	if acp.AvgPeriod.Seconds() <= 0 {
+		return fmt.Errorf("avg period must be positive: %d", acp.AvgPeriod)
+	}
+
+	if acp.AvgShift.Seconds() <= 0 {
+		return fmt.Errorf("avg shift must be positive: %d", acp.AvgShift)
+	}
+
+	return nil
 }

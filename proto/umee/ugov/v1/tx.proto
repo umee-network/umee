@@ -14,9 +14,12 @@ option (gogoproto.goproto_getters_all) = false;
 service Msg {
   // GovUpdateMinGasPrice sets protocol controlled tx min fees.
   rpc GovUpdateMinGasPrice(MsgGovUpdateMinGasPrice) returns (MsgGovUpdateMinGasPriceResponse);
+
+  // GovSetEmergencyGroup sets emergency group address.
+  rpc GovSetEmergencyGroup(MsgGovSetEmergencyGroup) returns (MsgGovSetEmergencyGroupResponse);
 }
 
-// MsgGovUpdateMinGasPrice is a request type for the Msg/GovUpdateMinGasPrice.
+// MsgGovUpdateMinGasPrice request type.
 message MsgGovUpdateMinGasPrice {
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
@@ -26,5 +29,17 @@ message MsgGovUpdateMinGasPrice {
   cosmos.base.v1beta1.DecCoin min_gas_price = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgGovUpdateMinGasPriceResponse is a response type for the Msg/GovUpdateMinGasPrice.
+// MsgGovUpdateMinGasPriceResponse response type.
 message MsgGovUpdateMinGasPriceResponse {};
+
+// MsgGovSetEmergencyGroup request type.
+message MsgGovSetEmergencyGroup {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority must be the address of the governance account.
+  string authority       = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string emergency_group = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// MsgGovSetEmergencyGroupResponse response type.
+message MsgGovSetEmergencyGroupResponse {};

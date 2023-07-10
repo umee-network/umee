@@ -4,6 +4,7 @@ package accs
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/tendermint/tendermint/crypto"
 )
 
 // Test user accounts
@@ -21,3 +22,8 @@ var (
 var (
 	FooModule = authtypes.NewModuleAddress("foomodule")
 )
+
+// GenerateAddr creates an address from the given name, without access to public / secret key.
+func GenerateAddr(seed string) sdk.AccAddress {
+	return sdk.AccAddress(crypto.AddressHash([]byte(seed)))
+}

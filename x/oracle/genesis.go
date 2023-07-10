@@ -71,6 +71,10 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	if moduleAcc == nil {
 		panic(fmt.Sprintf("%s module account has not been set", types.ModuleName))
 	}
+
+	// set historic avg counter params (avgPeriod and avgShift)
+	err := keeper.SetHistoricAvgCounterParams(ctx, genState.AvgCounterParams)
+	util.Panic(err)
 }
 
 // ExportGenesis returns the x/oracle module's exported genesis.
@@ -128,6 +132,7 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	historicPrices := keeper.AllHistoricPrices(ctx)
 	medianPrices := keeper.AllMedianPrices(ctx)
 	medianDeviationPrices := keeper.AllMedianDeviationPrices(ctx)
+	hacp := keeper.GetHistoricAvgCounterParams(ctx)
 
 	return types.NewGenesisState(
 		params,
@@ -139,5 +144,6 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		historicPrices,
 		medianPrices,
 		medianDeviationPrices,
+		hacp,
 	)
 }
