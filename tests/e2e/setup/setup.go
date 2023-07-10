@@ -313,7 +313,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		s.Require().NoError(vpr.ReadInConfig())
 
 		valConfig := tmconfig.DefaultConfig()
-		valConfig.Consensus.TimeoutCommit = 400 * time.Millisecond
+		valConfig.Consensus.SkipTimeoutCommit = true
 		s.Require().NoError(vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = "tcp://0.0.0.0:26656"
