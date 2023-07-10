@@ -3,8 +3,6 @@ package tests
 import (
 	"testing"
 
-	"gotest.tools/v3/assert"
-
 	umeeapp "github.com/umee-network/umee/v5/app"
 )
 

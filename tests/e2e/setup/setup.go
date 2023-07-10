@@ -162,7 +162,7 @@ func (s *E2ETestSuite) initGenesis() {
 	// bech32
 	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
 
-	bz, err = s.cdc.MarshalJSON(&bech32GenState)
+	bz, err := s.cdc.MarshalJSON(&bech32GenState)
 	s.Require().NoError(err)
 	appGenState[bech32ibctypes.ModuleName] = bz
 
