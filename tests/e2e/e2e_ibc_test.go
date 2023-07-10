@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -186,7 +187,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		***/
 		// Make gov proposal to disable the quota check on ibc-transfer
 
-		for i := 0; i < 3; i++ {
+		for i := 0; i < 5; i++ {
 			err = grpc.UIBCIBCTransferSatusUpdate(
 				s.Umee,
 				uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED,
