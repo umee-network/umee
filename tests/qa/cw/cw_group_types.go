@@ -18,10 +18,12 @@ func (msg GroupInitMsg) Marshal() ([]byte, error) {
 }
 
 // Queryies
-type Admin struct{}
-type AdminResp struct {
-	Admin string `json:"admin"`
-}
+type (
+	Admin     struct{}
+	AdminResp struct {
+		Admin string `json:"admin"`
+	}
+)
 type ListMembers struct {
 	StartAfter string `json:"start_after,omitempty"`
 	Limit      uint64 `json:"limit,omitempty"`
