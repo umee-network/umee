@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
+
 ## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
 
 ### Bug Fixes
