@@ -52,7 +52,6 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 				return false
 			}
 
-			s.T().Log("is equal? ", supply.AmountOf(ibcDenom).String(), amount.String(), supply.AmountOf(ibcDenom).Equal(amount), supply.String())
 			return supply.AmountOf(ibcDenom).Equal(amount)
 		},
 		2*time.Minute,
@@ -70,14 +69,9 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		stakeIBCHash := "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
 		umeeAPIEndpoint := s.UmeeREST()
 
-		sender, err := s.Chain.GaiaValidators[0].Address()
-		s.Require().NoError(err)
-		balances, _ := s.QueryUmeeAllBalances(s.GaiaREST(), sender)
-
 		valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 		s.Require().NoError(err)
 		recipient := valAddr.String()
-		s.T().Log("tokens here 2", balances.String(), recipient)
 
 		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false)

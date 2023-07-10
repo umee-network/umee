@@ -52,7 +52,7 @@ store_prefix = 'ibc'
 max_gas = 6000000
 gas_price = { price = 0.05, denom = 'uumee' }
 gas_adjustment = 1.0
-clock_drift = '60s' # to accommodate docker containers
+clock_drift = '1m' # to accommodate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
 
@@ -68,7 +68,7 @@ store_prefix = 'ibc'
 max_gas = 6000000
 gas_price = { price = 0.001, denom = 'stake' }
 gas_adjustment = 1.0
-clock_drift = '60s' # to accommodate docker containers
+clock_drift = '1m' # to accommodate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
 EOF
