@@ -93,9 +93,6 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	gravity "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity"
-	gravitykeeper "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/keeper"
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
 	icahost "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host"
 	icahostkeeper "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host/keeper"
@@ -189,7 +186,6 @@ func init() {
 		ica.AppModuleBasic{},
 		// intertx.AppModuleBasic{},
 		// ibcfee.AppModuleBasic{},
-		gravity.AppModuleBasic{},
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		bech32ibc.AppModuleBasic{},
@@ -213,7 +209,6 @@ func init() {
 		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		icatypes.ModuleName:         nil,
 
-		gravitytypes.ModuleName:  {authtypes.Minter, authtypes.Burner},
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasm.ModuleName:          {authtypes.Burner},
 
@@ -263,7 +258,6 @@ type UmeeApp struct {
 	IBCTransferKeeper ibctransferkeeper.Keeper
 	IBCKeeper         *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
 	ICAHostKeeper     icahostkeeper.Keeper
-	GravityKeeper     gravitykeeper.Keeper
 	LeverageKeeper    leveragekeeper.Keeper
 	IncentiveKeeper   incentivekeeper.Keeper
 	OracleKeeper      oraclekeeper.Keeper
@@ -330,7 +324,6 @@ func New(
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibchost.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
-		gravitytypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey,
 		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
@@ -482,27 +475,12 @@ func New(
 
 	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
 
-	app.GravityKeeper = gravitykeeper.NewKeeper(
-		keys[gravitytypes.StoreKey],
-		app.GetSubspace(gravitytypes.ModuleName),
-		appCodec,
-		&app.BankKeeper,
-		app.StakingKeeper,
-		&app.SlashingKeeper,
-		&app.DistrKeeper,
-		&app.AccountKeeper,
-		&app.IBCTransferKeeper,
-		&app.bech32IbcKeeper,
-	)
-	app.GravityKeeper.BurnValset(true)
-
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
 	app.StakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(
 			app.DistrKeeper.Hooks(),
 			app.SlashingKeeper.Hooks(),
-			app.GravityKeeper.Hooks(),
 		),
 	)
 
@@ -612,7 +590,6 @@ func New(
 		AddRoute(distrtypes.RouterKey, distr.NewCommunityPoolSpendProposalHandler(app.DistrKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
-		AddRoute(gravitytypes.RouterKey, gravitykeeper.NewGravityProposalHandler(app.GravityKeeper)).
 		AddRoute(bech32ibctypes.RouterKey, bech32ibc.NewBech32IBCProposalHandler(app.bech32IbcKeeper))
 
 	// The wasm gov proposal types can be individually enabled
@@ -707,7 +684,6 @@ func New(
 		ibctransfer.NewAppModule(app.IBCTransferKeeper),
 		// ibcfee.NewAppModule(app.IBCFeeKeeper),
 		ica.NewAppModule(nil, &app.ICAHostKeeper),
-		gravity.NewAppModule(app.GravityKeeper, app.BankKeeper),
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		bech32ibc.NewAppModule(appCodec, app.bech32IbcKeeper),
@@ -736,7 +712,6 @@ func New(
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
-		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
@@ -756,7 +731,6 @@ func New(
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
-		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
@@ -781,7 +755,6 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
-		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
@@ -799,7 +772,6 @@ func New(
 
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
-		gravitytypes.ModuleName,
 		bech32ibctypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
@@ -1115,7 +1087,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibchost.ModuleName)
 	// paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
-	paramsKeeper.Subspace(gravitytypes.ModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(wasm.ModuleName)
