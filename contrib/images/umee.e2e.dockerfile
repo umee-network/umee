@@ -1,8 +1,5 @@
 # Docker for e2e testing
-# Creates dynamic binaries, by building from the latest version of:
-# umeed and release version of peggo
-
-FROM ghcr.io/umee-network/peggo:latest-1.4 as peggo
+# Creates dynamic binaries, by building from the latest version of umeed
 
 FROM golang:1.20-bookworm AS builder
 ARG EXPERIMENTAL=false
@@ -27,5 +24,4 @@ ENTRYPOINT ["umeed", "start"]
 
 COPY --from=builder /go/pkg/mod/github.com/\!cosm\!wasm/wasmvm\@v*/internal/api/libwasmvm.*.so /usr/lib/
 COPY --from=builder /go/bin/* /usr/local/bin/
-COPY --from=peggo /usr/local/bin/peggo /usr/local/bin/peggo
 RUN apt-get update && apt-get install ca-certificates -y
