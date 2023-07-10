@@ -1,7 +1,6 @@
 package tx
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -30,12 +29,13 @@ type Client struct {
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
-// signing and broadcasting transactions
+// signing and broadcasting transactions by passing chainDataDir and remaining func arguments
 // Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
-	chainID string,
+	chainDataDir,
+	chainID,
 	tmrpcEndpoint string,
-	mnemonics []string,
+	mnemonics map[string]string,
 	gasAdjustment float64,
 	encCfg sdkparams.EncodingConfig,
 ) (c *Client, err error) {
@@ -46,13 +46,13 @@ func NewClient(
 		encCfg:        encCfg,
 	}
 
-	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, "", nil, encCfg.Codec)
+	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, chainDataDir, nil, encCfg.Codec)
 	if err != nil {
 		return nil, err
 	}
 
-	for index, menomic := range mnemonics {
-		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, fmt.Sprintf("val%d", index), menomic)
+	for accKey, menomic := range mnemonics {
+		kr, err := CreateAccountFromMnemonic(c.keyringKeyring, accKey, menomic)
 		c.keyringRecord = append(c.keyringRecord, kr)
 		if err != nil {
 			return nil, err

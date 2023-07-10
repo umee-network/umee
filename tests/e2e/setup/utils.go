@@ -1,4 +1,4 @@
-package e2e
+package setup
 
 import (
 	"bytes"
@@ -10,7 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/ory/dockertest/v3/docker"
@@ -19,64 +22,15 @@ import (
 	"github.com/umee-network/umee/v5/x/uibc"
 )
 
-func (s *IntegrationTestSuite) umeeREST() string {
-	return fmt.Sprintf("http://%s", s.valResources[0].GetHostPort("1317/tcp"))
+func (s *E2ETestSuite) UmeeREST() string {
+	return fmt.Sprintf("http://%s", s.ValResources[0].GetHostPort("1317/tcp"))
 }
 
-func (s *IntegrationTestSuite) gaiaREST() string {
-	return fmt.Sprintf("http://%s", s.gaiaResource.GetHostPort("1317/tcp"))
+func (s *E2ETestSuite) GaiaREST() string {
+	return fmt.Sprintf("http://%s", s.GaiaResource.GetHostPort("1317/tcp"))
 }
 
-func (s *IntegrationTestSuite) connectIBCChains() {
-	s.T().Logf("connecting %s and %s chains via IBC", s.chain.id, gaiaChainID)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-
-	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
-		Context:      ctx,
-		AttachStdout: true,
-		AttachStderr: true,
-		Container:    s.hermesResource.Container.ID,
-		User:         "root",
-		Cmd: []string{
-			"hermes",
-			"create",
-			"channel",
-			s.chain.id,
-			gaiaChainID,
-			"--port-a=transfer",
-			"--port-b=transfer",
-		},
-	})
-	s.Require().NoError(err)
-
-	var (
-		outBuf bytes.Buffer
-		errBuf bytes.Buffer
-	)
-
-	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
-		Context:      ctx,
-		Detach:       false,
-		OutputStream: &outBuf,
-		ErrorStream:  &errBuf,
-	})
-	s.Require().NoErrorf(
-		err,
-		"failed connect chains; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
-	)
-
-	s.Require().Containsf(
-		errBuf.String(),
-		"successfully opened init channel",
-		"failed to connect chains via IBC: %s", errBuf.String(),
-	)
-
-	s.T().Logf("connected %s and %s chains via IBC", s.chain.id, gaiaChainID)
-}
-
-func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin) {
+func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
@@ -99,11 +53,11 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 		cmd = append(cmd, fmt.Sprintf("--receiver=%s", recipient))
 	}
 
-	exec, err := s.dkrPool.Client.CreateExec(docker.CreateExecOptions{
+	exec, err := s.DkrPool.Client.CreateExec(docker.CreateExecOptions{
 		Context:      ctx,
 		AttachStdout: true,
 		AttachStderr: true,
-		Container:    s.hermesResource.Container.ID,
+		Container:    s.HermesResource.Container.ID,
 		Cmd:          cmd,
 	})
 	s.Require().NoError(err)
@@ -113,7 +67,7 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 		errBuf bytes.Buffer
 	)
 
-	err = s.dkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+	err = s.DkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
 		Context:      ctx,
 		Detach:       false,
 		OutputStream: &outBuf,
@@ -129,10 +83,10 @@ func (s *IntegrationTestSuite) sendIBC(srcChainID, dstChainID, recipient string,
 	time.Sleep(time.Second * 12)
 }
 
-// queryREST make http query to grpc-web endpoint and tries to decode valPtr using proto-JSON
+// QueryREST make http query to grpc-web endpoint and tries to decode valPtr using proto-JSON
 // decoder if valPtr implements proto.Message. Otherwise standard JSON decoder is used.
 // valPtr must be a pointer.
-func queryREST(endpoint string, valPtr interface{}) error {
+func (s *E2ETestSuite) QueryREST(endpoint string, valPtr interface{}) error {
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		return fmt.Errorf("failed to execute HTTP request: %w", err)
@@ -148,7 +102,7 @@ func queryREST(endpoint string, valPtr interface{}) error {
 		if err != nil {
 			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
 		}
-		if err = cdc.UnmarshalJSON(bz, valProto); err != nil {
+		if err = s.cdc.UnmarshalJSON(bz, valProto); err != nil {
 			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
 		}
 	} else {
@@ -160,10 +114,10 @@ func queryREST(endpoint string, valPtr interface{}) error {
 	return nil
 }
 
-func queryUmeeTx(endpoint, txHash string) error {
+func (s *E2ETestSuite) QueryUmeeTx(endpoint, txHash string) error {
 	endpoint = fmt.Sprintf("%s/cosmos/tx/v1beta1/txs/%s", endpoint, txHash)
 	var result map[string]interface{}
-	if err := queryREST(endpoint, &result); err != nil {
+	if err := s.QueryREST(endpoint, &result); err != nil {
 		return err
 	}
 
@@ -174,76 +128,76 @@ func queryUmeeTx(endpoint, txHash string) error {
 	return nil
 }
 
-func queryUmeeAllBalances(endpoint, addr string) (sdk.Coins, error) {
+func (s *E2ETestSuite) QueryUmeeAllBalances(endpoint, addr string) (sdk.Coins, error) {
 	endpoint = fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s", endpoint, addr)
 	var balancesResp banktypes.QueryAllBalancesResponse
-	if err := queryREST(endpoint, &balancesResp); err != nil {
+	if err := s.QueryREST(endpoint, &balancesResp); err != nil {
 		return nil, err
 	}
 
 	return balancesResp.Balances, nil
 }
 
-func queryTotalSupply(endpoint string) (sdk.Coins, error) {
+func (s *E2ETestSuite) QueryTotalSupply(endpoint string) (sdk.Coins, error) {
 	endpoint = fmt.Sprintf("%s/cosmos/bank/v1beta1/supply", endpoint)
 	var balancesResp banktypes.QueryTotalSupplyResponse
-	if err := queryREST(endpoint, &balancesResp); err != nil {
+	if err := s.QueryREST(endpoint, &balancesResp); err != nil {
 		return nil, err
 	}
 
 	return balancesResp.Supply, nil
 }
 
-func queryExchangeRate(endpoint, denom string) (sdk.DecCoins, error) {
+func (s *E2ETestSuite) QueryExchangeRate(endpoint, denom string) (sdk.DecCoins, error) {
 	endpoint = fmt.Sprintf("%s/umee/oracle/v1/denoms/exchange_rates/%s", endpoint, denom)
 	var resp oracletypes.QueryExchangeRatesResponse
-	if err := queryREST(endpoint, &resp); err != nil {
+	if err := s.QueryREST(endpoint, &resp); err != nil {
 		return nil, err
 	}
 
 	return resp.ExchangeRates, nil
 }
 
-func queryHistAvgPrice(endpoint, denom string) (sdk.Dec, error) {
+func (s *E2ETestSuite) QueryHistAvgPrice(endpoint, denom string) (sdk.Dec, error) {
 	endpoint = fmt.Sprintf("%s/umee/historacle/v1/avg_price/%s", endpoint, strings.ToUpper(denom))
 	var resp oracletypes.QueryAvgPriceResponse
-	if err := queryREST(endpoint, &resp); err != nil {
+	if err := s.QueryREST(endpoint, &resp); err != nil {
 		return sdk.Dec{}, err
 	}
 
 	return resp.Price, nil
 }
 
-func queryOutflows(endpoint, denom string) (sdk.Dec, error) {
+func (s *E2ETestSuite) QueryOutflows(endpoint, denom string) (sdk.Dec, error) {
 	endpoint = fmt.Sprintf("%s/umee/uibc/v1/outflows?denom=%s", endpoint, denom)
 	var resp uibc.QueryOutflowsResponse
-	if err := queryREST(endpoint, &resp); err != nil {
+	if err := s.QueryREST(endpoint, &resp); err != nil {
 		return sdk.Dec{}, err
 	}
 
 	return resp.Amount, nil
 }
 
-func queryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
+func (s *E2ETestSuite) QueryUmeeDenomBalance(endpoint, addr, denom string) (sdk.Coin, error) {
 	endpoint = fmt.Sprintf("%s/cosmos/bank/v1beta1/balances/%s/by_denom?denom=%s", endpoint, addr, denom)
 	var resp banktypes.QueryBalanceResponse
-	if err := queryREST(endpoint, &resp); err != nil {
+	if err := s.QueryREST(endpoint, &resp); err != nil {
 		return sdk.Coin{}, err
 	}
 
 	return *resp.Balance, nil
 }
 
-func (s *IntegrationTestSuite) queryUmeeBalance(
+func (s *E2ETestSuite) QueryUmeeBalance(
 	umeeValIdx int,
 	umeeTokenDenom string,
 ) (umeeBalance sdk.Coin, umeeAddr string) {
-	umeeEndpoint := fmt.Sprintf("http://%s", s.valResources[umeeValIdx].GetHostPort("1317/tcp"))
-	umeeAddress, err := s.chain.validators[umeeValIdx].keyInfo.GetAddress()
+	umeeEndpoint := fmt.Sprintf("http://%s", s.ValResources[umeeValIdx].GetHostPort("1317/tcp"))
+	umeeAddress, err := s.Chain.Validators[umeeValIdx].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 	umeeAddr = umeeAddress.String()
 
-	umeeBalance, err = queryUmeeDenomBalance(umeeEndpoint, umeeAddr, umeeTokenDenom)
+	umeeBalance, err = s.QueryUmeeDenomBalance(umeeEndpoint, umeeAddr, umeeTokenDenom)
 	s.Require().NoError(err)
 	s.T().Logf(
 		"Umee Balance of tokens validator; index: %d, addr: %s, amount: %s, denom: %s",
@@ -251,4 +205,41 @@ func (s *IntegrationTestSuite) queryUmeeBalance(
 	)
 
 	return umeeBalance, umeeAddr
+}
+
+func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
+	var raw sdktx.TxRaw
+
+	// reject all unknown proto fields in the root TxRaw
+	err := unknownproto.RejectUnknownFieldsStrict(txBytes, &raw, encodingConfig.InterfaceRegistry)
+	if err != nil {
+		return nil, fmt.Errorf("failed to reject unknown fields: %w", err)
+	}
+
+	if err := cdc.Unmarshal(txBytes, &raw); err != nil {
+		return nil, err
+	}
+
+	var body sdktx.TxBody
+	if err := cdc.Unmarshal(raw.BodyBytes, &body); err != nil {
+		return nil, fmt.Errorf("failed to decode tx: %w", err)
+	}
+
+	var authInfo sdktx.AuthInfo
+
+	// reject all unknown proto fields in AuthInfo
+	err = unknownproto.RejectUnknownFieldsStrict(raw.AuthInfoBytes, &authInfo, encodingConfig.InterfaceRegistry)
+	if err != nil {
+		return nil, fmt.Errorf("failed to reject unknown fields: %w", err)
+	}
+
+	if err := cdc.Unmarshal(raw.AuthInfoBytes, &authInfo); err != nil {
+		return nil, fmt.Errorf("failed to decode auth info: %w", err)
+	}
+
+	return &sdktx.Tx{
+		Body:       &body,
+		AuthInfo:   &authInfo,
+		Signatures: raw.Signatures,
+	}, nil
 }

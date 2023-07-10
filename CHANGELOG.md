@@ -46,8 +46,20 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
+
+### Bug Fixes
+
+- [2125](https://github.com/umee-network/umee/pull/2125) Fix v5.1 upgrade handler.
+
+## [v5.1.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.1.0-rc1) - 2023-06-30
+
 ### Features
 
+- [2121](https://github.com/umee-network/umee/pull/2121) Allow `MsgLeveragedLiquidate` to auto-select repay and reward denoms if request fields left blank.
+- [2114](https://github.com/umee-network/umee/pull/2114) Add borrow factor to `x/leverage`
+- [2102](https://github.com/umee-network/umee/pull/2102) and [2106](https://github.com/umee-network/umee/pull/2106) Add `MsgLeveragedLiquidate` to `x/leverage`
+- [2085](https://github.com/umee-network/umee/pull/2085) Add `inspect` query to leverage module, which msut be enabled on a node by running with `-l` liquidator query flag.
 - [1952](https://github.com/umee-network/umee/pull/1952) Add `x/incentive` module.
 - [2015](https://github.com/umee-network/umee/pull/2015), [2050](https://github.com/umee-network/umee/pull/2050) Add `x/ugov` module.
 - [2078](https://github.com/umee-network/umee/pull/2078) Upgrade `ibc-go` to v6.2.

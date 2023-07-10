@@ -19,4 +19,5 @@ func TestCosmwasm(t *testing.T) {
 	its.TestLeverageQueries()
 	its.TestOracleQueries()
 	its.TestLeverageTxs()
+	its.TestIncentiveQueries()
 }

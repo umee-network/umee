@@ -330,6 +330,7 @@ func (k Keeper) Liquidate(
 		requestedRepay,
 		rewardDenom,
 		directLiquidation,
+		false,
 	)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
@@ -355,16 +356,8 @@ func (k Keeper) Liquidate(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
-	// if borrower's collateral has reached zero, mark any remaining borrows as bad debt
-	if err := k.checkBadDebt(ctx, borrowerAddr); err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
-
-	// finally, force incentive module to update bond and unbonding amounts if required,
-	// by ending existing unbondings early or instantly unbonding some bonded tokens
-	// until bonded + unbonding for the account is not greater than its collateral amount
-	err = k.reduceBondTo(ctx, borrowerAddr, k.GetCollateral(ctx, borrowerAddr, uTokenLiquidate.Denom))
-	if err != nil {
+	// check for bad debt and trigger forced unbond hooks
+	if err := k.postLiquidate(ctx, borrowerAddr, uTokenLiquidate.Denom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 
@@ -373,4 +366,61 @@ func (k Keeper) Liquidate(
 		return tokenRepay, uTokenLiquidate, tokenReward, nil
 	}
 	return tokenRepay, uTokenLiquidate, uTokenLiquidate, nil
+}
+
+// LeveragedLiquidate
+func (k Keeper) LeveragedLiquidate(
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
+) (repaid sdk.Coin, reward sdk.Coin, err error) {
+	// If the message did not specify repay or reward denoms, select one arbitrarily (first in
+	// denom alphabetical order) from borrower position. Then proceed normally with the transaction.
+	if repayDenom == "" {
+		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
+		if !borrowed.IsZero() {
+			repayDenom = borrowed[0].Denom
+		}
+	}
+	if rewardDenom == "" {
+		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
+		if !collateral.IsZero() {
+			rewardDenom = types.ToTokenDenom(collateral[0].Denom)
+		}
+	}
+
+	if err := k.validateAcceptedDenom(ctx, repayDenom); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	uRewardDenom := types.ToUTokenDenom(rewardDenom)
+
+	tokenRepay, uTokenReward, _, err := k.getLiquidationAmounts(
+		ctx,
+		liquidatorAddr,
+		borrowerAddr,
+		sdk.NewCoin(repayDenom, sdk.OneInt()), // amount is ignored for LeveragedLiquidate
+		rewardDenom,
+		false,
+		true,
+	)
+	if err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	if tokenRepay.IsZero() || uTokenReward.IsZero() {
+		return sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationRepayZero
+	}
+
+	// directly move debt from borrower to liquidator without transferring any tokens between accounts
+	if err := k.moveBorrow(ctx, borrowerAddr, liquidatorAddr, tokenRepay); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// directly move collateral from borrower to liquidator while keeping it collateralized
+	if err := k.moveCollateral(ctx, borrowerAddr, liquidatorAddr, uTokenReward); err != nil {
+		return sdk.Coin{}, sdk.Coin{}, err
+	}
+
+	// check for bad debt and trigger forced unbond hooks
+	return tokenRepay, uTokenReward, k.postLiquidate(ctx, borrowerAddr, uRewardDenom)
 }

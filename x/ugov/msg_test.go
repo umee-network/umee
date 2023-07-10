@@ -1,6 +1,7 @@
 package ugov
 
 import (
+	fmt "fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -47,4 +48,33 @@ func TestMsgGovUpdateMinGasPrice(t *testing.T) {
 	msg = validMsgGovUpdateMinGasPrice()
 	msg.Authority = accs.Alice.String()
 	require.ErrorIs(msg.ValidateBasic(), govtypes.ErrInvalidSigner, "must fail on a non gov account")
+}
+
+func validMsgGovSetEmergencyGroup() MsgGovSetEmergencyGroup {
+	return MsgGovSetEmergencyGroup{
+		Authority:      authtypes.NewModuleAddress("gov").String(),
+		EmergencyGroup: accs.Alice.String(),
+	}
+}
+
+func TestMsgGovSetEmergencyGroup(t *testing.T) {
+	t.Parallel()
+	require := require.New(t)
+
+	msg := validMsgGovSetEmergencyGroup()
+	require.Equal(fmt.Sprintf("authority:%q emergency_group:%q ", msg.Authority, msg.EmergencyGroup),
+		msg.String())
+	require.Contains("MsgGovSetEmergencyGroup", msg.Route())
+	require.NoError(msg.ValidateBasic())
+
+	signers := msg.GetSigners()
+	require.Len(signers, 1)
+	require.Equal(msg.Authority, signers[0].String())
+
+	msg.Authority = accs.Bob.String()
+	require.ErrorIs(msg.ValidateBasic(), govtypes.ErrInvalidSigner, "must fail on a non gov account")
+
+	msg = validMsgGovSetEmergencyGroup()
+	msg.EmergencyGroup = "umee1yesmdu06f7strl67kjvg2w7t5kacc"
+	require.ErrorContains(msg.ValidateBasic(), "bech32 failed", "must fail with bad emergency_group address")
 }

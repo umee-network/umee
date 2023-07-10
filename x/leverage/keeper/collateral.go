@@ -50,6 +50,16 @@ func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(uToken))
 }
 
+// moveCollateral moves collateral from one address to another while keeping the uTokens in the module.
+// It occurs during fast liquidations.
+func (k Keeper) moveCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, uToken sdk.Coin) error {
+	err := k.setCollateral(ctx, fromAddr, k.GetCollateral(ctx, fromAddr, uToken.Denom).Sub(uToken))
+	if err != nil {
+		return err
+	}
+	return k.setCollateral(ctx, toAddr, k.GetCollateral(ctx, toAddr, uToken.Denom).Add(uToken))
+}
+
 // GetTotalCollateral returns an sdk.Coin representing how much of a given uToken
 // the x/leverage module account currently holds as collateral. Non-uTokens return zero.
 func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
@@ -63,9 +73,9 @@ func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
 }
 
 // CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by
-// collateral sdk.Coins, using each token's uToken exchange rate. Always uses spot price.
+// collateral sdk.Coins, using each token's uToken exchange rate.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
-func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
+func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
 	for _, coin := range collateral {
@@ -76,12 +86,12 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 		}
 
 		// get USD value of base assets
-		v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
+		v, err := k.TokenValue(ctx, baseAsset, mode)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
 
-		// add each collateral coin's weighted value to borrow limit
+		// add each collateral coin's value to borrow limit
 		total = total.Add(v)
 	}
 
@@ -89,10 +99,10 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins) 
 }
 
 // VisibleCollateralValue uses the price oracle to determine the value (in USD) provided by
-// collateral sdk.Coins, using each token's uToken exchange rate. Always uses spot price.
+// collateral sdk.Coins, using each token's uToken exchange rate.
 // Unlike CalculateCollateralValue, this function will not return an error if value calculation
 // fails on a token - instead, that token will contribute zero value to the total.
-func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
+func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
 	total := sdk.ZeroDec()
 
 	for _, coin := range collateral {
@@ -103,7 +113,7 @@ func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins) (s
 		}
 
 		// get USD value of base assets
-		v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
+		v, err := k.TokenValue(ctx, baseAsset, mode)
 		if err == nil {
 			// for coins that did not error, add their value to the total
 			total = total.Add(v)
@@ -159,13 +169,13 @@ func (k *Keeper) VisibleCollateralShare(ctx sdk.Context, denom string) (sdk.Dec,
 	thisCollateral := sdk.NewCoins(sdk.NewCoin(denom, systemCollateral.AmountOf(denom)))
 
 	// get USD collateral value for all uTokens combined, except those experiencing price outages
-	totalValue, err := k.VisibleCollateralValue(ctx, systemCollateral)
+	totalValue, err := k.VisibleCollateralValue(ctx, systemCollateral, types.PriceModeSpot)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
 
 	// get USD collateral value for this uToken only
-	thisValue, err := k.CalculateCollateralValue(ctx, thisCollateral)
+	thisValue, err := k.CalculateCollateralValue(ctx, thisCollateral, types.PriceModeSpot)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}

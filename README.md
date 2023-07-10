@@ -55,7 +55,8 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 |    v4.2.x    |    ✓    | v0.46.10+  | v5.2.x | v1.3.x+ | umee/v2.1.1  |   umee/v4 v1.5.3-umee-4    |  v1.1.1   |
 |    v4.3.x    |    ✓    | v0.46.11+  | v6.1.x | v1.3.x+ | umee/v2.1.1  |   umee/v4 v1.5.3-umee-6    |  v1.2.1   |
 |    v4.4.x    |    ✓    | v0.46.11+  | v6.1.x | v1.3.x+ | umee/v2.1.4+ |   umee/v4 v1.5.3-umee-6    |  v1.2.3   |
-|    v5.0.x    |    ✓    | v0.46.11+  | v6.1.x | v1.3.x+ | umee/v2.1.4+ |   umee/v4 v1.5.3-umee-8    |  v1.2.3   |
+|    v5.0.x    |    ✓    | v0.46.13+  | v6.2.x | v1.3.x+ | umee/v2.1.4+ |   umee/v4 v1.5.3-umee-8    |  v1.2.4   |
+|    v5.1.x    |    ✓    | v0.46.13+  | v6.2.x |   ---   | umee/v2.1.6+ |   umee/v4 v1.5.3-umee-10   |  v1.2.4   |
 
 #### Price Feeder
 
@@ -87,6 +88,18 @@ To install the `umeed` binary:
 $ make build
 ```
 
+### Docker build
+
+```bash
+docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
+
+# start bash
+docker run -it --name umeed umee-network/umeed bash
+
+# or start the start the node if you already have a node directory setup
+docker run -it --name umeed umee-network/umeed umeed start
+```
+
 ### Recommended Database Backend
 
 We recommend to use RocksDB. It requires to install `rocksdb` system libraries.
@@ -114,18 +127,18 @@ db_backend = "rocksdb"
 
 Generate the latest swagger:
 
-  ```bash
-   $ make proto-swagger-gen
-   $ make proto-update-swagger-docs
-   ```
+```bash
+ $ make proto-swagger-gen
+ $ make proto-update-swagger-docs
+```
 
 Build the new binary or install the new binary with the latest swagger docs:
 
-   ```bash
-   $ make build
-   # or
-   $ make install
-   ```
+```bash
+$ make build
+# or
+$ make install
+```
 
 Make sure to execute these commands whenever you want to update the swagger documentation.
 

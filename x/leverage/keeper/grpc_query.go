@@ -228,7 +228,7 @@ func (q Querier) AccountSummary(
 	}
 
 	// collateral value always uses spot prices, and this line skips assets that are missing prices
-	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral)
+	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeSpot)
 	if err != nil {
 		return nil, err
 	}

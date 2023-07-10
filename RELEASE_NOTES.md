@@ -6,31 +6,22 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v5.0.0
+## v5.1.0
 
 Highlights:
 
-- Cosmwasm integration (v0.31).
-- Gravity Bridge phase-3: shutdown of the transfers. In this release we introduce valset burn mechanism,
-  which will block the Ethereum smart contract for processing any further transactions, as well
-  as sending transfers back to Ethereum. This follows the plan approved through in the
-  [prop-67](https://www.mintscan.io/umee/proposals/67).
-  NOTE: All validators must continue to use Peggo to not get slashed.
-- Updated to the latest Cosmos SDK v0.46.12
-- New generic functions for storage management: `util/store`.
+- [`x/incentive`](x/incentive/README.md) module: allows to create incentive programs for liquidity mining.
+- new x/leverage security measure: [Borrow Factor](x/leverage/README.md#borrow-factor)
+- new x/leverage [`MsgLeveragedLiquidate`](proto/umee/leverage/v1/tx.proto#L59) was added. Allows suppliers to use their active collateral to absorb unhealthy debts. See [Liquidation](x/leverage/README.md#liquidation) for more details.
+- Gravity Bridge phase-4: the GB valset was correctly burned. Slashing is removed and there is no need to run Peggo any more.
 
-See [CHANGELOG](https://github.com/umee-network/umee/blob/v5.0.0/CHANGELOG.md).
+[v5.1.0 CHANGELOG](https://github.com/umee-network/umee/blob/v5.1.0/CHANGELOG.md).
 
 ### Validators
 
-#### libwasmvm update
+#### Peggo
 
-Our dependencies have been updated. Now the binary requires `libwasmvm v1.2.4`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
-
-- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.2.4/internal/api/libwasmvm.$(uname -m).so`
-- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.2.4/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
-
-You don't need to do anything if you are using our Docker image.
+You can kill Peggo (there is no need to run it any more).
 
 #### Min Gas Prices
 
@@ -40,8 +31,6 @@ Since v4.2 release we request all validators set a `minimum-gas-prices` setting 
 minimum-gas-prices = "0.1uumee"
 ```
 
-You MUST also set the related parameter when starting Peggo `--cosmos-gas-prices="0.1uumee"`
-
 ### Upgrade instructions
 
 - Download latest binary or build from source.
@@ -49,7 +38,6 @@ You MUST also set the related parameter when starting Peggo `--cosmos-gas-prices
   - Run the binary to make sure it works for you: `umeed version`
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Swap binaries.
-- Ensure latest Peggo (v1.4.0) is running
 - Ensure latest Price Feeder (see [compatibility matrix](https://github.com/umee-network/umee/#release-compatibility-matrix)) is running and check your price feeder config is up to date.
 - Restart the chain.
 

@@ -17,7 +17,8 @@ type AvgKeeper struct {
 }
 
 func (k Keeper) AvgKeeper(ctx sdk.Context) AvgKeeper {
-	return AvgKeeper{store: ctx.KVStore(k.storeKey), period: k.AvgPeriod, shift: k.AvgShift}
+	p := k.GetHistoricAvgCounterParams(ctx)
+	return AvgKeeper{store: ctx.KVStore(k.storeKey), period: p.AvgPeriod, shift: p.AvgShift}
 }
 
 func (k AvgKeeper) numCounters() int64 {

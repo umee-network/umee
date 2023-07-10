@@ -86,6 +86,6 @@ func (q UmeeQuery) HandleMaxBorrow(
 	ctx context.Context,
 	qs lvtypes.QueryServer,
 ) (proto.Message, error) {
-	req := &lvtypes.QueryMaxBorrow{Address: q.MaxBorrow.Address, Denom: q.MaxBorrow.Address}
+	req := &lvtypes.QueryMaxBorrow{Address: q.MaxBorrow.Address, Denom: q.MaxBorrow.Denom}
 	return qs.MaxBorrow(ctx, req)
 }

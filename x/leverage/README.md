@@ -20,6 +20,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [uToken Exchange Rate](#utoken-exchange-rate)
      - [Supply Utilization](#supply-utilization)
      - [Borrow Limit](#borrow-limit)
+     - [Borrow Factor](#borrow-factor)
      - [Liquidation Threshold](#liquidation-threshold)
      - [Borrow APY](#borrow-apy)
      - [Supplying APY](#supplying-apy)
@@ -168,6 +169,21 @@ A user's borrow limit is the sum of the contributions from each denomination of 
 
 For tokens with hith historic prices enabled (indicated by a `HistoricMedians` parameter greater than zero), each collateral `TokenValue` is computed with `PriceModeLow`, i.e. the lower of either spot price or historic price is used.
 
+#### Borrow Factor
+
+Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
+
+An implied parameter `BorrowFactor` is derived from `CollateralWeight` - specifically, it is the minimum of `2.0` and `1/CollateralWeight`.
+The maximum borrow factor of `2.0` allows risky or non-collateral assets (`0 <= CollateralWeight < 0.5`) to be borrowed to a certain minimum degree.
+
+When a user is borrowing, their borrow limit is whichever is more restrictive of the following two rules:
+
+- Borrowed value must be less than collateral value times `CollateralWeight` (sum over each collateral asset)
+- Borrowed value times `BorrowFactor` (sum over each borrowed asset) must be less than collateral value.
+
+This means that when the original borrow limit based on collateral weight would allow a higher quality collateral to borrow a risky asset with a small margin of safety, the user's effective collateral weight is reduced to that of the riskier asset.
+(Or `0.5` at the minimum.)
+
 #### Historic Borrow Limit, Value
 
 The leverage module also makes use of the oracle's historic prices to enforce an additional restriction on borrowing.
@@ -295,7 +311,34 @@ umeed start
 
 ## Messages
 
-See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto#L11) for list of supported messages.
+See [leverage tx proto](https://github.com/umee-network/umee/blob/main/proto/umee/leverage/v1/tx.proto#L11) for full documentation of supported messages.
+
+Here are their basic functions:
+
+### Supplying
+
+- `MsgSupply`: Supplies base tokens to the module and receives uTokens in exchange. UTokens can later be used to withdraw.
+- `MsgWithdraw`: Exchanges uTokens for the base tokens originally supplied, plus interest. UTokens withdrawn can be any combination of wallet uTokens (from supply) or collateral uTokens. When withdrawing collateral, borrow limit cannot be exceeded or the withdrawal will fail.
+- `MsgMaxWithdraw`: Withdraws the maximum allowed amount of uTokens, respecting the user's borrow limit and the module's liquidity requirements, if any.
+
+### Collateralizing
+
+- `MsgCollateralize`: Sends uTokens to the module as the collateral. Collateral increases a user's borrow limit, but can be siezed in a liquidation if borrowed value exceeds a certain threshold above borrow limit due to price movements or interest owed. Collateral tokens still earn supply interest while collateralized.
+- `MsgSupplyCollateral`: Combines `MsgSupply` and `MsgCollateralize`.
+- `MsgDecollateralize`: Returns some collateral uTokens to wallet balance, without withdrawing base tokens. Borrow limit cannot be exceeded or the decollateralize will fail.
+
+### Borrowing
+
+- `MsgBorrow` Borrows base tokens from the module. Borrow limit cannot be exceeded or the transaction will fail.
+- `MsgRepay` Repays borrowed tokens to the module, plus interest owed.
+
+### Liquidation
+
+- `MsgLiquidate` Liquidates a borrower whose borrowed value has exceeded their liquidation threshold (which is a certain amount above their borrow limit). The liquidator repays a portion of their debt using base tokens, and receives uTokens from the target's collateral, or the equivalent base tokens. The maximum liquidation amount is restricted by both the liquidator's specified amount and the borrower's liquidation eligibility, which may be partial.
+- `MsgLeveragedLiquidate` Liquidates a borrower, but instead of repaying with base tokens from the liquidator wallet balance, moves the debt from the borrower to the liquidator and creates a new borrow position for the liquidator. Liquidator receives uTokens from the bororwer's collateral, and immediately collateralizes them to secure the liquidator positoin.
+
+This transaction will succeed even if the liquidator could not afford to borrow the initial tokens (thanks to the new collateral position acquired from the borrower), as long as they are below 80% usage of their new borrow limit after the reward collateral is added.
+The liquidator is left with a new borrow that they must pay off, and new collateral which can eventually be withdrawn.
 
 ## Update Registry Proposal
 

@@ -192,10 +192,7 @@ func init() {
 		uibcmodule.AppModuleBasic{},
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
-	}
-
-	if Experimental {
-		moduleBasics = append(moduleBasics, incentivemodule.AppModuleBasic{})
+		incentivemodule.AppModuleBasic{},
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -330,10 +327,7 @@ func New(
 		leveragetypes.StoreKey, oracletypes.StoreKey,
 		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
-	}
-
-	if Experimental {
-		storeKeys = append(storeKeys, incentive.StoreKey)
+		incentive.StoreKey,
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -471,15 +465,13 @@ func New(
 
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
 
-	if Experimental {
-		app.IncentiveKeeper = incentivekeeper.NewKeeper(
-			appCodec,
-			keys[incentive.StoreKey],
-			app.BankKeeper,
-			app.LeverageKeeper,
-		)
-		app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
-	}
+	app.IncentiveKeeper = incentivekeeper.NewKeeper(
+		appCodec,
+		keys[incentive.StoreKey],
+		app.BankKeeper,
+		app.LeverageKeeper,
+	)
+	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
 	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
 
@@ -631,7 +623,9 @@ func New(
 	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,cosmwasm_1_2,umee"
 
 	// Register umee custom plugin to wasm
-	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper), wasmOpts...)
+	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper), wasmOpts...)
+	// Register stargate queries
+	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
 
 	app.WasmKeeper = wasm.NewKeeper(
 		appCodec,
@@ -697,12 +691,7 @@ func New(
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
-	}
-	if Experimental {
-		appModules = append(
-			appModules,
-			incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
-		)
+		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 	}
 
 	app.mm = module.NewManager(appModules...)
@@ -728,6 +717,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
+		incentive.ModuleName,
 	}
 
 	endBlockers := []string{
@@ -746,6 +736,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
+		incentive.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -769,6 +760,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
+		incentive.ModuleName,
 	}
 
 	orderMigrations := []string{
@@ -785,13 +777,7 @@ func New(
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasm.ModuleName,
-	}
-
-	if Experimental {
-		beginBlockers = append(beginBlockers, incentive.ModuleName)
-		endBlockers = append(endBlockers, incentive.ModuleName)
-		initGenesis = append(initGenesis, incentive.ModuleName)
-		orderMigrations = append(orderMigrations, incentive.ModuleName)
+		incentive.ModuleName,
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)

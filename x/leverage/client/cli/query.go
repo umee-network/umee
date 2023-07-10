@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -36,6 +37,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdQueryBadDebts(),
 		GetCmdQueryMaxWithdraw(),
 		GetCmdQueryMaxBorrow(),
+		GetCmdQueryInspect(),
 	)
 
 	return cmd
@@ -278,6 +280,55 @@ func GetCmdQueryMaxBorrow() *cobra.Command {
 				req.Denom = args[1]
 			}
 			resp, err := queryClient.MaxBorrow(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQueryInspect creates a Cobra command to query for the inspector command.
+func GetCmdQueryInspect() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "inspect [symbol] [borrowed] [collateral [danger] [ltv]",
+		Args:    cobra.MinimumNArgs(2),
+		Short:   "Inspect accounts with the leverage module, filtered with various minimum values.",
+		Example: "umeed q leverage inspect OSMO 100 0 0.9 0",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryInspect{
+				Symbol: args[0],
+			}
+			req.Borrowed, err = strconv.ParseFloat(args[1], 64)
+			if err != nil {
+				return err
+			}
+			if len(args) >= 3 {
+				req.Collateral, err = strconv.ParseFloat(args[2], 64)
+				if err != nil {
+					return err
+				}
+			}
+			if len(args) >= 4 {
+				req.Danger, err = strconv.ParseFloat(args[3], 64)
+				if err != nil {
+					return err
+				}
+			}
+			if len(args) >= 5 {
+				req.Ltv, err = strconv.ParseFloat(args[4], 64)
+				if err != nil {
+					return err
+				}
+			}
+			resp, err := queryClient.Inspect(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

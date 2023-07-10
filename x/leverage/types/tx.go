@@ -255,6 +255,40 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
+func NewMsgLeveragedLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, rewardDenom string,
+) *MsgLeveragedLiquidate {
+	return &MsgLeveragedLiquidate{
+		Liquidator:  liquidator.String(),
+		Borrower:    borrower.String(),
+		RepayDenom:  repayDenom,
+		RewardDenom: rewardDenom,
+	}
+}
+
+func (msg MsgLeveragedLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgLeveragedLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
+
+func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
+	if err := validateSenderAndDenom(msg.Borrower, msg.RewardDenom); err != nil {
+		return err
+	}
+	if err := sdk.ValidateDenom(msg.RepayDenom); err != nil {
+		return err
+	}
+	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	return err
+}
+
+func (msg *MsgLeveragedLiquidate) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Liquidator)
+}
+
+// GetSignBytes get the bytes for the message signer to sign on
+func (msg *MsgLeveragedLiquidate) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
 func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 	_, err := sdk.AccAddressFromBech32(sender)
 	if err != nil {
