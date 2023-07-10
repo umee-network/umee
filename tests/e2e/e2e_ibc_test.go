@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -61,23 +60,6 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 
 func (s *E2ETest) TestIBCTokenTransfer() {
 	// s.T().Parallel()
-
-	// IBC inbound transfer of non x/leverage registered tokens must fail, because
-	// because we won't have price for it.
-	s.Run("send_stake_to_umee", func() {
-		// require the recipient account receives the IBC tokens (IBC packets ACKd)
-		stakeIBCHash := "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
-		umeeAPIEndpoint := s.UmeeREST()
-
-		valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
-		s.Require().NoError(err)
-		recipient := valAddr.String()
-
-		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
-		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false)
-
-		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
-	})
 
 	s.Run("ibc_transfer_quota", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
@@ -227,5 +209,23 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// resend the umee token from gaia to umee
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewInt64Coin(umeeIBCHash, token.Amount.Int64()), false)
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdk.ZeroInt())
+	})
+
+
+	// IBC inbound transfer of non x/leverage registered tokens must fail, because
+	// because we won't have price for it.
+	s.Run("send_stake_to_umee", func() {
+		// require the recipient account receives the IBC tokens (IBC packets ACKd)
+		stakeIBCHash := "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
+		umeeAPIEndpoint := s.UmeeREST()
+
+		valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
+		s.Require().NoError(err)
+		recipient := valAddr.String()
+
+		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
+		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false)
+
+		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
 	})
 }

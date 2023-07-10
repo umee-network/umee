@@ -33,7 +33,7 @@ func MedianCheck(umee client.Client) error {
 	}
 
 	var exchangeRates sdk.DecCoins
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 20; i++ {
 		exchangeRates, err = umee.QueryExchangeRates()
 		if err == nil && len(exchangeRates) == len(denomAcceptList) {
 			break
