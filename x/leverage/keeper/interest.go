@@ -77,7 +77,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// calculate time elapsed since last interest accrual (measured in years for APR math)
 	if currentTime < prevInterestTime {
-		// precaution against this and similar issues: https://github.com/tendermint/tendermint/issues/8773
+		// precaution against this and similar issues: https://github.com/cometbft/cometbft/issues/8773
 		k.Logger(ctx).With("AccrueAllInterest will wait for block time > prevInterestTime").Error(
 			types.ErrNegativeTimeElapsed.Error(),
 			"current", currentTime,

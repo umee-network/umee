@@ -3,9 +3,9 @@ package store
 import (
 	"github.com/umee-network/umee/v5/util"
 
+	db "github.com/cometbft/cometbft-db"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	db "github.com/tendermint/tm-db"
 )
 
 // Iterate through all keys in a kvStore that start with a given prefix
@@ -44,7 +44,7 @@ func iterate(iter db.Iterator, cb func(key, val []byte) error) error {
 func LoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []byte) ([]T, error) {
 	iter := sdk.KVStorePrefixIterator(s, prefix)
 	defer iter.Close()
-	var out = make([]T, 0)
+	out := make([]T, 0)
 	for ; iter.Valid(); iter.Next() {
 		var o TPtr = new(T)
 		if err := o.Unmarshal(iter.Value()); err != nil {

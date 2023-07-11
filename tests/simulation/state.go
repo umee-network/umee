@@ -11,26 +11,28 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	dbm "github.com/cometbft/cometbft-db"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	"github.com/cometbft/cometbft/libs/log"
+	tmtypes "github.com/cometbft/cometbft/types"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"gotest.tools/v3/assert"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/cosmos/cosmos-sdk/store"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
+	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	"github.com/tendermint/tendermint/libs/log"
-	tmtypes "github.com/tendermint/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
-	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -73,10 +75,10 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 		accs []simtypes.Account,
 		config simtypes.Config,
 	) (appState json.RawMessage, simAccs []simtypes.Account, chainID string, genesisTimestamp time.Time) {
-		if simapp.FlagGenesisTimeValue == 0 {
+		if simcli.FlagGenesisTimeValue == 0 {
 			genesisTimestamp = simtypes.RandTimestamp(r)
 		} else {
-			genesisTimestamp = time.Unix(simapp.FlagGenesisTimeValue, 0)
+			genesisTimestamp = time.Unix(simcli.FlagGenesisTimeValue, 0)
 		}
 
 		chainID = config.ChainID
@@ -88,7 +90,7 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 			// override the default chain-id from simapp to set it later to the config
 			genesisDoc, accounts := appStateFromGenesisFileFn(r, cdc, config.GenesisFile)
 
-			if simapp.FlagGenesisTimeValue == 0 {
+			if simcli.FlagGenesisTimeValue == 0 {
 				// use genesis timestamp if no custom timestamp is provided (i.e no random timestamp)
 				genesisTimestamp = genesisDoc.GenesisTime
 			}
@@ -201,14 +203,14 @@ func appStateRandomizedFn(
 	var initialStake sdkmath.Int
 	appParams.GetOrGenerate(
 		cdc,
-		simappparams.StakePerAccount,
+		simtestutil.StakePerAccount,
 		&initialStake,
 		r,
 		func(r *rand.Rand) { initialStake = sdkmath.NewIntFromUint64(uint64(r.Int63n(1e12))) },
 	)
 	appParams.GetOrGenerate(
 		cdc,
-		simappparams.InitiallyBondedValidators,
+		simtestutil.InitiallyBondedValidators,
 		&numInitiallyBonded,
 		r,
 		func(r *rand.Rand) { numInitiallyBonded = int64(r.Intn(300)) },
@@ -304,7 +306,7 @@ func appExportAndImport(t *testing.T) (
 	dbm.DB, string, *umeeapp.UmeeApp, log.Logger, servertypes.ExportedApp, bool, dbm.DB, string, *umeeapp.UmeeApp,
 	simtypes.Config,
 ) {
-	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	config, db, dir, logger, skip, err := simtestutil.SetupSimulation("leveldb-app-sim", "Simulation")
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -318,7 +320,7 @@ func appExportAndImport(t *testing.T) (
 		true,
 		map[int64]bool{},
 		dir,
-		simapp.FlagPeriodValue,
+		simcli.FlagPeriodValue,
 		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),
@@ -334,19 +336,19 @@ func appExportAndImport(t *testing.T) (
 		app.BaseApp,
 		appStateFn(app.AppCodec(), app.StateSimulationManager),
 		simtypes.RandomAccounts,
-		simapp.SimulationOperations(app, app.AppCodec(), config),
+		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
 		app.AppCodec(),
 	)
 
 	// export state and simParams before the simulation error is checked
-	err = simapp.CheckExportSimulation(app, config, simParams)
+	err = simtestutil.CheckExportSimulation(app, config, simParams)
 	assert.NilError(t, err)
 	assert.NilError(t, simErr)
 
 	if config.Commit {
-		simapp.PrintStats(db)
+		simtestutil.PrintStats(db)
 	}
 
 	fmt.Printf("exporting genesis...\n")
@@ -356,7 +358,7 @@ func appExportAndImport(t *testing.T) (
 
 	fmt.Printf("importing genesis...\n")
 
-	config, newDB, newDir, _, _, err := simapp.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
+	config, newDB, newDir, _, _, err := simtestutil.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
 	assert.NilError(t, err, "simulation setup failed")
 
 	newApp := umeeapp.New(
@@ -366,7 +368,7 @@ func appExportAndImport(t *testing.T) (
 		true,
 		map[int64]bool{},
 		newDir,
-		simapp.FlagPeriodValue,
+		simcli.FlagPeriodValue,
 		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),

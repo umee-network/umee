@@ -3,9 +3,10 @@ package client
 import (
 	"context"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/umee-network/umee/v5/sdkclient"
+
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )
 
 // Client sdkclient.Client and provides umee chain specific transactions and queries.
@@ -24,7 +25,7 @@ func NewClient(
 	grpcEndpoint string,
 	mnemonics map[string]string,
 	gasAdjustment float64,
-	encCfg sdkparams.EncodingConfig,
+	encCfg testutil.TestEncodingConfig,
 ) (Client, error) {
 	c, err := sdkclient.NewClient(chainDataDir, chainID, tmrpcEndpoint, grpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	if err != nil {

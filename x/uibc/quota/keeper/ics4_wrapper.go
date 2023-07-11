@@ -2,11 +2,12 @@ package keeper
 
 import (
 	"cosmossdk.io/errors"
+	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	ics20types "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
-	ibcexported "github.com/cosmos/ibc-go/v6/modules/core/exported"
 
 	ibcutil "github.com/umee-network/umee/v5/util/ibc"
 )
@@ -22,8 +23,8 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 	sourceChannel string,
 	timeoutHeight clienttypes.Height,
 	timeoutTimestamp uint64,
-	data []byte) (uint64, error) {
-
+	data []byte,
+) (uint64, error) {
 	k := kb.Keeper(&ctx)
 	params := k.GetParams()
 

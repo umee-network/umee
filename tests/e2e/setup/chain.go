@@ -4,16 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
-	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
+	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )
 
 const (
@@ -21,23 +15,7 @@ const (
 	keyringAppName    = "testnet"
 )
 
-var (
-	encodingConfig sdkparams.EncodingConfig
-)
-
-func init() {
-	encodingConfig = umeeapp.MakeEncodingConfig()
-
-	encodingConfig.InterfaceRegistry.RegisterImplementations(
-		(*sdk.Msg)(nil),
-		&stakingtypes.MsgCreateValidator{},
-	)
-	encodingConfig.InterfaceRegistry.RegisterImplementations(
-		(*cryptotypes.PubKey)(nil),
-		&secp256k1.PubKey{},
-		&ed25519.PubKey{},
-	)
-}
+var encodingConfig testutil.TestEncodingConfig
 
 type chain struct {
 	dataDir        string

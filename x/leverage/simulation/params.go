@@ -12,29 +12,29 @@ import (
 
 // ParamChanges defines the parameters that can be modified by param change proposals
 // on the simulation
-func ParamChanges(*rand.Rand) []simtypes.ParamChange {
-	return []simtypes.ParamChange{
-		simulation.NewSimParamChange(types.ModuleName, string(types.KeyCompleteLiquidationThreshold),
+func ParamChanges(*rand.Rand) []simtypes.LegacyParamChange {
+	return []simtypes.LegacyParamChange{
+		simulation.NewSimLegacyParamChange(types.ModuleName, string(types.KeyCompleteLiquidationThreshold),
 			func(r *rand.Rand) string {
 				return fmt.Sprintf("\"%s\"", GenCompleteLiquidationThreshold(r))
 			},
 		),
-		simulation.NewSimParamChange(types.ModuleName, string(types.KeyMinimumCloseFactor),
+		simulation.NewSimLegacyParamChange(types.ModuleName, string(types.KeyMinimumCloseFactor),
 			func(r *rand.Rand) string {
 				return fmt.Sprintf("\"%s\"", GenMinimumCloseFactor(r))
 			},
 		),
-		simulation.NewSimParamChange(types.ModuleName, string(types.KeyOracleRewardFactor),
+		simulation.NewSimLegacyParamChange(types.ModuleName, string(types.KeyOracleRewardFactor),
 			func(r *rand.Rand) string {
 				return fmt.Sprintf("\"%s\"", GenOracleRewardFactor(r))
 			},
 		),
-		simulation.NewSimParamChange(types.ModuleName, string(types.KeySmallLiquidationSize),
+		simulation.NewSimLegacyParamChange(types.ModuleName, string(types.KeySmallLiquidationSize),
 			func(r *rand.Rand) string {
 				return fmt.Sprintf("\"%s\"", GenSmallLiquidationSize(r))
 			},
 		),
-		simulation.NewSimParamChange(types.ModuleName, string(types.KeyDirectLiquidationFee),
+		simulation.NewSimLegacyParamChange(types.ModuleName, string(types.KeyDirectLiquidationFee),
 			func(r *rand.Rand) string {
 				return fmt.Sprintf("\"%s\"", GenDirectLiquidationFee(r))
 			},

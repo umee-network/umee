@@ -3,6 +3,13 @@ package cmd
 import (
 	"os"
 
+	tmcfg "github.com/cometbft/cometbft/config"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
+	"github.com/spf13/cobra"
+	appparams "github.com/umee-network/umee/v5/app/params"
+
+	rosettacmd "cosmossdk.io/tools/rosetta/cmd"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -10,7 +17,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -18,17 +25,13 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/spf13/cobra"
-	tmcfg "github.com/tendermint/tendermint/config"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
-	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/x/leverage"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
-func NewRootCmd() (*cobra.Command, sdkparams.EncodingConfig) {
+func NewRootCmd() (*cobra.Command, testutil.TestEncodingConfig) {
 	encodingConfig := umeeapp.MakeEncodingConfig()
 	moduleManager := umeeapp.ModuleBasics
 
@@ -39,7 +42,7 @@ func NewRootCmd() (*cobra.Command, sdkparams.EncodingConfig) {
 		WithLegacyAmino(encodingConfig.Amino).
 		WithInput(os.Stdin).
 		WithAccountRetriever(types.AccountRetriever{}).
-		WithBroadcastMode(flags.BroadcastBlock).
+		WithBroadcastMode(flags.BroadcastSync).
 		WithHomeDir(umeeapp.DefaultNodeHome).
 		WithViper(appparams.Name)
 
@@ -172,7 +175,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 	)
 
 	// add rosetta
-	rootCmd.AddCommand(server.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
+	rootCmd.AddCommand(rosettacmd.RosettaCommand(a.encCfg.InterfaceRegistry, a.encCfg.Codec))
 }
 
 func addModuleInitFlags(startCmd *cobra.Command) {

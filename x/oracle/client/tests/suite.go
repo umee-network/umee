@@ -3,14 +3,14 @@ package tests
 import (
 	"fmt"
 
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/x/oracle/client/cli"

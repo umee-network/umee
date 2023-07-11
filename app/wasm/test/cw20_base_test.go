@@ -12,18 +12,20 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/umee-network/umee/v5/app/params"
+	"gotest.tools/v3/assert"
+
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
-	"github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -41,7 +43,7 @@ const (
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(2)
+	valPubKeys = simtestutil.CreateTestPubKeys(2)
 
 	valPubKey = valPubKeys[0]
 	pubKey    = secp256k1.GenPrivKey().PubKey()
@@ -64,8 +66,7 @@ type cw20InitMsg struct {
 	InitialBalances []Balance `json:"initial_balances"`
 }
 
-type InstantiateMsg struct {
-}
+type InstantiateMsg struct{}
 
 type Address struct {
 	Address string `json:"address"`

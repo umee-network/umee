@@ -7,6 +7,10 @@ import (
 	"path"
 	"path/filepath"
 
+	tmcfg "github.com/cometbft/cometbft/config"
+	tmos "github.com/cometbft/cometbft/libs/os"
+	p2p "github.com/cometbft/cometbft/p2p"
+	"github.com/cometbft/cometbft/privval"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -20,10 +24,6 @@ import (
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmcfg "github.com/tendermint/tendermint/config"
-	tmos "github.com/tendermint/tendermint/libs/os"
-	p2p "github.com/tendermint/tendermint/p2p"
-	"github.com/tendermint/tendermint/privval"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"

@@ -1,12 +1,16 @@
 package app
 
 import (
-	"cosmossdk.io/errors"
 	"github.com/CosmWasm/wasmd/x/wasm"
+	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
+	icagenesis "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/genesis/types"
+	icahosttypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
@@ -15,14 +19,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/nft"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
-	ica "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts"
-	icagenesis "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/genesis/types"
-	icahosttypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/host/types"
-	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
 
-	"github.com/umee-network/umee/v5/app/upgradev3"
 	"github.com/umee-network/umee/v5/app/upgradev3x3"
 	"github.com/umee-network/umee/v5/x/incentive"
 	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
@@ -59,7 +56,6 @@ func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 	planName := "v5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-
 			// GravityBridge is deleted after v5.1
 			// if err := app.GravityKeeper.MigrateFundsToDrainAccount(
 			// 	ctx,
@@ -86,7 +82,7 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 
 			// set the ICS27 consensus version so InitGenesis is not run
 			oldIcaVersion := fromVM[icatypes.ModuleName]
-			fromVM[icatypes.ModuleName] = app.mm.Modules[icatypes.ModuleName].ConsensusVersion()
+			// fromVM[icatypes.ModuleName] = app.mm.Modules[icatypes.ModuleName].ConsensusVersion() // ConsensusVersion doesn't exist anymore
 			g := icagenesis.GenesisState{HostGenesisState: icagenesis.DefaultHostGenesis()}
 			g.HostGenesisState.Params.AllowMessages = []string{
 				sdk.MsgTypeURL(&banktypes.MsgSend{}),
@@ -174,12 +170,12 @@ func (app *UmeeApp) registerUpgrade3_1to3_3(_ upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Run v3.3 migrator")
-			err := upgradev3x3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
+			err := upgradev3x3.Migrator(*app.GovKeeper, app.interfaceRegistry)(ctx)
 			if err != nil {
 				return fromVM, err
 			}
 			ctx.Logger().Info("Run x/bank v0.46.5 migration")
-			err = bankkeeper.NewMigrator(app.BankKeeper).Migrate3_V046_4_To_V046_5(ctx)
+			// err = bankkeeper.NewMigrator(app.BankKeeper, app.GetSubspace(banktypes.ModuleName)).Migrate3_V046_4_To_V046_5(ctx)
 			if err != nil {
 				return fromVM, err
 			}
@@ -196,7 +192,7 @@ func (app *UmeeApp) registerUpgrade3_2to3_3(_ upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Run v3.3 migrator")
-			err := upgradev3x3.Migrator(app.GovKeeper, app.interfaceRegistry)(ctx)
+			err := upgradev3x3.Migrator(*app.GovKeeper, app.interfaceRegistry)(ctx)
 			if err != nil {
 				return fromVM, err
 			}
@@ -213,11 +209,11 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Running setupBech32ibcKeeper")
-			err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
-			if err != nil {
-				return nil, errors.Wrapf(
-					err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", planName)
-			}
+			// err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
+			// if err != nil {
+			// 	return nil, errors.Wrapf(
+			// 		err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", planName)
+			// }
 
 			ctx.Logger().Info("Running module migrations")
 			vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
@@ -225,22 +221,22 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 				return vm, err
 			}
 
-			ctx.Logger().Info("Updating validator minimum commission rate param of staking module")
-			minCommissionRate, err := upgradev3.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
-			if err != nil {
-				return vm, errors.Wrapf(
-					err, "%q Upgrade: failed to update minimum commission rate param of staking module",
-					planName)
-			}
+			// ctx.Logger().Info("Updating validator minimum commission rate param of staking module")
+			// minCommissionRate, err := upgradev3.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
+			// if err != nil {
+			// 	return vm, errors.Wrapf(
+			// 		err, "%q Upgrade: failed to update minimum commission rate param of staking module",
+			// 		planName)
+			// }
 
-			ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
-				"name", planName)
-			err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
-			if err != nil {
-				return vm, errors.Wrapf(
-					err, "%q Upgrade: failed to update minimum commission rate for validators",
-					planName)
-			}
+			// ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
+			// 	"name", planName)
+			// err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
+			// if err != nil {
+			// 	return vm, errors.Wrapf(
+			// 		err, "%q Upgrade: failed to update minimum commission rate for validators",
+			// 		planName)
+			// }
 
 			return vm, err
 		})
@@ -249,7 +245,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 		Added: []string{
 			group.ModuleName,
 			nft.ModuleName,
-			bech32ibctypes.ModuleName,
+			// bech32ibctypes.ModuleName, // removed dependency
 			oracletypes.ModuleName,
 			leveragetypes.ModuleName,
 		},

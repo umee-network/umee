@@ -14,23 +14,22 @@ import (
 	"strings"
 	"time"
 
+	tmconfig "github.com/cometbft/cometbft/config"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
-	"github.com/spf13/viper"
-	"github.com/stretchr/testify/suite"
-	tmconfig "github.com/tendermint/tendermint/config"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/client"
@@ -38,6 +37,9 @@ import (
 	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 	"github.com/umee-network/umee/v5/x/uibc"
+
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 )
 
 type E2ETestSuite struct {
@@ -55,12 +57,31 @@ type E2ETestSuite struct {
 	Umee                client.Client
 	cdc                 codec.Codec
 	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
-
 }
 
 func (s *E2ETestSuite) SetupSuite() {
 	var err error
 	s.T().Log("setting up e2e integration test suite...")
+
+	// db := dbm.NewMemDB()
+	app := app.New(
+		nil,
+		nil,
+		nil,
+		true,
+		map[int64]bool{},
+		"",
+		0,
+		app.EmptyAppOptions{},
+		nil,
+		nil,
+	)
+	encodingConfig = testutil.TestEncodingConfig{
+		InterfaceRegistry: app.InterfaceRegistry(),
+		Codec:             app.AppCodec(),
+		TxConfig:          app.GetTxConfig(),
+		Amino:             app.LegacyAmino(),
+	}
 
 	// codec
 	s.cdc = encodingConfig.Codec
@@ -156,16 +177,6 @@ func (s *E2ETestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
-	var bech32GenState bech32ibctypes.GenesisState
-	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
-
-	// bech32
-	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
-
-	bz, err := s.cdc.MarshalJSON(&bech32GenState)
-	s.Require().NoError(err)
-	appGenState[bech32ibctypes.ModuleName] = bz
-
 	// Leverage
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
@@ -175,7 +186,7 @@ func (s *E2ETestSuite) initGenesis() {
 		fixtures.Token(ATOMBaseDenom, ATOM, uint32(ATOMExponent)),
 	)
 
-	bz, err = s.cdc.MarshalJSON(&leverageGenState)
+	bz, err := s.cdc.MarshalJSON(&leverageGenState)
 	s.Require().NoError(err)
 	appGenState[leveragetypes.ModuleName] = bz
 

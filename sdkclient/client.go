@@ -4,11 +4,13 @@ import (
 	"context"
 	"time"
 
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
+
 	"github.com/rs/zerolog"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	"github.com/umee-network/umee/v5/sdkclient/query"
 	"github.com/umee-network/umee/v5/sdkclient/tx"
+
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )
 
 // Client provides basic capabilities to connect to a Cosmos SDK based chain and execute
@@ -29,7 +31,7 @@ func NewClient(
 	grpcEndpoint string,
 	mnemonics map[string]string,
 	gasAdjustment float64,
-	encCfg sdkparams.EncodingConfig,
+	encCfg testutil.TestEncodingConfig,
 ) (uc Client, err error) {
 	uc = Client{}
 	uc.Query, err = query.NewClient(grpcEndpoint, 15*time.Second)
@@ -41,7 +43,7 @@ func NewClient(
 }
 
 func (c Client) NewChainHeightListener(ctx context.Context, logger zerolog.Logger) (*ChainHeightListener, error) {
-	return NewChainHeightListener(ctx, c.Tx.ClientContext.Client, logger)
+	return NewChainHeightListener(ctx, c.TmClient(), logger)
 }
 
 func (c Client) QueryTimeout() time.Duration {
@@ -49,5 +51,5 @@ func (c Client) QueryTimeout() time.Duration {
 }
 
 func (c Client) TmClient() rpcclient.Client {
-	return c.Tx.ClientContext.Client
+	return c.Tx.ClientContext.Client.(rpcclient.Client)
 }

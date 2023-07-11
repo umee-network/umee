@@ -3,16 +3,17 @@ package tx
 import (
 	"os"
 
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	tmjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-	tmjsonclient "github.com/tendermint/tendermint/rpc/jsonrpc/client"
 )
 
 type Client struct {
@@ -25,7 +26,7 @@ type Client struct {
 	keyringKeyring keyring.Keyring
 	keyringRecord  []*keyring.Record
 	txFactory      *tx.Factory
-	encCfg         sdkparams.EncodingConfig
+	encCfg         testutil.TestEncodingConfig
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
@@ -37,7 +38,7 @@ func NewClient(
 	tmrpcEndpoint string,
 	mnemonics map[string]string,
 	gasAdjustment float64,
-	encCfg sdkparams.EncodingConfig,
+	encCfg testutil.TestEncodingConfig,
 ) (c *Client, err error) {
 	c = &Client{
 		ChainID:       chainID,
@@ -84,7 +85,7 @@ func (c *Client) initClientCtx() error {
 		ChainID:           c.ChainID,
 		InterfaceRegistry: c.encCfg.InterfaceRegistry,
 		Output:            os.Stderr,
-		BroadcastMode:     flags.BroadcastBlock,
+		BroadcastMode:     flags.BroadcastSync,
 		TxConfig:          c.encCfg.TxConfig,
 		AccountRetriever:  authtypes.AccountRetriever{},
 		Codec:             c.encCfg.Codec,

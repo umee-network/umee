@@ -4,20 +4,22 @@ import (
 	"fmt"
 	"testing"
 
+	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
+
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"gotest.tools/v3/assert"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
-	"github.com/cosmos/cosmos-sdk/simapp"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/staking/teststaking"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	"gotest.tools/v3/assert"
+	"github.com/cosmos/cosmos-sdk/x/staking/testutil"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -34,7 +36,7 @@ const (
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(2)
+	valPubKeys = simtestutil.CreateTestPubKeys(2)
 
 	valPubKey = valPubKeys[0]
 	pubKey    = secp256k1.GenPrivKey().PubKey()
@@ -72,7 +74,7 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	uibc.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.UIbcQuotaKeeperB))
 
-	sh := teststaking.NewHelper(t, ctx, *app.StakingKeeper)
+	sh := testutil.NewHelper(t, ctx, *app.StakingKeeper)
 	sh.Denom = bondDenom
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 

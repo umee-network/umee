@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
+
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -12,9 +16,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-	abci "github.com/tendermint/tendermint/abci/types"
 
 	"github.com/umee-network/umee/v5/x/leverage/client/cli"
 	"github.com/umee-network/umee/v5/x/leverage/keeper"
@@ -168,9 +169,3 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 func AddModuleInitFlags(startCmd *cobra.Command) {
 	startCmd.Flags().BoolP(types.FlagEnableLiquidatorQuery, "l", false, "enable liquidator query")
 }
-
-// DEPRECATED
-
-func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier { return nil }
-func (AppModule) QuerierRoute() string                                { return "" }
-func (AppModule) Route() sdk.Route                                    { return sdk.Route{} }

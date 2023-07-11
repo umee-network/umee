@@ -3,12 +3,13 @@ package keeper
 import (
 	"time"
 
+	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store"
 	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 
 	"github.com/umee-network/umee/v5/x/uibc"
 )

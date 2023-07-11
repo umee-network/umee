@@ -9,8 +9,20 @@ import (
 	"strings"
 	"testing"
 
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
+	"github.com/rs/zerolog"
+	"gotest.tools/v3/assert"
+
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
+
 	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -25,15 +37,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
-	ibchost "github.com/cosmos/ibc-go/v6/modules/core/24-host"
-	"github.com/rs/zerolog"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
-	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -42,12 +45,12 @@ import (
 )
 
 func init() {
-	simapp.GetSimulatorFlags()
+	simcli.GetSimulatorFlags()
 }
 
 // TestFullAppSimulation tests application fuzzing given a random seed as input.
 func TestFullAppSimulation(t *testing.T) {
-	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-sim", "Simulation")
+	config, db, dir, logger, skip, err := simtestutil.SetupSimulation("leveldb-app-sim", "Simulation")
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -66,7 +69,7 @@ func TestFullAppSimulation(t *testing.T) {
 		true,
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
-		simapp.FlagPeriodValue,
+		simcli.FlagPeriodValue,
 		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),
@@ -82,30 +85,30 @@ func TestFullAppSimulation(t *testing.T) {
 		app.BaseApp,
 		appStateFn(app.AppCodec(), app.StateSimulationManager),
 		simtypes.RandomAccounts,
-		simapp.SimulationOperations(app, app.AppCodec(), config),
+		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
 		app.AppCodec(),
 	)
 
 	// export state and simParams before the simulation error is checked
-	err = simapp.CheckExportSimulation(app, config, simParams)
+	err = simtestutil.CheckExportSimulation(app, config, simParams)
 	assert.NilError(t, err)
 	assert.NilError(t, simErr)
 
 	if config.Commit {
-		simapp.PrintStats(db)
+		simtestutil.PrintStats(db)
 	}
 }
 
 // TestAppStateDeterminism tests for application non-determinism using a PRNG
 // as an input for the simulator's seed.
 func TestAppStateDeterminism(t *testing.T) {
-	if !simapp.FlagEnabledValue {
+	if !simtestutil.FlagEnabledValue {
 		t.Skip("skipping application simulation")
 	}
 
-	config := simapp.NewConfigFromFlags()
+	config := simtestutil.NewConfigFromFlags()
 	config.InitialBlockHeight = 1
 	config.ExportParamsPath = ""
 	config.OnOperation = false
@@ -121,7 +124,7 @@ func TestAppStateDeterminism(t *testing.T) {
 
 		for j := 0; j < numTimesToRunPerSeed; j++ {
 			var logger log.Logger
-			if simapp.FlagVerboseValue {
+			if simcli.FlagVerboseValue {
 				logger = server.ZeroLogWrapper{
 					Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
 				}
@@ -139,7 +142,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				true,
 				map[int64]bool{},
 				umeeapp.DefaultNodeHome,
-				simapp.FlagPeriodValue,
+				simcli.FlagPeriodValue,
 				umeeapp.MakeEncodingConfig(),
 				umeeapp.EmptyAppOptions{},
 				umeeapp.GetWasmEnabledProposals(),
@@ -158,7 +161,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				app.BaseApp,
 				appStateFn(app.AppCodec(), app.StateSimulationManager),
 				simtypes.RandomAccounts,
-				simapp.SimulationOperations(app, app.AppCodec(), config),
+				simtestutil.SimulationOperations(app, app.AppCodec(), config),
 				app.ModuleAccountAddrs(),
 				config,
 				app.AppCodec(),
@@ -166,7 +169,7 @@ func TestAppStateDeterminism(t *testing.T) {
 			assert.NilError(t, err)
 
 			if config.Commit {
-				simapp.PrintStats(db)
+				simtestutil.PrintStats(db)
 			}
 
 			appHash := app.LastCommitID().Hash
@@ -186,7 +189,7 @@ func TestAppStateDeterminism(t *testing.T) {
 }
 
 func BenchmarkFullAppSimulation(b *testing.B) {
-	config, db, dir, logger, skip, err := simapp.SetupSimulation("leveldb-app-bench-sim", "Simulation")
+	config, db, dir, logger, skip, err := simtestutil.SetupSimulation("leveldb-app-bench-sim", "Simulation")
 	if skip {
 		b.Skip("skipping application simulation")
 	}
@@ -205,7 +208,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		true,
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
-		simapp.FlagPeriodValue,
+		simcli.FlagPeriodValue,
 		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),
@@ -220,19 +223,19 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		app.BaseApp,
 		appStateFn(app.AppCodec(), app.StateSimulationManager),
 		simtypes.RandomAccounts,
-		simapp.SimulationOperations(app, app.AppCodec(), config),
+		simtestutil.SimulationOperations(app, app.AppCodec(), config),
 		app.ModuleAccountAddrs(),
 		config,
 		app.AppCodec(),
 	)
 
 	// export state and simParams before the simulation error is checked
-	err = simapp.CheckExportSimulation(app, config, simParams)
+	err = simtestutil.CheckExportSimulation(app, config, simParams)
 	assert.NilError(b, err)
 	assert.NilError(b, simErr)
 
 	if config.Commit {
-		simapp.PrintStats(db)
+		simtestutil.PrintStats(db)
 	}
 }
 
@@ -313,7 +316,7 @@ func TestAppImportExport(t *testing.T) {
 
 		fmt.Printf("compared %d different key/value pairs between %s and %s\n", len(failedKVAs), skp.A, skp.B)
 
-		assert.Equal(t, 0, len(failedKVAs), simapp.GetSimulationLog(skp.A.Name(), app.SimulationManager().StoreDecoders, failedKVAs, failedKVBs))
+		assert.Equal(t, 0, len(failedKVAs), simtestutil.GetSimulationLog(skp.A.Name(), app.SimulationManager().StoreDecoders, failedKVAs, failedKVBs))
 	}
 }
 
@@ -359,7 +362,7 @@ func TestAppSimulationAfterImport(t *testing.T) {
 		newApp.BaseApp,
 		appStateFn(newApp.AppCodec(), newApp.StateSimulationManager),
 		simtypes.RandomAccounts, // Replace with own random account function if using keys other than secp256k1
-		simapp.SimulationOperations(newApp, newApp.AppCodec(), config),
+		simtestutil.SimulationOperations(newApp, newApp.AppCodec(), config),
 		newApp.ModuleAccountAddrs(),
 		config,
 		newApp.AppCodec(),
