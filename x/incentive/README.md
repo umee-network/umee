@@ -67,7 +67,7 @@ Reward distribution math is
 
 When multiple incentive programs are active simultaneously, they compute their rewards independently.
 
-Additionally, when no users are eligible for an incentive program's rewards while it is active, it refrains from distributing any rewards until eligible bonds exist.
+Additionally, if no users are bonded while it is active, a program refrains from distributing any rewards until bonded users exist.
 
 For example, an incentive program which saw no bonded users for the first 25% of its duration would distribute 100% of its rewards over the remaining 75% duration.
 
