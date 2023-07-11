@@ -495,7 +495,8 @@ func TestPartialWithdraw(t *testing.T) {
 	require.Equal(k.t, bobRewards, rewards, "bob claimed rewards at time 220")
 }
 
-// TestRejoinScenario runs a scenario whe
+// TestRejoinScenario runs a scenario where two users start a program bonded, then both leave
+// and one rejoins to earn remaining rewards before the program ends.
 func TestRejoinScenario(t *testing.T) {
 	k, programStart := defaultSetup(t)
 
