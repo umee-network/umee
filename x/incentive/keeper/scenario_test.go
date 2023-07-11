@@ -502,12 +502,10 @@ func TestRejoinScenario(t *testing.T) {
 
 	// create two bonded accounts before the program starts. Alice bonds 3x what bob does.
 	k.advanceTimeTo(80)
-	alice := k.newBondedAccount(
-		coin.New(uUmee, 30_000000),
-	)
-	bob := k.newBondedAccount(
-		coin.New(uUmee, 10_000000),
-	)
+	aliceSupply = coin.New(uUmee, 30_000000)
+	alice := k.newBondedAccount(aliceSupply)
+	bobSupply = coin.New(uUmee, 30_000000)
+	bob := k.newBondedAccount(bobSupply)
 
 	k.advanceTimeTo(programStart)      // starts program,
 	k.advanceTimeTo(programStart + 20) // time passed 20%
