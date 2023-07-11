@@ -19,6 +19,8 @@ const (
 	uAtom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
 )
 
+var zeroCoins = sdk.NewCoins()
+
 // TestBasicIncentivePrograms runs an incentive program test scenario.
 // In this scenario, three separate incentive programs with varying start times
 // and funding amounts are run, with two users bonding at various times.
@@ -111,7 +113,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(
 		t,
-		sdk.NewCoins(),
+		zeroCoins,
 		rewards,
 		"bob pending rewards at time 101",
 	)
@@ -201,10 +203,10 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	// no more pending rewards after claiming
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(k.t, sdk.NewCoins(), rewards, "alice pending rewards after claim")
+	require.Equal(k.t, zeroCoins, rewards, "alice pending rewards after claim")
 	rewards, err = k.calculateRewards(k.ctx, bob)
 	require.NoError(k.t, err)
-	require.Equal(k.t, sdk.NewCoins(), rewards, "bob pending rewards after claim")
+	require.Equal(k.t, zeroCoins, rewards, "bob pending rewards after claim")
 }
 
 // TestZeroBonded runs an incentive program test scenario.
@@ -264,10 +266,10 @@ func TestZeroBonded(t *testing.T) {
 	// try to make another claim. The rewards should be zero
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(k.t, sdk.NewCoins(), rewards, "alice pending rewards after claim")
+	require.Equal(k.t, zeroCoins, rewards, "alice pending rewards after claim")
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(k.t, sdk.NewCoins(), rewards, "alice claimed rewards after claim")
+	require.Equal(k.t, zeroCoins, rewards, "alice claimed rewards after claim")
 }
 
 // TestZeroBondedAtProgramEnd runs an incentive program test scenario.
@@ -323,15 +325,14 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(t, sdk.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
 
 	// measure pending rewards (zero)
-	noRewards := sdk.NewCoins()
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
-	require.Equal(t, noRewards, rewards, "alice pending rewards at time 200")
+	require.Equal(t, zeroCoins, rewards, "alice pending rewards at time 200")
 
 	// actually claim the rewards (same amount)
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(k.t, noRewards, rewards, "alice claimed rewards at time 200")
+	require.Equal(k.t, zeroCoins, rewards, "alice claimed rewards at time 200")
 }
 
 // TestUserSupplyBeforeAndDuring runs an incentive program test scenario.
@@ -547,7 +548,7 @@ func TestRejoinScenario(t *testing.T) {
 	rewards, err := k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
 	aliceBalance := coin.UmeeCoins(1_500000)
-	require.Equal(t, sdk.NewCoins(), rewards, "alice pending rewards at time 200")
+	require.Equal(t, zeroCoins, rewards, "alice pending rewards at time 200")
 	require.Equal(t, aliceBalance, k.bankKeeper.SpendableCoins(k.ctx, alice), "alice balance at time 200")
 
 	// measure pending rewards (bob claimed his rewards from before unbond, but not after second bond)
@@ -561,7 +562,7 @@ func TestRejoinScenario(t *testing.T) {
 	// claim the rewards (same amounts)
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(k.t, sdk.NewCoins(), rewards, "alice claimed rewards at time 200")
+	require.Equal(k.t, zeroCoins, rewards, "alice claimed rewards at time 200")
 	rewards, err = k.UpdateAccount(k.ctx, bob)
 	require.NoError(k.t, err)
 	require.Equal(k.t, bobRewards, rewards, "bob claimed rewards at time 200")
