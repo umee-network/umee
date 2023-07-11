@@ -36,7 +36,20 @@ func (m msgServer) GovUpdateMinGasPrice(ctx context.Context, msg *ugov.MsgGovUpd
 	return &ugov.MsgGovUpdateMinGasPriceResponse{}, nil
 }
 
-func (m msgServer) GovSetEmergencyGroup(_ context.Context, _ *ugov.MsgGovSetEmergencyGroup,
+func (m msgServer) GovSetEmergencyGroup(ctx context.Context, msg *ugov.MsgGovSetEmergencyGroup,
 ) (*ugov.MsgGovSetEmergencyGroupResponse, error) {
-	panic("not implemented")
+	sdkCtx, err := sdkutil.StartMsg(ctx, msg)
+	if err != nil {
+		return nil, err
+	}
+	addr, err := sdk.AccAddressFromBech32(msg.EmergencyGroup)
+	if err != nil {
+		return nil, err
+	}
+	m.kb.Keeper(&sdkCtx).SetEmergencyGroup(addr)
+	sdkutil.Emit(&sdkCtx, &ugov.EventEmergencyGroup{
+		EmergencyGroup: msg.EmergencyGroup,
+	})
+
+	return &ugov.MsgGovSetEmergencyGroupResponse{}, nil
 }
