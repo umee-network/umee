@@ -21,6 +21,19 @@ const (
 
 var zeroCoins = sdk.NewCoins()
 
+// defaultSetup creates a parallel test with a basic 10 UMEE incentive program already funded.
+func defaultSetup(t *testing.T) (testKeeper, int64) {
+	t.Parallel()
+	k := newTestKeeper(t)
+	k.initCommunityFund(
+		coin.New(umee, 1000_000000),
+	)
+
+	programStart := int64(100)
+	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+	return k, programStart
+}
+
 // TestBasicIncentivePrograms runs an incentive program test scenario.
 // In this scenario, three separate incentive programs with varying start times
 // and funding amounts are run, with two users bonding at various times.
@@ -329,19 +342,6 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
 	require.Equal(k.t, zeroCoins, rewards, "alice claimed rewards at time 210")
-}
-
-// defaultSetup creates a parallel test with a basic 10 UMEE incentive program already funded.
-func defaultSetup(t *testing.T) (testKeeper, int64) {
-	t.Parallel()
-	k := newTestKeeper(t)
-	k.initCommunityFund(
-		coin.New(umee, 1000_000000),
-	)
-
-	programStart := int64(100)
-	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
-	return k, programStart
 }
 
 // TestUserSupplyBeforeAndDuring runs an incentive program test scenario.
