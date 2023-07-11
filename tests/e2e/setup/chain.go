@@ -21,9 +21,7 @@ const (
 	keyringAppName    = "testnet"
 )
 
-var (
-	encodingConfig sdkparams.EncodingConfig
-)
+var encodingConfig sdkparams.EncodingConfig
 
 func init() {
 	encodingConfig = umeeapp.MakeEncodingConfig()

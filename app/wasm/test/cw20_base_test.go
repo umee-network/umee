@@ -64,8 +64,7 @@ type cw20InitMsg struct {
 	InitialBalances []Balance `json:"initial_balances"`
 }
 
-type InstantiateMsg struct {
-}
+type InstantiateMsg struct{}
 
 type Address struct {
 	Address string `json:"address"`

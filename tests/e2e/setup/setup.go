@@ -55,7 +55,6 @@ type E2ETestSuite struct {
 	Umee                client.Client
 	cdc                 codec.Codec
 	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
-
 }
 
 func (s *E2ETestSuite) SetupSuite() {
