@@ -215,14 +215,8 @@ func TestBasicIncentivePrograms(t *testing.T) {
 // During the remaining half of the program, all rewards must be distributed (spread evenly over
 // the remaining time.)
 func TestZeroBonded(t *testing.T) {
-	t.Parallel()
-	k := newTestKeeper(t)
-	k.initCommunityFund(
-		coin.New(umee, 1000_000000),
-	)
+	k, programStart := defaultSetup(t)
 
-	programStart := int64(100)
-	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
 	k.advanceTimeTo(programStart) // starts program, but does not attempt rewards. Do not combine with next line.
 	k.advanceTimeTo(programStart + 50)
 	program := k.getProgram(1)
@@ -281,14 +275,8 @@ func TestZeroBonded(t *testing.T) {
 // once all users unbond after 75% duration and never return, the program is left with some rewards
 // it cannot distribute.
 func TestZeroBondedAtProgramEnd(t *testing.T) {
-	t.Parallel()
-	k := newTestKeeper(t)
-	k.initCommunityFund(
-		coin.New(umee, 1000_000000),
-	)
+	k, programStart := defaultSetup(t)
 
-	programStart := int64(100)
-	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
 	k.advanceTimeTo(programStart)      // starts program, but does not attempt rewards. Do not combine with next line.
 	k.advanceTimeTo(programStart + 25) // 25% duration
 	program := k.getProgram(1)
@@ -343,10 +331,8 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(k.t, zeroCoins, rewards, "alice claimed rewards at time 210")
 }
 
-// TestUserSupplyBeforeAndDuring runs an incentive program test scenario.
-// In this test case, A user supplies and bonds uUmee before the incentive program starts
-// and another user supplies half way through the incentive program.
-func TestUserSupplyBeforeAndDuring(t *testing.T) {
+// defaultSetup creates a parallel test with a basic 10 UMEE incentive program already funded.
+func defaultSetup(t *testing.T) (testKeeper, int64) {
 	t.Parallel()
 	k := newTestKeeper(t)
 	k.initCommunityFund(
@@ -355,6 +341,14 @@ func TestUserSupplyBeforeAndDuring(t *testing.T) {
 
 	programStart := int64(100)
 	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+	return k, programStart
+}
+
+// TestUserSupplyBeforeAndDuring runs an incentive program test scenario.
+// In this test case, A user supplies and bonds uUmee before the incentive program starts
+// and another user supplies half way through the incentive program.
+func TestUserSupplyBeforeAndDuring(t *testing.T) {
+	k, programStart := defaultSetup(t)
 
 	// now create a supplier with bonded tokens before the time starts
 	k.advanceTimeTo(80)
@@ -425,14 +419,7 @@ func TestUserSupplyBeforeAndDuring(t *testing.T) {
 // and another user supplies half way through the incentive program. The second user then
 // withdraws ~3/4 into the incentive program.
 func TestPartialWithdraw(t *testing.T) {
-	t.Parallel()
-	k := newTestKeeper(t)
-	k.initCommunityFund(
-		coin.New(umee, 1000_000000),
-	)
-
-	programStart := int64(100)
-	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+	k, programStart := defaultSetup(t)
 
 	// now create a supplier with bonded tokens before the time starts
 	k.advanceTimeTo(80)
@@ -510,15 +497,7 @@ func TestPartialWithdraw(t *testing.T) {
 
 // TestRejoinScenario runs a scenario whe
 func TestRejoinScenario(t *testing.T) {
-	t.Parallel()
-	k := newTestKeeper(t)
-	k.initCommunityFund(
-		coin.New(umee, 1000_000000),
-	)
-
-	// an incentive program with 10 UMEE rewards will run from t=100 to t=200
-	programStart := int64(100)
-	k.addIncentiveProgram(uUmee, programStart, 100, sdk.NewInt64Coin(umee, 10_000000), true)
+	k, programStart := defaultSetup(t)
 
 	// create two bonded accounts before the program starts. Alice bonds 3x what bob does.
 	k.advanceTimeTo(80)
