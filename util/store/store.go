@@ -139,8 +139,7 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetAddress(store sdk.KVStore, key []byte) sdk.AccAddress {
 	if bz := store.Get(key); len(bz) > 0 {
-		addr := sdk.AccAddress(bz)
-		return addr
+		return bz
 	}
 	// No stored bytes at key: return empty address
 	return sdk.AccAddress{}

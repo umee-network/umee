@@ -239,7 +239,7 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// GovUpdateMinGasPrice sets protocol controlled tx min fees.
 	GovUpdateMinGasPrice(ctx context.Context, in *MsgGovUpdateMinGasPrice, opts ...grpc.CallOption) (*MsgGovUpdateMinGasPriceResponse, error)
-	// GovSetEmergencyGroup sets protocol controlled tx min fees.
+	// GovSetEmergencyGroup sets emergency group address.
 	GovSetEmergencyGroup(ctx context.Context, in *MsgGovSetEmergencyGroup, opts ...grpc.CallOption) (*MsgGovSetEmergencyGroupResponse, error)
 }
 
@@ -273,7 +273,7 @@ func (c *msgClient) GovSetEmergencyGroup(ctx context.Context, in *MsgGovSetEmerg
 type MsgServer interface {
 	// GovUpdateMinGasPrice sets protocol controlled tx min fees.
 	GovUpdateMinGasPrice(context.Context, *MsgGovUpdateMinGasPrice) (*MsgGovUpdateMinGasPriceResponse, error)
-	// GovSetEmergencyGroup sets protocol controlled tx min fees.
+	// GovSetEmergencyGroup sets emergency group address.
 	GovSetEmergencyGroup(context.Context, *MsgGovSetEmergencyGroup) (*MsgGovSetEmergencyGroupResponse, error)
 }
 
