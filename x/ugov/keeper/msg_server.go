@@ -47,5 +47,9 @@ func (m msgServer) GovSetEmergencyGroup(ctx context.Context, msg *ugov.MsgGovSet
 		return nil, err
 	}
 	m.kb.Keeper(&sdkCtx).SetEmergencyGroup(addr)
+	sdkutil.Emit(&sdkCtx, &ugov.EventEmergencyGroup{
+		EmergencyGroup: msg.EmergencyGroup,
+	})
+
 	return &ugov.MsgGovSetEmergencyGroupResponse{}, nil
 }
