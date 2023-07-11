@@ -521,6 +521,8 @@ func TestRejoinScenario(t *testing.T) {
 	k.advanceTimeTo(programStart + 50) // time passed 50%
 
 	// bob bonds once more at 50% time elapsed
+	rewards, err := k.calculateRewards(k.ctx, bob)
+	require.Equal(t, zeroCoins, rewards, "bob pending rewards at time 150 (zero after unbond)")
 	k.mustBond(bob, bobSupply)
 
 	k.advanceTimeTo(programStart + 100) // time passed 100%
@@ -531,7 +533,7 @@ func TestRejoinScenario(t *testing.T) {
 	require.Equal(t, sdk.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
 
 	// measure pending rewards and wallet balance (alice claimed rewards, as part of the beginUnbonding transaction)
-	rewards, err := k.calculateRewards(k.ctx, alice)
+	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
 	aliceBalance := coin.UmeeCoins(1_500000)
 	require.Equal(t, zeroCoins, rewards, "alice pending rewards at time 200")
