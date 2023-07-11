@@ -29,8 +29,8 @@ func (m msgServer) GovUpdateMinGasPrice(ctx context.Context, msg *ugov.MsgGovUpd
 	if err := k.SetMinGasPrice(msg.MinGasPrice); err != nil {
 		return nil, err
 	}
-	sdkutil.Emit(&sdkCtx, &ugov.EventMinTxFees{
-		MinTxFees: sdk.NewDecCoins(msg.MinGasPrice),
+	sdkutil.Emit(&sdkCtx, &ugov.EventMinGasPrice{
+		MinGasPrices: sdk.NewDecCoins(msg.MinGasPrice),
 	})
 
 	return &ugov.MsgGovUpdateMinGasPriceResponse{}, nil
