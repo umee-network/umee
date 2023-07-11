@@ -45,7 +45,8 @@ func (c *Client) TxWasmInstantiateContract(storeCode uint64, initMsg []byte) (*s
 }
 
 func (c *Client) TxWasmExecuteContractByAccSeq(contractAddr string, execMsg []byte,
-	accSeq uint64) (*sdk.TxResponse, error) {
+	accSeq uint64,
+) (*sdk.TxResponse, error) {
 	fromAddr, err := c.keyringRecord[0].GetAddress()
 	if err != nil {
 		return nil, err

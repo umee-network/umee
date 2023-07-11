@@ -59,13 +59,13 @@ func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 	planName := "v5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-
-			if err := app.GravityKeeper.MigrateFundsToDrainAccount(
-				ctx,
-				sdk.MustAccAddressFromBech32("umee1gx9svenfs6ktvajje2wgqau3gk5mznwnyghq4l"),
-			); err != nil {
-				return nil, err
-			}
+			// GravityBridge is deleted after v5.1
+			// if err := app.GravityKeeper.MigrateFundsToDrainAccount(
+			// 	ctx,
+			// 	sdk.MustAccAddressFromBech32("umee1gx9svenfs6ktvajje2wgqau3gk5mznwnyghq4l"),
+			// ); err != nil {
+			// 	return nil, err
+			// }
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)

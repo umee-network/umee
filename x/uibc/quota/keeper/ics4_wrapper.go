@@ -22,8 +22,8 @@ func (kb Builder) SendPacket(ctx sdk.Context,
 	sourceChannel string,
 	timeoutHeight clienttypes.Height,
 	timeoutTimestamp uint64,
-	data []byte) (uint64, error) {
-
+	data []byte,
+) (uint64, error) {
 	k := kb.Keeper(&ctx)
 	params := k.GetParams()
 

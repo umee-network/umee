@@ -21,9 +21,11 @@ func (k LeverageKeeper) GetTokenSettings(_ sdk.Context, baseDenom string) (ltype
 	}
 	return ts, nil
 }
+
 func (k LeverageKeeper) ExchangeUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
+
 func (k LeverageKeeper) DeriveExchangeRate(_ sdk.Context, _ string) sdk.Dec {
 	panic("not implemented")
 }

@@ -10,10 +10,12 @@ import (
 )
 
 var (
-	_ sdk.Msg = &MsgGovUpdateMinGasPrice{}
+	_, _ sdk.Msg = &MsgGovUpdateMinGasPrice{},
+		&MsgGovSetEmergencyGroup{}
 
 	// amino
-	_ legacytx.LegacyMsg = &MsgGovUpdateMinGasPrice{}
+	_, _ legacytx.LegacyMsg = &MsgGovUpdateMinGasPrice{},
+		&MsgGovSetEmergencyGroup{}
 )
 
 // ValidateBasic implements Msg
@@ -21,7 +23,6 @@ func (msg *MsgGovUpdateMinGasPrice) ValidateBasic() error {
 	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
 		return err
 	}
-
 	return msg.MinGasPrice.Validate()
 }
 
@@ -35,13 +36,38 @@ func (msg *MsgGovUpdateMinGasPrice) String() string {
 	return fmt.Sprintf("<authority: %s, min_gas_price: %s>", msg.Authority, msg.MinGasPrice.String())
 }
 
-// Route implements LegacyMsg.Route
+// LegacyMsg.Type implementations
+
 func (msg MsgGovUpdateMinGasPrice) Route() string { return "" }
 
-// GetSignBytes implements the LegacyMsg.GetSignBytes
 func (msg MsgGovUpdateMinGasPrice) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
-
-// GetSignBytes implements the LegacyMsg.Type
 func (msg MsgGovUpdateMinGasPrice) Type() string { return sdk.MsgTypeURL(&msg) }
+
+//
+// MsgGovSetEmergencyGroup
+//
+
+// Msg interface implementation
+
+func (msg *MsgGovSetEmergencyGroup) ValidateBasic() error {
+	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+		return err
+	}
+	_, err := sdk.AccAddressFromBech32(msg.EmergencyGroup)
+	return err
+}
+
+// GetSignBytes implements Msg
+func (msg *MsgGovSetEmergencyGroup) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// LegacyMsg.Type implementations
+func (msg MsgGovSetEmergencyGroup) Route() string { return "" }
+
+func (msg MsgGovSetEmergencyGroup) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+}
+func (msg MsgGovSetEmergencyGroup) Type() string { return sdk.MsgTypeURL(&msg) }
