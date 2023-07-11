@@ -295,17 +295,25 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status ongoing (time 125)")
 	require.Equal(t, program.TotalRewards, program.RemainingRewards, "all of program's rewards remain (no bonds)")
 
-	// now create a supplier with bonded tokens, halfway through the program
-	alice := k.newBondedAccount(
-		coin.New(uUmee, 100_000000),
-	)
+	// now bond first tokens (at 25% of the progrum duration)
+	alice := k.newBondedAccount(coin.New(uUmee, 100_000000))
+
+	k.advanceTimeTo(programStart + 50) // 50% duration
+	program = k.getProgram(1)
+	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status ongoing (time 150)")
+	require.Equal(t, sdk.NewInt(6_666667), program.RemainingRewards.Amount, "one third of program rewards distributed")
+
+	// unbond half of the supply. Since Alice is is the only supplier, this should not change reward distribution
+	// also, alice claims rewards when unbonding
+	k.mustBeginUnbond(alice, coin.New(uUmee, 50_000000))
+
 	k.advanceTimeTo(programStart + 75) // 75% duration
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status ongoing (time 175)")
 	require.Equal(t, sdk.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
 
 	// measure pending rewards
-	aliceReward := coin.UmeeCoins(6_666666)
+	aliceReward := coin.UmeeCoins(3_333333)
 	rewards, err := k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
 	require.Equal(t, aliceReward, rewards, "alice pending rewards at time 175")
@@ -315,24 +323,24 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.NoError(k.t, err)
 	require.Equal(k.t, aliceReward, rewards, "alice claimed rewards at time 175")
 
-	// begin unbonding user at 75%, making her ineligible future rewards unless she bonds again
-	k.mustBeginUnbond(alice, coin.New(uUmee, 100_000000))
+	// fully unbond user at 75%, making her ineligible future rewards unless she bonds again
+	k.mustUnbond(alice, coin.New(uUmee, 100_000000))
 
 	// complete the program
-	k.advanceTimeTo(programStart + 100) // 100% duration
+	k.advanceTimeTo(programStart + 110) // a bit past 100% duration
 	program = k.getProgram(1)
-	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status completed (time 200)")
+	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status completed (time 210)")
 	require.Equal(t, sdk.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
 
 	// measure pending rewards (zero)
 	rewards, err = k.calculateRewards(k.ctx, alice)
 	require.NoError(t, err)
-	require.Equal(t, zeroCoins, rewards, "alice pending rewards at time 200")
+	require.Equal(t, zeroCoins, rewards, "alice pending rewards at time 210")
 
 	// actually claim the rewards (same amount)
 	rewards, err = k.UpdateAccount(k.ctx, alice)
 	require.NoError(k.t, err)
-	require.Equal(k.t, zeroCoins, rewards, "alice claimed rewards at time 200")
+	require.Equal(k.t, zeroCoins, rewards, "alice claimed rewards at time 210")
 }
 
 // TestUserSupplyBeforeAndDuring runs an incentive program test scenario.
