@@ -6,7 +6,7 @@ This document specifies the `x/leverage` module of the Umee chain.
 
 The leverage module allows users to supply and borrow assets, and implements various features to support this, such as a token accept-list, a dynamic interest rate module, incentivized liquidation of undercollateralized debt, and automatic reserve-based repayment of bad debt.
 
-The leverage module depends directly on `x/oracle` for asset prices, and interacts indirectly with `x/uibc`, `x/gravity`, and the cosmos `x/bank` module as these all affect account balances.
+The leverage module depends directly on `x/oracle` for asset prices, and interacts indirectly with `x/uibc`, and the cosmos `x/bank` module as these all affect account balances.
 
 ## Contents
 

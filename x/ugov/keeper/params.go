@@ -18,3 +18,11 @@ func (k Keeper) MinGasPrice() sdk.DecCoin {
 	}
 	return *gp
 }
+
+func (k Keeper) SetEmergencyGroup(p sdk.AccAddress) {
+	store.SetAddress(k.store, keyEmergencyGroup, p)
+}
+
+func (k Keeper) EmergencyGroup() sdk.AccAddress {
+	return store.GetAddress(k.store, keyEmergencyGroup)
+}

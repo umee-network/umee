@@ -46,9 +46,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Features
+
+- [2129](https://github.com/umee-network/umee/pull/2129) Emergency Group x/ugov proto.
+
 ### Improvements
 
 - [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
+
+### API Breaking
+
+- [2140](https://github.com/umee-network/umee/pull/2140)
 
 ## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
 
