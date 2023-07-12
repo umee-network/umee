@@ -6,8 +6,9 @@ import (
 
 	sdkerrors "cosmossdk.io/errors"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
+	"github.com/cosmos/gogoproto/proto"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
 
 	"github.com/umee-network/umee/v5/x/incentive"
 	inckeeper "github.com/umee-network/umee/v5/x/incentive/keeper"

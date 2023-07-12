@@ -71,7 +71,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	types.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.OracleKeeper))
 
-	sh := testutil.NewHelper(s.T(), ctx, *app.StakingKeeper)
+	sh := testutil.NewHelper(s.T(), ctx, app.StakingKeeper)
 	sh.Denom = bondDenom
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
@@ -84,7 +84,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
 
-	staking.EndBlocker(ctx, *app.StakingKeeper)
+	staking.EndBlocker(ctx, app.StakingKeeper)
 
 	s.app = app
 	s.ctx = ctx

@@ -6,11 +6,12 @@ import (
 
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/cosmos/gogoproto/proto"
+	"github.com/stretchr/testify/suite"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/gogo/protobuf/proto"
-	"github.com/stretchr/testify/suite"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"

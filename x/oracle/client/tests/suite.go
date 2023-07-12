@@ -5,12 +5,13 @@ import (
 
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
+	"github.com/cosmos/gogoproto/proto"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
-	"github.com/stretchr/testify/suite"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/x/oracle/client/cli"
@@ -80,7 +81,7 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 				val.Address.String(),
 				s.network.Validators[1].Address.String(),
 				fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+				fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 				fmt.Sprintf("--%s=%s", flags.FlagGasPrices, appparams.ProtocolMinGasPrice),
 			},
 			expectErr:    false,

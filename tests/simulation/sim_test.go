@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	"cosmossdk.io/log"
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
@@ -22,7 +22,6 @@ import (
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
 
-	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -50,7 +49,8 @@ func init() {
 
 // TestFullAppSimulation tests application fuzzing given a random seed as input.
 func TestFullAppSimulation(t *testing.T) {
-	config, db, dir, logger, skip, err := simtestutil.SetupSimulation("leveldb-app-sim", "Simulation")
+	config := simcli.NewConfigFromFlags()
+	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", false, true)
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -70,7 +70,6 @@ func TestFullAppSimulation(t *testing.T) {
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
 		simcli.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),
 		umeeapp.EmptyWasmOpts,
@@ -125,13 +124,9 @@ func TestAppStateDeterminism(t *testing.T) {
 		for j := 0; j < numTimesToRunPerSeed; j++ {
 			var logger log.Logger
 			if simcli.FlagVerboseValue {
-				logger = server.ZeroLogWrapper{
-					Logger: zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger(),
-				}
+				logger = log.NewCustomLogger(zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger())
 			} else {
-				logger = server.ZeroLogWrapper{
-					Logger: zerolog.Nop(),
-				}
+				logger = log.NewNopLogger()
 			}
 
 			db := dbm.NewMemDB()
@@ -143,7 +138,6 @@ func TestAppStateDeterminism(t *testing.T) {
 				map[int64]bool{},
 				umeeapp.DefaultNodeHome,
 				simcli.FlagPeriodValue,
-				umeeapp.MakeEncodingConfig(),
 				umeeapp.EmptyAppOptions{},
 				umeeapp.GetWasmEnabledProposals(),
 				umeeapp.EmptyWasmOpts,
@@ -189,7 +183,8 @@ func TestAppStateDeterminism(t *testing.T) {
 }
 
 func BenchmarkFullAppSimulation(b *testing.B) {
-	config, db, dir, logger, skip, err := simtestutil.SetupSimulation("leveldb-app-bench-sim", "Simulation")
+	config := simcli.NewConfigFromFlags()
+	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-bench-sim", "Simulation", false, true)
 	if skip {
 		b.Skip("skipping application simulation")
 	}
@@ -209,7 +204,6 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
 		simcli.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),
 		umeeapp.EmptyWasmOpts,

@@ -54,7 +54,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.Require().Len(setupVals, 1)
 	s.Require().Equal(int64(1), setupVals[0].GetConsensusPower(app.StakingKeeper.PowerReduction(ctx)))
 
-	sh := testutil.NewHelper(s.T(), ctx, *app.StakingKeeper)
+	sh := testutil.NewHelper(s.T(), ctx, app.StakingKeeper)
 	sh.Denom = bondDenom
 
 	// mint and send coins to validators
@@ -68,7 +68,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 398, true)
 	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 2, true)
 
-	staking.EndBlocker(ctx, *app.StakingKeeper)
+	staking.EndBlocker(ctx, app.StakingKeeper)
 
 	err := app.OracleKeeper.SetVoteThreshold(ctx, sdk.MustNewDecFromStr("0.4"))
 	s.Require().NoError(err)

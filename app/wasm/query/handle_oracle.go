@@ -1,8 +1,9 @@
 package query
 
 import (
+	"github.com/cosmos/gogoproto/proto"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
 
 	octypes "github.com/umee-network/umee/v5/x/oracle/types"
 )

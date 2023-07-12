@@ -22,6 +22,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 
+	dbm "github.com/cometbft/cometbft-db"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
@@ -63,10 +65,10 @@ func (s *E2ETestSuite) SetupSuite() {
 	var err error
 	s.T().Log("setting up e2e integration test suite...")
 
-	// db := dbm.NewMemDB()
+	db := dbm.NewMemDB()
 	app := app.New(
 		nil,
-		nil,
+		db,
 		nil,
 		true,
 		map[int64]bool{},
@@ -214,8 +216,8 @@ func (s *E2ETestSuite) initGenesis() {
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	votingPeroid := 5 * time.Second
-	govGenState.VotingParams.VotingPeriod = &votingPeroid
-	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
+	govGenState.Params.VotingPeriod = &votingPeroid
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
 	bz, err = s.cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)

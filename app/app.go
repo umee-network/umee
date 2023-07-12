@@ -325,6 +325,7 @@ func New(
 		uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
 		incentive.StoreKey,
+		consensusparamstypes.StoreKey, crisistypes.StoreKey,
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)

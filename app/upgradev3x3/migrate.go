@@ -1,13 +1,14 @@
 package upgradev3x3
 
 import (
+	"github.com/cosmos/gogoproto/proto"
+
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
-	"github.com/gogo/protobuf/proto"
 
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )

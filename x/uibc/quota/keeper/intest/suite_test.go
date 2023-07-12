@@ -74,7 +74,7 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	uibc.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.UIbcQuotaKeeperB))
 
-	sh := testutil.NewHelper(t, ctx, *app.StakingKeeper)
+	sh := testutil.NewHelper(t, ctx, app.StakingKeeper)
 	sh.Denom = bondDenom
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
 
@@ -89,7 +89,7 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 	sh.CreateValidator(valAddr, valPubKey, amt, true)
 	sh.CreateValidator(valAddr2, valPubKey2, amt, true)
 
-	staking.EndBlocker(ctx, *app.StakingKeeper)
+	staking.EndBlocker(ctx, app.StakingKeeper)
 
 	s.app = app
 	s.ctx = ctx

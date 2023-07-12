@@ -9,9 +9,9 @@ import (
 	_ "github.com/cosmos/cosmos-proto"
 	types "github.com/cosmos/cosmos-sdk/types"
 	_ "github.com/cosmos/cosmos-sdk/types/msgservice"
+	grpc1 "github.com/cosmos/gogoproto/grpc"
+	proto "github.com/cosmos/gogoproto/proto"
 	_ "github.com/gogo/protobuf/gogoproto"
-	grpc1 "github.com/gogo/protobuf/grpc"
-	proto "github.com/gogo/protobuf/proto"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -239,7 +239,7 @@ const _ = grpc.SupportPackageIsVersion4
 type MsgClient interface {
 	// GovUpdateMinGasPrice sets protocol controlled tx min fees.
 	GovUpdateMinGasPrice(ctx context.Context, in *MsgGovUpdateMinGasPrice, opts ...grpc.CallOption) (*MsgGovUpdateMinGasPriceResponse, error)
-	// GovSetEmergencyGroup sets protocol controlled tx min fees.
+	// GovSetEmergencyGroup sets emergency group address.
 	GovSetEmergencyGroup(ctx context.Context, in *MsgGovSetEmergencyGroup, opts ...grpc.CallOption) (*MsgGovSetEmergencyGroupResponse, error)
 }
 
@@ -273,7 +273,7 @@ func (c *msgClient) GovSetEmergencyGroup(ctx context.Context, in *MsgGovSetEmerg
 type MsgServer interface {
 	// GovUpdateMinGasPrice sets protocol controlled tx min fees.
 	GovUpdateMinGasPrice(context.Context, *MsgGovUpdateMinGasPrice) (*MsgGovUpdateMinGasPriceResponse, error)
-	// GovSetEmergencyGroup sets protocol controlled tx min fees.
+	// GovSetEmergencyGroup sets emergency group address.
 	GovSetEmergencyGroup(context.Context, *MsgGovSetEmergencyGroup) (*MsgGovSetEmergencyGroupResponse, error)
 }
 

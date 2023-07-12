@@ -1,12 +1,13 @@
 package setup
 
 import (
+	"github.com/cosmos/go-bip39"
+	appparams "github.com/umee-network/umee/v5/app/params"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/go-bip39"
-	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 const (
@@ -19,7 +20,7 @@ const (
 
 	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
 	PriceFeederServerPort     = "7171/tcp"
-	PriceFeederMaxStartupTime = 20 // seconds
+	PriceFeederMaxStartupTime = 60 // seconds
 )
 
 var (

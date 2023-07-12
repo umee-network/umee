@@ -14,10 +14,10 @@ import (
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	"github.com/umee-network/umee/v5/app/params"
 	"gotest.tools/v3/assert"
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
@@ -137,7 +137,7 @@ type IntegrationTestSuite struct {
 
 	codeID       uint64
 	contractAddr string
-	encfg        params.EncodingConfig
+	encfg        testutil.TestEncodingConfig
 }
 
 func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
@@ -156,7 +156,7 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	s.T = t
 	s.app = app
 	s.ctx = ctx
-	s.wasmMsgServer = wasmkeeper.NewMsgServerImpl(wasmkeeper.NewDefaultPermissionKeeper(app.WasmKeeper))
+	s.wasmMsgServer = wasmkeeper.NewMsgServerImpl(&app.WasmKeeper)
 	querier := app.GRPCQueryRouter()
 	wasmtypes.RegisterMsgServer(querier, s.wasmMsgServer)
 

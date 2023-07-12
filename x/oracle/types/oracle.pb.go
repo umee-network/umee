@@ -6,9 +6,9 @@ package types
 import (
 	fmt "fmt"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
+	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
 	_ "google.golang.org/protobuf/types/known/durationpb"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
@@ -606,7 +606,7 @@ func (m *AvgCounterParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	n1, err1 := github_com_gogo_protobuf_types.StdDurationMarshalTo(m.AvgShift, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdDuration(m.AvgShift):])
+	n1, err1 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.AvgShift, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.AvgShift):])
 	if err1 != nil {
 		return 0, err1
 	}
@@ -614,7 +614,7 @@ func (m *AvgCounterParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i = encodeVarintOracle(dAtA, i, uint64(n1))
 	i--
 	dAtA[i] = 0x12
-	n2, err2 := github_com_gogo_protobuf_types.StdDurationMarshalTo(m.AvgPeriod, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdDuration(m.AvgPeriod):])
+	n2, err2 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.AvgPeriod, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.AvgPeriod):])
 	if err2 != nil {
 		return 0, err2
 	}
@@ -813,7 +813,7 @@ func (m *AvgCounter) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.Start, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.Start):])
+	n3, err3 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.Start, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Start):])
 	if err3 != nil {
 		return 0, err3
 	}
@@ -900,9 +900,9 @@ func (m *AvgCounterParams) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = github_com_gogo_protobuf_types.SizeOfStdDuration(m.AvgPeriod)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.AvgPeriod)
 	n += 1 + l + sovOracle(uint64(l))
-	l = github_com_gogo_protobuf_types.SizeOfStdDuration(m.AvgShift)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.AvgShift)
 	n += 1 + l + sovOracle(uint64(l))
 	return n
 }
@@ -992,7 +992,7 @@ func (m *AvgCounter) Size() (n int) {
 	if m.Num != 0 {
 		n += 1 + sovOracle(uint64(m.Num))
 	}
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.Start)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.Start)
 	n += 1 + l + sovOracle(uint64(l))
 	return n
 }
@@ -1414,7 +1414,7 @@ func (m *AvgCounterParams) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdDurationUnmarshal(&m.AvgPeriod, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.AvgPeriod, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1447,7 +1447,7 @@ func (m *AvgCounterParams) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdDurationUnmarshal(&m.AvgShift, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.AvgShift, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -2081,7 +2081,7 @@ func (m *AvgCounter) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.Start, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.Start, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

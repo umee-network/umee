@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	tmcli "github.com/cometbft/cometbft/libs/cli"
+	"gotest.tools/v3/assert"
+
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"gotest.tools/v3/assert"
 )
 
 type E2ESuite struct {
@@ -85,7 +86,7 @@ func (s *E2ESuite) RunTransaction(tx TestTransaction) {
 		fmt.Sprintf("--%s=%s", flags.FlagFrom, s.Network.Validators[0].Address),
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 		fmt.Sprintf("--%s=true", flags.FlagSkipConfirmation),
-		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastBlock),
+		fmt.Sprintf("--%s=%s", flags.FlagBroadcastMode, flags.BroadcastSync),
 		fmt.Sprintf("--%s=%s", flags.FlagGas, "10000000"),
 		fmt.Sprintf("--%s=%s", flags.FlagFees, "1000000uumee"),
 	}

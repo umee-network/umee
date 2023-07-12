@@ -35,7 +35,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
-	appparams "github.com/umee-network/umee/v5/app/params"
 )
 
 // GenesisState of the blockchain is represented here as a map of raw json
@@ -306,7 +305,8 @@ func appExportAndImport(t *testing.T) (
 	dbm.DB, string, *umeeapp.UmeeApp, log.Logger, servertypes.ExportedApp, bool, dbm.DB, string, *umeeapp.UmeeApp,
 	simtypes.Config,
 ) {
-	config, db, dir, logger, skip, err := simtestutil.SetupSimulation("leveldb-app-sim", "Simulation")
+	config := simcli.NewConfigFromFlags()
+	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", false, true)
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -321,7 +321,6 @@ func appExportAndImport(t *testing.T) (
 		map[int64]bool{},
 		dir,
 		simcli.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),
 		umeeapp.EmptyWasmOpts,
@@ -353,12 +352,12 @@ func appExportAndImport(t *testing.T) (
 
 	fmt.Printf("exporting genesis...\n")
 
-	exported, err := app.ExportAppStateAndValidators(false, []string{})
+	exported, err := app.ExportAppStateAndValidators(false, []string{}, []string{})
 	assert.NilError(t, err)
 
 	fmt.Printf("importing genesis...\n")
 
-	config, newDB, newDir, _, _, err := simtestutil.SetupSimulation("leveldb-app-sim-2", "Simulation-2")
+	newDB, newDir, _, _, err := simtestutil.SetupSimulation(config, "leveldb-app-sim-2", "Simulation-2", false, true)
 	assert.NilError(t, err, "simulation setup failed")
 
 	newApp := umeeapp.New(
@@ -369,7 +368,6 @@ func appExportAndImport(t *testing.T) (
 		map[int64]bool{},
 		newDir,
 		simcli.FlagPeriodValue,
-		umeeapp.MakeEncodingConfig(),
 		umeeapp.EmptyAppOptions{},
 		umeeapp.GetWasmEnabledProposals(),
 		umeeapp.EmptyWasmOpts,

@@ -10,13 +10,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmos/gogoproto/proto"
+	"github.com/ory/dockertest/v3/docker"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/gogo/protobuf/proto"
-	"github.com/ory/dockertest/v3/docker"
 
 	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
 	"github.com/umee-network/umee/v5/x/uibc"

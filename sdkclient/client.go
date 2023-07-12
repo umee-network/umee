@@ -5,6 +5,7 @@ import (
 	"time"
 
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/v5/sdkclient/query"
@@ -51,5 +52,5 @@ func (c Client) QueryTimeout() time.Duration {
 }
 
 func (c Client) TmClient() rpcclient.Client {
-	return c.Tx.ClientContext.Client.(rpcclient.Client)
+	return c.Tx.ClientContext.Client.(*rpchttp.HTTP)
 }
