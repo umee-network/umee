@@ -104,7 +104,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initValidatorConfigs()
 	s.runValidators()
 	if !s.MinNetwork {
-		s.runPriceFeeder()
+		// s.runPriceFeeder()
 		s.runGaiaNetwork()
 		s.runIBCRelayer()
 	} else {
@@ -343,6 +343,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
 		appConfig.MinGasPrices = minGasPrice
+		appConfig.GRPC.Address = "0.0.0.0:9090"
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
@@ -510,7 +511,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 	s.HermesResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
 			Name:       "umee-gaia-relayer",
-			Repository: "ghcr.io/umee-network/hermes-e2e",
+			Repository: "ghcr.io/umee-network/hermes-e2e", //"informalsystems/hermes", //
 			Tag:        "latest",
 			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
@@ -526,7 +527,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.GaiaResource.Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.ValResources[1].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.ValResources[0].Container.Name[1:]),
 			},
 			Entrypoint: []string{
 				"sh",
@@ -618,7 +619,7 @@ func (s *E2ETestSuite) runPriceFeeder() {
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
 		if err != nil {
-			s.T().Log("Price feeder endpoint not available", err)
+			s.T().Log("Price feeder endpoint not available", err, endpoint)
 			return false
 		}
 
@@ -708,13 +709,17 @@ func (s *E2ETestSuite) connectIBCChains() {
 			"hermes",
 			"create",
 			"channel",
-			s.Chain.ID,
-			GaiaChainID,
-			"--port-a=transfer",
-			"--port-b=transfer",
+			"--a-chain=" + s.Chain.ID,  // chain-PXbLU5
+			"--b-chain=" + GaiaChainID, // test-gaia-chain
+			"--a-port=transfer",
+			"--b-port=transfer",
+			"--new-client-connection",
+			"--yes",
 		},
-	})
+	}) // hermes create channel chain-PXbLU5 test-gaia-chain --port-a=transfer --port-b=transfer
 	s.Require().NoError(err)
+
+	// hermes create channel --a-chain chain-c7cA0e --b-chain test-gaia-chain --a-port transfer --b-port transfer --new-client-connection --yes
 
 	var (
 		outBuf bytes.Buffer

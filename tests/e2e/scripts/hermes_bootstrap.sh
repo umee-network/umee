@@ -51,7 +51,7 @@ key_name = 'val01-umee'
 store_prefix = 'ibc'
 max_gas = 6000000
 gas_price = { price = 0.05, denom = 'uumee' }
-gas_adjustment = 1.0
+gas_multiplier = 2
 clock_drift = '1m' # to accommodate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
@@ -67,15 +67,18 @@ key_name = 'val01-gaia'
 store_prefix = 'ibc'
 max_gas = 6000000
 gas_price = { price = 0.001, denom = 'stake' }
-gas_adjustment = 1.0
+gas_multiplier = 2
 clock_drift = '1m' # to accommodate docker containers
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
 EOF
 
+echo $UMEE_E2E_GAIA_VAL_MNEMONIC > gaia_val_mnemonic.txt
+echo $UMEE_E2E_UMEE_VAL_MNEMONIC > umee_val_mnemonic.txt
+
 # import gaia and umee keys
-hermes keys restore ${UMEE_E2E_GAIA_CHAIN_ID} -n "val01-gaia" -m "${UMEE_E2E_GAIA_VAL_MNEMONIC}"
-hermes keys restore ${UMEE_E2E_UMEE_CHAIN_ID} -n "val01-umee" -m "${UMEE_E2E_UMEE_VAL_MNEMONIC}"
+hermes keys add --chain ${UMEE_E2E_GAIA_CHAIN_ID} --key-name "val01-gaia" --mnemonic-file gaia_val_mnemonic.txt
+hermes keys add --chain ${UMEE_E2E_UMEE_CHAIN_ID} --key-name "val01-umee" --mnemonic-file umee_val_mnemonic.txt
 
 # start Hermes relayer
 hermes start

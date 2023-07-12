@@ -18,9 +18,9 @@ const (
 	EthChainID uint = 15
 	EthMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"
 
-	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
+	PriceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-ojo" // "ghcr.io/umee-network/price-feeder-umee"
 	PriceFeederServerPort     = "7171/tcp"
-	PriceFeederMaxStartupTime = 60 // seconds
+	PriceFeederMaxStartupTime = 20 // seconds
 )
 
 var (
