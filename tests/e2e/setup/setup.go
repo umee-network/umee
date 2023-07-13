@@ -104,7 +104,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initValidatorConfigs()
 	s.runValidators()
 	if !s.MinNetwork {
-		// s.runPriceFeeder()
+		s.runPriceFeeder()
 		s.runGaiaNetwork()
 		s.runIBCRelayer()
 	} else {
@@ -342,6 +342,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
+		appConfig.API.Address = "tcp://0.0.0.0:1317"
 		appConfig.MinGasPrices = minGasPrice
 		appConfig.GRPC.Address = "0.0.0.0:9090"
 
@@ -739,7 +740,7 @@ func (s *E2ETestSuite) connectIBCChains() {
 
 	s.Require().Containsf(
 		errBuf.String(),
-		"successfully opened init channel",
+		"connection handshake already finished for Connection",
 		"failed to connect chains via IBC: %s", errBuf.String(),
 	)
 

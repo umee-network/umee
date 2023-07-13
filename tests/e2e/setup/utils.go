@@ -39,13 +39,12 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 	cmd := []string{
 		"hermes",
 		"tx",
-		"raw",
 		"ft-transfer",
-		dstChainID,
-		srcChainID,
-		"transfer",  // source chain port ID
-		"channel-0", // since only one connection/channel exists, assume 0
-		token.Amount.String(),
+		"--dst-chain=" + dstChainID,
+		"--src-chain=" + srcChainID,
+		"--src-port=transfer",     // source chain port ID
+		"--src-channel=channel-0", // since only one connection/channel exists, assume 0
+		"--amount=" + token.Amount.String(),
 		fmt.Sprintf("--denom=%s", token.Denom),
 		"--timeout-height-offset=1000",
 	}

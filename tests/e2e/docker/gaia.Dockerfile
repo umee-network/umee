@@ -1,5 +1,5 @@
 FROM golang:1.20-alpine
-ARG GAIA_VERSION=v5.0.7
+ARG GAIA_VERSION=v10.0.2
 
 ENV PACKAGES curl make git libc-dev bash gcc linux-headers
 RUN apk add --no-cache $PACKAGES

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -190,7 +191,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// resend the umee token from gaia to umee
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewInt64Coin(umeeIBCHash, token.Amount.Int64()))
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdk.ZeroInt())
-
 	})
 
 	// IBC inbound transfer of non x/leverage registered tokens must fail, because
