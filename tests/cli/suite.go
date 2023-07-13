@@ -8,6 +8,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/testutil"
 	clitestutil "github.com/cosmos/cosmos-sdk/testutil/cli"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -91,16 +92,29 @@ func (s *E2ESuite) RunTransaction(tx TestTransaction) {
 		fmt.Sprintf("--%s=%s", flags.FlagFees, "1000000uumee"),
 	}
 
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, tx.Command, append(tx.Args, txFlags...))
-	assert.NilError(s.T, err, tx.Name)
+	var (
+		out testutil.BufferWriter
+		err error
+	)
 
-	resp := &sdk.TxResponse{}
-	err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp)
-	assert.NilError(s.T, err, tx.Name)
+	err = s.Network.RetryForBlocks(func() error {
+		out, err = clitestutil.ExecTestCLICmd(clientCtx, tx.Command, append(tx.Args, txFlags...))
+		if err != nil {
+			return err
+		}
 
-	if tx.ExpectedErr == nil {
-		assert.Equal(s.T, 0, int(resp.Code), "msg: %s\nresp: %s", tx.Name, resp)
-	} else {
-		assert.Equal(s.T, int(tx.ExpectedErr.ABCICode()), int(resp.Code), tx.Name)
-	}
+		resp := &sdk.TxResponse{}
+		if err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), resp); err != nil {
+			return err
+		}
+
+		expectedCode := uint32(0)
+		if tx.ExpectedErr != nil {
+			expectedCode = tx.ExpectedErr.ABCICode()
+		}
+
+		return clitestutil.CheckTxCode(s.Network, clientCtx, resp.TxHash, expectedCode)
+	}, 2)
+
+	assert.NilError(s.T, err, tx.Name)
 }

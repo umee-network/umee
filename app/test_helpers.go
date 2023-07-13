@@ -18,6 +18,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -295,7 +296,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	}
 
 	votingPeriod := time.Minute
-	govGenState.VotingParams.VotingPeriod = &votingPeriod
+	govGenState.Params.VotingPeriod = &votingPeriod
 
 	bz, err = cdc.MarshalJSON(&govGenState)
 	if err != nil {
@@ -415,6 +416,7 @@ func NewTestNetworkFixture() network.TestFixture {
 			EmptyWasmOpts,
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 			baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
+			baseapp.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),
 		)
 	}
 
