@@ -53,3 +53,19 @@ func (m msgServer) GovSetEmergencyGroup(ctx context.Context, msg *ugov.MsgGovSet
 
 	return &ugov.MsgGovSetEmergencyGroupResponse{}, nil
 }
+
+// GovUpdateLiquidationParams implements ugov.MsgServer.
+func (m msgServer) GovUpdateLiquidationParams(ctx context.Context, msg *ugov.MsgGovUpdateLiquidationParams) (
+	*ugov.GovUpdateLiquidationParamsResponse, error) {
+	sdkCtx, err := sdkutil.StartMsg(ctx, msg)
+	if err != nil {
+		return nil, err
+	}
+
+	err = m.kb.Keeper(&sdkCtx).SetLiquidationParams(msg.LiquidationParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ugov.GovUpdateLiquidationParamsResponse{}, nil
+}

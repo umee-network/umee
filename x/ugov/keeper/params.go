@@ -5,6 +5,7 @@ import (
 
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/store"
+	"github.com/umee-network/umee/v5/x/ugov"
 )
 
 func (k Keeper) SetMinGasPrice(p sdk.DecCoin) error {
@@ -25,4 +26,16 @@ func (k Keeper) SetEmergencyGroup(p sdk.AccAddress) {
 
 func (k Keeper) EmergencyGroup() sdk.AccAddress {
 	return store.GetAddress(k.store, keyEmergencyGroup)
+}
+
+func (k Keeper) SetLiquidationParams(lp ugov.LiquidationParams) error {
+	return store.SetValue(k.store, KeyLiquidationParams, &lp, "liquidation_params")
+}
+
+func (k Keeper) LiquidationParams() ugov.LiquidationParams {
+	lp := store.GetValue[*ugov.LiquidationParams](k.store, KeyLiquidationParams, "liquidation_params")
+	if lp == nil {
+		return ugov.LiquidationParams{}
+	}
+	return *lp
 }

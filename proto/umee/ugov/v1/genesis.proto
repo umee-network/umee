@@ -3,7 +3,9 @@ package umee.ugov.v1;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/duration.proto";
 import "cosmos_proto/cosmos.proto";
+import "umee/ugov/v1/ugov.proto";
 
 option go_package                      = "github.com/umee-network/umee/v5/x/ugov";
 option (gogoproto.goproto_getters_all) = false;
@@ -14,4 +16,7 @@ message GenesisState {
 
   // Emergency Group address
   string emergency_group = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // LiquidationParams is params for new liquidation inflation rate params  for staking denoms
+  LiquidationParams liquidation_params = 3 [(gogoproto.nullable) = false];
 }

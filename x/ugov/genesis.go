@@ -7,10 +7,15 @@ import (
 // DefaultGenesis creates a default genesis state
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		MinGasPrice: coin.UmeeDec("0.1"),
+		MinGasPrice:       coin.UmeeDec("0.1"),
+		LiquidationParams: DefaultLiquidationParams(),
 	}
 }
 
 func (gs *GenesisState) Validate() error {
-	return gs.MinGasPrice.Validate()
+	if err := gs.MinGasPrice.Validate(); err != nil {
+		return err
+	}
+
+	return gs.LiquidationParams.Validate()
 }

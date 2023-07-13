@@ -22,6 +22,7 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		QueryMinGasPrice(),
+		QueryLiquidationParams(),
 	)
 
 	return cmd
@@ -41,6 +42,29 @@ func QueryMinGasPrice() *cobra.Command {
 
 			queryClient := ugov.NewQueryClient(clientCtx)
 			resp, err := queryClient.MinGasPrice(cmd.Context(), &ugov.QueryMinGasPrice{})
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// QueryLiquidationParams create the Msg/QueryLiquidationParams CLI.
+func QueryLiquidationParams() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "liquidation-params",
+		Args:  cobra.NoArgs,
+		Short: "Query the liquidation params",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := ugov.NewQueryClient(clientCtx)
+			resp, err := queryClient.LiquidationParams(cmd.Context(), &ugov.QueryLiquidationParams{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

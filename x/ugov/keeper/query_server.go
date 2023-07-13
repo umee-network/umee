@@ -21,14 +21,18 @@ func NewQuerier(kb Builder) Querier {
 // MinTxFees returns minimum transaction fees.
 func (q Querier) MinGasPrice(ctx context.Context, _ *ugov.QueryMinGasPrice) (*ugov.QueryMinGasPriceResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return &ugov.QueryMinGasPriceResponse{MinGasPrice: q.Keeper(&sdkCtx).MinGasPrice()},
-		nil
+	return &ugov.QueryMinGasPriceResponse{MinGasPrice: q.Keeper(&sdkCtx).MinGasPrice()}, nil
 }
 
 func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup,
 ) (*ugov.QueryEmergencyGroupResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return &ugov.QueryEmergencyGroupResponse{
-			EmergencyGroup: q.Keeper(&sdkCtx).EmergencyGroup().String()},
-		nil
+	return &ugov.QueryEmergencyGroupResponse{EmergencyGroup: q.Keeper(&sdkCtx).EmergencyGroup().String()}, nil
+}
+
+// LiquidationParams returns liquidation params
+func (q Querier) LiquidationParams(ctx context.Context, _ *ugov.QueryLiquidationParams) (
+	*ugov.QueryLiquidationParamsResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	return &ugov.QueryLiquidationParamsResponse{LiquidationParams: q.Keeper(&sdkCtx).LiquidationParams()}, nil
 }

@@ -1,0 +1,29 @@
+syntax = "proto3";
+package umee.ugov.v1;
+
+import "gogoproto/gogo.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/duration.proto";
+import "cosmos_proto/cosmos.proto";
+
+option go_package                      = "github.com/umee-network/umee/v5/x/ugov";
+option (gogoproto.goproto_getters_all) = false;
+
+// LiquidationParams
+message LiquidationParams {
+  // max_supply is the maximum supply for liquidation.
+  cosmos.base.v1beta1.Coin max_supply = 1 [(gogoproto.nullable) = false];
+  // inflation_cycle_duration is duration for changing the inflation rates for liquidation.
+  google.protobuf.Duration inflation_cycle_duration = 2 [
+    (gogoproto.nullable)    = false,
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag)     = "inflation_cycle_duration,omitempty",
+    (gogoproto.moretags)    = "yaml:\"inflation_cycle_duration\""
+  ];
+  // inflation_reduction_rate is reduction rate for inflation every inflation cycle.
+  string inflation_reduction_rate = 3 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+}

@@ -5,6 +5,7 @@ import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "umee/ugov/v1/ugov.proto";
 
 option go_package = "github.com/umee-network/umee/v5/x/ugov";
 
@@ -20,6 +21,11 @@ service Query {
   // EmergencyGroup returns emergency group address
   rpc EmergencyGroup(QueryEmergencyGroup) returns (QueryEmergencyGroupResponse) {
     option (google.api.http).get = "/umee/ugov/v1/emergency-group";
+  }
+
+  // LiquidationParams
+  rpc LiquidationParams(QueryLiquidationParams) returns (QueryLiquidationParamsResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/liquidation-params";
   }
 }
 
@@ -37,4 +43,12 @@ message QueryEmergencyGroup {}
 // QueryEmergencyGroupResponse response type.
 message QueryEmergencyGroupResponse {
   string emergency_group = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// QueryLiquidationParams request type.
+message QueryLiquidationParams {}
+
+// QueryLiquidationParamsResponse response type.
+message QueryLiquidationParamsResponse {
+  LiquidationParams liquidation_params = 1 [(gogoproto.nullable) = false];
 }
