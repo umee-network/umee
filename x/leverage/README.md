@@ -21,7 +21,6 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [Supply Utilization](#supply-utilization)
      - [Token Price](#token-price)
      - [Borrow Limit](#borrow-limit)
-     - [Borrow Factor](#borrow-factor)
      - [Liquidation Threshold](#liquidation-threshold)
      - [Borrow APY](#borrow-apy)
      - [Supplying APY](#supplying-apy)
@@ -164,6 +163,7 @@ The spot price is the price which was voted on by validators during the most rec
 The historic price is basically a median price for the asset over a given time period requested by the leverage module (`3 hours * Token.HistoricMedians`). For assets which do not user historic medians, the historic price simply returns the spot price.
 
 Often the leverage module will select from both prices when deriving important values. For example:
+
 - `PriceModeSpot` is used for most queries as well as liquidation transactions.
 - `PriceModeHigh` takes the higher of spot and historic prices, and is used primarily to calculated borrowed value.
 - `PriceModeLow` takes the lower of the two prices, and it used to calculate collateral value during borrow limit calculations.
