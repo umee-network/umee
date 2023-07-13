@@ -19,6 +19,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [Adjusted Borrow Amounts](#adjusted-borrow-amounts)
      - [uToken Exchange Rate](#utoken-exchange-rate)
      - [Supply Utilization](#supply-utilization)
+     - [Token Price](#token-price)
      - [Borrow Limit](#borrow-limit)
      - [Borrow Factor](#borrow-factor)
      - [Liquidation Threshold](#liquidation-threshold)
@@ -154,46 +155,43 @@ Supply utilization of a token denomination is calculated as:
 
 Supply utilization ranges between zero and one in general. In edge cases where `ReservedAmount(denom) > ModuleBalance(denom)`, utilization is taken to be `1.0`.
 
+#### Token Price
+
+The leverage module makes use of the oracle's spot prices and historic prices for all assets.
+
+The spot price is the price which was voted on by validators during the most recent window (usually 30 seconds). If voting failed, this price will not exist.
+
+The historic price is basically a median price for the asset over a given time period requested by the leverage module (`3 hours * Token.HistoricMedians`). For assets which do not user historic medians, the historic price simply returns the spot price.
+
+Often the leverage module will select from both prices when deriving important values. For example:
+- `PriceModeSpot` is used for most queries as well as liquidation transactions.
+- `PriceModeHigh` takes the higher of spot and historic prices, and is used primarily to calculated borrowed value.
+- `PriceModeLow` takes the lower of the two prices, and it used to calculate collateral value during borrow limit calculations.
+
+Transactions will also have different behaviors when encountering missing spot or historic prices, either failing immediately, proceeding with the missing price interpreted as zero, or executing a safer version of the transaction which does not require the price in question.
+
 #### Borrow Limit
 
 Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
 
-A user's borrow limit is the sum of the contributions from each denomination of collateral they have deposited.
+A user's borrow limit is the sum of the contributions from each denomination of collateral they have deposited, with some modifications.
 
-```go
-  collateral := GetBorrowerCollateral(borrower) // sdk.Coins
-  for _, coin := range collateral {
-    borrowLimit += GetCollateralWeight(coin.Denom) * TokenValue(coin) // TokenValue is in usd
-  }
-```
+The full calculation of a user's borrow limit is as follows:
 
-For tokens with hith historic prices enabled (indicated by a `HistoricMedians` parameter greater than zero), each collateral `TokenValue` is computed with `PriceModeLow`, i.e. the lower of either spot price or historic price is used.
+1. Calculate the USD value of the user's collateral assets, using the _lower_ of either spot price or historic price for each asset. Collateral with missing prices is treated as zero-valued.
+2. Calculate the USD value of the user's borrowed assets, using the _higher_ of either spot price or historic price for each asset. Borrowed assets with missing prices cause any transaction which could increased borrowed value or decrease borrow limit to fail.
+3. Find the average (weighted by collateralized value) of the `CollateralWeight` of the user's collateral assets.
+4. Find the average (weighted by borrowed value) of the `CollateralWeight` of the user's borrowed assets. This usage of collateral weight is called `Borrow Factor`.
+5. ---TODO--- favored asset pairs affect both borrow factor and collateral weight before the minimum is taken. Also liquidation threshold possibly.
+6. Find the _minimum_ of the average collateral weights found above. This is the user's `Effective Collateral Weight`.
 
-#### Borrow Factor
+#### Favored Asset Pairs
 
-Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
+The leverage module can define pairs of assets which are advantaged when one is used as collateral to borrow the other.
 
-An implied parameter `BorrowFactor` is derived from `CollateralWeight` - specifically, it is the minimum of `2.0` and `1/CollateralWeight`.
-The maximum borrow factor of `2.0` allows risky or non-collateral assets (`0 <= CollateralWeight < 0.5`) to be borrowed to a certain minimum degree.
+They are defined in the form `[Asset A, Asset B, Favored Collateral Weight]`. In effect, this means that
 
-When a user is borrowing, their borrow limit is whichever is more restrictive of the following two rules:
-
-- Borrowed value must be less than collateral value times `CollateralWeight` (sum over each collateral asset)
-- Borrowed value times `BorrowFactor` (sum over each borrowed asset) must be less than collateral value.
-
-This means that when the original borrow limit based on collateral weight would allow a higher quality collateral to borrow a risky asset with a small margin of safety, the user's effective collateral weight is reduced to that of the riskier asset.
-(Or `0.5` at the minimum.)
-
-#### Historic Borrow Limit, Value
-
-The leverage module also makes use of the oracle's historic prices to enforce an additional restriction on borrowing.
-
-The logic is:
-
-- For any `MsgBorrow`, `MsgMaxBorrow`, `MsgDecollateralize`, `MsgWithdraw`, or `MsgMaxWithdraw`
-- The borrower’s borrowed value must be less than their borrow limit, with borrowed value being computed using `PriceModeHigh`, i.e. the higher of either spot price or historic price is used.
-- Where historic prices are defined as the Median of the last `N` historic medians from the `oracle` module with `N = Token.HistoricMedians` in the leverage registry
-- Else the transaction fails
+> When collateral of `Asset A` exists on the same account as borrowed `Asset B`, the `CollateralWeight` of `Asset A` is replaced by `Favored Collateral Weight` when computing collateral weights, and the `CollateralWeight` of `Asset B` is replaced by `Favored Collateral Weight` when computing `Borrow Factor`.
 
 #### Liquidation Threshold
 
