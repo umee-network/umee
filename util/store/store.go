@@ -70,6 +70,7 @@ func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errFi
 // GetObject gets and unmarshals a structure from KVstore. Panics on failure to decode, and returns a boolean
 // indicating whether any data was found. If the return is false, the object might not be initialized with
 // valid zero values for its type.
+// Deprecated: use GetValue instead.
 func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)
@@ -83,6 +84,7 @@ func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.Prot
 }
 
 // SetObject marshals and sets a structure in KVstore. Returns error on failure to encode.
+// Deprecated: use SetValue instead.
 func SetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
 	bz, err := cdc.Marshal(object)
 	if err != nil {
