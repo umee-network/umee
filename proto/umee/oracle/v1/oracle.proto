@@ -3,6 +3,7 @@ package umee.oracle.v1;
 
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
 
 option go_package = "github.com/umee-network/umee/v5/x/oracle/types";
 
@@ -55,6 +56,24 @@ message Params {
   // Maximum Median Stamps represents the maximum amount of medians the
   // oracle module will store before pruning via FIFO.
   uint64 maximum_median_stamps = 12;
+}
+
+// AvgCounterParams - Historic avg counter params
+message AvgCounterParams {
+  // avg_period
+  google.protobuf.Duration avg_period = 1 [
+    (gogoproto.nullable)    = false,
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag)     = "avg_period,omitempty",
+    (gogoproto.moretags)    = "yaml:\"avg_period\""
+  ];
+  // avg shift
+  google.protobuf.Duration avg_shift = 2 [
+    (gogoproto.nullable)    = false,
+    (gogoproto.stdduration) = true,
+    (gogoproto.jsontag)     = "avg_shift,omitempty",
+    (gogoproto.moretags)    = "yaml:\"avg_shift\""
+  ];
 }
 
 // Denom - the object to hold configurations of each denom

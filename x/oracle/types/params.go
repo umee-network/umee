@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	time "time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -18,6 +19,8 @@ var (
 const (
 	MaxVoteThresholdPrecision  = 2
 	MaxVoteThresholdMultiplier = 100 // must be 10^MaxVoteThresholdPrecision
+	DefaultAvgPeriod           = time.Hour * 16
+	DefaultAvgShift            = time.Hour * 2
 )
 
 // Parameter keys
@@ -34,6 +37,7 @@ var (
 	KeyMedianStampPeriod        = []byte("MedianStampPeriod")
 	KeyMaximumPriceStamps       = []byte("MaximumPriceStamps")
 	KeyMaximumMedianStamps      = []byte("MedianStampAmount")
+	KeyHistoricAvgCounterParams = []byte("HistoricAvgCounterParams")
 )
 
 var _ paramstypes.ParamSet = &Params{}

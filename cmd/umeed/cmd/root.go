@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"os"
-	"strings"
 
-	bridgecmd "github.com/Gravity-Bridge/Gravity-Bridge/module/cmd/gravity/cmd"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -141,15 +139,6 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 	//
 	// 1. The standard one provided by the SDK, mainly motivated for testing
 	// and local network purposes.
-	// 2. The Gravity Bridge variant which allows validators to provide key
-	// delegation material.
-	bridgeGenTxCmd := bridgecmd.GenTxCmd(
-		a.moduleManager,
-		a.encCfg.TxConfig,
-		banktypes.GenesisBalancesIterator{},
-		umeeapp.DefaultNodeHome,
-	)
-	bridgeGenTxCmd.Use = strings.Replace(bridgeGenTxCmd.Use, "gentx", "gentx-gravity", 1)
 
 	gentxModule := a.moduleManager[genutiltypes.ModuleName].(genutil.AppModuleBasic)
 	gentxModule.GenTxValidator = umeeapp.GenTxValidator
@@ -165,7 +154,6 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 			banktypes.GenesisBalancesIterator{},
 			umeeapp.DefaultNodeHome,
 		),
-		bridgeGenTxCmd,
 		genutilcli.ValidateGenesisCmd(a.moduleManager),
 		addGenesisAccountCmd(umeeapp.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),

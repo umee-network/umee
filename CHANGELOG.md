@@ -46,7 +46,26 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-## [v5.1.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.0.0-rc1) - 2023-06-30
+### Features
+
+- [2129](https://github.com/umee-network/umee/pull/2129) Emergency Group x/ugov proto.
+- [2146](https://github.com/umee-network/umee/pull/2146) Add store GetTimeMs and SetTimeMs.
+
+### Improvements
+
+- [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
+
+### API Breaking
+
+- [2140](https://github.com/umee-network/umee/pull/2140)
+
+## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
+
+### Bug Fixes
+
+- [2125](https://github.com/umee-network/umee/pull/2125) Fix v5.1 upgrade handler.
+
+## [v5.1.0-rc1](https://github.com/umee-network/umee/releases/tag/v5.1.0-rc1) - 2023-06-30
 
 ### Features
 

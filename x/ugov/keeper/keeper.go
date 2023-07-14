@@ -13,7 +13,8 @@ type Builder struct {
 }
 
 func NewKeeperBuilder(
-	cdc codec.BinaryCodec, key storetypes.StoreKey) Builder {
+	cdc codec.BinaryCodec, key storetypes.StoreKey,
+) Builder {
 	return Builder{
 		Cdc:      cdc,
 		storeKey: key,

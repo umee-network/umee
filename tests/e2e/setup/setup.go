@@ -14,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
@@ -53,12 +52,9 @@ type E2ETestSuite struct {
 	HermesResource      *dockertest.Resource
 	priceFeederResource *dockertest.Resource
 	ValResources        []*dockertest.Resource
-	OrchResources       []*dockertest.Resource
-	GravityContractAddr string
 	Umee                client.Client
 	cdc                 codec.Codec
 	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
-
 }
 
 func (s *E2ETestSuite) SetupSuite() {
@@ -159,23 +155,13 @@ func (s *E2ETestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
-	// Gravity Bridge
-	var gravityGenState gravitytypes.GenesisState
-	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
-
-	gravityGenState.Params.BridgeChainId = uint64(EthChainID)
-
-	bz, err := s.cdc.MarshalJSON(&gravityGenState)
-	s.Require().NoError(err)
-	appGenState[gravitytypes.ModuleName] = bz
-
 	var bech32GenState bech32ibctypes.GenesisState
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
 
 	// bech32
 	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
 
-	bz, err = s.cdc.MarshalJSON(&bech32GenState)
+	bz, err := s.cdc.MarshalJSON(&bech32GenState)
 	s.Require().NoError(err)
 	appGenState[bech32ibctypes.ModuleName] = bz
 

@@ -1,7 +1,6 @@
 package simulation
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +11,6 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
@@ -172,38 +170,8 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 			})
 		}
 
-		gravityStateBz, ok := rawState[gravitytypes.ModuleName]
-		if !ok {
-			panic("gravity genesis state is missing")
-		}
-
-		gravityState := new(gravitytypes.GenesisState)
-		if err := cdc.UnmarshalJSON(gravityStateBz, gravityState); err != nil {
-			panic(err)
-		}
-
-		delegateKeys := make([]gravitytypes.MsgSetOrchestratorAddress, 0, len(stakingState.Validators))
-		for _, val := range stakingState.Validators {
-			if val.Status != stakingtypes.Bonded {
-				dummyethaddr := hex.EncodeToString([]byte(val.OperatorAddress))
-				gravityEthAddr, err := gravitytypes.NewEthAddress("0x" + dummyethaddr[:40])
-				if err != nil {
-					panic(err)
-				}
-
-				delegateKeys = append(delegateKeys, *gravitytypes.NewMsgSetOrchestratorAddress(
-					val.GetOperator(),
-					sdk.AccAddress(val.GetOperator()),
-					*gravityEthAddr,
-				))
-			}
-		}
-
-		gravityState.DelegateKeys = delegateKeys
-
 		rawState[stakingtypes.ModuleName] = cdc.MustMarshalJSON(stakingState)
 		rawState[banktypes.ModuleName] = cdc.MustMarshalJSON(bankState)
-		rawState[gravitytypes.ModuleName] = cdc.MustMarshalJSON(gravityState)
 
 		appState, err := json.Marshal(rawState)
 		if err != nil {

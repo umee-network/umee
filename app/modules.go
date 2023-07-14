@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	gravitytypes "github.com/Gravity-Bridge/Gravity-Bridge/module/x/gravity/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -135,18 +134,13 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 }
 
 func GenTxValidator(msgs []sdk.Msg) error {
-	if n := len(msgs); n < 1 || n > 2 {
+	if n := len(msgs); n != 1 {
 		return fmt.Errorf(
 			"contains invalid number of messages; expected: 2 or 1; got: %d", n)
 	}
 
 	if err := assertMsgType[*stakingtypes.MsgCreateValidator](msgs[0], 0); err != nil {
 		return err
-	}
-	if len(msgs) > 1 {
-		if err := assertMsgType[*gravitytypes.MsgSetOrchestratorAddress](msgs[1], 1); err != nil {
-			return err
-		}
 	}
 
 	for i := range msgs {

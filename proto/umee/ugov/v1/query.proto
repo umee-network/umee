@@ -1,9 +1,10 @@
 syntax = "proto3";
 package umee.ugov.v1;
 
-import "google/api/annotations.proto";
-import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/umee-network/umee/v5/x/ugov";
 
@@ -15,6 +16,11 @@ service Query {
   rpc MinGasPrice(QueryMinGasPrice) returns (QueryMinGasPriceResponse) {
     option (google.api.http).get = "/umee/ugov/v1/min-gas-price";
   }
+
+  // EmergencyGroup returns emergency group address
+  rpc EmergencyGroup(QueryEmergencyGroup) returns (QueryEmergencyGroupResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/emergency-group";
+  }
 }
 
 // QueryMinGasPrice is a request type.
@@ -23,4 +29,12 @@ message QueryMinGasPrice {}
 // QueryMinGasPriceResponse response type.
 message QueryMinGasPriceResponse {
   cosmos.base.v1beta1.DecCoin min_gas_price = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryEmergencyGroup request type.
+message QueryEmergencyGroup {}
+
+// QueryEmergencyGroupResponse response type.
+message QueryEmergencyGroupResponse {
+  string emergency_group = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
