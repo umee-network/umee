@@ -3,8 +3,10 @@ package store
 import (
 	"math"
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
@@ -66,4 +68,21 @@ func TestSetAndGetAddress(t *testing.T) {
 
 	SetAddress(store, key, val)
 	assert.DeepEqual(t, val, GetAddress(store, key))
+}
+
+func TestGetAndSetTime(t *testing.T) {
+	t.Parallel()
+	store := tsdk.KVStore(t)
+	key := []byte("tKey")
+
+	_, err := GetTimeMs(store, key)
+	assert.ErrorIs(t, err, sdkerrors.ErrNotFound)
+
+	val := time.Now()
+	SetTimeMs(store, key, val)
+
+	val2, err := GetTimeMs(store, key)
+	assert.NilError(t, err)
+	val = val.Truncate(time.Millisecond)
+	assert.Equal(t, val, val2)
 }
