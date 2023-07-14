@@ -20,6 +20,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [uToken Exchange Rate](#utoken-exchange-rate)
      - [Supply Utilization](#supply-utilization)
      - [Token Price](#token-price)
+     - [Borrow Factor](#borrow-factor)
      - [Borrow Limit](#borrow-limit)
      - [Liquidation Threshold](#liquidation-threshold)
      - [Borrow APY](#borrow-apy)
@@ -56,24 +57,22 @@ uTokens do not have parameters like the `Token` struct does, and they are always
 
 Users have the following actions available to them:
 
-- Supply accepted asset types to the module, receiving _uTokens_ in exchange.
+- `MsgSupply` accepted asset types to the module, receiving _uTokens_ in exchange.
 
   Suppliers earn interest at an effective rate of the asset's [Supplying APY](#supplying-apy) as the [uToken Exchange Rate](#utoken-exchange-rate) increases over time.
 
-  Additionally, for assets denominations already enabled as collateral, the supplied assets immediately become collateral as well, causing their borrow limit to increase.
+- `MsgCollateralize` or `MsgDecollateralize` a uToken denomination as collateral for borrowing.
 
-  If a user is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be withdrawn until the user's borrows are healthy again.
+  Enabling _uTokens_ as collateral stores them in the `leverage` module account, so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot decollateralize a uToken if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
+
+  If the user is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be decollateralized until the user's borrows are healthy again.
+
+- `MsgSupplyCollateral` to combine the effects of `MsgSupply` and `MsgCollateralize`.
 
   Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly supplied assets will be eligible for liquidation immediately.
 
-- Enable or Disable (`MsgSetCollateral`) a uToken denomination as collateral for borrowing.
-
-  Enabling _uTokens_ as collateral stores them in the `leverage` module account, so they cannot be transferred while in use. Disabling _uTokens_ as collateral returns them to the user's account. A user cannot disable a uToken denomination if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
-
-  If the user is undercollateralized (borrowed value > borrow limit), enabled collateral is eligible for liquidation and cannot be disabled until the user's borrows are healthy again.
-
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
-  Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral-enabled uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
+  Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
 - `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdrawn.
   This amount is calculated taking into account the available uTokens and collateral the user has, their borrow limit, and the available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` of the `Token`.
@@ -88,11 +87,15 @@ Users have the following actions available to them:
 
   Repayments that exceed a borrower's amount owed in the selected denomination succeed at paying the reduced amount rather than failing outright.
 
-- `MsgLiquidate` undercollateralized borrows a different user whose total borrowed value is greater than their [Liquidation Threshold](#liquidation-threshold).
+- `MsgLiquidate` repays undercollateralized borrows of a different user whose total borrowed value is greater than their [Liquidation Threshold](#liquidation-threshold) and receives some of their collateral as a reward.
 
   The liquidator must select a reward denomination present in the borrower's uToken collateral. Liquidation is limited by [Close Factor](#close-factor) and available balances, and will succeed at a reduced amount rather than fail outright when possible.
 
-  If a borrower is way past their borrow limit, incentivized liquidation may exhaust all of their collateral and leave some debt behind. When liquidation exhausts the last of a borrower's collateral, its remaining debt is marked as _bad debt_ in the keeper, so it can be repaid using module reserves.
+  If a borrower is way past their borrow limit, incentivized liquidation may exhaust all of their collateral and leave some debt behind. When liquidation exhausts the last of a borrower's collateral, its remaining debt is marked as _bad debt_ in the module, so it can be repaid using reserves.
+
+- `MsgLeverageLiquidate` liquidates an account, but instead of repaying tokens using the liquidator's balance it borrows them instead. Additionally, the reward received is collateralized instantly.
+
+  This allows more convenient liquidation where the liquidator does not need to keep balances of all potential repay tokens on hand, and can instead leverage a single type of collateral.
 
 ### Reserves
 
@@ -170,32 +173,41 @@ Often the leverage module will select from both prices when deriving important v
 
 Transactions will also have different behaviors when encountering missing spot or historic prices, either failing immediately, proceeding with the missing price interpreted as zero, or executing a safer version of the transaction which does not require the price in question.
 
-#### Borrow Limit
+#### Borrow Factor
 
 Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
 
-A user's borrow limit is the sum of the contributions from each denomination of collateral they have deposited, with some modifications.
+Additionally, each token when borrowed uses its collateral weight to limit the average collateral weight of collateral assets on the same account.
+
+For example, an account with using a single collateral token with `CollateralWeight 0.8` borrowing an single token with `CollateralWeight 0.7` will reduce the effective `CollateralWeight` of the account's collateral to `0.7` when computing borrow limit.
+
+#### Special Asset Pairs
+
+The leverage module can define pairs of assets which are advantaged when one is used as collateral to borrow the other.
+
+They are defined in the form `[Asset A, Asset B, Special Collateral Weight]`. In effect, this means that
+
+> When collateral of `Asset A` exists on the same account as borrowed `Asset B`, the `CollateralWeight` of `Asset A` is replaced by `Special Collateral Weight` when computing collateral weights, and the `CollateralWeight` of `Asset B` is replaced by `Special Collateral Weight` when computing `Borrow Factor`.
+
+#### Borrow Limit
+
+A user's borrow limit is the sum of the contributions from each denomination of collateral they have deposited, with some modifications due to `Borrow Factor` and `Special Asset Pairs`.
 
 The full calculation of a user's borrow limit is as follows:
 
 1. Calculate the USD value of the user's collateral assets, using the _lower_ of either spot price or historic price for each asset. Collateral with missing prices is treated as zero-valued.
 2. Calculate the USD value of the user's borrowed assets, using the _higher_ of either spot price or historic price for each asset. Borrowed assets with missing prices cause any transaction which could increased borrowed value or decrease borrow limit to fail.
-3. Find the average (weighted by collateralized value) of the `CollateralWeight` of the user's collateral assets.
-4. Find the average (weighted by borrowed value) of the `CollateralWeight` of the user's borrowed assets. This usage of collateral weight is called `Borrow Factor`.
-5. ---TODO--- favored asset pairs affect both borrow factor and collateral weight before the minimum is taken. Also liquidation threshold possibly.
-6. Find the _minimum_ of the average collateral weights found above. This is the user's `Effective Collateral Weight`.
+3. If the part or all of a user's position matches any `Special Asset Pairs`, subtract them from the general totals above and set them aside. A borrowed or collateral asset matching multiple special pairs attempts to use the one with the highest `Special Collateral Weight` first.
+3. Find the average (weighted by collateralized value) of the `CollateralWeight` of the user's collateral assets from the general total. Also average in any collateral from special asset pairs found in step 3, as if they were contributions from a separate asset type with `Special Collateral Weight`.
+4. Find the average (weighted by borrowed value) of the `CollateralWeight` of the user's borrowed assets from the general total. Also average in any borrows from special asset pairs found in step 3, as if they were contributions from a separate asset type with `Special Collateral Weight`. This is for `Borrow Factor`.
+5. Find the _minimum_ of the average collateral weights found above. This is the user's `Effective Collateral Weight`.
+6. Multiply the user's total collateral value (before subtractions from step 3) by their `Effective Collateral Weight`. This is their `Borrow Limit`.
 
-#### Favored Asset Pairs
-
-The leverage module can define pairs of assets which are advantaged when one is used as collateral to borrow the other.
-
-They are defined in the form `[Asset A, Asset B, Favored Collateral Weight]`. In effect, this means that
-
-> When collateral of `Asset A` exists on the same account as borrowed `Asset B`, the `CollateralWeight` of `Asset A` is replaced by `Favored Collateral Weight` when computing collateral weights, and the `CollateralWeight` of `Asset B` is replaced by `Favored Collateral Weight` when computing `Borrow Factor`.
+This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what `Borrow Limit` change in the user's position would produce a borrow limit exactly equal to their borrowed value.
 
 #### Liquidation Threshold
 
-Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a _borrower's_ liquidation threshold, when the token is used as collateral.
+Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold, when the token is used as collateral.
 
 A user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited. Any user whose borrow value is above their liquidation threshold is eligible to be liquidated.
 
