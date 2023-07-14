@@ -203,7 +203,7 @@ The full calculation of a user's borrow limit is as follows:
 5. Find the _minimum_ of the average collateral weights found above. This is the user's `Effective Collateral Weight`.
 6. Multiply the user's total collateral value (before subtractions from step 3) by their `Effective Collateral Weight`. This is their `Borrow Limit`.
 
-This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what `Borrow Limit` change in the user's position would produce a borrow limit exactly equal to their borrowed value.
+This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
 
 #### Liquidation Threshold
 
