@@ -218,6 +218,8 @@ A user's liquidation threshold is the sum of the contributions from each denomin
   }
 ```
 
+TODO: Special asset pairs and borrow factor considerations.
+
 #### Borrow APY
 
 Umee uses a dynamic interest rate model. The borrow APY for each borrowed token denomination changes based on that token Supply Utilization.
