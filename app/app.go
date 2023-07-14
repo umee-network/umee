@@ -71,7 +71,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/group"
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
 	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
-	"github.com/cosmos/cosmos-sdk/x/mint"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/nft"
@@ -143,6 +142,8 @@ import (
 	uibcoracle "github.com/umee-network/umee/v5/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v5/x/uibc/quota"
 	uibcquotakeeper "github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+
+	umint "github.com/umee-network/umee/v5/x/mint/module"
 )
 
 var (
@@ -667,7 +668,7 @@ func New(
 		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
 		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
-		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, nil),
+		umint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, app.UGovKeeperB),
 		// need to dereference StakingKeeper because x/distribution uses interface casting :(
 		// TODO: in the next SDK version we can remove the dereference
 		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper),

@@ -32,7 +32,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // LiquidationParams
 type LiquidationParams struct {
-	// max_supply is the maximum supply for liquidation denom.
+	// max_supply is the maximum supply for liquidation.
 	MaxSupply types.Coin `protobuf:"bytes,1,opt,name=max_supply,json=maxSupply,proto3" json:"max_supply"`
 	// inflation_cycle_duration is duration for changing the inflation rates for liquidation.
 	InflationCycleDuration time.Duration `protobuf:"bytes,2,opt,name=inflation_cycle_duration,json=inflationCycleDuration,proto3,stdduration" json:"inflation_cycle_duration,omitempty" yaml:"inflation_cycle_duration"`

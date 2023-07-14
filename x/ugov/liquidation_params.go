@@ -11,9 +11,11 @@ import (
 )
 
 var (
-	DefaultMaxSupply              = sdk.NewCoin(appparams.BondDenom, sdk.NewInt(12_000000000))
+	DefaultMaxSupply = sdk.NewCoin(appparams.BondDenom, sdk.NewInt(12_000000000_0000000))
+	// One year for default inflation cycle
 	DefaultInflationCycleDuration = time.Second * time.Duration(60*60*24*365)
-	DefaultInflationReductionRate = sdk.MustNewDecFromStr("0.01")
+	// 25% reduction rate for every inflation cyle
+	DefaultInflationReductionRate = sdk.MustNewDecFromStr("0.25")
 )
 
 func DefaultLiquidationParams() LiquidationParams {

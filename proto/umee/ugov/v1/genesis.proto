@@ -3,6 +3,7 @@ package umee.ugov.v1;
 
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 import "cosmos_proto/cosmos.proto";
 import "umee/ugov/v1/ugov.proto";
@@ -19,4 +20,6 @@ message GenesisState {
 
   // LiquidationParams is params for new liquidation inflation rate params  for staking denoms
   LiquidationParams liquidation_params = 3 [(gogoproto.nullable) = false];
+  // Unix timestamp when the inflation cycle is started
+  google.protobuf.Timestamp inflation_cycle_start_time = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }

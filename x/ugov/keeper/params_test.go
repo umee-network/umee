@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -50,4 +51,24 @@ func TestLiquidationParams(t *testing.T) {
 	rlp := k.LiquidationParams()
 	require.Equal(rlp, dlp)
 	require.Equal(rlp.MaxSupply.GetDenom(), appparams.BondDenom)
+}
+
+func TestInflationCycleStartTime(t *testing.T) {
+	t.Parallel()
+	require := require.New(t)
+	k := initKeeper(t)
+
+	st := time.Time{}
+	err := k.SetInflationCycleStartTime(st)
+	require.NoError(err)
+	in_c, err := k.GetInflationCycleStartTime()
+	require.NoError(err)
+	require.Equal(in_c.IsZero(), true, "it should be default zero time")
+
+	icst := time.Now()
+	err = k.SetInflationCycleStartTime(icst)
+	require.NoError(err)
+	ricst, err := k.GetInflationCycleStartTime()
+	require.NoError(err)
+	require.Equal(ricst.Equal(icst), true, "inflation cycle start time should be same")
 }

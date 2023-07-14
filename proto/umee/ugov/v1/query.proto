@@ -5,6 +5,8 @@ import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
 import "umee/ugov/v1/ugov.proto";
 
 option go_package = "github.com/umee-network/umee/v5/x/ugov";
@@ -26,6 +28,11 @@ service Query {
   // LiquidationParams
   rpc LiquidationParams(QueryLiquidationParams) returns (QueryLiquidationParamsResponse) {
     option (google.api.http).get = "/umee/ugov/v1/liquidation-params";
+  }
+
+  // InflationCycleStartTime returns when inflation cycle is started
+  rpc InflationCycleStartTime(QueryInflationCycleStartTime) returns (QueryInflationCycleStartTimeResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/inflation-cycle";
   }
 }
 
@@ -51,4 +58,12 @@ message QueryLiquidationParams {}
 // QueryLiquidationParamsResponse response type.
 message QueryLiquidationParamsResponse {
   LiquidationParams liquidation_params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryInflationCycleStartTime request type.
+message QueryInflationCycleStartTime {}
+
+// QueryInflationCycleStartTimeResponse response type.
+message QueryInflationCycleStartTimeResponse {
+  google.protobuf.Timestamp inflation_cycle_start_time = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }

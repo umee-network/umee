@@ -1,11 +1,17 @@
 package keeper
 
-import "github.com/umee-network/umee/v5/x/ugov"
+import (
+	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/x/ugov"
+)
 
 func (k Keeper) ExportGenesis() *ugov.GenesisState {
+	lcst, err := k.GetInflationCycleStartTime()
+	util.Panic(err)
 	return &ugov.GenesisState{
-		MinGasPrice:       k.MinGasPrice(),
-		LiquidationParams: k.LiquidationParams(),
+		MinGasPrice:             k.MinGasPrice(),
+		LiquidationParams:       k.LiquidationParams(),
+		InflationCycleStartTime: *lcst,
 	}
 }
 
@@ -14,5 +20,9 @@ func (k Keeper) InitGenesis(gs *ugov.GenesisState) error {
 		return err
 	}
 
-	return k.SetLiquidationParams(gs.LiquidationParams)
+	if err := k.SetLiquidationParams(gs.LiquidationParams); err != nil {
+		return err
+	}
+
+	return k.SetInflationCycleStartTime(gs.InflationCycleStartTime)
 }

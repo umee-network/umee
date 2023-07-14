@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/util/coin"
@@ -38,4 +40,12 @@ func (k Keeper) LiquidationParams() ugov.LiquidationParams {
 		return ugov.LiquidationParams{}
 	}
 	return *lp
+}
+
+func (k Keeper) SetInflationCycleStartTime(startTime time.Time) error {
+	return store.SetBinValue(k.store, KeyInflationCycleStartTime, &startTime, "inflation_cycle_start_time")
+}
+
+func (k Keeper) GetInflationCycleStartTime() (*time.Time, error) {
+	return store.GetBinValue[*time.Time](k.store, KeyInflationCycleStartTime, "inflation_cycle_start_time")
 }

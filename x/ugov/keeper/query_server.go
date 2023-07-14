@@ -36,3 +36,14 @@ func (q Querier) LiquidationParams(ctx context.Context, _ *ugov.QueryLiquidation
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	return &ugov.QueryLiquidationParamsResponse{LiquidationParams: q.Keeper(&sdkCtx).LiquidationParams()}, nil
 }
+
+// InflationCycleStartTime return when the inflation cycle is started
+func (q Querier) InflationCycleStartTime(ctx context.Context, _ *ugov.QueryInflationCycleStartTime) (
+	*ugov.QueryInflationCycleStartTimeResponse, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	icst, err := q.Keeper(&sdkCtx).GetInflationCycleStartTime()
+	if err != nil {
+		return nil, err
+	}
+	return &ugov.QueryInflationCycleStartTimeResponse{InflationCycleStartTime: icst}, nil
+}
