@@ -198,10 +198,10 @@ The full calculation of a user's borrow limit is as follows:
 1. Calculate the USD value of the user's collateral assets, using the _lower_ of either spot price or historic price for each asset. Collateral with missing prices is treated as zero-valued.
 2. Calculate the USD value of the user's borrowed assets, using the _higher_ of either spot price or historic price for each asset. Borrowed assets with missing prices cause any transaction which could increased borrowed value or decrease borrow limit to fail.
 3. If the part or all of a user's position matches any `Special Asset Pairs`, subtract them from the general totals above and set them aside. A borrowed or collateral asset matching multiple special pairs attempts to use the one with the highest `Special Collateral Weight` first.
-3. Find the average (weighted by collateralized value) of the `CollateralWeight` of the user's collateral assets from the general total. Also average in any collateral from special asset pairs found in step 3, as if they were contributions from a separate asset type with `Special Collateral Weight`.
-4. Find the average (weighted by borrowed value) of the `CollateralWeight` of the user's borrowed assets from the general total. Also average in any borrows from special asset pairs found in step 3, as if they were contributions from a separate asset type with `Special Collateral Weight`. This is for `Borrow Factor`.
-5. Find the _minimum_ of the average collateral weights found above. This is the user's `Effective Collateral Weight`.
-6. Multiply the user's total collateral value (before subtractions from step 3) by their `Effective Collateral Weight`. This is their `Borrow Limit`.
+4. Find the average (weighted by collateralized value) of the `CollateralWeight` of the user's collateral assets from the general total. Also average in any collateral from special asset pairs found in the previous step, as if they were contributions from a separate asset type with `Special Collateral Weight`.
+5. Find the average (weighted by borrowed value) of the `CollateralWeight` of the user's borrowed assets from the general total. Also average in any borrows from special asset pairs found previously, as if they were contributions from a separate asset type with `Special Collateral Weight`. This is for `Borrow Factor`.
+6. Find the _minimum_ of the average collateral weights found in the previous two steps. This is the user's `Effective Collateral Weight`.
+7. Multiply the user's total collateral value (before subtractions from step 3) by their `Effective Collateral Weight`. This is their `Borrow Limit`.
 
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
 
