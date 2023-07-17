@@ -205,6 +205,29 @@ The full calculation of a user's borrow limit is as follows:
 
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
 
+> Example Borrower:
+>
+> Collateral: $20 ATOM + $20 UMEE + $40 STATOM
+> Borrowed: $50 ATOM
+>
+> Assume the following collateral weights: UMEE 0.35, ATOM 0.6, STATOM 0.5
+>
+> Also assume a special asset pair [STATOM, ATOM, 0.75] is in effect. STATOM gets a boost when borrowing ATOM.
+>
+> Starting at step 3 above, since prices are already given, we first isolate any special asset pairs.
+>
+> $40 STATOM with a special collateral weight of 0.75 can borrow $30 ATOM. These amounts receive special collateral weights.
+>
+> The user's position (with collateral weights) now looks like the following:
+>
+> Collateral: $20 ATOM (0.6) + $20 UMEE (0.35) + $40 SPECIAL (0.75)
+> Borrowed: $30 SPECIAL (0.75) + $20 ATOM (0.6)
+>
+> Proceeding to step 6, the weighted average of the collateral's new collateral weights is `($20 * 0.6 + $20 * 0.35 + $40 * 0.75) / ($20 + $20 + $40)` = `0.6125`
+> The weighted average of the borrowed assets' collateral weights is `($30 * 0.75 + $20 * 0.6) / ($30 + $20)` = `0.69`
+>
+> Multiplying the user's collateral value by the minimum of `0.6125` and `0.69`, we get a final borrow limit of `0.6125 * ($20 + $20 + $40)` = `$49`
+
 #### Liquidation Threshold
 
 Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold, when the token is used as collateral.
