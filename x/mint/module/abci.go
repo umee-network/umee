@@ -67,9 +67,9 @@ func InflationCalculationFn(ctx sdk.Context, ugovKeeper ugovkeeper.Keeper, mintK
 	icst, err := ugovKeeper.GetInflationCycleStartTime()
 	util.Panic(err)
 
-	// TODO: needs to verify when to update this cycle time like in migrations or in this BeginBlock ?
-	// first time start time is zero
-	if !icst.IsZero() && ctx.BlockTime().After(icst.Add(lp.InflationCycleDuration)) {
+	// Initially inflation_cycle start time is zero
+	// Once chain start inflation cycle start time will be inflation rate change executed block time
+	if ctx.BlockTime().After(icst.Add(lp.InflationCycleDuration)) {
 		params.InflationMax = params.InflationMax.Mul(sdk.OneDec().Sub(lp.InflationReductionRate))
 		params.InflationMin = params.InflationMin.Mul(sdk.OneDec().Sub(lp.InflationReductionRate))
 
