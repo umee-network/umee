@@ -220,7 +220,7 @@ Any user whose borrow value is above their liquidation threshold is eligible to 
 ```
 
 Liquidation threshold can also be reduced by borrow factor or increased by special asset pairs.
-In practice, the following calculation is used for liquidation threshold:
+In practice, the following calculation (which reduces to the logic above in simple cases) is used for liquidation threshold:
 
 ```go
   effectiveCollateralWeight := GetBorrowLimit(borrower) / GetCollateralValue(borrower) // ranges 0-1
