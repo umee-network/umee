@@ -26,6 +26,7 @@ message GenesisState {
     (gogoproto.nullable)     = false,
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.Coins"
   ];
+  repeated SpecialAssetPair special_pairs = 10 [(gogoproto.nullable) = false];
 }
 
 // AdjustedBorrow is a borrow struct used in the leverage module's genesis

@@ -25,12 +25,19 @@ var (
 	KeyPrefixInterestScalar      = []byte{0x08}
 	KeyPrefixAdjustedTotalBorrow = []byte{0x09}
 	KeyPrefixUtokenSupply        = []byte{0x0A}
+	KeyPrefixSpecialAssetPair    = []byte{0x0B}
 )
 
 // KeyRegisteredToken returns a KVStore key for getting and setting a Token.
 func KeyRegisteredToken(baseTokenDenom string) []byte {
 	// assetprefix | denom | 0x00 for null-termination
 	return util.ConcatBytes(1, KeyPrefixRegisteredToken, []byte(baseTokenDenom))
+}
+
+// KeySpecialAssetPair returns a KVStore key for getting and setting a SpecialAssetPair.
+func KeySpecialAssetPair(collateral, borrow string) []byte {
+	// pairprefix | collateralDenom | 0x00 | borrowDenom | 0x00 for null-termination
+	return util.ConcatBytes(1, KeyPrefixSpecialAssetPair, []byte(collateral), []byte{0}, []byte(borrow))
 }
 
 // KeyAdjustedBorrow returns a KVStore key for getting and setting an

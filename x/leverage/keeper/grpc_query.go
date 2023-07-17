@@ -61,6 +61,22 @@ func (q Querier) RegisteredTokens(
 	}, nil
 }
 
+func (q Querier) SpecialAssetPairs(
+	goCtx context.Context,
+	req *types.QuerySpecialAssetPairs,
+) (*types.QuerySpecialAssetPairsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	pairs := q.Keeper.GetAllSpecialAssetPairs(ctx)
+
+	return &types.QuerySpecialAssetPairsResponse{
+		Pairs: pairs,
+	}, nil
+}
+
 func (q Querier) MarketSummary(
 	goCtx context.Context,
 	req *types.QueryMarketSummary,

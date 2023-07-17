@@ -66,6 +66,11 @@ service Msg {
   // GovUpdateRegistry adds new tokens to the token registry or
   // updates existing tokens with new settings.
   rpc GovUpdateRegistry(MsgGovUpdateRegistry) returns (MsgGovUpdateRegistryResponse);
+
+  // GovUpdateSpecialAssetPairs adds, updates, or removes special asset pairs. Note that a special asset
+  // pair can be removed by setting its special collateral weight to the collateral weight of the base
+  // asset.
+  rpc GovUpdateSpecialAssetPairs(MsgGovUpdateSpecialAssetPairs) returns (MsgGovUpdateSpecialAssetPairsResponse);
 }
 
 // MsgSupply represents a user's request to supply assets to the module.
@@ -264,3 +269,22 @@ message MsgGovUpdateRegistry {
 
 // MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
 message MsgGovUpdateRegistryResponse {}
+
+// MsgGovUpdateSpecialAssetPairs defines the Msg/GovUpdateSpecialAssetPairs request type.
+message MsgGovUpdateSpecialAssetPairs {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account.
+  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string title       = 2;
+  string description = 3;
+  // pairs are new or updated special asset pairs. Updating a special asset pair's
+  // collateral weight to match that of its base asset deletes it indead.
+  repeated SpecialAssetPair pairs = 4 [(gogoproto.nullable) = false];
+}
+
+// MsgGovUpdateSpecialAssetPairsResponse defines the Msg/GovUpdateSpecialAssetPairs response type.
+message MsgGovUpdateSpecialAssetPairsResponse {}

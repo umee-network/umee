@@ -8,10 +8,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var _ sdk.Msg = &MsgGovUpdateRegistry{}
+var (
+	_ sdk.Msg = &MsgGovUpdateRegistry{}
+	_ sdk.Msg = &MsgGovUpdateSpecialAssetPairs{}
+)
 
-// NewMsgUpdateRegistry will create a new MsgUpdateRegistry instance
-func NewMsgUpdateRegistry(authority, title, description string, updateTokens, addTokens []Token) *MsgGovUpdateRegistry {
+// NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance
+func NewMsgGovUpdateRegistry(authority, title, description string, updateTokens, addTokens []Token) *MsgGovUpdateRegistry {
 	return &MsgGovUpdateRegistry{
 		Title:        title,
 		Description:  description,
@@ -82,6 +85,73 @@ func validateRegistryTokenDenoms(tokens []Token) error {
 			return ErrDuplicateToken.Wrapf("duplicate token with baseDenom %s", token.BaseDenom)
 		}
 		tokenDenoms[token.BaseDenom] = true
+	}
+	return nil
+}
+
+// NewMsgGovUpdateSpecialAssetPairs will create a new MsgGovUpdateSpecialAssetPairs instance
+func NewMsgGovUpdateSpecialAssetPairs(authority, title, description string, pairs []SpecialAssetPair,
+) *MsgGovUpdateSpecialAssetPairs {
+	return &MsgGovUpdateSpecialAssetPairs{
+		Title:       title,
+		Description: description,
+		Authority:   authority,
+		Pairs:       pairs,
+	}
+}
+
+// Type implements Msg interface
+func (msg MsgGovUpdateSpecialAssetPairs) Type() string { return sdk.MsgTypeURL(&msg) }
+
+// String implements the Stringer interface.
+func (msg MsgGovUpdateSpecialAssetPairs) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+		return err
+	}
+
+	if len(msg.Pairs) == 0 {
+		return ErrEmptyUpdateSpecialAssetPairs
+	}
+
+	if err := validateSpecialAssetPairDenoms(msg.Pairs); err != nil {
+		return err
+	}
+
+	for _, pair := range msg.Pairs {
+		if err := pair.Validate(); err != nil {
+			return errors.Wrapf(err, "special asset pair [%s, %s]", pair.Collateral, pair.Borrow)
+		}
+	}
+
+	return nil
+}
+
+// GetSignBytes implements Msg
+func (msg MsgGovUpdateSpecialAssetPairs) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(&msg)
+	return sdk.MustSortJSON(bz)
+}
+
+// GetSigners implements Msg
+func (msg MsgGovUpdateSpecialAssetPairs) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// validateSpecialAssetPairDenoms returns error if duplicate special asset pairs exist.
+func validateSpecialAssetPairDenoms(pairs []SpecialAssetPair) error {
+	assetPairs := map[string]bool{}
+	for _, pair := range pairs {
+		s := pair.Collateral + "," + pair.Borrow
+		if _, ok := assetPairs[s]; ok {
+			return ErrDuplicatePair.Wrapf("[%s, %s]", pair.Collateral, pair.Borrow)
+		}
+		assetPairs[s] = true
 	}
 	return nil
 }

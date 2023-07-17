@@ -71,6 +71,31 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 	return token, err
 }
 
+// SetSpecialAssetPair stores a SpecialAssetPair into the x/leverage module's KVStore.
+func (k Keeper) SetSpecialAssetPair(ctx sdk.Context, pair types.SpecialAssetPair) error {
+	if err := pair.Validate(); err != nil {
+		return err
+	}
+
+	store := ctx.KVStore(k.storeKey)
+	key := types.KeySpecialAssetPair(pair.Collateral, pair.Borrow)
+
+	bz, err := k.cdc.Marshal(&pair)
+	if err != nil {
+		return err
+	}
+
+	store.Set(key, bz)
+	return nil
+}
+
+// DeleteSpecialAssetPair removes a SpecialAssetPair from the x/leverage module's KVStore.
+func (k Keeper) DeleteSpecialAssetPair(ctx sdk.Context, collateralDenom, borrowDenom string) {
+	store := ctx.KVStore(k.storeKey)
+	key := types.KeySpecialAssetPair(collateralDenom, borrowDenom)
+	store.Delete(key)
+}
+
 // SaveOrUpdateTokenSettingsToRegistry adds new tokens or updates the new tokens settings to registry.
 // It requires maps of the currently registered base and symbol denoms, so it can prevent duplicates of either.
 func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(

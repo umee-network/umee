@@ -569,3 +569,30 @@ func (s msgServer) GovUpdateRegistry(
 
 	return &types.MsgGovUpdateRegistryResponse{}, nil
 }
+
+// GovUpdateSpecialAssetPairs adds, updates, or deletes special asset pairs.
+func (s msgServer) GovUpdateSpecialAssetPairs(
+	goCtx context.Context,
+	msg *types.MsgGovUpdateSpecialAssetPairs,
+) (*types.MsgGovUpdateSpecialAssetPairsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	for _, pair := range msg.Pairs {
+		token, err := s.keeper.GetTokenSettings(ctx, pair.Collateral)
+		if err != nil {
+			return nil, err
+		}
+
+		if pair.CollateralWeight.Equal(token.CollateralWeight) {
+			// setting a special collateral weight equal to regular collateral weight deletes
+			// the special pair instead, since no special weight is needed in that case
+			s.keeper.DeleteSpecialAssetPair(ctx, pair.Collateral, pair.Borrow)
+		} else {
+			if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &types.MsgGovUpdateSpecialAssetPairsResponse{}, nil
+}

@@ -249,3 +249,25 @@ message Token {
     (gogoproto.moretags) = "yaml:\"historic_medians\""
   ];
 }
+
+// SpecialAssetPair defines a special (increased) CollateralWeight used when a specified Collateral is used
+// to collateralize a specified Borrow. This association is one-way (so it does not work in reverse).
+message SpecialAssetPair {
+  option (gogoproto.equal) = true;
+
+  // Collateral is the denomination of the collateral base token.
+  string collateral = 1;
+
+  // Borrow is the denomination of the borrowed base token.
+  string borrow = 2;
+
+  // Collateral Weight defines what portion of the total value of the asset
+  // can contribute to a users borrowing power. For special asset pairs, this
+  // also overrides the borrowed asset's collateral weight when eveluating borrow
+  // factor.
+  string collateral_weight = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"collateral_weight\""
+  ];
+}

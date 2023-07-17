@@ -42,6 +42,12 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 	return store.MustLoadAll[*types.Token](ctx.KVStore(k.storeKey), types.KeyPrefixRegisteredToken)
 }
 
+// GetAllSpecialAssetPairs returns all the special asset pairs from the x/leverage
+// module's KVStore.
+func (k Keeper) GetAllSpecialAssetPairs(ctx sdk.Context) []types.SpecialAssetPair {
+	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
+}
+
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
 // associated with an address.
 func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {

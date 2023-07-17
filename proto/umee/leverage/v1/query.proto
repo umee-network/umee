@@ -24,6 +24,12 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/registered_tokens";
   }
 
+  // SpecialAssetPairs queries for all special asset pairs.
+  rpc SpecialAssetPairs(QuerySpecialAssetPairs)
+      returns (QuerySpecialAssetPairsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/special_asset_pairs";
+  }
+
   // MarketSummary queries a base asset's current borrowing and supplying conditions.
   rpc MarketSummary(QueryMarketSummary)
       returns (QueryMarketSummaryResponse) {
@@ -98,6 +104,17 @@ message QueryRegisteredTokens {
 // RegisteredTokens gRPC service handler.
 message QueryRegisteredTokensResponse {
   repeated Token registry = 1 [(gogoproto.nullable) = false];
+}
+
+// QuerySpecialAssetPairs defines the request structure for the SpecialAssetPairs
+// gRPC service handler.
+message QuerySpecialAssetPairs {
+}
+
+// QuerySpecialAssetPairsResponse defines the response structure for the
+// SpecialAssetPairs gRPC service handler.
+message QuerySpecialAssetPairsResponse {
+  repeated SpecialAssetPair pairs = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryMarketSummary defines the request structure for the MarketSummary gRPC service handler.

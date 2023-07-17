@@ -24,7 +24,7 @@ func TestGenesisValidation(t *testing.T) {
 			*NewGenesisState(
 				Params{
 					CompleteLiquidationThreshold: sdk.MustNewDecFromStr("-0.4"),
-				}, nil, nil, nil, nil, 0, nil, nil, nil,
+				}, nil, nil, nil, nil, 0, nil, nil, nil, nil,
 			),
 			true,
 			"complete liquidation threshold must be positive",

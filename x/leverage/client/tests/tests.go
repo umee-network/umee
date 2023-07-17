@@ -96,6 +96,16 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			ErrMsg: "",
 		},
 		{
+			Name:     "query special asset pairs",
+			Command:  cli.GetCmdQuerySpecialAssetPairs(),
+			Args:     []string{},
+			Response: &types.QuerySpecialAssetPairsResponse{},
+			ExpectedResponse: &types.QuerySpecialAssetPairsResponse{
+				Pairs: []types.SpecialAssetPair{},
+			},
+			ErrMsg: "",
+		},
+		{
 			Name:     "query registered token info by base_denom",
 			Command:  cli.GetCmdQueryRegisteredTokens(),
 			Args:     []string{appparams.BondDenom},
