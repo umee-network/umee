@@ -209,7 +209,8 @@ This calculation must sometimes be done in reverse, for example when computing `
 
 Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold, when the token is used as collateral.
 
-A user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited. Any user whose borrow value is above their liquidation threshold is eligible to be liquidated.
+When a borrow position is limited by simple borrow limit (without special asset pairs or borrow factor), a user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited.
+Any user whose borrow value is above their liquidation threshold is eligible to be liquidated.
 
 ```go
   collateral := GetBorrowerCollateral(borrower) // sdk.Coins
@@ -218,7 +219,21 @@ A user's liquidation threshold is the sum of the contributions from each denomin
   }
 ```
 
-TODO: Special asset pairs and borrow factor considerations.
+Liquidation threshold can also be reduced by borrow factor or increased by special asset pairs.
+In practice, the following calculation is used for liquidation threshold:
+
+```go
+  effectiveCollateralWeight := GetBorrowLimit(borrower) / GetCollateralValue(borrower) // ranges 0-1
+  liquidationThresholdScale := (1 - AvgLiquidationThreshold(borrower)) / (1 - AvgCollateralWeight(borrower)) // ranges 0-1
+  effectiveLiquidationThreshold := 1 - ((1 - liquidationThresholdScale) * (1 - effectiveCollateralWeight)) // ranges 0-1
+  liquidationThreshold := effectiveLiquidationThreshold * GetCollateralValue(borrower) // dollar value
+```
+
+This utilizes the borrow limit, which has already been computed with special asset pairs and borrow limit considered, and the borrower's collateral:
+
+- The average (weighted by collateral value) collateral weights and liquidation thresholds of the borrower's collateral assets are collected.
+- The distances from average collateral weight to average liquidation threshold and 1 are compared. (For example when `CW = 0.6 LT = 0.7`, then liquidation threshold is `25%` of the way from `CW` to `1`.)
+- Then after all special considerations have been accounted for in borrow limit, the borrower's liquidation threshold behaves the same as the average parameters (e.g. it will be `25%` of the way between `borrow limit` and `collateral value`).
 
 #### Borrow APY
 
