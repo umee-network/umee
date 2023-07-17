@@ -229,11 +229,11 @@ In practice, the following calculation (which reduces to the logic above in simp
   liquidationThreshold := effectiveLiquidationThreshold * GetCollateralValue(borrower) // dollar value
 ```
 
-This utilizes the borrow limit, which has already been computed with special asset pairs and borrow limit considered, and the borrower's collateral:
+This utilizes the borrow limit, which has already been computed with special asset pairs and borrow limit considered, and the token parameters of borrower's collateral:
 
 - The average (weighted by collateral value) collateral weights and liquidation thresholds of the borrower's collateral assets are collected.
-- The distances from average collateral weight to average liquidation threshold and 1 are compared. (For example when `CW = 0.6 LT = 0.7`, then liquidation threshold is `25%` of the way from `CW` to `1`.)
-- Then after all special considerations have been accounted for in borrow limit, the borrower's liquidation threshold behaves the same as the average parameters (e.g. it will be `25%` of the way between `borrow limit` and `collateral value`).
+- The distances from average collateral weight to average liquidation threshold and 1 are compared. (For example when `CW = 0.6` and `LT = 0.7`, then liquidation threshold is `25%` of the way from `CW` to `1`.)
+- Then the borrower's liquidation threshold behaves the same as the average parameters (e.g. it will be `25%` of the way between `borrow limit` and `collateral value`).
 
 #### Borrow APY
 
