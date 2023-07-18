@@ -270,8 +270,7 @@ func (msg MsgLeveragedLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
 	if msg.RepayDenom != "" {
-		err := sdk.ValidateDenom(msg.RepayDenom)
-		if err != nil {
+		if err := sdk.ValidateDenom(msg.RepayDenom); err != nil {
 			return err
 		}
 	}
