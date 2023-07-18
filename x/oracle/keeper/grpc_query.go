@@ -280,7 +280,7 @@ func (q querier) Medians(
 		medians = q.AllMedianPrices(ctx)
 	}
 
-	return &types.QueryMediansResponse{Medians: *medians.Sort()}, nil
+	return &types.QueryMediansResponse{Medians: medians.Sort()}, nil
 }
 
 // MedianDeviations queries median deviations of all denoms, or, if specified, returns
@@ -307,7 +307,7 @@ func (q querier) MedianDeviations(
 		medianDeviations = q.AllMedianDeviationPrices(ctx)
 	}
 
-	return &types.QueryMedianDeviationsResponse{MedianDeviations: *medianDeviations.Sort()}, nil
+	return &types.QueryMedianDeviationsResponse{MedianDeviations: medianDeviations.Sort()}, nil
 }
 
 // AvgPrice queries historic avg price for requested denom.
