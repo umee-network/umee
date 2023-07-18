@@ -11,7 +11,7 @@ import (
 )
 
 // BeginBlock overrides the mint module BeginBlock.
-func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper MintKeeper) {
+func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper) {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyBeginBlocker)
 	// inflation rate change params
 	lp := ugovKeeper.InflationParams()
@@ -58,7 +58,7 @@ func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper MintKeeper) {
 	)
 }
 
-func InflationCalculationFn(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper MintKeeper,
+func InflationCalculationFn(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper,
 	lp ugov.InflationParams, params types.Params, bondedRatio sdk.Dec, currentInflation sdk.Dec) sdk.Dec {
 
 	// inflation cycle is completed , so we need to update the inflation max and min rate

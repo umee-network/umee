@@ -15,7 +15,7 @@ type UGovKeeper interface {
 	InflationParams() ugov.InflationParams
 }
 
-type MintKeeper interface {
+type Keeper interface {
 	SetParams(ctx sdk.Context, params minttypes.Params)
 	GetParams(ctx sdk.Context) (params minttypes.Params)
 	StakingTokenSupply(ctx sdk.Context) math.Int
