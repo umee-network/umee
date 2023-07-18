@@ -276,8 +276,7 @@ func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
 		}
 	}
 	if msg.RewardDenom != "" {
-		err := sdk.ValidateDenom(msg.RewardDenom)
-		if err != nil {
+		if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
 			return err
 		}
 	}
