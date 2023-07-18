@@ -184,25 +184,25 @@ func (m *MsgGovSetEmergencyGroupResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgGovSetEmergencyGroupResponse proto.InternalMessageInfo
 
-// MsgGovUpdateLiquidationParams request type.
-type MsgGovUpdateLiquidationParams struct {
+// MsgGovUpdateInflationParams request type.
+type MsgGovUpdateInflationParams struct {
 	// authority must be the address of the governance account.
-	Authority         string            `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	LiquidationParams LiquidationParams `protobuf:"bytes,2,opt,name=liquidation_params,json=liquidationParams,proto3" json:"liquidation_params"`
+	Authority       string          `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	InflationParams InflationParams `protobuf:"bytes,2,opt,name=inflation_params,json=inflationParams,proto3" json:"inflation_params"`
 }
 
-func (m *MsgGovUpdateLiquidationParams) Reset()         { *m = MsgGovUpdateLiquidationParams{} }
-func (m *MsgGovUpdateLiquidationParams) String() string { return proto.CompactTextString(m) }
-func (*MsgGovUpdateLiquidationParams) ProtoMessage()    {}
-func (*MsgGovUpdateLiquidationParams) Descriptor() ([]byte, []int) {
+func (m *MsgGovUpdateInflationParams) Reset()         { *m = MsgGovUpdateInflationParams{} }
+func (m *MsgGovUpdateInflationParams) String() string { return proto.CompactTextString(m) }
+func (*MsgGovUpdateInflationParams) ProtoMessage()    {}
+func (*MsgGovUpdateInflationParams) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9ffc07de1c6ee91b, []int{4}
 }
-func (m *MsgGovUpdateLiquidationParams) XXX_Unmarshal(b []byte) error {
+func (m *MsgGovUpdateInflationParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgGovUpdateLiquidationParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgGovUpdateInflationParams) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgGovUpdateLiquidationParams.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgGovUpdateInflationParams.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -212,34 +212,34 @@ func (m *MsgGovUpdateLiquidationParams) XXX_Marshal(b []byte, deterministic bool
 		return b[:n], nil
 	}
 }
-func (m *MsgGovUpdateLiquidationParams) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgGovUpdateLiquidationParams.Merge(m, src)
+func (m *MsgGovUpdateInflationParams) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovUpdateInflationParams.Merge(m, src)
 }
-func (m *MsgGovUpdateLiquidationParams) XXX_Size() int {
+func (m *MsgGovUpdateInflationParams) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgGovUpdateLiquidationParams) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgGovUpdateLiquidationParams.DiscardUnknown(m)
+func (m *MsgGovUpdateInflationParams) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovUpdateInflationParams.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgGovUpdateLiquidationParams proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovUpdateInflationParams proto.InternalMessageInfo
 
-// GovUpdateLiquidationParamsResponse response type.
-type GovUpdateLiquidationParamsResponse struct {
+// GovUpdateInflationParamsResponse response type.
+type GovUpdateInflationParamsResponse struct {
 }
 
-func (m *GovUpdateLiquidationParamsResponse) Reset()         { *m = GovUpdateLiquidationParamsResponse{} }
-func (m *GovUpdateLiquidationParamsResponse) String() string { return proto.CompactTextString(m) }
-func (*GovUpdateLiquidationParamsResponse) ProtoMessage()    {}
-func (*GovUpdateLiquidationParamsResponse) Descriptor() ([]byte, []int) {
+func (m *GovUpdateInflationParamsResponse) Reset()         { *m = GovUpdateInflationParamsResponse{} }
+func (m *GovUpdateInflationParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*GovUpdateInflationParamsResponse) ProtoMessage()    {}
+func (*GovUpdateInflationParamsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_9ffc07de1c6ee91b, []int{5}
 }
-func (m *GovUpdateLiquidationParamsResponse) XXX_Unmarshal(b []byte) error {
+func (m *GovUpdateInflationParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *GovUpdateLiquidationParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *GovUpdateInflationParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_GovUpdateLiquidationParamsResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_GovUpdateInflationParamsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -249,63 +249,63 @@ func (m *GovUpdateLiquidationParamsResponse) XXX_Marshal(b []byte, deterministic
 		return b[:n], nil
 	}
 }
-func (m *GovUpdateLiquidationParamsResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GovUpdateLiquidationParamsResponse.Merge(m, src)
+func (m *GovUpdateInflationParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GovUpdateInflationParamsResponse.Merge(m, src)
 }
-func (m *GovUpdateLiquidationParamsResponse) XXX_Size() int {
+func (m *GovUpdateInflationParamsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *GovUpdateLiquidationParamsResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_GovUpdateLiquidationParamsResponse.DiscardUnknown(m)
+func (m *GovUpdateInflationParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_GovUpdateInflationParamsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_GovUpdateLiquidationParamsResponse proto.InternalMessageInfo
+var xxx_messageInfo_GovUpdateInflationParamsResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*MsgGovUpdateMinGasPrice)(nil), "umee.ugov.v1.MsgGovUpdateMinGasPrice")
 	proto.RegisterType((*MsgGovUpdateMinGasPriceResponse)(nil), "umee.ugov.v1.MsgGovUpdateMinGasPriceResponse")
 	proto.RegisterType((*MsgGovSetEmergencyGroup)(nil), "umee.ugov.v1.MsgGovSetEmergencyGroup")
 	proto.RegisterType((*MsgGovSetEmergencyGroupResponse)(nil), "umee.ugov.v1.MsgGovSetEmergencyGroupResponse")
-	proto.RegisterType((*MsgGovUpdateLiquidationParams)(nil), "umee.ugov.v1.MsgGovUpdateLiquidationParams")
-	proto.RegisterType((*GovUpdateLiquidationParamsResponse)(nil), "umee.ugov.v1.GovUpdateLiquidationParamsResponse")
+	proto.RegisterType((*MsgGovUpdateInflationParams)(nil), "umee.ugov.v1.MsgGovUpdateInflationParams")
+	proto.RegisterType((*GovUpdateInflationParamsResponse)(nil), "umee.ugov.v1.GovUpdateInflationParamsResponse")
 }
 
 func init() { proto.RegisterFile("umee/ugov/v1/tx.proto", fileDescriptor_9ffc07de1c6ee91b) }
 
 var fileDescriptor_9ffc07de1c6ee91b = []byte{
-	// 512 bytes of a gzipped FileDescriptorProto
+	// 510 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x54, 0x3f, 0x6f, 0x13, 0x31,
-	0x1c, 0xbd, 0x2b, 0x08, 0xa9, 0x2e, 0x14, 0x71, 0x0a, 0x6a, 0x38, 0xc1, 0xa5, 0x44, 0x80, 0x2a,
-	0x50, 0x6c, 0x52, 0x04, 0x43, 0xb7, 0x86, 0x42, 0x16, 0x22, 0x55, 0x29, 0x2c, 0x2c, 0x91, 0x73,
-	0xb1, 0x5c, 0x8b, 0xd8, 0x3e, 0x6c, 0xdf, 0xd1, 0x8a, 0x8d, 0x4f, 0xc0, 0xc8, 0xc8, 0xc0, 0x8a,
-	0xc4, 0xc0, 0xca, 0x9e, 0xb1, 0x62, 0x62, 0xaa, 0x20, 0x19, 0xf8, 0x1a, 0xe8, 0x2e, 0x4e, 0xd3,
-	0x70, 0xb9, 0x82, 0xb2, 0x9d, 0xfd, 0x9e, 0xdf, 0x9f, 0xfb, 0x59, 0x06, 0x57, 0x63, 0x4e, 0x08,
-	0x8a, 0xa9, 0x4c, 0x50, 0x52, 0x47, 0xe6, 0x00, 0x46, 0x4a, 0x1a, 0xe9, 0x5d, 0x4c, 0xb7, 0x61,
-	0xba, 0x0d, 0x93, 0xba, 0x1f, 0x84, 0x52, 0x73, 0xa9, 0x51, 0x17, 0x6b, 0x82, 0x92, 0x7a, 0x97,
-	0x18, 0x5c, 0x47, 0xa1, 0x64, 0x62, 0xcc, 0xf6, 0xd7, 0x2c, 0xce, 0x35, 0x4d, 0x55, 0xb8, 0xa6,
-	0x16, 0xb8, 0x36, 0x06, 0x3a, 0xd9, 0x0a, 0x8d, 0x17, 0x16, 0x2a, 0x51, 0x49, 0xe5, 0x78, 0x3f,
-	0xfd, 0x9a, 0x28, 0xcd, 0xc4, 0xc9, 0xfc, 0x33, 0xa0, 0xfa, 0xd9, 0x05, 0x6b, 0x2d, 0x4d, 0x9b,
-	0x32, 0x79, 0x11, 0xf5, 0xb0, 0x21, 0x2d, 0x26, 0x9a, 0x58, 0xef, 0x2a, 0x16, 0x12, 0xef, 0x11,
-	0x58, 0xc6, 0xb1, 0xd9, 0x97, 0x8a, 0x99, 0xc3, 0xb2, 0xbb, 0xee, 0x6e, 0x2c, 0x37, 0xca, 0xdf,
-	0xbf, 0xd6, 0x4a, 0xd6, 0x6f, 0xbb, 0xd7, 0x53, 0x44, 0xeb, 0x3d, 0xa3, 0x98, 0xa0, 0xed, 0x29,
-	0xd5, 0x7b, 0x0a, 0x2e, 0x71, 0x26, 0x3a, 0x14, 0xa7, 0x01, 0x59, 0x48, 0xca, 0x4b, 0xeb, 0xee,
-	0xc6, 0xca, 0xe6, 0x75, 0x68, 0x0f, 0xa6, 0x75, 0xa1, 0xad, 0x0b, 0x77, 0x48, 0xf8, 0x58, 0x32,
-	0xd1, 0x38, 0x3f, 0x38, 0xae, 0x38, 0xed, 0x15, 0x3e, 0xf5, 0xdf, 0xf2, 0x3e, 0x7c, 0xac, 0x38,
-	0xef, 0x7e, 0x7f, 0xb9, 0x3b, 0xd5, 0xae, 0xde, 0x04, 0x95, 0x82, 0xb8, 0x6d, 0xa2, 0x23, 0x29,
-	0x34, 0xa9, 0x7e, 0x3a, 0xa9, 0xb4, 0x47, 0xcc, 0x13, 0x4e, 0x14, 0x25, 0x22, 0x3c, 0x6c, 0x2a,
-	0x19, 0x47, 0x0b, 0x57, 0xda, 0x06, 0x97, 0xc9, 0x44, 0xa9, 0x43, 0x53, 0xa9, 0xac, 0xd4, 0x59,
-	0xa7, 0x57, 0xc9, 0x8c, 0xf5, 0xd6, 0x6a, 0x51, 0x93, 0x5c, 0xca, 0x93, 0x26, 0xdf, 0x5c, 0x70,
-	0xe3, 0x74, 0xdb, 0x67, 0xec, 0x75, 0xcc, 0x7a, 0xd8, 0x30, 0x29, 0x76, 0xb1, 0xc2, 0x5c, 0x2f,
-	0xdc, 0xe7, 0x39, 0xf0, 0xfa, 0x53, 0xb1, 0x4e, 0x94, 0xa9, 0xd9, 0x39, 0x55, 0xe0, 0xe9, 0x4b,
-	0x0a, 0x73, 0xa6, 0x76, 0x54, 0x57, 0xfa, 0x7f, 0x03, 0xb9, 0x8a, 0xb7, 0x40, 0xb5, 0x38, 0xfb,
-	0xa4, 0xe5, 0xe6, 0xf1, 0x12, 0x38, 0xd7, 0xd2, 0xd4, 0xeb, 0x83, 0xd2, 0xdc, 0x6b, 0x78, 0x7b,
-	0x36, 0x4f, 0xc1, 0xf8, 0xfd, 0xda, 0x7f, 0xd1, 0x26, 0xae, 0xd6, 0x2d, 0x7f, 0x43, 0xe6, 0xba,
-	0xe5, 0x68, 0xf3, 0xdd, 0x0a, 0x27, 0xe9, 0xbd, 0x05, 0xfe, 0x19, 0x53, 0xbc, 0x57, 0x1c, 0x3d,
-	0x47, 0xf6, 0xef, 0xcf, 0x92, 0xff, 0xfd, 0x83, 0x1b, 0x3b, 0x83, 0x5f, 0x81, 0x33, 0x18, 0x06,
-	0xee, 0xd1, 0x30, 0x70, 0x7f, 0x0e, 0x03, 0xf7, 0xfd, 0x28, 0x70, 0x8e, 0x46, 0x81, 0xf3, 0x63,
-	0x14, 0x38, 0x2f, 0xef, 0x50, 0x66, 0xf6, 0xe3, 0x2e, 0x0c, 0x25, 0x47, 0xa9, 0x72, 0x4d, 0x10,
-	0xf3, 0x46, 0xaa, 0x57, 0xd9, 0x02, 0x25, 0x0f, 0xd1, 0x41, 0xf6, 0x5e, 0x74, 0x2f, 0x64, 0x0f,
-	0xc6, 0x83, 0x3f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xaf, 0xbb, 0x8d, 0x2c, 0xda, 0x04, 0x00, 0x00,
+	0x14, 0xbf, 0x2b, 0x08, 0xa9, 0x2e, 0xb4, 0xe8, 0x14, 0xd4, 0x10, 0xe0, 0x12, 0x22, 0x81, 0x0a,
+	0x52, 0x6c, 0xa5, 0x08, 0x86, 0x6e, 0x0d, 0x85, 0x88, 0x21, 0xa8, 0x4a, 0xc5, 0xc2, 0x12, 0x39,
+	0x17, 0xe3, 0x5a, 0xd4, 0xf6, 0xc9, 0xf6, 0x1d, 0xed, 0xca, 0x27, 0x60, 0x64, 0x64, 0x60, 0x45,
+	0x62, 0x80, 0xef, 0x90, 0xb1, 0x62, 0xea, 0x84, 0x20, 0x19, 0xf8, 0x1a, 0xe8, 0x2e, 0xbe, 0xa6,
+	0xd7, 0xe4, 0xa0, 0xca, 0x76, 0x7e, 0xef, 0xe7, 0xdf, 0x9f, 0x7b, 0x4f, 0x06, 0x37, 0x22, 0x4e,
+	0x08, 0x8a, 0xa8, 0x8c, 0x51, 0xdc, 0x44, 0xe6, 0x10, 0x86, 0x4a, 0x1a, 0xe9, 0x5d, 0x4d, 0xca,
+	0x30, 0x29, 0xc3, 0xb8, 0x59, 0xf1, 0x03, 0xa9, 0xb9, 0xd4, 0xa8, 0x8f, 0x35, 0x41, 0x71, 0xb3,
+	0x4f, 0x0c, 0x6e, 0xa2, 0x40, 0x32, 0x31, 0x41, 0x57, 0xd6, 0x6d, 0x9f, 0x6b, 0x9a, 0xb0, 0x70,
+	0x4d, 0x6d, 0xe3, 0xe6, 0xa4, 0xd1, 0x4b, 0x4f, 0x68, 0x72, 0xb0, 0xad, 0x12, 0x95, 0x54, 0x4e,
+	0xea, 0xc9, 0x57, 0xc6, 0x94, 0xb3, 0x93, 0xea, 0xa7, 0x8d, 0xfa, 0x17, 0x17, 0xac, 0x77, 0x34,
+	0x6d, 0xcb, 0xf8, 0x55, 0x38, 0xc0, 0x86, 0x74, 0x98, 0x68, 0x63, 0xbd, 0xab, 0x58, 0x40, 0xbc,
+	0x27, 0x60, 0x19, 0x47, 0x66, 0x5f, 0x2a, 0x66, 0x8e, 0xca, 0x6e, 0xcd, 0xdd, 0x58, 0x6e, 0x95,
+	0x7f, 0x7c, 0x6b, 0x94, 0xac, 0xde, 0xf6, 0x60, 0xa0, 0x88, 0xd6, 0x7b, 0x46, 0x31, 0x41, 0xbb,
+	0x53, 0xa8, 0xf7, 0x1c, 0x5c, 0xe3, 0x4c, 0xf4, 0x28, 0x4e, 0x0c, 0xb2, 0x80, 0x94, 0x97, 0x6a,
+	0xee, 0xc6, 0xca, 0xe6, 0x6d, 0x68, 0x2f, 0x26, 0x71, 0xa1, 0x8d, 0x0b, 0x77, 0x48, 0xf0, 0x54,
+	0x32, 0xd1, 0xba, 0x3c, 0xfc, 0x59, 0x75, 0xba, 0x2b, 0x7c, 0xaa, 0xbf, 0xe5, 0x7d, 0xfc, 0x54,
+	0x75, 0xde, 0xff, 0xf9, 0xfa, 0x70, 0xca, 0x5d, 0xbf, 0x0b, 0xaa, 0x05, 0x76, 0xbb, 0x44, 0x87,
+	0x52, 0x68, 0x52, 0xff, 0x7c, 0x1a, 0x69, 0x8f, 0x98, 0x67, 0x9c, 0x28, 0x4a, 0x44, 0x70, 0xd4,
+	0x56, 0x32, 0x0a, 0x17, 0x8e, 0xb4, 0x0d, 0xd6, 0x48, 0xc6, 0xd4, 0xa3, 0x09, 0x55, 0x1a, 0xea,
+	0x5f, 0xb7, 0x57, 0x49, 0x4e, 0x7a, 0x6b, 0xb5, 0x28, 0xc9, 0x8c, 0xcb, 0xd3, 0x24, 0xdf, 0x5d,
+	0x70, 0xeb, 0x6c, 0xda, 0x17, 0xe2, 0xcd, 0x01, 0x36, 0x4c, 0x8a, 0x5d, 0xac, 0x30, 0xd7, 0x0b,
+	0xa7, 0x79, 0x09, 0xae, 0xb3, 0x8c, 0xaa, 0x17, 0xa6, 0x5c, 0x76, 0x46, 0x77, 0xe0, 0xd9, 0x05,
+	0x85, 0xe7, 0x04, 0xed, 0x90, 0xd6, 0x58, 0xbe, 0x3c, 0x13, 0xad, 0x0e, 0x6a, 0x45, 0x9e, 0xb3,
+	0x6c, 0x9b, 0x27, 0x4b, 0xe0, 0x52, 0x47, 0x53, 0xef, 0x00, 0x94, 0xe6, 0x2e, 0xdf, 0xbd, 0xbc,
+	0x93, 0x82, 0xa1, 0x57, 0x1a, 0x17, 0x82, 0x65, 0xaa, 0x56, 0x6d, 0x76, 0x2f, 0xe6, 0xaa, 0xcd,
+	0xc0, 0xe6, 0xab, 0x15, 0xce, 0xcf, 0x8b, 0x40, 0xb9, 0x70, 0x76, 0x0f, 0x8a, 0x8d, 0x9f, 0x83,
+	0x56, 0x60, 0x1e, 0xfa, 0xbf, 0x5f, 0xdb, 0xda, 0x19, 0xfe, 0xf6, 0x9d, 0xe1, 0xc8, 0x77, 0x8f,
+	0x47, 0xbe, 0xfb, 0x6b, 0xe4, 0xbb, 0x1f, 0xc6, 0xbe, 0x73, 0x3c, 0xf6, 0x9d, 0x93, 0xb1, 0xef,
+	0xbc, 0xbe, 0x4f, 0x99, 0xd9, 0x8f, 0xfa, 0x30, 0x90, 0x1c, 0x25, 0xbc, 0x0d, 0x41, 0xcc, 0x3b,
+	0xa9, 0xde, 0xa6, 0x07, 0x14, 0x3f, 0x46, 0x87, 0xe9, 0xfb, 0xd0, 0xbf, 0x92, 0x3e, 0x10, 0x8f,
+	0xfe, 0x06, 0x00, 0x00, 0xff, 0xff, 0x3a, 0x00, 0x74, 0x14, 0xca, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -324,8 +324,8 @@ type MsgClient interface {
 	GovUpdateMinGasPrice(ctx context.Context, in *MsgGovUpdateMinGasPrice, opts ...grpc.CallOption) (*MsgGovUpdateMinGasPriceResponse, error)
 	// GovSetEmergencyGroup sets emergency group address.
 	GovSetEmergencyGroup(ctx context.Context, in *MsgGovSetEmergencyGroup, opts ...grpc.CallOption) (*MsgGovSetEmergencyGroupResponse, error)
-	// GovUpdateLiquidationParams sets new liquidation params for inflation
-	GovUpdateLiquidationParams(ctx context.Context, in *MsgGovUpdateLiquidationParams, opts ...grpc.CallOption) (*GovUpdateLiquidationParamsResponse, error)
+	// GovUpdateInflationParams sets new params for inflation rate change.
+	GovUpdateInflationParams(ctx context.Context, in *MsgGovUpdateInflationParams, opts ...grpc.CallOption) (*GovUpdateInflationParamsResponse, error)
 }
 
 type msgClient struct {
@@ -354,9 +354,9 @@ func (c *msgClient) GovSetEmergencyGroup(ctx context.Context, in *MsgGovSetEmerg
 	return out, nil
 }
 
-func (c *msgClient) GovUpdateLiquidationParams(ctx context.Context, in *MsgGovUpdateLiquidationParams, opts ...grpc.CallOption) (*GovUpdateLiquidationParamsResponse, error) {
-	out := new(GovUpdateLiquidationParamsResponse)
-	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Msg/GovUpdateLiquidationParams", in, out, opts...)
+func (c *msgClient) GovUpdateInflationParams(ctx context.Context, in *MsgGovUpdateInflationParams, opts ...grpc.CallOption) (*GovUpdateInflationParamsResponse, error) {
+	out := new(GovUpdateInflationParamsResponse)
+	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Msg/GovUpdateInflationParams", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -369,8 +369,8 @@ type MsgServer interface {
 	GovUpdateMinGasPrice(context.Context, *MsgGovUpdateMinGasPrice) (*MsgGovUpdateMinGasPriceResponse, error)
 	// GovSetEmergencyGroup sets emergency group address.
 	GovSetEmergencyGroup(context.Context, *MsgGovSetEmergencyGroup) (*MsgGovSetEmergencyGroupResponse, error)
-	// GovUpdateLiquidationParams sets new liquidation params for inflation
-	GovUpdateLiquidationParams(context.Context, *MsgGovUpdateLiquidationParams) (*GovUpdateLiquidationParamsResponse, error)
+	// GovUpdateInflationParams sets new params for inflation rate change.
+	GovUpdateInflationParams(context.Context, *MsgGovUpdateInflationParams) (*GovUpdateInflationParamsResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
@@ -383,8 +383,8 @@ func (*UnimplementedMsgServer) GovUpdateMinGasPrice(ctx context.Context, req *Ms
 func (*UnimplementedMsgServer) GovSetEmergencyGroup(ctx context.Context, req *MsgGovSetEmergencyGroup) (*MsgGovSetEmergencyGroupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GovSetEmergencyGroup not implemented")
 }
-func (*UnimplementedMsgServer) GovUpdateLiquidationParams(ctx context.Context, req *MsgGovUpdateLiquidationParams) (*GovUpdateLiquidationParamsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GovUpdateLiquidationParams not implemented")
+func (*UnimplementedMsgServer) GovUpdateInflationParams(ctx context.Context, req *MsgGovUpdateInflationParams) (*GovUpdateInflationParamsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GovUpdateInflationParams not implemented")
 }
 
 func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
@@ -427,20 +427,20 @@ func _Msg_GovSetEmergencyGroup_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_GovUpdateLiquidationParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgGovUpdateLiquidationParams)
+func _Msg_GovUpdateInflationParams_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgGovUpdateInflationParams)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).GovUpdateLiquidationParams(ctx, in)
+		return srv.(MsgServer).GovUpdateInflationParams(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.ugov.v1.Msg/GovUpdateLiquidationParams",
+		FullMethod: "/umee.ugov.v1.Msg/GovUpdateInflationParams",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).GovUpdateLiquidationParams(ctx, req.(*MsgGovUpdateLiquidationParams))
+		return srv.(MsgServer).GovUpdateInflationParams(ctx, req.(*MsgGovUpdateInflationParams))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -458,8 +458,8 @@ var _Msg_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_GovSetEmergencyGroup_Handler,
 		},
 		{
-			MethodName: "GovUpdateLiquidationParams",
-			Handler:    _Msg_GovUpdateLiquidationParams_Handler,
+			MethodName: "GovUpdateInflationParams",
+			Handler:    _Msg_GovUpdateInflationParams_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -589,7 +589,7 @@ func (m *MsgGovSetEmergencyGroupResponse) MarshalToSizedBuffer(dAtA []byte) (int
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgGovUpdateLiquidationParams) Marshal() (dAtA []byte, err error) {
+func (m *MsgGovUpdateInflationParams) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -599,18 +599,18 @@ func (m *MsgGovUpdateLiquidationParams) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgGovUpdateLiquidationParams) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgGovUpdateInflationParams) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgGovUpdateLiquidationParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgGovUpdateInflationParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
 	{
-		size, err := m.LiquidationParams.MarshalToSizedBuffer(dAtA[:i])
+		size, err := m.InflationParams.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
 			return 0, err
 		}
@@ -629,7 +629,7 @@ func (m *MsgGovUpdateLiquidationParams) MarshalToSizedBuffer(dAtA []byte) (int, 
 	return len(dAtA) - i, nil
 }
 
-func (m *GovUpdateLiquidationParamsResponse) Marshal() (dAtA []byte, err error) {
+func (m *GovUpdateInflationParamsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -639,12 +639,12 @@ func (m *GovUpdateLiquidationParamsResponse) Marshal() (dAtA []byte, err error) 
 	return dAtA[:n], nil
 }
 
-func (m *GovUpdateLiquidationParamsResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *GovUpdateInflationParamsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GovUpdateLiquidationParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *GovUpdateInflationParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -713,7 +713,7 @@ func (m *MsgGovSetEmergencyGroupResponse) Size() (n int) {
 	return n
 }
 
-func (m *MsgGovUpdateLiquidationParams) Size() (n int) {
+func (m *MsgGovUpdateInflationParams) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -723,12 +723,12 @@ func (m *MsgGovUpdateLiquidationParams) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovTx(uint64(l))
 	}
-	l = m.LiquidationParams.Size()
+	l = m.InflationParams.Size()
 	n += 1 + l + sovTx(uint64(l))
 	return n
 }
 
-func (m *GovUpdateLiquidationParamsResponse) Size() (n int) {
+func (m *GovUpdateInflationParamsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1072,7 +1072,7 @@ func (m *MsgGovSetEmergencyGroupResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgGovUpdateLiquidationParams) Unmarshal(dAtA []byte) error {
+func (m *MsgGovUpdateInflationParams) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1095,10 +1095,10 @@ func (m *MsgGovUpdateLiquidationParams) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgGovUpdateLiquidationParams: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgGovUpdateInflationParams: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgGovUpdateLiquidationParams: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgGovUpdateInflationParams: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1135,7 +1135,7 @@ func (m *MsgGovUpdateLiquidationParams) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LiquidationParams", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field InflationParams", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1162,7 +1162,7 @@ func (m *MsgGovUpdateLiquidationParams) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.LiquidationParams.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.InflationParams.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1187,7 +1187,7 @@ func (m *MsgGovUpdateLiquidationParams) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *GovUpdateLiquidationParamsResponse) Unmarshal(dAtA []byte) error {
+func (m *GovUpdateInflationParamsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1210,10 +1210,10 @@ func (m *GovUpdateLiquidationParamsResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: GovUpdateLiquidationParamsResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: GovUpdateInflationParamsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GovUpdateLiquidationParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: GovUpdateInflationParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:

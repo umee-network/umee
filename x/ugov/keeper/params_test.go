@@ -43,12 +43,12 @@ func TestLiquidationParams(t *testing.T) {
 	require := require.New(t)
 	k := initKeeper(t)
 
-	require.Equal(k.LiquidationParams(), ugov.LiquidationParams{},
-		"when nothing is set, empty address should be returned")
+	require.Equal(k.InflationParams(), ugov.InflationParams{},
+		"when nothing is set, empty inflationp params should return")
 
-	dlp := ugov.DefaultLiquidationParams()
-	k.SetLiquidationParams(dlp)
-	rlp := k.LiquidationParams()
+	dlp := ugov.DefaultInflationParams()
+	k.SetInflationParams(dlp)
+	rlp := k.InflationParams()
 	require.Equal(rlp, dlp)
 	require.Equal(rlp.MaxSupply.GetDenom(), appparams.BondDenom)
 }

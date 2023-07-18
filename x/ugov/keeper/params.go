@@ -30,14 +30,14 @@ func (k Keeper) EmergencyGroup() sdk.AccAddress {
 	return store.GetAddress(k.store, keyEmergencyGroup)
 }
 
-func (k Keeper) SetLiquidationParams(lp ugov.LiquidationParams) error {
-	return store.SetValue(k.store, KeyLiquidationParams, &lp, "liquidation_params")
+func (k Keeper) SetInflationParams(lp ugov.InflationParams) error {
+	return store.SetValue(k.store, KeyInflationParams, &lp, "liquidation_params")
 }
 
-func (k Keeper) LiquidationParams() ugov.LiquidationParams {
-	lp := store.GetValue[*ugov.LiquidationParams](k.store, KeyLiquidationParams, "liquidation_params")
+func (k Keeper) InflationParams() ugov.InflationParams {
+	lp := store.GetValue[*ugov.InflationParams](k.store, KeyInflationParams, "liquidation_params")
 	if lp == nil {
-		return ugov.LiquidationParams{}
+		return ugov.InflationParams{}
 	}
 	return *lp
 }

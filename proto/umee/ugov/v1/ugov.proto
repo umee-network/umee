@@ -9,8 +9,8 @@ import "cosmos_proto/cosmos.proto";
 option go_package                      = "github.com/umee-network/umee/v5/x/ugov";
 option (gogoproto.goproto_getters_all) = false;
 
-// LiquidationParams
-message LiquidationParams {
+// InflationParams params for changing the inflation min rate and max rate of mint module params.
+message InflationParams {
   // max_supply is the maximum supply for liquidation.
   cosmos.base.v1beta1.Coin max_supply = 1 [(gogoproto.nullable) = false];
   // inflation_cycle_duration is duration for changing the inflation rates for liquidation.

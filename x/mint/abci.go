@@ -5,18 +5,16 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	mk "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	"github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/umee-network/umee/v5/util"
 	ugov "github.com/umee-network/umee/v5/x/ugov"
-	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
 )
 
-// BeginBlock implements BeginBlock for the x/mint module.
-func BeginBlock(ctx sdk.Context, ugovKeeper ugovkeeper.Keeper, mintKeeper mk.Keeper) {
+// BeginBlock overrides the mint module BeginBlock.
+func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper MintKeeper) {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyBeginBlocker)
-	// liquidation params
-	lp := ugovKeeper.LiquidationParams()
+	// inflation rate change params
+	lp := ugovKeeper.InflationParams()
 	// mint module params
 	mintParams := mintKeeper.GetParams(ctx)
 
@@ -60,8 +58,8 @@ func BeginBlock(ctx sdk.Context, ugovKeeper ugovkeeper.Keeper, mintKeeper mk.Kee
 	)
 }
 
-func InflationCalculationFn(ctx sdk.Context, ugovKeeper ugovkeeper.Keeper, mintKeeper mk.Keeper,
-	lp ugov.LiquidationParams, params types.Params, bondedRatio sdk.Dec, currentInflation sdk.Dec) sdk.Dec {
+func InflationCalculationFn(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper MintKeeper,
+	lp ugov.InflationParams, params types.Params, bondedRatio sdk.Dec, currentInflation sdk.Dec) sdk.Dec {
 
 	// inflation cycle is completed , so we need to update the inflation max and min rate
 	icst, err := ugovKeeper.GetInflationCycleStartTime()

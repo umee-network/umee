@@ -25,12 +25,12 @@ service Query {
     option (google.api.http).get = "/umee/ugov/v1/emergency-group";
   }
 
-  // LiquidationParams
-  rpc LiquidationParams(QueryLiquidationParams) returns (QueryLiquidationParamsResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/liquidation-params";
+  // InflationParams returns params of inflation reduction rates
+  rpc InflationParams(QueryInflationParams) returns (QueryInflationParamsResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/inflation-params";
   }
 
-  // InflationCycleStartTime returns when inflation cycle is started
+  // InflationCycleStartTime returns inflation cycle start time
   rpc InflationCycleStartTime(QueryInflationCycleStartTime) returns (QueryInflationCycleStartTimeResponse) {
     option (google.api.http).get = "/umee/ugov/v1/inflation-cycle";
   }
@@ -52,12 +52,12 @@ message QueryEmergencyGroupResponse {
   string emergency_group = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
-// QueryLiquidationParams request type.
-message QueryLiquidationParams {}
+// QueryInflationParams request type.
+message QueryInflationParams {}
 
-// QueryLiquidationParamsResponse response type.
-message QueryLiquidationParamsResponse {
-  LiquidationParams liquidation_params = 1 [(gogoproto.nullable) = false];
+// QueryInflationParamsResponse response type.
+message QueryInflationParamsResponse {
+  InflationParams inflation_params = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryInflationCycleStartTime request type.

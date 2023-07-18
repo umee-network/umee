@@ -7,8 +7,8 @@ import (
 // DefaultGenesis creates a default genesis state
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		MinGasPrice:       coin.UmeeDec("0.1"),
-		LiquidationParams: DefaultLiquidationParams(),
+		MinGasPrice:     coin.UmeeDec("0.1"),
+		InflationParams: DefaultInflationParams(),
 	}
 }
 
@@ -17,5 +17,5 @@ func (gs *GenesisState) Validate() error {
 		return err
 	}
 
-	return gs.LiquidationParams.Validate()
+	return gs.InflationParams.Validate()
 }

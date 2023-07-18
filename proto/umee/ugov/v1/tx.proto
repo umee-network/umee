@@ -19,8 +19,8 @@ service Msg {
   // GovSetEmergencyGroup sets emergency group address.
   rpc GovSetEmergencyGroup(MsgGovSetEmergencyGroup) returns (MsgGovSetEmergencyGroupResponse);
 
-  // GovUpdateLiquidationParams sets new liquidation params for inflation
-  rpc GovUpdateLiquidationParams(MsgGovUpdateLiquidationParams) returns (GovUpdateLiquidationParamsResponse);
+  // GovUpdateInflationParams sets new params for inflation rate change.
+  rpc GovUpdateInflationParams(MsgGovUpdateInflationParams) returns (GovUpdateInflationParamsResponse);
 }
 
 // MsgGovUpdateMinGasPrice request type.
@@ -48,14 +48,14 @@ message MsgGovSetEmergencyGroup {
 // MsgGovSetEmergencyGroupResponse response type.
 message MsgGovSetEmergencyGroupResponse {};
 
-// MsgGovUpdateLiquidationParams request type.
-message MsgGovUpdateLiquidationParams {
+// MsgGovUpdateInflationParams request type.
+message MsgGovUpdateInflationParams {
   option (cosmos.msg.v1.signer) = "authority";
 
   // authority must be the address of the governance account.
-  string            authority          = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  LiquidationParams liquidation_params = 2 [(gogoproto.nullable) = false];
+  string          authority        = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  InflationParams inflation_params = 2 [(gogoproto.nullable) = false];
 }
 
-// GovUpdateLiquidationParamsResponse response type.
-message GovUpdateLiquidationParamsResponse {}
+// GovUpdateInflationParamsResponse response type.
+message GovUpdateInflationParamsResponse {}

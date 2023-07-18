@@ -143,7 +143,7 @@ import (
 	uibcquota "github.com/umee-network/umee/v5/x/uibc/quota"
 	uibcquotakeeper "github.com/umee-network/umee/v5/x/uibc/quota/keeper"
 
-	umint "github.com/umee-network/umee/v5/x/mint/module"
+	umint "github.com/umee-network/umee/v5/x/mint"
 )
 
 var (
