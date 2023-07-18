@@ -263,8 +263,7 @@ func (q querier) Medians(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	medians := types.Prices{}
+	var medians types.Prices
 
 	if len(req.Denom) > 0 {
 		if req.NumStamps == 0 {
