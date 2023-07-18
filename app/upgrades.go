@@ -70,6 +70,7 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 	for _, subspace := range app.ParamsKeeper.GetSubspaces() {
 		subspace := subspace
 
+		found := true
 		var keyTable paramstypes.KeyTable
 		switch subspace.Name() {
 		case authtypes.ModuleName:
@@ -88,9 +89,12 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 			keyTable = govv1.ParamKeyTable()
 		case crisistypes.ModuleName:
 			keyTable = crisistypes.ParamKeyTable()
+		default:
+			// subspace not handled
+			found = false
 		}
 
-		if !subspace.HasKeyTable() {
+		if found && !subspace.HasKeyTable() {
 			subspace.WithKeyTable(keyTable)
 		}
 	}

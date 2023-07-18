@@ -9,18 +9,19 @@ import (
 	"strings"
 	"testing"
 
-	"cosmossdk.io/log"
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibchost "github.com/cosmos/ibc-go/v7/modules/core/24-host"
-	"github.com/rs/zerolog"
 	"gotest.tools/v3/assert"
 
+	"github.com/cosmos/cosmos-sdk/baseapp"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
+
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
@@ -103,11 +104,11 @@ func TestFullAppSimulation(t *testing.T) {
 // TestAppStateDeterminism tests for application non-determinism using a PRNG
 // as an input for the simulator's seed.
 func TestAppStateDeterminism(t *testing.T) {
-	if !simtestutil.FlagEnabledValue {
+	if !simcli.FlagEnabledValue {
 		t.Skip("skipping application simulation")
 	}
 
-	config := simtestutil.NewConfigFromFlags()
+	config := simcli.NewConfigFromFlags()
 	config.InitialBlockHeight = 1
 	config.ExportParamsPath = ""
 	config.OnOperation = false
@@ -124,7 +125,7 @@ func TestAppStateDeterminism(t *testing.T) {
 		for j := 0; j < numTimesToRunPerSeed; j++ {
 			var logger log.Logger
 			if simcli.FlagVerboseValue {
-				logger = log.NewCustomLogger(zerolog.New(os.Stderr).Level(zerolog.InfoLevel).With().Timestamp().Logger())
+				logger = log.TestingLogger()
 			} else {
 				logger = log.NewNopLogger()
 			}
@@ -142,6 +143,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				umeeapp.GetWasmEnabledProposals(),
 				umeeapp.EmptyWasmOpts,
 				interBlockCacheOpt(),
+				baseapp.SetChainID(config.ChainID),
 			)
 
 			fmt.Printf(
@@ -293,7 +295,7 @@ func TestAppImportExport(t *testing.T) {
 		{app.GetKey(capabilitytypes.StoreKey), newApp.GetKey(capabilitytypes.StoreKey), [][]byte{}},
 		{app.GetKey(authzkeeper.StoreKey), newApp.GetKey(authzkeeper.StoreKey), [][]byte{authzkeeper.GrantKey, authzkeeper.GrantQueuePrefix}},
 
-		{app.GetKey(ibchost.StoreKey), newApp.GetKey(ibchost.StoreKey), [][]byte{}},
+		{app.GetKey(ibcexported.StoreKey), newApp.GetKey(ibcexported.StoreKey), [][]byte{}},
 		{app.GetKey(ibctransfertypes.StoreKey), newApp.GetKey(ibctransfertypes.StoreKey), [][]byte{}},
 
 		// Umee module
