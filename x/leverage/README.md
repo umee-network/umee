@@ -61,25 +61,35 @@ Users have the following actions available to them:
 
   Suppliers earn interest at an effective rate of the asset's [Supplying APY](#supplying-apy) as the [uToken Exchange Rate](#utoken-exchange-rate) increases over time.
 
+  Supplying will fail if a token has reached its `max_supply`.
+
 - `MsgCollateralize` or `MsgDecollateralize` a uToken denomination as collateral for borrowing.
 
   Collaterized _uTokens_ are stored in the `leverage` module and they cannot be transferred until they are decollaterized or liquidated. Decolaterized _uTokens_  are returned back to the user's account. A user cannot decollateralize a uToken if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
   If the user is undercollateralized (borrowed value > borrow limit), collateral is eligible for liquidation and cannot be decollateralized until the user's borrows are healthy again.
 
+  Collateralize can fail if it would violate the module's `min_collateral_liquidity` for the token.
+
 - `MsgSupplyCollateral` to combine the effects of `MsgSupply` and `MsgCollateralize`.
 
   Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly supplied assets will be eligible for liquidation immediately.
 
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
-  Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate). A user can always withdraw non-collateral uTokens, but can only withdraw collateral uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
+  Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate).
+  
+  A user can always withdraw non-collateral uTokens, but can only withdraw collateral uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
+
+  Users may also be preventing from withdrawing both non-collateral and collateral uTokens if it would violate the module's `min_collateral_liquidity`.
 
 - `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdrawn.
-  This amount is calculated taking into account the available uTokens and collateral the user has, their borrow limit, and the available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` of the `Token`.
+  This amount is calculated taking into account the available uTokens and collateral the user has, their borrow limit, and the available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` and `max_supply_utilization` of the `Token`.
 
 - `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#borrow-limit).
 
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#borrow-apy).
+
+  Borrow can fail if it would violate the module's `max_supply_utilization` or `min_collateral_liquidity`.
 
 - `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed. This amount is calculated taking into account the user's borrow limit and the module's available liquidity respecting the `min_collateral_liquidity` and `max_supply_utilization` of the `Token`.
 
@@ -96,6 +106,8 @@ Users have the following actions available to them:
 - `MsgLeverageLiquidate` liquidates an account, but instead of repaying tokens using the liquidator's balance it borrows them instead. Additionally, the reward received is collateralized instantly.
 
   This allows more convenient liquidation where the liquidator does not need to keep balances of all potential repay tokens on hand, and can instead leverage a single type of collateral.
+
+  From the module's point of view, no token or uToken transfers take place in this transaction, and the module's total borrowed and collateral amounts do not change. This makes leveraged liquidations immune to token liquidity exhaustion and harmless to module health measures like supply utilization and collateral liquitity.
 
 ### Reserves
 
