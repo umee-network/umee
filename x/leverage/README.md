@@ -63,7 +63,7 @@ Users have the following actions available to them:
 
   Supplying will fail if a token has reached its `max_supply`.
 
-- `MsgCollateralize` or `MsgDecollateralize` a uToken denomination as collateral for borrowing.
+- `MsgCollateralize` or `MsgDecollateralize` a uToken as collateral for borrowing.
 
   Collaterized _uTokens_ are stored in the `leverage` module and they cannot be transferred until they are decollaterized or liquidated. Decolaterized _uTokens_  are returned back to the user's account. A user cannot decollateralize a uToken if it would reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
 
