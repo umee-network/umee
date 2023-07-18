@@ -308,17 +308,13 @@ revive_cmd := go run github.com/mgechev/revive
 lint:
 	@echo "--> Running revive"
 	@${revive_cmd} -config .revive.toml -formatter friendly ./...
-# todo: many errors to fix in price-feeder
-#	@cd price-feeder && $(revive_cmd) -formatter friendly ./...
 	@echo "--> Running golangci_lint"
 	@${golangci_lint_cmd} run
-	@cd price-feeder && $(golangci_lint_cmd) run
 
 lint-fix:
 	@echo "--> Running linter to fix the lint issues"
 	find . -name '*.go' -type f -not -path "./vendor*" -not -path "*.git*" -not -path "./client/docs/statik/statik.go" -not -path "./tests/mocks/*" -not -name "*.pb.go" -not -name "*.pb.gw.go" -not -name "*.pulsar.go" -not -path "./crypto/keys/secp256k1/*" | xargs gofumpt -w -l
 	@${golangci_lint_cmd} run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
-	@cd price-feeder && $(golangci_lint_cmd) run --fix --out-format=tab --issues-exit-code=0 --timeout=8m
 
 .PHONY: lint lint-fix
 

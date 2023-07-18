@@ -30,7 +30,8 @@ func (k Keeper) UpdateAccount(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, 
 // updateRewards updates any rewardAccumulators associated with ongoing incentive programs
 // based on the time elapsed between LastRewardTime and block time. It decreases active
 // incentive programs' RemainingRewards by the amount of coins distributed.
-// Also sets module's LastRewardsTime to block time.
+// Also sets module's LastRewardsTime to block time. If no uTokens are currently bonded,
+// does nothing.
 func (k Keeper) updateRewards(ctx sdk.Context, blockTime int64) error {
 	prevTime := k.GetLastRewardsTime(ctx)
 	if prevTime > blockTime {
@@ -123,6 +124,10 @@ func (k Keeper) updatePrograms(ctx sdk.Context) error {
 	for _, op := range ongoingPrograms {
 		// if an ongoing program is ending, move it to completed programs without modifying any fields
 		if blockTime >= op.Duration+op.StartTime {
+			// if remaining rewards are nonzero, it means no eligible collateral was
+			// bonded during the last available block for rewards. Those remaining
+			// rewards remain in the module account (in the same place as unclaimed
+			// and upcoming rewards.)
 			if err := k.moveIncentiveProgram(ctx, op.ID, incentive.ProgramStatusCompleted); err != nil {
 				return err
 			}

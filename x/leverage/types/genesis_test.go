@@ -30,7 +30,8 @@ func TestGenesisValidation(t *testing.T) {
 			"complete liquidation threshold must be positive",
 		},
 		{
-			"invalid token registry", GenesisState{
+			"invalid token registry",
+			GenesisState{
 				Params: DefaultParams(),
 				Registry: []Token{
 					{},
@@ -40,7 +41,8 @@ func TestGenesisValidation(t *testing.T) {
 			"invalid denom",
 		},
 		{
-			"invalid adjusted borrows address", GenesisState{
+			"invalid adjusted borrows address",
+			GenesisState{
 				Params: DefaultParams(),
 				AdjustedBorrows: []AdjustedBorrow{
 					NewAdjustedBorrow("", sdk.DecCoin{}),
@@ -50,7 +52,8 @@ func TestGenesisValidation(t *testing.T) {
 			"empty address string is not allowed",
 		},
 		{
-			"invalid adjusted borrows amount", GenesisState{
+			"invalid adjusted borrows amount",
+			GenesisState{
 				Params: DefaultParams(),
 				AdjustedBorrows: []AdjustedBorrow{
 					NewAdjustedBorrow(testAddr, sdk.DecCoin{}),
@@ -60,7 +63,8 @@ func TestGenesisValidation(t *testing.T) {
 			"invalid denom",
 		},
 		{
-			"invalid collateral address", GenesisState{
+			"invalid collateral address",
+			GenesisState{
 				Params: DefaultParams(),
 				Collateral: []Collateral{
 					NewCollateral("", sdk.Coin{}),
@@ -70,7 +74,8 @@ func TestGenesisValidation(t *testing.T) {
 			"empty address string is not allowed",
 		},
 		{
-			"invalid collateral amount", GenesisState{
+			"invalid collateral amount",
+			GenesisState{
 				Params: DefaultParams(),
 				Collateral: []Collateral{
 					NewCollateral(testAddr, sdk.Coin{}),
@@ -80,7 +85,8 @@ func TestGenesisValidation(t *testing.T) {
 			"invalid denom",
 		},
 		{
-			"invalid reserves", GenesisState{
+			"invalid reserves",
+			GenesisState{
 				Params: DefaultParams(),
 				Reserves: sdk.Coins{
 					sdk.Coin{
@@ -92,7 +98,8 @@ func TestGenesisValidation(t *testing.T) {
 			"invalid denom",
 		},
 		{
-			"invalid badDebt address", GenesisState{
+			"invalid badDebt address",
+			GenesisState{
 				Params: DefaultParams(),
 				BadDebts: []BadDebt{
 					NewBadDebt("", ""),
@@ -102,7 +109,8 @@ func TestGenesisValidation(t *testing.T) {
 			"empty address string is not allowed",
 		},
 		{
-			"invalid badDebt denom", GenesisState{
+			"invalid badDebt denom",
+			GenesisState{
 				Params: DefaultParams(),
 				BadDebts: []BadDebt{
 					NewBadDebt(testAddr, ""),
@@ -112,7 +120,8 @@ func TestGenesisValidation(t *testing.T) {
 			"invalid denom",
 		},
 		{
-			"invalid interestScalar denom", GenesisState{
+			"invalid interestScalar denom",
+			GenesisState{
 				Params: DefaultParams(),
 				InterestScalars: []InterestScalar{
 					NewInterestScalar("", sdk.ZeroDec()),
@@ -122,7 +131,8 @@ func TestGenesisValidation(t *testing.T) {
 			"invalid denom",
 		},
 		{
-			"invalid interestScalar address", GenesisState{
+			"invalid interestScalar address",
+			GenesisState{
 				Params: DefaultParams(),
 				InterestScalars: []InterestScalar{
 					NewInterestScalar(validDenom, sdk.ZeroDec()),

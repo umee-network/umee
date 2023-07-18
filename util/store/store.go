@@ -12,10 +12,12 @@ package store
 import (
 	"encoding/binary"
 	"fmt"
+	"time"
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // GetValue loads value from the store using default Unmarshaler
@@ -139,8 +141,7 @@ func SetDec(store sdk.KVStore, key []byte, val sdk.Dec, errField string) error {
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func GetAddress(store sdk.KVStore, key []byte) sdk.AccAddress {
 	if bz := store.Get(key); len(bz) > 0 {
-		addr := sdk.AccAddress(bz)
-		return addr
+		return bz
 	}
 	// No stored bytes at key: return empty address
 	return sdk.AccAddress{}
@@ -154,6 +155,21 @@ func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress) {
 		return
 	}
 	store.Set(key, val)
+}
+
+// GetTimeMs retrieves time saved as Unix time in Miliseconds.
+// Returns sdkerrors.NotFound error if the value is not there, hence time = 0 is not supported.
+func GetTimeMs(store sdk.KVStore, key []byte) (time.Time, error) {
+	t := GetInteger[int64](store, key)
+	if t == 0 {
+		return time.Time{}, sdkerrors.ErrNotFound
+	}
+	return time.UnixMilli(t), nil
+}
+
+// SetTimeMs saves time as Unix time in Miliseconds.
+func SetTimeMs(store sdk.KVStore, key []byte, t time.Time) {
+	SetInteger(store, key, t.UnixMilli())
 }
 
 func SetInteger[T Integer](store sdk.KVStore, key []byte, v T) {

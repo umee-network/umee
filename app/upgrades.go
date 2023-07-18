@@ -9,6 +9,7 @@ import (
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -59,10 +60,11 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	app.registerUpgrade5_1(upgradeInfo)
 	app.registerUpgrade6(upgradeInfo)
+	app.registerUpgrade7(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
-	planName := "v6.0"
+func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
+	planName := "v7.0"
 
 	// Set param key table for params module migration
 	for _, subspace := range app.ParamsKeeper.GetSubspaces() {
@@ -109,6 +111,21 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 			consensustypes.ModuleName,
 			crisistypes.ModuleName,
 		},
+	})
+}
+
+func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
+	planName := "v6.0"
+	gravityModuleName := "gravity" // hardcoded to avoid dependency on GB module
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Deleted: []string{gravityModuleName},
 	})
 }
 
@@ -268,7 +285,7 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 		planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			ctx.Logger().Info("Running setupBech32ibcKeeper")
+			// ctx.Logger().Info("Running setupBech32ibcKeeper")
 			// err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
 			// if err != nil {
 			// 	return nil, errors.Wrapf(

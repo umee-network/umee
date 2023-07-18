@@ -39,6 +39,7 @@ func (msg *MsgGovUpdateMinGasPrice) String() string {
 // LegacyMsg.Type implementations
 
 func (msg MsgGovUpdateMinGasPrice) Route() string { return "" }
+
 func (msg MsgGovUpdateMinGasPrice) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
@@ -65,6 +66,7 @@ func (msg *MsgGovSetEmergencyGroup) GetSigners() []sdk.AccAddress {
 
 // LegacyMsg.Type implementations
 func (msg MsgGovSetEmergencyGroup) Route() string { return "" }
+
 func (msg MsgGovSetEmergencyGroup) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
