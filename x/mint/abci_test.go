@@ -8,10 +8,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	mintmodule "github.com/umee-network/umee/v5/x/mint/module"
 	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
+	"github.com/umee-network/umee/v5/x/mint"
 )
 
 func TestBeginBlock(t *testing.T) {
@@ -25,11 +25,11 @@ func TestBeginBlock(t *testing.T) {
 
 	oldMintParams := app.MintKeeper.GetParams(ctx)
 	uk := app.UGovKeeperB.Keeper(&ctx)
-	mintmodule.BeginBlock(ctx, uk, app.MintKeeper)
+	mint.BeginBlock(ctx, uk, app.MintKeeper)
 
 	// inflation min and max rate should change by reduce rate
 	newMintParams := app.MintKeeper.GetParams(ctx)
-	liquidationParams := uk.LiquidationParams()
+	liquidationParams := uk.InflationParams()
 	assert.DeepEqual(t,
 		oldMintParams.InflationMax.Mul(sdk.OneDec().Sub(liquidationParams.InflationReductionRate)),
 		newMintParams.InflationMax,

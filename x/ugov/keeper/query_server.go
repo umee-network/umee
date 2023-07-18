@@ -30,11 +30,11 @@ func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup
 	return &ugov.QueryEmergencyGroupResponse{EmergencyGroup: q.Keeper(&sdkCtx).EmergencyGroup().String()}, nil
 }
 
-// LiquidationParams returns liquidation params
-func (q Querier) LiquidationParams(ctx context.Context, _ *ugov.QueryLiquidationParams) (
-	*ugov.QueryLiquidationParamsResponse, error) {
+// InflationParams returns inflation rate change params
+func (q Querier) InflationParams(ctx context.Context, _ *ugov.QueryInflationParams) (
+	*ugov.QueryInflationParamsResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return &ugov.QueryLiquidationParamsResponse{LiquidationParams: q.Keeper(&sdkCtx).LiquidationParams()}, nil
+	return &ugov.QueryInflationParamsResponse{InflationParams: q.Keeper(&sdkCtx).InflationParams()}, nil
 }
 
 // InflationCycleStartTime return when the inflation cycle is started

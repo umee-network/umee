@@ -10,7 +10,7 @@ func (k Keeper) ExportGenesis() *ugov.GenesisState {
 	util.Panic(err)
 	return &ugov.GenesisState{
 		MinGasPrice:             k.MinGasPrice(),
-		LiquidationParams:       k.LiquidationParams(),
+		InflationParams:         k.InflationParams(),
 		InflationCycleStartTime: *lcst,
 	}
 }
@@ -20,7 +20,7 @@ func (k Keeper) InitGenesis(gs *ugov.GenesisState) error {
 		return err
 	}
 
-	if err := k.SetLiquidationParams(gs.LiquidationParams); err != nil {
+	if err := k.SetInflationParams(gs.InflationParams); err != nil {
 		return err
 	}
 

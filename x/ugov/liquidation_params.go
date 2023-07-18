@@ -18,15 +18,15 @@ var (
 	DefaultInflationReductionRate = sdk.MustNewDecFromStr("0.25")
 )
 
-func DefaultLiquidationParams() LiquidationParams {
-	return LiquidationParams{
+func DefaultInflationParams() InflationParams {
+	return InflationParams{
 		MaxSupply:              DefaultMaxSupply,
 		InflationCycleDuration: DefaultInflationCycleDuration,
 		InflationReductionRate: DefaultInflationReductionRate,
 	}
 }
 
-func (lp LiquidationParams) Validate() error {
+func (lp InflationParams) Validate() error {
 	if lp.MaxSupply.Amount.LT(math.NewInt(0)) {
 		return fmt.Errorf("%s must be not negative: %s", "max_supply", lp.MaxSupply.Amount.String())
 	}

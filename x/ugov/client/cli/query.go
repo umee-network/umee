@@ -65,7 +65,7 @@ func QueryLiquidationParams() *cobra.Command {
 			}
 
 			queryClient := ugov.NewQueryClient(clientCtx)
-			resp, err := queryClient.LiquidationParams(cmd.Context(), &ugov.QueryLiquidationParams{})
+			resp, err := queryClient.InflationParams(cmd.Context(), &ugov.QueryInflationParams{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

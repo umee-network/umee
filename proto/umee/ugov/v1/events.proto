@@ -19,7 +19,7 @@ message EventEmergencyGroup {
   string emergency_group = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
-// EventLiquidationParams is emitted when GovUpdateLiquidationParams is correctly executed.
-message EventLiquidationParams {
-  LiquidationParams liquidation_params = 1 [(gogoproto.nullable) = false];
+// EventInflationParams is emitted when GovUpdateInflationParams is correctly executed.
+message EventInflationParams {
+  InflationParams inflation_params = 1 [(gogoproto.nullable) = false];
 }
