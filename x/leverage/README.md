@@ -177,7 +177,7 @@ Transactions will also have different behaviors when encountering missing spot o
 
 Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
 
-Additionally, each token when borrowed uses its collateral weight to limit the average collateral weight of collateral assets on the same account.
+Additionally, each token when _borrowed_ uses its collateral weight to limit the average collateral weight of _collateral_ assets on the same account. This usage of collateral weight based on borrowed assets instead of collateral ones is called `Borrow Factor`.
 
 For example, an account with using a single collateral token with `CollateralWeight 0.8` borrowing an single token with `CollateralWeight 0.7` will reduce the effective `CollateralWeight` of the account's collateral to `0.7` when computing borrow limit.
 
