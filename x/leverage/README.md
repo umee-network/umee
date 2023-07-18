@@ -187,7 +187,7 @@ The leverage module can define pairs of assets which are advantaged when one is 
 
 They are defined in the form `[Asset A, Asset B, Special Collateral Weight]`. In effect, this means that
 
-> When collateral of `Asset A` exists on the same account as borrowed `Asset B`, the `CollateralWeight` of `Asset A` is replaced by `Special Collateral Weight` when computing collateral weights, and the `CollateralWeight` of `Asset B` is replaced by `Special Collateral Weight` when computing `Borrow Factor`.
+> When a user has collateral of `Asset A` and borrows `Asset B`, the `CollateralWeight` of `Asset A` is replaced by `Special Collateral Weight` when computing collateral weights, and the `CollateralWeight` of `Asset B` is replaced by `Special Collateral Weight` when computing `Borrow Factor`.
 
 #### Borrow Limit
 
