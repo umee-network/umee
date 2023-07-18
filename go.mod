@@ -6,7 +6,7 @@ require (
 	cosmossdk.io/errors v1.0.0
 	cosmossdk.io/math v1.0.1
 	github.com/CosmWasm/wasmd v0.31.0
-	github.com/CosmWasm/wasmvm v1.2.4
+	github.com/CosmWasm/wasmvm v1.3.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.46.13
 	github.com/cosmos/go-bip39 v1.0.0
