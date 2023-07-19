@@ -11,6 +11,8 @@ import (
 	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v5/app"
+	appparams "github.com/umee-network/umee/v5/app/params"
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/mint"
 )
 
@@ -25,6 +27,13 @@ func TestBeginBlock(t *testing.T) {
 
 	oldMintParams := app.MintKeeper.GetParams(ctx)
 	uk := app.UGovKeeperB.Keeper(&ctx)
+
+	inflationParams := uk.InflationParams()
+	inflationParams.MaxSupply = coin.New(appparams.BondDenom, 21_000000000000000)
+	err := uk.SetInflationParams(inflationParams)
+	assert.NilError(t, err)
+
+	// Override the mint module BeginBlock
 	mint.BeginBlock(ctx, uk, app.MintKeeper)
 
 	// inflation min and max rate should change by reduce rate
