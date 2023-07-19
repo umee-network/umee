@@ -42,10 +42,10 @@ func (k Keeper) InflationParams() ugov.InflationParams {
 	return *lp
 }
 
-func (k Keeper) SetInflationCycleStartTime(startTime time.Time) error {
-	return store.SetBinValue(k.store, KeyInflationCycleStartTime, &startTime, "inflation_cycle_start_time")
+func (k Keeper) SetInflationCycleStart(startTime time.Time) error {
+	return store.SetBinValue(k.store, KeyInflationCycleStart, &startTime, "inflation_cycle_start")
 }
 
-func (k Keeper) GetInflationCycleStartTime() (*time.Time, error) {
-	return store.GetBinValue[*time.Time](k.store, KeyInflationCycleStartTime, "inflation_cycle_start_time")
+func (k Keeper) GetInflationCycleStart() (*time.Time, error) {
+	return store.GetBinValue[*time.Time](k.store, KeyInflationCycleStart, "inflation_cycle_start")
 }

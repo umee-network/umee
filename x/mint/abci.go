@@ -61,13 +61,13 @@ func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper) {
 func InflationCalculationFn(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper,
 	lp ugov.InflationParams, params types.Params, bondedRatio sdk.Dec, currentInflation sdk.Dec) sdk.Dec {
 
-	// inflation cycle is completed , so we need to update the inflation max and min rate
-	icst, err := ugovKeeper.GetInflationCycleStartTime()
+	icst, err := ugovKeeper.GetInflationCycleStart()
 	util.Panic(err)
 
 	// Initially inflation_cycle start time is zero
 	// Once chain start inflation cycle start time will be inflation rate change executed block time
-	if ctx.BlockTime().After(icst.Add(lp.InflationCycleDuration)) {
+	if ctx.BlockTime().After(icst.Add(lp.InflationCycle)) {
+		// inflation cycle is completed , so we need to update the inflation max and min rate
 		params.InflationMax = params.InflationMax.Mul(sdk.OneDec().Sub(lp.InflationReductionRate))
 		params.InflationMin = params.InflationMin.Mul(sdk.OneDec().Sub(lp.InflationReductionRate))
 
@@ -75,19 +75,13 @@ func InflationCalculationFn(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper K
 		mintKeeper.SetParams(ctx, params)
 
 		// update the executed time of inflation cycle
-		err := ugovKeeper.SetInflationCycleStartTime(ctx.BlockTime())
+		err := ugovKeeper.SetInflationCycleStart(ctx.BlockTime())
 		util.Panic(err)
-		ctx.Logger().Info("inflation rates are updated",
+		ctx.Logger().Info("inflation min and max rates are updated",
 			"inflation_max", params.InflationMax, "inflation_min", params.InflationMin,
-			"inflation_cycle_start_time", ctx.BlockTime().String(),
+			"inflation_cycle_start", ctx.BlockTime().String(),
 		)
 	}
-
-	// The target annual inflation rate is recalculated for each previsions cycle. The
-	// inflation is also subject to a rate change (positive or negative) depending on
-	// the distance from the desired ratio (67%). The maximum rate change possible is
-	// defined to be 13% per year, however the annual inflation is capped as between
-	// 7% and 20%.
 
 	// (1 - bondedRatio/GoalBonded) * InflationRateChange
 	inflationRateChangePerYear := sdk.OneDec().
