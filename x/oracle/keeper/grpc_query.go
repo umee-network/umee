@@ -301,7 +301,7 @@ func (q querier) MedianDeviations(
 		if err != nil {
 			return nil, err
 		}
-		medianDeviations = append(medianDeviations, *price)
+		medianDeviations = append(medianDeviations, price)
 	} else {
 		medianDeviations = q.AllMedianDeviationPrices(ctx)
 	}

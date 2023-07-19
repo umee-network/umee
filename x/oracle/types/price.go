@@ -8,8 +8,8 @@ import (
 
 type Prices []Price
 
-func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) *Price {
-	return &Price{
+func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) Price {
+	return Price{
 		ExchangeRateTuple: ExchangeRateTuple{
 			ExchangeRate: exchangeRate,
 			Denom:        denom,
