@@ -217,8 +217,8 @@ func (s *E2ETestSuite) initGenesis() {
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	votingPeriod := 5 * time.Second
-	govGenState.VotingParams.VotingPeriod = &votingPeriod
-	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
+	govGenState.Params.VotingPeriod = &votingPeriod
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
 	bz, err = s.cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)

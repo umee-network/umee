@@ -30,6 +30,20 @@ func SubmitAndPassProposal(umee client.Client, changes []proposal.ParamChange) e
 		return err
 	}
 
+	// retry
+	for i := 0; i < 5; i++ {
+		newResp, err := umee.QueryTxHash(resp.TxHash)
+		if err != nil && i == 4 {
+			return err
+		}
+		if err == nil {
+			resp = newResp
+			break
+		}
+
+		time.Sleep(time.Second * (1 + time.Duration(i)))
+	}
+
 	return MakeVoteAndCheckProposal(umee, *resp)
 }
 
@@ -70,8 +84,22 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
+	// retry
+	for i := 0; i < 5; i++ {
+		newResp, err := umeeClient.QueryTxHash(resp.TxHash)
+		if err != nil && i == 4 {
+			return err
+		}
+		if err == nil {
+			resp = newResp
+			break
+		}
+
+		time.Sleep(time.Second * (1 + time.Duration(i)))
+	}
+
+	if len(resp.Events) == 0 {
+		return fmt.Errorf("no events in response")
 	}
 
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
@@ -79,7 +107,7 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 
 func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) error {
 	var proposalID string
-	for _, event := range resp.Logs[0].Events {
+	for _, event := range resp.Events {
 		if event.Type == "submit_proposal" {
 			for _, attribute := range event.Attributes {
 				if attribute.Key == "proposal_id" {

@@ -36,7 +36,7 @@ func (s *E2ETest) TestUpdateOracleParams() {
 	s.Require().Equal(uint64(20), params.MedianStampPeriod)
 
 	// simple retry loop to submit and pass a proposal
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 5; i++ {
 		err = grpc.SubmitAndPassProposal(
 			s.Umee,
 			grpc.OracleParamChanges(10, 2, 20),
@@ -45,7 +45,7 @@ func (s *E2ETest) TestUpdateOracleParams() {
 			break
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(time.Duration(i+1) * time.Second)
 	}
 
 	s.Require().NoError(err, "submit and pass proposal")

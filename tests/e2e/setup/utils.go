@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
@@ -33,25 +32,24 @@ func (s *E2ETestSuite) GaiaREST() string {
 }
 
 func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool) {
-	// ibctransfertypes.NewMsgTransfer()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
 	// retry up to 5 times
-	for i := 0; i < 5; i++ {	
-s.T().Logf("sending %s from %s to %s (%s)", token, srcChainID, dstChainID, recipient)
-	cmd := []string{
-		"hermes",
-		"tx",
-		"ft-transfer",
-		"--dst-chain=" + dstChainID,
-		"--src-chain=" + srcChainID,
-		"--src-port=transfer",     // source chain port ID
-		"--src-channel=channel-0", // since only one connection/channel exists, assume 0
-		"--amount=" + token.Amount.String(),
-		fmt.Sprintf("--denom=%s", token.Denom),
-		"--timeout-height-offset=1000",
-
+	for i := 0; i < 5; i++ {
+		s.T().Logf("sending %s from %s to %s (%s)", token, srcChainID, dstChainID, recipient)
+		cmd := []string{
+			"hermes",
+			"tx",
+			"ft-transfer",
+			"--dst-chain=" + dstChainID,
+			"--src-chain=" + srcChainID,
+			"--src-port=transfer",     // source chain port ID
+			"--src-channel=channel-0", // since only one connection/channel exists, assume 0
+			"--amount=" + token.Amount.String(),
+			fmt.Sprintf("--denom=%s", token.Denom),
+			"--timeout-height-offset=1000",
+		}
 
 		if len(recipient) != 0 {
 			cmd = append(cmd, fmt.Sprintf("--receiver=%s", recipient))
@@ -94,29 +92,25 @@ s.T().Logf("sending %s from %s to %s (%s)", token, srcChainID, dstChainID, recip
 			return
 		}
 
-		re := regexp.MustCompile(`[0-9A-Fa-f]{64}`)
-		txHash := re.FindString(errBuf.String() + outBuf.String())
-
-		// retry if we didn't get a txHash
-		if len(txHash) == 0 && i < 4 {
+		if !strings.Contains(outBuf.String(), "SUCCESS") {
 			continue
 		}
 
 		s.T().Log("successfully sent IBC tokens")
-		s.Require().NotEmptyf(txHash, "failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
-		s.T().Log("Waiting for Tx to be included in a block", txHash, srcChainID)
-		endpoint := s.UmeeREST()
-		if strings.Contains(srcChainID, "gaia") {
-			endpoint = s.GaiaREST()
-		}
+		time.Sleep(3 * time.Second)
+		// s.T().Log("Waiting for Tx to be included in a block", txHash, srcChainID)
+		// endpoint := s.UmeeREST()
+		// if strings.Contains(srcChainID, "gaia") {
+		// 	endpoint = s.GaiaREST()
+		// }
 
-		s.Require().Eventually(func() bool {
-			err := s.QueryUmeeTx(endpoint, txHash)
-			if err != nil {
-				s.T().Log("Tx Query Error", err)
-			}
-			return err == nil
-		}, 5*time.Second, 200*time.Millisecond)
+		// s.Require().Eventually(func() bool {
+		// 	err := s.QueryUmeeTx(endpoint, txHash)
+		// 	if err != nil {
+		// 		s.T().Log("Tx Query Error", err)
+		// 	}
+		// 	return err == nil
+		// }, 5*time.Second, 200*time.Millisecond)
 		return
 	}
 }

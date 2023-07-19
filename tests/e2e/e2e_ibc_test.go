@@ -187,7 +187,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		***/
 		// Make gov proposal to disable the quota check on ibc-transfer
 
-		for i := 0; i < 5; i++ {
+		for i := 0; i < 10; i++ {
 			err = grpc.UIBCIBCTransferSatusUpdate(
 				s.Umee,
 				uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED,
@@ -197,7 +197,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 				break
 			}
 
-			time.Sleep(1 * time.Second)
+			time.Sleep(time.Duration(i+1) * time.Second)
 		}
 
 		s.Require().NoError(err)
