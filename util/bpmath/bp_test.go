@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -23,4 +24,25 @@ func TestBPToDec(t *testing.T) {
 		bp := BP(tc.a).ToDec()
 		require.Equal(tc.exp.String(), bp.String(), fmt.Sprint("test-bp ", tc.name))
 	}
+}
+
+// Tests if it works both with sdk.Int and math.Int
+func TestInt(t *testing.T) {
+	t.Parallel()
+	require := require.New(t)
+
+	bp := BP(100)
+	si := sdk.NewInt(1234)
+
+	var sresult sdk.Int = Mul(si, bp)
+	require.Equal(sresult, sdk.NewInt(12))
+	var mresult math.Int = Mul(si, bp)
+	require.Equal(mresult, math.NewInt(12))
+
+	// now let's check math.Int
+	mi := math.NewInt(1234)
+	sresult = Mul(mi, bp)
+	require.Equal(sresult, sdk.NewInt(12))
+	mresult = Mul(mi, bp)
+	require.Equal(mresult, math.NewInt(12))
 }
