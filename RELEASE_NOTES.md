@@ -6,22 +6,24 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v5.1.0
+## v6.0.0
 
 Highlights:
 
-- [`x/incentive`](x/incentive/README.md) module: allows to create incentive programs for liquidity mining.
-- new x/leverage security measure: [Borrow Factor](x/leverage/README.md#borrow-factor)
-- new x/leverage [`MsgLeveragedLiquidate`](proto/umee/leverage/v1/tx.proto#L59) was added. Allows suppliers to use their active collateral to absorb unhealthy debts. See [Liquidation](x/leverage/README.md#liquidation) for more details.
-- Gravity Bridge phase-4: the GB valset was correctly burned. Slashing is removed and there is no need to run Peggo any more.
+- TODO
 
-[v5.1.0 CHANGELOG](https://github.com/umee-network/umee/blob/v5.1.0/CHANGELOG.md).
+[v6.0.0 CHANGELOG](https://github.com/umee-network/umee/blob/v6.0.0/CHANGELOG.md).
 
 ### Validators
 
-#### Peggo
+#### libwasmvm update
 
-You can kill Peggo (there is no need to run it any more).
+Our dependencies have been updated. Now the binary requires `libwasmvm v1.3.0`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+
+- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.3.0/internal/api/libwasmvm.$(uname -m).so`
+- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.3.0/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
+
+You don't need to do anything if you are using our Docker image.
 
 #### Min Gas Prices
 

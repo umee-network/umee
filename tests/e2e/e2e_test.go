@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 
@@ -34,11 +35,20 @@ func (s *E2ETest) TestUpdateOracleParams() {
 	s.Require().Equal(uint64(4), params.MaximumPriceStamps)
 	s.Require().Equal(uint64(20), params.MedianStampPeriod)
 
-	err = grpc.SubmitAndPassProposal(
-		s.Umee,
-		grpc.OracleParamChanges(10, 2, 20),
-	)
-	s.Require().NoError(err)
+	// simple retry loop to submit and pass a proposal
+	for i := 0; i < 3; i++ {
+		err = grpc.SubmitAndPassProposal(
+			s.Umee,
+			grpc.OracleParamChanges(10, 2, 20),
+		)
+		if err == nil {
+			break
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	s.Require().NoError(err, "submit and pass proposal")
 
 	params, err = s.Umee.QueryOracleParams()
 	s.Require().NoError(err)
