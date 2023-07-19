@@ -33,7 +33,7 @@ func quo(a, b cmath.Int, rounding Rounding, max uint64) uint64 {
 }
 
 // Mul returns a * b_basis_points
-// Contract: b \in [0; MatxUint32]
+// Contract: b in [0, MaxUint32]
 func Mul[T BP | FixedBP](a cmath.Int, b T) cmath.Int {
 	if b == 0 {
 		return cmath.ZeroInt()
