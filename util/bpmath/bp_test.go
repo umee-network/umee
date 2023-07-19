@@ -45,4 +45,14 @@ func TestInt(t *testing.T) {
 	require.Equal(sresult, sdk.NewInt(12))
 	mresult = Mul(mi, bp)
 	require.Equal(mresult, math.NewInt(12))
+
+	// test rounding
+	si = sdk.NewInt(1299)
+	require.Equal(bp.Mul(si), sdk.NewInt(12))
+
+	si = sdk.NewInt(-1299)
+	require.Equal(bp.Mul(si), sdk.NewInt(-12))
+
+	si = sdk.NewInt(-1201)
+	require.Equal(bp.Mul(si), sdk.NewInt(-12))
 }

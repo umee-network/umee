@@ -2,6 +2,7 @@ package bpmath
 
 import (
 	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // FixedBP assures that all operations are in 0-10'000 range
@@ -15,6 +16,11 @@ func FixedFromQuo(dividend, divisor math.Int, rounding Rounding) FixedBP {
 	return FixedBP(quo(dividend, divisor, rounding, One))
 }
 
-func (bp FixedBP) ToDec() math.LegacyDec {
-	return math.LegacyNewDecWithPrec(int64(bp), 4)
+func (bp FixedBP) ToDec() sdk.Dec {
+	return sdk.NewDecWithPrec(int64(bp), 4)
+}
+
+// Mul return a*bp rounding towards zero.
+func (bp FixedBP) Mul(a math.Int) math.Int {
+	return Mul(a, bp)
 }

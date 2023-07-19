@@ -1,4 +1,4 @@
-// Package bpmath provides types and functions for doing basis point operations.
-// There is no precision lost for operations like `a * b` where `a` or `b` is basis points,
-// and the other variable is `Int`.
+// Package bpmath provides types and functions for doing basis point operations with math.Int.
+// So, the result is always math.Int, and follows the Go rounding semantic for integer nubmer:
+// rounds towards zero.
 package bpmath
