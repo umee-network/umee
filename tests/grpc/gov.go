@@ -65,16 +65,16 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 		IbcStatus:   status,
 	}
 
-	var err error
-	for retry := 0; retry < 5; retry++ {
-		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-		if resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg}); err == nil {
-			return MakeVoteAndCheckProposal(umeeClient, *resp)
-		}
-		time.Sleep(time.Second * 1)
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
 	}
 
-	return err
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
 func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) error {
@@ -109,18 +109,23 @@ func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) err
 	}
 
 	now := time.Now()
-	sleepDuration := prop.VotingEndTime.Sub(now) + 3*time.Second
+	sleepDuration := prop.VotingEndTime.Sub(now) + 1*time.Second
 	fmt.Printf("sleeping %s until end of voting period + 1 block\n", sleepDuration)
 	time.Sleep(sleepDuration)
 
-	prop, err = umeeClient.GovProposal(proposalIDInt)
-	if err != nil {
-		return err
+	var propStatus string
+	for retry := 0; retry < 5; retry++ {
+		prop, err = umeeClient.GovProposal(proposalIDInt)
+		if err != nil {
+			return err
+		}
+
+		propStatus = prop.Status.String()
+		if propStatus == "PROPOSAL_STATUS_PASSED" {
+			return nil
+		}
+		time.Sleep(time.Second * (1 + time.Duration(retry)))
 	}
 
-	propStatus := prop.Status.String()
-	if propStatus != "PROPOSAL_STATUS_PASSED" {
-		return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
-	}
-	return nil
+	return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
 }
