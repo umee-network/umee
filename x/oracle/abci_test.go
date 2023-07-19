@@ -304,7 +304,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			s.Require().NoError(err)
 
 			medians := app.OracleKeeper.AllMedianPrices(ctx)
-			medians = *medians.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
+			medians = medians.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
 			actualMedian := medians[0].ExchangeRateTuple.ExchangeRate
 			s.Require().Equal(expectedMedian, actualMedian)
 
@@ -313,7 +313,7 @@ func (s *IntegrationTestSuite) TestEndblockerHistoracle() {
 			s.Require().NoError(err)
 
 			medianDeviations := app.OracleKeeper.AllMedianDeviationPrices(ctx)
-			medianDeviations = *medianDeviations.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
+			medianDeviations = medianDeviations.FilterByBlock(uint64(blockHeight)).FilterByDenom(denom)
 			actualMedianDeviation := medianDeviations[0].ExchangeRateTuple.ExchangeRate
 			s.Require().Equal(expectedMedianDeviation, actualMedianDeviation)
 		}
