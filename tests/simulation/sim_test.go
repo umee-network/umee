@@ -307,8 +307,6 @@ func TestAppImportExport(t *testing.T) {
 		storeA := ctxA.KVStore(skp.A)
 		storeB := ctxB.KVStore(skp.B)
 
-		fmt.Println("comparing store", skp.A.Name(), "with", skp.B.Name())
-
 		failedKVAs, failedKVBs := sdk.DiffKVStores(storeA, storeB, skp.Prefixes)
 		assert.Equal(t, len(failedKVAs), len(failedKVBs), "unequal sets of key-values to compare")
 
