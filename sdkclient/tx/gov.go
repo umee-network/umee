@@ -90,7 +90,7 @@ func (c *Client) TxGovVoteYesAll(proposalID uint64) error {
 			if _, err = BroadcastTx(*c.ClientContext, *c.txFactory, []sdk.Msg{msg}...); err == nil {
 				break
 			}
-			time.Sleep(time.Second * 1)
+			time.Sleep(time.Millisecond * 300)
 		}
 
 		if err != nil {

@@ -218,8 +218,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected := []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
-		*types.NewPrice(umeeMedian0.Amount, "umee", blockHeight0),
+		types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
+		types.NewPrice(umeeMedian0.Amount, "umee", blockHeight0),
 	}
 	s.Require().Equal(res.Medians, expected)
 
@@ -227,7 +227,7 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
+		types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
 	}
 	s.Require().Equal(res.Medians, expected)
 
@@ -239,10 +239,10 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
-		*types.NewPrice(umeeMedian0.Amount, "umee", blockHeight0),
-		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
-		*types.NewPrice(umeeMedian1.Amount, "umee", blockHeight1),
+		types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
+		types.NewPrice(umeeMedian0.Amount, "umee", blockHeight0),
+		types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
+		types.NewPrice(umeeMedian1.Amount, "umee", blockHeight1),
 	}
 	s.Require().Equal(res.Medians, expected)
 
@@ -250,8 +250,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
-		*types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
+		types.NewPrice(atomMedian0.Amount, "atom", blockHeight0),
+		types.NewPrice(atomMedian1.Amount, "atom", blockHeight1),
 	}
 	s.Require().Equal(res.Medians, expected)
 
@@ -275,8 +275,8 @@ func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
 	s.Require().NoError(err)
 
 	expected := []types.Price{
-		*types.NewPrice(atomMedianDeviation.Amount, "atom", blockHeight),
-		*types.NewPrice(umeeMedianDeviation.Amount, "umee", blockHeight),
+		types.NewPrice(atomMedianDeviation.Amount, "atom", blockHeight),
+		types.NewPrice(umeeMedianDeviation.Amount, "umee", blockHeight),
 	}
 	s.Require().Equal(res.MedianDeviations, expected)
 
@@ -284,7 +284,7 @@ func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
 	s.Require().NoError(err)
 
 	expected = []types.Price{
-		*types.NewPrice(atomMedianDeviation.Amount, "atom", blockHeight),
+		types.NewPrice(atomMedianDeviation.Amount, "atom", blockHeight),
 	}
 	s.Require().Equal(res.MedianDeviations, expected)
 }
