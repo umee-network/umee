@@ -1,0 +1,49 @@
+package bpmath
+
+import (
+	"math"
+
+	cmath "cosmossdk.io/math"
+)
+
+// BP represents values in basis points. Maximum value is 2^32-1.
+// Note: BP operations should not be chained - this causes precision loses.
+type BP uint32
+
+// FromQuo returns a/b in basis points.
+// Contract: a>=0 and b > 0.
+// Panics if a/b >= MaxUint32/10'000 or if b==0.
+func FromQuo(dividend, divisor cmath.Int, rounding Rounding) BP {
+	return BP(quo(dividend, divisor, rounding, math.MaxUint32))
+}
+
+func quo(a, b cmath.Int, rounding Rounding, max uint64) uint64 {
+	if b.IsZero() {
+		panic("divider can't be zero")
+	}
+	bp := a.MulRaw(ONE)
+	if rounding == UP {
+		bp = bp.Add(b.SubRaw(1))
+	}
+	x := bp.Quo(b).Uint64()
+	if x > max {
+		panic("basis points out of band")
+	}
+	return x
+}
+
+// Mul returns a * b_basis_points
+// Contract: b \in [0; MatxUint32]
+func Mul[T BP | FixedBP](a cmath.Int, b T) cmath.Int {
+	if b == 0 {
+		return cmath.ZeroInt()
+	}
+	if b == ONE {
+		return a
+	}
+	return a.MulRaw(int64(b)).Quo(oneBigInt)
+}
+
+func (bp BP) ToDec() cmath.LegacyDec {
+	return cmath.LegacyNewDecWithPrec(int64(bp), 4)
+}
