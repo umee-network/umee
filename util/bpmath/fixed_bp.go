@@ -4,7 +4,7 @@ import (
 	"cosmossdk.io/math"
 )
 
-// FixedBP assures that all oprations are in 0-10'000 range
+// FixedBP assures that all operations are in 0-10'000 range
 // Note: FixedBP operations should not be chained - this causes precision loses.
 type FixedBP uint32
 

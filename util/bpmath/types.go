@@ -7,11 +7,11 @@ import (
 type Rounding uint
 
 const (
-	DOWN = iota
+	DOWN Rounding = iota
 	UP
 )
 
-const ONE = 10000
+const One = 10000
 const half = ONE / 2
 
 var (

@@ -7,7 +7,7 @@ import (
 )
 
 // BP represents values in basis points. Maximum value is 2^32-1.
-// Note: BP operations should not be chained - this causes precision loses.
+// Note: BP operations should not be chained - this causes precision losses.
 type BP uint32
 
 // FromQuo returns a/b in basis points.
