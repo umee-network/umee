@@ -16,7 +16,7 @@ func TestBPToDec(t *testing.T) {
 		exp  math.LegacyDec
 	}{
 		{"t1", 99999, math.LegacyMustNewDecFromStr("9.9999")},
-		{"t2", ONE * 10, math.LegacyMustNewDecFromStr("10.0")},
+		{"t2", One * 10, math.LegacyMustNewDecFromStr("10.0")},
 	}
 	require := require.New(t)
 	for _, tc := range tcs {

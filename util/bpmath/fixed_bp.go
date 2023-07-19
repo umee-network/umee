@@ -12,7 +12,7 @@ type FixedBP uint32
 // Contract: a>=0 and b > 0.
 // Panics if b==0.
 func FixedFromQuo(dividend, divisor math.Int, rounding Rounding) FixedBP {
-	return FixedBP(quo(dividend, divisor, rounding, ONE))
+	return FixedBP(quo(dividend, divisor, rounding, One))
 }
 
 func (bp FixedBP) ToDec() math.LegacyDec {

@@ -18,18 +18,18 @@ func TestFixedQuo(t *testing.T) {
 		exp    FixedBP
 		panics bool
 	}{
-		{"t1", 0, 0, UP, ONE, true},
-		{"t2", 0, 0, DOWN, ONE, true},
-		{"t3", 1, 0, UP, ONE, true},
-		{"t4", 1, 0, DOWN, ONE, true},
+		{"t1", 0, 0, UP, One, true},
+		{"t2", 0, 0, DOWN, One, true},
+		{"t3", 1, 0, UP, One, true},
+		{"t4", 1, 0, DOWN, One, true},
 
 		{"t5", 20, 10, UP, 0, true},
 		{"t6", 20, 10, DOWN, 0, true},
-		{"t7", 20, 20, UP, ONE, false},
-		{"t7-1", 20, 20, DOWN, ONE, false},
+		{"t7", 20, 20, UP, One, false},
+		{"t7-1", 20, 20, DOWN, One, false},
 
-		{"t8", 1, 2, UP, ONE / 2, false},
-		{"t9", 1, 2, DOWN, ONE / 2, false},
+		{"t8", 1, 2, UP, One / 2, false},
+		{"t9", 1, 2, DOWN, One / 2, false},
 		{"t10", 1, 3, UP, 3334, false},
 		{"t11", 1, 3, DOWN, 3333, false},
 		{"t12", 2, 3, UP, 6667, false},
@@ -63,14 +63,14 @@ func TestFixedMul(t *testing.T) {
 	}{
 		{"t1", 20, 0, 0},
 		{"t2", 20, 1, 0},
-		{"t3", 20, ONE, 20},
+		{"t3", 20, One, 20},
 		{"t4", 20000, 0, 0},
 		{"t5", 20000, 1, 2},
 		{"t6", 20000, 2, 4},
-		{"t7", 20000, half, 10000},
+		{"t7", 20000, Half, 10000},
 		{"t8", 2000, 4, 0},
 		{"t9", 2000, 5, 1},
-		{"t10", 2000, half, 1000},
+		{"t10", 2000, Half, 1000},
 	}
 	require := require.New(t)
 	for _, tc := range tcs {
@@ -96,7 +96,7 @@ func TestFixedToDec(t *testing.T) {
 		{"t2", 1, math.LegacyMustNewDecFromStr("0.0001")},
 		{"t3", 20, math.LegacyMustNewDecFromStr("0.002")},
 		{"t4", 9999, math.LegacyMustNewDecFromStr("0.9999")},
-		{"t5", ONE, math.LegacyNewDec(1)},
+		{"t5", One, math.LegacyNewDec(1)},
 	}
 	require := require.New(t)
 	for _, tc := range tcs {

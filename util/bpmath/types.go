@@ -12,8 +12,8 @@ const (
 )
 
 const One = 10000
-const half = ONE / 2
+const Half = One / 2
 
 var (
-	oneBigInt = math.NewIntFromUint64(ONE)
+	oneBigInt = math.NewIntFromUint64(One)
 )

@@ -21,7 +21,7 @@ func quo(a, b cmath.Int, rounding Rounding, max uint64) uint64 {
 	if b.IsZero() {
 		panic("divider can't be zero")
 	}
-	bp := a.MulRaw(ONE)
+	bp := a.MulRaw(One)
 	if rounding == UP {
 		bp = bp.Add(b.SubRaw(1))
 	}
@@ -38,7 +38,7 @@ func Mul[T BP | FixedBP](a cmath.Int, b T) cmath.Int {
 	if b == 0 {
 		return cmath.ZeroInt()
 	}
-	if b == ONE {
+	if b == One {
 		return a
 	}
 	return a.MulRaw(int64(b)).Quo(oneBigInt)
