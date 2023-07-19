@@ -9,22 +9,20 @@ import (
 )
 
 func (k Keeper) GetParams(ctx sdk.Context) incentive.Params {
-	params := incentive.Params{}
-	ok := store.GetObject(k.KVStore(ctx), k.cdc, keyPrefixParams, &params, "params")
-	if !ok {
+	params := store.GetValue[*incentive.Params](k.KVStore(ctx), keyPrefixParams, "params")
+	if params == nil {
 		// on missing module parameters, return defaults rather than panicking or returning zero values
 		return incentive.DefaultParams()
 	}
-	return params
+	return *params
 }
 
 // setParams validates and sets the incentive module parameters
 func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
-	kvs := k.KVStore(ctx)
 	if err := params.Validate(); err != nil {
 		return err
 	}
-	return store.SetObject(kvs, k.cdc, keyPrefixParams, &params, "params")
+	return store.SetValue(k.KVStore(ctx), keyPrefixParams, &params, "params")
 }
 
 // incentiveProgramStatus gets an incentive program status by ID. If the program is not found,
