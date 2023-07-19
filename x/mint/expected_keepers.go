@@ -10,8 +10,8 @@ import (
 )
 
 type UGovKeeper interface {
-	SetInflationCycleStartTime(startTime time.Time) error
-	GetInflationCycleStartTime() (*time.Time, error)
+	SetInflationCycleStart(startTime time.Time) error
+	GetInflationCycleStart() (*time.Time, error)
 	InflationParams() ugov.InflationParams
 }
 

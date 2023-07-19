@@ -13,14 +13,14 @@ option (gogoproto.goproto_getters_all) = false;
 message InflationParams {
   // max_supply is the maximum supply for liquidation.
   cosmos.base.v1beta1.Coin max_supply = 1 [(gogoproto.nullable) = false];
-  // inflation_cycle_duration is duration for changing the inflation rates for liquidation.
-  google.protobuf.Duration inflation_cycle_duration = 2 [
+  // inflation_cycle duration after which inflation rates are changed.
+  google.protobuf.Duration inflation_cycle = 2 [
     (gogoproto.nullable)    = false,
     (gogoproto.stdduration) = true,
-    (gogoproto.jsontag)     = "inflation_cycle_duration,omitempty",
-    (gogoproto.moretags)    = "yaml:\"inflation_cycle_duration\""
+    (gogoproto.jsontag)     = "inflation_cycle,omitempty",
+    (gogoproto.moretags)    = "yaml:\"inflation_cycle\""
   ];
-  // inflation_reduction_rate is reduction rate for inflation every inflation cycle.
+  // inflation_reduction_rate for every inflation cycle.
   string inflation_reduction_rate = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",

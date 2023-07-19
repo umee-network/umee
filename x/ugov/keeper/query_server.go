@@ -41,9 +41,9 @@ func (q Querier) InflationParams(ctx context.Context, _ *ugov.QueryInflationPara
 func (q Querier) InflationCycleStartTime(ctx context.Context, _ *ugov.QueryInflationCycleStartTime) (
 	*ugov.QueryInflationCycleStartTimeResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	icst, err := q.Keeper(&sdkCtx).GetInflationCycleStartTime()
+	icst, err := q.Keeper(&sdkCtx).GetInflationCycleStart()
 	if err != nil {
 		return nil, err
 	}
-	return &ugov.QueryInflationCycleStartTimeResponse{InflationCycleStartTime: icst}, nil
+	return &ugov.QueryInflationCycleStartTimeResponse{InflationCycleStart: icst}, nil
 }

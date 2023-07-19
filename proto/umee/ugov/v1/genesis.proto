@@ -19,6 +19,7 @@ message GenesisState {
 
   // InflationParams is params for inflation rate changes
   InflationParams inflation_params = 3 [(gogoproto.nullable) = false];
-  // Unix timestamp when the inflation cycle is started
-  google.protobuf.Timestamp inflation_cycle_start_time = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+
+  // Time when the inflation cycle started
+  google.protobuf.Timestamp inflation_cycle_start = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }

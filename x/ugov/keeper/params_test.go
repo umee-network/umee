@@ -53,22 +53,22 @@ func TestLiquidationParams(t *testing.T) {
 	require.Equal(rlp.MaxSupply.GetDenom(), appparams.BondDenom)
 }
 
-func TestInflationCycleStartTime(t *testing.T) {
+func TestInflationCycleStart(t *testing.T) {
 	t.Parallel()
 	require := require.New(t)
 	k := initKeeper(t)
 
 	st := time.Time{}
-	err := k.SetInflationCycleStartTime(st)
+	err := k.SetInflationCycleStart(st)
 	require.NoError(err)
-	in_c, err := k.GetInflationCycleStartTime()
+	in_c, err := k.GetInflationCycleStart()
 	require.NoError(err)
 	require.Equal(in_c.IsZero(), true, "it should be default zero time")
 
 	icst := time.Now()
-	err = k.SetInflationCycleStartTime(icst)
+	err = k.SetInflationCycleStart(icst)
 	require.NoError(err)
-	ricst, err := k.GetInflationCycleStartTime()
+	ricst, err := k.GetInflationCycleStart()
 	require.NoError(err)
 	require.Equal(ricst.Equal(icst), true, "inflation cycle start time should be same")
 }
