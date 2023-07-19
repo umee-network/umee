@@ -20,7 +20,8 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-// GetValue loads value from the store using default Unmarshaler
+// GetValue loads value from the store using default Unmarshaler.
+// If the value contains codec.Any filed, then SetObject must be used instead.
 func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errField string) TPtr {
 	if bz := store.Get(key); len(bz) > 0 {
 		var c TPtr = new(T)
@@ -34,6 +35,7 @@ func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errF
 }
 
 // SetValue saves value in the store using default Marshaler
+// If the value contains codec.Any field, then SetObject must be used instead.
 func SetValue[T Marshalable](store sdk.KVStore, key []byte, value T, errField string) error {
 	bz, err := value.Marshal()
 	if err != nil {
@@ -70,7 +72,6 @@ func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errFi
 // GetObject gets and unmarshals a structure from KVstore. Panics on failure to decode, and returns a boolean
 // indicating whether any data was found. If the return is false, the object might not be initialized with
 // valid zero values for its type.
-// Deprecated: use GetValue instead.
 func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)
@@ -84,7 +85,6 @@ func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.Prot
 }
 
 // SetObject marshals and sets a structure in KVstore. Returns error on failure to encode.
-// Deprecated: use SetValue instead.
 func SetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
 	bz, err := cdc.Marshal(object)
 	if err != nil {
