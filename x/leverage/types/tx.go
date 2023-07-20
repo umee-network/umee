@@ -269,13 +269,21 @@ func (msg MsgLeveragedLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
 func (msg MsgLeveragedLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
-	if err := validateSenderAndDenom(msg.Borrower, msg.RewardDenom); err != nil {
+	if msg.RepayDenom != "" {
+		if err := sdk.ValidateDenom(msg.RepayDenom); err != nil {
+			return err
+		}
+	}
+	if msg.RewardDenom != "" {
+		if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
+			return err
+		}
+	}
+	_, err := sdk.AccAddressFromBech32(msg.Borrower)
+	if err != nil {
 		return err
 	}
-	if err := sdk.ValidateDenom(msg.RepayDenom); err != nil {
-		return err
-	}
-	_, err := sdk.AccAddressFromBech32(msg.Liquidator)
+	_, err = sdk.AccAddressFromBech32(msg.Liquidator)
 	return err
 }
 
