@@ -143,6 +143,10 @@ import (
 	uibcoracle "github.com/umee-network/umee/v5/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v5/x/uibc/quota"
 	uibcquotakeeper "github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+
+	"github.com/umee-network/umee/v5/x/metoken"
+	metokenkeeper "github.com/umee-network/umee/v5/x/metoken/keeper"
+	metokenmodule "github.com/umee-network/umee/v5/x/metoken/module"
 )
 
 var (
@@ -193,6 +197,7 @@ func init() {
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
 		incentivemodule.AppModuleBasic{},
+		metokenmodule.AppModuleBasic{},
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -216,6 +221,7 @@ func init() {
 		oracletypes.ModuleName: nil,
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
+		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
 	}
 }
 
@@ -264,6 +270,7 @@ type UmeeApp struct {
 	bech32IbcKeeper   bech32ibckeeper.Keeper
 	UIbcQuotaKeeperB  uibcquotakeeper.Builder
 	UGovKeeperB       ugovkeeper.Builder
+	MetokenKeeperB    metokenkeeper.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -328,6 +335,7 @@ func New(
 		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
 		incentive.StoreKey,
+		metoken.StoreKey,
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -395,7 +403,11 @@ func New(
 		app.ModuleAccountAddrs(),
 	)
 	_stakingKeeper := stakingkeeper.NewKeeper(
-		appCodec, keys[stakingtypes.StoreKey], app.AccountKeeper, app.BankKeeper, app.GetSubspace(stakingtypes.ModuleName),
+		appCodec,
+		keys[stakingtypes.StoreKey],
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.GetSubspace(stakingtypes.ModuleName),
 	)
 	app.StakingKeeper = &_stakingKeeper
 	app.MintKeeper = mintkeeper.NewKeeper(
@@ -461,6 +473,7 @@ func New(
 		app.BankKeeper,
 		app.OracleKeeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
+		authtypes.NewModuleAddress(metoken.ModuleName),
 	)
 
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
@@ -526,6 +539,14 @@ func New(
 		app.UIbcQuotaKeeperB, // ISC4 Wrapper: fee IBC middleware
 		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
+	)
+
+	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
+		appCodec,
+		keys[metoken.StoreKey],
+		app.BankKeeper,
+		app.LeverageKeeper,
+		app.OracleKeeper,
 	)
 
 	// Create Transfer Stack
@@ -665,7 +686,13 @@ func New(
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper),
 		crisis.NewAppModule(&app.CrisisKeeper, skipGenesisInvariants),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
+		feegrantmodule.NewAppModule(
+			appCodec,
+			app.AccountKeeper,
+			app.BankKeeper,
+			app.FeeGrantKeeper,
+			app.interfaceRegistry,
+		),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
 		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, nil),
 		// need to dereference StakingKeeper because x/distribution uses interface casting :(
@@ -691,6 +718,7 @@ func New(
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
+		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
 	}
 
 	app.mm = module.NewManager(appModules...)
@@ -701,14 +729,26 @@ func New(
 	// NOTE: staking module is required if HistoricalEntries param > 0
 	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
 	beginBlockers := []string{
-		upgradetypes.ModuleName, capabilitytypes.ModuleName, minttypes.ModuleName, distrtypes.ModuleName,
-		slashingtypes.ModuleName, evidencetypes.ModuleName, stakingtypes.ModuleName,
-		ibchost.ModuleName, ibctransfertypes.ModuleName,
-		authtypes.ModuleName, banktypes.ModuleName, govtypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName,
-		authz.ModuleName, feegrant.ModuleName,
+		upgradetypes.ModuleName,
+		capabilitytypes.ModuleName,
+		minttypes.ModuleName,
+		distrtypes.ModuleName,
+		slashingtypes.ModuleName,
+		evidencetypes.ModuleName,
+		stakingtypes.ModuleName,
+		ibchost.ModuleName,
+		ibctransfertypes.ModuleName,
+		authtypes.ModuleName,
+		banktypes.ModuleName,
+		govtypes.ModuleName,
+		crisistypes.ModuleName,
+		genutiltypes.ModuleName,
+		authz.ModuleName,
+		feegrant.ModuleName,
 		nft.ModuleName,
 		group.ModuleName,
-		paramstypes.ModuleName, vestingtypes.ModuleName,
+		paramstypes.ModuleName,
+		vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
 		oracletypes.ModuleName,
@@ -717,6 +757,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
 
 	endBlockers := []string{
@@ -736,6 +777,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -760,6 +802,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
 
 	orderMigrations := []string{
@@ -777,6 +820,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
@@ -809,8 +853,10 @@ func New(
 		},
 	)
 	// TODO: Ensure x/leverage, x/incentive implement simulator and add it here:
-	simTestModules := genmap.Pick(simStateModules,
-		[]string{oracletypes.ModuleName, ibchost.ModuleName})
+	simTestModules := genmap.Pick(
+		simStateModules,
+		[]string{oracletypes.ModuleName, ibchost.ModuleName},
+	)
 
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
 	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
@@ -844,7 +890,8 @@ func New(
 
 	if manager := app.SnapshotManager(); manager != nil {
 		err := manager.RegisterExtensions(
-			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper))
+			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+		)
 		if err != nil {
 			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
 		}
@@ -865,7 +912,8 @@ func New(
 	return app
 }
 
-func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig,
+func (app *UmeeApp) setAnteHandler(
+	txConfig client.TxConfig,
 	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey,
 ) {
 	anteHandler, err := customante.NewAnteHandler(
@@ -879,7 +927,8 @@ func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig,
 			SigGasConsumer:    ante.DefaultSigVerificationGasConsumer,
 			WasmConfig:        wasmConfig,
 			TXCounterStoreKey: wasmStoreKey,
-		})
+		},
+	)
 	if err != nil {
 		panic(err)
 	}
