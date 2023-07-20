@@ -46,6 +46,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bug Fixes
+
+- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgBeginUnbonding counting existing unbondings against max unbond twice.
+- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgLeverageLiquidate CLI not actually allowing wildcard denoms.
+
 ### Improvements
 
 - [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
