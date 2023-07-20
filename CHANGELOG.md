@@ -50,6 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [2129](https://github.com/umee-network/umee/pull/2129) Emergency Group x/ugov proto.
 - [2146](https://github.com/umee-network/umee/pull/2146) Add store GetTimeMs and SetTimeMs.
+- [2157](https://github.com/umee-network/umee/pull/2157) Add `x/metoken` module.
 
 ### Improvements
 
