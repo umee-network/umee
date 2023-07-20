@@ -39,12 +39,13 @@ func TestBeginBlock(t *testing.T) {
 	// inflation min and max rate should change by reduce rate
 	newMintParams := app.MintKeeper.GetParams(ctx)
 	liquidationParams := uk.InflationParams()
+	inflationReductionRate := liquidationParams.InflationReductionRate.ToDec().Quo(sdk.NewDec(100))
 	assert.DeepEqual(t,
-		oldMintParams.InflationMax.Mul(sdk.OneDec().Sub(liquidationParams.InflationReductionRate)),
+		oldMintParams.InflationMax.Mul(sdk.OneDec().Sub(inflationReductionRate)),
 		newMintParams.InflationMax,
 	)
 	assert.DeepEqual(t,
-		oldMintParams.InflationMin.Mul(sdk.OneDec().Sub(liquidationParams.InflationReductionRate)),
+		oldMintParams.InflationMin.Mul(sdk.OneDec().Sub(inflationReductionRate)),
 		newMintParams.InflationMin,
 	)
 }
