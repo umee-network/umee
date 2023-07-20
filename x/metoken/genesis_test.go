@@ -3,7 +3,7 @@ package metoken
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v4/util/coin"
+	"github.com/umee-network/umee/v5/util/coin"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,11 +13,11 @@ import (
 func TestGenesisState_Validate(t *testing.T) {
 	invalidRegistry := *DefaultGenesisState()
 	invalidRegistry.Registry = []Index{
-		NewIndex(sdk.NewCoin("token", sdkmath.ZeroInt()), Fee{}, nil),
+		NewIndex("token", sdkmath.ZeroInt(), 6, Fee{}, nil),
 	}
 
 	invalidBalance := *DefaultGenesisState()
-	invalidBalance.Balances = []IndexBalance{
+	invalidBalance.Balances = []IndexBalances{
 		{
 			MetokenSupply: sdk.Coin{
 				Denom:  "test",
@@ -36,12 +36,12 @@ func TestGenesisState_Validate(t *testing.T) {
 		{
 			"invalid registry",
 			invalidRegistry,
-			"meToken denom token should have the following format: me<TokenName>",
+			"meToken denom token should have the following format: me/<TokenName>",
 		},
 		{
 			"invalid balances",
 			invalidBalance,
-			"meToken denom test should have the following format: me<TokenName>",
+			"meToken denom test should have the following format: me/<TokenName>",
 		},
 	}
 
@@ -59,49 +59,41 @@ func TestGenesisState_Validate(t *testing.T) {
 	}
 }
 
-func TestIndexBalance_Validate(t *testing.T) {
-	usdt0 := coin.Zero("USDT")
+func TestIndexBalances_Validate(t *testing.T) {
+	zeroInt := sdkmath.ZeroInt()
+	negativeIntOne := sdkmath.NewInt(-1)
 
-	invalidMetokenDenom := validIndexBalance()
+	invalidMetokenDenom := validIndexBalances()
 	invalidMetokenDenom.MetokenSupply = sdk.NewCoin("test", sdkmath.ZeroInt())
 
-	invalidMetokenAmount := validIndexBalance()
-	invalidMetokenAmount.MetokenSupply = coin.Negative1("meToken")
+	invalidMetokenAmount := validIndexBalances()
+	invalidMetokenAmount.MetokenSupply = coin.Negative1("me/Token")
 
-	invalidAssetInLeverage := validIndexBalance()
-	invalidAssetInLeverage.AssetBalances[0] = NewAssetBalance(
-		coin.Negative1("USDT"),
-		sdk.Coin{},
-		sdk.Coin{},
-	)
+	invalidAssetInLeverage := validIndexBalances()
+	invalidAssetInLeverage.SetAssetBalance(NewAssetBalance("USDT", negativeIntOne, zeroInt, zeroInt, zeroInt))
 
-	invalidAssetInReserves := validIndexBalance()
-	invalidAssetInReserves.AssetBalances[0] = NewAssetBalance(
-		usdt0,
-		coin.Negative1("USDT"),
-		sdk.Coin{},
-	)
+	invalidAssetInReserves := validIndexBalances()
+	invalidAssetInReserves.SetAssetBalance(NewAssetBalance("USDT", zeroInt, negativeIntOne, zeroInt, zeroInt))
 
-	invalidAssetInFees := validIndexBalance()
-	invalidAssetInFees.AssetBalances[0] = NewAssetBalance(
-		usdt0,
-		usdt0,
-		coin.Negative1("USDT"),
-	)
+	invalidAssetInFees := validIndexBalances()
+	invalidAssetInFees.SetAssetBalance(NewAssetBalance("USDT", zeroInt, zeroInt, negativeIntOne, zeroInt))
 
-	differentAssetsInBalance := validIndexBalance()
-	differentAssetsInBalance.AssetBalances[0].Fees = coin.Zero("USDC")
+	invalidAssetInInterest := validIndexBalances()
+	invalidAssetInInterest.SetAssetBalance(NewAssetBalance("USDT", zeroInt, zeroInt, zeroInt, negativeIntOne))
+
+	duplicatedBalance := validIndexBalances()
+	duplicatedBalance.AssetBalances = append(duplicatedBalance.AssetBalances, NewZeroAssetBalance("USDT"))
 
 	tcs := []struct {
 		name   string
-		ib     IndexBalance
+		ib     IndexBalances
 		errMsg string
 	}{
-		{"valid index balance", validIndexBalance(), ""},
+		{"valid index balance", validIndexBalances(), ""},
 		{
 			"invalid meToken denom",
 			invalidMetokenDenom,
-			"meToken denom test should have the following format: me<TokenName>",
+			"meToken denom test should have the following format: me/<TokenName>",
 		},
 		{
 			"invalid meToken amount",
@@ -111,32 +103,33 @@ func TestIndexBalance_Validate(t *testing.T) {
 		{
 			"invalid assetInLeverage",
 			invalidAssetInLeverage,
-			"negative coin amount",
+			"asset balance cannot be negative",
 		},
 		{
 			"invalid assetInReserves",
 			invalidAssetInReserves,
-			"negative coin amount",
+			"asset balance cannot be negative",
 		},
 		{
 			"invalid assetInFee",
 			invalidAssetInFees,
-			"negative coin amount",
+			"asset balance cannot be negative",
 		},
 		{
-			"invalid assets denom",
-			differentAssetsInBalance,
-			"different assets in the Index balance",
+			"invalid assetInInterest",
+			invalidAssetInInterest,
+			"asset balance cannot be negative",
+		},
+		{
+			"duplicated balance",
+			duplicatedBalance,
+			"duplicated balance",
 		},
 		{
 			"valid index balance",
-			NewIndexBalance(
-				sdk.NewCoin("meUSD", sdkmath.ZeroInt()), []AssetBalance{
-					NewAssetBalance(
-						usdt0,
-						usdt0,
-						usdt0,
-					),
+			NewIndexBalances(
+				sdk.NewCoin("me/USD", sdkmath.ZeroInt()), []AssetBalance{
+					NewZeroAssetBalance("USDT"),
 				},
 			),
 			"",
@@ -157,15 +150,17 @@ func TestIndexBalance_Validate(t *testing.T) {
 	}
 }
 
-func validIndexBalance() IndexBalance {
-	usdt0 := coin.Zero("USDT")
-	return IndexBalance{
-		MetokenSupply: coin.Zero("meUSD"),
+func validIndexBalances() IndexBalances {
+	zeroInt := sdkmath.ZeroInt()
+	return IndexBalances{
+		MetokenSupply: coin.Zero("me/USD"),
 		AssetBalances: []AssetBalance{
 			NewAssetBalance(
-				usdt0,
-				usdt0,
-				usdt0,
+				"USDT",
+				zeroInt,
+				zeroInt,
+				zeroInt,
+				zeroInt,
 			),
 		},
 	}

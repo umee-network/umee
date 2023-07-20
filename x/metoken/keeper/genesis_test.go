@@ -2,31 +2,28 @@ package keeper
 
 import (
 	"testing"
+	"time"
 
-	"github.com/umee-network/umee/v4/util/coin"
+	"github.com/umee-network/umee/v5/x/metoken/mocks"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	ctypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/umee-network/umee/v5/util/coin"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/umee-network/umee/v4/x/metoken"
+	"github.com/umee-network/umee/v5/x/metoken"
 )
 
 func TestKeeper_InitGenesis(t *testing.T) {
-	interfaceRegistry := ctypes.NewInterfaceRegistry()
-	marshaller := codec.NewProtoCodec(interfaceRegistry)
-
-	ctx, keeper := initFullKeeper(t, marshaller)
+	keeper := initSimpleKeeper(t)
 
 	invalidRegistry := *metoken.DefaultGenesisState()
 	invalidRegistry.Registry = []metoken.Index{
-		metoken.NewIndex(sdk.NewCoin("token", sdkmath.ZeroInt()), metoken.Fee{}, nil),
+		metoken.NewIndex("token", sdkmath.ZeroInt(), 6, metoken.Fee{}, nil),
 	}
 
 	invalidBalance := *metoken.DefaultGenesisState()
-	invalidBalance.Balances = []metoken.IndexBalance{
+	invalidBalance.Balances = []metoken.IndexBalances{
 		{
 			MetokenSupply: sdk.Coin{
 				Denom:  "test",
@@ -45,12 +42,12 @@ func TestKeeper_InitGenesis(t *testing.T) {
 		{
 			"invalid registry",
 			invalidRegistry,
-			"meToken denom token should have the following format: me<TokenName>: invalid request",
+			"meToken denom token should have the following format: me/<TokenName>: invalid request",
 		},
 		{
 			"invalid balances",
 			invalidBalance,
-			"meToken denom test should have the following format: me<TokenName>: invalid request",
+			"meToken denom test should have the following format: me/<TokenName>: invalid request",
 		},
 	}
 
@@ -58,9 +55,9 @@ func TestKeeper_InitGenesis(t *testing.T) {
 		t.Run(
 			tc.name, func(t *testing.T) {
 				if tc.errMsg != "" {
-					assert.PanicsWithError(t, tc.errMsg, func() { keeper.InitGenesis(ctx, tc.g) })
+					assert.PanicsWithError(t, tc.errMsg, func() { keeper.InitGenesis(tc.g) })
 				} else {
-					assert.NotPanics(t, func() { keeper.InitGenesis(ctx, tc.g) })
+					assert.NotPanics(t, func() { keeper.InitGenesis(tc.g) })
 				}
 			},
 		)
@@ -68,17 +65,15 @@ func TestKeeper_InitGenesis(t *testing.T) {
 }
 
 func TestKeeper_ExportGenesis(t *testing.T) {
-	interfaceRegistry := ctypes.NewInterfaceRegistry()
-	marshaller := codec.NewProtoCodec(interfaceRegistry)
-
-	ctx, keeper := initFullKeeper(t, marshaller)
+	keeper := initSimpleKeeper(t)
 
 	usdt := "USDT"
-	usdt0 := coin.Zero(usdt)
+	int0 := sdkmath.ZeroInt()
 	expectedGenesis := *metoken.DefaultGenesisState()
 	expectedGenesis.Registry = []metoken.Index{
 		{
-			MetokenMaxSupply: sdk.NewCoin("meUSD", sdkmath.ZeroInt()),
+			Denom:     mocks.MeUSDDenom,
+			MaxSupply: sdkmath.ZeroInt(),
 			Fee: metoken.NewFee(
 				sdk.MustNewDecFromStr("0.001"),
 				sdk.MustNewDecFromStr("0.2"),
@@ -93,24 +88,26 @@ func TestKeeper_ExportGenesis(t *testing.T) {
 			},
 		},
 	}
-	expectedGenesis.Balances = []metoken.IndexBalance{
+	expectedGenesis.Balances = []metoken.IndexBalances{
 		{
-			MetokenSupply: coin.Zero("meUSD"),
+			MetokenSupply: coin.Zero(mocks.MeUSDDenom),
 			AssetBalances: []metoken.AssetBalance{
 				metoken.NewAssetBalance(
-					usdt0,
-					usdt0,
-					usdt0,
+					usdt,
+					int0,
+					int0,
+					int0,
+					int0,
 				),
 			},
 		},
 	}
-	expectedGenesis.NextRebalancingTime = 1683035091
-	expectedGenesis.NextInterestClaimTime = 1683035600
+	expectedGenesis.NextRebalancingTime = time.UnixMilli(time.Now().UnixMilli())
+	expectedGenesis.NextInterestClaimTime = time.UnixMilli(time.Now().UnixMilli())
 
-	assert.NotPanics(t, func() { keeper.InitGenesis(ctx, expectedGenesis) })
+	assert.NotPanics(t, func() { keeper.InitGenesis(expectedGenesis) })
 
-	resultGenesis := keeper.ExportGenesis(ctx)
+	resultGenesis := keeper.ExportGenesis()
 
 	assert.Equal(t, expectedGenesis, *resultGenesis)
 }

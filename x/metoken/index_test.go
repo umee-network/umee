@@ -3,8 +3,6 @@ package metoken
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v4/util/coin"
-
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
@@ -12,15 +10,15 @@ import (
 
 func TestIndex_Validate(t *testing.T) {
 	invalidMaxSupply := validIndex()
-	invalidMaxSupply.MetokenMaxSupply = coin.Negative1("meUSD")
+	invalidMaxSupply.Denom = "me/USD"
+	invalidMaxSupply.MaxSupply = sdkmath.NewInt(-1)
 
 	invalidFee := validIndex()
 	invalidFee.Fee = NewFee(sdk.MustNewDecFromStr("-1.0"), sdk.Dec{}, sdk.Dec{})
 
-	duplicatedAcceptedAsset := validIndex()
-	duplicatedAcceptedAsset.AcceptedAssets = []AcceptedAsset{
-		validAcceptedAsset("USDT"),
-		validAcceptedAsset("USDT"),
+	invalidDenomAcceptedAsset := validIndex()
+	invalidDenomAcceptedAsset.AcceptedAssets = []AcceptedAsset{
+		NewAcceptedAsset("????", sdk.MustNewDecFromStr("-0.2"), sdk.MustNewDecFromStr("1.0")),
 	}
 
 	invalidAcceptedAsset := validIndex()
@@ -34,6 +32,14 @@ func TestIndex_Validate(t *testing.T) {
 		validAcceptedAsset("USDC"),
 	}
 
+	duplicatedAcceptedAsset := validIndex()
+	duplicate := validAcceptedAsset("USDT")
+	duplicate.TargetAllocation = sdk.MustNewDecFromStr("0.5")
+	duplicatedAcceptedAsset.AcceptedAssets = []AcceptedAsset{
+		duplicate,
+		duplicate,
+	}
+
 	tcs := []struct {
 		name   string
 		i      Index
@@ -43,7 +49,7 @@ func TestIndex_Validate(t *testing.T) {
 		{
 			"invalid max supply",
 			invalidMaxSupply,
-			"negative coin amount",
+			"maxSupply cannot be negative",
 		},
 		{
 			"invalid fee",
@@ -51,9 +57,9 @@ func TestIndex_Validate(t *testing.T) {
 			"should be between 0.0 and 1.0",
 		},
 		{
-			"duplicated accepted asset",
-			duplicatedAcceptedAsset,
-			"duplicated accepted asset in the Index",
+			"invalid denom accepted asset",
+			invalidDenomAcceptedAsset,
+			"invalid denom",
 		},
 		{
 			"invalid accepted asset",
@@ -64,6 +70,11 @@ func TestIndex_Validate(t *testing.T) {
 			"invalid total allocation",
 			invalidTargetAllocation,
 			"of all the accepted assets should be 1.0",
+		},
+		{
+			"duplicated accepted asset",
+			duplicatedAcceptedAsset,
+			"duplicated accepted asset",
 		},
 	}
 
@@ -161,8 +172,6 @@ func TestFee_Validate(t *testing.T) {
 }
 
 func TestAcceptedAsset_Validate(t *testing.T) {
-	invalidDenom := validAcceptedAsset("???")
-
 	invalidTargetAllocation := validAcceptedAsset("USDT")
 	invalidTargetAllocation.TargetAllocation = sdk.MustNewDecFromStr("1.1")
 
@@ -172,11 +181,6 @@ func TestAcceptedAsset_Validate(t *testing.T) {
 		errMsg string
 	}{
 		{"valid accepted asset", validAcceptedAsset("USDT"), ""},
-		{
-			"invalid asset denom",
-			invalidDenom,
-			"invalid denom",
-		},
 		{
 			"invalid target allocation",
 			invalidTargetAllocation,
@@ -200,8 +204,10 @@ func TestAcceptedAsset_Validate(t *testing.T) {
 
 func validIndex() Index {
 	return Index{
-		MetokenMaxSupply: sdk.NewCoin("meUSD", sdkmath.ZeroInt()),
-		Fee:              validFee(),
+		Denom:     "me/USD",
+		MaxSupply: sdkmath.ZeroInt(),
+		Exponent:  6,
+		Fee:       validFee(),
 		AcceptedAssets: []AcceptedAsset{
 			validAcceptedAsset("USDT"),
 		},

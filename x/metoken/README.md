@@ -93,6 +93,7 @@ metoken_price = 10000 USD
 ```
 
 #### Initial price
+
 The initial price for the first transaction will be determined by the average price of the underlying assets,
 divided by the quantity of accepted assets in the Index, using the following formula:
 
@@ -238,6 +239,7 @@ leverage module based on the reserve_portion.
 ```
 
 Another example with an edge case where the min and max fee are used:
+
 ``` yaml
 - Fee:
   - Min: 0.01
@@ -374,17 +376,18 @@ The following serialization methods are used unless otherwise stated:
 
 ## Queries
 
-See <LINK TO BE ADDED> for list of supported queries.
+See (LINK TO BE ADDED) for list of supported queries.
 
 ## Messages
 
-See <LINK TO BE ADDED> for list of supported messages.
+See (LINK TO BE ADDED) for list of supported messages.
 
 ## Update Registry Proposal
 
 `Update-Registry` gov proposal will add the new index to index registry or update the existing index with new settings.
 
 ### CLI
+
 ```bash
 umeed tx gov submit-proposal [path-to-proposal-json] [flags]
 ```
@@ -407,10 +410,10 @@ where `proposal.json` contains:
       "@type": "/umeenetwork.umee.metoken.v1.MsgGovUpdateRegistry",
       "authority": "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp",
       "title": "Update the meToken Index Registry",
-      "description": "Add meUSD Index, Update meEUR Index",
+      "description": "Add me/USD Index, Update me/EUR Index",
       "add_indexes": [
         {
-          "metoken_denom": "meUSD",
+          "metoken_denom": "me/USD",
           "metoken_max_supply": "2000000",
           "fee": {
             "min": "0.01",
@@ -438,7 +441,7 @@ where `proposal.json` contains:
       ],
       "update_indexes": [
         {
-          "metoken_denom": "meEUR",
+          "metoken_denom": "me/EUR",
           "metoken_max_supply": "2000000",
           "fee": {
             "min": "0.001",
@@ -463,11 +466,11 @@ where `proposal.json` contains:
 
 ## Events
 
-See <LINK TO BE ADDED> for list of supported events.
+See (LINK TO BE ADDED) for list of supported events.
 
 ## Params
 
-See <LINK TO BE ADDED> for list of supported module params.
+See (LINK TO BE ADDED) for list of supported module params.
 
 ## End Block
 

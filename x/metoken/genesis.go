@@ -2,19 +2,20 @@ package metoken
 
 import (
 	"fmt"
+	"time"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // NewGenesisState creates a new GenesisState object
 func NewGenesisState(
 	params Params,
 	registry []Index,
-	balances []IndexBalance,
-	nextRebalancingTime int64,
-	nextInterestClaimTime int64,
+	balances []IndexBalances,
+	nextRebalancingTime time.Time,
+	nextInterestClaimTime time.Time,
 ) *GenesisState {
 	return &GenesisState{
 		Params:                params,
@@ -31,8 +32,8 @@ func DefaultGenesisState() *GenesisState {
 		Params:                DefaultParams(),
 		Registry:              nil,
 		Balances:              nil,
-		NextRebalancingTime:   0,
-		NextInterestClaimTime: 0,
+		NextRebalancingTime:   time.Time{},
+		NextInterestClaimTime: time.Time{},
 	}
 }
 
@@ -53,19 +54,19 @@ func (gs GenesisState) Validate() error {
 	return nil
 }
 
-// NewIndexBalance creates a new IndexBalance object.
-func NewIndexBalance(meTokenSupply sdk.Coin, assetBalances []AssetBalance) IndexBalance {
-	return IndexBalance{
+// NewIndexBalances creates a new IndexBalances object.
+func NewIndexBalances(meTokenSupply sdk.Coin, assetBalances []AssetBalance) IndexBalances {
+	return IndexBalances{
 		MetokenSupply: meTokenSupply,
 		AssetBalances: assetBalances,
 	}
 }
 
-// Validate perform basic validation of the IndexBalance
-func (ib IndexBalance) Validate() error {
+// Validate perform basic validation of the IndexBalances
+func (ib IndexBalances) Validate() error {
 	if !IsMeToken(ib.MetokenSupply.Denom) {
 		return sdkerrors.ErrInvalidRequest.Wrapf(
-			"meToken denom %s should have the following format: me<TokenName>",
+			"meToken denom %s should have the following format: me/<TokenName>",
 			ib.MetokenSupply.Denom,
 		)
 	}
@@ -74,7 +75,13 @@ func (ib IndexBalance) Validate() error {
 		return err
 	}
 
+	existingBalances := make(map[string]struct{})
 	for _, balance := range ib.AssetBalances {
+		if _, present := existingBalances[balance.Denom]; present {
+			return fmt.Errorf("duplicated balance %s in the Index: %s", balance.Denom, ib.MetokenSupply.Denom)
+		}
+		existingBalances[balance.Denom] = struct{}{}
+
 		if err := balance.Validate(); err != nil {
 			return err
 		}
@@ -83,38 +90,75 @@ func (ib IndexBalance) Validate() error {
 	return nil
 }
 
-// NewAssetBalance creates a new AssetBalance object
-func NewAssetBalance(inLeverage, inReserves, inFees sdk.Coin) AssetBalance {
+// AssetBalance returns an asset balance and its index from balances, given a specific denom.
+// If it isn't present, -1 as index.
+func (ib IndexBalances) AssetBalance(denom string) (int, AssetBalance) {
+	for i, balance := range ib.AssetBalances {
+		if balance.Denom == denom {
+			return i, balance
+		}
+	}
+
+	return -1, AssetBalance{}
+}
+
+// SetAssetBalance overrides an asset balance if exists in the list, otherwise add it to the list.
+func (ib IndexBalances) SetAssetBalance(balance AssetBalance) {
+	i, _ := ib.AssetBalance(balance.Denom)
+
+	if i < 0 {
+		ib.AssetBalances = append(ib.AssetBalances, balance)
+		return
+	}
+
+	ib.AssetBalances[i] = balance
+
+}
+
+// NewZeroAssetBalance creates a new AssetBalance object with all balances in zero.
+func NewZeroAssetBalance(denom string) AssetBalance {
 	return AssetBalance{
+		Denom:     denom,
+		Leveraged: sdkmath.ZeroInt(),
+		Reserved:  sdkmath.ZeroInt(),
+		Fees:      sdkmath.ZeroInt(),
+		Interest:  sdkmath.ZeroInt(),
+	}
+}
+
+// NewAssetBalance creates a new AssetBalance object.
+func NewAssetBalance(denom string, inLeverage, inReserves, inFees, inInterest sdkmath.Int) AssetBalance {
+	return AssetBalance{
+		Denom:     denom,
 		Leveraged: inLeverage,
 		Reserved:  inReserves,
 		Fees:      inFees,
+		Interest:  inInterest,
 	}
 }
 
 // Validate perform basic validation of the AssetBalance
 func (ab AssetBalance) Validate() error {
-	if err := ab.Leveraged.Validate(); err != nil {
+	if err := sdk.ValidateDenom(ab.Denom); err != nil {
 		return err
 	}
-
-	if err := ab.Reserved.Validate(); err != nil {
-		return err
+	if ab.Leveraged.IsNegative() {
+		return sdkerrors.ErrInvalidRequest.Wrapf("leveraged asset balance cannot be negative")
 	}
-
-	if err := ab.Fees.Validate(); err != nil {
-		return err
+	if ab.Reserved.IsNegative() {
+		return sdkerrors.ErrInvalidRequest.Wrapf("reserved asset balance cannot be negative")
 	}
-
-	if ab.Leveraged.Denom != ab.Reserved.Denom ||
-		ab.Leveraged.Denom != ab.Fees.Denom {
-		return fmt.Errorf(
-			"different assets in the Index balance: %s, %s, %s",
-			ab.Leveraged.Denom,
-			ab.Reserved.Denom,
-			ab.Fees.Denom,
-		)
+	if ab.Fees.IsNegative() {
+		return sdkerrors.ErrInvalidRequest.Wrapf("fees asset balance cannot be negative")
+	}
+	if ab.Interest.IsNegative() {
+		return sdkerrors.ErrInvalidRequest.Wrapf("interest asset balance cannot be negative")
 	}
 
 	return nil
+}
+
+// AvailableSupply returns reserved plus leveraged
+func (ab AssetBalance) AvailableSupply() sdkmath.Int {
+	return ab.Reserved.Add(ab.Leveraged)
 }

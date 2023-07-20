@@ -3,30 +3,38 @@ package umeenetwork.umee.metoken.v1;
 
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/timestamp.proto";
 import "umee/metoken/v1/metoken.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/metoken";
+option go_package = "github.com/umee-network/umee/v5/x/metoken";
 
 // GenesisState defines the x/metoken module's genesis state.
 message GenesisState {
-  Params                params                   = 1 [(gogoproto.nullable) = false];
-  repeated Index        registry                 = 2 [(gogoproto.nullable) = false];
-  repeated IndexBalance balances                 = 3 [(gogoproto.nullable) = false];
-  int64                 next_rebalancing_time    = 4;
-  int64                 next_interest_claim_time = 5;
+  Params                 params                   = 1 [(gogoproto.nullable) = false];
+  repeated Index         registry                 = 2 [(gogoproto.nullable) = false];
+  repeated IndexBalances balances                 = 3 [(gogoproto.nullable) = false];
+  google.protobuf.Timestamp next_rebalancing_time = 4 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime)  = true
+  ];
+
+  google.protobuf.Timestamp next_interest_claim_time = 5 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime)  = true
+  ];
 }
 
-// IndexBalance is the state of an Index, containing its meToken supply and all underlying asset balances.
-message IndexBalance {
+// IndexBalances is the state of an Index, containing its meToken supply and all underlying asset balances.
+message IndexBalances {
   cosmos.base.v1beta1.Coin metoken_supply = 1 [(gogoproto.nullable) = false];
   repeated AssetBalance    asset_balances = 2 [(gogoproto.nullable) = false];
 }
 
 // AssetBalance tracks how much of a single asset is held in leverage, reserves, fees and interest account.
-// It is composed of three sdk.Coin sharing the same asset denom.
 message AssetBalance {
-  cosmos.base.v1beta1.Coin leveraged = 1 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin reserved  = 2 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin fees      = 3 [(gogoproto.nullable) = false];
-  cosmos.base.v1beta1.Coin interest  = 4 [(gogoproto.nullable) = false];
+  string denom     = 1;
+  string leveraged = 2 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string reserved  = 3 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string fees      = 4 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+  string interest  = 5 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }

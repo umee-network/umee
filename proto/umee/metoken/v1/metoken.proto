@@ -2,9 +2,8 @@ syntax = "proto3";
 package umeenetwork.umee.metoken.v1;
 
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/metoken";
+option go_package = "github.com/umee-network/umee/v5/x/metoken";
 
 // Params defines the parameters for the metoken module.
 message Params {
@@ -14,7 +13,7 @@ message Params {
   // triggered
   int64 rebalancing_frequency = 1;
 
-  // Interest claiming frequency in seconds, determines how often metoken module will clamim accrued interest from
+  // Interest claiming frequency in seconds, determines how often metoken module will claim accrued interest from
   // leverage module
   int64 claiming_frequency = 2;
 }
@@ -24,21 +23,27 @@ message Params {
 message Index {
   option (gogoproto.equal) = true;
 
-  // MeToken Max Supply where:
   // Denom is the denomination of the Index's meToken denom that will be given to user in exchange of accepted
   // assets.
-  // Amount is the maximum amount of Index's meTokens can be minted.
+  string denom = 1;
+
+  // MaxSupply is the maximum amount of Index's meTokens can be minted.
   // A swap that requires to mint more Index's meToken than this value will result in an error.
   // Must be a non negative value. 0 means that there is no limit.
-  cosmos.base.v1beta1.Coin metoken_max_supply = 1 [(gogoproto.nullable) = false];
+  string max_supply = 2 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+
+  // Exponent is the power of ten by which to multiply, in order to convert
+  // an amount of the meToken for the exchange operations.
+  // Valid value: must be the same as the oracle.Denom.exponent.
+  uint32 exponent = 3;
 
   // Fee contains fee parameters used for swap and redemption fee calculations for all underlying
   // assets in this index.
-  Fee fee = 2 [(gogoproto.nullable) = false];
+  Fee fee = 4 [(gogoproto.nullable) = false];
 
   // Accepted Assets is the list of underlying Tokens that can be swapped and redeemed for the Index's meToken,
   // along with their token-specific parameters.
-  repeated AcceptedAsset accepted_assets = 3 [(gogoproto.nullable) = false];
+  repeated AcceptedAsset accepted_assets = 5 [(gogoproto.nullable) = false];
 }
 
 // Fee are the parameters used for the calculation of the fee to be applied for swaps and redemptions and charged to
@@ -77,9 +82,9 @@ message Fee {
 message AcceptedAsset {
   option (gogoproto.equal) = true;
 
-  // Asset Denom is the denomination of the underlying asset. Must be the base
+  // Denom is the denomination of the underlying asset. Must be the base
   // denom as registered in the Bank module (so IBC denom for IBC tokens).
-  string asset_denom = 1;
+  string denom = 1;
 
   // Reserve portion is the portion of swapped assets that will be kept in the metoken module as reserves,
   // instead of supplied to the leverage module. It is also the

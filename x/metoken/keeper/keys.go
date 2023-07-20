@@ -1,6 +1,6 @@
 package keeper
 
-import "github.com/umee-network/umee/v4/util"
+import "github.com/umee-network/umee/v5/util"
 
 var (
 	// Regular state
@@ -15,11 +15,11 @@ var (
 // keyIndex returns a KVStore key for index parameters for specific Index.
 func keyIndex(meTokendenom string) []byte {
 	// keyPrefixIndex | meTokendenom
-	return util.ConcatBytes(1, keyPrefixIndex, []byte(meTokendenom))
+	return util.ConcatBytes(0, keyPrefixIndex, []byte(meTokendenom))
 }
 
-// keyBalance returns a KVStore key for balane of a specific Index.
+// keyBalance returns a KVStore key for balance of a specific Index.
 func keyBalance(meTokendenom string) []byte {
 	// keyPrefixBalances | meTokendenom
-	return util.ConcatBytes(1, keyPrefixBalances, []byte(meTokendenom))
+	return util.ConcatBytes(0, keyPrefixBalances, []byte(meTokendenom))
 }

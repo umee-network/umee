@@ -7,7 +7,7 @@ import "cosmos/base/v1beta1/coin.proto";
 import "umee/metoken/v1/metoken.proto";
 import "umee/metoken/v1/genesis.proto";
 
-option go_package = "github.com/umee-network/umee/v4/x/metoken";
+option go_package = "github.com/umee-network/umee/v5/x/metoken";
 
 option (gogoproto.goproto_getters_all) = false;
 
@@ -36,10 +36,10 @@ service Query {
     option (google.api.http).get = "/umee/metoken/v1/redeem_fee";
   }
 
-  // IndexBalance queries for Index's balance of a specific or all the registered indexes.
-  rpc IndexBalance(QueryIndexBalance)
-      returns (QueryIndexBalanceResponse) {
-    option (google.api.http).get = "/umee/metoken/v1/index_balance";
+  // IndexBalances queries for Index's balances of a specific or all the registered indexes.
+  rpc IndexBalances(QueryIndexBalances)
+      returns (QueryIndexBalancesResponse) {
+    option (google.api.http).get = "/umee/metoken/v1/index_balances";
   }
 }
 
@@ -86,13 +86,13 @@ message QueryRedeemFeeResponse {
   cosmos.base.v1beta1.Coin asset = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryIndexBalance defines the request structure for the IndexBalance gRPC service handler.
+// QueryIndexBalances defines the request structure for the IndexBalances gRPC service handler.
 // metoken_denom param is optional, if it is not informed the query will return all the Indexes.
-message QueryIndexBalance {
+message QueryIndexBalances {
   string metoken_denom = 1;
 }
 
-// QueryIndexBalanceResponse defines the response structure for the IndexBalance gRPC service handler.
-message QueryIndexBalanceResponse {
-  repeated IndexBalance index_balances = 1 [(gogoproto.nullable) = false];
+// QueryIndexBalanceResponse defines the response structure for the IndexBalances gRPC service handler.
+message QueryIndexBalancesResponse {
+  repeated IndexBalances index_balances = 1 [(gogoproto.nullable) = false];
 }
