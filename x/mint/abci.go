@@ -68,8 +68,12 @@ func InflationCalculationFn(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper K
 	// Once chain start inflation cycle start time will be inflation rate change executed block time
 	if ctx.BlockTime().After(icst.Add(lp.InflationCycle)) {
 		// inflation cycle is completed , so we need to update the inflation max and min rate
-		params.InflationMax = params.InflationMax.Mul(sdk.OneDec().Sub(lp.InflationReductionRate))
-		params.InflationMin = params.InflationMin.Mul(sdk.OneDec().Sub(lp.InflationReductionRate))
+		// inflationReductionRate = 25 / 100 = 0.25
+		inflationReductionRate := lp.InflationReductionRate.ToDec().Quo(sdk.NewDec(100))
+		// InflationMax = PrevInflationMax * ( 1 - 0.25)
+		params.InflationMax = params.InflationMax.Mul(sdk.OneDec().Sub(inflationReductionRate))
+		// InflationMin = PrevInflationMin * ( 1 - 0.25)
+		params.InflationMin = params.InflationMin.Mul(sdk.OneDec().Sub(inflationReductionRate))
 
 		// update the changed inflation min and max rates
 		mintKeeper.SetParams(ctx, params)
