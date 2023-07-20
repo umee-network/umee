@@ -21,9 +21,8 @@ message InflationParams {
     (gogoproto.moretags)    = "yaml:\"inflation_cycle\""
   ];
   // inflation_reduction_rate for every inflation cycle.
-  string inflation_reduction_rate = 3 [
-    (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+  uint32 inflation_reduction_rate = 3 [
+    (gogoproto.customtype) = "github.com/umee-network/umee/v5/util/bpmath.FixedBP",
     (gogoproto.nullable)   = false
   ];
 }
