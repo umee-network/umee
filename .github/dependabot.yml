@@ -1,5 +1,4 @@
 version: 2
-# https://linear.app/umee/issue/UMEE-597/metoken-upstream-merge
 
 updates:
   - package-ecosystem: github-actions
