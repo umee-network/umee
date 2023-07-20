@@ -53,9 +53,9 @@ func (k Keeper) prefixStore(ctx sdk.Context, prefix []byte) sdk.KVStore {
 }
 
 func (k Keeper) setObject(ctx *sdk.Context, key []byte, object codec.ProtoMarshaler, errField string) error {
-	return store.SetObject(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
+	return store.SetValueCdc(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
 }
 
 func (k Keeper) getObject(ctx *sdk.Context, key []byte, object codec.ProtoMarshaler, errField string) bool {
-	return store.GetObject(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
+	return store.GetValueCdc(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
 }

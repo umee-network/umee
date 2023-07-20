@@ -270,7 +270,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		// clear store on no unbondings remaining
 		kvStore.Delete(key)
 	}
-	return store.SetObject(kvStore, k.cdc, key, &unbondings, "account unbondings")
+	return store.SetValueCdc(kvStore, k.cdc, key, &unbondings, "account unbondings")
 }
 
 // getRewardAccumulator retrieves the reward accumulator of all reward tokens for a single bonded uToken -

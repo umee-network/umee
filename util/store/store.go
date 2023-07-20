@@ -31,7 +31,6 @@ func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errF
 		}
 		return c
 	}
-
 	return nil
 }
 
@@ -71,10 +70,12 @@ func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errFi
 	return nil
 }
 
-// GetObject gets and unmarshals a structure from KVstore. Panics on failure to decode, and
+// GetValueCdc is similar to GetValue, but uses codec for marshaling. For Protobuf objects the
+// result is the same, unless codec.Any is used. In the latter case this function MUST be used,
+// instead of GetValue.
 // Returns a boolean indicating whether any data was found. If the return is false, the object
 // is not changed by this function.
-func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
+func GetValueCdc(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)
 		if err != nil {
@@ -85,8 +86,10 @@ func GetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.Prot
 	return false
 }
 
-// SetObject marshals and sets a structure in KVstore. Returns error on failure to encode.
-func SetObject(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
+// SetValueCdc is similar to the SetValue, but uses codec for marshaling. For Protobuf objects the
+// result is the same, unless codec.Any is used. In the latter case this function MUST be used,
+// instead of SetValue.
+func SetValueCdc(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
 	bz, err := cdc.Marshal(object)
 	if err != nil {
 		return fmt.Errorf("failed to encode %s, %s", errField, err.Error())
