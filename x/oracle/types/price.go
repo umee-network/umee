@@ -8,8 +8,8 @@ import (
 
 type Prices []Price
 
-func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) *Price {
-	return &Price{
+func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) Price {
+	return Price{
 		ExchangeRateTuple: ExchangeRateTuple{
 			ExchangeRate: exchangeRate,
 			Denom:        denom,
@@ -18,44 +18,43 @@ func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) *Price {
 	}
 }
 
-func (p *Prices) Decs() []sdk.Dec {
+func (p Prices) Decs() []sdk.Dec {
 	decs := []sdk.Dec{}
-	for _, price := range *p {
+	for _, price := range p {
 		decs = append(decs, price.ExchangeRateTuple.ExchangeRate)
 	}
 	return decs
 }
 
-func (p *Prices) FilterByBlock(blockNum uint64) *Prices {
+func (p Prices) FilterByBlock(blockNum uint64) Prices {
 	prices := Prices{}
-	for _, price := range *p {
+	for _, price := range p {
 		if price.BlockNum == blockNum {
 			prices = append(prices, price)
 		}
 	}
-	return &prices
+	return prices
 }
 
-func (p *Prices) FilterByDenom(denom string) *Prices {
+func (p Prices) FilterByDenom(denom string) Prices {
 	prices := Prices{}
-	for _, price := range *p {
+	for _, price := range p {
 		if price.ExchangeRateTuple.Denom == denom {
 			prices = append(prices, price)
 		}
 	}
-	return &prices
+	return prices
 }
 
-func (p *Prices) Sort() *Prices {
-	prices := *p
+func (p Prices) Sort() Prices {
 	sort.Slice(
-		prices,
+		p,
 		func(i, j int) bool {
-			if prices[i].BlockNum == prices[j].BlockNum {
-				return prices[i].ExchangeRateTuple.Denom < prices[j].ExchangeRateTuple.Denom
+			if p[i].BlockNum == p[j].BlockNum {
+				return p[i].ExchangeRateTuple.Denom < p[j].ExchangeRateTuple.Denom
 			}
-			return prices[i].BlockNum < prices[j].BlockNum
+			return p[i].BlockNum < p[j].BlockNum
 		},
 	)
-	return &prices
+	return p
 }

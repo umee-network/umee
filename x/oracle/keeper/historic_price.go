@@ -60,20 +60,18 @@ func (k Keeper) SetHistoricMedian(
 func (k Keeper) HistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
-) (*types.Price, error) {
+) (types.Price, error) {
 	store := ctx.KVStore(k.storeKey)
 	blockDiff := uint64(ctx.BlockHeight())%k.MedianStampPeriod(ctx) + 1
 	blockNum := uint64(ctx.BlockHeight()) - blockDiff
 	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
 	if bz == nil {
-		return &types.Price{}, types.ErrNoMedianDeviation.Wrap("denom: " + denom)
+		return types.Price{}, types.ErrNoMedianDeviation.Wrap("denom: " + denom)
 	}
 
 	decProto := sdk.DecProto{}
 	k.cdc.MustUnmarshal(bz, &decProto)
-	price := types.NewPrice(decProto.Dec, denom, blockNum)
-
-	return price, nil
+	return types.NewPrice(decProto.Dec, denom, blockNum), nil
 }
 
 // WithinHistoricMedianDeviation returns whether or not the current price of a
@@ -276,8 +274,7 @@ func (k Keeper) IterateHistoricMedians(
 		denom, block := types.ParseDenomAndBlockFromKey(iter.Key(), types.KeyPrefixMedian)
 		decProto := sdk.DecProto{}
 		k.cdc.MustUnmarshal(iter.Value(), &decProto)
-		price := types.NewPrice(decProto.Dec, denom, block)
-		if handler(*price) {
+		if handler(types.NewPrice(decProto.Dec, denom, block)) {
 			break
 		}
 	}
