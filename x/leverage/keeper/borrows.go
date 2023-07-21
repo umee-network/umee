@@ -81,7 +81,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	for _, p := range pairs {
 		b := borrowedValue.AmountOf(p.Borrow)
 		c := collateralValue.AmountOf(p.Collateral)
-		w := p.CollateralWeight
+		w := sdk.MaxDec(p.CollateralWeight, collateralWeight(p.Collateral)) // pairs may not reduce collateral weight
 		if b.IsPositive() && c.IsPositive() {
 			// some assets match the special pair
 			pairBorrowLimit := c.Mul(w)
