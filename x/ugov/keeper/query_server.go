@@ -34,7 +34,7 @@ func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup
 func (q Querier) InflationParams(ctx context.Context, _ *ugov.QueryInflationParams) (
 	*ugov.QueryInflationParamsResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return &ugov.QueryInflationParamsResponse{InflationParams: q.Keeper(&sdkCtx).InflationParams()}, nil
+	return &ugov.QueryInflationParamsResponse{Params: q.Keeper(&sdkCtx).InflationParams()}, nil
 }
 
 // InflationCycleStart return when the inflation cycle is started

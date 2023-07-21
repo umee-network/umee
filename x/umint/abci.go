@@ -15,12 +15,12 @@ import (
 func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper) {
 	defer telemetry.ModuleMeasureSince(types.ModuleName, time.Now(), telemetry.MetricKeyBeginBlocker)
 	// inflation rate change params
-	lp := ugovKeeper.InflationParams()
+	ip := ugovKeeper.InflationParams()
 	// mint module params
 	mintParams := mintKeeper.GetParams(ctx)
 
 	totalStakingSupply := mintKeeper.StakingTokenSupply(ctx)
-	if totalStakingSupply.GTE(lp.MaxSupply.Amount) {
+	if totalStakingSupply.GTE(ip.MaxSupply.Amount) {
 		// supply is already reached the maximum amount, so no more minting the staking token
 		return
 	}
@@ -29,15 +29,15 @@ func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper) {
 	minter := mintKeeper.GetMinter(ctx)
 	bondedRatio := mintKeeper.BondedRatio(ctx)
 	// recalculate inflation rate
-	minter.Inflation = InflationCalculationFn(ctx, ugovKeeper, mintKeeper, lp, mintParams, bondedRatio, minter.Inflation)
+	minter.Inflation = CalculateInflation(ctx, ugovKeeper, mintKeeper, ip, mintParams, bondedRatio, minter.Inflation)
 	minter.AnnualProvisions = minter.NextAnnualProvisions(mintParams, totalStakingSupply)
 	mintKeeper.SetMinter(ctx, minter)
 
 	// mint coins, update supply
 	mintedCoin := minter.BlockProvision(mintParams)
 	// checking the if mintedCoins + totalStakingSupply is more than max supply of staking denom
-	if mintedCoin.Amount.Add(totalStakingSupply).GT(lp.MaxSupply.Amount) {
-		mintedCoin = coin.New(mintParams.MintDenom, lp.MaxSupply.Amount.Sub(totalStakingSupply).Int64())
+	if mintedCoin.Amount.Add(totalStakingSupply).GT(ip.MaxSupply.Amount) {
+		mintedCoin = coin.New(mintParams.MintDenom, ip.MaxSupply.Amount.Sub(totalStakingSupply).Int64())
 	}
 	mintedCoins := sdk.NewCoins(mintedCoin)
 
@@ -64,7 +64,7 @@ func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper) {
 	)
 }
 
-func InflationCalculationFn(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper,
+func CalculateInflation(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper,
 	lp ugov.InflationParams, params types.Params, bondedRatio sdk.Dec, currentInflation sdk.Dec) sdk.Dec {
 
 	icst, err := ugovKeeper.GetInflationCycleStart()

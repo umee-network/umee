@@ -57,7 +57,7 @@ message QueryInflationParams {}
 
 // QueryInflationParamsResponse response type.
 message QueryInflationParamsResponse {
-  InflationParams inflation_params = 1 [(gogoproto.nullable) = false];
+  InflationParams params = 1 [(gogoproto.nullable) = false];
 }
 
 // QueryInflationCycleStart request type.

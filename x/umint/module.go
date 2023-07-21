@@ -31,11 +31,6 @@ func NewAppModule(cdc codec.Codec, keeper mk.Keeper, ak types.AccountKeeper, ugo
 	}
 }
 
-// Name implements module.AppModule.
-func (AppModule) Name() string {
-	return types.ModuleName
-}
-
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
 func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
 	BeginBlock(ctx, am.ugovKB.Keeper(&ctx), am.mintKeeper)

@@ -80,7 +80,7 @@ func (msg *MsgGovUpdateInflationParams) ValidateBasic() error {
 	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
 		return err
 	}
-	return msg.InflationParams.Validate()
+	return msg.Params.Validate()
 }
 
 // GetSignBytes implements Msg
