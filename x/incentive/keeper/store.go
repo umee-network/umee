@@ -83,7 +83,7 @@ func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 		return program, incentive.ProgramStatusNotExist, sdkerrors.ErrNotFound.Wrapf("program id %d", id)
 	}
 
-	if k.getObject(&ctx, keyIncentiveProgram(id, status), &program, "incentive program") {
+	if !k.getObject(&ctx, keyIncentiveProgram(id, status), &program, "incentive program") {
 		return program, incentive.ProgramStatusNotExist, sdkerrors.ErrNotFound.Wrapf("program id %d", id)
 	}
 	// Enforces that program ID matches where it was stored
