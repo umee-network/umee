@@ -12,6 +12,7 @@ import (
 
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/metoken"
 )
 
 type Keeper struct {
@@ -21,6 +22,7 @@ type Keeper struct {
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
 	liquidatorQueryEnabled bool
+	meTokenAddr            sdk.AccAddress
 
 	tokenHooks []types.TokenHooks
 	bondHooks  []types.BondHooks
@@ -33,6 +35,7 @@ func NewKeeper(
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 	enableLiquidatorQuery bool,
+	meTokenAddr sdk.AccAddress,
 ) Keeper {
 	// set KeyTable if it has not already been set
 	if !paramSpace.HasKeyTable() {
@@ -46,6 +49,7 @@ func NewKeeper(
 		bankKeeper:             bk,
 		oracleKeeper:           ok,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
+		meTokenAddr:            meTokenAddr,
 	}
 }
 
@@ -108,7 +112,14 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 	}
 
 	// The uTokens are sent to supplier address
-	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, uTokens); err != nil {
+	// Only base accounts and x/metoken module account are supported.
+	if supplierAddr.Equals(k.meTokenAddr) {
+		err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, metoken.ModuleName, uTokens)
+	} else {
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, uTokens)
+	}
+
+	if err != nil {
 		return sdk.Coin{}, err
 	}
 
@@ -156,14 +167,16 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		if collateralAmount.LT(amountFromCollateral) {
 			return sdk.Coin{}, isFromCollateral, types.ErrInsufficientBalance.Wrapf(
 				"%s uToken balance + %s from collateral is less than %s to withdraw",
-				amountFromWallet, collateralAmount, uToken)
+				amountFromWallet, collateralAmount, uToken,
+			)
 		}
 
 		unbondedCollateral := k.unbondedCollateral(ctx, supplierAddr, uToken.Denom)
 		if unbondedCollateral.Amount.LT(amountFromCollateral) {
 			return sdk.Coin{}, isFromCollateral, types.ErrBondedCollateral.Wrapf(
 				"%s unbonded collateral is less than %s to withdraw from collateral",
-				unbondedCollateral, amountFromCollateral)
+				unbondedCollateral, amountFromCollateral,
+			)
 		}
 
 		// reduce the supplier's collateral by amountFromCollateral
@@ -180,8 +193,15 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// send the base assets to supplier
+	// Only base accounts and x/metoken module account are supported.
 	tokens := sdk.NewCoins(token)
-	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, tokens); err != nil {
+	if supplierAddr.Equals(k.meTokenAddr) {
+		err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, metoken.ModuleName, tokens)
+	} else {
+		err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, tokens)
+	}
+
+	if err != nil {
 		return sdk.Coin{}, isFromCollateral, err
 	}
 
@@ -216,7 +236,8 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(
-		ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(borrow)); err != nil {
+		ctx, types.ModuleName, borrowerAddr, sdk.NewCoins(borrow),
+	); err != nil {
 		return err
 	}
 
@@ -287,7 +308,8 @@ func (k Keeper) Decollateralize(ctx sdk.Context, borrowerAddr sdk.AccAddress, uT
 	if unbondedCollateral.Amount.LT(uToken.Amount) {
 		return types.ErrBondedCollateral.Wrapf(
 			"%s unbonded collateral uTokens are less than %s to decollateralize",
-			unbondedCollateral, uToken)
+			unbondedCollateral, uToken,
+		)
 	}
 
 	// Decollateralizing uTokens withdraws them from the module account and returns them to the user
