@@ -11,9 +11,9 @@ const (
 	UP
 )
 
-const One = 10000
-const Half = One / 2
-
-var (
-	oneBigInt = math.NewIntFromUint64(One)
+const (
+	One  = 10000
+	Half = One / 2
 )
+
+var oneBigInt = math.NewIntFromUint64(One)

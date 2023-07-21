@@ -112,7 +112,6 @@ func (ib IndexBalances) SetAssetBalance(balance AssetBalance) {
 	}
 
 	ib.AssetBalances[i] = balance
-
 }
 
 // NewZeroAssetBalance creates a new AssetBalance object with all balances in zero.

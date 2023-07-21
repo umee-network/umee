@@ -115,5 +115,4 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 			},
 		)
 	}
-
 }
