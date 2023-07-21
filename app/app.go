@@ -71,6 +71,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/group"
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
 	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
+	"github.com/cosmos/cosmos-sdk/x/mint"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/nft"
@@ -119,6 +120,7 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	customante "github.com/umee-network/umee/v5/ante"
+	"github.com/umee-network/umee/v5/app/inflation"
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/swagger"
 	"github.com/umee-network/umee/v5/util/genmap"
@@ -142,8 +144,6 @@ import (
 	uibcoracle "github.com/umee-network/umee/v5/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v5/x/uibc/quota"
 	uibcquotakeeper "github.com/umee-network/umee/v5/x/uibc/quota/keeper"
-
-	"github.com/umee-network/umee/v5/x/umint"
 
 	"github.com/umee-network/umee/v5/x/metoken"
 	metokenkeeper "github.com/umee-network/umee/v5/x/metoken/keeper"
@@ -673,6 +673,11 @@ func New(
 	// we prefer to be more strict in what arguments the modules expect.
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
+	inflationClaculator := inflation.Calculator{
+		UgovKeeperB: app.UGovKeeperB,
+		MintKeeper:  &app.MintKeeper,
+	}
+
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.
 	appModules := []module.AppModule{
@@ -695,7 +700,7 @@ func New(
 			app.interfaceRegistry,
 		),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
-		umint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, app.UGovKeeperB),
+		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, inflationClaculator.InflationRate),
 		// need to dereference StakingKeeper because x/distribution uses interface casting :(
 		// TODO: in the next SDK version we can remove the dereference
 		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper),
