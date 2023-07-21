@@ -56,17 +56,17 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	})
 
 	// get the borrower's borrowed value by token
-	borrowed := k.GetBorrowerCollateral(ctx, borrowerAddr)
+	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	borrowedDenoms := []string{}
 	borrowedValue := sdk.NewDecCoins()
 	for _, b := range borrowed {
-		v, err := k.VisibleCollateralValue(ctx, sdk.NewCoins(b), types.PriceModeHigh)
+		v, err := k.TokenValue(ctx, b, types.PriceModeHigh)
 		if err != nil {
 			return err
 		}
 		if v.IsPositive() {
-			borrowedValue = borrowedValue.Add(sdk.NewDecCoinFromDec(types.ToTokenDenom(b.Denom), v))
-			collateralDenoms = append(borrowedDenoms, types.ToTokenDenom(b.Denom))
+			borrowedValue = borrowedValue.Add(sdk.NewDecCoinFromDec(b.Denom, v))
+			borrowedDenoms = append(borrowedDenoms, b.Denom)
 		}
 	}
 	sort.SliceStable(borrowedDenoms, func(i, j int) bool {
@@ -106,9 +106,10 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	var i, j int
 	for i < len(collateralDenoms) && j < len(borrowedDenoms) {
 		cDenom := collateralDenoms[i]
-		b := borrowedValue.AmountOf(cDenom)
 		bDenom := borrowedDenoms[j]
-		c := collateralValue.AmountOf(bDenom)
+
+		c := collateralValue.AmountOf(cDenom)
+		b := borrowedValue.AmountOf(bDenom)
 		w := sdk.MinDec(
 			collateralWeight(cDenom),
 			sdk.MaxDec(collateralWeight(bDenom), minimumBorrowFactor),
@@ -126,7 +127,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 			// next borrow
 			j++
 		} else {
-			// only some of the borrow, equal to collateral value * collateal weight is covered
+			// only some of the borrow, equal to collateral value * collateral weight is covered
 			borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
 				bDenom, c.Mul(w),
 			)))
@@ -146,6 +147,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 		for _, b := range borrowedValue {
 			overLimit = overLimit.Add(b.Amount)
 		}
+
 		return types.ErrUndercollaterized.Wrapf(
 			"borrowed: %s, limit: %s", totalBorrowedValue, totalBorrowedValue.Sub(overLimit))
 	}
