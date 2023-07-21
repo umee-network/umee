@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"sort"
+
 	sdkmath "cosmossdk.io/math"
 	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -43,9 +45,15 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 }
 
 // GetAllSpecialAssetPairs returns all the special asset pairs from the x/leverage
-// module's KVStore.
+// module's KVStore. Sorts by collateral weight (descending) before returning.
 func (k Keeper) GetAllSpecialAssetPairs(ctx sdk.Context) []types.SpecialAssetPair {
-	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
+	pairs := store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
+
+	sort.SliceStable(pairs, func(i, j int) bool {
+		// sorts by collateral weight (descending)
+		return pairs[i].CollateralWeight.GTE(pairs[j].CollateralWeight)
+	})
+	return pairs
 }
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
