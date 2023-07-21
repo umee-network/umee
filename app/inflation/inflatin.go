@@ -23,8 +23,13 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, para
 
 	// TODO: here we need to use a new inflation function and check if we need to go to the
 	// next inflation cycle
+	// minter.Inflation = c.calculateInflation()
 	minter.Inflation = minttypes.DefaultInflationCalculationFn(ctx, minter, params, bondedRatio)
 	return readjustSupply(totalSupply, maxSupply, minter, params)
+}
+
+func (c Calculator) calculateInflation() sdk.Dec {
+	panic("todo")
 }
 
 // TODO: add unit tests to this function
