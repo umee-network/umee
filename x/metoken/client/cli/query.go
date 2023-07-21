@@ -186,7 +186,7 @@ func GetCmdIndexPrice() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "index-price [metoken_denom]",
 		Args: cobra.MaximumNArgs(1),
-		Short: "Get price for all the registered indexes in the x/metoken module or search for a specific price with" +
+		Short: "Get price of all registered indexes in the x/metoken module or search for a specific price with" +
 			" metoken_denom.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
