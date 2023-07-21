@@ -38,7 +38,8 @@ func readjustSupply(totalSupply, maxSupply sdk.Int, minter minttypes.Minter, par
 	newSupply := minter.BlockProvision(params).Amount
 	newTotalSupply := totalSupply.Add(newSupply)
 	if newTotalSupply.GT(maxSupply) {
-		maxNewSupply := newTotalSupply.Sub(maxSupply)
+		overdraft := newTotalSupply.Sub(maxSupply)
+		maxNewSupply := newSupply.Sub(overdraft)
 		factor := sdk.NewDecFromInt(maxNewSupply).QuoInt(newSupply)
 		minter.Inflation = minter.Inflation.Mul(factor)
 	}
