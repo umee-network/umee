@@ -2,7 +2,6 @@ package tests
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	appparams "github.com/umee-network/umee/v5/app/params"
 	itestsuite "github.com/umee-network/umee/v5/tests/cli"
 	"github.com/umee-network/umee/v5/x/leverage/client/cli"
