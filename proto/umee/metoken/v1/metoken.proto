@@ -108,7 +108,7 @@ message AcceptedAsset {
 message Price {
   option (gogoproto.equal) = true;
 
-  // meToken denomination.
+  // meToken denom.
   string denom = 1;
 
   // Price in USD of one unit of meToken, expressed in decimals.
