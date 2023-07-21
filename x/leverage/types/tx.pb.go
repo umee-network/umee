@@ -1028,9 +1028,11 @@ func (*MsgSupplyCollateralResponse) XXX_MessageName() string {
 // MsgGovUpdateRegistry defines the Msg/GovUpdateRegistry request type.
 type MsgGovUpdateRegistry struct {
 	// authority is the address of the governance account.
-	Authority   string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
-	Title       string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	Authority string `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
+	// Deprecated: use proposal metadata instead.
+	Title string `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"` // Deprecated: Do not use.
+	// Deprecated: use proposal metadata instead.
+	Description string `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"` // Deprecated: Do not use.
 	// add_tokens defines new token settings.
 	AddTokens []Token `protobuf:"bytes,4,rep,name=add_tokens,json=addTokens,proto3" json:"add_tokens"`
 	// update_tokens defines the new settings for existed tokens.
