@@ -167,8 +167,8 @@ func (q Querier) IndexPrice(
 		indexes = k.GetAllRegisteredIndexes()
 	}
 
-	var prices []metoken.Price
-	for _, index := range indexes {
+	prices := make([]metoken.Price, len(indexes))
+	for i, index := range indexes {
 		ip, err := k.Prices(index)
 		if err != nil {
 			return nil, err
@@ -179,7 +179,7 @@ func (q Querier) IndexPrice(
 			return nil, err
 		}
 
-		prices = append(prices, price)
+		prices[i] = price
 	}
 
 	return &metoken.QueryIndexPriceResponse{
