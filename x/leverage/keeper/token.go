@@ -77,16 +77,8 @@ func (k Keeper) SetSpecialAssetPair(ctx sdk.Context, pair types.SpecialAssetPair
 		return err
 	}
 
-	store := ctx.KVStore(k.storeKey)
 	key := types.KeySpecialAssetPair(pair.Collateral, pair.Borrow)
-
-	bz, err := k.cdc.Marshal(&pair)
-	if err != nil {
-		return err
-	}
-
-	store.Set(key, bz)
-	return nil
+	return store.SetValue(ctx.KVStore(k.storeKey), key, &pair bz, "leverage-special-asset")
 }
 
 // DeleteSpecialAssetPair removes a SpecialAssetPair from the x/leverage module's KVStore.
