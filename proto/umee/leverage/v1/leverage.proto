@@ -255,7 +255,7 @@ message Token {
 message SpecialAssetPair {
   option (gogoproto.equal) = true;
 
-  // Collateral is the denomination of the collateral base token.
+  // Collateral base token denom.
   string collateral = 1;
 
   // Borrow is the denomination of the borrowed base token.
