@@ -128,6 +128,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 			j++
 		} else {
 			// only some of the borrow, equal to collateral value * collateral weight is covered
+			// if in a previous step the collateral and borrow both reached zero, this is zero
 			borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
 				bDenom, c.Mul(w),
 			)))
