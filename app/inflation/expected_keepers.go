@@ -1,19 +1,11 @@
 package inflation
 
 import (
-	"time"
-
 	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	// ugov "github.com/umee-network/umee/v5/x/ugov"
 )
-
-type UGovKeeper interface {
-	SetInflationCycleStart(startTime time.Time) error
-	GetInflationCycleStart() (*time.Time, error)
-	// InflationParams() ugov.InflationParams
-}
 
 type MintKeeper interface {
 	SetParams(ctx sdk.Context, params minttypes.Params)
