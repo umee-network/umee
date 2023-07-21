@@ -10,9 +10,9 @@ option go_package = "github.com/umee-network/umee/v5/x/metoken";
 
 // GenesisState defines the x/metoken module's genesis state.
 message GenesisState {
-  Params                 params                   = 1 [(gogoproto.nullable) = false];
-  repeated Index         registry                 = 2 [(gogoproto.nullable) = false];
-  repeated IndexBalances balances                 = 3 [(gogoproto.nullable) = false];
+  Params                    params                = 1 [(gogoproto.nullable) = false];
+  repeated Index            registry              = 2 [(gogoproto.nullable) = false];
+  repeated IndexBalances    balances              = 3 [(gogoproto.nullable) = false];
   google.protobuf.Timestamp next_rebalancing_time = 4 [
     (gogoproto.nullable) = false,
     (gogoproto.stdtime)  = true
