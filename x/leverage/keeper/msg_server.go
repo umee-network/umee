@@ -126,7 +126,7 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	// Get the total available for uToken to prevent withdraws above this limit.
-	uTokenTotalAvailable, err := s.keeper.moduleMaxWithdraw(ctx, userSpendableUtokens)
+	uTokenTotalAvailable, err := s.keeper.ModuleMaxWithdraw(ctx, userSpendableUtokens)
 	if err != nil {
 		return nil, err
 	}

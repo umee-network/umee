@@ -4,7 +4,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
+	"github.com/umee-network/umee/v5/x/metoken"
 
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
@@ -33,6 +35,7 @@ func NewTestKeeper(
 		bk,
 		ok,
 		enableLiquidatorQuery,
+		authtypes.NewModuleAddress(metoken.ModuleName),
 	)
 	return k, TestKeeper{&k}
 }

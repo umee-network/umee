@@ -1,0 +1,282 @@
+package keeper_test
+
+import (
+	"testing"
+
+	"github.com/umee-network/umee/v5/x/metoken/mocks"
+
+	sdkmath "cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v5/x/metoken"
+	"gotest.tools/v3/assert"
+)
+
+func TestQuerier_Params(t *testing.T) {
+	s := initKeeperTestSuite(t, nil, nil)
+	querier, ctx := s.queryClient, s.ctx
+
+	resp, err := querier.Params(ctx, nil)
+	assert.NilError(t, err)
+	assert.Check(t, resp.Params.RebalancingFrequency > 0)
+	assert.Check(t, resp.Params.ClaimingFrequency > 0)
+}
+
+func TestQuerier_Indexes(t *testing.T) {
+	index1 := mocks.StableIndex(mocks.MeUSDDenom)
+	index2 := mocks.StableIndex("me/EUR")
+
+	s := initKeeperTestSuite(t, []metoken.Index{index1, index2}, nil)
+	querier, ctx := s.queryClient, s.ctx
+
+	tcs := []struct {
+		name          string
+		denom         string
+		expIndexCount int
+		expErr        string
+	}{
+		{
+			"get all indexes",
+			"",
+			2,
+			"",
+		},
+		{
+			"get index found",
+			mocks.MeUSDDenom,
+			1,
+			"",
+		},
+		{
+			"get index not found",
+			"me/Test",
+			0,
+			"not found",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(
+			tc.name, func(t *testing.T) {
+				resp, err := querier.Indexes(
+					ctx, &metoken.QueryIndexes{
+						MetokenDenom: tc.denom,
+					},
+				)
+				if len(tc.expErr) == 0 {
+					assert.NilError(t, err)
+					assert.Check(t, tc.expIndexCount == len(resp.Registry))
+				} else {
+					assert.ErrorContains(t, err, tc.expErr)
+				}
+			},
+		)
+	}
+}
+
+func TestQuerier_Balances(t *testing.T) {
+	balance1 := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
+	balance2 := mocks.ValidUSDIndexBalances("me/EUR")
+
+	s := initKeeperTestSuite(t, nil, []metoken.IndexBalances{balance1, balance2})
+	querier, ctx := s.queryClient, s.ctx
+
+	tcs := []struct {
+		name          string
+		denom         string
+		expIndexCount int
+		expErr        string
+	}{
+		{
+			"get all balances",
+			"",
+			2,
+			"",
+		},
+		{
+			"get balance found",
+			mocks.MeUSDDenom,
+			1,
+			"",
+		},
+		{
+			"get balance not found",
+			"me/Test",
+			0,
+			"not found",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(
+			tc.name, func(t *testing.T) {
+				resp, err := querier.IndexBalances(
+					ctx, &metoken.QueryIndexBalances{
+						MetokenDenom: tc.denom,
+					},
+				)
+				if len(tc.expErr) > 0 {
+					assert.ErrorContains(t, err, tc.expErr)
+				} else {
+					assert.NilError(t, err)
+					assert.Check(t, tc.expIndexCount == len(resp.IndexBalances))
+				}
+			},
+		)
+	}
+}
+
+type feeTestCase struct {
+	name  string
+	asset sdk.Coin
+	denom string
+}
+
+func TestQuerier_SwapFee_meUSD(t *testing.T) {
+	index := mocks.StableIndex(mocks.MeUSDDenom)
+	balances := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
+
+	s := initKeeperTestSuite(t, []metoken.Index{index}, []metoken.IndexBalances{balances})
+	querier, ctx := s.queryClient, s.ctx
+
+	// set prices
+	prices := metoken.NewIndexPrices()
+	prices.SetPrice(mocks.USDTBaseDenom, mocks.USDTPrice, 6)
+	prices.SetPrice(mocks.USDCBaseDenom, mocks.USDCPrice, 6)
+	prices.SetPrice(mocks.ISTBaseDenom, mocks.ISTPrice, 6)
+
+	totalValue := sdk.ZeroDec()
+	values := make(map[string]sdk.Dec)
+	for _, balance := range balances.AssetBalances {
+		// calculate total asset supply (leveraged + reserved)
+		assetSupply := balance.AvailableSupply()
+		// get asset Price
+		assetPrice, err := prices.Price(balance.Denom)
+		assert.NilError(t, err)
+		// calculate asset value
+		assetValue := assetPrice.Price.MulInt(assetSupply)
+
+		// add asset value to the totalValue
+		totalValue = totalValue.Add(assetValue)
+		// calculate every asset balance value
+		values[balance.Denom] = assetValue
+	}
+
+	tcs := []feeTestCase{
+		{
+			name:  "10 USDT swap",
+			asset: sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(10_000000)),
+			denom: mocks.MeUSDDenom,
+		},
+		{
+			name:  "750 USDC swap",
+			asset: sdk.NewCoin(mocks.USDCBaseDenom, sdkmath.NewInt(750_000000)),
+			denom: mocks.MeUSDDenom,
+		},
+		{
+			name:  "1876 IST swap",
+			asset: sdk.NewCoin(mocks.ISTBaseDenom, sdkmath.NewInt(1876_000000)),
+			denom: mocks.MeUSDDenom,
+		},
+	}
+
+	for _, tc := range tcs {
+		req := &metoken.QuerySwapFee{
+			Asset:        tc.asset,
+			MetokenDenom: tc.denom,
+		}
+		denom := tc.asset.Denom
+
+		resp, err := querier.SwapFee(ctx, req)
+		assert.NilError(t, err)
+
+		// current_allocation = asset_value / total_value
+		currentAllocation := values[denom].Quo(totalValue)
+		i, aa := index.AcceptedAsset(denom)
+		assert.Check(t, i >= 0)
+		targetAllocation := aa.TargetAllocation
+
+		// swap_delta_allocation = (current_allocation - target_allocation) / target_allocation
+		swapDeltaAllocation := currentAllocation.Sub(targetAllocation).Quo(targetAllocation)
+
+		// fee = delta_allocation * balanced_fee + balanced_fee
+		fee := swapDeltaAllocation.Mul(index.Fee.BalancedFee).Add(index.Fee.BalancedFee)
+
+		// swap_fee = fee * amount
+		result := fee.MulInt(tc.asset.Amount).TruncateInt()
+
+		assert.Check(t, result.Equal(resp.Asset.Amount))
+	}
+}
+
+func TestQuerier_RedeemFee_meUSD(t *testing.T) {
+	index := mocks.StableIndex(mocks.MeUSDDenom)
+	balances := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
+
+	s := initKeeperTestSuite(t, []metoken.Index{index}, []metoken.IndexBalances{balances})
+	querier, ctx, app := s.queryClient, s.ctx, s.app
+
+	// set prices
+	prices, err := app.MetokenKeeperB.Keeper(&ctx).Prices(index)
+	assert.NilError(t, err)
+
+	tcs := []feeTestCase{
+		{
+			name:  "20 meUSD to USDT redemption",
+			asset: sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(20_000000)),
+			denom: mocks.USDTBaseDenom,
+		},
+		{
+			name:  "444 meUSD to USDC redemption",
+			asset: sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(444_000000)),
+			denom: mocks.USDCBaseDenom,
+		},
+		{
+			name:  "1267 meUSD to IST redemption",
+			asset: sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(1267_000000)),
+			denom: mocks.ISTBaseDenom,
+		},
+	}
+
+	for _, tc := range tcs {
+		req := &metoken.QueryRedeemFee{
+			Metoken:    tc.asset,
+			AssetDenom: tc.denom,
+		}
+		meTokenDenom, denom := tc.asset.Denom, tc.denom
+
+		resp, err := querier.RedeemFee(ctx, req)
+		assert.NilError(t, err)
+
+		price, err := prices.Price(denom)
+		assert.NilError(t, err)
+		i, balance := balances.AssetBalance(denom)
+		assert.Check(t, i >= 0)
+		supply := balance.AvailableSupply()
+
+		meTokenPrice, err := prices.Price(meTokenDenom)
+		assert.NilError(t, err)
+
+		// current_allocation = asset_value / total_value
+		currentAllocation := price.Price.MulInt(supply).Quo(meTokenPrice.Price.MulInt(balances.MetokenSupply.Amount))
+		i, aa := index.AcceptedAsset(denom)
+		assert.Check(t, i >= 0)
+		targetAllocation := aa.TargetAllocation
+
+		// redeem_delta_allocation = (target_allocation - current_allocation) / target_allocation
+		redeemDeltaAllocation := targetAllocation.Sub(currentAllocation).Quo(targetAllocation)
+
+		// fee = delta_allocation * balanced_fee + balanced_fee
+		fee := redeemDeltaAllocation.Mul(index.Fee.BalancedFee).Add(index.Fee.BalancedFee)
+
+		// exchange_rate = metoken_price / asset_price
+		exchangeRate := meTokenPrice.Price.Quo(price.Price)
+
+		// asset_to_redeem = exchange_rate * asset_amount
+		toRedeem := exchangeRate.MulInt(tc.asset.Amount).TruncateInt()
+
+		// total_fee = asset_to_redeem * fee
+		totalFee := fee.MulInt(toRedeem).TruncateInt()
+
+		assert.Check(t, totalFee.Equal(resp.Asset.Amount))
+	}
+}
