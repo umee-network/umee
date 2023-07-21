@@ -258,7 +258,7 @@ message SpecialAssetPair {
   // Collateral base token denom.
   string collateral = 1;
 
-  // Borrow is the denomination of the borrowed base token.
+  // Borrow base token denom.
   string borrow = 2;
 
   // Collateral Weight defines what portion of the total value of the asset
