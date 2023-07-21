@@ -54,7 +54,14 @@ func (c *Client) TxSubmitProposalWithMsg(msgs []sdk.Msg) (*sdk.TxResponse, error
 		return nil, err
 	}
 
-	submitProposal, err := v1.NewMsgSubmitProposal(msgs, deposit, fromAddr.String(), "metadata", "sometitle", "somesummary")
+	submitProposal, err := v1.NewMsgSubmitProposal(
+		msgs,
+		deposit,
+		fromAddr.String(),
+		"metadata",
+		"sometitle",
+		"somesummary",
+	)
 	if err != nil {
 		return nil, err
 	}

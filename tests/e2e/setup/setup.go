@@ -720,10 +720,8 @@ func (s *E2ETestSuite) connectIBCChains() {
 			"--new-client-connection",
 			"--yes",
 		},
-	}) // hermes create channel chain-PXbLU5 test-gaia-chain --port-a=transfer --port-b=transfer
+	})
 	s.Require().NoError(err)
-
-	// hermes create channel --a-chain chain-c7cA0e --b-chain test-gaia-chain --a-port transfer --b-port transfer --new-client-connection --yes
 
 	var (
 		outBuf bytes.Buffer

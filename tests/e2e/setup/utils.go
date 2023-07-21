@@ -98,19 +98,6 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 
 		s.T().Log("successfully sent IBC tokens")
 		time.Sleep(3 * time.Second)
-		// s.T().Log("Waiting for Tx to be included in a block", txHash, srcChainID)
-		// endpoint := s.UmeeREST()
-		// if strings.Contains(srcChainID, "gaia") {
-		// 	endpoint = s.GaiaREST()
-		// }
-
-		// s.Require().Eventually(func() bool {
-		// 	err := s.QueryUmeeTx(endpoint, txHash)
-		// 	if err != nil {
-		// 		s.T().Log("Tx Query Error", err)
-		// 	}
-		// 	return err == nil
-		// }, 5*time.Second, 200*time.Millisecond)
 		return
 	}
 }

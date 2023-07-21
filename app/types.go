@@ -32,7 +32,11 @@ type CosmosApp interface {
 	LoadHeight(height int64) error
 
 	// Exports the state of the application for a genesis file.
-	ExportAppStateAndValidators(forZeroHeight bool, jailAllowedAddrs []string, modulesToExport []string) (types.ExportedApp, error)
+	ExportAppStateAndValidators(
+		forZeroHeight bool,
+		jailAllowedAddrs []string,
+		modulesToExport []string,
+	) (types.ExportedApp, error)
 
 	// All the registered module account addresses.
 	ModuleAccountAddrs() map[string]bool

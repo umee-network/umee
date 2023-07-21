@@ -178,7 +178,7 @@ docker-build:
 	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
 
 docker-push-hermes:
-	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .
+	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
 
 docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
@@ -231,7 +231,7 @@ cover-html: test-unit-cover
 
 # we should be able to optimize docker build:
 # https://linear.app/umee/issue/UMEE-463/fix-docker-login-problem-when-running-e2e-tests
-test-e2e: #$(TEST_E2E_DEPS)
+test-e2e: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)'
 
 test-e2e-cov: $(TEST_E2E_DEPS)

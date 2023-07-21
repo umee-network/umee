@@ -29,6 +29,7 @@ func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup
 ) (*ugov.QueryEmergencyGroupResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	return &ugov.QueryEmergencyGroupResponse{
-			EmergencyGroup: q.Keeper(&sdkCtx).EmergencyGroup().String()},
+			EmergencyGroup: q.Keeper(&sdkCtx).EmergencyGroup().String(),
+		},
 		nil
 }
