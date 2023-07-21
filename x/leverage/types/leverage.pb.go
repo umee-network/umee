@@ -242,9 +242,9 @@ var xxx_messageInfo_Token proto.InternalMessageInfo
 // SpecialAssetPair defines a special (increased) CollateralWeight used when a specified Collateral is used
 // to collateralize a specified Borrow. This association is one-way (so it does not work in reverse).
 type SpecialAssetPair struct {
-	// Collateral is the denomination of the collateral base token.
+	// Collateral base token denom.
 	Collateral string `protobuf:"bytes,1,opt,name=collateral,proto3" json:"collateral,omitempty"`
-	// Borrow is the denomination of the borrowed base token.
+	// Borrow base token denom.
 	Borrow string `protobuf:"bytes,2,opt,name=borrow,proto3" json:"borrow,omitempty"`
 	// Collateral Weight defines what portion of the total value of the asset
 	// can contribute to a users borrowing power. For special asset pairs, this

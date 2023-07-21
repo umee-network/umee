@@ -1298,12 +1298,10 @@ paths:
                   properties:
                     collateral:
                       type: string
-                      description: >-
-                        Collateral is the denomination of the collateral base
-                        token.
+                      description: Collateral base token denom.
                     borrow:
                       type: string
-                      description: Borrow is the denomination of the borrowed base token.
+                      description: Borrow base token denom.
                     collateral_weight:
                       type: string
                       description: >-
@@ -4565,10 +4563,10 @@ definitions:
           properties:
             collateral:
               type: string
-              description: Collateral is the denomination of the collateral base token.
+              description: Collateral base token denom.
             borrow:
               type: string
-              description: Borrow is the denomination of the borrowed base token.
+              description: Borrow base token denom.
             collateral_weight:
               type: string
               description: >-
@@ -4614,10 +4612,10 @@ definitions:
     properties:
       collateral:
         type: string
-        description: Collateral is the denomination of the collateral base token.
+        description: Collateral base token denom.
       borrow:
         type: string
-        description: Borrow is the denomination of the borrowed base token.
+        description: Borrow base token denom.
       collateral_weight:
         type: string
         description: >-
