@@ -1298,12 +1298,10 @@ paths:
                   properties:
                     collateral:
                       type: string
-                      description: >-
-                        Collateral is the denomination of the collateral base
-                        token.
+                      description: Collateral base token denom.
                     borrow:
                       type: string
-                      description: Borrow is the denomination of the borrowed base token.
+                      description: Borrow base token denom.
                     collateral_weight:
                       type: string
                       description: >-
@@ -1314,7 +1312,7 @@ paths:
                         asset pairs, this
 
                         also overrides the borrowed asset's collateral weight
-                        when eveluating borrow
+                        when evaluating borrow
 
                         factor.
                   description: >-
@@ -4565,10 +4563,10 @@ definitions:
           properties:
             collateral:
               type: string
-              description: Collateral is the denomination of the collateral base token.
+              description: Collateral base token denom.
             borrow:
               type: string
-              description: Borrow is the denomination of the borrowed base token.
+              description: Borrow base token denom.
             collateral_weight:
               type: string
               description: >-
@@ -4579,7 +4577,7 @@ definitions:
                 pairs, this
 
                 also overrides the borrowed asset's collateral weight when
-                eveluating borrow
+                evaluating borrow
 
                 factor.
           description: >-
@@ -4614,10 +4612,10 @@ definitions:
     properties:
       collateral:
         type: string
-        description: Collateral is the denomination of the collateral base token.
+        description: Collateral base token denom.
       borrow:
         type: string
-        description: Borrow is the denomination of the borrowed base token.
+        description: Borrow base token denom.
       collateral_weight:
         type: string
         description: >-
@@ -4626,7 +4624,7 @@ definitions:
           can contribute to a users borrowing power. For special asset pairs,
           this
 
-          also overrides the borrowed asset's collateral weight when eveluating
+          also overrides the borrowed asset's collateral weight when evaluating
           borrow
 
           factor.
