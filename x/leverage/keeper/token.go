@@ -83,9 +83,8 @@ func (k Keeper) SetSpecialAssetPair(ctx sdk.Context, pair types.SpecialAssetPair
 
 // DeleteSpecialAssetPair removes a SpecialAssetPair from the x/leverage module's KVStore.
 func (k Keeper) DeleteSpecialAssetPair(ctx sdk.Context, collateralDenom, borrowDenom string) {
-	store := ctx.KVStore(k.storeKey)
 	key := types.KeySpecialAssetPair(collateralDenom, borrowDenom)
-	store.Delete(key)
+	ctx.KVStore(k.storeKey).Delete(key)
 }
 
 // SaveOrUpdateTokenSettingsToRegistry adds new tokens or updates the new tokens settings to registry.
