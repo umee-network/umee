@@ -103,7 +103,7 @@ func (ib IndexBalances) AssetBalance(denom string) (int, AssetBalance) {
 }
 
 // SetAssetBalance overrides an asset balance if exists in the list, otherwise add it to the list.
-func (ib IndexBalances) SetAssetBalance(balance AssetBalance) {
+func (ib *IndexBalances) SetAssetBalance(balance AssetBalance) {
 	i, _ := ib.AssetBalance(balance.Denom)
 
 	if i < 0 {
