@@ -91,7 +91,7 @@ func (s msgServer) BeginUnbonding(
 	}
 
 	// get current account state for the requested uToken denom only
-	bonded, currentUnbonding, unbondings := k.BondSummary(ctx, addr, denom)
+	bonded, _, unbondings := k.BondSummary(ctx, addr, denom)
 
 	maxUnbondings := int(k.GetParams(ctx).MaxUnbondings)
 	if maxUnbondings > 0 && len(unbondings) >= maxUnbondings {
@@ -100,11 +100,10 @@ func (s msgServer) BeginUnbonding(
 	}
 
 	// reject unbondings greater than maximum available amount
-	if currentUnbonding.Add(msg.UToken).Amount.GT(bonded.Amount) {
+	if msg.UToken.Amount.GT(bonded.Amount) {
 		return nil, incentive.ErrInsufficientBonded.Wrapf(
-			"bonded: %s, unbonding: %s, requested: %s",
+			"bonded: %s, requested: %s",
 			bonded,
-			currentUnbonding,
 			msg.UToken,
 		)
 	}
