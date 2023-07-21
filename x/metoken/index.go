@@ -191,7 +191,7 @@ func (i Index) HasAcceptedAsset(denom string) bool {
 }
 
 // SetAcceptedAsset overrides an accepted asset if exists in the list, otherwise add it to the list.
-func (i Index) SetAcceptedAsset(acceptedAsset AcceptedAsset) {
+func (i *Index) SetAcceptedAsset(acceptedAsset AcceptedAsset) {
 	index, _ := i.AcceptedAsset(acceptedAsset.Denom)
 	if index > 0 {
 		i.AcceptedAssets = append(i.AcceptedAssets, acceptedAsset)
