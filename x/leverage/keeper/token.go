@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
@@ -78,7 +80,7 @@ func (k Keeper) SetSpecialAssetPair(ctx sdk.Context, pair types.SpecialAssetPair
 	}
 
 	key := types.KeySpecialAssetPair(pair.Collateral, pair.Borrow)
-	return store.SetValue(ctx.KVStore(k.storeKey), key, &pair bz, "leverage-special-asset")
+	return store.SetValue(ctx.KVStore(k.storeKey), key, &pair, "leverage-special-asset")
 }
 
 // DeleteSpecialAssetPair removes a SpecialAssetPair from the x/leverage module's KVStore.
