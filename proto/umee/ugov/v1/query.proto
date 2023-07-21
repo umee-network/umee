@@ -30,9 +30,9 @@ service Query {
     option (google.api.http).get = "/umee/ugov/v1/inflation-params";
   }
 
-  // InflationCycleStartTime returns inflation cycle start time
-  rpc InflationCycleStartTime(QueryInflationCycleStartTime) returns (QueryInflationCycleStartTimeResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/inflation-cycle";
+  // InflationCycleStart returns inflation cycle start time
+  rpc InflationCycleStart(QueryInflationCycleStart) returns (QueryInflationCycleStartResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/inflation-cycle-start";
   }
 }
 
@@ -60,10 +60,10 @@ message QueryInflationParamsResponse {
   InflationParams inflation_params = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryInflationCycleStartTime request type.
-message QueryInflationCycleStartTime {}
+// QueryInflationCycleStart request type.
+message QueryInflationCycleStart {}
 
-// QueryInflationCycleStartTimeResponse response type.
-message QueryInflationCycleStartTimeResponse {
-  google.protobuf.Timestamp inflation_cycle_start = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+// QueryInflationCycleStartResponse response type.
+message QueryInflationCycleStartResponse {
+  google.protobuf.Timestamp start = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }

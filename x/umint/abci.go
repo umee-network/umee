@@ -1,4 +1,4 @@
-package mint
+package umint
 
 import (
 	"time"
@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/util/coin"
 	ugov "github.com/umee-network/umee/v5/x/ugov"
 )
 
@@ -34,8 +35,13 @@ func BeginBlock(ctx sdk.Context, ugovKeeper UGovKeeper, mintKeeper Keeper) {
 
 	// mint coins, update supply
 	mintedCoin := minter.BlockProvision(mintParams)
+	// checking the if mintedCoins + totalStakingSupply is more than max supply of staking denom
+	if mintedCoin.Amount.Add(totalStakingSupply).GT(lp.MaxSupply.Amount) {
+		mintedCoin = coin.New(mintParams.MintDenom, lp.MaxSupply.Amount.Sub(totalStakingSupply).Int64())
+	}
 	mintedCoins := sdk.NewCoins(mintedCoin)
 
+	// mint the coins
 	err := mintKeeper.MintCoins(ctx, mintedCoins)
 	util.Panic(err)
 
