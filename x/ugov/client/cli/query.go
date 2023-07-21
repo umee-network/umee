@@ -88,7 +88,7 @@ func QueryInflationCyleStartedTime() *cobra.Command {
 			}
 
 			queryClient := ugov.NewQueryClient(clientCtx)
-			resp, err := queryClient.InflationCycleStartTime(cmd.Context(), &ugov.QueryInflationCycleStartTime{})
+			resp, err := queryClient.InflationCycleStart(cmd.Context(), &ugov.QueryInflationCycleStart{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

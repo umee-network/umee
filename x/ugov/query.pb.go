@@ -260,22 +260,22 @@ func (m *QueryInflationParamsResponse) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryInflationParamsResponse proto.InternalMessageInfo
 
-// QueryInflationCycleStartTime request type.
-type QueryInflationCycleStartTime struct {
+// QueryInflationCycleStart request type.
+type QueryInflationCycleStart struct {
 }
 
-func (m *QueryInflationCycleStartTime) Reset()         { *m = QueryInflationCycleStartTime{} }
-func (m *QueryInflationCycleStartTime) String() string { return proto.CompactTextString(m) }
-func (*QueryInflationCycleStartTime) ProtoMessage()    {}
-func (*QueryInflationCycleStartTime) Descriptor() ([]byte, []int) {
+func (m *QueryInflationCycleStart) Reset()         { *m = QueryInflationCycleStart{} }
+func (m *QueryInflationCycleStart) String() string { return proto.CompactTextString(m) }
+func (*QueryInflationCycleStart) ProtoMessage()    {}
+func (*QueryInflationCycleStart) Descriptor() ([]byte, []int) {
 	return fileDescriptor_25fa04679024a47d, []int{6}
 }
-func (m *QueryInflationCycleStartTime) XXX_Unmarshal(b []byte) error {
+func (m *QueryInflationCycleStart) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryInflationCycleStartTime) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryInflationCycleStart) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryInflationCycleStartTime.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryInflationCycleStart.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -285,35 +285,35 @@ func (m *QueryInflationCycleStartTime) XXX_Marshal(b []byte, deterministic bool)
 		return b[:n], nil
 	}
 }
-func (m *QueryInflationCycleStartTime) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryInflationCycleStartTime.Merge(m, src)
+func (m *QueryInflationCycleStart) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryInflationCycleStart.Merge(m, src)
 }
-func (m *QueryInflationCycleStartTime) XXX_Size() int {
+func (m *QueryInflationCycleStart) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryInflationCycleStartTime) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryInflationCycleStartTime.DiscardUnknown(m)
+func (m *QueryInflationCycleStart) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryInflationCycleStart.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryInflationCycleStartTime proto.InternalMessageInfo
+var xxx_messageInfo_QueryInflationCycleStart proto.InternalMessageInfo
 
-// QueryInflationCycleStartTimeResponse response type.
-type QueryInflationCycleStartTimeResponse struct {
-	InflationCycleStart *time.Time `protobuf:"bytes,1,opt,name=inflation_cycle_start,json=inflationCycleStart,proto3,stdtime" json:"inflation_cycle_start,omitempty"`
+// QueryInflationCycleStartResponse response type.
+type QueryInflationCycleStartResponse struct {
+	Start *time.Time `protobuf:"bytes,1,opt,name=start,proto3,stdtime" json:"start,omitempty"`
 }
 
-func (m *QueryInflationCycleStartTimeResponse) Reset()         { *m = QueryInflationCycleStartTimeResponse{} }
-func (m *QueryInflationCycleStartTimeResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryInflationCycleStartTimeResponse) ProtoMessage()    {}
-func (*QueryInflationCycleStartTimeResponse) Descriptor() ([]byte, []int) {
+func (m *QueryInflationCycleStartResponse) Reset()         { *m = QueryInflationCycleStartResponse{} }
+func (m *QueryInflationCycleStartResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryInflationCycleStartResponse) ProtoMessage()    {}
+func (*QueryInflationCycleStartResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_25fa04679024a47d, []int{7}
 }
-func (m *QueryInflationCycleStartTimeResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryInflationCycleStartResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryInflationCycleStartTimeResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryInflationCycleStartResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryInflationCycleStartTimeResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryInflationCycleStartResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -323,17 +323,17 @@ func (m *QueryInflationCycleStartTimeResponse) XXX_Marshal(b []byte, determinist
 		return b[:n], nil
 	}
 }
-func (m *QueryInflationCycleStartTimeResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryInflationCycleStartTimeResponse.Merge(m, src)
+func (m *QueryInflationCycleStartResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryInflationCycleStartResponse.Merge(m, src)
 }
-func (m *QueryInflationCycleStartTimeResponse) XXX_Size() int {
+func (m *QueryInflationCycleStartResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryInflationCycleStartTimeResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryInflationCycleStartTimeResponse.DiscardUnknown(m)
+func (m *QueryInflationCycleStartResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryInflationCycleStartResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryInflationCycleStartTimeResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryInflationCycleStartResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*QueryMinGasPrice)(nil), "umee.ugov.v1.QueryMinGasPrice")
@@ -342,53 +342,53 @@ func init() {
 	proto.RegisterType((*QueryEmergencyGroupResponse)(nil), "umee.ugov.v1.QueryEmergencyGroupResponse")
 	proto.RegisterType((*QueryInflationParams)(nil), "umee.ugov.v1.QueryInflationParams")
 	proto.RegisterType((*QueryInflationParamsResponse)(nil), "umee.ugov.v1.QueryInflationParamsResponse")
-	proto.RegisterType((*QueryInflationCycleStartTime)(nil), "umee.ugov.v1.QueryInflationCycleStartTime")
-	proto.RegisterType((*QueryInflationCycleStartTimeResponse)(nil), "umee.ugov.v1.QueryInflationCycleStartTimeResponse")
+	proto.RegisterType((*QueryInflationCycleStart)(nil), "umee.ugov.v1.QueryInflationCycleStart")
+	proto.RegisterType((*QueryInflationCycleStartResponse)(nil), "umee.ugov.v1.QueryInflationCycleStartResponse")
 }
 
 func init() { proto.RegisterFile("umee/ugov/v1/query.proto", fileDescriptor_25fa04679024a47d) }
 
 var fileDescriptor_25fa04679024a47d = []byte{
-	// 614 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0x4f, 0x6f, 0xd3, 0x30,
-	0x18, 0xc6, 0x1b, 0x34, 0x10, 0x78, 0xb0, 0x4d, 0xde, 0xc6, 0x4a, 0xb6, 0xa5, 0x23, 0xc0, 0x04,
-	0x48, 0xb1, 0xd5, 0x21, 0x3e, 0xc0, 0xba, 0xc1, 0xc4, 0x01, 0x34, 0xba, 0x1d, 0x10, 0x97, 0xe2,
-	0x64, 0x5e, 0xb0, 0x68, 0xec, 0x10, 0x27, 0x85, 0x72, 0x42, 0x48, 0x1c, 0xb8, 0x4d, 0xe2, 0x0b,
-	0xf0, 0x21, 0x38, 0xf1, 0x09, 0x7a, 0x9c, 0xe0, 0xc2, 0x69, 0x40, 0xcb, 0x07, 0x41, 0x71, 0xfe,
-	0xac, 0x09, 0xa5, 0xe5, 0x56, 0xfb, 0x79, 0xfa, 0x3e, 0xbf, 0x37, 0x7e, 0x40, 0x35, 0xf2, 0x28,
-	0xc5, 0x91, 0x2b, 0x3a, 0xb8, 0x53, 0xc7, 0x2f, 0x23, 0x1a, 0x74, 0x91, 0x1f, 0x88, 0x50, 0xc0,
-	0x8b, 0xb1, 0x82, 0x62, 0x05, 0x75, 0xea, 0xba, 0xe1, 0x08, 0xe9, 0x09, 0x89, 0x6d, 0x22, 0x29,
-	0xee, 0xd4, 0x6d, 0x1a, 0x92, 0x3a, 0x76, 0x04, 0xe3, 0x89, 0x5b, 0xbf, 0x92, 0xe8, 0x2d, 0x75,
-	0xc2, 0xc9, 0x21, 0x95, 0x16, 0x5c, 0xe1, 0x8a, 0xe4, 0x3e, 0xfe, 0x95, 0xde, 0xae, 0xb8, 0x42,
-	0xb8, 0x6d, 0x8a, 0x89, 0xcf, 0x30, 0xe1, 0x5c, 0x84, 0x24, 0x64, 0x82, 0x67, 0xff, 0xa9, 0xa5,
-	0xaa, 0x3a, 0xd9, 0xd1, 0x21, 0x0e, 0x99, 0x47, 0x65, 0x48, 0x3c, 0x3f, 0x35, 0x2c, 0x15, 0xb8,
-	0x15, 0xa5, 0x12, 0x4c, 0x08, 0xe6, 0x1e, 0xc7, 0x5b, 0x3c, 0x64, 0x7c, 0x87, 0xc8, 0xdd, 0x80,
-	0x39, 0xd4, 0xb4, 0x41, 0xb5, 0x7c, 0xd7, 0xa4, 0xd2, 0x17, 0x5c, 0x52, 0x78, 0x1f, 0x5c, 0xf2,
-	0x18, 0x6f, 0xb9, 0x24, 0x66, 0x67, 0x0e, 0xad, 0x6a, 0x6b, 0xda, 0xcd, 0xe9, 0x8d, 0x15, 0x94,
-	0xee, 0x10, 0x2f, 0x8c, 0xd2, 0x85, 0xd1, 0x36, 0x75, 0xb6, 0x04, 0xe3, 0x8d, 0xa9, 0xde, 0x49,
-	0xad, 0xd2, 0x9c, 0xf6, 0x86, 0x32, 0x16, 0xc1, 0xbc, 0xca, 0xb8, 0xe7, 0xd1, 0xc0, 0xa5, 0xdc,
-	0xe9, 0xee, 0x04, 0x22, 0xf2, 0xcd, 0x67, 0x60, 0x79, 0xc4, 0x75, 0x9e, 0xbe, 0x09, 0x66, 0x69,
-	0xa6, 0xb4, 0xdc, 0x58, 0x52, 0xf9, 0x17, 0x1a, 0xd5, 0xaf, 0x9f, 0xad, 0x85, 0x14, 0x61, 0xf3,
-	0xe0, 0x20, 0xa0, 0x52, 0xee, 0x85, 0x01, 0xe3, 0x6e, 0x73, 0x86, 0x16, 0x13, 0x2e, 0x83, 0x05,
-	0x95, 0xf0, 0x80, 0x1f, 0xb6, 0xd5, 0x37, 0xdc, 0x25, 0x01, 0xf1, 0xa4, 0xc9, 0xc1, 0xca, 0xa8,
-	0xfb, 0x3c, 0xfa, 0x11, 0x98, 0x63, 0x99, 0xd4, 0xf2, 0x95, 0x96, 0xee, 0xbe, 0x8a, 0x86, 0x9f,
-	0x1e, 0x95, 0x06, 0xa4, 0xcb, 0xcf, 0xb2, 0x52, 0x9e, 0x51, 0xce, 0xdb, 0xea, 0x3a, 0x6d, 0xba,
-	0x17, 0x92, 0x20, 0xdc, 0x67, 0x1e, 0x35, 0xdf, 0x6a, 0xe0, 0xfa, 0x38, 0x43, 0x0e, 0xf6, 0x04,
-	0x2c, 0x9e, 0x82, 0x39, 0xb1, 0xa7, 0x25, 0x63, 0x53, 0x4a, 0xa7, 0xa3, 0xa4, 0x1b, 0x28, 0xeb,
-	0x06, 0xda, 0xcf, 0xba, 0xd1, 0x38, 0xdf, 0x3b, 0xa9, 0x69, 0x47, 0x3f, 0x6a, 0x5a, 0x73, 0x9e,
-	0xfd, 0x9d, 0xb2, 0xf1, 0x65, 0x0a, 0x9c, 0x55, 0x08, 0xf0, 0x0d, 0x98, 0x1e, 0x2a, 0x03, 0x34,
-	0x8a, 0x1b, 0x97, 0xcb, 0xa2, 0xaf, 0x8f, 0xd7, 0x33, 0x74, 0xf3, 0xda, 0xbb, 0x6f, 0xbf, 0x3f,
-	0x9e, 0x59, 0x85, 0xcb, 0xb8, 0x50, 0x4f, 0x8f, 0x71, 0xcb, 0x25, 0xd2, 0x52, 0x05, 0x83, 0xef,
-	0x35, 0x30, 0x53, 0xac, 0x03, 0xbc, 0x3a, 0x62, 0x7e, 0xd1, 0xa2, 0xdf, 0x9a, 0x68, 0xc9, 0x29,
-	0x6e, 0x28, 0x8a, 0x1a, 0x5c, 0x2d, 0x52, 0xe4, 0xbd, 0xb1, 0x54, 0xd1, 0xe0, 0x07, 0x0d, 0xcc,
-	0x96, 0xde, 0x16, 0x9a, 0x23, 0x52, 0x4a, 0x1e, 0xfd, 0xf6, 0x64, 0x4f, 0x8e, 0xb2, 0xae, 0x50,
-	0xd6, 0xa0, 0x51, 0x44, 0xc9, 0x1f, 0xc7, 0x4a, 0x8a, 0x07, 0x3f, 0x69, 0x60, 0xe9, 0x1f, 0xbd,
-	0x80, 0x63, 0xf3, 0x8a, 0x5e, 0x7d, 0xe3, 0xff, 0xbd, 0x93, 0x3e, 0xd7, 0x29, 0xa3, 0xea, 0x60,
-	0x63, 0xbb, 0xf7, 0xcb, 0xa8, 0xf4, 0xfa, 0x86, 0x76, 0xdc, 0x37, 0xb4, 0x9f, 0x7d, 0x43, 0x3b,
-	0x1a, 0x18, 0x95, 0xe3, 0x81, 0x51, 0xf9, 0x3e, 0x30, 0x2a, 0x4f, 0xd7, 0x5d, 0x16, 0x3e, 0x8f,
-	0x6c, 0xe4, 0x08, 0x4f, 0x8d, 0xb1, 0x38, 0x0d, 0x5f, 0x89, 0xe0, 0x45, 0x32, 0xb3, 0x73, 0x17,
-	0xbf, 0x56, 0x83, 0xed, 0x73, 0xaa, 0xb5, 0x77, 0xfe, 0x04, 0x00, 0x00, 0xff, 0xff, 0x04, 0xf0,
-	0x52, 0x05, 0x78, 0x05, 0x00, 0x00,
+	// 612 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0xcd, 0x6e, 0xd3, 0x4c,
+	0x14, 0x8d, 0x3f, 0xb5, 0x9f, 0x60, 0x0a, 0x6d, 0x35, 0x2d, 0x10, 0xdc, 0xc6, 0x09, 0xae, 0x1a,
+	0xf1, 0x23, 0xcf, 0x28, 0x45, 0x6c, 0xd8, 0x35, 0x2d, 0x54, 0x2c, 0x40, 0x25, 0x65, 0xc5, 0x82,
+	0x30, 0x76, 0xa7, 0x66, 0x44, 0x3c, 0x63, 0x3c, 0x76, 0x20, 0x2c, 0x91, 0x58, 0xb0, 0xab, 0xc4,
+	0x8e, 0xe7, 0xe8, 0x43, 0x64, 0x59, 0xc1, 0x86, 0x55, 0x81, 0x84, 0x07, 0x41, 0x1e, 0xff, 0x10,
+	0x5b, 0x69, 0xcb, 0xce, 0x73, 0xcf, 0xb9, 0xf7, 0x9c, 0xeb, 0x7b, 0x40, 0x35, 0xf2, 0x28, 0xc5,
+	0x91, 0x2b, 0xfa, 0xb8, 0xdf, 0xc2, 0x6f, 0x22, 0x1a, 0x0c, 0x90, 0x1f, 0x88, 0x50, 0xc0, 0x4b,
+	0x31, 0x82, 0x62, 0x04, 0xf5, 0x5b, 0xba, 0xe1, 0x08, 0xe9, 0x09, 0x89, 0x6d, 0x22, 0x29, 0xee,
+	0xb7, 0x6c, 0x1a, 0x92, 0x16, 0x76, 0x04, 0xe3, 0x09, 0x5b, 0xbf, 0x9e, 0xe0, 0x5d, 0xf5, 0xc2,
+	0xc9, 0x23, 0x85, 0x96, 0x5d, 0xe1, 0x8a, 0xa4, 0x1e, 0x7f, 0xa5, 0xd5, 0x55, 0x57, 0x08, 0xb7,
+	0x47, 0x31, 0xf1, 0x19, 0x26, 0x9c, 0x8b, 0x90, 0x84, 0x4c, 0xf0, 0xac, 0xa7, 0x9e, 0xa2, 0xea,
+	0x65, 0x47, 0x07, 0x38, 0x64, 0x1e, 0x95, 0x21, 0xf1, 0xfc, 0x94, 0x70, 0xad, 0xe0, 0x5b, 0xb9,
+	0x54, 0x80, 0x09, 0xc1, 0xe2, 0xd3, 0x78, 0x8b, 0xc7, 0x8c, 0xef, 0x10, 0xb9, 0x1b, 0x30, 0x87,
+	0x9a, 0x36, 0xa8, 0x96, 0x6b, 0x1d, 0x2a, 0x7d, 0xc1, 0x25, 0x85, 0x0f, 0xc1, 0x65, 0x8f, 0xf1,
+	0xae, 0x4b, 0x62, 0xef, 0xcc, 0xa1, 0x55, 0xad, 0xa1, 0xdd, 0x9c, 0xdb, 0x58, 0x45, 0xe9, 0x0e,
+	0xf1, 0xc2, 0x28, 0x5d, 0x18, 0x6d, 0x53, 0x67, 0x4b, 0x30, 0xde, 0x9e, 0x19, 0x9e, 0xd4, 0x2b,
+	0x9d, 0x39, 0x6f, 0x42, 0xe3, 0x0a, 0x58, 0x52, 0x1a, 0x0f, 0x3c, 0x1a, 0xb8, 0x94, 0x3b, 0x83,
+	0x9d, 0x40, 0x44, 0xbe, 0xf9, 0x12, 0xac, 0x4c, 0x29, 0xe7, 0xea, 0x9b, 0x60, 0x81, 0x66, 0x48,
+	0xd7, 0x8d, 0x21, 0xa5, 0x7f, 0xb1, 0x5d, 0xfd, 0x7a, 0x64, 0x2d, 0xa7, 0x16, 0x36, 0xf7, 0xf7,
+	0x03, 0x2a, 0xe5, 0x5e, 0x18, 0x30, 0xee, 0x76, 0xe6, 0x69, 0x51, 0xe1, 0x2a, 0x58, 0x56, 0x0a,
+	0x8f, 0xf8, 0x41, 0x4f, 0xfd, 0xc3, 0x5d, 0x12, 0x10, 0x4f, 0x9a, 0x1c, 0xac, 0x4e, 0xab, 0xe7,
+	0xd2, 0x4f, 0xc0, 0x22, 0xcb, 0xa0, 0xae, 0xaf, 0xb0, 0x74, 0xf7, 0x1a, 0x9a, 0x3c, 0x3d, 0x2a,
+	0x0d, 0x48, 0x97, 0x5f, 0x60, 0x25, 0x3d, 0x3d, 0xfd, 0xc9, 0x39, 0x7d, 0x6b, 0xe0, 0xf4, 0xe8,
+	0x5e, 0x48, 0x82, 0xd0, 0x7c, 0x01, 0x1a, 0xa7, 0x61, 0xb9, 0x9f, 0xfb, 0x60, 0x56, 0xc6, 0x85,
+	0xd4, 0x84, 0x8e, 0x92, 0x08, 0xa0, 0x2c, 0x02, 0xe8, 0x59, 0x16, 0x81, 0xf6, 0x85, 0xe1, 0x49,
+	0x5d, 0x3b, 0xfc, 0x51, 0xd7, 0x3a, 0x49, 0xcb, 0xc6, 0xd1, 0x0c, 0x98, 0x55, 0x02, 0xf0, 0x3d,
+	0x98, 0x9b, 0xb8, 0x32, 0x34, 0x8a, 0xab, 0x94, 0x53, 0xa0, 0x37, 0xcf, 0xc6, 0x33, 0x73, 0xe6,
+	0xda, 0x87, 0x6f, 0xbf, 0x3f, 0xff, 0x57, 0x83, 0x2b, 0xb8, 0x90, 0x3b, 0x8f, 0x71, 0xcb, 0x25,
+	0xd2, 0x52, 0xc9, 0x81, 0x1f, 0x35, 0x30, 0x5f, 0xbc, 0x33, 0xbc, 0x31, 0x65, 0x7e, 0x91, 0xa2,
+	0xdf, 0x3a, 0x97, 0x92, 0xbb, 0x58, 0x57, 0x2e, 0xea, 0xb0, 0x56, 0x74, 0x91, 0x07, 0xc2, 0x52,
+	0x09, 0x82, 0x9f, 0x34, 0xb0, 0x50, 0x3a, 0x1a, 0x34, 0xa7, 0xa8, 0x94, 0x38, 0xfa, 0xed, 0xf3,
+	0x39, 0xb9, 0x95, 0xa6, 0xb2, 0xd2, 0x80, 0x46, 0xd1, 0x4a, 0x1e, 0x0a, 0x2b, 0x49, 0x14, 0xfc,
+	0xa2, 0x81, 0xa5, 0x29, 0x57, 0x87, 0xcd, 0xb3, 0xb4, 0xfe, 0xf2, 0x74, 0xf4, 0x6f, 0xbc, 0xdc,
+	0xd7, 0x1d, 0xe5, 0x6b, 0x1d, 0xae, 0x9d, 0xe6, 0xcb, 0x89, 0x7b, 0x2c, 0x15, 0x9b, 0xf6, 0xf6,
+	0xf0, 0x97, 0x51, 0x19, 0x8e, 0x0c, 0xed, 0x78, 0x64, 0x68, 0x3f, 0x47, 0x86, 0x76, 0x38, 0x36,
+	0x2a, 0xc7, 0x63, 0xa3, 0xf2, 0x7d, 0x6c, 0x54, 0x9e, 0x37, 0x5d, 0x16, 0xbe, 0x8a, 0x6c, 0xe4,
+	0x08, 0x4f, 0x0d, 0xb3, 0x38, 0x0d, 0xdf, 0x8a, 0xe0, 0x75, 0x32, 0xb9, 0x7f, 0x0f, 0xbf, 0x53,
+	0xe3, 0xed, 0xff, 0x55, 0x42, 0xef, 0xfe, 0x09, 0x00, 0x00, 0xff, 0xff, 0x41, 0xbf, 0x24, 0x18,
+	0x4b, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -409,8 +409,8 @@ type QueryClient interface {
 	EmergencyGroup(ctx context.Context, in *QueryEmergencyGroup, opts ...grpc.CallOption) (*QueryEmergencyGroupResponse, error)
 	// InflationParams returns params of inflation reduction rates
 	InflationParams(ctx context.Context, in *QueryInflationParams, opts ...grpc.CallOption) (*QueryInflationParamsResponse, error)
-	// InflationCycleStartTime returns inflation cycle start time
-	InflationCycleStartTime(ctx context.Context, in *QueryInflationCycleStartTime, opts ...grpc.CallOption) (*QueryInflationCycleStartTimeResponse, error)
+	// InflationCycleStart returns inflation cycle start time
+	InflationCycleStart(ctx context.Context, in *QueryInflationCycleStart, opts ...grpc.CallOption) (*QueryInflationCycleStartResponse, error)
 }
 
 type queryClient struct {
@@ -448,9 +448,9 @@ func (c *queryClient) InflationParams(ctx context.Context, in *QueryInflationPar
 	return out, nil
 }
 
-func (c *queryClient) InflationCycleStartTime(ctx context.Context, in *QueryInflationCycleStartTime, opts ...grpc.CallOption) (*QueryInflationCycleStartTimeResponse, error) {
-	out := new(QueryInflationCycleStartTimeResponse)
-	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Query/InflationCycleStartTime", in, out, opts...)
+func (c *queryClient) InflationCycleStart(ctx context.Context, in *QueryInflationCycleStart, opts ...grpc.CallOption) (*QueryInflationCycleStartResponse, error) {
+	out := new(QueryInflationCycleStartResponse)
+	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Query/InflationCycleStart", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -465,8 +465,8 @@ type QueryServer interface {
 	EmergencyGroup(context.Context, *QueryEmergencyGroup) (*QueryEmergencyGroupResponse, error)
 	// InflationParams returns params of inflation reduction rates
 	InflationParams(context.Context, *QueryInflationParams) (*QueryInflationParamsResponse, error)
-	// InflationCycleStartTime returns inflation cycle start time
-	InflationCycleStartTime(context.Context, *QueryInflationCycleStartTime) (*QueryInflationCycleStartTimeResponse, error)
+	// InflationCycleStart returns inflation cycle start time
+	InflationCycleStart(context.Context, *QueryInflationCycleStart) (*QueryInflationCycleStartResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -482,8 +482,8 @@ func (*UnimplementedQueryServer) EmergencyGroup(ctx context.Context, req *QueryE
 func (*UnimplementedQueryServer) InflationParams(ctx context.Context, req *QueryInflationParams) (*QueryInflationParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InflationParams not implemented")
 }
-func (*UnimplementedQueryServer) InflationCycleStartTime(ctx context.Context, req *QueryInflationCycleStartTime) (*QueryInflationCycleStartTimeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method InflationCycleStartTime not implemented")
+func (*UnimplementedQueryServer) InflationCycleStart(ctx context.Context, req *QueryInflationCycleStart) (*QueryInflationCycleStartResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InflationCycleStart not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -544,20 +544,20 @@ func _Query_InflationParams_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_InflationCycleStartTime_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryInflationCycleStartTime)
+func _Query_InflationCycleStart_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryInflationCycleStart)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).InflationCycleStartTime(ctx, in)
+		return srv.(QueryServer).InflationCycleStart(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.ugov.v1.Query/InflationCycleStartTime",
+		FullMethod: "/umee.ugov.v1.Query/InflationCycleStart",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).InflationCycleStartTime(ctx, req.(*QueryInflationCycleStartTime))
+		return srv.(QueryServer).InflationCycleStart(ctx, req.(*QueryInflationCycleStart))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -579,8 +579,8 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_InflationParams_Handler,
 		},
 		{
-			MethodName: "InflationCycleStartTime",
-			Handler:    _Query_InflationCycleStartTime_Handler,
+			MethodName: "InflationCycleStart",
+			Handler:    _Query_InflationCycleStart_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -752,7 +752,7 @@ func (m *QueryInflationParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryInflationCycleStartTime) Marshal() (dAtA []byte, err error) {
+func (m *QueryInflationCycleStart) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -762,12 +762,12 @@ func (m *QueryInflationCycleStartTime) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryInflationCycleStartTime) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryInflationCycleStart) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryInflationCycleStartTime) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryInflationCycleStart) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -775,7 +775,7 @@ func (m *QueryInflationCycleStartTime) MarshalToSizedBuffer(dAtA []byte) (int, e
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryInflationCycleStartTimeResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryInflationCycleStartResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -785,18 +785,18 @@ func (m *QueryInflationCycleStartTimeResponse) Marshal() (dAtA []byte, err error
 	return dAtA[:n], nil
 }
 
-func (m *QueryInflationCycleStartTimeResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryInflationCycleStartResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryInflationCycleStartTimeResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryInflationCycleStartResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.InflationCycleStart != nil {
-		n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.InflationCycleStart, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.InflationCycleStart):])
+	if m.Start != nil {
+		n3, err3 := github_com_gogo_protobuf_types.StdTimeMarshalTo(*m.Start, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(*m.Start):])
 		if err3 != nil {
 			return 0, err3
 		}
@@ -881,7 +881,7 @@ func (m *QueryInflationParamsResponse) Size() (n int) {
 	return n
 }
 
-func (m *QueryInflationCycleStartTime) Size() (n int) {
+func (m *QueryInflationCycleStart) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -890,14 +890,14 @@ func (m *QueryInflationCycleStartTime) Size() (n int) {
 	return n
 }
 
-func (m *QueryInflationCycleStartTimeResponse) Size() (n int) {
+func (m *QueryInflationCycleStartResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.InflationCycleStart != nil {
-		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.InflationCycleStart)
+	if m.Start != nil {
+		l = github_com_gogo_protobuf_types.SizeOfStdTime(*m.Start)
 		n += 1 + l + sovQuery(uint64(l))
 	}
 	return n
@@ -1307,7 +1307,7 @@ func (m *QueryInflationParamsResponse) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryInflationCycleStartTime) Unmarshal(dAtA []byte) error {
+func (m *QueryInflationCycleStart) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1330,10 +1330,10 @@ func (m *QueryInflationCycleStartTime) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryInflationCycleStartTime: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryInflationCycleStart: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryInflationCycleStartTime: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryInflationCycleStart: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -1357,7 +1357,7 @@ func (m *QueryInflationCycleStartTime) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryInflationCycleStartTimeResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryInflationCycleStartResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1380,15 +1380,15 @@ func (m *QueryInflationCycleStartTimeResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryInflationCycleStartTimeResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryInflationCycleStartResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryInflationCycleStartTimeResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryInflationCycleStartResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field InflationCycleStart", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Start", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1415,10 +1415,10 @@ func (m *QueryInflationCycleStartTimeResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.InflationCycleStart == nil {
-				m.InflationCycleStart = new(time.Time)
+			if m.Start == nil {
+				m.Start = new(time.Time)
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.InflationCycleStart, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(m.Start, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -1,4 +1,4 @@
-package mint_test
+package umint_test
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	umeeapp "github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/mint"
+	"github.com/umee-network/umee/v5/x/umint"
 )
 
 func TestBeginBlock(t *testing.T) {
@@ -34,7 +34,7 @@ func TestBeginBlock(t *testing.T) {
 	assert.NilError(t, err)
 
 	// Override the mint module BeginBlock
-	mint.BeginBlock(ctx, uk, app.MintKeeper)
+	umint.BeginBlock(ctx, uk, app.MintKeeper)
 
 	// inflation min and max rate should change by reduce rate
 	newMintParams := app.MintKeeper.GetParams(ctx)

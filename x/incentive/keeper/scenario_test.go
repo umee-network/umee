@@ -325,7 +325,7 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(k.t, aliceReward, rewards, "alice claimed rewards at time 175")
 
 	// fully unbond user at 75%, making her ineligible future rewards unless she bonds again
-	k.mustUnbond(alice, coin.New(uUmee, 100_000000))
+	k.mustBeginUnbond(alice, coin.New(uUmee, 50_000000))
 
 	// complete the program
 	k.advanceTimeTo(programStart + 110) // a bit past 100% duration

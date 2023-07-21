@@ -1,0 +1,88 @@
+syntax = "proto3";
+package umeenetwork.umee.metoken.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+import "umee/metoken/v1/metoken.proto";
+
+option go_package                      = "github.com/umee-network/umee/v5/x/metoken";
+option (gogoproto.goproto_getters_all) = false;
+
+// Msg defines the x/metoken module's Msg service.
+service Msg {
+  // Swap defines a method for swapping an accepted asset for Index's meToken.
+  rpc Swap(MsgSwap) returns (MsgSwapResponse);
+
+  // Redeem defines a method for redeeming Index's meToken for an accepted asset.
+  rpc Redeem(MsgRedeem) returns (MsgRedeemResponse);
+
+  // GovSetParams is used by governance proposals to update parameters.
+  rpc GovSetParams(MsgGovSetParams) returns (MsgGovSetParamsResponse);
+
+  // GovUpdateRegistry adds new index to the index registry or
+  // updates existing index with new settings.
+  rpc GovUpdateRegistry(MsgGovUpdateRegistry) returns (MsgGovUpdateRegistryResponse);
+}
+
+// MsgSwap represents a user's request to swap assets for Index's meToken.
+message MsgSwap {
+  // User is the account address swapping assets and the signer of the message.
+  string                   user          = 1;
+  cosmos.base.v1beta1.Coin asset         = 2 [(gogoproto.nullable) = false];
+  string                   metoken_denom = 3;
+}
+
+// MsgSwapResponse defines the Msg/Swap response type.
+message MsgSwapResponse {
+  // Fee is the amount of accepted asset charged to the user as the fee for the transaction.
+  cosmos.base.v1beta1.Coin fee = 1 [(gogoproto.nullable) = false];
+  // Returned is the amount of Index's meToken minted and returned to the user.
+  cosmos.base.v1beta1.Coin returned = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgRedeem represents a user's request to redeem Index's meTokens for one of the accepted assets.
+message MsgRedeem {
+  // User is the account address redeeming assets and the signer of the message.
+  string                   user        = 1;
+  cosmos.base.v1beta1.Coin metoken     = 2 [(gogoproto.nullable) = false];
+  string                   asset_denom = 3;
+}
+
+// MsgRedeemResponse defines the Msg/Redeem response type.
+message MsgRedeemResponse {
+  // Returned is the amount of accepted asset returned to the user.
+  cosmos.base.v1beta1.Coin returned = 1 [(gogoproto.nullable) = false];
+  // Fee is the amount of accepted asset charged to the user as the fee for the transaction.
+  cosmos.base.v1beta1.Coin fee = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgGovSetParams defines the Msg/GovSetParams request type.
+message MsgGovSetParams {
+  option (gogoproto.equal)      = true;
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority must be the address of the governance account.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  Params params    = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgGovSetParamsResponse defines the Msg/GovSetParams response type.
+message MsgGovSetParamsResponse {}
+
+// MsgGovUpdateRegistry defines the Msg/GovUpdateRegistry request type.
+message MsgGovUpdateRegistry {
+  option (gogoproto.equal)      = true;
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority is the address of the governance account.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // add_index defines new index settings.
+  repeated Index add_index = 2 [(gogoproto.nullable) = false];
+  // update_index defines the new settings for existing index.
+  repeated Index update_index = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
+message MsgGovUpdateRegistryResponse {}

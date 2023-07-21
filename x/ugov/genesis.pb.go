@@ -36,7 +36,7 @@ type GenesisState struct {
 	EmergencyGroup string `protobuf:"bytes,2,opt,name=emergency_group,json=emergencyGroup,proto3" json:"emergency_group,omitempty"`
 	// InflationParams is params for inflation rate changes
 	InflationParams InflationParams `protobuf:"bytes,3,opt,name=inflation_params,json=inflationParams,proto3" json:"inflation_params"`
-	// Time when the inflation cycle started
+	// Time when the last inflation cycle started
 	InflationCycleStart time.Time `protobuf:"bytes,4,opt,name=inflation_cycle_start,json=inflationCycleStart,proto3,stdtime" json:"inflation_cycle_start"`
 }
 

@@ -46,10 +46,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Bug Fixes
+
+- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgBeginUnbonding counting existing unbondings against max unbond twice.
+- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgLeverageLiquidate CLI not actually allowing wildcard denoms.
+
 ### Features
 
 - [2129](https://github.com/umee-network/umee/pull/2129) Emergency Group x/ugov proto.
 - [2146](https://github.com/umee-network/umee/pull/2146) Add store GetTimeMs and SetTimeMs.
+- [2157](https://github.com/umee-network/umee/pull/2157) Add `x/metoken` module.
+- [2145](https://github.com/umee-network/umee/pull/2145) Add New `Inflation Parms` to x/ugov proto and added `inflation rate` change logic to umint
 
 ### Improvements
 
