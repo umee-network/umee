@@ -4,6 +4,7 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v5/util"
 	"github.com/umee-network/umee/v5/util/store"
@@ -116,12 +117,7 @@ func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
 func (k AvgKeeper) setAvgCounters(denom string, acs []types.AvgCounter) {
 	for i := range acs {
 		key := types.KeyAvgCounter(denom, byte(i))
-		bz, err := acs[i].Marshal()
-		if err != nil {
-			panic(err)
-		}
-		// bz := k.cdc.MustMarshal(&acs[i])
-		k.store.Set(key, bz)
+		util.Panic(store.SetValue(k.store, key, &acs[i], "avgCounter"))
 	}
 }
 
@@ -143,10 +139,22 @@ func (k AvgKeeper) GetCurrentAvg(denom string) (sdk.Dec, error) {
 
 func (k AvgKeeper) getCounter(denom string, idx byte) (types.AvgCounter, error) {
 	key := types.KeyAvgCounter(denom, idx)
-	bz := k.store.Get(key)
-	if len(bz) == 0 {
-		return types.AvgCounter{}, types.ErrNoLatestAvgPrice
+	av := store.GetValue[*types.AvgCounter](k.store, key, "avg counter")
+	if av == nil {
+		return types.AvgCounter{}, sdkerrors.ErrNotFound.Wrap("avg counter")
 	}
-	var av types.AvgCounter
-	return av, av.Unmarshal(bz)
+	return *av, nil
+}
+
+// SetHistoricAvgCounterParams sets avg period and avg shift time duration
+func (k Keeper) SetHistoricAvgCounterParams(ctx sdk.Context, acp types.AvgCounterParams) error {
+	kvs := ctx.KVStore(k.storeKey)
+	return store.SetValue(kvs, types.KeyHistoricAvgCounterParams, &acp, "historic avg counter params")
+}
+
+// GetHistoricAvgCounterParams gets the avg period and avg shift time duration from store
+func (k Keeper) GetHistoricAvgCounterParams(ctx sdk.Context) types.AvgCounterParams {
+	kvs := ctx.KVStore(k.storeKey)
+	return *store.GetValue[*types.AvgCounterParams](kvs, types.KeyHistoricAvgCounterParams,
+		"historic avg counter params")
 }
