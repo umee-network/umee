@@ -14,12 +14,12 @@ var (
 )
 
 // NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance
-func NewMsgGovUpdateRegistry(authority, title, description string, updateTokens, addTokens []Token) *MsgGovUpdateRegistry {
+func NewMsgGovUpdateRegistry(authority, title, description string, update, add []Token) *MsgGovUpdateRegistry {
 	return &MsgGovUpdateRegistry{
 		Title:        title,
 		Description:  description,
-		UpdateTokens: updateTokens,
-		AddTokens:    addTokens,
+		UpdateTokens: update,
+		AddTokens:    add,
 		Authority:    authority,
 	}
 }
