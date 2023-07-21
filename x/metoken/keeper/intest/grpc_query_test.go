@@ -280,3 +280,68 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 		assert.Check(t, totalFee.Equal(resp.Asset.Amount))
 	}
 }
+
+func TestQuerier_IndexPrice(t *testing.T) {
+	stableIndex := mocks.StableIndex(mocks.MeUSDDenom)
+	nonStableIndex := mocks.NonStableIndex(mocks.MeNonStableDenom)
+
+	stableBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
+	nonStableBalance := mocks.EmptyNonStableIndexBalances(mocks.MeNonStableDenom)
+
+	s := initKeeperTestSuite(
+		t,
+		[]metoken.Index{stableIndex, nonStableIndex},
+		[]metoken.IndexBalances{stableBalance, nonStableBalance},
+	)
+	querier, ctx := s.queryClient, s.ctx
+
+	tcs := []struct {
+		name          string
+		denom         string
+		expPriceCount int
+		expErr        string
+	}{
+		{
+			"invalid meToken denom",
+			"invalidDenom",
+			0,
+			"should have the following format: me/<TokenName>",
+		},
+		{
+			"index not found",
+			"me/NotFound",
+			0,
+			"not found",
+		},
+		{
+			"get meUSD price",
+			mocks.MeUSDDenom,
+			1,
+			"",
+		},
+		{
+			"get all prices",
+			"",
+			2,
+			"",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(
+			tc.name, func(t *testing.T) {
+				resp, err := querier.IndexPrice(
+					ctx, &metoken.QueryIndexPrice{
+						MetokenDenom: tc.denom,
+					},
+				)
+				if len(tc.expErr) == 0 {
+					assert.NilError(t, err)
+					assert.Check(t, tc.expPriceCount == len(resp.Prices))
+				} else {
+					assert.ErrorContains(t, err, tc.expErr)
+				}
+			},
+		)
+	}
+}

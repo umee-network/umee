@@ -15,12 +15,6 @@ type IndexPrices struct {
 	prices map[string]Price
 }
 
-// Price contains usd Price from x/oracle and Exponent from x/leverage
-type Price struct {
-	Price    sdk.Dec
-	Exponent uint32
-}
-
 // NewIndexPrices creates an instance of IndexPrices.
 func NewIndexPrices() IndexPrices {
 	return IndexPrices{prices: make(map[string]Price)}
@@ -39,6 +33,7 @@ func (ip IndexPrices) Price(denom string) (Price, error) {
 // SetPrice to the IndexPrices.
 func (ip IndexPrices) SetPrice(denom string, price sdk.Dec, exponent uint32) {
 	ip.prices[denom] = Price{
+		Denom:    denom,
 		Price:    price,
 		Exponent: exponent,
 	}

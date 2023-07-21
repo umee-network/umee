@@ -3,6 +3,8 @@ package keeper
 import (
 	"context"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v5/x/metoken"
 )
@@ -134,6 +136,54 @@ func (q Querier) IndexBalances(
 
 	return &metoken.QueryIndexBalancesResponse{
 		IndexBalances: balances,
+	}, nil
+}
+
+// IndexPrice returns Index price from the x/metoken module. If index denom is not specified,
+// returns prices for all the registered indexes.
+func (q Querier) IndexPrice(
+	goCtx context.Context,
+	req *metoken.QueryIndexPrice,
+) (*metoken.QueryIndexPriceResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	k := q.Keeper(&ctx)
+
+	var indexes []metoken.Index
+	if len(req.MetokenDenom) > 0 {
+		if !metoken.IsMeToken(req.MetokenDenom) {
+			return nil, sdkerrors.ErrInvalidRequest.Wrapf(
+				"meToken denom %s should have the following format: me/<TokenName>",
+				req.MetokenDenom,
+			)
+		}
+
+		index, err := k.RegisteredIndex(req.MetokenDenom)
+		if err != nil {
+			return nil, err
+		}
+
+		indexes = []metoken.Index{index}
+	} else {
+		indexes = k.GetAllRegisteredIndexes()
+	}
+
+	var prices []metoken.Price
+	for _, index := range indexes {
+		ip, err := k.Prices(index)
+		if err != nil {
+			return nil, err
+		}
+
+		price, err := ip.Price(index.Denom)
+		if err != nil {
+			return nil, err
+		}
+
+		prices = append(prices, price)
+	}
+
+	return &metoken.QueryIndexPriceResponse{
+		Prices: prices,
 	}, nil
 }
 
