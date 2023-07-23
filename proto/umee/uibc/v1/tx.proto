@@ -29,9 +29,11 @@ message MsgGovUpdateQuota {
   option (cosmos.msg.v1.signer)       = "authority";
 
   // authority is the address of the governance account.
-  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string title       = 2;
-  string description = 3;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Deprecated: use proposal metadata instead.
+  string title = 2 [deprecated = true];
+  // Deprecated: use proposal metadata instead.
+  string description = 3 [deprecated = true];
   // total quota defines the total outflow of ibc-transfer in USD
   string total = 4 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
@@ -62,9 +64,11 @@ message MsgGovSetIBCStatus {
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
   // authority is the address of the governance account.
-  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string title       = 2;
-  string description = 3;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Deprecated: use proposal metadata instead.
+  string title = 2 [deprecated = true];
+  // Deprecated: use proposal metadata instead.
+  string description = 3 [deprecated = true];
   // ibc_status defines status for ibc transfers
   IBCTransferStatus ibc_status = 4;
 }
