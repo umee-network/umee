@@ -8,6 +8,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/incentive"
 )
 
@@ -49,4 +50,12 @@ func (k Keeper) KVStore(ctx sdk.Context) sdk.KVStore {
 
 func (k Keeper) prefixStore(ctx sdk.Context, prefix []byte) sdk.KVStore {
 	return prefixstore.NewStore(ctx.KVStore(k.storeKey), prefix)
+}
+
+func (k Keeper) setObject(ctx *sdk.Context, key []byte, object codec.ProtoMarshaler, errField string) error {
+	return store.SetValueCdc(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
+}
+
+func (k Keeper) getObject(ctx *sdk.Context, key []byte, object codec.ProtoMarshaler, errField string) bool {
+	return store.GetValueCdc(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
 }

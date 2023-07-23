@@ -45,5 +45,5 @@ func (q Querier) InflationCycleStart(ctx context.Context, _ *ugov.QueryInflation
 	if err != nil {
 		return nil, err
 	}
-	return &ugov.QueryInflationCycleStartResponse{Start: icst}, nil
+	return &ugov.QueryInflationCycleStartResponse{Start: &icst}, nil
 }

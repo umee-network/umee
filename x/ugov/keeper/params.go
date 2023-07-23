@@ -43,9 +43,10 @@ func (k Keeper) InflationParams() ugov.InflationParams {
 }
 
 func (k Keeper) SetInflationCycleStart(startTime time.Time) error {
-	return store.SetBinValue(k.store, KeyInflationCycleStart, &startTime, "inflation_cycle_start")
+	store.SetTimeMs(k.store, KeyInflationCycleStart, startTime)
+	return nil
 }
 
-func (k Keeper) GetInflationCycleStart() (*time.Time, error) {
-	return store.GetBinValue[*time.Time](k.store, KeyInflationCycleStart, "inflation_cycle_start")
+func (k Keeper) GetInflationCycleStart() (time.Time, error) {
+	return store.GetTimeMs(k.store, KeyInflationCycleStart)
 }

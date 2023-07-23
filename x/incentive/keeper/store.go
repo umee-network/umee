@@ -9,22 +9,20 @@ import (
 )
 
 func (k Keeper) GetParams(ctx sdk.Context) incentive.Params {
-	params := incentive.Params{}
-	ok := store.GetObject(k.KVStore(ctx), k.cdc, keyPrefixParams, &params, "params")
-	if !ok {
+	params := store.GetValue[*incentive.Params](k.KVStore(ctx), keyPrefixParams, "params")
+	if params == nil {
 		// on missing module parameters, return defaults rather than panicking or returning zero values
 		return incentive.DefaultParams()
 	}
-	return params
+	return *params
 }
 
 // setParams validates and sets the incentive module parameters
 func (k Keeper) setParams(ctx sdk.Context, params incentive.Params) error {
-	kvs := k.KVStore(ctx)
 	if err := params.Validate(); err != nil {
 		return err
 	}
-	return store.SetObject(kvs, k.cdc, keyPrefixParams, &params, "params")
+	return store.SetValue(k.KVStore(ctx), keyPrefixParams, &params, "params")
 }
 
 // incentiveProgramStatus gets an incentive program status by ID. If the program is not found,
@@ -40,10 +38,9 @@ func (k Keeper) incentiveProgramStatus(ctx sdk.Context, id uint32) (incentive.Pr
 		incentive.ProgramStatusCompleted,
 	}
 
-	kvStore := k.KVStore(ctx)
-
 	var found int
 	var status incentive.ProgramStatus
+	kvStore := k.KVStore(ctx)
 
 	// Looks for an incentive program in upcoming, ongoing, then completed program lists.
 	for _, s := range statuses {
@@ -86,10 +83,7 @@ func (k Keeper) getIncentiveProgram(ctx sdk.Context, id uint32) (
 		return program, incentive.ProgramStatusNotExist, sdkerrors.ErrNotFound.Wrapf("program id %d", id)
 	}
 
-	kvStore := k.KVStore(ctx)
-
-	// Looks for an incentive program with the specified ID and status
-	if !store.GetObject(kvStore, k.cdc, keyIncentiveProgram(id, status), &program, "incentive program") {
+	if !k.getObject(&ctx, keyIncentiveProgram(id, status), &program, "incentive program") {
 		return program, incentive.ProgramStatusNotExist, sdkerrors.ErrNotFound.Wrapf("program id %d", id)
 	}
 	// Enforces that program ID matches where it was stored
@@ -116,9 +110,8 @@ func (k Keeper) setIncentiveProgram(
 		return sdkerrors.ErrInvalidRequest.Wrapf("program %d already exists with status %d", program.ID, s)
 	}
 
-	kvStore := k.KVStore(ctx)
 	key := keyIncentiveProgram(program.ID, status)
-	return store.SetObject(kvStore, k.cdc, key, &program, "incentive program")
+	return k.setObject(&ctx, key, &program, "incentive program")
 }
 
 // deleteIncentiveProgram deletes an incentive program. Returns an error if the program
@@ -132,9 +125,7 @@ func (k Keeper) deleteIncentiveProgram(ctx sdk.Context, id uint32) error {
 		return sdkerrors.ErrNotFound.Wrapf("program %d", id)
 	}
 
-	kvStore := k.KVStore(ctx)
-	key := keyIncentiveProgram(id, status)
-	kvStore.Delete(key)
+	k.KVStore(ctx).Delete(keyIncentiveProgram(id, status))
 	return nil
 }
 
@@ -222,11 +213,8 @@ func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string) sdk.Coin {
 // getUnbondings gets all unbondings currently associated with an account and bonded denom.
 func (k Keeper) getUnbondings(ctx sdk.Context, addr sdk.AccAddress, denom string) []incentive.Unbonding {
 	key := keyUnbondings(addr, denom)
-	kvStore := k.KVStore(ctx)
-
 	accUnbondings := incentive.AccountUnbondings{}
-	ok := store.GetObject(kvStore, k.cdc, key, &accUnbondings, "account unbondings")
-	if !ok {
+	if !k.getObject(&ctx, key, &accUnbondings, "account unbondings") {
 		return []incentive.Unbonding{}
 	}
 	return accUnbondings.Unbondings
@@ -282,7 +270,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 		// clear store on no unbondings remaining
 		kvStore.Delete(key)
 	}
-	return store.SetObject(kvStore, k.cdc, key, &unbondings, "account unbondings")
+	return store.SetValueCdc(kvStore, k.cdc, key, &unbondings, "account unbondings")
 }
 
 // getRewardAccumulator retrieves the reward accumulator of all reward tokens for a single bonded uToken -
@@ -290,8 +278,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 func (k Keeper) getRewardAccumulator(ctx sdk.Context, bondDenom string) incentive.RewardAccumulator {
 	key := keyRewardAccumulator(bondDenom)
 	accumulator := incentive.RewardAccumulator{}
-	ok := store.GetObject(k.KVStore(ctx), k.cdc, key, &accumulator, "reward accumulator")
-	if ok {
+	if k.getObject(&ctx, key, &accumulator, "reward accumulator") {
 		return accumulator
 	}
 	return incentive.NewRewardAccumulator(bondDenom, 0, sdk.NewDecCoins())
@@ -300,7 +287,7 @@ func (k Keeper) getRewardAccumulator(ctx sdk.Context, bondDenom string) incentiv
 // setRewardAccumulator sets the full reward accumulator for a single bonded uToken.
 func (k Keeper) setRewardAccumulator(ctx sdk.Context, accumulator incentive.RewardAccumulator) error {
 	key := keyRewardAccumulator(accumulator.UToken)
-	return store.SetObject(k.KVStore(ctx), k.cdc, key, &accumulator, "reward accumulator")
+	return k.setObject(&ctx, key, &accumulator, "reward accumulator")
 }
 
 // GetRewardTracker retrieves the reward tracker for a single bonded uToken on one account - this is the value of
@@ -309,8 +296,7 @@ func (k Keeper) setRewardAccumulator(ctx sdk.Context, accumulator incentive.Rewa
 func (k Keeper) getRewardTracker(ctx sdk.Context, addr sdk.AccAddress, bondDenom string) incentive.RewardTracker {
 	key := keyRewardTracker(addr, bondDenom)
 	tracker := incentive.RewardTracker{}
-	ok := store.GetObject(k.KVStore(ctx), k.cdc, key, &tracker, "reward tracker")
-	if ok {
+	if k.getObject(&ctx, key, &tracker, "reward tracker") {
 		return tracker
 	}
 	return incentive.NewRewardTracker(addr.String(), bondDenom, sdk.NewDecCoins())
@@ -324,7 +310,7 @@ func (k Keeper) setRewardTracker(ctx sdk.Context, tracker incentive.RewardTracke
 		k.clearRewardTracker(ctx, sdk.MustAccAddressFromBech32(tracker.Account), tracker.UToken)
 		return nil
 	}
-	return store.SetObject(k.KVStore(ctx), k.cdc, key, &tracker, "reward tracker")
+	return k.setObject(&ctx, key, &tracker, "reward tracker")
 }
 
 // clearRewardTracker clears a reward tracker matching a specific account + bonded uToken from the store

@@ -11,7 +11,7 @@ func (k Keeper) ExportGenesis() *ugov.GenesisState {
 	return &ugov.GenesisState{
 		MinGasPrice:         k.MinGasPrice(),
 		InflationParams:     k.InflationParams(),
-		InflationCycleStart: *lcst,
+		InflationCycleStart: lcst,
 	}
 }
 

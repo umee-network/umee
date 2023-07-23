@@ -70,5 +70,5 @@ func TestInflationCycleStart(t *testing.T) {
 	require.NoError(err)
 	ricst, err := k.GetInflationCycleStart()
 	require.NoError(err)
-	require.Equal(ricst.Equal(icst), true, "inflation cycle start time should be same")
+	require.Equal(ricst.UnixMilli(), icst.UnixMilli(), "inflation cycle start time should be same")
 }

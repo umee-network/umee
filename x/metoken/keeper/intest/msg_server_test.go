@@ -261,7 +261,6 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 			)
 		}
 	}
-
 }
 
 func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
