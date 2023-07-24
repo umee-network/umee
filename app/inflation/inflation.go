@@ -6,11 +6,11 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	"github.com/umee-network/umee/v5/util"
-	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
+	"github.com/umee-network/umee/v5/util/bpmath"
 )
 
 type Calculator struct {
-	UgovKeeperB ugovkeeper.Builder
+	UgovKeeperB UGovBKeeperI
 	MintKeeper  MintKeeper
 }
 
@@ -35,7 +35,7 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 	if ctx.BlockTime().After(icst.Add(inflationParams.InflationCycle)) {
 		// inflation cycle is completed , so we need to update the inflation max and min rate
 		// inflationReductionRate = 25 / 100 = 0.25
-		inflationReductionRate := inflationParams.InflationReductionRate.ToDec().Quo(sdk.NewDec(100))
+		inflationReductionRate := inflationParams.InflationReductionRate.ToDec().Quo(bpmath.FixedBP(100).ToDec())
 		// InflationMax = PrevInflationMax * ( 1 - 0.25)
 		mintParams.InflationMax = mintParams.InflationMax.Mul(sdk.OneDec().Sub(inflationReductionRate))
 		// InflationMin = PrevInflationMin * ( 1 - 0.25)
@@ -53,25 +53,27 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		)
 	}
 
-	minter.Inflation = minttypes.DefaultInflationCalculationFn(ctx, minter, mintParams, bondedRatio)
-	return c.adjustInflation(totalSupply, inflationParams.MaxSupply.Amount, minter, mintParams)
+	minter.Inflation = minter.NextInflationRate(mintParams, bondedRatio)
+	return c.AdjustInflation(totalSupply, inflationParams.MaxSupply.Amount, minter, mintParams)
 }
 
-// adjustInflation check if newly minting coins will execeed the MaxSupply then it will adjust the inflation with
+// AdjustInflation check if newly minting coins will execeed the MaxSupply then it will adjust the inflation with
 // respect to MaxSupply
-func (c Calculator) adjustInflation(totalSupply, maxSupply math.Int, minter minttypes.Minter,
+func (c Calculator) AdjustInflation(totalSupply, maxSupply math.Int, minter minttypes.Minter,
 	params minttypes.Params) sdk.Dec {
 	minter.AnnualProvisions = minter.NextAnnualProvisions(params, totalSupply)
 	newSupply := minter.BlockProvision(params).Amount
 	newTotalSupply := totalSupply.Add(newSupply)
+
 	if newTotalSupply.GT(maxSupply) {
 		newTotalSupply = maxSupply.Sub(totalSupply)
-		newAnnualProvision := newTotalSupply.Mul(sdk.NewInt(int64(params.BlocksPerYear)))
+		annualProvision := newTotalSupply.Mul(sdk.NewInt(int64(params.BlocksPerYear)))
+		newAnnualProvision := sdk.NewDec(annualProvision.Int64())
 		// AnnualProvisions = Inflation * TotalSupply
 		// Mint Coins  = AnnualProvisions / BlocksPerYear
 		// so get the new Inflation
 		// Inflation = (New Mint Coins  * BlocksPerYear ) / TotalSupply
-		return sdk.NewDec(newAnnualProvision.Quo(totalSupply).Int64())
+		return newAnnualProvision.Quo(sdk.NewDec(totalSupply.Int64()))
 	}
 	return minter.Inflation
 }
