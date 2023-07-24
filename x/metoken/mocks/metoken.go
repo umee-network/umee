@@ -83,6 +83,17 @@ func EmptyUSDIndexBalances(denom string) metoken.IndexBalances {
 	)
 }
 
+func EmptyNonStableIndexBalances(denom string) metoken.IndexBalances {
+	return metoken.NewIndexBalances(
+		sdk.NewCoin(denom, sdkmath.ZeroInt()),
+		[]metoken.AssetBalance{
+			metoken.NewZeroAssetBalance(USDTBaseDenom),
+			metoken.NewZeroAssetBalance(WBTCBaseDenom),
+			metoken.NewZeroAssetBalance(ETHBaseDenom),
+		},
+	)
+}
+
 func ValidUSDIndexBalances(denom string) metoken.IndexBalances {
 	return metoken.NewIndexBalances(
 		sdk.NewCoin(denom, sdkmath.NewInt(4960_000000)),
