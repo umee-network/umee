@@ -289,7 +289,7 @@ var (
 
 	pattern_Query_Outflows_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "uibc", "v1", "outflows"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_AllOutflows_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "uibc", "v1", "all-outflows"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_AllOutflows_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"umee", "uibc", "v1", "all_outflows"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (
