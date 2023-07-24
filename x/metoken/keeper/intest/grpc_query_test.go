@@ -282,6 +282,9 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 }
 
 func TestQuerier_IndexPrice(t *testing.T) {
+	// Within these cases we are testing grpc functionality,
+	// Exact prices are tested in their unit tests:
+	// https://github.com/umee-network/umee/blob/main/x/metoken/keeper/price_test.go
 	stableIndex := mocks.StableIndex(mocks.MeUSDDenom)
 	nonStableIndex := mocks.NonStableIndex(mocks.MeNonStableDenom)
 

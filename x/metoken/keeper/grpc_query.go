@@ -3,9 +3,9 @@ package keeper
 import (
 	"context"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v5/x/metoken"
 )
 
