@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -30,57 +31,94 @@ func (s *E2ETestSuite) GaiaREST() string {
 	return fmt.Sprintf("http://%s", s.GaiaResource.GetHostPort("1317/tcp"))
 }
 
-func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin) {
+func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool) {
+	// ibctransfertypes.NewMsgTransfer()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	s.T().Logf("sending %s from %s to %s (%s)", token, srcChainID, dstChainID, recipient)
-	cmd := []string{
-		"hermes",
-		"tx",
-		"raw",
-		"ft-transfer",
-		dstChainID,
-		srcChainID,
-		"transfer",  // source chain port ID
-		"channel-0", // since only one connection/channel exists, assume 0
-		token.Amount.String(),
-		fmt.Sprintf("--denom=%s", token.Denom),
-		"--timeout-height-offset=1000",
+	// retry up to 5 times
+	for i := 0; i < 5; i++ {
+		s.T().Logf("sending %s from %s to %s (%s). Try %d", token, srcChainID, dstChainID, recipient, i+1)
+		cmd := []string{
+			"hermes",
+			"tx",
+			"raw",
+			"ft-transfer",
+			dstChainID,
+			srcChainID,
+			"transfer",  // source chain port ID
+			"channel-0", // since only one connection/channel exists, assume 0
+			token.Amount.String(),
+			fmt.Sprintf("--denom=%s", token.Denom),
+			"--timeout-height-offset=3000",
+		}
+
+		if len(recipient) != 0 {
+			cmd = append(cmd, fmt.Sprintf("--receiver=%s", recipient))
+		}
+
+		exec, err := s.DkrPool.Client.CreateExec(docker.CreateExecOptions{
+			Context:      ctx,
+			AttachStdout: true,
+			AttachStderr: true,
+			Container:    s.HermesResource.Container.ID,
+			Cmd:          cmd,
+		})
+		s.Require().NoError(err)
+
+		var (
+			outBuf bytes.Buffer
+			errBuf bytes.Buffer
+		)
+
+		err = s.DkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
+			Context:      ctx,
+			Detach:       false,
+			OutputStream: &outBuf,
+			ErrorStream:  &errBuf,
+		})
+
+		// retry if we got an error
+		if err != nil && i < 4 {
+			continue
+		}
+
+		s.Require().NoErrorf(
+			err,
+			"failed to send IBC tokens; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
+		)
+
+		// don't check for the tx hash if we expect this to fail due to quota
+		if strings.Contains(errBuf.String(), "quota transfer exceeded") {
+			s.Require().True(failDueToQuota)
+			return
+		}
+
+		re := regexp.MustCompile(`[0-9A-Fa-f]{64}`)
+		txHash := re.FindString(errBuf.String() + outBuf.String())
+
+		// retry if we didn't get a txHash
+		if len(txHash) == 0 && i < 4 {
+			continue
+		}
+
+		s.T().Log("successfully sent IBC tokens")
+		s.Require().NotEmptyf(txHash, "failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
+		s.T().Log("Waiting for Tx to be included in a block", txHash, srcChainID)
+		endpoint := s.UmeeREST()
+		if strings.Contains(srcChainID, "gaia") {
+			endpoint = s.GaiaREST()
+		}
+
+		s.Require().Eventually(func() bool {
+			err := s.QueryUmeeTx(endpoint, txHash)
+			if err != nil {
+				s.T().Log("Tx Query Error", err)
+			}
+			return err == nil
+		}, 5*time.Second, 200*time.Millisecond)
+		return
 	}
-
-	if len(recipient) != 0 {
-		cmd = append(cmd, fmt.Sprintf("--receiver=%s", recipient))
-	}
-
-	exec, err := s.DkrPool.Client.CreateExec(docker.CreateExecOptions{
-		Context:      ctx,
-		AttachStdout: true,
-		AttachStderr: true,
-		Container:    s.HermesResource.Container.ID,
-		Cmd:          cmd,
-	})
-	s.Require().NoError(err)
-
-	var (
-		outBuf bytes.Buffer
-		errBuf bytes.Buffer
-	)
-
-	err = s.DkrPool.Client.StartExec(exec.ID, docker.StartExecOptions{
-		Context:      ctx,
-		Detach:       false,
-		OutputStream: &outBuf,
-		ErrorStream:  &errBuf,
-	})
-
-	s.Require().NoErrorf(
-		err,
-		"failed to send IBC tokens; stdout: %s, stderr: %s", outBuf.String(), errBuf.String(),
-	)
-	s.T().Log("successfully sent IBC tokens")
-	s.T().Log("Waiting for 12 seconds to make sure trasaction is processed or include in the block")
-	time.Sleep(time.Second * 12)
 }
 
 // QueryREST make http query to grpc-web endpoint and tries to decode valPtr using proto-JSON

@@ -24,6 +24,7 @@ type (
 		Admin string `json:"admin"`
 	}
 )
+
 type ListMembers struct {
 	StartAfter string `json:"start_after,omitempty"`
 	Limit      uint64 `json:"limit,omitempty"`

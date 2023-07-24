@@ -31,6 +31,7 @@ import (
 
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+
 	"github.com/umee-network/umee/v5/app"
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/client"
@@ -82,6 +83,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	if !s.MinNetwork {
 		s.runPriceFeeder()
 		s.runGaiaNetwork()
+		time.Sleep(3 * time.Second) // wait for gaia to start
 		s.runIBCRelayer()
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
@@ -201,8 +203,8 @@ func (s *E2ETestSuite) initGenesis() {
 	var govGenState govtypesv1.GenesisState
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
-	votingPeroid := 5 * time.Second
-	govGenState.VotingParams.VotingPeriod = &votingPeroid
+	votingPeriod := 5 * time.Second
+	govGenState.VotingParams.VotingPeriod = &votingPeriod
 	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
 	bz, err = s.cdc.MarshalJSON(&govGenState)
@@ -298,6 +300,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		s.Require().NoError(vpr.ReadInConfig())
 
 		valConfig := tmconfig.DefaultConfig()
+		valConfig.Consensus.SkipTimeoutCommit = true
 		s.Require().NoError(vpr.Unmarshal(valConfig))
 
 		valConfig.P2P.ListenAddress = "tcp://0.0.0.0:26656"
@@ -329,6 +332,7 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
 		appConfig.MinGasPrices = minGasPrice
+		appConfig.Pruning = "nothing"
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)
 	}
