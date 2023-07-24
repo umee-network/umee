@@ -14,12 +14,12 @@ option (gogoproto.goproto_getters_all) = false;
 service Query {
   // MinGasPrice returns minimum transaction fees.
   rpc MinGasPrice(QueryMinGasPrice) returns (QueryMinGasPriceResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/min-gas-price";
+    option (google.api.http).get = "/umee/ugov/v1/min_gas_price";
   }
 
   // EmergencyGroup returns emergency group address
   rpc EmergencyGroup(QueryEmergencyGroup) returns (QueryEmergencyGroupResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/emergency-group";
+    option (google.api.http).get = "/umee/ugov/v1/emergency_group";
   }
 }
 
