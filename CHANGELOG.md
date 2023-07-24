@@ -64,7 +64,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### API Breaking
 
-- [2140](https://github.com/umee-network/umee/pull/2140)
+- [2140](https://github.com/umee-network/umee/pull/2140) Renamed ugov EventMinTxFees to EventMinGasPrice.
+- [2165](https://github.com/umee-network/umee/pull/2165) Use underscore for message part in the web gRPC path format:
+  - `/umee/ugov/v1/min-gas-price` --> `/umee/ugov/v1/min_gas_price`
+  - `/umee/ugov/v1/emergency-group` --> `/umee/ugov/v1/emergency_group`
+  - `/umee/uibc/v1/all-outflows` --> `/umee/uibc/v1/all_outflows`
 
 ## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
 
