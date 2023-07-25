@@ -206,7 +206,7 @@ The leverage module can define pairs of assets which are advantaged when one is 
 
 They are defined in the form `[Asset A, Asset B, Special Collateral Weight]`. In effect, this means that
 
-> When a user has collateral of `Asset A` and borrows `Asset B`, the `CollateralWeight` of both `Asset A` and `Asset B` are replaced by `Special Collateral Weight`.
+> When a user has collateral of `Asset A` and borrows `Asset B`, or vice versa, the `CollateralWeight` of both `Asset A` and `Asset B` are replaced by `Special Collateral Weight`.
 
 #### Borrow Limit
 
@@ -217,7 +217,7 @@ The full calculation of a user's borrow limit is as follows:
 1. Calculate the USD value of the user's collateral assets, using the _lower_ of either spot price or historic price for each asset. Collateral with missing prices is treated as zero-valued.
 2. Calculate the USD value of the user's borrowed assets, using the _higher_ of either spot price or historic price for each asset. Borrowed assets with missing prices cause any transaction which could increased borrowed value or decrease borrow limit to fail.
 3. Sort all `Special Asset Pairs` with assets matching parts of the user's position, starting with the highest `Special Collateral Weight`.
-4. For each special asser pair, match collateral tokens with borrowed tokens until one of the two runs out. The matched amounts satisfy `Collateral Value (A) * Special Collateral Weight (A<->B) = Borrowed Value (B)` for each special asset pair `[A,B,CW(A<->B)]`. Subtract the collateral and borrowed tokens from the user's remaining position.
+4. For each special asser pair, match collateral tokens with borrowed tokens until one of the two runs out. The matched amounts satisfy `Collateral Value (A) * Special Collateral Weight (A,B) = Borrowed Value (B)` for each special asset pair `[A,B,CW]`. Subtract the collateral and borrowed tokens from the user's remaining position.
 5. Then sort the user's remaining collateral tokens by `Collateral Weight` and sort their remaining borrowed tokens by  the same.
 6. Starting with the highest collateral weight in each list, match collateral tokens with borrowed tokens until either collateral or borrowed tokens are exhausted. The matched amounts satisfy `Collateral Value (A) * Minimum Collateral Weight (A,B) = Borrowed Value (B)`
 7. If collateral tokens remain after the matching is complete, then the user has borrowed less than their borrow limit. `Borrow Limit = Borrowed Value + sum(collateral value * collateral weight)` summed over all remaining collateral tokens.
@@ -261,7 +261,7 @@ The result of these calculations will vary depending on the asset requested, and
 >
 > Assume the following collateral weights: AKT 0.3, BNB 0.4, CSMT 0.5, DOT 0.6, ETH 0.7, hereby abbreviated as denoms `A,B,C,D,E`
 >
-> Assume also special asset pairs [AKT, BNB, 0.5] and [CSMT, DOT, 0.8] abbreviated as `[A<->B,0.5]` and `[C<->D,0.8]`
+> Assume also special asset pairs [AKT, BNB, 0.5] and [CSMT, DOT, 0.8] abbreviated as `[A,B,0.5]` and `[C,D,0.8]`
 >
 > We will calculate the `MaxBorrow(BNB)` of a borrower with the following existing position:
 >
