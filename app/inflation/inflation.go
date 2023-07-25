@@ -33,13 +33,12 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 	// Initially inflation_cycle end time is zero
 	// Once chain start inflation cycle end time will be  executed block time + cycle duration
 	if ctx.BlockTime().After(cycleEnd) {
-		// inflation cycle is completed , so we need to update the inflation max and min rate
-		// inflationReductionRate = 25 / 100 = 0.25
-		inflationReductionRate := inflationParams.InflationReductionRate.ToDec().Quo(bpmath.FixedBP(100).ToDec())
+		// new inflation cycle is starting, so we need to update the inflation max and min rate
+		factor := bpmath.One - inflationParams.InflationReductionRate
 		// InflationMax = PrevInflationMax * ( 1 - 0.25)
-		mintParams.InflationMax = mintParams.InflationMax.Mul(sdk.OneDec().Sub(inflationReductionRate))
+		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
 		// InflationMin = PrevInflationMin * ( 1 - 0.25)
-		mintParams.InflationMin = mintParams.InflationMin.Mul(sdk.OneDec().Sub(inflationReductionRate))
+		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
 
 		// update the changed inflation min and max rates
 		c.MintKeeper.SetParams(ctx, mintParams)
