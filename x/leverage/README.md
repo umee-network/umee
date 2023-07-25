@@ -265,15 +265,46 @@ The result of these calculations will vary depending on the asset requested, and
 >
 > We will calculate the `MaxBorrow(B)` of a borrower with the following existing position:
 >
-> Collateral: $10 A, $20 B, $50 C, $20 D, $30 E
+> Collateral: $20 A, $20 B, $50 C, $20 D, $30 E
 >
-> Borrowed: $10 B, $45 D
+> Borrowed: $5 B, $45 D
 >
-> The new borrow of B will appear here on the user's position:
+> The new borrow of B will appear here on the user's position (ordered by by special pairs first, then collateral weight from highest to lowest, as the algortihm would match assets):
 >
-> | Collateral | Borrowed |
-> | - | - |
-> | test | test |
+> | Collateral | Borrowed | Effective Collateral Weight |
+> | - | - | - |
+> | $50 C | $40 D | 0.8 |
+> | $10 A | $5 B | 0.5 <--- 1st insertion |
+> | $8.33 E | $5 D | min(0.7,0.6) |
+> | $41.66 E | - | <--- 2nd insertion |
+> | $20 D | - | <--- 3rd insertion |
+> | $50 C | - | <--- 4th insertion |
+> | $20 B | - | <--- 5th insertion |
+> | $10 A | - | <--- 1st deletion |
+>
+> A new borrow of B will take some existing collateral of A (row marked `1st Deletion`) and add an additional $10 A, $5 B to an existing special pair (`1st insertion`). Then, it will match with unused collateral (`2nd - 5th insertion`).
+>
+> The resulting sorted position would be:
+>
+> | Collateral | Borrowed | Effective Collateral Weight |
+> | - | - | - |
+> | $50 C | $40 D | 0.8 |
+> | $20 A | $10 B | 0.5 |
+> | $8.33 E | $5 D | min(0.7,0.6) |
+> | $41.66 E | $16.66 B | min(0.7,0.4) |
+> | $20 D | $8 B | min(0.6,0.4) |
+> | $50 C | $20 B | min(0.5,0.4) |
+> | $20 B | $8 B | min(0.4,0.4) |
+>
+> Since the borrowed amount of B increased from $5 to ($10 + $16.66 + $8 + $20 + $8) = $62.66, we determine that `MaxBorrow(B) = $57.66` (and then convert from dollar back to tokens in queries.)
+>
+> Note that the calculation first had to locate the collateral A which would be moved from its regular row to a special asset row (and would have done so even if that meant orphaning some collateral that was previousy matched with it or a borrow from a lower priority special pair with collateral A)
+>
+> After such displaced assets are dealth with, including chain reactions, remaining borrowed B is inserted into the regular rows.
+> It cannot bump borrowed assets with a greater or equal collateral weight, but will displace lower-weighted borrows down to fill the bottom rows, then fill all emptry rows.
+
+The computation above for max borrow will behave differently for different tokens, given the presence or absence of special asset pairs and the collateral weight of the new borrow and the existing borrows being displaced.
+It will abort and return zero if all collateral is in use.
 
 #### Liquidation Threshold
 
