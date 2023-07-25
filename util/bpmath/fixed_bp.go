@@ -24,3 +24,8 @@ func (bp FixedBP) ToDec() sdk.Dec {
 func (bp FixedBP) Mul(a math.Int) math.Int {
 	return Mul(a, bp)
 }
+
+// MulDec return a*bp rounding towards zero.
+func (bp FixedBP) MulDec(a sdk.Dec) sdk.Dec {
+	return MulDec(a, bp)
+}
