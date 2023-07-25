@@ -257,6 +257,20 @@ When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow li
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
 The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
 
+> Example max borrow calculation
+>
+> Assume the following collateral weights: AKT 0.3, BNB 0.4, CSMT 0.5, DOT 0.6, ETH 0.7, hereby abbreviated as denoms `A,B,C,D,E`
+>
+> Assume also special asset pairs [AKT, BNB, 0.5] and [CSMT, DOT, 0.8] abbreviated as `[A->B,0.5]` and `[C->D,0.8]`
+>
+> We will calculate the `MaxBorrow(BNB)` of a borrower with the following existing position:
+>
+> Collateral: $10 AKT, $50 CSMT, $20 DOT, $30 ETH
+>
+> Borrowed: $10 BNB, $45 DOT
+>
+> ... (todo)
+
 #### Liquidation Threshold
 
 Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold when the token is used as collateral.
