@@ -2151,7 +2151,7 @@ paths:
           type: string
       tags:
         - Query
-  /umee/uibc/v1/all-outflows:
+  /umee/uibc/v1/all_outflows:
     get:
       summary: AllOutflow returns outflows for each denom in the current quota period.
       operationId: AllOutflows
@@ -2320,7 +2320,7 @@ paths:
                       format: byte
       tags:
         - Query
-  /umee/ugov/v1/emergency-group:
+  /umee/ugov/v1/emergency_group:
     get:
       summary: EmergencyGroup returns emergency group address
       operationId: EmergencyGroup
@@ -2357,7 +2357,7 @@ paths:
                       format: byte
       tags:
         - Query
-  /umee/ugov/v1/min-gas-price:
+  /umee/ugov/v1/min_gas_price:
     get:
       summary: MinGasPrice returns minimum transaction fees.
       operationId: MinGasPrice
