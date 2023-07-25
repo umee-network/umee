@@ -109,6 +109,8 @@ Users have the following actions available to them:
 
   From the module's point of view, no token or uToken transfers take place in this transaction, and the module's total borrowed and collateral amounts do not change. This makes leveraged liquidations immune to token liquidity exhaustion and harmless to module health measures like supply utilization and collateral liquitity.
 
+  In addition, this transaction forces the liquidator to repay the maximum amount allowed by the user's `Close Factor` and the chosen repay and reward denoms. The transaction will fail if they would come close to exceeding their borrow limit in doing this, currently requiring `Borrowed Value / Borrow Limit < 0.9`.
+
 ### Reserves
 
 A portion of accrued interest on all borrows (determined per-token by the parameter `ReserveFactor`) is set aside as a reserves, which are automatically used to pay down bad debt.
