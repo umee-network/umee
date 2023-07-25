@@ -265,7 +265,7 @@ The result of these calculations will vary depending on the asset requested, and
 >
 > We will calculate the `MaxBorrow(BNB)` of a borrower with the following existing position:
 >
-> Collateral: $10 AKT, $50 CSMT, $20 DOT, $30 ETH
+> Collateral: $10 AKT, $20 BNB, $50 CSMT, $20 DOT, $30 ETH
 >
 > Borrowed: $10 BNB, $45 DOT
 >
