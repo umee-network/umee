@@ -107,9 +107,12 @@ Users have the following actions available to them:
 
   This allows more convenient liquidation where the liquidator does not need to keep balances of all potential repay tokens on hand, and can instead leverage a single type of collateral.
 
-  From the module's point of view, no token or uToken transfers take place in this transaction, and the module's total borrowed and collateral amounts do not change. This makes leveraged liquidations immune to token liquidity exhaustion and harmless to module health measures like supply utilization and collateral liquitity.
+  From the module's point of view, no token or uToken transfers take place in this transaction, and the module's total borrowed and collateral amounts do not change.
+  This makes leveraged liquidations immune to token liquidity exhaustion and harmless to module health measures like supply utilization and collateral liquitity.
 
-  In addition, this transaction forces the liquidator to repay the maximum amount allowed by the user's `Close Factor` and the chosen repay and reward denoms. The transaction will fail if they would come close to exceeding their borrow limit in doing this, currently requiring `Borrowed Value / Borrow Limit < 0.9`.
+  In addition, this transaction forces the liquidator to repay the maximum amount allowed by the user's `Close Factor` and the chosen repay and reward denoms.
+  The transaction will fail if they would come close to exceeding their borrow limit in doing this, currently requiring `Borrowed Value / Borrow Limit < 0.9`.
+  This is to prevent the liquidator from entering a position that is hard to unwind, and become at risk for liquidation in turn.
 
 ### Reserves
 
