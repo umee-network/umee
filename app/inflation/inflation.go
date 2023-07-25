@@ -35,11 +35,11 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 	if ctx.BlockTime().After(cycleEnd) {
 		// inflation cycle is completed , so we need to update the inflation max and min rate
 		// inflationReductionRate = 25 / 100 = 0.25
-		inflationReductionRate := inflationParams.InflationReductionRate.ToDec().Quo(sdk.NewDec(100))
+		factor := sdk.OneDec().Sub(inflationParams.InflationReductionRate.ToDec().Quo(sdk.NewDec(100)))
 		// InflationMax = PrevInflationMax * ( 1 - 0.25)
-		mintParams.InflationMax = mintParams.InflationMax.Mul(sdk.OneDec().Sub(inflationReductionRate))
+		mintParams.InflationMax = factor.Mul(mintParams.InflationMax)
 		// InflationMin = PrevInflationMin * ( 1 - 0.25)
-		mintParams.InflationMin = mintParams.InflationMin.Mul(sdk.OneDec().Sub(inflationReductionRate))
+		mintParams.InflationMin = factor.Mul(mintParams.InflationMin)
 
 		// update the changed inflation min and max rates
 		c.MintKeeper.SetParams(ctx, mintParams)
