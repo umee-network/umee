@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -106,4 +107,27 @@ func TestFixedToDec(t *testing.T) {
 		bp := BP(tc.a).ToDec()
 		require.Equal(tc.exp.String(), bp.String(), fmt.Sprint("test-bp ", tc.name))
 	}
+}
+
+func TestFixedBPMulDec(t *testing.T) {
+	t.Parallel()
+	require := require.New(t)
+
+	bp := FixedBP(1000)
+	bp2 := FixedBP(1)
+	bp3 := FixedBP(5000)
+	bp4 := FixedBP(20000)
+	d := sdk.MustNewDecFromStr("12.5002")
+	d2 := sdk.NewDec(10000)
+	d3 := sdk.NewDec(1000)
+
+	require.Equal(d, MulDec(d, One))
+	require.Equal(sdk.ZeroDec(), MulDec(d, Zero))
+	require.Equal(sdk.OneDec(), bp2.MulDec(d2))
+	require.Equal(sdk.MustNewDecFromStr("0.1"), bp2.MulDec(d3))
+
+	require.Equal(sdk.MustNewDecFromStr("1.25002"), bp.MulDec(d))
+	require.Equal(sdk.MustNewDecFromStr("0.00125002"), bp2.MulDec(d))
+	require.Equal(sdk.MustNewDecFromStr("6.2501"), bp3.MulDec(d))
+	require.Equal(sdk.MustNewDecFromStr("25.0004"), bp4.MulDec(d))
 }
