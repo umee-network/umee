@@ -263,13 +263,17 @@ The result of these calculations will vary depending on the asset requested, and
 >
 > Assume also special asset pairs [AKT, BNB, 0.5] and [CSMT, DOT, 0.8] abbreviated as `[A,B,0.5]` and `[C,D,0.8]`
 >
-> We will calculate the `MaxBorrow(BNB)` of a borrower with the following existing position:
+> We will calculate the `MaxBorrow(B)` of a borrower with the following existing position:
 >
-> Collateral: $10 AKT, $20 BNB, $50 CSMT, $20 DOT, $30 ETH
+> Collateral: $10 A, $20 B, $50 C, $20 D, $30 E
 >
-> Borrowed: $10 BNB, $45 DOT
+> Borrowed: $10 B, $45 D
 >
-> ... (todo)
+> The new borrow of B will appear here on the user's position:
+>
+> | Collateral | Borrowed |
+> | - | - |
+> | test | test |
 
 #### Liquidation Threshold
 
