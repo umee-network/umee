@@ -285,7 +285,7 @@ The result of these calculations will vary depending on the asset requested, and
 > | $20 B | - | <--- 5th insertion |
 > | $10 A | - | <--- 1st deletion |
 >
-> A new borrow of B will take some existing collateral of A (row marked `1st Deletion`) and add an additional $10 A, $5 B to an existing special pair (`1st insertion`). Then, it will match with unused collateral (`2nd - 5th insertion`).
+> A new borrow of B will be matched with some collateral of A (row marked `1st Deletion`) and add an additional $10 A, $5 B to an existing special pair (`1st insertion`). Then, it will match with unused collateral (`2nd - 5th insertion`).
 >
 > The resulting sorted position would be:
 >
