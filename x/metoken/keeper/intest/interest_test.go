@@ -91,7 +91,7 @@ func TestInterestClaiming(t *testing.T) {
 
 	// confirm meToken account didn't receive any interest yet and the balances in meToken state and x/bank module
 	// are the same
-	checkInterest(t, ctx, app, index.MetokenMaxSupply.Denom, true)
+	checkInterest(t, ctx, app, index.Denom, true)
 
 	// create ctx in the future and generate accrued interest
 	err = app.LeverageKeeper.AccrueAllInterest(ctx)
@@ -105,7 +105,7 @@ func TestInterestClaiming(t *testing.T) {
 
 	// confirm meToken account received accrued interest and the balances in meToken state and x/bank module
 	// are the same
-	checkInterest(t, ctx, app, index.MetokenMaxSupply.Denom, false)
+	checkInterest(t, ctx, app, index.Denom, false)
 }
 
 func checkInterest(
@@ -116,7 +116,7 @@ func checkInterest(
 	zeroInterest bool,
 ) {
 	k := app.MetokenKeeperB.Keeper(&ctx)
-	metokenBalances, err := k.MustIndexBalance(meTokenDenom)
+	metokenBalances, err := k.IndexBalances(meTokenDenom)
 	require.NoError(t, err)
 	meTokenAddr := authtypes.NewModuleAddress(metoken.ModuleName)
 	bankBalance := app.BankKeeper.GetAllBalances(ctx, meTokenAddr)

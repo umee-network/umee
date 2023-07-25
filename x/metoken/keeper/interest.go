@@ -53,7 +53,6 @@ func (k Keeper) ClaimInterest() error {
 				}
 			}
 
-			// save updated balances
 			if err = k.updateBalances(balances, updatedBalances); err != nil {
 				return err
 			}

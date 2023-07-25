@@ -61,7 +61,6 @@ func (k Keeper) RebalanceReserves() error {
 								return err
 							}
 
-							// update balance
 							balance.Reserved = balance.Reserved.Sub(tokenSupplied)
 							balance.Leveraged = balance.Leveraged.Add(tokenSupplied)
 							updatedBalances = append(updatedBalances, balance)
@@ -69,14 +68,12 @@ func (k Keeper) RebalanceReserves() error {
 					}
 				}
 
-				// save updated balances
 				if err = k.updateBalances(balances, updatedBalances); err != nil {
 					return err
 				}
 			}
 		}
 
-		// update NextRebalancingTime
 		k.setNextRebalancingTime(k.ctx.BlockTime().Add(time.Duration(k.GetParams().RebalancingFrequency) * time.Second))
 	}
 

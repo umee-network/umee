@@ -3,8 +3,6 @@ package keeper_test
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
-
 	"github.com/stretchr/testify/require"
 
 	sdkmath "cosmossdk.io/math"
@@ -15,6 +13,7 @@ import (
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/metoken"
 	"github.com/umee-network/umee/v5/x/metoken/keeper"
+	"github.com/umee-network/umee/v5/x/metoken/mocks"
 )
 
 func TestRebalanceReserves(t *testing.T) {
@@ -66,27 +65,27 @@ func TestRebalanceReserves(t *testing.T) {
 
 	k := app.MetokenKeeperB.Keeper(&ctx)
 	// check the initial balances are balanced
-	checkBalances(t, ctx, app, k, index.MetokenMaxSupply.Denom, true)
+	checkBalances(t, ctx, app, k, index.Denom, true)
 
 	// change index setting modifying the reserve_portion
 	// usdt_reserve_portion from 0.2 to 0.25
 	usdtReservePortion := sdk.MustNewDecFromStr("0.25")
-	_, usdtSettings, err := index.GetAcceptedAsset(mocks.USDTBaseDenom)
-	require.NoError(t, err)
+	i, usdtSettings := index.AcceptedAsset(mocks.USDTBaseDenom)
+	require.True(t, i >= 0)
 	usdtSettings.ReservePortion = usdtReservePortion
 	index.SetAcceptedAsset(usdtSettings)
 
 	// usdc_reserve_portion from 0.2 to 0.5
 	usdcReservePortion := sdk.MustNewDecFromStr("0.5")
-	_, usdcSettings, err := index.GetAcceptedAsset(mocks.USDCBaseDenom)
-	require.NoError(t, err)
+	i, usdcSettings := index.AcceptedAsset(mocks.USDCBaseDenom)
+	require.True(t, i >= 0)
 	usdcSettings.ReservePortion = usdcReservePortion
 	index.SetAcceptedAsset(usdcSettings)
 
 	// ist_reserve_portion from 0.2 to 0.035
 	istReservePortion := sdk.MustNewDecFromStr("0.035")
-	_, istSettings, err := index.GetAcceptedAsset(mocks.ISTBaseDenom)
-	require.NoError(t, err)
+	i, istSettings := index.AcceptedAsset(mocks.ISTBaseDenom)
+	require.True(t, i >= 0)
 	istSettings.ReservePortion = istReservePortion
 	index.SetAcceptedAsset(istSettings)
 
@@ -101,14 +100,16 @@ func TestRebalanceReserves(t *testing.T) {
 	require.NoError(t, err)
 
 	// confirm now the balances are unbalanced
-	checkBalances(t, ctx, app, k, index.MetokenMaxSupply.Denom, false)
+	checkBalances(t, ctx, app, k, index.Denom, false)
 
 	err = k.RebalanceReserves()
 	require.NoError(t, err)
 
 	// confirm the balances are good now
-	checkBalances(t, ctx, app, k, index.MetokenMaxSupply.Denom, true)
-	require.True(t, k.GetNextRebalancingTime() > 0)
+	checkBalances(t, ctx, app, k, index.Denom, true)
+	genesis := k.ExportGenesis()
+	require.NoError(t, err)
+	require.True(t, !genesis.NextInterestClaimTime.IsZero())
 }
 
 func checkBalances(
@@ -121,11 +122,11 @@ func checkBalances(
 ) {
 	meTokenAddr := authtypes.NewModuleAddress(metoken.ModuleName)
 	// get index
-	index, err := k.MustRegisteredIndex(meTokenDenom)
+	index, err := k.RegisteredIndex(meTokenDenom)
 	require.NoError(t, err)
 
 	// get index balances
-	balances, err := k.MustIndexBalance(index.MetokenMaxSupply.Denom)
+	balances, err := k.IndexBalances(index.Denom)
 	require.NoError(t, err)
 
 	// get x/bank balance
@@ -133,8 +134,8 @@ func checkBalances(
 
 	for _, balance := range balances.AssetBalances {
 		// confirm the index is balanced as required in the configuration
-		_, assetSettings, err := index.GetAcceptedAsset(balance.Denom)
-		require.NoError(t, err)
+		i, assetSettings := index.AcceptedAsset(balance.Denom)
+		require.True(t, i >= 0)
 
 		desiredReserves := assetSettings.ReservePortion.MulInt(balance.AvailableSupply()).TruncateInt()
 		require.Equal(t, shouldBeBalanced, desiredReserves.Equal(balance.Reserved))
