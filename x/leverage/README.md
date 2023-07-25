@@ -209,15 +209,17 @@ The full calculation of a user's borrow limit is as follows:
 
 1. Calculate the USD value of the user's collateral assets, using the _lower_ of either spot price or historic price for each asset. Collateral with missing prices is treated as zero-valued.
 2. Calculate the USD value of the user's borrowed assets, using the _higher_ of either spot price or historic price for each asset. Borrowed assets with missing prices cause any transaction which could increased borrowed value or decrease borrow limit to fail.
-3. If the part or all of a user's position matches any `Special Asset Pairs`, subtract them from the general totals above and set them aside. A borrowed or collateral asset matching multiple special pairs attempts to use the one with the highest `Special Collateral Weight` first.
-4. Find the average (weighted by collateralized value) of the `CollateralWeight` of the user's collateral assets from the general total. Also average in any collateral from special asset pairs found in the previous step, as if they were contributions from a separate asset type with `Special Collateral Weight`.
-5. Find the average (weighted by borrowed value) of the `CollateralWeight` of the user's borrowed assets from the general total. Also average in any borrows from special asset pairs found previously, as if they were contributions from a separate asset type with `Special Collateral Weight`. This is for `Borrow Factor`.
-6. Find the _minimum_ of the average collateral weights found in the previous two steps. This is the user's `Effective Collateral Weight`.
-7. Multiply the user's total collateral value (before subtractions from step 3) by their `Effective Collateral Weight`. This is their `Borrow Limit`.
+3. Sort all `Special Asset Pairs` with assets matching parts of the user's position, starting with the highest `Special Collateral Weight`. 
+4. For each special asser pair, match collateral tokens with borrowed tokens until one of the two runs out. The matched amounts satisfy `Collateral Value (A) * Special Collateral Weight (A->B) = Borrowed Value (B)` for each special asset pair `[A,B,CW(A->B)]`. Subtract the collateral and borrowed tokens from the user's remaining position.
+5. Then sort the user's remaining collateral tokens by `Collateral Weight` and sort their remaining borrowed tokens by  weight.
+6. Starting with the highest collateral weight in each list, match collateral tokens with borrowed tokens until either collateral or borrowed tokens are exhausted. The matched amounts satisfy `Collateral Value (A) * Minimum Collateral Weight (A,B) = Borrowed Value (B)`
+7. If collateral tokens remain after the matching is complete, then the user has borrowed less than their borrow limit. `Borrow Limit = Borrowed Value + sum(collateral value * collateral weight)` summed over all remaining collateral tokens.
+8. If borrowed tokens remain after the matching is complete, then the user has borrowed more than their borrow limit. `Borrow Limit = Borrowed Value - sum(borrowed value)` summed over all remaining borrowed tokens.
 
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
+The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
 
-> Example Borrower:
+> Example Borrow Limit Calculation:
 >
 > Collateral: $20 ATOM + $20 UMEE + $40 STATOM
 > Borrowed: $50 ATOM
@@ -228,21 +230,26 @@ This calculation must sometimes be done in reverse, for example when computing `
 >
 > Starting at step 3 above, since prices are already given, we first isolate any special asset pairs.
 >
-> $40 STATOM with a special collateral weight of 0.75 can borrow $30 ATOM. These amounts receive special collateral weights.
+> $40 STATOM with a special collateral weight of 0.75 can borrow $30 ATOM. These amounts are matched with each other.
 >
-> The user's position (with collateral weights) now looks like the following:
+> The user's remaining position now looks like the following (sorted collateral weights):
 >
-> Collateral: $20 ATOM (0.6) + $20 UMEE (0.35) + $40 SPECIAL (0.75)
-> Borrowed: $30 SPECIAL (0.75) + $20 ATOM (0.6)
+> Collateral: $20 ATOM (0.6) + $20 UMEE (0.35)
+> Borrowed: $20 ATOM (0.6)
 >
-> Proceeding to step 6, the weighted average of the collateral's new collateral weights is `($20 * 0.6 + $20 * 0.35 + $40 * 0.75) / ($20 + $20 + $40)` = `0.6125`
-> The weighted average of the borrowed assets' collateral weights is `($30 * 0.75 + $20 * 0.6) / ($30 + $20)` = `0.69`
+> Then collateral is matched with borrowed assets starting with the highest weights.
 >
-> Multiplying the user's collateral value by the minimum of `0.6125` and `0.69`, we get a final borrow limit of `0.6125 * ($20 + $20 + $40)` = `$49`
+> First, $20 ATOM collateral is matched with $12 borrowed ATOM.
+>
+> Then, $20 UMEE collateral is matched with $7 borrowed ATOM.
+>
+> Collateral is now exhausted, and $1 borrowed ATOM remains.
+>
+> Thus the user is $1 above their borrow limit. Their borrow limit must be $50 - $1 = $49.
 
 #### Liquidation Threshold
 
-Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold, when the token is used as collateral.
+Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold when the token is used as collateral.
 
 When a borrow position is limited by simple borrow limit (without special asset pairs or borrow factor), a user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited.
 Any user whose borrow value is above their liquidation threshold is eligible to be liquidated.
@@ -269,6 +276,9 @@ This utilizes the borrow limit, which has already been computed with special ass
 - The average (weighted by collateral value) collateral weights and liquidation thresholds of the borrower's collateral assets are collected.
 - The distances from average collateral weight to average liquidation threshold and 1 are compared. (For example when `CW = 0.6` and `LT = 0.7`, then liquidation threshold is `25%` of the way from `CW` to `1`.)
 - Then the borrower's liquidation threshold behaves the same as the average parameters (e.g. it will be `25%` of the way between `borrow limit` and `collateral value`).
+
+This formula ensures that the behavior of an account's liquidation threshold remains intuitive:
+It will always be somewhere between the user's borrow limit and the full value of their collateral, and it behaves like the average of the dominant collateral tokens on their account.
 
 #### Borrow APY
 
