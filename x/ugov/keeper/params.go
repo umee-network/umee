@@ -30,23 +30,23 @@ func (k Keeper) EmergencyGroup() sdk.AccAddress {
 	return store.GetAddress(k.store, keyEmergencyGroup)
 }
 
-func (k Keeper) SetInflationParams(lp ugov.InflationParams) error {
-	return store.SetValue(k.store, KeyInflationParams, &lp, "liquidation_params")
+func (k Keeper) SetInflationParams(ip ugov.InflationParams) error {
+	return store.SetValue(k.store, keyInflationParams, &ip, "inflation_params")
 }
 
 func (k Keeper) InflationParams() ugov.InflationParams {
-	lp := store.GetValue[*ugov.InflationParams](k.store, KeyInflationParams, "liquidation_params")
-	if lp == nil {
+	ip := store.GetValue[*ugov.InflationParams](k.store, keyInflationParams, "inflation_params")
+	if ip == nil {
 		return ugov.InflationParams{}
 	}
-	return *lp
+	return *ip
 }
 
 func (k Keeper) SetInflationCycleEnd(startTime time.Time) error {
-	store.SetTimeMs(k.store, KeyInflationCycleStart, startTime)
+	store.SetTimeMs(k.store, keyInflationCycleEnd, startTime)
 	return nil
 }
 
 func (k Keeper) GetInflationCycleEnd() (time.Time, error) {
-	return store.GetTimeMs(k.store, KeyInflationCycleStart)
+	return store.GetTimeMs(k.store, keyInflationCycleEnd)
 }

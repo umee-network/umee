@@ -1,11 +1,10 @@
 package ugov
 
 import (
-	fmt "fmt"
 	time "time"
 
 	"cosmossdk.io/math"
-
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/util/bpmath"
 	"github.com/umee-network/umee/v5/util/coin"
@@ -19,17 +18,19 @@ func DefaultInflationParams() InflationParams {
 	}
 }
 
+var zeroInt = math.NewInt(0)
+
 func (ip InflationParams) Validate() error {
-	if ip.MaxSupply.Amount.LT(math.NewInt(0)) {
-		return fmt.Errorf("max_supply must be positive")
+	if ip.MaxSupply.Amount.LT(zeroInt) {
+		return sdkerrors.ErrInvalidRequest.Wrap("max_supply must be positive")
 	}
 
 	if ip.InflationReductionRate > bpmath.One || ip.InflationReductionRate < 100 {
-		return fmt.Errorf("inflation reduction must be between 100(0.1) to 10000 (1)")
+		return sdkerrors.ErrInvalidRequest.Wrap("inflation reduction must be between 100bp to 10'000bp")
 	}
 
 	if ip.InflationCycle.Seconds() <= 0 {
-		return fmt.Errorf("inflation cycle must be positive")
+		return sdkerrors.ErrInvalidRequest.Wrap("inflation cycle must be positive")
 	}
 
 	return nil

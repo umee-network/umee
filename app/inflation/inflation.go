@@ -30,20 +30,14 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 	cycleEnd, err := ugovKeeper.GetInflationCycleEnd()
 	util.Panic(err)
 
-	// Initially inflation_cycle end time is zero
-	// Once chain start inflation cycle end time will be  executed block time + cycle duration
 	if ctx.BlockTime().After(cycleEnd) {
 		// new inflation cycle is starting, so we need to update the inflation max and min rate
 		factor := bpmath.One - inflationParams.InflationReductionRate
-		// InflationMax = PrevInflationMax * ( 1 - 0.25)
 		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
-		// InflationMin = PrevInflationMin * ( 1 - 0.25)
 		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
 
-		// update the changed inflation min and max rates
 		c.MintKeeper.SetParams(ctx, mintParams)
 
-		// update the end time of current inflation cycle
 		err := ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
 		util.Panic(err)
 		ctx.Logger().Info("inflation min and max rates are updated",
@@ -70,7 +64,6 @@ func (c Calculator) AdjustInflation(totalSupply, maxSupply math.Int, minter mint
 		newAnnualProvision := sdk.NewDec(annualProvision.Int64())
 		// AnnualProvisions = Inflation * TotalSupply
 		// Mint Coins  = AnnualProvisions / BlocksPerYear
-		// so get the new Inflation
 		// Inflation = (New Mint Coins  * BlocksPerYear ) / TotalSupply
 		return newAnnualProvision.Quo(sdk.NewDec(totalSupply.Int64()))
 	}

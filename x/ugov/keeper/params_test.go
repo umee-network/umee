@@ -46,14 +46,14 @@ func TestLiquidationParams(t *testing.T) {
 	require.Equal(k.InflationParams(), ugov.InflationParams{},
 		"when nothing is set, empty inflationp params should return")
 
-	dlp := ugov.DefaultInflationParams()
-	k.SetInflationParams(dlp)
-	rlp := k.InflationParams()
-	require.Equal(rlp, dlp)
-	require.Equal(rlp.MaxSupply.GetDenom(), appparams.BondDenom)
+	dip := ugov.DefaultInflationParams()
+	k.SetInflationParams(dip)
+	p := k.InflationParams()
+	require.Equal(dip, p)
+	require.Equal(dip.MaxSupply.GetDenom(), appparams.BondDenom)
 }
 
-func TestInflationCycleStart(t *testing.T) {
+func TestInflationCycleEnd(t *testing.T) {
 	t.Parallel()
 	require := require.New(t)
 	k := initKeeper(t)
@@ -65,10 +65,10 @@ func TestInflationCycleStart(t *testing.T) {
 	require.NoError(err)
 	require.Equal(in_c.IsZero(), true, "it should be default zero time")
 
-	icst := time.Now()
-	err = k.SetInflationCycleEnd(icst)
+	cycleEnd := time.Now()
+	err = k.SetInflationCycleEnd(cycleEnd)
 	require.NoError(err)
-	ricst, err := k.GetInflationCycleEnd()
+	end, err := k.GetInflationCycleEnd()
 	require.NoError(err)
-	require.Equal(ricst.UnixMilli(), icst.UnixMilli(), "inflation cycle start time should be same")
+	require.Equal(end.UnixMilli(), cycleEnd.UnixMilli(), "inflation cycle end time should be same")
 }
