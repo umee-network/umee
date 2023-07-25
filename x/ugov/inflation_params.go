@@ -15,20 +15,20 @@ func DefaultInflationParams() InflationParams {
 	return InflationParams{
 		MaxSupply:              coin.New(appparams.BondDenom, 21_000000000_000000), // 21 Billion Maximum
 		InflationCycle:         time.Hour * 24 * 365,                               // 2 years for default inflation cycle
-		InflationReductionRate: bpmath.FixedBP(25),                                 // 25% reduction rate for inflation cyle
+		InflationReductionRate: bpmath.FixedBP(2500),                               // 25% reduction rate for inflation cyle
 	}
 }
 
-func (lp InflationParams) Validate() error {
-	if lp.MaxSupply.Amount.LT(math.NewInt(0)) {
+func (ip InflationParams) Validate() error {
+	if ip.MaxSupply.Amount.LT(math.NewInt(0)) {
 		return fmt.Errorf("max_supply must be positive")
 	}
 
-	if lp.InflationReductionRate > 100 {
-		return fmt.Errorf("inflation reduction must be between 0 to 100")
+	if ip.InflationReductionRate > bpmath.One || ip.InflationReductionRate < 100 {
+		return fmt.Errorf("inflation reduction must be between 100(0.1) to 10000 (1)")
 	}
 
-	if lp.InflationCycle.Seconds() <= 0 {
+	if ip.InflationCycle.Seconds() <= 0 {
 		return fmt.Errorf("inflation cycle must be positive")
 	}
 

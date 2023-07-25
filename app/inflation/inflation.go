@@ -6,6 +6,7 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
 	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/util/bpmath"
 	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
 )
 
@@ -33,13 +34,12 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 	// Initially inflation_cycle end time is zero
 	// Once chain start inflation cycle end time will be  executed block time + cycle duration
 	if ctx.BlockTime().After(cycleEnd) {
-		// inflation cycle is completed , so we need to update the inflation max and min rate
-		// inflationReductionRate = 25 / 100 = 0.25
-		factor := sdk.OneDec().Sub(inflationParams.InflationReductionRate.ToDec().Quo(sdk.NewDec(100)))
+		// new inflation cycle is starting , so we need to update the inflation max and min rate
+		factor := bpmath.One - inflationParams.InflationReductionRate
 		// InflationMax = PrevInflationMax * ( 1 - 0.25)
-		mintParams.InflationMax = factor.Mul(mintParams.InflationMax)
+		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
 		// InflationMin = PrevInflationMin * ( 1 - 0.25)
-		mintParams.InflationMin = factor.Mul(mintParams.InflationMin)
+		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
 
 		// update the changed inflation min and max rates
 		c.MintKeeper.SetParams(ctx, mintParams)
