@@ -22,6 +22,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [Token Price](#token-price)
      - [Borrow Factor](#borrow-factor)
      - [Borrow Limit](#borrow-limit)
+     - [Max Borrow](#max-borrow)
      - [Liquidation Threshold](#liquidation-threshold)
      - [Borrow APY](#borrow-apy)
      - [Supplying APY](#supplying-apy)
@@ -253,6 +254,8 @@ When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow li
 > Collateral is now exhausted, and $1 borrowed ATOM remains.
 >
 > Thus the user is $1 above their borrow limit. Their borrow limit must be $50 - $1 = $49.
+
+#### Max Borrow
 
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
 The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
