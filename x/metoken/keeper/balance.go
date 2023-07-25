@@ -16,7 +16,7 @@ func (k Keeper) IndexBalances(meTokenDenom string) (metoken.IndexBalances, error
 	return *balance, nil
 }
 
-// setIndexBalances saves an Index's Balance
+// setIndexBalances saves an Index's Balance.
 func (k Keeper) setIndexBalances(balance metoken.IndexBalances) error {
 	if err := balance.Validate(); err != nil {
 		return err
@@ -29,4 +29,19 @@ func (k Keeper) setIndexBalances(balance metoken.IndexBalances) error {
 func (k Keeper) hasIndexBalance(meTokenDenom string) bool {
 	balance := store.GetValue[*metoken.IndexBalances](k.store, keyBalance(meTokenDenom), "balance")
 	return balance != nil
+}
+
+// updateBalances of the assets of an Index and save them.
+func (k Keeper) updateBalances(balances metoken.IndexBalances, updatedBalances []metoken.AssetBalance) error {
+	if len(updatedBalances) > 0 {
+		for _, balance := range updatedBalances {
+			balances.SetAssetBalance(balance)
+		}
+		err := k.setIndexBalances(balances)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

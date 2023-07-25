@@ -561,6 +561,9 @@ type MockLeverageKeeper struct {
 	// ExchangeUTokenFunc is an instance of a mock function object
 	// controlling the behavior of the method ExchangeUToken.
 	ExchangeUTokenFunc *LeverageKeeperExchangeUTokenFunc
+	// GetAllSuppliedFunc is an instance of a mock function object
+	// controlling the behavior of the method GetAllSupplied.
+	GetAllSuppliedFunc *LeverageKeeperGetAllSuppliedFunc
 	// GetTokenSettingsFunc is an instance of a mock function object
 	// controlling the behavior of the method GetTokenSettings.
 	GetTokenSettingsFunc *LeverageKeeperGetTokenSettingsFunc
@@ -589,6 +592,11 @@ func NewMockLeverageKeeper() *MockLeverageKeeper {
 		},
 		ExchangeUTokenFunc: &LeverageKeeperExchangeUTokenFunc{
 			defaultHook: func(types.Context, types.Coin) (r0 types.Coin, r1 error) {
+				return
+			},
+		},
+		GetAllSuppliedFunc: &LeverageKeeperGetAllSuppliedFunc{
+			defaultHook: func(types.Context, types.AccAddress) (r0 types.Coins, r1 error) {
 				return
 			},
 		},
@@ -634,6 +642,11 @@ func NewStrictMockLeverageKeeper() *MockLeverageKeeper {
 				panic("unexpected invocation of MockLeverageKeeper.ExchangeUToken")
 			},
 		},
+		GetAllSuppliedFunc: &LeverageKeeperGetAllSuppliedFunc{
+			defaultHook: func(types.Context, types.AccAddress) (types.Coins, error) {
+				panic("unexpected invocation of MockLeverageKeeper.GetAllSupplied")
+			},
+		},
 		GetTokenSettingsFunc: &LeverageKeeperGetTokenSettingsFunc{
 			defaultHook: func(types.Context, string) (types1.Token, error) {
 				panic("unexpected invocation of MockLeverageKeeper.GetTokenSettings")
@@ -672,6 +685,9 @@ func NewMockLeverageKeeperFrom(i metoken.LeverageKeeper) *MockLeverageKeeper {
 		},
 		ExchangeUTokenFunc: &LeverageKeeperExchangeUTokenFunc{
 			defaultHook: i.ExchangeUToken,
+		},
+		GetAllSuppliedFunc: &LeverageKeeperGetAllSuppliedFunc{
+			defaultHook: i.GetAllSupplied,
 		},
 		GetTokenSettingsFunc: &LeverageKeeperGetTokenSettingsFunc{
 			defaultHook: i.GetTokenSettings,
@@ -906,6 +922,115 @@ func (c LeverageKeeperExchangeUTokenFuncCall) Args() []interface{} {
 // Results returns an interface slice containing the results of this
 // invocation.
 func (c LeverageKeeperExchangeUTokenFuncCall) Results() []interface{} {
+	return []interface{}{c.Result0, c.Result1}
+}
+
+// LeverageKeeperGetAllSuppliedFunc describes the behavior when the
+// GetAllSupplied method of the parent MockLeverageKeeper instance is
+// invoked.
+type LeverageKeeperGetAllSuppliedFunc struct {
+	defaultHook func(types.Context, types.AccAddress) (types.Coins, error)
+	hooks       []func(types.Context, types.AccAddress) (types.Coins, error)
+	history     []LeverageKeeperGetAllSuppliedFuncCall
+	mutex       sync.Mutex
+}
+
+// GetAllSupplied delegates to the next hook function in the queue and
+// stores the parameter and result values of this invocation.
+func (m *MockLeverageKeeper) GetAllSupplied(v0 types.Context, v1 types.AccAddress) (types.Coins, error) {
+	r0, r1 := m.GetAllSuppliedFunc.nextHook()(v0, v1)
+	m.GetAllSuppliedFunc.appendCall(LeverageKeeperGetAllSuppliedFuncCall{v0, v1, r0, r1})
+	return r0, r1
+}
+
+// SetDefaultHook sets function that is called when the GetAllSupplied
+// method of the parent MockLeverageKeeper instance is invoked and the hook
+// queue is empty.
+func (f *LeverageKeeperGetAllSuppliedFunc) SetDefaultHook(hook func(types.Context, types.AccAddress) (types.Coins, error)) {
+	f.defaultHook = hook
+}
+
+// PushHook adds a function to the end of hook queue. Each invocation of the
+// GetAllSupplied method of the parent MockLeverageKeeper instance invokes
+// the hook at the front of the queue and discards it. After the queue is
+// empty, the default hook function is invoked for any future action.
+func (f *LeverageKeeperGetAllSuppliedFunc) PushHook(hook func(types.Context, types.AccAddress) (types.Coins, error)) {
+	f.mutex.Lock()
+	f.hooks = append(f.hooks, hook)
+	f.mutex.Unlock()
+}
+
+// SetDefaultReturn calls SetDefaultHook with a function that returns the
+// given values.
+func (f *LeverageKeeperGetAllSuppliedFunc) SetDefaultReturn(r0 types.Coins, r1 error) {
+	f.SetDefaultHook(func(types.Context, types.AccAddress) (types.Coins, error) {
+		return r0, r1
+	})
+}
+
+// PushReturn calls PushHook with a function that returns the given values.
+func (f *LeverageKeeperGetAllSuppliedFunc) PushReturn(r0 types.Coins, r1 error) {
+	f.PushHook(func(types.Context, types.AccAddress) (types.Coins, error) {
+		return r0, r1
+	})
+}
+
+func (f *LeverageKeeperGetAllSuppliedFunc) nextHook() func(types.Context, types.AccAddress) (types.Coins, error) {
+	f.mutex.Lock()
+	defer f.mutex.Unlock()
+
+	if len(f.hooks) == 0 {
+		return f.defaultHook
+	}
+
+	hook := f.hooks[0]
+	f.hooks = f.hooks[1:]
+	return hook
+}
+
+func (f *LeverageKeeperGetAllSuppliedFunc) appendCall(r0 LeverageKeeperGetAllSuppliedFuncCall) {
+	f.mutex.Lock()
+	f.history = append(f.history, r0)
+	f.mutex.Unlock()
+}
+
+// History returns a sequence of LeverageKeeperGetAllSuppliedFuncCall
+// objects describing the invocations of this function.
+func (f *LeverageKeeperGetAllSuppliedFunc) History() []LeverageKeeperGetAllSuppliedFuncCall {
+	f.mutex.Lock()
+	history := make([]LeverageKeeperGetAllSuppliedFuncCall, len(f.history))
+	copy(history, f.history)
+	f.mutex.Unlock()
+
+	return history
+}
+
+// LeverageKeeperGetAllSuppliedFuncCall is an object that describes an
+// invocation of method GetAllSupplied on an instance of MockLeverageKeeper.
+type LeverageKeeperGetAllSuppliedFuncCall struct {
+	// Arg0 is the value of the 1st argument passed to this method
+	// invocation.
+	Arg0 types.Context
+	// Arg1 is the value of the 2nd argument passed to this method
+	// invocation.
+	Arg1 types.AccAddress
+	// Result0 is the value of the 1st result returned from this method
+	// invocation.
+	Result0 types.Coins
+	// Result1 is the value of the 2nd result returned from this method
+	// invocation.
+	Result1 error
+}
+
+// Args returns an interface slice containing the arguments of this
+// invocation.
+func (c LeverageKeeperGetAllSuppliedFuncCall) Args() []interface{} {
+	return []interface{}{c.Arg0, c.Arg1}
+}
+
+// Results returns an interface slice containing the results of this
+// invocation.
+func (c LeverageKeeperGetAllSuppliedFuncCall) Results() []interface{} {
 	return []interface{}{c.Result0, c.Result1}
 }
 

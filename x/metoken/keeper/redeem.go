@@ -63,20 +63,16 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 		return redeemResponse{}, err
 	}
 
-	uTokenWithdrawn, err := k.withdrawFromLeverage(sdk.NewCoin(assetDenom, amountFromLeverage))
+	tokensWithdrawn, err := k.withdrawFromLeverage(sdk.NewCoin(assetDenom, amountFromLeverage))
 	if err != nil {
 		return redeemResponse{}, err
 	}
 
 	// if there is a difference between the desired to withdraw from x/leverage and the withdrawn,
 	// take it from x/metoken reserves
-	tokenWithdrawn, err := k.leverageKeeper.ExchangeUToken(*k.ctx, uTokenWithdrawn)
-	if err != nil {
-		return redeemResponse{}, err
-	}
 
-	if tokenWithdrawn.Amount.LT(amountFromLeverage) {
-		tokenDiff := amountFromLeverage.Sub(tokenWithdrawn.Amount)
+	if tokensWithdrawn.Amount.LT(amountFromLeverage) {
+		tokenDiff := amountFromLeverage.Sub(tokensWithdrawn.Amount)
 		amountFromReserves = amountFromReserves.Add(tokenDiff)
 		amountFromLeverage = amountFromLeverage.Sub(tokenDiff)
 	}
@@ -149,6 +145,9 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 
 // withdrawFromLeverage before withdrawing from x/leverage check if it's possible to withdraw the desired amount
 // based on x/leverage module constrains. When the full amount is not available withdraw the max possible.
+// Returning args are:
+//   - tokensWithdrawn: the amount tokens withdrawn from x/leverage.
+//   - error
 func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error) {
 	uTokensFromLeverage, err := k.leverageKeeper.ExchangeToken(*k.ctx, tokensToWithdraw)
 	if err != nil {
@@ -169,7 +168,12 @@ func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error
 		return sdk.Coin{}, err
 	}
 
-	return uTokensToWithdraw, nil
+	tokensWithdrawn, err := k.leverageKeeper.ExchangeUToken(*k.ctx, uTokensToWithdraw)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return tokensWithdrawn, nil
 }
 
 // calculateRedeem returns the fee to be charged to the user,
