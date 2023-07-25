@@ -63,7 +63,7 @@ func (m msgServer) GovUpdateInflationParams(ctx context.Context, msg *ugov.MsgGo
 		return nil, err
 	}
 
-	err = m.kb.Keeper(&sdkCtx).SetInflationParams(msg.InflationParams)
+	err = m.kb.Keeper(&sdkCtx).SetInflationParams(msg.Params)
 	if err != nil {
 		return nil, err
 	}
