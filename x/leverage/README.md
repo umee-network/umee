@@ -218,6 +218,9 @@ The full calculation of a user's borrow limit is as follows:
 7. If collateral tokens remain after the matching is complete, then the user has borrowed less than their borrow limit. `Borrow Limit = Borrowed Value + sum(collateral value * collateral weight)` summed over all remaining collateral tokens.
 8. If borrowed tokens remain after the matching is complete, then the user has borrowed more than their borrow limit. `Borrow Limit = Borrowed Value - sum(borrowed value)` summed over all remaining borrowed tokens.
 
+Note that the borrow limit described in step 7 is the user's ideal borrow limit, their maximum borrowed value if all additional borrowed tokens had collateral weight equal to the weight of the remaining collateral.
+When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow limit will be lower.
+
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
 The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
 
