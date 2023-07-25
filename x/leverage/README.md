@@ -296,7 +296,7 @@ The result of these calculations will vary depending on the asset requested, and
 > | $50 C | $20 B | min(0.5,0.4) |
 > | $20 B | $8 B | min(0.4,0.4) |
 >
-> Since the borrowed amount of B increased from $5 to ($10 + $16.66 + $8 + $20 + $8) = $62.66, we determine that `MaxBorrow(B) = $57.66` (and then convert from dollar back to tokens in queries.)
+> Since the borrowed amount of B increased from $5 to ($10 + $16.66 + $8 + $20 + $8) = $62.66, we determine that `MaxBorrow(B) = $57.66` (and then convert from dollars back to tokens in queries.)
 >
 > Note that the calculation first had to locate the collateral A which would be moved from its regular row to a special asset row (and would have done so even if that meant orphaning some collateral that was previousy matched with it or a borrow from a lower priority special pair with collateral A)
 >
