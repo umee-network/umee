@@ -183,7 +183,9 @@ Often the leverage module will select from both prices when deriving important v
 - `PriceModeHigh` takes the higher of spot and historic prices, and is used primarily to calculated borrowed value.
 - `PriceModeLow` takes the lower of the two prices, and it used to calculate collateral value during borrow limit calculations.
 
-Transactions will also have different behaviors when encountering missing spot or historic prices, either failing immediately, proceeding with the missing price interpreted as zero, or executing a safer version of the transaction which does not require the price in question.
+Transactions will also have different behaviors when encountering missing spot or historic prices.
+Missing collateral prices will allow a transaction to succeed if all _known_ collateral is sufficient to cover the user's resulting position.
+Missing borrow prices cause any transaction which would increase borrowed value or decrease borrow limit to fail.
 
 #### Borrow Factor
 
