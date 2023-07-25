@@ -27,12 +27,12 @@ service Query {
 
   // InflationParams returns params of inflation reduction rates
   rpc InflationParams(QueryInflationParams) returns (QueryInflationParamsResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/inflation-params";
+    option (google.api.http).get = "/umee/ugov/v1/inflation_params";
   }
 
-  // InflationCycleStart returns inflation cycle start time
-  rpc InflationCycleStart(QueryInflationCycleStart) returns (QueryInflationCycleStartResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/inflation-cycle-start";
+  // InflationCycleEnd returns inflation cycle end time
+  rpc InflationCycleEnd(QueryInflationCycleEnd) returns (QueryInflationCycleEndResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/inflation_cycle_end";
   }
 }
 
@@ -57,13 +57,13 @@ message QueryInflationParams {}
 
 // QueryInflationParamsResponse response type.
 message QueryInflationParamsResponse {
-  InflationParams inflation_params = 1 [(gogoproto.nullable) = false];
+  InflationParams params = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryInflationCycleStart request type.
-message QueryInflationCycleStart {}
+// QueryInflationCycleEnd request type.
+message QueryInflationCycleEnd {}
 
-// QueryInflationCycleStartResponse response type.
-message QueryInflationCycleStartResponse {
-  google.protobuf.Timestamp start = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
+// QueryInflationCycleEndResponse response type.
+message QueryInflationCycleEndResponse {
+  google.protobuf.Timestamp end = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }

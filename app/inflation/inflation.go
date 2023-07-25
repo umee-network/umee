@@ -27,12 +27,12 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		return sdk.ZeroDec()
 	}
 
-	icst, err := ugovKeeper.GetInflationCycleStart()
+	cycleEnd, err := ugovKeeper.GetInflationCycleEnd()
 	util.Panic(err)
 
-	// Initially inflation_cycle start time is zero
-	// Once chain start inflation cycle start time will be inflation rate change executed block time
-	if ctx.BlockTime().After(icst.Add(inflationParams.InflationCycle)) {
+	// Initially inflation_cycle end time is zero
+	// Once chain start inflation cycle end time will be  executed block time + cycle duration
+	if ctx.BlockTime().After(cycleEnd) {
 		// inflation cycle is completed , so we need to update the inflation max and min rate
 		// inflationReductionRate = 25 / 100 = 0.25
 		inflationReductionRate := inflationParams.InflationReductionRate.ToDec().Quo(sdk.NewDec(100))
@@ -44,12 +44,12 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		// update the changed inflation min and max rates
 		c.MintKeeper.SetParams(ctx, mintParams)
 
-		// update the executed time of inflation cycle
-		err := ugovKeeper.SetInflationCycleStart(ctx.BlockTime())
+		// update the end time of current inflation cycle
+		err := ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
 		util.Panic(err)
 		ctx.Logger().Info("inflation min and max rates are updated",
 			"inflation_max", mintParams.InflationMax, "inflation_min", mintParams.InflationMin,
-			"inflation_cycle_start", ctx.BlockTime().String(),
+			"inflation_cycle_end", ctx.BlockTime().Add(inflationParams.InflationCycle).String(),
 		)
 	}
 

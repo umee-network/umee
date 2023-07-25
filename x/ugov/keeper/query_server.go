@@ -34,16 +34,16 @@ func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup
 func (q Querier) InflationParams(ctx context.Context, _ *ugov.QueryInflationParams) (
 	*ugov.QueryInflationParamsResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return &ugov.QueryInflationParamsResponse{InflationParams: q.Keeper(&sdkCtx).InflationParams()}, nil
+	return &ugov.QueryInflationParamsResponse{Params: q.Keeper(&sdkCtx).InflationParams()}, nil
 }
 
-// InflationCycleStart return when the inflation cycle is started
-func (q Querier) InflationCycleStart(ctx context.Context, _ *ugov.QueryInflationCycleStart) (
-	*ugov.QueryInflationCycleStartResponse, error) {
+// InflationCycleEnd return when the inflation cycle will be ended.
+func (q Querier) InflationCycleEnd(ctx context.Context, _ *ugov.QueryInflationCycleEnd) (
+	*ugov.QueryInflationCycleEndResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	icst, err := q.Keeper(&sdkCtx).GetInflationCycleStart()
+	cycleEndTime, err := q.Keeper(&sdkCtx).GetInflationCycleEnd()
 	if err != nil {
 		return nil, err
 	}
-	return &ugov.QueryInflationCycleStartResponse{Start: &icst}, nil
+	return &ugov.QueryInflationCycleEndResponse{End: &cycleEndTime}, nil
 }

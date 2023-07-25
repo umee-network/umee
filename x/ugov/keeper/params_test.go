@@ -59,16 +59,16 @@ func TestInflationCycleStart(t *testing.T) {
 	k := initKeeper(t)
 
 	st := time.Time{}
-	err := k.SetInflationCycleStart(st)
+	err := k.SetInflationCycleEnd(st)
 	require.NoError(err)
-	in_c, err := k.GetInflationCycleStart()
+	in_c, err := k.GetInflationCycleEnd()
 	require.NoError(err)
 	require.Equal(in_c.IsZero(), true, "it should be default zero time")
 
 	icst := time.Now()
-	err = k.SetInflationCycleStart(icst)
+	err = k.SetInflationCycleEnd(icst)
 	require.NoError(err)
-	ricst, err := k.GetInflationCycleStart()
+	ricst, err := k.GetInflationCycleEnd()
 	require.NoError(err)
 	require.Equal(ricst.UnixMilli(), icst.UnixMilli(), "inflation cycle start time should be same")
 }
