@@ -26,7 +26,7 @@ service Query {
 
   // AllOutflow returns outflows for each denom in the current quota period.
   rpc AllOutflows(QueryAllOutflows) returns (QueryAllOutflowsResponse) {
-    option (google.api.http).get = "/umee/uibc/v1/all-outflows";
+    option (google.api.http).get = "/umee/uibc/v1/all_outflows";
   }
 }
 
