@@ -303,7 +303,7 @@ The result of these calculations will vary depending on the asset requested, and
 >
 > Note that the calculation first had to locate the collateral A which would be moved from its regular row to a special asset row (and would have done so even if that meant orphaning some collateral that was previousy matched with it or a borrow from a lower priority special pair with collateral A)
 >
-> After such displaced assets are dealth with, including chain reactions, remaining borrowed B is inserted into the regular rows.
+> After such displaced assets are dealt with, including chain reactions, remaining borrowed B is inserted into the regular rows.
 > It cannot bump borrowed assets with a greater or equal collateral weight, but will displace lower-weighted borrows down to fill the bottom rows, then fill all emptry rows.
 
 The computation above for max borrow will behave differently for different tokens, given the presence or absence of special asset pairs and the collateral weight of the new borrow and the existing borrows being displaced.
