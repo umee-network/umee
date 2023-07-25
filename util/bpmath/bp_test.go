@@ -56,3 +56,26 @@ func TestInt(t *testing.T) {
 	si = sdk.NewInt(-1201)
 	require.Equal(bp.Mul(si), sdk.NewInt(-12))
 }
+
+func TestBPMulDec(t *testing.T) {
+	t.Parallel()
+	require := require.New(t)
+
+	bp := BP(1000)
+	bp2 := BP(1)
+	bp3 := BP(5000)
+	bp4 := BP(20000)
+	d := sdk.MustNewDecFromStr("12.5002")
+	d2 := sdk.NewDec(10000)
+	d3 := sdk.NewDec(1000)
+
+	require.Equal(d, MulDec(d, One))
+	require.Equal(sdk.ZeroDec(), MulDec(d, Zero))
+	require.Equal(sdk.OneDec(), bp2.MulDec(d2))
+	require.Equal(sdk.MustNewDecFromStr("0.1"), bp2.MulDec(d3))
+
+	require.Equal(sdk.MustNewDecFromStr("1.25002"), bp.MulDec(d))
+	require.Equal(sdk.MustNewDecFromStr("0.00125002"), bp2.MulDec(d))
+	require.Equal(sdk.MustNewDecFromStr("6.2501"), bp3.MulDec(d))
+	require.Equal(sdk.MustNewDecFromStr("25.0004"), bp4.MulDec(d))
+}

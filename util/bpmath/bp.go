@@ -20,6 +20,11 @@ func (bp BP) Mul(a cmath.Int) cmath.Int {
 	return Mul(a, bp)
 }
 
+// MulDec return a*bp rounding towards zero.
+func (bp BP) MulDec(a sdk.Dec) sdk.Dec {
+	return MulDec(a, bp)
+}
+
 // FromQuo returns a/b in basis points.
 // Contract: a>=0 and b > 0.
 // Panics if a/b >= MaxUint32/10'000 or if b==0.
@@ -44,7 +49,7 @@ func quo(a, b cmath.Int, rounding Rounding, max uint64) uint64 {
 
 // Mul returns a * b_basis_points rounding towards zero.
 // Contract: b in [0, MaxUint32]
-func Mul[T BP | FixedBP](a cmath.Int, b T) cmath.Int {
+func Mul[T BP | FixedBP | int](a cmath.Int, b T) cmath.Int {
 	if b == 0 {
 		return cmath.ZeroInt()
 	}
@@ -52,4 +57,16 @@ func Mul[T BP | FixedBP](a cmath.Int, b T) cmath.Int {
 		return a
 	}
 	return a.MulRaw(int64(b)).Quo(oneBigInt)
+}
+
+// MulDec returns a * b_basis_points rounding towards zero.
+// Contract: b in [0, MaxUint32]
+func MulDec[T BP | FixedBP | int](a sdk.Dec, b T) sdk.Dec {
+	if b == 0 {
+		return sdk.ZeroDec()
+	}
+	if b == One {
+		return a
+	}
+	return a.MulInt64(int64(b)).Quo(oneDec)
 }

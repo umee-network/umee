@@ -23,7 +23,7 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		QueryMinGasPrice(),
 		QueryLiquidationParams(),
-		QueryInflationCyleStartedTime(),
+		QueryInflationCyleEnd(),
 	)
 
 	return cmd
@@ -75,10 +75,10 @@ func QueryLiquidationParams() *cobra.Command {
 	return cmd
 }
 
-// QueryInflationCyleStartedTime create the Msg/QueryInflationCyleStartedTime CLI.
-func QueryInflationCyleStartedTime() *cobra.Command {
+// QueryInflationCyleEnd create the Msg/QueryInflationCyleEnd CLI.
+func QueryInflationCyleEnd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "inflation-cycle-start-time",
+		Use:   "inflation-cycle-end",
 		Args:  cobra.NoArgs,
 		Short: "Query the When the Inflation Cycle is Started",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -88,7 +88,7 @@ func QueryInflationCyleStartedTime() *cobra.Command {
 			}
 
 			queryClient := ugov.NewQueryClient(clientCtx)
-			resp, err := queryClient.InflationCycleStart(cmd.Context(), &ugov.QueryInflationCycleStart{})
+			resp, err := queryClient.InflationCycleEnd(cmd.Context(), &ugov.QueryInflationCycleEnd{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
