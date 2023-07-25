@@ -3,14 +3,15 @@ package types
 import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 
 	"github.com/umee-network/umee/v5/util/checkers"
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	_ sdk.Msg = &MsgGovUpdateRegistry{}
-	_ sdk.Msg = &MsgGovUpdateSpecialAssetPairs{}
+	_, _ sdk.Msg            = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssetPairs{}
+	_, _ legacytx.LegacyMsg = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssetPairs{}
 )
 
 // NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance
@@ -138,8 +139,10 @@ func validateSpecialAssetPairDenoms(pairs []SpecialAssetPair) error {
 
 // LegacyMsg.Type implementations
 
-func (msg MsgGovUpdateRegistry) Type() string          { return sdk.MsgTypeURL(&msg) }
-func (msg MsgGovUpdateSpecialAssetPairs) Type() string { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovUpdateRegistry) Type() string           { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovUpdateSpecialAssetPairs) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovUpdateRegistry) Route() string          { return "" }
+func (msg MsgGovUpdateSpecialAssetPairs) Route() string { return "" }
 
 func (msg MsgGovUpdateSpecialAssetPairs) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
