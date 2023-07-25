@@ -94,7 +94,7 @@ func TestInflationRate(t *testing.T) {
 		inflationParams func(ip ugov.InflationParams) ugov.InflationParams
 		bondedRatio     sdk.Dec
 		mintParams      func(params minttypes.Params) minttypes.Params
-		cycleStartTime  func() time.Time
+		cycleEndTime    func() time.Time
 		ctx             func() sdk.Context
 		expectedResult  func(expectedResult, bondedRatio sdk.Dec, mintParams minttypes.Params) sdk.Dec
 	}{
@@ -112,7 +112,7 @@ func TestInflationRate(t *testing.T) {
 				return ip
 			},
 			bondedRatio: sdk.NewDecWithPrec(20, 2),
-			cycleStartTime: func() time.Time {
+			cycleEndTime: func() time.Time {
 				// returns 2 hours back
 				n := time.Now().Add(-time.Hour * 2)
 				return n
@@ -126,7 +126,7 @@ func TestInflationRate(t *testing.T) {
 			},
 		},
 		{
-			name:        "ZeroInflation : Total Supply equals Max supply",
+			name:        "zero inflation : total supply equals max supply",
 			totalSupply: math.NewInt(100000000),
 			minter:      mockMinter,
 			mintParams: func(params minttypes.Params) minttypes.Params {
@@ -137,7 +137,7 @@ func TestInflationRate(t *testing.T) {
 				return ip
 			},
 			bondedRatio: sdk.NewDecWithPrec(30, 2),
-			cycleStartTime: func() time.Time {
+			cycleEndTime: func() time.Time {
 				return time.Now()
 			},
 			ctx: func() sdk.Context {
@@ -161,8 +161,8 @@ func TestInflationRate(t *testing.T) {
 				return ip
 			},
 			bondedRatio: sdk.NewDecWithPrec(20, 2),
-			cycleStartTime: func() time.Time {
-				return time.Now()
+			cycleEndTime: func() time.Time {
+				return time.Now().Add(2 * time.Hour)
 			},
 			ctx: func() sdk.Context {
 				return sdkContext.WithBlockTime(time.Now())
@@ -190,7 +190,7 @@ func TestInflationRate(t *testing.T) {
 				return ip
 			},
 			bondedRatio: sdk.NewDecWithPrec(20, 2),
-			cycleStartTime: func() time.Time {
+			cycleEndTime: func() time.Time {
 				return time.Now()
 			},
 			ctx: func() sdk.Context {
@@ -222,8 +222,8 @@ func TestInflationRate(t *testing.T) {
 			mockUGovKeeper.EXPECT().InflationParams().Return(test.inflationParams(mockInflationParams))
 			mockMintKeeper.EXPECT().StakingTokenSupply(gomock.Any()).Return(test.totalSupply)
 			mockMintKeeper.EXPECT().SetParams(gomock.Any(), gomock.Any()).AnyTimes()
-			mockUGovKeeper.EXPECT().GetInflationCycleStart().Return(test.cycleStartTime(), nil).AnyTimes()
-			mockUGovKeeper.EXPECT().SetInflationCycleStart(gomock.Any()).Return(nil).AnyTimes()
+			mockUGovKeeper.EXPECT().GetInflationCycleEnd().Return(test.cycleEndTime(), nil).AnyTimes()
+			mockUGovKeeper.EXPECT().SetInflationCycleEnd(gomock.Any()).Return(nil).AnyTimes()
 
 			result := calc.InflationRate(test.ctx(), test.minter, test.mintParams(mintParams), test.bondedRatio)
 

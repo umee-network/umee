@@ -24,8 +24,8 @@ type IParams interface {
 	EmergencyGroup() sdk.AccAddress
 	SetInflationParams(lp ugov.InflationParams) error
 	InflationParams() ugov.InflationParams
-	SetInflationCycleStart(startTime time.Time) error
-	GetInflationCycleStart() (time.Time, error)
+	SetInflationCycleEnd(startTime time.Time) error
+	GetInflationCycleEnd() (time.Time, error)
 }
 
 var _ IKeeper = Keeper{}
