@@ -226,9 +226,6 @@ The full calculation of a user's borrow limit is as follows:
 Note that the borrow limit described in step 7 is the user's ideal borrow limit, their maximum borrowed value if all additional borrowed tokens had collateral weight equal to the weight of the remaining collateral.
 When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow limit will be lower.
 
-This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
-The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
-
 > Example Borrow Limit Calculation:
 >
 > Collateral: $20 ATOM + $20 UMEE + $40 STATOM
@@ -242,7 +239,7 @@ The result of these calculations will vary depending on the asset requested, and
 >
 > $40 STATOM with a special collateral weight of 0.75 can borrow $30 ATOM. These amounts are matched with each other.
 >
-> The user's remaining position now looks like the following (sorted collateral weights):
+> The user's remaining position now looks like the following (sorted by collateral weights):
 >
 > Collateral: $20 ATOM (0.6) + $20 UMEE (0.35)
 > Borrowed: $20 ATOM (0.6)
@@ -256,6 +253,9 @@ The result of these calculations will vary depending on the asset requested, and
 > Collateral is now exhausted, and $1 borrowed ATOM remains.
 >
 > Thus the user is $1 above their borrow limit. Their borrow limit must be $50 - $1 = $49.
+
+This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
+The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
 
 #### Liquidation Threshold
 
