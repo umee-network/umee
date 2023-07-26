@@ -194,7 +194,7 @@ Each token in the `Token Registry` has a parameter called `CollateralWeight`, al
 
 An additional implied parameter is defined as `BorrowFactor = maximum(0.5, CollateralWeight)`. Borrow factor limits the effectiveness of any collateral which is borrowing the token in question.
 
-For example, an account using a single collateral token with `CollateralWeight 0.8` borrowing an single token with `CollateralWeight 0.7` will reduce the effective `CollateralWeight` of the account's collateral to `0.7` when computing borrow limit.
+For example, an account using a single collateral token with `CollateralWeight 0.8` borrowing a single token with `CollateralWeight 0.7` will reduce the effective `CollateralWeight` of the account's collateral to `0.7` when computing borrow limit.
 
 #### Special Asset Pairs
 
