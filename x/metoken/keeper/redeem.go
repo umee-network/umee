@@ -146,7 +146,7 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 }
 
 // withdrawFromLeverage before withdrawing from x/leverage check if it's possible to withdraw the desired amount
-// based on x/leverage module constrains. When the full amount is not available withdraw the max possible.
+// based on x/leverage module constraints. When the full amount is not available withdraw the max possible.
 // Returning args are:
 //   - tokensWithdrawn: the amount tokens withdrawn from x/leverage.
 //   - error
