@@ -1123,10 +1123,11 @@ type MsgGovUpdateSpecialAssetPairs struct {
 	// sets are bidirectional groups of special asset pairs. Creating a special asset
 	// set causes all assets in the set to have a certain collateral weight when borrowing
 	// against each other (but not looping with themselves). Overrides any existing
-	// special asset pairs between assets in the set.
+	// special asset pairs between assets in the set. Using a collateral weight
+	// one negative one will clear all existing special pairs in the set instead.
 	Sets []SpecialAssetSet `protobuf:"bytes,2,rep,name=sets,proto3" json:"sets"`
 	// pairs are new or updated special asset pairs. Updating a special asset pair's
-	// collateral weight to match that of its base asset deletes it instead.
+	// collateral weight to negative one deletes the pair instead.
 	// These pairs will be applied after any sets above when passing a proposal,
 	// so they can be used for more granular control.
 	Pairs []SpecialAssetPair `protobuf:"bytes,3,rep,name=pairs,proto3" json:"pairs"`
@@ -1456,8 +1457,8 @@ type MsgClient interface {
 	// updates existing tokens with new settings.
 	GovUpdateRegistry(ctx context.Context, in *MsgGovUpdateRegistry, opts ...grpc.CallOption) (*MsgGovUpdateRegistryResponse, error)
 	// GovUpdateSpecialAssetPairs adds, updates, or removes special asset pairs. Note that a special asset
-	// pair can be removed by setting its special collateral weight to the collateral weight of the base
-	// asset.
+	// pair can be removed by setting its special collateral weight to negative one. Also allows for the creation
+	// of sets of assets, where each asset in the set forms a special asset pair with all of the others.
 	GovUpdateSpecialAssetPairs(ctx context.Context, in *MsgGovUpdateSpecialAssetPairs, opts ...grpc.CallOption) (*MsgGovUpdateSpecialAssetPairsResponse, error)
 }
 
@@ -1630,8 +1631,8 @@ type MsgServer interface {
 	// updates existing tokens with new settings.
 	GovUpdateRegistry(context.Context, *MsgGovUpdateRegistry) (*MsgGovUpdateRegistryResponse, error)
 	// GovUpdateSpecialAssetPairs adds, updates, or removes special asset pairs. Note that a special asset
-	// pair can be removed by setting its special collateral weight to the collateral weight of the base
-	// asset.
+	// pair can be removed by setting its special collateral weight to negative one. Also allows for the creation
+	// of sets of assets, where each asset in the set forms a special asset pair with all of the others.
 	GovUpdateSpecialAssetPairs(context.Context, *MsgGovUpdateSpecialAssetPairs) (*MsgGovUpdateSpecialAssetPairsResponse, error)
 }
 
