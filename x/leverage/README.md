@@ -227,28 +227,15 @@ When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow li
 > Collateral: $20 ATOM + $20 UMEE + $40 STATOM
 > Borrowed: $50 ATOM
 >
-> Assume the following collateral weights: UMEE 0.35, ATOM 0.6, STATOM 0.5
->
-> Also assume a special asset pair [STATOM, ATOM, 0.75] is in effect. STATOM gets a boost when borrowing ATOM.
->
+> Assume the following collateral weights: UMEE 0.35, ATOM 0.6, STATOM 0.5. Also assume a special asset pair [STATOM, ATOM, 0.75] is in effect. STATOM gets a boost when borrowing ATOM.
 > Starting at step 3 above, since prices are already given, we first isolate any special asset pairs.
->
-> $40 STATOM with a special collateral weight of 0.75 can borrow $30 ATOM. These amounts are matched with each other.
->
-> The user's remaining position now looks like the following (sorted by collateral weights):
+> $40 STATOM with a special collateral weight of 0.75 can borrow $30 ATOM. These amounts are matched with each other. The user's remaining position now looks like the following (sorted by collateral weights):
 >
 > Collateral: $20 ATOM (0.6) + $20 UMEE (0.35)
 > Borrowed: $20 ATOM (0.6)
 >
-> Then collateral is matched with borrowed assets starting with the highest weights.
->
-> First, $20 ATOM collateral is matched with $12 borrowed ATOM.
->
-> Then, $20 UMEE collateral is matched with $7 borrowed ATOM.
->
-> Collateral is now exhausted, and $1 borrowed ATOM remains.
->
-> Thus the user is $1 above their borrow limit. Their borrow limit must be $50 - $1 = $49.
+> Then collateral is matched with borrowed assets starting with the highest weights. First, $20 ATOM collateral is matched with $12 borrowed ATOM. Then, $20 UMEE collateral is matched with $7 borrowed ATOM.
+> Collateral is now exhausted, and $1 borrowed ATOM remains. Thus the user is $1 above their borrow limit. Their borrow limit must be $50 - $1 = $49.
 
 #### Max Borrow
 
