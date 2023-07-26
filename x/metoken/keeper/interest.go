@@ -17,13 +17,19 @@ func (k Keeper) ClaimInterest() error {
 	}
 
 	if k.ctx.BlockTime().After(interestClaimTime) {
-		leverageLiquidity, err := k.leverageKeeper.GetAllSupplied(*k.ctx,
-			authtypes.NewModuleAddress(metoken.ModuleName))
+		indexes := k.GetAllRegisteredIndexes()
+		if len(indexes) == 0 {
+			return nil
+		}
+
+		leverageLiquidity, err := k.leverageKeeper.GetAllSupplied(
+			*k.ctx,
+			authtypes.NewModuleAddress(metoken.ModuleName),
+		)
 		if err != nil {
 			return err
 		}
 
-		indexes := k.GetAllRegisteredIndexes()
 		for _, index := range indexes {
 			balances, err := k.IndexBalances(index.Denom)
 			if err != nil {

@@ -165,22 +165,11 @@ func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error
 		return coin.Zero(tokensToWithdraw.Denom), nil
 	}
 
-	uTokensToWithdraw := sdk.NewCoin(
-		uTokensFromLeverage.Denom,
-		sdk.MinInt(
-			availableUTokensFromLeverage,
-			uTokensFromLeverage.Amount,
-		),
-	)
-	if _, _, err = k.leverageKeeper.Withdraw(
+	tokensWithdrawn, _, err := k.leverageKeeper.Withdraw(
 		*k.ctx,
 		authtypes.NewModuleAddress(metoken.ModuleName),
-		uTokensToWithdraw,
-	); err != nil {
-		return sdk.Coin{}, err
-	}
-
-	tokensWithdrawn, err := k.leverageKeeper.ExchangeUToken(*k.ctx, uTokensToWithdraw)
+		sdk.NewCoin(uTokensFromLeverage.Denom, sdk.MinInt(availableUTokensFromLeverage, uTokensFromLeverage.Amount)),
+	)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
