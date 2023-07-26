@@ -73,7 +73,6 @@ Users have the following actions available to them:
   Collateralize can fail if it would violate the module's `min_collateral_liquidity` for the token.
 
 - `MsgSupplyCollateral` to combine the effects of `MsgSupply` and `MsgCollateralize`.
-
   Care should be taken by undercollateralized users when supplying token amounts too small to restore the health of their borrows, as the newly supplied assets will be eligible for liquidation immediately.
 
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
