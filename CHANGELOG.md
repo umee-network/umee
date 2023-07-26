@@ -51,7 +51,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2129](https://github.com/umee-network/umee/pull/2129) Emergency Group x/ugov proto.
 - [2146](https://github.com/umee-network/umee/pull/2146) Add store `GetTimeMs` and `SetTimeMs`.
 - [2157](https://github.com/umee-network/umee/pull/2157) Add `x/metoken` module.
-- [2145](https://github.com/umee-network/umee/pull/2145) Add hard market cap for token emission.
+- [2145](https://github.com/umee-network/umee/pull/2145) Add New `Inflation Parms` to x/ugov proto and added `inflation rate` change logic to umint
+- [2159](https://github.com/umee-network/umee/pull/2159) Add hard market cap for token emission.
 - [2155](https://github.com/umee-network/umee/pull/2155) `bpmath`: basis points math package.
 - [2166](https://github.com/umee-network/umee/pull/2166) Basis Points: `MulDec`
 
