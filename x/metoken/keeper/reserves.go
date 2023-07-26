@@ -3,11 +3,16 @@ package keeper
 import (
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v5/x/metoken"
 )
+
+// one is the smallest unit of a base denom.
+var one = sdkmath.NewInt(1)
 
 // RebalanceReserves checks if the portion of reserves is below the desired and transfer the missing amount from
 // x/leverage to x/metoken reserves, or vice versa.
@@ -41,6 +46,10 @@ func (k Keeper) RebalanceReserves() error {
 						// transfer the missing amount from x/leverage to x/metoken
 						if desiredReserves.GT(balance.Reserved) {
 							missingReserves := desiredReserves.Sub(balance.Reserved)
+							if missingReserves.LTE(one) {
+								continue
+							}
+
 							tokensWithdrawn, err := k.withdrawFromLeverage(sdk.NewCoin(balance.Denom, missingReserves))
 							if err != nil {
 								return err
@@ -55,6 +64,9 @@ func (k Keeper) RebalanceReserves() error {
 						// transfer the extra amount to x/leverage
 						if desiredReserves.LT(balance.Reserved) {
 							extraReserves := balance.Reserved.Sub(desiredReserves)
+							if extraReserves.LTE(one) {
+								continue
+							}
 
 							tokenSupplied, err := k.supplyToLeverage(sdk.NewCoin(balance.Denom, extraReserves))
 							if err != nil {
