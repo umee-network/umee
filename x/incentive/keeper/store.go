@@ -146,7 +146,6 @@ func (k Keeper) setNextProgramID(ctx sdk.Context, id uint32) error {
 }
 
 // getLastRewardsTime gets the last unix time incentive rewards were computed globally by EndBlocker.
-// panics if it would return a negative value.
 func (k Keeper) GetLastRewardsTime(ctx sdk.Context) int64 {
 	t, _ := store.GetInteger[int64](k.KVStore(ctx), keyLastRewardsTime)
 	return t
