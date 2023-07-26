@@ -181,7 +181,7 @@ The leverage module makes use of the oracle's spot prices and historic prices fo
 
 The spot price is the price which was voted on by validators during the most recent window (usually 30 seconds). If voting failed, this price will not exist.
 
-The historic price is basically a median price for the asset over a given time period requested by the leverage module (`3 hours * Token.HistoricMedians`). For assets which do not user historic medians, the historic price simply returns the spot price.
+The historic price is basically a median price for the asset over a given time period requested by the leverage module (`3 hours * Token.HistoricMedians`). For assets which do not use historic medians, the historic price simply returns the spot price.
 
 Often the leverage module will select from both prices when deriving important values. For example:
 
