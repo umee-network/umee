@@ -206,7 +206,7 @@ They are defined in the form `[Asset A, Asset B, Special Collateral Weight]`. In
 
 #### Borrow Limit
 
-A user's borrow limit is the sum of the contributions from each denomination of collateral they have deposited, with some modifications due to `Borrow Factor` and `Special Asset Pairs`.
+A user's borrow limit is the sum of the contributions from each collateral they have deposited, with some modifications due to `Borrow Factor` and `Special Asset Pairs`.
 
 The full calculation of a user's borrow limit is as follows:
 
