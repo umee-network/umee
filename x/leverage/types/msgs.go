@@ -82,10 +82,11 @@ func validateRegistryTokenDenoms(tokens []Token) error {
 }
 
 // NewMsgGovUpdateSpecialAssetPairs will create a new MsgGovUpdateSpecialAssetPairs instance
-func NewMsgGovUpdateSpecialAssetPairs(authority string, pairs []SpecialAssetPair,
+func NewMsgGovUpdateSpecialAssetPairs(authority string, sets []SpecialAssetSet, pairs []SpecialAssetPair,
 ) *MsgGovUpdateSpecialAssetPairs {
 	return &MsgGovUpdateSpecialAssetPairs{
 		Authority: authority,
+		Sets:      sets,
 		Pairs:     pairs,
 	}
 }
@@ -118,6 +119,11 @@ func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
 	for _, pair := range msg.Pairs {
 		if err := pair.Validate(); err != nil {
 			return errors.Wrapf(err, "special asset pair [%s, %s]", pair.Collateral, pair.Borrow)
+		}
+	}
+	for _, set := range msg.Sets {
+		if err := set.Validate(); err != nil {
+			return errors.Wrapf(err, "special asset set [%s]", set.String())
 		}
 	}
 

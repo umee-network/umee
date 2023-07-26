@@ -1348,6 +1348,12 @@ paths:
                     value:
                       type: string
                       format: byte
+      parameters:
+        - name: denom
+          description: denom can be used to query only pairs affecting a specific asset.
+          in: query
+          required: false
+          type: string
       tags:
         - Query
   /umee/historacle/v1/avg_price/{denom}:

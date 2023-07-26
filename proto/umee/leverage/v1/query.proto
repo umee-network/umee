@@ -109,6 +109,8 @@ message QueryRegisteredTokensResponse {
 // QuerySpecialAssetPairs defines the request structure for the SpecialAssetPairs
 // gRPC service handler.
 message QuerySpecialAssetPairs {
+  // denom can be used to query only pairs affecting a specific asset
+  string denom = 1;
 }
 
 // QuerySpecialAssetPairsResponse defines the response structure for the

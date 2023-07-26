@@ -213,6 +213,28 @@ func (p SpecialAssetPair) Validate() error {
 	return nil
 }
 
+// Validate performs validation on an SpecialAssetSet type
+func (s SpecialAssetSet) Validate() error {
+	if err := validateBaseDenoms(s.Assets...); err != nil {
+		return err
+	}
+
+	denoms := map[string]bool{}
+	for _, a := range s.Assets {
+		if _, ok := denoms[a]; ok {
+			return ErrDuplicatePair
+		}
+		denoms[a] = true
+	}
+
+	// Collateral weight is non-negative and less than 1.
+	if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid collateral rate: %s", s.CollateralWeight)
+	}
+
+	return nil
+}
+
 // validateBaseDenoms ensures that one or more strings are valid token denoms without the uToken prefix
 func validateBaseDenoms(denoms ...string) error {
 	for _, s := range denoms {
