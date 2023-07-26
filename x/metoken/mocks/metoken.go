@@ -202,7 +202,7 @@ func ValidToken(baseDenom, symbolDenom string, exponent uint32) ltypes.Token {
 		Blacklist:              false,
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
+		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.05"),
 		MaxSupply:              sdk.ZeroInt(),
 		HistoricMedians:        24,
 	}

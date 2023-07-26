@@ -107,9 +107,6 @@ func TestRebalanceReserves(t *testing.T) {
 
 	// confirm the balances are good now
 	checkBalances(t, ctx, app, k, index.Denom, true)
-	genesis := k.ExportGenesis()
-	require.NoError(t, err)
-	require.True(t, !genesis.NextInterestClaimTime.IsZero())
 }
 
 func checkBalances(

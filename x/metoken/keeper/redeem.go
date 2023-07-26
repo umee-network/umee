@@ -3,6 +3,8 @@ package keeper
 import (
 	"fmt"
 
+	"github.com/umee-network/umee/v5/util/coin"
+
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	sdkmath "cosmossdk.io/math"
@@ -159,7 +161,17 @@ func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error
 		return sdk.Coin{}, err
 	}
 
-	uTokensToWithdraw := sdk.NewCoin(uTokensFromLeverage.Denom, availableUTokensFromLeverage)
+	if availableUTokensFromLeverage.IsZero() {
+		return coin.Zero(tokensToWithdraw.Denom), nil
+	}
+
+	uTokensToWithdraw := sdk.NewCoin(
+		uTokensFromLeverage.Denom,
+		sdk.MinInt(
+			availableUTokensFromLeverage,
+			uTokensFromLeverage.Amount,
+		),
+	)
 	if _, _, err = k.leverageKeeper.Withdraw(
 		*k.ctx,
 		authtypes.NewModuleAddress(metoken.ModuleName),

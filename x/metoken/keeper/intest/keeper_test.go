@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -39,7 +40,7 @@ func initKeeperTestSuite(t *testing.T, registry []metoken.Index, balances []meto
 			ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 			Height:  9,
 		},
-	)
+	).WithBlockTime(time.Now())
 
 	oracleMock := mocks.NewMockOracleKeeper()
 	oracleMock.AllMedianPricesFunc.SetDefaultHook(mocks.ValidPricesFunc())
