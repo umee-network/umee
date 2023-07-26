@@ -98,15 +98,15 @@ func SetValueCdc(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.Pr
 	return nil
 }
 
-// GetInt retrieves an sdkmath.Int from a KVStore, or returns zero if no value is stored.
+// GetInt retrieves an sdkmath.Int from a KVStore, or returns (0, false) if no value is stored.
 // It panics if a stored value fails to unmarshal or is negative.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func GetInt(store sdk.KVStore, key []byte, errField string) sdkmath.Int {
+func GetInt(store sdk.KVStore, key []byte, errField string) (sdkmath.Int, bool) {
 	val := GetValue[*sdkmath.Int](store, key, errField)
 	if val == nil { // Not found
-		return sdk.ZeroInt()
+		return sdk.ZeroInt(), false
 	}
-	return *val
+	return *val, true
 }
 
 // SetInt stores an sdkmath.Int in a KVStore, or clears if setting to zero or nil.

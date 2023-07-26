@@ -34,7 +34,8 @@ func TestGetAndSetInt(t *testing.T) {
 	err := SetInt(store, key, val, "no error")
 	assert.NilError(t, err)
 
-	v := GetInt(store, key, "no error")
+	v, ok := GetInt(store, key, "no error")
+	assert.Equal(t, true, ok)
 	assert.DeepEqual(t, v, val)
 }
 

@@ -166,14 +166,14 @@ func (k Keeper) setLastRewardsTime(ctx sdk.Context, time int64) error {
 // getTotalBonded retrieves the total amount of uTokens of a given denom which are bonded to the incentive module
 func (k Keeper) getTotalBonded(ctx sdk.Context, denom string) sdk.Coin {
 	key := keyTotalBonded(denom)
-	amount := store.GetInt(k.KVStore(ctx), key, "total bonded")
+	amount, _ := store.GetInt(k.KVStore(ctx), key, "total bonded")
 	return sdk.NewCoin(denom, amount)
 }
 
 // GetBonded retrieves the amount of uTokens of a given denom which are bonded by an account
 func (k Keeper) GetBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	key := keyBondAmount(addr, denom)
-	amount := store.GetInt(k.KVStore(ctx), key, "bonded amount")
+	amount, _ := store.GetInt(k.KVStore(ctx), key, "bonded amount")
 	return sdk.NewCoin(denom, amount)
 }
 
@@ -200,7 +200,7 @@ func (k Keeper) setBonded(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin)
 // getUnbonding retrieves the amount of uTokens of a given denom which are unbonding by an account
 func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin {
 	key := keyUnbondAmount(addr, denom)
-	amount := store.GetInt(k.KVStore(ctx), key, "unbonding amount")
+	amount, _ := store.GetInt(k.KVStore(ctx), key, "unbonding amount")
 	return sdk.NewCoin(denom, amount)
 }
 
@@ -208,7 +208,7 @@ func (k Keeper) getUnbondingAmount(ctx sdk.Context, addr sdk.AccAddress, denom s
 // the incentive module
 func (k Keeper) getTotalUnbonding(ctx sdk.Context, denom string) sdk.Coin {
 	key := keyTotalUnbonding(denom)
-	amount := store.GetInt(k.KVStore(ctx), key, "total unbonding")
+	amount, _ := store.GetInt(k.KVStore(ctx), key, "total unbonding")
 	return sdk.NewCoin(denom, amount)
 }
 
