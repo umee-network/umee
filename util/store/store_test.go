@@ -40,7 +40,8 @@ func TestGetAndSetInt(t *testing.T) {
 
 func checkStoreNumber[T Integer](name string, val T, store sdk.KVStore, key []byte, t *testing.T) {
 	SetInteger(store, key, val)
-	vOut := GetInteger[T](store, key)
+	vOut, ok := GetInteger[T](store, key)
+	require.True(t, ok)
 	require.Equal(t, val, vOut, name)
 }
 

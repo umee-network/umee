@@ -131,7 +131,8 @@ func (k Keeper) deleteIncentiveProgram(ctx sdk.Context, id uint32) error {
 
 // getNextProgramID gets the ID that will be assigned to the next incentive program passed by governance.
 func (k Keeper) getNextProgramID(ctx sdk.Context) uint32 {
-	return store.GetInteger[uint32](k.KVStore(ctx), keyNextProgramID)
+	id, _ := store.GetInteger[uint32](k.KVStore(ctx), keyNextProgramID)
+	return id
 }
 
 // setNextProgramID sets the ID that will be assigned to the next incentive program passed by governance.
@@ -147,7 +148,8 @@ func (k Keeper) setNextProgramID(ctx sdk.Context, id uint32) error {
 // getLastRewardsTime gets the last unix time incentive rewards were computed globally by EndBlocker.
 // panics if it would return a negative value.
 func (k Keeper) GetLastRewardsTime(ctx sdk.Context) int64 {
-	return store.GetInteger[int64](k.KVStore(ctx), keyLastRewardsTime)
+	t, _ := store.GetInteger[int64](k.KVStore(ctx), keyLastRewardsTime)
+	return t
 }
 
 // setLastRewardsTime sets the last unix time incentive rewards were computed globally by EndBlocker.
