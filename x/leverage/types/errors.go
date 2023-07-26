@@ -29,6 +29,7 @@ var (
 	ErrEmptyAddAndUpdateTokens      = errors.Register(ModuleName, 208, "empty add and update tokens")
 	ErrEmptyUpdateSpecialAssetPairs = errors.Register(ModuleName, 209, "empty update special asset pairs")
 	ErrDuplicatePair                = errors.Register(ModuleName, 210, "duplicate special asset pair")
+	ErrProposedSetOrder             = errors.Register(ModuleName, 211, "asset sets not in ascending (weight) order")
 
 	// 3XX = User Positions
 	ErrInsufficientBalance    = errors.Register(ModuleName, 300, "insufficient balance")

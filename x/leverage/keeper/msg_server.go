@@ -588,28 +588,22 @@ func (s msgServer) GovUpdateSpecialAssetPairs(
 						Borrow:           b,
 						CollateralWeight: set.CollateralWeight,
 					}
+					// sets or overrides (or deletes on negative collateral weight) each pair
 					if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
 						return nil, err
 					}
+
 				}
 			}
 		}
 	}
 
+	// individual pairs are applied after sets, so they can override specific relationships
+	// between assets.
 	for _, pair := range msg.Pairs {
-		token, err := s.keeper.GetTokenSettings(ctx, pair.Collateral)
-		if err != nil {
+		// sets or overrides (or deletes on negative collateral weight) each pair
+		if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
 			return nil, err
-		}
-
-		if pair.CollateralWeight.Equal(token.CollateralWeight) {
-			// setting a special collateral weight equal to regular collateral weight deletes
-			// the special pair instead.
-			s.keeper.DeleteSpecialAssetPair(ctx, pair.Collateral, pair.Borrow)
-		} else {
-			if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
-				return nil, err
-			}
 		}
 	}
 

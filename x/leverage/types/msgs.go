@@ -116,14 +116,25 @@ func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
 		return err
 	}
 
+	ascendingWeight := sdk.ZeroDec()
+	for _, set := range msg.Sets {
+		// ensures sets are sorted from lowest to highest collateral weight
+		// to ensure overlapping sets cause the higher collateral weight to
+		// be stored in state
+		if set.CollateralWeight.IsPositive() {
+			if set.CollateralWeight.LT(ascendingWeight) {
+				return ErrProposedSetOrder
+			}
+			ascendingWeight = set.CollateralWeight
+		}
+		if err := set.Validate(); err != nil {
+			return errors.Wrapf(err, "special asset set [%s]", set.String())
+		}
+	}
+
 	for _, pair := range msg.Pairs {
 		if err := pair.Validate(); err != nil {
 			return errors.Wrapf(err, "special asset pair [%s, %s]", pair.Collateral, pair.Borrow)
-		}
-	}
-	for _, set := range msg.Sets {
-		if err := set.Validate(); err != nil {
-			return errors.Wrapf(err, "special asset set [%s]", set.String())
 		}
 	}
 
