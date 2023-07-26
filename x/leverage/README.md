@@ -84,9 +84,7 @@ Users have the following actions available to them:
   This amount is calculated taking into account the available uTokens and collateral the user has, their borrow limit, and the available liquidity and collateral that can be withdrawn from the module respecting the `min_collateral_liquidity` and `max_supply_utilization` of the `Token`.
 
 - `MsgBorrow` assets of an accepted type, up to their [Borrow Limit](#borrow-limit).
-
   Interest will accrue on borrows for as long as they are not paid off, with the amount owed increasing at a rate of the asset's [Borrow APY](#borrow-apy).
-
   Borrow can fail if it would violate the module's `max_supply_utilization` or `min_collateral_liquidity`.
 
 - `MsgMaxBorrow` borrows assets by automatically calculating the maximum amount that can be borrowed. This amount is calculated taking into account the user's borrow limit and the module's available liquidity respecting the `min_collateral_liquidity` and `max_supply_utilization` of the `Token`.
