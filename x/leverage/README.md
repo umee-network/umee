@@ -227,8 +227,8 @@ The full calculation of a user's borrow limit is as follows:
 Note that the borrow limit described in step 7 is the user's ideal borrow limit, their maximum borrowed value if all additional borrowed tokens had collateral weight equal to the weight of the remaining collateral.
 When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow limit will be lower.
 
-> Example Borrow Limit Calculation:
->
+#### Example Borrow Limit Calculation
+
 > Collateral: $20 ATOM + $20 UMEE + $40 STATOM
 > Borrowed: $50 ATOM
 >
