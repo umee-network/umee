@@ -57,6 +57,10 @@ func (l Leverage) GetTotalSupply(_ sdk.Context, _ string) (sdk.Coin, error) {
 	panic("not implemented")
 }
 
+func (l Leverage) GetAllSupplied(_ sdk.Context, _ sdk.AccAddress) (sdk.Coins, error) {
+	panic("not implemented")
+}
+
 func NewLeverageMock() Leverage {
 	return Leverage{
 		tokens: map[string]ltypes.Token{
