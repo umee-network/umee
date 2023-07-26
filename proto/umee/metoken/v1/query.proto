@@ -111,5 +111,5 @@ message QueryIndexPrice {
 
 // QueryIndexPriceResponse defines the response structure for the IndexPrice gRPC service handler.
 message QueryIndexPriceResponse {
-  repeated Price prices = 1 [(gogoproto.nullable)   = false];
+  repeated Price prices = 1 [(gogoproto.nullable) = false];
 }
