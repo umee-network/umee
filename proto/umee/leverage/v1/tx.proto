@@ -68,8 +68,8 @@ service Msg {
   rpc GovUpdateRegistry(MsgGovUpdateRegistry) returns (MsgGovUpdateRegistryResponse);
 
   // GovUpdateSpecialAssetPairs adds, updates, or removes special asset pairs. Note that a special asset
-  // pair can be removed by setting its special collateral weight to the collateral weight of the base
-  // asset.
+  // pair can be removed by setting its special collateral weight to negative one. Also allows for the creation
+  // of sets of assets, where each asset in the set forms a special asset pair with all of the others.
   rpc GovUpdateSpecialAssetPairs(MsgGovUpdateSpecialAssetPairs) returns (MsgGovUpdateSpecialAssetPairsResponse);
 }
 
