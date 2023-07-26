@@ -6,7 +6,6 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
@@ -17,26 +16,35 @@ func TestGetAndSetDec(t *testing.T) {
 	t.Parallel()
 	store := tsdk.KVStore(t)
 	key := []byte("decKey")
-	val := sdk.MustNewDecFromStr("1234")
-	err := SetDec(store, key, val, "no error")
+	v1 := sdk.MustNewDecFromStr("1234.5679")
+	v2, ok := GetDec(store, key, "no error")
+	assert.Equal(t, false, ok)
+	assert.DeepEqual(t, sdk.ZeroDec(), v2)
+
+	err := SetDec(store, key, v1, "no error")
 	assert.NilError(t, err)
 
-	v := GetDec(store, key, "no error")
-	assert.DeepEqual(t, v, val)
+	v2, ok = GetDec(store, key, "no error")
+	assert.Equal(t, true, ok)
+	assert.DeepEqual(t, v2, v1)
 }
 
 func TestGetAndSetInt(t *testing.T) {
 	t.Parallel()
 	store := tsdk.KVStore(t)
 	key := []byte("intKey")
-	val, ok := sdk.NewIntFromString("1234")
+	v2, ok := GetInt(store, key, "no error")
+	assert.Equal(t, false, ok)
+	assert.DeepEqual(t, sdk.ZeroInt(), v2)
+
+	v1, ok := sdk.NewIntFromString("1234")
 	assert.Equal(t, true, ok)
-	err := SetInt(store, key, val, "no error")
+	err := SetInt(store, key, v1, "no error")
 	assert.NilError(t, err)
 
-	v, ok := GetInt(store, key, "no error")
+	v2, ok = GetInt(store, key, "no error")
 	assert.Equal(t, true, ok)
-	assert.DeepEqual(t, v, val)
+	assert.DeepEqual(t, v2, v1)
 }
 
 func checkStoreNumber[T Integer](name string, val T, store sdk.KVStore, key []byte, t *testing.T) {

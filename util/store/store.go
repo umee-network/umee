@@ -17,7 +17,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
 // GetValue loads value from the store using default Unmarshaler. Panics on failure to decode.
@@ -120,14 +119,14 @@ func SetInt(store sdk.KVStore, key []byte, val sdkmath.Int, errField string) err
 	return SetValue(store, key, &val, errField)
 }
 
-// GetDec retrieves an sdk.Dec from a KVStore, or returns zero if no value is stored.
+// GetDec retrieves an sdk.Dec from a KVStore, or returns (0, false) if no value is stored.
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
-func GetDec(store sdk.KVStore, key []byte, errField string) sdk.Dec {
+func GetDec(store sdk.KVStore, key []byte, errField string) (sdk.Dec, bool) {
 	val := GetValue[*sdk.Dec](store, key, errField)
 	if val == nil { // Not found
-		return sdk.ZeroDec()
+		return sdk.ZeroDec(), false
 	}
-	return *val
+	return *val, true
 }
 
 // SetDec stores an sdk.Dec in a KVStore, or clears if setting to zero or nil.
