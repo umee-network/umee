@@ -78,9 +78,7 @@ Users have the following actions available to them:
 
 - `MsgWithdraw` supplied assets by turning in uTokens of the associated denomination.
   Withdraw respects the [uToken Exchange Rate](#utoken-exchange-rate).
-  
   A user can always withdraw non-collateral uTokens, but can only withdraw collateral uTokens if it would not reduce their [Borrow Limit](#borrow-limit) below their total borrowed value.
-
   Users may also be preventing from withdrawing both non-collateral and collateral uTokens if it would violate the module's `min_collateral_liquidity`.
 
 - `MsgMaxWithdraw` supplied assets by automatically calculating the maximum amount that can be withdrawn.
