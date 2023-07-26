@@ -5,6 +5,7 @@ import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "umee/ugov/v1/ugov.proto";
 
 option go_package = "github.com/umee-network/umee/v5/x/ugov";
 
@@ -17,6 +18,9 @@ service Msg {
 
   // GovSetEmergencyGroup sets emergency group address.
   rpc GovSetEmergencyGroup(MsgGovSetEmergencyGroup) returns (MsgGovSetEmergencyGroupResponse);
+
+  // GovUpdateInflationParams sets new params for inflation rate change.
+  rpc GovUpdateInflationParams(MsgGovUpdateInflationParams) returns (GovUpdateInflationParamsResponse);
 }
 
 // MsgGovUpdateMinGasPrice request type.
@@ -43,3 +47,15 @@ message MsgGovSetEmergencyGroup {
 
 // MsgGovSetEmergencyGroupResponse response type.
 message MsgGovSetEmergencyGroupResponse {};
+
+// MsgGovUpdateInflationParams request type.
+message MsgGovUpdateInflationParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority must be the address of the governance account.
+  string          authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  InflationParams params    = 2 [(gogoproto.nullable) = false];
+}
+
+// GovUpdateInflationParamsResponse response type.
+message GovUpdateInflationParamsResponse {}
