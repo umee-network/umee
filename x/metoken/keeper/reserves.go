@@ -6,8 +6,6 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	"github.com/umee-network/umee/v5/x/metoken"
 	lerrors "github.com/umee-network/umee/v5/x/metoken/errors"
 )
@@ -44,7 +42,13 @@ func (k Keeper) RebalanceReserves() error {
 			if balance.AvailableSupply().IsPositive() {
 				i, assetSettings := index.AcceptedAsset(balance.Denom)
 				if i < 0 {
-					return sdkerrors.ErrNotFound.Wrapf("asset %s not found in the index", balance.Denom)
+					k.Logger().Debug(
+						"rebalancing reserves: failed getting accepted asset",
+						"asset", balance.Denom,
+						"index", index.Denom,
+						"block_time", k.ctx.BlockTime(),
+					)
+					continue
 				}
 
 				// Calculate the desired reserves amount
