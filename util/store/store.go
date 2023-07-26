@@ -163,12 +163,9 @@ func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress) {
 
 // GetTimeMs retrieves time saved as Unix time in Miliseconds.
 // Returns sdkerrors.NotFound error if the value is not there, hence time = 0 is not supported.
-func GetTimeMs(store sdk.KVStore, key []byte) (time.Time, error) {
-	t := GetInteger[int64](store, key)
-	if t == 0 {
-		return time.Time{}, sdkerrors.ErrNotFound
-	}
-	return time.UnixMilli(t), nil
+func GetTimeMs(store sdk.KVStore, key []byte) (time.Time, bool) {
+	t, ok := GetInteger[int64](store, key)
+	return time.UnixMilli(t), ok
 }
 
 // SetTimeMs saves time as Unix time in Miliseconds.
@@ -197,20 +194,19 @@ func SetInteger[T Integer](store sdk.KVStore, key []byte, v T) {
 	store.Set(key, bz)
 }
 
-func GetInteger[T Integer](store sdk.KVStore, key []byte) T {
+func GetInteger[T Integer](store sdk.KVStore, key []byte) (T, bool) {
 	bz := store.Get(key)
 	if bz == nil {
-		return 0
+		return 0, false
 	}
 	var v T
 	switch any(v).(type) {
 	case int64, uint64:
-		v2 := binary.LittleEndian.Uint64(bz)
-		return T(v2)
+		return T(binary.LittleEndian.Uint64(bz)), true
 	case int32, uint32:
-		return T(binary.LittleEndian.Uint32(bz))
+		return T(binary.LittleEndian.Uint32(bz)), true
 	case byte:
-		return T(bz[0])
+		return T(bz[0]), true
 	}
 	panic("not possible: all types must be covered above")
 }

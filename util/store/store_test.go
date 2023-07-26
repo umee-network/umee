@@ -75,14 +75,14 @@ func TestGetAndSetTime(t *testing.T) {
 	store := tsdk.KVStore(t)
 	key := []byte("tKey")
 
-	_, err := GetTimeMs(store, key)
-	assert.ErrorIs(t, err, sdkerrors.ErrNotFound)
+	_, ok := GetTimeMs(store, key)
+	assert.Equal(t, false, ok)
 
 	val := time.Now()
 	SetTimeMs(store, key, val)
 
-	val2, err := GetTimeMs(store, key)
-	assert.NilError(t, err)
+	val2, ok := GetTimeMs(store, key)
+	assert.Equal(t, true, ok)
 	val = val.Truncate(time.Millisecond)
 	assert.Equal(t, val, val2)
 }
