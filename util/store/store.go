@@ -161,7 +161,7 @@ func SetAddress(store sdk.KVStore, key []byte, val sdk.AccAddress) {
 }
 
 // GetTimeMs retrieves time saved as Unix time in Miliseconds.
-// Returns sdkerrors.NotFound error if the value is not there, hence time = 0 is not supported.
+// Returns if the value is not in the store, returns (0 unix time, false).
 func GetTimeMs(store sdk.KVStore, key []byte) (time.Time, bool) {
 	t, ok := GetInteger[int64](store, key)
 	return time.UnixMilli(t), ok
