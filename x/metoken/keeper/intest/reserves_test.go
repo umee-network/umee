@@ -7,7 +7,6 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v5/app"
 	"github.com/umee-network/umee/v5/util/coin"
@@ -19,7 +18,7 @@ import (
 func TestRebalanceReserves(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -117,7 +116,7 @@ func checkBalances(
 	meTokenDenom string,
 	shouldBeBalanced bool,
 ) {
-	meTokenAddr := authtypes.NewModuleAddress(metoken.ModuleName)
+	meTokenAddr := keeper.ModuleAddr()
 	// get index
 	index, err := k.RegisteredIndex(meTokenDenom)
 	require.NoError(t, err)

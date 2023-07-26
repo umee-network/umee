@@ -8,18 +8,18 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v5/app"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v5/x/metoken/keeper"
 	"github.com/umee-network/umee/v5/x/metoken/mocks"
 )
 
 func TestInterestClaiming(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -100,7 +100,7 @@ func TestInterestClaiming(t *testing.T) {
 	err = app.LeverageKeeper.AccrueAllInterest(futureCtx)
 	require.NoError(t, err)
 
-	err = app.MetokenKeeperB.Keeper(&ctx).ClaimInterest()
+	err = app.MetokenKeeperB.Keeper(&ctx).ClaimLeverageInterest()
 	require.NoError(t, err)
 
 	// confirm meToken account received accrued interest and the balances in meToken state and x/bank module
@@ -113,21 +113,21 @@ func checkInterest(
 	ctx sdk.Context,
 	app *app.UmeeApp,
 	meTokenDenom string,
-	zeroInterest bool,
+	requireZero bool,
 ) {
 	k := app.MetokenKeeperB.Keeper(&ctx)
 	metokenBalances, err := k.IndexBalances(meTokenDenom)
 	require.NoError(t, err)
-	meTokenAddr := authtypes.NewModuleAddress(metoken.ModuleName)
-	bankBalance := app.BankKeeper.GetAllBalances(ctx, meTokenAddr)
+	moduleAddr := keeper.ModuleAddr()
+	bankBalance := app.BankKeeper.GetAllBalances(ctx, moduleAddr)
 
 	for _, balance := range metokenBalances.AssetBalances {
 		// check interest
-		require.Equal(t, zeroInterest, balance.Interest.IsZero())
+		require.Equal(t, requireZero, balance.Interest.IsZero())
 
 		// confirm balance in x/bank and x/module state is the same
 		found, bBalance := bankBalance.Find(balance.Denom)
 		require.True(t, found)
-		require.True(t, bBalance.Amount.Equal(balance.Interest.Add(balance.Reserved).Add(balance.Fees)))
+		require.Equal(t, bBalance.Amount, balance.Interest.Add(balance.Reserved).Add(balance.Fees))
 	}
 }

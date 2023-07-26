@@ -30,8 +30,8 @@ type KeeperTestSuite struct {
 	addrs               []sdk.AccAddress
 }
 
-// initKeeperTestSuite creates a full keeper with all the external dependencies mocked
-func initKeeperTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.IndexBalances) *KeeperTestSuite {
+// initTestSuite creates a full keeper with all the external dependencies mocked
+func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.IndexBalances) *KeeperTestSuite {
 	t.Parallel()
 	isCheckTx := false
 	app := umeeapp.Setup(t)

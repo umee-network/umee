@@ -3,14 +3,13 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/umee-network/umee/v5/util/coin"
-
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v5/x/metoken/errors"
 )
 
 // redeemResponse wraps all the coins of a successful redemption
@@ -153,12 +152,12 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error) {
 	uTokensFromLeverage, err := k.leverageKeeper.ExchangeToken(*k.ctx, tokensToWithdraw)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.Coin{}, errors.Wrap(err, true)
 	}
 
 	availableUTokensFromLeverage, err := k.leverageKeeper.ModuleMaxWithdraw(*k.ctx, uTokensFromLeverage)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.Coin{}, errors.Wrap(err, true)
 	}
 
 	if availableUTokensFromLeverage.IsZero() {
@@ -167,11 +166,11 @@ func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error
 
 	tokensWithdrawn, _, err := k.leverageKeeper.Withdraw(
 		*k.ctx,
-		authtypes.NewModuleAddress(metoken.ModuleName),
+		ModuleAddr(),
 		sdk.NewCoin(uTokensFromLeverage.Denom, sdk.MinInt(availableUTokensFromLeverage, uTokensFromLeverage.Amount)),
 	)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.Coin{}, errors.Wrap(err, false)
 	}
 
 	return tokensWithdrawn, nil
