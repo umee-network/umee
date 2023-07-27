@@ -1,5 +1,5 @@
 syntax = "proto3";
-package umeenetwork.umee.metoken.v1;
+package umee.metoken.v1;
 
 import "gogoproto/gogo.proto";
 
