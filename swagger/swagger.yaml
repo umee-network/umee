@@ -2363,6 +2363,102 @@ paths:
                       format: byte
       tags:
         - Query
+  /umee/ugov/v1/inflation_cycle_end:
+    get:
+      summary: InflationCycleEnd returns inflation cycle end time
+      operationId: InflationCycleEnd
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              end:
+                type: string
+                format: date-time
+            description: QueryInflationCycleEndResponse response type.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/ugov/v1/inflation_params:
+    get:
+      summary: InflationParams returns params of inflation reduction rates
+      operationId: InflationParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                type: object
+                properties:
+                  max_supply:
+                    description: max_supply is the maximum supply for liquidation.
+                    type: object
+                    properties:
+                      denom:
+                        type: string
+                      amount:
+                        type: string
+                  inflation_cycle:
+                    type: string
+                    description: >-
+                      inflation_cycle duration after which inflation rates are
+                      changed.
+                  inflation_reduction_rate:
+                    type: integer
+                    format: int64
+                    description: inflation_reduction_rate for every inflation cycle.
+                description: >-
+                  InflationParams params for changing the inflation min rate and
+                  max rate of mint module params.
+            description: QueryInflationParamsResponse response type.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
   /umee/ugov/v1/min_gas_price:
     get:
       summary: MinGasPrice returns minimum transaction fees.
@@ -3516,6 +3612,524 @@ paths:
           description: >-
             denom is an optional field which causes the query to return the
             totals of only one uToken.
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/metoken/v1/index_balances:
+    get:
+      summary: >-
+        IndexBalances queries for Index's balances of a specific or all the
+        registered indexes.
+      operationId: IndexBalances
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              index_balances:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    metoken_supply:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        amount:
+                          type: string
+                      description: >-
+                        Coin defines a token with a denomination and an amount.
+
+
+                        NOTE: The amount field is an Int which implements the
+                        custom method
+
+                        signatures required by gogoproto.
+                    asset_balances:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          denom:
+                            type: string
+                          leveraged:
+                            type: string
+                          reserved:
+                            type: string
+                          fees:
+                            type: string
+                          interest:
+                            type: string
+                        description: >-
+                          AssetBalance tracks how much of a single asset is held
+                          in leverage, reserves, fees and interest account.
+                  description: >-
+                    IndexBalances is the state of an Index, containing its
+                    meToken supply and all underlying asset balances.
+            description: >-
+              QueryIndexBalanceResponse defines the response structure for the
+              IndexBalances gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: metoken_denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/metoken/v1/index_price:
+    get:
+      summary: >-
+        IndexPrice queries for Index's price of a specific or all the registered
+        indexes.
+      operationId: IndexPrice
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              prices:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                      description: meToken denom.
+                    price:
+                      type: string
+                      description: >-
+                        Price in USD of one unit of meToken, expressed in
+                        decimals.
+                    exponent:
+                      type: integer
+                      format: int64
+                      description: >-
+                        Exponent is the power of ten by which to multiply, in
+                        order to convert
+
+                        an amount of the meToken for the exchange operations.
+                  description: Price is used to inform meToken price and exponent.
+            description: >-
+              QueryIndexPriceResponse defines the response structure for the
+              IndexPrice gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: metoken_denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/metoken/v1/indexes:
+    get:
+      summary: Indexes queries for a specific or all the registered indexes.
+      operationId: Indexes
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              registry:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                      description: >-
+                        Denom is the denomination of the Index's meToken denom
+                        that will be given to user in exchange of accepted
+
+                        assets.
+                    max_supply:
+                      type: string
+                      description: >-
+                        MaxSupply is the maximum amount of Index's meTokens can
+                        be minted.
+
+                        A swap that requires to mint more Index's meToken than
+                        this value will result in an error.
+
+                        Must be a non negative value. 0 means that there is no
+                        limit.
+                    exponent:
+                      type: integer
+                      format: int64
+                      description: >-
+                        Exponent is the power of ten by which to multiply, in
+                        order to convert
+
+                        an amount of the meToken for the exchange operations.
+
+                        Valid value: must be the same as the
+                        oracle.Denom.exponent.
+                    fee:
+                      description: >-
+                        Fee contains fee parameters used for swap and redemption
+                        fee calculations for all underlying
+
+                        assets in this index.
+                      type: object
+                      properties:
+                        min_fee:
+                          type: string
+                          description: >-
+                            Min fee is the minimum fee to be charged to the
+                            user. The applied fee will tend to decrease down to
+                            this value,
+
+                            when the accepted asset is undersupplied in the
+                            index. It must be less than Balanced and Max fees.
+
+                            Valid values: 0-1.
+                        balanced_fee:
+                          type: string
+                          description: >-
+                            Balanced fee is the fee to be charged to the user
+                            when the index is balanced. It must be greater than
+                            min_fee and
+
+                            lower than max_fee
+
+                            Valid values: 0-1.
+                        max_fee:
+                          type: string
+                          description: >-
+                            Max fee is the maximum fee to be charged to the
+                            user. The applied fee will tend to increase up to
+                            this value,
+
+                            when the accepted asset is oversupplied in the
+                            index. It must be greater than Min and Balanced fee.
+
+                            Valid values: 0-1.
+                      title: >-
+                        Fee are the parameters used for the calculation of the
+                        fee to be applied for swaps and redemptions and charged
+                        to
+
+                        the user. The usage of these parameters is explained
+                        here:
+
+                        https://github.com/umee-network/umee/tree/main/x/metoken#dynamic-fee
+                    accepted_assets:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          denom:
+                            type: string
+                            description: >-
+                              Denom is the denomination of the underlying asset.
+                              Must be the base
+
+                              denom as registered in the Bank module (so IBC
+                              denom for IBC tokens).
+                          reserve_portion:
+                            type: string
+                            description: >-
+                              Reserve portion is the portion of swapped assets
+                              that will be kept in the metoken module as
+                              reserves,
+
+                              instead of supplied to the leverage module. It is
+                              also the
+
+                              portion that will be taken from metoken module
+                              reserves when a redemption occurs.
+
+                              Valid values: 0-1.
+                          target_allocation:
+                            type: string
+                            description: >-
+                              Target allocation is the portion of an accepted
+                              asset the Index is targeting to have. The sum of
+
+                              target allocations of every accepted asset in the
+                              Index should be equal to 1.
+
+                              Valid values: 0-1.
+                        title: >-
+                          AcceptedAsset is an asset that is accepted to
+                          participate in the Index's swaps and redemptions,
+                          along with its
+
+                          metadata and parameters
+                      description: >-
+                        Accepted Assets is the list of underlying Tokens that
+                        can be swapped and redeemed for the Index's meToken,
+
+                        along with their token-specific parameters.
+                  description: >-
+                    Index defines an index of assets that are allowed to swap
+                    and redeem for the Index's meToken,
+
+                    along with its metadata and parameters.
+            description: >-
+              QueryIndexesResponse defines the response structure for the
+              Indexes gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: metoken_denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/metoken/v1/params:
+    get:
+      summary: Params queries the parameters of the x/metoken module.
+      operationId: MeTokenParams
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              params:
+                type: object
+                properties:
+                  rebalancing_frequency:
+                    type: string
+                    format: int64
+                    title: >-
+                      Reserves Re-balancing Frequency in seconds, determines how
+                      often the re-balancing of the module reserves will be
+
+                      triggered
+                  claiming_frequency:
+                    type: string
+                    format: int64
+                    title: >-
+                      Interest claiming frequency in seconds, determines how
+                      often metoken module will claim accrued interest from
+
+                      leverage module
+                description: Params defines the parameters for the metoken module.
+            description: >-
+              QueryParamsResponse defines the response structure for the Params
+              gRPC
+
+              service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/metoken/v1/redeem_fee:
+    get:
+      summary: RedeemFee computes a fee that would be applied when executing MsgRedeem.
+      operationId: RedeemFee
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              asset:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+            description: >-
+              QueryRedeemFeeResponse defines the response structure for the
+              RedeemFee gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: metoken.denom
+          in: query
+          required: false
+          type: string
+        - name: metoken.amount
+          in: query
+          required: false
+          type: string
+        - name: asset_denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
+  /umee/metoken/v1/swap_fee:
+    get:
+      summary: SwapFee computes fee that would be applied when executing MsgSwap.
+      operationId: SwapFee
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              asset:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  amount:
+                    type: string
+                description: >-
+                  Coin defines a token with a denomination and an amount.
+
+
+                  NOTE: The amount field is an Int which implements the custom
+                  method
+
+                  signatures required by gogoproto.
+            description: >-
+              QuerySwapFeeResponse defines the response structure for the
+              SwapFee gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: asset.denom
+          in: query
+          required: false
+          type: string
+        - name: asset.amount
+          in: query
+          required: false
+          type: string
+        - name: metoken_denom
           in: query
           required: false
           type: string
@@ -5423,12 +6037,65 @@ definitions:
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
       service handler.
+  umee.ugov.v1.InflationParams:
+    type: object
+    properties:
+      max_supply:
+        description: max_supply is the maximum supply for liquidation.
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+      inflation_cycle:
+        type: string
+        description: inflation_cycle duration after which inflation rates are changed.
+      inflation_reduction_rate:
+        type: integer
+        format: int64
+        description: inflation_reduction_rate for every inflation cycle.
+    description: >-
+      InflationParams params for changing the inflation min rate and max rate of
+      mint module params.
   umee.ugov.v1.QueryEmergencyGroupResponse:
     type: object
     properties:
       emergency_group:
         type: string
     description: QueryEmergencyGroupResponse response type.
+  umee.ugov.v1.QueryInflationCycleEndResponse:
+    type: object
+    properties:
+      end:
+        type: string
+        format: date-time
+    description: QueryInflationCycleEndResponse response type.
+  umee.ugov.v1.QueryInflationParamsResponse:
+    type: object
+    properties:
+      params:
+        type: object
+        properties:
+          max_supply:
+            description: max_supply is the maximum supply for liquidation.
+            type: object
+            properties:
+              denom:
+                type: string
+              amount:
+                type: string
+          inflation_cycle:
+            type: string
+            description: inflation_cycle duration after which inflation rates are changed.
+          inflation_reduction_rate:
+            type: integer
+            format: int64
+            description: inflation_reduction_rate for every inflation cycle.
+        description: >-
+          InflationParams params for changing the inflation min rate and max
+          rate of mint module params.
+    description: QueryInflationParamsResponse response type.
   umee.ugov.v1.QueryMinGasPriceResponse:
     type: object
     properties:
@@ -6192,3 +6859,552 @@ definitions:
       It tracks both its start time and end time, so that if the module's
       unbonding time changes, the unbonding can complete at the earlier of
       its original end time or its new one based on the new parameter.
+  umeenetwork.umee.metoken.v1.AcceptedAsset:
+    type: object
+    properties:
+      denom:
+        type: string
+        description: |-
+          Denom is the denomination of the underlying asset. Must be the base
+          denom as registered in the Bank module (so IBC denom for IBC tokens).
+      reserve_portion:
+        type: string
+        description: >-
+          Reserve portion is the portion of swapped assets that will be kept in
+          the metoken module as reserves,
+
+          instead of supplied to the leverage module. It is also the
+
+          portion that will be taken from metoken module reserves when a
+          redemption occurs.
+
+          Valid values: 0-1.
+      target_allocation:
+        type: string
+        description: >-
+          Target allocation is the portion of an accepted asset the Index is
+          targeting to have. The sum of
+
+          target allocations of every accepted asset in the Index should be
+          equal to 1.
+
+          Valid values: 0-1.
+    title: >-
+      AcceptedAsset is an asset that is accepted to participate in the Index's
+      swaps and redemptions, along with its
+
+      metadata and parameters
+  umeenetwork.umee.metoken.v1.AssetBalance:
+    type: object
+    properties:
+      denom:
+        type: string
+      leveraged:
+        type: string
+      reserved:
+        type: string
+      fees:
+        type: string
+      interest:
+        type: string
+    description: >-
+      AssetBalance tracks how much of a single asset is held in leverage,
+      reserves, fees and interest account.
+  umeenetwork.umee.metoken.v1.Fee:
+    type: object
+    properties:
+      min_fee:
+        type: string
+        description: >-
+          Min fee is the minimum fee to be charged to the user. The applied fee
+          will tend to decrease down to this value,
+
+          when the accepted asset is undersupplied in the index. It must be less
+          than Balanced and Max fees.
+
+          Valid values: 0-1.
+      balanced_fee:
+        type: string
+        description: >-
+          Balanced fee is the fee to be charged to the user when the index is
+          balanced. It must be greater than min_fee and
+
+          lower than max_fee
+
+          Valid values: 0-1.
+      max_fee:
+        type: string
+        description: >-
+          Max fee is the maximum fee to be charged to the user. The applied fee
+          will tend to increase up to this value,
+
+          when the accepted asset is oversupplied in the index. It must be
+          greater than Min and Balanced fee.
+
+          Valid values: 0-1.
+    title: >-
+      Fee are the parameters used for the calculation of the fee to be applied
+      for swaps and redemptions and charged to
+
+      the user. The usage of these parameters is explained here:
+
+      https://github.com/umee-network/umee/tree/main/x/metoken#dynamic-fee
+  umeenetwork.umee.metoken.v1.Index:
+    type: object
+    properties:
+      denom:
+        type: string
+        description: >-
+          Denom is the denomination of the Index's meToken denom that will be
+          given to user in exchange of accepted
+
+          assets.
+      max_supply:
+        type: string
+        description: >-
+          MaxSupply is the maximum amount of Index's meTokens can be minted.
+
+          A swap that requires to mint more Index's meToken than this value will
+          result in an error.
+
+          Must be a non negative value. 0 means that there is no limit.
+      exponent:
+        type: integer
+        format: int64
+        description: |-
+          Exponent is the power of ten by which to multiply, in order to convert
+          an amount of the meToken for the exchange operations.
+          Valid value: must be the same as the oracle.Denom.exponent.
+      fee:
+        description: >-
+          Fee contains fee parameters used for swap and redemption fee
+          calculations for all underlying
+
+          assets in this index.
+        type: object
+        properties:
+          min_fee:
+            type: string
+            description: >-
+              Min fee is the minimum fee to be charged to the user. The applied
+              fee will tend to decrease down to this value,
+
+              when the accepted asset is undersupplied in the index. It must be
+              less than Balanced and Max fees.
+
+              Valid values: 0-1.
+          balanced_fee:
+            type: string
+            description: >-
+              Balanced fee is the fee to be charged to the user when the index
+              is balanced. It must be greater than min_fee and
+
+              lower than max_fee
+
+              Valid values: 0-1.
+          max_fee:
+            type: string
+            description: >-
+              Max fee is the maximum fee to be charged to the user. The applied
+              fee will tend to increase up to this value,
+
+              when the accepted asset is oversupplied in the index. It must be
+              greater than Min and Balanced fee.
+
+              Valid values: 0-1.
+        title: >-
+          Fee are the parameters used for the calculation of the fee to be
+          applied for swaps and redemptions and charged to
+
+          the user. The usage of these parameters is explained here:
+
+          https://github.com/umee-network/umee/tree/main/x/metoken#dynamic-fee
+      accepted_assets:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+              description: >-
+                Denom is the denomination of the underlying asset. Must be the
+                base
+
+                denom as registered in the Bank module (so IBC denom for IBC
+                tokens).
+            reserve_portion:
+              type: string
+              description: >-
+                Reserve portion is the portion of swapped assets that will be
+                kept in the metoken module as reserves,
+
+                instead of supplied to the leverage module. It is also the
+
+                portion that will be taken from metoken module reserves when a
+                redemption occurs.
+
+                Valid values: 0-1.
+            target_allocation:
+              type: string
+              description: >-
+                Target allocation is the portion of an accepted asset the Index
+                is targeting to have. The sum of
+
+                target allocations of every accepted asset in the Index should
+                be equal to 1.
+
+                Valid values: 0-1.
+          title: >-
+            AcceptedAsset is an asset that is accepted to participate in the
+            Index's swaps and redemptions, along with its
+
+            metadata and parameters
+        description: >-
+          Accepted Assets is the list of underlying Tokens that can be swapped
+          and redeemed for the Index's meToken,
+
+          along with their token-specific parameters.
+    description: >-
+      Index defines an index of assets that are allowed to swap and redeem for
+      the Index's meToken,
+
+      along with its metadata and parameters.
+  umeenetwork.umee.metoken.v1.IndexBalances:
+    type: object
+    properties:
+      metoken_supply:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+      asset_balances:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            leveraged:
+              type: string
+            reserved:
+              type: string
+            fees:
+              type: string
+            interest:
+              type: string
+          description: >-
+            AssetBalance tracks how much of a single asset is held in leverage,
+            reserves, fees and interest account.
+    description: >-
+      IndexBalances is the state of an Index, containing its meToken supply and
+      all underlying asset balances.
+  umeenetwork.umee.metoken.v1.Params:
+    type: object
+    properties:
+      rebalancing_frequency:
+        type: string
+        format: int64
+        title: >-
+          Reserves Re-balancing Frequency in seconds, determines how often the
+          re-balancing of the module reserves will be
+
+          triggered
+      claiming_frequency:
+        type: string
+        format: int64
+        title: >-
+          Interest claiming frequency in seconds, determines how often metoken
+          module will claim accrued interest from
+
+          leverage module
+    description: Params defines the parameters for the metoken module.
+  umeenetwork.umee.metoken.v1.Price:
+    type: object
+    properties:
+      denom:
+        type: string
+        description: meToken denom.
+      price:
+        type: string
+        description: Price in USD of one unit of meToken, expressed in decimals.
+      exponent:
+        type: integer
+        format: int64
+        description: |-
+          Exponent is the power of ten by which to multiply, in order to convert
+          an amount of the meToken for the exchange operations.
+    description: Price is used to inform meToken price and exponent.
+  umeenetwork.umee.metoken.v1.QueryIndexBalancesResponse:
+    type: object
+    properties:
+      index_balances:
+        type: array
+        items:
+          type: object
+          properties:
+            metoken_supply:
+              type: object
+              properties:
+                denom:
+                  type: string
+                amount:
+                  type: string
+              description: >-
+                Coin defines a token with a denomination and an amount.
+
+
+                NOTE: The amount field is an Int which implements the custom
+                method
+
+                signatures required by gogoproto.
+            asset_balances:
+              type: array
+              items:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                  leveraged:
+                    type: string
+                  reserved:
+                    type: string
+                  fees:
+                    type: string
+                  interest:
+                    type: string
+                description: >-
+                  AssetBalance tracks how much of a single asset is held in
+                  leverage, reserves, fees and interest account.
+          description: >-
+            IndexBalances is the state of an Index, containing its meToken
+            supply and all underlying asset balances.
+    description: >-
+      QueryIndexBalanceResponse defines the response structure for the
+      IndexBalances gRPC service handler.
+  umeenetwork.umee.metoken.v1.QueryIndexPriceResponse:
+    type: object
+    properties:
+      prices:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+              description: meToken denom.
+            price:
+              type: string
+              description: Price in USD of one unit of meToken, expressed in decimals.
+            exponent:
+              type: integer
+              format: int64
+              description: >-
+                Exponent is the power of ten by which to multiply, in order to
+                convert
+
+                an amount of the meToken for the exchange operations.
+          description: Price is used to inform meToken price and exponent.
+    description: >-
+      QueryIndexPriceResponse defines the response structure for the IndexPrice
+      gRPC service handler.
+  umeenetwork.umee.metoken.v1.QueryIndexesResponse:
+    type: object
+    properties:
+      registry:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+              description: >-
+                Denom is the denomination of the Index's meToken denom that will
+                be given to user in exchange of accepted
+
+                assets.
+            max_supply:
+              type: string
+              description: >-
+                MaxSupply is the maximum amount of Index's meTokens can be
+                minted.
+
+                A swap that requires to mint more Index's meToken than this
+                value will result in an error.
+
+                Must be a non negative value. 0 means that there is no limit.
+            exponent:
+              type: integer
+              format: int64
+              description: >-
+                Exponent is the power of ten by which to multiply, in order to
+                convert
+
+                an amount of the meToken for the exchange operations.
+
+                Valid value: must be the same as the oracle.Denom.exponent.
+            fee:
+              description: >-
+                Fee contains fee parameters used for swap and redemption fee
+                calculations for all underlying
+
+                assets in this index.
+              type: object
+              properties:
+                min_fee:
+                  type: string
+                  description: >-
+                    Min fee is the minimum fee to be charged to the user. The
+                    applied fee will tend to decrease down to this value,
+
+                    when the accepted asset is undersupplied in the index. It
+                    must be less than Balanced and Max fees.
+
+                    Valid values: 0-1.
+                balanced_fee:
+                  type: string
+                  description: >-
+                    Balanced fee is the fee to be charged to the user when the
+                    index is balanced. It must be greater than min_fee and
+
+                    lower than max_fee
+
+                    Valid values: 0-1.
+                max_fee:
+                  type: string
+                  description: >-
+                    Max fee is the maximum fee to be charged to the user. The
+                    applied fee will tend to increase up to this value,
+
+                    when the accepted asset is oversupplied in the index. It
+                    must be greater than Min and Balanced fee.
+
+                    Valid values: 0-1.
+              title: >-
+                Fee are the parameters used for the calculation of the fee to be
+                applied for swaps and redemptions and charged to
+
+                the user. The usage of these parameters is explained here:
+
+                https://github.com/umee-network/umee/tree/main/x/metoken#dynamic-fee
+            accepted_assets:
+              type: array
+              items:
+                type: object
+                properties:
+                  denom:
+                    type: string
+                    description: >-
+                      Denom is the denomination of the underlying asset. Must be
+                      the base
+
+                      denom as registered in the Bank module (so IBC denom for
+                      IBC tokens).
+                  reserve_portion:
+                    type: string
+                    description: >-
+                      Reserve portion is the portion of swapped assets that will
+                      be kept in the metoken module as reserves,
+
+                      instead of supplied to the leverage module. It is also the
+
+                      portion that will be taken from metoken module reserves
+                      when a redemption occurs.
+
+                      Valid values: 0-1.
+                  target_allocation:
+                    type: string
+                    description: >-
+                      Target allocation is the portion of an accepted asset the
+                      Index is targeting to have. The sum of
+
+                      target allocations of every accepted asset in the Index
+                      should be equal to 1.
+
+                      Valid values: 0-1.
+                title: >-
+                  AcceptedAsset is an asset that is accepted to participate in
+                  the Index's swaps and redemptions, along with its
+
+                  metadata and parameters
+              description: >-
+                Accepted Assets is the list of underlying Tokens that can be
+                swapped and redeemed for the Index's meToken,
+
+                along with their token-specific parameters.
+          description: >-
+            Index defines an index of assets that are allowed to swap and redeem
+            for the Index's meToken,
+
+            along with its metadata and parameters.
+    description: >-
+      QueryIndexesResponse defines the response structure for the Indexes gRPC
+      service handler.
+  umeenetwork.umee.metoken.v1.QueryParamsResponse:
+    type: object
+    properties:
+      params:
+        type: object
+        properties:
+          rebalancing_frequency:
+            type: string
+            format: int64
+            title: >-
+              Reserves Re-balancing Frequency in seconds, determines how often
+              the re-balancing of the module reserves will be
+
+              triggered
+          claiming_frequency:
+            type: string
+            format: int64
+            title: >-
+              Interest claiming frequency in seconds, determines how often
+              metoken module will claim accrued interest from
+
+              leverage module
+        description: Params defines the parameters for the metoken module.
+    description: |-
+      QueryParamsResponse defines the response structure for the Params gRPC
+      service handler.
+  umeenetwork.umee.metoken.v1.QueryRedeemFeeResponse:
+    type: object
+    properties:
+      asset:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+    description: >-
+      QueryRedeemFeeResponse defines the response structure for the RedeemFee
+      gRPC service handler.
+  umeenetwork.umee.metoken.v1.QuerySwapFeeResponse:
+    type: object
+    properties:
+      asset:
+        type: object
+        properties:
+          denom:
+            type: string
+          amount:
+            type: string
+        description: |-
+          Coin defines a token with a denomination and an amount.
+
+          NOTE: The amount field is an Int which implements the custom method
+          signatures required by gogoproto.
+    description: >-
+      QuerySwapFeeResponse defines the response structure for the SwapFee gRPC
+      service handler.

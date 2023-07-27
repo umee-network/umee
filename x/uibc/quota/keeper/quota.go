@@ -39,7 +39,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
 func (k Keeper) GetTokenOutflows(denom string) sdk.DecCoin {
-	amount := store.GetDec(k.store, KeyTotalOutflows(denom), "total_outflow")
+	amount, _ := store.GetDec(k.store, KeyTotalOutflows(denom), "total_outflow")
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 

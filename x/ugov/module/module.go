@@ -104,8 +104,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genState ugov.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	util.Panic(
-		am.kb.Keeper(&ctx).InitGenesis(&genState))
+	util.Panic(am.kb.Keeper(&ctx).InitGenesis(&genState))
 
 	return []abci.ValidatorUpdate{}
 }

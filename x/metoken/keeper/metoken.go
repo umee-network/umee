@@ -43,8 +43,10 @@ func (k Keeper) GetAllIndexesBalances() []metoken.IndexBalances {
 }
 
 // getNextRebalancingTime returns next x/metoken re-balancing time in Milliseconds.
-func (k Keeper) getNextRebalancingTime() (time.Time, error) {
-	return store.GetTimeMs(k.store, keyPrefixNextRebalancingTime)
+// Returns 0 unix time if the time was not set before.
+func (k Keeper) getNextRebalancingTime() time.Time {
+	t, _ := store.GetTimeMs(k.store, keyPrefixNextRebalancingTime)
+	return t
 }
 
 // setNextRebalancingTime next x/metoken re-balancing time in Milliseconds.
@@ -53,8 +55,10 @@ func (k Keeper) setNextRebalancingTime(nextRebalancingTime time.Time) {
 }
 
 // getNextInterestClaimTime returns next x/metoken interest claiming time in Milliseconds.
-func (k Keeper) getNextInterestClaimTime() (time.Time, error) {
-	return store.GetTimeMs(k.store, keyPrefixNextInterestClaimTime)
+// Returns 0 unix time if the time was not set before.
+func (k Keeper) getNextInterestClaimTime() time.Time {
+	t, _ := store.GetTimeMs(k.store, keyPrefixNextInterestClaimTime)
+	return t
 }
 
 // setNextInterestClaimTime next x/metoken interest claiming time in Milliseconds.
