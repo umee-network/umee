@@ -41,11 +41,11 @@ func (l Leverage) ExchangeUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
 
-func (l Leverage) Supply(_ sdk.Context, _ sdk.AccAddress, _ sdk.Coin) (sdk.Coin, error) {
+func (l Leverage) SupplyFromModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
 	panic("not implemented")
 }
 
-func (l Leverage) Withdraw(_ sdk.Context, _ sdk.AccAddress, _ sdk.Coin) (sdk.Coin, bool, error) {
+func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
 	panic("not implemented")
 }
 
