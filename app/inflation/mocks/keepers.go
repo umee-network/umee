@@ -117,12 +117,11 @@ func (mr *MockUGovKeeperMockRecorder) ExportGenesis() *gomock.Call {
 }
 
 // GetInflationCycleEnd mocks base method.
-func (m *MockUGovKeeper) GetInflationCycleEnd() (time.Time, error) {
+func (m *MockUGovKeeper) GetInflationCycleEnd() time.Time {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetInflationCycleEnd")
 	ret0, _ := ret[0].(time.Time)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	return ret0
 }
 
 // GetInflationCycleEnd indicates an expected call of GetInflationCycleEnd.

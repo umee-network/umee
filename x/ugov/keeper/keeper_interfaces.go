@@ -25,7 +25,7 @@ type IParams interface {
 	SetInflationParams(lp ugov.InflationParams) error
 	InflationParams() ugov.InflationParams
 	SetInflationCycleEnd(startTime time.Time) error
-	GetInflationCycleEnd() (time.Time, error)
+	GetInflationCycleEnd() time.Time
 }
 
 var _ IKeeper = Keeper{}
