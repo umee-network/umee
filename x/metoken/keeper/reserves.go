@@ -4,15 +4,11 @@ import (
 	"errors"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/x/metoken"
 	lerrors "github.com/umee-network/umee/v5/x/metoken/errors"
 )
-
-// oneHundred of a base denom. It used to avoid transferring dust back and forth.
-var oneHundred = sdkmath.NewInt(100)
 
 // RebalanceReserves checks if the portion of reserves is below the desired and transfer the missing amount from
 // x/leverage to x/metoken reserves, or vice versa.
@@ -53,10 +49,6 @@ func (k Keeper) RebalanceReserves() error {
 				// transfer the missing amount from x/leverage to x/metoken
 				if desiredReserves.GT(balance.Reserved) {
 					missingReserves := desiredReserves.Sub(balance.Reserved)
-					if missingReserves.LTE(oneHundred) {
-						continue
-					}
-
 					tokensWithdrawn, err := k.withdrawFromLeverage(sdk.NewCoin(balance.Denom, missingReserves))
 					if err != nil {
 						var leverageError *lerrors.LeverageError
@@ -80,10 +72,6 @@ func (k Keeper) RebalanceReserves() error {
 					// In case the x/metoken module has more reserves than required,
 					// transfer the extra amount to x/leverage
 					extraReserves := balance.Reserved.Sub(desiredReserves)
-					if extraReserves.LTE(oneHundred) {
-						continue
-					}
-
 					tokenSupplied, err := k.supplyToLeverage(sdk.NewCoin(balance.Denom, extraReserves))
 					if err != nil {
 						var leverageError *lerrors.LeverageError
