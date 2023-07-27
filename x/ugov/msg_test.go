@@ -1,18 +1,16 @@
 package ugov
 
 import (
-	fmt "fmt"
+	"fmt"
 	"testing"
-
-	"github.com/umee-network/umee/v5/util/bpmath"
-
-	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v5/tests/accs"
+	"github.com/umee-network/umee/v5/util/bpmath"
 	"github.com/umee-network/umee/v5/util/coin"
 )
 
