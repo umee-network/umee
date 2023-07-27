@@ -275,7 +275,7 @@ func (m *AcceptedAsset) GetDenom() string {
 
 // Price is used to inform meToken price and exponent.
 type Price struct {
-	// meToken denomination.
+	// meToken denom.
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	// Price in USD of one unit of meToken, expressed in decimals.
 	Price github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=price,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"price"`

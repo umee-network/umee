@@ -23,17 +23,11 @@ func (k Keeper) InitGenesis(genState metoken.GenesisState) {
 
 // ExportGenesis returns the x/metoken module's exported genesis state.
 func (k Keeper) ExportGenesis() *metoken.GenesisState {
-	nextRebalancingTime, err := k.getNextRebalancingTime()
-	util.Panic(err)
-
-	nextInterestClaimTime, err := k.getNextInterestClaimTime()
-	util.Panic(err)
-
 	return &metoken.GenesisState{
 		Params:                k.GetParams(),
 		Registry:              k.GetAllRegisteredIndexes(),
 		Balances:              k.GetAllIndexesBalances(),
-		NextRebalancingTime:   nextRebalancingTime,
-		NextInterestClaimTime: nextInterestClaimTime,
+		NextRebalancingTime:   k.getNextRebalancingTime(),
+		NextInterestClaimTime: k.getNextInterestClaimTime(),
 	}
 }
