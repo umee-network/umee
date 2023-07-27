@@ -616,12 +616,12 @@ func NewMockLeverageKeeper() *MockLeverageKeeper {
 			},
 		},
 		SupplyFromModuleFunc: &LeverageKeeperSupplyFromModuleFunc{
-			defaultHook: func(types.Context, string, types.Coin) (r0 types.Coin, r1 error, r2 bool) {
+			defaultHook: func(types.Context, string, types.Coin) (r0 types.Coin, r1 bool, r2 error) {
 				return
 			},
 		},
 		WithdrawToModuleFunc: &LeverageKeeperWithdrawToModuleFunc{
-			defaultHook: func(types.Context, string, types.Coin) (r0 types.Coin, r1 error, r2 bool) {
+			defaultHook: func(types.Context, string, types.Coin) (r0 types.Coin, r1 bool, r2 error) {
 				return
 			},
 		},
@@ -663,12 +663,12 @@ func NewStrictMockLeverageKeeper() *MockLeverageKeeper {
 			},
 		},
 		SupplyFromModuleFunc: &LeverageKeeperSupplyFromModuleFunc{
-			defaultHook: func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+			defaultHook: func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 				panic("unexpected invocation of MockLeverageKeeper.SupplyFromModule")
 			},
 		},
 		WithdrawToModuleFunc: &LeverageKeeperWithdrawToModuleFunc{
-			defaultHook: func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+			defaultHook: func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 				panic("unexpected invocation of MockLeverageKeeper.WithdrawToModule")
 			},
 		},
@@ -1368,15 +1368,15 @@ func (c LeverageKeeperModuleMaxWithdrawFuncCall) Results() []interface{} {
 // SupplyFromModule method of the parent MockLeverageKeeper instance is
 // invoked.
 type LeverageKeeperSupplyFromModuleFunc struct {
-	defaultHook func(types.Context, string, types.Coin) (types.Coin, error, bool)
-	hooks       []func(types.Context, string, types.Coin) (types.Coin, error, bool)
+	defaultHook func(types.Context, string, types.Coin) (types.Coin, bool, error)
+	hooks       []func(types.Context, string, types.Coin) (types.Coin, bool, error)
 	history     []LeverageKeeperSupplyFromModuleFuncCall
 	mutex       sync.Mutex
 }
 
 // SupplyFromModule delegates to the next hook function in the queue and
 // stores the parameter and result values of this invocation.
-func (m *MockLeverageKeeper) SupplyFromModule(v0 types.Context, v1 string, v2 types.Coin) (types.Coin, error, bool) {
+func (m *MockLeverageKeeper) SupplyFromModule(v0 types.Context, v1 string, v2 types.Coin) (types.Coin, bool, error) {
 	r0, r1, r2 := m.SupplyFromModuleFunc.nextHook()(v0, v1, v2)
 	m.SupplyFromModuleFunc.appendCall(LeverageKeeperSupplyFromModuleFuncCall{v0, v1, v2, r0, r1, r2})
 	return r0, r1, r2
@@ -1385,7 +1385,7 @@ func (m *MockLeverageKeeper) SupplyFromModule(v0 types.Context, v1 string, v2 ty
 // SetDefaultHook sets function that is called when the SupplyFromModule
 // method of the parent MockLeverageKeeper instance is invoked and the hook
 // queue is empty.
-func (f *LeverageKeeperSupplyFromModuleFunc) SetDefaultHook(hook func(types.Context, string, types.Coin) (types.Coin, error, bool)) {
+func (f *LeverageKeeperSupplyFromModuleFunc) SetDefaultHook(hook func(types.Context, string, types.Coin) (types.Coin, bool, error)) {
 	f.defaultHook = hook
 }
 
@@ -1393,7 +1393,7 @@ func (f *LeverageKeeperSupplyFromModuleFunc) SetDefaultHook(hook func(types.Cont
 // SupplyFromModule method of the parent MockLeverageKeeper instance invokes
 // the hook at the front of the queue and discards it. After the queue is
 // empty, the default hook function is invoked for any future action.
-func (f *LeverageKeeperSupplyFromModuleFunc) PushHook(hook func(types.Context, string, types.Coin) (types.Coin, error, bool)) {
+func (f *LeverageKeeperSupplyFromModuleFunc) PushHook(hook func(types.Context, string, types.Coin) (types.Coin, bool, error)) {
 	f.mutex.Lock()
 	f.hooks = append(f.hooks, hook)
 	f.mutex.Unlock()
@@ -1401,20 +1401,20 @@ func (f *LeverageKeeperSupplyFromModuleFunc) PushHook(hook func(types.Context, s
 
 // SetDefaultReturn calls SetDefaultHook with a function that returns the
 // given values.
-func (f *LeverageKeeperSupplyFromModuleFunc) SetDefaultReturn(r0 types.Coin, r1 error, r2 bool) {
-	f.SetDefaultHook(func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+func (f *LeverageKeeperSupplyFromModuleFunc) SetDefaultReturn(r0 types.Coin, r1 bool, r2 error) {
+	f.SetDefaultHook(func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 		return r0, r1, r2
 	})
 }
 
 // PushReturn calls PushHook with a function that returns the given values.
-func (f *LeverageKeeperSupplyFromModuleFunc) PushReturn(r0 types.Coin, r1 error, r2 bool) {
-	f.PushHook(func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+func (f *LeverageKeeperSupplyFromModuleFunc) PushReturn(r0 types.Coin, r1 bool, r2 error) {
+	f.PushHook(func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 		return r0, r1, r2
 	})
 }
 
-func (f *LeverageKeeperSupplyFromModuleFunc) nextHook() func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+func (f *LeverageKeeperSupplyFromModuleFunc) nextHook() func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -1462,10 +1462,10 @@ type LeverageKeeperSupplyFromModuleFuncCall struct {
 	Result0 types.Coin
 	// Result1 is the value of the 2nd result returned from this method
 	// invocation.
-	Result1 error
+	Result1 bool
 	// Result2 is the value of the 3rd result returned from this method
 	// invocation.
-	Result2 bool
+	Result2 error
 }
 
 // Args returns an interface slice containing the arguments of this
@@ -1484,15 +1484,15 @@ func (c LeverageKeeperSupplyFromModuleFuncCall) Results() []interface{} {
 // WithdrawToModule method of the parent MockLeverageKeeper instance is
 // invoked.
 type LeverageKeeperWithdrawToModuleFunc struct {
-	defaultHook func(types.Context, string, types.Coin) (types.Coin, error, bool)
-	hooks       []func(types.Context, string, types.Coin) (types.Coin, error, bool)
+	defaultHook func(types.Context, string, types.Coin) (types.Coin, bool, error)
+	hooks       []func(types.Context, string, types.Coin) (types.Coin, bool, error)
 	history     []LeverageKeeperWithdrawToModuleFuncCall
 	mutex       sync.Mutex
 }
 
 // WithdrawToModule delegates to the next hook function in the queue and
 // stores the parameter and result values of this invocation.
-func (m *MockLeverageKeeper) WithdrawToModule(v0 types.Context, v1 string, v2 types.Coin) (types.Coin, error, bool) {
+func (m *MockLeverageKeeper) WithdrawToModule(v0 types.Context, v1 string, v2 types.Coin) (types.Coin, bool, error) {
 	r0, r1, r2 := m.WithdrawToModuleFunc.nextHook()(v0, v1, v2)
 	m.WithdrawToModuleFunc.appendCall(LeverageKeeperWithdrawToModuleFuncCall{v0, v1, v2, r0, r1, r2})
 	return r0, r1, r2
@@ -1501,7 +1501,7 @@ func (m *MockLeverageKeeper) WithdrawToModule(v0 types.Context, v1 string, v2 ty
 // SetDefaultHook sets function that is called when the WithdrawToModule
 // method of the parent MockLeverageKeeper instance is invoked and the hook
 // queue is empty.
-func (f *LeverageKeeperWithdrawToModuleFunc) SetDefaultHook(hook func(types.Context, string, types.Coin) (types.Coin, error, bool)) {
+func (f *LeverageKeeperWithdrawToModuleFunc) SetDefaultHook(hook func(types.Context, string, types.Coin) (types.Coin, bool, error)) {
 	f.defaultHook = hook
 }
 
@@ -1509,7 +1509,7 @@ func (f *LeverageKeeperWithdrawToModuleFunc) SetDefaultHook(hook func(types.Cont
 // WithdrawToModule method of the parent MockLeverageKeeper instance invokes
 // the hook at the front of the queue and discards it. After the queue is
 // empty, the default hook function is invoked for any future action.
-func (f *LeverageKeeperWithdrawToModuleFunc) PushHook(hook func(types.Context, string, types.Coin) (types.Coin, error, bool)) {
+func (f *LeverageKeeperWithdrawToModuleFunc) PushHook(hook func(types.Context, string, types.Coin) (types.Coin, bool, error)) {
 	f.mutex.Lock()
 	f.hooks = append(f.hooks, hook)
 	f.mutex.Unlock()
@@ -1517,20 +1517,20 @@ func (f *LeverageKeeperWithdrawToModuleFunc) PushHook(hook func(types.Context, s
 
 // SetDefaultReturn calls SetDefaultHook with a function that returns the
 // given values.
-func (f *LeverageKeeperWithdrawToModuleFunc) SetDefaultReturn(r0 types.Coin, r1 error, r2 bool) {
-	f.SetDefaultHook(func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+func (f *LeverageKeeperWithdrawToModuleFunc) SetDefaultReturn(r0 types.Coin, r1 bool, r2 error) {
+	f.SetDefaultHook(func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 		return r0, r1, r2
 	})
 }
 
 // PushReturn calls PushHook with a function that returns the given values.
-func (f *LeverageKeeperWithdrawToModuleFunc) PushReturn(r0 types.Coin, r1 error, r2 bool) {
-	f.PushHook(func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+func (f *LeverageKeeperWithdrawToModuleFunc) PushReturn(r0 types.Coin, r1 bool, r2 error) {
+	f.PushHook(func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 		return r0, r1, r2
 	})
 }
 
-func (f *LeverageKeeperWithdrawToModuleFunc) nextHook() func(types.Context, string, types.Coin) (types.Coin, error, bool) {
+func (f *LeverageKeeperWithdrawToModuleFunc) nextHook() func(types.Context, string, types.Coin) (types.Coin, bool, error) {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -1578,10 +1578,10 @@ type LeverageKeeperWithdrawToModuleFuncCall struct {
 	Result0 types.Coin
 	// Result1 is the value of the 2nd result returned from this method
 	// invocation.
-	Result1 error
+	Result1 bool
 	// Result2 is the value of the 3rd result returned from this method
 	// invocation.
-	Result2 bool
+	Result2 error
 }
 
 // Args returns an interface slice containing the arguments of this
