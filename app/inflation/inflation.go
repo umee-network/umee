@@ -21,16 +21,13 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 	ugovKeeper := c.UgovKeeperB.Keeper(&ctx)
 	inflationParams := ugovKeeper.InflationParams()
 	maxSupplyAmount := inflationParams.MaxSupply.Amount
-
 	totalSupply := c.MintKeeper.StakingTokenSupply(ctx)
 	if totalSupply.GTE(maxSupplyAmount) {
 		// supply is already reached the maximum amount, so inflation should be zero
 		return sdk.ZeroDec()
 	}
 
-	cycleEnd, err := ugovKeeper.GetInflationCycleEnd()
-	util.Panic(err)
-
+	cycleEnd := ugovKeeper.GetInflationCycleEnd()
 	if ctx.BlockTime().After(cycleEnd) {
 		// new inflation cycle is starting , so we need to update the inflation max and min rate
 		factor := bpmath.One - inflationParams.InflationReductionRate
