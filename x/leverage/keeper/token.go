@@ -74,25 +74,23 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 // SaveOrUpdateTokenSettingsToRegistry adds new tokens or updates the new tokens settings to registry.
 // It requires maps of the currently registered base and symbol denoms, so it can prevent duplicates of either.
 func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
-	ctx sdk.Context, tokens []types.Token, regdTkDenoms, regdSymDenoms map[string]bool, update bool,
+	ctx sdk.Context, tokens []types.Token, regDenoms, regSymbols map[string]bool, update bool,
 ) error {
-	for _, token := range tokens {
-		if err := token.Validate(); err != nil {
-			return err
-		}
+	if len(tokens) == 0 {
+		return nil
 	}
+	// NOTE: validation is skipped here because it's done in MsgGovUpdateRegistry.ValidateBasic()
 
 	for _, token := range tokens {
 		if update {
-			if _, ok := regdTkDenoms[token.BaseDenom]; !ok {
+			if _, ok := regDenoms[token.BaseDenom]; !ok {
 				return types.ErrNotRegisteredToken.Wrapf("token %s is not registered", token.BaseDenom)
 			}
 		} else {
-			if _, ok := regdTkDenoms[token.BaseDenom]; ok {
+			if _, ok := regDenoms[token.BaseDenom]; ok {
 				return types.ErrDuplicateToken.Wrapf("token %s is already registered", token.BaseDenom)
 			}
-
-			if _, ok := regdSymDenoms[strings.ToUpper(token.SymbolDenom)]; ok {
+			if _, ok := regSymbols[strings.ToUpper(token.SymbolDenom)]; ok {
 				return types.ErrDuplicateToken.Wrapf("symbol denom %s is already registered", token.SymbolDenom)
 			}
 		}

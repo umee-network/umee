@@ -40,24 +40,11 @@ func (msg MsgGovUpdateRegistry) ValidateBasic() error {
 		return ErrEmptyAddAndUpdateTokens
 	}
 
-	if err := validateRegistryTokenDenoms(msg.AddTokens); err != nil {
+	if err := validateRegistryToken(msg.AddTokens); err != nil {
 		return err
 	}
-
-	for _, token := range msg.AddTokens {
-		if err := token.Validate(); err != nil {
-			return errors.Wrap(err, "token")
-		}
-	}
-
-	if err := validateRegistryTokenDenoms(msg.UpdateTokens); err != nil {
+	if err := validateRegistryToken(msg.UpdateTokens); err != nil {
 		return err
-	}
-
-	for _, token := range msg.UpdateTokens {
-		if err := token.Validate(); err != nil {
-			return errors.Wrap(err, "token")
-		}
 	}
 
 	return nil
@@ -74,12 +61,15 @@ func (msg MsgGovUpdateRegistry) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-// validateRegistryTokenDenoms returns error if duplicate baseDenom exists.
-func validateRegistryTokenDenoms(tokens []Token) error {
+// validateRegistryToken returns error if duplicate baseDenom exists.
+func validateRegistryToken(tokens []Token) error {
 	tokenDenoms := map[string]bool{}
 	for _, token := range tokens {
+		if err := token.Validate(); err != nil {
+			return err
+		}
 		if _, ok := tokenDenoms[token.BaseDenom]; ok {
-			return ErrDuplicateToken.Wrapf("duplicate token with baseDenom %s", token.BaseDenom)
+			return ErrDuplicateToken.Wrapf("with baseDenom %s", token.BaseDenom)
 		}
 		tokenDenoms[token.BaseDenom] = true
 	}

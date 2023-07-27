@@ -540,23 +540,23 @@ func (s msgServer) GovUpdateRegistry(
 	msg *types.MsgGovUpdateRegistry,
 ) (*types.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	regdTkDenoms := make(map[string]bool)
-	regdSymDenoms := make(map[string]bool)
+	regDenoms := make(map[string]bool)
+	regSymbols := make(map[string]bool)
 
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
 	for _, token := range registeredTokens {
-		regdTkDenoms[token.BaseDenom] = true
-		regdSymDenoms[strings.ToUpper(token.SymbolDenom)] = true
+		regDenoms[token.BaseDenom] = true
+		regSymbols[strings.ToUpper(token.SymbolDenom)] = true
 	}
 
 	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regdTkDenoms, regdSymDenoms, true)
+	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regDenoms, regSymbols, true)
 	if err != nil {
 		return nil, err
 	}
 
 	// adds the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regdTkDenoms, regdSymDenoms, false)
+	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regDenoms, regSymbols, false)
 	if err != nil {
 		return nil, err
 	}
