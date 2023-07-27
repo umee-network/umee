@@ -185,6 +185,10 @@ func ValidPricesFunc() func(ctx sdk.Context) otypes.Prices {
 }
 
 func ValidToken(baseDenom, symbolDenom string, exponent uint32) ltypes.Token {
+	maxSupply := sdk.NewInt(1000000_00000000)
+	if baseDenom == ETHBaseDenom {
+		maxSupply = sdk.ZeroInt()
+	}
 	return ltypes.Token{
 		BaseDenom:              baseDenom,
 		SymbolDenom:            symbolDenom,
@@ -203,7 +207,7 @@ func ValidToken(baseDenom, symbolDenom string, exponent uint32) ltypes.Token {
 		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
 		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
 		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.05"),
-		MaxSupply:              sdk.ZeroInt(),
+		MaxSupply:              maxSupply,
 		HistoricMedians:        24,
 	}
 }

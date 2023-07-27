@@ -6,12 +6,12 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	
+
 	"github.com/umee-network/umee/v5/x/metoken"
 	lerrors "github.com/umee-network/umee/v5/x/metoken/errors"
 )
 
-// one is the smallest unit of a base denom.
+// one is the smallest unit of a base denom. It used to avoid transferring dust back and forth.
 var one = sdkmath.NewInt(1)
 
 // RebalanceReserves checks if the portion of reserves is below the desired and transfer the missing amount from
