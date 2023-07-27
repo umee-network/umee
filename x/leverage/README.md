@@ -204,6 +204,16 @@ They are defined in the form `[Asset A, Asset B, Special Collateral Weight]`. In
 
 > When a user has collateral of `Asset A` and borrows `Asset B`, or vice versa, the `CollateralWeight` of both `Asset A` and `Asset B` are replaced by `Special Collateral Weight`.
 
+#### Special Asset Pair Examples
+
+> Consider a scenario where assets `A,B,C,D` all have collateral weight `0.75`. There is also a special asset pair `[A,B,0.9]` which privileges borrows between those two assets.
+>
+> A user with `Collateral: $10A, Borrowed: $7A` is unaffected by any special asset pairs. The maximum `A` it could borrow is `$7.50`
+>
+> A user with `Collateral: $10A + $10C, Borrowed: $7B, $7C` has a special pair in effect. The special pair resolves to `Collateral: $7.77A, Borrowed: $7B` and the rest of their position is treated normally as `Collateral: $2.23A + $10C, Borrowed: $7C` which has significant room to borrow more.
+>
+> A user with `Collateral: $10A + $10C, Borrowed: $15B` has a special pair in effect. The special pair resolves to `Collateral: $10A, Borrowed: $9B` and the rest of their position is treated normally as `Collateral: $10C, Borrowed: $6C` which can accomodate an additional `$1.50` of borrowing.
+
 #### Borrow Limit
 
 A user's borrow limit is the sum of the contributions from each collateral they have deposited, with some modifications due to `Borrow Factor` and `Special Asset Pairs`.
