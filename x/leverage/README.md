@@ -20,7 +20,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [uToken Exchange Rate](#utoken-exchange-rate)
      - [Supply Utilization](#supply-utilization)
      - [Token Price](#token-price)
-     - [Borrow Factor](#borrow-factor)
+     - [Collateral Weight and Borrow Factor](#collateral-weight-andborrow-factor)
      - [Borrow Limit](#borrow-limit)
      - [Max Borrow](#max-borrow)
      - [Liquidation Threshold](#liquidation-threshold)
@@ -188,7 +188,7 @@ Transactions will also have different behaviors when encountering missing spot o
 Missing collateral prices will allow a transaction to succeed if all _known_ collateral is sufficient to cover the user's resulting position.
 Missing borrow prices cause any transaction which would increase borrowed value or decrease borrow limit to fail.
 
-#### Borrow Factor
+#### Collateral Weight and Borrow Factor
 
 Each token in the `Token Registry` has a parameter called `CollateralWeight`, always less than 1, which determines the portion of the token's value that goes towards a user's borrow limit, when the token is used as collateral.
 
