@@ -222,7 +222,7 @@ func TestInflationRate(t *testing.T) {
 			mockUGovKeeper.EXPECT().InflationParams().Return(test.inflationParams(mockInflationParams))
 			mockMintKeeper.EXPECT().StakingTokenSupply(gomock.Any()).Return(test.totalSupply)
 			mockMintKeeper.EXPECT().SetParams(gomock.Any(), gomock.Any()).AnyTimes()
-			mockUGovKeeper.EXPECT().GetInflationCycleEnd().Return(test.cycleEndTime(), nil).AnyTimes()
+			mockUGovKeeper.EXPECT().GetInflationCycleEnd().Return(test.cycleEndTime()).AnyTimes()
 			mockUGovKeeper.EXPECT().SetInflationCycleEnd(gomock.Any()).Return(nil).AnyTimes()
 
 			result := calc.InflationRate(test.ctx(), test.minter, test.mintParams(mintParams), test.bondedRatio)
