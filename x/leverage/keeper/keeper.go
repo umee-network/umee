@@ -85,15 +85,15 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Coin {
 // exchange for uTokens on behalf of another module. In addition to the regular error
 // return, also returns a boolean which indicates whether the error was recoverable.
 // A recoverable = true error means SupplyFromModule was aborted without harming state.
-func (k Keeper) SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Coin) (sdk.Coin, error, bool) {
+func (k Keeper) SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Coin) (sdk.Coin, bool, error) {
 	if err := k.validateSupply(ctx, coin); err != nil {
-		return sdk.Coin{}, err, true
+		return sdk.Coin{}, true, err
 	}
 
 	// determine uToken amount to mint
 	uToken, err := k.ExchangeToken(ctx, coin)
 	if err != nil {
-		return sdk.Coin{}, err, true
+		return sdk.Coin{}, true, err
 	}
 
 	// All errors past this point are considered non-recoverable
@@ -101,25 +101,25 @@ func (k Keeper) SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Co
 	// send token balance to leverage module account
 	err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, fromModule, types.ModuleName, sdk.NewCoins(coin))
 	if err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 
 	// mint uToken and set new total uToken supply
 	uTokens := sdk.NewCoins(uToken)
 	if err = k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Add(uToken)); err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 
 	// The uTokens are sent to supplier module
 	if err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, fromModule, uTokens); err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 
 	// On nil error, recoverable is set to true
-	return uToken, nil, true
+	return uToken, true, nil
 }
 
 // Supply attempts to deposit assets into the leverage module account in
@@ -248,46 +248,46 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 // returns an error. Returns the amount of base tokens received. In addition to the regular error
 // return, also returns a boolean which indicates whether the error was recoverable.
 // A recoverable = true error means WithdrawToModule was aborted without harming state.
-func (k Keeper) WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Coin) (sdk.Coin, error, bool) {
+func (k Keeper) WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Coin) (sdk.Coin, bool, error) {
 	if err := validateUToken(uToken); err != nil {
-		return sdk.Coin{}, err, true
+		return sdk.Coin{}, true, err
 	}
 
 	// calculate base asset amount to withdraw
 	token, err := k.ExchangeUToken(ctx, uToken)
 	if err != nil {
-		return sdk.Coin{}, err, true
+		return sdk.Coin{}, true, err
 	}
 
 	// Ensure leverage module account has sufficient unreserved tokens to withdraw
 	availableAmount := k.AvailableLiquidity(ctx, token.Denom)
 	if token.Amount.GT(availableAmount) {
-		return sdk.Coin{}, types.ErrLendingPoolInsufficient.Wrap(token.String()), true
+		return sdk.Coin{}, true, types.ErrLendingPoolInsufficient.Wrap(token.String())
 	}
 
 	// All errors past this point are considered non-recoverable
 
 	// transfer uTokens to the leverage module account
 	if err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, toModule, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 
 	// send the base assets to withdrawing module
 	tokens := sdk.NewCoins(token)
 	if err = k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, toModule, tokens); err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 
 	// burn the uTokens and set the new total uToken supply
 	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Sub(uToken)); err != nil {
-		return sdk.Coin{}, err, false
+		return sdk.Coin{}, false, err
 	}
 
 	// On nil error, recoverable is set to true
-	return token, nil, true
+	return token, true, nil
 }
 
 // Borrow attempts to borrow tokens from the leverage module account using

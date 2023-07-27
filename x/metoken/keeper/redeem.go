@@ -164,7 +164,7 @@ func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error
 		return coin.Zero(tokensToWithdraw.Denom), nil
 	}
 
-	tokensWithdrawn, err, recoverable := k.leverageKeeper.WithdrawToModule(
+	tokensWithdrawn, recoverable, err := k.leverageKeeper.WithdrawToModule(
 		*k.ctx,
 		metoken.ModuleName,
 		sdk.NewCoin(uTokensFromLeverage.Denom, sdk.MinInt(availableUTokensFromLeverage, uTokensFromLeverage.Amount)),
