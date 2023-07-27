@@ -81,6 +81,44 @@ func (k Keeper) ModuleBalance(ctx sdk.Context, denom string) sdk.Coin {
 	return sdk.NewCoin(denom, amount)
 }
 
+// Supply attempts to deposit assets into the leverage module account in
+// exchange for uTokens. If asset type is invalid or account balance is
+// insufficient, we return an error. Returns the amount of uTokens minted.
+// Note: For supplying from a module account instead of a user, use SupplyFromModule.
+func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) (sdk.Coin, error) {
+	if err := k.validateSupply(ctx, coin); err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// determine uToken amount to mint
+	uToken, err := k.ExchangeToken(ctx, coin)
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// send token balance to leverage module account
+	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, sdk.NewCoins(coin))
+	if err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// mint uToken and set new total uToken supply
+	uTokens := sdk.NewCoins(uToken)
+	if err = k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
+		return sdk.Coin{}, err
+	}
+	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Add(uToken)); err != nil {
+		return sdk.Coin{}, err
+	}
+
+	// The uTokens are sent to supplier address
+	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, uTokens); err != nil {
+		return sdk.Coin{}, err
+	}
+
+	return uToken, nil
+}
+
 // SupplyFromModule attempts to deposit assets into the leverage module account in
 // exchange for uTokens on behalf of another module. In addition to the regular error
 // return, also returns a boolean which indicates whether the error was recoverable.
@@ -122,43 +160,6 @@ func (k Keeper) SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Co
 	return uToken, true, nil
 }
 
-// Supply attempts to deposit assets into the leverage module account in
-// exchange for uTokens. If asset type is invalid or account balance is
-// insufficient, we return an error. Returns the amount of uTokens minted.
-func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) (sdk.Coin, error) {
-	if err := k.validateSupply(ctx, coin); err != nil {
-		return sdk.Coin{}, err
-	}
-
-	// determine uToken amount to mint
-	uToken, err := k.ExchangeToken(ctx, coin)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
-
-	// send token balance to leverage module account
-	err = k.bankKeeper.SendCoinsFromAccountToModule(ctx, supplierAddr, types.ModuleName, sdk.NewCoins(coin))
-	if err != nil {
-		return sdk.Coin{}, err
-	}
-
-	// mint uToken and set new total uToken supply
-	uTokens := sdk.NewCoins(uToken)
-	if err = k.bankKeeper.MintCoins(ctx, types.ModuleName, uTokens); err != nil {
-		return sdk.Coin{}, err
-	}
-	if err = k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Add(uToken)); err != nil {
-		return sdk.Coin{}, err
-	}
-
-	// The uTokens are sent to supplier address
-	if err = k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, supplierAddr, uTokens); err != nil {
-		return sdk.Coin{}, err
-	}
-
-	return uToken, nil
-}
-
 // Withdraw attempts to redeem uTokens from the leverage module in exchange for base tokens.
 // If there are not enough uTokens in balance, Withdraw will attempt to withdraw uToken collateral
 // to make up the difference. If the uToken denom is invalid or balances are insufficient to withdraw
@@ -166,6 +167,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 // This function does NOT check that a borrower remains under their borrow limit or that
 // collateral liquidity remains healthy - those assertions have been moved to MsgServer.
 // Returns a boolean which is true if some or all of the withdrawn uTokens were from collateral.
+// Note: For withdrawing to a module account instead of a user, use WithdrawToModule.
 func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) (sdk.Coin, bool, error) {
 	isFromCollateral := false
 
