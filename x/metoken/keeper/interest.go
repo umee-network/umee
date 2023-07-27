@@ -16,10 +16,7 @@ func (k Keeper) ClaimLeverageInterest() error {
 		return nil
 	}
 
-	leverageLiquidity, err := k.leverageKeeper.GetAllSupplied(
-		*k.ctx,
-		ModuleAddr(),
-	)
+	leverageLiquidity, err := k.leverageKeeper.GetAllSupplied(*k.ctx, ModuleAddr())
 	if err != nil {
 		return err
 	}

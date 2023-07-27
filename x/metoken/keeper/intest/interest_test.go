@@ -93,9 +93,12 @@ func TestInterestClaiming(t *testing.T) {
 	// are the same
 	checkInterest(t, ctx, app, index.Denom, true)
 
-	// create ctx in the future and generate accrued interest
+	// call AccrueAllInterest for the first time to setLastInterestTime for the next execution.
+	// Otherwise, AccrueAllInterest does nothing on the first run.
 	err = app.LeverageKeeper.AccrueAllInterest(ctx)
 	require.NoError(t, err)
+
+	// create ctx in the future and generate accrued interest
 	futureCtx := ctx.WithBlockTime(time.Now().Add(240 * time.Hour))
 	err = app.LeverageKeeper.AccrueAllInterest(futureCtx)
 	require.NoError(t, err)
