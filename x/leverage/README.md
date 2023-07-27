@@ -242,16 +242,11 @@ When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow li
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
 The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
 
-> Example max borrow calculation
->
-> Assume the following collateral weights: AKT 0.3, BNB 0.4, CSMT 0.5, DOT 0.6, ETH 0.7, hereby abbreviated as denoms `A,B,C,D,E`
->
-> Assume also special asset pairs [AKT, BNB, 0.5] and [CSMT, DOT, 0.8] abbreviated as `[A,B,0.5]` and `[C,D,0.8]`
->
-> We will calculate the `MaxBorrow(B)` of a borrower with the following existing position:
+#### Example Max Borrow Calculation
+
+> Assume the following collateral weights: AKT 0.3, BNB 0.4, CSMT 0.5, DOT 0.6, ETH 0.7, hereby abbreviated as denoms `A,B,C,D,E` and special asset pairs [AKT, BNB, 0.5] and [CSMT, DOT, 0.8] abbreviated as `[A,B,0.5]` and `[C,D,0.8]`. We will calculate the `MaxBorrow(B)` of a borrower with the following existing position:
 >
 > Collateral: $20 A, $20 B, $50 C, $20 D, $30 E
->
 > Borrowed: $5 B, $45 D
 >
 > The new borrow of B will appear here on the user's position (ordered by by special pairs first, then collateral weight from highest to lowest, as the algortihm would match assets):
@@ -268,7 +263,6 @@ The result of these calculations will vary depending on the asset requested, and
 > | $10 A | - | <--- 1st deletion |
 >
 > A new borrow of B will be matched with some collateral of A (row marked `1st Deletion`) and add an additional $10 A, $5 B to an existing special pair (`1st insertion`). Then, it will match with unused collateral (`2nd - 5th insertion`).
->
 > The resulting sorted position would be:
 >
 > | Collateral | Borrowed | Effective Collateral Weight |
@@ -282,9 +276,7 @@ The result of these calculations will vary depending on the asset requested, and
 > | $20 B | $8 B | min(0.4,0.4) |
 >
 > Since the borrowed amount of B increased from $5 to ($10 + $16.66 + $8 + $20 + $8) = $62.66, we determine that `MaxBorrow(B) = $57.66` (and then convert from dollars back to tokens in queries.)
->
 > Note that the calculation first had to locate the collateral A which would be moved from its regular row to a special asset row (and would have done so even if that meant orphaning some collateral that was previousy matched with it or a borrow from a lower priority special pair with collateral A)
->
 > After such displaced assets are dealt with, including chain reactions, remaining borrowed B is inserted into the regular rows.
 > It cannot bump borrowed assets with a greater or equal collateral weight, but will displace lower-weighted borrows down to the bottom, then fill all emptry rows.
 
