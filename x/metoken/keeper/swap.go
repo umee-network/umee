@@ -141,12 +141,12 @@ func (k Keeper) supplyToLeverage(tokensToSupply sdk.Coin) (sdkmath.Int, error) {
 		}
 	}
 
-	if _, err = k.leverageKeeper.Supply(
+	if _, err, recoverable := k.leverageKeeper.SupplyFromModule(
 		*k.ctx,
-		ModuleAddr(),
+		metoken.ModuleName,
 		tokensToSupply,
 	); err != nil {
-		return sdkmath.Int{}, errors.Wrap(err, false)
+		return sdkmath.Int{}, errors.Wrap(err, recoverable)
 	}
 
 	return tokensToSupply.Amount, nil
