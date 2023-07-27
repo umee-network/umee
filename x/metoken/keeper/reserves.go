@@ -56,6 +56,7 @@ func (k Keeper) RebalanceReserves() error {
 							k.Logger().Debug(
 								"rebalancing reserves: couldn't withdraw from leverage",
 								"error", err.Error(),
+								"index", index.Denom,
 								"block_time", k.ctx.BlockTime(),
 							)
 							continue
@@ -79,6 +80,7 @@ func (k Keeper) RebalanceReserves() error {
 							k.Logger().Debug(
 								"rebalancing reserves: couldn't supply to leverage",
 								"error", err.Error(),
+								"index", index.Denom,
 								"block_time", k.ctx.BlockTime(),
 							)
 							continue
