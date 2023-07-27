@@ -11,18 +11,13 @@ import (
 	lerrors "github.com/umee-network/umee/v5/x/metoken/errors"
 )
 
-// one is the smallest unit of a base denom. It used to avoid transferring dust back and forth.
-var one = sdkmath.NewInt(1)
+// oneHundred of a base denom. It used to avoid transferring dust back and forth.
+var oneHundred = sdkmath.NewInt(100)
 
 // RebalanceReserves checks if the portion of reserves is below the desired and transfer the missing amount from
 // x/leverage to x/metoken reserves, or vice versa.
 func (k Keeper) RebalanceReserves() error {
-	rebalancingTime, err := k.getNextRebalancingTime()
-	if err != nil {
-		return err
-	}
-
-	if k.ctx.BlockTime().Before(rebalancingTime) {
+	if k.ctx.BlockTime().Before(k.getNextRebalancingTime()) {
 		return nil
 	}
 
@@ -58,7 +53,7 @@ func (k Keeper) RebalanceReserves() error {
 				// transfer the missing amount from x/leverage to x/metoken
 				if desiredReserves.GT(balance.Reserved) {
 					missingReserves := desiredReserves.Sub(balance.Reserved)
-					if missingReserves.LTE(one) {
+					if missingReserves.LTE(oneHundred) {
 						continue
 					}
 
@@ -85,7 +80,7 @@ func (k Keeper) RebalanceReserves() error {
 					// In case the x/metoken module has more reserves than required,
 					// transfer the extra amount to x/leverage
 					extraReserves := balance.Reserved.Sub(desiredReserves)
-					if extraReserves.LTE(one) {
+					if extraReserves.LTE(oneHundred) {
 						continue
 					}
 

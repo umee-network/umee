@@ -12,12 +12,7 @@ import (
 
 // ClaimLeverageInterest sends accrued interest from x/leverage module to x/metoken account.
 func (k Keeper) ClaimLeverageInterest() error {
-	interestClaimTime, err := k.getNextInterestClaimTime()
-	if err != nil {
-		return err
-	}
-
-	if k.ctx.BlockTime().Before(interestClaimTime) {
+	if k.ctx.BlockTime().Before(k.getNextInterestClaimTime()) {
 		return nil
 	}
 
