@@ -43,6 +43,7 @@ inflation_cycle_duration  time.Duration
 // old_inflation * (10'000 - inflation_reduction_rate)/10'000
 inflation_reduction_rate sdk.Dec
 ```
+
 1. `max_supply` : This parameter determines the maximum supply of token. $UMEE max supply is 21 billion tokens.
 2. `inflation_cycle_duration` : This paramter determines the duration of inflation cycle.
 3. `inflation_reduction_rate` (100bp to 10'000bp): This parameter determines the rate at which the inflation rate is reduced. A value of 100bp indicates 1%, 0.1 corresponds to a 10% reduction rate, and 0.01 represents a 1% reduction rate.
