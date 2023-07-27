@@ -3,14 +3,15 @@ package types
 import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 
 	"github.com/umee-network/umee/v5/util/checkers"
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	_ sdk.Msg = &MsgGovUpdateRegistry{}
-	_ sdk.Msg = &MsgGovUpdateSpecialAssetPairs{}
+	_, _ sdk.Msg            = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssetPairs{}
+	_, _ legacytx.LegacyMsg = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssetPairs{}
 )
 
 // NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance
@@ -23,9 +24,6 @@ func NewMsgGovUpdateRegistry(authority, title, description string, update, add [
 		Authority:    authority,
 	}
 }
-
-// Type implements Msg interface
-func (msg MsgGovUpdateRegistry) Type() string { return sdk.MsgTypeURL(&msg) }
 
 // String implements the Stringer interface.
 func (msg MsgGovUpdateRegistry) String() string {
@@ -66,12 +64,6 @@ func (msg MsgGovUpdateRegistry) ValidateBasic() error {
 	return nil
 }
 
-// GetSignBytes implements Msg
-func (msg MsgGovUpdateRegistry) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
-}
-
 // GetSigners implements Msg
 func (msg MsgGovUpdateRegistry) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
@@ -90,18 +82,19 @@ func validateRegistryTokenDenoms(tokens []Token) error {
 }
 
 // NewMsgGovUpdateSpecialAssetPairs will create a new MsgGovUpdateSpecialAssetPairs instance
-func NewMsgGovUpdateSpecialAssetPairs(authority, title, description string, pairs []SpecialAssetPair,
+func NewMsgGovUpdateSpecialAssetPairs(authority string, sets []SpecialAssetSet, pairs []SpecialAssetPair,
 ) *MsgGovUpdateSpecialAssetPairs {
 	return &MsgGovUpdateSpecialAssetPairs{
-		Title:       title,
-		Description: description,
-		Authority:   authority,
-		Pairs:       pairs,
+		Authority: authority,
+		Sets:      sets,
+		Pairs:     pairs,
 	}
 }
 
-// Type implements Msg interface
-func (msg MsgGovUpdateSpecialAssetPairs) Type() string { return sdk.MsgTypeURL(&msg) }
+// GetSigners implements Msg
+func (msg MsgGovUpdateSpecialAssetPairs) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
 
 // String implements the Stringer interface.
 func (msg MsgGovUpdateSpecialAssetPairs) String() string {
@@ -111,7 +104,7 @@ func (msg MsgGovUpdateSpecialAssetPairs) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 
@@ -123,6 +116,22 @@ func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
 		return err
 	}
 
+	ascendingWeight := sdk.ZeroDec()
+	for _, set := range msg.Sets {
+		// ensures sets are sorted from lowest to highest collateral weight
+		// to ensure overlapping sets cause the higher collateral weight to
+		// be stored in state
+		if set.CollateralWeight.IsPositive() {
+			if set.CollateralWeight.LT(ascendingWeight) {
+				return ErrProposedSetOrder
+			}
+			ascendingWeight = set.CollateralWeight
+		}
+		if err := set.Validate(); err != nil {
+			return errors.Wrapf(err, "special asset set [%s]", set.String())
+		}
+	}
+
 	for _, pair := range msg.Pairs {
 		if err := pair.Validate(); err != nil {
 			return errors.Wrapf(err, "special asset pair [%s, %s]", pair.Collateral, pair.Borrow)
@@ -130,17 +139,6 @@ func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
 	}
 
 	return nil
-}
-
-// GetSignBytes implements Msg
-func (msg MsgGovUpdateSpecialAssetPairs) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(&msg)
-	return sdk.MustSortJSON(bz)
-}
-
-// GetSigners implements Msg
-func (msg MsgGovUpdateSpecialAssetPairs) GetSigners() []sdk.AccAddress {
-	return checkers.Signers(msg.Authority)
 }
 
 // validateSpecialAssetPairDenoms returns error if duplicate special asset pairs exist.
@@ -154,4 +152,19 @@ func validateSpecialAssetPairDenoms(pairs []SpecialAssetPair) error {
 		assetPairs[s] = true
 	}
 	return nil
+}
+
+// LegacyMsg.Type implementations
+
+func (msg MsgGovUpdateRegistry) Type() string           { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovUpdateSpecialAssetPairs) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovUpdateRegistry) Route() string          { return "" }
+func (msg MsgGovUpdateSpecialAssetPairs) Route() string { return "" }
+
+func (msg MsgGovUpdateSpecialAssetPairs) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+}
+
+func (msg MsgGovUpdateRegistry) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }

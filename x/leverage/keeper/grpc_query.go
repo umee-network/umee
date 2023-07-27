@@ -70,7 +70,14 @@ func (q Querier) SpecialAssetPairs(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	pairs := q.Keeper.GetAllSpecialAssetPairs(ctx)
+	var pairs []types.SpecialAssetPair
+	if req.Denom == "" {
+		// all pairs
+		pairs = q.Keeper.GetAllSpecialAssetPairs(ctx)
+	} else {
+		// only pairs affecting one asset
+		pairs = q.Keeper.GetSpecialAssetPairs(ctx, req.Denom)
+	}
 
 	return &types.QuerySpecialAssetPairsResponse{
 		Pairs: pairs,

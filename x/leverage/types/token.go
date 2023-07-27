@@ -205,9 +205,35 @@ func (p SpecialAssetPair) Validate() error {
 		return err
 	}
 
-	// Collateral weight is non-negative and less than 1.
-	if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
-		return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
+	// Collateral weight is non-negative and less than 1, or is exactly negative one.
+	if !p.CollateralWeight.Equal(sdk.MustNewDecFromStr("-1")) {
+		if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
+			return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
+		}
+	}
+
+	return nil
+}
+
+// Validate performs validation on an SpecialAssetSet type
+func (s SpecialAssetSet) Validate() error {
+	if err := validateBaseDenoms(s.Assets...); err != nil {
+		return err
+	}
+
+	denoms := map[string]bool{}
+	for _, a := range s.Assets {
+		if _, ok := denoms[a]; ok {
+			return ErrDuplicatePair
+		}
+		denoms[a] = true
+	}
+
+	// Collateral weight is non-negative and less than 1, or is exactly negative one.
+	if !s.CollateralWeight.Equal(sdk.MustNewDecFromStr("-1")) {
+		if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdk.OneDec()) {
+			return fmt.Errorf("invalid collateral rate: %s", s.CollateralWeight)
+		}
 	}
 
 	return nil

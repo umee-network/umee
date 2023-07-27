@@ -577,20 +577,33 @@ func (s msgServer) GovUpdateSpecialAssetPairs(
 ) (*types.MsgGovUpdateSpecialAssetPairsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	for _, pair := range msg.Pairs {
-		token, err := s.keeper.GetTokenSettings(ctx, pair.Collateral)
-		if err != nil {
-			return nil, err
-		}
+	for _, set := range msg.Sets {
+		// each special asset set is decomposed into its component pairs and stored in state.
+		// overrides existing pairs between assets in the new set.
+		for _, a := range set.Assets {
+			for _, b := range set.Assets {
+				if a != b {
+					pair := types.SpecialAssetPair{
+						Collateral:       a,
+						Borrow:           b,
+						CollateralWeight: set.CollateralWeight,
+					}
+					// sets or overrides (or deletes on negative collateral weight) each pair
+					if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
+						return nil, err
+					}
 
-		if pair.CollateralWeight.Equal(token.CollateralWeight) {
-			// setting a special collateral weight equal to regular collateral weight deletes
-			// the special pair instead, since no special weight is needed in that case
-			s.keeper.DeleteSpecialAssetPair(ctx, pair.Collateral, pair.Borrow)
-		} else {
-			if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
-				return nil, err
+				}
 			}
+		}
+	}
+
+	// individual pairs are applied after sets, so they can override specific relationships
+	// between assets.
+	for _, pair := range msg.Pairs {
+		// sets or overrides (or deletes on negative collateral weight) each pair
+		if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
+			return nil, err
 		}
 	}
 

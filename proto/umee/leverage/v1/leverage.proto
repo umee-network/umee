@@ -271,3 +271,21 @@ message SpecialAssetPair {
     (gogoproto.moretags)   = "yaml:\"collateral_weight\""
   ];
 }
+
+// SpecialAssetSet defines a special (increased) CollateralWeight used when any of a set
+// of assets are used to borrow each other (except for looping). It is used in gov proposals
+// to create all the pairs that make up a set at once.
+message SpecialAssetSet {
+  option (gogoproto.equal) = true;
+
+  // Collateral or borrowed base token denoms.
+  repeated string assets = 1;
+
+  // Collateral Weight defines what portion of the total value of the assets
+  // can contribute to a users borrowing power, when borrowing within the set.
+  string collateral_weight = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false,
+    (gogoproto.moretags)   = "yaml:\"collateral_weight\""
+  ];
+}

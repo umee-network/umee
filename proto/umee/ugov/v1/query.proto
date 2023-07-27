@@ -5,6 +5,9 @@ import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+import "umee/ugov/v1/ugov.proto";
 
 option go_package = "github.com/umee-network/umee/v5/x/ugov";
 
@@ -14,12 +17,22 @@ option (gogoproto.goproto_getters_all) = false;
 service Query {
   // MinGasPrice returns minimum transaction fees.
   rpc MinGasPrice(QueryMinGasPrice) returns (QueryMinGasPriceResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/min-gas-price";
+    option (google.api.http).get = "/umee/ugov/v1/min_gas_price";
   }
 
   // EmergencyGroup returns emergency group address
   rpc EmergencyGroup(QueryEmergencyGroup) returns (QueryEmergencyGroupResponse) {
-    option (google.api.http).get = "/umee/ugov/v1/emergency-group";
+    option (google.api.http).get = "/umee/ugov/v1/emergency_group";
+  }
+
+  // InflationParams returns params of inflation reduction rates
+  rpc InflationParams(QueryInflationParams) returns (QueryInflationParamsResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/inflation_params";
+  }
+
+  // InflationCycleEnd returns inflation cycle end time
+  rpc InflationCycleEnd(QueryInflationCycleEnd) returns (QueryInflationCycleEndResponse) {
+    option (google.api.http).get = "/umee/ugov/v1/inflation_cycle_end";
   }
 }
 
@@ -37,4 +50,20 @@ message QueryEmergencyGroup {}
 // QueryEmergencyGroupResponse response type.
 message QueryEmergencyGroupResponse {
   string emergency_group = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+}
+
+// QueryInflationParams request type.
+message QueryInflationParams {}
+
+// QueryInflationParamsResponse response type.
+message QueryInflationParamsResponse {
+  InflationParams params = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryInflationCycleEnd request type.
+message QueryInflationCycleEnd {}
+
+// QueryInflationCycleEndResponse response type.
+message QueryInflationCycleEndResponse {
+  google.protobuf.Timestamp end = 1 [(gogoproto.nullable) = true, (gogoproto.stdtime) = true];
 }

@@ -48,6 +48,13 @@ func (k Keeper) GetAllSpecialAssetPairs(ctx sdk.Context) []types.SpecialAssetPai
 	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
 }
 
+// GetSpecialAssetPairs returns all the special asset pairs from the x/leverage
+// module's KVStore which match a single asset.
+func (k Keeper) GetSpecialAssetPairs(ctx sdk.Context, denom string) []types.SpecialAssetPair {
+	prefix := types.KeySpecialAssetPairOneDenom(denom)
+	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), prefix)
+}
+
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
 // associated with an address.
 func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress) sdk.Coins {
