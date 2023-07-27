@@ -45,6 +45,14 @@
           "Params": "IncentiveParams"
         }
       }
+    },
+    {
+      "url": "./tmp-swagger-gen/umee/metoken/v1/query.swagger.json",
+      "operationIds": {
+        "rename": {
+          "Params": "MeTokenParams"
+        }
+      }
     }
   ]
 }
