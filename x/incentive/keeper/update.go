@@ -191,7 +191,7 @@ func (k Keeper) EndBlock(ctx sdk.Context) (skipped bool, err error) {
 
 	if blockTime <= prevTime {
 		// Avoids this and related issues: https://github.com/tendermint/tendermint/issues/8773
-		k.Logger(ctx).Debug(
+		k.Logger(ctx).Error(
 			"incentive module will wait for block time > prevRewardTime",
 			"current", blockTime,
 			"prev", prevTime,
