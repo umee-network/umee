@@ -6,6 +6,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/metoken"
@@ -206,4 +207,8 @@ func (k Keeper) validateInLeverage(index metoken.Index) error {
 	}
 
 	return nil
+}
+
+func ModuleAddr() sdk.AccAddress {
+	return authtypes.NewModuleAddress(metoken.ModuleName)
 }
