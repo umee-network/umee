@@ -55,7 +55,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2159](https://github.com/umee-network/umee/pull/2159) Add hard market cap for token emission.
 - [2155](https://github.com/umee-network/umee/pull/2155) `bpmath`: basis points math package.
 - [2166](https://github.com/umee-network/umee/pull/2166) Basis Points: `MulDec`
-- [21XX](https://github.com/umee-network/umee/pull/21XX) Add SupplyFromModule and WithdrawToModule to leverage keeper.
+- [2170](https://github.com/umee-network/umee/pull/2170) Add SupplyFromModule and WithdrawToModule to leverage keeper.
 
 ### Improvements
 
