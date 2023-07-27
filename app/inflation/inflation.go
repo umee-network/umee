@@ -27,9 +27,7 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		return sdk.ZeroDec()
 	}
 
-	cycleEnd, err := ugovKeeper.GetInflationCycleEnd()
-	util.Panic(err)
-
+	cycleEnd := ugovKeeper.GetInflationCycleEnd()
 	if ctx.BlockTime().After(cycleEnd) {
 		// new inflation cycle is starting, so we need to update the inflation max and min rate
 		factor := bpmath.One - inflationParams.InflationReductionRate
