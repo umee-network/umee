@@ -286,7 +286,7 @@ message MsgGovUpdateSpecialAssetPairs {
   // set causes all assets in the set to have a certain collateral weight when borrowing
   // against each other (but not looping with themselves). Overrides any existing
   // special asset pairs between assets in the set. Using a collateral weight
-  // one negative one will clear all existing special pairs in the set instead.
+  // negative one (-1) will clear all existing special pairs in the set instead.
   repeated SpecialAssetSet sets = 2 [(gogoproto.nullable) = false];
 
   // pairs are new or updated special asset pairs. Updating a special asset pair's
