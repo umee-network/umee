@@ -22,7 +22,7 @@ func GetQueryCmd() *cobra.Command {
 
 	cmd.AddCommand(
 		QueryMinGasPrice(),
-		QueryLiquidationParams(),
+		QueryInflationParams(),
 		QueryInflationCyleEnd(),
 	)
 
@@ -52,12 +52,12 @@ func QueryMinGasPrice() *cobra.Command {
 	return cmd
 }
 
-// QueryLiquidationParams create the Msg/QueryLiquidationParams CLI.
-func QueryLiquidationParams() *cobra.Command {
+// QueryInflationParams create the Msg/QueryInflationParams CLI.
+func QueryInflationParams() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "liquidation-params",
+		Use:   "inflation-params",
 		Args:  cobra.NoArgs,
-		Short: "Query the liquidation params",
+		Short: "Query the inflation params",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
