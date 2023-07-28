@@ -44,69 +44,53 @@ inflation_cycle_duration  time.Duration
 inflation_reduction_rate sdk.Dec
 ```
 
-1. `max_supply` : This parameter determines the maximum supply of token. $UMEE max supply is 21 billion tokens.
-2. `inflation_cycle_duration` : This paramter determines the duration of inflation cycle.
-3. `inflation_reduction_rate` (100bp to 10'000bp): This parameter determines the rate at which the inflation rate is reduced. A value of 100bp indicates 1%, 0.1 corresponds to a 10% reduction rate, and 0.01 represents a 1% reduction rate.
+See [Ugov Proto](https://github.com/umee-network/umee/blob/main/proto/umee/ugov/v1/ugov.proto) for inflation params
 
 ### InflationCalculationFn
 
 The inflation calculation logic will be implemented as follows:
 
-```go
-type Calculator struct {
-    UgovKeeperB ugovkeeper.Builder
-    MintKeeper  MintKeeper
-}
+```bash
+Input: sdk.Context, minter, mint module params , bondedRatio
+Output: Inflation 
 
-func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mintParams minttypes.Params,
-    bondedRatio sdk.Dec) sdk.Dec {
+Procedure inflationRate(ctx , minter, mintParams, bondedRatio):
 
-    ugovKeeper := c.UgovKeeperB.Keeper(&ctx)
-    inflationParams := ugovKeeper.InflationParams()
-    maxSupplyAmount := inflationParams.MaxSupply.Amount
+    INFLATION_PARAMS = // GET INFLATION_PARAMS FROM UGOV MODULE 
+    MAX_SUPPLY = // MAX SUPPLY OF MINTING DENOM FROM INFLATION_PARAMS
 
-    totalSupply := c.MintKeeper.StakingTokenSupply(ctx)
-    if totalSupply.GTE(maxSupplyAmount) {
+    TOTAL_TOKENS_SUPPLY =  // TOTAL SUPPLY OF MINTING DENOM 
+    If TOTAL_TOKENS_SUPPLY.GTE(MAX_SUPPLY) :
         // supply has already reached the maximum amount, so inflation should be zero
-        return sdk.ZeroDec()
-    }
+        Return sdk.ZeroDec()
 
-    cycleEnd, err := ugovKeeper.GetInflationCycleEnd()
-    util.Panic(err)
+    INFLATION_CYCLE_END_TIME = // CURRENT INFLATION CYCLE END TIME FROM UGOV STORE 
 
-    if ctx.BlockTime().After(cycleEnd) {
+    If ctx.BlockTime > INFLATION_CYCLE_END_TIME:
         // new inflation cycle is starting, so we need to update the inflation max and min rate
-        factor := bpmath.One - inflationParams.InflationReductionRate
+        factor = 1 - INFLATION_PARAMS.InflationReductionRate // 1 - 0.25 = 0.75
         mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
         mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
 
-        c.MintKeeper.SetParams(ctx, mintParams)
+        MintKeeper.SetParams(ctx, mintParams)
 
-        err := ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
-        util.Panic(err)
-    }
+        // SET CURRENT NEW INFLATION CYCLE END TIME IN UGOV STORE 
+        CYCLE_END_TIME = ctx.BlockTime().Add(INFLATION_PARAMS.InflationCycle)
 
-    minter.Inflation = minttypes.DefaultInflationCalculationFn(ctx, minter, mintParams, bondedRatio)
-    return c.AdjustInflation(totalSupply, inflationParams.MaxSupply.Amount, minter, mintParams)
-}
+    Inflation = minttypes.DefaultInflationCalculationFn(ctx, minter, mintParams, bondedRatio)
+    
+    // if the newly minted coins will exceed the MaxSupply, and adjusts the inflation accordingly.
+    MINTING_COINS =( Inflation * TOTAL_TOKENS_SUPPLY )/ mintParams.BlocksPerYear
+    IF (MINTING_COINS + TOTAL_TOKENS_SUPPLY) > MAX_SUPPLY:
+        MINTING_COINS = MAX_SUPPLY - TOTAL_TOKENS_SUPPLY
+        Return Inflation = (MINTING_COINS * mintParams.BlocksPerYear) / TOTAL_TOKENS_SUPPLY
+    
+    Return Inflation
 
-// AdjustInflation checks if the newly minted coins will exceed the MaxSupply, and adjusts the inflation accordingly.
-func (c Calculator) AdjustInflation(totalSupply, maxSupply math.Int, minter minttypes.Minter,
-    params minttypes.Params) sdk.Dec {
-    minter.AnnualProvisions = minter.NextAnnualProvisions(params, totalSupply)
-    newSupply := minter.BlockProvision(params).Amount
-    newTotalSupply := totalSupply.Add(newSupply)
-    if newTotalSupply.GT(maxSupply) {
-        newTotalSupply = maxSupply.Sub(totalSupply)
-        newAnnualProvision := newTotalSupply.Mul(sdk.NewInt(int64(params.BlocksPerYear)))
-        // AnnualProvisions = Inflation * TotalSupply
-        // Mint Coins = AnnualProvisions / BlocksPerYear
-        // Inflation = (New Mint Coins * BlocksPerYear) / TotalSupply
-        return sdk.NewDec(newAnnualProvision.Quo(totalSupply).Int64())
-    }
-    return minter.Inflation
-}
+End Procedure
 ```
+
+[Please Check here](https://github.com/umee-network/umee/blob/main/app/inflation/inflation.go) for above psudo code implementation
 
 ## Conclusion
 
