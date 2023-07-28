@@ -267,8 +267,7 @@ message SpecialAssetPair {
   // factor.
   string collateral_weight = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"collateral_weight\""
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -285,7 +284,6 @@ message SpecialAssetSet {
   // can contribute to a users borrowing power, when borrowing within the set.
   string collateral_weight = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"collateral_weight\""
+    (gogoproto.nullable)   = false
   ];
 }

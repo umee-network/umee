@@ -1124,10 +1124,10 @@ type MsgGovUpdateSpecialAssetPairs struct {
 	// set causes all assets in the set to have a certain collateral weight when borrowing
 	// against each other (but not looping with themselves). Overrides any existing
 	// special asset pairs between assets in the set. Using a collateral weight
-	// one negative one will clear all existing special pairs in the set instead.
+	// negative one (-1) will clear all existing special pairs in the set instead.
 	Sets []SpecialAssetSet `protobuf:"bytes,2,rep,name=sets,proto3" json:"sets"`
 	// pairs are new or updated special asset pairs. Updating a special asset pair's
-	// collateral weight to negative one deletes the pair instead.
+	// collateral weight to negative one (-1) deletes the pair instead.
 	// These pairs will be applied after any sets above when passing a proposal,
 	// so they can be used for more granular control.
 	Pairs []SpecialAssetPair `protobuf:"bytes,3,rep,name=pairs,proto3" json:"pairs"`
