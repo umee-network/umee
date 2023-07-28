@@ -55,7 +55,7 @@ The inflation calculation logic will be implemented as follows:
 Input: sdk.Context, minter, mint module params , bondedRatio
 Output: Inflation 
 
-Procedure inflationRate(ctx , minter, mintParams, bondedRatio):
+Function inflationRate(ctx , minter, mintParams, bondedRatio):
 
     INFLATION_PARAMS = // GET INFLATION_PARAMS FROM UGOV MODULE 
     MAX_SUPPLY = // MAX SUPPLY OF MINTING DENOM FROM INFLATION_PARAMS
@@ -87,8 +87,6 @@ Procedure inflationRate(ctx , minter, mintParams, bondedRatio):
         Return Inflation = (MINTING_COINS * mintParams.BlocksPerYear) / TOTAL_TOKENS_SUPPLY
     
     Return Inflation
-
-End Procedure
 ```
 
 See implementation [here](https://github.com/umee-network/umee/blob/main/app/inflation/inflation.go).
