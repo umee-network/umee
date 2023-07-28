@@ -7,9 +7,9 @@ The UMEE Tokenomic Restructuring proposal aims to optimize the tokenomics of the
 
 ## Design Overview
 
-1. The $UMEE 2.0 Tokenomics will adopt a similar Cosmos dynamic inflation mechanism based on the bonding rate of the network. This allows the Umee chain to naturally adjust the inflation rate to drive staking activities and reach the targeted bonding rate.
+1. The $UMEE 2.0 Tokenomics will adopt dynamic inflation mechanism based on the bonding rate of the network. This allows the Umee chain to naturally adjust the inflation rate to drive staking activities and reach the targeted bonding rate.
 
-2. To initiate the new tokenomics, the maximum and minimum inflation rates will decrease by 25%. Subsequent decreases will occur every two years.
+2. To initiate the new tokenomics, the maximum and minimum inflation rates will decrease by 20%.
 
    - Current min and max inflation rates: 7% - 14%
    - New max and min inflation rates at the start: 5.6% - 11.2%
@@ -18,30 +18,31 @@ The UMEE Tokenomic Restructuring proposal aims to optimize the tokenomics of the
 
    - Each inflation cycle will have a variable yearly total amount of newly emitted tokens.
    - At the end of each inflation cycle, the `min_inflation_rate`, `max_inflation_rate` will be decreased by 25%.
+    See [Mint Proto](https://github.com/cosmos/cosmos-sdk/blob/v0.46.13/proto/cosmos/mint/v1beta1/mint.proto) for max and mint inflation rates
    - The inflation rate change speed will be accelerated from 1 year to 6 months.
 
 4. The total $UMEE supply will be capped at 21 billion tokens.
 
    - Inflation will be reduced during each inflation cycle until minting stops when the maximum supply is reached.
    - Minting will resume if the supply drops below 21 billion, and it will stop again once the 21 billion mark is reached.
-   - The supply will be `StakingTokenSupply`.
+   - The supply will measured by total supply of $UMEE on network.
 
 5. All inflationary tokens will be distributed to stakers and delegators, similar to the current mechanism.
 
-6. **Umee governance will have the power to vote and modify the `inflation params`` if the external environment significantly changes, necessitating a different approach.**
+6. **Umee governance will have the power to vote and modify these inflation parameters if the external environment significantly changes, necessitating a different approach.**
 
 ## Technical Specification
 
-The Inflation Params to be stored in the `x/ugov` module:
+The Inflation Params will be stored in the `x/ugov` module:
 
 ```go
-// max supply based on the bank/QueryTotalSupplyRequest 
+// maximum supply in base denom (uumee) 
 max_supply       sdk.Coin
-// length of the inflation cycle as described in the Design
+// length of the inflation cycle
 inflation_cycle_duration  time.Duration
 // in basis points. 12 corresponds to 0.012. New inflation is calculated as:
 // old_inflation * (10'000 - inflation_reduction_rate)/10'000
-inflation_reduction_rate sdk.Dec
+inflation_reduction_rate bpmath.FixedBP
 ```
 
 See [Ugov Proto](https://github.com/umee-network/umee/blob/main/proto/umee/ugov/v1/ugov.proto) for inflation params
@@ -50,7 +51,7 @@ See [Ugov Proto](https://github.com/umee-network/umee/blob/main/proto/umee/ugov/
 
 The inflation calculation logic will be implemented as follows:
 
-```bash
+```go pseudocode
 Input: sdk.Context, minter, mint module params , bondedRatio
 Output: Inflation 
 
@@ -90,8 +91,4 @@ Procedure inflationRate(ctx , minter, mintParams, bondedRatio):
 End Procedure
 ```
 
-[Please Check here](https://github.com/umee-network/umee/blob/main/app/inflation/inflation.go) for above psudo code implementation
-
-## Conclusion
-
-The UMEE Tokenomic Restructuring proposal aims to optimize the $UMEE token economics, providing a dynamic and adaptive mechanism for inflation adjustment based on the network's bonding rate. The proposed changes will support the growth of the Umee ecosystem and enhance the overall staking experience for validators and delegators. Umee governance retains the ability to adapt the inflation schedule if required to respond to external changes in the future.
+See implementation [here](https://github.com/umee-network/umee/blob/main/app/inflation/inflation.go).
