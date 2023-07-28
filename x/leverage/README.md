@@ -20,7 +20,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
      - [uToken Exchange Rate](#utoken-exchange-rate)
      - [Supply Utilization](#supply-utilization)
      - [Token Price](#token-price)
-     - [Collateral Weight and Borrow Factor](#collateral-weight-andborrow-factor)
+     - [Collateral Weight and Borrow Factor](#collateral-weight-and-borrow-factor)
      - [Borrow Limit](#borrow-limit)
      - [Max Borrow](#max-borrow)
      - [Liquidation Threshold](#liquidation-threshold)
