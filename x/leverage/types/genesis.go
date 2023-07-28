@@ -103,13 +103,8 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	if err := validateSpecialAssetPairDenoms(gs.SpecialPairs); err != nil {
+	if err := validateSpecialAssetPairs(gs.SpecialPairs); err != nil {
 		return err
-	}
-	for _, pair := range gs.SpecialPairs {
-		if err := pair.Validate(); err != nil {
-			return err
-		}
 	}
 
 	return gs.UtokenSupply.Validate()
