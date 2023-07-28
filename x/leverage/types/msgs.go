@@ -112,7 +112,7 @@ func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
 		return ErrEmptyUpdateSpecialAssetPairs
 	}
 
-	if err := validateSpecialAssetPairDenoms(msg.Pairs); err != nil {
+	if err := validateSpecialAssetPairs(msg.Pairs); err != nil {
 		return err
 	}
 
@@ -129,12 +129,6 @@ func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
 		}
 		if err := set.Validate(); err != nil {
 			return errors.Wrapf(err, "special asset set [%s]", set.String())
-		}
-	}
-
-	for _, pair := range msg.Pairs {
-		if err := pair.Validate(); err != nil {
-			return errors.Wrapf(err, "special asset pair [%s, %s]", pair.Collateral, pair.Borrow)
 		}
 	}
 
