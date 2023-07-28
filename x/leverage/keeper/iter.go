@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"sort"
+
 	sdkmath "cosmossdk.io/math"
 	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -45,14 +47,22 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 // GetAllSpecialAssetPairs returns all the special asset pairs from the x/leverage
 // module's KVStore.
 func (k Keeper) GetAllSpecialAssetPairs(ctx sdk.Context) []types.SpecialAssetPair {
-	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
+	pairs := store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
+	sort.SliceStable(pairs, func(i, j int) bool {
+		return pairs[i].CollateralWeight.LT(pairs[j].CollateralWeight)
+	})
+	return pairs
 }
 
 // GetSpecialAssetPairs returns all the special asset pairs from the x/leverage
 // module's KVStore which match a single asset.
 func (k Keeper) GetSpecialAssetPairs(ctx sdk.Context, denom string) []types.SpecialAssetPair {
 	prefix := types.KeySpecialAssetPairOneDenom(denom)
-	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), prefix)
+	pairs := store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), prefix)
+	sort.SliceStable(pairs, func(i, j int) bool {
+		return pairs[i].CollateralWeight.LT(pairs[j].CollateralWeight)
+	})
+	return pairs
 }
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
