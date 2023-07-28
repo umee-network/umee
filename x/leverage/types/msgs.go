@@ -141,8 +141,14 @@ func (msg MsgGovUpdateSpecialAssetPairs) ValidateBasic() error {
 	return nil
 }
 
-// validateSpecialAssetPairDenoms returns error if duplicate special asset pairs exist.
-func validateSpecialAssetPairDenoms(pairs []SpecialAssetPair) error {
+// validateSpecialAssetPairs returns error if duplicate special asset pairs exist or
+// if any individual pairs are invalid.
+func validateSpecialAssetPairs(pairs []SpecialAssetPair) error {
+	for _, pair := range pairs {
+		if err := pair.Validate(); err != nil {
+			return err
+		}
+	}
 	assetPairs := map[string]bool{}
 	for _, pair := range pairs {
 		s := pair.Collateral + "," + pair.Borrow
