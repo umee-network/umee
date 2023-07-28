@@ -1314,7 +1314,7 @@ paths:
                         also overrides the borrowed asset's collateral weight
                         when evaluating borrow
 
-                        factor.
+                        factor. Valid values: 0-1.
                   description: >-
                     SpecialAssetPair defines a special (increased)
                     CollateralWeight used when a specified Collateral is used
@@ -5199,7 +5199,7 @@ definitions:
                 also overrides the borrowed asset's collateral weight when
                 evaluating borrow
 
-                factor.
+                factor. Valid values: 0-1.
           description: >-
             SpecialAssetPair defines a special (increased) CollateralWeight used
             when a specified Collateral is used
@@ -5247,7 +5247,7 @@ definitions:
           also overrides the borrowed asset's collateral weight when evaluating
           borrow
 
-          factor.
+          factor. Valid values: 0-1.
     description: >-
       SpecialAssetPair defines a special (increased) CollateralWeight used when
       a specified Collateral is used

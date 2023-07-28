@@ -249,7 +249,7 @@ type SpecialAssetPair struct {
 	// Collateral Weight defines what portion of the total value of the asset
 	// can contribute to a users borrowing power. For special asset pairs, this
 	// also overrides the borrowed asset's collateral weight when evaluating borrow
-	// factor.
+	// factor. Valid values: 0-1.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight"`
 }
 
@@ -294,6 +294,7 @@ type SpecialAssetSet struct {
 	Assets []string `protobuf:"bytes,1,rep,name=assets,proto3" json:"assets,omitempty"`
 	// Collateral Weight defines what portion of the total value of the assets
 	// can contribute to a users borrowing power, when borrowing within the set.
+	// Valid values: 0-1.
 	CollateralWeight github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,2,opt,name=collateral_weight,json=collateralWeight,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"collateral_weight"`
 }
 
