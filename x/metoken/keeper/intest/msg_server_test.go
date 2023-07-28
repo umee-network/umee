@@ -3,19 +3,17 @@ package keeper_test
 import (
 	"testing"
 
-	otypes "github.com/umee-network/umee/v5/x/oracle/types"
-
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
-
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
+
+	sdkmath "cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/metoken"
 	"github.com/umee-network/umee/v5/x/metoken/keeper"
-
-	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	otypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 type testCase struct {
@@ -29,7 +27,7 @@ type testCase struct {
 func TestMsgServer_Swap(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -170,7 +168,7 @@ func TestMsgServer_Swap(t *testing.T) {
 func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 	index := mocks.NonStableIndex(mocks.MeNonStableDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -266,7 +264,7 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -467,7 +465,7 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 func TestMsgServer_Swap_Depegging(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -914,7 +912,7 @@ func verifySwap(
 func TestMsgServer_Redeem(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -1079,7 +1077,7 @@ func TestMsgServer_Redeem(t *testing.T) {
 func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 	index := mocks.NonStableIndex(mocks.MeNonStableDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -1214,7 +1212,7 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 func TestMsgServer_Redeem_Depegging(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	_, err := msgServer.GovUpdateRegistry(
@@ -1676,7 +1674,7 @@ func verifyRedeem(
 }
 
 func TestMsgServer_GovSetParams(t *testing.T) {
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 
 	testCases := []struct {
@@ -1714,7 +1712,7 @@ func TestMsgServer_GovSetParams(t *testing.T) {
 }
 
 func TestMsgServer_GovUpdateRegistry(t *testing.T) {
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
 	govAddr := app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
 

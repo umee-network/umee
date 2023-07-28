@@ -24,10 +24,11 @@ type LeverageKeeper interface {
 	GetTokenSettings(ctx sdk.Context, denom string) (ltypes.Token, error)
 	ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 	ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
-	Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Coin) (sdk.Coin, error)
-	Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sdk.Coin) (sdk.Coin, bool, error)
+	SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Coin) (sdk.Coin, bool, error)
+	WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Coin) (sdk.Coin, bool, error)
 	ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (sdkmath.Int, error)
 	GetTotalSupply(ctx sdk.Context, denom string) (sdk.Coin, error)
+	GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sdk.Coins, error)
 }
 
 // OracleKeeper interface for price feed.
