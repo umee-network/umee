@@ -290,7 +290,7 @@ message MsgGovUpdateSpecialAssetPairs {
   repeated SpecialAssetSet sets = 2 [(gogoproto.nullable) = false];
 
   // pairs are new or updated special asset pairs. Updating a special asset pair's
-  // collateral weight to negative one deletes the pair instead.
+  // collateral weight to negative one (-1) deletes the pair instead.
   // These pairs will be applied after any sets above when passing a proposal,
   // so they can be used for more granular control.
   repeated SpecialAssetPair pairs = 3 [(gogoproto.nullable) = false];
