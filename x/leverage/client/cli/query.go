@@ -101,7 +101,7 @@ func GetCmdQueryRegisteredTokens() *cobra.Command {
 func GetCmdQuerySpecialAssetPairs() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "special-pairs",
-		Args:  cobra.NoArgs,
+		Args:  cobra.RangeArgs(0, 1),
 		Short: "Query for all currently registered special asset pairs",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
@@ -111,6 +111,9 @@ func GetCmdQuerySpecialAssetPairs() *cobra.Command {
 
 			queryClient := types.NewQueryClient(clientCtx)
 			req := &types.QuerySpecialAssetPairs{}
+			if len(args) > 0 {
+				req.Denom = args[0]
+			}
 			resp, err := queryClient.SpecialAssetPairs(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
