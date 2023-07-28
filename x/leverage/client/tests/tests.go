@@ -97,7 +97,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		{
 			Name:     "query special asset pairs",
 			Command:  cli.GetCmdQuerySpecialAssetPairs(),
-			Args:     []string{},
+			Args:     []string{"uumee"},
 			Response: &types.QuerySpecialAssetPairsResponse{},
 			ExpectedResponse: &types.QuerySpecialAssetPairsResponse{
 				Pairs: []types.SpecialAssetPair{},
