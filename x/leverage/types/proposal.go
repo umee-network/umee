@@ -5,19 +5,19 @@ import (
 )
 
 var (
-	proposalTypeMsgGovUpdateRegistry          = MsgGovUpdateRegistry{}.Type()
-	proposalTypeMsgGovUpdateSpecialAssetPairs = MsgGovUpdateSpecialAssetPairs{}.Type()
+	proposalTypeMsgGovUpdateRegistry      = MsgGovUpdateRegistry{}.Type()
+	proposalTypeMsgGovUpdateSpecialAssets = MsgGovUpdateSpecialAssets{}.Type()
 )
 
 func init() {
 	gov.RegisterProposalType(proposalTypeMsgGovUpdateRegistry)
-	gov.RegisterProposalType(proposalTypeMsgGovUpdateSpecialAssetPairs)
+	gov.RegisterProposalType(proposalTypeMsgGovUpdateSpecialAssets)
 }
 
 // Implements Proposal Interface
 var (
 	_ gov.Content = &MsgGovUpdateRegistry{}
-	_ gov.Content = &MsgGovUpdateSpecialAssetPairs{}
+	_ gov.Content = &MsgGovUpdateSpecialAssets{}
 )
 
 func (msg *MsgGovUpdateRegistry) GetTitle() string       { return msg.Title }
@@ -27,9 +27,9 @@ func (msg *MsgGovUpdateRegistry) ProposalType() string {
 	return proposalTypeMsgGovUpdateRegistry
 }
 
-func (msg *MsgGovUpdateSpecialAssetPairs) GetTitle() string       { return "Special Asset Pairs" }
-func (msg *MsgGovUpdateSpecialAssetPairs) GetDescription() string { return "" }
-func (msg *MsgGovUpdateSpecialAssetPairs) ProposalRoute() string  { return ModuleName }
-func (msg *MsgGovUpdateSpecialAssetPairs) ProposalType() string {
-	return proposalTypeMsgGovUpdateSpecialAssetPairs
+func (msg *MsgGovUpdateSpecialAssets) GetTitle() string       { return "Special Asset Pairs" }
+func (msg *MsgGovUpdateSpecialAssets) GetDescription() string { return "" }
+func (msg *MsgGovUpdateSpecialAssets) ProposalRoute() string  { return ModuleName }
+func (msg *MsgGovUpdateSpecialAssets) ProposalType() string {
+	return proposalTypeMsgGovUpdateSpecialAssets
 }

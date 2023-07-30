@@ -570,11 +570,11 @@ func (s msgServer) GovUpdateRegistry(
 	return &types.MsgGovUpdateRegistryResponse{}, nil
 }
 
-// GovUpdateSpecialAssetPairs adds, updates, or deletes special asset pairs.
-func (s msgServer) GovUpdateSpecialAssetPairs(
+// GovUpdateSpecialAssets adds, updates, or deletes special asset pairs.
+func (s msgServer) GovUpdateSpecialAssets(
 	goCtx context.Context,
-	msg *types.MsgGovUpdateSpecialAssetPairs,
-) (*types.MsgGovUpdateSpecialAssetPairsResponse, error) {
+	msg *types.MsgGovUpdateSpecialAssets,
+) (*types.MsgGovUpdateSpecialAssetsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	for _, set := range msg.Sets {
@@ -592,7 +592,6 @@ func (s msgServer) GovUpdateSpecialAssetPairs(
 					if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
 						return nil, err
 					}
-
 				}
 			}
 		}
@@ -607,5 +606,5 @@ func (s msgServer) GovUpdateSpecialAssetPairs(
 		}
 	}
 
-	return &types.MsgGovUpdateSpecialAssetPairsResponse{}, nil
+	return &types.MsgGovUpdateSpecialAssetsResponse{}, nil
 }
