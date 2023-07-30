@@ -173,4 +173,4 @@ updatetokens:
 	tassert.NotEmpty(t, msg.GetSigners(), "signers shouldn't be empty")
 }
 
-// TODO : tests for MsgGovUpdateSpecialAssetPairs
+// TODO : tests for MsgGovUpdateSpecialAssets

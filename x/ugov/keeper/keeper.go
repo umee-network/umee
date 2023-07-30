@@ -21,7 +21,7 @@ func NewKeeperBuilder(
 	}
 }
 
-func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
+func (kb Builder) Keeper(ctx *sdk.Context) IKeeper {
 	return Keeper{
 		store: ctx.KVStore(kb.storeKey),
 		cdc:   kb.Cdc,

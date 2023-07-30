@@ -61,10 +61,10 @@ func (q Querier) RegisteredTokens(
 	}, nil
 }
 
-func (q Querier) SpecialAssetPairs(
+func (q Querier) SpecialAssets(
 	goCtx context.Context,
-	req *types.QuerySpecialAssetPairs,
-) (*types.QuerySpecialAssetPairsResponse, error) {
+	req *types.QuerySpecialAssets,
+) (*types.QuerySpecialAssetsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -79,7 +79,7 @@ func (q Querier) SpecialAssetPairs(
 		pairs = q.Keeper.GetSpecialAssetPairs(ctx, req.Denom)
 	}
 
-	return &types.QuerySpecialAssetPairsResponse{
+	return &types.QuerySpecialAssetsResponse{
 		Pairs: pairs,
 	}, nil
 }

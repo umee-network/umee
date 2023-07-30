@@ -3,9 +3,10 @@ package metoken
 import (
 	"testing"
 
+	"gotest.tools/v3/assert"
+
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"gotest.tools/v3/assert"
 )
 
 func TestIndex_Validate(t *testing.T) {
@@ -90,6 +91,32 @@ func TestIndex_Validate(t *testing.T) {
 			},
 		)
 	}
+}
+
+func TestIndex_Update(t *testing.T) {
+	existingAsset := "USDT"
+	newAsset := "IST"
+	index := validIndex()
+	assert.Check(t, len(index.AcceptedAssets) == 1)
+
+	i, _ := index.AcceptedAsset(existingAsset)
+	assert.Check(t, i >= 0)
+
+	i, _ = index.AcceptedAsset(newAsset)
+	assert.Check(t, i == -1)
+
+	newAcceptedAsset := validAcceptedAsset(newAsset)
+	index.SetAcceptedAsset(newAcceptedAsset)
+	assert.Check(t, len(index.AcceptedAssets) == 2)
+
+	assert.Check(t, index.HasAcceptedAsset(newAsset))
+
+	newAcceptedAsset.ReservePortion = sdk.MustNewDecFromStr("0.5")
+	index.SetAcceptedAsset(newAcceptedAsset)
+
+	i, asset := index.AcceptedAsset(newAcceptedAsset.Denom)
+	assert.Check(t, i >= 0)
+	assert.Check(t, sdk.MustNewDecFromStr("0.5").Equal(asset.ReservePortion))
 }
 
 func TestFee_Validate(t *testing.T) {

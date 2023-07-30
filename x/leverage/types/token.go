@@ -205,11 +205,14 @@ func (p SpecialAssetPair) Validate() error {
 		return err
 	}
 
-	// Collateral weight is non-negative and less than 1, or is exactly negative one.
-	if !p.CollateralWeight.Equal(sdk.MustNewDecFromStr("-1")) {
-		if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
-			return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
-		}
+	// Collateral Weight is non-negative and less than 1.
+	if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
+	}
+
+	// Liquidation Threshold ranges between collateral weight and 1.
+	if p.LiquidationThreshold.LT(p.CollateralWeight) || p.LiquidationThreshold.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid liquidation threshold: %s", p.LiquidationThreshold)
 	}
 
 	return nil
@@ -229,11 +232,14 @@ func (s SpecialAssetSet) Validate() error {
 		denoms[a] = true
 	}
 
-	// Collateral weight is non-negative and less than 1, or is exactly negative one.
-	if !s.CollateralWeight.Equal(sdk.MustNewDecFromStr("-1")) {
-		if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdk.OneDec()) {
-			return fmt.Errorf("invalid collateral rate: %s", s.CollateralWeight)
-		}
+	// Collateral Weight is non-negative and less than 1.
+	if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid collateral rate: %s", s.CollateralWeight)
+	}
+
+	// Liquidation Threshold ranges between collateral weight and 1.
+	if s.LiquidationThreshold.LT(s.CollateralWeight) || s.LiquidationThreshold.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid liquidation threshold: %s", s.LiquidationThreshold)
 	}
 
 	return nil

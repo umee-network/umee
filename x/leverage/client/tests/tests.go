@@ -95,11 +95,11 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			ErrMsg: "",
 		},
 		{
-			Name:     "query special asset pairs",
-			Command:  cli.GetCmdQuerySpecialAssetPairs(),
-			Args:     []string{},
-			Response: &types.QuerySpecialAssetPairsResponse{},
-			ExpectedResponse: &types.QuerySpecialAssetPairsResponse{
+			Name:     "query special assets",
+			Command:  cli.GetCmdQuerySpecialAssets(),
+			Args:     []string{"uumee"},
+			Response: &types.QuerySpecialAssetsResponse{},
+			ExpectedResponse: &types.QuerySpecialAssetsResponse{
 				Pairs: []types.SpecialAssetPair{},
 			},
 			ErrMsg: "",

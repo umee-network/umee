@@ -570,11 +570,11 @@ func (s msgServer) GovUpdateRegistry(
 	return &types.MsgGovUpdateRegistryResponse{}, nil
 }
 
-// GovUpdateSpecialAssetPairs adds, updates, or deletes special asset pairs.
-func (s msgServer) GovUpdateSpecialAssetPairs(
+// GovUpdateSpecialAssets adds, updates, or deletes special asset pairs.
+func (s msgServer) GovUpdateSpecialAssets(
 	goCtx context.Context,
-	msg *types.MsgGovUpdateSpecialAssetPairs,
-) (*types.MsgGovUpdateSpecialAssetPairsResponse, error) {
+	msg *types.MsgGovUpdateSpecialAssets,
+) (*types.MsgGovUpdateSpecialAssetsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	for _, set := range msg.Sets {
@@ -588,11 +588,10 @@ func (s msgServer) GovUpdateSpecialAssetPairs(
 						Borrow:           b,
 						CollateralWeight: set.CollateralWeight,
 					}
-					// sets or overrides (or deletes on negative collateral weight) each pair
+					// sets or overrides (or deletes on zero collateral weight) each pair
 					if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
 						return nil, err
 					}
-
 				}
 			}
 		}
@@ -601,11 +600,11 @@ func (s msgServer) GovUpdateSpecialAssetPairs(
 	// individual pairs are applied after sets, so they can override specific relationships
 	// between assets.
 	for _, pair := range msg.Pairs {
-		// sets or overrides (or deletes on negative collateral weight) each pair
+		// sets or overrides (or deletes on zero collateral weight) each pair
 		if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
 			return nil, err
 		}
 	}
 
-	return &types.MsgGovUpdateSpecialAssetPairsResponse{}, nil
+	return &types.MsgGovUpdateSpecialAssetsResponse{}, nil
 }

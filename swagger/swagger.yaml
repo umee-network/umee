@@ -1281,10 +1281,10 @@ paths:
           type: string
       tags:
         - Query
-  /umee/leverage/v1/special_asset_pairs:
+  /umee/leverage/v1/special_assets:
     get:
-      summary: SpecialAssetPairs queries for all special asset pairs.
-      operationId: SpecialAssetPairs
+      summary: SpecialAssets queries for all special asset pairs.
+      operationId: SpecialAssets
       responses:
         '200':
           description: A successful response.
@@ -1314,18 +1314,26 @@ paths:
                         also overrides the borrowed asset's collateral weight
                         when evaluating borrow
 
-                        factor.
+                        factor. Valid values: 0-1.
+                    liquidation_threshold:
+                      type: string
+                      title: >-
+                        Liquidation threshold defines what portion of the total
+                        value of the assets
+
+                        can contribute to a users liquidation threshold, when
+                        borrowing within the pair.
+
+                        Valid values in range [collateral_weight,1]
                   description: >-
                     SpecialAssetPair defines a special (increased)
                     CollateralWeight used when a specified Collateral is used
 
                     to collateralize a specified Borrow. This association is
                     one-way (so it does not work in reverse).
-            description: >-
-              QuerySpecialAssetPairsResponse defines the response structure for
-              the
-
-              SpecialAssetPairs gRPC service handler.
+            description: |-
+              QuerySpecialAssetsResponse defines the response structure for the
+              SpecialAssets gRPC service handler.
         default:
           description: An unexpected error response.
           schema:
@@ -5173,7 +5181,7 @@ definitions:
     description: |-
       QueryRegisteredTokensResponse defines the response structure for the
       RegisteredTokens gRPC service handler.
-  umee.leverage.v1.QuerySpecialAssetPairsResponse:
+  umee.leverage.v1.QuerySpecialAssetsResponse:
     type: object
     properties:
       pairs:
@@ -5199,7 +5207,17 @@ definitions:
                 also overrides the borrowed asset's collateral weight when
                 evaluating borrow
 
-                factor.
+                factor. Valid values: 0-1.
+            liquidation_threshold:
+              type: string
+              title: >-
+                Liquidation threshold defines what portion of the total value of
+                the assets
+
+                can contribute to a users liquidation threshold, when borrowing
+                within the pair.
+
+                Valid values in range [collateral_weight,1]
           description: >-
             SpecialAssetPair defines a special (increased) CollateralWeight used
             when a specified Collateral is used
@@ -5207,8 +5225,8 @@ definitions:
             to collateralize a specified Borrow. This association is one-way (so
             it does not work in reverse).
     description: |-
-      QuerySpecialAssetPairsResponse defines the response structure for the
-      SpecialAssetPairs gRPC service handler.
+      QuerySpecialAssetsResponse defines the response structure for the
+      SpecialAssets gRPC service handler.
   umee.leverage.v1.RiskInfo:
     type: object
     properties:
@@ -5247,7 +5265,17 @@ definitions:
           also overrides the borrowed asset's collateral weight when evaluating
           borrow
 
-          factor.
+          factor. Valid values: 0-1.
+      liquidation_threshold:
+        type: string
+        title: >-
+          Liquidation threshold defines what portion of the total value of the
+          assets
+
+          can contribute to a users liquidation threshold, when borrowing within
+          the pair.
+
+          Valid values in range [collateral_weight,1]
     description: >-
       SpecialAssetPair defines a special (increased) CollateralWeight used when
       a specified Collateral is used
@@ -6859,7 +6887,7 @@ definitions:
       It tracks both its start time and end time, so that if the module's
       unbonding time changes, the unbonding can complete at the earlier of
       its original end time or its new one based on the new parameter.
-  umeenetwork.umee.metoken.v1.AcceptedAsset:
+  umee.metoken.v1.AcceptedAsset:
     type: object
     properties:
       denom:
@@ -6894,7 +6922,7 @@ definitions:
       swaps and redemptions, along with its
 
       metadata and parameters
-  umeenetwork.umee.metoken.v1.AssetBalance:
+  umee.metoken.v1.AssetBalance:
     type: object
     properties:
       denom:
@@ -6910,7 +6938,7 @@ definitions:
     description: >-
       AssetBalance tracks how much of a single asset is held in leverage,
       reserves, fees and interest account.
-  umeenetwork.umee.metoken.v1.Fee:
+  umee.metoken.v1.Fee:
     type: object
     properties:
       min_fee:
@@ -6949,7 +6977,7 @@ definitions:
       the user. The usage of these parameters is explained here:
 
       https://github.com/umee-network/umee/tree/main/x/metoken#dynamic-fee
-  umeenetwork.umee.metoken.v1.Index:
+  umee.metoken.v1.Index:
     type: object
     properties:
       denom:
@@ -7069,7 +7097,7 @@ definitions:
       the Index's meToken,
 
       along with its metadata and parameters.
-  umeenetwork.umee.metoken.v1.IndexBalances:
+  umee.metoken.v1.IndexBalances:
     type: object
     properties:
       metoken_supply:
@@ -7105,7 +7133,7 @@ definitions:
     description: >-
       IndexBalances is the state of an Index, containing its meToken supply and
       all underlying asset balances.
-  umeenetwork.umee.metoken.v1.Params:
+  umee.metoken.v1.Params:
     type: object
     properties:
       rebalancing_frequency:
@@ -7125,7 +7153,7 @@ definitions:
 
           leverage module
     description: Params defines the parameters for the metoken module.
-  umeenetwork.umee.metoken.v1.Price:
+  umee.metoken.v1.Price:
     type: object
     properties:
       denom:
@@ -7141,7 +7169,7 @@ definitions:
           Exponent is the power of ten by which to multiply, in order to convert
           an amount of the meToken for the exchange operations.
     description: Price is used to inform meToken price and exponent.
-  umeenetwork.umee.metoken.v1.QueryIndexBalancesResponse:
+  umee.metoken.v1.QueryIndexBalancesResponse:
     type: object
     properties:
       index_balances:
@@ -7188,7 +7216,7 @@ definitions:
     description: >-
       QueryIndexBalanceResponse defines the response structure for the
       IndexBalances gRPC service handler.
-  umeenetwork.umee.metoken.v1.QueryIndexPriceResponse:
+  umee.metoken.v1.QueryIndexPriceResponse:
     type: object
     properties:
       prices:
@@ -7214,7 +7242,7 @@ definitions:
     description: >-
       QueryIndexPriceResponse defines the response structure for the IndexPrice
       gRPC service handler.
-  umeenetwork.umee.metoken.v1.QueryIndexesResponse:
+  umee.metoken.v1.QueryIndexesResponse:
     type: object
     properties:
       registry:
@@ -7346,7 +7374,7 @@ definitions:
     description: >-
       QueryIndexesResponse defines the response structure for the Indexes gRPC
       service handler.
-  umeenetwork.umee.metoken.v1.QueryParamsResponse:
+  umee.metoken.v1.QueryParamsResponse:
     type: object
     properties:
       params:
@@ -7372,7 +7400,7 @@ definitions:
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
       service handler.
-  umeenetwork.umee.metoken.v1.QueryRedeemFeeResponse:
+  umee.metoken.v1.QueryRedeemFeeResponse:
     type: object
     properties:
       asset:
@@ -7390,7 +7418,7 @@ definitions:
     description: >-
       QueryRedeemFeeResponse defines the response structure for the RedeemFee
       gRPC service handler.
-  umeenetwork.umee.metoken.v1.QuerySwapFeeResponse:
+  umee.metoken.v1.QuerySwapFeeResponse:
     type: object
     properties:
       asset:

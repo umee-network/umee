@@ -264,11 +264,18 @@ message SpecialAssetPair {
   // Collateral Weight defines what portion of the total value of the asset
   // can contribute to a users borrowing power. For special asset pairs, this
   // also overrides the borrowed asset's collateral weight when evaluating borrow
-  // factor.
+  // factor. Valid values: 0-1.
   string collateral_weight = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"collateral_weight\""
+    (gogoproto.nullable)   = false
+  ];
+
+  // Liquidation threshold defines what portion of the total value of the assets
+  // can contribute to a users liquidation threshold, when borrowing within the pair.
+  // Valid values in range [collateral_weight,1]
+  string liquidation_threshold = 4 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -283,9 +290,17 @@ message SpecialAssetSet {
 
   // Collateral Weight defines what portion of the total value of the assets
   // can contribute to a users borrowing power, when borrowing within the set.
+  // Valid values: 0-1.
   string collateral_weight = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"collateral_weight\""
+    (gogoproto.nullable)   = false
+  ];
+
+  // Liquidation threshold defines what portion of the total value of the assets
+  // can contribute to a users liquidation threshold, when borrowing within the set.
+  // Valid values in range [collateral_weight,1]
+  string liquidation_threshold = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
   ];
 }

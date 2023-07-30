@@ -67,10 +67,10 @@ service Msg {
   // updates existing tokens with new settings.
   rpc GovUpdateRegistry(MsgGovUpdateRegistry) returns (MsgGovUpdateRegistryResponse);
 
-  // GovUpdateSpecialAssetPairs adds, updates, or removes special asset pairs. Note that a special asset
+  // GovUpdateSpecialAssets adds, updates, or removes special asset pairs. Note that a special asset
   // pair can be removed by setting its special collateral weight to negative one. Also allows for the creation
   // of sets of assets, where each asset in the set forms a special asset pair with all of the others.
-  rpc GovUpdateSpecialAssetPairs(MsgGovUpdateSpecialAssetPairs) returns (MsgGovUpdateSpecialAssetPairsResponse);
+  rpc GovUpdateSpecialAssets(MsgGovUpdateSpecialAssets) returns (MsgGovUpdateSpecialAssetsResponse);
 }
 
 // MsgSupply represents a user's request to supply assets to the module.
@@ -272,8 +272,8 @@ message MsgGovUpdateRegistry {
 // MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
 message MsgGovUpdateRegistryResponse {}
 
-// MsgGovUpdateSpecialAssetPairs defines the Msg/GovUpdateSpecialAssetPairs request type.
-message MsgGovUpdateSpecialAssetPairs {
+// MsgGovUpdateSpecialAssets defines the Msg/GovUpdateSpecialAssets request type.
+message MsgGovUpdateSpecialAssets {
   option (gogoproto.equal)            = true;
   option (gogoproto.goproto_getters)  = false;
   option (gogoproto.goproto_stringer) = false;
@@ -285,16 +285,17 @@ message MsgGovUpdateSpecialAssetPairs {
   // sets are bidirectional groups of special asset pairs. Creating a special asset
   // set causes all assets in the set to have a certain collateral weight when borrowing
   // against each other (but not looping with themselves). Overrides any existing
-  // special asset pairs between assets in the set. Using a collateral weight
-  // one negative one will clear all existing special pairs in the set instead.
+  // special asset pairs between assets in the set. Using both collateral weight
+  // and liquidation theshold of zero will clear all existing special pairs in the set instead.
   repeated SpecialAssetSet sets = 2 [(gogoproto.nullable) = false];
 
-  // pairs are new or updated special asset pairs. Updating a special asset pair's
-  // collateral weight to negative one deletes the pair instead.
+  // pairs are new or updated special asset pairs. Updating both a special asset pair's
+  // collateral weight and liquidation threshold to zero deletes the pair instead.
   // These pairs will be applied after any sets above when passing a proposal,
-  // so they can be used for more granular control.
+  // so they can be used to override certain set elements, set directional relationships,
+  // or set an asset's relation to itself (looping).
   repeated SpecialAssetPair pairs = 3 [(gogoproto.nullable) = false];
 }
 
-// MsgGovUpdateSpecialAssetPairsResponse defines the Msg/GovUpdateSpecialAssetPairs response type.
-message MsgGovUpdateSpecialAssetPairsResponse {}
+// MsgGovUpdateSpecialAssetsResponse defines the Msg/GovUpdateSpecialAssets response type.
+message MsgGovUpdateSpecialAssetsResponse {}
