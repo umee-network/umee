@@ -108,7 +108,7 @@ func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
 		return err
 	}
 
-	if len(msg.Pairs) == 0 {
+	if len(msg.Pairs) == 0 && len(msg.Sets) == 0 {
 		return ErrEmptyUpdateSpecialAssets
 	}
 
