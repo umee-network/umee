@@ -102,7 +102,7 @@ func GetCmdQuerySpecialAssets() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "special-assets",
 		Args:  cobra.RangeArgs(0, 1),
-		Short: "Query for all currently registered special asset pairs",
+		Short: "Query for all special asset pairs, or only those affecting a single collateral token.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
