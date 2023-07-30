@@ -1,9 +1,12 @@
 package keeper
 
 import (
+	"errors"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/umee-network/umee/v5/util/checkers"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
@@ -103,4 +106,88 @@ func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
 	}
 
 	return nil
+}
+
+var maxEmergencyActionNumericDiff = sdk.MustNewDecFromStr("0.2")
+
+func validateEmergencyTokenSettingsUpdate(regTokens, updates []types.Token) error {
+	tmap := map[string]types.Token{}
+	for _, t := range regTokens {
+		tmap[t.BaseDenom] = t
+	}
+
+	errs := checkTokensRegistered(updates, tmap)
+	for _, ut := range updates {
+		t := tmap[ut.BaseDenom]
+		if t.ReserveFactor != ut.ReserveFactor {
+			errs = append(errs, errors.New("can't change ReserveFactor"))
+		}
+		if t.CollateralWeight != ut.CollateralWeight {
+			errs = append(errs, errors.New("can't change CollateralWeight"))
+		}
+		if t.LiquidationThreshold != ut.LiquidationThreshold {
+			errs = append(errs, errors.New("can't change LiquidationThreshold"))
+		}
+		if t.BaseBorrowRate != ut.BaseBorrowRate {
+			errs = append(errs, errors.New("can't change BaseBorrowRate"))
+		}
+		if t.KinkBorrowRate != ut.KinkBorrowRate {
+			errs = append(errs, errors.New("can't change KinkBorrowRate"))
+		}
+		if t.MaxBorrowRate != ut.MaxBorrowRate {
+			errs = append(errs, errors.New("can't change MaxBorrowRate"))
+		}
+		if t.KinkUtilization != ut.KinkUtilization {
+			errs = append(errs, errors.New("can't change KinkUtilization"))
+		}
+		if t.LiquidationIncentive != ut.LiquidationIncentive {
+			errs = append(errs, errors.New("can't change LiquidationIncentive"))
+		}
+		if t.SymbolDenom != ut.SymbolDenom {
+			errs = append(errs, errors.New("can't change SymbolDenom"))
+		}
+		if t.Exponent != ut.Exponent {
+			errs = append(errs, errors.New("can't change Exponent"))
+		}
+		if t.Blacklist != ut.Blacklist {
+			errs = append(errs, errors.New("can't change Blacklist"))
+		}
+		if t.HistoricMedians != ut.HistoricMedians {
+			errs = append(errs, errors.New("can't change HistoricMedians"))
+		}
+
+		// EnableMsgSupply, EnableMsgBorrow
+		// we only allow switch to disable
+		if !t.EnableMsgSupply && ut.EnableMsgSupply {
+			errs = append(errs, errors.New("can't switch EnableMsgSupply to true"))
+		}
+		if !t.EnableMsgBorrow && ut.EnableMsgBorrow {
+			errs = append(errs, errors.New("can't switch EnableMsgBorrow to true"))
+		}
+
+		// MaxCollateralShare
+		// allow limited numeric change
+		err := checkers.DecMaxDiff(
+			t.MaxCollateralShare, ut.MaxCollateralShare, maxEmergencyActionNumericDiff, "MaxCollateralShare")
+		if err != nil {
+			errs = append(errs, err)
+		}
+
+		// MaxCollateralShare, MaxSupplyUtilization, MinCollateralLiquidity, MaxSupply
+		// allow any change
+
+	}
+
+	return errors.Join(errs...)
+}
+
+func checkTokensRegistered[T any](tokens []types.Token, regTokens map[string]T) []error {
+	errs := []error{}
+	for i := range tokens {
+		d := tokens[i].BaseDenom
+		if _, ok := regTokens[d]; !ok {
+			errs = append(errs, types.ErrNotRegisteredToken.Wrap(d))
+		}
+	}
+	return errs
 }
