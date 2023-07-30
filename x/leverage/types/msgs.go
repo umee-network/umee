@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
@@ -98,8 +100,13 @@ func (msg MsgGovUpdateSpecialAssets) GetSigners() []sdk.AccAddress {
 
 // String implements the Stringer interface.
 func (msg MsgGovUpdateSpecialAssets) String() string {
-	out, _ := yaml.Marshal(msg)
-	return string(out)
+	// return fmt.Sprintf("<authority: %s, min_gas_price: %s>", msg.Authority, msg.MinGasPrice.String())
+	return fmt.Sprintf(
+		"authority: %s, sets: %s, pairs: %s",
+		msg.Authority,
+		msg.Sets,
+		msg.Pairs,
+	)
 }
 
 // ValidateBasic implements Msg
