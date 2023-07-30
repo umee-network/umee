@@ -30,7 +30,7 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdQueryParams(),
 		GetCmdQueryRegisteredTokens(),
-		GetCmdQuerySpecialAssetPairs(),
+		GetCmdQuerySpecialAssets(),
 		GetCmdQueryMarketSummary(),
 		GetCmdQueryAccountBalances(),
 		GetCmdQueryAccountSummary(),
@@ -96,11 +96,11 @@ func GetCmdQueryRegisteredTokens() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQuerySpecialAssetPairs creates a Cobra command to query for all
+// GetCmdQuerySpecialAssets creates a Cobra command to query for all
 // the special asset pairs in the x/leverage module.
-func GetCmdQuerySpecialAssetPairs() *cobra.Command {
+func GetCmdQuerySpecialAssets() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "special-pairs",
+		Use:   "special-assets",
 		Args:  cobra.RangeArgs(0, 1),
 		Short: "Query for all currently registered special asset pairs",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -110,11 +110,11 @@ func GetCmdQuerySpecialAssetPairs() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QuerySpecialAssetPairs{}
+			req := &types.QuerySpecialAssets{}
 			if len(args) > 0 {
 				req.Denom = args[0]
 			}
-			resp, err := queryClient.SpecialAssetPairs(cmd.Context(), req)
+			resp, err := queryClient.SpecialAssets(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
