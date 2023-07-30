@@ -75,12 +75,12 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 
 // SetSpecialAssetPair stores a SpecialAssetPair into the x/leverage module's KVStore.
 // Deletes any existing special pairs between the assets instead if given zero
-// collateral weight.
+// collateral weight and zero liquidation threshold.
 func (k Keeper) SetSpecialAssetPair(ctx sdk.Context, pair types.SpecialAssetPair) error {
 	if err := pair.Validate(); err != nil {
 		return err
 	}
-	if !pair.CollateralWeight.IsPositive() {
+	if !pair.CollateralWeight.IsPositive() && !pair.LiquidationThreshold.IsPositive() {
 		k.deleteSpecialAssetPair(ctx, pair.Collateral, pair.Borrow)
 		return nil
 	}
