@@ -147,6 +147,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 // limit when prices are down instead of a complete loss of borrowing ability.
 func (k Keeper) VisibleBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
 	limit := sdk.ZeroDec()
+	// TODO: obsolete this function using account position
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets

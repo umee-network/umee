@@ -259,10 +259,11 @@ func (q Querier) AccountSummary(
 	// borrow limit shown here as it is used in leverage logic:
 	// using the lower of spot or historic prices for each collateral token
 	// skips collateral tokens with missing oracle prices
-	borrowLimit, err := q.Keeper.VisibleBorrowLimit(ctx, collateral)
+	ap, err := q.Keeper.getAccountPosition(ctx, addr)
 	if err != nil {
 		return nil, err
 	}
+	borrowLimit := ap.BorrowLimit()
 
 	resp := &types.QueryAccountSummaryResponse{
 		SuppliedValue:   suppliedValue,
