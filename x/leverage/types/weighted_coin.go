@@ -30,10 +30,10 @@ type WeightedDecCoin struct {
 // together as part of a special asset pair in an account's position. The parameters
 // of the special asset pair are also included.
 type WeightedSpecialPair struct {
-	// the Collateral asset and its value and weight
-	Collateral WeightedDecCoin
-	// the borrowed asset and its value and weight
-	Borrow WeightedDecCoin
+	// the Collateral asset and its value
+	Collateral sdk.DecCoin
+	// the borrowed asset and its value
+	Borrow sdk.DecCoin
 	// the collateral weight of the special pair
 	SpecialWeight sdk.Dec
 	// the liquidation threshold of the special pair
@@ -61,10 +61,10 @@ func (wsp WeightedSpecialPair) higher(b WeightedSpecialPair) bool {
 	if wsp.LiquidationThreshold.GT(b.LiquidationThreshold) {
 		return true // sort next by liquidation threshold
 	}
-	if wsp.Collateral.Asset.Denom < b.Collateral.Asset.Denom {
+	if wsp.Collateral.Denom < b.Collateral.Denom {
 		return true // break ties by collateral denom first
 	}
-	return wsp.Borrow.Asset.Denom < b.Borrow.Asset.Denom // then by borrow denom
+	return wsp.Borrow.Denom < b.Borrow.Denom // then by borrow denom
 }
 
 // Add returns the sum of a weightedDecCoins and an additional weightedDecCoin.
@@ -100,16 +100,8 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 	for _, wp := range wsp {
 		if wp.canCombine(add) {
 			sum = append(sum, WeightedSpecialPair{
-				Collateral: WeightedDecCoin{
-					Asset:       wp.Collateral.Asset.Add(add.Collateral.Asset),
-					Weight:      wp.Collateral.Weight,
-					Liquidation: wp.Collateral.Liquidation,
-				},
-				Borrow: WeightedDecCoin{
-					Asset:       wp.Borrow.Asset.Add(add.Borrow.Asset),
-					Weight:      wp.Borrow.Weight,
-					Liquidation: wp.Borrow.Liquidation,
-				},
+				Collateral:           wp.Collateral.Add(add.Collateral),
+				Borrow:               wp.Borrow.Add(add.Borrow),
 				SpecialWeight:        wp.SpecialWeight,
 				LiquidationThreshold: wp.LiquidationThreshold,
 			})
@@ -126,5 +118,5 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 
 // canCombine returns true if the borrow and collateral denoms of two WeightedSpecialPair are equal
 func (wp WeightedSpecialPair) canCombine(b WeightedSpecialPair) bool {
-	return wp.Collateral.Asset.Denom == b.Collateral.Asset.Denom && wp.Borrow.Asset.Denom == b.Borrow.Asset.Denom
+	return wp.Collateral.Denom == b.Collateral.Denom && wp.Borrow.Denom == b.Borrow.Denom
 }
