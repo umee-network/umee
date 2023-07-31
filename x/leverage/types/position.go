@@ -58,11 +58,25 @@ func NewAccountPosition(
 	// cache all potentially relevant special asset pairs, and sort them by collateral weight.
 	// Initialize their amounts, which will eventually store matching asset value, to zero.
 	for _, sp := range pairs {
+		cw := sdk.MaxDec(
+			sp.CollateralWeight, // pairs may not reduce collateral weight below what the tokens would produce
+			sdk.MinDec(
+				position.tokenCollateralWeight(sp.Collateral),
+				position.tokenCollateralWeight(sp.Borrow),
+			),
+		)
+		lt := sdk.MaxDec(
+			sp.LiquidationThreshold, // pairs may not reduce liquidation threshold below what the tokens would produce
+			sdk.MinDec(
+				position.tokenLiquidationThreshold(sp.Collateral),
+				position.tokenLiquidationThreshold(sp.Borrow),
+			),
+		)
 		wp := WeightedSpecialPair{
 			Collateral:           sdk.NewDecCoinFromDec(sp.Collateral, sdk.ZeroDec()),
 			Borrow:               sdk.NewDecCoinFromDec(sp.Borrow, sdk.ZeroDec()),
-			SpecialWeight:        sp.CollateralWeight,
-			LiquidationThreshold: sp.LiquidationThreshold,
+			SpecialWeight:        cw,
+			LiquidationThreshold: lt,
 		}
 		// sorting is performed by Add function
 		position.specialPairs = position.specialPairs.Add(wp)
@@ -71,6 +85,37 @@ func NewAccountPosition(
 	for _, cv := range collateralValue {
 		// track total collateral value
 		position.collateralValue = position.collateralValue.Add(cv.Amount)
+	}
+	for _, bv := range borrowedValue {
+		// track total borrowed value
+		position.borrowedValue = position.borrowedValue.Add(bv.Amount)
+	}
+
+	// match assets into special asset pairs, removing matched value from collateralValue and borrowedValue
+	for _, p := range position.specialPairs {
+		b := borrowedValue.AmountOf(p.Borrow.Denom)
+		c := collateralValue.AmountOf(p.Collateral.Denom)
+		if b.IsPositive() && c.IsPositive() {
+			// some unmatched assets match the special pair
+			pairBorrowLimit := c.Mul(p.SpecialWeight)
+			if pairBorrowLimit.GTE(b) {
+				// all of the borrow is covered by collateral in this pair
+				borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(p.Borrow.Denom, b)))
+				collateralValue = collateralValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
+					// some collateral, equal to borrow value / collateral weight, is used
+					p.Collateral.Denom, b.Quo(p.SpecialWeight),
+				)))
+			} else {
+				// only some of the borrow, equal to collateral value * collateal weight is covered
+				borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
+					p.Borrow.Denom, c.Mul(p.SpecialWeight),
+				)))
+				collateralValue = collateralValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(p.Collateral.Denom, c)))
+			}
+		}
+	}
+
+	for _, cv := range collateralValue {
 		// sort collateral by collateral weight using Add function
 		position.collateral = position.collateral.Add(
 			WeightedDecCoin{
@@ -82,8 +127,6 @@ func NewAccountPosition(
 	}
 
 	for _, bv := range borrowedValue {
-		// track total borrowed value
-		position.borrowedValue = position.borrowedValue.Add(bv.Amount)
 		// sort borrows by collateral weight using Add function
 		position.borrowed = position.borrowed.Add(
 			WeightedDecCoin{
@@ -93,8 +136,6 @@ func NewAccountPosition(
 			},
 		)
 	}
-
-	// TODO: match regular assets into special asset pairs on init
 
 	return position
 }
