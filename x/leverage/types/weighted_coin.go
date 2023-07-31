@@ -40,7 +40,7 @@ type WeightedSpecialPair struct {
 	LiquidationThreshold sdk.Dec
 }
 
-// higher returns true if a WeightedDecCoin wdc should be sorted after
+// higher returns true if a WeightedDecCoin should be sorted after
 // another WeightedDecCoin b
 func (wdc WeightedDecCoin) higher(b WeightedDecCoin) bool {
 	if wdc.Weight.GT(b.Weight) {
@@ -52,7 +52,7 @@ func (wdc WeightedDecCoin) higher(b WeightedDecCoin) bool {
 	return wdc.Asset.Denom < b.Asset.Denom // break ties by denom
 }
 
-// higher returns true if a WeightedSpecialPair wdc should be sorted after
+// higher returns true if a WeightedSpecialPair should be sorted after
 // another WeightedSpecialPair b
 func (wsp WeightedSpecialPair) higher(b WeightedSpecialPair) bool {
 	if wsp.SpecialWeight.GT(b.SpecialWeight) {
