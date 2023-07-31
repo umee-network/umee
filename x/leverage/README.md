@@ -200,13 +200,14 @@ For example, an account using a single collateral token with `CollateralWeight 0
 
 The leverage module can define pairs of assets which are advantaged when one is used as collateral to borrow the other.
 
-They are defined in the form `[Asset A, Asset B, Special Collateral Weight]`. In effect, this means that
+They are defined in the form `[Asset A, Asset B, Special Collateral Weight, Special Liquidation Threshold]`. In effect, this means that
 
-> When a user has collateral of `Asset A` and borrows `Asset B`, or vice versa, the `CollateralWeight` of both `Asset A` and `Asset B` are replaced by `Special Collateral Weight`.
+> When a user has collateral of `Asset A` and borrows `Asset B`, or vice versa, the `CollateralWeight` of both `Asset A` and `Asset B` are replaced by `Special Collateral Weight`. The `LiquidationThreshold` of the assets is also replaced by that of the special pair.
 
 #### Special Asset Pair Examples
 
 > Consider a scenario where assets `A,B,C,D` all have collateral weight `0.75`. There is also a special asset pair `[A,B,0.9]` which privileges borrows between those two assets.
+> (Note: Liquidation threshold has been omitted from the special pair in this example.)
 >
 > A user with `Collateral: $10A, Borrowed: $7A` is unaffected by any special asset pairs. The maximum `A` it could borrow is `$7.50`
 >
@@ -320,6 +321,7 @@ In practice, the following calculation (which reduces to the logic above in simp
 This utilizes the borrow limit, which has already been computed with special asset pairs, and the token parameters of borrower's collateral:
 
 - The average (weighted by collateral value) collateral weights and liquidation thresholds of the borrower's collateral assets are collected.
+- For collateral assets being counted in special asset pairs, the collateral weight and liquidation threshold of the pair is used instead of that of the asset.
 - The distances from average collateral weight to average liquidation threshold and 1 are compared. (For example when `CW = 0.6` and `LT = 0.7`, then liquidation threshold is `25%` of the way from `CW` to `1`.)
 - Then the borrower's liquidation threshold behaves the same as the average parameters (e.g. it will be `25%` of the way between `borrow limit` and `collateral value`).
 
