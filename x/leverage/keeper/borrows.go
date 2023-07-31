@@ -7,8 +7,6 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
-var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
-
 // assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
 // under either recent (historic median) or current prices. Checks using rules for collateral
 // weight, borrow factor, ans special asset pairs to determine borrow limit. Error if

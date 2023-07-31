@@ -27,11 +27,7 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (types.
 		denom := types.ToTokenDenom(c.Denom)
 		collateralValue = collateralValue.Add(sdk.NewDecCoinFromDec(denom, v))
 		// get special asset pairs which could apply to this collateral token
-		pairs := k.GetSpecialAssetPairs(ctx, c.Denom)
-		for _, p := range pairs {
-			specialPairs = append(specialPairs, p)
-		}
-
+		specialPairs = append(specialPairs, k.GetSpecialAssetPairs(ctx, c.Denom)...)
 	}
 
 	// get the borrower's borrowed value by token, sorted by collateral weight (descending)
