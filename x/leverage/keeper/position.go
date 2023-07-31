@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"sort"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/x/leverage/types"
@@ -10,14 +8,51 @@ import (
 
 // accountPosition contains an account's borrowed and collateral values, arranged
 // into special asset pairs and regular assets. If created by getAccountPosition,
-// each list will always be sorted by collateral weight.
+// each list will always be sorted by collateral weight. Also caches some relevant
+// values that will be reused in computation, like token settings.
 type accountPosition struct {
-	// all special asset pairs which apply to the account
-	specialPairs []weightedSpecialPair
+	// all special asset pairs which apply to the account. Specifically, this should
+	// cache any special pairs which match the account's collateral, even if they do
+	// not match one of its borrows. This is the widest set of information that could
+	// be needed when calculating maxWithdraw of an already collateralized asset, or
+	// maxBorrow of any asset (even if not initially present in the position)
+	specialPairs []types.WeightedSpecialPair
 	// all collateral value not being used for special asset pairs
-	collateral weightedDecCoins
+	collateral types.WeightedDecCoins
 	// all borrowed value not being used for special asset pairs
-	borrowed weightedDecCoins
+	borrowed types.WeightedDecCoins
+	// caches retrieved token settings
+	tokens map[string]types.Token
+}
+
+func (ap *accountPosition) tokenCollateralWeight(ctx sdk.Context, k Keeper, denom string) sdk.Dec {
+	if ap.tokens == nil {
+		ap.tokens = map[string]types.Token{}
+	}
+	if t, ok := ap.tokens[denom]; ok {
+		return t.CollateralWeight
+	}
+	t, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdk.ZeroDec()
+	}
+	ap.tokens[denom] = t
+	return t.CollateralWeight
+}
+
+func (ap *accountPosition) tokenLiquidationThreshold(ctx sdk.Context, k Keeper, denom string) sdk.Dec {
+	if ap.tokens == nil {
+		ap.tokens = map[string]types.Token{}
+	}
+	if t, ok := ap.tokens[denom]; ok {
+		return t.LiquidationThreshold
+	}
+	t, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdk.ZeroDec()
+	}
+	ap.tokens[denom] = t
+	return t.LiquidationThreshold
 }
 
 // getAccountPosition creates and sorts an accountPosition for an address, using information
@@ -25,18 +60,6 @@ type accountPosition struct {
 // Will treat collateral with missing prices as zero-valued, but will error on missing borrow prices.
 func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (accountPosition, error) {
 	position := accountPosition{}
-	tokens := map[string]types.Token{}
-	collateralWeight := func(denom string) sdk.Dec {
-		if t, ok := tokens[denom]; ok {
-			return t.CollateralWeight
-		}
-		t, err := k.GetTokenSettings(ctx, denom)
-		if err != nil {
-			return sdk.ZeroDec()
-		}
-		tokens[denom] = t
-		return t.CollateralWeight
-	}
 
 	// get the borrower's collateral value by token, sorted by collateral weight (descending)
 	collateral := k.GetBorrowerCollateral(ctx, addr)
@@ -48,9 +71,9 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (accoun
 		if v.IsPositive() {
 			denom := types.ToTokenDenom(c.Denom)
 			position.collateral = position.collateral.Add(
-				weightedDecCoin{
-					asset:  sdk.NewDecCoinFromDec(denom, v),
-					weight: collateralWeight(denom),
+				types.WeightedDecCoin{
+					Asset:  sdk.NewDecCoinFromDec(denom, v),
+					Weight: position.tokenCollateralWeight(ctx, k, denom),
 				},
 			)
 		}
@@ -66,9 +89,9 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (accoun
 		if v.IsPositive() {
 			denom := types.ToTokenDenom(b.Denom)
 			position.borrowed = position.borrowed.Add(
-				weightedDecCoin{
-					asset:  sdk.NewDecCoinFromDec(denom, v),
-					weight: collateralWeight(denom),
+				types.WeightedDecCoin{
+					Asset:  sdk.NewDecCoinFromDec(denom, v),
+					Weight: position.tokenCollateralWeight(ctx, k, denom),
 				},
 			)
 		}
@@ -86,53 +109,3 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (accoun
 // TODO: bump to the bottom, or top, when computing max borrow
 // TODO: similar when computing max withdraw
 // TODO: isolate special pairs and bump
-
-type weightedDecCoin struct {
-	// the USD value of an asset in a position
-	asset sdk.DecCoin
-	// the collateral weight
-	weight sdk.Dec
-}
-
-// higher returns true if a weightedDecCoin wdc should be sorted after
-// another weightedDecCoin b
-func (wdc weightedDecCoin) higher(b weightedDecCoin) bool {
-	if wdc.weight.GT(b.weight) {
-		return true // sort first by collateral weight
-	}
-	return wdc.asset.Denom < b.asset.Denom // break ties by denom
-}
-
-type weightedDecCoins []weightedDecCoin
-
-// Add returns the sum of a weightedDecCoins and a since additional weightedDecCoin.
-// The result is sorted by collateral weight (descending) then denom (alphabetical).
-func (wdc weightedDecCoins) Add(add weightedDecCoin) (sum weightedDecCoins) {
-	if len(wdc) == 0 {
-		return weightedDecCoins{add}
-	}
-	for _, c := range wdc {
-		if c.asset.Denom == add.asset.Denom {
-			sum = append(sum, weightedDecCoin{
-				asset:  c.asset.Add(add.asset),
-				weight: add.weight,
-			})
-		} else {
-			sum = append(sum, c)
-		}
-	}
-	// sorts the sum. Fixes unsorted input as well.
-	sort.SliceStable(sum, func(i, j int) bool {
-		return sum[i].higher(sum[j])
-	})
-	return sum
-}
-
-type weightedSpecialPair struct {
-	// the collateral asset and its value and weight
-	collateral weightedDecCoin
-	// the borrowed asset and its value and weight
-	borrow weightedDecCoin
-	// the collateral weight of the special pair
-	specialWeight sdk.Dec
-}
