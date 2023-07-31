@@ -37,8 +37,7 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (types.
 			return types.AccountPosition{}, err
 		}
 		if v.IsPositive() {
-			denom := types.ToTokenDenom(b.Denom)
-			borrowedValue = borrowedValue.Add(sdk.NewDecCoinFromDec(denom, v))
+			borrowedValue = borrowedValue.Add(sdk.NewDecCoinFromDec(b.Denom, v))
 		}
 	}
 
