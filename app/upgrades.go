@@ -59,10 +59,10 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerNewTokenEmissionUpgrade(upgradeInfo)
 }
 
-// TODO: this upgrade registration is just for testing purpose, once we finalise the release for new token emission
+// TODO: this upgrade registration is just for testing purpose, once we finalize the release for new token emission
 // then we need to change planName and storeUpgrades
 func (app *UmeeApp) registerNewTokenEmissionUpgrade(upgradeInfo upgradetypes.Plan) {
-	// TODO:finalise the name
+	// TODO:finalize the name
 	planName := "token_emission"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
