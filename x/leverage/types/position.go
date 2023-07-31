@@ -4,6 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
+
 // AccountPosition must be created by NewAccountPosition for proper initialization.
 // Contains an account's borrowed and collateral values, arranged into special asset
 // pairs and regular assets. Each list will always be sorted by collateral weight.
@@ -62,14 +64,14 @@ func NewAccountPosition(
 			sp.CollateralWeight, // pairs may not reduce collateral weight below what the tokens would produce
 			sdk.MinDec(
 				position.tokenCollateralWeight(sp.Collateral),
-				position.tokenCollateralWeight(sp.Borrow),
+				sdk.MaxDec(position.tokenCollateralWeight(sp.Borrow), minimumBorrowFactor),
 			),
 		)
 		lt := sdk.MaxDec(
 			sp.LiquidationThreshold, // pairs may not reduce liquidation threshold below what the tokens would produce
 			sdk.MinDec(
 				position.tokenLiquidationThreshold(sp.Collateral),
-				position.tokenLiquidationThreshold(sp.Borrow),
+				sdk.MaxDec(position.tokenLiquidationThreshold(sp.Borrow), minimumBorrowFactor),
 			),
 		)
 		wp := WeightedSpecialPair{
@@ -140,6 +142,16 @@ func NewAccountPosition(
 	return position
 }
 
+// BorrowedValue returns an account's total USD value borrowed
+func (ap *AccountPosition) BorrowedValue() sdk.Dec {
+	return ap.borrowedValue
+}
+
+// CollateralValue returns an account's collateral's total USD value
+func (ap *AccountPosition) CollateralValue() sdk.Dec {
+	return ap.collateralValue
+}
+
 // tokenCollateralWeight gets a token's collateral weight if it is registered, else zero
 func (ap *AccountPosition) tokenCollateralWeight(denom string) sdk.Dec {
 	if t, ok := ap.tokens[denom]; ok {
@@ -154,6 +166,63 @@ func (ap *AccountPosition) tokenLiquidationThreshold(denom string) sdk.Dec {
 		return t.LiquidationThreshold
 	}
 	return sdk.ZeroDec()
+}
+
+// BorrowLimit computes the borrow limit of a position, which may be less or more than its borrowed value
+func (ap *AccountPosition) BorrowLimit() sdk.Dec {
+	// An initialized account position already has special asset pairs matched up, so
+	// this function only needs to deal with assets outside of special pairs.
+
+	// These copies of user position will be mutated in the matching process
+	remainingBorrow := ap.borrowed
+	remainingCollateral := ap.collateral
+
+	var i, j int
+	for i < len(remainingCollateral) && j < len(remainingBorrow) {
+		cDenom := remainingCollateral[i].Asset.Denom
+		bDenom := remainingBorrow[j].Asset.Denom
+		c := remainingCollateral[i].Asset.Amount
+		b := remainingBorrow[j].Asset.Amount
+		w := sdk.MinDec(
+			remainingCollateral[i].Weight,
+			sdk.MaxDec(remainingBorrow[j].Weight, minimumBorrowFactor),
+		)
+		// match collateral and borrow at indexes i and j, exhausting at least one of them
+		pairBorrowLimit := c.Mul(w)
+		if pairBorrowLimit.GTE(b) {
+			// all of the borrow is covered by collateral in this pair
+			remainingBorrow = remainingBorrow.Sub(sdk.NewDecCoinFromDec(bDenom, b))
+			remainingCollateral = remainingCollateral.Sub(sdk.NewDecCoinFromDec(
+				// some collateral, equal to borrow value / collateral weight, is used
+				cDenom, b.Quo(w),
+			))
+			// next borrow
+			j++
+		} else {
+			// only some of the borrow, equal to collateral value * collateral weight is covered
+			// if in a previous step the collateral and borrow both reached zero, this is zero
+			remainingBorrow = remainingBorrow.Sub(sdk.NewDecCoinFromDec(
+				bDenom, c.Mul(w),
+			))
+			remainingCollateral = remainingCollateral.Sub(sdk.NewDecCoinFromDec(cDenom, c))
+			// next collateral
+			i++
+		}
+	}
+
+	// if any borrows remain after matching, user is over borrow limit by remaining value
+	remainingBorrowValue := remainingBorrow.Total()
+	if remainingBorrowValue.IsPositive() {
+		return ap.borrowedValue.Sub(remainingBorrowValue)
+	}
+
+	// if no borrows remain after matching, user may have additional borrow limit available
+	borrowLimit := ap.borrowedValue
+	for _, c := range remainingCollateral {
+		// the borrow limit calculation assumes no additional limitations based on borrow factor
+		borrowLimit = borrowLimit.Add(c.Asset.Amount.Mul(c.Weight))
+	}
+	return borrowLimit
 }
 
 // TODO: bump to the bottom, or top, when computing max borrow

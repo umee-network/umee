@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"sort"
-
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -23,145 +21,16 @@ var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
 // to allow up to 100% borrow limit, or a lower value (e.g. 0.9) if a transaction should fail
 // if a safety margin is desired (e.g. <90% borrow limit).
 func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdk.Dec) error {
-	tokens := map[string]types.Token{}
-	collateralWeight := func(denom string) sdk.Dec {
-		if t, ok := tokens[denom]; ok {
-			return t.CollateralWeight
-		}
-		t, err := k.GetTokenSettings(ctx, denom)
-		if err != nil {
-			return sdk.ZeroDec()
-		}
-		tokens[denom] = t
-		return t.CollateralWeight
-	}
-
-	// get the borrower's collateral value by token
-	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-	collateralDenoms := []string{}
-	collateralValue := sdk.NewDecCoins()
-	for _, c := range collateral {
-		v, err := k.VisibleCollateralValue(ctx, sdk.NewCoins(c), types.PriceModeLow)
-		if err != nil {
-			return err
-		}
-		if v.IsPositive() {
-			collateralValue = collateralValue.Add(sdk.NewDecCoinFromDec(types.ToTokenDenom(c.Denom), v))
-			collateralDenoms = append(collateralDenoms, types.ToTokenDenom(c.Denom))
-		}
-	}
-	sort.SliceStable(collateralDenoms, func(i, j int) bool {
-		// sorts by collateral weight (descending)
-		return collateralWeight(collateralDenoms[i]).GTE(collateralWeight(collateralDenoms[j]))
-	})
-
-	// get the borrower's borrowed value by token
-	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	borrowedDenoms := []string{}
-	borrowedValue := sdk.NewDecCoins()
-	for _, b := range borrowed {
-		v, err := k.TokenValue(ctx, b, types.PriceModeHigh)
-		if err != nil {
-			return err
-		}
-		if v.IsPositive() {
-			borrowedValue = borrowedValue.Add(sdk.NewDecCoinFromDec(b.Denom, v))
-			borrowedDenoms = append(borrowedDenoms, b.Denom)
-		}
-	}
-	sort.SliceStable(borrowedDenoms, func(i, j int) bool {
-		// sorts by collateral weight (descending)
-		return collateralWeight(borrowedDenoms[i]).GTE(collateralWeight(borrowedDenoms[j]))
-	})
-
-	// get all special pairs, already sorted by collateral weight (descending)
-	pairs := k.GetAllSpecialAssetPairs(ctx)
-
-	// match collateral to borrows using special asset pairs first
-	for _, p := range pairs {
-		b := borrowedValue.AmountOf(p.Borrow)
-		c := collateralValue.AmountOf(p.Collateral)
-		w := sdk.MaxDec(p.CollateralWeight, collateralWeight(p.Collateral)) // pairs may not reduce collateral weight
-		if b.IsPositive() && c.IsPositive() {
-			// some assets match the special pair
-			pairBorrowLimit := c.Mul(w)
-			if pairBorrowLimit.GTE(b) {
-				// all of the borrow is covered by collateral in this pair
-				borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(p.Borrow, b)))
-				collateralValue = collateralValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
-					// some collateral, equal to borrow value / collateral weight, is used
-					p.Collateral, b.Quo(w),
-				)))
-			} else {
-				// only some of the borrow, equal to collateral value * collateal weight is covered
-				borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
-					p.Borrow, c.Mul(w),
-				)))
-				collateralValue = collateralValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(p.Collateral, c)))
-			}
-		}
-	}
-
-	// match remaining collateralValue to borrowedValue starting with the highest collateral weights first
-	var i, j int
-	for i < len(collateralDenoms) && j < len(borrowedDenoms) {
-		cDenom := collateralDenoms[i]
-		bDenom := borrowedDenoms[j]
-
-		c := collateralValue.AmountOf(cDenom)
-		b := borrowedValue.AmountOf(bDenom)
-		w := sdk.MinDec(
-			collateralWeight(cDenom),
-			sdk.MaxDec(collateralWeight(bDenom), minimumBorrowFactor),
-		)
-
-		// match collateral and borrow at indexes i and j, exhausting at least one of them
-		pairBorrowLimit := c.Mul(w)
-		if pairBorrowLimit.GTE(b) {
-			// all of the borrow is covered by collateral in this pair
-			borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(bDenom, b)))
-			collateralValue = collateralValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
-				// some collateral, equal to borrow value / collateral weight, is used
-				cDenom, b.Quo(w),
-			)))
-			// next borrow
-			j++
-		} else {
-			// only some of the borrow, equal to collateral value * collateral weight is covered
-			// if in a previous step the collateral and borrow both reached zero, this is zero
-			borrowedValue = borrowedValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
-				bDenom, c.Mul(w),
-			)))
-			collateralValue = collateralValue.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(cDenom, c)))
-			// next collateral
-			i++
-		}
-	}
-
-	// if any borrows remain after matching, user is over borrow limit by remaining value
-	totalBorrowedValue, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeHigh)
+	position, err := k.getAccountPosition(ctx, borrowerAddr)
 	if err != nil {
 		return err
 	}
-	if !borrowedValue.IsZero() {
-		overLimit := sdk.ZeroDec()
-		for _, b := range borrowedValue {
-			overLimit = overLimit.Add(b.Amount)
-		}
 
+	borrowedValue := position.BorrowedValue()
+	borrowLimit := position.BorrowLimit()
+	if borrowedValue.GT(borrowLimit.Mul(maxUsage)) {
 		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s", totalBorrowedValue, totalBorrowedValue.Sub(overLimit))
-	}
-
-	// if no borrows remain after matching, user may have additional borrow limit available
-	borrowLimit := totalBorrowedValue
-	for _, c := range collateralValue {
-		borrowLimit = borrowLimit.Add(c.Amount.Mul(collateralWeight(c.Denom)))
-	}
-
-	if totalBorrowedValue.GT(borrowLimit.Mul(maxUsage)) {
-		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s, max usage %s", totalBorrowedValue, borrowLimit, maxUsage)
+			"borrowed: %s, limit: %s, max usage %s", borrowedValue, borrowLimit, maxUsage)
 	}
 	return nil
 }

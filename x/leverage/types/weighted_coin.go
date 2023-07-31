@@ -91,6 +91,41 @@ func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 	return sum
 }
 
+// Total returns the total USD value in a WeightedDecCoins, unaffected by collateral weight
+func (wdc WeightedDecCoins) Total() sdk.Dec {
+	total := sdk.ZeroDec()
+	for _, c := range wdc {
+		total = total.Add(c.Asset.Amount)
+	}
+	return total
+}
+
+// Sub subtracts a sdk.DecCoin from a WeightedDecCoins. Panics if the result would be negative.
+func (wdc WeightedDecCoins) Sub(sub sdk.DecCoin) (diff WeightedDecCoins) {
+	found := false
+	for _, c := range wdc {
+		if c.Asset.Denom == sub.Denom {
+			diff = append(diff, WeightedDecCoin{
+				Asset:       c.Asset.Sub(sub), // sdk.DecCoin.Sub panics on negative result
+				Weight:      c.Weight,
+				Liquidation: c.Liquidation,
+			})
+			found = true
+		} else {
+			diff = append(diff, c)
+		}
+	}
+	if !found {
+		panic("WeightedDecCoins: sub denom not present")
+	}
+
+	// sorts the diff. Fixes unsorted input as well.
+	sort.SliceStable(diff, func(i, j int) bool {
+		return diff[i].higher(diff[j])
+	})
+	return diff
+}
+
 // Add returns the sum of a WeightedSpecialPairs and an additional WeightedSpecialPair.
 // The result is sorted.
 func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecialPairs) {
@@ -117,6 +152,6 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 }
 
 // canCombine returns true if the borrow and collateral denoms of two WeightedSpecialPair are equal
-func (wp WeightedSpecialPair) canCombine(b WeightedSpecialPair) bool {
-	return wp.Collateral.Denom == b.Collateral.Denom && wp.Borrow.Denom == b.Borrow.Denom
+func (wsp WeightedSpecialPair) canCombine(b WeightedSpecialPair) bool {
+	return wsp.Collateral.Denom == b.Collateral.Denom && wsp.Borrow.Denom == b.Borrow.Denom
 }
