@@ -220,13 +220,47 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	return limit
 }
 
-// MaxBorrow
+// MaxBorrow computes the maximum USD value of a given base token denom a position can borrow
+// without exceeding its borrow limit.
 func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
+	// An initialized account position already has special asset pairs matched up, but these pairs
+	// could change due to new borrow.
+	//
+	// Effects of new borrow:
+	// - borrow first added to applicable special pairs
+	//		- can absorb collateral from lower weight special pairs
+	//			- each displaced borrow asset which lost its paired collateral must be placed again
+	//				- displaced borrow asset placed in special pairs, if available
+	//					- can displace additional borrowed assets from pairs (etc, chain reaction)
+	//						- if reached borrow limit, stop here
+	//				- displaced borrow asset placed in unpaired assets
+	//					- can displace unpaired borrowed assets
+	//						- if reached borrow limit, stop here
+	// - borrow then added to unpaired assets
+	//		- can displace borrow assets of lower weight
+	//			- borrow until borrow limit is reached
 	return sdk.ZeroDec()
 }
 
-// MaxWithdraw
+// MaxWithdraw computes the maximum USD value of a given base token denom a position can withdraw
+// from its collateral.
 func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
+	// An initialized account position already has special asset pairs matched up, but these pairs
+	// could change due to withdrawal.
+	//
+	// Effects of collateral withdrawal:
+	// - collateral first taken from unpaired assets
+	//		- can displace borrow assets which were being collateralized
+	//			- if reached borrow limit, stop here
+	// - then taken from paired assets, lowest weight pairs first
+	//		- each displaced borrow asset which lost its paired collateral must be placed again
+	//			- displaced borrow asset placed in special pairs, if available
+	//				- can displace additional borrowed assets from pairs (etc, chain reaction)
+	//					- if reached borrow limit, stop here
+	//			- displaced borrow asset placed in unpaired assets
+	//				- can displace unpaired borrowed assets
+	//					- if reached borrow limit, stop here
+	// - if borrow limit still not reached, user is free to withdraw maxmimum
 	return sdk.ZeroDec()
 }
 
