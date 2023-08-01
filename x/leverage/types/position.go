@@ -239,6 +239,11 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	// - borrow then added to unpaired assets
 	//		- can displace borrow assets of lower weight
 	//			- borrow until borrow limit is reached
+	//
+	// To calculate maximum new borrow (reverse procedure)
+	// - collect unpaired collateral value
+	//		- if none, no new borrows are possible
+	// - ...
 	return sdk.ZeroDec()
 }
 
@@ -267,3 +272,40 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 // TODO: bump to the bottom, or top, when computing max borrow
 // TODO: similar when computing max withdraw
 // TODO: isolate special pairs and bump
+
+/*
+
+Possible approach: Asset Priority Ladder
+
+ 	Collateral		Borrow
+	-------------------------------
+	A(sp)			B(sp)
+	A(sp)			C(sp)
+	B(sp)			A(sp)	<--- special asset pairs will always be present, having zero amount if unused
+	A(sp)			A(sp)
+	C(sp)			B(sp)
+	C(sp)			D(sp)
+	-------------------------------
+	A				A
+	B				A
+	B				B		<--- these matchings of ordinary assets only exist when nonzero
+	C				B
+	C				C
+	C				D
+	C				-		<--- there is leftover collateral initially, when MaxBorrow or MaxWithdraw is nonzero
+	D				-
+
+When computing max borrow of asset B, we need to find a borrow amount such that all remaining unused collateral
+is consumed. This is complicated by the fact that the borrowed B will first occupy in any special pairs which
+allow borrowed B, thus pulling the opposing collateral asset in the affected pairs from either another special
+pair, or some used collateral, or unused collateral. The first two options displace whatever borrowed asset was
+borrowed by that collateral, which has the same effects as described from the start of this paragraph. If not
+occupying a special pair, the borrow B should be inserted into the table or ordinary assets by matching all
+lower weighted borrows (C and D) with the lowest weight leftover collateral assets first, thus freeing up other
+collateral in the middle of the ordinary asset table which may be occupied by B. The amount of B placed throughout
+all of this is the MaxBorrow.
+
+Some kind of helper function which manipulates the pairs and assets from the AccountPosition struct is needed,
+likely one that can call itself recursively for these chain reactions. It should be able to detect when it has
+finally filled all empty borrow slots and then return the total amount of borrowing achieved.
+*/
