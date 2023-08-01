@@ -15,6 +15,7 @@ import (
 	wq "github.com/umee-network/umee/v5/app/wasm/query"
 	"github.com/umee-network/umee/v5/x/incentive"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/metoken"
 	"github.com/umee-network/umee/v5/x/oracle/types"
 )
 
@@ -267,6 +268,34 @@ func (s *IntegrationTestSuite) TestIncentiveQueries() {
 				err := json.Unmarshal(data, &rr)
 				assert.NilError(s.T, err)
 				assert.DeepEqual(s.T, rr.Params, incentive.DefaultParams())
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		s.T.Run(tc.Name, func(t *testing.T) {
+			resp := s.queryContract(tc.CQ)
+			tc.ResponseCheck(resp.Data)
+		})
+	}
+}
+
+func (s *IntegrationTestSuite) TestMetokenQueries() {
+	tests := []struct {
+		Name          string
+		CQ            []byte
+		ResponseCheck func(data []byte)
+	}{
+		{
+			Name: "metoken query params",
+			CQ: s.genCustomQuery(wq.UmeeQuery{
+				MeTokenParameters: &metoken.QueryParams{},
+			}),
+			ResponseCheck: func(data []byte) {
+				var rr metoken.QueryParamsResponse
+				err := json.Unmarshal(data, &rr)
+				assert.NilError(s.T, err)
+				assert.DeepEqual(s.T, rr.Params, metoken.DefaultParams())
 			},
 		},
 	}

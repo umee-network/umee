@@ -7,6 +7,7 @@ import (
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	"github.com/umee-network/umee/v5/x/incentive"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/metoken"
 	octypes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
@@ -90,6 +91,14 @@ type UmeeQuery struct {
 	ActualRates *incentive.QueryActualRates `json:"actual_rates,omitempty"`
 	// LastRewardTime queries the last block time at which incentive rewards were calculated.
 	LastRewardTime *incentive.QueryLastRewardTime `json:"last_reward_time,omitempty"`
+
+	// metoken queries
+	MeTokenParameters *metoken.QueryParams        `json:"metoken_parameters,omitempty"`
+	Indexes           *metoken.QueryIndexes       `json:"metoken_indexes,omitempty"`
+	SwapFee           *metoken.QuerySwapFee       `json:"metoken_swapfee,omitempty"`
+	RedeemFee         *metoken.QueryRedeemFee     `json:"metoken_redeemfee,omitempty"`
+	IndexBalances     *metoken.QueryIndexBalances `json:"metoken_indexbalances,omitempty"`
+	IndexPrice        *metoken.QueryIndexPrice    `json:"metoken_indexprice,omitempty"`
 }
 
 // MarshalResponse marshals any response.
