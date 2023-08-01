@@ -4,6 +4,8 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
@@ -69,6 +71,28 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 
 	err := k.cdc.Unmarshal(bz, &token)
 	return token, err
+}
+
+// SetSpecialAssetPair stores a SpecialAssetPair into the x/leverage module's KVStore.
+// Deletes any existing special pairs between the assets instead if given zero
+// collateral weight and zero liquidation threshold.
+func (k Keeper) SetSpecialAssetPair(ctx sdk.Context, pair types.SpecialAssetPair) error {
+	if err := pair.Validate(); err != nil {
+		return err
+	}
+	if !pair.CollateralWeight.IsPositive() && !pair.LiquidationThreshold.IsPositive() {
+		k.deleteSpecialAssetPair(ctx, pair.Collateral, pair.Borrow)
+		return nil
+	}
+
+	key := types.KeySpecialAssetPair(pair.Collateral, pair.Borrow)
+	return store.SetValue(ctx.KVStore(k.storeKey), key, &pair, "leverage-special-asset")
+}
+
+// deleteSpecialAssetPair removes a SpecialAssetPair from the x/leverage module's KVStore.
+func (k Keeper) deleteSpecialAssetPair(ctx sdk.Context, collateralDenom, borrowDenom string) {
+	key := types.KeySpecialAssetPair(collateralDenom, borrowDenom)
+	ctx.KVStore(k.storeKey).Delete(key)
 }
 
 // SaveOrUpdateTokenSettingsToRegistry adds new tokens or updates the new tokens settings to registry.

@@ -18,6 +18,7 @@ func NewGenesisState(
 	badDebts []BadDebt,
 	interestScalars []InterestScalar,
 	uTokenSupply sdk.Coins,
+	specialPairs []SpecialAssetPair,
 ) *GenesisState {
 	return &GenesisState{
 		Params:           params,
@@ -29,6 +30,7 @@ func NewGenesisState(
 		BadDebts:         badDebts,
 		InterestScalars:  interestScalars,
 		UtokenSupply:     uTokenSupply,
+		SpecialPairs:     specialPairs,
 	}
 }
 
@@ -48,6 +50,9 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
+	if err := validateRegistryTokenDenoms(gs.Registry); err != nil {
+		return err
+	}
 	for _, token := range gs.Registry {
 		if err := token.Validate(); err != nil {
 			return err
@@ -96,6 +101,10 @@ func (gs GenesisState) Validate() error {
 		if rate.Scalar.LT(sdk.OneDec()) {
 			return ErrInvalidExchangeRate.Wrap(rate.String())
 		}
+	}
+
+	if err := validateSpecialAssetPairs(gs.SpecialPairs); err != nil {
+		return err
 	}
 
 	return gs.UtokenSupply.Validate()
