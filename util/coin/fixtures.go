@@ -48,7 +48,7 @@ func UmeeDec(amount string) sdk.DecCoin {
 	return Dec(appparams.BondDenom, amount)
 }
 
-// Utoken creates a uToken DecCoin.
+// Utoken creates a uToken Coin.
 func Utoken(denom string, amount int64) sdk.Coin {
 	return New(leveragetypes.ToUTokenDenom(denom), amount)
 }

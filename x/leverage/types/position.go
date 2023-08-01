@@ -220,6 +220,16 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	return limit
 }
 
+// MaxBorrow
+func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
+	return sdk.ZeroDec()
+}
+
+// MaxWithdraw
+func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
+	return sdk.ZeroDec()
+}
+
 // TODO: bump to the bottom, or top, when computing max borrow
 // TODO: similar when computing max withdraw
 // TODO: isolate special pairs and bump
