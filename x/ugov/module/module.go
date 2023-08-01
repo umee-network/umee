@@ -20,6 +20,10 @@ import (
 	"github.com/umee-network/umee/v5/x/ugov/keeper"
 )
 
+const (
+	consensusVersion uint64 = 2
+)
+
 var (
 	_ module.AppModule      = AppModule{}
 	_ module.AppModuleBasic = AppModuleBasic{}
@@ -111,7 +115,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 
 // ConsensusVersion implements module.AppModule
 func (AppModule) ConsensusVersion() uint64 {
-	return 1
+	return consensusVersion
 }
 
 // RegisterInvariants implements module.AppModule
@@ -121,6 +125,11 @@ func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	ugov.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServer(am.kb))
 	ugov.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.kb))
+
+	m := keeper.NewMigrator(am.kb)
+	if err := cfg.RegisterMigration(ugov.ModuleName, 1, m.Migrate1to2); err != nil {
+		panic(fmt.Sprintf("failed to migrate x/%s from version 1 to 2: %v", ugov.ModuleName, err))
+	}
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
