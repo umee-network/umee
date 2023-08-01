@@ -259,11 +259,11 @@ func (q Querier) AccountSummary(
 	// borrow limit shown here as it is used in leverage logic:
 	// using the lower of spot or historic prices for each collateral token
 	// skips collateral tokens with missing oracle prices
-	ap, err := q.Keeper.getAccountPosition(ctx, addr)
+	ap, err := q.Keeper.getAccountPosition(ctx, addr, false)
 	if err != nil {
 		return nil, err
 	}
-	borrowLimit := ap.BorrowLimit()
+	borrowLimit := ap.Limit()
 
 	resp := &types.QueryAccountSummaryResponse{
 		SuppliedValue:   suppliedValue,
@@ -274,9 +274,10 @@ func (q Querier) AccountSummary(
 
 	// liquidation always uses spot prices. This response field will be null
 	// if a price is missing
-	liquidationThreshold, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
+	ap, err = q.Keeper.getAccountPosition(ctx, addr, true)
 	if err == nil {
-		resp.LiquidationThreshold = &liquidationThreshold
+		lt := ap.Limit()
+		resp.LiquidationThreshold = &lt
 	}
 
 	return resp, nil

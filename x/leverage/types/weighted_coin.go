@@ -6,29 +6,25 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// A list of WeightedDecCoin sorted by collateral weight (descending), then liquidation threshold
-// (descending), and finally denom (alphabetical) to break ties.
+// A list of WeightedDecCoin sorted by collateral weight (descending) and denom (alphabetical) to break ties.
 type WeightedDecCoins []WeightedDecCoin
 
-// A list of WeightedSpecialPair sorted by collateral weight (descending), then liquidation threshold
-// (descending), and finally denom (alphabetical) to break ties.
+// A list of WeightedSpecialPair sorted by collateral weight (descending), and denom (alphabetical) to break ties.
 type WeightedSpecialPairs []WeightedSpecialPair
 
 // WeightedDecCoin holds an sdk.DecCoin representing a USD value amount of a given token denom, with
-// no information on the underlying token amount. It also holds the token's collateral weight and
-// liquidation threshold.
+// no information on the underlying token amount. It also holds the token's collateral weight OR
+// liquidation threshold, depending on usage.
 type WeightedDecCoin struct {
 	// the USD value of an Asset in a position
 	Asset sdk.DecCoin
 	// the collateral Weight
 	Weight sdk.Dec
-	// the Liquidation threshold
-	Liquidation sdk.Dec
 }
 
 // WeightedSpecialPair contains borrowed and collateral value that has been matched
-// together as part of a special asset pair in an account's position. The parameters
-// of the special asset pair are also included.
+// together as part of a special asset pair in an account's position. The collateral
+// weight OR liquidation threshold of the special pair, depending on usage, is also included.
 type WeightedSpecialPair struct {
 	// the Collateral asset and its value
 	Collateral sdk.DecCoin
@@ -36,8 +32,6 @@ type WeightedSpecialPair struct {
 	Borrow sdk.DecCoin
 	// the collateral weight of the special pair
 	SpecialWeight sdk.Dec
-	// the liquidation threshold of the special pair
-	LiquidationThreshold sdk.Dec
 }
 
 // higher returns true if a WeightedDecCoin should be sorted after
@@ -45,9 +39,6 @@ type WeightedSpecialPair struct {
 func (wdc WeightedDecCoin) higher(b WeightedDecCoin) bool {
 	if wdc.Weight.GT(b.Weight) {
 		return true // sort first by collateral weight
-	}
-	if wdc.Liquidation.GT(b.Liquidation) {
-		return true // sort next by liquidation threshold
 	}
 	return wdc.Asset.Denom < b.Asset.Denom // break ties by denom
 }
@@ -57,9 +48,6 @@ func (wdc WeightedDecCoin) higher(b WeightedDecCoin) bool {
 func (wsp WeightedSpecialPair) higher(b WeightedSpecialPair) bool {
 	if wsp.SpecialWeight.GT(b.SpecialWeight) {
 		return true // sort first by collateral weight
-	}
-	if wsp.LiquidationThreshold.GT(b.LiquidationThreshold) {
-		return true // sort next by liquidation threshold
 	}
 	if wsp.Collateral.Denom < b.Collateral.Denom {
 		return true // break ties by collateral denom first
@@ -76,9 +64,8 @@ func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 	for _, c := range wdc {
 		if c.Asset.Denom == add.Asset.Denom {
 			sum = append(sum, WeightedDecCoin{
-				Asset:       c.Asset.Add(add.Asset),
-				Weight:      c.Weight,
-				Liquidation: c.Liquidation,
+				Asset:  c.Asset.Add(add.Asset),
+				Weight: c.Weight,
 			})
 		} else {
 			sum = append(sum, c)
@@ -106,9 +93,8 @@ func (wdc WeightedDecCoins) Sub(sub sdk.DecCoin) (diff WeightedDecCoins) {
 	for _, c := range wdc {
 		if c.Asset.Denom == sub.Denom {
 			diff = append(diff, WeightedDecCoin{
-				Asset:       c.Asset.Sub(sub), // sdk.DecCoin.Sub panics on negative result
-				Weight:      c.Weight,
-				Liquidation: c.Liquidation,
+				Asset:  c.Asset.Sub(sub), // sdk.DecCoin.Sub panics on negative result
+				Weight: c.Weight,
 			})
 			found = true
 		} else {
@@ -135,10 +121,9 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 	for _, wp := range wsp {
 		if wp.canCombine(add) {
 			sum = append(sum, WeightedSpecialPair{
-				Collateral:           wp.Collateral.Add(add.Collateral),
-				Borrow:               wp.Borrow.Add(add.Borrow),
-				SpecialWeight:        wp.SpecialWeight,
-				LiquidationThreshold: wp.LiquidationThreshold,
+				Collateral:    wp.Collateral.Add(add.Collateral),
+				Borrow:        wp.Borrow.Add(add.Borrow),
+				SpecialWeight: wp.SpecialWeight,
 			})
 		} else {
 			sum = append(sum, wp)

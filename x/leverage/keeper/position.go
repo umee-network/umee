@@ -9,8 +9,11 @@ import (
 // getAccountPosition creates and sorts an accountPosition for an address, using information
 // from the keeper's special asset pairs and token collateral weights as well as oracle prices.
 // Will treat collateral with missing prices as zero-valued, but will error on missing borrow prices.
+// On computing liquidation threshold, will treat borrows with missing prices as zero and error on
+// missing collateral prices instead, as well as using spot prices instead of both spot and historic.
 // Also stores all token settings and any special asset pairs that could apply to the account's collateral.
-func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (types.AccountPosition, error) {
+func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLiquidation bool,
+) (types.AccountPosition, error) {
 	tokenSettings := k.GetAllRegisteredTokens(ctx)
 	specialPairs := []types.SpecialAssetPair{}
 	collateral := k.GetBorrowerCollateral(ctx, addr)
@@ -18,9 +21,22 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (types.
 	borrowed := k.GetBorrowerBorrows(ctx, addr)
 	borrowedValue := sdk.NewDecCoins()
 
+	var (
+		v   sdk.Dec
+		err error
+	)
+
 	// get the borrower's collateral value by token
 	for _, c := range collateral {
-		v, err := k.VisibleCollateralValue(ctx, sdk.NewCoins(c), types.PriceModeLow)
+		if isForLiquidation {
+			// for liquidation threshold, error on collateral without prices
+			// and use spot price
+			v, err = k.CalculateCollateralValue(ctx, sdk.NewCoins(c), types.PriceModeSpot)
+		} else {
+			// for borrow limit, max borrow, and max withdraw, ignore collateral without prices
+			// and use the lower of historic or spot prices
+			v, err = k.VisibleCollateralValue(ctx, sdk.NewCoins(c), types.PriceModeLow)
+		}
 		if err != nil {
 			return types.AccountPosition{}, err
 		}
@@ -30,9 +46,17 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (types.
 		specialPairs = append(specialPairs, k.GetSpecialAssetPairs(ctx, c.Denom)...)
 	}
 
-	// get the borrower's borrowed value by token, sorted by collateral weight (descending)
+	// get the borrower's borrowed value by token
 	for _, b := range borrowed {
-		v, err := k.TokenValue(ctx, b, types.PriceModeHigh)
+		if isForLiquidation {
+			// for liquidation threshold, ignore borrow without prices
+			// and use spot price
+			v, err = k.VisibleTokenValue(ctx, sdk.NewCoins(b), types.PriceModeSpot)
+		} else {
+			// for borrow limit, max borrow, and max withdraw, error on borrow without prices
+			// and use the higher of historic or spot prices
+			v, err = k.TokenValue(ctx, b, types.PriceModeHigh)
+		}
 		if err != nil {
 			return types.AccountPosition{}, err
 		}
@@ -41,5 +65,7 @@ func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress) (types.
 		}
 	}
 
-	return types.NewAccountPosition(tokenSettings, specialPairs, collateralValue, borrowedValue), nil
+	return types.NewAccountPosition(
+		tokenSettings, specialPairs, collateralValue, borrowedValue, isForLiquidation,
+	), nil
 }

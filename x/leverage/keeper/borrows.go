@@ -19,13 +19,13 @@ import (
 // to allow up to 100% borrow limit, or a lower value (e.g. 0.9) if a transaction should fail
 // if a safety margin is desired (e.g. <90% borrow limit).
 func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdk.Dec) error {
-	position, err := k.getAccountPosition(ctx, borrowerAddr)
+	position, err := k.getAccountPosition(ctx, borrowerAddr, false)
 	if err != nil {
 		return err
 	}
 
 	borrowedValue := position.BorrowedValue()
-	borrowLimit := position.BorrowLimit()
+	borrowLimit := position.Limit()
 	if borrowedValue.GT(borrowLimit.Mul(maxUsage)) {
 		return types.ErrUndercollaterized.Wrapf(
 			"borrowed: %s, limit: %s, max usage %s", borrowedValue, borrowLimit, maxUsage)
@@ -177,42 +177,6 @@ func (k Keeper) VisibleBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.D
 	}
 
 	return limit, nil
-}
-
-// CalculateLiquidationThreshold determines the maximum borrowed value (in USD) that a
-// borrower with given collateral could reach before being eligible for liquidation, using
-// each token's oracle price, uToken exchange rate, and liquidation threshold.
-// An error is returned if any input coins are not uTokens or if value
-// calculation fails. Always uses spot prices.
-func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
-	totalThreshold := sdk.ZeroDec()
-
-	for _, coin := range collateral {
-		// convert uToken collateral to base assets
-		baseAsset, err := k.ExchangeUToken(ctx, coin)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		// ignore blacklisted tokens
-		if !ts.Blacklist {
-			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
-			if err != nil {
-				return sdk.ZeroDec(), err
-			}
-
-			// add each collateral coin's weighted value to liquidation threshold
-			totalThreshold = totalThreshold.Add(v.Mul(ts.LiquidationThreshold))
-		}
-	}
-
-	return totalThreshold, nil
 }
 
 // checkSupplyUtilization returns the appropriate error if a token denom's
