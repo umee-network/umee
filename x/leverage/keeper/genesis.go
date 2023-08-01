@@ -43,6 +43,10 @@ func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
 	for _, rate := range genState.InterestScalars {
 		util.Panic(k.setInterestScalar(ctx, rate.Denom, rate.Scalar))
 	}
+
+	for _, pair := range genState.SpecialPairs {
+		util.Panic(k.SetSpecialAssetPair(ctx, pair))
+	}
 }
 
 // ExportGenesis returns the x/leverage module's exported genesis state.
@@ -57,6 +61,7 @@ func (k Keeper) ExportGenesis(ctx sdk.Context) *types.GenesisState {
 		k.getAllBadDebts(ctx),
 		k.getAllInterestScalars(ctx),
 		k.GetAllUTokenSupply(ctx),
+		k.GetAllSpecialAssetPairs(ctx),
 	)
 }
 

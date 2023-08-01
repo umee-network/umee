@@ -138,7 +138,7 @@ func TestMsgGovUpdateRegistryOtherFunctionality(t *testing.T) {
 		MaxSupply:              sdk.NewInt(100_000_000000),
 		HistoricMedians:        24,
 	}
-	msg := types.NewMsgUpdateRegistry(
+	msg := types.NewMsgGovUpdateRegistry(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(), "title", "description",
 		[]types.Token{umee}, []types.Token{},
 	)
@@ -172,3 +172,5 @@ updatetokens:
 	tassert.NotNil(t, msg.GetSignBytes(), "sign byte shouldn't be nil")
 	tassert.NotEmpty(t, msg.GetSigners(), "signers shouldn't be empty")
 }
+
+// TODO : tests for MsgGovUpdateSpecialAssets

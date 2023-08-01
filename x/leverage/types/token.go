@@ -60,20 +60,8 @@ func ToTokenDenom(denom string) string {
 // Validate performs validation on an Token type returning an error if the Token
 // is invalid.
 func (t Token) Validate() error {
-	if err := sdk.ValidateDenom(t.BaseDenom); err != nil {
+	if err := validateBaseDenoms(t.BaseDenom, t.SymbolDenom); err != nil {
 		return err
-	}
-	if HasUTokenPrefix(t.BaseDenom) {
-		// prevent base asset denoms that start with "u/"
-		return ErrUToken.Wrap(t.BaseDenom)
-	}
-
-	if err := sdk.ValidateDenom(t.SymbolDenom); err != nil {
-		return err
-	}
-	if HasUTokenPrefix(t.SymbolDenom) {
-		// prevent symbol denoms that start with "u/"
-		return ErrUToken.Wrap(t.SymbolDenom)
 	}
 
 	one := sdk.OneDec()
@@ -209,4 +197,60 @@ func DefaultRegistry() []Token {
 	return []Token{
 		defaultUmeeToken(),
 	}
+}
+
+// Validate performs validation on an SpecialAssetPair type
+func (p SpecialAssetPair) Validate() error {
+	if err := validateBaseDenoms(p.Collateral, p.Borrow); err != nil {
+		return err
+	}
+
+	// Collateral Weight is non-negative and less than 1.
+	if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
+	}
+
+	// Liquidation Threshold ranges between collateral weight and 1.
+	if p.LiquidationThreshold.LT(p.CollateralWeight) || p.LiquidationThreshold.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid liquidation threshold: %s", p.LiquidationThreshold)
+	}
+
+	return nil
+}
+
+// Validate performs validation on an SpecialAssetSet type
+func (s SpecialAssetSet) Validate() error {
+	if err := validateBaseDenoms(s.Assets...); err != nil {
+		return err
+	}
+
+	denoms := map[string]bool{}
+	for _, a := range s.Assets {
+		if _, ok := denoms[a]; ok {
+			return ErrDuplicatePair
+		}
+		denoms[a] = true
+	}
+
+	// Collateral Weight is non-negative and less than 1.
+	if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid collateral rate: %s", s.CollateralWeight)
+	}
+
+	// Liquidation Threshold ranges between collateral weight and 1.
+	if s.LiquidationThreshold.LT(s.CollateralWeight) || s.LiquidationThreshold.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid liquidation threshold: %s", s.LiquidationThreshold)
+	}
+
+	return nil
+}
+
+// validateBaseDenoms ensures that one or more strings are valid token denoms without the uToken prefix
+func validateBaseDenoms(denoms ...string) error {
+	for _, s := range denoms {
+		if err := ValidateBaseDenom(s); err != nil {
+			return err
+		}
+	}
+	return nil
 }
