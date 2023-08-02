@@ -75,31 +75,31 @@ func (mr *MockBankKeeperMockRecorder) SetDenomMetaData(ctx, denomMetaData interf
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetDenomMetaData", reflect.TypeOf((*MockBankKeeper)(nil).SetDenomMetaData), ctx, denomMetaData)
 }
 
-// MockLeverageKeeper is a mock of LeverageKeeper interface.
-type MockLeverageKeeper struct {
+// MockLeverage is a mock of Leverage interface.
+type MockLeverage struct {
 	ctrl     *gomock.Controller
-	recorder *MockLeverageKeeperMockRecorder
+	recorder *MockLeverageMockRecorder
 }
 
-// MockLeverageKeeperMockRecorder is the mock recorder for MockLeverageKeeper.
-type MockLeverageKeeperMockRecorder struct {
-	mock *MockLeverageKeeper
+// MockLeverageMockRecorder is the mock recorder for MockLeverage.
+type MockLeverageMockRecorder struct {
+	mock *MockLeverage
 }
 
-// NewMockLeverageKeeper creates a new mock instance.
-func NewMockLeverageKeeper(ctrl *gomock.Controller) *MockLeverageKeeper {
-	mock := &MockLeverageKeeper{ctrl: ctrl}
-	mock.recorder = &MockLeverageKeeperMockRecorder{mock}
+// NewMockLeverage creates a new mock instance.
+func NewMockLeverage(ctrl *gomock.Controller) *MockLeverage {
+	mock := &MockLeverage{ctrl: ctrl}
+	mock.recorder = &MockLeverageMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockLeverageKeeper) EXPECT() *MockLeverageKeeperMockRecorder {
+func (m *MockLeverage) EXPECT() *MockLeverageMockRecorder {
 	return m.recorder
 }
 
 // DeriveExchangeRate mocks base method.
-func (m *MockLeverageKeeper) DeriveExchangeRate(ctx types.Context, denom string) types.Dec {
+func (m *MockLeverage) DeriveExchangeRate(ctx types.Context, denom string) types.Dec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeriveExchangeRate", ctx, denom)
 	ret0, _ := ret[0].(types.Dec)
@@ -107,28 +107,13 @@ func (m *MockLeverageKeeper) DeriveExchangeRate(ctx types.Context, denom string)
 }
 
 // DeriveExchangeRate indicates an expected call of DeriveExchangeRate.
-func (mr *MockLeverageKeeperMockRecorder) DeriveExchangeRate(ctx, denom interface{}) *gomock.Call {
+func (mr *MockLeverageMockRecorder) DeriveExchangeRate(ctx, denom interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeriveExchangeRate", reflect.TypeOf((*MockLeverageKeeper)(nil).DeriveExchangeRate), ctx, denom)
-}
-
-// UToken2TokenRate mocks base method.
-func (m *MockLeverageKeeper) UToken2TokenRate(ctx types.Context, uToken types.Coin) (types.Coin, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UToken2TokenRate", ctx, uToken)
-	ret0, _ := ret[0].(types.Coin)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UToken2TokenRate indicates an expected call of UToken2TokenRate.
-func (mr *MockLeverageKeeperMockRecorder) UToken2TokenRate(ctx, uToken interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UToken2TokenRate", reflect.TypeOf((*MockLeverageKeeper)(nil).UToken2TokenRate), ctx, uToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeriveExchangeRate", reflect.TypeOf((*MockLeverage)(nil).DeriveExchangeRate), ctx, denom)
 }
 
 // GetTokenSettings mocks base method.
-func (m *MockLeverageKeeper) GetTokenSettings(ctx types.Context, baseDenom string) (types1.Token, error) {
+func (m *MockLeverage) GetTokenSettings(ctx types.Context, baseDenom string) (types1.Token, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTokenSettings", ctx, baseDenom)
 	ret0, _ := ret[0].(types1.Token)
@@ -137,9 +122,24 @@ func (m *MockLeverageKeeper) GetTokenSettings(ctx types.Context, baseDenom strin
 }
 
 // GetTokenSettings indicates an expected call of GetTokenSettings.
-func (mr *MockLeverageKeeperMockRecorder) GetTokenSettings(ctx, baseDenom interface{}) *gomock.Call {
+func (mr *MockLeverageMockRecorder) GetTokenSettings(ctx, baseDenom interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSettings", reflect.TypeOf((*MockLeverageKeeper)(nil).GetTokenSettings), ctx, baseDenom)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSettings", reflect.TypeOf((*MockLeverage)(nil).GetTokenSettings), ctx, baseDenom)
+}
+
+// UToken2TokenRate mocks base method.
+func (m *MockLeverage) UToken2TokenRate(ctx types.Context, uToken types.Coin) (types.Coin, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UToken2TokenRate", ctx, uToken)
+	ret0, _ := ret[0].(types.Coin)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UToken2TokenRate indicates an expected call of UToken2TokenRate.
+func (mr *MockLeverageMockRecorder) UToken2TokenRate(ctx, uToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UToken2TokenRate", reflect.TypeOf((*MockLeverage)(nil).UToken2TokenRate), ctx, uToken)
 }
 
 // MockOracle is a mock of Oracle interface.
