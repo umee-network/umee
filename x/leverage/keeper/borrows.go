@@ -19,7 +19,7 @@ import (
 // to allow up to 100% borrow limit, or a lower value (e.g. 0.9) if a transaction should fail
 // if a safety margin is desired (e.g. <90% borrow limit).
 func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdk.Dec) error {
-	position, err := k.getAccountPosition(ctx, borrowerAddr, false)
+	position, err := k.GetAccountPosition(ctx, borrowerAddr, false)
 	if err != nil {
 		return err
 	}

@@ -29,7 +29,7 @@ func (k Keeper) getLiquidationAmounts(
 
 	// calculate borrower health in USD values, using spot prices only (no historic).
 	// Skips borrowed tokens with unknown oracle prices, treating them as zero value
-	position, err := k.getAccountPosition(ctx, targetAddr, true)
+	position, err := k.GetAccountPosition(ctx, targetAddr, true)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}

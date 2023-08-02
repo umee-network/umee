@@ -127,7 +127,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		}
 		checkedAddrs[borrowerAddr.String()] = struct{}{}
 
-		position, err := k.getAccountPosition(ctx, borrowerAddr, true)
+		position, err := k.GetAccountPosition(ctx, borrowerAddr, true)
 		if err == nil {
 			borrowValue := position.BorrowedValue()
 			liquidationThreshold := position.Limit()

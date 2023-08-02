@@ -13,7 +13,7 @@ import (
 // allowed by only the collateral whose prices are known.
 func (k *Keeper) newMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
-	position, err := k.getAccountPosition(ctx, addr, false)
+	position, err := k.GetAccountPosition(ctx, addr, false)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
@@ -46,7 +46,7 @@ func (k *Keeper) newMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string
 		return sdk.Coin{}, types.ErrUToken
 	}
 
-	position, err := k.getAccountPosition(ctx, addr, false)
+	position, err := k.GetAccountPosition(ctx, addr, false)
 	if err != nil {
 		return sdk.Coin{}, err
 	}

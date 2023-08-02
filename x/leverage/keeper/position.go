@@ -6,13 +6,13 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
-// getAccountPosition creates and sorts an accountPosition for an address, using information
+// GetAccountPosition creates and sorts an accountPosition for an address, using information
 // from the keeper's special asset pairs and token collateral weights as well as oracle prices.
 // Will treat collateral with missing prices as zero-valued, but will error on missing borrow prices.
 // On computing liquidation threshold, will treat borrows with missing prices as zero and error on
 // missing collateral prices instead, as well as using spot prices instead of both spot and historic.
 // Also stores all token settings and any special asset pairs that could apply to the account's collateral.
-func (k Keeper) getAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLiquidation bool,
+func (k Keeper) GetAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLiquidation bool,
 ) (types.AccountPosition, error) {
 	tokenSettings := k.GetAllRegisteredTokens(ctx)
 	specialPairs := []types.SpecialAssetPair{}
