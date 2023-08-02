@@ -10,6 +10,7 @@ import (
 	"github.com/umee-network/umee/v5/app/wasm/query"
 	inckeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
 	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
+	metokenkeeper "github.com/umee-network/umee/v5/x/metoken/keeper"
 	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
 )
 
@@ -18,8 +19,9 @@ func RegisterCustomPlugins(
 	leverageKeeper leveragekeeper.Keeper,
 	oracleKeeper oraclekeeper.Keeper,
 	incentiveKeeper inckeeper.Keeper,
+	metokenBuilder metokenkeeper.Builder,
 ) []wasmkeeper.Option {
-	wasmQueryPlugin := query.NewQueryPlugin(leverageKeeper, oracleKeeper, incentiveKeeper)
+	wasmQueryPlugin := query.NewQueryPlugin(leverageKeeper, oracleKeeper, incentiveKeeper, metokenBuilder)
 	queryPluginOpt := wasmkeeper.WithQueryPlugins(&wasmkeeper.QueryPlugins{
 		Custom: wasmQueryPlugin.CustomQuerier(),
 	})
