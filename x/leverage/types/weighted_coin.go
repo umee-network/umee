@@ -12,13 +12,17 @@ type WeightedDecCoins []WeightedDecCoin
 // A list of WeightedSpecialPair sorted by collateral weight (descending), and denom (alphabetical) to break ties.
 type WeightedSpecialPairs []WeightedSpecialPair
 
+// A list of WeightedNormalPair sorted by collateral weight (of the collateral, then of the borrow),
+// and denom (alphabetical) of the two to break ties.
+type WeightedNormalPairs []WeightedNormalPair
+
 // WeightedDecCoin holds an sdk.DecCoin representing a USD value amount of a given token denom, with
 // no information on the underlying token amount. It also holds the token's collateral weight OR
 // liquidation threshold, depending on usage.
 type WeightedDecCoin struct {
 	// the USD value of an Asset in a position
 	Asset sdk.DecCoin
-	// the collateral Weight
+	// the collateral Weight or liquidation threshold
 	Weight sdk.Dec
 }
 
@@ -26,33 +30,57 @@ type WeightedDecCoin struct {
 // together as part of a special asset pair in an account's position. The collateral
 // weight OR liquidation threshold of the special pair, depending on usage, is also included.
 type WeightedSpecialPair struct {
-	// the Collateral asset and its value
+	// the collateral asset and its value
 	Collateral sdk.DecCoin
 	// the borrowed asset and its value
 	Borrow sdk.DecCoin
-	// the collateral weight of the special pair
+	// the collateral weight (or liquidation treshold) of the special pair
 	SpecialWeight sdk.Dec
 }
 
+// WeightedNormalPair contains borrowed and collateral value that has been matched together
+// using regular collateral weights after special asset pairs are taken from an account's position.
+type WeightedNormalPair struct {
+	// the collateral asset and its weight and value
+	Collateral WeightedDecCoin
+	// the borrowed asset and its weight and value
+	Borrow WeightedDecCoin
+}
+
 // higher returns true if a WeightedDecCoin should be sorted after
-// another WeightedDecCoin b
+// another WeightedDecCoin b. Always use sort.SliceStable to preserve
+// order of coins with equal weight.
 func (wdc WeightedDecCoin) higher(b WeightedDecCoin) bool {
 	if wdc.Weight.GT(b.Weight) {
-		return true // sort first by collateral weight
+		return true // sort by collateral weight, descending
 	}
-	return wdc.Asset.Denom < b.Asset.Denom // break ties by denom
+	return false
 }
 
 // higher returns true if a WeightedSpecialPair should be sorted after
-// another WeightedSpecialPair b
+// another WeightedSpecialPair b. Always use sort.SliceStable to preserve
+// order of pairs with equal weight.
 func (wsp WeightedSpecialPair) higher(b WeightedSpecialPair) bool {
 	if wsp.SpecialWeight.GT(b.SpecialWeight) {
-		return true // sort first by collateral weight
+		return true // sort by special collateral weight, descending
 	}
-	if wsp.Collateral.Denom < b.Collateral.Denom {
-		return true // break ties by collateral denom first
+	return false
+}
+
+// higher returns true if a WeightedNormalPair should be sorted after
+// another WeightedNormalPair b. Always use sort.SliceStable to preserve
+// order of pairs with equal weight.
+func (wnp WeightedNormalPair) higher(b WeightedNormalPair) bool {
+	if wnp.Collateral.higher(b.Collateral) {
+		return true // sort first by collateral
 	}
-	return wsp.Borrow.Denom < b.Borrow.Denom // then by borrow denom
+	if wnp.Collateral.Weight.Equal(b.Collateral.Weight) {
+		// break ties by borrow
+		if wnp.Borrow.higher(b.Borrow) {
+			return true
+		}
+	}
+	return false
 }
 
 // Add returns the sum of a weightedDecCoins and an additional weightedDecCoin.

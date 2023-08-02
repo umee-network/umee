@@ -308,4 +308,8 @@ all of this is the MaxBorrow.
 Some kind of helper function which manipulates the pairs and assets from the AccountPosition struct is needed,
 likely one that can call itself recursively for these chain reactions. It should be able to detect when it has
 finally filled all empty borrow slots and then return the total amount of borrowing achieved.
+
+Probably these functions should progressively limit their own scope if they're going to be recursive. Visually, any
+operation which displaces a borrow or collateral can only affect assets below its row (or maybe above in the case
+of having the same weight?)
 */
