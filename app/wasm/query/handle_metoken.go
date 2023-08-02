@@ -7,7 +7,7 @@ import (
 	"github.com/umee-network/umee/v5/x/metoken"
 )
 
-// HandleMeTokenParams handles the get the x/metoken module's parameters.
+// HandleMeTokenParams handles the get for x/metoken module's parameters.
 func (q UmeeQuery) HandleMeTokenParams(
 	ctx context.Context,
 	qs metoken.QueryServer,
@@ -15,7 +15,7 @@ func (q UmeeQuery) HandleMeTokenParams(
 	return qs.Params(ctx, &metoken.QueryParams{})
 }
 
-// HandleMeTokenIndexes handles the get the x/metoken indexes.
+// HandleMeTokenIndexes handles the get for x/metoken indexes.
 func (q UmeeQuery) HandleMeTokenIndexes(
 	ctx context.Context,
 	qs metoken.QueryServer,
@@ -24,7 +24,7 @@ func (q UmeeQuery) HandleMeTokenIndexes(
 	return qs.Indexes(ctx, &req)
 }
 
-// HandleMeTokenSwapFee handles the get the x/metoken swap fee.
+// HandleMeTokenSwapFee handles the get for x/metoken swap fee.
 func (q UmeeQuery) HandleMeTokenSwapFee(
 	ctx context.Context,
 	qs metoken.QueryServer,
@@ -33,7 +33,7 @@ func (q UmeeQuery) HandleMeTokenSwapFee(
 	return qs.SwapFee(ctx, &req)
 }
 
-// HandleMeTokenRedeemFee handles the get the x/metoken redeem fee.
+// HandleMeTokenRedeemFee handles the get for x/metoken redeem fee.
 func (q UmeeQuery) HandleMeTokenRedeemFee(
 	ctx context.Context,
 	qs metoken.QueryServer,
@@ -42,7 +42,7 @@ func (q UmeeQuery) HandleMeTokenRedeemFee(
 	return qs.RedeemFee(ctx, &req)
 }
 
-// HandleMeTokenIndexBalances handles the get the x/metoken indexes balances.
+// HandleMeTokenIndexBalances handles the get for x/metoken indexes balances.
 func (q UmeeQuery) HandleMeTokenIndexBalances(
 	ctx context.Context,
 	qs metoken.QueryServer,
@@ -51,7 +51,7 @@ func (q UmeeQuery) HandleMeTokenIndexBalances(
 	return qs.IndexBalances(ctx, &req)
 }
 
-// HandleMeTokenIndexPrice handles the get the x/metoken indexe price.
+// HandleMeTokenIndexPrice handles the get for x/metoken indexe price.
 func (q UmeeQuery) HandleMeTokenIndexPrice(
 	ctx context.Context,
 	qs metoken.QueryServer,
