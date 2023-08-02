@@ -75,7 +75,7 @@ func TestInterestClaiming(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	uTokens, err := app.LeverageKeeper.ExchangeToken(ctx, borrowerSupply)
+	uTokens, err := app.LeverageKeeper.ToUToken(ctx, borrowerSupply)
 	require.NoError(t, err)
 
 	err = app.LeverageKeeper.Collateralize(ctx, borrower, uTokens)

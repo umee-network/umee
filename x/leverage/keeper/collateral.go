@@ -80,7 +80,7 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, 
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
-		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		baseAsset, err := k.ToToken(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -107,7 +107,7 @@ func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins, mo
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
-		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		baseAsset, err := k.ToToken(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -251,7 +251,7 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 
 	// Get module collateral for the uDenom
 	totalCollateral := k.GetTotalCollateral(ctx, spendableUTokens.Denom)
-	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
+	totalTokenCollateral, err := k.ToTokens(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}

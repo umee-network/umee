@@ -9,6 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/golang/mock/gomock"
+	"gotest.tools/v3/assert"
+
 	"github.com/umee-network/umee/v5/app/inflation"
 	mocks "github.com/umee-network/umee/v5/app/inflation/mocks"
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -16,7 +18,6 @@ import (
 	"github.com/umee-network/umee/v5/util/bpmath"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/ugov"
-	"gotest.tools/v3/assert"
 )
 
 func TestAdjustInflation(t *testing.T) {

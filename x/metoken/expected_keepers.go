@@ -22,8 +22,8 @@ type BankKeeper interface {
 // LeverageKeeper interface for interacting with x/leverage
 type LeverageKeeper interface {
 	GetTokenSettings(ctx sdk.Context, denom string) (ltypes.Token, error)
-	ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
-	ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
+	ToUToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
+	ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
 	SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Coin) (sdk.Coin, bool, error)
 	WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Coin) (sdk.Coin, bool, error)
 	ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (sdkmath.Int, error)
