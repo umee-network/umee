@@ -251,7 +251,7 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 
 	// Get module collateral for the uDenom
 	totalCollateral := k.GetTotalCollateral(ctx, spendableUTokens.Denom)
-	totalTokenCollateral, err := k.Tokens2uTokensRate(ctx, sdk.NewCoins(totalCollateral))
+	totalTokenCollateral, err := k.ToTokens(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}

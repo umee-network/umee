@@ -38,7 +38,7 @@ func (k Keeper) GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sd
 	}
 
 	// convert the sum of found uTokens to base tokens
-	return k.Tokens2uTokensRate(ctx, collateral.Add(uTokens...))
+	return k.ToTokens(ctx, collateral.Add(uTokens...))
 }
 
 // GetTotalSupply returns the total supplied by all suppliers in a given denom,
