@@ -44,7 +44,7 @@ const (
 	oracleBaseQueryPath    = "/umee.oracle.v1.Query/"
 	uibcBaseQueryPath      = "/umee.uibc.v1.Query/"
 	incentiveBaseQueryPath = "/umee.incentive.v1.Query/"
-	metokenBaseQueryPath   = "/umee.metoken.v1.Query/"
+	metokenBaseQueryPath   = "/umee.metoken.v1.Query/" // #nosec G101
 )
 
 func init() {
