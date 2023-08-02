@@ -9,7 +9,7 @@ import (
 
 // assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
 // under either recent (historic median) or current prices. Checks using rules for collateral
-// weight, borrow factor, ans special asset pairs to determine borrow limit. Error if
+// weight, borrow factor, and special asset pairs to determine borrow limit. Error if
 // borrowed asset prices cannot be calculated, but will  treat collateral whose prices are
 // unavailable as having zero value. This can still result in a borrow limit being too low,
 // unless the remaining collateral is enough to cover all borrows.
