@@ -105,8 +105,7 @@ func NewAccountPosition(
 		c := collateralValueToSort.AmountOf(p.Collateral.Denom)
 		if b.IsPositive() && c.IsPositive() {
 			// some unmatched assets match the special pair
-			bCoin := sdk.NewDecCoinFromDec(p.Borrow.Denom, sdk.ZeroDec())
-			cCoin := sdk.NewDecCoinFromDec(p.Collateral.Denom, sdk.ZeroDec())
+			var bCoin, cCoin sdk.DecCoin
 			pairBorrowLimit := c.Mul(p.SpecialWeight)
 			if pairBorrowLimit.GTE(b) {
 				// all of the borrow is covered by collateral in this pair
@@ -142,8 +141,7 @@ func NewAccountPosition(
 		)
 		// match collateral and borrow at indexes i and j, exhausting at least one of them
 		pairBorrowLimit := c.Mul(w)
-		bCoin := sdk.NewDecCoinFromDec(bDenom, sdk.ZeroDec())
-		cCoin := sdk.NewDecCoinFromDec(cDenom, sdk.ZeroDec())
+		var bCoin, cCoin sdk.DecCoin
 		if pairBorrowLimit.GTE(b) {
 			// all of the borrow is covered by collateral in this pair
 			bCoin = sdk.NewDecCoinFromDec(bDenom, b)
