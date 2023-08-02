@@ -11,11 +11,11 @@ import (
 )
 
 func (k Keeper) SetMinGasPrice(p sdk.DecCoin) error {
-	return store.SetValue(k.store, keyMinGasPrice, &p, "gas_price")
+	return store.SetValue(k.store, ugov.KeyMinGasPrice, &p, "gas_price")
 }
 
 func (k Keeper) MinGasPrice() sdk.DecCoin {
-	gp := store.GetValue[*sdk.DecCoin](k.store, keyMinGasPrice, "gas_price")
+	gp := store.GetValue[*sdk.DecCoin](k.store, ugov.KeyMinGasPrice, "gas_price")
 	if gp == nil {
 		return coin.Umee0dec
 	}
@@ -23,32 +23,32 @@ func (k Keeper) MinGasPrice() sdk.DecCoin {
 }
 
 func (k Keeper) SetEmergencyGroup(p sdk.AccAddress) {
-	store.SetAddress(k.store, keyEmergencyGroup, p)
+	store.SetAddress(k.store, ugov.KeyEmergencyGroup, p)
 }
 
 func (k Keeper) EmergencyGroup() sdk.AccAddress {
-	return store.GetAddress(k.store, keyEmergencyGroup)
+	return store.GetAddress(k.store, ugov.KeyEmergencyGroup)
 }
 
 func (k Keeper) SetInflationParams(ip ugov.InflationParams) error {
-	return store.SetValue(k.store, keyInflationParams, &ip, "inflation_params")
+	return store.SetValue(k.store, ugov.KeyInflationParams, &ip, "inflation_params")
 }
 
 func (k Keeper) InflationParams() ugov.InflationParams {
-	ip := store.GetValue[*ugov.InflationParams](k.store, keyInflationParams, "inflation_params")
+	ip := store.GetValue[*ugov.InflationParams](k.store, ugov.KeyInflationParams, "inflation_params")
 	if ip == nil {
 		return ugov.InflationParams{}
 	}
 	return *ip
 }
 
-func (k Keeper) SetInflationCycleEnd(startTime time.Time) error {
-	store.SetTimeMs(k.store, keyInflationCycleEnd, startTime)
+func (k Keeper) SetInflationCycleEnd(cycleEnd time.Time) error {
+	store.SetTimeMs(k.store, ugov.KeyInflationCycleEnd, cycleEnd)
 	return nil
 }
 
 // Returns zero unix time if the inflation cycle was not set.
 func (k Keeper) GetInflationCycleEnd() time.Time {
-	t, _ := store.GetTimeMs(k.store, keyInflationCycleEnd)
+	t, _ := store.GetTimeMs(k.store, ugov.KeyInflationCycleEnd)
 	return t
 }
