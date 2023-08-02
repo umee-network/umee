@@ -19,7 +19,7 @@ func (k Keeper) GetSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress, denom 
 	collateral := k.GetCollateral(ctx, supplierAddr, uDenom)
 
 	// convert uTokens to tokens
-	return k.ExchangeUToken(ctx, balance.Add(collateral))
+	return k.ToToken(ctx, balance.Add(collateral))
 }
 
 // GetAllSupplied returns the total tokens supplied by a user, including
@@ -38,7 +38,7 @@ func (k Keeper) GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sd
 	}
 
 	// convert the sum of found uTokens to base tokens
-	return k.ExchangeUTokens(ctx, collateral.Add(uTokens...))
+	return k.ToTokens(ctx, collateral.Add(uTokens...))
 }
 
 // GetTotalSupply returns the total supplied by all suppliers in a given denom,
@@ -50,7 +50,7 @@ func (k Keeper) GetTotalSupply(ctx sdk.Context, denom string) (sdk.Coin, error) 
 
 	// convert associated uToken's total supply to base tokens
 	uTokenDenom := types.ToUTokenDenom(denom)
-	return k.ExchangeUToken(ctx, k.GetUTokenSupply(ctx, uTokenDenom))
+	return k.ToToken(ctx, k.GetUTokenSupply(ctx, uTokenDenom))
 }
 
 // checkMaxSupply returns the appropriate error if a token denom's

@@ -7,11 +7,10 @@ import (
 
 	"github.com/umee-network/umee/v5/util"
 	"github.com/umee-network/umee/v5/util/bpmath"
-	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
 )
 
 type Calculator struct {
-	UgovKeeperB ugovkeeper.Builder
+	UgovKeeperB UGovBKeeperI
 	MintKeeper  MintKeeper
 }
 
@@ -21,15 +20,16 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 	ugovKeeper := c.UgovKeeperB.Keeper(&ctx)
 	inflationParams := ugovKeeper.InflationParams()
 	maxSupplyAmount := inflationParams.MaxSupply.Amount
-	totalSupply := c.MintKeeper.StakingTokenSupply(ctx)
-	if totalSupply.GTE(maxSupplyAmount) {
-		// supply is already reached the maximum amount, so inflation should be zero
+
+	stakingTokenSupply := c.MintKeeper.StakingTokenSupply(ctx)
+	if stakingTokenSupply.GTE(maxSupplyAmount) {
+		// staking token supply is already reached the maximum amount, so inflation should be zero
 		return sdk.ZeroDec()
 	}
 
 	cycleEnd := ugovKeeper.GetInflationCycleEnd()
 	if ctx.BlockTime().After(cycleEnd) {
-		// new inflation cycle is starting , so we need to update the inflation max and min rate
+		// new inflation cycle is starting, so we need to update the inflation max and min rate
 		factor := bpmath.One - inflationParams.InflationReductionRate
 		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
 		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
@@ -44,24 +44,26 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		)
 	}
 
-	minter.Inflation = minttypes.DefaultInflationCalculationFn(ctx, minter, mintParams, bondedRatio)
-	return c.adjustInflation(totalSupply, inflationParams.MaxSupply.Amount, minter, mintParams)
+	minter.Inflation = minter.NextInflationRate(mintParams, bondedRatio)
+	return c.AdjustInflation(stakingTokenSupply, inflationParams.MaxSupply.Amount, minter, mintParams)
 }
 
-// adjustInflation check if newly minting coins will execeed the MaxSupply then it will adjust the inflation with
+// AdjustInflation checks if newly minting coins will execeed the MaxSupply then it will adjust the inflation with
 // respect to MaxSupply
-func (c Calculator) adjustInflation(totalSupply, maxSupply math.Int, minter minttypes.Minter,
+func (c Calculator) AdjustInflation(stakingTokenSupply, maxSupply math.Int, minter minttypes.Minter,
 	params minttypes.Params) sdk.Dec {
-	minter.AnnualProvisions = minter.NextAnnualProvisions(params, totalSupply)
-	newSupply := minter.BlockProvision(params).Amount
-	newTotalSupply := totalSupply.Add(newSupply)
+	minter.AnnualProvisions = minter.NextAnnualProvisions(params, stakingTokenSupply)
+	newMintingAmount := minter.BlockProvision(params).Amount
+	newTotalSupply := stakingTokenSupply.Add(newMintingAmount)
+
 	if newTotalSupply.GT(maxSupply) {
-		newTotalSupply = maxSupply.Sub(totalSupply)
-		newAnnualProvision := newTotalSupply.Mul(sdk.NewInt(int64(params.BlocksPerYear)))
+		newTotalSupply = maxSupply.Sub(stakingTokenSupply)
+		annualProvision := newTotalSupply.Mul(sdk.NewInt(int64(params.BlocksPerYear)))
+		newAnnualProvision := sdk.NewDec(annualProvision.Int64())
 		// AnnualProvisions = Inflation * TotalSupply
 		// Mint Coins  = AnnualProvisions / BlocksPerYear
 		// Inflation = (New Mint Coins  * BlocksPerYear ) / TotalSupply
-		return sdk.NewDec(newAnnualProvision.Quo(totalSupply).Int64())
+		return newAnnualProvision.Quo(sdk.NewDec(stakingTokenSupply.Int64()))
 	}
 	return minter.Inflation
 }

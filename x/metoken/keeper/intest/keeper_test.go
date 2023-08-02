@@ -1,9 +1,11 @@
-package keeper_test
+package intest
 
 import (
 	"fmt"
 	"testing"
+	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
 	sdkmath "cosmossdk.io/math"
@@ -29,8 +31,8 @@ type KeeperTestSuite struct {
 	addrs               []sdk.AccAddress
 }
 
-// initKeeperTestSuite creates a full keeper with all the external dependencies mocked
-func initKeeperTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.IndexBalances) *KeeperTestSuite {
+// initTestSuite creates a full keeper with all the external dependencies mocked
+func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.IndexBalances) *KeeperTestSuite {
 	t.Parallel()
 	isCheckTx := false
 	app := umeeapp.Setup(t)
@@ -39,10 +41,17 @@ func initKeeperTestSuite(t *testing.T, registry []metoken.Index, balances []meto
 			ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 			Height:  9,
 		},
-	)
+	).WithBlockTime(time.Now())
 
-	oracleMock := mocks.NewMockOracleKeeper()
-	oracleMock.AllMedianPricesFunc.SetDefaultHook(mocks.ValidPricesFunc())
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	oracleMock := mocks.NewMockOracleKeeper(ctrl)
+	oracleMock.
+		EXPECT().
+		AllMedianPrices(gomock.Any()).
+		Return(mocks.ValidPrices()).
+		AnyTimes()
 
 	kb := keeper.NewKeeperBuilder(
 		app.AppCodec(),

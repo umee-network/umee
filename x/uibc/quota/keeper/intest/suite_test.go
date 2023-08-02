@@ -1,4 +1,4 @@
-package keeper_test
+package intest
 
 import (
 	"fmt"
@@ -107,6 +107,6 @@ func initKeeper(
 ) (sdk.Context, keeper.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	kb := keeper.NewKeeperBuilder(cdc, storeKey, ics4Wrapper, leverage, oracle)
+	kb := keeper.NewKeeperBuilder(cdc, storeKey, leverage, oracle)
 	return ctx, kb.Keeper(&ctx)
 }

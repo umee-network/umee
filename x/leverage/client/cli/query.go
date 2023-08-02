@@ -30,6 +30,7 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		GetCmdQueryParams(),
 		GetCmdQueryRegisteredTokens(),
+		GetCmdQuerySpecialAssets(),
 		GetCmdQueryMarketSummary(),
 		GetCmdQueryAccountBalances(),
 		GetCmdQueryAccountSummary(),
@@ -86,6 +87,34 @@ func GetCmdQueryRegisteredTokens() *cobra.Command {
 				req.BaseDenom = args[0]
 			}
 			resp, err := queryClient.RegisteredTokens(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetCmdQuerySpecialAssets creates a Cobra command to query for all
+// the special asset pairs in the x/leverage module.
+func GetCmdQuerySpecialAssets() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "special-assets",
+		Args:  cobra.RangeArgs(0, 1),
+		Short: "Query for all special asset pairs, or only those affecting a single collateral token.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QuerySpecialAssets{}
+			if len(args) > 0 {
+				req.Denom = args[0]
+			}
+			resp, err := queryClient.SpecialAssets(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
