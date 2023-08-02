@@ -11,7 +11,7 @@ import (
 // these uTokens which are non-collateral. Input denom should be a base token. If oracle prices are missing for
 // some of the borrower's collateral (other than the denom being withdrawn), computes the maximum safe withdraw
 // allowed by only the collateral whose prices are known.
-func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
+func (k *Keeper) newMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
 	position, err := k.getAccountPosition(ctx, addr, false)
 	if err != nil {
@@ -41,7 +41,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 // userMaxBorrow calculates the maximum amount of a given token an account can currently borrow.
 // input denom should be a base token. If oracle prices are missing for some of the borrower's
 // collateral, computes the maximum safe borrow allowed by only the collateral whose prices are known.
-func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
+func (k *Keeper) newMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
 	if types.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
 	}
