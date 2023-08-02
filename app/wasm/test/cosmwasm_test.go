@@ -20,4 +20,8 @@ func TestCosmwasm(t *testing.T) {
 	its.TestOracleQueries()
 	its.TestLeverageTxs()
 	its.TestIncentiveQueries()
+	its.TestMetokenQueries()
+
+	// stargate queries
+	its.TestStargateQueries()
 }
