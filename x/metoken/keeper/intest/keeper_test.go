@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 
 	sdkmath "cosmossdk.io/math"
@@ -42,8 +43,15 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		},
 	).WithBlockTime(time.Now())
 
-	oracleMock := mocks.NewMockOracleKeeper()
-	oracleMock.AllMedianPricesFunc.SetDefaultHook(mocks.ValidPricesFunc())
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	oracleMock := mocks.NewMockOracleKeeper(ctrl)
+	oracleMock.
+		EXPECT().
+		AllMedianPrices(gomock.Any()).
+		Return(mocks.ValidPrices()).
+		AnyTimes()
 
 	kb := keeper.NewKeeperBuilder(
 		app.AppCodec(),
