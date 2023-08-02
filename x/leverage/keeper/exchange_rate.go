@@ -41,9 +41,9 @@ func (k Keeper) ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 	return sdk.NewCoin(tokenDenom, tokenAmount), nil
 }
 
-// ToToken returns list of Tokens in the amount a user would receive when withdrawing the
+// ToTokens returns list of Tokens in the amount a user would receive when withdrawing the
 // list of uTokens.
-// Returns error if any of the inputs are uTokens.
+// Returns error if any of the inputs are tokens.
 func (k Keeper) ToTokens(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) {
 	if err := uTokens.Validate(); err != nil {
 		return sdk.Coins{}, err
