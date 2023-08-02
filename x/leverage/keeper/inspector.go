@@ -68,8 +68,8 @@ func (q Querier) Inspect(
 		borrowedValue, collateralValue, liquidationThreshold := sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()
 		position, err := k.getAccountPosition(ctx, addr, true)
 		if err == nil {
-			borrowedValue = position.BorrowedValue()
-			collateralValue = position.CollateralValue()
+			borrowedValue = position.BorrowedValue
+			collateralValue = position.CollateralValue
 			liquidationThreshold = position.Limit()
 		}
 		borrowed := k.GetBorrowerBorrows(ctx, addr)

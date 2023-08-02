@@ -129,7 +129,7 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 
 		position, err := k.getAccountPosition(ctx, borrowerAddr, true)
 		if err == nil {
-			borrowValue := position.BorrowedValue()
+			borrowValue := position.BorrowedValue
 			liquidationThreshold := position.Limit()
 			if liquidationThreshold.LT(borrowValue) {
 				// If liquidation threshold is smaller than borrowed value then the
