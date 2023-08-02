@@ -550,7 +550,7 @@ func New(
 	  - IBC Rate Limit Middleware
 	 **********/
 
-	quotaICS4 := uibcquota.NewQuotaICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
+	quotaICS4 := uibcquota.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
 
 	// Create Transfer Keeper and pass IBCFeeKeeper as expected Channel and PortKeeper
 	// since fee middleware will wrap the IBCKeeper for underlying application.

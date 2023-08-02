@@ -12,19 +12,19 @@ import (
 	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
 )
 
-// QuotaICS4 wraps SendPacket to check IBC quota.
-type QuotaICS4 struct {
+// ICS4 wraps SendPacket to check IBC quota.
+type ICS4 struct {
 	porttypes.ICS4Wrapper
 
 	kb keeper.Builder
 }
 
-func NewQuotaICS4(parent porttypes.ICS4Wrapper, kb keeper.Builder) QuotaICS4 {
-	return QuotaICS4{parent, kb}
+func NewICS4(parent porttypes.ICS4Wrapper, kb keeper.Builder) ICS4 {
+	return ICS4{parent, kb}
 }
 
 // SendPacket implements types.Middleware
-func (q QuotaICS4) SendPacket(
+func (q ICS4) SendPacket(
 	ctx sdk.Context,
 	chanCap *capabilitytypes.Capability,
 	sourcePort string,
