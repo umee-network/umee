@@ -192,21 +192,6 @@ func (mr *MockLeverageKeeperMockRecorder) SupplyFromModule(ctx, fromModule, coin
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SupplyFromModule", reflect.TypeOf((*MockLeverageKeeper)(nil).SupplyFromModule), ctx, fromModule, coin)
 }
 
-// ToUToken mocks base method.
-func (m *MockLeverageKeeper) ToUToken(ctx types.Context, token types.Coin) (types.Coin, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ToUToken", ctx, token)
-	ret0, _ := ret[0].(types.Coin)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ToUToken indicates an expected call of ToUToken.
-func (mr *MockLeverageKeeperMockRecorder) ToUToken(ctx, token interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToUToken", reflect.TypeOf((*MockLeverageKeeper)(nil).ToUToken), ctx, token)
-}
-
 // ToToken mocks base method.
 func (m *MockLeverageKeeper) ToToken(ctx types.Context, uToken types.Coin) (types.Coin, error) {
 	m.ctrl.T.Helper()
@@ -220,6 +205,21 @@ func (m *MockLeverageKeeper) ToToken(ctx types.Context, uToken types.Coin) (type
 func (mr *MockLeverageKeeperMockRecorder) ToToken(ctx, uToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToToken", reflect.TypeOf((*MockLeverageKeeper)(nil).ToToken), ctx, uToken)
+}
+
+// ToUToken mocks base method.
+func (m *MockLeverageKeeper) ToUToken(ctx types.Context, token types.Coin) (types.Coin, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ToUToken", ctx, token)
+	ret0, _ := ret[0].(types.Coin)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ToUToken indicates an expected call of ToUToken.
+func (mr *MockLeverageKeeperMockRecorder) ToUToken(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToUToken", reflect.TypeOf((*MockLeverageKeeper)(nil).ToUToken), ctx, token)
 }
 
 // WithdrawToModule mocks base method.
