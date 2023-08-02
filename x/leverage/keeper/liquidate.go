@@ -34,8 +34,8 @@ func (k Keeper) getLiquidationAmounts(
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
 	liquidationThreshold := position.Limit()
-	borrowedValue := position.BorrowedValue
-	collateralValue := position.CollateralValue
+	borrowedValue := position.BorrowedValue()
+	collateralValue := position.CollateralValue()
 
 	if borrowedValue.LT(liquidationThreshold) {
 		// borrower is healthy and cannot be liquidated

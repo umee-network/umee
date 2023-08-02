@@ -22,24 +22,24 @@ type AccountPosition struct {
 	// A pair that does not currently apply to the account (but could do so if a borrow
 	// were added or existing pairs were rearranged) will have zero USD value
 	// but will still be initialized with the proper weights, and sorted in order.
-	SpecialPairs WeightedSpecialPairs
+	specialPairs WeightedSpecialPairs
 	// collateral and borrowed that have matched with each other after special pairs
 	// are sorted in order of descending collateral weight (of the collateral primarily).
 	// these will all be nonzero after a position is initialized.
-	NormalPairs WeightedNormalPairs
+	normalPairs WeightedNormalPairs
 	// surplus collateral after all borrows have been matched
-	SurplusCollateral WeightedDecCoins
+	surplusCollateral WeightedDecCoins
 	// surplus borrows if collateral was inadequate
-	SurplusBorrows WeightedDecCoins
+	surplusBorrows WeightedDecCoins
 	// caches retrieved token settings
-	Tokens map[string]Token
+	tokens map[string]Token
 	// total collateral value (using PriceModeLow and interpreting unknown prices as zero)
-	CollateralValue sdk.Dec
+	collateralValue sdk.Dec
 	// total borrowed value (using PriceModeHigh and requiring all prices known)
-	BorrowedValue sdk.Dec
-	// IsForLiquidation tracks whether the position was built using collateral weight
+	borrowedValue sdk.Dec
+	// isForLiquidation tracks whether the position was built using collateral weight
 	// or liquidation threshold
-	IsForLiquidation bool
+	isForLiquidation bool
 }
 
 // NewAccountPosition creates and sorts an account position based on token settings,
@@ -54,19 +54,19 @@ func NewAccountPosition(
 	isLiquidation bool,
 ) AccountPosition {
 	position := AccountPosition{
-		SpecialPairs:      WeightedSpecialPairs{},
-		NormalPairs:       WeightedNormalPairs{},
-		SurplusCollateral: WeightedDecCoins{},
-		SurplusBorrows:    WeightedDecCoins{},
-		Tokens:            map[string]Token{},
-		CollateralValue:   sdk.ZeroDec(),
-		BorrowedValue:     sdk.ZeroDec(),
-		IsForLiquidation:  isLiquidation,
+		specialPairs:      WeightedSpecialPairs{},
+		normalPairs:       WeightedNormalPairs{},
+		surplusCollateral: WeightedDecCoins{},
+		surplusBorrows:    WeightedDecCoins{},
+		tokens:            map[string]Token{},
+		collateralValue:   sdk.ZeroDec(),
+		borrowedValue:     sdk.ZeroDec(),
+		isForLiquidation:  isLiquidation,
 	}
 
 	// cache all registered tokens
 	for _, t := range tokens {
-		position.Tokens[t.BaseDenom] = t
+		position.tokens[t.BaseDenom] = t
 	}
 
 	// cache all potentially relevant special asset pairs, and sort them by collateral weight (or liquidation threshold).
@@ -87,20 +87,20 @@ func NewAccountPosition(
 			SpecialWeight: weight,
 		}
 		// sorting is performed by Add function
-		position.SpecialPairs = position.SpecialPairs.Add(wp)
+		position.specialPairs = position.specialPairs.Add(wp)
 	}
 
 	for _, cv := range collateralValueToSort {
 		// track total collateral value
-		position.CollateralValue = position.CollateralValue.Add(cv.Amount)
+		position.collateralValue = position.collateralValue.Add(cv.Amount)
 	}
 	for _, bv := range borrowedValueToSort {
 		// track total borrowed value
-		position.BorrowedValue = position.BorrowedValue.Add(bv.Amount)
+		position.borrowedValue = position.borrowedValue.Add(bv.Amount)
 	}
 
 	// match assets into special asset pairs, removing matched value from borrowedValueToSort and collateralValueToSort
-	for i, p := range position.SpecialPairs {
+	for i, p := range position.specialPairs {
 		b := borrowedValueToSort.AmountOf(p.Borrow.Denom)
 		c := collateralValueToSort.AmountOf(p.Collateral.Denom)
 		if b.IsPositive() && c.IsPositive() {
@@ -122,8 +122,8 @@ func NewAccountPosition(
 			borrowedValueToSort = borrowedValueToSort.Sub(sdk.NewDecCoins(bCoin))
 			collateralValueToSort = collateralValueToSort.Sub(sdk.NewDecCoins(cCoin))
 			// add newly paired assets to the appropriate special pair
-			position.SpecialPairs[i].Borrow = bCoin
-			position.SpecialPairs[i].Collateral = cCoin
+			position.specialPairs[i].Borrow = bCoin
+			position.specialPairs[i].Collateral = cCoin
 		}
 	}
 
@@ -164,7 +164,7 @@ func NewAccountPosition(
 			borrowedValueToSort = borrowedValueToSort.Sub(sdk.NewDecCoins(bCoin))
 			collateralValueToSort = collateralValueToSort.Sub(sdk.NewDecCoins(cCoin))
 			// create a normal asset pair and add it to the account position
-			position.NormalPairs = append(position.NormalPairs, WeightedNormalPair{
+			position.normalPairs = append(position.normalPairs, WeightedNormalPair{
 				Collateral: WeightedDecCoin{
 					Asset:  cCoin,
 					Weight: position.tokenWeight(cDenom),
@@ -180,7 +180,7 @@ func NewAccountPosition(
 	// any remaining collateral could not be paired (so borrower is under limit)
 	for _, cv := range collateralValueToSort {
 		// sort collateral by collateral weight (or liquidation threshold) using Add function
-		position.SurplusCollateral = position.SurplusCollateral.Add(
+		position.surplusCollateral = position.surplusCollateral.Add(
 			WeightedDecCoin{
 				Asset:  sdk.NewDecCoinFromDec(cv.Denom, cv.Amount),
 				Weight: position.tokenWeight(cv.Denom),
@@ -191,7 +191,7 @@ func NewAccountPosition(
 	// any remaining borrows could not be paired (so borrower is over limit)
 	for _, bv := range borrowedValueToSort {
 		// sort borrows by collateral weight (or liquidation threshold) using Add function
-		position.SurplusBorrows = position.SurplusBorrows.Add(
+		position.surplusBorrows = position.surplusBorrows.Add(
 			WeightedDecCoin{
 				Asset:  sdk.NewDecCoinFromDec(bv.Denom, bv.Amount),
 				Weight: position.tokenWeight(bv.Denom),
@@ -202,10 +202,20 @@ func NewAccountPosition(
 	return position
 }
 
+// BorrowedValue returns an account's total USD value borrowed
+func (ap *AccountPosition) BorrowedValue() sdk.Dec {
+	return ap.borrowedValue
+}
+
+// CollateralValue returns an account's collateral's total USD value
+func (ap *AccountPosition) CollateralValue() sdk.Dec {
+	return ap.collateralValue
+}
+
 // tokenWeight gets a token's collateral weight or liquidation threshold if it is registered, else zero
 func (ap *AccountPosition) tokenWeight(denom string) sdk.Dec {
-	if t, ok := ap.Tokens[denom]; ok {
-		if ap.IsForLiquidation {
+	if t, ok := ap.tokens[denom]; ok {
+		if ap.isForLiquidation {
 			return t.LiquidationThreshold
 		}
 		return t.CollateralWeight
@@ -221,14 +231,14 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	// the distance from current borrowed value to the limit.
 
 	// if any borrows remain after matching, user is over borrow limit (or LT) by remaining value
-	remainingBorrowValue := ap.SurplusBorrows.Total()
+	remainingBorrowValue := ap.surplusBorrows.Total()
 	if remainingBorrowValue.IsPositive() {
-		return ap.BorrowedValue.Sub(remainingBorrowValue)
+		return ap.borrowedValue.Sub(remainingBorrowValue)
 	}
 
 	// if no borrows remain after matching, user may have additional borrow limit (or LT) available
-	limit := ap.BorrowedValue
-	for _, c := range ap.SurplusCollateral {
+	limit := ap.borrowedValue
+	for _, c := range ap.surplusCollateral {
 		// the borrow limit calculation assumes no additional limitations based on borrow factor
 		// this is accurate if the asset to be borrowed has a higher collateral weight than all
 		// remaining collateral. otherwise, it overestimates. MaxBorrow is more precise in those cases.
