@@ -127,19 +127,19 @@ func (mr *MockLeverageMockRecorder) GetTokenSettings(ctx, baseDenom interface{})
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTokenSettings", reflect.TypeOf((*MockLeverage)(nil).GetTokenSettings), ctx, baseDenom)
 }
 
-// UToken2TokenRate mocks base method.
-func (m *MockLeverage) UToken2TokenRate(ctx types.Context, uToken types.Coin) (types.Coin, error) {
+// ToToken mocks base method.
+func (m *MockLeverage) ToToken(ctx types.Context, uToken types.Coin) (types.Coin, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UToken2TokenRate", ctx, uToken)
+	ret := m.ctrl.Call(m, "ToToken", ctx, uToken)
 	ret0, _ := ret[0].(types.Coin)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UToken2TokenRate indicates an expected call of UToken2TokenRate.
-func (mr *MockLeverageMockRecorder) UToken2TokenRate(ctx, uToken interface{}) *gomock.Call {
+// ToToken indicates an expected call of ToToken.
+func (mr *MockLeverageMockRecorder) ToToken(ctx, uToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UToken2TokenRate", reflect.TypeOf((*MockLeverage)(nil).UToken2TokenRate), ctx, uToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ToToken", reflect.TypeOf((*MockLeverage)(nil).ToToken), ctx, uToken)
 }
 
 // MockOracle is a mock of Oracle interface.

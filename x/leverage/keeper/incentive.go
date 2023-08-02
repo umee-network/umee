@@ -7,7 +7,7 @@ import (
 // DonateCollateral burns some collateral uTokens already present in the module, then adds their equivalent amount
 // in tokens reserves. Currently, this is only used as the penalty for incentive module's MsgEmergencyUnbond.
 func (k Keeper) DonateCollateral(ctx sdk.Context, fromAddr sdk.AccAddress, uToken sdk.Coin) error {
-	token, err := k.UToken2TokenRate(ctx, uToken)
+	token, err := k.ToToken(ctx, uToken)
 	if err != nil {
 		return err
 	}

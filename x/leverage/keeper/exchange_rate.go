@@ -6,9 +6,9 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
-// Token2uTokenRate returns a uToken amount user would receive when supplying the token.
+// ToUToken returns a uToken amount user would receive when supplying the token.
 // Returns error if the token is not a Token.
-func (k Keeper) Token2uTokenRate(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
+func (k Keeper) ToUToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
 	if err := token.Validate(); err != nil {
 		return sdk.Coin{}, err
 	}
@@ -23,9 +23,9 @@ func (k Keeper) Token2uTokenRate(ctx sdk.Context, token sdk.Coin) (sdk.Coin, err
 	return sdk.NewCoin(uTokenDenom, uTokenAmount), nil
 }
 
-// UToken2TokenRate returns a token amount user would receive when supplying the uToken.
+// ToToken returns a token amount user would receive when supplying the uToken.
 // Returns error if the uToken is not a uToken.
-func (k Keeper) UToken2TokenRate(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+func (k Keeper) ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 	if err := uToken.Validate(); err != nil {
 		return sdk.Coin{}, err
 	}
@@ -50,7 +50,7 @@ func (k Keeper) Tokens2uTokensRate(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coin
 
 	tokens := sdk.Coins{}
 	for _, coin := range uTokens {
-		token, err := k.UToken2TokenRate(ctx, coin)
+		token, err := k.ToToken(ctx, coin)
 		if err != nil {
 			return sdk.Coins{}, err
 		}

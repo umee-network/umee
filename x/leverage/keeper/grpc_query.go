@@ -362,7 +362,7 @@ func (q Querier) MaxWithdraw(
 		// On non-nil error here, max withdraw is zero.
 		uToken, _, err := q.Keeper.userMaxWithdraw(ctx, addr, denom)
 		if err == nil && uToken.IsPositive() {
-			token, err := q.Keeper.UToken2TokenRate(ctx, uToken)
+			token, err := q.Keeper.ToToken(ctx, uToken)
 			if err != nil {
 				return nil, err
 			}

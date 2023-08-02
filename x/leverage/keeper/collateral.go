@@ -80,7 +80,7 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, 
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
-		baseAsset, err := k.UToken2TokenRate(ctx, coin)
+		baseAsset, err := k.ToToken(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -107,7 +107,7 @@ func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins, mo
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
-		baseAsset, err := k.UToken2TokenRate(ctx, coin)
+		baseAsset, err := k.ToToken(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}

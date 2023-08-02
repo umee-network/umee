@@ -13,7 +13,7 @@ import (
 func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
-	availableUTokens, err := k.Token2uTokenRate(ctx, availableTokens)
+	availableUTokens, err := k.ToUToken(ctx, availableTokens)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
