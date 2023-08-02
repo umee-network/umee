@@ -13,7 +13,7 @@ import (
 func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
 	uDenom := types.ToUTokenDenom(denom)
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
-	availableUTokens, err := k.ExchangeToken(ctx, availableTokens)
+	availableUTokens, err := k.Token2uTokenRate(ctx, availableTokens)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
@@ -282,7 +282,7 @@ func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 
 	// Get module collateral for the associated uToken
 	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
-	totalTokenCollateral, err := k.ExchangeUTokens(ctx, sdk.NewCoins(totalCollateral))
+	totalTokenCollateral, err := k.Tokens2uTokensRate(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
 		return sdkmath.Int{}, err
 	}

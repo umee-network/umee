@@ -6,9 +6,9 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
-// ExchangeToken converts an sdk.Coin containing a base asset to its value as a
-// uToken.
-func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
+// Token2uTokenRate returns a uToken amount user would receive when supplying the token.
+// Returns error if the token is not a Token.
+func (k Keeper) Token2uTokenRate(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
 	if err := token.Validate(); err != nil {
 		return sdk.Coin{}, err
 	}
@@ -19,14 +19,13 @@ func (k Keeper) ExchangeToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error)
 	}
 
 	exchangeRate := k.DeriveExchangeRate(ctx, token.Denom)
-
 	uTokenAmount := toDec(token.Amount).Quo(exchangeRate).TruncateInt()
 	return sdk.NewCoin(uTokenDenom, uTokenAmount), nil
 }
 
-// ExchangeUToken converts an sdk.Coin containing a uToken to its value in a base
-// token.
-func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+// UToken2TokenRate returns a token amount user would receive when supplying the uToken.
+// Returns error if the uToken is not a uToken.
+func (k Keeper) UToken2TokenRate(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 	if err := uToken.Validate(); err != nil {
 		return sdk.Coin{}, err
 	}
@@ -42,16 +41,16 @@ func (k Keeper) ExchangeUToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, erro
 	return sdk.NewCoin(tokenDenom, tokenAmount), nil
 }
 
-// ExchangeUTokens converts an sdk.Coins containing uTokens to their values in base
+// Tokens2uTokensRate converts an sdk.Coins containing uTokens to their values in base
 // tokens.
-func (k Keeper) ExchangeUTokens(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) {
+func (k Keeper) Tokens2uTokensRate(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) {
 	if err := uTokens.Validate(); err != nil {
 		return sdk.Coins{}, err
 	}
 
 	tokens := sdk.Coins{}
 	for _, coin := range uTokens {
-		token, err := k.ExchangeUToken(ctx, coin)
+		token, err := k.UToken2TokenRate(ctx, coin)
 		if err != nil {
 			return sdk.Coins{}, err
 		}

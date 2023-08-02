@@ -167,7 +167,7 @@ func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode typ
 	tokens := sdk.NewCoins()
 
 	for _, u := range uTokens {
-		t, err := k.ExchangeUToken(ctx, u)
+		t, err := k.UToken2TokenRate(ctx, u)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}

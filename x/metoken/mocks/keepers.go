@@ -555,12 +555,12 @@ func (c BankKeeperSendCoinsFromModuleToAccountFuncCall) Results() []interface{} 
 // interface (from the package github.com/umee-network/umee/v5/x/metoken)
 // used for unit testing.
 type MockLeverageKeeper struct {
-	// ExchangeTokenFunc is an instance of a mock function object
-	// controlling the behavior of the method ExchangeToken.
-	ExchangeTokenFunc *LeverageKeeperExchangeTokenFunc
-	// ExchangeUTokenFunc is an instance of a mock function object
-	// controlling the behavior of the method ExchangeUToken.
-	ExchangeUTokenFunc *LeverageKeeperExchangeUTokenFunc
+	// Token2uTokenRateFunc is an instance of a mock function object
+	// controlling the behavior of the method Token2uTokenRate.
+	Token2uTokenRateFunc *LeverageKeeperExchangeTokenFunc
+	// UToken2TokenRateFunc is an instance of a mock function object
+	// controlling the behavior of the method UToken2TokenRate.
+	UToken2TokenRateFunc *LeverageKeeperUToken2TokenRateFunc
 	// GetAllSuppliedFunc is an instance of a mock function object
 	// controlling the behavior of the method GetAllSupplied.
 	GetAllSuppliedFunc *LeverageKeeperGetAllSuppliedFunc
@@ -585,12 +585,12 @@ type MockLeverageKeeper struct {
 // All methods return zero values for all results, unless overwritten.
 func NewMockLeverageKeeper() *MockLeverageKeeper {
 	return &MockLeverageKeeper{
-		ExchangeTokenFunc: &LeverageKeeperExchangeTokenFunc{
+		Token2uTokenRateFunc: &LeverageKeeperExchangeTokenFunc{
 			defaultHook: func(types.Context, types.Coin) (r0 types.Coin, r1 error) {
 				return
 			},
 		},
-		ExchangeUTokenFunc: &LeverageKeeperExchangeUTokenFunc{
+		UToken2TokenRateFunc: &LeverageKeeperUToken2TokenRateFunc{
 			defaultHook: func(types.Context, types.Coin) (r0 types.Coin, r1 error) {
 				return
 			},
@@ -632,14 +632,14 @@ func NewMockLeverageKeeper() *MockLeverageKeeper {
 // interface. All methods panic on invocation, unless overwritten.
 func NewStrictMockLeverageKeeper() *MockLeverageKeeper {
 	return &MockLeverageKeeper{
-		ExchangeTokenFunc: &LeverageKeeperExchangeTokenFunc{
+		Token2uTokenRateFunc: &LeverageKeeperExchangeTokenFunc{
 			defaultHook: func(types.Context, types.Coin) (types.Coin, error) {
-				panic("unexpected invocation of MockLeverageKeeper.ExchangeToken")
+				panic("unexpected invocation of MockLeverageKeeper.Token2uTokenRate")
 			},
 		},
-		ExchangeUTokenFunc: &LeverageKeeperExchangeUTokenFunc{
+		UToken2TokenRateFunc: &LeverageKeeperUToken2TokenRateFunc{
 			defaultHook: func(types.Context, types.Coin) (types.Coin, error) {
-				panic("unexpected invocation of MockLeverageKeeper.ExchangeUToken")
+				panic("unexpected invocation of MockLeverageKeeper.UToken2TokenRate")
 			},
 		},
 		GetAllSuppliedFunc: &LeverageKeeperGetAllSuppliedFunc{
@@ -680,11 +680,11 @@ func NewStrictMockLeverageKeeper() *MockLeverageKeeper {
 // overwritten.
 func NewMockLeverageKeeperFrom(i metoken.LeverageKeeper) *MockLeverageKeeper {
 	return &MockLeverageKeeper{
-		ExchangeTokenFunc: &LeverageKeeperExchangeTokenFunc{
-			defaultHook: i.ExchangeToken,
+		Token2uTokenRateFunc: &LeverageKeeperExchangeTokenFunc{
+			defaultHook: i.Token2uTokenRate,
 		},
-		ExchangeUTokenFunc: &LeverageKeeperExchangeUTokenFunc{
-			defaultHook: i.ExchangeUToken,
+		UToken2TokenRateFunc: &LeverageKeeperUToken2TokenRateFunc{
+			defaultHook: i.UToken2TokenRate,
 		},
 		GetAllSuppliedFunc: &LeverageKeeperGetAllSuppliedFunc{
 			defaultHook: i.GetAllSupplied,
@@ -707,36 +707,36 @@ func NewMockLeverageKeeperFrom(i metoken.LeverageKeeper) *MockLeverageKeeper {
 	}
 }
 
-// LeverageKeeperExchangeTokenFunc describes the behavior when the
-// ExchangeToken method of the parent MockLeverageKeeper instance is
+// LeverageKeeperToken2uTokenRateFunc describes the behavior when the
+// Token2uTokenRate method of the parent MockLeverageKeeper instance is
 // invoked.
-type LeverageKeeperExchangeTokenFunc struct {
+type LeverageKeeperToken2uTokenRateFunc struct {
 	defaultHook func(types.Context, types.Coin) (types.Coin, error)
 	hooks       []func(types.Context, types.Coin) (types.Coin, error)
-	history     []LeverageKeeperExchangeTokenFuncCall
+	history     []LeverageKeeperToken2uTokenRateFuncCall
 	mutex       sync.Mutex
 }
 
-// ExchangeToken delegates to the next hook function in the queue and stores
+// Token2uTokenRate delegates to the next hook function in the queue and stores
 // the parameter and result values of this invocation.
-func (m *MockLeverageKeeper) ExchangeToken(v0 types.Context, v1 types.Coin) (types.Coin, error) {
-	r0, r1 := m.ExchangeTokenFunc.nextHook()(v0, v1)
-	m.ExchangeTokenFunc.appendCall(LeverageKeeperExchangeTokenFuncCall{v0, v1, r0, r1})
+func (m *MockLeverageKeeper) Token2uTokenRate(v0 types.Context, v1 types.Coin) (types.Coin, error) {
+	r0, r1 := m.Token2uTokenRateFunc.nextHook()(v0, v1)
+	m.Token2uTokenRateFunc.appendCall(LeverageKeeperExchangeTokenFuncCall{v0, v1, r0, r1})
 	return r0, r1
 }
 
-// SetDefaultHook sets function that is called when the ExchangeToken method
+// SetDefaultHook sets function that is called when the Token2uTokenRate method
 // of the parent MockLeverageKeeper instance is invoked and the hook queue
 // is empty.
-func (f *LeverageKeeperExchangeTokenFunc) SetDefaultHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
+func (f *LeverageKeeperToken2uTokenRateFunc) SetDefaultHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
 	f.defaultHook = hook
 }
 
 // PushHook adds a function to the end of hook queue. Each invocation of the
-// ExchangeToken method of the parent MockLeverageKeeper instance invokes
+// Token2uTokenRate method of the parent MockLeverageKeeper instance invokes
 // the hook at the front of the queue and discards it. After the queue is
 // empty, the default hook function is invoked for any future action.
-func (f *LeverageKeeperExchangeTokenFunc) PushHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
+func (f *LeverageKeeperToken2uTokenRateFunc) PushHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
 	f.mutex.Lock()
 	f.hooks = append(f.hooks, hook)
 	f.mutex.Unlock()
@@ -744,20 +744,20 @@ func (f *LeverageKeeperExchangeTokenFunc) PushHook(hook func(types.Context, type
 
 // SetDefaultReturn calls SetDefaultHook with a function that returns the
 // given values.
-func (f *LeverageKeeperExchangeTokenFunc) SetDefaultReturn(r0 types.Coin, r1 error) {
+func (f *LeverageKeeperToken2uTokenRateFunc) SetDefaultReturn(r0 types.Coin, r1 error) {
 	f.SetDefaultHook(func(types.Context, types.Coin) (types.Coin, error) {
 		return r0, r1
 	})
 }
 
 // PushReturn calls PushHook with a function that returns the given values.
-func (f *LeverageKeeperExchangeTokenFunc) PushReturn(r0 types.Coin, r1 error) {
+func (f *LeverageKeeperToken2uTokenRateFunc) PushReturn(r0 types.Coin, r1 error) {
 	f.PushHook(func(types.Context, types.Coin) (types.Coin, error) {
 		return r0, r1
 	})
 }
 
-func (f *LeverageKeeperExchangeTokenFunc) nextHook() func(types.Context, types.Coin) (types.Coin, error) {
+func (f *LeverageKeeperToken2uTokenRateFunc) nextHook() func(types.Context, types.Coin) (types.Coin, error) {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -770,26 +770,26 @@ func (f *LeverageKeeperExchangeTokenFunc) nextHook() func(types.Context, types.C
 	return hook
 }
 
-func (f *LeverageKeeperExchangeTokenFunc) appendCall(r0 LeverageKeeperExchangeTokenFuncCall) {
+func (f *LeverageKeeperToken2uTokenRateFunc) appendCall(r0 LeverageKeeperExchangeTokenFuncCall) {
 	f.mutex.Lock()
 	f.history = append(f.history, r0)
 	f.mutex.Unlock()
 }
 
-// History returns a sequence of LeverageKeeperExchangeTokenFuncCall objects
+// History returns a sequence of LeverageKeeperToken2uTokenRateFuncCall objects
 // describing the invocations of this function.
-func (f *LeverageKeeperExchangeTokenFunc) History() []LeverageKeeperExchangeTokenFuncCall {
+func (f *LeverageKeeperToken2uTokenRateFunc) History() []LeverageKeeperExchangeTokenFuncCall {
 	f.mutex.Lock()
-	history := make([]LeverageKeeperExchangeTokenFuncCall, len(f.history))
+	history := make([]LeverageKeeperToken2uTokenRateFuncCall, len(f.history))
 	copy(history, f.history)
 	f.mutex.Unlock()
 
 	return history
 }
 
-// LeverageKeeperExchangeTokenFuncCall is an object that describes an
-// invocation of method ExchangeToken on an instance of MockLeverageKeeper.
-type LeverageKeeperExchangeTokenFuncCall struct {
+// LeverageKeeperToken2uTokenRateFuncCall is an object that describes an
+// invocation of method Token2uTokenRate on an instance of MockLeverageKeeper.
+type LeverageKeeperToken2uTokenRateFuncCall struct {
 	// Arg0 is the value of the 1st argument passed to this method
 	// invocation.
 	Arg0 types.Context
@@ -806,46 +806,46 @@ type LeverageKeeperExchangeTokenFuncCall struct {
 
 // Args returns an interface slice containing the arguments of this
 // invocation.
-func (c LeverageKeeperExchangeTokenFuncCall) Args() []interface{} {
+func (c LeverageKeeperToken2uTokenRateFuncCall) Args() []interface{} {
 	return []interface{}{c.Arg0, c.Arg1}
 }
 
 // Results returns an interface slice containing the results of this
 // invocation.
-func (c LeverageKeeperExchangeTokenFuncCall) Results() []interface{} {
+func (c LeverageKeeperToken2uTokenRateFuncCall) Results() []interface{} {
 	return []interface{}{c.Result0, c.Result1}
 }
 
-// LeverageKeeperExchangeUTokenFunc describes the behavior when the
-// ExchangeUToken method of the parent MockLeverageKeeper instance is
+// LeverageKeeperUToken2TokenRateFunc describes the behavior when the
+// UToken2TokenRate method of the parent MockLeverageKeeper instance is
 // invoked.
-type LeverageKeeperExchangeUTokenFunc struct {
+type LeverageKeeperUToken2TokenRateFunc struct {
 	defaultHook func(types.Context, types.Coin) (types.Coin, error)
 	hooks       []func(types.Context, types.Coin) (types.Coin, error)
-	history     []LeverageKeeperExchangeUTokenFuncCall
+	history     []LeverageKeeperUToken2TokenRateFuncCall
 	mutex       sync.Mutex
 }
 
-// ExchangeUToken delegates to the next hook function in the queue and
+// UToken2TokenRate delegates to the next hook function in the queue and
 // stores the parameter and result values of this invocation.
-func (m *MockLeverageKeeper) ExchangeUToken(v0 types.Context, v1 types.Coin) (types.Coin, error) {
-	r0, r1 := m.ExchangeUTokenFunc.nextHook()(v0, v1)
-	m.ExchangeUTokenFunc.appendCall(LeverageKeeperExchangeUTokenFuncCall{v0, v1, r0, r1})
+func (m *MockLeverageKeeper) UToken2TokenRate(v0 types.Context, v1 types.Coin) (types.Coin, error) {
+	r0, r1 := m.UToken2TokenRateFunc.nextHook()(v0, v1)
+	m.UToken2TokenRateFunc.appendCall(LeverageKeeperUToken2TokenRateFuncCall{v0, v1, r0, r1})
 	return r0, r1
 }
 
-// SetDefaultHook sets function that is called when the ExchangeUToken
+// SetDefaultHook sets function that is called when the UToken2TokenRate
 // method of the parent MockLeverageKeeper instance is invoked and the hook
 // queue is empty.
-func (f *LeverageKeeperExchangeUTokenFunc) SetDefaultHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
+func (f *LeverageKeeperUToken2TokenRateFunc) SetDefaultHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
 	f.defaultHook = hook
 }
 
 // PushHook adds a function to the end of hook queue. Each invocation of the
-// ExchangeUToken method of the parent MockLeverageKeeper instance invokes
+// UToken2TokenRate method of the parent MockLeverageKeeper instance invokes
 // the hook at the front of the queue and discards it. After the queue is
 // empty, the default hook function is invoked for any future action.
-func (f *LeverageKeeperExchangeUTokenFunc) PushHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
+func (f *LeverageKeeperUToken2TokenRateFunc) PushHook(hook func(types.Context, types.Coin) (types.Coin, error)) {
 	f.mutex.Lock()
 	f.hooks = append(f.hooks, hook)
 	f.mutex.Unlock()
@@ -853,20 +853,20 @@ func (f *LeverageKeeperExchangeUTokenFunc) PushHook(hook func(types.Context, typ
 
 // SetDefaultReturn calls SetDefaultHook with a function that returns the
 // given values.
-func (f *LeverageKeeperExchangeUTokenFunc) SetDefaultReturn(r0 types.Coin, r1 error) {
+func (f *LeverageKeeperUToken2TokenRateFunc) SetDefaultReturn(r0 types.Coin, r1 error) {
 	f.SetDefaultHook(func(types.Context, types.Coin) (types.Coin, error) {
 		return r0, r1
 	})
 }
 
 // PushReturn calls PushHook with a function that returns the given values.
-func (f *LeverageKeeperExchangeUTokenFunc) PushReturn(r0 types.Coin, r1 error) {
+func (f *LeverageKeeperUToken2TokenRateFunc) PushReturn(r0 types.Coin, r1 error) {
 	f.PushHook(func(types.Context, types.Coin) (types.Coin, error) {
 		return r0, r1
 	})
 }
 
-func (f *LeverageKeeperExchangeUTokenFunc) nextHook() func(types.Context, types.Coin) (types.Coin, error) {
+func (f *LeverageKeeperUToken2TokenRateFunc) nextHook() func(types.Context, types.Coin) (types.Coin, error) {
 	f.mutex.Lock()
 	defer f.mutex.Unlock()
 
@@ -879,26 +879,26 @@ func (f *LeverageKeeperExchangeUTokenFunc) nextHook() func(types.Context, types.
 	return hook
 }
 
-func (f *LeverageKeeperExchangeUTokenFunc) appendCall(r0 LeverageKeeperExchangeUTokenFuncCall) {
+func (f *LeverageKeeperUToken2TokenRateFunc) appendCall(r0 LeverageKeeperUToken2TokenRateFuncCall) {
 	f.mutex.Lock()
 	f.history = append(f.history, r0)
 	f.mutex.Unlock()
 }
 
-// History returns a sequence of LeverageKeeperExchangeUTokenFuncCall
+// History returns a sequence of LeverageKeeperUToken2TokenRateFuncCall
 // objects describing the invocations of this function.
-func (f *LeverageKeeperExchangeUTokenFunc) History() []LeverageKeeperExchangeUTokenFuncCall {
+func (f *LeverageKeeperUToken2TokenRateFunc) History() []LeverageKeeperUToken2TokenRateFuncCall {
 	f.mutex.Lock()
-	history := make([]LeverageKeeperExchangeUTokenFuncCall, len(f.history))
+	history := make([]LeverageKeeperUToken2TokenRateFuncCall, len(f.history))
 	copy(history, f.history)
 	f.mutex.Unlock()
 
 	return history
 }
 
-// LeverageKeeperExchangeUTokenFuncCall is an object that describes an
-// invocation of method ExchangeUToken on an instance of MockLeverageKeeper.
-type LeverageKeeperExchangeUTokenFuncCall struct {
+// LeverageKeeperUToken2TokenRateFuncCall is an object that describes an
+// invocation of method UToken2TokenRate on an instance of MockLeverageKeeper.
+type LeverageKeeperUToken2TokenRateFuncCall struct {
 	// Arg0 is the value of the 1st argument passed to this method
 	// invocation.
 	Arg0 types.Context
@@ -915,13 +915,13 @@ type LeverageKeeperExchangeUTokenFuncCall struct {
 
 // Args returns an interface slice containing the arguments of this
 // invocation.
-func (c LeverageKeeperExchangeUTokenFuncCall) Args() []interface{} {
+func (c LeverageKeeperUToken2TokenRateFuncCall) Args() []interface{} {
 	return []interface{}{c.Arg0, c.Arg1}
 }
 
 // Results returns an interface slice containing the results of this
 // invocation.
-func (c LeverageKeeperExchangeUTokenFuncCall) Results() []interface{} {
+func (c LeverageKeeperUToken2TokenRateFuncCall) Results() []interface{} {
 	return []interface{}{c.Result0, c.Result1}
 }
 

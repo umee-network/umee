@@ -134,7 +134,7 @@ func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
-		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		baseAsset, err := k.UToken2TokenRate(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -170,7 +170,7 @@ func (k Keeper) VisibleBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.D
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
-		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		baseAsset, err := k.UToken2TokenRate(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -208,7 +208,7 @@ func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Co
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
-		baseAsset, err := k.ExchangeUToken(ctx, coin)
+		baseAsset, err := k.UToken2TokenRate(ctx, coin)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}

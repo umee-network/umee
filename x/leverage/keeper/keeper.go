@@ -91,7 +91,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 	}
 
 	// determine uToken amount to mint
-	uToken, err := k.ExchangeToken(ctx, coin)
+	uToken, err := k.Token2uTokenRate(ctx, coin)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -129,7 +129,7 @@ func (k Keeper) SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Co
 	}
 
 	// determine uToken amount to mint
-	uToken, err := k.ExchangeToken(ctx, coin)
+	uToken, err := k.Token2uTokenRate(ctx, coin)
 	if err != nil {
 		return sdk.Coin{}, true, err
 	}
@@ -176,7 +176,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// calculate base asset amount to withdraw
-	token, err := k.ExchangeUToken(ctx, uToken)
+	token, err := k.UToken2TokenRate(ctx, uToken)
 	if err != nil {
 		return sdk.Coin{}, isFromCollateral, err
 	}
@@ -256,7 +256,7 @@ func (k Keeper) WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Co
 	}
 
 	// calculate base asset amount to withdraw
-	token, err := k.ExchangeUToken(ctx, uToken)
+	token, err := k.UToken2TokenRate(ctx, uToken)
 	if err != nil {
 		return sdk.Coin{}, true, err
 	}

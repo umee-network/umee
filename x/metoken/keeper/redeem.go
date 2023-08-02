@@ -150,7 +150,7 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 //   - tokensWithdrawn: the amount tokens withdrawn from x/leverage.
 //   - error
 func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error) {
-	uTokensFromLeverage, err := k.leverageKeeper.ExchangeToken(*k.ctx, tokensToWithdraw)
+	uTokensFromLeverage, err := k.leverageKeeper.Token2uTokenRate(*k.ctx, tokensToWithdraw)
 	if err != nil {
 		return sdk.Coin{}, errors.Wrap(err, true)
 	}

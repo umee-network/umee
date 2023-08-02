@@ -218,8 +218,8 @@ func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ l
 	return total, nil
 }
 
-// ExchangeUToken implements the expected leverage keeper, with uToken exchange rates always equal to 1
-func (m *mockLeverageKeeper) ExchangeUToken(_ sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
+// UToken2TokenRate implements the expected leverage keeper, with uToken exchange rates always equal to 1
+func (m *mockLeverageKeeper) UToken2TokenRate(_ sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 	if !leveragetypes.HasUTokenPrefix(uToken.Denom) {
 		return uToken, leveragetypes.ErrUToken
 	}

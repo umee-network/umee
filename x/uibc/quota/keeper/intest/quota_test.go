@@ -53,14 +53,14 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	assert.NilError(t, err)
 
 	// invalid token, returns error from mock leverage
-	leverageMock.EXPECT().ExchangeUToken(ctx, invalidToken).Return(sdk.Coin{}, ltypes.ErrNotUToken).AnyTimes()
+	leverageMock.EXPECT().UToken2TokenRate(ctx, invalidToken).Return(sdk.Coin{}, ltypes.ErrNotUToken).AnyTimes()
 
 	err = k.CheckAndUpdateQuota(invalidToken.Denom, invalidToken.Amount)
 	assert.ErrorIs(t, err, ltypes.ErrNotUToken)
 
 	// UMEE uToken, exchanges correctly, but returns ErrNotRegisteredToken when trying to get Token's settings
 	// from leverage mock keeper
-	leverageMock.EXPECT().ExchangeUToken(ctx, umeeUToken).Return(
+	leverageMock.EXPECT().UToken2TokenRate(ctx, umeeUToken).Return(
 		sdk.NewCoin("umee", sdkmath.NewInt(100)),
 		nil,
 	).AnyTimes()

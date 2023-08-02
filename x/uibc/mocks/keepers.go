@@ -112,19 +112,19 @@ func (mr *MockLeverageKeeperMockRecorder) DeriveExchangeRate(ctx, denom interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeriveExchangeRate", reflect.TypeOf((*MockLeverageKeeper)(nil).DeriveExchangeRate), ctx, denom)
 }
 
-// ExchangeUToken mocks base method.
-func (m *MockLeverageKeeper) ExchangeUToken(ctx types.Context, uToken types.Coin) (types.Coin, error) {
+// UToken2TokenRate mocks base method.
+func (m *MockLeverageKeeper) UToken2TokenRate(ctx types.Context, uToken types.Coin) (types.Coin, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExchangeUToken", ctx, uToken)
+	ret := m.ctrl.Call(m, "UToken2TokenRate", ctx, uToken)
 	ret0, _ := ret[0].(types.Coin)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ExchangeUToken indicates an expected call of ExchangeUToken.
-func (mr *MockLeverageKeeperMockRecorder) ExchangeUToken(ctx, uToken interface{}) *gomock.Call {
+// UToken2TokenRate indicates an expected call of UToken2TokenRate.
+func (mr *MockLeverageKeeperMockRecorder) UToken2TokenRate(ctx, uToken interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExchangeUToken", reflect.TypeOf((*MockLeverageKeeper)(nil).ExchangeUToken), ctx, uToken)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UToken2TokenRate", reflect.TypeOf((*MockLeverageKeeper)(nil).UToken2TokenRate), ctx, uToken)
 }
 
 // GetTokenSettings mocks base method.

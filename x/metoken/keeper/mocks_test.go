@@ -33,11 +33,11 @@ func (l Leverage) GetTokenSettings(_ sdk.Context, denom string) (ltypes.Token, e
 	return ts, nil
 }
 
-func (l Leverage) ExchangeToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
+func (l Leverage) Token2uTokenRate(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
 
-func (l Leverage) ExchangeUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
+func (l Leverage) UToken2TokenRate(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
 
