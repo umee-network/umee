@@ -74,7 +74,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
   - `/umee/ugov/v1/min-gas-price` --> `/umee/ugov/v1/min_gas_price`
   - `/umee/ugov/v1/emergency-group` --> `/umee/ugov/v1/emergency_group`
   - `/umee/uibc/v1/all-outflows` --> `/umee/uibc/v1/all_outflows`
-- [2180](https://github.com/umee-network/umee/pull/2180) Rename leverage `Kepeer.ExchangeToken -> ToUToken`, `Kepeer.ExchangeUToken -> ToTokenRate` and `Kepeer.ExchangeTokens -> ToUTokens`.
+- [2180](https://github.com/umee-network/umee/pull/2180) Rename leverage `Keeper.ExchangeToken -> ToUToken`, `Keeper.ExchangeUToken -> ToToken` and `Keeper.ExchangeTokens -> ToUTokens`.
 
 ## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
 

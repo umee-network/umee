@@ -6,8 +6,9 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
-// ToUToken returns a uToken amount user would receive when supplying the token.
-// Returns error if the token is not a Token.
+// ToUToken converts a token to uTokens at the current uToken exchange rate.
+// This is the uToken amount a user would receive when supplying the token.
+// Returns error if the input is not a Token.
 func (k Keeper) ToUToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
 	if err := token.Validate(); err != nil {
 		return sdk.Coin{}, err
@@ -23,8 +24,9 @@ func (k Keeper) ToUToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
 	return sdk.NewCoin(uTokenDenom, uTokenAmount), nil
 }
 
-// ToToken returns a token amount user would receive when supplying the uToken.
-// Returns error if the uToken is not a uToken.
+// ToToken converts a uToken to tokens at the current uToken exchange rate.
+// This is the token amount a user would receive when withdrawing the uToken.
+// Returns error if the input is not a uToken.
 func (k Keeper) ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 	if err := uToken.Validate(); err != nil {
 		return sdk.Coin{}, err
@@ -41,7 +43,9 @@ func (k Keeper) ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 	return sdk.NewCoin(tokenDenom, tokenAmount), nil
 }
 
-// Tokens2uTokensRate converts an sdk.Coins containing uTokens to their values in base
+// ToToken converts an sdk.Coins containing uTokens to tokens using uToken exchange rates.
+// These are the token amounts a user would receive when withdrawing the uTokens.
+// Returns error if any of the inputs are uTokens.
 // tokens.
 func (k Keeper) Tokens2uTokensRate(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) {
 	if err := uTokens.Validate(); err != nil {
