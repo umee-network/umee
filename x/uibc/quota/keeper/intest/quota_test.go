@@ -38,14 +38,12 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	umeeUToken := sdk.NewCoin("u/umee", sdkmath.NewInt(100))
 	atomToken := sdk.NewCoin("atom", sdkmath.NewInt(1000))
 	daiToken := sdk.NewCoin("dai", sdkmath.NewInt(50))
-	// gomock initializations
-	leverageCtrl := gomock.NewController(t)
-	defer leverageCtrl.Finish()
-	leverageMock := mocks.NewMockLeverageKeeper(leverageCtrl)
 
-	oracleCtrl := gomock.NewController(t)
-	defer oracleCtrl.Finish()
-	oracleMock := mocks.NewMockOracle(oracleCtrl)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	leverageMock := mocks.NewMockLeverage(ctrl)
+	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
 	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)
@@ -102,14 +100,12 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	umeeQuota := sdkmath.NewInt(10000)
 	umeeToken := sdk.NewCoin("umee", umeeAmount)
 	umeeExponent := 6
-	// gomock initializations
-	leverageCtrl := gomock.NewController(t)
-	defer leverageCtrl.Finish()
-	leverageMock := mocks.NewMockLeverageKeeper(leverageCtrl)
 
-	oracleCtrl := gomock.NewController(t)
-	defer oracleCtrl.Finish()
-	oracleMock := mocks.NewMockOracle(oracleCtrl)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	leverageMock := mocks.NewMockLeverage(ctrl)
+	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
 	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)
