@@ -1,4 +1,4 @@
-package types
+package types_test
 
 import (
 	"testing"
@@ -6,18 +6,21 @@ import (
 	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
-func testToken(denom, cw, lt string) Token {
-	return Token{
+func testToken(denom, cw, lt string) types.Token {
+	return types.Token{
 		BaseDenom:            denom,
 		CollateralWeight:     sdk.MustNewDecFromStr(cw),
 		LiquidationThreshold: sdk.MustNewDecFromStr(lt),
 	}
 }
 
-func testPair(borrow, collateral, cw, lt string) SpecialAssetPair {
-	return SpecialAssetPair{
+func testPair(borrow, collateral, cw, lt string) types.SpecialAssetPair {
+	return types.SpecialAssetPair{
 		Borrow:               borrow,
 		Collateral:           collateral,
 		CollateralWeight:     sdk.MustNewDecFromStr(cw),
@@ -29,7 +32,7 @@ func testPair(borrow, collateral, cw, lt string) SpecialAssetPair {
 // A < B < C < D < E < F < G for both collateral weight and liquidation threshold,
 // but H = I = 0 for collateral weight and G < H < I for liquidation threshold.
 // This should produce a wide range of behaviors.
-var orderedTokens = []Token{
+var orderedTokens = []types.Token{
 	testToken("AAAA", "0.1", "0.15"),
 	testToken("BBBB", "0.2", "0.25"),
 	testToken("CCCC", "0.3", "0.35"),
@@ -44,7 +47,7 @@ var orderedTokens = []Token{
 // These special asset pairs are used for testing asset positions.
 // The even-numbered assets (B,D,F,H) are involved in special pairs, and the others aren't.
 // When combined with the order of the test assets, many complex positions can be formed.
-var orderedPairs = []SpecialAssetPair{
+var orderedPairs = []types.SpecialAssetPair{
 	// F and H are paired at [0.6,0.8] but not looped
 	// D can borrow any (B,D,F,H) at [0.5,0.5]
 	// B can be borrowed by any (B,D,F,H) at [0.3,0.3]
@@ -66,11 +69,11 @@ var orderedPairs = []SpecialAssetPair{
 }
 
 func TestBorrowLimit(t *testing.T) {
-	position := NewAccountPosition(
+	position := types.NewAccountPosition(
 		orderedTokens,
 		orderedPairs,
 		sdk.NewDecCoins(
-			sdk.NewDecCoinFromDec("AAAA", sdk.MustNewDecFromStr("100.00")),
+			coin.Dec("AAAA", "100"),
 		),
 		sdk.NewDecCoins(),
 		false,
@@ -80,11 +83,11 @@ func TestBorrowLimit(t *testing.T) {
 }
 
 func TestLiquidationThreshold(t *testing.T) {
-	position := NewAccountPosition(
+	position := types.NewAccountPosition(
 		orderedTokens,
 		orderedPairs,
 		sdk.NewDecCoins(
-			sdk.NewDecCoinFromDec("AAAA", sdk.MustNewDecFromStr("100.00")),
+			coin.Dec("AAAA", "100"),
 		),
 		sdk.NewDecCoins(),
 		true,
