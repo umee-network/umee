@@ -20,6 +20,8 @@ func TestCosmwasm(t *testing.T) {
 	its.TestOracleQueries()
 	its.TestLeverageTxs()
 	its.TestIncentiveQueries()
-	// TODO: needs to enable after smart contract updated
-	// its.TestMetokenQueries()
+	its.TestMetokenQueries()
+
+	// stargate queries
+	its.TestStargateQueries()
 }
