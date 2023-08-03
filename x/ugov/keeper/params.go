@@ -48,7 +48,7 @@ func (k Keeper) SetInflationCycleEnd(cycleEnd time.Time) error {
 }
 
 // Returns zero unix time if the inflation cycle was not set.
-func (k Keeper) GetInflationCycleEnd() time.Time {
+func (k Keeper) InflationCycleEnd() time.Time {
 	t, _ := store.GetTimeMs(k.store, ugov.KeyInflationCycleEnd)
 	return t
 }

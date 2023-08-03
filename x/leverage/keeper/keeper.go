@@ -414,10 +414,10 @@ func (k Keeper) Liquidate(
 	}
 
 	// detect if the user selected a base token reward instead of a uToken
-	directLiquidation := !types.HasUTokenPrefix(rewardDenom)
+	directLiquidation := !coin.HasUTokenPrefix(rewardDenom)
 	if !directLiquidation {
 		// convert rewardDenom to base token
-		rewardDenom = types.ToTokenDenom(rewardDenom)
+		rewardDenom = coin.StripUTokenDenom(rewardDenom)
 	}
 	// ensure that base reward is a registered token
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
@@ -484,7 +484,7 @@ func (k Keeper) LeveragedLiquidate(
 	if rewardDenom == "" {
 		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 		if !collateral.IsZero() {
-			rewardDenom = types.ToTokenDenom(collateral[0].Denom)
+			rewardDenom = coin.StripUTokenDenom(collateral[0].Denom)
 		}
 	}
 
@@ -494,7 +494,7 @@ func (k Keeper) LeveragedLiquidate(
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
-	uRewardDenom := types.ToUTokenDenom(rewardDenom)
+	uRewardDenom := coin.ToUTokenDenom(rewardDenom)
 
 	tokenRepay, uTokenReward, _, err := k.getLiquidationAmounts(
 		ctx,

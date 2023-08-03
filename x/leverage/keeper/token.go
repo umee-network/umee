@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/util/checkers"
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
@@ -17,7 +18,7 @@ func (k Keeper) CleanTokenRegistry(ctx sdk.Context) error {
 	tokens := k.GetAllRegisteredTokens(ctx)
 	for _, t := range tokens {
 		if t.Blacklist {
-			uDenom := types.ToUTokenDenom(t.BaseDenom)
+			uDenom := coin.ToUTokenDenom(t.BaseDenom)
 			uSupply := k.GetUTokenSupply(ctx, uDenom)
 			if uSupply.IsZero() {
 				err := k.deleteTokenSettings(ctx, t)
