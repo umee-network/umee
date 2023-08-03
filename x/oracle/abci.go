@@ -5,11 +5,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/umee-network/umee/v5/util/decmath"
-
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/decmath"
 	"github.com/umee-network/umee/v5/x/oracle/keeper"
 	"github.com/umee-network/umee/v5/x/oracle/types"
 )
