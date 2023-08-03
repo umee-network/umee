@@ -68,30 +68,44 @@ var orderedPairs = []types.SpecialAssetPair{
 	testPair("HHHH", "HHHH", "0.1", "0.1"),
 }
 
-func TestBorrowLimit(t *testing.T) {
-	position := types.NewAccountPosition(
-		orderedTokens,
-		orderedPairs,
-		sdk.NewDecCoins(
-			coin.Dec("AAAA", "100"),
-		),
-		sdk.NewDecCoins(),
-		false,
-	)
+func TestSimpleBorrowLimit(t *testing.T) {
+	type testCase struct {
+		collateral    sdk.DecCoins
+		borrow        sdk.DecCoins
+		limit         string
+		isLiquidation bool
+		msg           string
+	}
 
-	assert.DeepEqual(t, sdk.MustNewDecFromStr("10.00"), (position.Limit()))
-}
+	testCases := []testCase{
+		{
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(),
+			"10.00",
+			false,
+			"collateral weight A",
+		},
+		{
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(),
+			"15.00",
+			true,
+			"liquidation threshold A",
+		},
+	}
 
-func TestLiquidationThreshold(t *testing.T) {
-	position := types.NewAccountPosition(
-		orderedTokens,
-		orderedPairs,
-		sdk.NewDecCoins(
-			coin.Dec("AAAA", "100"),
-		),
-		sdk.NewDecCoins(),
-		true,
-	)
-
-	assert.DeepEqual(t, sdk.MustNewDecFromStr("15.00"), (position.Limit()))
+	for _, tc := range testCases {
+		position := types.NewAccountPosition(
+			orderedTokens,
+			orderedPairs,
+			tc.collateral,
+			tc.borrow,
+			tc.isLiquidation,
+		)
+		assert.DeepEqual(t, sdk.MustNewDecFromStr(tc.limit), (position.Limit()))
+	}
 }
