@@ -89,6 +89,7 @@ func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 	if len(wdc) == 0 {
 		return WeightedDecCoins{add}
 	}
+	found := false
 	for _, c := range wdc {
 		if c.Asset.Denom == add.Asset.Denom {
 			sum = append(sum, WeightedDecCoin{
@@ -98,6 +99,9 @@ func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 		} else {
 			sum = append(sum, c)
 		}
+	}
+	if !found {
+		sum = append(sum, add)
 	}
 	// sorts the sum. Fixes unsorted input as well.
 	sort.SliceStable(sum, func(i, j int) bool {
@@ -146,6 +150,7 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 	if len(wsp) == 0 {
 		return WeightedSpecialPairs{add}
 	}
+	found := false
 	for _, wp := range wsp {
 		if wp.canCombine(add) {
 			sum = append(sum, WeightedSpecialPair{
@@ -156,6 +161,9 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 		} else {
 			sum = append(sum, wp)
 		}
+	}
+	if !found {
+		sum = append(sum, add)
 	}
 	// sorts the sum. Fixes unsorted input as well.
 	sort.SliceStable(sum, func(i, j int) bool {

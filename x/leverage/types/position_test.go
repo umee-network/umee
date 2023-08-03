@@ -79,6 +79,7 @@ func TestSimpleBorrowLimit(t *testing.T) {
 
 	testCases := []testCase{
 		{
+			// single asset
 			sdk.NewDecCoins(
 				coin.Dec("AAAA", "100"),
 			),
@@ -88,6 +89,7 @@ func TestSimpleBorrowLimit(t *testing.T) {
 			"collateral weight A",
 		},
 		{
+			// single asset
 			sdk.NewDecCoins(
 				coin.Dec("AAAA", "100"),
 			),
@@ -95,6 +97,30 @@ func TestSimpleBorrowLimit(t *testing.T) {
 			"15.00",
 			true,
 			"liquidation threshold A",
+		},
+		{
+			// multiple assets, one with zero weight
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("GGGG", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(),
+			"80.00",
+			false,
+			"collateral weight AGI",
+		},
+		{
+			// multiple assets
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("GGGG", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(),
+			"185.00",
+			true,
+			"liquidation threshold AGI",
 		},
 	}
 
@@ -106,6 +132,7 @@ func TestSimpleBorrowLimit(t *testing.T) {
 			tc.borrow,
 			tc.isLiquidation,
 		)
-		assert.DeepEqual(t, sdk.MustNewDecFromStr(tc.limit), (position.Limit()))
+		// assert.Equal(t, position.String(), "")
+		assert.Equal(t, sdk.MustNewDecFromStr(tc.limit).String(), (position.Limit().String()), tc.msg)
 	}
 }

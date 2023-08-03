@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -40,6 +42,24 @@ type AccountPosition struct {
 	// isForLiquidation tracks whether the position was built using collateral weight
 	// or liquidation threshold
 	isForLiquidation bool
+}
+
+func (ap *AccountPosition) String() string {
+	s := "special:\n"
+	for _, wsp := range ap.specialPairs {
+		s += fmt.Sprintf("  %s, %s, %s\n", wsp.Collateral, wsp.Borrow, wsp.SpecialWeight)
+	}
+	s += "normal:\n"
+	for _, wnp := range ap.normalPairs {
+		s += fmt.Sprintf("  %s, %s\n", wnp.Collateral, wnp.Borrow)
+	}
+	for _, sc := range ap.surplusCollateral {
+		s += fmt.Sprintf("  %s, -\n", sc)
+	}
+	for _, sb := range ap.surplusBorrows {
+		s += fmt.Sprintf("  - , %s\n", sb)
+	}
+	return s
 }
 
 // NewAccountPosition creates and sorts an account position based on token settings,
