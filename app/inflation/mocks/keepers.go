@@ -116,18 +116,18 @@ func (mr *MockUGovKeeperMockRecorder) ExportGenesis() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExportGenesis", reflect.TypeOf((*MockUGovKeeper)(nil).ExportGenesis))
 }
 
-// GetInflationCycleEnd mocks base method.
-func (m *MockUGovKeeper) GetInflationCycleEnd() time.Time {
+// InflationCycleEnd mocks base method.
+func (m *MockUGovKeeper) InflationCycleEnd() time.Time {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetInflationCycleEnd")
+	ret := m.ctrl.Call(m, "InflationCycleEnd")
 	ret0, _ := ret[0].(time.Time)
 	return ret0
 }
 
-// GetInflationCycleEnd indicates an expected call of GetInflationCycleEnd.
-func (mr *MockUGovKeeperMockRecorder) GetInflationCycleEnd() *gomock.Call {
+// InflationCycleEnd indicates an expected call of GetInflationCycleEnd.
+func (mr *MockUGovKeeperMockRecorder) InflationCycleEnd() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInflationCycleEnd", reflect.TypeOf((*MockUGovKeeper)(nil).GetInflationCycleEnd))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InflationCycleEnd", reflect.TypeOf((*MockUGovKeeper)(nil).GetInflationCycleEnd))
 }
 
 // InflationParams mocks base method.

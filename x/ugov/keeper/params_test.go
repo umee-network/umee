@@ -61,12 +61,12 @@ func TestInflationCycleEnd(t *testing.T) {
 	st := time.Time{}
 	err := k.SetInflationCycleEnd(st)
 	require.NoError(err)
-	end := k.GetInflationCycleEnd()
+	end := k.InflationCycleEnd()
 	require.Equal(end.IsZero(), true, "it should be default zero time")
 
 	cycleEnd := time.Now()
 	err = k.SetInflationCycleEnd(cycleEnd)
 	require.NoError(err)
-	end = k.GetInflationCycleEnd()
+	end = k.InflationCycleEnd()
 	require.Equal(end, cycleEnd.Truncate(time.Millisecond), "inflation cycle end time should be same")
 }
