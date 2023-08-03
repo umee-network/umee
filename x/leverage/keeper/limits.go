@@ -3,6 +3,8 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
@@ -11,7 +13,7 @@ import (
 // some of the borrower's collateral (other than the denom being withdrawn), computes the maximum safe withdraw
 // allowed by only the collateral whose prices are known.
 func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, sdk.Coin, error) {
-	uDenom := types.ToUTokenDenom(denom)
+	uDenom := coin.ToUTokenDenom(denom)
 	availableTokens := sdk.NewCoin(denom, k.AvailableLiquidity(ctx, denom))
 	availableUTokens, err := k.ToUToken(ctx, availableTokens)
 	if err != nil {
@@ -144,7 +146,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 // input denom should be a base token. If oracle prices are missing for some of the borrower's
 // collateral, computes the maximum safe borrow allowed by only the collateral whose prices are known.
 func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) (sdk.Coin, error) {
-	if types.HasUTokenPrefix(denom) {
+	if coin.HasUTokenPrefix(denom) {
 		return sdk.Coin{}, types.ErrUToken
 	}
 	token, err := k.GetTokenSettings(ctx, denom)
@@ -230,7 +232,7 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 // under current market conditions. If any collateral denoms other than this are missing
 // oracle prices, calculates a (lower) maximum amount using the collateral with known prices.
 func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.Int, error) {
-	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
+	token, err := k.GetTokenSettings(ctx, coin.StripUTokenDenom(denom))
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
@@ -264,7 +266,7 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 
 	// determine the amount of base tokens which would be required to reach maxValue,
 	// using the higher of spot or historic prices
-	udenom := types.ToUTokenDenom(denom)
+	udenom := coin.ToUTokenDenom(denom)
 	maxUTokens, err := k.UTokenWithValue(ctx, udenom, maxValue, types.PriceModeHigh)
 	if err != nil {
 		return sdk.ZeroInt(), err
@@ -281,7 +283,7 @@ func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
 	// Get module collateral for the associated uToken
-	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
+	totalCollateral := k.GetTotalCollateral(ctx, coin.ToUTokenDenom(denom))
 	totalTokenCollateral, err := k.ToTokens(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
 		return sdkmath.Int{}, err

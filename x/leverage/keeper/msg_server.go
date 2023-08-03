@@ -104,7 +104,7 @@ func (s msgServer) MaxWithdraw(
 	if err != nil {
 		return nil, err
 	}
-	if types.HasUTokenPrefix(msg.Denom) {
+	if coin.HasUTokenPrefix(msg.Denom) {
 		return nil, types.ErrUToken
 	}
 	if _, err = s.keeper.GetTokenSettings(ctx, msg.Denom); err != nil {
@@ -196,7 +196,7 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
-	if err := s.keeper.checkCollateralLiquidity(ctx, types.ToTokenDenom(msg.Asset.Denom)); err != nil {
+	if err := s.keeper.checkCollateralLiquidity(ctx, coin.StripUTokenDenom(msg.Asset.Denom)); err != nil {
 		return nil, err
 	}
 

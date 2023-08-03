@@ -4,6 +4,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
@@ -63,7 +64,7 @@ func (k Keeper) moveCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress,
 // GetTotalCollateral returns an sdk.Coin representing how much of a given uToken
 // the x/leverage module account currently holds as collateral. Non-uTokens return zero.
 func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
-	if !types.HasUTokenPrefix(denom) {
+	if !coin.HasUTokenPrefix(denom) {
 		// non-uTokens cannot be collateral
 		return sdk.Coin{}
 	}
@@ -132,7 +133,7 @@ func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 
 	tokens := k.GetAllRegisteredTokens(ctx)
 	for _, t := range tokens {
-		uDenom := types.ToUTokenDenom(t.BaseDenom)
+		uDenom := coin.ToUTokenDenom(t.BaseDenom)
 		total = total.Add(k.GetTotalCollateral(ctx, uDenom))
 	}
 	return total
@@ -142,7 +143,7 @@ func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 // which is defined as the token's liquidity, divided by the base token equivalent
 // of associated uToken's total collateral. Ranges from 0 to 1.0
 func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
-	totalCollateral := k.GetTotalCollateral(ctx, types.ToUTokenDenom(denom))
+	totalCollateral := k.GetTotalCollateral(ctx, coin.ToUTokenDenom(denom))
 	exchangeRate := k.DeriveExchangeRate(ctx, denom)
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
@@ -204,7 +205,7 @@ func (k Keeper) checkCollateralLiquidity(ctx sdk.Context, denom string) error {
 // checkCollateralShare returns an error if a given uToken is above its collateral share
 // as calculated using only tokens whose oracle prices exist
 func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
-	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(denom))
+	token, err := k.GetTokenSettings(ctx, coin.StripUTokenDenom(denom))
 	if err != nil {
 		return err
 	}
@@ -230,7 +231,7 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 // withdraw up to the amount in their wallet, then determines how much collateral can be withdrawn in addition to that.
 // The returned value is the sum of the two values.
 func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (sdkmath.Int, error) {
-	denom := types.ToTokenDenom(spendableUTokens.Denom)
+	denom := coin.StripUTokenDenom(spendableUTokens.Denom)
 
 	// Get the module_available_liquidity
 	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
