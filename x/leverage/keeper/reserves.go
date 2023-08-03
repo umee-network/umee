@@ -16,7 +16,7 @@ func (k Keeper) clearBlacklistedCollateral(ctx sdk.Context, borrowerAddr sdk.Acc
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 	hasCollateral := false
 	for _, coin := range collateral {
-		denom := types.ToTokenDenom(coin.Denom)
+		denom := coin.StripUTokenDenom(coin.Denom)
 		token, err := k.GetTokenSettings(ctx, denom)
 		if err != nil {
 			return false, err

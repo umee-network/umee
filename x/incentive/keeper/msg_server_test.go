@@ -19,8 +19,8 @@ func TestMsgBond(t *testing.T) {
 	const (
 		umee  = fixtures.UmeeDenom
 		atom  = fixtures.AtomDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-		uatom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
+		uumee = coin.UTokenPrefix + fixtures.UmeeDenom
+		uatom = coin.UTokenPrefix + fixtures.AtomDenom
 	)
 
 	// create an account which the mock leverage keeper will report as
@@ -104,8 +104,8 @@ func TestMsgBeginUnbonding(t *testing.T) {
 	const (
 		umee  = fixtures.UmeeDenom
 		atom  = fixtures.AtomDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-		uatom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
+		uumee = coin.UTokenPrefix + fixtures.UmeeDenom
+		uatom = coin.UTokenPrefix + fixtures.AtomDenom
 	)
 
 	// create an account which the mock leverage keeper will report as
@@ -201,8 +201,8 @@ func TestMsgEmergencyUnbond(t *testing.T) {
 	const (
 		umee  = fixtures.UmeeDenom
 		atom  = fixtures.AtomDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-		uatom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
+		uumee = coin.UTokenPrefix + fixtures.UmeeDenom
+		uatom = coin.UTokenPrefix + fixtures.AtomDenom
 	)
 
 	// create an account which the mock leverage keeper will report as
@@ -290,7 +290,7 @@ func TestMsgSponsor(t *testing.T) {
 
 	const (
 		umee  = fixtures.UmeeDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
+		uumee = coin.UTokenPrefix + fixtures.UmeeDenom
 	)
 
 	sponsor := k.newAccount(sdk.NewInt64Coin(umee, 15_000000))
@@ -389,7 +389,7 @@ func TestMsgGovCreatePrograms(t *testing.T) {
 
 	const (
 		umee  = fixtures.UmeeDenom
-		uumee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
+		uumee = coin.UTokenPrefix + fixtures.UmeeDenom
 	)
 
 	// fund community fund with 15 UMEE

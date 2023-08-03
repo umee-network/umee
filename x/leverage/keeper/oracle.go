@@ -196,7 +196,7 @@ func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mod
 // Returns an error on invalid price or non-uToken denom. Rounds down, i.e. the
 // value of the uToken returned may be slightly less than the requested value.
 func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mode types.PriceMode) (sdk.Coin, error) {
-	base := types.ToTokenDenom(denom)
+	base := coin.StripUTokenDenom(denom)
 	if base == "" {
 		return sdk.Coin{}, types.ErrNotUToken.Wrap(denom)
 	}

@@ -2,59 +2,25 @@ package types
 
 import (
 	"fmt"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
-)
-
-const (
-	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
-	UTokenPrefix = "u/"
+	"github.com/umee-network/umee/v5/util/coin"
 )
 
 var halfDec = sdk.MustNewDecFromStr("0.5")
-
-// HasUTokenPrefix detects the uToken prefix on a denom.
-func HasUTokenPrefix(denom string) bool {
-	return strings.HasPrefix(denom, UTokenPrefix)
-}
-
-// ToUTokenDenom adds the uToken prefix to a denom. Returns an empty string
-// instead if the prefix was already present.
-func ToUTokenDenom(denom string) string {
-	if HasUTokenPrefix(denom) {
-		return ""
-	}
-	return UTokenPrefix + denom
-}
 
 // ValidateBaseDenom validates a denom and ensures it is not a uToken.
 func ValidateBaseDenom(denom string) error {
 	if err := sdk.ValidateDenom(denom); err != nil {
 		return err
 	}
-	if HasUTokenPrefix(denom) {
+	if coin.HasUTokenPrefix(denom) {
 		return ErrUToken.Wrap(denom)
 	}
 	return nil
-}
-
-// ToTokenDenom strips the uToken prefix from a denom, or returns an empty
-// string if it was not present. Also returns an empty string if the prefix
-// was repeated multiple times.
-func ToTokenDenom(denom string) string {
-	if !HasUTokenPrefix(denom) {
-		return ""
-	}
-	s := strings.TrimPrefix(denom, UTokenPrefix)
-	if HasUTokenPrefix(s) {
-		// denom started with "u/u/"
-		return ""
-	}
-	return s
 }
 
 // Validate performs validation on an Token type returning an error if the Token

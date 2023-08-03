@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/incentive"
 	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
 )
@@ -210,7 +211,7 @@ func addressUToken(account string, asset sdk.Coin) (sdk.AccAddress, string, erro
 	if err != nil {
 		return sdk.AccAddress{}, "", err
 	}
-	if !leveragetypes.HasUTokenPrefix(asset.Denom) {
+	if !coin.HasUTokenPrefix(asset.Denom) {
 		return sdk.AccAddress{}, "", leveragetypes.ErrNotUToken.Wrap(asset.Denom)
 	}
 
