@@ -124,10 +124,10 @@ func (m *MockUGovKeeper) InflationCycleEnd() time.Time {
 	return ret0
 }
 
-// InflationCycleEnd indicates an expected call of GetInflationCycleEnd.
+// InflationCycleEnd indicates an expected call of InflationCycleEnd.
 func (mr *MockUGovKeeperMockRecorder) InflationCycleEnd() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InflationCycleEnd", reflect.TypeOf((*MockUGovKeeper)(nil).GetInflationCycleEnd))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InflationCycleEnd", reflect.TypeOf((*MockUGovKeeper)(nil).InflationCycleEnd))
 }
 
 // InflationParams mocks base method.
