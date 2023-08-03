@@ -1,8 +1,11 @@
 package oracle
 
 import (
+	"errors"
 	"strings"
 	"time"
+
+	"github.com/umee-network/umee/v5/util/decmath"
 
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -85,6 +88,16 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		// Calculate and stamp median/median deviation if median stamp period has passed
 		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
 			if err = k.CalcAndSetHistoricMedian(ctx, denom); err != nil {
+				if errors.Is(err, decmath.ErrEmptyList) {
+					k.Logger(ctx).Debug(
+						"CalcPrices failed on EndBlocker",
+						"denom", denom,
+						"error", err.Error(),
+						"height", ctx.BlockHeight(),
+						"time", ctx.BlockTime(),
+					)
+					continue
+				}
 				return err
 			}
 		}
