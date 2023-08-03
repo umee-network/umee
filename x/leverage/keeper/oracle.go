@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/sdkutil"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"

@@ -224,7 +224,7 @@ func (m *mockLeverageKeeper) ToToken(_ sdk.Context, uToken sdk.Coin) (sdk.Coin, 
 		return uToken, leveragetypes.ErrUToken
 	}
 	return sdk.NewCoin(
-		leveragecoin.StripUTokenDenom(uToken.Denom),
+		coin.StripUTokenDenom(uToken.Denom),
 		uToken.Amount,
 	), nil
 }
