@@ -7,7 +7,7 @@ import (
 )
 
 // minimum borrow factor is the minimum collateral weight and minimum liquidation threshold
-// allowed when a borrowed token is limiting the efficiency of a pair of assets
+// allowed when a borrowed token is limiting the efficiency of a pair of assets.
 var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
 
 // AccountPosition must be created by NewAccountPosition for proper initialization.
@@ -92,15 +92,21 @@ func NewAccountPosition(
 	// cache all potentially relevant special asset pairs, and sort them by collateral weight (or liquidation threshold).
 	// Initialize their amounts, which will eventually store matching asset value, to zero.
 	for _, sp := range pairs {
-		weight := sdk.MaxDec(
-			sp.CollateralWeight,
+		weight := sp.CollateralWeight
+		if isLiquidation {
+			weight = sp.LiquidationThreshold
+		}
+		if weight.LTE(
 			// pairs may not reduce collateral weight or liquidation threshold
-			// below what the tokens would produce without the special pair
+			// below what the tokens would produce without the special pair.
+			// Such pairs are omitted from the position entirely.
 			sdk.MinDec(
 				position.tokenWeight(sp.Collateral),
 				sdk.MaxDec(position.tokenWeight(sp.Borrow), minimumBorrowFactor),
 			),
-		)
+		) {
+			continue
+		}
 		wp := WeightedSpecialPair{
 			Collateral:    sdk.NewDecCoinFromDec(sp.Collateral, sdk.ZeroDec()),
 			Borrow:        sdk.NewDecCoinFromDec(sp.Borrow, sdk.ZeroDec()),
@@ -125,7 +131,8 @@ func NewAccountPosition(
 		c := collateralValueToSort.AmountOf(p.Collateral.Denom)
 		if b.IsPositive() && c.IsPositive() {
 			// some unmatched assets match the special pair
-			var bCoin, cCoin sdk.DecCoin
+			bCoin := sdk.NewDecCoinFromDec(p.Borrow.Denom, sdk.ZeroDec())
+			cCoin := sdk.NewDecCoinFromDec(p.Collateral.Denom, sdk.ZeroDec())
 			pairBorrowLimit := c.Mul(p.SpecialWeight)
 			if pairBorrowLimit.GTE(b) {
 				// all of the borrow is covered by collateral in this pair

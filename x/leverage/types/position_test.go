@@ -84,6 +84,7 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("AAAA", "100"),
 			),
 			sdk.NewDecCoins(),
+			// collateral weight 0.1, liquidation threshold 0.15
 			"10.00",
 			"15.00",
 			"simple A",
@@ -96,19 +97,67 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("IIII", "100"),
 			),
 			sdk.NewDecCoins(),
+			// sum of multiple assets, each using its collateral weight and liquidation threshold
 			"80.00",
 			"185.00",
 			"simple AGI",
 		},
 		{
-			// single with special pair (no borrows)
+			// single asset unused with special pair (no borrows)
 			sdk.NewDecCoins(
-				coin.Dec("DDDD", "100"),
+				coin.Dec("FFFF", "100"),
 			),
 			sdk.NewDecCoins(),
-			"40.00",
-			"45.00",
-			"simple D",
+			// collateral weight 0.6, liquidation threshold 0.65
+			// the F <-> H special pair has no effect
+			"60.00",
+			"65.00",
+			"simple F",
+		},
+		{
+			// single asset with unused special pair (normal borrow)
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "30"),
+			),
+			// borrow limit is unaffected since F -> F does not benefit from special pairs or suffer from borrow factor
+			// the F <-> H special pair has no effect
+			"60.00",
+			"65.00",
+			"F loop",
+		},
+		{
+			// single asset with unused special pair (borrowFactor reducing weight, minimumBorrowFactor active)
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "40"),
+			),
+			// 40 A consumes 80 F collateral (weight 0.5 due to MinimumBorrowFactor), leaving 20 F collateral unused.
+			// Total borrow limit and liquidation thresholds are 40 + [0.6 and 0.65] * 20
+			// the F <-> H special pair has no effect
+			"52.00",
+			"53.00",
+			"F -> A",
+		},
+		{
+			// single asset with special pair in effect
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("HHHH", "30"),
+			),
+			// 30 A consumes 50 F collateral (weight 0.6 due to Special Pair), leaving 50 F collateral unused.
+			// Remaining borrow limit is 30 + 0.6 * 50 = 60.
+			// Meanwhile, 30A consumes 37.5 F collateral (liquidation threshold 0.8 due to special pair),
+			// leaving 62.5. Total liquidation threshold is 30 + 62.50 * 0.65
+			"60.00",
+			"70.625",
+			"F -> H",
 		},
 	}
 
@@ -120,7 +169,9 @@ func TestBorrowLimit(t *testing.T) {
 			tc.borrow,
 			false,
 		)
-		// assert.Equal(t, position.String(), "")
+		if !sdk.MustNewDecFromStr(tc.borrowLimit).Equal(borrowPosition.Limit()) {
+			assert.Equal(t, borrowPosition.String(), "borrow limit position")
+		}
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.borrowLimit).String(),
 			borrowPosition.Limit().String(),
@@ -133,6 +184,9 @@ func TestBorrowLimit(t *testing.T) {
 			tc.borrow,
 			true,
 		)
+		if !sdk.MustNewDecFromStr(tc.liquidationthreshold).Equal(liquidationPosition.Limit()) {
+			assert.Equal(t, liquidationPosition.String(), "liquidation threshold position")
+		}
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.liquidationthreshold).String(),
 			liquidationPosition.Limit().String(),
