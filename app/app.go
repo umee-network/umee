@@ -475,6 +475,7 @@ func New(
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
+		nil, //app.UGovKeeperB.Keeper,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 		authtypes.NewModuleAddress(metoken.ModuleName),
 	)

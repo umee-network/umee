@@ -20,6 +20,7 @@ type Keeper struct {
 	paramSpace             paramtypes.Subspace
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
+	ugov                   types.UgovBuilder
 	liquidatorQueryEnabled bool
 	meTokenAddr            sdk.AccAddress
 
@@ -31,8 +32,9 @@ func NewKeeper(
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
-	bk types.BankKeeper,
-	ok types.OracleKeeper,
+	b types.BankKeeper,
+	o types.OracleKeeper,
+	ugov types.UgovBuilder,
 	enableLiquidatorQuery bool,
 	meTokenAddr sdk.AccAddress,
 ) Keeper {
@@ -45,8 +47,9 @@ func NewKeeper(
 		cdc:                    cdc,
 		storeKey:               storeKey,
 		paramSpace:             paramSpace,
-		bankKeeper:             bk,
-		oracleKeeper:           ok,
+		bankKeeper:             b,
+		oracleKeeper:           o,
+		ugov:                   ugov,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
 		meTokenAddr:            meTokenAddr,
 	}

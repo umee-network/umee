@@ -540,30 +540,29 @@ func (s msgServer) GovUpdateRegistry(
 	msg *types.MsgGovUpdateRegistry,
 ) (*types.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	regDenoms := make(map[string]bool)
+	regDenoms := make(map[string]types.Token)
 	regSymbols := make(map[string]bool)
 
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
 	for _, token := range registeredTokens {
-		regDenoms[token.BaseDenom] = true
+		regDenoms[token.BaseDenom] = token
 		regSymbols[strings.ToUpper(token.SymbolDenom)] = true
 	}
 
 	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regDenoms, regSymbols, true)
-	if err != nil {
-		return nil, err
-	}
+	// err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regDenoms, regSymbols, true)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	// adds the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regDenoms, regSymbols, false)
-	if err != nil {
-		return nil, err
-	}
+	// // adds the new token settings
+	// err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regDenoms, regSymbols, false)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// cleans blacklisted tokens from the registry if they have not been supplied
-	err = s.keeper.CleanTokenRegistry(ctx)
-	if err != nil {
+	if err := s.keeper.CleanTokenRegistry(ctx); err != nil {
 		return nil, err
 	}
 

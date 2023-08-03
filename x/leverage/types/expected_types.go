@@ -34,3 +34,9 @@ type OracleKeeper interface {
 	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
 	MedianOfHistoricMedians(ctx sdk.Context, denom string, numStamps uint64) (sdk.Dec, uint32, error)
 }
+
+type UgovBuilder func[T Ugov](ctx *sdk.Context) T
+
+type Ugov interface {
+	EmergencyGroup() sdk.AccAddress
+}
