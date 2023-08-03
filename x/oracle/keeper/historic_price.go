@@ -34,8 +34,11 @@ func (k Keeper) CalcAndSetHistoricMedian(
 	denom string,
 ) error {
 	historicPrices := k.historicPrices(ctx, denom, k.MaximumPriceStamps(ctx))
-	// this should never happen
 	if len(historicPrices) == 0 {
+		k.Logger(ctx).Error(
+			"this should never happen",
+			"denom", denom,
+		)
 		return nil
 	}
 
