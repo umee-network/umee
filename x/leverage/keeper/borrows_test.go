@@ -213,7 +213,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	require.ErrorIs(err, types.ErrNotUToken)
 
 	// Create collateral uTokens (1k u/umee)
-	umeeCollatDenom := types.ToUTokenDenom(umeeDenom)
+	umeeCollatDenom := coin.ToUTokenDenom(umeeDenom)
 	umeeCollateral := sdk.NewCoins(coin.New(umeeCollatDenom, 1000_000000))
 
 	// Manually compute borrow limit using collateral weight of 0.25
@@ -228,7 +228,7 @@ func (s *IntegrationTestSuite) TestCalculateBorrowLimit() {
 	require.Equal(expectedUmeeLimit, borrowLimit)
 
 	// Create collateral atom uTokens (1k u/uatom)
-	atomCollatDenom := types.ToUTokenDenom(atomDenom)
+	atomCollatDenom := coin.ToUTokenDenom(atomDenom)
 	atomCollateral := sdk.NewCoins(coin.New(atomCollatDenom, 1000_000000))
 
 	// Manually compute borrow limit using collateral weight of 0.25
