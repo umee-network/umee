@@ -79,7 +79,7 @@ func TestBorrowLimit(t *testing.T) {
 		false,
 	)
 
-	assert.Assert(t, sdk.MustNewDecFromStr("10.00").Equal(position.Limit()), "simple borrow limit")
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("10.00"), (position.Limit()))
 }
 
 func TestLiquidationThreshold(t *testing.T) {
@@ -93,5 +93,5 @@ func TestLiquidationThreshold(t *testing.T) {
 		true,
 	)
 
-	assert.Assert(t, sdk.MustNewDecFromStr("15.00").Equal(position.Limit()), "simple liquidation threshold")
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("15.00"), (position.Limit()))
 }
