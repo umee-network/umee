@@ -68,13 +68,13 @@ var orderedPairs = []types.SpecialAssetPair{
 	testPair("HHHH", "HHHH", "0.1", "0.1"),
 }
 
-func TestSimpleBorrowLimit(t *testing.T) {
+func TestBorrowLimit(t *testing.T) {
 	type testCase struct {
-		collateral    sdk.DecCoins
-		borrow        sdk.DecCoins
-		limit         string
-		isLiquidation bool
-		msg           string
+		collateral           sdk.DecCoins
+		borrow               sdk.DecCoins
+		borrowLimit          string
+		liquidationthreshold string
+		msg                  string
 	}
 
 	testCases := []testCase{
@@ -85,18 +85,8 @@ func TestSimpleBorrowLimit(t *testing.T) {
 			),
 			sdk.NewDecCoins(),
 			"10.00",
-			false,
-			"collateral weight A",
-		},
-		{
-			// single asset
-			sdk.NewDecCoins(
-				coin.Dec("AAAA", "100"),
-			),
-			sdk.NewDecCoins(),
 			"15.00",
-			true,
-			"liquidation threshold A",
+			"simple A",
 		},
 		{
 			// multiple assets, one with zero weight
@@ -107,32 +97,46 @@ func TestSimpleBorrowLimit(t *testing.T) {
 			),
 			sdk.NewDecCoins(),
 			"80.00",
-			false,
-			"collateral weight AGI",
+			"185.00",
+			"simple AGI",
 		},
 		{
-			// multiple assets
+			// single with special pair (no borrows)
 			sdk.NewDecCoins(
-				coin.Dec("AAAA", "100"),
-				coin.Dec("GGGG", "100"),
-				coin.Dec("IIII", "100"),
+				coin.Dec("DDDD", "100"),
 			),
 			sdk.NewDecCoins(),
-			"185.00",
-			true,
-			"liquidation threshold AGI",
+			"40.00",
+			"45.00",
+			"simple D",
 		},
 	}
 
 	for _, tc := range testCases {
-		position := types.NewAccountPosition(
+		borrowPosition := types.NewAccountPosition(
 			orderedTokens,
 			orderedPairs,
 			tc.collateral,
 			tc.borrow,
-			tc.isLiquidation,
+			false,
 		)
 		// assert.Equal(t, position.String(), "")
-		assert.Equal(t, sdk.MustNewDecFromStr(tc.limit).String(), (position.Limit().String()), tc.msg)
+		assert.Equal(t,
+			sdk.MustNewDecFromStr(tc.borrowLimit).String(),
+			borrowPosition.Limit().String(),
+			tc.msg+" borrow limit",
+		)
+		liquidationPosition := types.NewAccountPosition(
+			orderedTokens,
+			orderedPairs,
+			tc.collateral,
+			tc.borrow,
+			true,
+		)
+		assert.Equal(t,
+			sdk.MustNewDecFromStr(tc.liquidationthreshold).String(),
+			liquidationPosition.Limit().String(),
+			tc.msg+" liquidation threshold",
+		)
 	}
 }
