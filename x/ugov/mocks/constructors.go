@@ -2,12 +2,12 @@ package mocks
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/golang/mock/gomock"
 	ugov "github.com/umee-network/umee/v5/x/ugov"
 )
 
-func NewUgovParamsBuilder(ctrl *gomock.Controller) ugov.ParamsKeeperBuilder {
+// NewUgovParamsBuilder creates a ParamsKeeper builder function
+func NewUgovParamsBuilder(pk ugov.ParamsKeeper) ugov.ParamsKeeperBuilder {
 	return func(_ *sdk.Context) ugov.ParamsKeeper {
-		return NewMockParamsKeeper(ctrl)
+		return pk
 	}
 }
