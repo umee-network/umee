@@ -18,6 +18,7 @@ import (
 	"github.com/umee-network/umee/v5/util/bpmath"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/ugov"
+	ugovmocks "github.com/umee-network/umee/v5/x/ugov/mocks"
 )
 
 func TestAdjustInflation(t *testing.T) {
@@ -208,12 +209,10 @@ func TestInflationRate(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			// Create the mock MintKeeper and UgovKeeper
 			mockMintKeeper := mocks.NewMockMintKeeper(ctrl)
-			mockUGovBuilder := mocks.NewMockUGovBKeeperI(ctrl)
-			mockUGovKeeper := mocks.NewMockUGovKeeper(ctrl)
 
 			calc := inflation.Calculator{
 				MintKeeper:  mockMintKeeper,
-				UgovKeeperB: mockUGovBuilder,
+				UgovKeeperB: ugovmocks.NewUgovParamsBuilder(ctrl),
 			}
 
 			// mockUGovBuilder returns the mockUGovKeeper

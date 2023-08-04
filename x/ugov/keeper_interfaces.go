@@ -6,10 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type BKeeper interface {
-	Keeper(ctx *sdk.Context) IKeeper
-}
-
 type IKeeper interface {
 	ParamsKeeper
 	WithEmergencyGroup
@@ -30,3 +26,8 @@ type ParamsKeeper interface {
 type WithEmergencyGroup interface {
 	EmergencyGroup() sdk.AccAddress
 }
+
+// Builder functions
+
+type EmergencyGroupBuilder func(*sdk.Context) WithEmergencyGroup
+type ParamsKeeperBuilder func(*sdk.Context) ParamsKeeper

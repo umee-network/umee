@@ -10,10 +10,8 @@ import (
 	"github.com/umee-network/umee/v5/x/ugov"
 )
 
-type UGovKeeperBuilder func(ctx *sdk.Context) ugov.ParamsKeeper
-
 type Calculator struct {
-	UgovKeeperB UGovKeeperBuilder
+	UgovKeeperB ugov.ParamsKeeperBuilder
 	MintKeeper  MintKeeper
 }
 
