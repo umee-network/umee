@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type IKeeper interface {
+type Keeper interface {
 	ParamsKeeper
 	WithEmergencyGroup
 	ExportGenesis() *GenesisState

@@ -7,7 +7,7 @@ import (
 	"github.com/umee-network/umee/v5/x/ugov"
 )
 
-var _ ugov.IKeeper = Keeper{}
+var _ ugov.Keeper = Keeper{}
 
 // Builder constructs Keeper by perparing all related dependencies (notably the store).
 type Builder struct {
@@ -24,7 +24,7 @@ func NewKeeperBuilder(
 	}
 }
 
-func (kb Builder) Keeper(ctx *sdk.Context) ugov.IKeeper {
+func (kb Builder) Keeper(ctx *sdk.Context) ugov.Keeper {
 	return Keeper{
 		store: ctx.KVStore(kb.storeKey),
 		cdc:   kb.Cdc,

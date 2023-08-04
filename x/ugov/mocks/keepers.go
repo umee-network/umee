@@ -13,31 +13,31 @@ import (
 	ugov "github.com/umee-network/umee/v5/x/ugov"
 )
 
-// MockIKeeper is a mock of IKeeper interface.
-type MockIKeeper struct {
+// MockKeeper is a mock of Keeper interface.
+type MockKeeper struct {
 	ctrl     *gomock.Controller
-	recorder *MockIKeeperMockRecorder
+	recorder *MockKeeperMockRecorder
 }
 
-// MockIKeeperMockRecorder is the mock recorder for MockIKeeper.
-type MockIKeeperMockRecorder struct {
-	mock *MockIKeeper
+// MockKeeperMockRecorder is the mock recorder for MockKeeper.
+type MockKeeperMockRecorder struct {
+	mock *MockKeeper
 }
 
-// NewMockIKeeper creates a new mock instance.
-func NewMockIKeeper(ctrl *gomock.Controller) *MockIKeeper {
-	mock := &MockIKeeper{ctrl: ctrl}
-	mock.recorder = &MockIKeeperMockRecorder{mock}
+// NewMockKeeper creates a new mock instance.
+func NewMockKeeper(ctrl *gomock.Controller) *MockKeeper {
+	mock := &MockKeeper{ctrl: ctrl}
+	mock.recorder = &MockKeeperMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockIKeeper) EXPECT() *MockIKeeperMockRecorder {
+func (m *MockKeeper) EXPECT() *MockKeeperMockRecorder {
 	return m.recorder
 }
 
 // EmergencyGroup mocks base method.
-func (m *MockIKeeper) EmergencyGroup() types.AccAddress {
+func (m *MockKeeper) EmergencyGroup() types.AccAddress {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "EmergencyGroup")
 	ret0, _ := ret[0].(types.AccAddress)
@@ -45,13 +45,13 @@ func (m *MockIKeeper) EmergencyGroup() types.AccAddress {
 }
 
 // EmergencyGroup indicates an expected call of EmergencyGroup.
-func (mr *MockIKeeperMockRecorder) EmergencyGroup() *gomock.Call {
+func (mr *MockKeeperMockRecorder) EmergencyGroup() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EmergencyGroup", reflect.TypeOf((*MockIKeeper)(nil).EmergencyGroup))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EmergencyGroup", reflect.TypeOf((*MockKeeper)(nil).EmergencyGroup))
 }
 
 // ExportGenesis mocks base method.
-func (m *MockIKeeper) ExportGenesis() *ugov.GenesisState {
+func (m *MockKeeper) ExportGenesis() *ugov.GenesisState {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ExportGenesis")
 	ret0, _ := ret[0].(*ugov.GenesisState)
@@ -59,13 +59,13 @@ func (m *MockIKeeper) ExportGenesis() *ugov.GenesisState {
 }
 
 // ExportGenesis indicates an expected call of ExportGenesis.
-func (mr *MockIKeeperMockRecorder) ExportGenesis() *gomock.Call {
+func (mr *MockKeeperMockRecorder) ExportGenesis() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExportGenesis", reflect.TypeOf((*MockIKeeper)(nil).ExportGenesis))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExportGenesis", reflect.TypeOf((*MockKeeper)(nil).ExportGenesis))
 }
 
 // InflationCycleEnd mocks base method.
-func (m *MockIKeeper) InflationCycleEnd() time.Time {
+func (m *MockKeeper) InflationCycleEnd() time.Time {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InflationCycleEnd")
 	ret0, _ := ret[0].(time.Time)
@@ -73,13 +73,13 @@ func (m *MockIKeeper) InflationCycleEnd() time.Time {
 }
 
 // InflationCycleEnd indicates an expected call of InflationCycleEnd.
-func (mr *MockIKeeperMockRecorder) InflationCycleEnd() *gomock.Call {
+func (mr *MockKeeperMockRecorder) InflationCycleEnd() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InflationCycleEnd", reflect.TypeOf((*MockIKeeper)(nil).InflationCycleEnd))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InflationCycleEnd", reflect.TypeOf((*MockKeeper)(nil).InflationCycleEnd))
 }
 
 // InflationParams mocks base method.
-func (m *MockIKeeper) InflationParams() ugov.InflationParams {
+func (m *MockKeeper) InflationParams() ugov.InflationParams {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InflationParams")
 	ret0, _ := ret[0].(ugov.InflationParams)
@@ -87,13 +87,13 @@ func (m *MockIKeeper) InflationParams() ugov.InflationParams {
 }
 
 // InflationParams indicates an expected call of InflationParams.
-func (mr *MockIKeeperMockRecorder) InflationParams() *gomock.Call {
+func (mr *MockKeeperMockRecorder) InflationParams() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InflationParams", reflect.TypeOf((*MockIKeeper)(nil).InflationParams))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InflationParams", reflect.TypeOf((*MockKeeper)(nil).InflationParams))
 }
 
 // InitGenesis mocks base method.
-func (m *MockIKeeper) InitGenesis(gs *ugov.GenesisState) error {
+func (m *MockKeeper) InitGenesis(gs *ugov.GenesisState) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InitGenesis", gs)
 	ret0, _ := ret[0].(error)
@@ -101,13 +101,13 @@ func (m *MockIKeeper) InitGenesis(gs *ugov.GenesisState) error {
 }
 
 // InitGenesis indicates an expected call of InitGenesis.
-func (mr *MockIKeeperMockRecorder) InitGenesis(gs interface{}) *gomock.Call {
+func (mr *MockKeeperMockRecorder) InitGenesis(gs interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitGenesis", reflect.TypeOf((*MockIKeeper)(nil).InitGenesis), gs)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InitGenesis", reflect.TypeOf((*MockKeeper)(nil).InitGenesis), gs)
 }
 
 // MinGasPrice mocks base method.
-func (m *MockIKeeper) MinGasPrice() types.DecCoin {
+func (m *MockKeeper) MinGasPrice() types.DecCoin {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MinGasPrice")
 	ret0, _ := ret[0].(types.DecCoin)
@@ -115,25 +115,25 @@ func (m *MockIKeeper) MinGasPrice() types.DecCoin {
 }
 
 // MinGasPrice indicates an expected call of MinGasPrice.
-func (mr *MockIKeeperMockRecorder) MinGasPrice() *gomock.Call {
+func (mr *MockKeeperMockRecorder) MinGasPrice() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MinGasPrice", reflect.TypeOf((*MockIKeeper)(nil).MinGasPrice))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MinGasPrice", reflect.TypeOf((*MockKeeper)(nil).MinGasPrice))
 }
 
 // SetEmergencyGroup mocks base method.
-func (m *MockIKeeper) SetEmergencyGroup(p types.AccAddress) {
+func (m *MockKeeper) SetEmergencyGroup(p types.AccAddress) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetEmergencyGroup", p)
 }
 
 // SetEmergencyGroup indicates an expected call of SetEmergencyGroup.
-func (mr *MockIKeeperMockRecorder) SetEmergencyGroup(p interface{}) *gomock.Call {
+func (mr *MockKeeperMockRecorder) SetEmergencyGroup(p interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetEmergencyGroup", reflect.TypeOf((*MockIKeeper)(nil).SetEmergencyGroup), p)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetEmergencyGroup", reflect.TypeOf((*MockKeeper)(nil).SetEmergencyGroup), p)
 }
 
 // SetInflationCycleEnd mocks base method.
-func (m *MockIKeeper) SetInflationCycleEnd(startTime time.Time) error {
+func (m *MockKeeper) SetInflationCycleEnd(startTime time.Time) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetInflationCycleEnd", startTime)
 	ret0, _ := ret[0].(error)
@@ -141,13 +141,13 @@ func (m *MockIKeeper) SetInflationCycleEnd(startTime time.Time) error {
 }
 
 // SetInflationCycleEnd indicates an expected call of SetInflationCycleEnd.
-func (mr *MockIKeeperMockRecorder) SetInflationCycleEnd(startTime interface{}) *gomock.Call {
+func (mr *MockKeeperMockRecorder) SetInflationCycleEnd(startTime interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInflationCycleEnd", reflect.TypeOf((*MockIKeeper)(nil).SetInflationCycleEnd), startTime)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInflationCycleEnd", reflect.TypeOf((*MockKeeper)(nil).SetInflationCycleEnd), startTime)
 }
 
 // SetInflationParams mocks base method.
-func (m *MockIKeeper) SetInflationParams(lp ugov.InflationParams) error {
+func (m *MockKeeper) SetInflationParams(lp ugov.InflationParams) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetInflationParams", lp)
 	ret0, _ := ret[0].(error)
@@ -155,13 +155,13 @@ func (m *MockIKeeper) SetInflationParams(lp ugov.InflationParams) error {
 }
 
 // SetInflationParams indicates an expected call of SetInflationParams.
-func (mr *MockIKeeperMockRecorder) SetInflationParams(lp interface{}) *gomock.Call {
+func (mr *MockKeeperMockRecorder) SetInflationParams(lp interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInflationParams", reflect.TypeOf((*MockIKeeper)(nil).SetInflationParams), lp)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInflationParams", reflect.TypeOf((*MockKeeper)(nil).SetInflationParams), lp)
 }
 
 // SetMinGasPrice mocks base method.
-func (m *MockIKeeper) SetMinGasPrice(p types.DecCoin) error {
+func (m *MockKeeper) SetMinGasPrice(p types.DecCoin) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SetMinGasPrice", p)
 	ret0, _ := ret[0].(error)
@@ -169,9 +169,9 @@ func (m *MockIKeeper) SetMinGasPrice(p types.DecCoin) error {
 }
 
 // SetMinGasPrice indicates an expected call of SetMinGasPrice.
-func (mr *MockIKeeperMockRecorder) SetMinGasPrice(p interface{}) *gomock.Call {
+func (mr *MockKeeperMockRecorder) SetMinGasPrice(p interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetMinGasPrice", reflect.TypeOf((*MockIKeeper)(nil).SetMinGasPrice), p)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetMinGasPrice", reflect.TypeOf((*MockKeeper)(nil).SetMinGasPrice), p)
 }
 
 // MockParamsKeeper is a mock of ParamsKeeper interface.
