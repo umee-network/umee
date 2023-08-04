@@ -171,6 +171,38 @@ func TestBorrowLimit(t *testing.T) {
 			"AGI -> G at borrow limit",
 		},
 		{
+			// multiple assets, one with zero weight, at liquidation threshold
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("GGGG", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "165"),
+			),
+			// significantly over borrow limit, so calculation subtracts value of surplus borrows
+			// from total borrowed value to determine borrow limit
+			"80.00",
+			"165.00",
+			"AGI -> G at liquidation threshold",
+		},
+		{
+			// multiple assets, one with zero weight, above liquidation threshold
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("GGGG", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "500"),
+			),
+			// significantly over borrow limit and liquidation threshold, but calculation still reaches
+			// the same values for them
+			"80.00",
+			"165.00",
+			"AGI -> G above liquidation threshold",
+		},
+		{
 			// single asset unused with special pair (no borrows)
 			sdk.NewDecCoins(
 				coin.Dec("FFFF", "100"),
