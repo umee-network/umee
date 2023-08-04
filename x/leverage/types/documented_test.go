@@ -11,7 +11,8 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
-func TestDocScenario(t *testing.T) {
+func TestMaxBorrowScenarioA(t *testing.T) {
+	// This scenario reproduces the final table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
 	borrowPosition := types.NewAccountPosition(
 		[]types.Token{
 			testToken("AAAA", "0.4", "0.5"),
@@ -38,7 +39,14 @@ func TestDocScenario(t *testing.T) {
 		false,
 	)
 	assert.Equal(t,
-		sdk.MustNewDecFromStr("80.00").String(),
-		borrowPosition.Limit().String(),
+		"special:\n"+
+			"  0.000000000000000000BBBB, 0.000000000000000000AAAA, 0.500000000000000000\n"+
+			"  100.000000000000000000AAAA, 50.000000000000000000BBBB, 0.500000000000000000\n"+
+			"  0.000000000000000000CCCC, 0.000000000000000000AAAA, 0.400000000000000000\n"+
+			"normal:\n"+
+			"  {50.000000000000000000DDDD 0.100000000000000000}, {5.000000000000000000BBBB 0.300000000000000000}\n"+
+			"  {200.000000000000000000DDDD 0.100000000000000000}, {20.000000000000000000CCCC 0.200000000000000000}\n"+
+			"  {50.000000000000000000DDDD 0.100000000000000000}, {5.000000000000000000DDDD 0.100000000000000000}\n",
+		borrowPosition.String(),
 	)
 }
