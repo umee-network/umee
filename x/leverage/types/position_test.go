@@ -141,6 +141,11 @@ func TestBorrowLimit(t *testing.T) {
 			"15.00",
 			"A -> C above liquidation threshold",
 		},
+		//
+		//
+		//	TODO: make sure not to divide by zero with zero collateral weight.
+		//
+		//
 		{
 			// multiple assets, one with zero weight
 			sdk.NewDecCoins(

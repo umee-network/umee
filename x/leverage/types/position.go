@@ -99,12 +99,13 @@ func NewAccountPosition(
 		if weight.LTE(
 			// pairs may not reduce collateral weight or liquidation threshold
 			// below what the tokens would produce without the special pair.
-			// Such pairs are omitted from the position entirely.
 			sdk.MinDec(
 				position.tokenWeight(sp.Collateral),
 				sdk.MaxDec(position.tokenWeight(sp.Borrow), minimumBorrowFactor),
 			),
-		) {
+		) || weight.IsZero() {
+			// Such pairs as well as those with zero weight are omitted from the
+			// position entirely.
 			continue
 		}
 		wp := WeightedSpecialPair{
@@ -169,24 +170,27 @@ func NewAccountPosition(
 		// match collateral and borrow at indexes i and j, exhausting at least one of them
 		pairBorrowLimit := c.Mul(w)
 		var bCoin, cCoin sdk.DecCoin
-		if pairBorrowLimit.GTE(b) {
-			// all of the borrow is covered by collateral in this pair
-			bCoin = sdk.NewDecCoinFromDec(bDenom, b)
-			// some collateral, equal to borrow value / collateral weight, is used
-			cCoin = sdk.NewDecCoinFromDec(cDenom, b.Quo(w))
-			// next borrow
-			j++
-		} else {
+		if pairBorrowLimit.LTE(b) {
+			// all of the collateral is used (note: this case includes collateral with zero weight)
+			cCoin = sdk.NewDecCoinFromDec(cDenom, c)
 			// only some of the borrow, equal to collateral value * collateral weight is covered
 			bCoin = sdk.NewDecCoinFromDec(bDenom, c.Mul(w))
-			// all of the collateral is used
-			cCoin = sdk.NewDecCoinFromDec(cDenom, c)
 			// next collateral
 			i++
+		} else {
+			// some collateral, equal to borrow value / collateral weight, is used
+			cCoin = sdk.NewDecCoinFromDec(cDenom, b.Quo(w))
+			// all of the borrow is covered by collateral in this pair
+			bCoin = sdk.NewDecCoinFromDec(bDenom, b)
+			// next borrow
+			j++
 		}
 
-		// skip zero positions
-		if bCoin.IsPositive() {
+		// skip zero positions. Note that it is possible for nonzero collateral to
+		// cover zero borrows (due to zero collateral weight), but not for nonzero
+		// borrows to be covered by zero collateral. Thus, cCoin.IsPositive()
+		// effectively filters normal pairs where both collateral and borrow are zero.
+		if cCoin.IsPositive() {
 			// subtract newly paired assets from unsorted assets
 			borrowedValueToSort = borrowedValueToSort.Sub(sdk.NewDecCoins(bCoin))
 			collateralValueToSort = collateralValueToSort.Sub(sdk.NewDecCoins(cCoin))
