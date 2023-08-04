@@ -7,17 +7,20 @@ import (
 
 	"github.com/umee-network/umee/v5/util"
 	"github.com/umee-network/umee/v5/util/bpmath"
+	"github.com/umee-network/umee/v5/x/ugov"
 )
 
+type UGovKeeperBuilder func(ctx *sdk.Context) ugov.ParamsKeeper
+
 type Calculator struct {
-	UgovKeeperB UGovBKeeperI
+	UgovKeeperB UGovKeeperBuilder
 	MintKeeper  MintKeeper
 }
 
 func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mintParams minttypes.Params,
 	bondedRatio sdk.Dec) sdk.Dec {
 
-	ugovKeeper := c.UgovKeeperB.Keeper(&ctx)
+	ugovKeeper := c.UgovKeeperB(&ctx)
 	inflationParams := ugovKeeper.InflationParams()
 	maxSupplyAmount := inflationParams.MaxSupply.Amount
 
