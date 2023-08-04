@@ -151,13 +151,28 @@ func TestBorrowLimit(t *testing.T) {
 			sdk.NewDecCoins(
 				coin.Dec("HHHH", "30"),
 			),
-			// 30 A consumes 50 F collateral (weight 0.6 due to Special Pair), leaving 50 F collateral unused.
+			// 30 H consumes 50 F collateral (weight 0.6 due to Special Pair), leaving 50 F collateral unused.
 			// Remaining borrow limit is 30 + 0.6 * 50 = 60.
 			// Meanwhile, 30A consumes 37.5 F collateral (liquidation threshold 0.8 due to special pair),
 			// leaving 62.5. Total liquidation threshold is 30 + 62.50 * 0.65
 			"60.00",
 			"70.625",
-			"F -> H",
+			"F -> H below borrow limit",
+		},
+		{
+			// single asset with special pair in effect - exactly at borrow limit
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("HHHH", "60"),
+			),
+			// 60 H consumes all 100 F collateral (weight 0.6 due to Special Pair). Borrow limit equals value.
+			// Meanwhile, 60A consumes 75 F collateral (liquidation threshold 0.8 due to special pair),
+			// leaving 25. Total liquidation threshold is 60 + 25 * 0.65
+			"60.00",
+			"76.25",
+			"F -> H at borrow limit",
 		},
 	}
 
