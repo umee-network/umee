@@ -174,6 +174,22 @@ func TestBorrowLimit(t *testing.T) {
 			"76.25",
 			"F -> H at borrow limit",
 		},
+		{
+			// single asset with special pair in effect - exactly at liquidation threshold
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("HHHH", "80"),
+			),
+			// 60 H consumes all 100 F collateral (weight 0.6 due to Special Pair).
+			// A remaining 20H is surplus borrowed value. Borrow limit equals value minus surplus.
+			// Meanwhile, 80A consumes 100 F collateral (liquidation threshold 0.8 due to special pair).
+			// Liquidation threshold is exactly borrowed value.
+			"60.00",
+			"80.00",
+			"F -> H at liquidation threshold",
+		},
 	}
 
 	for _, tc := range testCases {
