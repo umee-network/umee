@@ -33,12 +33,8 @@ func (kb Builder) Keeper(ctx *sdk.Context) ugov.Keeper {
 
 // functions to downcast Keeper constructor into super types.
 
-func (kb Builder) Params(ctx *sdk.Context) ugov.ParamsKeeper {
-	return kb.Keeper(ctx)
-}
-func (kb Builder) EmergencyGroup(ctx *sdk.Context) ugov.WithEmergencyGroup {
-	return kb.Keeper(ctx)
-}
+func (kb Builder) Params(ctx *sdk.Context) ugov.ParamsKeeper               { return kb.Keeper(ctx) }
+func (kb Builder) EmergencyGroup(ctx *sdk.Context) ugov.WithEmergencyGroup { return kb.Keeper(ctx) }
 
 // Keeper provides a light interface for module data access and transformation
 type Keeper struct {
