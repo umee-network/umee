@@ -37,7 +37,6 @@ func (kb Builder) Params(ctx *sdk.Context) ugov.ParamsKeeper {
 	return kb.Keeper(ctx)
 }
 func (kb Builder) EmergencyGroup(ctx *sdk.Context) ugov.WithEmergencyGroup {
-	ctx.GasMeter()
 	return kb.Keeper(ctx)
 }
 
