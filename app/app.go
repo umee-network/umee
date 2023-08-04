@@ -677,7 +677,7 @@ func New(
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
 	inflationClaculator := inflation.Calculator{
-		UgovKeeperB: app.UGovKeeperB,
+		UgovKeeperB: app.UGovKeeperB.Params,
 		MintKeeper:  &app.MintKeeper,
 	}
 
