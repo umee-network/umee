@@ -69,8 +69,8 @@ func (ap *AccountPosition) String() string {
 func NewAccountPosition(
 	tokens []Token,
 	pairs []SpecialAssetPair,
-	collateralValueToSort,
-	borrowedValueToSort sdk.DecCoins,
+	unsortedCollateralValue,
+	unsortedBorrowValue sdk.DecCoins,
 	isLiquidation bool,
 ) AccountPosition {
 	position := AccountPosition{
@@ -117,19 +117,22 @@ func NewAccountPosition(
 		position.specialPairs = position.specialPairs.Add(wp)
 	}
 
-	for _, cv := range collateralValueToSort {
+	// !! TODO: sort.SliceStable collateralValueToSort and borrowValueToSort
+	// so normal pairs aren't disrupted
+
+	for _, cv := range unsortedCollateralValue {
 		// track total collateral value
 		position.collateralValue = position.collateralValue.Add(cv.Amount)
 	}
-	for _, bv := range borrowedValueToSort {
+	for _, bv := range unsortedBorrowValue {
 		// track total borrowed value
 		position.borrowedValue = position.borrowedValue.Add(bv.Amount)
 	}
 
 	// match assets into special asset pairs, removing matched value from borrowedValueToSort and collateralValueToSort
 	for i, p := range position.specialPairs {
-		b := borrowedValueToSort.AmountOf(p.Borrow.Denom)
-		c := collateralValueToSort.AmountOf(p.Collateral.Denom)
+		b := unsortedBorrowValue.AmountOf(p.Borrow.Denom)
+		c := unsortedCollateralValue.AmountOf(p.Collateral.Denom)
 		if b.IsPositive() && c.IsPositive() {
 			// some unmatched assets match the special pair
 			bCoin := sdk.NewDecCoinFromDec(p.Borrow.Denom, sdk.ZeroDec())
@@ -147,21 +150,38 @@ func NewAccountPosition(
 				cCoin = sdk.NewDecCoinFromDec(cCoin.Denom, c)
 			}
 			// subtract newly paired assets from unsorted assets
-			borrowedValueToSort = borrowedValueToSort.Sub(sdk.NewDecCoins(bCoin))
-			collateralValueToSort = collateralValueToSort.Sub(sdk.NewDecCoins(cCoin))
+			unsortedBorrowValue = unsortedBorrowValue.Sub(sdk.NewDecCoins(bCoin))
+			unsortedCollateralValue = unsortedCollateralValue.Sub(sdk.NewDecCoins(cCoin))
 			// add newly paired assets to the appropriate special pair
 			position.specialPairs[i].Borrow = bCoin
 			position.specialPairs[i].Collateral = cCoin
 		}
 	}
 
+	sortedCollateralValue := WeightedDecCoins{}
+	for _, cv := range unsortedCollateralValue {
+		// sort collateral assets which are not part of special pairs
+		sortedCollateralValue = sortedCollateralValue.Add(WeightedDecCoin{
+			Asset:  cv,
+			Weight: position.tokenWeight(cv.Denom),
+		})
+	}
+	sortedBorrowValue := WeightedDecCoins{}
+	for _, bv := range unsortedBorrowValue {
+		// sort borrowed assets which are not part of special pairs
+		sortedBorrowValue = sortedBorrowValue.Add(WeightedDecCoin{
+			Asset:  bv,
+			Weight: position.tokenWeight(bv.Denom),
+		})
+	}
+
 	// match assets into normal asset pairs, removing matched value from borrowedValueToSort and collateralValueToSort
 	var i, j int
-	for i < len(collateralValueToSort) && j < len(borrowedValueToSort) {
-		cDenom := collateralValueToSort[i].Denom
-		bDenom := borrowedValueToSort[j].Denom
-		c := collateralValueToSort[i].Amount
-		b := borrowedValueToSort[j].Amount
+	for i < len(sortedCollateralValue) && j < len(sortedBorrowValue) {
+		cDenom := sortedCollateralValue[i].Asset.Denom
+		bDenom := sortedBorrowValue[j].Asset.Denom
+		c := sortedCollateralValue[i].Asset.Amount
+		b := sortedBorrowValue[j].Asset.Amount
 		w := sdk.MinDec(
 			// for normal asset pairs, both tokens limit the collateral weight of the pair
 			position.tokenWeight(cDenom),
@@ -186,14 +206,11 @@ func NewAccountPosition(
 			j++
 		}
 
-		// skip zero positions. Note that it is possible for nonzero collateral to
-		// cover zero borrows (due to zero collateral weight), but not for nonzero
-		// borrows to be covered by zero collateral. Thus, cCoin.IsPositive()
-		// effectively filters normal pairs where both collateral and borrow are zero.
-		if cCoin.IsPositive() {
+		// skip zero positions.
+		if cCoin.IsPositive() || bCoin.IsPositive() {
 			// subtract newly paired assets from unsorted assets
-			borrowedValueToSort = borrowedValueToSort.Sub(sdk.NewDecCoins(bCoin))
-			collateralValueToSort = collateralValueToSort.Sub(sdk.NewDecCoins(cCoin))
+			sortedBorrowValue = sortedBorrowValue.Sub(bCoin)
+			sortedCollateralValue = sortedCollateralValue.Sub(cCoin)
 			// create a normal asset pair and add it to the account position
 			position.normalPairs = append(position.normalPairs, WeightedNormalPair{
 				Collateral: WeightedDecCoin{
@@ -209,25 +226,19 @@ func NewAccountPosition(
 	}
 
 	// any remaining collateral could not be paired (so borrower is under limit)
-	for _, cv := range collateralValueToSort {
-		// sort collateral by collateral weight (or liquidation threshold) using Add function
-		position.surplusCollateral = position.surplusCollateral.Add(
-			WeightedDecCoin{
-				Asset:  sdk.NewDecCoinFromDec(cv.Denom, cv.Amount),
-				Weight: position.tokenWeight(cv.Denom),
-			},
-		)
+	for _, cv := range sortedCollateralValue {
+		if cv.Asset.IsPositive() {
+			// sort collateral by collateral weight (or liquidation threshold) using Add function
+			position.surplusCollateral = position.surplusCollateral.Add(cv)
+		}
 	}
 
 	// any remaining borrows could not be paired (so borrower is over limit)
-	for _, bv := range borrowedValueToSort {
-		// sort borrows by collateral weight (or liquidation threshold) using Add function
-		position.surplusBorrows = position.surplusBorrows.Add(
-			WeightedDecCoin{
-				Asset:  sdk.NewDecCoinFromDec(bv.Denom, bv.Amount),
-				Weight: position.tokenWeight(bv.Denom),
-			},
-		)
+	for _, bv := range sortedBorrowValue {
+		if bv.Asset.IsPositive() {
+			// sort borrows by collateral weight (or liquidation threshold) using Add function
+			position.surplusBorrows = position.surplusBorrows.Add(bv)
+		}
 	}
 
 	return position

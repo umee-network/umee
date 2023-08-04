@@ -141,11 +141,6 @@ func TestBorrowLimit(t *testing.T) {
 			"15.00",
 			"A -> C above liquidation threshold",
 		},
-		//
-		//
-		//	TODO: make sure not to divide by zero with zero collateral weight.
-		//
-		//
 		{
 			// multiple assets, one with zero weight
 			sdk.NewDecCoins(
@@ -158,6 +153,22 @@ func TestBorrowLimit(t *testing.T) {
 			"80.00",
 			"185.00",
 			"simple AGI",
+		},
+		{
+			// multiple assets, one with zero weight, at borrow limit
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("GGGG", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "80"),
+			),
+			// effectiveness of I collateral is reduced to due to G liquidation threshold, thus leading
+			// to a lower liquidation threshold than "simple AGI" test case above
+			"80.00",
+			"165.00",
+			"AGI -> G at borrow limit",
 		},
 		{
 			// single asset unused with special pair (no borrows)
@@ -274,7 +285,7 @@ func TestBorrowLimit(t *testing.T) {
 			false,
 		)
 		if !sdk.MustNewDecFromStr(tc.borrowLimit).Equal(borrowPosition.Limit()) {
-			assert.Equal(t, borrowPosition.String(), "borrow limit position")
+			assert.Equal(t, borrowPosition.String(), "borrow limit position "+tc.msg)
 		}
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.borrowLimit).String(),
@@ -289,7 +300,7 @@ func TestBorrowLimit(t *testing.T) {
 			true,
 		)
 		if !sdk.MustNewDecFromStr(tc.liquidationthreshold).Equal(liquidationPosition.Limit()) {
-			assert.Equal(t, liquidationPosition.String(), "liquidation threshold position")
+			assert.Equal(t, liquidationPosition.String(), "liquidation threshold position "+tc.msg)
 		}
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.liquidationthreshold).String(),
