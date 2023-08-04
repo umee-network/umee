@@ -90,6 +90,58 @@ func TestBorrowLimit(t *testing.T) {
 			"simple A",
 		},
 		{
+			// single asset, with borrow
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("CCCC", "6"),
+			),
+			// collateral weight 0.1, liquidation threshold 0.15
+			"10.00",
+			"15.00",
+			"A -> C",
+		},
+		{
+			// single asset, at borrow limit
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("CCCC", "10"),
+			),
+			// collateral weight 0.1, liquidation threshold 0.15
+			"10.00",
+			"15.00",
+			"A -> C at borrow limit",
+		},
+		{
+			// single asset, at liquidation threshold
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("CCCC", "15"),
+			),
+			// collateral weight 0.1, liquidation threshold 0.15
+			"10.00",
+			"15.00",
+			"A -> C at liquidation threshold",
+		},
+		{
+			// single asset, above liquidation threshold
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("CCCC", "25"),
+			),
+			// collateral weight 0.1, liquidation threshold 0.15
+			"10.00",
+			"15.00",
+			"A -> C above liquidation threshold",
+		},
+		{
 			// multiple assets, one with zero weight
 			sdk.NewDecCoins(
 				coin.Dec("AAAA", "100"),
