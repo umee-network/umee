@@ -48,36 +48,32 @@ type WeightedNormalPair struct {
 }
 
 // higher returns true if a WeightedDecCoin should be sorted after
-// another WeightedDecCoin b. Always use sort.SliceStable to preserve
-// order of coins with equal weight.
+// another WeightedDecCoin b.
 func (wdc WeightedDecCoin) higher(b WeightedDecCoin) bool {
 	if wdc.Weight.GT(b.Weight) {
 		return true // sort by collateral weight, descending
+	}
+	if wdc.Weight.Equal(b.Weight) {
+		// for the same weight, sort by asset denom
+		return wdc.Asset.Denom < b.Asset.Denom
 	}
 	return false
 }
 
 // higher returns true if a WeightedSpecialPair should be sorted after
-// another WeightedSpecialPair b. Always use sort.SliceStable to preserve
-// order of pairs with equal weight.
+// another WeightedSpecialPair b.
 func (wsp WeightedSpecialPair) higher(b WeightedSpecialPair) bool {
 	if wsp.SpecialWeight.GT(b.SpecialWeight) {
-		return true // sort by special collateral weight, descending
+		return true // sort first by special collateral weight, descending
 	}
-	return false
-}
-
-// higher returns true if a WeightedNormalPair should be sorted after
-// another WeightedNormalPair b. Always use sort.SliceStable to preserve
-// order of pairs with equal weight.
-func (wnp WeightedNormalPair) higher(b WeightedNormalPair) bool {
-	if wnp.Collateral.higher(b.Collateral) {
-		return true // sort first by collateral
-	}
-	if wnp.Collateral.Weight.Equal(b.Collateral.Weight) {
-		// break ties by borrow
-		if wnp.Borrow.higher(b.Borrow) {
+	if wsp.SpecialWeight.Equal(b.SpecialWeight) {
+		if wsp.Collateral.Denom < b.Collateral.Denom {
+			// for the same weight, sort by collateral denom
 			return true
+		}
+		if wsp.Collateral.Denom == b.Collateral.Denom {
+			// for the same collateral denom and weight, sort by borrow denom
+			return wsp.Borrow.Denom < b.Borrow.Denom
 		}
 	}
 	return false
