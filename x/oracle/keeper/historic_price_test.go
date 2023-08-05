@@ -16,6 +16,7 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 	// prefix to test unique prefix safety when iterating for
 	// similar prefixes
 	displayDenomVariation := displayDenom + "test"
+	nonExistingDenom := "nonexistingdenom"
 
 	// add multiple historic prices to store
 	exchangeRates := []string{"1.0", "1.2", "1.1", "1.4", "1.1", "1.15", "1.2", "1.3", "1.2"}
@@ -26,6 +27,8 @@ func (s *IntegrationTestSuite) TestSetHistoraclePricing() {
 			err := app.OracleKeeper.CalcAndSetHistoricMedian(ctx, displayDenom)
 			s.Require().NoError(err)
 			err = app.OracleKeeper.CalcAndSetHistoricMedian(ctx, displayDenomVariation)
+			s.Require().NoError(err)
+			err = app.OracleKeeper.CalcAndSetHistoricMedian(ctx, nonExistingDenom)
 			s.Require().NoError(err)
 		}
 

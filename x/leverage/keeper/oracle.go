@@ -6,6 +6,7 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/sdkutil"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
@@ -167,7 +168,7 @@ func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode typ
 	tokens := sdk.NewCoins()
 
 	for _, u := range uTokens {
-		t, err := k.ExchangeUToken(ctx, u)
+		t, err := k.ToToken(ctx, u)
 		if err != nil {
 			return sdk.ZeroDec(), err
 		}
@@ -196,7 +197,7 @@ func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mod
 // Returns an error on invalid price or non-uToken denom. Rounds down, i.e. the
 // value of the uToken returned may be slightly less than the requested value.
 func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mode types.PriceMode) (sdk.Coin, error) {
-	base := types.ToTokenDenom(denom)
+	base := coin.StripUTokenDenom(denom)
 	if base == "" {
 		return sdk.Coin{}, types.ErrNotUToken.Wrap(denom)
 	}

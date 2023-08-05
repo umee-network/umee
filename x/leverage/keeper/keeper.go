@@ -91,7 +91,7 @@ func (k Keeper) Supply(ctx sdk.Context, supplierAddr sdk.AccAddress, coin sdk.Co
 	}
 
 	// determine uToken amount to mint
-	uToken, err := k.ExchangeToken(ctx, coin)
+	uToken, err := k.ToUToken(ctx, coin)
 	if err != nil {
 		return sdk.Coin{}, err
 	}
@@ -129,7 +129,7 @@ func (k Keeper) SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Co
 	}
 
 	// determine uToken amount to mint
-	uToken, err := k.ExchangeToken(ctx, coin)
+	uToken, err := k.ToUToken(ctx, coin)
 	if err != nil {
 		return sdk.Coin{}, true, err
 	}
@@ -176,7 +176,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// calculate base asset amount to withdraw
-	token, err := k.ExchangeUToken(ctx, uToken)
+	token, err := k.ToToken(ctx, uToken)
 	if err != nil {
 		return sdk.Coin{}, isFromCollateral, err
 	}
@@ -256,7 +256,7 @@ func (k Keeper) WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Co
 	}
 
 	// calculate base asset amount to withdraw
-	token, err := k.ExchangeUToken(ctx, uToken)
+	token, err := k.ToToken(ctx, uToken)
 	if err != nil {
 		return sdk.Coin{}, true, err
 	}
@@ -411,10 +411,10 @@ func (k Keeper) Liquidate(
 	}
 
 	// detect if the user selected a base token reward instead of a uToken
-	directLiquidation := !types.HasUTokenPrefix(rewardDenom)
+	directLiquidation := !coin.HasUTokenPrefix(rewardDenom)
 	if !directLiquidation {
 		// convert rewardDenom to base token
-		rewardDenom = types.ToTokenDenom(rewardDenom)
+		rewardDenom = coin.StripUTokenDenom(rewardDenom)
 	}
 	// ensure that base reward is a registered token
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
@@ -481,7 +481,7 @@ func (k Keeper) LeveragedLiquidate(
 	if rewardDenom == "" {
 		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 		if !collateral.IsZero() {
-			rewardDenom = types.ToTokenDenom(collateral[0].Denom)
+			rewardDenom = coin.StripUTokenDenom(collateral[0].Denom)
 		}
 	}
 
@@ -491,7 +491,7 @@ func (k Keeper) LeveragedLiquidate(
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
-	uRewardDenom := types.ToUTokenDenom(rewardDenom)
+	uRewardDenom := coin.ToUTokenDenom(rewardDenom)
 
 	tokenRepay, uTokenReward, _, err := k.getLiquidationAmounts(
 		ctx,

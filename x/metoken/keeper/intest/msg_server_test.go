@@ -1,8 +1,9 @@
-package keeper_test
+package intest
 
 import (
 	"testing"
 
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
@@ -558,40 +559,38 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 	}
 
 	// after initial swaps IST price is dropped to 0.64 USD
-	oracleMock := mocks.NewMockOracleKeeper()
-	oracleMock.AllMedianPricesFunc.SetDefaultHook(
-		func(ctx sdk.Context) otypes.Prices {
-			prices := otypes.Prices{}
-			median := otypes.Price{
-				ExchangeRateTuple: otypes.NewExchangeRateTuple(
-					mocks.USDTSymbolDenom,
-					mocks.USDTPrice,
-				),
-				BlockNum: uint64(1),
-			}
-			prices = append(prices, median)
 
-			median = otypes.Price{
-				ExchangeRateTuple: otypes.NewExchangeRateTuple(
-					mocks.USDCSymbolDenom,
-					mocks.USDCPrice,
-				),
-				BlockNum: uint64(1),
-			}
-			prices = append(prices, median)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-			median = otypes.Price{
-				ExchangeRateTuple: otypes.NewExchangeRateTuple(
-					mocks.ISTSymbolDenom,
-					sdk.MustNewDecFromStr("0.64"),
-				),
-				BlockNum: uint64(1),
-			}
-			prices = append(prices, median)
-
-			return prices
+	initialPrices := otypes.Prices{
+		otypes.Price{
+			ExchangeRateTuple: otypes.NewExchangeRateTuple(
+				mocks.USDTSymbolDenom,
+				mocks.USDTPrice,
+			),
+			BlockNum: uint64(1),
+		}, otypes.Price{
+			ExchangeRateTuple: otypes.NewExchangeRateTuple(
+				mocks.USDCSymbolDenom,
+				mocks.USDCPrice,
+			),
+			BlockNum: uint64(1),
+		}, otypes.Price{
+			ExchangeRateTuple: otypes.NewExchangeRateTuple(
+				mocks.ISTSymbolDenom,
+				sdk.MustNewDecFromStr("0.64"),
+			),
+			BlockNum: uint64(1),
 		},
-	)
+	}
+
+	oracleMock := mocks.NewMockOracleKeeper(ctrl)
+	oracleMock.
+		EXPECT().
+		AllMedianPrices(gomock.Any()).
+		Return(initialPrices).
+		AnyTimes()
 
 	kb := keeper.NewKeeperBuilder(
 		app.AppCodec(),
@@ -683,7 +682,11 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 	}
 
 	// after some swaps with depegged price, all is back to normal
-	oracleMock.AllMedianPricesFunc.SetDefaultHook(mocks.ValidPricesFunc())
+	oracleMock.
+		EXPECT().
+		AllMedianPrices(gomock.Any()).
+		Return(mocks.ValidPrices()).
+		AnyTimes()
 
 	kb = keeper.NewKeeperBuilder(
 		app.AppCodec(),
@@ -1252,40 +1255,37 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 	}
 
 	// after initial swaps USDT price is dropped to 0.73 USD
-	oracleMock := mocks.NewMockOracleKeeper()
-	oracleMock.AllMedianPricesFunc.SetDefaultHook(
-		func(ctx sdk.Context) otypes.Prices {
-			prices := otypes.Prices{}
-			median := otypes.Price{
-				ExchangeRateTuple: otypes.NewExchangeRateTuple(
-					mocks.USDTSymbolDenom,
-					sdk.MustNewDecFromStr("0.73"),
-				),
-				BlockNum: uint64(1),
-			}
-			prices = append(prices, median)
 
-			median = otypes.Price{
-				ExchangeRateTuple: otypes.NewExchangeRateTuple(
-					mocks.USDCSymbolDenom,
-					mocks.USDCPrice,
-				),
-				BlockNum: uint64(1),
-			}
-			prices = append(prices, median)
-
-			median = otypes.Price{
-				ExchangeRateTuple: otypes.NewExchangeRateTuple(
-					mocks.ISTSymbolDenom,
-					mocks.ISTPrice,
-				),
-				BlockNum: uint64(1),
-			}
-			prices = append(prices, median)
-
-			return prices
+	initialPrices := otypes.Prices{
+		otypes.Price{
+			ExchangeRateTuple: otypes.NewExchangeRateTuple(
+				mocks.USDTSymbolDenom,
+				sdk.MustNewDecFromStr("0.73"),
+			),
+			BlockNum: uint64(1),
+		}, otypes.Price{
+			ExchangeRateTuple: otypes.NewExchangeRateTuple(
+				mocks.USDCSymbolDenom,
+				mocks.USDCPrice,
+			),
+			BlockNum: uint64(1),
+		}, otypes.Price{
+			ExchangeRateTuple: otypes.NewExchangeRateTuple(
+				mocks.ISTSymbolDenom,
+				mocks.ISTPrice,
+			),
+			BlockNum: uint64(1),
 		},
-	)
+	}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	oracleMock := mocks.NewMockOracleKeeper(ctrl)
+	oracleMock.
+		EXPECT().
+		AllMedianPrices(gomock.Any()).
+		Return(initialPrices).
+		AnyTimes()
 
 	kb := keeper.NewKeeperBuilder(
 		app.AppCodec(),
@@ -1377,7 +1377,11 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 	}
 
 	// after some redemptions with depegged price, all is back to normal
-	oracleMock.AllMedianPricesFunc.SetDefaultHook(mocks.ValidPricesFunc())
+	oracleMock.
+		EXPECT().
+		AllMedianPrices(gomock.Any()).
+		Return(mocks.ValidPrices()).
+		AnyTimes()
 
 	kb = keeper.NewKeeperBuilder(
 		app.AppCodec(),

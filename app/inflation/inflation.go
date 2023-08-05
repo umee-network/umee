@@ -7,17 +7,18 @@ import (
 
 	"github.com/umee-network/umee/v5/util"
 	"github.com/umee-network/umee/v5/util/bpmath"
+	"github.com/umee-network/umee/v5/x/ugov"
 )
 
 type Calculator struct {
-	UgovKeeperB UGovBKeeperI
+	UgovKeeperB ugov.ParamsKeeperBuilder
 	MintKeeper  MintKeeper
 }
 
 func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mintParams minttypes.Params,
 	bondedRatio sdk.Dec) sdk.Dec {
 
-	ugovKeeper := c.UgovKeeperB.Keeper(&ctx)
+	ugovKeeper := c.UgovKeeperB(&ctx)
 	inflationParams := ugovKeeper.InflationParams()
 	maxSupplyAmount := inflationParams.MaxSupply.Amount
 
@@ -27,7 +28,7 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		return sdk.ZeroDec()
 	}
 
-	cycleEnd := ugovKeeper.GetInflationCycleEnd()
+	cycleEnd := ugovKeeper.InflationCycleEnd()
 	if ctx.BlockTime().After(cycleEnd) {
 		// new inflation cycle is starting, so we need to update the inflation max and min rate
 		factor := bpmath.One - inflationParams.InflationReductionRate

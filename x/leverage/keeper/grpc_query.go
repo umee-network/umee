@@ -7,6 +7,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
@@ -112,7 +113,7 @@ func (q Querier) MarketSummary(
 	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
 	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
 
-	uDenom := types.ToUTokenDenom(req.Denom)
+	uDenom := coin.ToUTokenDenom(req.Denom)
 	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
 	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
 
@@ -362,7 +363,7 @@ func (q Querier) MaxWithdraw(
 		// On non-nil error here, max withdraw is zero.
 		uToken, _, err := q.Keeper.userMaxWithdraw(ctx, addr, denom)
 		if err == nil && uToken.IsPositive() {
-			token, err := q.Keeper.ExchangeUToken(ctx, uToken)
+			token, err := q.Keeper.ToToken(ctx, uToken)
 			if err != nil {
 				return nil, err
 			}

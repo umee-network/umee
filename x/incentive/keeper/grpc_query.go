@@ -263,7 +263,7 @@ func (q Querier) ActualRates(
 	}
 
 	// compute oracle price ratio of rewards to reference bond amount
-	referenceToken, err := k.leverageKeeper.ExchangeUToken(ctx, referenceUToken)
+	referenceToken, err := k.leverageKeeper.ToToken(ctx, referenceUToken)
 	if err != nil {
 		return nil, err
 	}

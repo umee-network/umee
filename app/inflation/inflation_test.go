@@ -9,6 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/golang/mock/gomock"
+	"gotest.tools/v3/assert"
+
 	"github.com/umee-network/umee/v5/app/inflation"
 	mocks "github.com/umee-network/umee/v5/app/inflation/mocks"
 	appparams "github.com/umee-network/umee/v5/app/params"
@@ -16,7 +18,7 @@ import (
 	"github.com/umee-network/umee/v5/util/bpmath"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/ugov"
-	"gotest.tools/v3/assert"
+	ugovmocks "github.com/umee-network/umee/v5/x/ugov/mocks"
 )
 
 func TestAdjustInflation(t *testing.T) {
@@ -203,31 +205,25 @@ func TestInflationRate(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-
 			ctrl := gomock.NewController(t)
-			// Create the mock MintKeeper and UgovKeeper
 			mockMintKeeper := mocks.NewMockMintKeeper(ctrl)
-			mockUGovBuilder := mocks.NewMockUGovBKeeperI(ctrl)
-			mockUGovKeeper := mocks.NewMockUGovKeeper(ctrl)
+			mockUGovKeeper := ugovmocks.NewMockParamsKeeper(ctrl)
+
+			mockMintKeeper.EXPECT().StakingTokenSupply(gomock.Any()).Return(test.totalSupply)
+			mockMintKeeper.EXPECT().SetParams(gomock.Any(), gomock.Any()).AnyTimes()
+
+			mockUGovKeeper.EXPECT().InflationParams().Return(test.inflationParams(mockInflationParams))
+			mockUGovKeeper.EXPECT().InflationCycleEnd().Return(test.cycleEndTime()).AnyTimes()
+			mockUGovKeeper.EXPECT().SetInflationCycleEnd(gomock.Any()).Return(nil).AnyTimes()
 
 			calc := inflation.Calculator{
 				MintKeeper:  mockMintKeeper,
-				UgovKeeperB: mockUGovBuilder,
+				UgovKeeperB: ugovmocks.NewUgovParamsBuilder(mockUGovKeeper),
 			}
-
-			// mockUGovBuilder returns the mockUGovKeeper
-			mockUGovBuilder.EXPECT().Keeper(gomock.Any()).Return(mockUGovKeeper)
-
-			// Set up the mock behavior for MintKeeper and UgovKeeper
-			mockUGovKeeper.EXPECT().InflationParams().Return(test.inflationParams(mockInflationParams))
-			mockMintKeeper.EXPECT().StakingTokenSupply(gomock.Any()).Return(test.totalSupply)
-			mockMintKeeper.EXPECT().SetParams(gomock.Any(), gomock.Any()).AnyTimes()
-			mockUGovKeeper.EXPECT().GetInflationCycleEnd().Return(test.cycleEndTime()).AnyTimes()
-			mockUGovKeeper.EXPECT().SetInflationCycleEnd(gomock.Any()).Return(nil).AnyTimes()
-
 			result := calc.InflationRate(test.ctx(), test.minter, test.mintParams(mintParams), test.bondedRatio)
 
-			assert.DeepEqual(t, test.expectedResult(test.minter.Inflation, test.bondedRatio, test.mintParams(mintParams)), result)
+			assert.DeepEqual(t,
+				test.expectedResult(test.minter.Inflation, test.bondedRatio, test.mintParams(mintParams)), result)
 			ctrl.Finish()
 		})
 	}

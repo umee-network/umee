@@ -5,7 +5,7 @@ import (
 )
 
 func (k Keeper) ExportGenesis() *ugov.GenesisState {
-	cycleEndTime := k.GetInflationCycleEnd()
+	cycleEndTime := k.InflationCycleEnd()
 	return &ugov.GenesisState{
 		MinGasPrice:       k.MinGasPrice(),
 		InflationParams:   k.InflationParams(),

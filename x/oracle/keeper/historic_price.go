@@ -34,6 +34,16 @@ func (k Keeper) CalcAndSetHistoricMedian(
 	denom string,
 ) error {
 	historicPrices := k.historicPrices(ctx, denom, k.MaximumPriceStamps(ctx))
+	if len(historicPrices) == 0 {
+		k.Logger(ctx).Error(
+			"There always should be an historic price before we attempt to make any median price. "+
+				"This scenario should never happen.",
+			"denom", denom,
+			"block_height", ctx.BlockHeight(),
+		)
+		return nil
+	}
+
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
 		return errors.Wrap(err, "denom: "+denom)
