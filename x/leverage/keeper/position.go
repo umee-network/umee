@@ -3,6 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
@@ -40,7 +41,7 @@ func (k Keeper) GetAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLi
 		if err != nil {
 			return types.AccountPosition{}, err
 		}
-		denom := types.ToTokenDenom(c.Denom)
+		denom := coin.StripUTokenDenom(c.Denom)
 		collateralValue = collateralValue.Add(sdk.NewDecCoinFromDec(denom, v))
 		// get special asset pairs which could apply to this collateral token
 		specialPairs = append(specialPairs, k.GetSpecialAssetPairs(ctx, c.Denom)...)
