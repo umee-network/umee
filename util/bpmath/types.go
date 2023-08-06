@@ -18,5 +18,7 @@ const (
 	Zero = 0
 )
 
-var oneBigInt = math.NewIntFromUint64(One)
-var oneDec = sdk.NewDec(One)
+var (
+	oneBigInt = math.NewIntFromUint64(One)
+	oneDec    = sdk.NewDec(One)
+)

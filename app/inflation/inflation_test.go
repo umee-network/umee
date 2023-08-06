@@ -78,7 +78,6 @@ func TestAdjustInflation(t *testing.T) {
 }
 
 func TestInflationRate(t *testing.T) {
-
 	mintParams := minttypes.DefaultParams()
 	mockMinter := minttypes.NewMinter(sdk.MustNewDecFromStr("0.15"), sdk.NewDec(0))
 	mockInflationParams := ugov.InflationParams{

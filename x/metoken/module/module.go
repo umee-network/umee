@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	abci "github.com/cometbft/cometbft/abci/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v5/x/metoken/client/cli"
 
 	"github.com/umee-network/umee/v5/util"

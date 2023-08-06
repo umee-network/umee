@@ -218,7 +218,8 @@ func (s *IntegrationTestSuite) TestStargateQueries() {
 				assert.NilError(s.T, err)
 				assert.DeepEqual(s.T, metoken.DefaultParams(), rr.Params)
 			},
-		}, {
+		},
+		{
 			name: "stargate: leverage market summary",
 			sq: func() StargateQuery {
 				data := lvtypes.QueryMarketSummary{
