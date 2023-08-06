@@ -311,28 +311,27 @@ func TestBorrowLimit(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		borrowPosition := types.NewAccountPosition(
+		borrowPosition, err := types.NewAccountPosition(
 			orderedTokens,
 			orderedPairs,
 			tc.collateral,
 			tc.borrow,
 			false,
 		)
-		if !sdk.MustNewDecFromStr(tc.borrowLimit).Equal(borrowPosition.Limit()) {
-			assert.Equal(t, borrowPosition.String(), "borrow limit position "+tc.msg)
-		}
+		assert.NilError(t, err, tc.msg+" borrow limit\n\n"+borrowPosition.String())
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.borrowLimit).String(),
 			borrowPosition.Limit().String(),
-			tc.msg+" borrow limit",
+			tc.msg+" borrow limit\n\n"+borrowPosition.String(),
 		)
-		liquidationPosition := types.NewAccountPosition(
+		liquidationPosition, err := types.NewAccountPosition(
 			orderedTokens,
 			orderedPairs,
 			tc.collateral,
 			tc.borrow,
 			true,
 		)
+		assert.NilError(t, err, tc.msg+" liquidation threshold\n\n"+liquidationPosition.String())
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.liquidationthreshold).String(),
 			liquidationPosition.Limit().String(),
@@ -391,13 +390,14 @@ func TestMaxBorrow(t *testing.T) {
 	}
 
 	for _, tc := range testCases {
-		borrowPosition := types.NewAccountPosition(
+		borrowPosition, err := types.NewAccountPosition(
 			orderedTokens,
 			orderedPairs,
 			tc.collateral,
 			tc.borrow,
 			false,
 		)
+		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			borrowPosition.MaxBorrow(tc.maxBorrowDenom).String(),

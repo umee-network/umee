@@ -13,7 +13,7 @@ import (
 
 func TestMaxBorrowScenarioA(t *testing.T) {
 	// This scenario reproduces the final table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
-	borrowPosition := types.NewAccountPosition(
+	borrowPosition, err := types.NewAccountPosition(
 		[]types.Token{
 			testToken("AAAA", "0.4", "0.5"),
 			testToken("BBBB", "0.3", "0.5"),
@@ -38,6 +38,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 		),
 		false,
 	)
+	assert.NilError(t, err)
 	assert.Equal(t,
 		"special:\n"+
 			"  100.000000000000000000AAAA, 50.000000000000000000BBBB, 0.500000000000000000\n"+

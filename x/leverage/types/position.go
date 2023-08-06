@@ -72,7 +72,7 @@ func NewAccountPosition(
 	unsortedCollateralValue,
 	unsortedBorrowValue sdk.DecCoins,
 	isLiquidation bool,
-) AccountPosition {
+) (AccountPosition, error) {
 	position := AccountPosition{
 		specialPairs:      WeightedSpecialPairs{},
 		normalPairs:       WeightedNormalPairs{},
@@ -241,7 +241,7 @@ func NewAccountPosition(
 		}
 	}
 
-	return position
+	return position, nil
 }
 
 // BorrowedValue returns an account's total USD value borrowed
