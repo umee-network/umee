@@ -24,24 +24,32 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 		ap.tokenWeight(denom),
 	)
 	total := sdk.ZeroDec()
+	// ignores collateral with weight of zero
+	ineligible := WeightedDecCoins{}
 	// converts surplus collateral into normal asset pairs with new borrow
-	for _, uc := range ap.surplusCollateral {
+	for i, uc := range ap.surplusCollateral {
 		weight := sdk.MinDec(uc.Weight, borrowFactor)
-		bCoin := sdk.NewDecCoinFromDec(denom, uc.Asset.Amount.Mul(weight))
-		ap.normalPairs = ap.normalPairs.Add(WeightedNormalPair{
-			Collateral: WeightedDecCoin{
-				Asset:  uc.Asset,
-				Weight: ap.tokenWeight(uc.Asset.Denom),
-			},
-			Borrow: WeightedDecCoin{
-				Asset:  bCoin,
-				Weight: ap.tokenWeight(denom),
-			},
-		})
-		// tracks how much was borrowed
-		total = total.Add(bCoin.Amount)
+		if weight.IsPositive() {
+			bCoin := sdk.NewDecCoinFromDec(denom, uc.Asset.Amount.Mul(weight))
+			ap.normalPairs = ap.normalPairs.Add(WeightedNormalPair{
+				Collateral: WeightedDecCoin{
+					Asset:  uc.Asset,
+					Weight: ap.tokenWeight(uc.Asset.Denom),
+				},
+				Borrow: WeightedDecCoin{
+					Asset:  bCoin,
+					Weight: ap.tokenWeight(denom),
+				},
+			})
+			// tracks how much was borrowed
+			total = total.Add(bCoin.Amount)
+			// clears surplus collateral which has now been borrowed against
+			ap.surplusCollateral[i].Asset.Amount = sdk.ZeroDec()
+		} else {
+			ineligible = ineligible.Add(uc)
+		}
 	}
-	// clears surplus collateral which has now been borrowed against
-	ap.surplusCollateral = WeightedDecCoins{}
+	// the only remaining surplus collateral is that which cannot be borrowed against
+	ap.surplusCollateral = ineligible
 	return total
 }
