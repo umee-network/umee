@@ -323,7 +323,11 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	//
 	// TODO: the rest of the steps
 	//
-	// borrow the maximum possible amount against all remaining unpaired collateral
+	// rearrange normal assets such that borrows which are lower weight than the
+	// requested denom are pushed below surplus collateral, and any collateral
+	// which can be used to borrow the input denom becomes the new surplus
+	ap.demoteBorrowsAfter(denom)
+	// borrow the maximum possible amount of input denom against all remaining unpaired collateral
 	borrowed = borrowed.Add(ap.fillOrdinaryCollateral(denom))
 	return borrowed
 }

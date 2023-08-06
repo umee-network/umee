@@ -53,3 +53,15 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 	ap.surplusCollateral = ineligible
 	return total
 }
+
+// demoteBorrowsAfter takes any borrows which would be sorted after an input borrowed denom
+// and matches them with surplus collateral, and then ordinary collateral starting at the
+// lowest in the list. And freed up collateral is moved to the position's surplus collateral,
+// where it can be used by other operations such as fillOrdinaryCollateral.
+func (ap *AccountPosition) demoteBorrowsAfter(denom string) {
+	//
+	//
+	//
+	//
+	//
+}
