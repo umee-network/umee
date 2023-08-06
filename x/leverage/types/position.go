@@ -241,7 +241,40 @@ func NewAccountPosition(
 		}
 	}
 
-	return position, nil
+	// always validates the position before returning for safety
+	return position, position.Validate()
+}
+
+// validates basic properties of a position that should aloways be true
+func (ap *AccountPosition) Validate() error {
+	if len(ap.surplusCollateral) > 0 && len(ap.surplusBorrows) > 0 {
+		return ErrInvalidPosition.Wrap("has both unpaired borrows and unpaired collateral")
+	}
+	totalCollateral := sdk.ZeroDec()
+	totalBorrowed := sdk.ZeroDec()
+
+	for _, sp := range ap.specialPairs {
+		totalCollateral = totalCollateral.Add(sp.Collateral.Amount)
+		totalBorrowed = totalBorrowed.Add(sp.Borrow.Amount)
+	}
+	for _, np := range ap.normalPairs {
+		totalCollateral = totalCollateral.Add(np.Collateral.Asset.Amount)
+		totalBorrowed = totalBorrowed.Add(np.Borrow.Asset.Amount)
+	}
+	for _, c := range ap.surplusCollateral {
+		totalCollateral = totalCollateral.Add(c.Asset.Amount)
+	}
+	for _, b := range ap.surplusBorrows {
+		totalBorrowed = totalBorrowed.Add(b.Asset.Amount)
+	}
+
+	if !totalCollateral.Equal(ap.collateralValue) {
+		return ErrInvalidPosition.Wrap("total collateral value mismatch")
+	}
+	if !totalBorrowed.Equal(ap.borrowedValue) {
+		return ErrInvalidPosition.Wrap("total borrow value mismatch")
+	}
+	return nil
 }
 
 // BorrowedValue returns an account's total USD value borrowed

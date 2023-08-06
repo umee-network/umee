@@ -60,6 +60,7 @@ var (
 	ErrInconsistentTotalBorrow = errors.Register(ModuleName, 605, "total adjusted borrow inconsistency")
 	ErrExcessiveTimeElapsed    = errors.Register(ModuleName, 606, "excessive time elapsed since last interest time")
 	ErrIncentiveKeeperNotSet   = errors.Register(ModuleName, 607, "incentive keeper not set")
+	ErrInvalidPosition         = errors.Register(ModuleName, 608, "accountPosition struct invalid")
 
 	// 7XX = Disabled Functionality
 	ErrNotLiquidatorNode = errors.Register(ModuleName, 700, "node has disabled liquidator queries")
