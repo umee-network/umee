@@ -371,11 +371,11 @@ func TestMaxBorrow(t *testing.T) {
 				coin.Dec("AAAA", "100"),
 			),
 			sdk.NewDecCoins(
-				coin.Dec("AAAA", "5"),
+				coin.Dec("AAAA", "7"),
 			),
 			// collateral weight 0.1, should be able to borrow 10 total
 			"AAAA",
-			"5.00",
+			"3.00",
 			"simple A->A max(A)",
 		},
 		{
@@ -384,11 +384,11 @@ func TestMaxBorrow(t *testing.T) {
 				coin.Dec("AAAA", "100"),
 			),
 			sdk.NewDecCoins(
-				coin.Dec("IIII", "5"),
+				coin.Dec("IIII", "4"),
 			),
 			// collateral weight 0.1, should be able to borrow 10 total
 			"AAAA",
-			"5.00",
+			"6.00",
 			"simple A->I max(A)",
 		},
 	}
