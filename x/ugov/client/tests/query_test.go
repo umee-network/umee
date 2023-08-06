@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	tmcli "github.com/tendermint/tendermint/libs/cli"
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 
 	itestsuite "github.com/umee-network/umee/v5/tests/cli"
 	"github.com/umee-network/umee/v5/util/coin"
