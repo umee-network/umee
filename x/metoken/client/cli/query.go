@@ -29,6 +29,7 @@ func GetQueryCmd() *cobra.Command {
 		GetCmdIndexBalances(),
 		GetCmdSwapFee(),
 		GetCmdRedeemFee(),
+		GetCmdIndexPrice(),
 	)
 
 	return cmd
@@ -171,6 +172,34 @@ func GetCmdIndexBalances() *cobra.Command {
 				queryReq.MetokenDenom = args[0]
 			}
 			resp, err := queryClient.IndexBalances(cmd.Context(), &queryReq)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// GetCmdIndexPrice creates a Cobra command to query for the x/metoken module Index Price.
+// metoken_denom is optional, if it isn't provided then prices for all the registered indexes will be returned.
+func GetCmdIndexPrice() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:  "index-price [metoken_denom]",
+		Args: cobra.MaximumNArgs(1),
+		Short: "Get price of all registered indexes in the x/metoken module or search for a specific price with" +
+			" metoken_denom.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := metoken.NewQueryClient(clientCtx)
+			queryReq := metoken.QueryIndexPrice{}
+			if len(args) > 0 {
+				queryReq.MetokenDenom = args[0]
+			}
+			resp, err := queryClient.IndexPrice(cmd.Context(), &queryReq)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

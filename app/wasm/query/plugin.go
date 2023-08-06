@@ -14,15 +14,18 @@ import (
 	inckeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
 	lvkeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
 	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/metoken"
+	metokenkeeper "github.com/umee-network/umee/v5/x/metoken/keeper"
 	ockeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
 	ocpes "github.com/umee-network/umee/v5/x/oracle/types"
 )
 
 // Plugin wraps the query plugin with queriers.
 type Plugin struct {
-	lvQueryServer  lvtypes.QueryServer
-	ocQueryServer  ocpes.QueryServer
-	incQueryServer incentive.QueryServer
+	lvQueryServer      lvtypes.QueryServer
+	ocQueryServer      ocpes.QueryServer
+	incQueryServer     incentive.QueryServer
+	metokenQueryServer metoken.QueryServer
 }
 
 // NewQueryPlugin creates a plugin to query native modules.
@@ -30,11 +33,13 @@ func NewQueryPlugin(
 	leverageKeeper lvkeeper.Keeper,
 	oracleKeeper ockeeper.Keeper,
 	incentiveKeeper inckeeper.Keeper,
+	metokenBuilder metokenkeeper.Builder,
 ) *Plugin {
 	return &Plugin{
-		lvQueryServer:  lvkeeper.NewQuerier(leverageKeeper),
-		ocQueryServer:  ockeeper.NewQuerier(oracleKeeper),
-		incQueryServer: inckeeper.NewQuerier(incentiveKeeper),
+		lvQueryServer:      lvkeeper.NewQuerier(leverageKeeper),
+		ocQueryServer:      ockeeper.NewQuerier(oracleKeeper),
+		incQueryServer:     inckeeper.NewQuerier(incentiveKeeper),
+		metokenQueryServer: metokenkeeper.NewQuerier(metokenBuilder),
 	}
 }
 
@@ -119,6 +124,20 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			resp, err = smartcontractQuery.HandleActualRates(ctx, plugin.incQueryServer)
 		case smartcontractQuery.LastRewardTime != nil:
 			resp, err = smartcontractQuery.HandleLastRewardTime(ctx, plugin.incQueryServer)
+
+			// metoken
+		case smartcontractQuery.MeTokenParameters != nil:
+			resp, err = smartcontractQuery.HandleMeTokenParams(ctx, plugin.metokenQueryServer)
+		case smartcontractQuery.Indexes != nil:
+			resp, err = smartcontractQuery.HandleMeTokenIndexes(ctx, plugin.metokenQueryServer)
+		case smartcontractQuery.SwapFee != nil:
+			resp, err = smartcontractQuery.HandleMeTokenSwapFee(ctx, plugin.metokenQueryServer)
+		case smartcontractQuery.RedeemFee != nil:
+			resp, err = smartcontractQuery.HandleMeTokenRedeemFee(ctx, plugin.metokenQueryServer)
+		case smartcontractQuery.IndexBalances != nil:
+			resp, err = smartcontractQuery.HandleMeTokenIndexBalances(ctx, plugin.metokenQueryServer)
+		case smartcontractQuery.IndexPrice != nil:
+			resp, err = smartcontractQuery.HandleMeTokenIndexPrice(ctx, plugin.metokenQueryServer)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid umee query"}

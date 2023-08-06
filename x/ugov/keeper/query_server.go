@@ -3,8 +3,9 @@ package keeper
 import (
 	context "context"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v5/x/ugov"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 var _ ugov.QueryServer = Querier{}
@@ -21,8 +22,7 @@ func NewQuerier(kb Builder) Querier {
 // MinTxFees returns minimum transaction fees.
 func (q Querier) MinGasPrice(ctx context.Context, _ *ugov.QueryMinGasPrice) (*ugov.QueryMinGasPriceResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	return &ugov.QueryMinGasPriceResponse{MinGasPrice: q.Keeper(&sdkCtx).MinGasPrice()},
-		nil
+	return &ugov.QueryMinGasPriceResponse{MinGasPrice: q.Keeper(&sdkCtx).MinGasPrice()}, nil
 }
 
 func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup,
@@ -32,4 +32,21 @@ func (q Querier) EmergencyGroup(ctx context.Context, _ *ugov.QueryEmergencyGroup
 			EmergencyGroup: q.Keeper(&sdkCtx).EmergencyGroup().String(),
 		},
 		nil
+}
+
+// InflationParams returns inflation rate change params
+func (q Querier) InflationParams(ctx context.Context, _ *ugov.QueryInflationParams) (
+	*ugov.QueryInflationParamsResponse, error,
+) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	return &ugov.QueryInflationParamsResponse{Params: q.Keeper(&sdkCtx).InflationParams()}, nil
+}
+
+// InflationCycleEnd return when the inflation cycle will be ended.
+func (q Querier) InflationCycleEnd(ctx context.Context, _ *ugov.QueryInflationCycleEnd) (
+	*ugov.QueryInflationCycleEndResponse, error,
+) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	cycleEndTime := q.Keeper(&sdkCtx).InflationCycleEnd()
+	return &ugov.QueryInflationCycleEndResponse{End: &cycleEndTime}, nil
 }

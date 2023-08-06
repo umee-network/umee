@@ -17,6 +17,7 @@ import (
 
 	"github.com/umee-network/umee/v5/x/incentive"
 	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/metoken"
 	otypes "github.com/umee-network/umee/v5/x/oracle/types"
 	ugovtypes "github.com/umee-network/umee/v5/x/ugov"
 	uibctypes "github.com/umee-network/umee/v5/x/uibc"
@@ -44,6 +45,7 @@ const (
 	oracleBaseQueryPath    = "/umee.oracle.v1.Query/"
 	uibcBaseQueryPath      = "/umee.uibc.v1.Query/"
 	incentiveBaseQueryPath = "/umee.incentive.v1.Query/"
+	metokenBaseQueryPath   = "/umee.metoken.v1.Query/" // #nosec G101
 )
 
 func init() {
@@ -135,6 +137,14 @@ func init() {
 	setWhitelistedQuery(incentiveBaseQueryPath+"CurrentRates", &incentive.QueryCurrentRatesResponse{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"ActualRates", &incentive.QueryActualRates{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"LastRewardTime", &incentive.QueryLastRewardTimeResponse{})
+
+	// metoken
+	setWhitelistedQuery(metokenBaseQueryPath+"Params", &metoken.QueryParamsResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+"Indexes", &metoken.QueryIndexesResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+"SwapFee", &metoken.QuerySwapFeeResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+"RedeemFee", &metoken.QueryRedeemFeeResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+"IndexBalances", &metoken.QueryIndexBalancesResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+"IndexPrice", &metoken.QueryIndexPriceResponse{})
 }
 
 // GetWhitelistedQuery returns the whitelisted query at the provided path.

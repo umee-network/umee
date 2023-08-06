@@ -124,6 +124,8 @@ import (
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
 	customante "github.com/umee-network/umee/v5/ante"
+	"github.com/umee-network/umee/v5/app/inflation"
+	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/swagger"
 	"github.com/umee-network/umee/v5/util/genmap"
 	"github.com/umee-network/umee/v5/x/incentive"
@@ -460,6 +462,8 @@ func New(
 
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 
+	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
+
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
 		keys[oracletypes.ModuleName],
@@ -490,7 +494,13 @@ func New(
 	)
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
-	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
+	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
+		appCodec,
+		keys[metoken.StoreKey],
+		app.BankKeeper,
+		app.LeverageKeeper,
+		app.OracleKeeper,
+	)
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
@@ -529,48 +539,40 @@ func New(
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquotakeeper.NewKeeperBuilder(
-		appCodec,
-		keys[uibc.StoreKey],
-		app.IBCKeeper.ChannelKeeper, app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
+		appCodec, keys[uibc.StoreKey],
+		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
 	)
 
-	// Middleware Stacks
+	/**********
+	 * ICS20 (Transfer) Middleware Stacks
+	 * SendPacket, originates from the application to an IBC channel:
+	   transferKeeper.SendPacket -> uibcquota.SendPacket -> channel.SendPacket
+	 * RecvPacket, message that originates from an IBC channel and goes down to app, the flow is the other way
+	   channel.RecvPacket -> uibcquota.OnRecvPacket -> transfer.OnRecvPacket
+
+	* transfer stack contains (from top to bottom):
+	  - Umee IBC Transfer
+	  - IBC Rate Limit Middleware
+	 **********/
+
+	quotaICS4 := uibcquota.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
 
 	// Create Transfer Keeper and pass IBCFeeKeeper as expected Channel and PortKeeper
 	// since fee middleware will wrap the IBCKeeper for underlying application.
 	app.IBCTransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.UIbcQuotaKeeperB, // ISC4 Wrapper: fee IBC middleware
+		quotaICS4, // ISC4 Wrapper: fee IBC middleware
 		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
 	)
-
-	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
-		appCodec,
-		keys[metoken.StoreKey],
-		app.BankKeeper,
-		app.LeverageKeeper,
-		app.OracleKeeper,
-	)
-
-	// Create Transfer Stack
-	// SendPacket, originates from the application to an IBC channel:
-	// transferKeeper.SendPacket -> uibcquota.SendPacket -> channel.SendPacket
-
-	// RecvPacket, message that originates from an IBC channel and goes down to app, the flow is the other way
-	// channel.RecvPacket -> uibcquota.OnRecvPacket -> transfer.OnRecvPacket
-
-	// transfer stack contains (from top to bottom):
-	// - Umee IBC Transfer
-	// - IBC Rate Limit Middleware
 
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
 	transferStack = ibctransfer.NewIBCModule(app.IBCTransferKeeper)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
-	transferStack = uibcquota.NewICS20Middleware(transferStack, app.UIbcQuotaKeeperB, appCodec)
+	transferStack = uibcquota.NewICS20Module(transferStack, app.UIbcQuotaKeeperB, appCodec)
 
-	// Create Interchain Accounts Stack
+	// Create Interchain Accounts Controller Stack
 	// SendPacket, since it is originating from the application to core IBC:
 	// icaAuthModuleKeeper.SendTx -> icaController.SendPacket -> fee.SendPacket -> channel.SendPacket
 
@@ -638,7 +640,8 @@ func New(
 	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,cosmwasm_1_2,umee"
 
 	// Register umee custom plugin to wasm
-	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper), wasmOpts...)
+	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper,
+		app.MetokenKeeperB), wasmOpts...)
 	// Register stargate queries
 	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
 
@@ -669,6 +672,11 @@ func New(
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
 	// we prefer to be more strict in what arguments the modules expect.
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
+
+	inflationClaculator := inflation.Calculator{
+		UgovKeeperB: app.UGovKeeperB.Params,
+		MintKeeper:  &app.MintKeeper,
+	}
 
 	// NOTE: Any module instantiated in the module manager that is later modified
 	// must be passed by reference here.

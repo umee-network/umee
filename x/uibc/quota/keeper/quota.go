@@ -12,6 +12,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/store"
 	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
 	"github.com/umee-network/umee/v5/x/uibc"
@@ -40,7 +41,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
 func (k Keeper) GetTokenOutflows(denom string) sdk.DecCoin {
-	amount := store.GetDec(k.store, KeyTotalOutflows(denom), "total_outflow")
+	amount, _ := store.GetDec(k.store, KeyTotalOutflows(denom), "total_outflow")
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 
@@ -140,9 +141,9 @@ func (k Keeper) getExchangePrice(denom string, amount sdkmath.Int) (sdk.Dec, err
 	)
 
 	// convert to base asset if it is `uToken`
-	if ltypes.HasUTokenPrefix(denom) {
+	if coin.HasUTokenPrefix(denom) {
 		// NOTE: to avoid ctx, we can use similar approach: create a leverage keeper builder
-		transferCoin, err = k.leverage.ExchangeUToken(*k.ctx, transferCoin)
+		transferCoin, err = k.leverage.ToToken(*k.ctx, transferCoin)
 		if err != nil {
 			return sdk.Dec{}, err
 		}

@@ -3,13 +3,12 @@ package keeper
 import (
 	"fmt"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v5/x/metoken/errors"
 )
 
 // swapResponse wraps all the coins of a successful swap
@@ -129,7 +128,7 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 func (k Keeper) supplyToLeverage(tokensToSupply sdk.Coin) (sdkmath.Int, error) {
 	isLimited, availableToSupply, err := k.availableToSupply(tokensToSupply.Denom)
 	if err != nil {
-		return sdkmath.Int{}, err
+		return sdkmath.Int{}, errors.Wrap(err, true)
 	}
 
 	if isLimited {
@@ -142,12 +141,12 @@ func (k Keeper) supplyToLeverage(tokensToSupply sdk.Coin) (sdkmath.Int, error) {
 		}
 	}
 
-	if _, err = k.leverageKeeper.Supply(
+	if _, recoverable, err := k.leverageKeeper.SupplyFromModule(
 		*k.ctx,
-		authtypes.NewModuleAddress(metoken.ModuleName),
+		metoken.ModuleName,
 		tokensToSupply,
 	); err != nil {
-		return sdkmath.Int{}, err
+		return sdkmath.Int{}, errors.Wrap(err, recoverable)
 	}
 
 	return tokensToSupply.Amount, nil

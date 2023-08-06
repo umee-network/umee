@@ -15,25 +15,24 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v5/util/sdkutil"
-
 	"github.com/umee-network/umee/v5/x/uibc"
 	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
 )
 
-var _ porttypes.Middleware = ICS20Middleware{}
+var _ porttypes.IBCModule = ICS20Module{}
 
-// ICS20Middleware overwrites OnAcknowledgementPacket and OnTimeoutPacket to revert
+// ICS20Module overwrites OnAcknowledgementPacket and OnTimeoutPacket to revert
 // quota update on acknowledgement error or timeout.
-type ICS20Middleware struct {
+type ICS20Module struct {
 	porttypes.IBCModule
 	kb  keeper.Builder
 	cdc codec.JSONCodec
 }
 
-// NewICS20Middleware is an IBCMiddlware constructor.
+// NewICS20Module is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Middleware(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSONCodec) ICS20Middleware {
-	return ICS20Middleware{
+func NewICS20Module(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSONCodec) ICS20Module {
+	return ICS20Module{
 		IBCModule: app,
 		kb:        k,
 		cdc:       cdc,
@@ -41,7 +40,7 @@ func NewICS20Middleware(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSO
 }
 
 // OnRecvPacket implements types.Middleware
-func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
+func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
 	params := im.kb.Keeper(&ctx).GetParams()
 	if !params.IbcStatus.IBCTransferEnabled() {
@@ -67,7 +66,7 @@ func (im ICS20Middleware) OnRecvPacket(ctx sdk.Context, packet channeltypes.Pack
 }
 
 // OnAcknowledgementPacket implements types.Middleware
-func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
+func (im ICS20Module) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
 	relayer sdk.AccAddress,
 ) error {
 	var ack channeltypes.Acknowledgement
@@ -86,7 +85,7 @@ func (im ICS20Middleware) OnAcknowledgementPacket(ctx sdk.Context, packet channe
 }
 
 // OnTimeoutPacket implements types.Middleware
-func (im ICS20Middleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
+func (im ICS20Module) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
 	err := im.revertQuotaUpdate(ctx, packet.Data)
 	emitOnRevertQuota(&ctx, "timeout", packet.Data, err)
 
@@ -94,7 +93,7 @@ func (im ICS20Middleware) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.P
 }
 
 // revertQuotaUpdate must be called on packet acknnowledgemenet error to revert necessary changes.
-func (im ICS20Middleware) revertQuotaUpdate(
+func (im ICS20Module) revertQuotaUpdate(
 	ctx sdk.Context,
 	packetData []byte,
 ) error {

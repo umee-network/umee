@@ -2,78 +2,32 @@ package types
 
 import (
 	"fmt"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	appparams "github.com/umee-network/umee/v5/app/params"
-)
-
-const (
-	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
-	UTokenPrefix = "u/"
+	"github.com/umee-network/umee/v5/util/coin"
 )
 
 var halfDec = sdk.MustNewDecFromStr("0.5")
-
-// HasUTokenPrefix detects the uToken prefix on a denom.
-func HasUTokenPrefix(denom string) bool {
-	return strings.HasPrefix(denom, UTokenPrefix)
-}
-
-// ToUTokenDenom adds the uToken prefix to a denom. Returns an empty string
-// instead if the prefix was already present.
-func ToUTokenDenom(denom string) string {
-	if HasUTokenPrefix(denom) {
-		return ""
-	}
-	return UTokenPrefix + denom
-}
 
 // ValidateBaseDenom validates a denom and ensures it is not a uToken.
 func ValidateBaseDenom(denom string) error {
 	if err := sdk.ValidateDenom(denom); err != nil {
 		return err
 	}
-	if HasUTokenPrefix(denom) {
+	if coin.HasUTokenPrefix(denom) {
 		return ErrUToken.Wrap(denom)
 	}
 	return nil
 }
 
-// ToTokenDenom strips the uToken prefix from a denom, or returns an empty
-// string if it was not present. Also returns an empty string if the prefix
-// was repeated multiple times.
-func ToTokenDenom(denom string) string {
-	if !HasUTokenPrefix(denom) {
-		return ""
-	}
-	s := strings.TrimPrefix(denom, UTokenPrefix)
-	if HasUTokenPrefix(s) {
-		// denom started with "u/u/"
-		return ""
-	}
-	return s
-}
-
 // Validate performs validation on an Token type returning an error if the Token
 // is invalid.
 func (t Token) Validate() error {
-	if err := sdk.ValidateDenom(t.BaseDenom); err != nil {
+	if err := validateBaseDenoms(t.BaseDenom, t.SymbolDenom); err != nil {
 		return err
-	}
-	if HasUTokenPrefix(t.BaseDenom) {
-		// prevent base asset denoms that start with "u/"
-		return ErrUToken.Wrap(t.BaseDenom)
-	}
-
-	if err := sdk.ValidateDenom(t.SymbolDenom); err != nil {
-		return err
-	}
-	if HasUTokenPrefix(t.SymbolDenom) {
-		// prevent symbol denoms that start with "u/"
-		return ErrUToken.Wrap(t.SymbolDenom)
 	}
 
 	one := sdk.OneDec()
@@ -209,4 +163,60 @@ func DefaultRegistry() []Token {
 	return []Token{
 		defaultUmeeToken(),
 	}
+}
+
+// Validate performs validation on an SpecialAssetPair type
+func (p SpecialAssetPair) Validate() error {
+	if err := validateBaseDenoms(p.Collateral, p.Borrow); err != nil {
+		return err
+	}
+
+	// Collateral Weight is non-negative and less than 1.
+	if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
+	}
+
+	// Liquidation Threshold ranges between collateral weight and 1.
+	if p.LiquidationThreshold.LT(p.CollateralWeight) || p.LiquidationThreshold.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid liquidation threshold: %s", p.LiquidationThreshold)
+	}
+
+	return nil
+}
+
+// Validate performs validation on an SpecialAssetSet type
+func (s SpecialAssetSet) Validate() error {
+	if err := validateBaseDenoms(s.Assets...); err != nil {
+		return err
+	}
+
+	denoms := map[string]bool{}
+	for _, a := range s.Assets {
+		if _, ok := denoms[a]; ok {
+			return ErrDuplicatePair
+		}
+		denoms[a] = true
+	}
+
+	// Collateral Weight is non-negative and less than 1.
+	if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid collateral rate: %s", s.CollateralWeight)
+	}
+
+	// Liquidation Threshold ranges between collateral weight and 1.
+	if s.LiquidationThreshold.LT(s.CollateralWeight) || s.LiquidationThreshold.GTE(sdk.OneDec()) {
+		return fmt.Errorf("invalid liquidation threshold: %s", s.LiquidationThreshold)
+	}
+
+	return nil
+}
+
+// validateBaseDenoms ensures that one or more strings are valid token denoms without the uToken prefix
+func validateBaseDenoms(denoms ...string) error {
+	for _, s := range denoms {
+		if err := ValidateBaseDenom(s); err != nil {
+			return err
+		}
+	}
+	return nil
 }

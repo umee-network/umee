@@ -2,8 +2,10 @@ package tests
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	appparams "github.com/umee-network/umee/v5/app/params"
 	itestsuite "github.com/umee-network/umee/v5/tests/cli"
+	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/client/cli"
 	"github.com/umee-network/umee/v5/x/leverage/fixtures"
 	"github.com/umee-network/umee/v5/x/leverage/types"
@@ -91,6 +93,16 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				Registry: []types.Token{
 					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
+			},
+			ErrMsg: "",
+		},
+		{
+			Name:     "query special assets",
+			Command:  cli.GetCmdQuerySpecialAssets(),
+			Args:     []string{"uumee"},
+			Response: &types.QuerySpecialAssetsResponse{},
+			ExpectedResponse: &types.QuerySpecialAssetsResponse{
+				Pairs: []types.SpecialAssetPair{},
 			},
 			ErrMsg: "",
 		},
@@ -296,7 +308,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 					sdk.NewInt64Coin(appparams.BondDenom, 1001),
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 1000),
+					sdk.NewInt64Coin(coin.ToUTokenDenom(appparams.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
 					sdk.NewInt64Coin(appparams.BondDenom, 251),
@@ -370,7 +382,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 					sdk.NewInt64Coin(appparams.BondDenom, 201), // slightly increased uToken exchange rate
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(types.ToUTokenDenom(appparams.BondDenom), 100),
+					sdk.NewInt64Coin(coin.ToUTokenDenom(appparams.BondDenom), 100),
 				),
 				Borrowed: sdk.NewCoins(),
 			},

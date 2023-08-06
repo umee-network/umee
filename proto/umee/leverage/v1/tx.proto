@@ -66,6 +66,11 @@ service Msg {
   // GovUpdateRegistry adds new tokens to the token registry or
   // updates existing tokens with new settings.
   rpc GovUpdateRegistry(MsgGovUpdateRegistry) returns (MsgGovUpdateRegistryResponse);
+
+  // GovUpdateSpecialAssets adds, updates, or removes special asset pairs. Note that a special asset
+  // pair can be removed by setting its special collateral weight to negative one. Also allows for the creation
+  // of sets of assets, where each asset in the set forms a special asset pair with all of the others.
+  rpc GovUpdateSpecialAssets(MsgGovUpdateSpecialAssets) returns (MsgGovUpdateSpecialAssetsResponse);
 }
 
 // MsgSupply represents a user's request to supply assets to the module.
@@ -253,9 +258,11 @@ message MsgGovUpdateRegistry {
   option (cosmos.msg.v1.signer)       = "authority";
 
   // authority is the address of the governance account.
-  string authority   = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  string title       = 2;
-  string description = 3;
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // Deprecated: use proposal metadata instead.
+  string title = 2 [deprecated = true];
+  // Deprecated: use proposal metadata instead.
+  string description = 3 [deprecated = true];
   // add_tokens defines new token settings.
   repeated Token add_tokens = 4 [(gogoproto.nullable) = false];
   // update_tokens defines the new settings for existed tokens.
@@ -264,3 +271,31 @@ message MsgGovUpdateRegistry {
 
 // MsgGovUpdateRegistryResponse defines the Msg/GovUpdateRegistry response type.
 message MsgGovUpdateRegistryResponse {}
+
+// MsgGovUpdateSpecialAssets defines the Msg/GovUpdateSpecialAssets request type.
+message MsgGovUpdateSpecialAssets {
+  option (gogoproto.equal)            = true;
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // sets are bidirectional groups of special asset pairs. Creating a special asset
+  // set causes all assets in the set to have a certain collateral weight when borrowing
+  // against each other (but not looping with themselves). Overrides any existing
+  // special asset pairs between assets in the set. Using both collateral weight
+  // and liquidation theshold of zero will clear all existing special pairs in the set instead.
+  repeated SpecialAssetSet sets = 2 [(gogoproto.nullable) = false];
+
+  // pairs are new or updated special asset pairs. Updating both a special asset pair's
+  // collateral weight and liquidation threshold to zero deletes the pair instead.
+  // These pairs will be applied after any sets above when passing a proposal,
+  // so they can be used to override certain set elements, set directional relationships,
+  // or set an asset's relation to itself (looping).
+  repeated SpecialAssetPair pairs = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgGovUpdateSpecialAssetsResponse defines the Msg/GovUpdateSpecialAssets response type.
+message MsgGovUpdateSpecialAssetsResponse {}

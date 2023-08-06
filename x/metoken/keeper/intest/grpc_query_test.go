@@ -1,18 +1,19 @@
-package keeper_test
+package intest
 
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"gotest.tools/v3/assert"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v5/x/metoken"
-	"gotest.tools/v3/assert"
+	"github.com/umee-network/umee/v5/x/metoken/mocks"
 )
 
 func TestQuerier_Params(t *testing.T) {
-	s := initKeeperTestSuite(t, nil, nil)
+	s := initTestSuite(t, nil, nil)
 	querier, ctx := s.queryClient, s.ctx
 
 	resp, err := querier.Params(ctx, nil)
@@ -25,7 +26,7 @@ func TestQuerier_Indexes(t *testing.T) {
 	index1 := mocks.StableIndex(mocks.MeUSDDenom)
 	index2 := mocks.StableIndex("me/EUR")
 
-	s := initKeeperTestSuite(t, []metoken.Index{index1, index2}, nil)
+	s := initTestSuite(t, []metoken.Index{index1, index2}, nil)
 	querier, ctx := s.queryClient, s.ctx
 
 	tcs := []struct {
@@ -77,7 +78,7 @@ func TestQuerier_Balances(t *testing.T) {
 	balance1 := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
 	balance2 := mocks.ValidUSDIndexBalances("me/EUR")
 
-	s := initKeeperTestSuite(t, nil, []metoken.IndexBalances{balance1, balance2})
+	s := initTestSuite(t, nil, []metoken.IndexBalances{balance1, balance2})
 	querier, ctx := s.queryClient, s.ctx
 
 	tcs := []struct {
@@ -135,7 +136,7 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 	balances := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, []metoken.Index{index}, []metoken.IndexBalances{balances})
+	s := initTestSuite(t, []metoken.Index{index}, []metoken.IndexBalances{balances})
 	querier, ctx := s.queryClient, s.ctx
 
 	// set prices
@@ -212,7 +213,7 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 	index := mocks.StableIndex(mocks.MeUSDDenom)
 	balances := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
 
-	s := initKeeperTestSuite(t, []metoken.Index{index}, []metoken.IndexBalances{balances})
+	s := initTestSuite(t, []metoken.Index{index}, []metoken.IndexBalances{balances})
 	querier, ctx, app := s.queryClient, s.ctx, s.app
 
 	// set prices
@@ -278,5 +279,73 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 		totalFee := fee.MulInt(toRedeem).TruncateInt()
 
 		assert.Check(t, totalFee.Equal(resp.Asset.Amount))
+	}
+}
+
+func TestQuerier_IndexPrice(t *testing.T) {
+	// Within these cases we are testing grpc functionality,
+	// Exact prices are tested in their unit tests:
+	// https://github.com/umee-network/umee/blob/main/x/metoken/keeper/price_test.go
+	stableIndex := mocks.StableIndex(mocks.MeUSDDenom)
+	nonStableIndex := mocks.NonStableIndex(mocks.MeNonStableDenom)
+
+	stableBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
+	nonStableBalance := mocks.EmptyNonStableIndexBalances(mocks.MeNonStableDenom)
+
+	s := initTestSuite(
+		t,
+		[]metoken.Index{stableIndex, nonStableIndex},
+		[]metoken.IndexBalances{stableBalance, nonStableBalance},
+	)
+	querier, ctx := s.queryClient, s.ctx
+
+	tcs := []struct {
+		name          string
+		denom         string
+		expPriceCount int
+		expErr        string
+	}{
+		{
+			"invalid meToken denom",
+			"invalidDenom",
+			0,
+			"should have the following format: me/<TokenName>",
+		},
+		{
+			"index not found",
+			"me/NotFound",
+			0,
+			"not found",
+		},
+		{
+			"get meUSD price",
+			mocks.MeUSDDenom,
+			1,
+			"",
+		},
+		{
+			"get all prices",
+			"",
+			2,
+			"",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(
+			tc.name, func(t *testing.T) {
+				resp, err := querier.IndexPrice(
+					ctx, &metoken.QueryIndexPrice{
+						MetokenDenom: tc.denom,
+					},
+				)
+				if len(tc.expErr) == 0 {
+					assert.NilError(t, err)
+					assert.Check(t, tc.expPriceCount == len(resp.Prices))
+				} else {
+					assert.ErrorContains(t, err, tc.expErr)
+				}
+			},
+		)
 	}
 }

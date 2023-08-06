@@ -6,6 +6,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v5/util/store"
 	"github.com/umee-network/umee/v5/x/metoken"
@@ -43,8 +44,10 @@ func (k Keeper) GetAllIndexesBalances() []metoken.IndexBalances {
 }
 
 // getNextRebalancingTime returns next x/metoken re-balancing time in Milliseconds.
-func (k Keeper) getNextRebalancingTime() (time.Time, error) {
-	return store.GetTimeMs(k.store, keyPrefixNextRebalancingTime)
+// Returns 0 unix time if the time was not set before.
+func (k Keeper) getNextRebalancingTime() time.Time {
+	t, _ := store.GetTimeMs(k.store, keyPrefixNextRebalancingTime)
+	return t
 }
 
 // setNextRebalancingTime next x/metoken re-balancing time in Milliseconds.
@@ -53,8 +56,10 @@ func (k Keeper) setNextRebalancingTime(nextRebalancingTime time.Time) {
 }
 
 // getNextInterestClaimTime returns next x/metoken interest claiming time in Milliseconds.
-func (k Keeper) getNextInterestClaimTime() (time.Time, error) {
-	return store.GetTimeMs(k.store, keyPrefixNextInterestClaimTime)
+// Returns 0 unix time if the time was not set before.
+func (k Keeper) getNextInterestClaimTime() time.Time {
+	t, _ := store.GetTimeMs(k.store, keyPrefixNextInterestClaimTime)
+	return t
 }
 
 // setNextInterestClaimTime next x/metoken interest claiming time in Milliseconds.
@@ -202,4 +207,8 @@ func (k Keeper) validateInLeverage(index metoken.Index) error {
 	}
 
 	return nil
+}
+
+func ModuleAddr() sdk.AccAddress {
+	return authtypes.NewModuleAddress(metoken.ModuleName)
 }

@@ -46,24 +46,36 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
-### Bug Fixes
-
-- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgBeginUnbonding counting existing unbondings against max unbond twice.
-- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgLeverageLiquidate CLI not actually allowing wildcard denoms.
-
 ### Features
 
 - [2129](https://github.com/umee-network/umee/pull/2129) Emergency Group x/ugov proto.
-- [2146](https://github.com/umee-network/umee/pull/2146) Add store GetTimeMs and SetTimeMs.
+- [2146](https://github.com/umee-network/umee/pull/2146) Add store `GetTimeMs` and `SetTimeMs`.
 - [2157](https://github.com/umee-network/umee/pull/2157) Add `x/metoken` module.
+- [2150](https://github.com/umee-network/umee/pull/2150) Add gov message to create Special Asset Pairs
+- [2145](https://github.com/umee-network/umee/pull/2145) Add New `Inflation Parms` to x/ugov proto and added `inflation rate` change logic to umint
+- [2159](https://github.com/umee-network/umee/pull/2159) Add hard market cap for token emission.
+- [2155](https://github.com/umee-network/umee/pull/2155) `bpmath`: basis points math package.
+- [2166](https://github.com/umee-network/umee/pull/2166) Basis Points: `MulDec`
+- [2170](https://github.com/umee-network/umee/pull/2170) Add SupplyFromModule and WithdrawToModule to leverage keeper.
 
 ### Improvements
 
 - [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
 
+### Bug Fixes
+
+- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgBeginUnbonding counting existing unbondings against max unbond twice.
+- [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgLeverageLiquidate CLI not actually allowing wildcard denoms.
+
 ### API Breaking
 
-- [2140](https://github.com/umee-network/umee/pull/2140)
+- [2140](https://github.com/umee-network/umee/pull/2140) Renamed ugov EventMinTxFees to EventMinGasPrice.
+- [2165](https://github.com/umee-network/umee/pull/2165) Use underscore for message part in the web gRPC path format:
+  - `/umee/ugov/v1/min-gas-price` --> `/umee/ugov/v1/min_gas_price`
+  - `/umee/ugov/v1/emergency-group` --> `/umee/ugov/v1/emergency_group`
+  - `/umee/uibc/v1/all-outflows` --> `/umee/uibc/v1/all_outflows`
+- [2180](https://github.com/umee-network/umee/pull/2180) Rename leverage `Keeper.ExchangeToken -> ToUToken`, `Keeper.ExchangeUToken -> ToToken` and `Keeper.ExchangeUTokens -> ToTokens`.
+- [2183](https://github.com/umee-network/umee/pull/2183) Move `ToUTokenDenom`, `StripUTokenDenom` and `HasUTokenPrefix` from `leverage/keeper` to `coin` package.
 
 ## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
 

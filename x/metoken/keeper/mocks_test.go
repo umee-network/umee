@@ -33,19 +33,19 @@ func (l Leverage) GetTokenSettings(_ sdk.Context, denom string) (ltypes.Token, e
 	return ts, nil
 }
 
-func (l Leverage) ExchangeToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
+func (l Leverage) ToUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
 
-func (l Leverage) ExchangeUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
+func (l Leverage) ToToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
 
-func (l Leverage) Supply(_ sdk.Context, _ sdk.AccAddress, _ sdk.Coin) (sdk.Coin, error) {
+func (l Leverage) SupplyFromModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
 	panic("not implemented")
 }
 
-func (l Leverage) Withdraw(_ sdk.Context, _ sdk.AccAddress, _ sdk.Coin) (sdk.Coin, bool, error) {
+func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
 	panic("not implemented")
 }
 
@@ -54,6 +54,10 @@ func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, _ sdk.Coin) (sdkmath.Int, err
 }
 
 func (l Leverage) GetTotalSupply(_ sdk.Context, _ string) (sdk.Coin, error) {
+	panic("not implemented")
+}
+
+func (l Leverage) GetAllSupplied(_ sdk.Context, _ sdk.AccAddress) (sdk.Coins, error) {
 	panic("not implemented")
 }
 

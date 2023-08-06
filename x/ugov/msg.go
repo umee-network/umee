@@ -10,12 +10,10 @@ import (
 )
 
 var (
-	_, _ sdk.Msg = &MsgGovUpdateMinGasPrice{},
-		&MsgGovSetEmergencyGroup{}
+	_, _, _ sdk.Msg = &MsgGovUpdateMinGasPrice{}, &MsgGovSetEmergencyGroup{}, &MsgGovUpdateInflationParams{}
 
 	// amino
-	_, _ legacytx.LegacyMsg = &MsgGovUpdateMinGasPrice{},
-		&MsgGovSetEmergencyGroup{}
+	_, _, _ legacytx.LegacyMsg = &MsgGovUpdateMinGasPrice{}, &MsgGovSetEmergencyGroup{}, &MsgGovUpdateInflationParams{}
 )
 
 // ValidateBasic implements Msg
@@ -71,3 +69,29 @@ func (msg MsgGovSetEmergencyGroup) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 func (msg MsgGovSetEmergencyGroup) Type() string { return sdk.MsgTypeURL(&msg) }
+
+//
+// MsgGovUpdateInflationParams
+//
+
+// Msg interface implementation
+
+func (msg *MsgGovUpdateInflationParams) ValidateBasic() error {
+	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+		return err
+	}
+	return msg.Params.Validate()
+}
+
+// GetSignBytes implements Msg
+func (msg *MsgGovUpdateInflationParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// LegacyMsg.Type implementations
+func (msg MsgGovUpdateInflationParams) Route() string { return "" }
+
+func (msg MsgGovUpdateInflationParams) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+}
+func (msg MsgGovUpdateInflationParams) Type() string { return sdk.MsgTypeURL(&msg) }

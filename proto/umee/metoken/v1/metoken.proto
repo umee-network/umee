@@ -103,3 +103,21 @@ message AcceptedAsset {
     (gogoproto.nullable)   = false
   ];
 }
+
+// Price is used to inform meToken price and exponent.
+message Price {
+  option (gogoproto.equal) = true;
+
+  // meToken denom.
+  string denom = 1;
+
+  // Price in USD of one unit of meToken, expressed in decimals.
+  string price = 2 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // Exponent is the power of ten by which to multiply, in order to convert
+  // an amount of the meToken for the exchange operations.
+  uint32 exponent = 3;
+}

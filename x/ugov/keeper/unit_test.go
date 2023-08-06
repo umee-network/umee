@@ -23,7 +23,7 @@ func initKeeper(t *testing.T) TestKeeper {
 }
 
 type TestKeeper struct {
-	Keeper
+	ugov.Keeper
 	t   *testing.T
 	ctx *sdk.Context
 }

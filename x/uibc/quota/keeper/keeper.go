@@ -16,23 +16,20 @@ import (
 
 // Builder constructs Keeper by perparing all related dependencies (notably the store).
 type Builder struct {
-	storeKey    storetypes.StoreKey
-	cdc         codec.BinaryCodec
-	leverage    uibc.Leverage
-	oracle      uibc.Oracle
-	ics4Wrapper porttypes.ICS4Wrapper
+	storeKey storetypes.StoreKey
+	cdc      codec.BinaryCodec
+	leverage uibc.Leverage
+	oracle   uibc.Oracle
 }
 
 func NewKeeperBuilder(
-	cdc codec.BinaryCodec, key storetypes.StoreKey, ics4Wrapper porttypes.ICS4Wrapper, leverage uibc.Leverage,
-	oracle uibc.Oracle,
+	cdc codec.BinaryCodec, key storetypes.StoreKey, leverage uibc.Leverage, oracle uibc.Oracle,
 ) Builder {
 	return Builder{
-		cdc:         cdc,
-		storeKey:    key,
-		ics4Wrapper: ics4Wrapper,
-		leverage:    leverage,
-		oracle:      oracle,
+		cdc:      cdc,
+		storeKey: key,
+		leverage: leverage,
+		oracle:   oracle,
 	}
 }
 

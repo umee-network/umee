@@ -104,7 +104,7 @@ func (s msgServer) MaxWithdraw(
 	if err != nil {
 		return nil, err
 	}
-	if types.HasUTokenPrefix(msg.Denom) {
+	if coin.HasUTokenPrefix(msg.Denom) {
 		return nil, types.ErrUToken
 	}
 	if _, err = s.keeper.GetTokenSettings(ctx, msg.Denom); err != nil {
@@ -196,7 +196,7 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
-	if err := s.keeper.checkCollateralLiquidity(ctx, types.ToTokenDenom(msg.Asset.Denom)); err != nil {
+	if err := s.keeper.checkCollateralLiquidity(ctx, coin.StripUTokenDenom(msg.Asset.Denom)); err != nil {
 		return nil, err
 	}
 
@@ -568,4 +568,43 @@ func (s msgServer) GovUpdateRegistry(
 	}
 
 	return &types.MsgGovUpdateRegistryResponse{}, nil
+}
+
+// GovUpdateSpecialAssets adds, updates, or deletes special asset pairs.
+func (s msgServer) GovUpdateSpecialAssets(
+	goCtx context.Context,
+	msg *types.MsgGovUpdateSpecialAssets,
+) (*types.MsgGovUpdateSpecialAssetsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	for _, set := range msg.Sets {
+		// each special asset set is decomposed into its component pairs and stored in state.
+		// overrides existing pairs between assets in the new set.
+		for _, a := range set.Assets {
+			for _, b := range set.Assets {
+				if a != b {
+					pair := types.SpecialAssetPair{
+						Collateral:       a,
+						Borrow:           b,
+						CollateralWeight: set.CollateralWeight,
+					}
+					// sets or overrides (or deletes on zero collateral weight) each pair
+					if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
+						return nil, err
+					}
+				}
+			}
+		}
+	}
+
+	// individual pairs are applied after sets, so they can override specific relationships
+	// between assets.
+	for _, pair := range msg.Pairs {
+		// sets or overrides (or deletes on zero collateral weight) each pair
+		if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {
+			return nil, err
+		}
+	}
+
+	return &types.MsgGovUpdateSpecialAssetsResponse{}, nil
 }

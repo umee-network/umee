@@ -1,4 +1,4 @@
-package keeper_test
+package intest
 
 import (
 	"testing"
@@ -38,14 +38,12 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	umeeUToken := sdk.NewCoin("u/umee", sdkmath.NewInt(100))
 	atomToken := sdk.NewCoin("atom", sdkmath.NewInt(1000))
 	daiToken := sdk.NewCoin("dai", sdkmath.NewInt(50))
-	// gomock initializations
-	leverageCtrl := gomock.NewController(t)
-	defer leverageCtrl.Finish()
-	leverageMock := mocks.NewMockLeverageKeeper(leverageCtrl)
 
-	oracleCtrl := gomock.NewController(t)
-	defer oracleCtrl.Finish()
-	oracleMock := mocks.NewMockOracle(oracleCtrl)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	leverageMock := mocks.NewMockLeverage(ctrl)
+	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
 	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)
@@ -53,14 +51,14 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	assert.NilError(t, err)
 
 	// invalid token, returns error from mock leverage
-	leverageMock.EXPECT().ExchangeUToken(ctx, invalidToken).Return(sdk.Coin{}, ltypes.ErrNotUToken).AnyTimes()
+	leverageMock.EXPECT().ToToken(ctx, invalidToken).Return(sdk.Coin{}, ltypes.ErrNotUToken).AnyTimes()
 
 	err = k.CheckAndUpdateQuota(invalidToken.Denom, invalidToken.Amount)
 	assert.ErrorIs(t, err, ltypes.ErrNotUToken)
 
 	// UMEE uToken, exchanges correctly, but returns ErrNotRegisteredToken when trying to get Token's settings
 	// from leverage mock keeper
-	leverageMock.EXPECT().ExchangeUToken(ctx, umeeUToken).Return(
+	leverageMock.EXPECT().ToToken(ctx, umeeUToken).Return(
 		sdk.NewCoin("umee", sdkmath.NewInt(100)),
 		nil,
 	).AnyTimes()
@@ -102,14 +100,12 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	umeeQuota := sdkmath.NewInt(10000)
 	umeeToken := sdk.NewCoin("umee", umeeAmount)
 	umeeExponent := 6
-	// gomock initializations
-	leverageCtrl := gomock.NewController(t)
-	defer leverageCtrl.Finish()
-	leverageMock := mocks.NewMockLeverageKeeper(leverageCtrl)
 
-	oracleCtrl := gomock.NewController(t)
-	defer oracleCtrl.Finish()
-	oracleMock := mocks.NewMockOracle(oracleCtrl)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	leverageMock := mocks.NewMockLeverage(ctrl)
+	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
 	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)

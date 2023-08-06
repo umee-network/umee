@@ -32,6 +32,7 @@ func init() {
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgGovUpdateMinGasPrice{}, proto.MessageName(&MsgGovUpdateMinGasPrice{}), nil)
 	cdc.RegisterConcrete(&MsgGovSetEmergencyGroup{}, "umee/ugov/MsgGovSetEmergencyGroup", nil)
+	cdc.RegisterConcrete(&MsgGovUpdateInflationParams{}, "umee/ugov/MsgGovUpdateInflationParams", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -39,6 +40,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		(*sdk.Msg)(nil),
 		&MsgGovUpdateMinGasPrice{},
 		&MsgGovSetEmergencyGroup{},
+		&MsgGovUpdateInflationParams{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
