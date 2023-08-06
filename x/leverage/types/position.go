@@ -296,7 +296,8 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 }
 
 // MaxBorrow computes the maximum USD value of a given base token denom a position can borrow
-// without exceeding its borrow limit.
+// without exceeding its borrow limit. Mutates the AccountPosition to show the new borrow amount,
+// meaning subsequent calls to MaxBorrow will return zero.
 func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	borrowed := sdk.ZeroDec()
 	// An initialized account position already has special asset pairs matched up, but these pairs
@@ -326,7 +327,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	// rearrange normal assets such that borrows which are lower weight than the
 	// requested denom are pushed below surplus collateral, and any collateral
 	// which can be used to borrow the input denom becomes the new surplus
-	ap.demoteBorrowsAfter(denom)
+	// ap.demoteBorrowsAfter(denom)
 	// borrow the maximum possible amount of input denom against all remaining unpaired collateral
 	borrowed = borrowed.Add(ap.fillOrdinaryCollateral(denom))
 	return borrowed

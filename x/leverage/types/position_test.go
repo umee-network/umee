@@ -333,13 +333,10 @@ func TestBorrowLimit(t *testing.T) {
 			tc.borrow,
 			true,
 		)
-		if !sdk.MustNewDecFromStr(tc.liquidationthreshold).Equal(liquidationPosition.Limit()) {
-			assert.Equal(t, liquidationPosition.String(), "liquidation threshold position "+tc.msg)
-		}
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.liquidationthreshold).String(),
 			liquidationPosition.Limit().String(),
-			tc.msg+" liquidation threshold",
+			tc.msg+" liquidation threshold\n\n"+liquidationPosition.String(),
 		)
 	}
 }
@@ -401,13 +398,10 @@ func TestMaxBorrow(t *testing.T) {
 			tc.borrow,
 			false,
 		)
-		//if !sdk.MustNewDecFromStr(tc.maxBorrow).Equal(borrowPosition.MaxBorrow(tc.maxBorrowDenom)) {
-		//	assert.Equal(t, borrowPosition.String(), "borrow limit position "+tc.msg)
-		//}
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			borrowPosition.MaxBorrow(tc.maxBorrowDenom).String(),
-			tc.msg+" max borrow",
+			tc.msg+" max borrow\n\n"+borrowPosition.String(),
 		)
 	}
 }
