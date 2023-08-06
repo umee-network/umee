@@ -125,7 +125,6 @@ import (
 
 	customante "github.com/umee-network/umee/v5/ante"
 	"github.com/umee-network/umee/v5/app/inflation"
-	appparams "github.com/umee-network/umee/v5/app/params"
 	"github.com/umee-network/umee/v5/swagger"
 	"github.com/umee-network/umee/v5/util/genmap"
 	"github.com/umee-network/umee/v5/x/incentive"
@@ -673,7 +672,7 @@ func New(
 	// we prefer to be more strict in what arguments the modules expect.
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
-	inflationClaculator := inflation.Calculator{
+	inflationCalculator := inflation.Calculator{
 		UgovKeeperB: app.UGovKeeperB.Params,
 		MintKeeper:  &app.MintKeeper,
 	}
@@ -694,7 +693,7 @@ func New(
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
 		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
-		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, nil, app.GetSubspace(minttypes.ModuleName)),
+		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, inflationCalculator.InflationRate, app.GetSubspace(minttypes.ModuleName)),
 		// need to dereference StakingKeeper because x/distribution uses interface casting :(
 		// TODO: in the next SDK version we can remove the dereference
 		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName)),

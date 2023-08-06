@@ -1,8 +1,6 @@
 package quota
 
 import (
-	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
-
 	"cosmossdk.io/errors"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
