@@ -360,10 +360,36 @@ func TestMaxBorrow(t *testing.T) {
 				coin.Dec("AAAA", "100"),
 			),
 			sdk.NewDecCoins(),
-			// collateral weight 0.1, should be able to borrow 100 A
+			// collateral weight 0.1, should be able to borrow 10 A
 			"AAAA",
 			"10.00",
 			"simple A max(A)",
+		},
+		{
+			// single asset, with existing looped borrow
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "5"),
+			),
+			// collateral weight 0.1, should be able to borrow 10 total
+			"AAAA",
+			"5.00",
+			"simple A->A max(A)",
+		},
+		{
+			// single asset, with existing borrow
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("IIII", "5"),
+			),
+			// collateral weight 0.1, should be able to borrow 10 total
+			"AAAA",
+			"5.00",
+			"simple A->I max(A)",
 		},
 	}
 
