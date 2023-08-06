@@ -47,36 +47,49 @@ type WeightedNormalPair struct {
 	Borrow WeightedDecCoin
 }
 
-// higher returns true if a WeightedDecCoin should be sorted after
-// another WeightedDecCoin b.
-func (wdc WeightedDecCoin) higher(b WeightedDecCoin) bool {
-	if wdc.Weight.GT(b.Weight) {
-		return true // sort by collateral weight, descending
+// before returns true if a WeightedDecCoin should be sorted before
+// another WeightedDecCoin b. It should be used as a sort.Less
+func (wdc WeightedDecCoin) before(b WeightedDecCoin) bool {
+	if !wdc.Weight.Equal(b.Weight) {
+		// sort by collateral weight, descending
+		return wdc.Weight.GT(b.Weight)
 	}
-	if wdc.Weight.Equal(b.Weight) {
-		// for the same weight, sort by asset denom
-		return wdc.Asset.Denom < b.Asset.Denom
-	}
-	return false
+	// for the same weight, sort by asset denom, alphabetical
+	return wdc.Asset.Denom < b.Asset.Denom
 }
 
-// higher returns true if a WeightedSpecialPair should be sorted after
-// another WeightedSpecialPair b.
-func (wsp WeightedSpecialPair) higher(b WeightedSpecialPair) bool {
-	if wsp.SpecialWeight.GT(b.SpecialWeight) {
-		return true // sort first by special collateral weight, descending
+// before returns true if a WeightedNormalPair should be sorted before
+// another WeightedNormalPair b. It should be used as a sort.Less
+func (wnp WeightedNormalPair) before(b WeightedNormalPair) bool {
+	if !wnp.Collateral.Weight.Equal(b.Collateral.Weight) {
+		// first sort by collateral weight, descending
+		return wnp.Collateral.Weight.GT(b.Collateral.Weight)
 	}
-	if wsp.SpecialWeight.Equal(b.SpecialWeight) {
-		if wsp.Collateral.Denom < b.Collateral.Denom {
-			// for the same weight, sort by collateral denom
-			return true
-		}
-		if wsp.Collateral.Denom == b.Collateral.Denom {
-			// for the same collateral denom and weight, sort by borrow denom
-			return wsp.Borrow.Denom < b.Borrow.Denom
-		}
+	if !wnp.Borrow.Weight.Equal(b.Borrow.Weight) {
+		// if collateral weights are the same, sort by borrow weight, descending
+		return wnp.Borrow.Weight.GT(b.Borrow.Weight)
 	}
-	return false
+	if wnp.Collateral.Asset.Denom != b.Collateral.Asset.Denom {
+		// if both weight are equal, sort by collateral denom, alphabetical
+		return wnp.Collateral.Asset.Denom != b.Collateral.Asset.Denom
+	}
+	// if all of the above were equal, sort by borrow denom, alphabetical
+	return wnp.Borrow.Asset.Denom < b.Borrow.Asset.Denom
+}
+
+// before returns true if a WeightedSpecialPair should be sorted before
+// another WeightedSpecialPair b. It should be used as a sort.Less
+func (wsp WeightedSpecialPair) before(b WeightedSpecialPair) bool {
+	if !wsp.SpecialWeight.Equal(b.SpecialWeight) {
+		// sort first by special collateral weight, descending
+		return wsp.SpecialWeight.GT(b.SpecialWeight)
+	}
+	if wsp.Collateral.Denom != b.Collateral.Denom {
+		// for the same weight, sort by collateral denom, alphabetical
+		return wsp.Collateral.Denom < b.Collateral.Denom
+	}
+	// for the same collateral denom and weight, sort by borrow denom, alphabetical
+	return wsp.Borrow.Denom < b.Borrow.Denom
 }
 
 // Add returns the sum of a weightedDecCoins and an additional weightedDecCoin.
@@ -101,7 +114,7 @@ func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 	}
 	// sorts the sum. Fixes unsorted input as well.
 	sort.SliceStable(sum, func(i, j int) bool {
-		return sum[i].higher(sum[j])
+		return sum[i].before(sum[j])
 	})
 	return sum
 }
@@ -135,7 +148,7 @@ func (wdc WeightedDecCoins) Sub(sub sdk.DecCoin) (diff WeightedDecCoins) {
 
 	// sorts the diff. Fixes unsorted input as well.
 	sort.SliceStable(diff, func(i, j int) bool {
-		return diff[i].higher(diff[j])
+		return diff[i].before(diff[j])
 	})
 	return diff
 }
@@ -163,7 +176,40 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 	}
 	// sorts the sum. Fixes unsorted input as well.
 	sort.SliceStable(sum, func(i, j int) bool {
-		return sum[i].higher(sum[j])
+		return sum[i].before(sum[j])
+	})
+	return sum
+}
+
+// Add returns the sum of a WeightedNormalPairs and an additional WeightedNormalPair.
+// The result is sorted.
+func (wnp WeightedNormalPairs) Add(add WeightedNormalPair) (sum WeightedNormalPairs) {
+	if len(wnp) == 0 {
+		return WeightedNormalPairs{add}
+	}
+	found := false
+	for _, wp := range wnp {
+		if wp.canCombine(add) {
+			sum = append(sum, WeightedNormalPair{
+				Collateral: WeightedDecCoin{
+					Asset:  wp.Collateral.Asset.Add(add.Collateral.Asset),
+					Weight: wp.Collateral.Weight,
+				},
+				Borrow: WeightedDecCoin{
+					Asset:  wp.Borrow.Asset.Add(add.Borrow.Asset),
+					Weight: wp.Borrow.Weight,
+				},
+			})
+		} else {
+			sum = append(sum, wp)
+		}
+	}
+	if !found {
+		sum = append(sum, add)
+	}
+	// sorts the sum. Fixes unsorted input as well.
+	sort.SliceStable(sum, func(i, j int) bool {
+		return sum[i].before(sum[j])
 	})
 	return sum
 }
@@ -171,4 +217,9 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 // canCombine returns true if the borrow and collateral denoms of two WeightedSpecialPair are equal
 func (wsp WeightedSpecialPair) canCombine(b WeightedSpecialPair) bool {
 	return wsp.Collateral.Denom == b.Collateral.Denom && wsp.Borrow.Denom == b.Borrow.Denom
+}
+
+// canCombine returns true if the borrow and collateral denoms of two WeightedNormalPair are equal
+func (wnp WeightedNormalPair) canCombine(b WeightedNormalPair) bool {
+	return wnp.Collateral.Asset.Denom == b.Collateral.Asset.Denom && wnp.Borrow.Asset.Denom == b.Borrow.Asset.Denom
 }

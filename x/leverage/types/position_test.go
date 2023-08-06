@@ -68,6 +68,8 @@ var orderedPairs = []types.SpecialAssetPair{
 	testPair("HHHH", "HHHH", "0.1", "0.1"),
 }
 
+// TestBorrowLimit verifies the borrow limit and liquidation threshold of various positions created
+// from given borrowed and collateral values after token weights and special pairs are applied.
 func TestBorrowLimit(t *testing.T) {
 	type testCase struct {
 		collateral           sdk.DecCoins
@@ -338,6 +340,48 @@ func TestBorrowLimit(t *testing.T) {
 			sdk.MustNewDecFromStr(tc.liquidationthreshold).String(),
 			liquidationPosition.Limit().String(),
 			tc.msg+" liquidation threshold",
+		)
+	}
+}
+
+func TestMaxBorrow(t *testing.T) {
+	type testCase struct {
+		collateral     sdk.DecCoins
+		borrow         sdk.DecCoins
+		maxBorrowDenom string
+		maxBorrow      string
+		msg            string
+	}
+
+	testCases := []testCase{
+		{
+			// single asset
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(),
+			// collateral weight 0.1, should be able to borrow 100 A
+			"AAAA",
+			"10.00",
+			"simple A max(A)",
+		},
+	}
+
+	for _, tc := range testCases {
+		borrowPosition := types.NewAccountPosition(
+			orderedTokens,
+			orderedPairs,
+			tc.collateral,
+			tc.borrow,
+			false,
+		)
+		//if !sdk.MustNewDecFromStr(tc.maxBorrow).Equal(borrowPosition.MaxBorrow(tc.maxBorrowDenom)) {
+		//	assert.Equal(t, borrowPosition.String(), "borrow limit position "+tc.msg)
+		//}
+		assert.Equal(t,
+			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
+			borrowPosition.MaxBorrow(tc.maxBorrowDenom).String(),
+			tc.msg+" max borrow",
 		)
 	}
 }

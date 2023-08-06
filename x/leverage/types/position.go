@@ -212,7 +212,7 @@ func NewAccountPosition(
 			sortedBorrowValue = sortedBorrowValue.Sub(bCoin)
 			sortedCollateralValue = sortedCollateralValue.Sub(cCoin)
 			// create a normal asset pair and add it to the account position
-			position.normalPairs = append(position.normalPairs, WeightedNormalPair{
+			position.normalPairs = position.normalPairs.Add(WeightedNormalPair{
 				Collateral: WeightedDecCoin{
 					Asset:  cCoin,
 					Weight: position.tokenWeight(cDenom),
@@ -265,6 +265,12 @@ func (ap *AccountPosition) tokenWeight(denom string) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
+// hasToken returns true if a token is registered
+func (ap *AccountPosition) hasToken(denom string) bool {
+	_, ok := ap.tokens[denom]
+	return ok
+}
+
 // Limit computes the borrow limit or liquidation threshold of a position, depending on position.isForLiquidation.
 // The result may be less or more than its borrowed value.
 func (ap *AccountPosition) Limit() sdk.Dec {
@@ -292,6 +298,7 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 // MaxBorrow computes the maximum USD value of a given base token denom a position can borrow
 // without exceeding its borrow limit.
 func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
+	borrowed := sdk.ZeroDec()
 	// An initialized account position already has special asset pairs matched up, but these pairs
 	// could change due to new borrow.
 	//
@@ -313,7 +320,12 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	// - collect unpaired collateral value
 	//		- if none, no new borrows are possible
 	// - ...
-	return sdk.ZeroDec()
+	//
+	// TODO: the rest of the steps
+	//
+	// borrow the maximum possible amount against all remaining unpaired collateral
+	borrowed = borrowed.Add(ap.fillOrdinaryCollateral(denom))
+	return borrowed
 }
 
 // MaxWithdraw computes the maximum USD value of a given base token denom a position can withdraw
@@ -382,3 +394,18 @@ Probably these functions should progressively limit their own scope if they're g
 operation which displaces a borrow or collateral can only affect assets below its row (or maybe above in the case
 of having the same weight?)
 */
+
+//
+//
+//
+//
+//
+
+// Current Thoughts: Have to modify the position object
+// 1 - function which fills empty (non-special) spots
+//		- straightforward. returns amount filled.
+// 2 - function which displaces ordinary assets which sort below an input, into empty spots.
+//		- actually climbs the ordinary assets, pulling borrows downward
+// etc = (more steps)
+// function which withdraws from normal assets (for displacing and maxwithdraw)
+// function which displaces ordinary assets into special? or vv
