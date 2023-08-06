@@ -13,7 +13,7 @@ import (
 // If the requested token denom did not exist or the borrower was already
 // at or over their borrow limit, this is a no-op which returns zero.
 func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
-	if len(ap.surplusCollateral) == 0 {
+	if len(ap.unpairedCollateral) == 0 {
 		return sdk.ZeroDec()
 	}
 	if !ap.hasToken(denom) {
@@ -26,8 +26,8 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 	total := sdk.ZeroDec()
 	// ignores collateral with weight of zero
 	ineligible := WeightedDecCoins{}
-	// converts surplus collateral into normal asset pairs with new borrow
-	for i, uc := range ap.surplusCollateral {
+	// converts unpaired collateral into normal asset pairs with new borrow
+	for i, uc := range ap.unpairedCollateral {
 		weight := sdk.MinDec(uc.Weight, borrowFactor)
 		if weight.IsPositive() {
 			bCoin := sdk.NewDecCoinFromDec(denom, uc.Asset.Amount.Mul(weight))
@@ -43,20 +43,20 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 			})
 			// tracks how much was borrowed
 			total = total.Add(bCoin.Amount)
-			// clears surplus collateral which has now been borrowed against
-			ap.surplusCollateral[i].Asset.Amount = sdk.ZeroDec()
+			// clears unpaired collateral which has now been borrowed against
+			ap.unpairedCollateral[i].Asset.Amount = sdk.ZeroDec()
 		} else {
 			ineligible = ineligible.Add(uc)
 		}
 	}
-	// the only remaining surplus collateral is that which cannot be borrowed against
-	ap.surplusCollateral = ineligible
+	// the only remaining unpaired collateral is that which cannot be borrowed against
+	ap.unpairedCollateral = ineligible
 	return total
 }
 
 // demoteBorrowsAfter takes any borrows which would be sorted after an input borrowed denom
-// and matches them with surplus collateral, and then ordinary collateral starting at the
-// lowest in the list. And freed up collateral is moved to the position's surplus collateral,
+// and matches them with unpaired collateral, and then ordinary collateral starting at the
+// lowest in the list. And freed up collateral is moved to the position's unpaired collateral,
 // where it can be used by other operations such as fillOrdinaryCollateral.
 func (ap *AccountPosition) demoteBorrowsAfter(denom string) {
 	//

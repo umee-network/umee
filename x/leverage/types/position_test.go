@@ -182,7 +182,7 @@ func TestBorrowLimit(t *testing.T) {
 			sdk.NewDecCoins(
 				coin.Dec("GGGG", "165"),
 			),
-			// significantly over borrow limit, so calculation subtracts value of surplus borrows
+			// significantly over borrow limit, so calculation subtracts value of unpaired borrows
 			// from total borrowed value to determine borrow limit
 			"80.00",
 			"165.00",
@@ -285,7 +285,7 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("HHHH", "80"),
 			),
 			// 60 H consumes all 100 F collateral (weight 0.6 due to Special Pair).
-			// A remaining 20H is surplus borrowed value. Borrow limit equals value minus surplus.
+			// A remaining 20H is unpaired borrowed value. Borrow limit equals value minus unpaired.
 			// Meanwhile, 80A consumes 100 F collateral (liquidation threshold 0.8 due to special pair).
 			// Liquidation threshold is exactly borrowed value.
 			"60.00",
@@ -301,9 +301,9 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("HHHH", "100"),
 			),
 			// 60 H consumes all 100 F collateral (weight 0.6 due to Special Pair).
-			// A remaining 40H is surplus borrowed value. Borrow limit equals value minus surplus.
+			// A remaining 40H is unpaired borrowed value. Borrow limit equals value minus unpaired.
 			// 80 H consumes all 100 F collateral (liquidation threshold 0.8 due to Special Pair).
-			// A remaining 20H is surplus borrowed value. Liquidation threshold equals value minus surplus.
+			// A remaining 20H is unpaired borrowed value. Liquidation threshold equals value minus unpaired.
 			"60.00",
 			"80.00",
 			"F -> H above liquidation threshold",
