@@ -169,7 +169,9 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 // normal pairs with specified collateral. There are two cases: one where the entire collateral amount of
 // the input denom is freed up, and another where a partial amount must remain paired with existing
 // borrows. Returns the value withdrawn, whether the withdrawal had to stop before withdrawing
-// all of the selected collateral, and any errors.
+// all of the selected collateral, and any errors. The account position should not be reused
+// after this calculation until its normal pairs are redone.
+// TODO: explain and re-evaluate above
 func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
@@ -181,7 +183,6 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 	unpairedBorrows := WeightedDecCoins{}
 	// collateral and borrows are taken from normal pairs
 	for _, np := range ap.normalPairs {
-		// if the collateral in each ordinary pair should be kept
 		if np.Collateral.before(WeightedDecCoin{
 			Asset:  sdk.NewDecCoin(denom, sdk.ZeroInt()),
 			Weight: ap.tokenWeight(denom),
@@ -194,11 +195,11 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 			unpairedCollateral = unpairedCollateral.Add(np.Collateral)
 		}
 	}
-	// initial unpaired collateral is also added to the pre-sorted pool of collateral to pair
+	// initial unpaired collateral is also added to the pool of collateral to pair
 	for _, c := range ap.unpairedCollateral {
 		unpairedCollateral = unpairedCollateral.Add(c)
 	}
-	// track initial amount of input denom
+	// track initial amount of input denom (excluding special pairs)
 	initialAmount := unpairedCollateral.Total(denom)
 	// match assets into normal asset pairs, removing matched value from sortedCollateral and sortedBorrows
 	// unlike NewAccountPosition, this prioritizes the lowest weight borrows and collateral first
@@ -236,10 +237,10 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 
 		// skip zero positions.
 		if cCoin.IsPositive() || bCoin.IsPositive() {
-			// subtract newly paired assets from unsorted assets
+			// subtract newly paired assets from unpaired assets
 			unpairedBorrows = unpairedBorrows.Sub(bCoin)
 			unpairedCollateral = unpairedCollateral.Sub(cCoin)
-			// create a normal asset pair and add it to the account position
+			// create a normal asset pair and add it to the new list of normal pairs
 			normalPairs = normalPairs.Add(WeightedNormalPair{
 				Collateral: WeightedDecCoin{
 					Asset:  cCoin,
@@ -256,8 +257,7 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 	// now there should be unpaired collateral left over, but no unpaired borrows.
 	// the maximum amount of input denom collateral has been moved to unpaired collateral,
 	// but any additional unpaired collateral is also abnormal, having been paired from lowest
-	// to highest
-	// all normal pairs have been created in their new order.
+	// to highest. all normal pairs have been created in their new order.
 
 	// overwrite the position's affected assets
 	ap.normalPairs = normalPairs
@@ -269,7 +269,7 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 			if cv.Asset.Denom == denom {
 				withdrawn = withdrawn.Add(cv.Asset.Amount)
 			} else {
-				// sort remaining unpaired collateral by collateral weight (or liquidation threshold) using Add function
+				// sort remaining unpaired collateral using Add function
 				ap.unpairedCollateral = ap.unpairedCollateral.Add(cv)
 			}
 		}
