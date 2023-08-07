@@ -60,6 +60,8 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	assert.NilError(t, err)
 	assert.DeepEqual(t, sdk.MustNewDecFromStr("30.00"), maxBorrow)
 	// TODO: perfect the behavior of MaxBorrow and test that it matches finalPosition below.
+	// It would need to move the collateral A in the special pair with C to the more efficient
+	// pair with B, demoting the C borrow to ordinary assets.
 	assert.Equal(t,
 		"special:\n"+
 			"  50.000000000000000000AAAA, 25.000000000000000000BBBB, 0.500000000000000000\n"+
