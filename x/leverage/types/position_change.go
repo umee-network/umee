@@ -43,8 +43,9 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 					Weight: ap.tokenWeight(denom),
 				},
 			})
-			// tracks how much was borrowed
+			// tracks how much was borrowed, and adds it to position
 			total = total.Add(bCoin.Amount)
+			ap.borrowedValue = total.Add(bCoin.Amount)
 			// clears unpaired collateral which has now been borrowed against
 			ap.unpairedCollateral[i].Asset.Amount = sdk.ZeroDec()
 		} else {
@@ -53,7 +54,6 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 	}
 	// the only remaining unpaired collateral is that which cannot be borrowed against
 	ap.unpairedCollateral = ineligible
-	// TODO: add new borrows to total value
 	return total
 }
 
