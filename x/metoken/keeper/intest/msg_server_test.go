@@ -778,8 +778,8 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 	}
 }
 
-func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
-	index := mocks.StableIndex(mocks.MeUSDDenom)
+func TestMsgServer_Swap_EdgeCase(t *testing.T) {
+	index := mocks.NonStableIndex(mocks.MeNonStableDenom)
 
 	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
@@ -793,38 +793,31 @@ func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// create and fund a user with 100 IST
+	// create and fund a user with 1 ETH
 	user := s.newAccount(
 		t,
-		coin.New(mocks.USDCBaseDenom, 100_000000),
+		coin.New(mocks.ETHBaseDenom, 1_000000000000000000),
 	)
 
-	// swap 1 USDC for me/USD in order to mint index tokens
-	_, err = msgServer.Swap(
+	k := app.MetokenKeeperB.Keeper(&ctx)
+	iMeTokenBalance, err := k.IndexBalances(mocks.MeNonStableDenom)
+	require.NoError(t, err)
+
+	// swap 0.00000001 ETH for meToken
+	// 0.00000001 ETH is less than the minimum amount of meToken, so the swap shouldn't change the balances
+	resp, err := msgServer.Swap(
 		ctx,
 		&metoken.MsgSwap{
-			User: user.String(), Asset: coin.New(mocks.USDCBaseDenom, 1_000000),
-			MetokenDenom: mocks.MeUSDDenom,
+			User: user.String(), Asset: coin.New(mocks.ETHBaseDenom, 10000000000),
+			MetokenDenom: mocks.MeNonStableDenom,
 		},
-	)
-	require.NoError(t, err)
-
-	// try to redeem 0.000001 me/USD (the minimum possible amount) for an asset with a higher price than me/USD
-	k := app.MetokenKeeperB.Keeper(&ctx)
-	iMeTokenBalance, err := k.IndexBalances(mocks.MeUSDDenom)
-	require.NoError(t, err)
-
-	resp, err := msgServer.Redeem(
-		ctx,
-		&metoken.MsgRedeem{User: user.String(), Metoken: coin.New(mocks.MeUSDDenom, 1), AssetDenom: mocks.ISTBaseDenom},
 	)
 	require.NoError(t, err)
 	require.Equal(t, sdkmath.ZeroInt(), resp.Fee.Amount)
 	require.Equal(t, sdkmath.ZeroInt(), resp.Returned.Amount)
 
 	// the result should be the same as the initial balance
-	// if me/USD amount redeemed is less than the minimum amount possible of an asset, no meTokens should be burned
-	fMeTokenBalance, err := k.IndexBalances(mocks.MeUSDDenom)
+	fMeTokenBalance, err := k.IndexBalances(mocks.MeNonStableDenom)
 	require.Equal(t, iMeTokenBalance, fMeTokenBalance)
 }
 
@@ -1594,6 +1587,56 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 			)
 		}
 	}
+}
+
+func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
+	index := mocks.StableIndex(mocks.MeUSDDenom)
+
+	s := initTestSuite(t, nil, nil)
+	msgServer, ctx, app := s.msgServer, s.ctx, s.app
+
+	_, err := msgServer.GovUpdateRegistry(
+		ctx, &metoken.MsgGovUpdateRegistry{
+			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			AddIndex:    []metoken.Index{index},
+			UpdateIndex: nil,
+		},
+	)
+	require.NoError(t, err)
+
+	// create and fund a user with 100 IST
+	user := s.newAccount(
+		t,
+		coin.New(mocks.USDCBaseDenom, 100_000000),
+	)
+
+	// swap 1 USDC for me/USD in order to mint index tokens
+	_, err = msgServer.Swap(
+		ctx,
+		&metoken.MsgSwap{
+			User: user.String(), Asset: coin.New(mocks.USDCBaseDenom, 1_000000),
+			MetokenDenom: mocks.MeUSDDenom,
+		},
+	)
+	require.NoError(t, err)
+
+	// try to redeem 0.000001 me/USD (the minimum possible amount) for an asset with a higher price than me/USD
+	k := app.MetokenKeeperB.Keeper(&ctx)
+	iMeTokenBalance, err := k.IndexBalances(mocks.MeUSDDenom)
+	require.NoError(t, err)
+
+	resp, err := msgServer.Redeem(
+		ctx,
+		&metoken.MsgRedeem{User: user.String(), Metoken: coin.New(mocks.MeUSDDenom, 1), AssetDenom: mocks.ISTBaseDenom},
+	)
+	require.NoError(t, err)
+	require.Equal(t, sdkmath.ZeroInt(), resp.Fee.Amount)
+	require.Equal(t, sdkmath.ZeroInt(), resp.Returned.Amount)
+
+	// the result should be the same as the initial balance
+	// if me/USD amount redeemed is less than the minimum amount possible of an asset, no meTokens should be burned
+	fMeTokenBalance, err := k.IndexBalances(mocks.MeUSDDenom)
+	require.Equal(t, iMeTokenBalance, fMeTokenBalance)
 }
 
 func verifyRedeem(
