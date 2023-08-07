@@ -25,16 +25,23 @@ func init() {
 
 const minProposalTitleLen = 3
 
-// AssertGovAuthority errors is the authority is the gov module address
+// AssertGovAuthority errors is the authority is not the gov module address. Panics if
+// the gov module address is not set during the package initialization.
 func AssertGovAuthority(authority string) error {
-	if govModuleAddr == "" {
-		return sdkerrors.ErrLogic.Wrap("govModuleAddrs in the checkers package must be set before using this function")
-	}
-	if authority != govModuleAddr {
+	if !IsGovAuthority(authority) {
 		return govtypes.ErrInvalidSigner.Wrapf(
 			"expected %s, got %s", govModuleAddr, authority)
 	}
 	return nil
+}
+
+// IsGovAuthority returns true if the authority is the gov module address. Panics if
+// the gov module address is not set during the package initialization.
+func IsGovAuthority(authority string) bool {
+	if govModuleAddr == "" {
+		panic("govModuleAddrs in the checkers package must be set before using this function")
+	}
+	return authority == govModuleAddr
 }
 
 // ValidateProposal checks the format of the title, description, and authority of a gov message.
