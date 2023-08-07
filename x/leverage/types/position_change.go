@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -155,7 +157,7 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 	// any remaining borrows could not be paired (should not occur)
 	for _, bv := range unpairedBorrows {
 		if bv.Asset.IsPositive() {
-			return ErrInvalidPosition.Wrap("borrow position over limit following displaceBorrowsAfter")
+			return fmt.Errorf("borrow position over limit following displaceBorrowsAfter(%s)", denom)
 		}
 	}
 	return nil

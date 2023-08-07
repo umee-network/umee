@@ -245,7 +245,7 @@ func NewAccountPosition(
 // validates basic properties of a position that should always be true
 func (ap *AccountPosition) Validate() error {
 	if len(ap.unpairedCollateral) > 0 && len(ap.unpairedBorrows) > 0 {
-		return ErrInvalidPosition.Wrap("has both unpaired borrows and unpaired collateral")
+		return fmt.Errorf("position has both unpaired borrows and unpaired collateral")
 	}
 	totalCollateral := sdk.ZeroDec()
 	totalBorrowed := sdk.ZeroDec()
@@ -266,10 +266,10 @@ func (ap *AccountPosition) Validate() error {
 	}
 
 	if !totalCollateral.Equal(ap.collateralValue) {
-		return ErrInvalidPosition.Wrap("total collateral value mismatch")
+		return fmt.Errorf("total collateral value mismatch")
 	}
 	if !totalBorrowed.Equal(ap.borrowedValue) {
-		return ErrInvalidPosition.Wrap("total borrow value mismatch")
+		return fmt.Errorf("total borrow value mismatch")
 	}
 	return nil
 }
