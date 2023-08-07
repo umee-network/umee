@@ -181,17 +181,17 @@ func (ap *AccountPosition) displaceBorrowsFromCollateralDenom(denom string) erro
 // add themselves other special asset pairs or pair with normal collateral. In both of those cases,
 // existing collateral may be pulled from its current special or normal asset pairs (if lower weight)
 // to cover the displaced borrow, thus creating new displaced normal or special borrows which must
-// themselves be handled.
-func (ap *AccountPosition) displaceBorrowsFromSpecialPair(denom string) error {
+// themselves be handled. Returns the amount of borrows displaced, a boolean indicating whether the
+// borrow was completely displaced, and an error on failure.
+func (ap *AccountPosition) displaceBorrowsFromSpecialPair(denom string) (sdk.Dec, bool, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
-		return nil
+		return sdk.ZeroDec(), false, nil
 	}
 	// TODO: steps
 	// might need to create a copy of account position to avoid mutating the original, when figuring out
 	// how much can be displaced. otherwise, use reversible actions only.
-	return nil
-	// should this return the amount displaced?
+	return sdk.ZeroDec(), true, nil
 }
 
 // displaceCollateralFromSpecialPair attempts to displace as many collateral assets from a given special
@@ -200,15 +200,16 @@ func (ap *AccountPosition) displaceBorrowsFromSpecialPair(denom string) error {
 // existing collateral may be pulled from its current special or normal asset pairs (if lower weight)
 // to cover the displaced borrow, thus creating new displaced normal or special borrows which must
 // themselves be handled. There are two cases which this function can result in: one where the full
-// amount of collateral was displaced, and one where it could only be partially displaced.
-func (ap *AccountPosition) displaceCollateralFromSpecialPair(denom string) error {
+// amount of collateral was displaced, and one where it could only be partially displaced. Returns
+// the amount of collateral displaced, a boolean indicating whether the collateral was completely
+// displaced, and an error on failure.
+func (ap *AccountPosition) displaceCollateralFromSpecialPair(denom string) (sdk.Dec, bool, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
-		return nil
+		return sdk.ZeroDec(), false, nil
 	}
 	// TODO: steps
 	// might need to create a copy of account position to avoid mutating the original, when figuring out
 	// how much can be displaced. otherwise, use reversible actions only.
-	return nil
-	// should this return the amount displaced?
+	return sdk.ZeroDec(), true, nil
 }
