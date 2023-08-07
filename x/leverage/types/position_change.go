@@ -9,7 +9,7 @@ import (
 // fillOrdinaryCollateral finds all unused collateral assets in a position
 // and borrows the maximum amount of an input denom against them. Does not
 // interact with special asset pairs or move borrows around between collateral,
-// so must be called only after a position has been rearranged to accomodate
+// so must be called only after a position has been rearranged to accommodate
 // a max borrow. Returns the amount of borrows added. The account position
 // is mutated to include the new borrows, and will be at its borrow limit.
 // If the requested token denom did not exist or the borrower was already
