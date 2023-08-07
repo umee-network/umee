@@ -59,7 +59,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	maxBorrow, err := initialPosition.MaxBorrow("BBBB")
 	assert.NilError(t, err)
 	assert.DeepEqual(t, sdk.MustNewDecFromStr("30.00"), maxBorrow)
-	// TODO: peerfect the behavior of MaxBorrow and test that it matches finalPosition below.
+	// TODO: perfect the behavior of MaxBorrow and test that it matches finalPosition below.
 	assert.Equal(t,
 		"special:\n"+
 			"  50.000000000000000000AAAA, 25.000000000000000000BBBB, 0.500000000000000000\n"+
