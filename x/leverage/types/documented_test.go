@@ -52,6 +52,13 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 			"  {260.000000000000000000DDDD 0.100000000000000000}, -\n",
 		initialPosition.String(),
 	)
+	borrowLimit := initialPosition.Limit()
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("71.00"), borrowLimit) // $45 borrowed + $26 generic max borrow
+
+	// why is this 25? must investigate, should not be below 26
+	maxBorrow, err := initialPosition.MaxBorrow("BBBB")
+	assert.NilError(t, err)
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("7.77"), maxBorrow)
 
 	// This borrow position reproduces the final table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
 	finalPosition, err := types.NewAccountPosition(
