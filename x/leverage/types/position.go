@@ -352,7 +352,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 	//			- borrow until borrow limit is reached
 	//
 	// To calculate max borrow exactly, this procedure would need to be executed in order until the
-	// position runs out of surplus collateral.
+	// position runs out of unpaired collateral.
 	borrowed := sdk.ZeroDec()
 	// for each special asset pair which allows this borrowed token, starting with highest weight
 	for i, sp := range ap.specialPairs {
@@ -390,7 +390,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 
 // MaxWithdraw computes the maximum USD value of a given base token denom a position can withdraw
 // from its collateral.
-func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
+func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, error) {
 	// An initialized account position already has special asset pairs matched up, but these pairs
 	// could change due to withdrawal.
 	//
@@ -405,7 +405,17 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	//				- can displace normal borrowed assets
 	//					- if reached borrow limit, stop here
 	// - if borrow limit still not reached, user is free to withdraw maxmimum
-	return sdk.ZeroDec()
+	//
+	// To calculate max withdraw exactly, this procedure would need to be executed in order until the
+	// position runs out of unpaired collateral or all collateral of the input denom is withdrawn.
+	withdrawn, done, err := ap.withdrawNormalCollateral(denom)
+	if done || err != nil {
+		return withdrawn, err
+	}
+
+	// TODO: steps
+
+	return withdrawn, nil
 }
 
 /*

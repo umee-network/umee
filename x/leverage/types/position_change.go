@@ -168,9 +168,9 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 // withdrawNormalCollateral attempts to displace as many borrowed assets as possible away from
 // normal pairs with specified collateral. There are two cases: one where the entire collateral amount of
 // the input denom is freed up, and another where a partial amount must remain paired with existing
-// borrows. Returns the value withdrawn, whether the withdrawal had to stop before withdrawing
-// all of the selected collateral, and any errors. The account position should not be reused
-// after this calculation until its normal pairs are redone.
+// borrows. Returns the value withdrawn, a boolean indicating whether the position has reached
+// its borrow limit, and any errors. The account position should not be reused after this calculation
+// until its normal pairs are redone.
 // TODO: explain and re-evaluate above
 func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
@@ -199,8 +199,6 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 	for _, c := range ap.unpairedCollateral {
 		unpairedCollateral = unpairedCollateral.Add(c)
 	}
-	// track initial amount of input denom (excluding special pairs)
-	initialAmount := unpairedCollateral.Total(denom)
 	// match assets into normal asset pairs, removing matched value from sortedCollateral and sortedBorrows
 	// unlike NewAccountPosition, this prioritizes the lowest weight borrows and collateral first
 	i := len(unpairedCollateral) - 1
@@ -282,8 +280,8 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 			)
 		}
 	}
-	// returns true if collateral of the input denom remains
-	return withdrawn, initialAmount.GT(withdrawn), nil
+	// returns true if unpaired collateral is exhausted
+	return withdrawn, len(ap.unpairedCollateral) == 0, nil
 }
 
 // displaceBorrowsFromSpecialPair attempts to displace as many borrowed assets from a given special
