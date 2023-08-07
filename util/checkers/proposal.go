@@ -25,8 +25,8 @@ func init() {
 
 const minProposalTitleLen = 3
 
-// IsGovAuthority errors is the authority is the gov module address
-func IsGovAuthority(authority string) error {
+// AssertGovAuthority errors is the authority is the gov module address
+func AssertGovAuthority(authority string) error {
 	if govModuleAddr == "" {
 		return sdkerrors.ErrLogic.Wrap("govModuleAddrs in the checkers package must be set before using this function")
 	}
@@ -39,7 +39,7 @@ func IsGovAuthority(authority string) error {
 
 // ValidateProposal checks the format of the title, description, and authority of a gov message.
 func ValidateProposal(title, description, authority string) error {
-	if err := IsGovAuthority(authority); err != nil {
+	if err := AssertGovAuthority(authority); err != nil {
 		return err
 	}
 	if len(strings.TrimSpace(title)) < minProposalTitleLen {

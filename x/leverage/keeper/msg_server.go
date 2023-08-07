@@ -2,10 +2,12 @@ package keeper
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/checkers"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/sdkutil"
 	"github.com/umee-network/umee/v5/x/leverage/types"
@@ -548,6 +550,8 @@ func (s msgServer) GovUpdateRegistry(
 		regDenoms[token.BaseDenom] = token
 		regSymbols[strings.ToUpper(token.SymbolDenom)] = true
 	}
+
+	//err := checkers.IsGovAuthority(msg.Authority)
 
 	// update the token settings
 	// err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regDenoms, regSymbols, true)

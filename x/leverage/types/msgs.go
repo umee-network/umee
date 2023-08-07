@@ -101,7 +101,7 @@ func (msg MsgGovUpdateSpecialAssets) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 
