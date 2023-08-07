@@ -373,6 +373,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 			// also add the borrowed assets
 			ap.specialPairs[i].Borrow.Amount = sp.Borrow.Amount.Add(b)
 			ap.borrowedValue = ap.borrowedValue.Add(b)
+			borrowed = borrowed.Add(b)
 		}
 	}
 	// rearrange normal assets such that borrows which are lower weight than the
