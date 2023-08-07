@@ -53,6 +53,7 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 	}
 	// the only remaining unpaired collateral is that which cannot be borrowed against
 	ap.unpairedCollateral = ineligible
+	// TODO: add new borrows to total value
 	return total
 }
 
@@ -276,14 +277,15 @@ func (ap *AccountPosition) displaceBorrowsFromCollateralDenom(denom string) erro
 
 // displaceBorrowsFromSpecialPair attempts to displace as many borrowed assets from a given special
 // asset pair as possible. This is used to free up the collateral in that pair so that it may be
-// withdrawn. Displaced borrows must be absorbed by normal collateral.
+// withdrawn. Displaced borrows must be absorbed by normal collateral. Returns the amount of
+// collateral removed from the pair, a boolean indicating whether the collateral was completely
+// removed (instead of partially), and an error. Mutated position
 func (ap *AccountPosition) displaceBorrowsFromSpecialPair(denom string) (sdk.Dec, bool, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
 		return sdk.ZeroDec(), false, nil
 	}
 	// TODO: steps
-	// might need to create a copy of account position to avoid mutating the original, when figuring out
-	// how much can be displaced. otherwise, use reversible actions only.
+	// TODO: subtract removed collateral from total value
 	return sdk.ZeroDec(), true, nil
 }
