@@ -117,9 +117,6 @@ func NewAccountPosition(
 		position.specialPairs = position.specialPairs.Add(wp)
 	}
 
-	// !! TODO: sort.SliceStable collateralValueToSort and borrowValueToSort
-	// so normal pairs aren't disrupted
-
 	for _, cv := range unsortedCollateralValue {
 		// track total collateral value
 		position.collateralValue = position.collateralValue.Add(cv.Amount)
@@ -129,7 +126,7 @@ func NewAccountPosition(
 		position.borrowedValue = position.borrowedValue.Add(bv.Amount)
 	}
 
-	// match assets into special asset pairs, removing matched value from borrowedValueToSort and collateralValueToSort
+	// match assets into special asset pairs, removing matched value from unsortedBorrowValue and unsortedCollateralValue
 	for i, p := range position.specialPairs {
 		b := unsortedBorrowValue.AmountOf(p.Borrow.Denom)
 		c := unsortedCollateralValue.AmountOf(p.Collateral.Denom)
@@ -158,18 +155,18 @@ func NewAccountPosition(
 		}
 	}
 
-	sortedCollateralValue := WeightedDecCoins{}
+	unpairedCollateral := WeightedDecCoins{}
 	for _, cv := range unsortedCollateralValue {
 		// sort collateral assets which are not part of special pairs
-		sortedCollateralValue = sortedCollateralValue.Add(WeightedDecCoin{
+		unpairedCollateral = unpairedCollateral.Add(WeightedDecCoin{
 			Asset:  cv,
 			Weight: position.tokenWeight(cv.Denom),
 		})
 	}
-	sortedBorrowValue := WeightedDecCoins{}
+	unpairedBorrows := WeightedDecCoins{}
 	for _, bv := range unsortedBorrowValue {
 		// sort borrowed assets which are not part of special pairs
-		sortedBorrowValue = sortedBorrowValue.Add(WeightedDecCoin{
+		unpairedBorrows = unpairedBorrows.Add(WeightedDecCoin{
 			Asset:  bv,
 			Weight: position.tokenWeight(bv.Denom),
 		})
@@ -177,11 +174,11 @@ func NewAccountPosition(
 
 	// match assets into normal asset pairs, removing matched value from borrowedValueToSort and collateralValueToSort
 	var i, j int
-	for i < len(sortedCollateralValue) && j < len(sortedBorrowValue) {
-		cDenom := sortedCollateralValue[i].Asset.Denom
-		bDenom := sortedBorrowValue[j].Asset.Denom
-		c := sortedCollateralValue[i].Asset.Amount
-		b := sortedBorrowValue[j].Asset.Amount
+	for i < len(unpairedCollateral) && j < len(unpairedBorrows) {
+		cDenom := unpairedCollateral[i].Asset.Denom
+		bDenom := unpairedBorrows[j].Asset.Denom
+		c := unpairedCollateral[i].Asset.Amount
+		b := unpairedBorrows[j].Asset.Amount
 		w := sdk.MinDec(
 			// for normal asset pairs, both tokens limit the collateral weight of the pair
 			position.tokenWeight(cDenom),
@@ -194,7 +191,7 @@ func NewAccountPosition(
 			// all of the collateral is used (note: this case includes collateral with zero weight)
 			cCoin = sdk.NewDecCoinFromDec(cDenom, c)
 			// only some of the borrow, equal to collateral value * collateral weight is covered
-			bCoin = sdk.NewDecCoinFromDec(bDenom, c.Mul(w))
+			bCoin = sdk.NewDecCoinFromDec(bDenom, pairBorrowLimit)
 			// next collateral
 			i++
 		} else {
@@ -209,8 +206,8 @@ func NewAccountPosition(
 		// skip zero positions.
 		if cCoin.IsPositive() || bCoin.IsPositive() {
 			// subtract newly paired assets from unsorted assets
-			sortedBorrowValue = sortedBorrowValue.Sub(bCoin)
-			sortedCollateralValue = sortedCollateralValue.Sub(cCoin)
+			unpairedBorrows = unpairedBorrows.Sub(bCoin)
+			unpairedCollateral = unpairedCollateral.Sub(cCoin)
 			// create a normal asset pair and add it to the account position
 			position.normalPairs = position.normalPairs.Add(WeightedNormalPair{
 				Collateral: WeightedDecCoin{
@@ -226,7 +223,7 @@ func NewAccountPosition(
 	}
 
 	// any remaining collateral could not be paired (so borrower is under limit)
-	for _, cv := range sortedCollateralValue {
+	for _, cv := range unpairedCollateral {
 		if cv.Asset.IsPositive() {
 			// sort collateral by collateral weight (or liquidation threshold) using Add function
 			position.unpairedCollateral = position.unpairedCollateral.Add(cv)
@@ -234,7 +231,7 @@ func NewAccountPosition(
 	}
 
 	// any remaining borrows could not be paired (so borrower is over limit)
-	for _, bv := range sortedBorrowValue {
+	for _, bv := range unpairedBorrows {
 		if bv.Asset.IsPositive() {
 			// sort borrows by collateral weight (or liquidation threshold) using Add function
 			position.unpairedBorrows = position.unpairedBorrows.Add(bv)
@@ -245,7 +242,7 @@ func NewAccountPosition(
 	return position, position.Validate()
 }
 
-// validates basic properties of a position that should aloways be true
+// validates basic properties of a position that should always be true
 func (ap *AccountPosition) Validate() error {
 	if len(ap.unpairedCollateral) > 0 && len(ap.unpairedBorrows) > 0 {
 		return ErrInvalidPosition.Wrap("has both unpaired borrows and unpaired collateral")
@@ -331,7 +328,7 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 // MaxBorrow computes the maximum USD value of a given base token denom a position can borrow
 // without exceeding its borrow limit. Mutates the AccountPosition to show the new borrow amount,
 // meaning subsequent calls to MaxBorrow will return zero.
-func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
+func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 	borrowed := sdk.ZeroDec()
 	// An initialized account position already has special asset pairs matched up, but these pairs
 	// could change due to new borrow.
@@ -356,14 +353,17 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	// - ...
 	//
 	// TODO: the rest of the steps
-	//
+
 	// rearrange normal assets such that borrows which are lower weight than the
 	// requested denom are pushed below unpaired collateral, and any collateral
 	// which can be used to borrow the input denom becomes the new unpaired
-	// ap.demoteBorrowsAfter(denom)
+	err := ap.displaceBorrowsAfter(denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
 	// borrow the maximum possible amount of input denom against all remaining unpaired collateral
 	borrowed = borrowed.Add(ap.fillOrdinaryCollateral(denom))
-	return borrowed
+	return borrowed, nil
 }
 
 // MaxWithdraw computes the maximum USD value of a given base token denom a position can withdraw

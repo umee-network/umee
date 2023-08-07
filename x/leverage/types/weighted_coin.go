@@ -105,6 +105,7 @@ func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 				Asset:  c.Asset.Add(add.Asset),
 				Weight: c.Weight,
 			})
+			found = true
 		} else {
 			sum = append(sum, c)
 		}
@@ -167,6 +168,7 @@ func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecia
 				Borrow:        wp.Borrow.Add(add.Borrow),
 				SpecialWeight: wp.SpecialWeight,
 			})
+			found = true
 		} else {
 			sum = append(sum, wp)
 		}
@@ -200,6 +202,7 @@ func (wnp WeightedNormalPairs) Add(add WeightedNormalPair) (sum WeightedNormalPa
 					Weight: wp.Borrow.Weight,
 				},
 			})
+			found = true
 		} else {
 			sum = append(sum, wp)
 		}

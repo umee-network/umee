@@ -387,6 +387,54 @@ func TestMaxBorrow(t *testing.T) {
 			"6.00",
 			"simple A->I max(A)",
 		},
+		{
+			// single asset, with multiple existing borrows, borrowing lowest-weighted asset
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "1"),
+				coin.Dec("CCCC", "1"),
+				coin.Dec("EEEE", "1"),
+				coin.Dec("IIII", "1"),
+			),
+			// collateral weight 0.1, should be able to borrow 10 total
+			"AAAA",
+			"6.00",
+			"A->ACEI max(A)",
+		},
+		{
+			// single asset, with multiple existing borrows, borrowing mid-weighted asset
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "1"),
+				coin.Dec("CCCC", "1"),
+				coin.Dec("EEEE", "1"),
+				coin.Dec("IIII", "1"),
+			),
+			// collateral weight 0.1, should be able to borrow 10 total
+			"CCCC",
+			"6.00",
+			"A->ACEI max(C)",
+		},
+		{
+			// single asset, with multiple existing borrows, borrowing highest-weighted asset
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "1"),
+				coin.Dec("CCCC", "1"),
+				coin.Dec("EEEE", "1"),
+				coin.Dec("IIII", "1"),
+			),
+			// collateral weight 0.1, should be able to borrow 10 total
+			"IIII",
+			"6.00",
+			"A->ACEI max(I)",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -398,9 +446,11 @@ func TestMaxBorrow(t *testing.T) {
 			false,
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
+		maxborrow, err := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
+		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
-			borrowPosition.MaxBorrow(tc.maxBorrowDenom).String(),
+			maxborrow.String(),
 			tc.msg+" max borrow\n\n"+borrowPosition.String(),
 		)
 	}

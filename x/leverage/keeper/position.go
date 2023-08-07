@@ -68,5 +68,5 @@ func (k Keeper) GetAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLi
 
 	return types.NewAccountPosition(
 		tokenSettings, specialPairs, collateralValue, borrowedValue, isForLiquidation,
-	), nil
+	)
 }
