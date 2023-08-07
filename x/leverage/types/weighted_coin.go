@@ -120,11 +120,14 @@ func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 	return sum
 }
 
-// Total returns the total USD value in a WeightedDecCoins, unaffected by collateral weight
-func (wdc WeightedDecCoins) Total() sdk.Dec {
+// Total returns the total USD value in a WeightedDecCoins, unaffected by collateral weight.
+// If denom is not empty, returns a the amount of that denom.
+func (wdc WeightedDecCoins) Total(denom string) sdk.Dec {
 	total := sdk.ZeroDec()
 	for _, c := range wdc {
-		total = total.Add(c.Asset.Amount)
+		if denom == "" || c.Asset.Denom == denom {
+			total = total.Add(c.Asset.Amount)
+		}
 	}
 	return total
 }

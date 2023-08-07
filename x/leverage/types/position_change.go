@@ -165,14 +165,15 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 	return nil
 }
 
-// displaceBorrowsFromCollateralDenom attempts to displace as many borrowed assets as possible away from
+// withdrawNormalCollateral attempts to displace as many borrowed assets as possible away from
 // normal pairs with specified collateral. There are two cases: one where the entire collateral amount of
 // the input denom is freed up, and another where a partial amount must remain paired with existing
-// borrows.
-func (ap *AccountPosition) displaceBorrowsFromCollateralDenom(denom string) error {
+// borrows. Returns the value withdrawn, whether the withdrawal had to stop before withdrawing
+// all of the selected collateral, and any errors.
+func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
-		return nil
+		return sdk.ZeroDec(), true, nil
 	}
 	// all of the position's borrows and collateral will be rearranged
 	normalPairs := WeightedNormalPairs{}
@@ -197,6 +198,8 @@ func (ap *AccountPosition) displaceBorrowsFromCollateralDenom(denom string) erro
 	for _, c := range ap.unpairedCollateral {
 		unpairedCollateral = unpairedCollateral.Add(c)
 	}
+	// track initial amount of input denom
+	initialAmount := unpairedCollateral.Total(denom)
 	// match assets into normal asset pairs, removing matched value from sortedCollateral and sortedBorrows
 	// unlike NewAccountPosition, this prioritizes the lowest weight borrows and collateral first
 	i := len(unpairedCollateral) - 1
@@ -260,19 +263,27 @@ func (ap *AccountPosition) displaceBorrowsFromCollateralDenom(denom string) erro
 	ap.normalPairs = normalPairs
 	// overwrites unpaired collateral with newly freed assets from displacement
 	ap.unpairedCollateral = WeightedDecCoins{}
+	withdrawn := sdk.ZeroDec()
 	for _, cv := range unpairedCollateral {
 		if cv.Asset.IsPositive() {
-			// sort collateral by collateral weight (or liquidation threshold) using Add function
-			ap.unpairedCollateral = ap.unpairedCollateral.Add(cv)
+			if cv.Asset.Denom == denom {
+				withdrawn = withdrawn.Add(cv.Asset.Amount)
+			} else {
+				// sort remaining unpaired collateral by collateral weight (or liquidation threshold) using Add function
+				ap.unpairedCollateral = ap.unpairedCollateral.Add(cv)
+			}
 		}
 	}
 	// any remaining borrows could not be paired (should not occur)
 	for _, bv := range unpairedBorrows {
 		if bv.Asset.IsPositive() {
-			return fmt.Errorf("borrow position over limit following displaceBorrowsFromCollateralDenom(%s)", denom)
+			return sdk.ZeroDec(), true, fmt.Errorf(
+				"borrow position over limit following displaceBorrowsFromCollateralDenom(%s)", denom,
+			)
 		}
 	}
-	return nil
+	// returns true if collateral of the input denom remains
+	return withdrawn, initialAmount.GT(withdrawn), nil
 }
 
 // displaceBorrowsFromSpecialPair attempts to displace as many borrowed assets from a given special

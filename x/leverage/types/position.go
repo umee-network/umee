@@ -309,7 +309,7 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	// the distance from current borrowed value to the limit.
 
 	// if any borrows remain after matching, user is over borrow limit (or LT) by remaining value
-	remainingBorrowValue := ap.unpairedBorrows.Total()
+	remainingBorrowValue := ap.unpairedBorrows.Total("")
 	if remainingBorrowValue.IsPositive() {
 		return ap.borrowedValue.Sub(remainingBorrowValue)
 	}
@@ -329,7 +329,6 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 // without exceeding its borrow limit. Mutates the AccountPosition to show the new borrow amount,
 // meaning subsequent calls to MaxBorrow will return zero.
 func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
-	borrowed := sdk.ZeroDec()
 	// An initialized account position already has special asset pairs matched up, but these pairs
 	// could change due to new borrow.
 	//
@@ -343,13 +342,37 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 	//				- displaced borrow asset placed in unpaired assets
 	//					- can displace unpaired borrowed assets
 	//						- if reached borrow limit, stop here
-	// - borrow then added to unpaired assets
+	//		- can absorb collateral from normal pairs
+	//				- only up to the amount allowed by withdrawNormalCollateral
+	//						- if reached borrow limit, stop here
+	// - borrow then added to normal and unpaired assets
 	//		- can displace borrow assets of lower weight
 	//			- borrow until borrow limit is reached
 	//
-	// To calculate maximum new borrow (reverse procedure)
-	// TODO: the rest of the procedure before the final steps below
-
+	// To calculate max borrow exactly, this procedure would need to be executed in order until the
+	// position runs out of surplus collateral.
+	borrowed := sdk.ZeroDec()
+	// for each special asset pair which allows this borrowed token, starting with highest weight
+	for i, sp := range ap.specialPairs {
+		// TODO: naive MaxBorrow currently does not attempt to displace collateral from
+		// lower weight special pairs with the same borrow asset, so it will
+		// underestimate MaxBorrow when such pairs exist.
+		if sp.Borrow.Denom == denom {
+			// free up collateral by withdrawing it from the position
+			c, _, err := ap.withdrawNormalCollateral(sp.Collateral.Denom)
+			if err != nil {
+				return sdk.ZeroDec(), err
+			}
+			// calculate additional borrow amount
+			b := c.Mul(sp.SpecialWeight)
+			// add the freed collateral back to the position in a special pair
+			ap.specialPairs[i].Collateral.Amount = sp.Collateral.Amount.Add(c)
+			ap.collateralValue = ap.collateralValue.Add(c)
+			// also add the borrowed assets
+			ap.specialPairs[i].Borrow.Amount = sp.Borrow.Amount.Add(b)
+			ap.borrowedValue = ap.borrowedValue.Add(b)
+		}
+	}
 	// rearrange normal assets such that borrows which are lower weight than the
 	// requested denom are pushed below unpaired collateral, and any collateral
 	// which can be used to borrow the input denom becomes the new unpaired
