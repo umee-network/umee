@@ -168,14 +168,13 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 // withdrawNormalCollateral attempts to displace as many borrowed assets as possible away from
 // normal pairs with specified collateral. There are two cases: one where the entire collateral amount of
 // the input denom is freed up, and another where a partial amount must remain paired with existing
-// borrows. Returns the value withdrawn, a boolean indicating whether the position has reached
-// its borrow limit, and any errors. The account position should not be reused after this calculation
-// until its normal pairs are redone.
+// borrows. Returns the value withdrawn and any errors. The account position should not be
+// reused after this calculation until its normal pairs are redone.
 // TODO: explain and re-evaluate above
-func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool, error) {
+func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
-		return sdk.ZeroDec(), true, nil
+		return sdk.ZeroDec(), nil
 	}
 	// all of the position's borrows and collateral will be rearranged
 	normalPairs := WeightedNormalPairs{}
@@ -275,13 +274,12 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 	// any remaining borrows could not be paired (should not occur)
 	for _, bv := range unpairedBorrows {
 		if bv.Asset.IsPositive() {
-			return sdk.ZeroDec(), true, fmt.Errorf(
+			return sdk.ZeroDec(), fmt.Errorf(
 				"borrow position over limit following displaceBorrowsFromCollateralDenom(%s)", denom,
 			)
 		}
 	}
-	// returns true if unpaired collateral is exhausted
-	return withdrawn, len(ap.unpairedCollateral) == 0, nil
+	return withdrawn, nil
 }
 
 // displaceBorrowsFromSpecialPair attempts to displace as many borrowed assets from a given special

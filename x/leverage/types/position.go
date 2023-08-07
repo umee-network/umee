@@ -361,7 +361,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 		// underestimate MaxBorrow when such pairs exist.
 		if sp.Borrow.Denom == denom {
 			// free up collateral by withdrawing it from the position
-			c, _, err := ap.withdrawNormalCollateral(sp.Collateral.Denom)
+			c, err := ap.withdrawNormalCollateral(sp.Collateral.Denom)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
@@ -408,9 +408,9 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, error) {
 	//
 	// To calculate max withdraw exactly, this procedure would need to be executed in order until the
 	// position runs out of unpaired collateral or all collateral of the input denom is withdrawn.
-	withdrawn, done, err := ap.withdrawNormalCollateral(denom)
-	if done || err != nil {
-		return withdrawn, err
+	withdrawn, err := ap.withdrawNormalCollateral(denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
 	}
 
 	// TODO: steps
