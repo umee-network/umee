@@ -11,6 +11,11 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
+var (
+	noMinimumBorrowFactor   = sdk.MustNewDecFromStr("0.01")
+	highMinimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
+)
+
 func testToken(denom, cw, lt string) types.Token {
 	return types.Token{
 		BaseDenom:            denom,
@@ -317,6 +322,7 @@ func TestBorrowLimit(t *testing.T) {
 			tc.collateral,
 			tc.borrow,
 			false,
+			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" borrow limit\n\n"+borrowPosition.String())
 		assert.Equal(t,
@@ -330,6 +336,7 @@ func TestBorrowLimit(t *testing.T) {
 			tc.collateral,
 			tc.borrow,
 			true,
+			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" liquidation threshold\n\n"+liquidationPosition.String())
 		assert.Equal(t,
@@ -444,6 +451,7 @@ func TestMaxBorrow(t *testing.T) {
 			tc.collateral,
 			tc.borrow,
 			false,
+			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
 		maxborrow, err := borrowPosition.MaxBorrow(tc.maxBorrowDenom)

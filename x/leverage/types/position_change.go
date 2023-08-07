@@ -22,7 +22,7 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 	borrowFactor := sdk.MaxDec(
-		minimumBorrowFactor,
+		ap.minimumBorrowFactor,
 		ap.tokenWeight(denom),
 	)
 	total := sdk.ZeroDec()
@@ -102,7 +102,7 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 		w := sdk.MinDec(
 			// for normal asset pairs, both tokens limit the collateral weight of the pair
 			ap.tokenWeight(cDenom),
-			sdk.MaxDec(ap.tokenWeight(bDenom), minimumBorrowFactor),
+			sdk.MaxDec(ap.tokenWeight(bDenom), ap.minimumBorrowFactor),
 		)
 		// match collateral and borrow at indexes i and j, exhausting at least one of them
 		pairBorrowLimit := c.Mul(w)
@@ -213,7 +213,7 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 		w := sdk.MinDec(
 			// for normal asset pairs, both tokens limit the collateral weight of the pair
 			ap.tokenWeight(cDenom),
-			sdk.MaxDec(ap.tokenWeight(bDenom), minimumBorrowFactor),
+			sdk.MaxDec(ap.tokenWeight(bDenom), ap.minimumBorrowFactor),
 		)
 		// match collateral and borrow at indexes i and j, exhausting at least one of them
 		pairBorrowLimit := c.Mul(w)

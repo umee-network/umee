@@ -7,6 +7,11 @@ import (
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
 
+// minimum borrow factor is the minimum collateral weight and minimum liquidation threshold
+// allowed when a borrowed token is limiting the efficiency of a pair of assets.
+// TODO: parameterize this in the leverage module
+var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
+
 // GetAccountPosition creates and sorts an accountPosition for an address, using information
 // from the keeper's special asset pairs and token collateral weights as well as oracle prices.
 // Will treat collateral with missing prices as zero-valued, but will error on missing borrow prices.
@@ -67,6 +72,6 @@ func (k Keeper) GetAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLi
 	}
 
 	return types.NewAccountPosition(
-		tokenSettings, specialPairs, collateralValue, borrowedValue, isForLiquidation,
+		tokenSettings, specialPairs, collateralValue, borrowedValue, isForLiquidation, minimumBorrowFactor,
 	)
 }

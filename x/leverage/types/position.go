@@ -6,10 +6,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// minimum borrow factor is the minimum collateral weight and minimum liquidation threshold
-// allowed when a borrowed token is limiting the efficiency of a pair of assets.
-var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
-
 // AccountPosition must be created by NewAccountPosition for proper initialization.
 // Contains an account's borrowed and collateral values, arranged into special asset
 // pairs and regular assets. Each list will always be sorted by collateral weight.
@@ -42,6 +38,10 @@ type AccountPosition struct {
 	// isForLiquidation tracks whether the position was built using collateral weight
 	// or liquidation threshold
 	isForLiquidation bool
+	// minimum borrow factor is the minimum collateral weight and minimum liquidation threshold
+	// allowed when a borrowed token is limiting the efficiency of a pair of assets.
+	// TODO: parameterize this in the leverage module
+	minimumBorrowFactor sdk.Dec
 }
 
 func (ap *AccountPosition) String() string {
@@ -72,16 +72,18 @@ func NewAccountPosition(
 	unsortedCollateralValue,
 	unsortedBorrowValue sdk.DecCoins,
 	isLiquidation bool,
+	minimumBorrowFactor sdk.Dec,
 ) (AccountPosition, error) {
 	position := AccountPosition{
-		specialPairs:       WeightedSpecialPairs{},
-		normalPairs:        WeightedNormalPairs{},
-		unpairedCollateral: WeightedDecCoins{},
-		unpairedBorrows:    WeightedDecCoins{},
-		tokens:             map[string]Token{},
-		collateralValue:    sdk.ZeroDec(),
-		borrowedValue:      sdk.ZeroDec(),
-		isForLiquidation:   isLiquidation,
+		specialPairs:        WeightedSpecialPairs{},
+		normalPairs:         WeightedNormalPairs{},
+		unpairedCollateral:  WeightedDecCoins{},
+		unpairedBorrows:     WeightedDecCoins{},
+		tokens:              map[string]Token{},
+		collateralValue:     sdk.ZeroDec(),
+		borrowedValue:       sdk.ZeroDec(),
+		isForLiquidation:    isLiquidation,
+		minimumBorrowFactor: minimumBorrowFactor,
 	}
 
 	// cache all registered tokens
