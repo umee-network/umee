@@ -348,11 +348,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 	//			- borrow until borrow limit is reached
 	//
 	// To calculate maximum new borrow (reverse procedure)
-	// - collect unpaired collateral value
-	//		- if none, no new borrows are possible
-	// - ...
-	//
-	// TODO: the rest of the steps
+	// TODO: the rest of the procedure before the final steps below
 
 	// rearrange normal assets such that borrows which are lower weight than the
 	// requested denom are pushed below unpaired collateral, and any collateral

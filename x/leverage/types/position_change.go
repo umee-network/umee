@@ -161,6 +161,54 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 	return nil
 }
 
-// TODO: displaceBorrowsFrom(denom)
-// used for max withdraw from ordinary
-// ""fromSpecial separate function?
+// displaceBorrowsFromCollateralDenom attempts to displace as many borrowed assets as possible away from
+// normal pairs with specified collateral. There are two cases: one where the entire collateral amount of
+// the input denom is freed up, and another where a partial amount must remain paired with existing
+// borrows.
+func (ap *AccountPosition) displaceBorrowsFromCollateralDenom(denom string) error {
+	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
+		// no-op if there are no normal assets to sort or if the borrower is over limit
+		return nil
+	}
+	// TODO: steps
+	return nil
+	// should this return the amount displaced? or just leave collateral in ap.unpairedCollateral
+}
+
+// displaceBorrowsFromSpecialPair attempts to displace as many borrowed assets from a given special
+// asset pair as possible. This is used to free up the collateral in that pair so that it may be
+// withdrawn or moved to a higher priority special asset pair. Displaced borrows will attempt to
+// add themselves other special asset pairs or pair with normal collateral. In both of those cases,
+// existing collateral may be pulled from its current special or normal asset pairs (if lower weight)
+// to cover the displaced borrow, thus creating new displaced normal or special borrows which must
+// themselves be handled.
+func (ap *AccountPosition) displaceBorrowsFromSpecialPair(denom string) error {
+	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
+		// no-op if there are no normal assets to sort or if the borrower is over limit
+		return nil
+	}
+	// TODO: steps
+	// might need to create a copy of account position to avoid mutating the original, when figuring out
+	// how much can be displaced. otherwise, use reversible actions only.
+	return nil
+	// should this return the amount displaced?
+}
+
+// displaceCollateralFromSpecialPair attempts to displace as many collateral assets from a given special
+// asset pair as possible. This displaces borrows associated with the special pair, which will attempt to
+// add themselves other special asset pairs or pair with normal collateral. In both of those cases,
+// existing collateral may be pulled from its current special or normal asset pairs (if lower weight)
+// to cover the displaced borrow, thus creating new displaced normal or special borrows which must
+// themselves be handled. There are two cases which this function can result in: one where the full
+// amount of collateral was displaced, and one where it could only be partially displaced.
+func (ap *AccountPosition) displaceCollateralFromSpecialPair(denom string) error {
+	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
+		// no-op if there are no normal assets to sort or if the borrower is over limit
+		return nil
+	}
+	// TODO: steps
+	// might need to create a copy of account position to avoid mutating the original, when figuring out
+	// how much can be displaced. otherwise, use reversible actions only.
+	return nil
+	// should this return the amount displaced?
+}
