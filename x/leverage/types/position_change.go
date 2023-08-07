@@ -288,7 +288,7 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, bool
 // asset pair as possible. This is used to free up the collateral in that pair so that it may be
 // withdrawn. Displaced borrows must be absorbed by normal collateral. Returns the amount of
 // collateral removed from the pair, a boolean indicating whether the collateral was completely
-// removed (instead of partially), and an error. Mutated position
+// removed (instead of partially), and an error.
 func (ap *AccountPosition) displaceBorrowsFromSpecialPair(denom string) (sdk.Dec, bool, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
