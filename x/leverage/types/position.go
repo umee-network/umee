@@ -396,27 +396,21 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	//
 	// Effects of collateral withdrawal:
 	// - collateral first taken from unpaired assets
-	//		- can displace borrow assets which were being collateralized
-	//			- if reached borrow limit, stop here
 	// - then taken from paired assets, lowest weight pairs first
 	//		- each displaced borrow asset which lost its paired collateral must be placed again
 	//			- displaced borrow asset placed in special pairs, if available
 	//				- can displace additional borrowed assets from pairs (etc, chain reaction)
 	//					- if reached borrow limit, stop here
-	//			- displaced borrow asset placed in unpaired assets
-	//				- can displace unpaired borrowed assets
+	//			- displaced borrow asset placed in normal assets
+	//				- can displace normal borrowed assets
 	//					- if reached borrow limit, stop here
 	// - if borrow limit still not reached, user is free to withdraw maxmimum
 	return sdk.ZeroDec()
 }
 
-// TODO: bump to the bottom, or top, when computing max borrow
-// TODO: similar when computing max withdraw
-// TODO: isolate special pairs and bump
-
 /*
 
-Possible approach: Asset Priority Ladder
+Concept: Asset Priority Ladder. High priority assets at the top. Chain reactions propagate downward.
 
  	Collateral		Borrow
 	-------------------------------
@@ -433,35 +427,27 @@ Possible approach: Asset Priority Ladder
 	C				B
 	C				C
 	C				D
-	C				-		<--- there is leftover collateral initially, if MaxBorrow or MaxWithdraw is nonzero
+	C				-		<--- there is unpaired collateral initially, if MaxBorrow or MaxWithdraw is nonzero
 	D				-
 
 When computing max borrow of asset B, we need to find a borrow amount such that all remaining unused collateral
 is consumed. This is complicated by the fact that the borrowed B will first occupy in any special pairs which
 allow borrowed B, thus pulling the opposing collateral asset in the affected pairs from either another special
-pair, or some used collateral, or unused collateral. The first two options displace whatever borrowed asset was
+pair, or some normal pair, or unpaired collateral. The first two options displace whatever borrowed asset was
 borrowed by that collateral, which has the same effects as described from the start of this paragraph. If not
-occupying a special pair, the borrow B should be inserted into the table or ordinary assets by matching all
-lower weighted borrows (C and D) with the lowest weight leftover collateral assets first, thus freeing up other
-collateral in the middle of the ordinary asset table which may be occupied by B. The amount of B placed throughout
+occupying a special pair, the borrow B should be inserted into the table or normal pairs by matching all
+lower weighted borrows (C and D) with the lowest weight normal collateral assets first, thus freeing up other
+collateral in the middle of the normal asset table which may be occupied by B. The amount of B placed throughout
 all of this is the MaxBorrow.
 
 Some kind of helper function which manipulates the pairs and assets from the AccountPosition struct is needed,
-likely one that can call itself recursively for these chain reactions. It should be able to detect when it has
-finally filled all empty borrow slots and then return the total amount of borrowing achieved.
+likely one that can call itself recursively for the chain reactions caused by displacing special pairs. It should
+be able to detect when it has finally filled all collateral with borrows and then return the total amount of borrowing
+achieved.
 
 Probably these functions should progressively limit their own scope if they're going to be recursive. Visually, any
-operation which displaces a borrow or collateral can only affect assets below its row (or maybe above in the case
-of having the same weight?)
+operation which displaces a borrow or collateral can only affect assets below its row. Therefore the scope narrows
+by gradually omitting rows of special pairs until only normal pairs and unpaired collateral are left, which can
+be handled without recursion.
+
 */
-
-//
-//
-//
-//
-//
-
-// Current Thoughts: Have to modify the position object
-// etc = (more steps)
-// function which withdraws from normal assets (for displacing and maxwithdraw)
-// function which displaces ordinary assets into special?
