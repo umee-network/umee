@@ -54,11 +54,11 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 	return total
 }
 
-// displaceBorrowsAfter takes any borrows which would be sorted after an input borrowed denom
+// displaceBorrowsAfterBorrowDenom takes any borrows which would be sorted after an input borrowed denom
 // and matches them with unpaired collateral, and then ordinary collateral starting at the
 // lowest in the list. And freed up collateral is moved to the position's unpaired collateral,
 // where it can be used by other operations such as fillOrdinaryCollateral.
-func (ap *AccountPosition) displaceBorrowsAfter(denom string) error {
+func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
 		return nil

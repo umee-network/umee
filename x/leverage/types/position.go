@@ -357,7 +357,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 	// rearrange normal assets such that borrows which are lower weight than the
 	// requested denom are pushed below unpaired collateral, and any collateral
 	// which can be used to borrow the input denom becomes the new unpaired
-	err := ap.displaceBorrowsAfter(denom)
+	err := ap.displaceBorrowsAfterBorrowDenom(denom)
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
@@ -440,10 +440,6 @@ of having the same weight?)
 //
 
 // Current Thoughts: Have to modify the position object
-// 1 - function which fills empty (non-special) spots
-//		- straightforward. returns amount filled.
-// 2 - function which displaces ordinary assets which sort below an input, into empty spots.
-//		- actually climbs the ordinary assets, pulling borrows downward
 // etc = (more steps)
 // function which withdraws from normal assets (for displacing and maxwithdraw)
-// function which displaces ordinary assets into special? or vv
+// function which displaces ordinary assets into special?
