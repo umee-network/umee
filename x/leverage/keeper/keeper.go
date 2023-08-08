@@ -12,6 +12,7 @@ import (
 
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/ugov"
 )
 
 type Keeper struct {
@@ -20,7 +21,7 @@ type Keeper struct {
 	paramSpace             paramtypes.Subspace
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
-	ugov                   types.UgovBuilder
+	ugov                   ugov.WithEmergencyGroup
 	liquidatorQueryEnabled bool
 	meTokenAddr            sdk.AccAddress
 

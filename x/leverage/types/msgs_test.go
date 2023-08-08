@@ -102,14 +102,14 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 		},
 	}
 
-	for _, tc := range tcs {
+	for i, tc := range tcs {
 		t.Run(
 			tc.name, func(t *testing.T) {
 				err := tc.q.ValidateBasic()
 				if tc.err == "" {
-					assert.NilError(t, err)
+					assert.NilError(t, err, "test: %v", i)
 				} else {
-					assert.ErrorContains(t, err, tc.err)
+					assert.ErrorContains(t, err, tc.err, "test: %v", i)
 				}
 			},
 		)

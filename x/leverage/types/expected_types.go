@@ -3,7 +3,6 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/umee-network/umee/v5/x/ugov"
 )
 
 // AccountKeeper defines the expected account keeper used for leverage simulations (noalias)
@@ -35,5 +34,3 @@ type OracleKeeper interface {
 	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
 	MedianOfHistoricMedians(ctx sdk.Context, denom string, numStamps uint64) (sdk.Dec, uint32, error)
 }
-
-type UgovBuilder func(ctx *sdk.Context) ugov.WithEmergencyGroup
