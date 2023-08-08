@@ -170,9 +170,8 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 // withdrawNormalCollateral attempts to displace as many borrowed assets as possible away from
 // normal pairs with specified collateral. There are two cases: one where the entire collateral amount of
 // the input denom is freed up, and another where a partial amount must remain paired with existing
-// borrows. Returns the value withdrawn and any errors. The account position should not be
-// reused after this calculation until its normal pairs are redone.
-// TODO: explain and re-evaluate above
+// borrows. Returns the value withdrawn and any errors. The account position is then sorted to fix
+// the order of normal assets that were not withdrawn.
 func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
@@ -282,6 +281,9 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, erro
 			)
 		}
 	}
+
+	// fix the order of the collateral which was shuffled around due to withdrawal
+	ap.sortNormalAssets()
 	return withdrawn, nil
 }
 
