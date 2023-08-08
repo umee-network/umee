@@ -28,24 +28,20 @@ func (k Keeper) getLiquidationAmounts(
 	totalBorrowed := k.GetBorrowerBorrows(ctx, targetAddr)
 	repayDenomBorrowed := sdk.NewCoin(repayDenom, totalBorrowed.AmountOf(repayDenom))
 
-	// calculate borrower health in USD values, using spot prices only (no historic)
-	// borrowed value will skip borrowed tokens with unknown oracle prices, treating them as zero value
-	borrowedValue, err := k.VisibleTokenValue(ctx, totalBorrowed, types.PriceModeSpot)
+	// calculate borrower health in USD values, using spot prices only (no historic).
+	// Skips borrowed tokens with unknown oracle prices, treating them as zero value
+	position, err := k.GetAccountPosition(ctx, targetAddr, true)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
 	}
-	collateralValue, err := k.CalculateCollateralValue(ctx, borrowerCollateral, types.PriceModeSpot)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
-	liquidationThreshold, err := k.CalculateLiquidationThreshold(ctx, borrowerCollateral)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err
-	}
+	liquidationThreshold := position.Limit()
+	borrowedValue := position.BorrowedValue()
+	collateralValue := position.CollateralValue()
 	if borrowedValue.LT(liquidationThreshold) {
 		// borrower is healthy and cannot be liquidated
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, types.ErrLiquidationIneligible
 	}
+
 	repayDenomBorrowedValue, err := k.TokenValue(ctx, repayDenomBorrowed, types.PriceModeSpot)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, sdk.Coin{}, err

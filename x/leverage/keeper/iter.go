@@ -127,29 +127,19 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		}
 		checkedAddrs[borrowerAddr.String()] = struct{}{}
 
-		// get borrower's total borrowed
-		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-
-		// get borrower's total collateral
-		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-
-		// use oracle helper functions to find total borrowed value in USD
-		// skips denoms without prices
-		borrowValue, err := k.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
-		if err != nil {
-			return err
+		position, err := k.GetAccountPosition(ctx, borrowerAddr, true)
+		if err == nil {
+			borrowValue := position.BorrowedValue()
+			liquidationThreshold := position.Limit()
+			if liquidationThreshold.LT(borrowValue) {
+				// If liquidation threshold is smaller than borrowed value then the
+				// address is eligible for liquidation.
+				liquidationTargets = append(liquidationTargets, borrowerAddr)
+			}
 		}
 
-		// compute liquidation threshold from enabled collateral
-		// in this case, we can't reasonably skip missing prices but can move on
-		// to the next borrower instead of stopping the entire query
-		liquidationLimit, err := k.CalculateLiquidationThreshold(ctx, collateral)
-		if err == nil && liquidationLimit.LT(borrowValue) {
-			// If liquidation limit is smaller than borrowed value then the
-			// address is eligible for liquidation.
-			liquidationTargets = append(liquidationTargets, borrowerAddr)
-		}
-		// Non-price errors will cause the query itself to fail
+		// Non-price errors will cause the query itself to fail, whereas oracle errors
+		// simply cause the address to be skipped
 		if nonOracleError(err) {
 			return err
 		}
