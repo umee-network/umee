@@ -44,12 +44,17 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		// this works with missing collateral price
 		maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
 	} else {
-		// for partial withdrawal, must have collateral price
+		// for partial withdrawal, must have collateral price to withdraw anything more than wallet uTokens
 		maxWithdraw, err = k.UTokenWithValue(ctx, uDenom, maxWithdrawValue, types.PriceModeLow)
-		if err != nil {
+		if nonOracleError(err) {
+			// non-oracle errors fail the transaction (or query)
 			return sdk.Coin{}, sdk.Coin{}, err
 		}
-
+		if err != nil {
+			// oracle errors cause max withdraw to only be wallet uTokens
+			withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
+			return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
+		}
 	}
 
 	// find the minimum of max withdraw (from positions) or unbonded collateral (incentive module)
