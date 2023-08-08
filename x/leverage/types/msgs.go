@@ -58,13 +58,13 @@ func (msg MsgGovUpdateRegistry) GetSigners() []sdk.AccAddress {
 func validateRegistryToken(tokens []Token) error {
 	tokenDenoms := map[string]bool{}
 	for _, token := range tokens {
-		if err := token.Validate(); err != nil {
-			return err
-		}
 		if _, ok := tokenDenoms[token.BaseDenom]; ok {
 			return ErrDuplicateToken.Wrapf("with baseDenom %s", token.BaseDenom)
 		}
 		tokenDenoms[token.BaseDenom] = true
+		if err := token.Validate(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
