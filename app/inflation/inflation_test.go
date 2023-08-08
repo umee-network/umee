@@ -218,7 +218,7 @@ func TestInflationRate(t *testing.T) {
 
 			calc := inflation.Calculator{
 				MintKeeper:  mockMintKeeper,
-				UgovKeeperB: ugovmocks.NewUgovParamsBuilder(mockUGovKeeper),
+				UgovKeeperB: ugovmocks.NewParamsBuilder(mockUGovKeeper),
 			}
 			result := calc.InflationRate(test.ctx(), test.minter, test.mintParams(mintParams), test.bondedRatio)
 

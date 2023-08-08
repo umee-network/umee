@@ -9,6 +9,7 @@ import (
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/fixtures"
 	"github.com/umee-network/umee/v5/x/leverage/types"
+	ugovmocks "github.com/umee-network/umee/v5/x/ugov/mocks"
 )
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
@@ -36,9 +37,9 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			true,
 			"invalid denom",
 		}, {
-			"unauthorized authority address",
+			"no authority address",
 			&types.MsgGovUpdateRegistry{
-				Authority:   s.addrs[0].String(),
+				Authority:   "",
 				Title:       "test",
 				Description: "test",
 				AddTokens: []types.Token{
@@ -46,7 +47,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			true,
-			"expected gov account",
+			"empty address",
 		}, {
 			"already registered token",
 			&types.MsgGovUpdateRegistry{
@@ -132,9 +133,9 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			true,
 			"invalid denom",
 		}, {
-			"unauthorized authority address",
+			"no authority address",
 			&types.MsgGovUpdateRegistry{
-				Authority:   s.addrs[0].String(),
+				Authority:   "",
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
@@ -142,11 +143,35 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				},
 			},
 			true,
-			"expected gov account",
+			"empty address",
+		}, {
+			"invalid authority and valid update token registry",
+			&types.MsgGovUpdateRegistry{
+				Authority:   s.addrs[0].String(),
+				Title:       "test",
+				Description: "test",
+				UpdateTokens: []types.Token{
+					modifiedUmee,
+				},
+			},
+			true,
+			"unauthorized",
 		}, {
 			"valid authority and valid update token registry",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				UpdateTokens: []types.Token{
+					modifiedUmee,
+				},
+			},
+			false,
+			"",
+		}, {
+			"valid emergency group and valid update token registry",
+			&types.MsgGovUpdateRegistry{
+				Authority:   ugovmocks.SimpleEmergencyGroupAddr.String(),
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
