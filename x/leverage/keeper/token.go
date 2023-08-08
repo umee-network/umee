@@ -154,28 +154,28 @@ func validateEmergencyTokenSettingsUpdate(regTokens map[string]types.Token, upda
 	var errs []error
 	for _, ut := range updates {
 		t := regTokens[ut.BaseDenom]
-		if t.ReserveFactor != ut.ReserveFactor {
+		if !t.ReserveFactor.Equal(ut.ReserveFactor) {
 			errs = append(errs, errors.New("can't change ReserveFactor"))
 		}
-		if t.CollateralWeight != ut.CollateralWeight {
+		if !t.CollateralWeight.Equal(ut.CollateralWeight) {
 			errs = append(errs, errors.New("can't change CollateralWeight"))
 		}
-		if t.LiquidationThreshold != ut.LiquidationThreshold {
+		if !t.LiquidationThreshold.Equal(ut.LiquidationThreshold) {
 			errs = append(errs, errors.New("can't change LiquidationThreshold"))
 		}
-		if t.BaseBorrowRate != ut.BaseBorrowRate {
+		if !t.BaseBorrowRate.Equal(ut.BaseBorrowRate) {
 			errs = append(errs, errors.New("can't change BaseBorrowRate"))
 		}
-		if t.KinkBorrowRate != ut.KinkBorrowRate {
+		if !t.KinkBorrowRate.Equal(ut.KinkBorrowRate) {
 			errs = append(errs, errors.New("can't change KinkBorrowRate"))
 		}
-		if t.MaxBorrowRate != ut.MaxBorrowRate {
+		if !t.MaxBorrowRate.Equal(ut.MaxBorrowRate) {
 			errs = append(errs, errors.New("can't change MaxBorrowRate"))
 		}
-		if t.KinkUtilization != ut.KinkUtilization {
+		if !t.KinkUtilization.Equal(ut.KinkUtilization) {
 			errs = append(errs, errors.New("can't change KinkUtilization"))
 		}
-		if t.LiquidationIncentive != ut.LiquidationIncentive {
+		if !t.LiquidationIncentive.Equal(ut.LiquidationIncentive) {
 			errs = append(errs, errors.New("can't change LiquidationIncentive"))
 		}
 		if t.SymbolDenom != ut.SymbolDenom {
