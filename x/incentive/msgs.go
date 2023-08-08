@@ -163,7 +163,7 @@ func NewMsgGovSetParams(authority string, params Params) *MsgGovSetParams {
 }
 
 func (msg MsgGovSetParams) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 	return msg.Params.Validate()
@@ -194,7 +194,7 @@ func NewMsgGovCreatePrograms(authority string, programs []IncentiveProgram) *Msg
 }
 
 func (msg MsgGovCreatePrograms) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 	if len(msg.Programs) == 0 {

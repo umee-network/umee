@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -101,7 +99,6 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 func initKeeper(
 	t *testing.T,
 	cdc codec.BinaryCodec,
-	ics4Wrapper porttypes.ICS4Wrapper,
 	leverage uibc.Leverage,
 	oracle uibc.Oracle,
 ) (sdk.Context, keeper.Keeper) {

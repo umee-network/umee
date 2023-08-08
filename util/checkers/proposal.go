@@ -25,21 +25,36 @@ func init() {
 
 const minProposalTitleLen = 3
 
-// IsGovAuthority errors is the authority is the gov module address
-func IsGovAuthority(authority string) error {
-	if govModuleAddr == "" {
-		return sdkerrors.ErrLogic.Wrap("govModuleAddrs in the checkers package must be set before using this function")
-	}
-	if authority != govModuleAddr {
+// AssertGovAuthority errors is the authority is not the gov module address. Panics if
+// the gov module address is not set during the package initialization.
+func AssertGovAuthority(authority string) error {
+	if !IsGovAuthority(authority) {
 		return govtypes.ErrInvalidSigner.Wrapf(
 			"expected %s, got %s", govModuleAddr, authority)
 	}
 	return nil
 }
 
-// ValidateProposal checks the format of the title, description, and authority of a gov message.
-func ValidateProposal(title, description, authority string) error {
-	if err := IsGovAuthority(authority); err != nil {
+// IsGovAuthority returns true if the authority is the gov module address. Panics if
+// the gov module address is not set during the package initialization.
+func IsGovAuthority(authority string) bool {
+	if govModuleAddr == "" {
+		panic("govModuleAddrs in the checkers package must be set before using this function")
+	}
+	return authority == govModuleAddr
+}
+
+// ValidateProposal checks the format of the title, description.
+// If `requireGov=true` then authority must be a gov module address. Otherwise authority must be
+// a correct bech32 address.
+func ValidateProposal(title, description, authority string, requireGov bool) error {
+	var err error
+	if requireGov {
+		err = AssertGovAuthority(authority)
+	} else {
+		_, err = sdk.AccAddressFromBech32(authority)
+	}
+	if err != nil {
 		return err
 	}
 	if len(strings.TrimSpace(title)) < minProposalTitleLen {

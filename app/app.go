@@ -469,12 +469,14 @@ func New(
 		app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
+
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
+		app.UGovKeeperB.EmergencyGroup,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 		authtypes.NewModuleAddress(metoken.ModuleName),
 	)
