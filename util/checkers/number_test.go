@@ -3,7 +3,6 @@ package checkers
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/umee/v5/tests/tsdk"
 )
@@ -33,27 +32,29 @@ func TestNumberDiff(t *testing.T) {
 
 func TestDecDiff(t *testing.T) {
 	assert := assert.New(t)
+	decMaxDiff := func(a, b, maxDiff float64) error {
+		return DecMaxDiff(tsdk.DecF(a), tsdk.DecF(b), tsdk.DecF(maxDiff), "")
+	}
 
-	zero := sdk.ZeroDec()
-	assert.NoError(DecMaxDiff(tsdk.DecF(1), tsdk.DecF(1), zero, ""))
-	assert.NoError(DecMaxDiff(tsdk.DecF(-1), tsdk.DecF(-1), zero, ""))
-	assert.NoError(DecMaxDiff(tsdk.DecF(0), tsdk.DecF(0), zero, ""))
+	assert.NoError(decMaxDiff(1, 1, 0))
+	assert.NoError(decMaxDiff(-1, -1, 0))
+	assert.NoError(decMaxDiff(0, 0, 0))
 
-	assert.NoError(DecMaxDiff(tsdk.DecF(0.0001), tsdk.DecF(0.0001), zero, ""))
-	assert.NoError(DecMaxDiff(tsdk.DecF(-0.0001), tsdk.DecF(-0.0001), zero, ""))
+	assert.NoError(decMaxDiff(0.0001, 0.0001, 0))
+	assert.NoError(decMaxDiff(-0.0001, -0.0001, 0))
 
-	// assert.Error(DecMaxDiff(1, -1, 0, ""))
-	// assert.Error(DecMaxDiff(1, -1, -1, ""))
-	// assert.Error(DecMaxDiff(-1, 1, 0, ""))
-	// assert.Error(DecMaxDiff(-1, 1, -1, ""))
+	assert.Error(decMaxDiff(1, -1, 0))
+	assert.Error(decMaxDiff(1, -1, -1))
+	assert.Error(decMaxDiff(-1, 1, 0))
+	assert.Error(decMaxDiff(-1, 1, -1))
 
-	// assert.NoError(DecMaxDiff(1, -1, 2, ""))
-	// assert.NoError(DecMaxDiff(1, -1, 3, ""))
-	// assert.NoError(DecMaxDiff(1, -1, 100, ""))
-	// assert.NoError(DecMaxDiff(1, -1, 60000000, ""))
+	assert.NoError(decMaxDiff(1, -1, 2))
+	assert.NoError(decMaxDiff(1, -1, 3))
+	assert.NoError(decMaxDiff(1, -1, 100))
+	assert.NoError(decMaxDiff(1, -1, 60000000))
 
-	// assert.NoError(DecMaxDiff(-1, 1, 2, ""))
-	// assert.NoError(DecMaxDiff(-1, 1, 3, ""))
-	// assert.NoError(DecMaxDiff(-1, 1, 100, ""))
-	// assert.NoError(DecMaxDiff(-1, 1, 60000000, ""))
+	assert.NoError(decMaxDiff(-1, 1, 2))
+	assert.NoError(decMaxDiff(-1, 1, 3))
+	assert.NoError(decMaxDiff(-1, 1, 100))
+	assert.NoError(decMaxDiff(-1, 1, 60000000))
 }
