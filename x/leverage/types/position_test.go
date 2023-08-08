@@ -347,7 +347,7 @@ func TestBorrowLimit(t *testing.T) {
 	}
 }
 
-func TestMaxBorrow(t *testing.T) {
+func TestMaxBorrowNoSpecialPairs(t *testing.T) {
 	type testCase struct {
 		collateral     sdk.DecCoins
 		borrow         sdk.DecCoins
@@ -559,7 +559,7 @@ func TestMaxBorrow(t *testing.T) {
 	}
 }
 
-func TestMaxWithdraw(t *testing.T) {
+func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 	type testCase struct {
 		collateral       sdk.DecCoins
 		borrow           sdk.DecCoins
