@@ -58,3 +58,26 @@ func TestDecDiff(t *testing.T) {
 	assert.NoError(decMaxDiff(-1, 1, 100))
 	assert.NoError(decMaxDiff(-1, 1, 60000000))
 }
+
+func TestDecInZeroOne(t *testing.T) {
+	assert.NoError(t, DecInZeroOne(tsdk.DecF(0), "", true))
+	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.01), "", true))
+	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.999), "", true))
+
+	assert.NoError(t, DecInZeroOne(tsdk.DecF(0), "", false))
+	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.01), "", false))
+	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.999), "", false))
+
+	assert.NoError(t, DecInZeroOne(tsdk.DecF(1), "", true))
+	assert.Error(t, DecInZeroOne(tsdk.DecF(1), "", false))
+
+	assert.Error(t, DecInZeroOne(tsdk.DecF(1.01), "", false))
+	assert.Error(t, DecInZeroOne(tsdk.DecF(2), "", false))
+	assert.Error(t, DecInZeroOne(tsdk.DecF(213812), "", false))
+	assert.Error(t, DecInZeroOne(tsdk.DecF(-1), "", false))
+
+	assert.Error(t, DecInZeroOne(tsdk.DecF(1.01), "", true))
+	assert.Error(t, DecInZeroOne(tsdk.DecF(2), "", true))
+	assert.Error(t, DecInZeroOne(tsdk.DecF(213812), "", true))
+	assert.Error(t, DecInZeroOne(tsdk.DecF(-1), "", true))
+}
