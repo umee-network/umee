@@ -2,10 +2,10 @@ package keeper
 
 import (
 	"context"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/util/checkers"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/sdkutil"
 	"github.com/umee-network/umee/v5/x/leverage/types"
@@ -541,27 +541,16 @@ func (s msgServer) GovUpdateRegistry(
 ) (*types.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	regDenoms := make(map[string]types.Token)
-	regSymbols := make(map[string]bool)
-
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
 	for _, token := range registeredTokens {
 		regDenoms[token.BaseDenom] = token
-		regSymbols[strings.ToUpper(token.SymbolDenom)] = true
 	}
 
-	//err := checkers.IsGovAuthority(msg.Authority)
-
-	// update the token settings
-	// err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regDenoms, regSymbols, true)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// // adds the new token settings
-	// err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regDenoms, regSymbols, false)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	byEmergencyGroup := !checkers.IsGovAuthority(msg.Authority)
+	err := s.keeper.UpdateTokenRegistry(ctx, msg.UpdateTokens, msg.AddTokens, regDenoms, byEmergencyGroup)
+	if err != nil {
+		return nil, err
+	}
 
 	// cleans blacklisted tokens from the registry if they have not been supplied
 	if err := s.keeper.CleanTokenRegistry(ctx); err != nil {

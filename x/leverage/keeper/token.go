@@ -6,6 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/v5/util/checkers"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/store"
@@ -98,32 +99,47 @@ func (k Keeper) deleteSpecialAssetPair(ctx sdk.Context, collateralDenom, borrowD
 	ctx.KVStore(k.storeKey).Delete(key)
 }
 
-// SaveOrUpdateTokenSettingsToRegistry adds new tokens or updates the new tokens settings to registry.
+// UpdateTokenRegistry adds new tokens or updates the new tokens settings to registry.
 // It requires maps of the currently registered base and symbol denoms, so it can prevent duplicates of either.
-func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
-	ctx sdk.Context, tokens []types.Token, regDenoms, regSymbols map[string]bool, update bool,
+func (k Keeper) UpdateTokenRegistry(
+	ctx sdk.Context, toUpdate, toAdd []types.Token,
+	regDenoms map[string]types.Token, byEmergencyGroup bool,
 ) error {
-	if len(tokens) == 0 {
-		return nil
-	}
 	// NOTE: validation is skipped here because it's done in MsgGovUpdateRegistry.ValidateBasic()
+	// and in k.SetTokenSettings
 
-	for _, token := range tokens {
-		if update {
-			if _, ok := regDenoms[token.BaseDenom]; !ok {
-				return types.ErrNotRegisteredToken.Wrapf("token %s is not registered", token.BaseDenom)
-			}
-		} else {
-			if _, ok := regDenoms[token.BaseDenom]; ok {
-				return types.ErrDuplicateToken.Wrapf("token %s is already registered", token.BaseDenom)
-			}
-			if _, ok := regSymbols[strings.ToUpper(token.SymbolDenom)]; ok {
-				return types.ErrDuplicateToken.Wrapf("symbol denom %s is already registered", token.SymbolDenom)
-			}
+	errs := assertTokensRegistered(toUpdate, regDenoms)
+
+	if byEmergencyGroup {
+		if len(toAdd) != 0 {
+			sdkerrors.ErrInvalidRequest.Wrap("Emergency Group can't register new tokens")
+		}
+		if errs2 := validateEmergencyTokenSettingsUpdate(regDenoms, toUpdate); errs2 != nil {
+			errs = append(errs, errs2...)
 		}
 	}
 
-	for _, token := range tokens {
+	if len(errs) != 0 {
+		return errors.Join(errs...)
+	}
+
+	for _, token := range toUpdate {
+		if err := k.SetTokenSettings(ctx, token); err != nil {
+			return err
+		}
+	}
+
+	regSymbols := map[string]bool{}
+	for i := range regDenoms {
+		regSymbols[strings.ToUpper(regDenoms[i].SymbolDenom)] = true
+	}
+	for _, token := range toAdd {
+		if _, ok := regDenoms[token.BaseDenom]; ok {
+			return types.ErrDuplicateToken.Wrapf("token %s is already registered", token.BaseDenom)
+		}
+		if _, ok := regSymbols[strings.ToUpper(token.SymbolDenom)]; ok {
+			return types.ErrDuplicateToken.Wrapf("symbol denom %s is already registered", token.SymbolDenom)
+		}
 		if err := k.SetTokenSettings(ctx, token); err != nil {
 			return err
 		}
@@ -134,15 +150,10 @@ func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
 
 var maxEmergencyActionNumericDiff = sdk.MustNewDecFromStr("0.2")
 
-func validateEmergencyTokenSettingsUpdate(regTokens, updates []types.Token) error {
-	tmap := map[string]types.Token{}
-	for _, t := range regTokens {
-		tmap[t.BaseDenom] = t
-	}
-
-	errs := checkTokensRegistered(updates, tmap)
+func validateEmergencyTokenSettingsUpdate(regTokens map[string]types.Token, updates []types.Token) []error {
+	var errs []error
 	for _, ut := range updates {
-		t := tmap[ut.BaseDenom]
+		t := regTokens[ut.BaseDenom]
 		if t.ReserveFactor != ut.ReserveFactor {
 			errs = append(errs, errors.New("can't change ReserveFactor"))
 		}
@@ -199,13 +210,12 @@ func validateEmergencyTokenSettingsUpdate(regTokens, updates []types.Token) erro
 
 		// MaxCollateralShare, MaxSupplyUtilization, MinCollateralLiquidity, MaxSupply
 		// allow any change
-
 	}
 
-	return errors.Join(errs...)
+	return errs
 }
 
-func checkTokensRegistered[T any](tokens []types.Token, regTokens map[string]T) []error {
+func assertTokensRegistered(tokens []types.Token, regTokens map[string]types.Token) []error {
 	errs := []error{}
 	for i := range tokens {
 		d := tokens[i].BaseDenom

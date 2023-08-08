@@ -34,6 +34,7 @@ func NewTestKeeper(
 		paramSpace,
 		bk,
 		ok,
+		nil, // TODO
 		enableLiquidatorQuery,
 		authtypes.NewModuleAddress(metoken.ModuleName),
 	)
