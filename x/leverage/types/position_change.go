@@ -299,3 +299,5 @@ func (ap *AccountPosition) withdrawFromSpecialPair(denom string) (sdk.Dec, error
 	// 3) collateral amount is returned, after being subtracted from total value
 	return sdk.ZeroDec(), nil
 }
+
+// TODO: unit-test this file

@@ -6,6 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// TODO: unit-test this file
+
 // AccountPosition must be created by NewAccountPosition for proper initialization.
 // Contains an account's borrowed and collateral values, arranged into special asset
 // pairs and regular assets. Each list will always be sorted by collateral weight.
