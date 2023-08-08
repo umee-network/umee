@@ -200,13 +200,14 @@ For example, an account using a single collateral token with `CollateralWeight 0
 
 The leverage module can define pairs of assets which are advantaged when one is used as collateral to borrow the other.
 
-They are defined in the form `[Asset A, Asset B, Special Collateral Weight]`. In effect, this means that
+They are defined in the form `[Asset A, Asset B, Special Collateral Weight, Special Liquidation Threshold]`. In effect, this means that
 
-> When a user has collateral of `Asset A` and borrows `Asset B`, or vice versa, the `CollateralWeight` of both `Asset A` and `Asset B` are replaced by `Special Collateral Weight`.
+> When a user has collateral of `Asset A` and borrows `Asset B`, or vice versa, the `CollateralWeight` of both `Asset A` and `Asset B` are replaced by `Special Collateral Weight`. The `LiquidationThreshold` of the assets is also replaced by that of the special pair.
 
 #### Special Asset Pair Examples
 
 > Consider a scenario where assets `A,B,C,D` all have collateral weight `0.75`. There is also a special asset pair `[A,B,0.9]` which privileges borrows between those two assets.
+> (Note: Liquidation threshold has been omitted from the special pair in this example.)
 >
 > A user with `Collateral: $10A, Borrowed: $7A` is unaffected by any special asset pairs. The maximum `A` it could borrow is `$7.50`
 >
@@ -295,10 +296,11 @@ It will abort and return zero if all collateral is in use.
 
 #### Liquidation Threshold
 
-Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold when the token is used as collateral.
-
-When a borrow position is limited by simple borrow limit (without special asset pairs or borrow factor), a user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited.
 Any user whose borrow value is above their liquidation threshold is eligible to be liquidated.
+
+Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold when the token is used as collateral. 
+
+When a borrow position is limited by simple borrow limit (without special asset pairs or borrow factor), a user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited:
 
 ```go
   collateral := GetBorrowerCollateral(borrower) // sdk.Coins
@@ -308,23 +310,7 @@ Any user whose borrow value is above their liquidation threshold is eligible to 
 ```
 
 Liquidation threshold can also be reduced by borrow factor or increased by special asset pairs.
-In practice, the following calculation (which reduces to the logic above in simple cases) is used for liquidation threshold:
-
-```go
-  effectiveCollateralWeight := GetBorrowLimit(borrower) / GetCollateralValue(borrower) // ranges 0-1
-  liquidationThresholdScale := (1 - AvgLiquidationThreshold(borrower)) / (1 - AvgCollateralWeight(borrower)) // ranges 0-1
-  effectiveLiquidationThreshold := 1 - ((1 - liquidationThresholdScale) * (1 - effectiveCollateralWeight)) // ranges 0-1
-  liquidationThreshold := effectiveLiquidationThreshold * GetCollateralValue(borrower) // dollar value
-```
-
-This utilizes the borrow limit, which has already been computed with special asset pairs, and the token parameters of borrower's collateral:
-
-- The average (weighted by collateral value) collateral weights and liquidation thresholds of the borrower's collateral assets are collected.
-- The distances from average collateral weight to average liquidation threshold and 1 are compared. (For example when `CW = 0.6` and `LT = 0.7`, then liquidation threshold is `25%` of the way from `CW` to `1`.)
-- Then the borrower's liquidation threshold behaves the same as the average parameters (e.g. it will be `25%` of the way between `borrow limit` and `collateral value`).
-
-This formula ensures that the behavior of an account's liquidation threshold remains intuitive:
-It will always be somewhere between the user's borrow limit and the full value of their collateral, and it behaves like the average of the dominant collateral tokens on their account.
+When those are taken into account, the procedure for deriving a user's liquidation threshold is identical to the procedure for borrow limit, except `LiquidationThreshold` is used instead of `CollateralWeight` for individual tokens and for special pairs.
 
 #### Borrow APY
 
