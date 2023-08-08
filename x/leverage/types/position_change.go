@@ -294,6 +294,7 @@ func (ap *AccountPosition) withdrawFromSpecialPair(denom string) (sdk.Dec, error
 	}
 	// TODO: steps
 	// 1) max borrow with a cap (NEW) of this pair's borrow amount
+	//		if reusing position, make function to re-sort its normal pairs and unpaired assets
 	// 2) subtract borrwed amount and equivalent collateral from pair
 	// 3) collateral amount is returned, after being subtracted from total value
 	return sdk.ZeroDec(), nil
