@@ -112,7 +112,7 @@ func (k Keeper) UpdateTokenRegistry(
 
 	if byEmergencyGroup {
 		if len(toAdd) != 0 {
-			sdkerrors.ErrInvalidRequest.Wrap("Emergency Group can't register new tokens")
+			errs = append(errs, sdkerrors.ErrInvalidRequest.Wrap("Emergency Group can't register new tokens"))
 		}
 		if errs2 := validateEmergencyTokenSettingsUpdate(regDenoms, toUpdate); errs2 != nil {
 			errs = append(errs, errs2...)
