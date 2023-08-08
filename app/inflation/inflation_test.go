@@ -228,3 +228,36 @@ func TestInflationRate(t *testing.T) {
 		})
 	}
 }
+
+func TestNextInflationRate(t *testing.T) {
+	minter := minttypes.Minter{
+		Inflation: sdk.NewDecWithPrec(0, 2),
+	}
+
+	mintParams := minttypes.DefaultParams()
+	mintParams.InflationMax = sdk.NewDecWithPrec(40, 2)
+	mintParams.InflationMin = sdk.NewDecWithPrec(1, 2)
+	mintParams.InflationRateChange = sdk.NewDec(1)
+	mintParams.BlocksPerYear = 10
+	mintParams.GoalBonded = sdk.NewDec(33)
+
+	bondedRatio := sdk.NewDec(20)
+
+	// default inflation rate (1 year inflation rate change speed )
+	ir := minter.NextInflationRate(mintParams, bondedRatio)
+	// GoalBondedRatio = BondedRatio / (1-(inflation*mintParams.BlocksPerYear))
+	assert.DeepEqual(t,
+		mintParams.GoalBonded.RoundInt64(),
+		bondedRatio.Quo(sdk.OneDec().Sub(ir.Mul(sdk.NewDec(int64(mintParams.BlocksPerYear))))).RoundInt64(),
+	)
+
+	// changing inflation rate speed from 1 year to 6 months
+	mintParams.BlocksPerYear = mintParams.BlocksPerYear / 2
+	nir := minter.NextInflationRate(mintParams, bondedRatio)
+
+	assert.DeepEqual(t, ir.Mul(sdk.NewDec(2)), nir)
+	assert.DeepEqual(t,
+		mintParams.GoalBonded.RoundInt64(),
+		bondedRatio.Quo(sdk.OneDec().Sub(nir.Mul(sdk.NewDec(int64(mintParams.BlocksPerYear))))).RoundInt64(),
+	)
+}
