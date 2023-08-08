@@ -699,6 +699,6 @@ func TestMaxWithdraw(t *testing.T) {
 	}
 }
 
-// TODO: more cases for positions with multiple collateral types
+// TODO: more cases for positions with multiple borrow and collateral types
 // TODO: max borrow and max withdraw tests with special pairs involved
 // TODO: clever zero cases, such as max withdraw something that does not exist
