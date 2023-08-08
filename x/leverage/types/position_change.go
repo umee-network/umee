@@ -179,7 +179,7 @@ func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 // borrows. Returns the value withdrawn and any errors. The account position is then sorted to fix
 // the order of normal assets that were not withdrawn.
 func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, error) {
-	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
+	if len(ap.unpairedCollateral) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
 		return sdk.ZeroDec(), nil
 	}

@@ -310,6 +310,32 @@ func (ap *AccountPosition) CollateralValue() sdk.Dec {
 	return ap.collateralValue
 }
 
+// IsHealthy returns true if an account's borrowed value is less than its borrow limit.
+func (ap *AccountPosition) IsHealthy() bool {
+	return ap.Limit().GT(ap.borrowedValue)
+}
+
+// HasCollateral returns true if a position has nonzero collateral value
+// of a given token in special pairs, normal pairs, or unpaired collateral.
+func (ap *AccountPosition) HasCollateral(denom string) bool {
+	for _, sp := range ap.specialPairs {
+		if sp.Collateral.Denom == denom && sp.Collateral.IsPositive() {
+			return true
+		}
+	}
+	for _, np := range ap.normalPairs {
+		if np.Collateral.Asset.Denom == denom && np.Collateral.Asset.IsPositive() {
+			return true
+		}
+	}
+	for _, c := range ap.unpairedCollateral {
+		if c.Asset.Denom == denom && c.Asset.IsPositive() {
+			return true
+		}
+	}
+	return false
+}
+
 // tokenWeight gets a token's collateral weight or liquidation threshold if it is registered, else zero
 func (ap *AccountPosition) tokenWeight(denom string) sdk.Dec {
 	if t, ok := ap.tokens[denom]; ok {

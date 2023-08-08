@@ -23,19 +23,36 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	unbondedCollateral := k.unbondedCollateral(ctx, addr, uDenom)
 
 	position, err := k.GetAccountPosition(ctx, addr, false)
-	if err != nil {
+	if nonOracleError(err) {
+		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, sdk.Coin{}, err
+	}
+	if err != nil {
+		// oracle errors cause max withdraw to only be wallet uTokens
+		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
+		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
 	maxWithdrawValue, err := position.MaxWithdraw(denom)
 	if err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
-	maxWithdraw, err := k.UTokenWithValue(ctx, uDenom, maxWithdrawValue, types.PriceModeLow)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
+
+	maxWithdraw := coin.Zero(uDenom)
+	if position.IsHealthy() && !position.HasCollateral(denom) {
+		// if after max withdraw, the position has no more collateral of the requested denom
+		// but is still under its borrow limit, then withdraw everything.
+		// this works with missing collateral price
+		maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
+	} else {
+		// for partial withdrawal, must have collateral price
+		maxWithdraw, err = k.UTokenWithValue(ctx, uDenom, maxWithdrawValue, types.PriceModeLow)
+		if err != nil {
+			return sdk.Coin{}, sdk.Coin{}, err
+		}
+
 	}
 
-	// find the minimum of mox withdraw (from positions) or unbonded collateral (incentive module)
+	// find the minimum of max withdraw (from positions) or unbonded collateral (incentive module)
 	if unbondedCollateral.Amount.LT(maxWithdraw.Amount) {
 		maxWithdraw = unbondedCollateral
 	}

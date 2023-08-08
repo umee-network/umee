@@ -464,4 +464,121 @@ func TestMaxBorrow(t *testing.T) {
 	}
 }
 
-// TODO: Add TestMaxWithdraw with a similar amount of test cases
+func TestMaxWithdraw(t *testing.T) {
+	type testCase struct {
+		collateral       sdk.DecCoins
+		borrow           sdk.DecCoins
+		maxWithdrawDenom string
+		maxWithdraw      string
+		msg              string
+	}
+
+	testCases := []testCase{
+		{
+			// single asset
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(),
+			// can withdraw all
+			"AAAA",
+			"100.00",
+			"simple A maxWithdraw(A)",
+		},
+		{
+			// single asset, with existing looped borrow
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "7"),
+			),
+			// collateral weight 0.1, should be able to withdraw 30
+			"AAAA",
+			"30.00",
+			"simple A->A maxWithdraw(A)",
+		},
+		{
+			// single asset, with existing borrow
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("IIII", "4"),
+			),
+			// collateral weight 0.1, should be able to withdraw 60 total
+			"AAAA",
+			"60.00",
+			"simple A->I maxWithdraw(A)",
+		},
+		/*
+			{
+				// single asset, with multiple existing borrows, borrowing lowest-weighted asset
+				sdk.NewDecCoins(
+					coin.Dec("AAAA", "100"),
+				),
+				sdk.NewDecCoins(
+					coin.Dec("AAAA", "1"),
+					coin.Dec("CCCC", "1"),
+					coin.Dec("EEEE", "1"),
+					coin.Dec("IIII", "1"),
+				),
+				// collateral weight 0.1, should be able to borrow 10 total
+				"AAAA",
+				"6.00",
+				"A->ACEI maxWithdraw(A)",
+			},
+			{
+				// single asset, with multiple existing borrows, borrowing mid-weighted asset
+				sdk.NewDecCoins(
+					coin.Dec("AAAA", "100"),
+				),
+				sdk.NewDecCoins(
+					coin.Dec("AAAA", "1"),
+					coin.Dec("CCCC", "1"),
+					coin.Dec("EEEE", "1"),
+					coin.Dec("IIII", "1"),
+				),
+				// collateral weight 0.1, should be able to borrow 10 total
+				"CCCC",
+				"6.00",
+				"A->ACEI maxWithdraw(C)",
+			},
+			{
+				// single asset, with multiple existing borrows, borrowing highest-weighted asset
+				sdk.NewDecCoins(
+					coin.Dec("AAAA", "100"),
+				),
+				sdk.NewDecCoins(
+					coin.Dec("AAAA", "1"),
+					coin.Dec("CCCC", "1"),
+					coin.Dec("EEEE", "1"),
+					coin.Dec("IIII", "1"),
+				),
+				// collateral weight 0.1, should be able to borrow 10 total
+				"IIII",
+				"6.00",
+				"A->ACEI maxWithdraw(I)",
+			},
+		*/
+	}
+
+	for _, tc := range testCases {
+		borrowPosition, err := types.NewAccountPosition(
+			orderedTokens,
+			orderedPairs,
+			tc.collateral,
+			tc.borrow,
+			false,
+			highMinimumBorrowFactor,
+		)
+		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+borrowPosition.String())
+		maxWithdraw, err := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
+		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+borrowPosition.String())
+		assert.Equal(t,
+			sdk.MustNewDecFromStr(tc.maxWithdraw).String(),
+			maxWithdraw.String(),
+			tc.msg+" max withddaw\n\n"+borrowPosition.String(),
+		)
+	}
+}
