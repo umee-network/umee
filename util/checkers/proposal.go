@@ -44,9 +44,17 @@ func IsGovAuthority(authority string) bool {
 	return authority == govModuleAddr
 }
 
-// ValidateProposal checks the format of the title, description, and authority of a gov message.
-func ValidateProposal(title, description, authority string) error {
-	if err := AssertGovAuthority(authority); err != nil {
+// ValidateProposal checks the format of the title, description.
+// If `requireGov=true` then authority must be a gov module address. Otherwise authority must be
+// a correct bech32 address.
+func ValidateProposal(title, description, authority string, requireGov bool) error {
+	var err error
+	if requireGov {
+		err = AssertGovAuthority(authority)
+	} else {
+		_, err = sdk.AccAddressFromBech32(authority)
+	}
+	if err != nil {
 		return err
 	}
 	if len(strings.TrimSpace(title)) < minProposalTitleLen {

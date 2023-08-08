@@ -3,6 +3,7 @@ package types_test
 import (
 	"testing"
 
+	"github.com/umee-network/umee/v5/tests/accs"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -52,12 +53,16 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 		}
 	}
 
+	validMsg := newMsg([]types.Token{validToken}, nil)
+	validMsg2 := newMsg([]types.Token{validToken}, nil)
+	validMsg2.Authority = accs.Alice.String()
+
 	tcs := []struct {
 		name string
 		q    types.MsgGovUpdateRegistry
 		err  string
 	}{
-		{"no authority", types.MsgGovUpdateRegistry{}, "expected gov account"},
+		{"no authority", types.MsgGovUpdateRegistry{}, "empty address"},
 		{
 			"duplicated base_denom add",
 			newMsg([]types.Token{validToken, duplicateBaseDenom}, nil),
@@ -83,12 +88,10 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 			"empty add and update tokens",
 		},
 		{
-			"valid", types.MsgGovUpdateRegistry{
-				Authority:   authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-				Title:       "Title",
-				Description: "Description",
-				AddTokens:   []types.Token{validToken},
-			}, "",
+			"valid", validMsg, "",
+		},
+		{
+			"valid: non gov module address", validMsg2, "",
 		},
 	}
 

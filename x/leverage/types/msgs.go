@@ -35,7 +35,7 @@ func (msg MsgGovUpdateRegistry) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateRegistry) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, false); err != nil {
 		return err
 	}
 
