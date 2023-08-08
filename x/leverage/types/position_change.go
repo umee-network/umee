@@ -264,6 +264,7 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, erro
 	for _, cv := range unpairedCollateral {
 		if cv.Asset.IsPositive() {
 			if cv.Asset.Denom == denom {
+				// withdrawn collateral is not added back to the position
 				withdrawn = withdrawn.Add(cv.Asset.Amount)
 			} else {
 				// sort remaining unpaired collateral using Add function
@@ -282,17 +283,16 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, erro
 	return withdrawn, nil
 }
 
-// displaceBorrowsFromSpecialPair attempts to displace as many borrowed assets from a given special
+// withdrawFromSpecialPair attempts to displace as many borrowed assets from a given special
 // asset pair as possible. This is used to free up the collateral in that pair so that it may be
 // withdrawn. Displaced borrows must be absorbed by normal collateral. Returns the amount of
-// collateral removed from the pair, a boolean indicating whether the collateral was completely
-// removed (instead of partially), and an error.
-func (ap *AccountPosition) displaceBorrowsFromSpecialPair(denom string) (sdk.Dec, bool, error) {
+// collateral removed from the pair and an error.
+func (ap *AccountPosition) withdrawFromSpecialPair(denom string) (sdk.Dec, error) {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
-		return sdk.ZeroDec(), false, nil
+		return sdk.ZeroDec(), nil
 	}
 	// TODO: steps
 	// TODO: subtract removed collateral from total value
-	return sdk.ZeroDec(), true, nil
+	return sdk.ZeroDec(), nil
 }

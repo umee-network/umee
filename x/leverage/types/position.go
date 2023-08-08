@@ -412,9 +412,17 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, error) {
 	if err != nil {
 		return sdk.ZeroDec(), err
 	}
-
-	// TODO: steps
-
+	for i := len(ap.specialPairs) - 1; i >= 0; i-- {
+		// for all special pairs, starting with the lowest weight
+		if ap.specialPairs[i].Collateral.Denom == denom {
+			// attempt to withdraw collateral from special pairs
+			c, err := ap.withdrawFromSpecialPair(denom)
+			if err != nil {
+				return sdk.ZeroDec(), err
+			}
+			withdrawn = withdrawn.Add(c)
+		}
+	}
 	return withdrawn, nil
 }
 
