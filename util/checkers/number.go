@@ -21,12 +21,7 @@ func IntegerMaxDiff[T constraints.Integer](a, b, maxDiff T, note string) error {
 }
 
 func DecMaxDiff(a, b, maxDiff sdk.Dec, note string) error {
-	var diff sdk.Dec
-	if a.GT(b) {
-		diff = a.Sub(b)
-	} else {
-		diff = b.Sub(a)
-	}
+	diff := a.Sub(b).Abs()
 	if diff.GT(maxDiff) {
 		return fmt.Errorf("%s, diff (=%v) is too big", note, diff)
 	}
