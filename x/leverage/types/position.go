@@ -312,7 +312,7 @@ func (ap *AccountPosition) CollateralValue() sdk.Dec {
 
 // IsHealthy returns true if an account's borrowed value is less than its borrow limit.
 func (ap *AccountPosition) IsHealthy() bool {
-	return ap.Limit().GT(ap.borrowedValue)
+	return ap.Limit().GTE(ap.borrowedValue)
 }
 
 // HasCollateral returns true if a position has nonzero collateral value
