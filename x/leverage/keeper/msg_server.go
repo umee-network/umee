@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/v5/util/checkers"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/sdkutil"
@@ -547,6 +548,16 @@ func (s msgServer) GovUpdateRegistry(
 	}
 
 	byEmergencyGroup := !checkers.IsGovAuthority(msg.Authority)
+	if byEmergencyGroup {
+		a, err := sdk.AccAddressFromBech32(msg.Authority)
+		if err != nil {
+			return nil, sdkerrors.ErrInvalidAddress.Wrapf("Authority: %v", err)
+		}
+		if !s.keeper.ugov(&ctx).EmergencyGroup().Equals(a) {
+			return nil, sdkerrors.ErrUnauthorized
+		}
+	}
+
 	err := s.keeper.UpdateTokenRegistry(ctx, msg.UpdateTokens, msg.AddTokens, regDenoms, byEmergencyGroup)
 	if err != nil {
 		return nil, err
