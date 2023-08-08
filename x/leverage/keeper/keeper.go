@@ -21,7 +21,7 @@ type Keeper struct {
 	paramSpace             paramtypes.Subspace
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
-	ugov                   ugov.WithEmergencyGroup
+	ugov                   ugov.EmergencyGroupBuilder
 	liquidatorQueryEnabled bool
 	meTokenAddr            sdk.AccAddress
 
@@ -35,7 +35,7 @@ func NewKeeper(
 	paramSpace paramtypes.Subspace,
 	b types.BankKeeper,
 	o types.OracleKeeper,
-	ugov types.UgovBuilder,
+	ugov ugov.EmergencyGroupBuilder,
 	enableLiquidatorQuery bool,
 	meTokenAddr sdk.AccAddress,
 ) Keeper {
