@@ -16,7 +16,9 @@ import (
 // is mutated to include the new borrows, and will be at its borrow limit.
 // If the requested token denom did not exist or the borrower was already
 // at or over their borrow limit, this is a no-op which returns zero.
-func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
+// Also accepts a maximum amount of asset to borrow, which should be set
+// to the position's total collateral value for max borrow.
+func (ap *AccountPosition) fillOrdinaryCollateral(denom string, max sdk.Dec) sdk.Dec {
 	if len(ap.unpairedCollateral) == 0 {
 		return sdk.ZeroDec()
 	}
@@ -27,17 +29,23 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 		ap.minimumBorrowFactor,
 		ap.tokenWeight(denom),
 	)
-	total := sdk.ZeroDec()
-	// ignores collateral with weight of zero
-	ineligible := WeightedDecCoins{}
+	newBorrow := sdk.ZeroDec()
 	// converts unpaired collateral into normal asset pairs with new borrow
 	for i, uc := range ap.unpairedCollateral {
 		weight := sdk.MinDec(uc.Weight, borrowFactor)
-		if weight.IsPositive() {
+		if weight.IsPositive() && newBorrow.LT(max) {
+			cCoin := uc.Asset
 			bCoin := sdk.NewDecCoinFromDec(denom, uc.Asset.Amount.Mul(weight))
+			remainingToBorrow := max.Sub(newBorrow)
+			if bCoin.Amount.GT(remainingToBorrow) {
+				// when partially borrowing for this collateral will reach max
+				bCoin.Amount = bCoin.Amount.Mul(remainingToBorrow)
+				cCoin.Amount = cCoin.Amount.Mul(remainingToBorrow.Quo(bCoin.Amount))
+			}
+			// create a normal pair with a new borrow and some previously unpaired collateral
 			ap.normalPairs = ap.normalPairs.Add(WeightedNormalPair{
 				Collateral: WeightedDecCoin{
-					Asset:  uc.Asset,
+					Asset:  cCoin,
 					Weight: ap.tokenWeight(uc.Asset.Denom),
 				},
 				Borrow: WeightedDecCoin{
@@ -46,23 +54,21 @@ func (ap *AccountPosition) fillOrdinaryCollateral(denom string) sdk.Dec {
 				},
 			})
 			// tracks how much was borrowed, and adds it to position
-			total = total.Add(bCoin.Amount)
-			ap.borrowedValue = total.Add(bCoin.Amount)
-			// clears unpaired collateral which has now been borrowed against
-			ap.unpairedCollateral[i].Asset.Amount = sdk.ZeroDec()
-		} else {
-			ineligible = ineligible.Add(uc)
+			newBorrow = newBorrow.Add(bCoin.Amount)
+			ap.borrowedValue = newBorrow.Add(bCoin.Amount)
+			// reduces unpaired collateral by amount that was moved to normal pair
+			ap.unpairedCollateral[i].Asset = uc.Asset.Sub(cCoin)
 		}
 	}
-	// the only remaining unpaired collateral is that which cannot be borrowed against
-	ap.unpairedCollateral = ineligible
-	return total
+	ap.sortNormalAssets()
+	return newBorrow
 }
 
 // displaceBorrowsAfterBorrowDenom takes any borrows which would be sorted after an input borrowed denom
 // and matches them with unpaired collateral, and then ordinary collateral starting at the
 // lowest in the list. And freed up collateral is moved to the position's unpaired collateral,
-// where it can be used by other operations such as fillOrdinaryCollateral.
+// where it can be used by other operations such as fillOrdinaryCollateral. Note that due to the
+// displacement of assets from their normal order, the account position is not sorted.
 func (ap *AccountPosition) displaceBorrowsAfterBorrowDenom(denom string) error {
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
@@ -203,7 +209,7 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, erro
 	// unlike NewAccountPosition, this prioritizes the lowest weight borrows and collateral first
 	i := len(unpairedCollateral) - 1
 	j := len(unpairedBorrows) - 1
-	// TODO: refactor mostly duplicate code from NewAccountPosition (only the iteration order is reversed here)
+	// TODO: refactor mostly duplicate code from sortNormalAssets (only the iteration order is reversed here)
 	for i >= 0 && j >= 0 {
 		cDenom := unpairedCollateral[i].Asset.Denom
 		bDenom := unpairedBorrows[j].Asset.Denom
@@ -267,6 +273,7 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, erro
 			if cv.Asset.Denom == denom {
 				// withdrawn collateral is not added back to the position
 				withdrawn = withdrawn.Add(cv.Asset.Amount)
+				ap.collateralValue = ap.collateralValue.Sub(cv.Asset.Amount)
 			} else {
 				// sort remaining unpaired collateral using Add function
 				ap.unpairedCollateral = ap.unpairedCollateral.Add(cv)
@@ -284,22 +291,41 @@ func (ap *AccountPosition) withdrawNormalCollateral(denom string) (sdk.Dec, erro
 
 	// fix the order of the collateral which was shuffled around due to withdrawal
 	ap.sortNormalAssets()
-	return withdrawn, nil
+	return withdrawn, ap.Validate()
 }
 
 // withdrawFromSpecialPair attempts to displace as many borrowed assets from a given special
 // asset pair as possible. This is used to free up the collateral in that pair so that it may be
 // withdrawn. Displaced borrows must be absorbed by normal collateral. Returns the amount of
-// collateral removed from the pair and an error.
-func (ap *AccountPosition) withdrawFromSpecialPair(denom string) (sdk.Dec, error) {
+// collateral removed from the pair and an error. Special pair to withdraw from is identified by
+// its index in AccountPosition (which will not change even if collateral is completely withdrawn.)
+func (ap *AccountPosition) withdrawFromSpecialPair(index int) (sdk.Dec, error) {
+	// General steps:
+	// 1) max borrow from normal assets with a cap of this pair's borrow amount
+	// 2) subtract borrwed amount and equivalent collateral from pair
+	// 3) collateral amount is returned, after being subtracted from total value
 	if len(ap.normalPairs) == 0 || len(ap.unpairedBorrows) > 0 {
 		// no-op if there are no normal assets to sort or if the borrower is over limit
 		return sdk.ZeroDec(), nil
 	}
-	// TODO: steps
-	// 1) max borrow with a cap (NEW) of this pair's borrow amount
-	//		if reusing position, make function to re-sort its normal pairs and unpaired assets
-	// 2) subtract borrwed amount and equivalent collateral from pair
-	// 3) collateral amount is returned, after being subtracted from total value
-	return sdk.ZeroDec(), nil
+	sp := ap.specialPairs[index]
+	// rearrange normal assets such that borrows which are lower weight than the
+	// borrow denom are pushed below unpaired collateral, and any collateral
+	// which can be used to borrow the that denom becomes the new unpaired
+	err := ap.displaceBorrowsAfterBorrowDenom(sp.Borrow.Denom)
+	if err != nil {
+		return sdk.ZeroDec(), err
+	}
+	// borrow against all remaining unpaired collateral until collateral exhausted or
+	// the special pair's borrow amount is reached
+	borrowed := ap.fillOrdinaryCollateral(sp.Borrow.Denom, sp.Borrow.Amount)
+	withdrawn := borrowed.Quo(sp.SpecialWeight)
+	// remove borrowed assets and withdrawn collateral from special asset pair
+	// note that with the new borrow (from fillOrdinaryCollateral) increasing and
+	// the special borrow decreasing, this position's total borrowed did not change
+	ap.specialPairs[index].Collateral.Amount = sp.Collateral.Amount.Sub(withdrawn)
+	ap.specialPairs[index].Borrow.Amount = sp.Borrow.Amount.Sub(borrowed)
+	ap.borrowedValue = ap.borrowedValue.Sub(borrowed)
+	ap.collateralValue = ap.collateralValue.Sub(withdrawn)
+	return withdrawn, ap.Validate()
 }

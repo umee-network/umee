@@ -408,7 +408,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) (sdk.Dec, error) {
 		return sdk.ZeroDec(), err
 	}
 	// borrow the maximum possible amount of input denom against all remaining unpaired collateral
-	borrowed = borrowed.Add(ap.fillOrdinaryCollateral(denom))
+	borrowed = borrowed.Add(ap.fillOrdinaryCollateral(denom, ap.collateralValue))
 	return borrowed, nil
 }
 
@@ -440,7 +440,7 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, error) {
 		// for all special pairs, starting with the lowest weight
 		if ap.specialPairs[i].Collateral.Denom == denom {
 			// attempt to withdraw collateral from special pairs
-			c, err := ap.withdrawFromSpecialPair(denom)
+			c, err := ap.withdrawFromSpecialPair(i)
 			if err != nil {
 				return sdk.ZeroDec(), err
 			}
