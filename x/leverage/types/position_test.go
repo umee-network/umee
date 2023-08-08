@@ -438,9 +438,60 @@ func TestMaxBorrow(t *testing.T) {
 				coin.Dec("IIII", "1"),
 			),
 			// collateral weight 0.1, should be able to borrow 10 total
-			"IIII",
+			"GGGG",
 			"6.00",
-			"A->ACEI max(I)",
+			"A->ACEI max(G)",
+		},
+		{
+			// mid-weight asset, with multiple existing borrows, borrowing lowest-weighted asset
+			sdk.NewDecCoins(
+				coin.Dec("CCCC", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "1"),
+				coin.Dec("CCCC", "1"),
+				coin.Dec("EEEE", "1"),
+				coin.Dec("IIII", "1"),
+			),
+			// note that minimum borrow factor is 0.5, so all borrows here are weighted min(0.3,0.5) = 0.3
+			// Total borrow will be 100 * 0.3 = 30 so max borrow will be 30 - 4 due to initial borrow
+			"AAAA",
+			"26.00",
+			"C->ACEI max(A)",
+		},
+		{
+			// high-weight asset, with multiple existing borrows, borrowing lowest-weighted asset
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "1"),
+				coin.Dec("CCCC", "1"),
+				coin.Dec("EEEE", "1"),
+				coin.Dec("IIII", "1"),
+			),
+			// collateral weight 0.5 for all borrows due to minimum borrow factor consumes 8 collateral.
+			// remaining max borrow is 92 * 0.5
+			"AAAA",
+			"46.00",
+			"G->ACEI max(A)",
+		},
+		{
+			// high-weight asset, with multiple existing borrows, borrowing highest-weighted asset
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "1"),
+				coin.Dec("CCCC", "1"),
+				coin.Dec("EEEE", "1"),
+				coin.Dec("IIII", "1"),
+			),
+			// collateral weight 0.5 for all borrows due to minimum borrow factor consumes 8 collateral.
+			// remaining max borrow is 92 * 0.7
+			"GGGG",
+			"64.40", // 46 + (92 * 0.2)
+			"G->ACEI max(I)",
 		},
 	}
 
@@ -550,3 +601,4 @@ func TestMaxWithdraw(t *testing.T) {
 }
 
 // TODO: more cases for positions with multiple collateral types
+// TODO: max borrow and max withdraw tests with special pairs involved
