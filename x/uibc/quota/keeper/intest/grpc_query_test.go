@@ -24,11 +24,12 @@ func TestGRPCQueryParams(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		_, err := client.Params(ctx, &tc.req)
+		resp, err := client.Params(ctx, &tc.req)
 		if tc.errExpected {
 			assert.Error(t, err, "")
 		} else {
 			assert.NilError(t, err)
+			assert.DeepEqual(t, uibc.DefaultParams(), resp.Params)
 		}
 	}
 }
