@@ -159,7 +159,6 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debugCmd(),
 		config.Cmd(),
-		ibcDenom(),
 	)
 
 	server.AddCommands(rootCmd, umeeapp.DefaultNodeHome, a.newApp, a.appExport, addModuleInitFlags)
