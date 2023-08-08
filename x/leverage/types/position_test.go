@@ -622,6 +622,61 @@ func TestMaxWithdraw(t *testing.T) {
 			"60.00",
 			"A->ACEI maxWithdraw(A)",
 		},
+
+		{
+			// high-weight asset
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "100"),
+			),
+			sdk.NewDecCoins(),
+			// can withdraw all
+			"GGGG",
+			"100.00",
+			"simple G maxWithdraw(G)",
+		},
+		{
+			// high-weight asset, with existing borrow
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "7"),
+			),
+			// collateral weight 0.5 due to minimum borrow factor, should be able to withdraw 100 - 14
+			"GGGG",
+			"86.00",
+			"simple G->A maxWithdraw(G)",
+		},
+		{
+			// high-weight asset, with existing looped borrow
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "7"),
+			),
+			// collateral weight 0.7, should be able to withdraw 100 - (7 / 0.7)
+			"GGGG",
+			"90.00",
+			"simple G->G maxWithdraw(G)",
+		},
+		{
+			// high-weight asset, with multiple existing borrows
+			sdk.NewDecCoins(
+				coin.Dec("GGGG", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "10"),
+				coin.Dec("CCCC", "10"),
+				coin.Dec("GGGG", "14"),
+				coin.Dec("IIII", "10"),
+			),
+			// collateral weight 0.5 for A,C,I and 0.7 for G means (30 / 0.5 + 14 / 0.7) collateral
+			// is reserved. Max withdraw is thus 100 - (60 + 20)
+			"GGGG",
+			"20.00",
+			"G->ACEI maxWithdraw(G)",
+		},
 	}
 
 	for _, tc := range testCases {
@@ -639,10 +694,11 @@ func TestMaxWithdraw(t *testing.T) {
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxWithdraw).String(),
 			maxWithdraw.String(),
-			tc.msg+" max withddaw\n\n"+borrowPosition.String(),
+			tc.msg+" max withdraw\n\n"+borrowPosition.String(),
 		)
 	}
 }
 
 // TODO: more cases for positions with multiple collateral types
 // TODO: max borrow and max withdraw tests with special pairs involved
+// TODO: clever zero cases, such as max withdraw something that does not exist
