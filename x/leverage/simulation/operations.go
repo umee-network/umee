@@ -395,33 +395,8 @@ func randomLiquidateFields(
 	// note: liquidator and borrower might even be the same account
 	liquidator, _ = simtypes.RandomAcc(r, accs)
 	borrower, _ = simtypes.RandomAcc(r, accs)
-	collateral := lk.GetBorrowerCollateral(ctx, borrower.Address)
-	if collateral.Empty() {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-
-	borrowed := lk.GetBorrowerBorrows(ctx, borrower.Address)
-	borrowed = simtypes.RandSubsetCoins(r, borrowed)
-	if borrowed.Empty() {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-
-	liquidationThreshold, err := lk.CalculateLiquidationThreshold(ctx, collateral)
-	if err != nil {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-	borrowedValue, err := lk.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
-	if err != nil {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-	if borrowedValue.LTE(liquidationThreshold) {
-		// borrower not eligible for liquidation
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-
-	rewardDenom = coin.StripUTokenDenom(randomCoin(r, collateral).Denom)
-
-	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
+	// TODO: evaluate whether we want liquidations in sims when we are enabling them for leverage
+	return liquidator, borrower, sdk.Coin{}, "", true
 }
 
 func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
