@@ -493,6 +493,50 @@ func TestMaxBorrow(t *testing.T) {
 			"64.40", // 46 + (92 * 0.2)
 			"G->ACEI max(I)",
 		},
+		{
+			// multiple asset
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("EEEE", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(),
+			// collateral weights 0.1. 0.5. 0.0, should be able to borrow 10 A + 50 A + 0 A
+			"AAAA",
+			"60.00",
+			"AEI max(A)",
+		},
+		{
+			// multiple asset, with existing looped borrow
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("EEEE", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "7"),
+			),
+			// same position - borrow should reach 60 total
+			"AAAA",
+			"53.00",
+			"AEI->A max(A)",
+		},
+		{
+			// single asset, with existing borrow
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "100"),
+				coin.Dec("EEEE", "100"),
+				coin.Dec("IIII", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("IIII", "4"),
+			),
+			// existing borrow has collateral weight 0.5 due to minimum borrow factor and pairs with 8E
+			// the remaning 100A, 100I, 92E can borrow 10+0+46 = 56 more A
+			"AAAA",
+			"56.00",
+			"AEI->I max(A)",
+		},
 	}
 
 	for _, tc := range testCases {
