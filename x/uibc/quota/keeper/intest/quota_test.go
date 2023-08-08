@@ -46,7 +46,7 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
-	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)
+	ctx, k := initKeeper(t, marshaller, leverageMock, oracleMock)
 	err := k.ResetAllQuotas()
 	assert.NilError(t, err)
 
@@ -108,7 +108,7 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
-	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)
+	ctx, k := initKeeper(t, marshaller, leverageMock, oracleMock)
 	err := k.ResetAllQuotas()
 	assert.NilError(t, err)
 

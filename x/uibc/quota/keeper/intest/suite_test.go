@@ -101,7 +101,6 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 func initKeeper(
 	t *testing.T,
 	cdc codec.BinaryCodec,
-	ics4Wrapper porttypes.ICS4Wrapper,
 	leverage uibc.Leverage,
 	oracle uibc.Oracle,
 ) (sdk.Context, keeper.Keeper) {

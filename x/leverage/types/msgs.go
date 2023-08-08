@@ -46,11 +46,7 @@ func (msg MsgGovUpdateRegistry) ValidateBasic() error {
 	if err := validateRegistryToken(msg.AddTokens); err != nil {
 		return err
 	}
-	if err := validateRegistryToken(msg.UpdateTokens); err != nil {
-		return err
-	}
-
-	return nil
+	return validateRegistryToken(msg.UpdateTokens)
 }
 
 // GetSigners implements Msg
