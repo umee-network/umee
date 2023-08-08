@@ -544,6 +544,7 @@ func (s msgServer) GovUpdateRegistry(
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
 	for _, token := range registeredTokens {
 		regDenoms[token.BaseDenom] = token
+		regDenoms[token.SymbolDenom] = token
 	}
 
 	byEmergencyGroup := !checkers.IsGovAuthority(msg.Authority)
