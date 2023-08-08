@@ -35,7 +35,7 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 		"", sdkmath.ZeroInt(), 6, metoken.Fee{},
 		[]metoken.AcceptedAsset{
 			metoken.NewAcceptedAsset(
-				mocks.USDTBaseDenom, sdk.MustNewDecFromStr("0.2"),
+				mocks.TestDenom1, sdk.MustNewDecFromStr("0.2"),
 				sdk.MustNewDecFromStr("1.0"),
 			),
 		},
@@ -46,6 +46,8 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 
 	deletedAsset := mocks.StableIndex(mocks.MeUSDDenom)
 	deletedAsset.AcceptedAssets = deletedAsset.AcceptedAssets[:1]
+
+	addDuplicatedAsset := mocks.StableIndex("me/Test")
 
 	tcs := []struct {
 		name        string
@@ -72,8 +74,14 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 			errMsg:      "should have the following format",
 		},
 		{
+			name:        "add: asset accepted by another index",
+			addIndex:    []metoken.Index{addDuplicatedAsset},
+			updateIndex: nil,
+			errMsg:      "is already accepted in another index",
+		},
+		{
 			name:        "add: valid",
-			addIndex:    []metoken.Index{mocks.StableIndex("me/TH")},
+			addIndex:    []metoken.Index{mocks.NonStableIndex("me/TH")},
 			updateIndex: nil,
 			errMsg:      "",
 		},

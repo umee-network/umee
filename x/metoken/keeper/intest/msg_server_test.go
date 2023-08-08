@@ -181,19 +181,19 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// create and fund a user with 10000 USDT, 1.431 WBTC, 2.876 ETH
+	// create and fund a user with 10000 CMST, 1.431 WBTC, 2.876 ETH
 	user := s.newAccount(
 		t,
-		coin.New(mocks.USDTBaseDenom, 10000_000000),
+		coin.New(mocks.CMSTBaseDenom, 10000_000000),
 		coin.New(mocks.WBTCBaseDenom, 1_43100000),
 		coin.New(mocks.ETHBaseDenom, 2_876000000000000000),
 	)
 
 	tcs := []testCase{
 		{
-			"valid - first swap 1547 USDT",
+			"valid - first swap 1547 CMST",
 			user,
-			coin.New(mocks.USDTBaseDenom, 1547_000000),
+			coin.New(mocks.CMSTBaseDenom, 1547_000000),
 			mocks.MeNonStableDenom,
 			"",
 		},
@@ -1135,10 +1135,10 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	// create and fund a user with 10000 USDT, 1.431 WBTC, 2.876 ETH
+	// create and fund a user with 10000 CMST, 1.431 WBTC, 2.876 ETH
 	user := s.newAccount(
 		t,
-		coin.New(mocks.USDTBaseDenom, 10000_000000),
+		coin.New(mocks.CMSTBaseDenom, 10000_000000),
 		coin.New(mocks.WBTCBaseDenom, 21_43100000),
 		coin.New(mocks.ETHBaseDenom, 2_876000000000000000),
 	)
@@ -1147,7 +1147,7 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 	swaps := []*metoken.MsgSwap{
 		{
 			User:         user.String(),
-			Asset:        sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(1547_000000)),
+			Asset:        sdk.NewCoin(mocks.CMSTBaseDenom, sdkmath.NewInt(1547_000000)),
 			MetokenDenom: mocks.MeNonStableDenom,
 		},
 		{
@@ -1184,10 +1184,10 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 			"",
 		},
 		{
-			"valid - redeem 0.1 meNonStable USDT",
+			"valid - redeem 0.1 meNonStable CMST",
 			user,
 			coin.New(mocks.MeNonStableDenom, 10000000),
-			mocks.USDTBaseDenom,
+			mocks.CMSTBaseDenom,
 			"",
 		},
 		{
@@ -1198,10 +1198,10 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 			"",
 		},
 		{
-			"valid - redeem 2.182736 meNonStable for USDT - not enough USDT",
+			"valid - redeem 2.182736 meNonStable for CMST - not enough CMST",
 			user,
 			coin.New(mocks.MeNonStableDenom, 2_18273600),
-			mocks.USDTBaseDenom,
+			mocks.CMSTBaseDenom,
 			"not enough",
 		},
 	}
@@ -1846,10 +1846,10 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		},
 	)
 
-	deletedAssetIndex := mocks.StableIndex(mocks.MeUSDDenom)
+	deletedAssetIndex := mocks.NonStableIndex(mocks.MeNonStableDenom)
 	aa := []metoken.AcceptedAsset{
-		metoken.NewAcceptedAsset(mocks.USDTBaseDenom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5")),
-		metoken.NewAcceptedAsset(mocks.USDCBaseDenom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5")),
+		metoken.NewAcceptedAsset(mocks.WBTCSymbolDenom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5")),
+		metoken.NewAcceptedAsset(mocks.ETHSymbolDenom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5")),
 	}
 	deletedAssetIndex.AcceptedAssets = aa
 
@@ -1907,7 +1907,11 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		},
 		{
 			"valid - add",
-			metoken.NewMsgGovUpdateRegistry(govAddr, []metoken.Index{mocks.StableIndex(mocks.MeUSDDenom)}, nil),
+			metoken.NewMsgGovUpdateRegistry(
+				govAddr,
+				[]metoken.Index{mocks.NonStableIndex(mocks.MeNonStableDenom)},
+				nil,
+			),
 			"",
 		},
 		{

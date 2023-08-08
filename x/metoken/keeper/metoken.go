@@ -75,25 +75,42 @@ func (k Keeper) UpdateIndexes(
 	registry := k.GetAllRegisteredIndexes()
 
 	registeredIndexes := make(map[string]metoken.Index)
+	registeredAssets := make(map[string]string)
 	for _, index := range registry {
 		registeredIndexes[index.Denom] = index
+		for _, aa := range index.AcceptedAssets {
+			registeredAssets[aa.Denom] = index.Denom
+		}
 	}
 
-	if err := k.addIndexes(addIndexes, registeredIndexes); err != nil {
+	if err := k.addIndexes(addIndexes, registeredIndexes, registeredAssets); err != nil {
 		return err
 	}
 
-	return k.updateIndexes(updateIndexes, registeredIndexes)
+	return k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets)
 }
 
 // addIndexes handles addition of the indexes from the request along with their validations.
-func (k Keeper) addIndexes(indexes []metoken.Index, registeredIndexes map[string]metoken.Index) error {
+func (k Keeper) addIndexes(
+	indexes []metoken.Index,
+	registeredIndexes map[string]metoken.Index,
+	registeredAssets map[string]string,
+) error {
 	for _, index := range indexes {
 		if _, present := registeredIndexes[index.Denom]; present {
 			return sdkerrors.ErrInvalidRequest.Wrapf(
 				"add: index with denom %s already exists",
 				index.Denom,
 			)
+		}
+
+		for _, aa := range index.AcceptedAssets {
+			if _, present := registeredAssets[aa.Denom]; present {
+				return sdkerrors.ErrInvalidRequest.Wrapf(
+					"add: asset %s is already accepted in another index",
+					aa.Denom,
+				)
+			}
 		}
 
 		if err := k.validateInLeverage(index); err != nil {
@@ -134,7 +151,11 @@ func (k Keeper) addIndexes(indexes []metoken.Index, registeredIndexes map[string
 }
 
 // updateIndexes handles updates of the indexes from the request along with their validations.
-func (k Keeper) updateIndexes(indexes []metoken.Index, registeredIndexes map[string]metoken.Index) error {
+func (k Keeper) updateIndexes(
+	indexes []metoken.Index,
+	registeredIndexes map[string]metoken.Index,
+	registeredAssets map[string]string,
+) error {
 	for _, index := range indexes {
 		oldIndex, present := registeredIndexes[index.Denom]
 		if !present {
@@ -142,6 +163,15 @@ func (k Keeper) updateIndexes(indexes []metoken.Index, registeredIndexes map[str
 				"update: index with denom %s not found",
 				index.Denom,
 			)
+		}
+
+		for _, aa := range index.AcceptedAssets {
+			if indexDenom, present := registeredAssets[aa.Denom]; present && indexDenom != index.Denom {
+				return sdkerrors.ErrInvalidRequest.Wrapf(
+					"add: asset %s is already accepted in another index",
+					aa.Denom,
+				)
+			}
 		}
 
 		if oldIndex.Exponent != index.Exponent {

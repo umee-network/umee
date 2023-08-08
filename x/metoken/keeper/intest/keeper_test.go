@@ -95,6 +95,13 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
+			mocks.ValidToken(mocks.CMSTBaseDenom, mocks.CMSTSymbolDenom, 6),
+		),
+	)
+	require.NoError(
+		t,
+		app.LeverageKeeper.SetTokenSettings(
+			ctx,
 			mocks.ValidToken(mocks.WBTCBaseDenom, mocks.WBTCSymbolDenom, 8),
 		),
 	)

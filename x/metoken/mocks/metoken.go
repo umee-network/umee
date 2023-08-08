@@ -20,14 +20,18 @@ const (
 	WBTCSymbolDenom  = "WBTC"
 	ETHBaseDenom     = "ibc/04CE51E6E02243E565AE676DD60336E48D455F8AAD0611FA0299A22FDAC448D6"
 	ETHSymbolDenom   = "ETH"
+	CMSTBaseDenom    = "ibc/31FA0BA043524F2EFBC9AB0539C43708B8FC549E4800E02D103DDCECAC5FF40C"
+	CMSTSymbolDenom  = "CMST"
 	MeUSDDenom       = "me/USD"
 	MeNonStableDenom = "me/NonStable"
+	TestDenom1       = "testDenom1"
 )
 
 var (
 	USDTPrice = sdk.MustNewDecFromStr("0.998")
 	USDCPrice = sdk.MustNewDecFromStr("1.0")
 	ISTPrice  = sdk.MustNewDecFromStr("1.02")
+	CMSTPrice = sdk.MustNewDecFromStr("0.998")
 	WBTCPrice = sdk.MustNewDecFromStr("27268.938478585498709550")
 	ETHPrice  = sdk.MustNewDecFromStr("1851.789229542837161069")
 )
@@ -53,7 +57,7 @@ func NonStableIndex(denom string) metoken.Index {
 		8,
 		ValidFee(),
 		[]metoken.AcceptedAsset{
-			acceptedAsset(USDTBaseDenom, "0.33"),
+			acceptedAsset(CMSTBaseDenom, "0.33"),
 			acceptedAsset(WBTCBaseDenom, "0.34"),
 			acceptedAsset(ETHBaseDenom, "0.33"),
 		},
@@ -129,6 +133,7 @@ func ValidPrices() otypes.Prices {
 	usdtPrice := USDTPrice.Sub(sdk.MustNewDecFromStr("0.24"))
 	usdcPrice := USDCPrice.Sub(sdk.MustNewDecFromStr("0.24"))
 	istPrice := ISTPrice.Sub(sdk.MustNewDecFromStr("0.24"))
+	cmstPrice := CMSTPrice.Sub(sdk.MustNewDecFromStr("0.24"))
 	wbtcPrice := WBTCPrice.Sub(sdk.MustNewDecFromStr("0.24"))
 	ethPrice := ETHPrice.Sub(sdk.MustNewDecFromStr("0.24"))
 	for i := 1; i <= 24; i++ {
@@ -152,6 +157,14 @@ func ValidPrices() otypes.Prices {
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				ISTSymbolDenom,
 				istPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
+			),
+			BlockNum: uint64(i),
+		}
+		prices = append(prices, median)
+		median = otypes.Price{
+			ExchangeRateTuple: otypes.NewExchangeRateTuple(
+				CMSTSymbolDenom,
+				cmstPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
 			),
 			BlockNum: uint64(i),
 		}
