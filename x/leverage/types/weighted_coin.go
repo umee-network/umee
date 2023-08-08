@@ -6,6 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// TODO: unit-test this file
+
 // A list of WeightedDecCoin sorted by collateral weight (descending) and denom (alphabetical) to break ties.
 type WeightedDecCoins []WeightedDecCoin
 

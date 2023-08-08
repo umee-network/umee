@@ -6,6 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+// TODO: unit-test this file
+
 // fillOrdinaryCollateral finds all unused collateral assets in a position
 // and borrows the maximum amount of an input denom against them. Does not
 // interact with special asset pairs or move borrows around between collateral,
@@ -299,5 +301,3 @@ func (ap *AccountPosition) withdrawFromSpecialPair(denom string) (sdk.Dec, error
 	// 3) collateral amount is returned, after being subtracted from total value
 	return sdk.ZeroDec(), nil
 }
-
-// TODO: unit-test this file
