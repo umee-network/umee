@@ -27,14 +27,6 @@ func newRedeemResponse(fee sdk.Coin, fromReserves sdk.Coin, fromLeverage sdk.Coi
 	}
 }
 
-func zeroRedeemResponse(denom string) redeemResponse {
-	return redeemResponse{
-		fee:          coin.Zero(denom),
-		fromReserves: coin.Zero(denom),
-		fromLeverage: coin.Zero(denom),
-	}
-}
-
 // redeem executes all the necessary calculations and transactions to perform a redemption between users meTokens and
 // an accepted asset by the Index.
 // A redemption includes the following actions:
@@ -73,7 +65,7 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 	}
 
 	if amountFromReserves.IsZero() && amountFromLeverage.IsZero() {
-		return zeroRedeemResponse(assetDenom), nil
+		return redeemResponse{}, fmt.Errorf("insufficient %s for redemption", meToken.Denom)
 	}
 
 	tokensWithdrawn, err := k.withdrawFromLeverage(sdk.NewCoin(assetDenom, amountFromLeverage))

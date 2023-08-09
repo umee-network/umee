@@ -3,8 +3,6 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/umee-network/umee/v5/util/coin"
-
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -27,15 +25,6 @@ func newSwapResponse(meTokens sdk.Coin, fee sdk.Coin, reserved sdk.Coin, leverag
 		fee:       fee,
 		reserved:  reserved,
 		leveraged: leveraged,
-	}
-}
-
-func zeroSwapResponse(meTokenDenom, assetDenom string) swapResponse {
-	return swapResponse{
-		meTokens:  coin.Zero(meTokenDenom),
-		fee:       coin.Zero(assetDenom),
-		reserved:  coin.Zero(assetDenom),
-		leveraged: coin.Zero(assetDenom),
 	}
 }
 
@@ -67,7 +56,7 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 	}
 
 	if meTokenAmount.IsZero() {
-		return zeroSwapResponse(meTokenDenom, asset.Denom), nil
+		return swapResponse{}, fmt.Errorf("insufficient %s for swap", asset.Denom)
 	}
 
 	balances, err := k.IndexBalances(meTokenDenom)

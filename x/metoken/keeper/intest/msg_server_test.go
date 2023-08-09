@@ -805,19 +805,18 @@ func TestMsgServer_Swap_EdgeCase(t *testing.T) {
 
 	// swap 0.00000001 ETH for meToken
 	// 0.00000001 ETH is less than the minimum amount of meToken, so the swap shouldn't change the balances
-	resp, err := msgServer.Swap(
+	_, err = msgServer.Swap(
 		ctx,
 		&metoken.MsgSwap{
 			User: user.String(), Asset: coin.New(mocks.ETHBaseDenom, 10000000000),
 			MetokenDenom: mocks.MeNonStableDenom,
 		},
 	)
-	require.NoError(t, err)
-	require.Equal(t, sdkmath.ZeroInt(), resp.Fee.Amount)
-	require.Equal(t, sdkmath.ZeroInt(), resp.Returned.Amount)
+	require.ErrorContains(t, err, "insufficient")
 
 	// the result should be the same as the initial balance
 	fMeTokenBalance, err := k.IndexBalances(mocks.MeNonStableDenom)
+	require.NoError(t, err)
 	require.Equal(t, iMeTokenBalance, fMeTokenBalance)
 }
 
@@ -1625,13 +1624,11 @@ func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
 	iMeTokenBalance, err := k.IndexBalances(mocks.MeUSDDenom)
 	require.NoError(t, err)
 
-	resp, err := msgServer.Redeem(
+	_, err = msgServer.Redeem(
 		ctx,
 		&metoken.MsgRedeem{User: user.String(), Metoken: coin.New(mocks.MeUSDDenom, 1), AssetDenom: mocks.ISTBaseDenom},
 	)
-	require.NoError(t, err)
-	require.Equal(t, sdkmath.ZeroInt(), resp.Fee.Amount)
-	require.Equal(t, sdkmath.ZeroInt(), resp.Returned.Amount)
+	require.ErrorContains(t, err, "insufficient")
 
 	// the result should be the same as the initial balance
 	// if me/USD amount redeemed is less than the minimum amount possible of an asset, no meTokens should be burned
