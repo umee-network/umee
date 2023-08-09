@@ -27,7 +27,7 @@ func TestIsGovAuthority(t *testing.T) {
 	}
 
 	for i, tc := range tcs {
-		err := IsGovAuthority(tc.auth)
+		err := AssertGovAuthority(tc.auth)
 		if tc.isErr {
 			require.ErrorIs(err, govtypes.ErrInvalidSigner, "[test: %d] expected error", i)
 		} else {

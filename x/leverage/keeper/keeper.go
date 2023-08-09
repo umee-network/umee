@@ -12,6 +12,7 @@ import (
 
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/ugov"
 )
 
 type Keeper struct {
@@ -20,6 +21,7 @@ type Keeper struct {
 	paramSpace             paramtypes.Subspace
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
+	ugov                   ugov.EmergencyGroupBuilder
 	liquidatorQueryEnabled bool
 	meTokenAddr            sdk.AccAddress
 
@@ -31,8 +33,9 @@ func NewKeeper(
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
-	bk types.BankKeeper,
-	ok types.OracleKeeper,
+	b types.BankKeeper,
+	o types.OracleKeeper,
+	ugov ugov.EmergencyGroupBuilder,
 	enableLiquidatorQuery bool,
 	meTokenAddr sdk.AccAddress,
 ) Keeper {
@@ -45,8 +48,9 @@ func NewKeeper(
 		cdc:                    cdc,
 		storeKey:               storeKey,
 		paramSpace:             paramSpace,
-		bankKeeper:             bk,
-		oracleKeeper:           ok,
+		bankKeeper:             b,
+		oracleKeeper:           o,
+		ugov:                   ugov,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
 		meTokenAddr:            meTokenAddr,
 	}

@@ -35,7 +35,7 @@ func (msg MsgGovUpdateRegistry) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateRegistry) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority); err != nil {
+	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, false); err != nil {
 		return err
 	}
 
@@ -43,27 +43,10 @@ func (msg MsgGovUpdateRegistry) ValidateBasic() error {
 		return ErrEmptyAddAndUpdateTokens
 	}
 
-	if err := validateRegistryTokenDenoms(msg.AddTokens); err != nil {
+	if err := validateRegistryToken(msg.AddTokens); err != nil {
 		return err
 	}
-
-	for _, token := range msg.AddTokens {
-		if err := token.Validate(); err != nil {
-			return errors.Wrap(err, "token")
-		}
-	}
-
-	if err := validateRegistryTokenDenoms(msg.UpdateTokens); err != nil {
-		return err
-	}
-
-	for _, token := range msg.UpdateTokens {
-		if err := token.Validate(); err != nil {
-			return errors.Wrap(err, "token")
-		}
-	}
-
-	return nil
+	return validateRegistryToken(msg.UpdateTokens)
 }
 
 // GetSigners implements Msg
@@ -71,14 +54,17 @@ func (msg MsgGovUpdateRegistry) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-// validateRegistryTokenDenoms returns error if duplicate baseDenom exists.
-func validateRegistryTokenDenoms(tokens []Token) error {
+// validateRegistryToken returns error if duplicate baseDenom exists.
+func validateRegistryToken(tokens []Token) error {
 	tokenDenoms := map[string]bool{}
 	for _, token := range tokens {
 		if _, ok := tokenDenoms[token.BaseDenom]; ok {
-			return ErrDuplicateToken.Wrapf("duplicate token with baseDenom %s", token.BaseDenom)
+			return ErrDuplicateToken.Wrapf("with baseDenom %s", token.BaseDenom)
 		}
 		tokenDenoms[token.BaseDenom] = true
+		if err := token.Validate(); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -111,7 +97,7 @@ func (msg MsgGovUpdateSpecialAssets) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 

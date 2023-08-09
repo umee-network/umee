@@ -75,7 +75,7 @@ func NewMsgGovSetParams(authority string, params Params) *MsgGovSetParams {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovSetParams) ValidateBasic() error {
-	return checkers.IsGovAuthority(msg.Authority)
+	return checkers.AssertGovAuthority(msg.Authority)
 }
 
 // GetSigners implements Msg
@@ -101,7 +101,7 @@ func NewMsgGovUpdateRegistry(authority string, addIndex, updateIndex []Index) *M
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateRegistry) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 

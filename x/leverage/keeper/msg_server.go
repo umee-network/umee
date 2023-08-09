@@ -2,10 +2,11 @@ package keeper
 
 import (
 	"context"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/umee-network/umee/v5/util/checkers"
 	"github.com/umee-network/umee/v5/util/coin"
 	"github.com/umee-network/umee/v5/util/sdkutil"
 	"github.com/umee-network/umee/v5/x/leverage/types"
@@ -540,30 +541,30 @@ func (s msgServer) GovUpdateRegistry(
 	msg *types.MsgGovUpdateRegistry,
 ) (*types.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	regdTkDenoms := make(map[string]bool)
-	regdSymDenoms := make(map[string]bool)
-
+	regDenoms := make(map[string]types.Token)
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
 	for _, token := range registeredTokens {
-		regdTkDenoms[token.BaseDenom] = true
-		regdSymDenoms[strings.ToUpper(token.SymbolDenom)] = true
+		regDenoms[token.BaseDenom] = token
 	}
 
-	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regdTkDenoms, regdSymDenoms, true)
-	if err != nil {
-		return nil, err
+	byEmergencyGroup := !checkers.IsGovAuthority(msg.Authority)
+	if byEmergencyGroup {
+		a, err := sdk.AccAddressFromBech32(msg.Authority)
+		if err != nil {
+			return nil, sdkerrors.ErrInvalidAddress.Wrapf("Authority: %v", err)
+		}
+		if !s.keeper.ugov(&ctx).EmergencyGroup().Equals(a) {
+			return nil, sdkerrors.ErrUnauthorized
+		}
 	}
 
-	// adds the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regdTkDenoms, regdSymDenoms, false)
+	err := s.keeper.UpdateTokenRegistry(ctx, msg.UpdateTokens, msg.AddTokens, regDenoms, byEmergencyGroup)
 	if err != nil {
 		return nil, err
 	}
 
 	// cleans blacklisted tokens from the registry if they have not been supplied
-	err = s.keeper.CleanTokenRegistry(ctx)
-	if err != nil {
+	if err := s.keeper.CleanTokenRegistry(ctx); err != nil {
 		return nil, err
 	}
 
