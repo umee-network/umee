@@ -48,11 +48,11 @@ func TestValidateEmergencyQuotaParamsUpdate(t *testing.T) {
 		{"valid total quota update", mkParams(99, 10, 50), ""},
 		{"valid update", mkParams(0, 0, 50), ""},
 
+		{"invalid  update", mkParams(201, 11, 50), "can't increase"},
 		{"invalid total quota update", mkParams(101, 10, 50), "can't increase"},
 		{"invalid token quota update", mkParams(10, 12, 50), "can't increase"},
 		{"invalid quota duration update1", mkParams(100, 10, 51), "can't change QuotaDuration"},
 		{"invalid quota duration update2", mkParams(100, 10, 49), "can't change QuotaDuration"},
-		{"invalid  update", mkParams(201, 11, 50), "can't increase"},
 	}
 
 	assert := assert.New(t)

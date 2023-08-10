@@ -51,10 +51,10 @@ func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom sdk.Dec, quotaDurati
 func validateEmergencyQuotaParamsUpdate(pOld, pNew uibc.Params) error {
 	var errs []error
 	if pNew.TotalQuota.GT(pOld.TotalQuota) || pNew.TokenQuota.GT(pOld.TokenQuota) {
-		errs = append(errs, errors.New("Emergency Group can't increase TotalQuota nor TokenQuota"))
+		errs = append(errs, errors.New("emergency group can't increase TotalQuota nor TokenQuota"))
 	}
 	if pNew.QuotaDuration != pOld.QuotaDuration {
-		errs = append(errs, errors.New("Emergency Group can't change QuotaDuration"))
+		errs = append(errs, errors.New("emergency group can't change QuotaDuration"))
 	}
 	if len(errs) != 0 {
 		return errors.Join(errs...)
