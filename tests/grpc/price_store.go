@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/util/decmath"
+	"github.com/umee-network/umee/v6/util/decmath"
 )
 
 type PriceStore struct {

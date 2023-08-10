@@ -2,8 +2,8 @@ package mocks
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/tests/accs"
-	ugov "github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v6/tests/accs"
+	ugov "github.com/umee-network/umee/v6/x/ugov"
 )
 
 var _ ugov.WithEmergencyGroup = simpleEmergencyGroup{}

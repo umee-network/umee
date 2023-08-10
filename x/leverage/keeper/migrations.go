@@ -3,8 +3,8 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // Migrator is a struct for handling in-place store migrations.

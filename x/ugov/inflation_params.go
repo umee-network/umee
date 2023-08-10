@@ -5,9 +5,9 @@ import (
 
 	"cosmossdk.io/math"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/bpmath"
-	"github.com/umee-network/umee/v5/util/coin"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 func DefaultInflationParams() InflationParams {

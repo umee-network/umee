@@ -6,9 +6,9 @@ import (
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/cmd/umeed/cmd"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/cmd/umeed/cmd"
 )
 
 func main() {

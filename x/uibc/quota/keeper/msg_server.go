@@ -3,8 +3,8 @@ package keeper
 import (
 	"context"
 
-	"github.com/umee-network/umee/v5/util/sdkutil"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 var _ uibc.MsgServer = msgServer{}

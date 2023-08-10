@@ -15,14 +15,14 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 	"github.com/golang/mock/gomock"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	lfixtures "github.com/umee-network/umee/v5/x/leverage/fixtures"
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/uibc"
-	"github.com/umee-network/umee/v5/x/uibc/mocks"
-	"github.com/umee-network/umee/v5/x/uibc/quota"
-	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	lfixtures "github.com/umee-network/umee/v6/x/leverage/fixtures"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/mocks"
+	"github.com/umee-network/umee/v6/x/uibc/quota"
+	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 
 type MockICS4Wrapper struct {

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v6/tests/tsdk"
 )
 
 func TestNumberDiff(t *testing.T) {

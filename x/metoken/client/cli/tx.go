@@ -9,7 +9,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/metoken module.

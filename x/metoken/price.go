@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 // IndexPrices holds meToken and all the underlying assets Price.

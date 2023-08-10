@@ -3,12 +3,12 @@ package tests
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	itestsuite "github.com/umee-network/umee/v5/tests/cli"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/client/cli"
-	"github.com/umee-network/umee/v5/x/leverage/fixtures"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	itestsuite "github.com/umee-network/umee/v6/tests/cli"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/client/cli"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func (s *IntegrationTests) TestInvalidQueries() {

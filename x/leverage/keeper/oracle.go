@@ -6,10 +6,10 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/util/sdkutil"
-	"github.com/umee-network/umee/v5/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 var ten = sdk.MustNewDecFromStr("10")

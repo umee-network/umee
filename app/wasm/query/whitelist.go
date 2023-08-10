@@ -14,12 +14,12 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 
-	"github.com/umee-network/umee/v5/x/incentive"
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	otypes "github.com/umee-network/umee/v5/x/oracle/types"
-	ugovtypes "github.com/umee-network/umee/v5/x/ugov"
-	uibctypes "github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/incentive"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	otypes "github.com/umee-network/umee/v6/x/oracle/types"
+	ugovtypes "github.com/umee-network/umee/v6/x/ugov"
+	uibctypes "github.com/umee-network/umee/v6/x/uibc"
 )
 
 // stargateWhitelist keeps whitelist and its deterministic

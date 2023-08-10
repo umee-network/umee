@@ -9,14 +9,14 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 
-	"github.com/umee-network/umee/v5/x/incentive"
-	inckeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
-	lvkeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
-	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	metokenkeeper "github.com/umee-network/umee/v5/x/metoken/keeper"
-	ockeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
-	ocpes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/incentive"
+	inckeeper "github.com/umee-network/umee/v6/x/incentive/keeper"
+	lvkeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
+	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
+	ockeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
+	ocpes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // Plugin wraps the query plugin with queriers.

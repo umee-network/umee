@@ -7,7 +7,7 @@ import "cosmos/base/v1beta1/coin.proto";
 import "umee/metoken/v1/metoken.proto";
 import "umee/metoken/v1/genesis.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/metoken";
+option go_package = "github.com/umee-network/umee/v6/x/metoken";
 
 option (gogoproto.goproto_getters_all) = false;
 

@@ -7,8 +7,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/oracle/keeper"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/oracle/keeper"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // EndBlocker is called at the end of every block

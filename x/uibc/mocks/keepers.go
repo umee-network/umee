@@ -10,7 +10,7 @@ import (
 	types "github.com/cosmos/cosmos-sdk/types"
 	types0 "github.com/cosmos/cosmos-sdk/x/bank/types"
 	gomock "github.com/golang/mock/gomock"
-	types1 "github.com/umee-network/umee/v5/x/leverage/types"
+	types1 "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // MockBankKeeper is a mock of BankKeeper interface.
