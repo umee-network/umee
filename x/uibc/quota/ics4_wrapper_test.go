@@ -15,14 +15,15 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 	"github.com/golang/mock/gomock"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	lfixtures "github.com/umee-network/umee/v5/x/leverage/fixtures"
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/uibc"
-	"github.com/umee-network/umee/v5/x/uibc/mocks"
-	"github.com/umee-network/umee/v5/x/uibc/quota"
-	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	lfixtures "github.com/umee-network/umee/v6/x/leverage/fixtures"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/oracle/types"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
+	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/mocks"
+	"github.com/umee-network/umee/v6/x/uibc/quota"
+	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 
 type MockICS4Wrapper struct {
@@ -47,11 +48,12 @@ func TestSendPacket(t *testing.T) {
 
 	leverageMock := mocks.NewMockLeverage(ctrl)
 	oracleMock := mocks.NewMockOracle(ctrl)
+	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
 	mock := MockICS4Wrapper{}
 
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	kb := keeper.NewKeeperBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock)
+	kb := keeper.NewKeeperBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock, eg)
 	dp := uibc.DefaultParams()
 	keeper := kb.Keeper(&ctx)
 	keeper.SetParams(dp)

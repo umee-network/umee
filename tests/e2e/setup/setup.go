@@ -32,13 +32,13 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 
-	"github.com/umee-network/umee/v5/app"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/client"
-	"github.com/umee-network/umee/v5/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/app"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/client"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 type E2ETestSuite struct {

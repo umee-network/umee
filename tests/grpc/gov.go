@@ -10,8 +10,8 @@ import (
 	gtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 
-	"github.com/umee-network/umee/v5/client"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/client"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 var govDeposit sdk.Coins

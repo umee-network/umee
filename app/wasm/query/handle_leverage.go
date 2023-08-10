@@ -5,7 +5,7 @@ import (
 
 	"github.com/gogo/protobuf/proto"
 
-	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // HandleLeverageParams handles the get the x/leverage module's parameters.

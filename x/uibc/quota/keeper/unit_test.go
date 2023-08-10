@@ -9,8 +9,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 const (
@@ -20,10 +21,11 @@ const (
 
 // creates keeper without external dependencies (app, leverage etc...)
 func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
+	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
 	ir := cdctypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(ir)
 	storeKey := storetypes.NewMemoryStoreKey("quota")
-	kb := NewKeeperBuilder(cdc, storeKey, l, o)
+	kb := NewKeeperBuilder(cdc, storeKey, l, o, eg)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return TestKeeper{kb.Keeper(&ctx), t, &ctx}
 }

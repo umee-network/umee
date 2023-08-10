@@ -3,7 +3,7 @@ package tests
 import (
 	"testing"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
+	umeeapp "github.com/umee-network/umee/v6/app"
 )
 
 func TestIntegrationTestSuite(t *testing.T) {

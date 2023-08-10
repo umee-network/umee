@@ -11,11 +11,11 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/coin"
-	umeesim "github.com/umee-network/umee/v5/util/sim"
-	"github.com/umee-network/umee/v5/x/leverage/keeper"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
+	umeesim "github.com/umee-network/umee/v6/util/sim"
+	"github.com/umee-network/umee/v6/x/leverage/keeper"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // Default simulation operation weights for leverage messages

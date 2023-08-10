@@ -1,8 +1,8 @@
 package keeper_test
 
 import (
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/coin"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 func (s *IntegrationTestSuite) TestSetReserves() {

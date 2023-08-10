@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v6/x/incentive"
 )
 
 // InitGenesis initializes the x/incentive module state from a provided genesis state.

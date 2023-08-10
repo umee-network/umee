@@ -5,11 +5,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/umee-network/umee/v5/util/checkers"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/util/sdkutil"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 var _ types.MsgServer = msgServer{}
@@ -547,18 +546,12 @@ func (s msgServer) GovUpdateRegistry(
 		regDenoms[token.BaseDenom] = token
 	}
 
-	byEmergencyGroup := !checkers.IsGovAuthority(msg.Authority)
-	if byEmergencyGroup {
-		a, err := sdk.AccAddressFromBech32(msg.Authority)
-		if err != nil {
-			return nil, sdkerrors.ErrInvalidAddress.Wrapf("Authority: %v", err)
-		}
-		if !s.keeper.ugov(&ctx).EmergencyGroup().Equals(a) {
-			return nil, sdkerrors.ErrUnauthorized
-		}
+	byEmergencyGroup, err := checkers.EmergencyGroupAuthority(msg.Authority, s.keeper.ugov(&ctx))
+	if err != nil {
+		return nil, err
 	}
 
-	err := s.keeper.UpdateTokenRegistry(ctx, msg.UpdateTokens, msg.AddTokens, regDenoms, byEmergencyGroup)
+	err = s.keeper.UpdateTokenRegistry(ctx, msg.UpdateTokens, msg.AddTokens, regDenoms, byEmergencyGroup)
 	if err != nil {
 		return nil, err
 	}

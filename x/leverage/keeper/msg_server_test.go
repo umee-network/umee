@@ -6,10 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/fixtures"
-	"github.com/umee-network/umee/v5/x/leverage/types"
-	ugovmocks "github.com/umee-network/umee/v5/x/ugov/mocks"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
+	"github.com/umee-network/umee/v6/x/leverage/types"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {

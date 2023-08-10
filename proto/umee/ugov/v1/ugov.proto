@@ -5,7 +5,7 @@ import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "google/protobuf/duration.proto";
 
-option go_package                      = "github.com/umee-network/umee/v5/x/ugov";
+option go_package                      = "github.com/umee-network/umee/v6/x/ugov";
 option (gogoproto.goproto_getters_all) = false;
 
 // InflationParams params for changing the inflation min rate and max rate of mint module params.
@@ -21,7 +21,7 @@ message InflationParams {
   ];
   // inflation_reduction_rate for every inflation cycle.
   uint32 inflation_reduction_rate = 3 [
-    (gogoproto.customtype) = "github.com/umee-network/umee/v5/util/bpmath.FixedBP",
+    (gogoproto.customtype) = "github.com/umee-network/umee/v6/util/bpmath.FixedBP",
     (gogoproto.nullable)   = false
   ];
 }
