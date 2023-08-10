@@ -3,11 +3,15 @@ package main
 import (
 	"os"
 
-	"github.com/umee-network/umee/v5/cmd/ibc_denom/cmd"
+	"github.com/spf13/cobra"
 )
 
+func NewRootCmd() *cobra.Command {
+	return ibcDenomCmd()
+}
+
 func main() {
-	rootCmd := cmd.NewRootCmd()
+	rootCmd := NewRootCmd()
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
