@@ -60,7 +60,6 @@ func OracleParamChanges(
 func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransferStatus) error {
 	msg := uibc.MsgGovSetIBCStatus{
 		Authority:   authtypes.NewModuleAddress(gtypes.ModuleName).String(),
-		Title:       "Update the ibc transfer status",
 		Description: "Update the ibc transfer status",
 		IbcStatus:   status,
 	}
