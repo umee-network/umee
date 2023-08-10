@@ -537,7 +537,7 @@ func New(
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquotakeeper.NewKeeperBuilder(
 		appCodec, keys[uibc.StoreKey],
-		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
+		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
 
 	/**********
