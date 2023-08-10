@@ -48,14 +48,6 @@ func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom sdk.Dec, quotaDurati
 	return k.SetParams(pNew)
 }
 
-// SetIBCStatus update the ibc-transfer status in module params.
-func (k Keeper) SetIBCStatus(ibcStatus uibc.IBCTransferStatus) error {
-	params := k.GetParams()
-	params.IbcStatus = ibcStatus
-
-	return k.SetParams(params)
-}
-
 func validateEmergencyQuotaParamsUpdate(pOld, pNew uibc.Params) error {
 	var errs []error
 	if pNew.TotalQuota.GT(pOld.TotalQuota) || pNew.TokenQuota.GT(pOld.TokenQuota) {
@@ -68,4 +60,12 @@ func validateEmergencyQuotaParamsUpdate(pOld, pNew uibc.Params) error {
 		return errors.Join(errs...)
 	}
 	return nil
+}
+
+// SetIBCStatus update the ibc-transfer status in module params.
+func (k Keeper) SetIBCStatus(ibcStatus uibc.IBCTransferStatus) error {
+	params := k.GetParams()
+	params.IbcStatus = ibcStatus
+
+	return k.SetParams(params)
 }

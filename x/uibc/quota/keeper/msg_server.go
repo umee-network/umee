@@ -50,6 +50,11 @@ func (m msgServer) GovSetIBCStatus(
 	}
 
 	k := m.kb.Keeper(&sdkCtx)
+	// emergency group can change status to any valid value
+	if _, err = checkers.EmergencyGroupAuthority(msg.Authority, k.ugov); err != nil {
+		return nil, err
+	}
+
 	if err := k.SetIBCStatus(msg.IbcStatus); err != nil {
 		return &uibc.MsgGovSetIBCStatusResponse{}, err
 	}
