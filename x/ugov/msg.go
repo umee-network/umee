@@ -37,11 +37,10 @@ func (msg *MsgGovUpdateMinGasPrice) String() string {
 // LegacyMsg.Type implementations
 
 func (msg MsgGovUpdateMinGasPrice) Route() string { return "" }
-
+func (msg MsgGovUpdateMinGasPrice) Type() string  { return sdk.MsgTypeURL(&msg) }
 func (msg MsgGovUpdateMinGasPrice) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
-func (msg MsgGovUpdateMinGasPrice) Type() string { return sdk.MsgTypeURL(&msg) }
 
 //
 // MsgGovSetEmergencyGroup

@@ -26,7 +26,7 @@ func (msg *MsgGovUpdateQuota) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateQuota) ValidateBasic() error {
-	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 
@@ -66,7 +66,7 @@ func (msg *MsgGovSetIBCStatus) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovSetIBCStatus) ValidateBasic() error {
-	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 
