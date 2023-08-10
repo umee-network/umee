@@ -90,8 +90,7 @@ func (msg *MsgGovUpdateInflationParams) GetSigners() []sdk.AccAddress {
 
 // LegacyMsg.Type implementations
 func (msg MsgGovUpdateInflationParams) Route() string { return "" }
-
+func (msg MsgGovUpdateInflationParams) Type() string  { return sdk.MsgTypeURL(&msg) }
 func (msg MsgGovUpdateInflationParams) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
-func (msg MsgGovUpdateInflationParams) Type() string { return sdk.MsgTypeURL(&msg) }

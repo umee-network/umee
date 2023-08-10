@@ -16,11 +16,10 @@ var (
 	_, _ legacytx.LegacyMsg = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssets{}
 )
 
-// NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance
-func NewMsgGovUpdateRegistry(authority, title, description string, update, add []Token) *MsgGovUpdateRegistry {
+// NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance.
+// Authority must be a valid bech32 address.
+func NewMsgGovUpdateRegistry(authority string, update, add []Token) *MsgGovUpdateRegistry {
 	return &MsgGovUpdateRegistry{
-		Title:        title,
-		Description:  description,
 		UpdateTokens: update,
 		AddTokens:    add,
 		Authority:    authority,
@@ -35,7 +34,7 @@ func (msg MsgGovUpdateRegistry) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateRegistry) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, false); err != nil {
+	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
 		return err
 	}
 
