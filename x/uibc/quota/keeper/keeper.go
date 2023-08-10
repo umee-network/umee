@@ -40,6 +40,7 @@ func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
 		store:     ctx.KVStore(kb.storeKey),
 		leverage:  kb.leverage,
 		oracle:    kb.oracle,
+		ugov:      kb.ugov(ctx),
 		cdc:       kb.cdc,
 		blockTime: ctx.BlockTime(),
 
@@ -54,7 +55,7 @@ type Keeper struct {
 	store    sdk.KVStore
 	leverage uibc.Leverage
 	oracle   uibc.Oracle
-	ugov     ugov.EmergencyGroupBuilder
+	ugov     ugov.WithEmergencyGroup
 
 	/**
 	if Keeper methods depends on sdk.Context, then we should add those dependencies directly,
