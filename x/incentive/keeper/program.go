@@ -6,8 +6,8 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/incentive"
 )
 
 // createIncentiveProgram saves an incentive program to upcoming programs after it

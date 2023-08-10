@@ -1,9 +1,9 @@
 package keeper
 
 import (
-	"github.com/umee-network/umee/v5/util/store"
+	"github.com/umee-network/umee/v6/util/store"
 
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // SetParams sets the x/metoken module's parameters.

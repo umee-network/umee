@@ -7,7 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 type LeverageKeeper struct {

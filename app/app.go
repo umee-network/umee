@@ -119,35 +119,35 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
-	customante "github.com/umee-network/umee/v5/ante"
-	"github.com/umee-network/umee/v5/app/inflation"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/swagger"
-	"github.com/umee-network/umee/v5/util/genmap"
-	"github.com/umee-network/umee/v5/x/incentive"
-	incentivekeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
-	incentivemodule "github.com/umee-network/umee/v5/x/incentive/module"
-	"github.com/umee-network/umee/v5/x/leverage"
-	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/oracle"
-	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/ugov"
-	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
-	ugovmodule "github.com/umee-network/umee/v5/x/ugov/module"
+	customante "github.com/umee-network/umee/v6/ante"
+	"github.com/umee-network/umee/v6/app/inflation"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/swagger"
+	"github.com/umee-network/umee/v6/util/genmap"
+	"github.com/umee-network/umee/v6/x/incentive"
+	incentivekeeper "github.com/umee-network/umee/v6/x/incentive/keeper"
+	incentivemodule "github.com/umee-network/umee/v6/x/incentive/module"
+	"github.com/umee-network/umee/v6/x/leverage"
+	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/ugov"
+	ugovkeeper "github.com/umee-network/umee/v6/x/ugov/keeper"
+	ugovmodule "github.com/umee-network/umee/v6/x/ugov/module"
 
 	// umee ibc-transfer and quota for ibc-transfer
-	uwasm "github.com/umee-network/umee/v5/app/wasm"
-	"github.com/umee-network/umee/v5/x/uibc"
-	uibcmodule "github.com/umee-network/umee/v5/x/uibc/module"
-	uibcoracle "github.com/umee-network/umee/v5/x/uibc/oracle"
-	uibcquota "github.com/umee-network/umee/v5/x/uibc/quota"
-	uibcquotakeeper "github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	uwasm "github.com/umee-network/umee/v6/app/wasm"
+	"github.com/umee-network/umee/v6/x/uibc"
+	uibcmodule "github.com/umee-network/umee/v6/x/uibc/module"
+	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
+	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
+	uibcquotakeeper "github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 
-	"github.com/umee-network/umee/v5/x/metoken"
-	metokenkeeper "github.com/umee-network/umee/v5/x/metoken/keeper"
-	metokenmodule "github.com/umee-network/umee/v5/x/metoken/module"
+	"github.com/umee-network/umee/v6/x/metoken"
+	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
+	metokenmodule "github.com/umee-network/umee/v6/x/metoken/module"
 )
 
 var (
@@ -469,12 +469,14 @@ func New(
 		app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
+
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
 		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
+		app.UGovKeeperB.EmergencyGroup,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 		authtypes.NewModuleAddress(metoken.ModuleName),
 	)
@@ -535,7 +537,7 @@ func New(
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquotakeeper.NewKeeperBuilder(
 		appCodec, keys[uibc.StoreKey],
-		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
+		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
 
 	/**********

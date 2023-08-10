@@ -10,9 +10,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 func TestIndex_AddAndUpdate(t *testing.T) {

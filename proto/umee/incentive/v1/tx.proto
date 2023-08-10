@@ -7,7 +7,7 @@ import "cosmos/msg/v1/msg.proto";
 import "gogoproto/gogo.proto";
 import "umee/incentive/v1/incentive.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/incentive";
+option go_package = "github.com/umee-network/umee/v6/x/incentive";
 
 // Msg defines the x/incentive module's Msg service.
 service Msg {

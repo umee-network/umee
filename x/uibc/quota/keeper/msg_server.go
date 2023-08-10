@@ -3,8 +3,9 @@ package keeper
 import (
 	"context"
 
-	"github.com/umee-network/umee/v5/util/sdkutil"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 var _ uibc.MsgServer = msgServer{}
@@ -28,7 +29,12 @@ func (m msgServer) GovUpdateQuota(ctx context.Context, msg *uibc.MsgGovUpdateQuo
 	}
 
 	k := m.kb.Keeper(&sdkCtx)
-	if err := k.UpdateQuotaParams(msg.Total, msg.PerDenom, msg.QuotaDuration); err != nil {
+	byEmergencyGroup, err := checkers.EmergencyGroupAuthority(msg.Authority, k.ugov)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := k.UpdateQuotaParams(msg.Total, msg.PerDenom, msg.QuotaDuration, byEmergencyGroup); err != nil {
 		return nil, err
 	}
 	return &uibc.MsgGovUpdateQuotaResponse{}, nil
@@ -44,6 +50,11 @@ func (m msgServer) GovSetIBCStatus(
 	}
 
 	k := m.kb.Keeper(&sdkCtx)
+	// emergency group can change status to any valid value
+	if _, err = checkers.EmergencyGroupAuthority(msg.Authority, k.ugov); err != nil {
+		return nil, err
+	}
+
 	if err := k.SetIBCStatus(msg.IbcStatus); err != nil {
 		return &uibc.MsgGovSetIBCStatusResponse{}, err
 	}

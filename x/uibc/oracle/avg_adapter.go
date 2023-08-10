@@ -3,7 +3,7 @@ package oracle
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 type UmeeAvgPriceOracle interface {

@@ -15,10 +15,10 @@ import (
 	tmrand "github.com/tendermint/tendermint/libs/rand"
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/metoken/keeper"
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/keeper"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 type KeeperTestSuite struct {

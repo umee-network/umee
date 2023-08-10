@@ -4,9 +4,9 @@ import (
 	"cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/util/decmath"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/util/decmath"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // HistoricMedians returns a list of a given denom's last numStamps medians.
@@ -34,6 +34,16 @@ func (k Keeper) CalcAndSetHistoricMedian(
 	denom string,
 ) error {
 	historicPrices := k.historicPrices(ctx, denom, k.MaximumPriceStamps(ctx))
+	if len(historicPrices) == 0 {
+		k.Logger(ctx).Error(
+			"There always should be an historic price before we attempt to make any median price. "+
+				"This scenario should never happen.",
+			"denom", denom,
+			"block_height", ctx.BlockHeight(),
+		)
+		return nil
+	}
+
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
 		return errors.Wrap(err, "denom: "+denom)

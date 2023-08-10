@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // HandleMeTokenParams handles the get for x/metoken module's parameters.

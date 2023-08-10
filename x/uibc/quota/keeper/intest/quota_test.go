@@ -9,11 +9,11 @@ import (
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
-	lfixtures "github.com/umee-network/umee/v5/x/leverage/fixtures"
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/uibc"
-	"github.com/umee-network/umee/v5/x/uibc/mocks"
+	lfixtures "github.com/umee-network/umee/v6/x/leverage/fixtures"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/mocks"
 )
 
 func TestResetQuota(t *testing.T) {
@@ -46,7 +46,7 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
-	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)
+	ctx, k := initKeeper(t, marshaller, leverageMock, oracleMock)
 	err := k.ResetAllQuotas()
 	assert.NilError(t, err)
 
@@ -108,7 +108,7 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	oracleMock := mocks.NewMockOracle(ctrl)
 
 	marshaller := codec.NewProtoCodec(nil)
-	ctx, k := initKeeper(t, marshaller, nil, leverageMock, oracleMock)
+	ctx, k := initKeeper(t, marshaller, leverageMock, oracleMock)
 	err := k.ResetAllQuotas()
 	assert.NilError(t, err)
 

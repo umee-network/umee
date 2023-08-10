@@ -9,7 +9,7 @@ import (
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
-	github_com_umee_network_umee_v5_util_bpmath "github.com/umee-network/umee/v5/util/bpmath"
+	github_com_umee_network_umee_v5_util_bpmath "github.com/umee-network/umee/v6/util/bpmath"
 	_ "google.golang.org/protobuf/types/known/durationpb"
 	io "io"
 	math "math"
@@ -36,7 +36,7 @@ type InflationParams struct {
 	// inflation_cycle duration after which inflation rates are changed.
 	InflationCycle time.Duration `protobuf:"bytes,2,opt,name=inflation_cycle,json=inflationCycle,proto3,stdduration" json:"inflation_cycle,omitempty" yaml:"inflation_cycle"`
 	// inflation_reduction_rate for every inflation cycle.
-	InflationReductionRate github_com_umee_network_umee_v5_util_bpmath.FixedBP `protobuf:"varint,3,opt,name=inflation_reduction_rate,json=inflationReductionRate,proto3,customtype=github.com/umee-network/umee/v5/util/bpmath.FixedBP" json:"inflation_reduction_rate"`
+	InflationReductionRate github_com_umee_network_umee_v5_util_bpmath.FixedBP `protobuf:"varint,3,opt,name=inflation_reduction_rate,json=inflationReductionRate,proto3,customtype=github.com/umee-network/umee/v6/util/bpmath.FixedBP" json:"inflation_reduction_rate"`
 }
 
 func (m *InflationParams) Reset()         { *m = InflationParams{} }

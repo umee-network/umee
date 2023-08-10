@@ -11,14 +11,14 @@ import (
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/app/inflation"
-	mocks "github.com/umee-network/umee/v5/app/inflation/mocks"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/util/bpmath"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/ugov"
-	ugovmocks "github.com/umee-network/umee/v5/x/ugov/mocks"
+	"github.com/umee-network/umee/v6/app/inflation"
+	mocks "github.com/umee-network/umee/v6/app/inflation/mocks"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/ugov"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
 func TestAdjustInflation(t *testing.T) {
@@ -218,7 +218,7 @@ func TestInflationRate(t *testing.T) {
 
 			calc := inflation.Calculator{
 				MintKeeper:  mockMintKeeper,
-				UgovKeeperB: ugovmocks.NewUgovParamsBuilder(mockUGovKeeper),
+				UgovKeeperB: ugovmocks.NewParamsBuilder(mockUGovKeeper),
 			}
 			result := calc.InflationRate(test.ctx(), test.minter, test.mintParams(mintParams), test.bondedRatio)
 

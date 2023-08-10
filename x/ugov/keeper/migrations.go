@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	v2 "github.com/umee-network/umee/v5/x/ugov/migrations/v2"
+	v2 "github.com/umee-network/umee/v6/x/ugov/migrations/v2"
 )
 
 // Migrator is a struct for handling in-place store migrations.

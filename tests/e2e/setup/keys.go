@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
-	appparams "github.com/umee-network/umee/v5/app/params"
+	appparams "github.com/umee-network/umee/v6/app/params"
 )
 
 const (

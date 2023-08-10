@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func validToken() types.Token {
