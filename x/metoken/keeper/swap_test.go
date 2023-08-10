@@ -7,10 +7,11 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
-func TestSwap(t *testing.T) {
+func TestSwap_Valid(t *testing.T) {
 	k := initMeUSDKeeper(t, NewBankMock(), NewLeverageMock(), NewOracleMock())
 
 	tenUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(10_000000))
@@ -39,6 +40,36 @@ func TestSwap(t *testing.T) {
 	p, err := k.Prices(i)
 	assert.NoError(t, err)
 	meTokenPrice, err := p.Price(mocks.MeUSDDenom)
-	assert.Equal(t, resp.meTokens, sdk.NewCoin(mocks.MeUSDDenom, mocks.USDTPrice.Quo(meTokenPrice.Price).MulInt(resp.
-		reserved.Amount.Add(resp.leveraged.Amount)).TruncateInt()))
+	assert.Equal(
+		t, resp.meTokens, sdk.NewCoin(
+			mocks.MeUSDDenom, mocks.USDTPrice.Quo(meTokenPrice.Price).MulInt(
+				resp.
+					reserved.Amount.Add(resp.leveraged.Amount),
+			).TruncateInt(),
+		),
+	)
+}
+
+func TestSwap_Errors(t *testing.T) {
+	k := initMeUSDKeeper(t, NewBankMock(), NewLeverageMock(), NewOracleMock())
+
+	_, err := k.swap(sdk.AccAddress{}, mocks.MeUSDDenom, sdk.NewCoin("nonexistingMetoken", sdkmath.OneInt()))
+	assert.ErrorContains(t, err, "not found")
+
+	moreMaxSupply := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(10000000_000000))
+	_, err = k.swap(sdk.AccAddress{}, mocks.MeUSDDenom, moreMaxSupply)
+	assert.ErrorContains(t, err, "not possible to mint the desired amount")
+}
+
+func TestSwap_LeverageOversupplied(t *testing.T) {
+	l := NewLeverageMock()
+	ts := l.tokens[mocks.USDTBaseDenom]
+	ts.MaxSupply = sdkmath.NewInt(10_000000)
+	l.tokens[mocks.USDTBaseDenom] = ts
+	k := initMeUSDKeeper(t, NewBankMock(), l, NewOracleMock())
+
+	thirtyUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(30_000000))
+	resp, err := k.swap(sdk.AccAddress{}, mocks.MeUSDDenom, thirtyUSDT)
+	assert.NoError(t, err)
+	assert.True(t, resp.reserved.IsGTE(resp.leveraged))
 }
