@@ -9,6 +9,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v5/x/ugov"
 	"github.com/umee-network/umee/v5/x/uibc"
 )
 
@@ -18,16 +19,19 @@ type Builder struct {
 	cdc      codec.BinaryCodec
 	leverage uibc.Leverage
 	oracle   uibc.Oracle
+	ugov     ugov.EmergencyGroupBuilder
 }
 
 func NewKeeperBuilder(
-	cdc codec.BinaryCodec, key storetypes.StoreKey, leverage uibc.Leverage, oracle uibc.Oracle,
+	cdc codec.BinaryCodec, key storetypes.StoreKey,
+	leverage uibc.Leverage, oracle uibc.Oracle, ugov ugov.EmergencyGroupBuilder,
 ) Builder {
 	return Builder{
 		cdc:      cdc,
 		storeKey: key,
 		leverage: leverage,
 		oracle:   oracle,
+		ugov:     ugov,
 	}
 }
 
@@ -50,6 +54,7 @@ type Keeper struct {
 	store    sdk.KVStore
 	leverage uibc.Leverage
 	oracle   uibc.Oracle
+	ugov     ugov.EmergencyGroupBuilder
 
 	/**
 	if Keeper methods depends on sdk.Context, then we should add those dependencies directly,
