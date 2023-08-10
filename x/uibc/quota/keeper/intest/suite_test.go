@@ -20,6 +20,7 @@ import (
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/tests/tsdk"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 	"github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
@@ -104,6 +105,7 @@ func initKeeper(
 ) (sdk.Context, keeper.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	kb := keeper.NewKeeperBuilder(cdc, storeKey, leverage, oracle)
+	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
+	kb := keeper.NewKeeperBuilder(cdc, storeKey, leverage, oracle, eg)
 	return ctx, kb.Keeper(&ctx)
 }

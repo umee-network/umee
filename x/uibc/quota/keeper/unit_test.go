@@ -21,10 +21,10 @@ const (
 
 // creates keeper without external dependencies (app, leverage etc...)
 func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
+	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
 	ir := cdctypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(ir)
 	storeKey := storetypes.NewMemoryStoreKey("quota")
-	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
 	kb := NewKeeperBuilder(cdc, storeKey, l, o, eg)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return TestKeeper{kb.Keeper(&ctx), t, &ctx}
