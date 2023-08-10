@@ -3,7 +3,7 @@ package ugov
 import (
 	"time"
 
-	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 // DefaultGenesis creates a default genesis state

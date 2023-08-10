@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v6/x/incentive"
 )
 
 // HandleLeverageParams handles the get the x/leverage module's parameters.

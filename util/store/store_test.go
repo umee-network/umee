@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v6/tests/tsdk"
 )
 
 func TestGetAndSetDec(t *testing.T) {

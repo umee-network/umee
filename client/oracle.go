@@ -3,7 +3,7 @@ package client
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 func (c Client) OracleQueryClient() oracletypes.QueryClient {

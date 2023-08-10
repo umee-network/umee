@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/spf13/cobra"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/uibc module.

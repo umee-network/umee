@@ -5,9 +5,9 @@ import (
 
 	"cosmossdk.io/errors"
 
-	"github.com/umee-network/umee/v5/util/decmath"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/util/decmath"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // nonOracleError returns true if an error is non-nil

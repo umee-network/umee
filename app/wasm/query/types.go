@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
-	"github.com/umee-network/umee/v5/x/incentive"
-	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	octypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/incentive"
+	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	octypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts.

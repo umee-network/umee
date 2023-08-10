@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gogo/protobuf/proto"
 
-	octypes "github.com/umee-network/umee/v5/x/oracle/types"
+	octypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // HandleFeederDelegation gets all the feeder delegation of a validator.

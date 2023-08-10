@@ -6,7 +6,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/v5/client"
+	"github.com/umee-network/umee/v6/client"
 )
 
 // MedianCheck waits for availability of all exchange rates from the denom accept list,

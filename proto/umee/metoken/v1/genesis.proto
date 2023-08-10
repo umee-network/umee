@@ -6,7 +6,7 @@ import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 import "umee/metoken/v1/metoken.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/metoken";
+option go_package = "github.com/umee-network/umee/v6/x/metoken";
 
 // GenesisState defines the x/metoken module's genesis state.
 message GenesisState {

@@ -1,8 +1,8 @@
 package keeper
 
 import (
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // InitGenesis initializes the x/metoken module's state from a provided genesis state.

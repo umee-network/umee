@@ -6,8 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/metoken"
-	lerrors "github.com/umee-network/umee/v5/x/metoken/errors"
+	"github.com/umee-network/umee/v6/x/metoken"
+	lerrors "github.com/umee-network/umee/v6/x/metoken/errors"
 )
 
 // RebalanceReserves checks if the portion of reserves is below the desired and transfer the missing amount from
