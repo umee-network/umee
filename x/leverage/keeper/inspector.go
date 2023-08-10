@@ -10,7 +10,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 type tokenExchangeRate struct {
@@ -125,9 +126,9 @@ func symbolDecCoins(
 
 	for _, c := range coins {
 		exchangeRate := sdk.OneDec()
-		if types.HasUTokenPrefix(c.Denom) {
+		if coin.HasUTokenPrefix(c.Denom) {
 			// uTokens will be converted to base tokens
-			c.Denom = types.ToTokenDenom(c.Denom)
+			c.Denom = coin.StripUTokenDenom(c.Denom)
 			exchangeRate = tokens[c.Denom].exchangeRate
 		}
 		t, ok := tokens[c.Denom]

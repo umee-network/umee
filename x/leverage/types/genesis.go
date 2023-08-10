@@ -50,7 +50,7 @@ func (gs GenesisState) Validate() error {
 		return err
 	}
 
-	if err := validateRegistryTokenDenoms(gs.Registry); err != nil {
+	if err := validateRegistryToken(gs.Registry); err != nil {
 		return err
 	}
 	for _, token := range gs.Registry {

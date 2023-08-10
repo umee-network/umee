@@ -2,7 +2,9 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // Migrator is a struct for handling in-place store migrations.
@@ -21,7 +23,7 @@ func (m Migrator) MigrateBNB(ctx sdk.Context) (bool, error) {
 	// Bad BNB token denom
 	badDenom := "ibc/77BCD42E49E5B7E0FC6B269FEBF0185B15044F13F6F38CA285DF0AF883459F40"
 	// Ensure zero supply of the token being removed from leverage registry
-	uSupply := m.keeper.GetUTokenSupply(ctx, types.ToUTokenDenom(badDenom))
+	uSupply := m.keeper.GetUTokenSupply(ctx, coin.ToUTokenDenom(badDenom))
 	if !uSupply.IsZero() {
 		ctx.Logger().Error("can't correctly migrate leverage with existing supply",
 			"token", badDenom, "total_u_supply", uSupply)

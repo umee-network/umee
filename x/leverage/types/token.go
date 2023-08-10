@@ -2,77 +2,47 @@ package types
 
 import (
 	"fmt"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-)
-
-const (
-	// UTokenPrefix defines the uToken denomination prefix for all uToken types.
-	UTokenPrefix = "u/"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 var halfDec = sdk.MustNewDecFromStr("0.5")
-
-// HasUTokenPrefix detects the uToken prefix on a denom.
-func HasUTokenPrefix(denom string) bool {
-	return strings.HasPrefix(denom, UTokenPrefix)
-}
-
-// ToUTokenDenom adds the uToken prefix to a denom. Returns an empty string
-// instead if the prefix was already present.
-func ToUTokenDenom(denom string) string {
-	if HasUTokenPrefix(denom) {
-		return ""
-	}
-	return UTokenPrefix + denom
-}
+var one = sdk.OneDec()
 
 // ValidateBaseDenom validates a denom and ensures it is not a uToken.
 func ValidateBaseDenom(denom string) error {
 	if err := sdk.ValidateDenom(denom); err != nil {
 		return err
 	}
-	if HasUTokenPrefix(denom) {
+	if coin.HasUTokenPrefix(denom) {
 		return ErrUToken.Wrap(denom)
 	}
 	return nil
 }
 
-// ToTokenDenom strips the uToken prefix from a denom, or returns an empty
-// string if it was not present. Also returns an empty string if the prefix
-// was repeated multiple times.
-func ToTokenDenom(denom string) string {
-	if !HasUTokenPrefix(denom) {
-		return ""
-	}
-	s := strings.TrimPrefix(denom, UTokenPrefix)
-	if HasUTokenPrefix(s) {
-		// denom started with "u/u/"
-		return ""
-	}
-	return s
-}
-
 // Validate performs validation on an Token type returning an error if the Token
 // is invalid.
 func (t Token) Validate() error {
-	if err := validateBaseDenoms(t.BaseDenom, t.SymbolDenom); err != nil {
+	if err := validateBaseDenoms(t.BaseDenom); err != nil {
+		return fmt.Errorf("base_denom: %v", err)
+	}
+	if err := validateBaseDenoms(t.SymbolDenom); err != nil {
+		return fmt.Errorf("symbol_denom: %v", err)
+	}
+
+	if err := checkers.DecInZeroOne(t.ReserveFactor, "reserve factor", false); err != nil {
 		return err
 	}
-
-	one := sdk.OneDec()
-
-	// Reserve factor is non-negative and less than 1.
-	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GTE(one) {
-		return fmt.Errorf("invalid reserve factor: %s", t.ReserveFactor)
+	if err := checkers.DecInZeroOne(t.CollateralWeight, "collateral weight", false); err != nil {
+		return err
 	}
-	// Collateral weight is non-negative and less than 1.
-	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GTE(one) {
-		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
+	if err := checkers.DecInZeroOne(t.ReserveFactor, "reserve factor", false); err != nil {
+		return err
 	}
 	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GTE(one) {
 		return fmt.Errorf(

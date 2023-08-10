@@ -6,17 +6,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/incentive"
-	"github.com/umee-network/umee/v5/x/leverage/fixtures"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/incentive"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 )
 
 const (
 	umee  = fixtures.UmeeDenom
 	atom  = fixtures.AtomDenom
-	uUmee = leveragetypes.UTokenPrefix + fixtures.UmeeDenom
-	uAtom = leveragetypes.UTokenPrefix + fixtures.AtomDenom
+	uUmee = coin.UTokenPrefix + fixtures.UmeeDenom
+	uAtom = coin.UTokenPrefix + fixtures.AtomDenom
 )
 
 var zeroCoins = sdk.NewCoins()

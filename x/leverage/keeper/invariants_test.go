@@ -1,10 +1,9 @@
 package keeper_test
 
 import (
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/keeper"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/keeper"
 )
 
 func (s *IntegrationTestSuite) TestReserveAmountInvariant() {
@@ -30,7 +29,7 @@ func (s *IntegrationTestSuite) TestCollateralAmountInvariant() {
 	_, broken := keeper.InefficientCollateralAmountInvariant(app.LeverageKeeper)(ctx)
 	require.False(broken)
 
-	uTokenDenom := types.ToUTokenDenom(appparams.BondDenom)
+	uTokenDenom := coin.ToUTokenDenom(appparams.BondDenom)
 
 	// withdraw the supplied umee in the initBorrowScenario
 	s.withdraw(addr, coin.New(uTokenDenom, 1000_000000))

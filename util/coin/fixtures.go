@@ -3,8 +3,7 @@ package coin
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
 )
 
 const umee = appparams.BondDenom
@@ -12,7 +11,7 @@ const umee = appparams.BondDenom
 // common coins used in tests
 var (
 	// the uToken denom "u/uumee"
-	UumeeDenom = leveragetypes.ToUTokenDenom(umee)
+	UumeeDenom = ToUTokenDenom(umee)
 	// 1uumee Coin
 	Umee1 = New(umee, 1)
 	// 10_000uumee Coin
@@ -50,15 +49,15 @@ func UmeeDec(amount string) sdk.DecCoin {
 
 // Utoken creates a uToken DecCoin.
 func Utoken(denom string, amount int64) sdk.Coin {
-	return New(leveragetypes.ToUTokenDenom(denom), amount)
+	return New(ToUTokenDenom(denom), amount)
 }
 
 // UtokenDec creates a uToken DecCoin.
 func UtokenDec(denom string, amount string) sdk.DecCoin {
-	return Dec(leveragetypes.ToUTokenDenom(denom), amount)
+	return Dec(ToUTokenDenom(denom), amount)
 }
 
 // UtokenDecF creates a uToken DecCoin.
 func UtokenDecF(denom string, amount float64) sdk.DecCoin {
-	return DecF(leveragetypes.ToUTokenDenom(denom), amount)
+	return DecF(ToUTokenDenom(denom), amount)
 }

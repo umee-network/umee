@@ -5,9 +5,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/util/store"
-	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/store"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 func (k Keeper) SetMinGasPrice(p sdk.DecCoin) error {
@@ -48,7 +48,7 @@ func (k Keeper) SetInflationCycleEnd(cycleEnd time.Time) error {
 }
 
 // Returns zero unix time if the inflation cycle was not set.
-func (k Keeper) GetInflationCycleEnd() time.Time {
+func (k Keeper) InflationCycleEnd() time.Time {
 	t, _ := store.GetTimeMs(k.store, ugov.KeyInflationCycleEnd)
 	return t
 }

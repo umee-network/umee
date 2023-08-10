@@ -4,7 +4,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // getLiquidationAmounts takes a repayment and reward denom proposed by a liquidator and calculates
@@ -20,7 +21,7 @@ func (k Keeper) getLiquidationAmounts(
 	leveragedLiquidate bool,
 ) (tokenRepay sdk.Coin, collateralLiquidate sdk.Coin, tokenReward sdk.Coin, err error) {
 	repayDenom := requestedRepay.Denom
-	collateralDenom := types.ToUTokenDenom(rewardDenom)
+	collateralDenom := coin.ToUTokenDenom(rewardDenom)
 
 	// get relevant liquidator, borrower, and module balances
 	borrowerCollateral := k.GetBorrowerCollateral(ctx, targetAddr)

@@ -8,8 +8,8 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 // creates keeper without external dependencies (app, leverage etc...)
@@ -23,7 +23,7 @@ func initKeeper(t *testing.T) TestKeeper {
 }
 
 type TestKeeper struct {
-	IKeeper
+	ugov.Keeper
 	t   *testing.T
 	ctx *sdk.Context
 }

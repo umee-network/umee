@@ -3,13 +3,14 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // validateAcceptedDenom validates an sdk.Coin and ensures it is a registered Token
 // with Blacklisted == false
 func (k Keeper) validateAcceptedDenom(ctx sdk.Context, denom string) error {
-	if types.HasUTokenPrefix(denom) {
+	if coin.HasUTokenPrefix(denom) {
 		return types.ErrUToken.Wrap(denom)
 	}
 	token, err := k.GetTokenSettings(ctx, denom)
@@ -58,7 +59,7 @@ func (k Keeper) validateCollateralize(ctx sdk.Context, collateral sdk.Coin) erro
 	if err := validateUToken(collateral); err != nil {
 		return err
 	}
-	token, err := k.GetTokenSettings(ctx, types.ToTokenDenom(collateral.Denom))
+	token, err := k.GetTokenSettings(ctx, coin.StripUTokenDenom(collateral.Denom))
 	if err != nil {
 		return err
 	}
@@ -69,23 +70,23 @@ func (k Keeper) validateCollateralize(ctx sdk.Context, collateral sdk.Coin) erro
 }
 
 // validateBaseToken validates an sdk.Coin and ensures its Denom is not a uToken.
-func validateBaseToken(coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
+func validateBaseToken(c sdk.Coin) error {
+	if err := c.Validate(); err != nil {
 		return err
 	}
-	if types.HasUTokenPrefix(coin.Denom) {
-		return types.ErrUToken.Wrap(coin.Denom)
+	if coin.HasUTokenPrefix(c.Denom) {
+		return types.ErrUToken.Wrap(c.Denom)
 	}
 	return nil
 }
 
 // validateUToken validates an sdk.Coin and ensures its Denom is a uToken.
-func validateUToken(coin sdk.Coin) error {
-	if err := coin.Validate(); err != nil {
+func validateUToken(c sdk.Coin) error {
+	if err := c.Validate(); err != nil {
 		return err
 	}
-	if !types.HasUTokenPrefix(coin.Denom) {
-		return types.ErrNotUToken.Wrap(coin.Denom)
+	if !coin.HasUTokenPrefix(c.Denom) {
+		return types.ErrNotUToken.Wrap(c.Denom)
 	}
 	return nil
 }

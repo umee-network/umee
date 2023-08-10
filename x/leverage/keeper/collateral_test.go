@@ -3,13 +3,13 @@ package keeper_test
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func (s *IntegrationTestSuite) TestGetCollateralAmount() {
 	ctx, require := s.ctx, s.Require()
-	uDenom := types.ToUTokenDenom(umeeDenom)
+	uDenom := coin.ToUTokenDenom(umeeDenom)
 
 	// get u/umee collateral amount of empty account address
 	collateral := s.tk.GetCollateral(ctx, sdk.AccAddress{}, uDenom)
@@ -56,7 +56,7 @@ func (s *IntegrationTestSuite) TestGetCollateralAmount() {
 
 func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 	ctx, require := s.ctx, s.Require()
-	uDenom := types.ToUTokenDenom(umeeDenom)
+	uDenom := coin.ToUTokenDenom(umeeDenom)
 
 	// set u/umee collateral amount of empty account address (error)
 	err := s.tk.SetCollateral(ctx, sdk.AccAddress{}, coin.New(uDenom, 0))
@@ -115,7 +115,7 @@ func (s *IntegrationTestSuite) TestTotalCollateral() {
 	require.Equal(sdk.Coin{}, collateral, "not a uToken")
 
 	// Test zero collateral
-	uDenom := types.ToUTokenDenom(umeeDenom)
+	uDenom := coin.ToUTokenDenom(umeeDenom)
 	collateral = app.LeverageKeeper.GetTotalCollateral(ctx, uDenom)
 	require.Equal(coin.New(uDenom, 0), collateral, "zero collateral")
 

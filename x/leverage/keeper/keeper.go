@@ -10,8 +10,9 @@ import (
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 type Keeper struct {
@@ -20,6 +21,7 @@ type Keeper struct {
 	paramSpace             paramtypes.Subspace
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
+	ugov                   ugov.EmergencyGroupBuilder
 	liquidatorQueryEnabled bool
 	meTokenAddr            sdk.AccAddress
 
@@ -31,8 +33,9 @@ func NewKeeper(
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	paramSpace paramtypes.Subspace,
-	bk types.BankKeeper,
-	ok types.OracleKeeper,
+	b types.BankKeeper,
+	o types.OracleKeeper,
+	ugov ugov.EmergencyGroupBuilder,
 	enableLiquidatorQuery bool,
 	meTokenAddr sdk.AccAddress,
 ) Keeper {
@@ -45,8 +48,9 @@ func NewKeeper(
 		cdc:                    cdc,
 		storeKey:               storeKey,
 		paramSpace:             paramSpace,
-		bankKeeper:             bk,
-		oracleKeeper:           ok,
+		bankKeeper:             b,
+		oracleKeeper:           o,
+		ugov:                   ugov,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
 		meTokenAddr:            meTokenAddr,
 	}
@@ -411,10 +415,10 @@ func (k Keeper) Liquidate(
 	}
 
 	// detect if the user selected a base token reward instead of a uToken
-	directLiquidation := !types.HasUTokenPrefix(rewardDenom)
+	directLiquidation := !coin.HasUTokenPrefix(rewardDenom)
 	if !directLiquidation {
 		// convert rewardDenom to base token
-		rewardDenom = types.ToTokenDenom(rewardDenom)
+		rewardDenom = coin.StripUTokenDenom(rewardDenom)
 	}
 	// ensure that base reward is a registered token
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
@@ -481,7 +485,7 @@ func (k Keeper) LeveragedLiquidate(
 	if rewardDenom == "" {
 		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 		if !collateral.IsZero() {
-			rewardDenom = types.ToTokenDenom(collateral[0].Denom)
+			rewardDenom = coin.StripUTokenDenom(collateral[0].Denom)
 		}
 	}
 
@@ -491,7 +495,7 @@ func (k Keeper) LeveragedLiquidate(
 	if err := k.validateAcceptedDenom(ctx, rewardDenom); err != nil {
 		return sdk.Coin{}, sdk.Coin{}, err
 	}
-	uRewardDenom := types.ToUTokenDenom(rewardDenom)
+	uRewardDenom := coin.ToUTokenDenom(rewardDenom)
 
 	tokenRepay, uTokenReward, _, err := k.getLiquidationAmounts(
 		ctx,

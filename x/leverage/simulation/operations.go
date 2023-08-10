@@ -11,10 +11,11 @@ import (
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	umeesim "github.com/umee-network/umee/v5/util/sim"
-	"github.com/umee-network/umee/v5/x/leverage/keeper"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
+	umeesim "github.com/umee-network/umee/v6/util/sim"
+	"github.com/umee-network/umee/v6/x/leverage/keeper"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // Default simulation operation weights for leverage messages
@@ -261,9 +262,9 @@ func randomCoin(r *rand.Rand, coins sdk.Coins) sdk.Coin {
 // getSpendableTokens returns all non-uTokens from an account's spendable coins.
 func getSpendableTokens(ctx sdk.Context, addr sdk.AccAddress, bk types.BankKeeper) sdk.Coins {
 	tokens := sdk.NewCoins()
-	for _, coin := range bk.SpendableCoins(ctx, addr) {
-		if !types.HasUTokenPrefix(coin.Denom) {
-			tokens = tokens.Add(coin)
+	for _, c := range bk.SpendableCoins(ctx, addr) {
+		if !coin.HasUTokenPrefix(c.Denom) {
+			tokens = tokens.Add(c)
 		}
 	}
 
@@ -273,9 +274,9 @@ func getSpendableTokens(ctx sdk.Context, addr sdk.AccAddress, bk types.BankKeepe
 // getSpendableUTokens returns all uTokens from an account's spendable coins.
 func getSpendableUTokens(ctx sdk.Context, addr sdk.AccAddress, bk types.BankKeeper) sdk.Coins {
 	uTokens := sdk.NewCoins()
-	for _, coin := range bk.SpendableCoins(ctx, addr) {
-		if types.HasUTokenPrefix(coin.Denom) {
-			uTokens = uTokens.Add(coin)
+	for _, c := range bk.SpendableCoins(ctx, addr) {
+		if coin.HasUTokenPrefix(c.Denom) {
+			uTokens = uTokens.Add(c)
 		}
 	}
 
@@ -418,7 +419,7 @@ func randomLiquidateFields(
 		return liquidator, borrower, sdk.Coin{}, "", true
 	}
 
-	rewardDenom = types.ToTokenDenom(randomCoin(r, collateral).Denom)
+	rewardDenom = coin.StripUTokenDenom(randomCoin(r, collateral).Denom)
 
 	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
 }

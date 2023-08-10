@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/simapp"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
@@ -19,11 +17,12 @@ import (
 	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"gotest.tools/v3/assert"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/x/uibc"
-	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
+	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 
 const (
@@ -101,12 +100,12 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 func initKeeper(
 	t *testing.T,
 	cdc codec.BinaryCodec,
-	ics4Wrapper porttypes.ICS4Wrapper,
 	leverage uibc.Leverage,
 	oracle uibc.Oracle,
 ) (sdk.Context, keeper.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	kb := keeper.NewKeeperBuilder(cdc, storeKey, leverage, oracle)
+	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
+	kb := keeper.NewKeeperBuilder(cdc, storeKey, leverage, oracle, eg)
 	return ctx, kb.Keeper(&ctx)
 }

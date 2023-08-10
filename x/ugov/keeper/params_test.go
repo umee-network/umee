@@ -7,10 +7,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/tests/accs"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/ugov"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/tests/accs"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 func TestGasPrice(t *testing.T) {
@@ -61,12 +61,12 @@ func TestInflationCycleEnd(t *testing.T) {
 	st := time.Time{}
 	err := k.SetInflationCycleEnd(st)
 	require.NoError(err)
-	end := k.GetInflationCycleEnd()
+	end := k.InflationCycleEnd()
 	require.Equal(end.IsZero(), true, "it should be default zero time")
 
 	cycleEnd := time.Now()
 	err = k.SetInflationCycleEnd(cycleEnd)
 	require.NoError(err)
-	end = k.GetInflationCycleEnd()
+	end = k.InflationCycleEnd()
 	require.Equal(end, cycleEnd.Truncate(time.Millisecond), "inflation cycle end time should be same")
 }

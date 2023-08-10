@@ -10,7 +10,7 @@ import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
 	// stargate client
-	"github.com/umee-network/umee/v5/client"
+	"github.com/umee-network/umee/v6/client"
 )
 
 // StargateQuerier dispatches whitelisted stargate queries

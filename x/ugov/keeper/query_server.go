@@ -4,7 +4,7 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 var _ ugov.QueryServer = Querier{}
@@ -41,6 +41,6 @@ func (q Querier) InflationParams(ctx context.Context, _ *ugov.QueryInflationPara
 func (q Querier) InflationCycleEnd(ctx context.Context, _ *ugov.QueryInflationCycleEnd) (
 	*ugov.QueryInflationCycleEndResponse, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	cycleEndTime := q.Keeper(&sdkCtx).GetInflationCycleEnd()
+	cycleEndTime := q.Keeper(&sdkCtx).InflationCycleEnd()
 	return &ugov.QueryInflationCycleEndResponse{End: &cycleEndTime}, nil
 }

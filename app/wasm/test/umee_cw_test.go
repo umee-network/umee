@@ -10,13 +10,13 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"gotest.tools/v3/assert"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	wm "github.com/umee-network/umee/v5/app/wasm/msg"
-	wq "github.com/umee-network/umee/v5/app/wasm/query"
-	"github.com/umee-network/umee/v5/x/incentive"
-	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	wm "github.com/umee-network/umee/v6/app/wasm/msg"
+	wq "github.com/umee-network/umee/v6/app/wasm/query"
+	"github.com/umee-network/umee/v6/x/incentive"
+	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 func (s *IntegrationTestSuite) TestLeverageQueries() {

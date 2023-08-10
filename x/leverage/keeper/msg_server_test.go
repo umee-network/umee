@@ -6,9 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/fixtures"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
+	"github.com/umee-network/umee/v6/x/leverage/types"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
@@ -36,9 +37,9 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			true,
 			"invalid denom",
 		}, {
-			"unauthorized authority address",
+			"no authority address",
 			&types.MsgGovUpdateRegistry{
-				Authority:   s.addrs[0].String(),
+				Authority:   "",
 				Title:       "test",
 				Description: "test",
 				AddTokens: []types.Token{
@@ -46,7 +47,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			true,
-			"expected gov account",
+			"empty address",
 		}, {
 			"already registered token",
 			&types.MsgGovUpdateRegistry{
@@ -132,9 +133,9 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			true,
 			"invalid denom",
 		}, {
-			"unauthorized authority address",
+			"no authority address",
 			&types.MsgGovUpdateRegistry{
-				Authority:   s.addrs[0].String(),
+				Authority:   "",
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
@@ -142,11 +143,35 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				},
 			},
 			true,
-			"expected gov account",
+			"empty address",
+		}, {
+			"invalid authority and valid update token registry",
+			&types.MsgGovUpdateRegistry{
+				Authority:   s.addrs[0].String(),
+				Title:       "test",
+				Description: "test",
+				UpdateTokens: []types.Token{
+					modifiedUmee,
+				},
+			},
+			true,
+			"unauthorized",
 		}, {
 			"valid authority and valid update token registry",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
+				Title:       "test",
+				Description: "test",
+				UpdateTokens: []types.Token{
+					modifiedUmee,
+				},
+			},
+			false,
+			"",
+		}, {
+			"valid emergency group and valid update token registry",
+			&types.MsgGovUpdateRegistry{
+				Authority:   ugovmocks.SimpleEmergencyGroupAddr.String(),
 				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
@@ -482,7 +507,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			_, err := srv.Withdraw(ctx, msg)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
-			denom := types.ToTokenDenom(tc.uToken.Denom)
+			denom := coin.StripUTokenDenom(tc.uToken.Denom)
 
 			// initial state
 			iBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
@@ -951,7 +976,7 @@ func (s *IntegrationTestSuite) TestMsgCollateralize() {
 			_, err := srv.Collateralize(ctx, msg)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
-			denom := types.ToTokenDenom(tc.uToken.Denom)
+			denom := coin.StripUTokenDenom(tc.uToken.Denom)
 
 			// initial state
 			iBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
@@ -1109,7 +1134,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			_, err := srv.Decollateralize(ctx, msg)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
-			denom := types.ToTokenDenom(tc.uToken.Denom)
+			denom := coin.StripUTokenDenom(tc.uToken.Denom)
 
 			// initial state
 			iBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
@@ -2009,7 +2034,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 			_, err := srv.Liquidate(ctx, msg)
 			require.ErrorIs(err, tc.err, tc.msg)
 		} else {
-			baseRewardDenom := types.ToTokenDenom(tc.expectedLiquidate.Denom)
+			baseRewardDenom := coin.StripUTokenDenom(tc.expectedLiquidate.Denom)
 
 			// initial state (borrowed denom)
 			biUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
@@ -2064,7 +2089,7 @@ func (s *IntegrationTestSuite) TestMsgLiquidate() {
 
 			// verify liquidated denom uToken supply is unchanged if indirect liquidation, or reduced if direct
 			expectedLiquidatedUTokenSupply := liUTokenSupply
-			if !types.HasUTokenPrefix(tc.rewardDenom) {
+			if !coin.HasUTokenPrefix(tc.rewardDenom) {
 				expectedLiquidatedUTokenSupply = expectedLiquidatedUTokenSupply.Sub(tc.expectedLiquidate)
 			}
 			require.Equal(expectedLiquidatedUTokenSupply, lfUTokenSupply, "%s: %s", tc.msg, "uToken supply (liquidated denom")
@@ -2261,7 +2286,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			}
 			if msg.RewardDenom == "" {
 				if !biCollateral.IsZero() {
-					tc.rewardDenom = types.ToTokenDenom(biCollateral[0].Denom)
+					tc.rewardDenom = coin.StripUTokenDenom(biCollateral[0].Denom)
 				}
 			}
 

@@ -3,7 +3,8 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // ToUToken returns uToken in the amount a user would receive when supplying the token.
@@ -13,7 +14,7 @@ func (k Keeper) ToUToken(ctx sdk.Context, token sdk.Coin) (sdk.Coin, error) {
 		return sdk.Coin{}, err
 	}
 
-	uTokenDenom := types.ToUTokenDenom(token.Denom)
+	uTokenDenom := coin.ToUTokenDenom(token.Denom)
 	if uTokenDenom == "" {
 		return sdk.Coin{}, types.ErrUToken.Wrap(token.Denom)
 	}
@@ -30,7 +31,7 @@ func (k Keeper) ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error) {
 		return sdk.Coin{}, err
 	}
 
-	tokenDenom := types.ToTokenDenom(uToken.Denom)
+	tokenDenom := coin.StripUTokenDenom(uToken.Denom)
 	if tokenDenom == "" {
 		return sdk.Coin{}, types.ErrNotUToken.Wrap(uToken.Denom)
 	}
@@ -71,7 +72,7 @@ func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
 	moduleBalance := toDec(k.ModuleBalance(ctx, denom).Amount)
 	reserveAmount := toDec(k.GetReserves(ctx, denom).Amount)
 	totalBorrowed := k.getAdjustedTotalBorrowed(ctx, denom).Mul(k.getInterestScalar(ctx, denom))
-	uTokenSupply := k.GetUTokenSupply(ctx, types.ToUTokenDenom(denom)).Amount
+	uTokenSupply := k.GetUTokenSupply(ctx, coin.ToUTokenDenom(denom)).Amount
 
 	// Derive effective token supply
 	tokenSupply := moduleBalance.Add(totalBorrowed).Sub(reserveAmount)

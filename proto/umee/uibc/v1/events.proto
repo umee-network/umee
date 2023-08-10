@@ -4,7 +4,7 @@ package umee.uibc.v1;
 import "gogoproto/gogo.proto";
 import "umee/uibc/v1/quota.proto";
 
-option go_package                      = "github.com/umee-network/umee/v5/x/uibc";
+option go_package                      = "github.com/umee-network/umee/v6/x/uibc";
 option (gogoproto.goproto_getters_all) = false;
 
 // EventBadRevert is emitted on failure of ibc-transfer quota.

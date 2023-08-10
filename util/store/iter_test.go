@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/util/keys"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/util/keys"
 )
 
 func TestIterate(t *testing.T) {

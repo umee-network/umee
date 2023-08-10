@@ -2,13 +2,13 @@ package keeper
 
 import (
 	"context"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/util/sdkutil"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 var _ types.MsgServer = msgServer{}
@@ -104,7 +104,7 @@ func (s msgServer) MaxWithdraw(
 	if err != nil {
 		return nil, err
 	}
-	if types.HasUTokenPrefix(msg.Denom) {
+	if coin.HasUTokenPrefix(msg.Denom) {
 		return nil, types.ErrUToken
 	}
 	if _, err = s.keeper.GetTokenSettings(ctx, msg.Denom); err != nil {
@@ -196,7 +196,7 @@ func (s msgServer) Collateralize(
 		return nil, err
 	}
 
-	if err := s.keeper.checkCollateralLiquidity(ctx, types.ToTokenDenom(msg.Asset.Denom)); err != nil {
+	if err := s.keeper.checkCollateralLiquidity(ctx, coin.StripUTokenDenom(msg.Asset.Denom)); err != nil {
 		return nil, err
 	}
 
@@ -540,30 +540,24 @@ func (s msgServer) GovUpdateRegistry(
 	msg *types.MsgGovUpdateRegistry,
 ) (*types.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	regdTkDenoms := make(map[string]bool)
-	regdSymDenoms := make(map[string]bool)
-
+	regDenoms := make(map[string]types.Token)
 	registeredTokens := s.keeper.GetAllRegisteredTokens(ctx)
 	for _, token := range registeredTokens {
-		regdTkDenoms[token.BaseDenom] = true
-		regdSymDenoms[strings.ToUpper(token.SymbolDenom)] = true
+		regDenoms[token.BaseDenom] = token
 	}
 
-	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regdTkDenoms, regdSymDenoms, true)
+	byEmergencyGroup, err := checkers.EmergencyGroupAuthority(msg.Authority, s.keeper.ugov(&ctx))
 	if err != nil {
 		return nil, err
 	}
 
-	// adds the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regdTkDenoms, regdSymDenoms, false)
+	err = s.keeper.UpdateTokenRegistry(ctx, msg.UpdateTokens, msg.AddTokens, regDenoms, byEmergencyGroup)
 	if err != nil {
 		return nil, err
 	}
 
 	// cleans blacklisted tokens from the registry if they have not been supplied
-	err = s.keeper.CleanTokenRegistry(ctx)
-	if err != nil {
+	if err := s.keeper.CleanTokenRegistry(ctx); err != nil {
 		return nil, err
 	}
 

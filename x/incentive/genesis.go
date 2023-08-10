@@ -8,7 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // NewGenesisState creates a new GenesisState object
@@ -189,7 +190,7 @@ func (ip IncentiveProgram) Validate() error {
 	if err := sdk.ValidateDenom(ip.UToken); err != nil {
 		return err
 	}
-	if !leveragetypes.HasUTokenPrefix(ip.UToken) {
+	if !coin.HasUTokenPrefix(ip.UToken) {
 		// only allow uToken denoms as bonded denoms
 		return errors.Wrap(leveragetypes.ErrNotUToken, ip.UToken)
 	}
@@ -197,7 +198,7 @@ func (ip IncentiveProgram) Validate() error {
 	if err := ip.TotalRewards.Validate(); err != nil {
 		return err
 	}
-	if leveragetypes.HasUTokenPrefix(ip.TotalRewards.Denom) {
+	if coin.HasUTokenPrefix(ip.TotalRewards.Denom) {
 		// only allow base token denoms as rewards
 		return errors.Wrap(leveragetypes.ErrUToken, ip.TotalRewards.Denom)
 	}
@@ -264,7 +265,7 @@ func (b Bond) Validate() error {
 	if err := b.UToken.Validate(); err != nil {
 		return err
 	}
-	if !leveragetypes.HasUTokenPrefix(b.UToken.Denom) {
+	if !coin.HasUTokenPrefix(b.UToken.Denom) {
 		return leveragetypes.ErrNotUToken.Wrap(b.UToken.Denom)
 	}
 	return nil
@@ -286,14 +287,14 @@ func (rt RewardTracker) Validate() error {
 	if err := sdk.ValidateDenom(rt.UToken); err != nil {
 		return err
 	}
-	if !leveragetypes.HasUTokenPrefix(rt.UToken) {
+	if !coin.HasUTokenPrefix(rt.UToken) {
 		return leveragetypes.ErrNotUToken.Wrap(rt.UToken)
 	}
 	if err := rt.Rewards.Validate(); err != nil {
 		return err
 	}
 	for _, r := range rt.Rewards {
-		if leveragetypes.HasUTokenPrefix(r.Denom) {
+		if coin.HasUTokenPrefix(r.Denom) {
 			return leveragetypes.ErrUToken.Wrap(r.Denom)
 		}
 	}
@@ -313,14 +314,14 @@ func (ra RewardAccumulator) Validate() error {
 	if err := sdk.ValidateDenom(ra.UToken); err != nil {
 		return err
 	}
-	if !leveragetypes.HasUTokenPrefix(ra.UToken) {
+	if !coin.HasUTokenPrefix(ra.UToken) {
 		return leveragetypes.ErrNotUToken.Wrap(ra.UToken)
 	}
 	if err := ra.Rewards.Validate(); err != nil {
 		return err
 	}
 	for _, r := range ra.Rewards {
-		if leveragetypes.HasUTokenPrefix(r.Denom) {
+		if coin.HasUTokenPrefix(r.Denom) {
 			return leveragetypes.ErrUToken.Wrap(r.Denom)
 		}
 	}
@@ -340,7 +341,7 @@ func (u Unbonding) Validate() error {
 	if u.End < u.Start {
 		return ErrInvalidUnbonding.Wrap("start time > end time")
 	}
-	if !leveragetypes.HasUTokenPrefix(u.UToken.Denom) {
+	if !coin.HasUTokenPrefix(u.UToken.Denom) {
 		return leveragetypes.ErrNotUToken.Wrap(u.UToken.Denom)
 	}
 	return u.UToken.Validate()
@@ -362,7 +363,7 @@ func (au AccountUnbondings) Validate() error {
 	if err := sdk.ValidateDenom(au.UToken); err != nil {
 		return err
 	}
-	if !leveragetypes.HasUTokenPrefix(au.UToken) {
+	if !coin.HasUTokenPrefix(au.UToken) {
 		return leveragetypes.ErrNotUToken.Wrap(au.UToken)
 	}
 	for _, u := range au.Unbondings {

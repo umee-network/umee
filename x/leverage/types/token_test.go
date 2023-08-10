@@ -6,38 +6,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
-
-func TestToTokenDenom(t *testing.T) {
-	// Turns uToken denoms into base tokens
-	assert.Equal(t, "uumee", types.ToTokenDenom("u/uumee"))
-	assert.Equal(t, "ibc/abcd", types.ToTokenDenom("u/ibc/abcd"))
-
-	// Empty return for base tokens
-	assert.Equal(t, "", types.ToTokenDenom("uumee"))
-	assert.Equal(t, "", types.ToTokenDenom("ibc/abcd"))
-
-	// Empty return on repreated prefix
-	assert.Equal(t, "", types.ToTokenDenom("u/u/abcd"))
-
-	// Edge cases
-	assert.Equal(t, "", types.ToTokenDenom("u/"))
-	assert.Equal(t, "", types.ToTokenDenom(""))
-}
-
-func TestToUTokenDenom(t *testing.T) {
-	// Turns base token denoms into base uTokens
-	assert.Equal(t, "u/uumee", types.ToUTokenDenom("uumee"))
-	assert.Equal(t, "u/ibc/abcd", types.ToUTokenDenom("ibc/abcd"))
-
-	// Empty return for uTokens
-	assert.Equal(t, "", types.ToUTokenDenom("u/uumee"))
-	assert.Equal(t, "", types.ToUTokenDenom("u/ibc/abcd"))
-
-	// Edge cases
-	assert.Equal(t, "u/", types.ToUTokenDenom(""))
-}
 
 func validToken() types.Token {
 	return types.Token{

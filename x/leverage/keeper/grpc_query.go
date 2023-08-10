@@ -7,7 +7,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 var _ types.QueryServer = Querier{}
@@ -112,7 +113,7 @@ func (q Querier) MarketSummary(
 	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
 	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
 
-	uDenom := types.ToUTokenDenom(req.Denom)
+	uDenom := coin.ToUTokenDenom(req.Denom)
 	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
 	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
 

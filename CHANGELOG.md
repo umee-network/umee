@@ -75,6 +75,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
   - `/umee/ugov/v1/emergency-group` --> `/umee/ugov/v1/emergency_group`
   - `/umee/uibc/v1/all-outflows` --> `/umee/uibc/v1/all_outflows`
 - [2180](https://github.com/umee-network/umee/pull/2180) Rename leverage `Keeper.ExchangeToken -> ToUToken`, `Keeper.ExchangeUToken -> ToToken` and `Keeper.ExchangeUTokens -> ToTokens`.
+- [2183](https://github.com/umee-network/umee/pull/2183) Move `ToUTokenDenom`, `StripUTokenDenom` and `HasUTokenPrefix` from `leverage/keeper` to `coin` package.
 
 ## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
 

@@ -3,8 +3,9 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/sdkutil"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // clearBlacklistedCollateral decollateralizes any blacklisted uTokens
@@ -15,15 +16,15 @@ import (
 func (k Keeper) clearBlacklistedCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress) (bool, error) {
 	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
 	hasCollateral := false
-	for _, coin := range collateral {
-		denom := types.ToTokenDenom(coin.Denom)
+	for _, c := range collateral {
+		denom := coin.StripUTokenDenom(c.Denom)
 		token, err := k.GetTokenSettings(ctx, denom)
 		if err != nil {
 			return false, err
 		}
 		if token.Blacklist {
 			// Decollateralize any blacklisted uTokens encountered
-			err := k.decollateralize(ctx, borrowerAddr, borrowerAddr, coin)
+			err := k.decollateralize(ctx, borrowerAddr, borrowerAddr, c)
 			if err != nil {
 				return false, err
 			}
