@@ -43,6 +43,19 @@ func IsGovAuthority(authority string) bool {
 	return authority == govModuleAddr
 }
 
+func ProposalDescription(description string) error {
+	if len(description) == 0 {
+		return errors.New("proposal description cannot be empty")
+	}
+	if len(description) > gov1b1.MaxDescriptionLength {
+		return fmt.Errorf(
+			"proposal description is longer than max length of %d",
+			gov1b1.MaxDescriptionLength,
+		)
+	}
+	return nil
+}
+
 // WithEmergencyGroup is a copy of ugov.WithEmergencyGroup to avoid import cycle
 type WithEmergencyGroup interface {
 	EmergencyGroup() sdk.AccAddress
