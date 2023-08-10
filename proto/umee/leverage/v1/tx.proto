@@ -257,12 +257,12 @@ message MsgGovUpdateRegistry {
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
 
+  // field 2 and 3 (title and description) are removed.
+  // Proposal metadata should be used instead.
+  reserved 2, 3;
+
   // authority is the address of the governance account.
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // Deprecated: use proposal metadata instead.
-  string title = 2 [deprecated = true];
-  // Deprecated: use proposal metadata instead.
-  string description = 3 [deprecated = true];
   // add_tokens defines new token settings.
   repeated Token add_tokens = 4 [(gogoproto.nullable) = false];
   // update_tokens defines the new settings for existed tokens.
