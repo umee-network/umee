@@ -7,10 +7,10 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/util/store"
-	"github.com/umee-network/umee/v5/x/ugov"
-	v2 "github.com/umee-network/umee/v5/x/ugov/migrations/v2"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/util/store"
+	"github.com/umee-network/umee/v6/x/ugov"
+	v2 "github.com/umee-network/umee/v6/x/ugov/migrations/v2"
 )
 
 func TestMigrateStore(t *testing.T) {

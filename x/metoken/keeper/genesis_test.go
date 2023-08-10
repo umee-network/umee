@@ -4,14 +4,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 
-	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v6/util/coin"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 func TestKeeper_InitGenesis(t *testing.T) {

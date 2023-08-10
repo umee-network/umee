@@ -3,7 +3,7 @@ package incentive
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // BankKeeper defines the expected x/bank keeper interface.

@@ -2,7 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // Migrator is a struct for handling in-place store migrations.

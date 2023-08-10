@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
+	appparams "github.com/umee-network/umee/v6/app/params"
 )
 
 func TestKeyExchangeRate(t *testing.T) {

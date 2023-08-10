@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 func (k Keeper) ExportGenesis() *ugov.GenesisState {

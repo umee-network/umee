@@ -6,10 +6,10 @@ import (
 
 	tmcli "github.com/tendermint/tendermint/libs/cli"
 
-	itestsuite "github.com/umee-network/umee/v5/tests/cli"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/ugov"
-	"github.com/umee-network/umee/v5/x/ugov/client/cli"
+	itestsuite "github.com/umee-network/umee/v6/tests/cli"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/ugov"
+	"github.com/umee-network/umee/v6/x/ugov/client/cli"
 )
 
 func (s *IntegrationTests) TestMinGasPrice(_ *testing.T) {

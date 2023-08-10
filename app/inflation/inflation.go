@@ -5,9 +5,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/util/bpmath"
-	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 type Calculator struct {

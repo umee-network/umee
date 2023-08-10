@@ -9,9 +9,9 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/tests/accs"
-	"github.com/umee-network/umee/v5/util/bpmath"
-	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v6/tests/accs"
+	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 var govAddr = authtypes.NewModuleAddress("gov").String()

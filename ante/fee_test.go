@@ -7,10 +7,10 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	signing "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
-	"github.com/umee-network/umee/v5/ante"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/coin"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/ante"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 func (suite *IntegrationTestSuite) TestFeeAndPriority() {

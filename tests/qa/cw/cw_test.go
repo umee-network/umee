@@ -16,7 +16,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gotest.tools/v3/assert"
 
-	cwutil "github.com/umee-network/umee/v5/tests/util"
+	cwutil "github.com/umee-network/umee/v6/tests/util"
 )
 
 const (

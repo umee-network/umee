@@ -3,7 +3,7 @@ package umee.metoken.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/metoken";
+option go_package = "github.com/umee-network/umee/v6/x/metoken";
 
 // Params defines the parameters for the metoken module.
 message Params {

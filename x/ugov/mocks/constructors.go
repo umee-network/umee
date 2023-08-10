@@ -2,7 +2,7 @@ package mocks
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ugov "github.com/umee-network/umee/v5/x/ugov"
+	ugov "github.com/umee-network/umee/v6/x/ugov"
 )
 
 // NewParamsBuilder creates a ParamsKeeper builder function

@@ -1,4 +1,4 @@
-module github.com/umee-network/umee/v5
+module github.com/umee-network/umee/v6
 
 go 1.20
 

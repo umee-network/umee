@@ -8,7 +8,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 func TestMsgServer_GovUpdateQuota(t *testing.T) {

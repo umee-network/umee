@@ -4,9 +4,9 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/util/sdkutil"
+	"github.com/umee-network/umee/v6/util/sdkutil"
 
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 var _ metoken.MsgServer = msgServer{}
