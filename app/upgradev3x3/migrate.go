@@ -5,18 +5,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
-	gov "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 )
-
-// Implements Proposal Interface
-var _ gov.Content = &UpdateRegistryProposal{}
-
-func registerInterfaces(registry cdctypes.InterfaceRegistry) {
-	registry.RegisterImplementations(
-		(*gov.Content)(nil),
-		&UpdateRegistryProposal{},
-	)
-}
 
 type migrator struct {
 	gov govkeeper.Keeper
@@ -25,7 +14,7 @@ type migrator struct {
 // Creates migration handler for gov leverage proposals to new the gov system
 // and MsgGovUpdateRegistry type.
 func Migrator(gk govkeeper.Keeper, registry cdctypes.InterfaceRegistry) module.MigrationHandler {
-	registerInterfaces(registry)
+	// note: content was removed, use v3.3 for implementation details.
 	m := migrator{gk}
 	return m.migrate
 }
