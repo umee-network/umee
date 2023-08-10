@@ -3,8 +3,8 @@ package module
 import (
 	abci "github.com/tendermint/tendermint/abci/types"
 
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/x/metoken/keeper"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/x/metoken/keeper"
 )
 
 // EndBlocker implements EndBlock for the x/metoken module.

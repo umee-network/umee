@@ -3,8 +3,8 @@ package keeper
 import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/util/store"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/util/store"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // IndexBalances returns Index Token supply, if it's not found returns an error.

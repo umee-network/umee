@@ -3,7 +3,7 @@ package keeper
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/stretchr/testify/require"

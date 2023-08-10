@@ -7,8 +7,8 @@ import (
 	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	"github.com/rs/zerolog"
 	rpcclient "github.com/tendermint/tendermint/rpc/client"
-	"github.com/umee-network/umee/v5/sdkclient/query"
-	"github.com/umee-network/umee/v5/sdkclient/tx"
+	"github.com/umee-network/umee/v6/sdkclient/query"
+	"github.com/umee-network/umee/v6/sdkclient/tx"
 )
 
 // Client provides basic capabilities to connect to a Cosmos SDK based chain and execute

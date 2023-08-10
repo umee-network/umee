@@ -8,8 +8,8 @@ import (
 
 	sdkerrors "cosmossdk.io/errors"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/oracle/types"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/oracle/types"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // GenerateSalt generates a random salt, size length/2,  as a HEX encoded string.

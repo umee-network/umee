@@ -19,8 +19,8 @@ import (
 	"github.com/gogo/protobuf/proto"
 	"github.com/ory/dockertest/v3/docker"
 
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/uibc"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 func (s *E2ETestSuite) UmeeREST() string {

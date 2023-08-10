@@ -9,8 +9,8 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/ugov"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/ugov"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // Builder constructs Keeper by perparing all related dependencies (notably the store).

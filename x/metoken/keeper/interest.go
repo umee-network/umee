@@ -6,8 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/metoken"
-	lerrors "github.com/umee-network/umee/v5/x/metoken/errors"
+	"github.com/umee-network/umee/v6/x/metoken"
+	lerrors "github.com/umee-network/umee/v6/x/metoken/errors"
 )
 
 // ClaimLeverageInterest sends accrued interest from x/leverage module to x/metoken account.

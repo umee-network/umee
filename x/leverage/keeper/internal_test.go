@@ -7,9 +7,9 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	ugovmocks "github.com/umee-network/umee/v5/x/ugov/mocks"
+	"github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
 // TestKeeper is a keeper with some normally

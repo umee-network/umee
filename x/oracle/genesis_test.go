@@ -2,8 +2,8 @@ package oracle_test
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/oracle"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/oracle"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 	"gotest.tools/v3/assert"
 )
 

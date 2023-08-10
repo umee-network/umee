@@ -4,8 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/util/store"
-	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v6/util/store"
+	"github.com/umee-network/umee/v6/x/incentive"
 )
 
 func (k Keeper) GetParams(ctx sdk.Context) incentive.Params {

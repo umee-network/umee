@@ -9,11 +9,11 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/app"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/metoken/keeper"
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"github.com/umee-network/umee/v6/app"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/keeper"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 func TestInterestClaiming(t *testing.T) {

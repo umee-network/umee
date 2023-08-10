@@ -10,11 +10,11 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
 	"github.com/cosmos/ibc-go/v6/modules/core/exported"
 
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/util/store"
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/store"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 var ten = sdk.MustNewDecFromStr("10")

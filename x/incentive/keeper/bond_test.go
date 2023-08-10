@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 func TestBonds(t *testing.T) {

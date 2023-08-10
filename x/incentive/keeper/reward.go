@@ -3,9 +3,9 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/incentive"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/incentive"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 var secondsPerYear = sdk.MustNewDecFromStr("31557600") // 365.25 * 3600 * 24
