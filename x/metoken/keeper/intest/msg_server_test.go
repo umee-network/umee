@@ -38,9 +38,9 @@ func TestMsgServer_Swap(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 100 USDT, 1000 USDC and 2000000 IST
 	user := s.newAccount(
 		t,
 		coin.New(mocks.USDTBaseDenom, 100_000000),
@@ -65,6 +65,16 @@ func TestMsgServer_Swap(t *testing.T) {
 			},
 			"",
 			"invalid denom",
+		},
+		{
+			"zero amount",
+			user,
+			sdk.Coin{
+				Denom:  mocks.USDTBaseDenom,
+				Amount: sdkmath.ZeroInt(),
+			},
+			"",
+			"zero amount",
 		},
 		{
 			"invalid meToken denom",
@@ -134,20 +144,20 @@ func TestMsgServer_Swap(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -179,9 +189,9 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 10000 CMST, 1.431 WBTC, 2.876 ETH
 	user := s.newAccount(
 		t,
 		coin.New(mocks.CMSTBaseDenom, 10000_000000),
@@ -230,20 +240,20 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -275,9 +285,9 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 1000 USDT, 5000 USDC, 20000 IST and 7.674 ETH
 	user := s.newAccount(
 		t,
 		coin.New(mocks.USDTBaseDenom, 10000_000000),
@@ -327,20 +337,20 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -374,7 +384,7 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 			UpdateIndex: []metoken.Index{index},
 		},
 	)
-	require.NoError(t, err)
+	require.NoError(err)
 
 	tcs = []testCase{
 		{
@@ -431,20 +441,20 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -476,9 +486,9 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 10000 USDT, 10000 USDC, 10000 IST
 	user := s.newAccount(
 		t,
 		coin.New(mocks.USDTBaseDenom, 10000_000000),
@@ -527,20 +537,20 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -650,20 +660,20 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -746,20 +756,20 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -791,7 +801,8 @@ func TestMsgServer_Swap_EdgeCase(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
 	// create and fund a user with 1 ETH
 	user := s.newAccount(
@@ -801,9 +812,8 @@ func TestMsgServer_Swap_EdgeCase(t *testing.T) {
 
 	k := app.MetokenKeeperB.Keeper(&ctx)
 	iMeTokenBalance, err := k.IndexBalances(mocks.MeNonStableDenom)
-	require.NoError(t, err)
+	require.NoError(err)
 
-	// swap 0.00000001 ETH for meToken
 	// 0.00000001 ETH is less than the minimum amount of meToken, so the swap shouldn't change the balances
 	_, err = msgServer.Swap(
 		ctx,
@@ -812,12 +822,12 @@ func TestMsgServer_Swap_EdgeCase(t *testing.T) {
 			MetokenDenom: mocks.MeNonStableDenom,
 		},
 	)
-	require.ErrorContains(t, err, "insufficient")
+	require.ErrorContains(err, "insufficient")
 
 	// the result should be the same as the initial balance
 	fMeTokenBalance, err := k.IndexBalances(mocks.MeNonStableDenom)
-	require.NoError(t, err)
-	require.Equal(t, iMeTokenBalance, fMeTokenBalance)
+	require.NoError(err)
+	require.Equal(iMeTokenBalance, fMeTokenBalance)
 }
 
 func verifySwap(
@@ -901,12 +911,12 @@ func verifySwap(
 	expectedLeveraged := sdk.NewCoin(denom, amountToSwap.Sub(expectedReserved.Amount))
 
 	// verify the outputs of swap function
-	require.Equal(t, expectedFee, resp.Fee, tc.name)
-	require.Equal(t, expectedMeTokens, resp.Returned, tc.name)
+	require := require.New(t)
+	require.Equal(expectedFee, resp.Fee, tc.name)
+	require.Equal(expectedMeTokens, resp.Returned, tc.name)
 
 	// verify token balance decreased and meToken balance increased by the expected amounts
 	require.Equal(
-		t,
 		iUserBalance.Sub(tc.asset).Add(expectedMeTokens),
 		fUserBalance,
 		tc.name,
@@ -914,18 +924,16 @@ func verifySwap(
 	)
 	// verify uToken assetSupply increased by the expected amount
 	require.Equal(
-		t,
 		iUTokenSupply.Add(sdk.NewCoin("u/"+expectedLeveraged.Denom, expectedLeveraged.Amount)),
 		fUTokenSupply,
 		tc.name,
 		"uToken assetSupply",
 	)
 	// reserved + leveraged + fee must be = to total amount supplied by the user for the swap
-	require.Equal(t, expectedReserved.Add(expectedLeveraged).Add(expectedFee), tc.asset)
+	require.Equal(expectedReserved.Add(expectedLeveraged).Add(expectedFee), tc.asset)
 
 	// meToken assetSupply is increased by the expected amount
 	require.Equal(
-		t,
 		iMeTokenBalance.MetokenSupply.Add(expectedMeTokens),
 		fMeTokenBalance.MetokenSupply,
 		tc.name,
@@ -935,19 +943,16 @@ func verifySwap(
 	i, fAssetBalance := fMeTokenBalance.AssetBalance(denom)
 	assert.Check(t, i >= 0)
 	require.Equal(
-		t,
 		iAssetBalance.Reserved.Add(expectedReserved.Amount),
 		fAssetBalance.Reserved,
 		"reserved",
 	)
 	require.Equal(
-		t,
 		iAssetBalance.Leveraged.Add(expectedLeveraged.Amount),
 		fAssetBalance.Leveraged,
 		"leveraged",
 	)
 	require.Equal(
-		t,
 		iAssetBalance.Fees.Add(expectedFee.Amount),
 		fAssetBalance.Fees,
 		"fee",
@@ -967,9 +972,9 @@ func TestMsgServer_Redeem(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 1000 USDT, 1000 USDC and 1000 IST
 	user := s.newAccount(
 		t,
 		coin.New(mocks.USDTBaseDenom, 1000_000000),
@@ -977,7 +982,6 @@ func TestMsgServer_Redeem(t *testing.T) {
 		coin.New(mocks.ISTBaseDenom, 1000_000000),
 	)
 
-	// swap 547 USDT, 200 USDC and 740 IST to have an initial meUSD balance
 	swaps := []*metoken.MsgSwap{
 		{
 			User:         user.String(),
@@ -998,7 +1002,7 @@ func TestMsgServer_Redeem(t *testing.T) {
 
 	for _, swap := range swaps {
 		_, err := msgServer.Swap(ctx, swap)
-		require.NoError(t, err)
+		require.NoError(err)
 	}
 
 	tcs := []testCase{
@@ -1018,6 +1022,16 @@ func TestMsgServer_Redeem(t *testing.T) {
 			},
 			"",
 			"invalid denom",
+		},
+		{
+			"zero amount",
+			user,
+			sdk.Coin{
+				Denom:  mocks.MeUSDDenom,
+				Amount: sdkmath.ZeroInt(),
+			},
+			"",
+			"zero amount",
 		},
 		{
 			"invalid asset denom",
@@ -1087,20 +1101,20 @@ func TestMsgServer_Redeem(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of redeem function
 			resp, err := msgServer.Redeem(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifyRedeem(
 				t,
@@ -1132,9 +1146,9 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 10000 CMST, 1.431 WBTC, 2.876 ETH
 	user := s.newAccount(
 		t,
 		coin.New(mocks.CMSTBaseDenom, 10000_000000),
@@ -1163,8 +1177,8 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 
 	for _, swap := range swaps {
 		resp, err := msgServer.Swap(ctx, swap)
-		require.NoError(t, err)
-		require.NotNil(t, resp)
+		require.NoError(err)
+		require.NotNil(resp)
 	}
 
 	tcs := []testCase{
@@ -1222,20 +1236,20 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of redeem function
 			resp, err := msgServer.Redeem(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifyRedeem(
 				t,
@@ -1267,9 +1281,9 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 10000 USDT, 10000 USDC, 10000 IST
 	user := s.newAccount(
 		t,
 		coin.New(mocks.USDTBaseDenom, 10000_000000),
@@ -1277,7 +1291,6 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		coin.New(mocks.ISTBaseDenom, 10000_000000),
 	)
 
-	// swap 5000 USDT, 3500 USDC an initial meUSD balance
 	swaps := []*metoken.MsgSwap{
 		{
 			User:         user.String(),
@@ -1293,7 +1306,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 
 	for _, swap := range swaps {
 		_, err := msgServer.Swap(ctx, swap)
-		require.NoError(t, err)
+		require.NoError(err)
 	}
 
 	// after initial swaps USDT price is dropped to 0.73 USD
@@ -1387,20 +1400,20 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of redeem function
 			resp, err := msgServer.Redeem(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifyRedeem(
 				t,
@@ -1483,20 +1496,20 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of swap function
 			resp, err := msgServer.Swap(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifySwap(
 				t,
@@ -1556,20 +1569,20 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 			iUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			iUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			iMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			prices, err := k.Prices(index)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			// verify the outputs of redeem function
 			resp, err := msgServer.Redeem(ctx, msg)
-			require.NoError(t, err, tc.name)
+			require.NoError(err, tc.name)
 
 			// final state
 			fUserBalance := app.BankKeeper.GetAllBalances(ctx, tc.addr)
 			fUTokenSupply := app.LeverageKeeper.GetAllUTokenSupply(ctx)
 			fMeTokenBalance, err := k.IndexBalances(meTokenDenom)
-			require.NoError(t, err)
+			require.NoError(err)
 
 			verifyRedeem(
 				t,
@@ -1601,15 +1614,14 @@ func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
 			UpdateIndex: nil,
 		},
 	)
-	require.NoError(t, err)
+	require := require.New(t)
+	require.NoError(err)
 
-	// create and fund a user with 100 IST
 	user := s.newAccount(
 		t,
 		coin.New(mocks.USDCBaseDenom, 100_000000),
 	)
 
-	// swap 1 USDC for me/USD in order to mint index tokens
 	_, err = msgServer.Swap(
 		ctx,
 		&metoken.MsgSwap{
@@ -1617,23 +1629,23 @@ func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
 			MetokenDenom: mocks.MeUSDDenom,
 		},
 	)
-	require.NoError(t, err)
+	require.NoError(err)
 
 	// try to redeem 0.000001 me/USD (the minimum possible amount) for an asset with a higher price than me/USD
 	k := app.MetokenKeeperB.Keeper(&ctx)
 	iMeTokenBalance, err := k.IndexBalances(mocks.MeUSDDenom)
-	require.NoError(t, err)
+	require.NoError(err)
 
 	_, err = msgServer.Redeem(
 		ctx,
 		&metoken.MsgRedeem{User: user.String(), Metoken: coin.New(mocks.MeUSDDenom, 1), AssetDenom: mocks.ISTBaseDenom},
 	)
-	require.ErrorContains(t, err, "insufficient")
+	require.ErrorContains(err, "insufficient")
 
 	// the result should be the same as the initial balance
 	// if me/USD amount redeemed is less than the minimum amount possible of an asset, no meTokens should be burned
 	fMeTokenBalance, err := k.IndexBalances(mocks.MeUSDDenom)
-	require.Equal(t, iMeTokenBalance, fMeTokenBalance)
+	require.Equal(iMeTokenBalance, fMeTokenBalance)
 }
 
 func verifyRedeem(
@@ -1711,20 +1723,19 @@ func verifyRedeem(
 	)
 	expectedFromLeverage := sdk.NewCoin(denom, amountToWithdraw.Sub(expectedFromReserves.Amount))
 
+	require := require.New(t)
 	// verify the outputs of swap function
-	require.Equal(t, expectedFee, resp.Fee, tc.name, "expectedFee")
-	require.Equal(t, expectedAssets, resp.Returned, tc.name, "expectedAssets")
+	require.Equal(expectedFee, resp.Fee, tc.name, "expectedFee")
+	require.Equal(expectedAssets, resp.Returned, tc.name, "expectedAssets")
 
 	// verify meToken balance decreased and asset balance increased by the expected amounts
 	require.True(
-		t,
 		iUserBalance.Sub(tc.asset).Add(expectedAssets).IsEqual(fUserBalance),
 		tc.name,
 		"token balance",
 	)
 	// verify uToken assetSupply decreased by the expected amount
 	require.True(
-		t,
 		iUTokenSupply.Sub(
 			sdk.NewCoin(
 				"u/"+expectedFromLeverage.Denom,
@@ -1736,7 +1747,6 @@ func verifyRedeem(
 	)
 	// from_reserves + from_leverage must be = to total amount withdrawn from the modules
 	require.True(
-		t,
 		expectedFromReserves.Amount.Add(expectedFromLeverage.Amount).Equal(amountToWithdraw),
 		tc.name,
 		"total withdraw",
@@ -1744,7 +1754,6 @@ func verifyRedeem(
 
 	// meToken assetSupply is decreased by the expected amount
 	require.True(
-		t,
 		iMeTokenBalance.MetokenSupply.Sub(tc.asset).IsEqual(fMeTokenBalance.MetokenSupply),
 		tc.name,
 		"meToken assetSupply",
@@ -1753,18 +1762,16 @@ func verifyRedeem(
 	i, fAssetBalance := fMeTokenBalance.AssetBalance(denom)
 	assert.Check(t, i >= 0)
 	require.True(
-		t,
 		iAssetBalance.Reserved.Sub(expectedFromReserves.Amount).Equal(fAssetBalance.Reserved),
 		tc.name,
 		"reserved",
 	)
 	require.True(
-		t,
 		iAssetBalance.Leveraged.Sub(expectedFromLeverage.Amount).Equal(fAssetBalance.Leveraged),
 		tc.name,
 		"leveraged",
 	)
-	require.True(t, iAssetBalance.Fees.Add(expectedFee.Amount).Equal(fAssetBalance.Fees), tc.name, "fees")
+	require.True(iAssetBalance.Fees.Add(expectedFee.Amount).Equal(fAssetBalance.Fees), tc.name, "fees")
 }
 
 func TestMsgServer_GovSetParams(t *testing.T) {

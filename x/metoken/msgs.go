@@ -151,6 +151,9 @@ func validateUserAndAssetAndDenom(sender string, asset *sdk.Coin, denom string) 
 	if err := asset.Validate(); err != nil {
 		return err
 	}
+	if asset.IsZero() {
+		return sdkerrors.ErrInvalidRequest.Wrapf("zero amount asset %s", asset.Denom)
+	}
 
 	return sdk.ValidateDenom(denom)
 }

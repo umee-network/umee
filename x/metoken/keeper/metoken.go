@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"errors"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
@@ -104,13 +105,20 @@ func (k Keeper) addIndexes(
 			)
 		}
 
+		var errs []error
 		for _, aa := range index.AcceptedAssets {
 			if _, present := registeredAssets[aa.Denom]; present {
-				return sdkerrors.ErrInvalidRequest.Wrapf(
-					"add: asset %s is already accepted in another index",
-					aa.Denom,
+				errs = append(
+					errs, sdkerrors.ErrInvalidRequest.Wrapf(
+						"add: asset %s is already accepted in another index",
+						aa.Denom,
+					),
 				)
 			}
+		}
+
+		if len(errs) != 0 {
+			return errors.Join(errs...)
 		}
 
 		if err := k.validateInLeverage(index); err != nil {
@@ -165,13 +173,20 @@ func (k Keeper) updateIndexes(
 			)
 		}
 
+		var errs []error
 		for _, aa := range index.AcceptedAssets {
 			if indexDenom, present := registeredAssets[aa.Denom]; present && indexDenom != index.Denom {
-				return sdkerrors.ErrInvalidRequest.Wrapf(
-					"add: asset %s is already accepted in another index",
-					aa.Denom,
+				errs = append(
+					errs, sdkerrors.ErrInvalidRequest.Wrapf(
+						"add: asset %s is already accepted in another index",
+						aa.Denom,
+					),
 				)
 			}
+		}
+
+		if len(errs) != 0 {
+			return errors.Join(errs...)
 		}
 
 		if oldIndex.Exponent != index.Exponent {
