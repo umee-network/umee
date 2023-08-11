@@ -384,11 +384,11 @@ func randomRepayFields(
 // from the borrower's borrows and a random sdk.Coin from the borrower's collateral.
 // It returns skip=true if no collateral is found.
 func randomLiquidateFields(
-	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
+	r *rand.Rand, _ sdk.Context, accs []simtypes.Account, _ keeper.Keeper,
 ) (
 	liquidator simtypes.Account,
 	borrower simtypes.Account,
-	repaymentToken sdk.Coin,
+	repaymentToken sdk.Coin, //nolint
 	rewardDenom string,
 	skip bool,
 ) {
