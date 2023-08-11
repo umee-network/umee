@@ -298,7 +298,7 @@ It will abort and return zero if all collateral is in use.
 
 Any user whose borrow value is above their liquidation threshold is eligible to be liquidated.
 
-Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold when the token is used as collateral. 
+Each token in the `Token Registry` has a parameter called `LiquidationThreshold`, always greater than or equal to collateral weight, but less than 1, which determines the portion of the token's value that goes towards a borrower's liquidation threshold when the token is used as collateral.
 
 When a borrow position is limited by simple borrow limit (without special asset pairs or borrow factor), a user's liquidation threshold is the sum of the contributions from each denomination of collateral they have deposited:
 

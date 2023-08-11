@@ -53,7 +53,7 @@ However, this actually underestimates the max borrow amount because asset `B` qu
 What will actually happen, is any newly borrowed `B` will be paired with collateral `A` in the highest priority special asset pair (and also any collateral `A` that is floating around in regular assets) before being matched with leftover collateral.
 First it will take from the `$10 A` sitting in normal assets (and displace the `$1 D` which was being covered by that collateral onto the unused collateral at the bottom).
 If the `$1 D` could only be partially moved due to a limited amount of unused collateral, we would compute the amount of `A` collateral that would be freed up, and the resulting size of the `B` max borrow, and return there.
-(This logic is a recursive` MaxWithdraw(A)`)
+(This logic is a recursive `MaxWithdraw(A)`)
 
 Position after first displacement of collateral `A`:
 
@@ -86,7 +86,7 @@ Position after second displacement of collateral `A`:
 Note that the `(A,C, 0.4)` special pair which was used is now unused, as its collateral was moved to the more efficient pair `(A,B,0.5)`.
 There is still a little left over collateral `D`, so with all the special pairs dealt with, the ordinary assets can be settled.
 Due to the rule "borrowed assets are listed by collateral weight, descending" any remaining borrow `B` will insert itself below rows containing borrowed `A`, but above any rows containing borrowed `C` or `D`.
-This functions as a recursive` MaxWithdraw(D)` from this example position since only `D` collateral is being affected.
+This functions as a recursive `MaxWithdraw(D)` from this example position since only `D` collateral is being affected.
 Position after final displacement of collateral `D`:
 
 | Collateral | Borrow | Weight            | Change in Position |
@@ -110,4 +110,4 @@ Overall Result:
 
 Therefore `MaxBorrow(B) = $25 + $5 + $5 = $35`.
 
-This is greater than the naive estimate of `$26` from the start of the example. 
+This is greater than the naive estimate of `$26` from the start of the example.
