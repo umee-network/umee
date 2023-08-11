@@ -34,24 +34,27 @@ func (l Leverage) GetTokenSettings(_ sdk.Context, denom string) (ltypes.Token, e
 	return ts, nil
 }
 
-func (l Leverage) ToUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
-	panic("not implemented")
+func (l Leverage) ToUToken(_ sdk.Context, coin sdk.Coin) (sdk.Coin, error) {
+	return coin, nil
 }
 
-func (l Leverage) ToToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
-	panic("not implemented")
+func (l Leverage) ToToken(_ sdk.Context, coin sdk.Coin) (sdk.Coin, error) {
+	return coin, nil
 }
 
 func (l Leverage) SupplyFromModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
 	return sdk.Coin{}, true, nil
 }
 
-func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
-	panic("not implemented")
+func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, coin sdk.Coin) (sdk.Coin, bool, error) {
+	return coin, true, nil
 }
 
-func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, _ sdk.Coin) (sdkmath.Int, error) {
-	panic("not implemented")
+func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, coin sdk.Coin) (sdkmath.Int, error) {
+	if coin.Denom == mocks.ISTBaseDenom {
+		return sdk.MustNewDecFromStr("0.5").MulInt(coin.Amount).TruncateInt(), nil
+	}
+	return coin.Amount, nil
 }
 
 func (l Leverage) GetTotalSupply(_ sdk.Context, denom string) (sdk.Coin, error) {
