@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 
-	"github.com/umee-network/umee/v5/util/checkers"
+	"github.com/umee-network/umee/v6/util/checkers"
 )
 
 var (
@@ -18,7 +18,7 @@ var (
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateMinGasPrice) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 	return msg.MinGasPrice.Validate()
@@ -50,7 +50,7 @@ func (msg MsgGovUpdateMinGasPrice) Type() string { return sdk.MsgTypeURL(&msg) }
 // Msg interface implementation
 
 func (msg *MsgGovSetEmergencyGroup) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 	_, err := sdk.AccAddressFromBech32(msg.EmergencyGroup)
@@ -77,7 +77,7 @@ func (msg MsgGovSetEmergencyGroup) Type() string { return sdk.MsgTypeURL(&msg) }
 // Msg interface implementation
 
 func (msg *MsgGovUpdateInflationParams) ValidateBasic() error {
-	if err := checkers.IsGovAuthority(msg.Authority); err != nil {
+	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
 	return msg.Params.Validate()

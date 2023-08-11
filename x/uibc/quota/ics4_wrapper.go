@@ -8,8 +8,8 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v6/modules/core/02-client/types"
 	porttypes "github.com/cosmos/ibc-go/v6/modules/core/05-port/types"
 
-	ibcutil "github.com/umee-network/umee/v5/util/ibc"
-	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	ibcutil "github.com/umee-network/umee/v6/util/ibc"
+	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 
 // ICS4 wraps SendPacket to check IBC quota.

@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/util/checkers"
+	"github.com/umee-network/umee/v6/util/checkers"
 )
 
 var (
@@ -50,7 +50,7 @@ func (msg *MsgGovUpdateQuota) ValidateBasic() error {
 		return sdkerrors.ErrInvalidRequest.Wrap("total quota must be greater than or equal to per_denom quota")
 	}
 
-	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
+	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, true)
 }
 
 // GetSignBytes implements Msg
@@ -91,7 +91,7 @@ func (msg *MsgGovSetIBCStatus) ValidateBasic() error {
 		return err
 	}
 
-	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority)
+	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, true)
 }
 
 // GetSignBytes implements Msg

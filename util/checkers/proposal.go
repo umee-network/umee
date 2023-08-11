@@ -13,7 +13,7 @@ import (
 
 	// imported to assure params are set before loading this package and we can correctly
 	// initialize govModuleAddr
-	_ "github.com/umee-network/umee/v5/app/params"
+	_ "github.com/umee-network/umee/v6/app/params"
 )
 
 // govModuleAddr is set during the first call of ValidateProposal
@@ -25,21 +25,59 @@ func init() {
 
 const minProposalTitleLen = 3
 
-// IsGovAuthority errors is the authority is the gov module address
-func IsGovAuthority(authority string) error {
-	if govModuleAddr == "" {
-		return sdkerrors.ErrLogic.Wrap("govModuleAddrs in the checkers package must be set before using this function")
-	}
-	if authority != govModuleAddr {
+// AssertGovAuthority errors is the authority is not the gov module address. Panics if
+// the gov module address is not set during the package initialization.
+func AssertGovAuthority(authority string) error {
+	if !IsGovAuthority(authority) {
 		return govtypes.ErrInvalidSigner.Wrapf(
 			"expected %s, got %s", govModuleAddr, authority)
 	}
 	return nil
 }
 
-// ValidateProposal checks the format of the title, description, and authority of a gov message.
-func ValidateProposal(title, description, authority string) error {
-	if err := IsGovAuthority(authority); err != nil {
+// IsGovAuthority returns true if the authority is the gov module address. Panics if
+// the gov module address is not set during the package initialization.
+func IsGovAuthority(authority string) bool {
+	if govModuleAddr == "" {
+		panic("govModuleAddrs in the checkers package must be set before using this function")
+	}
+	return authority == govModuleAddr
+}
+
+// WithEmergencyGroup is a copy of ugov.WithEmergencyGroup to avoid import cycle
+type WithEmergencyGroup interface {
+	EmergencyGroup() sdk.AccAddress
+}
+
+// EmergencyGroupAuthority returns true if the authority is EmergencyGroup. Returns false if
+// authority is the x/gov address. Returns error otherwise.
+// Note: we use WithEmergencyGroup rather than emergency group AccAddress to avoid storage read
+// if it's not necessary.
+func EmergencyGroupAuthority(authority string, eg WithEmergencyGroup) (bool, error) {
+	if IsGovAuthority(authority) {
+		return false, nil
+	}
+	a, err := sdk.AccAddressFromBech32(authority)
+	if err != nil {
+		return false, sdkerrors.ErrInvalidAddress.Wrapf("Authority: %v", err)
+	}
+	if !eg.EmergencyGroup().Equals(a) {
+		return false, sdkerrors.ErrUnauthorized
+	}
+	return true, nil
+}
+
+// ValidateProposal checks the format of the title, description.
+// If `requireGov=true` then authority must be a gov module address. Otherwise authority must be
+// a correct bech32 address.
+func ValidateProposal(title, description, authority string, requireGov bool) error {
+	var err error
+	if requireGov {
+		err = AssertGovAuthority(authority)
+	} else {
+		_, err = sdk.AccAddressFromBech32(authority)
+	}
+	if err != nil {
 		return err
 	}
 	if len(strings.TrimSpace(title)) < minProposalTitleLen {

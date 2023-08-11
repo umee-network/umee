@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 
-	itestsuite "github.com/umee-network/umee/v5/tests/cli"
+	itestsuite "github.com/umee-network/umee/v6/tests/cli"
 )
 
 type IntegrationTests struct {

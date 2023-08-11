@@ -3,7 +3,7 @@ package keeper_test
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 	"gotest.tools/v3/assert"
 )
 
@@ -29,7 +29,7 @@ func (s *IntegrationTestSuite) TestKeeper_InitGenesis() {
 				},
 			},
 			true,
-			"invalid denom: ",
+			"base_denom: invalid denom: ",
 		},
 		{
 			"invalid address for borrow",
@@ -152,9 +152,9 @@ func (s *IntegrationTestSuite) TestKeeper_InitGenesis() {
 		s.Run(
 			tc.name, func() {
 				if tc.expectErr {
-					s.Assertions.PanicsWithError(tc.errMsg, func() { s.app.LeverageKeeper.InitGenesis(s.ctx, tc.g) })
+					s.PanicsWithError(tc.errMsg, func() { s.app.LeverageKeeper.InitGenesis(s.ctx, tc.g) })
 				} else {
-					s.Assertions.NotPanics(func() { s.app.LeverageKeeper.InitGenesis(s.ctx, tc.g) })
+					s.NotPanics(func() { s.app.LeverageKeeper.InitGenesis(s.ctx, tc.g) })
 				}
 			},
 		)

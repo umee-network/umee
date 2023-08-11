@@ -6,11 +6,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/coin"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 var halfDec = sdk.MustNewDecFromStr("0.5")
+var one = sdk.OneDec()
 
 // ValidateBaseDenom validates a denom and ensures it is not a uToken.
 func ValidateBaseDenom(denom string) error {
@@ -26,19 +28,21 @@ func ValidateBaseDenom(denom string) error {
 // Validate performs validation on an Token type returning an error if the Token
 // is invalid.
 func (t Token) Validate() error {
-	if err := validateBaseDenoms(t.BaseDenom, t.SymbolDenom); err != nil {
+	if err := validateBaseDenoms(t.BaseDenom); err != nil {
+		return fmt.Errorf("base_denom: %v", err)
+	}
+	if err := validateBaseDenoms(t.SymbolDenom); err != nil {
+		return fmt.Errorf("symbol_denom: %v", err)
+	}
+
+	if err := checkers.DecInZeroOne(t.ReserveFactor, "reserve factor", false); err != nil {
 		return err
 	}
-
-	one := sdk.OneDec()
-
-	// Reserve factor is non-negative and less than 1.
-	if t.ReserveFactor.IsNegative() || t.ReserveFactor.GTE(one) {
-		return fmt.Errorf("invalid reserve factor: %s", t.ReserveFactor)
+	if err := checkers.DecInZeroOne(t.CollateralWeight, "collateral weight", false); err != nil {
+		return err
 	}
-	// Collateral weight is non-negative and less than 1.
-	if t.CollateralWeight.IsNegative() || t.CollateralWeight.GTE(one) {
-		return fmt.Errorf("invalid collateral rate: %s", t.CollateralWeight)
+	if err := checkers.DecInZeroOne(t.ReserveFactor, "reserve factor", false); err != nil {
+		return err
 	}
 	if t.LiquidationThreshold.LT(t.CollateralWeight) || t.LiquidationThreshold.GTE(one) {
 		return fmt.Errorf(

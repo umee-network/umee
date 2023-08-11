@@ -7,8 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/x/metoken"
-	otypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	otypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 var usdExponent = uint32(0)

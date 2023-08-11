@@ -23,16 +23,16 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	"github.com/umee-network/umee/v5/app/upgradev3"
-	"github.com/umee-network/umee/v5/app/upgradev3x3"
-	"github.com/umee-network/umee/v5/x/incentive"
-	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/app/upgradev3"
+	"github.com/umee-network/umee/v6/app/upgradev3x3"
+	"github.com/umee-network/umee/v6/x/incentive"
+	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 
-	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/ugov"
-	"github.com/umee-network/umee/v5/x/uibc"
+	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/ugov"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.

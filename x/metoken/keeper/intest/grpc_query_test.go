@@ -8,8 +8,8 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 func TestQuerier_Params(t *testing.T) {

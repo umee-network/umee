@@ -3,8 +3,8 @@ package metoken
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
-	otypes "github.com/umee-network/umee/v5/x/oracle/types"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	otypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // BankKeeper defines the expected x/bank keeper interface.
