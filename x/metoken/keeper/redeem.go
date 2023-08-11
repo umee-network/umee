@@ -64,6 +64,10 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 		return redeemResponse{}, err
 	}
 
+	if amountFromReserves.IsZero() && amountFromLeverage.IsZero() {
+		return redeemResponse{}, fmt.Errorf("insufficient %s for redemption", meToken.Denom)
+	}
+
 	tokensWithdrawn, err := k.withdrawFromLeverage(sdk.NewCoin(assetDenom, amountFromLeverage))
 	if err != nil {
 		return redeemResponse{}, err
@@ -71,7 +75,6 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 
 	// if there is a difference between the desired to withdraw from x/leverage and the withdrawn,
 	// take it from x/metoken reserves
-
 	if tokensWithdrawn.Amount.LT(amountFromLeverage) {
 		tokenDiff := amountFromLeverage.Sub(tokensWithdrawn.Amount)
 		amountFromReserves = amountFromReserves.Add(tokenDiff)
@@ -202,6 +205,10 @@ func (k Keeper) calculateRedeem(
 	amountToWithdraw, err := indexPrices.SwapRate(meToken, assetDenom)
 	if err != nil {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), err
+	}
+
+	if amountToWithdraw.IsZero() {
+		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), nil
 	}
 
 	amountFromReserves := assetSettings.ReservePortion.MulInt(amountToWithdraw).TruncateInt()

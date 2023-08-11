@@ -71,6 +71,10 @@ func NewLeverageMock() Leverage {
 			mocks.USDTBaseDenom: mocks.ValidToken(mocks.USDTBaseDenom, mocks.USDTSymbolDenom, 6),
 			mocks.USDCBaseDenom: mocks.ValidToken(mocks.USDCBaseDenom, mocks.USDCSymbolDenom, 6),
 			mocks.ISTBaseDenom:  mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
+			mocks.WBTCBaseDenom: mocks.ValidToken(mocks.WBTCBaseDenom, mocks.WBTCSymbolDenom, 6),
+			mocks.ETHBaseDenom:  mocks.ValidToken(mocks.ETHBaseDenom, mocks.ETHSymbolDenom, 6),
+			mocks.TestDenom1:    mocks.ValidToken(mocks.TestDenom1, mocks.TestDenom1, 6),
+			mocks.CMSTBaseDenom: mocks.ValidToken(mocks.CMSTBaseDenom, mocks.CMSTSymbolDenom, 6),
 		},
 	}
 }

@@ -55,6 +55,10 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 		return swapResponse{}, err
 	}
 
+	if meTokenAmount.IsZero() {
+		return swapResponse{}, fmt.Errorf("insufficient %s for swap", asset.Denom)
+	}
+
 	balances, err := k.IndexBalances(meTokenDenom)
 	if err != nil {
 		return swapResponse{}, err
