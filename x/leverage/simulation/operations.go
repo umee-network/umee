@@ -384,44 +384,19 @@ func randomRepayFields(
 // from the borrower's borrows and a random sdk.Coin from the borrower's collateral.
 // It returns skip=true if no collateral is found.
 func randomLiquidateFields(
-	r *rand.Rand, ctx sdk.Context, accs []simtypes.Account, lk keeper.Keeper,
+	r *rand.Rand, _ sdk.Context, accs []simtypes.Account, _ keeper.Keeper,
 ) (
 	liquidator simtypes.Account,
 	borrower simtypes.Account,
-	repaymentToken sdk.Coin,
+	repaymentToken sdk.Coin, //nolint
 	rewardDenom string,
 	skip bool,
 ) {
 	// note: liquidator and borrower might even be the same account
 	liquidator, _ = simtypes.RandomAcc(r, accs)
 	borrower, _ = simtypes.RandomAcc(r, accs)
-	collateral := lk.GetBorrowerCollateral(ctx, borrower.Address)
-	if collateral.Empty() {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-
-	borrowed := lk.GetBorrowerBorrows(ctx, borrower.Address)
-	borrowed = simtypes.RandSubsetCoins(r, borrowed)
-	if borrowed.Empty() {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-
-	liquidationThreshold, err := lk.CalculateLiquidationThreshold(ctx, collateral)
-	if err != nil {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-	borrowedValue, err := lk.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
-	if err != nil {
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-	if borrowedValue.LTE(liquidationThreshold) {
-		// borrower not eligible for liquidation
-		return liquidator, borrower, sdk.Coin{}, "", true
-	}
-
-	rewardDenom = coin.StripUTokenDenom(randomCoin(r, collateral).Denom)
-
-	return liquidator, borrower, randomCoin(r, borrowed), rewardDenom, false
+	// TODO: evaluate whether we want liquidations in sims when we are enabling them for leverage
+	return liquidator, borrower, sdk.Coin{}, "", true
 }
 
 func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
