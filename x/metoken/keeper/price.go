@@ -79,13 +79,18 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 
 // latestPrice from the list of medians, based on the block number.
 func latestPrice(prices otypes.Prices, symbolDenom string) (sdk.Dec, error) {
-	denomPrices := prices.FilterByDenom(symbolDenom)
+	latestPrice := otypes.Price{}
+	for _, price := range prices {
+		if price.ExchangeRateTuple.Denom == symbolDenom && price.BlockNum > latestPrice.BlockNum {
+			latestPrice = price
+		}
+	}
 
-	if len(denomPrices) == 0 {
+	if latestPrice.BlockNum == 0 {
 		return sdk.Dec{}, fmt.Errorf("price not found in oracle for denom %s", symbolDenom)
 	}
 
-	return denomPrices[len(denomPrices)-1].ExchangeRateTuple.ExchangeRate, nil
+	return latestPrice.ExchangeRateTuple.ExchangeRate, nil
 }
 
 // valueInUSD given a specific amount, price and exponent
