@@ -10,6 +10,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 
+	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -33,6 +35,7 @@ import (
 	"github.com/umee-network/umee/v5/x/incentive"
 	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v5/x/metoken"
 
 	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
@@ -90,6 +93,8 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 			keyTable = govv1.ParamKeyTable()
 		case crisistypes.ModuleName:
 			keyTable = crisistypes.ParamKeyTable()
+		case wasm.ModuleName:
+			keyTable = wasmtypes.ParamKeyTable()
 		default:
 			// subspace not handled
 			found = false
@@ -114,6 +119,7 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 		Added: []string{
 			consensustypes.ModuleName,
+			metoken.ModuleName,
 			crisistypes.ModuleName,
 		},
 	})
