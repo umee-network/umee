@@ -608,7 +608,7 @@ func (s *E2ETestSuite) runPriceFeeder() {
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
 		if err != nil {
-			s.T().Log("PriceByBaseDenom feeder endpoint not available", err)
+			s.T().Log("Price feeder endpoint not available", err)
 			return false
 		}
 

@@ -230,7 +230,7 @@ func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode type
 	// to obtain the base token price ratio. If fromDenom has a higher exponent, then
 	// the ratio p1/p2 must be adjusted lower.
 	powerDifference := int32(e2) - int32(e1)
-	// PriceByBaseDenom ratio > 1 if fromDenom is worth more than toDenom.
+	// Price ratio > 1 if fromDenom is worth more than toDenom.
 	return exponent(p1, powerDifference).Quo(p2), nil
 }
 
