@@ -37,7 +37,7 @@ var (
 	ErrLiquidationRepayZero   = errors.Register(ModuleName, 303, "liquidation would repay zero tokens")
 	ErrBondedCollateral       = errors.Register(ModuleName, 304, "collateral is bonded to incentive module")
 
-	// 4XX = Price Sensitive
+	// 4XX = PriceByBaseDenom Sensitive
 	ErrBadValue              = errors.Register(ModuleName, 400, "bad USD value")
 	ErrInvalidOraclePrice    = errors.Register(ModuleName, 401, "invalid oracle price")
 	ErrUndercollaterized     = errors.Register(ModuleName, 402, "borrow positions are undercollaterized")

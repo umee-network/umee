@@ -139,12 +139,12 @@ func (q Querier) IndexBalances(
 	}, nil
 }
 
-// IndexPrice returns Index price from the x/metoken module. If index denom is not specified,
+// IndexPrices returns Index price from the x/metoken module. If index denom is not specified,
 // returns prices for all the registered indexes.
-func (q Querier) IndexPrice(
+func (q Querier) IndexPrices(
 	goCtx context.Context,
-	req *metoken.QueryIndexPrice,
-) (*metoken.QueryIndexPriceResponse, error) {
+	req *metoken.QueryIndexPrices,
+) (*metoken.QueryIndexPricesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k := q.Keeper(&ctx)
 
@@ -167,22 +167,17 @@ func (q Querier) IndexPrice(
 		indexes = k.GetAllRegisteredIndexes()
 	}
 
-	prices := make([]metoken.Price, len(indexes))
+	prices := make([]metoken.IndexPrices, len(indexes))
 	for i, index := range indexes {
 		ip, err := k.Prices(index)
 		if err != nil {
 			return nil, err
 		}
 
-		price, err := ip.Price(index.Denom)
-		if err != nil {
-			return nil, err
-		}
-
-		prices[i] = price
+		prices[i] = ip.QueryExport()
 	}
 
-	return &metoken.QueryIndexPriceResponse{
+	return &metoken.QueryIndexPricesResponse{
 		Prices: prices,
 	}, nil
 }

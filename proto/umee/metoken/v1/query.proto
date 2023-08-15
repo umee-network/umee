@@ -42,10 +42,11 @@ service Query {
     option (google.api.http).get = "/umee/metoken/v1/index_balances";
   }
 
-  // IndexPrice queries for Index's price of a specific or all the registered indexes.
-  rpc IndexPrice(QueryIndexPrice)
-      returns (QueryIndexPriceResponse) {
-    option (google.api.http).get = "/umee/metoken/v1/index_price";
+  // IndexPrices queries for Index's price of a specific or all the registered indexes. It also includes the
+  // underlying assets prices as well as swap and redeem rates.
+  rpc IndexPrices(QueryIndexPrices)
+      returns (QueryIndexPricesResponse) {
+    option (google.api.http).get = "/umee/metoken/v1/index_prices";
   }
 }
 
@@ -103,13 +104,13 @@ message QueryIndexBalancesResponse {
   repeated IndexBalances index_balances = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryIndexePrice defines the request structure for the IndexPrice gRPC service handler.
+// QueryIndexPrices defines the request structure for the IndexPrice gRPC service handler.
 // metoken_denom param is optional, if it is not informed the query will return all the Index's prices.
-message QueryIndexPrice {
+message QueryIndexPrices {
   string metoken_denom = 1;
 }
 
-// QueryIndexPriceResponse defines the response structure for the IndexPrice gRPC service handler.
-message QueryIndexPriceResponse {
-  repeated Price prices = 1 [(gogoproto.nullable) = false];
+// QueryIndexPriceResponses defines the response structure for the IndexPrice gRPC service handler.
+message QueryIndexPricesResponse {
+  repeated IndexPrices prices = 1 [(gogoproto.nullable) = false];
 }

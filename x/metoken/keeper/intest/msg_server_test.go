@@ -839,23 +839,21 @@ func verifySwap(
 	denom, meTokenDenom := tc.asset.Denom, tc.denom
 
 	// initial state
-	assetPrice, err := prices.Price(denom)
-	assert.NilError(t, err)
+	i, assetPrice := prices.PriceByBaseDenom(denom)
+	assert.Check(t, i >= 0)
 	i, iAssetBalance := iMeTokenBalance.AssetBalance(denom)
 	assert.Check(t, i >= 0)
 	assetSupply := iAssetBalance.Leveraged.Add(iAssetBalance.Reserved)
-	meTokenPrice, err := prices.Price(meTokenDenom)
-	assert.NilError(t, err)
 
 	assetExponentFactorVsUSD, err := metoken.ExponentFactor(assetPrice.Exponent, 0)
 	assert.NilError(t, err)
 	decAssetSupply := assetExponentFactorVsUSD.MulInt(assetSupply)
 	assetValue := decAssetSupply.Mul(assetPrice.Price)
 
-	meTokenExponentFactor, err := metoken.ExponentFactor(meTokenPrice.Exponent, 0)
+	meTokenExponentFactor, err := metoken.ExponentFactor(prices.Exponent, 0)
 	assert.NilError(t, err)
 	decMeTokenSupply := meTokenExponentFactor.MulInt(iMeTokenBalance.MetokenSupply.Amount)
-	meTokenValue := decMeTokenSupply.Mul(meTokenPrice.Price)
+	meTokenValue := decMeTokenSupply.Mul(prices.Price)
 
 	// current_allocation = asset_value / total_value
 	// swap_delta_allocation = (current_allocation - target_allocation) / target_allocation
@@ -892,9 +890,9 @@ func verifySwap(
 	amountToSwap := tc.asset.Amount.Sub(expectedFee.Amount)
 
 	// swap_exchange_rate = asset_price / metoken_price
-	exchangeRate := assetPrice.Price.Quo(meTokenPrice.Price)
+	exchangeRate := assetPrice.Price.Quo(prices.Price)
 
-	assetExponentFactorVsMeToken, err := prices.ExponentFactor(denom, meTokenDenom)
+	assetExponentFactorVsMeToken, err := metoken.ExponentFactor(assetPrice.Exponent, prices.Exponent)
 	assert.NilError(t, err)
 
 	// expected_metokens = amount_to_swap * exchange_rate * exponent_factor
@@ -1654,31 +1652,27 @@ func verifyRedeem(
 	iMeTokenBalance, fMeTokenBalance metoken.IndexBalances,
 	prices metoken.IndexPrices, resp metoken.MsgRedeemResponse,
 ) {
-	meTokenDenom, denom := tc.asset.Denom, tc.denom
-
 	// initial state
-	assetPrice, err := prices.Price(denom)
-	assert.NilError(t, err)
-	i, iAssetBalance := iMeTokenBalance.AssetBalance(denom)
+	i, assetPrice := prices.PriceByBaseDenom(tc.denom)
+	assert.Check(t, i >= 0)
+	i, iAssetBalance := iMeTokenBalance.AssetBalance(tc.denom)
 	assert.Check(t, i >= 0)
 	assetSupply := iAssetBalance.Leveraged.Add(iAssetBalance.Reserved)
-	meTokenPrice, err := prices.Price(meTokenDenom)
-	assert.NilError(t, err)
 
 	assetExponentFactorVsUSD, err := metoken.ExponentFactor(assetPrice.Exponent, 0)
 	assert.NilError(t, err)
 	decAssetSupply := assetExponentFactorVsUSD.MulInt(assetSupply)
 	assetValue := decAssetSupply.Mul(assetPrice.Price)
 
-	meTokenExponentFactor, err := metoken.ExponentFactor(meTokenPrice.Exponent, 0)
+	meTokenExponentFactor, err := metoken.ExponentFactor(prices.Exponent, 0)
 	assert.NilError(t, err)
 	decMeTokenSupply := meTokenExponentFactor.MulInt(iMeTokenBalance.MetokenSupply.Amount)
-	meTokenValue := decMeTokenSupply.Mul(meTokenPrice.Price)
+	meTokenValue := decMeTokenSupply.Mul(prices.Price)
 
 	// current_allocation = asset_value / total_value
 	// redeem_delta_allocation = (target_allocation - current_allocation) / target_allocation
 	currentAllocation, redeemDeltaAllocation := sdk.ZeroDec(), sdk.ZeroDec()
-	i, aa := index.AcceptedAsset(denom)
+	i, aa := index.AcceptedAsset(tc.denom)
 	assert.Check(t, i >= 0)
 	targetAllocation := aa.TargetAllocation
 	if assetSupply.IsZero() {
@@ -1697,31 +1691,31 @@ func verifyRedeem(
 		fee = index.Fee.MaxFee
 	}
 	// redeem_exchange_rate = metoken_price / asset_price
-	redeemExchangeRate := meTokenPrice.Price.Quo(assetPrice.Price)
+	redeemExchangeRate := prices.Price.Quo(assetPrice.Price)
 
-	assetExponentFactorVsMeToken, err := prices.ExponentFactor(meTokenDenom, denom)
+	assetExponentFactorVsMeToken, err := metoken.ExponentFactor(prices.Exponent, assetPrice.Exponent)
 	assert.NilError(t, err)
 
 	// amount_to_redeem = exchange_rate * metoken_amount
 	amountToWithdraw := redeemExchangeRate.MulInt(tc.asset.Amount).Mul(assetExponentFactorVsMeToken).TruncateInt()
 
 	// expected_fee = fee * amount_to_redeem
-	expectedFee := sdk.NewCoin(denom, fee.MulInt(amountToWithdraw).TruncateInt())
+	expectedFee := sdk.NewCoin(tc.denom, fee.MulInt(amountToWithdraw).TruncateInt())
 
 	// amount_to_redeem = amountToWithdraw - expectedFee
 	amountToRedeem := amountToWithdraw.Sub(expectedFee.Amount)
 
 	expectedAssets := sdk.NewCoin(
-		denom,
+		tc.denom,
 		amountToRedeem,
 	)
 
 	// calculating reserved and leveraged
 	expectedFromReserves := sdk.NewCoin(
-		denom,
+		tc.denom,
 		aa.ReservePortion.MulInt(amountToWithdraw).TruncateInt(),
 	)
-	expectedFromLeverage := sdk.NewCoin(denom, amountToWithdraw.Sub(expectedFromReserves.Amount))
+	expectedFromLeverage := sdk.NewCoin(tc.denom, amountToWithdraw.Sub(expectedFromReserves.Amount))
 
 	require := require.New(t)
 	// verify the outputs of swap function
@@ -1759,7 +1753,7 @@ func verifyRedeem(
 		"meToken assetSupply",
 	)
 
-	i, fAssetBalance := fMeTokenBalance.AssetBalance(denom)
+	i, fAssetBalance := fMeTokenBalance.AssetBalance(tc.denom)
 	assert.Check(t, i >= 0)
 	require.True(
 		iAssetBalance.Reserved.Sub(expectedFromReserves.Amount).Equal(fAssetBalance.Reserved),

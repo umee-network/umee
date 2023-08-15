@@ -168,7 +168,7 @@ func (m *MockOracle) EXPECT() *MockOracleMockRecorder {
 // Price mocks base method.
 func (m *MockOracle) Price(ctx types.Context, denom string) (types.Dec, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Price", ctx, denom)
+	ret := m.ctrl.Call(m, "PriceByBaseDenom", ctx, denom)
 	ret0, _ := ret[0].(types.Dec)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -177,5 +177,5 @@ func (m *MockOracle) Price(ctx types.Context, denom string) (types.Dec, error) {
 // Price indicates an expected call of Price.
 func (mr *MockOracleMockRecorder) Price(ctx, denom interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Price", reflect.TypeOf((*MockOracle)(nil).Price), ctx, denom)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PriceByBaseDenom", reflect.TypeOf((*MockOracle)(nil).Price), ctx, denom)
 }

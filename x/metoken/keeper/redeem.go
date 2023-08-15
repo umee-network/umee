@@ -202,7 +202,7 @@ func (k Keeper) calculateRedeem(
 		)
 	}
 
-	amountToWithdraw, err := indexPrices.SwapRate(meToken, assetDenom)
+	amountToWithdraw, err := indexPrices.RedeemRate(meToken, assetDenom)
 	if err != nil {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), err
 	}

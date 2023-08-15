@@ -180,7 +180,7 @@ func GetCmdIndexBalances() *cobra.Command {
 	return cmd
 }
 
-// GetCmdIndexPrice creates a Cobra command to query for the x/metoken module Index Price.
+// GetCmdIndexPrice creates a Cobra command to query for the x/metoken module Index PriceByBaseDenom.
 // metoken_denom is optional, if it isn't provided then prices for all the registered indexes will be returned.
 func GetCmdIndexPrice() *cobra.Command {
 	cmd := &cobra.Command{
@@ -195,11 +195,11 @@ func GetCmdIndexPrice() *cobra.Command {
 			}
 
 			queryClient := metoken.NewQueryClient(clientCtx)
-			queryReq := metoken.QueryIndexPrice{}
+			queryReq := metoken.QueryIndexPrices{}
 			if len(args) > 0 {
 				queryReq.MetokenDenom = args[0]
 			}
-			resp, err := queryClient.IndexPrice(cmd.Context(), &queryReq)
+			resp, err := queryClient.IndexPrices(cmd.Context(), &queryReq)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

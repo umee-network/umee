@@ -210,7 +210,7 @@ func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPric
 
 	amountToSwap := asset.Amount.Sub(fee.Amount)
 
-	meTokens, err := indexPrices.SwapRate(sdk.NewCoin(asset.Denom, amountToSwap), index.Denom)
+	meTokens, err := indexPrices.SwapRate(sdk.NewCoin(asset.Denom, amountToSwap))
 	if err != nil {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), err
 	}

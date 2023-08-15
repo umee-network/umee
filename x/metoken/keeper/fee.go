@@ -91,20 +91,16 @@ func (k Keeper) currentAllocation(
 		return sdk.ZeroDec(), nil
 	}
 
-	assetPrice, err := indexPrices.Price(assetDenom)
-	if err != nil {
-		return sdk.Dec{}, err
+	i, assetPrice := indexPrices.PriceByBaseDenom(assetDenom)
+	if i < 0 {
+		return sdk.Dec{}, sdkerrors.ErrNotFound.Wrapf("price not found for denom %s", assetDenom)
 	}
 	assetUSD, err := valueInUSD(balance.AvailableSupply(), assetPrice.Price, assetPrice.Exponent)
 	if err != nil {
 		return sdk.Dec{}, err
 	}
 
-	meTokenPrice, err := indexPrices.Price(index.Denom)
-	if err != nil {
-		return sdk.Dec{}, err
-	}
-	meTokenUSD, err := valueInUSD(balances.MetokenSupply.Amount, meTokenPrice.Price, meTokenPrice.Exponent)
+	meTokenUSD, err := valueInUSD(balances.MetokenSupply.Amount, indexPrices.Price, indexPrices.Exponent)
 	if err != nil {
 		return sdk.Dec{}, err
 	}

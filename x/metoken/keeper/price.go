@@ -15,8 +15,7 @@ var usdExponent = uint32(0)
 
 // Prices calculates meToken price as an avg of median prices of all index accepted assets.
 func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
-	indexPrices := metoken.NewIndexPrices()
-	meTokenDenom := index.Denom
+	indexPrices := metoken.EmptyIndexPrices(index)
 
 	supply, err := k.IndexBalances(index.Denom)
 	if err != nil {
@@ -38,7 +37,14 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 		if err != nil {
 			return indexPrices, err
 		}
-		indexPrices.SetPrice(aa.Denom, assetPrice, tokenSettings.Exponent)
+		indexPrices.SetPrice(
+			metoken.AssetPrice{
+				BaseDenom:   aa.Denom,
+				SymbolDenom: tokenSettings.SymbolDenom,
+				Price:       assetPrice,
+				Exponent:    tokenSettings.Exponent,
+			},
+		)
 
 		// if no meTokens were minted, the totalAssetValue is the sum of all the assets prices.
 		// otherwise is the sum of the value of all the assets in the index.
@@ -60,18 +66,14 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 
 	if supply.MetokenSupply.IsZero() {
 		// if no meTokens were minted, the meTokenPrice is totalAssetsUSDValue divided by accepted assets quantity
-		indexPrices.SetPrice(
-			meTokenDenom,
-			totalAssetsUSDValue.QuoInt(sdkmath.NewInt(int64(len(index.AcceptedAssets)))),
-			index.Exponent,
-		)
+		indexPrices.Price = totalAssetsUSDValue.QuoInt(sdkmath.NewInt(int64(len(index.AcceptedAssets))))
 	} else {
 		// otherwise, the meTokenPrice is totalAssetsUSDValue divided by meTokens minted quantity
 		meTokenPrice, err := priceInUSD(supply.MetokenSupply.Amount, totalAssetsUSDValue, index.Exponent)
 		if err != nil {
 			return indexPrices, err
 		}
-		indexPrices.SetPrice(meTokenDenom, meTokenPrice, index.Exponent)
+		indexPrices.Price = meTokenPrice
 	}
 
 	return indexPrices, nil
