@@ -2,10 +2,11 @@ package keeper
 
 import (
 	sdkmath "cosmossdk.io/math"
-	"github.com/umee-network/umee/v6/x/metoken/mocks"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v6/util/coin"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 	otypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
@@ -33,28 +34,31 @@ func (l Leverage) GetTokenSettings(_ sdk.Context, denom string) (ltypes.Token, e
 	return ts, nil
 }
 
-func (l Leverage) ToUToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
-	panic("not implemented")
+func (l Leverage) ToUToken(_ sdk.Context, coin sdk.Coin) (sdk.Coin, error) {
+	return coin, nil
 }
 
-func (l Leverage) ToToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
-	panic("not implemented")
+func (l Leverage) ToToken(_ sdk.Context, coin sdk.Coin) (sdk.Coin, error) {
+	return coin, nil
 }
 
 func (l Leverage) SupplyFromModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
-	panic("not implemented")
+	return sdk.Coin{}, true, nil
 }
 
-func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, _ sdk.Coin) (sdk.Coin, bool, error) {
-	panic("not implemented")
+func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, coin sdk.Coin) (sdk.Coin, bool, error) {
+	return coin, true, nil
 }
 
-func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, _ sdk.Coin) (sdkmath.Int, error) {
-	panic("not implemented")
+func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, coin sdk.Coin) (sdkmath.Int, error) {
+	if coin.Denom == mocks.ISTBaseDenom {
+		return sdk.MustNewDecFromStr("0.5").MulInt(coin.Amount).TruncateInt(), nil
+	}
+	return coin.Amount, nil
 }
 
-func (l Leverage) GetTotalSupply(_ sdk.Context, _ string) (sdk.Coin, error) {
-	panic("not implemented")
+func (l Leverage) GetTotalSupply(_ sdk.Context, denom string) (sdk.Coin, error) {
+	return coin.Zero(denom), nil
 }
 
 func (l Leverage) GetAllSupplied(_ sdk.Context, _ sdk.AccAddress) (sdk.Coins, error) {
@@ -73,4 +77,26 @@ func NewLeverageMock() Leverage {
 			mocks.CMSTBaseDenom: mocks.ValidToken(mocks.CMSTBaseDenom, mocks.CMSTSymbolDenom, 6),
 		},
 	}
+}
+
+type Bank struct{}
+
+func NewBankMock() Bank {
+	return Bank{}
+}
+
+func (b Bank) MintCoins(_ sdk.Context, _ string, _ sdk.Coins) error {
+	return nil
+}
+
+func (b Bank) BurnCoins(_ sdk.Context, _ string, _ sdk.Coins) error {
+	return nil
+}
+
+func (b Bank) SendCoinsFromModuleToAccount(_ sdk.Context, _ string, _ sdk.AccAddress, _ sdk.Coins) error {
+	return nil
+}
+
+func (b Bank) SendCoinsFromAccountToModule(_ sdk.Context, _ sdk.AccAddress, _ string, _ sdk.Coins) error {
+	return nil
 }
