@@ -70,36 +70,38 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	metoken.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.MetokenKeeperB))
 
+	require := require.New(t)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.USDTBaseDenom, mocks.USDTSymbolDenom, 6),
 		),
 	)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.USDCBaseDenom, mocks.USDCSymbolDenom, 6),
 		),
 	)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
 		),
 	)
 	require.NoError(
-		t,
+		app.LeverageKeeper.SetTokenSettings(
+			ctx,
+			mocks.ValidToken(mocks.CMSTBaseDenom, mocks.CMSTSymbolDenom, 6),
+		),
+	)
+	require.NoError(
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.WBTCBaseDenom, mocks.WBTCSymbolDenom, 8),
 		),
 	)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.ETHBaseDenom, mocks.ETHSymbolDenom, 18),
