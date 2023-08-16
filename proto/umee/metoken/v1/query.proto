@@ -102,6 +102,7 @@ message QueryIndexBalances {
 // QueryIndexBalanceResponse defines the response structure for the IndexBalances gRPC service handler.
 message QueryIndexBalancesResponse {
   repeated IndexBalances index_balances = 1 [(gogoproto.nullable) = false];
+  repeated IndexPrices   prices         = 2 [(gogoproto.nullable) = false];
 }
 
 // QueryIndexPrices defines the request structure for the IndexPrice gRPC service handler.

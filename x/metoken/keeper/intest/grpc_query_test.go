@@ -75,17 +75,20 @@ func TestQuerier_Indexes(t *testing.T) {
 }
 
 func TestQuerier_Balances(t *testing.T) {
-	balance1 := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
-	balance2 := mocks.ValidUSDIndexBalances("me/EUR")
+	index1 := mocks.StableIndex(mocks.MeUSDDenom)
+	index2 := mocks.NonStableIndex(mocks.MeNonStableDenom)
 
-	s := initTestSuite(t, nil, []metoken.IndexBalances{balance1, balance2})
+	balance1 := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
+	balance2 := mocks.EmptyNonStableIndexBalances(mocks.MeNonStableDenom)
+
+	s := initTestSuite(t, []metoken.Index{index1, index2}, []metoken.IndexBalances{balance1, balance2})
 	querier, ctx := s.queryClient, s.ctx
 
 	tcs := []struct {
-		name          string
-		denom         string
-		expIndexCount int
-		expErr        string
+		name            string
+		denom           string
+		expBalanceCount int
+		expErr          string
 	}{
 		{
 			"get all balances",
@@ -119,7 +122,8 @@ func TestQuerier_Balances(t *testing.T) {
 					assert.ErrorContains(t, err, tc.expErr)
 				} else {
 					assert.NilError(t, err)
-					assert.Check(t, tc.expIndexCount == len(resp.IndexBalances))
+					assert.Check(t, tc.expBalanceCount == len(resp.IndexBalances))
+					assert.Check(t, tc.expBalanceCount == len(resp.Prices))
 				}
 			},
 		)
