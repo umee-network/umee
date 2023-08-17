@@ -124,7 +124,7 @@ message IndexPrices {
   repeated AssetPrice assets = 4 [(gogoproto.nullable) = false];
 }
 
-// AssetPrice informs the price, exponent, and the swap and the redeem rate of an asset accepted in the Index.
+// AssetPrice information related to the index operations.
 message AssetPrice {
   option (gogoproto.equal) = true;
 
