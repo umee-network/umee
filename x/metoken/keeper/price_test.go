@@ -24,22 +24,22 @@ func TestIndexPrices_Prices(t *testing.T) {
 	// inexisting asset case
 	ip, err := k.Prices(index)
 	require.NoError(t, err)
-	i, _ := ip.PriceByBaseDenom("inexistingAsset")
-	require.Equal(t, -1, i)
+	_, err = ip.PriceByBaseDenom("inexistingAsset")
+	require.ErrorContains(t, err, "not found")
 
 	// confirm all the asset prices are set correctly
-	i, price := ip.PriceByBaseDenom(mocks.USDTBaseDenom)
-	require.NotEqual(t, -1, i)
+	price, err := ip.PriceByBaseDenom(mocks.USDTBaseDenom)
+	require.NoError(t, err)
 	require.Equal(t, price.Exponent, uint32(6))
 	require.True(t, price.Price.Equal(mocks.USDTPrice))
 
-	i, price = ip.PriceByBaseDenom(mocks.USDCBaseDenom)
-	require.NotEqual(t, -1, i)
+	price, err = ip.PriceByBaseDenom(mocks.USDCBaseDenom)
+	require.NoError(t, err)
 	require.Equal(t, price.Exponent, uint32(6))
 	require.True(t, price.Price.Equal(mocks.USDCPrice))
 
-	i, price = ip.PriceByBaseDenom(mocks.ISTBaseDenom)
-	require.NotEqual(t, -1, i)
+	price, err = ip.PriceByBaseDenom(mocks.ISTBaseDenom)
+	require.NoError(t, err)
 	require.Equal(t, price.Exponent, uint32(6))
 	require.True(t, price.Price.Equal(mocks.ISTPrice))
 
@@ -77,8 +77,8 @@ func TestIndexPrices_Convert(t *testing.T) {
 	require.NotEqual(t, sdk.ZeroDec(), ip.Price)
 
 	// convert 20 USDC to meUSD
-	i, usdcPrice := ip.PriceByBaseDenom(mocks.USDCBaseDenom)
-	require.NotEqual(t, -1, i)
+	usdcPrice, err := ip.PriceByBaseDenom(mocks.USDCBaseDenom)
+	require.NoError(t, err)
 
 	coin := sdk.NewCoin(mocks.USDCBaseDenom, sdkmath.NewInt(20_000000))
 	result, err := ip.SwapRate(coin)
@@ -86,8 +86,8 @@ func TestIndexPrices_Convert(t *testing.T) {
 	require.True(t, result.Equal(usdcPrice.Price.Quo(ip.Price).MulInt(coin.Amount).TruncateInt()))
 
 	// convert 130 meUSD to IST
-	i, istPrice := ip.PriceByBaseDenom(mocks.ISTBaseDenom)
-	require.NotEqual(t, -1, i)
+	istPrice, err := ip.PriceByBaseDenom(mocks.ISTBaseDenom)
+	require.NoError(t, err)
 
 	coin = sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(130_000000))
 	result, err = ip.RedeemRate(coin, mocks.ISTBaseDenom)
@@ -106,13 +106,13 @@ func TestIndexPrices_Convert(t *testing.T) {
 	// change supply given the new exponents
 	supply, err := k.IndexBalances(mocks.MeUSDDenom)
 	require.NoError(t, err)
-	i, usdtBalance := supply.AssetBalance(mocks.USDCBaseDenom)
+	usdtBalance, i := supply.AssetBalance(mocks.USDCBaseDenom)
 	require.True(t, i >= 0)
 	usdtBalance.Reserved = usdtBalance.Reserved.Mul(sdkmath.NewInt(100))
 	usdtBalance.Leveraged = usdtBalance.Leveraged.Mul(sdkmath.NewInt(100))
 	supply.SetAssetBalance(usdtBalance)
 
-	i, istBalance := supply.AssetBalance(mocks.ISTBaseDenom)
+	istBalance, i := supply.AssetBalance(mocks.ISTBaseDenom)
 	require.True(t, i >= 0)
 	istBalance.Reserved = istBalance.Reserved.Quo(sdkmath.NewInt(100))
 	istBalance.Leveraged = istBalance.Leveraged.Quo(sdkmath.NewInt(100))
@@ -124,8 +124,8 @@ func TestIndexPrices_Convert(t *testing.T) {
 	require.NoError(t, err)
 
 	// convert 115 USDC to meUSD
-	i, usdcPrice = ip.PriceByBaseDenom(mocks.USDCBaseDenom)
-	require.NotEqual(t, -1, i)
+	usdcPrice, err = ip.PriceByBaseDenom(mocks.USDCBaseDenom)
+	require.NoError(t, err)
 
 	coin = sdk.NewCoin(mocks.USDCBaseDenom, sdkmath.NewInt(115_000000))
 	result, err = ip.SwapRate(coin)
@@ -140,8 +140,8 @@ func TestIndexPrices_Convert(t *testing.T) {
 	)
 
 	// convert 1783.91827311 meUSD to IST
-	i, istPrice = ip.PriceByBaseDenom(mocks.ISTBaseDenom)
-	require.NotEqual(t, -1, i)
+	istPrice, err = ip.PriceByBaseDenom(mocks.ISTBaseDenom)
+	require.NoError(t, err)
 
 	coin = sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(1783_91827311))
 	result, err = ip.RedeemRate(coin, mocks.ISTBaseDenom)
@@ -158,11 +158,11 @@ func TestIndexPrices_Convert(t *testing.T) {
 }
 
 func meUSDIndexPricesAdjustedToBalance(t *testing.T, balance metoken.IndexBalances) metoken.IndexPrices {
-	i, usdtSupply := balance.AssetBalance(mocks.USDTBaseDenom)
+	usdtSupply, i := balance.AssetBalance(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)
-	i, usdcSupply := balance.AssetBalance(mocks.USDCBaseDenom)
+	usdcSupply, i := balance.AssetBalance(mocks.USDCBaseDenom)
 	require.True(t, i >= 0)
-	i, istSupply := balance.AssetBalance(mocks.ISTBaseDenom)
+	istSupply, i := balance.AssetBalance(mocks.ISTBaseDenom)
 	require.True(t, i >= 0)
 
 	prices := metoken.IndexPrices{

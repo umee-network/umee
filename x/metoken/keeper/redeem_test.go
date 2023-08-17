@@ -28,8 +28,8 @@ func TestRedeem_Valid(t *testing.T) {
 	assert.NoError(t, err)
 	p, err := k.Prices(index)
 	assert.NoError(t, err)
-	i, usdtPrice := p.PriceByBaseDenom(mocks.USDTBaseDenom)
-	assert.True(t, i >= 0)
+	usdtPrice, err := p.PriceByBaseDenom(mocks.USDTBaseDenom)
+	assert.NoError(t, err)
 	exchangeRate := p.Price.Quo(usdtPrice.Price)
 	coins := exchangeRate.MulInt(fiftyMeUSD.Amount).TruncateInt()
 

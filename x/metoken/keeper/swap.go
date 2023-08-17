@@ -102,7 +102,7 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 	}
 
 	balances.MetokenSupply.Amount = balances.MetokenSupply.Amount.Add(meTokenAmount)
-	i, balance := balances.AssetBalance(asset.Denom)
+	balance, i := balances.AssetBalance(asset.Denom)
 	if i < 0 {
 		return swapResponse{}, sdkerrors.ErrNotFound.Wrapf(
 			"balance for denom %s not found",
@@ -195,7 +195,7 @@ func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPric
 	sdkmath.Int,
 	error,
 ) {
-	i, assetSettings := index.AcceptedAsset(asset.Denom)
+	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkerrors.ErrNotFound.Wrapf(
 			"asset %s is not accepted in the index",

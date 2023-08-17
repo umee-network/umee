@@ -81,7 +81,7 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 		amountFromLeverage = amountFromLeverage.Sub(tokenDiff)
 	}
 
-	i, balance := balances.AssetBalance(assetDenom)
+	balance, i := balances.AssetBalance(assetDenom)
 	if i < 0 {
 		return redeemResponse{}, sdkerrors.ErrNotFound.Wrapf(
 			"balance for denom %s not found",
@@ -194,7 +194,7 @@ func (k Keeper) calculateRedeem(
 	meToken sdk.Coin,
 	assetDenom string,
 ) (sdkmath.Int, sdkmath.Int, error) {
-	i, assetSettings := index.AcceptedAsset(assetDenom)
+	assetSettings, i := index.AcceptedAsset(assetDenom)
 	if i < 0 {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkerrors.ErrNotFound.Wrapf(
 			"asset %s is not accepted in the index",

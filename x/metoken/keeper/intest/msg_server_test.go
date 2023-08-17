@@ -839,9 +839,9 @@ func verifySwap(
 	denom, meTokenDenom := tc.asset.Denom, tc.denom
 
 	// initial state
-	i, assetPrice := prices.PriceByBaseDenom(denom)
-	assert.Check(t, i >= 0)
-	i, iAssetBalance := iMeTokenBalance.AssetBalance(denom)
+	assetPrice, err := prices.PriceByBaseDenom(denom)
+	assert.NilError(t, err)
+	iAssetBalance, i := iMeTokenBalance.AssetBalance(denom)
 	assert.Check(t, i >= 0)
 	assetSupply := iAssetBalance.Leveraged.Add(iAssetBalance.Reserved)
 
@@ -858,7 +858,7 @@ func verifySwap(
 	// current_allocation = asset_value / total_value
 	// swap_delta_allocation = (current_allocation - target_allocation) / target_allocation
 	currentAllocation, swapDeltaAllocation := sdk.ZeroDec(), sdk.ZeroDec()
-	i, aa := index.AcceptedAsset(denom)
+	aa, i := index.AcceptedAsset(denom)
 	assert.Check(t, i >= 0)
 	targetAllocation := aa.TargetAllocation
 
@@ -938,7 +938,7 @@ func verifySwap(
 		"meToken assetSupply",
 	)
 
-	i, fAssetBalance := fMeTokenBalance.AssetBalance(denom)
+	fAssetBalance, i := fMeTokenBalance.AssetBalance(denom)
 	assert.Check(t, i >= 0)
 	require.Equal(
 		iAssetBalance.Reserved.Add(expectedReserved.Amount),
@@ -1653,9 +1653,9 @@ func verifyRedeem(
 	prices metoken.IndexPrices, resp metoken.MsgRedeemResponse,
 ) {
 	// initial state
-	i, assetPrice := prices.PriceByBaseDenom(tc.denom)
-	assert.Check(t, i >= 0)
-	i, iAssetBalance := iMeTokenBalance.AssetBalance(tc.denom)
+	assetPrice, err := prices.PriceByBaseDenom(tc.denom)
+	assert.NilError(t, err)
+	iAssetBalance, i := iMeTokenBalance.AssetBalance(tc.denom)
 	assert.Check(t, i >= 0)
 	assetSupply := iAssetBalance.Leveraged.Add(iAssetBalance.Reserved)
 
@@ -1672,7 +1672,7 @@ func verifyRedeem(
 	// current_allocation = asset_value / total_value
 	// redeem_delta_allocation = (target_allocation - current_allocation) / target_allocation
 	currentAllocation, redeemDeltaAllocation := sdk.ZeroDec(), sdk.ZeroDec()
-	i, aa := index.AcceptedAsset(tc.denom)
+	aa, i := index.AcceptedAsset(tc.denom)
 	assert.Check(t, i >= 0)
 	targetAllocation := aa.TargetAllocation
 	if assetSupply.IsZero() {
@@ -1753,7 +1753,7 @@ func verifyRedeem(
 		"meToken assetSupply",
 	)
 
-	i, fAssetBalance := fMeTokenBalance.AssetBalance(tc.denom)
+	fAssetBalance, i := fMeTokenBalance.AssetBalance(tc.denom)
 	assert.Check(t, i >= 0)
 	require.True(
 		iAssetBalance.Reserved.Sub(expectedFromReserves.Amount).Equal(fAssetBalance.Reserved),
@@ -1958,7 +1958,7 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 						)
 						assert.Check(t, found)
 						for _, aa := range addIndex.AcceptedAssets {
-							i, balance := balances.AssetBalance(aa.Denom)
+							balance, i := balances.AssetBalance(aa.Denom)
 							assert.Check(t, i >= 0)
 							assert.Check(t, balance.Fees.Equal(sdkmath.ZeroInt()))
 							assert.Check(t, balance.Interest.Equal(sdkmath.ZeroInt()))
@@ -1975,7 +1975,7 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 						balances, found := app.MetokenKeeperB.Keeper(&ctx).IndexBalances(updateIndex.Denom)
 						assert.Check(t, found)
 						for _, aa := range updateIndex.AcceptedAssets {
-							i, balance := balances.AssetBalance(aa.Denom)
+							balance, i := balances.AssetBalance(aa.Denom)
 							assert.Check(t, i >= 0)
 							assert.Check(t, balance.Fees.Equal(sdkmath.ZeroInt()))
 							assert.Check(t, balance.Interest.Equal(sdkmath.ZeroInt()))

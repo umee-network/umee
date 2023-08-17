@@ -176,8 +176,8 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 		// calculate total asset supply (leveraged + reserved)
 		assetSupply := balance.AvailableSupply()
 		// get asset PriceByBaseDenom
-		i, assetPrice := prices.PriceByBaseDenom(balance.Denom)
-		assert.Check(t, i >= 0)
+		assetPrice, err := prices.PriceByBaseDenom(balance.Denom)
+		assert.NilError(t, err)
 		// calculate asset value
 		assetValue := assetPrice.Price.MulInt(assetSupply)
 
@@ -217,7 +217,7 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 
 		// current_allocation = asset_value / total_value
 		currentAllocation := values[denom].Quo(totalValue)
-		i, aa := index.AcceptedAsset(denom)
+		aa, i := index.AcceptedAsset(denom)
 		assert.Check(t, i >= 0)
 		targetAllocation := aa.TargetAllocation
 
@@ -271,15 +271,15 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 		resp, err := querier.RedeemFee(ctx, req)
 		assert.NilError(t, err)
 
-		i, price := prices.PriceByBaseDenom(tc.denom)
-		assert.Check(t, i >= 0)
-		i, balance := balances.AssetBalance(tc.denom)
+		price, err := prices.PriceByBaseDenom(tc.denom)
+		assert.NilError(t, err)
+		balance, i := balances.AssetBalance(tc.denom)
 		assert.Check(t, i >= 0)
 		supply := balance.AvailableSupply()
 
 		// current_allocation = asset_value / total_value
 		currentAllocation := price.Price.MulInt(supply).Quo(prices.Price.MulInt(balances.MetokenSupply.Amount))
-		i, aa := index.AcceptedAsset(tc.denom)
+		aa, i := index.AcceptedAsset(tc.denom)
 		assert.Check(t, i >= 0)
 		targetAllocation := aa.TargetAllocation
 

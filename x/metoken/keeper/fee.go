@@ -11,7 +11,7 @@ func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, as
 	sdk.Coin,
 	error,
 ) {
-	i, assetSettings := index.AcceptedAsset(asset.Denom)
+	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
 		return sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
@@ -41,7 +41,7 @@ func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, 
 	sdk.Coin,
 	error,
 ) {
-	i, assetSettings := index.AcceptedAsset(asset.Denom)
+	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
 		return sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
@@ -76,7 +76,7 @@ func (k Keeper) currentAllocation(
 		return sdk.Dec{}, err
 	}
 
-	i, balance := balances.AssetBalance(assetDenom)
+	balance, i := balances.AssetBalance(assetDenom)
 	if i < 0 {
 		return sdk.Dec{}, sdkerrors.ErrNotFound.Wrapf("balance for denom %s not found", assetDenom)
 	}
@@ -91,9 +91,9 @@ func (k Keeper) currentAllocation(
 		return sdk.ZeroDec(), nil
 	}
 
-	i, assetPrice := indexPrices.PriceByBaseDenom(assetDenom)
-	if i < 0 {
-		return sdk.Dec{}, sdkerrors.ErrNotFound.Wrapf("price not found for denom %s", assetDenom)
+	assetPrice, err := indexPrices.PriceByBaseDenom(assetDenom)
+	if err != nil {
+		return sdk.Dec{}, err
 	}
 	assetUSD, err := valueInUSD(balance.AvailableSupply(), assetPrice.Price, assetPrice.Exponent)
 	if err != nil {

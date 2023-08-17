@@ -20,31 +20,34 @@ func EmptyIndexPrices(index Index) IndexPrices {
 	}
 }
 
-// PriceByBaseDenom returns a AssetPrice given a specific denom.
-func (ip IndexPrices) PriceByBaseDenom(denom string) (int, AssetPrice) {
-	for i, ap := range ip.Assets {
+// PriceByBaseDenom returns a AssetPrice given a specific base_denom.
+func (ip IndexPrices) PriceByBaseDenom(denom string) (AssetPrice, error) {
+	for _, ap := range ip.Assets {
 		if ap.BaseDenom == denom {
-			return i, ap
+			return ap, nil
 		}
 	}
-	return -1, AssetPrice{}
+	return AssetPrice{}, sdkerrors.ErrNotFound.Wrapf("price not found for denom %s", denom)
 }
 
 // SetPrice to the IndexPrices.
 func (ip *IndexPrices) SetPrice(price AssetPrice) {
-	i, _ := ip.PriceByBaseDenom(price.BaseDenom)
-	if i < 0 {
-		ip.Assets = append(ip.Assets, price)
-		return
+	for i, ap := range ip.Assets {
+		if ap.BaseDenom == price.BaseDenom {
+			ip.Assets[i] = price
+			return
+		}
 	}
-	ip.Assets[i] = price
+
+	ip.Assets = append(ip.Assets, price)
+
 }
 
 // SwapRate converts an asset to meToken applying exchange_rate and normalizing the exponent.
 func (ip IndexPrices) SwapRate(from sdk.Coin) (sdkmath.Int, error) {
-	i, fromPrice := ip.PriceByBaseDenom(from.Denom)
-	if i < 0 {
-		return sdkmath.Int{}, sdkerrors.ErrNotFound.Wrapf("price not found for denom %s", from.Denom)
+	fromPrice, err := ip.PriceByBaseDenom(from.Denom)
+	if err != nil {
+		return sdkmath.Int{}, err
 	}
 
 	exchangeRate := fromPrice.Price.Quo(ip.Price)
@@ -59,9 +62,9 @@ func (ip IndexPrices) SwapRate(from sdk.Coin) (sdkmath.Int, error) {
 
 // RedeemRate converts meToken to an asset applying exchange_rate and normalizing the exponent.
 func (ip IndexPrices) RedeemRate(from sdk.Coin, to string) (sdkmath.Int, error) {
-	i, toPrice := ip.PriceByBaseDenom(to)
-	if i < 0 {
-		return sdkmath.Int{}, sdkerrors.ErrNotFound.Wrapf("price not found for denom %s", to)
+	toPrice, err := ip.PriceByBaseDenom(to)
+	if err != nil {
+		return sdkmath.Int{}, err
 	}
 
 	exchangeRate := ip.Price.Quo(toPrice.Price)

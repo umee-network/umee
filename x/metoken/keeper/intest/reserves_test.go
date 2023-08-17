@@ -69,21 +69,21 @@ func TestRebalanceReserves(t *testing.T) {
 	// change index setting modifying the reserve_portion
 	// usdt_reserve_portion from 0.2 to 0.25
 	usdtReservePortion := sdk.MustNewDecFromStr("0.25")
-	i, usdtSettings := index.AcceptedAsset(mocks.USDTBaseDenom)
+	usdtSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)
 	usdtSettings.ReservePortion = usdtReservePortion
 	index.SetAcceptedAsset(usdtSettings)
 
 	// usdc_reserve_portion from 0.2 to 0.5
 	usdcReservePortion := sdk.MustNewDecFromStr("0.5")
-	i, usdcSettings := index.AcceptedAsset(mocks.USDCBaseDenom)
+	usdcSettings, i := index.AcceptedAsset(mocks.USDCBaseDenom)
 	require.True(t, i >= 0)
 	usdcSettings.ReservePortion = usdcReservePortion
 	index.SetAcceptedAsset(usdcSettings)
 
 	// ist_reserve_portion from 0.2 to 0.035
 	istReservePortion := sdk.MustNewDecFromStr("0.035")
-	i, istSettings := index.AcceptedAsset(mocks.ISTBaseDenom)
+	istSettings, i := index.AcceptedAsset(mocks.ISTBaseDenom)
 	require.True(t, i >= 0)
 	istSettings.ReservePortion = istReservePortion
 	index.SetAcceptedAsset(istSettings)
@@ -130,7 +130,7 @@ func checkBalances(
 
 	for _, balance := range balances.AssetBalances {
 		// confirm the index is balanced as required in the configuration
-		i, assetSettings := index.AcceptedAsset(balance.Denom)
+		assetSettings, i := index.AcceptedAsset(balance.Denom)
 		require.True(t, i >= 0)
 
 		desiredReserves := assetSettings.ReservePortion.MulInt(balance.AvailableSupply()).TruncateInt()

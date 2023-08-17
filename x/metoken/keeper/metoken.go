@@ -225,7 +225,7 @@ func (k Keeper) updateIndexes(
 			}
 
 			for _, aa := range index.AcceptedAssets {
-				if i, _ := balances.AssetBalance(aa.Denom); i < 0 {
+				if _, i := balances.AssetBalance(aa.Denom); i < 0 {
 					balances.AssetBalances = append(balances.AssetBalances, metoken.NewZeroAssetBalance(aa.Denom))
 				}
 			}

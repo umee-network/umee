@@ -51,7 +51,7 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 		if supply.MetokenSupply.IsZero() {
 			totalAssetsUSDValue = totalAssetsUSDValue.Add(assetPrice)
 		} else {
-			i, balance := supply.AssetBalance(aa.Denom)
+			balance, i := supply.AssetBalance(aa.Denom)
 			if i < 0 {
 				return indexPrices, sdkerrors.ErrNotFound.Wrapf("balance for denom %s not found", aa.Denom)
 			}
