@@ -57,6 +57,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	k.ClearExchangeRates(ctx)
 
 	// NOTE: it filters out inactive or jailed validators
+	// ballotDenomSlice is oracle votes of the symbol denoms, those are stored by AggregateExchangeRateVote
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 	threshold := k.VoteThreshold(ctx).MulInt64(types.MaxVoteThresholdMultiplier).TruncateInt64()
 
