@@ -27,7 +27,7 @@ func TestSwapFee(t *testing.T) {
 
 	// target_allocation = 0 -> fee = max_fee * coin_amount
 	// fee = 0.5 * 10 = 5
-	i, usdtAsset := index.AcceptedAsset(mocks.USDTBaseDenom)
+	usdtAsset, i := index.AcceptedAsset(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)
 
 	usdtAsset.TargetAllocation = sdk.ZeroDec()
@@ -65,7 +65,7 @@ func TestRedeemFee(t *testing.T) {
 
 	// target_allocation = 0 -> fee = min_fee * coin_amount
 	// fee = 0.01 * 10 = 0.1
-	i, usdtAsset := index.AcceptedAsset(mocks.USDTBaseDenom)
+	usdtAsset, i := index.AcceptedAsset(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)
 
 	usdtAsset.TargetAllocation = sdk.ZeroDec()

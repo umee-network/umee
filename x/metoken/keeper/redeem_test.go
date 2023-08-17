@@ -24,15 +24,13 @@ func TestRedeem_Valid(t *testing.T) {
 
 	// exchange_rate = metoken_price / coin_price
 	// coins = metokens * exchange_rate
-	i, err := k.RegisteredIndex(mocks.MeUSDDenom)
+	index, err := k.RegisteredIndex(mocks.MeUSDDenom)
 	assert.NoError(t, err)
-	p, err := k.Prices(i)
+	p, err := k.Prices(index)
 	assert.NoError(t, err)
-	meTokenPrice, err := p.Price(mocks.MeUSDDenom)
+	usdtPrice, err := p.PriceByBaseDenom(mocks.USDTBaseDenom)
 	assert.NoError(t, err)
-	usdtPrice, err := p.Price(mocks.USDTBaseDenom)
-	assert.NoError(t, err)
-	exchangeRate := meTokenPrice.Price.Quo(usdtPrice.Price)
+	exchangeRate := p.Price.Quo(usdtPrice.Price)
 	coins := exchangeRate.MulInt(fiftyMeUSD.Amount).TruncateInt()
 
 	// delta_allocation = (target_allocation - current_allocation) / target_allocation
