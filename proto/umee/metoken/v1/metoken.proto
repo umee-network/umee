@@ -104,8 +104,7 @@ message AcceptedAsset {
   ];
 }
 
-// IndexPrices is used to inform meToken price and exponent, and the prices of all the underlying assets with their
-// swap and redeem rates.
+// IndexPrices provides meToken price related index information.
 message IndexPrices {
   option (gogoproto.equal) = true;
 
