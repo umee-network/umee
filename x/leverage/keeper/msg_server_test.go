@@ -23,7 +23,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 		req         *types.MsgGovUpdateRegistry
 		expectErr   bool
 		errMsg      string
-		noOFRecords int
+		noOfRecords int
 	}{
 		{
 			"invalid token data",
@@ -105,7 +105,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, tc.noOFRecords)
+				s.Require().Len(tokens, tc.noOfRecords)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, ntA.BaseDenom)
 				s.Require().NoError(err)
