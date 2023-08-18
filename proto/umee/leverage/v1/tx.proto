@@ -257,12 +257,14 @@ message MsgGovUpdateRegistry {
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
 
-  // field 2 and 3 (title and description) are removed.
-  // Proposal metadata should be used instead.
-  reserved 2, 3;
+  // field 2 (title) is removed. Proposal metadata should be used instead.
+  reserved 2;
 
-  // authority is the address of the governance account.
+  // authority is the address of the governance account or the Emergency Group.
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  // description motivating the change. Should be used only when executing by the
+  // Emergency Group. Otherwise the x/gov Proposal metadata should be used.
+  string description = 3;
   // add_tokens defines new token settings.
   repeated Token add_tokens = 4 [(gogoproto.nullable) = false];
   // update_tokens defines the new settings for existed tokens.
@@ -279,22 +281,26 @@ message MsgGovUpdateSpecialAssets {
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
 
-  // authority is the address of the governance account.
+  // authority is the address of the governance account or the Emergency Group.
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // description motivating the change. Should be used only when executing by the
+  // Emergency Group. Otherwise the x/gov Proposal metadata should be used.
+  string description = 2;
 
   // sets are bidirectional groups of special asset pairs. Creating a special asset
   // set causes all assets in the set to have a certain collateral weight when borrowing
   // against each other (but not looping with themselves). Overrides any existing
   // special asset pairs between assets in the set. Using both collateral weight
   // and liquidation theshold of zero will clear all existing special pairs in the set instead.
-  repeated SpecialAssetSet sets = 2 [(gogoproto.nullable) = false];
+  repeated SpecialAssetSet sets = 3 [(gogoproto.nullable) = false];
 
   // pairs are new or updated special asset pairs. Updating both a special asset pair's
   // collateral weight and liquidation threshold to zero deletes the pair instead.
   // These pairs will be applied after any sets above when passing a proposal,
   // so they can be used to override certain set elements, set directional relationships,
   // or set an asset's relation to itself (looping).
-  repeated SpecialAssetPair pairs = 3 [(gogoproto.nullable) = false];
+  repeated SpecialAssetPair pairs = 4 [(gogoproto.nullable) = false];
 }
 
 // MsgGovUpdateSpecialAssetsResponse defines the Msg/GovUpdateSpecialAssets response type.
