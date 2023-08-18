@@ -15,8 +15,7 @@ var usdExponent = uint32(0)
 
 // Prices calculates meToken price as an avg of median prices of all index accepted assets.
 func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
-	indexPrices := metoken.NewIndexPrices()
-	meTokenDenom := index.Denom
+	indexPrices := metoken.EmptyIndexPrices(index)
 
 	supply, err := k.IndexBalances(index.Denom)
 	if err != nil {
@@ -38,14 +37,21 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 		if err != nil {
 			return indexPrices, err
 		}
-		indexPrices.SetPrice(aa.Denom, assetPrice, tokenSettings.Exponent)
+		indexPrices.SetPrice(
+			metoken.AssetPrice{
+				BaseDenom:   aa.Denom,
+				SymbolDenom: tokenSettings.SymbolDenom,
+				Price:       assetPrice,
+				Exponent:    tokenSettings.Exponent,
+			},
+		)
 
 		// if no meTokens were minted, the totalAssetValue is the sum of all the assets prices.
 		// otherwise is the sum of the value of all the assets in the index.
 		if supply.MetokenSupply.IsZero() {
 			totalAssetsUSDValue = totalAssetsUSDValue.Add(assetPrice)
 		} else {
-			i, balance := supply.AssetBalance(aa.Denom)
+			balance, i := supply.AssetBalance(aa.Denom)
 			if i < 0 {
 				return indexPrices, sdkerrors.ErrNotFound.Wrapf("balance for denom %s not found", aa.Denom)
 			}
@@ -60,18 +66,14 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 
 	if supply.MetokenSupply.IsZero() {
 		// if no meTokens were minted, the meTokenPrice is totalAssetsUSDValue divided by accepted assets quantity
-		indexPrices.SetPrice(
-			meTokenDenom,
-			totalAssetsUSDValue.QuoInt(sdkmath.NewInt(int64(len(index.AcceptedAssets)))),
-			index.Exponent,
-		)
+		indexPrices.Price = totalAssetsUSDValue.QuoInt(sdkmath.NewInt(int64(len(index.AcceptedAssets))))
 	} else {
 		// otherwise, the meTokenPrice is totalAssetsUSDValue divided by meTokens minted quantity
 		meTokenPrice, err := priceInUSD(supply.MetokenSupply.Amount, totalAssetsUSDValue, index.Exponent)
 		if err != nil {
 			return indexPrices, err
 		}
-		indexPrices.SetPrice(meTokenDenom, meTokenPrice, index.Exponent)
+		indexPrices.Price = meTokenPrice
 	}
 
 	return indexPrices, nil
@@ -79,13 +81,18 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 
 // latestPrice from the list of medians, based on the block number.
 func latestPrice(prices otypes.Prices, symbolDenom string) (sdk.Dec, error) {
-	denomPrices := prices.FilterByDenom(symbolDenom)
+	latestPrice := otypes.Price{}
+	for _, price := range prices {
+		if price.ExchangeRateTuple.Denom == symbolDenom && price.BlockNum > latestPrice.BlockNum {
+			latestPrice = price
+		}
+	}
 
-	if len(denomPrices) == 0 {
+	if latestPrice.BlockNum == 0 {
 		return sdk.Dec{}, fmt.Errorf("price not found in oracle for denom %s", symbolDenom)
 	}
 
-	return denomPrices[len(denomPrices)-1].ExchangeRateTuple.ExchangeRate, nil
+	return latestPrice.ExchangeRateTuple.ExchangeRate, nil
 }
 
 // valueInUSD given a specific amount, price and exponent

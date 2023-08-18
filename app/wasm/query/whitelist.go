@@ -143,7 +143,7 @@ func init() {
 	setWhitelistedQuery(metokenBaseQueryPath+"SwapFee", &metoken.QuerySwapFeeResponse{})
 	setWhitelistedQuery(metokenBaseQueryPath+"RedeemFee", &metoken.QueryRedeemFeeResponse{})
 	setWhitelistedQuery(metokenBaseQueryPath+"IndexBalances", &metoken.QueryIndexBalancesResponse{})
-	setWhitelistedQuery(metokenBaseQueryPath+"IndexPrice", &metoken.QueryIndexPriceResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+"IndexPrices", &metoken.QueryIndexPricesResponse{})
 }
 
 // GetWhitelistedQuery returns the whitelisted query at the provided path.

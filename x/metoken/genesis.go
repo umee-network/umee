@@ -92,19 +92,19 @@ func (ib IndexBalances) Validate() error {
 
 // AssetBalance returns an asset balance and its index from balances, given a specific denom.
 // If it isn't present, -1 as index.
-func (ib IndexBalances) AssetBalance(denom string) (int, AssetBalance) {
+func (ib IndexBalances) AssetBalance(denom string) (AssetBalance, int) {
 	for i, balance := range ib.AssetBalances {
 		if balance.Denom == denom {
-			return i, balance
+			return balance, i
 		}
 	}
 
-	return -1, AssetBalance{}
+	return AssetBalance{}, -1
 }
 
 // SetAssetBalance overrides an asset balance if exists in the list, otherwise add it to the list.
 func (ib *IndexBalances) SetAssetBalance(balance AssetBalance) {
-	i, _ := ib.AssetBalance(balance.Denom)
+	_, i := ib.AssetBalance(balance.Denom)
 
 	if i < 0 {
 		ib.AssetBalances = append(ib.AssetBalances, balance)

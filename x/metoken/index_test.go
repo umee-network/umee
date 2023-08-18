@@ -99,10 +99,10 @@ func TestIndex_Update(t *testing.T) {
 	index := validIndex()
 	assert.Check(t, len(index.AcceptedAssets) == 1)
 
-	i, _ := index.AcceptedAsset(existingAsset)
+	_, i := index.AcceptedAsset(existingAsset)
 	assert.Check(t, i >= 0)
 
-	i, _ = index.AcceptedAsset(newAsset)
+	_, i = index.AcceptedAsset(newAsset)
 	assert.Check(t, i == -1)
 
 	newAcceptedAsset := validAcceptedAsset(newAsset)
@@ -114,7 +114,7 @@ func TestIndex_Update(t *testing.T) {
 	newAcceptedAsset.ReservePortion = sdk.MustNewDecFromStr("0.5")
 	index.SetAcceptedAsset(newAcceptedAsset)
 
-	i, asset := index.AcceptedAsset(newAcceptedAsset.Denom)
+	asset, i := index.AcceptedAsset(newAcceptedAsset.Denom)
 	assert.Check(t, i >= 0)
 	assert.Check(t, sdk.MustNewDecFromStr("0.5").Equal(asset.ReservePortion))
 }

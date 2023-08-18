@@ -50,7 +50,7 @@ func Zero(denom string) sdk.Coin {
 	return sdk.NewInt64Coin(denom, 0)
 }
 
-// Zero returns new coin with zero amount
+// ZeroDec returns new decCoin with zero amount
 func ZeroDec(denom string) sdk.DecCoin {
 	return sdk.NewInt64DecCoin(denom, 0)
 }

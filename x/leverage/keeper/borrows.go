@@ -8,46 +8,26 @@ import (
 )
 
 // assertBorrowerHealth returns an error if a borrower is currently above their borrow limit,
-// under either recent (historic median) or current prices. Checks using borrow limit based
-// on collateral weight, then check separately for borrow limit using borrow factor. Error if
-// borrowed asset prices cannot be calculated, but will try to treat collateral whose prices are
-// unavailable as having zero value. This can still result in a borrow limit being too low,
-// unless the remaining collateral is enough to cover all borrows.
+// under either recent (historic median) or current prices. Error if borrowed asset prices
+// cannot be calculated, but will try to treat collateral whose prices are unavailable as
+// having zero value. This can still result in a borrow limit being too low, unless the
+// remaining collateral is enough to cover all borrows.
 // This should be checked in msg_server.go at the end of any transaction which is restricted
-// by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw.
+// by borrow limits, i.e. Borrow, Decollateralize, Withdraw, MaxWithdraw, LeveragedLiquidate.
 // MaxUsage sets the maximum percent of a user's borrow limit that can be in use: set to 1
 // to allow up to 100% borrow limit, or a lower value (e.g. 0.9) if a transaction should fail
 // if a safety margin is desired (e.g. <90% borrow limit).
 func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdk.Dec) error {
-	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-	collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-
-	// check health using collateral weight
-	borrowValue, err := k.TotalTokenValue(ctx, borrowed, types.PriceModeHigh)
+	position, err := k.GetAccountPosition(ctx, borrowerAddr, false)
 	if err != nil {
 		return err
 	}
-	borrowLimit, err := k.VisibleBorrowLimit(ctx, collateral)
-	if err != nil {
-		return err
-	}
-	if borrowValue.GT(borrowLimit.Mul(maxUsage)) {
+	borrowedValue := position.BorrowedValue()
+	borrowLimit := position.Limit()
+	if borrowedValue.GT(borrowLimit.Mul(maxUsage)) {
 		return types.ErrUndercollaterized.Wrapf(
-			"borrowed: %s, limit: %s, max usage %s", borrowValue, borrowLimit, maxUsage)
-	}
-
-	// check health using borrow factor
-	weightedBorrowValue, err := k.ValueWithBorrowFactor(ctx, borrowed, types.PriceModeHigh)
-	if err != nil {
-		return err
-	}
-	collateralValue, err := k.VisibleUTokensValue(ctx, collateral, types.PriceModeLow)
-	if err != nil {
-		return err
-	}
-	if weightedBorrowValue.GT(collateralValue.Mul(maxUsage)) {
-		return types.ErrUndercollaterized.Wrapf(
-			"weighted borrow: %s, collateral value: %s, max usage %s", weightedBorrowValue, collateralValue, maxUsage)
+			"borrowed: %s, limit: %s, max usage %s", borrowedValue, borrowLimit, maxUsage,
+		)
 	}
 
 	return nil
@@ -123,115 +103,6 @@ func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	}
 
 	return totalBorrowed.Quo(tokenSupply)
-}
-
-// CalculateBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
-// collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
-// The lower of spot price or historic price is used for each collateral token.
-// An error is returned if any input coins are not uTokens or if value calculation fails.
-func (k Keeper) CalculateBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
-	limit := sdk.ZeroDec()
-
-	for _, coin := range collateral {
-		// convert uToken collateral to base assets
-		baseAsset, err := k.ToToken(ctx, coin)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		// ignore blacklisted tokens
-		if !ts.Blacklist {
-			// get USD value of base assets using the chosen price mode
-			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeLow)
-			if err != nil {
-				return sdk.ZeroDec(), err
-			}
-			// add each collateral coin's weighted value to borrow limit
-			limit = limit.Add(v.Mul(ts.CollateralWeight))
-		}
-	}
-
-	return limit, nil
-}
-
-// VisibleBorrowLimit uses the price oracle to determine the borrow limit (in USD) provided by
-// collateral sdk.Coins, using each token's uToken exchange rate and collateral weight.
-// The lower of spot price or historic price is used for each collateral token.
-// An error is returned if any input coins are not uTokens.
-// This function skips assets that are missing prices, which will lead to a lower borrow
-// limit when prices are down instead of a complete loss of borrowing ability.
-func (k Keeper) VisibleBorrowLimit(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
-	limit := sdk.ZeroDec()
-
-	for _, coin := range collateral {
-		// convert uToken collateral to base assets
-		baseAsset, err := k.ToToken(ctx, coin)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		// ignore blacklisted tokens
-		if !ts.Blacklist {
-			// get USD value of base assets using the chosen price mode
-			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeLow)
-			if err == nil {
-				// if both spot and historic (if required) prices exist,
-				// add collateral coin's weighted value to borrow limit
-				limit = limit.Add(v.Mul(ts.CollateralWeight))
-			}
-			if nonOracleError(err) {
-				return sdk.ZeroDec(), err
-			}
-		}
-	}
-
-	return limit, nil
-}
-
-// CalculateLiquidationThreshold determines the maximum borrowed value (in USD) that a
-// borrower with given collateral could reach before being eligible for liquidation, using
-// each token's oracle price, uToken exchange rate, and liquidation threshold.
-// An error is returned if any input coins are not uTokens or if value
-// calculation fails. Always uses spot prices.
-func (k Keeper) CalculateLiquidationThreshold(ctx sdk.Context, collateral sdk.Coins) (sdk.Dec, error) {
-	totalThreshold := sdk.ZeroDec()
-
-	for _, coin := range collateral {
-		// convert uToken collateral to base assets
-		baseAsset, err := k.ToToken(ctx, coin)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		ts, err := k.GetTokenSettings(ctx, baseAsset.Denom)
-		if err != nil {
-			return sdk.ZeroDec(), err
-		}
-
-		// ignore blacklisted tokens
-		if !ts.Blacklist {
-			// get USD value of base assets
-			v, err := k.TokenValue(ctx, baseAsset, types.PriceModeSpot)
-			if err != nil {
-				return sdk.ZeroDec(), err
-			}
-
-			// add each collateral coin's weighted value to liquidation threshold
-			totalThreshold = totalThreshold.Add(v.Mul(ts.LiquidationThreshold))
-		}
-	}
-
-	return totalThreshold, nil
 }
 
 // checkSupplyUtilization returns the appropriate error if a token denom's
