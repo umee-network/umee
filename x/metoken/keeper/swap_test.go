@@ -39,10 +39,9 @@ func TestSwap_Valid(t *testing.T) {
 	assert.NoError(t, err)
 	p, err := k.Prices(i)
 	assert.NoError(t, err)
-	meTokenPrice, err := p.Price(mocks.MeUSDDenom)
 	assert.Equal(
 		t, resp.meTokens, sdk.NewCoin(
-			mocks.MeUSDDenom, mocks.USDTPrice.Quo(meTokenPrice.Price).MulInt(
+			mocks.MeUSDDenom, mocks.USDTPrice.Quo(p.Price).MulInt(
 				resp.
 					reserved.Amount.Add(resp.leveraged.Amount),
 			).TruncateInt(),

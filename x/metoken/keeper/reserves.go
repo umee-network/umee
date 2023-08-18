@@ -32,7 +32,7 @@ func (k Keeper) RebalanceReserves() error {
 		updatedBalances := make([]metoken.AssetBalance, 0)
 		for _, balance := range balances.AssetBalances {
 			if balance.AvailableSupply().IsPositive() {
-				i, assetSettings := index.AcceptedAsset(balance.Denom)
+				assetSettings, i := index.AcceptedAsset(balance.Denom)
 				if i < 0 {
 					k.Logger().Debug(
 						"rebalancing reserves: failed getting accepted asset",

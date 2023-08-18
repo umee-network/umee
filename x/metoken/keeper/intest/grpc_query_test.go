@@ -75,17 +75,20 @@ func TestQuerier_Indexes(t *testing.T) {
 }
 
 func TestQuerier_Balances(t *testing.T) {
-	balance1 := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
-	balance2 := mocks.ValidUSDIndexBalances("me/EUR")
+	index1 := mocks.StableIndex(mocks.MeUSDDenom)
+	index2 := mocks.NonStableIndex(mocks.MeNonStableDenom)
 
-	s := initTestSuite(t, nil, []metoken.IndexBalances{balance1, balance2})
+	balance1 := mocks.ValidUSDIndexBalances(mocks.MeUSDDenom)
+	balance2 := mocks.EmptyNonStableIndexBalances(mocks.MeNonStableDenom)
+
+	s := initTestSuite(t, []metoken.Index{index1, index2}, []metoken.IndexBalances{balance1, balance2})
 	querier, ctx := s.queryClient, s.ctx
 
 	tcs := []struct {
-		name          string
-		denom         string
-		expIndexCount int
-		expErr        string
+		name            string
+		denom           string
+		expBalanceCount int
+		expErr          string
 	}{
 		{
 			"get all balances",
@@ -119,7 +122,8 @@ func TestQuerier_Balances(t *testing.T) {
 					assert.ErrorContains(t, err, tc.expErr)
 				} else {
 					assert.NilError(t, err)
-					assert.Check(t, tc.expIndexCount == len(resp.IndexBalances))
+					assert.Check(t, tc.expBalanceCount == len(resp.IndexBalances))
+					assert.Check(t, tc.expBalanceCount == len(resp.Prices))
 				}
 			},
 		)
@@ -140,18 +144,39 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 	querier, ctx := s.queryClient, s.ctx
 
 	// set prices
-	prices := metoken.NewIndexPrices()
-	prices.SetPrice(mocks.USDTBaseDenom, mocks.USDTPrice, 6)
-	prices.SetPrice(mocks.USDCBaseDenom, mocks.USDCPrice, 6)
-	prices.SetPrice(mocks.ISTBaseDenom, mocks.ISTPrice, 6)
+	prices := metoken.EmptyIndexPrices(index)
+	prices.SetPrice(
+		metoken.AssetPrice{
+			BaseDenom:   mocks.USDTBaseDenom,
+			SymbolDenom: mocks.USDTSymbolDenom,
+			Price:       mocks.USDTPrice,
+			Exponent:    6,
+		},
+	)
+	prices.SetPrice(
+		metoken.AssetPrice{
+			BaseDenom:   mocks.USDCBaseDenom,
+			SymbolDenom: mocks.USDCSymbolDenom,
+			Price:       mocks.USDCPrice,
+			Exponent:    6,
+		},
+	)
+	prices.SetPrice(
+		metoken.AssetPrice{
+			BaseDenom:   mocks.ISTBaseDenom,
+			SymbolDenom: mocks.ISTSymbolDenom,
+			Price:       mocks.ISTPrice,
+			Exponent:    6,
+		},
+	)
 
 	totalValue := sdk.ZeroDec()
 	values := make(map[string]sdk.Dec)
 	for _, balance := range balances.AssetBalances {
 		// calculate total asset supply (leveraged + reserved)
 		assetSupply := balance.AvailableSupply()
-		// get asset Price
-		assetPrice, err := prices.Price(balance.Denom)
+		// get asset PriceByBaseDenom
+		assetPrice, err := prices.PriceByBaseDenom(balance.Denom)
 		assert.NilError(t, err)
 		// calculate asset value
 		assetValue := assetPrice.Price.MulInt(assetSupply)
@@ -192,7 +217,7 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 
 		// current_allocation = asset_value / total_value
 		currentAllocation := values[denom].Quo(totalValue)
-		i, aa := index.AcceptedAsset(denom)
+		aa, i := index.AcceptedAsset(denom)
 		assert.Check(t, i >= 0)
 		targetAllocation := aa.TargetAllocation
 
@@ -243,23 +268,18 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 			Metoken:    tc.asset,
 			AssetDenom: tc.denom,
 		}
-		meTokenDenom, denom := tc.asset.Denom, tc.denom
-
 		resp, err := querier.RedeemFee(ctx, req)
 		assert.NilError(t, err)
 
-		price, err := prices.Price(denom)
+		price, err := prices.PriceByBaseDenom(tc.denom)
 		assert.NilError(t, err)
-		i, balance := balances.AssetBalance(denom)
+		balance, i := balances.AssetBalance(tc.denom)
 		assert.Check(t, i >= 0)
 		supply := balance.AvailableSupply()
 
-		meTokenPrice, err := prices.Price(meTokenDenom)
-		assert.NilError(t, err)
-
 		// current_allocation = asset_value / total_value
-		currentAllocation := price.Price.MulInt(supply).Quo(meTokenPrice.Price.MulInt(balances.MetokenSupply.Amount))
-		i, aa := index.AcceptedAsset(denom)
+		currentAllocation := price.Price.MulInt(supply).Quo(prices.Price.MulInt(balances.MetokenSupply.Amount))
+		aa, i := index.AcceptedAsset(tc.denom)
 		assert.Check(t, i >= 0)
 		targetAllocation := aa.TargetAllocation
 
@@ -270,7 +290,7 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 		fee := redeemDeltaAllocation.Mul(index.Fee.BalancedFee).Add(index.Fee.BalancedFee)
 
 		// exchange_rate = metoken_price / asset_price
-		exchangeRate := meTokenPrice.Price.Quo(price.Price)
+		exchangeRate := prices.Price.Quo(price.Price)
 
 		// asset_to_redeem = exchange_rate * asset_amount
 		toRedeem := exchangeRate.MulInt(tc.asset.Amount).TruncateInt()
@@ -282,7 +302,7 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 	}
 }
 
-func TestQuerier_IndexPrice(t *testing.T) {
+func TestQuerier_IndexPrices(t *testing.T) {
 	// Within these cases we are testing grpc functionality,
 	// Exact prices are tested in their unit tests:
 	// https://github.com/umee-network/umee/blob/main/x/metoken/keeper/price_test.go
@@ -334,14 +354,20 @@ func TestQuerier_IndexPrice(t *testing.T) {
 	for _, tc := range tcs {
 		t.Run(
 			tc.name, func(t *testing.T) {
-				resp, err := querier.IndexPrice(
-					ctx, &metoken.QueryIndexPrice{
+				resp, err := querier.IndexPrices(
+					ctx, &metoken.QueryIndexPrices{
 						MetokenDenom: tc.denom,
 					},
 				)
 				if len(tc.expErr) == 0 {
 					assert.NilError(t, err)
 					assert.Check(t, tc.expPriceCount == len(resp.Prices))
+					for _, i := range resp.Prices {
+						for _, a := range i.Assets {
+							assert.Check(t, a.SwapRate.GT(sdk.ZeroDec()))
+							assert.Check(t, a.RedeemRate.GT(sdk.ZeroDec()))
+						}
+					}
 				} else {
 					assert.ErrorContains(t, err, tc.expErr)
 				}

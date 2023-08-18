@@ -134,30 +134,46 @@ func (q Querier) IndexBalances(
 		balances = []metoken.IndexBalances{balance}
 	}
 
+	prices, err := q.getPrices(k, req.MetokenDenom)
+	if err != nil {
+		return nil, err
+	}
+
 	return &metoken.QueryIndexBalancesResponse{
 		IndexBalances: balances,
+		Prices:        prices,
 	}, nil
 }
 
-// IndexPrice returns Index price from the x/metoken module. If index denom is not specified,
+// IndexPrices returns Index price from the x/metoken module. If index denom is not specified,
 // returns prices for all the registered indexes.
-func (q Querier) IndexPrice(
+func (q Querier) IndexPrices(
 	goCtx context.Context,
-	req *metoken.QueryIndexPrice,
-) (*metoken.QueryIndexPriceResponse, error) {
+	req *metoken.QueryIndexPrices,
+) (*metoken.QueryIndexPricesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	k := q.Keeper(&ctx)
 
+	prices, err := q.getPrices(q.Keeper(&ctx), req.MetokenDenom)
+	if err != nil {
+		return nil, err
+	}
+
+	return &metoken.QueryIndexPricesResponse{
+		Prices: prices,
+	}, nil
+}
+
+func (q Querier) getPrices(k Keeper, meTokenDenom string) ([]metoken.IndexPrices, error) {
 	var indexes []metoken.Index
-	if len(req.MetokenDenom) > 0 {
-		if !metoken.IsMeToken(req.MetokenDenom) {
+	if len(meTokenDenom) > 0 {
+		if !metoken.IsMeToken(meTokenDenom) {
 			return nil, sdkerrors.ErrInvalidRequest.Wrapf(
 				"meToken denom %s should have the following format: me/<TokenName>",
-				req.MetokenDenom,
+				meTokenDenom,
 			)
 		}
 
-		index, err := k.RegisteredIndex(req.MetokenDenom)
+		index, err := k.RegisteredIndex(meTokenDenom)
 		if err != nil {
 			return nil, err
 		}
@@ -167,24 +183,17 @@ func (q Querier) IndexPrice(
 		indexes = k.GetAllRegisteredIndexes()
 	}
 
-	prices := make([]metoken.Price, len(indexes))
+	prices := make([]metoken.IndexPrices, len(indexes))
 	for i, index := range indexes {
 		ip, err := k.Prices(index)
 		if err != nil {
 			return nil, err
 		}
 
-		price, err := ip.Price(index.Denom)
-		if err != nil {
-			return nil, err
-		}
-
-		prices[i] = price
+		prices[i] = ip.QueryExport()
 	}
 
-	return &metoken.QueryIndexPriceResponse{
-		Prices: prices,
-	}, nil
+	return prices, nil
 }
 
 // NewQuerier returns Querier object.
