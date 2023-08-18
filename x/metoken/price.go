@@ -3,50 +3,56 @@ package metoken
 import (
 	"fmt"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v6/util/coin"
 )
 
-// IndexPrices holds meToken and all the underlying assets Price.
-type IndexPrices struct {
-	prices map[string]Price
-}
-
-// NewIndexPrices creates an instance of IndexPrices.
-func NewIndexPrices() IndexPrices {
-	return IndexPrices{prices: make(map[string]Price)}
-}
-
-// Price returns a Price given a specific denom.
-func (ip IndexPrices) Price(denom string) (Price, error) {
-	price, found := ip.prices[denom]
-	if !found || !price.Price.IsPositive() {
-		return Price{}, sdkerrors.ErrNotFound.Wrapf("price not found for denom %s", denom)
+func EmptyIndexPrices(index Index) IndexPrices {
+	return IndexPrices{
+		Denom:    index.Denom,
+		Price:    sdk.Dec{},
+		Exponent: index.Exponent,
+		Assets:   make([]AssetPrice, 0),
 	}
+}
 
-	return price, nil
+// PriceByBaseDenom returns a AssetPrice given a specific base_denom.
+func (ip IndexPrices) PriceByBaseDenom(denom string) (AssetPrice, error) {
+	for _, ap := range ip.Assets {
+		if ap.BaseDenom == denom {
+			return ap, nil
+		}
+	}
+	return AssetPrice{}, sdkerrors.ErrNotFound.Wrapf("price not found for denom %s", denom)
 }
 
 // SetPrice to the IndexPrices.
-func (ip IndexPrices) SetPrice(denom string, price sdk.Dec, exponent uint32) {
-	ip.prices[denom] = Price{
-		Denom:    denom,
-		Price:    price,
-		Exponent: exponent,
+func (ip *IndexPrices) SetPrice(price AssetPrice) {
+	for i, ap := range ip.Assets {
+		if ap.BaseDenom == price.BaseDenom {
+			ip.Assets[i] = price
+			return
+		}
 	}
+
+	ip.Assets = append(ip.Assets, price)
+
 }
 
-// SwapRate converts one asset in the index to another applying exchange_rate and normalizing the exponent.
-func (ip IndexPrices) SwapRate(from sdk.Coin, to string) (sdkmath.Int, error) {
-	exchangeRate, err := ip.rate(from.Denom, to)
+// SwapRate converts an asset to meToken applying exchange_rate and normalizing the exponent.
+func (ip IndexPrices) SwapRate(from sdk.Coin) (sdkmath.Int, error) {
+	fromPrice, err := ip.PriceByBaseDenom(from.Denom)
 	if err != nil {
 		return sdkmath.Int{}, err
 	}
 
-	exponentFactor, err := ip.ExponentFactor(from.Denom, to)
+	exchangeRate := fromPrice.Price.Quo(ip.Price)
+
+	exponentFactor, err := ExponentFactor(fromPrice.Exponent, ip.Exponent)
 	if err != nil {
 		return sdkmath.Int{}, err
 	}
@@ -54,35 +60,39 @@ func (ip IndexPrices) SwapRate(from sdk.Coin, to string) (sdkmath.Int, error) {
 	return exchangeRate.MulInt(from.Amount).Mul(exponentFactor).TruncateInt(), nil
 }
 
-// rate calculates the exchange rate based on IndexPrices.
-func (ip IndexPrices) rate(from, to string) (sdk.Dec, error) {
-	fromPrice, err := ip.Price(from)
+// RedeemRate converts meToken to an asset applying exchange_rate and normalizing the exponent.
+func (ip IndexPrices) RedeemRate(from sdk.Coin, to string) (sdkmath.Int, error) {
+	toPrice, err := ip.PriceByBaseDenom(to)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.Int{}, err
 	}
 
-	toPrice, err := ip.Price(to)
+	exchangeRate := ip.Price.Quo(toPrice.Price)
+
+	exponentFactor, err := ExponentFactor(ip.Exponent, toPrice.Exponent)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.Int{}, err
 	}
 
-	return fromPrice.Price.Quo(toPrice.Price), nil
+	return exchangeRate.MulInt(from.Amount).Mul(exponentFactor).TruncateInt(), nil
 }
 
-// ExponentFactor calculates the multiplayer to be used to multiply from denom to get same decimals as to denom.
-// If there is no such difference the result will be 1.
-func (ip IndexPrices) ExponentFactor(from, to string) (sdk.Dec, error) {
-	fromPrice, err := ip.Price(from)
-	if err != nil {
-		return sdk.Dec{}, err
+// QueryExport completes the structure with missing data for the query.
+func (ip IndexPrices) QueryExport() IndexPrices {
+	assets := make([]AssetPrice, len(ip.Assets))
+	for i := 0; i < len(ip.Assets); i++ {
+		asset := ip.Assets[i]
+		asset.SwapRate = asset.Price.Quo(ip.Price)
+		asset.RedeemRate = ip.Price.Quo(asset.Price)
+		assets[i] = asset
 	}
 
-	toPrice, err := ip.Price(to)
-	if err != nil {
-		return sdk.Dec{}, err
+	return IndexPrices{
+		Denom:    ip.Denom,
+		Price:    ip.Price,
+		Exponent: ip.Exponent,
+		Assets:   assets,
 	}
-
-	return ExponentFactor(fromPrice.Exponent, toPrice.Exponent)
 }
 
 // ExponentFactor calculates the factor to multiply by which the assets with different exponents.

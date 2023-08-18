@@ -56,6 +56,6 @@ func (q UmeeQuery) HandleMeTokenIndexPrice(
 	ctx context.Context,
 	qs metoken.QueryServer,
 ) (proto.Message, error) {
-	req := metoken.QueryIndexPrice{MetokenDenom: q.IndexPrice.MetokenDenom}
-	return qs.IndexPrice(ctx, &req)
+	req := metoken.QueryIndexPrices{MetokenDenom: q.IndexPrice.MetokenDenom}
+	return qs.IndexPrices(ctx, &req)
 }
