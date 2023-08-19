@@ -47,16 +47,17 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
-	voteTargets := make([]string, 0)
+	voteTargets := make(map[string]bool, 0)
 	voteTargetDenoms := make([]string, 0)
 	for _, v := range params.AcceptList {
-		voteTargets = append(voteTargets, v.SymbolDenom)
+		voteTargets[v.SymbolDenom] = true // unique symbol denoms <Note: we are allowing duplicate symbol denoms>
 		voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 	}
 
 	k.ClearExchangeRates(ctx)
 
 	// NOTE: it filters out inactive or jailed validators
+	// ballotDenomSlice is oracle votes of the symbol denoms, those are stored by AggregateExchangeRateVote
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
 	threshold := k.VoteThreshold(ctx).MulInt64(types.MaxVoteThresholdMultiplier).TruncateInt64()
 
