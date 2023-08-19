@@ -46,10 +46,19 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
+
+### State Machine Breaking
+
+- [2197](https://github.com/umee-network/umee/pull/2197) Allowing duplicate symbols on leverage token registry. Fix the oracle voting miss counter on duplicate symbol denoms.
+
 ### Bug Fixes
 
 - [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgBeginUnbonding counting existing unbondings against max unbond twice.
 - [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgLeverageLiquidate CLI not actually allowing wildcard denoms.
+- [2197](https://github.com/umee-network/umee/pull/2197) Allowing duplicate symbols on leverage token registry. Fix the oracle voting miss counter on duplicate symbol denoms.
 
 ### Improvements
 

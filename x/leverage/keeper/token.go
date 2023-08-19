@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"strings"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v5/x/leverage/types"
 )
@@ -91,13 +89,9 @@ func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
 			if _, ok := regdTkDenoms[token.BaseDenom]; ok {
 				return types.ErrDuplicateToken.Wrapf("token %s is already registered", token.BaseDenom)
 			}
-
-			if _, ok := regdSymDenoms[strings.ToUpper(token.SymbolDenom)]; ok {
-				return types.ErrDuplicateToken.Wrapf("symbol denom %s is already registered", token.SymbolDenom)
-			}
+			// Note: we are allowing duplicate symbols (Kava USDT, axelar USDT both have same USDT symbol )
 		}
 	}
-
 	for _, token := range tokens {
 		if err := k.SetTokenSettings(ctx, token); err != nil {
 			return err

@@ -18,10 +18,11 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 	// new token with existed symbol denom
 	ntB := fixtures.Token("untb", "ABCD", 6)
 	testCases := []struct {
-		name      string
-		req       *types.MsgGovUpdateRegistry
-		expectErr bool
-		errMsg    string
+		name        string
+		req         *types.MsgGovUpdateRegistry
+		expectErr   bool
+		errMsg      string
+		noOfRecords int
 	}{
 		{
 			"invalid token data",
@@ -35,6 +36,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			},
 			true,
 			"invalid denom",
+			0,
 		}, {
 			"unauthorized authority address",
 			&types.MsgGovUpdateRegistry{
@@ -47,6 +49,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			},
 			true,
 			"expected gov account",
+			0,
 		}, {
 			"already registered token",
 			&types.MsgGovUpdateRegistry{
@@ -59,6 +62,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			},
 			true,
 			fmt.Sprintf("token %s is already registered", registeredUmee.BaseDenom),
+			0,
 		}, {
 			"valid authority and valid token for registry",
 			&types.MsgGovUpdateRegistry{
@@ -71,6 +75,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			},
 			false,
 			"",
+			7,
 		}, {
 			"regisering new token with existed symbol denom",
 			&types.MsgGovUpdateRegistry{
@@ -81,8 +86,9 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 					ntB,
 				},
 			},
-			true,
-			fmt.Sprintf("symbol denom %s is already registered", ntB.SymbolDenom),
+			false,
+			"",
+			8,
 		},
 	}
 
@@ -98,7 +104,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 7)
+				s.Require().Len(tokens, tc.noOfRecords)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, ntA.BaseDenom)
 				s.Require().NoError(err)
