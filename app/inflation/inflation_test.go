@@ -261,3 +261,43 @@ func TestNextInflationRate(t *testing.T) {
 		bondedRatio.Quo(sdk.OneDec().Sub(nir.Mul(sdk.NewDec(int64(mintParams.BlocksPerYear))))).RoundInt64(),
 	)
 }
+
+func TestInflationRateChange(t *testing.T) {
+	minter := minttypes.Minter{
+		Inflation: sdk.NewDecWithPrec(0, 2),
+	}
+
+	// current inflation  = 0
+	// max inflation = 0.5
+	// min inflation = 0.02
+	// blocks per year = 100
+
+	mintParams := minttypes.DefaultParams()
+	mintParams.InflationMax = sdk.NewDecWithPrec(5, 1)
+	mintParams.InflationMin = sdk.NewDecWithPrec(2, 2)
+	mintParams.InflationRateChange = sdk.NewDec(1)
+	mintParams.BlocksPerYear = 100
+
+	bondedRatio := sdk.NewDecWithPrec(1, 2)
+	// after 50 blocks (half the year) inflation will be updated
+	// every block, inflation = prevInflation + currentInflationRateChange
+	var ir sdk.Dec
+	for i := 0; i < 50; i++ {
+		ir = minter.NextInflationRate(mintParams, bondedRatio)
+		minter.Inflation = ir
+	}
+	// current inflation after the 50 blocks will be increased to MaxInflationRate
+	nir := minter.NextInflationRate(mintParams, bondedRatio)
+	assert.Equal(t, nir, mintParams.InflationMax)
+
+	// current bonded ratio =1 then inflation rate change per year will be negative
+	// so after the 50 blocks inflation will be minimum
+	minter.Inflation = sdk.NewDecWithPrec(2, 2)
+	bondedRatio = sdk.NewDec(1)
+	for i := 0; i < 50; i++ {
+		ir = minter.NextInflationRate(mintParams, bondedRatio)
+		minter.Inflation = ir
+	}
+	// it should be minimum , because inflationRateChangePerYear will be negative
+	assert.Equal(t, ir, mintParams.InflationMin)
+}
