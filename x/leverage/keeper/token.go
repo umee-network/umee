@@ -134,11 +134,9 @@ func (k Keeper) UpdateTokenRegistry(
 		regSymbols[strings.ToUpper(regDenoms[i].SymbolDenom)] = true
 	}
 	for _, token := range toAdd {
+		// Note: we are allowing duplicate symbols (Kava USDT, axelar USDT both have same USDT symbol )
 		if _, ok := regDenoms[token.BaseDenom]; ok {
 			return types.ErrDuplicateToken.Wrapf("token %s is already registered", token.BaseDenom)
-		}
-		if _, ok := regSymbols[strings.ToUpper(token.SymbolDenom)]; ok {
-			return types.ErrDuplicateToken.Wrapf("symbol denom %s is already registered", token.SymbolDenom)
 		}
 		if err := k.SetTokenSettings(ctx, token); err != nil {
 			return err

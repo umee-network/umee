@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	cosmossdk.io/errors v1.0.0
-	cosmossdk.io/math v1.0.1
+	cosmossdk.io/math v1.1.0
 	github.com/CosmWasm/wasmd v0.31.0
 	github.com/CosmWasm/wasmvm v1.3.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3
