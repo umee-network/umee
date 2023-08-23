@@ -66,31 +66,26 @@ func EmergencyGroupAuthority(authority string, eg WithEmergencyGroup) (bool, err
 	return true, nil
 }
 
-// ValidateProposal checks the format of the title, description.
-// If `requireGov=true` then authority must be a gov module address. Otherwise authority must be
-// a correct bech32 address.
-func ValidateProposal(description, authority string) error {
-	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
-		return err
-	}
+// Proposal checks the format of the description in relation to the authority (x/gov
+// account or other valid account).
+// Authority must be a correct bech32 address.
+func Proposal(authority, description string) error {
 	if IsGovAuthority(authority) {
 		if len(description) != 0 {
 			return errors.New("for x/gov proposals, description must be empty, and the x/gov proposal metadata should be used instead")
 		}
 	} else {
-		return ProposalDescription(description)
+		if _, err := sdk.AccAddressFromBech32(authority); err != nil {
+			return err
+		}
+		if len(description) == 0 || len(description) > gov1b1.MaxDescriptionLength {
+			return fmt.Errorf(
+				"proposal description must be not empty and not longer than %d",
+				gov1b1.MaxDescriptionLength,
+			)
+		}
 	}
 
-	return nil
-}
-
-func ProposalDescription(description string) error {
-	if len(description) == 0 || len(description) > gov1b1.MaxDescriptionLength {
-		return fmt.Errorf(
-			"proposal description must be not empty and not longer than %d",
-			gov1b1.MaxDescriptionLength,
-		)
-	}
 	return nil
 }
 
