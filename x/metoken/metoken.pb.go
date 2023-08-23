@@ -273,8 +273,7 @@ func (m *AcceptedAsset) GetDenom() string {
 	return ""
 }
 
-// IndexPrices is used to inform meToken price and exponent, and the prices of all the underlying assets with their
-// swap and redeem rates.
+// IndexPrices provides meToken price related index information.
 type IndexPrices struct {
 	// meToken denom.
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
@@ -340,7 +339,7 @@ func (m *IndexPrices) GetAssets() []AssetPrice {
 	return nil
 }
 
-// AssetPrice informs the price, exponent, and the swap and the redeem rate of an asset accepted in the Index.
+// AssetPrice information related to the index operations.
 type AssetPrice struct {
 	BaseDenom   string `protobuf:"bytes,1,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty"`
 	SymbolDenom string `protobuf:"bytes,2,opt,name=symbol_denom,json=symbolDenom,proto3" json:"symbol_denom,omitempty"`

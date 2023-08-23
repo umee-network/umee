@@ -3678,6 +3678,66 @@ paths:
                   description: >-
                     IndexBalances is the state of an Index, containing its
                     meToken supply and all underlying asset balances.
+              prices:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                      description: meToken denom.
+                    price:
+                      type: string
+                      description: >-
+                        Price in USD of one unit of meToken, expressed in
+                        decimals.
+                    exponent:
+                      type: integer
+                      format: int64
+                      description: >-
+                        Exponent is the power of ten by which to multiply, in
+                        order to convert
+
+                        an amount of the meToken for the exchange operations.
+                    assets:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          base_denom:
+                            type: string
+                          symbol_denom:
+                            type: string
+                          price:
+                            type: string
+                            description: >-
+                              Price in USD of one unit of asset, expressed in
+                              decimals.
+                          exponent:
+                            type: integer
+                            format: int64
+                            description: >-
+                              Exponent is the power of ten by which to multiply,
+                              in order to convert
+
+                              an amount of the asset for the exchange
+                              operations.
+                          swap_rate:
+                            type: string
+                            description: >-
+                              SwapRate used for exchange calculations asset ->
+                              meToken.
+                          redeem_rate:
+                            type: string
+                            description: >-
+                              RedeemRate used for exchange calculations meToken
+                              -> asset.
+                        description: >-
+                          AssetPrice information related to the index
+                          operations.
+                  description: >-
+                    IndexPrices provides meToken price related index
+                    information.
             description: >-
               QueryIndexBalanceResponse defines the response structure for the
               IndexBalances gRPC service handler.
@@ -3710,12 +3770,14 @@ paths:
           type: string
       tags:
         - Query
-  /umee/metoken/v1/index_price:
+  /umee/metoken/v1/index_prices:
     get:
       summary: >-
-        IndexPrice queries for Index's price of a specific or all the registered
-        indexes.
-      operationId: IndexPrice
+        IndexPrices queries for Index's price of a specific or all the
+        registered indexes. It also includes the
+
+        underlying assets prices as well as swap and redeem rates.
+      operationId: IndexPrices
       responses:
         '200':
           description: A successful response.
@@ -3743,9 +3805,47 @@ paths:
                         order to convert
 
                         an amount of the meToken for the exchange operations.
-                  description: Price is used to inform meToken price and exponent.
+                    assets:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          base_denom:
+                            type: string
+                          symbol_denom:
+                            type: string
+                          price:
+                            type: string
+                            description: >-
+                              Price in USD of one unit of asset, expressed in
+                              decimals.
+                          exponent:
+                            type: integer
+                            format: int64
+                            description: >-
+                              Exponent is the power of ten by which to multiply,
+                              in order to convert
+
+                              an amount of the asset for the exchange
+                              operations.
+                          swap_rate:
+                            type: string
+                            description: >-
+                              SwapRate used for exchange calculations asset ->
+                              meToken.
+                          redeem_rate:
+                            type: string
+                            description: >-
+                              RedeemRate used for exchange calculations meToken
+                              -> asset.
+                        description: >-
+                          AssetPrice information related to the index
+                          operations.
+                  description: >-
+                    IndexPrices provides meToken price related index
+                    information.
             description: >-
-              QueryIndexPriceResponse defines the response structure for the
+              QueryIndexPriceResponses defines the response structure for the
               IndexPrice gRPC service handler.
         default:
           description: An unexpected error response.
@@ -6938,6 +7038,29 @@ definitions:
     description: >-
       AssetBalance tracks how much of a single asset is held in leverage,
       reserves, fees and interest account.
+  umee.metoken.v1.AssetPrice:
+    type: object
+    properties:
+      base_denom:
+        type: string
+      symbol_denom:
+        type: string
+      price:
+        type: string
+        description: Price in USD of one unit of asset, expressed in decimals.
+      exponent:
+        type: integer
+        format: int64
+        description: |-
+          Exponent is the power of ten by which to multiply, in order to convert
+          an amount of the asset for the exchange operations.
+      swap_rate:
+        type: string
+        description: SwapRate used for exchange calculations asset -> meToken.
+      redeem_rate:
+        type: string
+        description: RedeemRate used for exchange calculations meToken -> asset.
+    description: AssetPrice information related to the index operations.
   umee.metoken.v1.Fee:
     type: object
     properties:
@@ -7133,6 +7256,49 @@ definitions:
     description: >-
       IndexBalances is the state of an Index, containing its meToken supply and
       all underlying asset balances.
+  umee.metoken.v1.IndexPrices:
+    type: object
+    properties:
+      denom:
+        type: string
+        description: meToken denom.
+      price:
+        type: string
+        description: Price in USD of one unit of meToken, expressed in decimals.
+      exponent:
+        type: integer
+        format: int64
+        description: |-
+          Exponent is the power of ten by which to multiply, in order to convert
+          an amount of the meToken for the exchange operations.
+      assets:
+        type: array
+        items:
+          type: object
+          properties:
+            base_denom:
+              type: string
+            symbol_denom:
+              type: string
+            price:
+              type: string
+              description: Price in USD of one unit of asset, expressed in decimals.
+            exponent:
+              type: integer
+              format: int64
+              description: >-
+                Exponent is the power of ten by which to multiply, in order to
+                convert
+
+                an amount of the asset for the exchange operations.
+            swap_rate:
+              type: string
+              description: SwapRate used for exchange calculations asset -> meToken.
+            redeem_rate:
+              type: string
+              description: RedeemRate used for exchange calculations meToken -> asset.
+          description: AssetPrice information related to the index operations.
+    description: IndexPrices provides meToken price related index information.
   umee.metoken.v1.Params:
     type: object
     properties:
@@ -7153,22 +7319,6 @@ definitions:
 
           leverage module
     description: Params defines the parameters for the metoken module.
-  umee.metoken.v1.Price:
-    type: object
-    properties:
-      denom:
-        type: string
-        description: meToken denom.
-      price:
-        type: string
-        description: Price in USD of one unit of meToken, expressed in decimals.
-      exponent:
-        type: integer
-        format: int64
-        description: |-
-          Exponent is the power of ten by which to multiply, in order to convert
-          an amount of the meToken for the exchange operations.
-    description: Price is used to inform meToken price and exponent.
   umee.metoken.v1.QueryIndexBalancesResponse:
     type: object
     properties:
@@ -7213,10 +7363,59 @@ definitions:
           description: >-
             IndexBalances is the state of an Index, containing its meToken
             supply and all underlying asset balances.
+      prices:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+              description: meToken denom.
+            price:
+              type: string
+              description: Price in USD of one unit of meToken, expressed in decimals.
+            exponent:
+              type: integer
+              format: int64
+              description: >-
+                Exponent is the power of ten by which to multiply, in order to
+                convert
+
+                an amount of the meToken for the exchange operations.
+            assets:
+              type: array
+              items:
+                type: object
+                properties:
+                  base_denom:
+                    type: string
+                  symbol_denom:
+                    type: string
+                  price:
+                    type: string
+                    description: Price in USD of one unit of asset, expressed in decimals.
+                  exponent:
+                    type: integer
+                    format: int64
+                    description: >-
+                      Exponent is the power of ten by which to multiply, in
+                      order to convert
+
+                      an amount of the asset for the exchange operations.
+                  swap_rate:
+                    type: string
+                    description: SwapRate used for exchange calculations asset -> meToken.
+                  redeem_rate:
+                    type: string
+                    description: >-
+                      RedeemRate used for exchange calculations meToken ->
+                      asset.
+                description: AssetPrice information related to the index operations.
+          description: IndexPrices provides meToken price related index information.
     description: >-
       QueryIndexBalanceResponse defines the response structure for the
       IndexBalances gRPC service handler.
-  umee.metoken.v1.QueryIndexPriceResponse:
+  umee.metoken.v1.QueryIndexPricesResponse:
     type: object
     properties:
       prices:
@@ -7238,9 +7437,38 @@ definitions:
                 convert
 
                 an amount of the meToken for the exchange operations.
-          description: Price is used to inform meToken price and exponent.
+            assets:
+              type: array
+              items:
+                type: object
+                properties:
+                  base_denom:
+                    type: string
+                  symbol_denom:
+                    type: string
+                  price:
+                    type: string
+                    description: Price in USD of one unit of asset, expressed in decimals.
+                  exponent:
+                    type: integer
+                    format: int64
+                    description: >-
+                      Exponent is the power of ten by which to multiply, in
+                      order to convert
+
+                      an amount of the asset for the exchange operations.
+                  swap_rate:
+                    type: string
+                    description: SwapRate used for exchange calculations asset -> meToken.
+                  redeem_rate:
+                    type: string
+                    description: >-
+                      RedeemRate used for exchange calculations meToken ->
+                      asset.
+                description: AssetPrice information related to the index operations.
+          description: IndexPrices provides meToken price related index information.
     description: >-
-      QueryIndexPriceResponse defines the response structure for the IndexPrice
+      QueryIndexPriceResponses defines the response structure for the IndexPrice
       gRPC service handler.
   umee.metoken.v1.QueryIndexesResponse:
     type: object
