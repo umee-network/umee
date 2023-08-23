@@ -34,7 +34,7 @@ func (msg MsgGovUpdateRegistry) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateRegistry) ValidateBasic() error {
-	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+	if err := checkers.ValidateProposal(msg.Description, msg.Authority); err != nil {
 		return err
 	}
 
@@ -96,12 +96,16 @@ func (msg MsgGovUpdateSpecialAssets) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
+	// Today we only accept x/gov
 	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
+	if len(msg.Description) != 0 {
+		return fmt.Errorf("for x/gov proposals, description must be empty, and the x/gov proposal metadata should be used instead")
+	}
 
 	if len(msg.Pairs) == 0 && len(msg.Sets) == 0 {
-		return ErrEmptyUpdateSpecialAssets
+		return fmt.Errorf("empty special asset pairs update")
 	}
 
 	if err := validateSpecialAssetPairs(msg.Pairs); err != nil {
@@ -115,7 +119,7 @@ func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
 		// be stored in state
 		if set.CollateralWeight.IsPositive() {
 			if set.CollateralWeight.LT(ascendingWeight) {
-				return ErrProposedSetOrder
+				return fmt.Errorf("asset sets not in ascending (weight) order")
 			}
 			ascendingWeight = set.CollateralWeight
 		}
@@ -139,7 +143,7 @@ func validateSpecialAssetPairs(pairs []SpecialAssetPair) error {
 	for _, pair := range pairs {
 		s := pair.Collateral + "," + pair.Borrow
 		if _, ok := assetPairs[s]; ok {
-			return ErrDuplicatePair.Wrapf("[%s, %s]", pair.Collateral, pair.Borrow)
+			return fmt.Errorf("duplicate special asset pair: %s", s)
 		}
 		assetPairs[s] = true
 	}

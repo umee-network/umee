@@ -44,19 +44,6 @@ func IsGovAuthority(authority string) bool {
 	return authority == govModuleAddr
 }
 
-func ProposalDescription(description string) error {
-	if len(description) == 0 {
-		return errors.New("proposal description cannot be empty")
-	}
-	if len(description) > gov1b1.MaxDescriptionLength {
-		return fmt.Errorf(
-			"proposal description is longer than max length of %d",
-			gov1b1.MaxDescriptionLength,
-		)
-	}
-	return nil
-}
-
 // WithEmergencyGroup is a copy of ugov.WithEmergencyGroup to avoid import cycle
 type WithEmergencyGroup interface {
 	EmergencyGroup() sdk.AccAddress
@@ -83,34 +70,28 @@ func EmergencyGroupAuthority(authority string, eg WithEmergencyGroup) (bool, err
 // ValidateProposal checks the format of the title, description.
 // If `requireGov=true` then authority must be a gov module address. Otherwise authority must be
 // a correct bech32 address.
-func ValidateProposal(title, description, authority string, requireGov bool) error {
-	var err error
-	if requireGov {
-		err = AssertGovAuthority(authority)
-	} else {
-		_, err = sdk.AccAddressFromBech32(authority)
-	}
-	if err != nil {
+func ValidateProposal(description, authority string) error {
+	if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 		return err
 	}
-	if len(strings.TrimSpace(title)) < minProposalTitleLen {
-		return fmt.Errorf("proposal title must be at least %d of non blank characters",
-			minProposalTitleLen)
-	}
-	if len(title) > gov1b1.MaxTitleLength {
-		return fmt.Errorf("proposal title is longer than max length of %d", gov1b1.MaxTitleLength)
+	if IsGovAuthority(authority) {
+		if len(description) != 0 {
+			return errors.New("for x/gov proposals, description must be empty, and the x/gov proposal metadata should be used instead")
+		}
+	} else {
+		return ProposalDescription(description)
 	}
 
-	if len(description) == 0 {
-		return errors.New("proposal description cannot be blank")
-	}
-	if len(description) > gov1b1.MaxDescriptionLength {
+	return nil
+}
+
+func ProposalDescription(description string) error {
+	if len(description) == 0 || len(description) > gov1b1.MaxDescriptionLength {
 		return fmt.Errorf(
-			"proposal description is longer than max length of %d",
+			"proposal description must be not empty and not longer than %d",
 			gov1b1.MaxDescriptionLength,
 		)
 	}
-
 	return nil
 }
 
