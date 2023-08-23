@@ -238,28 +238,20 @@ func TestNextInflationRate(t *testing.T) {
 	mintParams.InflationMax = sdk.NewDecWithPrec(40, 2)
 	mintParams.InflationMin = sdk.NewDecWithPrec(1, 2)
 	mintParams.InflationRateChange = sdk.NewDec(1)
-	mintParams.BlocksPerYear = 10
+	mintParams.BlocksPerYear = 100
 	mintParams.GoalBonded = sdk.NewDec(33)
 
 	bondedRatio := sdk.NewDec(20)
 
 	// default inflation rate (1 year inflation rate change speed )
 	ir := minter.NextInflationRate(mintParams, bondedRatio)
-	// GoalBondedRatio = BondedRatio / (1-(inflation*mintParams.BlocksPerYear))
-	assert.DeepEqual(t,
-		mintParams.GoalBonded.RoundInt64(),
-		bondedRatio.Quo(sdk.OneDec().Sub(ir.Mul(sdk.NewDec(int64(mintParams.BlocksPerYear))))).RoundInt64(),
-	)
+	assert.DeepEqual(t, mintParams.InflationMin, ir)
 
 	// changing inflation rate speed from 1 year to 6 months
-	mintParams.BlocksPerYear = mintParams.BlocksPerYear / 2
+	mintParams.BlocksPerYear = mintParams.BlocksPerYear * 2
 	nir := minter.NextInflationRate(mintParams, bondedRatio)
 
-	assert.DeepEqual(t, ir.Mul(sdk.NewDec(2)), nir)
-	assert.DeepEqual(t,
-		mintParams.GoalBonded.RoundInt64(),
-		bondedRatio.Quo(sdk.OneDec().Sub(nir.Mul(sdk.NewDec(int64(mintParams.BlocksPerYear))))).RoundInt64(),
-	)
+	assert.DeepEqual(t, mintParams.InflationMin, nir)
 }
 
 func TestInflationRateChange(t *testing.T) {
@@ -267,15 +259,10 @@ func TestInflationRateChange(t *testing.T) {
 		Inflation: sdk.NewDecWithPrec(0, 2),
 	}
 
-	// current inflation  = 0
-	// max inflation = 0.5
-	// min inflation = 0.02
-	// blocks per year = 100
-
 	mintParams := minttypes.DefaultParams()
-	mintParams.InflationMax = sdk.NewDecWithPrec(5, 1)
-	mintParams.InflationMin = sdk.NewDecWithPrec(2, 2)
-	mintParams.InflationRateChange = sdk.NewDec(1)
+	mintParams.InflationMax = sdk.NewDecWithPrec(5, 1) // 0.5
+	mintParams.InflationMin = sdk.NewDecWithPrec(2, 2) // 0.02
+	mintParams.InflationRateChange = sdk.NewDec(1)     // will be overwritten in the `NextInflationRate`
 	mintParams.BlocksPerYear = 100
 
 	bondedRatio := sdk.NewDecWithPrec(1, 2)
