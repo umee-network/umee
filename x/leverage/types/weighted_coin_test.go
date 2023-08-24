@@ -61,12 +61,12 @@ func TestWeightedDecCoinSorting(t *testing.T) {
 			sortedBeforeIndex: 0,                            // sorted before all
 		},
 		{
-			denom:             "AAAA", // would come before reference index zero
+			denom:             "AAAA",
 			weight:            sdk.MustNewDecFromStr("1.0"),
 			sortedBeforeIndex: 0, // sorted before all
 		},
 		{
-			denom:             "VVVV", // matches reference index zero
+			denom:             "VVVV",
 			weight:            sdk.MustNewDecFromStr("1.0"),
 			sortedBeforeIndex: 1, // sorted before all except its match at index zero
 		},
@@ -87,17 +87,19 @@ func TestWeightedDecCoinSorting(t *testing.T) {
 		},
 		{
 			denom:             "AAAA",
-			weight:            sdk.MustNewDecFromStr("-0.1"),
-			sortedBeforeIndex: len(referenceCoins), // sorted after all
+			weight:            sdk.MustNewDecFromStr("-0.1"), // edge case (< 0)
+			sortedBeforeIndex: len(referenceCoins),           // sorted after all
 		},
 	}
 
+	// check before() using referenceCoins
 	for i, wdc := range referenceCoins {
 		for j, c := range referenceCoins {
 			assert.Equal(t, i < j, wdc.before(c), "require pre-sorted referenceCoins ", i, j)
 		}
 	}
 
+	// check new coins, including matching coins and edge cases
 	for _, tc := range testCases {
 		c := WeightedDecCoin{
 			Asset:  coin.Dec(tc.denom, "1.0"),
