@@ -6,11 +6,10 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	gtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 
 	"github.com/umee-network/umee/v6/client"
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -59,7 +58,7 @@ func OracleParamChanges(
 
 func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransferStatus) error {
 	msg := uibc.MsgGovSetIBCStatus{
-		Authority:   authtypes.NewModuleAddress(gtypes.ModuleName).String(),
+		Authority:   checkers.GovModuleAddr,
 		Description: "Update the ibc transfer status",
 		IbcStatus:   status,
 	}

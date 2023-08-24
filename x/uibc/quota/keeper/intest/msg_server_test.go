@@ -53,9 +53,9 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 			errMsg: "",
 		},
 		{
-			name: "valid msg with new update <update the new params again>",
+			name: "valid update the new params again",
 			msg: uibc.MsgGovUpdateQuota{
-				Description:   "desc",
+				Description:   "",
 				Authority:     checkers.GovModuleAddr,
 				QuotaDuration: time.Duration(time.Minute * 1000),
 				PerDenom:      sdk.NewDec(10000),
@@ -98,19 +98,19 @@ func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 				Authority:   accs.Alice.String(),
 				IbcStatus:   1,
 			},
-			errMsg: "expected gov account as only signer for proposal message",
+			errMsg: "unauthorized",
 		}, {
 			name: "invalid ibc-transfer status in msg",
 			msg: uibc.MsgGovSetIBCStatus{
-				Description: "desc",
+				Description: "",
 				Authority:   checkers.GovModuleAddr,
 				IbcStatus:   10,
 			},
 			errMsg: "invalid ibc-transfer status",
 		}, {
-			name: "valid in msg <enable the ibc-transfer pause>",
+			name: "valid ibc-transfer pause",
 			msg: uibc.MsgGovSetIBCStatus{
-				Description: "desc",
+				Description: "",
 				Authority:   checkers.GovModuleAddr,
 				IbcStatus:   2,
 			},
