@@ -1,4 +1,4 @@
-package setup
+package util
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -23,12 +23,12 @@ const (
 )
 
 var (
-	minGasPrice     = appparams.ProtocolMinGasPrice.String()
+	MinGasPrice     = appparams.ProtocolMinGasPrice.String()
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
+	StakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
 
 	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
-	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
+	StakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
 
 var (

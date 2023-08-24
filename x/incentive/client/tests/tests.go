@@ -11,7 +11,7 @@ import (
 	leveragecli "github.com/umee-network/umee/v6/x/leverage/client/cli"
 )
 
-func (s *IntegrationTests) TestInvalidQueries() {
+func (s *CLITests) TestInvalidQueries() {
 	invalidQueries := []itestsuite.TestQuery{
 		{
 			Name:    "query pending rewards (invalid address)",
@@ -48,8 +48,9 @@ func (s *IntegrationTests) TestInvalidQueries() {
 	s.RunTestQueries(invalidQueries...)
 }
 
-func (s *IntegrationTests) TestIncentiveScenario() {
-	val := s.Network.Validators[0]
+func (s *CLITests) TestIncentiveScenario() {
+	addr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
+	s.Require.NoError(err)
 
 	zeroQueries := []itestsuite.TestQuery{
 		{
@@ -161,7 +162,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 			Name:    "query pending rewards (zero)",
 			Command: cli.GetCmdQueryPendingRewards(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 			},
 			Response: &incentive.QueryPendingRewardsResponse{},
 			ExpectedResponse: &incentive.QueryPendingRewardsResponse{

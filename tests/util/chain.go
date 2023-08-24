@@ -1,8 +1,14 @@
-package setup
+package util
 
 import (
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
+
+	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
+	"github.com/spf13/viper"
+	tmconfig "github.com/tendermint/tendermint/config"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
@@ -17,20 +23,20 @@ import (
 )
 
 const (
-	keyringPassphrase = "testpassphrase"
-	keyringAppName    = "testnet"
+	KeyringPassphrase = "testpassphrase"
+	KeyringAppName    = "testnet"
 )
 
-var encodingConfig sdkparams.EncodingConfig
+var EncodingConfig sdkparams.EncodingConfig
 
 func init() {
-	encodingConfig = umeeapp.MakeEncodingConfig()
+	EncodingConfig = umeeapp.MakeEncodingConfig()
 
-	encodingConfig.InterfaceRegistry.RegisterImplementations(
+	EncodingConfig.InterfaceRegistry.RegisterImplementations(
 		(*sdk.Msg)(nil),
 		&stakingtypes.MsgCreateValidator{},
 	)
-	encodingConfig.InterfaceRegistry.RegisterImplementations(
+	EncodingConfig.InterfaceRegistry.RegisterImplementations(
 		(*cryptotypes.PubKey)(nil),
 		&secp256k1.PubKey{},
 		&ed25519.PubKey{},
@@ -58,6 +64,90 @@ func NewChain() (*Chain, error) {
 
 func (c *Chain) configDir() string {
 	return fmt.Sprintf("%s/%s", c.DataDir, c.ID)
+}
+
+func (c *Chain) InitNodes(cdc codec.Codec, numValidators int) error {
+	if err := c.CreateAndInitValidators(cdc, numValidators); err != nil {
+		return err
+	}
+
+	// initialize a genesis file for the first validator
+	val0ConfigDir := c.Validators[0].ConfigDir()
+	for _, val := range c.Validators {
+		valAddr, err := val.KeyInfo.GetAddress()
+		if err != nil {
+			return err
+		}
+		if err := AddGenesisAccount(cdc, val0ConfigDir, "", InitBalanceStr, valAddr); err != nil {
+			return err
+		}
+
+	}
+
+	// copy the genesis file to the remaining validators
+	for _, val := range c.Validators[1:] {
+		if _, err := CopyFile(
+			filepath.Join(val0ConfigDir, "config", "genesis.json"),
+			filepath.Join(val.ConfigDir(), "config", "genesis.json"),
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Chain) InitValidatorConfigs() error {
+	for i, val := range c.Validators {
+		tmCfgPath := filepath.Join(val.ConfigDir(), "config", "config.toml")
+
+		vpr := viper.New()
+		vpr.SetConfigFile(tmCfgPath)
+		if err := vpr.ReadInConfig(); err != nil {
+			return err
+		}
+
+		valConfig := tmconfig.DefaultConfig()
+		valConfig.Consensus.SkipTimeoutCommit = true
+		if err := vpr.Unmarshal(valConfig); err != nil {
+			return err
+		}
+
+		valConfig.P2P.ListenAddress = "tcp://0.0.0.0:26656"
+		valConfig.P2P.AddrBookStrict = false
+		valConfig.P2P.ExternalAddress = fmt.Sprintf("%s:%d", val.InstanceName(), 26656)
+		valConfig.RPC.ListenAddress = "tcp://0.0.0.0:26657"
+		valConfig.StateSync.Enable = false
+		valConfig.LogLevel = "info"
+
+		var peers []string
+
+		for j := 0; j < len(c.Validators); j++ {
+			if i == j {
+				continue
+			}
+
+			peer := c.Validators[j]
+			peerID := fmt.Sprintf("%s@%s%d:26656", peer.NodeKey.ID(), peer.Moniker, j)
+			peers = append(peers, peerID)
+		}
+
+		valConfig.P2P.PersistentPeers = strings.Join(peers, ",")
+
+		tmconfig.WriteConfigFile(tmCfgPath, valConfig)
+
+		// set application configuration
+		appCfgPath := filepath.Join(val.ConfigDir(), "config", "app.toml")
+
+		appConfig := srvconfig.DefaultConfig()
+		appConfig.API.Enable = true
+		appConfig.MinGasPrices = MinGasPrice
+		appConfig.Pruning = "nothing"
+
+		srvconfig.WriteConfigFile(appCfgPath, appConfig)
+	}
+
+	return nil
 }
 
 func (c *Chain) CreateAndInitValidators(cdc codec.Codec, count int) error {
@@ -97,7 +187,7 @@ func (c *Chain) CreateAndInitGaiaValidator(cdc codec.Codec) error {
 	}
 
 	gaiaVal.keyInfo = *info
-	gaiaVal.mnemonic = mnemonic
+	gaiaVal.Mnemonic = mnemonic
 
 	c.GaiaValidators = append(c.GaiaValidators, gaiaVal)
 
@@ -107,8 +197,8 @@ func (c *Chain) CreateAndInitGaiaValidator(cdc codec.Codec) error {
 func (c *Chain) createValidator(index int) *validator {
 	return &validator{
 		chain:   c,
-		index:   index,
-		moniker: "umee",
+		Index:   index,
+		Moniker: "umee",
 	}
 }
 

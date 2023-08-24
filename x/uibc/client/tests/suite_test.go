@@ -3,17 +3,15 @@ package tests
 import (
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/testutil/network"
-
 	itestsuite "github.com/umee-network/umee/v6/tests/cli"
 )
 
-type IntegrationTests struct {
-	*itestsuite.E2ESuite
+type CLITests struct {
+	*itestsuite.CLISuite
 }
 
-func NewIntegrationTestSuite(cfg network.Config, t *testing.T) *IntegrationTests {
-	return &IntegrationTests{
-		&itestsuite.E2ESuite{Cfg: cfg, T: t},
+func NewCLITestSuite(t *testing.T) *CLITests {
+	return &CLITests{
+		&itestsuite.CLISuite{T: t},
 	}
 }

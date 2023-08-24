@@ -1,4 +1,4 @@
-package setup
+package util
 
 import (
 	"encoding/json"
@@ -39,7 +39,7 @@ func getGenDoc(path string) (*tmtypes.GenesisDoc, error) {
 	return doc, nil
 }
 
-func addGenesisAccount(cdc codec.Codec, path, moniker, amountStr string, accAddr sdk.AccAddress) error {
+func AddGenesisAccount(cdc codec.Codec, path, moniker, amountStr string, accAddr sdk.AccAddress) error {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
 

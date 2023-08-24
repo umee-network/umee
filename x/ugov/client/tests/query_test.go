@@ -12,7 +12,7 @@ import (
 	"github.com/umee-network/umee/v6/x/ugov/client/cli"
 )
 
-func (s *IntegrationTests) TestMinGasPrice(_ *testing.T) {
+func (s *CLITests) TestMinGasPrice(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Query min gas price for tx",
@@ -31,7 +31,7 @@ func (s *IntegrationTests) TestMinGasPrice(_ *testing.T) {
 	s.RunTestQueries(queries...)
 }
 
-func (s *IntegrationTests) TestInflationParams(_ *testing.T) {
+func (s *CLITests) TestInflationParams(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Query inflation params",

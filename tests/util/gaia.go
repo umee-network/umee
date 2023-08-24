@@ -1,4 +1,4 @@
-package setup
+package util
 
 import (
 	"fmt"
@@ -8,10 +8,10 @@ import (
 
 type gaiaValidator struct {
 	index    int
-	mnemonic string
+	Mnemonic string
 	keyInfo  keyring.Record
 }
 
-func (g *gaiaValidator) instanceName() string {
+func (g *gaiaValidator) InstanceName() string {
 	return fmt.Sprintf("gaiaval%d", g.index)
 }

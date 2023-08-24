@@ -11,7 +11,7 @@ import (
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
-func (s *IntegrationTests) TestInvalidQueries() {
+func (s *CLITests) TestInvalidQueries() {
 	invalidQueries := []itestsuite.TestQuery{
 		{
 			Name:    "query market summary - denom not registered",
@@ -68,7 +68,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 	s.RunTestQueries(invalidQueries...)
 }
 
-func (s *IntegrationTests) TestLeverageScenario() {
+func (s *CLITests) TestLeverageScenario() {
 	val := s.Network.Validators[0]
 
 	oracleSymbolPrice := sdk.MustNewDecFromStr("34.21")

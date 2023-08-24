@@ -12,7 +12,7 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc/client/cli"
 )
 
-func (s *IntegrationTests) TestQueryParams(_ *testing.T) {
+func (s *CLITests) TestQueryParams(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Query params",
@@ -31,7 +31,7 @@ func (s *IntegrationTests) TestQueryParams(_ *testing.T) {
 	s.RunTestQueries(queries...)
 }
 
-func (s *IntegrationTests) TestGetQuota(_ *testing.T) {
+func (s *CLITests) TestGetQuota(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Get ibc-transfer quota of all denoms",
