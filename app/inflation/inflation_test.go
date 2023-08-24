@@ -269,6 +269,9 @@ func TestInflationRateChange(t *testing.T) {
 	// after 50 blocks (half the year) inflation will be updated
 	// every block, inflation = prevInflation + currentInflationRateChange
 	var ir sdk.Dec
+	ir = minter.NextInflationRate(mintParams, bondedRatio)
+	// at initial based on bondedRatio and GoalBonded , the inflation will be at mintParams.InflationMin
+	assert.Equal(t, ir, mintParams.InflationMin)
 	for i := 0; i < 50; i++ {
 		ir = minter.NextInflationRate(mintParams, bondedRatio)
 		minter.Inflation = ir
