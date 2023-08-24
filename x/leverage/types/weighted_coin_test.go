@@ -9,44 +9,24 @@ import (
 	"github.com/umee-network/umee/v6/util/coin"
 )
 
-// referenceCoins aare a pre-sorted WeightedDecCoins with some equal weights and no repeated denoms
+// referenceCoins are a pre-sorted WeightedDecCoins with some equal weights and no repeated denoms
 var referenceCoins = WeightedDecCoins{
-	{
-		Asset:  coin.Dec("VVVV", "1.0"),
-		Weight: sdk.MustNewDecFromStr("1.0"),
-	},
-	{
-		Asset:  coin.Dec("WWWW", "1.0"),
-		Weight: sdk.MustNewDecFromStr("1.0"),
-	},
-	{
-		Asset:  coin.Dec("DDDD", "1.0"),
-		Weight: sdk.MustNewDecFromStr("0.4"),
-	},
-	{
-		Asset:  coin.Dec("CCCC", "1.0"),
-		Weight: sdk.MustNewDecFromStr("0.3"),
-	},
-	{
-		Asset:  coin.Dec("BBBB", "1.0"),
-		Weight: sdk.MustNewDecFromStr("0.2"),
-	},
-	{
-		Asset:  coin.Dec("XXXX", "1.0"),
-		Weight: sdk.MustNewDecFromStr("0.2"),
-	},
-	{
-		Asset:  coin.Dec("AAAA", "1.0"),
-		Weight: sdk.MustNewDecFromStr("0.1"),
-	},
-	{
-		Asset:  coin.Dec("YYYY", "1.0"),
-		Weight: sdk.MustNewDecFromStr("0.0"),
-	},
-	{
-		Asset:  coin.Dec("ZZZZ", "1.0"),
-		Weight: sdk.MustNewDecFromStr("0.0"),
-	},
+	weightedDecCoin("VVVV", "1.0", "1.0"),
+	weightedDecCoin("WWWW", "2.0", "1.0"),
+	weightedDecCoin("DDDD", "1.0", "0.4"),
+	weightedDecCoin("CCCC", "2.0", "0.3"),
+	weightedDecCoin("BBBB", "1.0", "0.2"),
+	weightedDecCoin("XXXX", "2.0", "0.2"),
+	weightedDecCoin("AAAA", "1.0", "0.1"),
+	weightedDecCoin("YYYY", "2.0", "0.0"),
+	weightedDecCoin("ZZZZ", "1.0", "0.0"),
+}
+
+func weightedDecCoin(denom, amount, weight string) WeightedDecCoin {
+	return WeightedDecCoin{
+		Asset:  coin.Dec(denom, amount),
+		Weight: sdk.MustNewDecFromStr(weight),
+	}
 }
 
 func TestWeightedDecCoinSorting(t *testing.T) {
@@ -113,5 +93,97 @@ func TestWeightedDecCoinSorting(t *testing.T) {
 				"test coin sorts before reference index ", c, i,
 			)
 		}
+	}
+}
+
+func TestWeightedDecCoinTotal(t *testing.T) {
+	testCases := []struct {
+		weightedCoins WeightedDecCoins
+		denom         string
+		denomTotal    string
+		total         string
+		message       string
+	}{
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "0.1", "0.1"),
+			},
+			"AAAA",
+			"0.1",
+			"0.1",
+			"single asset",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "0.1", "0.1"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"AAAA",
+			"1.1",
+			"1.1",
+			"duplicate asset",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "2.0", "0.1"),
+				weightedDecCoin("BBBB", "1.0", "0.1"),
+			},
+			"BBBB",
+			"1.0",
+			"3.0",
+			"different assets",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "0.0", "0.1"),
+				weightedDecCoin("BBBB", "1.0", "0.1"),
+				weightedDecCoin("CCCC", "2.0", "0.1"),
+				weightedDecCoin("DDDD", "3.0", "0.1"),
+				weightedDecCoin("EEEE", "4.0", "0.1"),
+			},
+			"AAAA",
+			"0.0",
+			"10.0",
+			"multiple same-weight assets, including a zero",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "0.0", "0.4"),
+				weightedDecCoin("BBBB", "1.0", "0.3"),
+				weightedDecCoin("CCCC", "2.0", "0.2"),
+				weightedDecCoin("DDDD", "3.0", "0.3"),
+				weightedDecCoin("EEEE", "4.0", "0.0"),
+			},
+			"",
+			"10.0",
+			"10.0",
+			"multiple weighted assets, including a zero",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "1.0", "0.3"),
+				weightedDecCoin("AAAA", "0.0", "0.4"),
+				weightedDecCoin("CCCC", "2.0", "0.2"),
+				weightedDecCoin("EEEE", "4.0", "0.0"),
+				weightedDecCoin("DDDD", "3.0", "0.3"),
+			},
+			"AAAA",
+			"0.0",
+			"10.0",
+			"unsorted weighted assets, including a zero",
+		},
+	}
+
+	for _, tc := range testCases {
+		assert.Equal(t,
+			sdk.MustNewDecFromStr(tc.total).String(),
+			tc.weightedCoins.Total("").String(),
+			"full total"+tc.message,
+		)
+		assert.Equal(t,
+			sdk.MustNewDecFromStr(tc.denomTotal).String(),
+			tc.weightedCoins.Total(tc.denom).String(),
+			tc.denom+" denom total "+tc.message,
+		)
 	}
 }
