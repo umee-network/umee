@@ -4,27 +4,30 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/umee-network/umee/v6/tests/accs"
+	"github.com/umee-network/umee/v6/util/checkers"
 	"gotest.tools/v3/assert"
 )
 
-func validMsgGovUpdateQuota() MsgGovUpdateQuota {
-	return MsgGovUpdateQuota{
-		Title:         "update quota",
-		Authority:     authtypes.NewModuleAddress("gov").String(),
-		Description:   "desc",
+func TestMsgGovUpdateQuota(t *testing.T) {
+	t.Parallel()
+	validMsg := MsgGovUpdateQuota{
+		Authority:     checkers.GovModuleAddr,
+		Description:   "",
 		Total:         sdk.MustNewDecFromStr("1000"),
 		PerDenom:      sdk.MustNewDecFromStr("1000"),
 		QuotaDuration: 100,
 	}
-}
 
-func TestMsgGovUpdateQuota(t *testing.T) {
-	t.Parallel()
-	validMsg := validMsgGovUpdateQuota()
+	validEmergencyGroup := validMsg
+	validEmergencyGroup.Authority = accs.Alice.String()
+	validEmergencyGroup.Description = "not empty"
 
-	invalidAuthority := validMsg
-	invalidAuthority.Authority = authtypes.NewModuleAddress("govv").String()
+	invalidDesc := validMsg
+	invalidDesc.Description = "not empty description"
+
+	invalidDesc2 := validEmergencyGroup
+	invalidDesc2.Description = ""
 
 	invalidTotalQuota := validMsg
 	invalidTotalQuota.PerDenom = sdk.NewDec(10)
@@ -40,9 +43,17 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 			msg:    validMsg,
 			errMsg: "",
 		}, {
-			name:   "invalid authority address in msg",
-			msg:    invalidAuthority,
-			errMsg: "expected gov account",
+			name:   "valid msg other authority",
+			msg:    validEmergencyGroup,
+			errMsg: "",
+		}, {
+			name:   "invalid description",
+			msg:    invalidDesc,
+			errMsg: "description must be empty",
+		}, {
+			name:   "invalid description2",
+			msg:    invalidDesc2,
+			errMsg: "description must be not empty",
 		}, {
 			name:   "invalid total quota with respect to per denom",
 			msg:    invalidTotalQuota,
@@ -62,21 +73,20 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 	}
 }
 
-func validMsgGovSetIBCStatus() MsgGovSetIBCStatus {
-	return MsgGovSetIBCStatus{
-		Title:       "title",
-		Authority:   authtypes.NewModuleAddress("gov").String(),
-		Description: "desc",
-		IbcStatus:   1,
-	}
-}
-
 func TestMsgGovSetIBCStatus(t *testing.T) {
 	t.Parallel()
-	validMsg := validMsgGovSetIBCStatus()
+	validMsg := MsgGovSetIBCStatus{
+		Authority:   checkers.GovModuleAddr,
+		Description: "",
+		IbcStatus:   1,
+	}
+
+	validEmergencyGroup := validMsg
+	validEmergencyGroup.Authority = accs.Alice.String()
+	validEmergencyGroup.Description = "not empty"
 
 	invalidAuthority := validMsg
-	invalidAuthority.Authority = authtypes.NewModuleAddress("govv").String()
+	invalidAuthority.Authority = "ABC"
 
 	invalidIBCStatus := validMsg
 	invalidIBCStatus.IbcStatus = 10
@@ -91,9 +101,13 @@ func TestMsgGovSetIBCStatus(t *testing.T) {
 			name:   "valid msg",
 			errMsg: "",
 		}, {
+			msg:    validEmergencyGroup,
+			name:   "valid msg with other authority",
+			errMsg: "",
+		}, {
 			name:   "invalid authority address in msg",
 			msg:    invalidAuthority,
-			errMsg: "expected gov account",
+			errMsg: "invalid bech32",
 		}, {
 			name:   "invalid ibc pause status in msg",
 			msg:    invalidIBCStatus,

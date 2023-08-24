@@ -5,20 +5,18 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/tests/accs"
 	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/util/coin"
 )
 
-var govAddr = authtypes.NewModuleAddress("gov").String()
-
 func validMsgGovUpdateMinGasPrice() MsgGovUpdateMinGasPrice {
 	return MsgGovUpdateMinGasPrice{
-		Authority:   govAddr,
+		Authority:   checkers.GovModuleAddr,
 		MinGasPrice: coin.Atom1_25dec,
 	}
 }
@@ -54,7 +52,7 @@ func TestMsgGovUpdateMinGasPrice(t *testing.T) {
 
 func validMsgGovSetEmergencyGroup() MsgGovSetEmergencyGroup {
 	return MsgGovSetEmergencyGroup{
-		Authority:      govAddr,
+		Authority:      checkers.GovModuleAddr,
 		EmergencyGroup: accs.Alice.String(),
 	}
 }
@@ -81,7 +79,7 @@ func TestMsgGovSetEmergencyGroup(t *testing.T) {
 
 func validMsgGovUpdateInflationParams() MsgGovUpdateInflationParams {
 	return MsgGovUpdateInflationParams{
-		Authority: govAddr,
+		Authority: checkers.GovModuleAddr,
 		Params:    DefaultInflationParams(),
 	}
 }

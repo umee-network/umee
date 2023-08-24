@@ -88,7 +88,7 @@ func Proposal(authority, description string) error {
 func Description(d string) error {
 	if len(d) == 0 || len(d) > gov1b1.MaxDescriptionLength {
 		return fmt.Errorf(
-			"proposal description must be not empty and not longer than %d",
+			"description must be not empty and not longer than %d",
 			gov1b1.MaxDescriptionLength,
 		)
 	}
