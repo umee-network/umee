@@ -38,7 +38,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			"already registered token",
 			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Description: "test",
+				Description: "",
 				AddTokens: []types.Token{
 					registeredUmee,
 				},
@@ -49,7 +49,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			"valid authority and valid token for registry",
 			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Description: "test",
+				Description: "",
 				AddTokens: []types.Token{
 					ntA,
 				},
@@ -60,7 +60,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			"regisering new token with existed symbol denom",
 			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Description: "test",
+				Description: "",
 				AddTokens: []types.Token{
 					ntB,
 				},
@@ -107,7 +107,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			"invalid token data",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Description: "test",
+				Description: "",
 				UpdateTokens: []types.Token{
 					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
