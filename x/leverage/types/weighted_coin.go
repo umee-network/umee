@@ -95,27 +95,46 @@ func (wsp WeightedSpecialPair) before(b WeightedSpecialPair) bool {
 }
 
 // Add returns the sum of a weightedDecCoins and an additional weightedDecCoin.
-// The result is sorted.
+// The result is sorted, has any duplicate denoms combined, and any zero amounts omitted.
 func (wdc WeightedDecCoins) Add(add WeightedDecCoin) (sum WeightedDecCoins) {
 	if len(wdc) == 0 {
+		if add.Asset.IsZero() {
+			// omit zero outputs
+			return WeightedDecCoins{}
+		}
 		return WeightedDecCoins{add}
 	}
-	found := false
-	for _, c := range wdc {
-		if c.Asset.Denom == add.Asset.Denom {
-			sum = append(sum, WeightedDecCoin{
-				Asset:  c.Asset.Add(add.Asset),
-				Weight: c.Weight,
-			})
-			found = true
-		} else {
-			sum = append(sum, c)
+	denoms := []string{}
+	weightedCoins := map[string]WeightedDecCoin{}
+	// if add it nonzero, collect it
+	if add.Asset.IsPositive() {
+		denoms = append(denoms, add.Asset.Denom)
+		weightedCoins[add.Asset.Denom] = add
+	}
+	// for all coins in wdc, add them to the total if nonzero
+	for _, wc := range wdc {
+		if wc.Asset.IsPositive() {
+			denom := wc.Asset.Denom
+			if c, ok := weightedCoins[denom]; ok {
+				if !wc.Weight.Equal(c.Weight) {
+					panic("WeightedDecCoins.Add: same denom but different weight")
+				}
+				// combine matching denoms
+				weightedCoins[denom] = WeightedDecCoin{
+					Asset:  wc.Asset.Add(c.Asset),
+					Weight: wc.Weight,
+				}
+			} else {
+				denoms = append(denoms, denom)
+				weightedCoins[denom] = wc
+			}
 		}
 	}
-	if !found {
-		sum = append(sum, add)
+	// collect total coins into a slice
+	for _, denom := range denoms {
+		sum = append(sum, weightedCoins[denom])
 	}
-	// sorts the sum. Fixes unsorted input as well.
+	// sorts the sum.
 	sort.SliceStable(sum, func(i, j int) bool {
 		return sum[i].before(sum[j])
 	})
@@ -160,7 +179,7 @@ func (wdc WeightedDecCoins) Sub(sub sdk.DecCoin) (diff WeightedDecCoins) {
 }
 
 // Add returns the sum of a WeightedSpecialPairs and an additional WeightedSpecialPair.
-// The result is sorted.
+// The result is sorted. Zero amount pairs are not omitted.
 func (wsp WeightedSpecialPairs) Add(add WeightedSpecialPair) (sum WeightedSpecialPairs) {
 	if len(wsp) == 0 {
 		return WeightedSpecialPairs{add}
