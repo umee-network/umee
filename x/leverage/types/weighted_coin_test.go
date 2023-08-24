@@ -187,3 +187,35 @@ func TestWeightedDecCoinTotal(t *testing.T) {
 		)
 	}
 }
+
+func TestWeightedDecCoinsAdd(_ *testing.T) {
+	// TODO
+}
+
+func TestWeightedDecCoinsSub(_ *testing.T) {
+	// TODO
+}
+
+func TestWeightedNormalPairBefore(_ *testing.T) {
+	// TODO
+}
+
+func TestWeightedSpecialPairBefore(_ *testing.T) {
+	// TODO
+}
+
+func TestWeightedSpecialPairsAdd(_ *testing.T) {
+	// TODO
+}
+
+func TestWeightedNormalPairsAdd(_ *testing.T) {
+	// TODO
+}
+
+func TestWeightedSpecialPairsCanCombine(_ *testing.T) {
+	// TODO
+}
+
+func TestWeightedNormalPairsCanCombine(_ *testing.T) {
+	// TODO
+}
