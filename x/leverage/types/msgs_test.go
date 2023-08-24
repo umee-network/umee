@@ -3,16 +3,13 @@ package types_test
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v6/tests/accs"
-	"github.com/umee-network/umee/v6/x/leverage/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	tassert "github.com/stretchr/testify/assert"
-
 	"gotest.tools/v3/assert"
+
+	"github.com/umee-network/umee/v6/tests/accs"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
@@ -45,9 +42,8 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 	invalidSymbol.SymbolDenom = ""
 
 	newMsg := func(addTokens, updateTokens []types.Token) types.MsgGovUpdateRegistry {
-		return types.MsgGovUpdateRegistry{Authority: authtypes.NewModuleAddress(govtypes.ModuleName).String(),
-			Title:        "Title",
-			Description:  "Description",
+		return types.MsgGovUpdateRegistry{Authority: checkers.GovModuleAddr,
+			Description:  "",
 			AddTokens:    addTokens,
 			UpdateTokens: updateTokens,
 		}
@@ -56,6 +52,7 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 	validMsg := newMsg([]types.Token{validToken}, nil)
 	validMsg2 := newMsg([]types.Token{validToken}, nil)
 	validMsg2.Authority = accs.Alice.String()
+	validMsg2.Description = "some description"
 
 	tcs := []struct {
 		name string
@@ -132,13 +129,13 @@ func TestMsgGovUpdateRegistryOtherFunctionality(t *testing.T) {
 		HistoricMedians:        24,
 	}
 	msg := types.NewMsgGovUpdateRegistry(
-		authtypes.NewModuleAddress(govtypes.ModuleName).String(), "title", "description",
+		checkers.GovModuleAddr,
+		"",
 		[]types.Token{umee}, []types.Token{},
 	)
 
 	expResult := `authority: umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp
-title: title
-description: description
+description: ""
 addtokens: []
 updatetokens:
     - base_denom: uumee

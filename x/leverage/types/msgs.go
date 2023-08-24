@@ -18,11 +18,12 @@ var (
 
 // NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance.
 // Authority must be a valid bech32 address.
-func NewMsgGovUpdateRegistry(authority string, update, add []Token) *MsgGovUpdateRegistry {
+func NewMsgGovUpdateRegistry(authority, description string, update, add []Token) *MsgGovUpdateRegistry {
 	return &MsgGovUpdateRegistry{
+		Authority:    authority,
+		Description:  description,
 		UpdateTokens: update,
 		AddTokens:    add,
-		Authority:    authority,
 	}
 }
 

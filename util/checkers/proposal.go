@@ -15,11 +15,11 @@ import (
 	_ "github.com/umee-network/umee/v6/app/params"
 )
 
-// govModuleAddr is set during the first call of ValidateProposal
-var govModuleAddr string
+// GovModuleAddr is set during the first call of ValidateProposal
+var GovModuleAddr string
 
 func init() {
-	govModuleAddr = authtypes.NewModuleAddress(govtypes.ModuleName).String()
+	GovModuleAddr = authtypes.NewModuleAddress(govtypes.ModuleName).String()
 }
 
 const minProposalTitleLen = 3
@@ -29,7 +29,7 @@ const minProposalTitleLen = 3
 func AssertGovAuthority(authority string) error {
 	if !IsGovAuthority(authority) {
 		return govtypes.ErrInvalidSigner.Wrapf(
-			"expected %s, got %s", govModuleAddr, authority)
+			"expected %s, got %s", GovModuleAddr, authority)
 	}
 	return nil
 }
@@ -37,10 +37,10 @@ func AssertGovAuthority(authority string) error {
 // IsGovAuthority returns true if the authority is the gov module address. Panics if
 // the gov module address is not set during the package initialization.
 func IsGovAuthority(authority string) bool {
-	if govModuleAddr == "" {
+	if GovModuleAddr == "" {
 		panic("govModuleAddrs in the checkers package must be set before using this function")
 	}
-	return authority == govModuleAddr
+	return authority == GovModuleAddr
 }
 
 // WithEmergencyGroup is a copy of ugov.WithEmergencyGroup to avoid import cycle
