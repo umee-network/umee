@@ -37,30 +37,30 @@ func init() {
 	)
 }
 
-type chain struct {
-	dataDir        string
+type Chain struct {
+	DataDir        string
 	ID             string
 	Validators     []*validator
 	GaiaValidators []*gaiaValidator
 }
 
-func newChain() (*chain, error) {
+func NewChain() (*Chain, error) {
 	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-")
 	if err != nil {
 		return nil, err
 	}
 
-	return &chain{
-		ID:      "chain-" + tmrand.NewRand().Str(6),
-		dataDir: tmpDir,
+	return &Chain{
+		ID:      "Chain-" + tmrand.NewRand().Str(6),
+		DataDir: tmpDir,
 	}, nil
 }
 
-func (c *chain) configDir() string {
-	return fmt.Sprintf("%s/%s", c.dataDir, c.ID)
+func (c *Chain) configDir() string {
+	return fmt.Sprintf("%s/%s", c.DataDir, c.ID)
 }
 
-func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
+func (c *Chain) CreateAndInitValidators(cdc codec.Codec, count int) error {
 	for i := 0; i < count; i++ {
 		node := c.createValidator(i)
 
@@ -86,7 +86,7 @@ func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
 	return nil
 }
 
-func (c *chain) createAndInitGaiaValidator(cdc codec.Codec) error {
+func (c *Chain) CreateAndInitGaiaValidator(cdc codec.Codec) error {
 	// create gaia validator
 	gaiaVal := c.createGaiaValidator(0)
 
@@ -104,7 +104,7 @@ func (c *chain) createAndInitGaiaValidator(cdc codec.Codec) error {
 	return nil
 }
 
-func (c *chain) createValidator(index int) *validator {
+func (c *Chain) createValidator(index int) *validator {
 	return &validator{
 		chain:   c,
 		index:   index,
@@ -112,7 +112,7 @@ func (c *chain) createValidator(index int) *validator {
 	}
 }
 
-func (c *chain) createGaiaValidator(index int) *gaiaValidator {
+func (c *Chain) createGaiaValidator(index int) *gaiaValidator {
 	return &gaiaValidator{
 		index: index,
 	}

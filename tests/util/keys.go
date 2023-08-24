@@ -12,7 +12,7 @@ import (
 const (
 	PhotonDenom    = "photon"
 	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom
-	GaiaChainID    = "test-gaia-chain"
+	GaiaChainID    = "test-gaia-Chain"
 
 	EthChainID uint = 15
 	EthMinerPK      = "0xb1bab011e03a9862664706fc3bbaa1b16651528e5f0e7fbfcbfdd8be302a13e7"

@@ -30,7 +30,7 @@ import (
 )
 
 type validator struct {
-	chain        *chain
+	chain        *Chain
 	index        int
 	moniker      string
 	mnemonic     string
