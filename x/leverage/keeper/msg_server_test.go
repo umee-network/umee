@@ -93,7 +93,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 }
 
 func (s *IntegrationTestSuite) TestUpdateRegistry() {
-	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+	govAccAddr := checkers.GovModuleAddr
 	modifiedUmee := fixtures.Token("uumee", "UMEE", 6)
 	modifiedUmee.ReserveFactor = sdk.MustNewDecFromStr("0.69")
 

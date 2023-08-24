@@ -10,6 +10,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/keeper"
@@ -33,7 +34,7 @@ func TestMsgServer_Swap(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -184,7 +185,7 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -280,7 +281,7 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -379,7 +380,7 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 
 	_, err = msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    nil,
 			UpdateIndex: []metoken.Index{index},
 		},
@@ -481,7 +482,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -796,7 +797,7 @@ func TestMsgServer_Swap_EdgeCase(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -965,7 +966,7 @@ func TestMsgServer_Redeem(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1139,7 +1140,7 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1274,7 +1275,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1607,7 +1608,7 @@ func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1785,7 +1786,7 @@ func TestMsgServer_GovSetParams(t *testing.T) {
 		{
 			"valid",
 			metoken.NewMsgGovSetParams(
-				app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+				checkers.GovModuleAddr,
 				metoken.DefaultParams(),
 			),
 			"",
@@ -1809,12 +1810,11 @@ func TestMsgServer_GovSetParams(t *testing.T) {
 func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
-	govAddr := app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
 
 	existingIndex := mocks.StableIndex("me/Existing")
 	_, err := msgServer.GovUpdateRegistry(
 		ctx,
-		metoken.NewMsgGovUpdateRegistry(govAddr, []metoken.Index{existingIndex}, nil),
+		metoken.NewMsgGovUpdateRegistry(checker.GovModuleAddr, []metoken.Index{existingIndex}, nil),
 	)
 	require.NoError(t, err)
 

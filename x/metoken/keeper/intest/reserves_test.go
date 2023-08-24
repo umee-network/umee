@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/app"
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/keeper"
@@ -23,7 +24,7 @@ func TestRebalanceReserves(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -91,7 +92,7 @@ func TestRebalanceReserves(t *testing.T) {
 	// update index
 	_, err = msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    nil,
 			UpdateIndex: []metoken.Index{index},
 		},
