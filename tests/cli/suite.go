@@ -174,7 +174,10 @@ func (s *CLISuite) initGenesis() {
 
 	// write the updated genesis file to each validator
 	for _, val := range s.Chain.Validators {
-		util.WriteFile(filepath.Join(val.ConfigDir(), "config", "genesis.json"), bz)
+		err = util.WriteFile(filepath.Join(val.ConfigDir(), "config", "genesis.json"), bz)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

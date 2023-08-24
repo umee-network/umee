@@ -69,7 +69,7 @@ func (s *CLITests) TestInvalidQueries() {
 }
 
 func (s *CLITests) TestLeverageScenario() {
-	val := s.Network.Validators[0]
+	addr, _ := s.Chain.Validators[0].KeyInfo.GetAddress()
 
 	oracleSymbolPrice := sdk.MustNewDecFromStr("34.21")
 
@@ -166,7 +166,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query max withdraw (zero)",
 			Command: cli.GetCmdQueryMaxWithdraw(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 				"uumee",
 			},
 			Response: &types.QueryMaxWithdrawResponse{},
@@ -180,7 +180,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query max borrow (zero)",
 			Command: cli.GetCmdQueryMaxBorrow(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 				"uumee",
 			},
 			Response: &types.QueryMaxBorrowResponse{},
@@ -240,7 +240,7 @@ func (s *CLITests) TestLeverageScenario() {
 		Name:    "liquidate",
 		Command: cli.GetCmdLiquidate(),
 		Args: []string{
-			val.Address.String(),
+			addr.String(),
 			"5uumee", // borrower attempts to liquidate itself, but is ineligible
 			"uumee",
 		},
@@ -250,7 +250,7 @@ func (s *CLITests) TestLeverageScenario() {
 		Name:    "liquidate",
 		Command: cli.GetCmdLeveragedLiquidate(),
 		Args: []string{
-			val.Address.String(),
+			addr.String(),
 			"uumee", // borrower attempts to liquidate itself, but is ineligible
 			"uumee",
 		},
@@ -300,7 +300,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query account balances",
 			Command: cli.GetCmdQueryAccountBalances(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 			},
 			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
@@ -320,7 +320,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query account summary",
 			Command: cli.GetCmdQueryAccountSummary(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 			},
 			Response: &types.QueryAccountSummaryResponse{},
 			ExpectedResponse: &types.QueryAccountSummaryResponse{
@@ -344,7 +344,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query max withdraw (borrow limit reached)",
 			Command: cli.GetCmdQueryMaxWithdraw(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 				"uumee",
 			},
 			Response: &types.QueryMaxWithdrawResponse{},
@@ -358,7 +358,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query max borrow (borrow limit reached)",
 			Command: cli.GetCmdQueryMaxBorrow(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 				"uumee",
 			},
 			Response: &types.QueryMaxBorrowResponse{},
@@ -374,7 +374,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query account balances",
 			Command: cli.GetCmdQueryAccountBalances(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 			},
 			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
@@ -392,7 +392,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query max withdraw (after repay)",
 			Command: cli.GetCmdQueryMaxWithdraw(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 				"uumee",
 			},
 			Response: &types.QueryMaxWithdrawResponse{},
@@ -410,7 +410,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query max borrow (after repay)",
 			Command: cli.GetCmdQueryMaxBorrow(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 				"uumee",
 			},
 			Response: &types.QueryMaxBorrowResponse{},
@@ -425,7 +425,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query all max withdraw (after repay)",
 			Command: cli.GetCmdQueryMaxWithdraw(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 			},
 			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
@@ -442,7 +442,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query all max borrow (after repay)",
 			Command: cli.GetCmdQueryMaxBorrow(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 			},
 			Response: &types.QueryMaxBorrowResponse{},
 			ExpectedResponse: &types.QueryMaxBorrowResponse{
@@ -459,7 +459,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query account balances (empty after withdraw max)",
 			Command: cli.GetCmdQueryAccountBalances(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 			},
 			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
@@ -474,7 +474,7 @@ func (s *CLITests) TestLeverageScenario() {
 			Name:    "query max withdraw (after withdraw max)",
 			Command: cli.GetCmdQueryMaxWithdraw(),
 			Args: []string{
-				val.Address.String(),
+				addr.String(),
 				"uumee",
 			},
 			Response: &types.QueryMaxWithdrawResponse{},
