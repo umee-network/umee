@@ -101,8 +101,8 @@ func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
 	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
 		return err
 	}
-	if len(msg.Description) != 0 {
-		return fmt.Errorf("for x/gov proposals, description must be empty, and the x/gov proposal metadata should be used instead")
+	if err := checkers.Description(msg.Description); err != nil {
+		return err
 	}
 
 	if len(msg.Pairs) == 0 && len(msg.Sets) == 0 {

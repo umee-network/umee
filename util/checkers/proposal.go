@@ -22,8 +22,6 @@ func init() {
 	GovModuleAddr = authtypes.NewModuleAddress(govtypes.ModuleName).String()
 }
 
-const minProposalTitleLen = 3
-
 // AssertGovAuthority errors is the authority is not the gov module address. Panics if
 // the gov module address is not set during the package initialization.
 func AssertGovAuthority(authority string) error {
@@ -72,20 +70,28 @@ func EmergencyGroupAuthority(authority string, eg WithEmergencyGroup) (bool, err
 func Proposal(authority, description string) error {
 	if IsGovAuthority(authority) {
 		if len(description) != 0 {
-			return errors.New("for x/gov proposals, description must be empty, and the x/gov proposal metadata should be used instead")
+			return errors.New(
+				"description must be empty for x/gov proposals, the x/gov proposal metadata should be used instead")
 		}
 	} else {
 		if _, err := sdk.AccAddressFromBech32(authority); err != nil {
 			return err
 		}
-		if len(description) == 0 || len(description) > gov1b1.MaxDescriptionLength {
-			return fmt.Errorf(
-				"proposal description must be not empty and not longer than %d",
-				gov1b1.MaxDescriptionLength,
-			)
+		if err := Description(description); err != nil {
+			return err
 		}
 	}
 
+	return nil
+}
+
+func Description(d string) error {
+	if len(d) == 0 || len(d) > gov1b1.MaxDescriptionLength {
+		return fmt.Errorf(
+			"proposal description must be not empty and not longer than %d",
+			gov1b1.MaxDescriptionLength,
+		)
+	}
 	return nil
 }
 

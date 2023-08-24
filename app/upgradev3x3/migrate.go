@@ -13,12 +13,12 @@ type migrator struct {
 
 // Creates migration handler for gov leverage proposals to new the gov system
 // and MsgGovUpdateRegistry type.
-func Migrator(gk govkeeper.Keeper, registry cdctypes.InterfaceRegistry) module.MigrationHandler {
+func Migrator(gk govkeeper.Keeper, _ cdctypes.InterfaceRegistry) module.MigrationHandler {
 	// note: content was removed, use v3.3 for implementation details.
 	m := migrator{gk}
 	return m.migrate
 }
 
-func (m migrator) migrate(ctx sdk.Context) error {
+func (m migrator) migrate(_ sdk.Context) error {
 	panic("use v3.3 binary")
 }
