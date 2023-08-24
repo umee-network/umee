@@ -21,8 +21,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 	ntB := fixtures.Token("untb", "ABCD", 6)
 	testCases := []struct {
 		name        string
-		req         *types.MsgGovUpdateRegistry
-		expectErr   bool
+		req         types.MsgGovUpdateRegistry
 		errMsg      string
 		noOfRecords int
 	}{
@@ -33,7 +32,6 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				Description: "",
 				AddTokens:   []types.Token{fixtures.Token("uosmo", "", 6)}, // empty denom is invalid,
 			},
-			true,
 			"invalid denom",
 			0,
 		}, {
@@ -45,7 +43,6 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 					registeredUmee,
 				},
 			},
-			true,
 			fmt.Sprintf("token %s is already registered", registeredUmee.BaseDenom),
 			0,
 		}, {
@@ -57,7 +54,6 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 					ntA,
 				},
 			},
-			false,
 			"",
 			7,
 		}, {
@@ -69,7 +65,6 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 					ntB,
 				},
 			},
-			false,
 			"",
 			8,
 		},
@@ -81,7 +76,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 			if err == nil {
 				_, err = s.msgSrvr.GovUpdateRegistry(s.ctx, &tc.req)
 			}
-			if tc.expectErr {
+			if tc.errMsg != "" {
 				s.Require().ErrorContains(err, tc.errMsg)
 			} else {
 				s.Require().NoError(err)
