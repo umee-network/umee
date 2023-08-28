@@ -1,4 +1,4 @@
-package upgradev6
+package upgradev6x0
 
 import (
 	"fmt"
@@ -42,7 +42,9 @@ func Migrate(ctx sdk.Context, gk govkeeper.Keeper) error {
 	return nil
 }
 
-func migrateMsgGovUpdateRegistry(ctx sdk.Context, p *govv1.Proposal, old *MsgGovUpdateRegistry, gk govkeeper.Keeper, logger log.Logger) {
+func migrateMsgGovUpdateRegistry(
+	ctx sdk.Context, p *govv1.Proposal, old *MsgGovUpdateRegistry, gk govkeeper.Keeper, logger log.Logger,
+) {
 	newMsg := types.MsgGovUpdateRegistry{
 		Authority:    old.Authority,
 		Description:  "",
