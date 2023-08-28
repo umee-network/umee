@@ -473,7 +473,6 @@ func New(
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
-		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
