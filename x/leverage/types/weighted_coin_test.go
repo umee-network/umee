@@ -534,18 +534,213 @@ func TestWeightedSpecialPairBefore(t *testing.T) {
 	}
 }
 
-func TestWeightedSpecialPairsAdd(_ *testing.T) {
-	// TODO
+func TestWeightedSpecialPairsAdd(t *testing.T) {
+	testCases := []struct {
+		initial WeightedSpecialPairs
+		add     WeightedSpecialPair
+		sum     WeightedSpecialPairs
+		message string
+	}{
+		// TODO: cases
+	}
+
+	for _, tc := range testCases {
+		sum := tc.initial.Add(tc.add)
+		assert.Equal(t, len(tc.sum), len(sum), tc.message)
+		for i, wsp := range tc.sum {
+			assert.Equal(t, wsp.String(), sum[i].String(), tc.message)
+		}
+	}
 }
 
-func TestWeightedNormalPairsAdd(_ *testing.T) {
-	// TODO
+func TestWeightedNormalPairsAdd(t *testing.T) {
+	testCases := []struct {
+		initial WeightedNormalPairs
+		add     WeightedNormalPair
+		sum     WeightedNormalPairs
+		message string
+	}{
+		// TODO: cases
+	}
+
+	for _, tc := range testCases {
+		sum := tc.initial.Add(tc.add)
+		assert.Equal(t, len(tc.sum), len(sum), tc.message)
+		for i, wnp := range tc.sum {
+			assert.Equal(t, wnp.String(), sum[i].String(), tc.message)
+		}
+	}
 }
 
-func TestWeightedSpecialPairsCanCombine(_ *testing.T) {
-	// TODO
+func TestWeightedSpecialPairsCanCombine(t *testing.T) {
+	testCases := []struct {
+		pairs      WeightedSpecialPairs
+		canCombine bool
+		message    string
+	}{
+		{
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "0.1"),
+					Borrow:        coin.Dec("BBBB", "100.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+			},
+			true,
+			"AB pairs, disregarding differing weights",
+		},
+		{
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("AAAA"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "0.1"),
+					Borrow:        coin.Dec("AAAA", "100.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.ZeroDec("AAAA"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+			},
+			true,
+			"AA pairs, disregarding differing weights",
+		},
+		{
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("AAAA"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "0.1"),
+					Borrow:        coin.Dec("BBBB", "100.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+				},
+				{
+					Collateral:    coin.Dec("BBBB", "20.0"),
+					Borrow:        coin.ZeroDec("AAAA"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+				{
+					Collateral:    coin.ZeroDec("BBBB"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+			},
+			false,
+			"unique pairs",
+		},
+	}
+
+	// each test case is constructed so that its pairs must all be combinable,
+	// or all be unique.
+	for _, tc := range testCases {
+		for i, a := range tc.pairs {
+			for j, b := range tc.pairs {
+				// Test every possible relation within the set, except
+				// elements with themselves in the unique (cannot combine) case.
+				if i != j || tc.canCombine {
+					assert.Equal(t, tc.canCombine, a.canCombine(b), tc.message, a, b)
+				}
+			}
+		}
+	}
 }
 
-func TestWeightedNormalPairsCanCombine(_ *testing.T) {
-	// TODO
+func TestWeightedNormalPairsCanCombine(t *testing.T) {
+	testCases := []struct {
+		pairs      WeightedNormalPairs
+		canCombine bool
+		message    string
+	}{
+		{
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.3"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "0", "0.6"),
+					Borrow:     weightedDecCoin("BBBB", "0", "0.7"),
+				},
+			},
+			true,
+			"AB pairs, disregarding differing weights",
+		},
+		{
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("AAAA", "1.0", "0.2"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("AAAA", "1.0", "0.3"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "0", "0.6"),
+					Borrow:     weightedDecCoin("AAAA", "0", "0.7"),
+				},
+			},
+			true,
+			"AA pairs, disregarding differing weights",
+		},
+
+		{
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("AAAA", "1.0", "0.2"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.3"),
+				},
+				{
+					Collateral: weightedDecCoin("BBBB", "0", "0.6"),
+					Borrow:     weightedDecCoin("AAAA", "0", "0.7"),
+				},
+				{
+					Collateral: weightedDecCoin("BBBB", "0", "0.6"),
+					Borrow:     weightedDecCoin("BBBB", "0", "0.7"),
+				},
+			},
+			false,
+			"unique pairs",
+		},
+	}
+
+	// each test case is constructed so that its pairs must all be combinable,
+	// or all be unique.
+	for _, tc := range testCases {
+		for i, a := range tc.pairs {
+			for j, b := range tc.pairs {
+				// Test every possible relation within the set, except
+				// elements with themselves in the unique (cannot combine) case.
+				if i != j || tc.canCombine {
+					assert.Equal(t, tc.canCombine, a.canCombine(b), tc.message, a, b)
+				}
+			}
+		}
+	}
 }
