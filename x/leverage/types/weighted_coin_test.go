@@ -591,6 +591,48 @@ func TestWeightedSpecialPairsAdd(t *testing.T) {
 					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
 				},
 				{
+					Collateral:    coin.Dec("AAAA", "100.0"),
+					Borrow:        coin.Dec("CCCC", "60.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.Dec("AAAA", "10.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+			},
+			WeightedSpecialPair{
+				Collateral:    coin.Dec("AAAA", "0.0"),
+				Borrow:        coin.Dec("CCCC", "0.0"),
+				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+			},
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "100.0"),
+					Borrow:        coin.Dec("CCCC", "60.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.Dec("AAAA", "10.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+			},
+			"survives existing pair zero valued input",
+		},
+		{
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
 					Collateral:    coin.Dec("AAAA", "20.0"),
 					Borrow:        coin.Dec("AAAA", "10.0"),
 					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
@@ -621,6 +663,43 @@ func TestWeightedSpecialPairsAdd(t *testing.T) {
 			"new pair addition with zero values present",
 		},
 
+		{
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.Dec("AAAA", "10.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+			},
+			WeightedSpecialPair{
+				Collateral:    coin.Dec("AAAA", "0.0"),
+				Borrow:        coin.Dec("CCCC", "0.0"),
+				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+			},
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "0.0"),
+					Borrow:        coin.Dec("CCCC", "0.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.Dec("AAAA", "10.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+			},
+			"new zero-valued pair addition with zero values present",
+		},
 		{
 			[]WeightedSpecialPair{
 				{
