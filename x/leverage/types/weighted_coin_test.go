@@ -620,6 +620,44 @@ func TestWeightedSpecialPairsAdd(t *testing.T) {
 			},
 			"new pair addition with zero values present",
 		},
+
+		{
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.Dec("AAAA", "10.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+			},
+			WeightedSpecialPair{
+				Collateral:    coin.Dec("AAAA", "50.0"),
+				Borrow:        coin.Dec("CCCC", "30.0"),
+				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+			},
+			[]WeightedSpecialPair{
+				{
+					Collateral:    coin.ZeroDec("AAAA"),
+					Borrow:        coin.ZeroDec("BBBB"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "50.0"),
+					Borrow:        coin.Dec("CCCC", "30.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+				},
+				{
+					Collateral:    coin.Dec("AAAA", "20.0"),
+					Borrow:        coin.Dec("AAAA", "10.0"),
+					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+				},
+			},
+			"fixes unsorted input",
+		},
 		{
 			[]WeightedSpecialPair{
 				{
@@ -660,7 +698,79 @@ func TestWeightedNormalPairsAdd(t *testing.T) {
 		sum     WeightedNormalPairs
 		message string
 	}{
-		// TODO: cases
+		{
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
+				},
+			},
+			WeightedNormalPair{
+				Collateral: weightedDecCoin("AAAA", "20.0", "0.1"),
+				Borrow:     weightedDecCoin("BBBB", "2.0", "0.2"),
+			},
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "30.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "3.0", "0.2"),
+				},
+			},
+			"simple add",
+		},
+		{
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
+				},
+			},
+			WeightedNormalPair{
+				Collateral: weightedDecCoin("AAAA", "20.0", "0.4"),
+				Borrow:     weightedDecCoin("BBBB", "8.0", "0.4"),
+			},
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "30.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "9.0", "0.2"),
+				},
+			},
+			"differing weights (should never happen) keeps original weight",
+		},
+		{
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("CCCC", "10.0", "0.0"),
+					Borrow:     weightedDecCoin("CCCC", "0", "0.0"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("AAAA", "1.0", "0.1"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
+				},
+			},
+			WeightedNormalPair{
+				Collateral: weightedDecCoin("AAAA", "20.0", "0.1"),
+				Borrow:     weightedDecCoin("BBBB", "2.0", "0.2"),
+			},
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "30.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "3.0", "0.2"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("AAAA", "1.0", "0.1"),
+				},
+				{
+					Collateral: weightedDecCoin("CCCC", "10.0", "0.0"),
+					Borrow:     weightedDecCoin("CCCC", "0", "0.0"),
+				},
+			},
+			"fixes unsorted input",
+		},
 	}
 
 	for _, tc := range testCases {
