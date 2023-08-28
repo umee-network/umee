@@ -98,10 +98,6 @@ func migrateIBCMetadataProposal(
 	if err != nil {
 		return err
 	}
-	err = p.UnpackInterfaces(ir)
-	if err != nil {
-		return err
-	}
 
 	p.Metadata = fmt.Sprintf("{\"title\":%q,\"summary\":%q}", gravityIBCProp.Title, gravityIBCProp.String())
 	logger.Info("MIGRATING proposal", "id", p.Id)
