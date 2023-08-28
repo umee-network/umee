@@ -603,7 +603,7 @@ func (s msgServer) GovUpdateSpecialAssets(
 	return &types.MsgGovUpdateSpecialAssetsResponse{}, nil
 }
 
-// GovSetParams adds, updates, or deletes special asset pairs.
+// GovSetParams updates module parameters.
 func (s msgServer) GovSetParams(
 	goCtx context.Context,
 	msg *types.MsgGovSetParams,
