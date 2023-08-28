@@ -29,7 +29,7 @@ import (
 	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 
-	"github.com/umee-network/umee/v6/app/upgradev6"
+	"github.com/umee-network/umee/v6/app/upgradev6x0"
 	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/ugov"
@@ -65,7 +65,7 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			if err := upgradev6.Migrate(ctx, app.GovKeeper); err != nil {
+			if err := upgradev6x0.Migrate(ctx, app.GovKeeper); err != nil {
 				return fromVM, err
 			}
 			// TODO: need to register emergency group
