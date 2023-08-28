@@ -423,7 +423,44 @@ func TestWeightedNormalPairBefore(t *testing.T) {
 			Collateral: weightedDecCoin("VVVV", "1.0", "1.0"),
 			Borrow:     weightedDecCoin("AAAA", "1.0", "0.1"),
 		},
+		// this section of ABCD assets confirms weight sorting of pairs,
+		// which prioritizes collateral weight and breaks ties
+		// with borrow weight. this must work even if borrow weight
+		// is out of order (which should not happen in practice)
+		{
+			Collateral: weightedDecCoin("DDDD", "1.0", "0.4"),
+			Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
+		},
+		{
+			Collateral: weightedDecCoin("DDDD", "1.0", "0.4"),
+			Borrow:     weightedDecCoin("AAAA", "1.0", "0.1"),
+		},
+		{
+			Collateral: weightedDecCoin("CCCC", "1.0", "0.3"),
+			Borrow:     weightedDecCoin("CCCC", "1.0", "0.3"),
+		},
+		{
+			Collateral: weightedDecCoin("BBBB", "1.0", "0.2"),
+			Borrow:     weightedDecCoin("CCCC", "1.0", "0.3"),
+		},
+		// this zero weight collateral should always be sorted last
+		// regardless of what borrow it is paired with
+		{
+			Collateral: weightedDecCoin("ZZZZ", "1.0", "0.0"),
+			Borrow:     weightedDecCoin("VVVV", "1.0", "1.0"),
+		},
 	}
+
+	// check before() using referencePairs
+	for i, wdc := range referencePairs {
+		for j, c := range referencePairs {
+			assert.Equal(t, i < j, wdc.before(c), "require pre-sorted referencePairs ", i, j)
+		}
+	}
+}
+
+func TestWeightedSpecialPairBefore(_ *testing.T) {
+	// TODO
 
 	/*
 		referenceCoins := WeightedDecCoins{
@@ -438,17 +475,6 @@ func TestWeightedNormalPairBefore(t *testing.T) {
 			weightedDecCoin("ZZZZ", "1.0", "0.0"),
 		}
 	*/
-
-	// check before() using referencePairs
-	for i, wdc := range referencePairs {
-		for j, c := range referencePairs {
-			assert.Equal(t, i < j, wdc.before(c), "require pre-sorted referencePairs ", i, j)
-		}
-	}
-}
-
-func TestWeightedSpecialPairBefore(_ *testing.T) {
-	// TODO
 }
 
 func TestWeightedSpecialPairsAdd(_ *testing.T) {
