@@ -29,6 +29,7 @@ import (
 	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 
+	"github.com/umee-network/umee/v6/app/upgradev6"
 	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/ugov"
@@ -61,9 +62,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 
 // TODO: this upgrade registration is just for testing purpose, once we finalize the release for new token emission
 // then we need to change planName and storeUpgrades
-// func (app *UmeeApp) registerNewTokenEmissionUpgrade(upgradeInfo upgradetypes.Plan) {
-// 	// TODO:finalize the name
-// 	planName := "token_emission"
+// func (app *UmeeApp) registerNewTokenEmissionUpgrade() {
 // 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 // 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 // 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
@@ -82,6 +81,11 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			if err := upgradev6.Migrate(ctx, app.GovKeeper); err != nil {
+				return fromVM, err
+			}
+			// TODO: need to register emergency group
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
