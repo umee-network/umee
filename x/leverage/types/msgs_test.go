@@ -36,7 +36,7 @@ func TestMsgGovSetParams(t *testing.T) {
 					DirectLiquidationFee:         sdk.ZeroDec(),
 				},
 			},
-			"",
+			"complete liquidation threshold must be positive",
 			"invalid params",
 		},
 		{
