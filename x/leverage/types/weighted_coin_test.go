@@ -723,6 +723,33 @@ func TestWeightedNormalPairsAdd(t *testing.T) {
 					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
 					Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
 				},
+				{
+					Collateral: weightedDecCoin("AAAA", "0.0", "0.1"),
+					Borrow:     weightedDecCoin("DDDD", "0.0", "0.2"),
+				},
+			},
+			WeightedNormalPair{
+				Collateral: weightedDecCoin("AAAA", "0.0", "0.1"),
+				Borrow:     weightedDecCoin("BBBB", "0.0", "0.2"),
+			},
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
+				},
+				{
+					Collateral: weightedDecCoin("AAAA", "0.0", "0.1"),
+					Borrow:     weightedDecCoin("DDDD", "0.0", "0.2"),
+				},
+			},
+			"survives zero inputs",
+		},
+		{
+			[]WeightedNormalPair{
+				{
+					Collateral: weightedDecCoin("AAAA", "10.0", "0.1"),
+					Borrow:     weightedDecCoin("BBBB", "1.0", "0.2"),
+				},
 			},
 			WeightedNormalPair{
 				Collateral: weightedDecCoin("AAAA", "20.0", "0.4"),
@@ -915,7 +942,6 @@ func TestWeightedNormalPairsCanCombine(t *testing.T) {
 			true,
 			"AA pairs, disregarding differing weights",
 		},
-
 		{
 			[]WeightedNormalPair{
 				{
