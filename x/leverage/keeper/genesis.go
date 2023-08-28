@@ -10,7 +10,7 @@ import (
 
 // InitGenesis initializes the x/leverage module state from a provided genesis state.
 func (k Keeper) InitGenesis(ctx sdk.Context, genState types.GenesisState) {
-	k.SetParams(ctx, genState.Params)
+	util.Panic(k.SetParams(ctx, genState.Params))
 
 	for _, token := range genState.Registry {
 		util.Panic(k.SetTokenSettings(ctx, token))

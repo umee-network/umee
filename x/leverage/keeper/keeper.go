@@ -7,7 +7,6 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -18,7 +17,6 @@ import (
 type Keeper struct {
 	cdc                    codec.Codec
 	storeKey               storetypes.StoreKey
-	paramSpace             paramtypes.Subspace
 	bankKeeper             types.BankKeeper
 	oracleKeeper           types.OracleKeeper
 	ugov                   ugov.EmergencyGroupBuilder
@@ -32,22 +30,15 @@ type Keeper struct {
 func NewKeeper(
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
-	paramSpace paramtypes.Subspace,
 	b types.BankKeeper,
 	o types.OracleKeeper,
 	ugov ugov.EmergencyGroupBuilder,
 	enableLiquidatorQuery bool,
 	meTokenAddr sdk.AccAddress,
 ) Keeper {
-	// set KeyTable if it has not already been set
-	if !paramSpace.HasKeyTable() {
-		paramSpace = paramSpace.WithKeyTable(types.ParamKeyTable())
-	}
-
 	return Keeper{
 		cdc:                    cdc,
 		storeKey:               storeKey,
-		paramSpace:             paramSpace,
 		bankKeeper:             b,
 		oracleKeeper:           o,
 		ugov:                   ugov,

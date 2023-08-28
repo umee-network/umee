@@ -61,6 +61,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
+- [2209](https://github.com/umee-network/umee/pull/2209) Move leverage module params from paramspace to regular leverage module state.
 
 ### State Machine Breaking
 

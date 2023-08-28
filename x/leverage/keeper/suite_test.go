@@ -63,7 +63,6 @@ func (s *IntegrationTestSuite) SetupTest() {
 	k, tk := keeper.NewTestKeeper(
 		app.AppCodec(),
 		app.GetKey(types.ModuleName),
-		app.GetSubspace(types.ModuleName),
 		app.BankKeeper,
 		s.mockOracle,
 		true,

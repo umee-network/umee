@@ -12,8 +12,54 @@ import (
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
-func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
+func TestMsgGovSetParams(t *testing.T) {
+	tcs := []struct {
+		msg  types.MsgGovSetParams
+		err  string
+		name string
+	}{
+		{
+			types.MsgGovSetParams{
+				Params: types.DefaultParams(),
+			},
+			"empty address",
+			"no authority",
+		},
+		{
+			types.MsgGovSetParams{
+				checkers.GovModuleAddr,
+				types.Params{
+					CompleteLiquidationThreshold: sdk.ZeroDec(),
+					SmallLiquidationSize:         sdk.ZeroDec(),
+					OracleRewardFactor:           sdk.ZeroDec(),
+					MinimumCloseFactor:           sdk.ZeroDec(),
+					DirectLiquidationFee:         sdk.ZeroDec(),
+				},
+			},
+			"complete liquidation threshold must be positive",
+			"invalid params",
+		},
+		{
+			types.MsgGovSetParams{
+				checkers.GovModuleAddr,
+				types.DefaultParams(),
+			},
+			"",
+			"valid",
+		},
+	}
 
+	for _, tc := range tcs {
+		err := tc.msg.ValidateBasic()
+		if tc.err == "" {
+			assert.NilError(t, err, tc.name)
+		} else {
+			assert.ErrorContains(t, err, tc.err, tc.name)
+		}
+	}
+}
+
+func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 	validToken := types.Token{
 		BaseDenom:              "uumee",
 		SymbolDenom:            "UMEE",
@@ -42,7 +88,8 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 	invalidSymbol.SymbolDenom = ""
 
 	newMsg := func(addTokens, updateTokens []types.Token) types.MsgGovUpdateRegistry {
-		return types.MsgGovUpdateRegistry{Authority: checkers.GovModuleAddr,
+		return types.MsgGovUpdateRegistry{
+			Authority:    checkers.GovModuleAddr,
 			Description:  "",
 			AddTokens:    addTokens,
 			UpdateTokens: updateTokens,
