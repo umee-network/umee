@@ -197,7 +197,7 @@ func (s SpecialAssetSet) Validate() error {
 	denoms := map[string]bool{}
 	for _, a := range s.Assets {
 		if _, ok := denoms[a]; ok {
-			return ErrDuplicatePair
+			return fmt.Errorf("duplicate special asset pair: %s", a)
 		}
 		denoms[a] = true
 	}

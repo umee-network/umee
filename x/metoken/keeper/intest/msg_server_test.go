@@ -10,6 +10,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/keeper"
@@ -33,7 +34,7 @@ func TestMsgServer_Swap(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -184,7 +185,7 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -280,7 +281,7 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -379,7 +380,7 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 
 	_, err = msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    nil,
 			UpdateIndex: []metoken.Index{index},
 		},
@@ -481,7 +482,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -796,7 +797,7 @@ func TestMsgServer_Swap_EdgeCase(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -965,7 +966,7 @@ func TestMsgServer_Redeem(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1139,7 +1140,7 @@ func TestMsgServer_Redeem_NonStableAssets_DiffExponents(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1274,7 +1275,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1607,7 +1608,7 @@ func TestMsgServer_Redeem_EdgeCase(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -1770,7 +1771,7 @@ func verifyRedeem(
 
 func TestMsgServer_GovSetParams(t *testing.T) {
 	s := initTestSuite(t, nil, nil)
-	msgServer, ctx, app := s.msgServer, s.ctx, s.app
+	msgServer, ctx := s.msgServer, s.ctx
 
 	testCases := []struct {
 		name   string
@@ -1785,7 +1786,7 @@ func TestMsgServer_GovSetParams(t *testing.T) {
 		{
 			"valid",
 			metoken.NewMsgGovSetParams(
-				app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+				checkers.GovModuleAddr,
 				metoken.DefaultParams(),
 			),
 			"",
@@ -1809,12 +1810,11 @@ func TestMsgServer_GovSetParams(t *testing.T) {
 func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 	s := initTestSuite(t, nil, nil)
 	msgServer, ctx, app := s.msgServer, s.ctx, s.app
-	govAddr := app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
 
 	existingIndex := mocks.StableIndex("me/Existing")
 	_, err := msgServer.GovUpdateRegistry(
 		ctx,
-		metoken.NewMsgGovUpdateRegistry(govAddr, []metoken.Index{existingIndex}, nil),
+		metoken.NewMsgGovUpdateRegistry(checkers.GovModuleAddr, []metoken.Index{existingIndex}, nil),
 	)
 	require.NoError(t, err)
 
@@ -1863,13 +1863,13 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		},
 		{
 			"invalid - empty add and update indexes",
-			metoken.NewMsgGovUpdateRegistry(govAddr, nil, nil),
+			metoken.NewMsgGovUpdateRegistry(checkers.GovModuleAddr, nil, nil),
 			"empty add and update indexes",
 		},
 		{
 			"invalid - duplicated add indexes",
 			metoken.NewMsgGovUpdateRegistry(
-				govAddr,
+				checkers.GovModuleAddr,
 				[]metoken.Index{mocks.StableIndex(mocks.MeUSDDenom), mocks.StableIndex(mocks.MeUSDDenom)},
 				nil,
 			),
@@ -1878,7 +1878,7 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		{
 			"invalid - duplicated update indexes",
 			metoken.NewMsgGovUpdateRegistry(
-				govAddr,
+				checkers.GovModuleAddr,
 				[]metoken.Index{mocks.StableIndex(mocks.MeUSDDenom)},
 				[]metoken.Index{mocks.StableIndex(mocks.MeUSDDenom)},
 			),
@@ -1887,7 +1887,7 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		{
 			"invalid - add index",
 			metoken.NewMsgGovUpdateRegistry(
-				govAddr,
+				checkers.GovModuleAddr,
 				[]metoken.Index{mocks.StableIndex(mocks.USDTBaseDenom)},
 				nil,
 			),
@@ -1895,18 +1895,18 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		},
 		{
 			"invalid - existing add index",
-			metoken.NewMsgGovUpdateRegistry(govAddr, []metoken.Index{existingIndex}, nil),
+			metoken.NewMsgGovUpdateRegistry(checkers.GovModuleAddr, []metoken.Index{existingIndex}, nil),
 			"already exists",
 		},
 		{
 			"invalid - index with not registered token",
-			metoken.NewMsgGovUpdateRegistry(govAddr, []metoken.Index{indexWithNotRegisteredToken}, nil),
+			metoken.NewMsgGovUpdateRegistry(checkers.GovModuleAddr, []metoken.Index{indexWithNotRegisteredToken}, nil),
 			"not a registered Token",
 		},
 		{
 			"valid - add",
 			metoken.NewMsgGovUpdateRegistry(
-				govAddr,
+				checkers.GovModuleAddr,
 				[]metoken.Index{mocks.NonStableIndex(mocks.MeNonStableDenom)},
 				nil,
 			),
@@ -1915,7 +1915,7 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		{
 			"invalid - update index",
 			metoken.NewMsgGovUpdateRegistry(
-				govAddr,
+				checkers.GovModuleAddr,
 				nil,
 				[]metoken.Index{mocks.StableIndex(mocks.USDTBaseDenom)},
 			),
@@ -1923,17 +1923,17 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 		},
 		{
 			"invalid - non-existing update index",
-			metoken.NewMsgGovUpdateRegistry(govAddr, nil, []metoken.Index{mocks.StableIndex("me/NonExisting")}),
+			metoken.NewMsgGovUpdateRegistry(checkers.GovModuleAddr, nil, []metoken.Index{mocks.StableIndex("me/NonExisting")}),
 			"not found",
 		},
 		{
 			"invalid - update index exponent with balance",
-			metoken.NewMsgGovUpdateRegistry(govAddr, nil, []metoken.Index{existingIndex}),
+			metoken.NewMsgGovUpdateRegistry(checkers.GovModuleAddr, nil, []metoken.Index{existingIndex}),
 			"exponent cannot be changed when supply is greater than zero",
 		},
 		{
 			"invalid - update index deleting an asset",
-			metoken.NewMsgGovUpdateRegistry(govAddr, nil, []metoken.Index{deletedAssetIndex}),
+			metoken.NewMsgGovUpdateRegistry(checkers.GovModuleAddr, nil, []metoken.Index{deletedAssetIndex}),
 			"cannot be deleted from an index",
 		},
 	}

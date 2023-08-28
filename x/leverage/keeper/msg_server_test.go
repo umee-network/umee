@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	"github.com/umee-network/umee/v6/x/leverage/types"
@@ -13,81 +14,57 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
-	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+	govAccAddr := checkers.GovModuleAddr
 	registeredUmee := fixtures.Token("uumee", "UMEE", 6)
 	ntA := fixtures.Token("unta", "ABCD", 6)
 	// new token with existed symbol denom
 	ntB := fixtures.Token("untb", "ABCD", 6)
 	testCases := []struct {
 		name        string
-		req         *types.MsgGovUpdateRegistry
-		expectErr   bool
+		req         types.MsgGovUpdateRegistry
 		errMsg      string
 		noOfRecords int
 	}{
 		{
 			"invalid token data",
-			&types.MsgGovUpdateRegistry{
+			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
-				AddTokens: []types.Token{
-					fixtures.Token("uosmo", "", 6), // empty denom is invalid
-				},
+				Description: "",
+				AddTokens:   []types.Token{fixtures.Token("uosmo", "", 6)}, // empty denom is invalid,
 			},
-			true,
 			"invalid denom",
 			0,
 		}, {
-			"no authority address",
-			&types.MsgGovUpdateRegistry{
-				Authority:   "",
-				Title:       "test",
-				Description: "test",
-				AddTokens: []types.Token{
-					ntA,
-				},
-			},
-			true,
-			"empty address",
-			0,
-		}, {
 			"already registered token",
-			&types.MsgGovUpdateRegistry{
+			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
+				Description: "",
 				AddTokens: []types.Token{
 					registeredUmee,
 				},
 			},
-			true,
 			fmt.Sprintf("token %s is already registered", registeredUmee.BaseDenom),
 			0,
 		}, {
 			"valid authority and valid token for registry",
-			&types.MsgGovUpdateRegistry{
+			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
+				Description: "",
 				AddTokens: []types.Token{
 					ntA,
 				},
 			},
-			false,
 			"",
 			7,
 		}, {
 			"regisering new token with existed symbol denom",
-			&types.MsgGovUpdateRegistry{
+			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
+				Description: "",
 				AddTokens: []types.Token{
 					ntB,
 				},
 			},
-			false,
 			"",
 			8,
 		},
@@ -97,9 +74,9 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 		s.Run(tc.name, func() {
 			err := tc.req.ValidateBasic()
 			if err == nil {
-				_, err = s.msgSrvr.GovUpdateRegistry(s.ctx, tc.req)
+				_, err = s.msgSrvr.GovUpdateRegistry(s.ctx, &tc.req)
 			}
-			if tc.expectErr {
+			if tc.errMsg != "" {
 				s.Require().ErrorContains(err, tc.errMsg)
 			} else {
 				s.Require().NoError(err)
@@ -116,7 +93,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 }
 
 func (s *IntegrationTestSuite) TestUpdateRegistry() {
-	govAccAddr := s.app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String()
+	govAccAddr := checkers.GovModuleAddr
 	modifiedUmee := fixtures.Token("uumee", "UMEE", 6)
 	modifiedUmee.ReserveFactor = sdk.MustNewDecFromStr("0.69")
 
@@ -130,8 +107,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			"invalid token data",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
+				Description: "",
 				UpdateTokens: []types.Token{
 					fixtures.Token("uosmo", "", 6), // empty denom is invalid
 				},
@@ -142,7 +118,6 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			"no authority address",
 			&types.MsgGovUpdateRegistry{
 				Authority:   "",
-				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
 					fixtures.Token("uosmo", "", 6), // empty denom is invalid
@@ -154,7 +129,6 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			"invalid authority and valid update token registry",
 			&types.MsgGovUpdateRegistry{
 				Authority:   s.addrs[0].String(),
-				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
 					modifiedUmee,
@@ -166,8 +140,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			"valid authority and valid update token registry",
 			&types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
-				Title:       "test",
-				Description: "test",
+				Description: "",
 				UpdateTokens: []types.Token{
 					modifiedUmee,
 				},
@@ -178,7 +151,6 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 			"valid emergency group and valid update token registry",
 			&types.MsgGovUpdateRegistry{
 				Authority:   ugovmocks.SimpleEmergencyGroupAddr.String(),
-				Title:       "test",
 				Description: "test",
 				UpdateTokens: []types.Token{
 					modifiedUmee,
