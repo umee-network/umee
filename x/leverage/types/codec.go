@@ -39,8 +39,8 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgLeveragedLiquidate{}, "umee/leverage/MsgLeveragedLiquidate", nil)
 
 	cdc.RegisterConcrete(&MsgGovUpdateRegistry{}, "umee/leverage/MsgGovUpdateRegistry", nil)
-	cdc.RegisterConcrete(&MsgGovSetParams{}, "umee/incentive/MsgGovSetParams", nil)
-	cdc.RegisterConcrete(&MsgGovUpdateSpecialAssets{}, "umee/incentive/MsgGovUpdateSpecialAssets", nil)
+	cdc.RegisterConcrete(&MsgGovSetParams{}, "umee/leverage/MsgGovSetParams", nil)
+	cdc.RegisterConcrete(&MsgGovUpdateSpecialAssets{}, "umee/leverage/MsgGovUpdateSpecialAssets", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
