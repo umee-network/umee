@@ -14,17 +14,9 @@ var (
 	_ sdk.Msg = &MsgGovSetIBCStatus{}
 )
 
-// GetTitle returns the title of the proposal.
-func (msg *MsgGovUpdateQuota) GetTitle() string { return msg.Title }
-
-// GetDescription implements govv1b1.Content interface.
-func (msg *MsgGovUpdateQuota) GetDescription() string { return msg.Description }
-
-// Route implements Msg
-func (msg MsgGovUpdateQuota) Route() string { return "" }
-
-// Type implements Msg
-func (msg MsgGovUpdateQuota) Type() string { return sdk.MsgTypeURL(&msg) }
+//
+// MsgGovUpdateQuota
+//
 
 // String implements the Stringer interface.
 func (msg *MsgGovUpdateQuota) String() string {
@@ -34,46 +26,37 @@ func (msg *MsgGovUpdateQuota) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateQuota) ValidateBasic() error {
-	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+	if err := checkers.Proposal(msg.Authority, msg.Description); err != nil {
 		return err
 	}
 
 	if msg.Total.IsNil() || !msg.Total.IsPositive() {
 		return sdkerrors.ErrInvalidRequest.Wrap("total quota must be positive")
 	}
-
 	if msg.PerDenom.IsNil() || !msg.PerDenom.IsPositive() {
 		return sdkerrors.ErrInvalidRequest.Wrap("quota per denom must be positive")
 	}
-
 	if msg.Total.LT(msg.PerDenom) {
 		return sdkerrors.ErrInvalidRequest.Wrap("total quota must be greater than or equal to per_denom quota")
 	}
 
-	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, true)
+	return nil
 }
 
-// GetSignBytes implements Msg
-func (msg *MsgGovUpdateQuota) GetSignBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
-}
-
-// GetSigners implements Msg
 func (msg *MsgGovUpdateQuota) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
 }
 
-// GetTitle implements govv1b1.Content interface.
-func (msg *MsgGovSetIBCStatus) GetTitle() string { return msg.Title }
+// LegacyMsg.Type implementations
+func (msg MsgGovUpdateQuota) Route() string { return "" }
+func (msg MsgGovUpdateQuota) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg *MsgGovUpdateQuota) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
 
-// GetDescription implements govv1b1.Content interface.
-func (msg *MsgGovSetIBCStatus) GetDescription() string { return msg.Description }
-
-// Route implements Msg
-func (msg MsgGovSetIBCStatus) Route() string { return "" }
-
-// Type implements Msg
-func (msg MsgGovSetIBCStatus) Type() string { return sdk.MsgTypeURL(&msg) }
+//
+// MsgGovSetIBCStatus
+//
 
 // String implements the Stringer interface.
 func (msg *MsgGovSetIBCStatus) String() string {
@@ -83,24 +66,22 @@ func (msg *MsgGovSetIBCStatus) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovSetIBCStatus) ValidateBasic() error {
-	if err := checkers.ValidateAddr(msg.Authority, "authority"); err != nil {
+	if err := checkers.Proposal(msg.Authority, msg.Description); err != nil {
 		return err
 	}
 
-	if err := validateIBCTransferStatus(msg.IbcStatus); err != nil {
-		return err
-	}
-
-	return checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, true)
-}
-
-// GetSignBytes implements Msg
-func (msg *MsgGovSetIBCStatus) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+	return validateIBCTransferStatus(msg.IbcStatus)
 }
 
 // GetSigners implements Msg
 func (msg *MsgGovSetIBCStatus) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Authority)
+}
+
+// LegacyMsg.Type implementations
+func (msg MsgGovSetIBCStatus) Route() string { return "" }
+func (msg MsgGovSetIBCStatus) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg *MsgGovSetIBCStatus) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
 }
