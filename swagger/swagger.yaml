@@ -943,13 +943,7 @@ paths:
                       uTokens as liquidation rewards.
 
                       Valid values: 0-1.
-                description: >-
-                  Params defines the parameters for the leverage module.
-
-                  See
-                  https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
-
-                  for more details.
+                description: Params defines the parameters for the leverage module.
             description: >-
               QueryParamsResponse defines the response structure for the Params
               gRPC
@@ -4491,13 +4485,7 @@ definitions:
           uTokens as liquidation rewards.
 
           Valid values: 0-1.
-    description: >-
-      Params defines the parameters for the leverage module.
-
-      See
-      https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
-
-      for more details.
+    description: Params defines the parameters for the leverage module.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
     properties:
@@ -5025,13 +5013,7 @@ definitions:
               uTokens as liquidation rewards.
 
               Valid values: 0-1.
-        description: >-
-          Params defines the parameters for the leverage module.
-
-          See
-          https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
-
-          for more details.
+        description: Params defines the parameters for the leverage module.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
       service handler.

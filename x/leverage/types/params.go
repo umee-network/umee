@@ -4,63 +4,7 @@ import (
 	fmt "fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	"gopkg.in/yaml.v3"
 )
-
-var _ paramtypes.ParamSet = &Params{}
-
-var (
-	KeyCompleteLiquidationThreshold = []byte("CompleteLiquidationThreshold")
-	KeyMinimumCloseFactor           = []byte("MinimumCloseFactor")
-	KeyOracleRewardFactor           = []byte("OracleRewardFactor")
-	KeySmallLiquidationSize         = []byte("SmallLiquidationSize")
-	KeyDirectLiquidationFee         = []byte("DirectLiquidationFee")
-)
-
-// ParamSetPairs implements the ParamSet interface and returns all the key/value
-// pairs pairs of x/leverage module's parameters.
-func (p *Params) ParamSetPairs() paramtypes.ParamSetPairs {
-	return paramtypes.ParamSetPairs{
-		paramtypes.NewParamSetPair(
-			KeyCompleteLiquidationThreshold,
-			&p.CompleteLiquidationThreshold,
-			validateLiquidationThreshold,
-		),
-		paramtypes.NewParamSetPair(
-			KeyMinimumCloseFactor,
-			&p.MinimumCloseFactor,
-			validateMinimumCloseFactor,
-		),
-		paramtypes.NewParamSetPair(
-			KeyOracleRewardFactor,
-			&p.OracleRewardFactor,
-			validateOracleRewardFactor,
-		),
-		paramtypes.NewParamSetPair(
-			KeySmallLiquidationSize,
-			&p.SmallLiquidationSize,
-			validateSmallLiquidationSize,
-		),
-		paramtypes.NewParamSetPair(
-			KeyDirectLiquidationFee,
-			&p.DirectLiquidationFee,
-			validateDirectLiquidationFee,
-		),
-	}
-}
-
-// String implements the Stringer interface.
-func (p Params) String() string {
-	out, _ := yaml.Marshal(p)
-	return string(out)
-}
-
-// ParamKeyTable returns the x/leverage module's parameter KeyTable expected by
-// the x/params module.
-func ParamKeyTable() paramtypes.KeyTable {
-	return paramtypes.NewKeyTable().RegisterParamSet(&Params{})
-}
 
 // DefaultParams returns a default set of parameters.
 func DefaultParams() Params {
@@ -90,12 +34,7 @@ func (p Params) Validate() error {
 	return validateDirectLiquidationFee(p.DirectLiquidationFee)
 }
 
-func validateLiquidationThreshold(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateLiquidationThreshold(v sdk.Dec) error {
 	if !v.IsPositive() {
 		return fmt.Errorf("complete liquidation threshold must be positive: %d", v)
 	}
@@ -107,12 +46,7 @@ func validateLiquidationThreshold(i interface{}) error {
 	return nil
 }
 
-func validateMinimumCloseFactor(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateMinimumCloseFactor(v sdk.Dec) error {
 	if v.IsNegative() {
 		return fmt.Errorf("minimum close factor cannot be negative: %d", v)
 	}
@@ -123,12 +57,7 @@ func validateMinimumCloseFactor(i interface{}) error {
 	return nil
 }
 
-func validateOracleRewardFactor(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateOracleRewardFactor(v sdk.Dec) error {
 	if v.IsNegative() {
 		return fmt.Errorf("oracle reward factor cannot be negative: %d", v)
 	}
@@ -139,12 +68,7 @@ func validateOracleRewardFactor(i interface{}) error {
 	return nil
 }
 
-func validateSmallLiquidationSize(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateSmallLiquidationSize(v sdk.Dec) error {
 	if v.IsNegative() {
 		return fmt.Errorf("small liquidation size cannot be negative: %d", v)
 	}
@@ -152,12 +76,7 @@ func validateSmallLiquidationSize(i interface{}) error {
 	return nil
 }
 
-func validateDirectLiquidationFee(i interface{}) error {
-	v, ok := i.(sdk.Dec)
-	if !ok {
-		return fmt.Errorf("invalid parameter type: %T", i)
-	}
-
+func validateDirectLiquidationFee(v sdk.Dec) error {
 	if v.IsNegative() {
 		return fmt.Errorf("direct liquidation fee cannot be negative: %d", v)
 	}

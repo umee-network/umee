@@ -26,6 +26,7 @@ var (
 	KeyPrefixAdjustedTotalBorrow = []byte{0x09}
 	KeyPrefixUtokenSupply        = []byte{0x0A}
 	KeyPrefixSpecialAssetPair    = []byte{0x0B}
+	KeyParams                    = []byte{0x0C}
 )
 
 // KeyRegisteredToken returns a KVStore key for getting and setting a Token.

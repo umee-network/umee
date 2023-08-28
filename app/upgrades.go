@@ -68,7 +68,9 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 			if err := upgradev6x0.Migrate(ctx, app.GovKeeper); err != nil {
 				return fromVM, err
 			}
-			app.LeverageKeeper.SetParams(ctx, leveragetypes.DefaultParams())
+			if err := app.LeverageKeeper.SetParams(ctx, leveragetypes.DefaultParams()); err != nil {
+				return fromVM, err
+			}
 			// TODO: need to register emergency group
 			// TODO: set new inflation params
 
