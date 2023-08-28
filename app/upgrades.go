@@ -65,7 +65,7 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			if err := upgradev6x0.Migrate(ctx, app.GovKeeper); err != nil {
+			if err := upgradev6x0.Migrate(ctx, app.interfaceRegistry, app.GovKeeper); err != nil {
 				return fromVM, err
 			}
 			app.LeverageKeeper.SetParams(ctx, leveragetypes.DefaultParams())
