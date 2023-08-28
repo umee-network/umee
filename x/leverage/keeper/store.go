@@ -91,8 +91,7 @@ func (k Keeper) SetParams(ctx sdk.Context, params types.Params) error {
 func (k Keeper) GetParams(ctx sdk.Context) types.Params {
 	params := store.GetValue[*types.Params](ctx.KVStore(k.storeKey), types.KeyParams, "leverage params")
 	if params == nil {
-		// if params have not been changed, default params are used
-		return types.DefaultParams()
+		panic("params not initialized")
 	}
 	return *params
 }
