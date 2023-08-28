@@ -293,8 +293,107 @@ func TestWeightedDecCoinsAdd(t *testing.T) {
 	}
 }
 
-func TestWeightedDecCoinsSub(_ *testing.T) {
-	// TODO
+func TestWeightedDecCoinsSub(t *testing.T) {
+	testCases := []struct {
+		initial WeightedDecCoins
+		sub     WeightedDecCoin
+		diff    WeightedDecCoins
+		message string
+	}{
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.1"),
+				weightedDecCoin("CCCC", "3.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.1"),
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.1"),
+				weightedDecCoin("CCCC", "0.0", "0.1"),
+			},
+			"sub equal weight assets",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "4.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			weightedDecCoin("BBBB", "2.0", "0.2"),
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"partial sub asset",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("CCCC", "3.0", "0.3"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("CCCC", "0.0", "0.3"),
+			},
+			// note that this Sub function is used during sorting
+			// operations which rely on coin index - no denom's
+			// index should change as a result
+			"does not fix unsorted input",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "0.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("CCCC", "3.0", "0.3"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "0.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("CCCC", "0.0", "0.3"),
+			},
+			// input denom indexes cannot change (even by being removed)
+			"does not omit existing zero input",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "0.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"survives zero input",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("CCCC", "3.0", "0.3"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("CCCC", "0.0", "0.3"),
+			},
+			// input denom indexes cannot change (even by fix duplicate)
+			"does not fix duplicate input",
+		},
+	}
+
+	for _, tc := range testCases {
+		diff := tc.initial.Sub(tc.sub.Asset)
+		assert.Equal(t, len(tc.diff), len(diff), tc.message)
+		for i, wc := range tc.diff {
+			assert.Equal(t, wc.String(), diff[i].String(), tc.message)
+		}
+	}
 }
 
 func TestWeightedNormalPairBefore(_ *testing.T) {

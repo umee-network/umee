@@ -152,6 +152,7 @@ func (wdc WeightedDecCoins) Total(denom string) sdk.Dec {
 }
 
 // Sub subtracts a sdk.DecCoin from a WeightedDecCoins. Panics if the result would be negative.
+// Does not sort or change the order of the input denoms, combine duplicates, or remove zero coins.
 func (wdc WeightedDecCoins) Sub(sub sdk.DecCoin) (diff WeightedDecCoins) {
 	found := false
 	for _, c := range wdc {
@@ -165,14 +166,10 @@ func (wdc WeightedDecCoins) Sub(sub sdk.DecCoin) (diff WeightedDecCoins) {
 			diff = append(diff, c)
 		}
 	}
-	if !found {
+	if sub.IsPositive() && !found {
 		panic("WeightedDecCoins: sub denom not present")
 	}
 
-	// sorts the diff. Fixes unsorted input as well.
-	sort.SliceStable(diff, func(i, j int) bool {
-		return diff[i].before(diff[j])
-	})
 	return diff
 }
 
