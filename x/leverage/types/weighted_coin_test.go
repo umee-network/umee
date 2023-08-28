@@ -452,29 +452,86 @@ func TestWeightedNormalPairBefore(t *testing.T) {
 	}
 
 	// check before() using referencePairs
-	for i, wdc := range referencePairs {
+	for i, wnp := range referencePairs {
 		for j, c := range referencePairs {
-			assert.Equal(t, i < j, wdc.before(c), "require pre-sorted referencePairs ", i, j)
+			assert.Equal(t, i < j, wnp.before(c), "require pre-sorted referencePairs ", i, j)
 		}
 	}
 }
 
-func TestWeightedSpecialPairBefore(_ *testing.T) {
-	// TODO
+func TestWeightedSpecialPairBefore(t *testing.T) {
+	// referencePairs are a pre-sorted WeightedSpecialPairs with some equal weights and repeated denoms
+	referencePairs := WeightedSpecialPairs{
+		// this section of V & W assets confirms alphabetical sorting of equal-weight pairs
+		// completely disregarding amount
+		{
+			Collateral:    coin.ZeroDec("VVVV"),
+			Borrow:        coin.ZeroDec("VVVV"),
+			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
+		},
+		{
+			Collateral:    coin.ZeroDec("VVVV"),
+			Borrow:        coin.ZeroDec("WWWW"),
+			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
+		},
+		{
+			Collateral:    coin.Dec("WWWW", "30.00"),
+			Borrow:        coin.Dec("VVVV", "30.00"),
+			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
+		},
+		{
+			Collateral:    coin.Dec("WWWW", "60.00"),
+			Borrow:        coin.Dec("WWWW", "60.00"),
+			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
+		},
+		// this Y -> W pair confirms that weight of the pair
+		// take precedence over alphabetical
+		{
+			Collateral:    coin.ZeroDec("YYYY"),
+			Borrow:        coin.ZeroDec("WWWW"),
+			SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+		},
+		// this section ensures regular sorting by collateral weight
+		{
+			Collateral:    coin.ZeroDec("DDDD"),
+			Borrow:        coin.ZeroDec("CCCC"),
+			SpecialWeight: sdk.MustNewDecFromStr("0.4"),
+		},
+		{
+			Collateral:    coin.ZeroDec("CCCC"),
+			Borrow:        coin.ZeroDec("BBBB"),
+			SpecialWeight: sdk.MustNewDecFromStr("0.3"),
+		},
+		{
+			Collateral:    coin.Dec("BBBB", "100.00"),
+			Borrow:        coin.Dec("AAAA", "20.00"),
+			SpecialWeight: sdk.MustNewDecFromStr("0.2"),
+		},
+		{
+			Collateral:    coin.ZeroDec("AAAA"),
+			Borrow:        coin.ZeroDec("DDDD"),
+			SpecialWeight: sdk.MustNewDecFromStr("0.1"),
+		},
+		// these zero-weight pairs should always be last,
+		// regardless of coin amounts
+		{
+			Collateral:    coin.ZeroDec("YYYY"),
+			Borrow:        coin.ZeroDec("YYYY"),
+			SpecialWeight: sdk.MustNewDecFromStr("0.0"),
+		},
+		{
+			Collateral:    coin.Dec("ZZZZ", "100.00"),
+			Borrow:        coin.Dec("ZZZZ", "0.00"),
+			SpecialWeight: sdk.MustNewDecFromStr("0.0"),
+		},
+	}
 
-	/*
-		referenceCoins := WeightedDecCoins{
-			weightedDecCoin("VVVV", "1.0", "1.0"),
-			weightedDecCoin("WWWW", "2.0", "1.0"),
-			weightedDecCoin("DDDD", "1.0", "0.4"),
-			weightedDecCoin("CCCC", "2.0", "0.3"),
-			weightedDecCoin("BBBB", "1.0", "0.2"),
-			weightedDecCoin("XXXX", "2.0", "0.2"),
-			weightedDecCoin("AAAA", "1.0", "0.1"),
-			weightedDecCoin("YYYY", "2.0", "0.0"),
-			weightedDecCoin("ZZZZ", "1.0", "0.0"),
+	// check before() using referencePairs
+	for i, wsp := range referencePairs {
+		for j, c := range referencePairs {
+			assert.Equal(t, i < j, wsp.before(c), "require pre-sorted referencePairs ", i, j)
 		}
-	*/
+	}
 }
 
 func TestWeightedSpecialPairsAdd(_ *testing.T) {
