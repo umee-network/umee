@@ -37,7 +37,6 @@ func Migrate(ctx sdk.Context, gk govkeeper.Keeper) error {
 			logger.Debug("Ignoring, not MsgGovUpdateRegistry",
 				"msg_type", proto.MessageName(cached.(proto.Message)))
 		}
-
 	}
 	return nil
 }
