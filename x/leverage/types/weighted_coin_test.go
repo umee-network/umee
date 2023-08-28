@@ -188,8 +188,109 @@ func TestWeightedDecCoinTotal(t *testing.T) {
 	}
 }
 
-func TestWeightedDecCoinsAdd(_ *testing.T) {
-	// TODO
+func TestWeightedDecCoinsAdd(t *testing.T) {
+	testCases := []struct {
+		initial WeightedDecCoins
+		add     WeightedDecCoin
+		sum     WeightedDecCoins
+		message string
+	}{
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.1"),
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.1"),
+				weightedDecCoin("CCCC", "3.0", "0.1"),
+			},
+			"add equal weight assets",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("CCCC", "3.0", "0.3"),
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"sorts by weight",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			weightedDecCoin("BBBB", "2.0", "0.2"),
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "4.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"existing asset",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("CCCC", "3.0", "0.3"),
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"fixes unsorted input",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "0.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("CCCC", "3.0", "0.3"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"omits existing zero input",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "0.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("BBBB", "2.0", "0.2"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			"omits new zero input",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.3"),
+			WeightedDecCoins{
+				weightedDecCoin("CCCC", "3.0", "0.3"),
+				weightedDecCoin("AAAA", "2.0", "0.1"),
+			},
+			"fixes duplicate input",
+		},
+	}
+
+	for _, tc := range testCases {
+		sum := tc.initial.Add(tc.add)
+		assert.Equal(t, len(tc.sum), len(sum), tc.message)
+		for i, wc := range tc.sum {
+			assert.Equal(t, wc.String(), sum[i].String(), tc.message)
+		}
+	}
 }
 
 func TestWeightedDecCoinsSub(_ *testing.T) {
