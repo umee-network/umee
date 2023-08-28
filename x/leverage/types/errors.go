@@ -25,11 +25,8 @@ var (
 		ModuleName, 206,
 		"collateral weight of Token is zero: can't be used as a collateral",
 	)
-	ErrDuplicateToken           = errors.Register(ModuleName, 207, "duplicate token")
-	ErrEmptyAddAndUpdateTokens  = errors.Register(ModuleName, 208, "empty add and update tokens")
-	ErrEmptyUpdateSpecialAssets = errors.Register(ModuleName, 209, "empty update special asset pairs")
-	ErrDuplicatePair            = errors.Register(ModuleName, 210, "duplicate special asset pair")
-	ErrProposedSetOrder         = errors.Register(ModuleName, 211, "asset sets not in ascending (weight) order")
+	ErrDuplicateToken          = errors.Register(ModuleName, 207, "duplicate token")
+	ErrEmptyAddAndUpdateTokens = errors.Register(ModuleName, 208, "empty add and update tokens")
 
 	// 3XX = User Positions
 	ErrInsufficientBalance    = errors.Register(ModuleName, 300, "insufficient balance")

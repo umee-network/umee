@@ -206,7 +206,7 @@ func validateEmergencyTokenSettingsUpdate(regTokens map[string]types.Token, upda
 			errs = append(errs, err)
 		}
 
-		// MaxCollateralShare, MaxSupplyUtilization, MinCollateralLiquidity, MaxSupply
+		// MaxSupplyUtilization, MinCollateralLiquidity, MaxSupply
 		// allow any change
 	}
 

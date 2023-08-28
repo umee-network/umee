@@ -16,14 +16,14 @@ var (
 	_, _ legacytx.LegacyMsg = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssets{}
 )
 
-// NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance
-func NewMsgGovUpdateRegistry(authority, title, description string, update, add []Token) *MsgGovUpdateRegistry {
+// NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance.
+// Authority must be a valid bech32 address.
+func NewMsgGovUpdateRegistry(authority, description string, update, add []Token) *MsgGovUpdateRegistry {
 	return &MsgGovUpdateRegistry{
-		Title:        title,
+		Authority:    authority,
 		Description:  description,
 		UpdateTokens: update,
 		AddTokens:    add,
-		Authority:    authority,
 	}
 }
 
@@ -35,7 +35,7 @@ func (msg MsgGovUpdateRegistry) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateRegistry) ValidateBasic() error {
-	if err := checkers.ValidateProposal(msg.Title, msg.Description, msg.Authority, false); err != nil {
+	if err := checkers.Proposal(msg.Authority, msg.Description); err != nil {
 		return err
 	}
 
@@ -97,12 +97,16 @@ func (msg MsgGovUpdateSpecialAssets) String() string {
 
 // ValidateBasic implements Msg
 func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
+	// Today we only accept x/gov
 	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
+		return err
+	}
+	if err := checkers.Description(msg.Description); err != nil {
 		return err
 	}
 
 	if len(msg.Pairs) == 0 && len(msg.Sets) == 0 {
-		return ErrEmptyUpdateSpecialAssets
+		return fmt.Errorf("empty special asset pairs update")
 	}
 
 	if err := validateSpecialAssetPairs(msg.Pairs); err != nil {
@@ -116,7 +120,7 @@ func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
 		// be stored in state
 		if set.CollateralWeight.IsPositive() {
 			if set.CollateralWeight.LT(ascendingWeight) {
-				return ErrProposedSetOrder
+				return fmt.Errorf("asset sets not in ascending (weight) order")
 			}
 			ascendingWeight = set.CollateralWeight
 		}
@@ -140,7 +144,7 @@ func validateSpecialAssetPairs(pairs []SpecialAssetPair) error {
 	for _, pair := range pairs {
 		s := pair.Collateral + "," + pair.Borrow
 		if _, ok := assetPairs[s]; ok {
-			return ErrDuplicatePair.Wrapf("[%s, %s]", pair.Collateral, pair.Borrow)
+			return fmt.Errorf("duplicate special asset pair: %s", s)
 		}
 		assetPairs[s] = true
 	}

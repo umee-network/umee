@@ -38,12 +38,10 @@ func TestUpdateRegistryProposalString(t *testing.T) {
 	token.ReserveFactor = sdk.NewDec(40)
 	p := types.MsgGovUpdateRegistry{
 		Authority:   "authority",
-		Title:       "test",
 		Description: "test",
 		AddTokens:   []types.Token{token},
 	}
 	expected := `authority: authority
-title: test
 description: test
 addtokens:
     - base_denom: uumee

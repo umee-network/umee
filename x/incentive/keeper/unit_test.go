@@ -132,7 +132,6 @@ func (k *testKeeper) initCommunityFund(funds ...sdk.Coin) {
 // and requires no errors. Use when setting up incentive scenarios.
 func (k *testKeeper) addIncentiveProgram(uDenom string, start, duration int64, reward sdk.Coin, fromCommunity bool,
 ) {
-	// govAccAddr := s.app.GovKeeper.GetGovernanceAccount(ctx).GetAddress().String()
 	govAccAddr := "govAcct"
 
 	program := incentive.IncentiveProgram{
