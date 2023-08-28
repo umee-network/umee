@@ -57,23 +57,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	app.registerUpgrade5_1(upgradeInfo)
 	app.registerUpgrade6(upgradeInfo)
-	// app.registerNewTokenEmissionUpgrade(upgradeInfo)
 }
-
-// TODO: this upgrade registration is just for testing purpose, once we finalize the release for new token emission
-// then we need to change planName and storeUpgrades
-// func (app *UmeeApp) registerNewTokenEmissionUpgrade() {
-// 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-// 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-// 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-// 		},
-// 	)
-
-// 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-// 		Added:   []string{metoken.ModuleName},
-// 		Deleted: []string{"gravity"},
-// 	})
-// }
 
 func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.0"
@@ -85,6 +69,7 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 				return fromVM, err
 			}
 			// TODO: need to register emergency group
+			// TODO: set new inflation params
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
