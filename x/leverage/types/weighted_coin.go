@@ -70,8 +70,8 @@ func (wnp WeightedNormalPair) before(b WeightedNormalPair) bool {
 		return wnp.Borrow.Weight.GT(b.Borrow.Weight)
 	}
 	if wnp.Collateral.Asset.Denom != b.Collateral.Asset.Denom {
-		// if both weight are equal, sort by collateral denom, alphabetical
-		return wnp.Collateral.Asset.Denom != b.Collateral.Asset.Denom
+		// if both weights are equal, sort by collateral denom, alphabetical
+		return wnp.Collateral.Asset.Denom < b.Collateral.Asset.Denom
 	}
 	// if all of the above were equal, sort by borrow denom, alphabetical
 	return wnp.Borrow.Asset.Denom < b.Borrow.Asset.Denom

@@ -9,19 +9,6 @@ import (
 	"github.com/umee-network/umee/v6/util/coin"
 )
 
-// referenceCoins are a pre-sorted WeightedDecCoins with some equal weights and no repeated denoms
-var referenceCoins = WeightedDecCoins{
-	weightedDecCoin("VVVV", "1.0", "1.0"),
-	weightedDecCoin("WWWW", "2.0", "1.0"),
-	weightedDecCoin("DDDD", "1.0", "0.4"),
-	weightedDecCoin("CCCC", "2.0", "0.3"),
-	weightedDecCoin("BBBB", "1.0", "0.2"),
-	weightedDecCoin("XXXX", "2.0", "0.2"),
-	weightedDecCoin("AAAA", "1.0", "0.1"),
-	weightedDecCoin("YYYY", "2.0", "0.0"),
-	weightedDecCoin("ZZZZ", "1.0", "0.0"),
-}
-
 func weightedDecCoin(denom, amount, weight string) WeightedDecCoin {
 	return WeightedDecCoin{
 		Asset:  coin.Dec(denom, amount),
@@ -30,6 +17,19 @@ func weightedDecCoin(denom, amount, weight string) WeightedDecCoin {
 }
 
 func TestWeightedDecCoinSorting(t *testing.T) {
+	// referenceCoins are a pre-sorted WeightedDecCoins with some equal weights and no repeated denoms
+	referenceCoins := WeightedDecCoins{
+		weightedDecCoin("VVVV", "1.0", "1.0"),
+		weightedDecCoin("WWWW", "2.0", "1.0"),
+		weightedDecCoin("DDDD", "1.0", "0.4"),
+		weightedDecCoin("CCCC", "2.0", "0.3"),
+		weightedDecCoin("BBBB", "1.0", "0.2"),
+		weightedDecCoin("XXXX", "2.0", "0.2"),
+		weightedDecCoin("AAAA", "1.0", "0.1"),
+		weightedDecCoin("YYYY", "2.0", "0.0"),
+		weightedDecCoin("ZZZZ", "1.0", "0.0"),
+	}
+
 	testCases := []struct {
 		denom             string
 		weight            sdk.Dec
@@ -396,8 +396,55 @@ func TestWeightedDecCoinsSub(t *testing.T) {
 	}
 }
 
-func TestWeightedNormalPairBefore(_ *testing.T) {
-	// TODO
+func TestWeightedNormalPairBefore(t *testing.T) {
+	// referencePairs are a pre-sorted WeightedNormalPairs with some equal weights and repeated denoms
+	referencePairs := WeightedNormalPairs{
+		// this section of V & W assets confirms alphabetical sorting of equal-weight pairs
+		{
+			Collateral: weightedDecCoin("VVVV", "1.0", "1.0"),
+			Borrow:     weightedDecCoin("VVVV", "1.0", "1.0"),
+		},
+		{
+			Collateral: weightedDecCoin("VVVV", "1.0", "1.0"),
+			Borrow:     weightedDecCoin("WWWW", "1.0", "1.0"),
+		},
+		{
+			Collateral: weightedDecCoin("WWWW", "1.0", "1.0"),
+			Borrow:     weightedDecCoin("VVVV", "1.0", "1.0"),
+		},
+		{
+			Collateral: weightedDecCoin("WWWW", "1.0", "1.0"),
+			Borrow:     weightedDecCoin("WWWW", "1.0", "1.0"),
+		},
+		// this V -> A pair confirms that weight of the borrow (0.1)
+		// take precedence over alphabetical of the collateral (V-W)
+		// when weight of the collateral is equal (1.0)
+		{
+			Collateral: weightedDecCoin("VVVV", "1.0", "1.0"),
+			Borrow:     weightedDecCoin("AAAA", "1.0", "0.1"),
+		},
+	}
+
+	/*
+		referenceCoins := WeightedDecCoins{
+			weightedDecCoin("VVVV", "1.0", "1.0"),
+			weightedDecCoin("WWWW", "2.0", "1.0"),
+			weightedDecCoin("DDDD", "1.0", "0.4"),
+			weightedDecCoin("CCCC", "2.0", "0.3"),
+			weightedDecCoin("BBBB", "1.0", "0.2"),
+			weightedDecCoin("XXXX", "2.0", "0.2"),
+			weightedDecCoin("AAAA", "1.0", "0.1"),
+			weightedDecCoin("YYYY", "2.0", "0.0"),
+			weightedDecCoin("ZZZZ", "1.0", "0.0"),
+		}
+	*/
+
+	// check before() using referencePairs
+	for i, wdc := range referencePairs {
+		for j, c := range referencePairs {
+			assert.Equal(t, i < j, wdc.before(c), "require pre-sorted referencePairs ", i, j)
+		}
+	}
 }
 
 func TestWeightedSpecialPairBefore(_ *testing.T) {
