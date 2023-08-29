@@ -1,6 +1,8 @@
 package v2
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 )
@@ -12,6 +14,6 @@ func MigrateStore(ctx sdk.Context, k ugov.Keeper) error {
 		return err
 	}
 
-	cycleEnd := ctx.BlockTime().Add(ip.InflationCycle)
+	cycleEnd := time.Date(2023, time.October, 15, 0, 0, 0, 0, time.UTC)
 	return k.SetInflationCycleEnd(cycleEnd)
 }

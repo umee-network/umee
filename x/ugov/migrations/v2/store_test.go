@@ -8,7 +8,7 @@ import (
 
 	"github.com/umee-network/umee/v6/x/ugov"
 	"github.com/umee-network/umee/v6/x/ugov/keeper/intest"
-	"github.com/umee-network/umee/v6/x/ugov/migrations/v2"
+	v2 "github.com/umee-network/umee/v6/x/ugov/migrations/v2"
 )
 
 func TestMigrateStore(t *testing.T) {
@@ -27,5 +27,5 @@ func TestMigrateStore(t *testing.T) {
 	assert.DeepEqual(t, ugov.DefaultInflationParams(), p)
 
 	cycleEnd = k.InflationCycleEnd()
-	assert.DeepEqual(t, sdkCtx.BlockTime().Add(p.InflationCycle), cycleEnd)
+	assert.DeepEqual(t, time.Date(2023, time.October, 15, 0, 0, 0, 0, time.UTC), cycleEnd)
 }
