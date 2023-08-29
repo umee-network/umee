@@ -10,76 +10,9 @@ import (
 )
 
 const (
-	ProposalTypeUnhaltBridge = "UnhaltBridge"
-	ProposalTypeAirdrop      = "Airdrop"
-	ProposalTypeIBCMetadata  = "IBCMetadata"
-	RouterKey                = "gravity"
+	ProposalTypeIBCMetadata = "IBCMetadata"
+	RouterKey               = "gravity"
 )
-
-func (p *UnhaltBridgeProposal) GetTitle() string { return p.Title }
-
-func (p *UnhaltBridgeProposal) GetDescription() string { return p.Description }
-
-func (p *UnhaltBridgeProposal) ProposalRoute() string { return RouterKey }
-
-func (p *UnhaltBridgeProposal) ProposalType() string {
-	return ProposalTypeUnhaltBridge
-}
-
-func (p *UnhaltBridgeProposal) ValidateBasic() error {
-	return nil
-}
-
-func (p UnhaltBridgeProposal) String() string {
-	var b strings.Builder
-	b.WriteString(fmt.Sprintf(`Unhalt Bridge Proposal:
-  Title:          %s
-  Description:    %s
-  target_nonce:   %d
-`, p.Title, p.Description, p.TargetNonce))
-	return b.String()
-}
-
-func (p *AirdropProposal) GetTitle() string { return p.Title }
-
-func (p *AirdropProposal) GetDescription() string { return p.Description }
-
-func (p *AirdropProposal) ProposalRoute() string { return RouterKey }
-
-func (p *AirdropProposal) ProposalType() string {
-	return ProposalTypeAirdrop
-}
-
-func (p *AirdropProposal) ValidateBasic() error {
-	return nil
-}
-
-func (p AirdropProposal) String() string {
-	var b strings.Builder
-	total := uint64(0)
-	for _, v := range p.Amounts {
-		total += v
-	}
-	parsedRecipients := make([]sdk.AccAddress, len(p.Recipients)/20)
-	for i := 0; i < len(p.Recipients)/20; i++ {
-		indexStart := i * 20
-		indexEnd := indexStart + 20
-		addr := p.Recipients[indexStart:indexEnd]
-		parsedRecipients[i] = addr
-	}
-	recipients := ""
-	for i, a := range parsedRecipients {
-		recipients += fmt.Sprintf("Account: %s Amount: %d%s", a.String(), p.Amounts[i], p.Denom)
-	}
-
-	b.WriteString(fmt.Sprintf(`Airdrop Proposal:
-  Title:          %s
-  Description:    %s
-  Total Amount:   %d%s
-  Recipients:     %s
-`, p.Title, p.Description, total, p.Denom, recipients))
-	return b.String()
-}
 
 func (p *IBCMetadataProposal) GetTitle() string { return p.Title }
 
