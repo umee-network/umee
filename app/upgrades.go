@@ -37,8 +37,7 @@ import (
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
-// It takes a boolean parameter to enable or disable experimental features.
-func (app UmeeApp) RegisterUpgradeHandlers(bool) {
+func (app UmeeApp) RegisterUpgradeHandlers() {
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
 		panic(err)
