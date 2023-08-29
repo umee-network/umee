@@ -94,7 +94,7 @@ jobs:
     # skip the e2e tests when `skip-e2e-test` label is present on pull request
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-e2e-test') }}
     runs-on: ubuntu-latest
-    needs: install-tparse
+    needs: [install-tparse, test-unit-cover] # TODO don't depend on unit tests!
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v3
