@@ -24,17 +24,21 @@ func Migrate(ctx sdk.Context, gk govkeeper.Keeper) error {
 	done = true
 
 	proposals := gk.GetProposals(ctx)
+
+	logger.Info("Proposals to migrate: ", "len", len(proposals))
+
 	for _, p := range proposals {
 		if len(p.Messages) != 1 {
-			logger.Debug("Ignoring, too many messages", "msgs", p.Messages)
+			logger.Error("Ignoring, too many messages", "msgs", p.Messages)
 			continue
 		}
 
 		cached := p.Messages[0].GetCachedValue()
 		if oldUpdateRegistry, ok := cached.(*MsgGovUpdateRegistry); ok {
+			logger.Info(">>>>>>> start migrating", p.Id)
 			migrateMsgGovUpdateRegistry(ctx, p, oldUpdateRegistry, gk, logger)
 		} else {
-			logger.Debug("Ignoring, not MsgGovUpdateRegistry",
+			logger.Error("Ignoring, not MsgGovUpdateRegistry",
 				"msg_type", proto.MessageName(cached.(proto.Message)))
 		}
 	}
@@ -54,11 +58,11 @@ func migrateMsgGovUpdateRegistry(
 	p.Messages[0], err = cdctypes.NewAnyWithValue(&newMsg)
 	if err != nil {
 		logger.Error("Can't pack ANY", err)
-	} else {
-		if p.Metadata != "" {
-			p.Metadata = fmt.Sprintf("{\"title\":%q,\"summary\":%q}", old.Title, old.Description)
-		}
-		logger.Info("\n\nMIGRATING proposal:\n" + p.String())
-		gk.SetProposal(ctx, *p)
+		return
 	}
+	if p.Metadata != "" {
+		p.Metadata = fmt.Sprintf("{\"title\":%q,\"summary\":%q}", old.Title, old.Description)
+	}
+	logger.Info(">>>>>>>>>>>> MIGRATING proposal:\n" + p.String())
+	gk.SetProposal(ctx, *p)
 }
