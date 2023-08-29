@@ -81,7 +81,7 @@ jobs:
       - name: Test and Create Coverage Report
         if: env.GIT_DIFF
         run: |
-          EXPERIMENTAL=true make test-unit-cover
+          EXPERIMENTAL=true make docker-build-e2e-experimental test-unit-cover
       - uses: codecov/codecov-action@v3.1.4
         if: env.GIT_DIFF
         with:
