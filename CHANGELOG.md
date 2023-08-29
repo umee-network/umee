@@ -74,7 +74,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2197](https://github.com/umee-network/umee/pull/2197) Allowing duplicate symbols on leverage token registry. Fix the oracle voting miss counter on duplicate symbol denoms.
 - [2212](https://github.com/umee-network/umee/pull/2212) Fixes an x/oracle RPC endpoint spelling, changing "/umee/oracle/v1/valdiators/{validator_addr}/aggregate_vote" to "/umee/oracle/v1/validators/{validator_addr}/aggregate_vote"
 
-
 ### API Breaking
 
 - [2140](https://github.com/umee-network/umee/pull/2140) Renamed ugov EventMinTxFees to EventMinGasPrice.
