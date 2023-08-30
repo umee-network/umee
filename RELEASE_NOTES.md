@@ -6,16 +6,18 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v5.1.0
+## v5.2.0
+
+This is maintenance release, which prepares the chain for the v6.0 release.
 
 Highlights:
 
-- [`x/incentive`](x/incentive/README.md) module: allows to create incentive programs for liquidity mining.
-- new x/leverage security measure: [Borrow Factor](x/leverage/README.md#borrow-factor)
-- new x/leverage [`MsgLeveragedLiquidate`](proto/umee/leverage/v1/tx.proto#L59) was added. Allows suppliers to use their active collateral to absorb unhealthy debts. See [Liquidation](x/leverage/README.md#liquidation) for more details.
-- Gravity Bridge phase-4: the GB valset was correctly burned. Slashing is removed and there is no need to run Peggo any more.
+- [x/leverage] Allow setting multiple tokens with the same symbol name but different denom. This fixes the oracle voting miss counter on duplicate symbol denoms.
+- Adding Amino support to `x/leverage.MsgLeveragedLiquidate`.
+- Fix MsgBeginUnbonding counting existing unbondings against max unbond twice.
+- Fixes an x/oracle RPC endpoint spelling: `/umee/oracle/v1/validators/{validator_addr}/aggregate_vote`
 
-[v5.1.0 CHANGELOG](https://github.com/umee-network/umee/blob/v5.1.0/CHANGELOG.md).
+More: [v5.2.0 CHANGELOG](https://github.com/umee-network/umee/blob/v5.2.0/CHANGELOG.md).
 
 ### Validators
 
