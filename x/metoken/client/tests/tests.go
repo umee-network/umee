@@ -3,7 +3,6 @@ package tests
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v6/app/params"
 	itestsuite "github.com/umee-network/umee/v6/tests/cli"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/client/cli"
@@ -64,7 +63,6 @@ func (s *IntegrationTests) TestInvalidQueries() {
 }
 
 func (s *IntegrationTests) TestValidQueries() {
-	meTokenDenom := "me/" + params.BondDenom
 	queries := []itestsuite.TestQuery{
 		{
 			Name:     "query params",
@@ -82,7 +80,7 @@ func (s *IntegrationTests) TestValidQueries() {
 			Args:     []string{},
 			Response: &metoken.QueryIndexesResponse{},
 			ExpectedResponse: &metoken.QueryIndexesResponse{
-				Registry: []metoken.Index{mfixtures.StableIndex(mfixtures.MeUSDDenom)},
+				Registry: []metoken.Index{mfixtures.BondIndex()},
 			},
 			ErrMsg: "",
 		},
@@ -92,7 +90,24 @@ func (s *IntegrationTests) TestValidQueries() {
 			Args:     []string{},
 			Response: &metoken.QueryIndexBalancesResponse{},
 			ExpectedResponse: &metoken.QueryIndexBalancesResponse{
-				IndexBalances: []metoken.IndexBalances{mfixtures.EmptyUSDIndexBalances(mfixtures.MeUSDDenom)},
+				IndexBalances: []metoken.IndexBalances{mfixtures.BondBalance()},
+				Prices: []metoken.IndexPrices{
+					{
+						Denom:    mfixtures.MeBondDenom,
+						Price:    sdk.MustNewDecFromStr("34.21"),
+						Exponent: 6,
+						Assets: []metoken.AssetPrice{
+							{
+								BaseDenom:   mfixtures.BondDenom,
+								SymbolDenom: "UMEE",
+								Price:       sdk.MustNewDecFromStr("34.21"),
+								Exponent:    6,
+								SwapRate:    sdk.OneDec(),
+								RedeemRate:  sdk.OneDec(),
+							},
+						},
+					},
+				},
 			},
 			ErrMsg: "",
 		},
@@ -101,25 +116,20 @@ func (s *IntegrationTests) TestValidQueries() {
 			Command: cli.GetCmdSwapFee(),
 			Args: []string{
 				"1876000000uumee",
-				meTokenDenom,
+				mfixtures.MeBondDenom,
 			},
 			Response: &metoken.QuerySwapFeeResponse{},
 			ExpectedResponse: &metoken.QuerySwapFeeResponse{
-				// with all balances in 0
-				// current_allocation = 0
-				// fee = min_fee
-				// fee = 0.01
-				// swap_fee = fee * amount
 				// swap_fee = 0.01 * 1876_000000 = 18760000
 				Asset: sdk.NewCoin(
-					"ibc/BA460328D9ABA27E643A924071FDB3836E4CE8084C6D2380F25EFAB85CF8EB11",
+					"uumee",
 					sdkmath.NewInt(18_760000),
 				),
 			},
 			ErrMsg: "",
 		},
 		{
-			Name:    "query redeem fee for 100 meUSD to USDC",
+			Name:    "query redeem fee for 100 meUSD to uumee",
 			Command: cli.GetCmdRedeemFee(),
 			Args: []string{
 				"100000000me/uumee",
@@ -130,19 +140,18 @@ func (s *IntegrationTests) TestValidQueries() {
 				// with all balances in 0
 				// current_allocation = 0
 				// redeem_delta_allocation = target_allocation - current_allocation
-				// redeem_delta_allocation = 0.34 - 0 = 0.34
+				// redeem_delta_allocation = 1.0 - 0 = 1.0
 				// fee = redeem_delta_allocation * balanced_fee + balanced_fee
-				// fee = 0.34 * 0.2 + 0.2 = 0.268
-				// exchange_rate = metoken_price / asset_price
-				// exchange_rate = 1.006 / 1 = 1.006
+				// fee = 1.0 * 0.2 + 0.2 = 0.4
+				// exchange_rate = 1
 				// asset_to_redeem = exchange_rate * metoken_amount
-				// asset_to_redeem = 1.006 * 100_000000 = 100_600000
+				// asset_to_redeem = 1 * 100_000000 = 100_000000
 				// total_fee = asset_to_redeem * fee
-				// total_fee = 100_600000 * 0.268 = 26_960800
+				// total_fee = 100_000000 * 0.4 = 40_000000
 
 				Asset: sdk.NewCoin(
 					"uumee",
-					sdkmath.NewInt(26_960800),
+					sdkmath.NewInt(40_000000),
 				),
 			},
 			ErrMsg: "",

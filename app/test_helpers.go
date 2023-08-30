@@ -33,7 +33,6 @@ import (
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/app/params"
-	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -305,42 +304,12 @@ func IntegrationTestNetworkConfig() network.Config {
 	appGenState[govtypes.ModuleName] = bz
 
 	var metokenGenState metoken.GenesisState
-	// TODO: remove after meToken release ------
-	appGenState[metoken.ModuleName] = cdc.MustMarshalJSON(metoken.DefaultGenesisState())
-	// TODO: -----------------------------------
 	if err := cdc.UnmarshalJSON(appGenState[metoken.ModuleName], &metokenGenState); err != nil {
 		panic(err)
 	}
 
-	metokenGenState.Registry = []metoken.Index{
-		{
-			Denom:     "me/" + params.BondDenom,
-			MaxSupply: sdk.NewInt(1000000_00000),
-			Exponent:  6,
-			Fee:       mocks.ValidFee(),
-			AcceptedAssets: []metoken.AcceptedAsset{
-				metoken.NewAcceptedAsset(
-					params.BondDenom, sdk.MustNewDecFromStr("0.2"),
-					sdk.MustNewDecFromStr("1.0"),
-				),
-			},
-		},
-	}
-
-	metokenGenState.Balances = []metoken.IndexBalances{
-		{
-			MetokenSupply: coin.Zero("me/" + params.BondDenom),
-			AssetBalances: []metoken.AssetBalance{
-				{
-					Denom:     params.BondDenom,
-					Leveraged: math.ZeroInt(),
-					Reserved:  math.ZeroInt(),
-					Fees:      math.ZeroInt(),
-					Interest:  math.ZeroInt(),
-				},
-			},
-		},
-	}
+	metokenGenState.Registry = []metoken.Index{mocks.BondIndex()}
+	metokenGenState.Balances = []metoken.IndexBalances{mocks.BondBalance()}
 
 	bz, err = cdc.MarshalJSON(&metokenGenState)
 	if err != nil {
