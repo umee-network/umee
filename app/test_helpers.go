@@ -305,6 +305,9 @@ func IntegrationTestNetworkConfig() network.Config {
 	appGenState[govtypes.ModuleName] = bz
 
 	var metokenGenState metoken.GenesisState
+	// TODO: remove after meToken release ------
+	appGenState[metoken.ModuleName] = cdc.MustMarshalJSON(metoken.DefaultGenesisState())
+	// TODO: -----------------------------------
 	if err := cdc.UnmarshalJSON(appGenState[metoken.ModuleName], &metokenGenState); err != nil {
 		panic(err)
 	}
