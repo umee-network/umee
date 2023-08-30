@@ -12,7 +12,7 @@ import (
 )
 
 func TestMigrateStore(t *testing.T) {
-	sdkCtx, k := intest.MkKeeper(t)
+	_, k := intest.MkKeeper(t)
 
 	// before migration
 	p := k.InflationParams()
@@ -21,7 +21,7 @@ func TestMigrateStore(t *testing.T) {
 	assert.Equal(t, time.UnixMilli(0), cycleEnd)
 
 	// after migration
-	err := v2.MigrateStore(*sdkCtx, k)
+	err := v2.MigrateStore(k)
 	assert.NilError(t, err)
 	p = k.InflationParams()
 	assert.DeepEqual(t, ugov.DefaultInflationParams(), p)

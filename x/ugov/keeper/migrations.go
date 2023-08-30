@@ -20,5 +20,5 @@ func NewMigrator(kb Builder) Migrator {
 
 // Migrate1to2 migrates from version 1 to 2.
 func (m Migrator) Migrate1to2(ctx sdk.Context) error {
-	return v2.MigrateStore(ctx, m.kb.Keeper(&ctx))
+	return v2.MigrateStore(m.kb.Keeper(&ctx))
 }
