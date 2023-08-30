@@ -51,7 +51,12 @@ func (q Querier) SwapFee(goCtx context.Context, req *metoken.QuerySwapFee) (*met
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k := q.Keeper(&ctx)
 
-	if err := req.Asset.Validate(); err != nil {
+	asset, err := sdk.ParseCoinNormalized(req.Asset)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := asset.Validate(); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +72,7 @@ func (q Querier) SwapFee(goCtx context.Context, req *metoken.QuerySwapFee) (*met
 	}
 
 	// calculate the fee for the asset amount
-	swapFee, err := k.swapFee(index, indexPrices, req.Asset)
+	swapFee, err := k.swapFee(index, indexPrices, asset)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +88,16 @@ func (q Querier) RedeemFee(goCtx context.Context, req *metoken.QueryRedeemFee) (
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k := q.Keeper(&ctx)
 
-	if err := req.Metoken.Validate(); err != nil {
+	meToken, err := sdk.ParseCoinNormalized(req.Metoken)
+	if err != nil {
 		return nil, err
 	}
 
-	index, err := k.RegisteredIndex(req.Metoken.Denom)
+	if err := meToken.Validate(); err != nil {
+		return nil, err
+	}
+
+	index, err := k.RegisteredIndex(meToken.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +109,7 @@ func (q Querier) RedeemFee(goCtx context.Context, req *metoken.QueryRedeemFee) (
 	}
 
 	// calculate amount to withdraw from x/metoken and x/leverage
-	amountFromReserves, amountFromLeverage, err := k.calculateRedeem(index, indexPrices, req.Metoken, req.AssetDenom)
+	amountFromReserves, amountFromLeverage, err := k.calculateRedeem(index, indexPrices, meToken, req.AssetDenom)
 	if err != nil {
 		return nil, err
 	}
