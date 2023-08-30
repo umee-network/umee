@@ -72,7 +72,6 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 				return fromVM, err
 			}
 			// TODO: need to register emergency group
-			// TODO: set new inflation params
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
