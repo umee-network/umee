@@ -5,7 +5,6 @@ import (
 
 	"gotest.tools/v3/assert"
 
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -132,7 +131,7 @@ func TestQuerier_Balances(t *testing.T) {
 
 type feeTestCase struct {
 	name  string
-	asset sdk.Coin
+	asset string
 	denom string
 }
 
@@ -190,17 +189,17 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 	tcs := []feeTestCase{
 		{
 			name:  "10 USDT swap",
-			asset: sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(10_000000)),
+			asset: "10000000" + mocks.USDTBaseDenom,
 			denom: mocks.MeUSDDenom,
 		},
 		{
 			name:  "750 USDC swap",
-			asset: sdk.NewCoin(mocks.USDCBaseDenom, sdkmath.NewInt(750_000000)),
+			asset: "750000000" + mocks.USDCBaseDenom,
 			denom: mocks.MeUSDDenom,
 		},
 		{
 			name:  "1876 IST swap",
-			asset: sdk.NewCoin(mocks.ISTBaseDenom, sdkmath.NewInt(1876_000000)),
+			asset: "1876000000" + mocks.ISTBaseDenom,
 			denom: mocks.MeUSDDenom,
 		},
 	}
@@ -210,7 +209,9 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 			Asset:        tc.asset,
 			MetokenDenom: tc.denom,
 		}
-		denom := tc.asset.Denom
+		asset, err := sdk.ParseCoinNormalized(tc.asset)
+		assert.NilError(t, err)
+		denom := asset.Denom
 
 		resp, err := querier.SwapFee(ctx, req)
 		assert.NilError(t, err)
@@ -228,7 +229,7 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 		fee := swapDeltaAllocation.Mul(index.Fee.BalancedFee).Add(index.Fee.BalancedFee)
 
 		// swap_fee = fee * amount
-		result := fee.MulInt(tc.asset.Amount).TruncateInt()
+		result := fee.MulInt(asset.Amount).TruncateInt()
 
 		assert.Check(t, result.Equal(resp.Asset.Amount))
 	}
@@ -248,17 +249,17 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 	tcs := []feeTestCase{
 		{
 			name:  "20 meUSD to USDT redemption",
-			asset: sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(20_000000)),
+			asset: "20000000" + mocks.MeUSDDenom,
 			denom: mocks.USDTBaseDenom,
 		},
 		{
 			name:  "444 meUSD to USDC redemption",
-			asset: sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(444_000000)),
+			asset: "444000000" + mocks.MeUSDDenom,
 			denom: mocks.USDCBaseDenom,
 		},
 		{
 			name:  "1267 meUSD to IST redemption",
-			asset: sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(1267_000000)),
+			asset: "1267000000" + mocks.MeUSDDenom,
 			denom: mocks.ISTBaseDenom,
 		},
 	}
@@ -293,7 +294,9 @@ func TestQuerier_RedeemFee_meUSD(t *testing.T) {
 		exchangeRate := prices.Price.Quo(price.Price)
 
 		// asset_to_redeem = exchange_rate * asset_amount
-		toRedeem := exchangeRate.MulInt(tc.asset.Amount).TruncateInt()
+		asset, err := sdk.ParseCoinNormalized(tc.asset)
+		assert.NilError(t, err)
+		toRedeem := exchangeRate.MulInt(asset.Amount).TruncateInt()
 
 		// total_fee = asset_to_redeem * fee
 		totalFee := fee.MulInt(toRedeem).TruncateInt()
