@@ -24,6 +24,7 @@ import (
 
 	"github.com/umee-network/umee/v5/app/upgradev3"
 	"github.com/umee-network/umee/v5/app/upgradev3x3"
+	"github.com/umee-network/umee/v5/app/upgradev5x2"
 	"github.com/umee-network/umee/v5/x/incentive"
 	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
@@ -53,13 +54,25 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v4.4", upgradeInfo)
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	app.registerUpgrade5_1(upgradeInfo)
+	app.registerUpgrade5_2(upgradeInfo)
+}
+
+func (app *UmeeApp) registerUpgrade5_2(upgradeInfo upgradetypes.Plan) {
+	planName := "v5.2"
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			if err := upgradev5x2.Migrate(ctx, app.GovKeeper); err != nil {
+				return fromVM, err
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 func (app *UmeeApp) registerUpgrade5_1(upgradeInfo upgradetypes.Plan) {
 	planName := "v5.1"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-
 			if err := app.GravityKeeper.MigrateFundsToDrainAccount(
 				ctx,
 				sdk.MustAccAddressFromBech32("umee1gx9svenfs6ktvajje2wgqau3gk5mznwnyghq4l"),
