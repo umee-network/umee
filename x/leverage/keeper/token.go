@@ -72,7 +72,7 @@ func (k Keeper) GetTokenSettings(ctx sdk.Context, denom string) (types.Token, er
 // SaveOrUpdateTokenSettingsToRegistry adds new tokens or updates the new tokens settings to registry.
 // It requires maps of the currently registered base and symbol denoms, so it can prevent duplicates of either.
 func (k Keeper) SaveOrUpdateTokenSettingsToRegistry(
-	ctx sdk.Context, tokens []types.Token, regdTkDenoms, regdSymDenoms map[string]bool, update bool,
+	ctx sdk.Context, tokens []types.Token, regdTkDenoms map[string]bool, update bool,
 ) error {
 	for _, token := range tokens {
 		if err := token.Validate(); err != nil {
