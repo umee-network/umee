@@ -550,13 +550,13 @@ func (s msgServer) GovUpdateRegistry(
 	}
 
 	// update the token settings
-	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regdTkDenoms, regdSymDenoms, true)
+	err := s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.UpdateTokens, regdTkDenoms, true)
 	if err != nil {
 		return nil, err
 	}
 
 	// adds the new token settings
-	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regdTkDenoms, regdSymDenoms, false)
+	err = s.keeper.SaveOrUpdateTokenSettingsToRegistry(ctx, msg.AddTokens, regdTkDenoms, false)
 	if err != nil {
 		return nil, err
 	}
