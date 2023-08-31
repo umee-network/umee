@@ -7,8 +7,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/v6/util/cli"
 	"github.com/umee-network/umee/v6/x/metoken"
 )
@@ -103,11 +101,7 @@ func GetCmdSwapFee() *cobra.Command {
 			queryClient := metoken.NewQueryClient(clientCtx)
 			queryReq := metoken.QuerySwapFee{}
 
-			asset, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
-			}
-			queryReq.Asset = asset
+			queryReq.Asset = args[0]
 			queryReq.MetokenDenom = args[1]
 
 			resp, err := queryClient.SwapFee(cmd.Context(), &queryReq)
@@ -136,11 +130,7 @@ func GetCmdRedeemFee() *cobra.Command {
 			queryClient := metoken.NewQueryClient(clientCtx)
 			queryReq := metoken.QueryRedeemFee{}
 
-			metoken, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
-			}
-			queryReq.Metoken = metoken
+			queryReq.Metoken = args[0]
 			queryReq.AssetDenom = args[1]
 
 			resp, err := queryClient.RedeemFee(cmd.Context(), &queryReq)
