@@ -3,6 +3,7 @@ package tests
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	itestsuite "github.com/umee-network/umee/v6/tests/cli"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/client/cli"
@@ -160,4 +161,47 @@ func (s *IntegrationTests) TestValidQueries() {
 
 	// These queries do not require any setup
 	s.RunTestQueries(queries...)
+}
+
+func (s *IntegrationTests) TestTransactions() {
+	txs := []itestsuite.TestTransaction{
+		{
+			Name:    "swap index not found",
+			Command: cli.GetCmdSwap(),
+			Args: []string{
+				"300000000" + mfixtures.BondDenom,
+				"me/Test",
+			},
+			ExpectedErr: sdkerrors.ErrNotFound,
+		},
+		{
+			Name:    "swap 300uumee",
+			Command: cli.GetCmdSwap(),
+			Args: []string{
+				"300000000" + mfixtures.BondDenom,
+				mfixtures.MeBondDenom,
+			},
+			ExpectedErr: nil,
+		},
+		{
+			Name:    "swap index not found",
+			Command: cli.GetCmdRedeem(),
+			Args: []string{
+				"300000000" + "me/Test",
+				mfixtures.BondDenom,
+			},
+			ExpectedErr: sdkerrors.ErrNotFound,
+		},
+		{
+			Name:    "redeem 100me/uumee",
+			Command: cli.GetCmdRedeem(),
+			Args: []string{
+				"100000000" + mfixtures.MeBondDenom,
+				mfixtures.BondDenom,
+			},
+			ExpectedErr: nil,
+		},
+	}
+
+	s.RunTestTransactions(txs...)
 }

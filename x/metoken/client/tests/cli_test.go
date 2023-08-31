@@ -23,4 +23,7 @@ func TestIntegrationSuite(t *testing.T) {
 	// test cli queries
 	s.TestInvalidQueries()
 	s.TestValidQueries()
+
+	//test cli transactions
+	s.TestTransactions()
 }
