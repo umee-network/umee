@@ -61,7 +61,7 @@ func (app *UmeeApp) registerUpgrade5_2(upgradeInfo upgradetypes.Plan) {
 	planName := "v5.2"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			if err := upgradev5x2.Migrate(ctx, app.GovKeeper); err != nil {
+			if err := upgradev5x2.Migrate(ctx, app.interfaceRegistry, app.GovKeeper); err != nil {
 				return fromVM, err
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
