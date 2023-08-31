@@ -57,7 +57,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade5_2(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade5_2(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade5_2(_ upgradetypes.Plan) {
 	planName := "v5.2"
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {

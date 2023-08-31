@@ -87,7 +87,12 @@ func migrateMsgGovUpdateRegistry(
 }
 
 func migrateIBCMetadataProposal(
-	ctx sdk.Context, ir cdctypes.InterfaceRegistry, p *govv1.Proposal, old *govv1.MsgExecLegacyContent, gk govkeeper.Keeper, logger log.Logger,
+	ctx sdk.Context,
+	ir cdctypes.InterfaceRegistry,
+	p *govv1.Proposal,
+	old *govv1.MsgExecLegacyContent,
+	gk govkeeper.Keeper,
+	logger log.Logger,
 ) error {
 	logger.Info(">>> MIGRATING proposal", "id", p.Id)
 	var gravityIBCProp *gravitytypes.IBCMetadataProposal
