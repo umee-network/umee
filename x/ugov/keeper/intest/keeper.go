@@ -14,7 +14,7 @@ import (
 )
 
 // MkKeeper initializes ugov.Keeper with no other dependencies.
-// Should be used only when not other module is required.
+// Should be used only when no other module is required.
 func MkKeeper(t *testing.T) (*sdk.Context, ugov.Keeper) {
 	ir := cdctypes.NewInterfaceRegistry()
 	ugov.RegisterInterfaces(ir)
