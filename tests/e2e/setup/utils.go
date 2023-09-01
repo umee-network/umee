@@ -11,6 +11,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/umee-network/umee/v6/x/metoken"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -135,21 +137,38 @@ func (s *E2ETestSuite) QueryREST(endpoint string, valPtr interface{}) error {
 		return fmt.Errorf("tx query returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
 	}
 
-	if valProto, ok := valPtr.(proto.Message); ok {
-		bz, err := io.ReadAll(resp.Body)
+	return decodeRespBody(s.cdc, endpoint, resp.Body, valPtr)
+}
+
+// TxREST make http tx to grpc-web endpoint and tries to decode respPtr using proto-JSON
+// decoder if respPtr implements proto.Message. Otherwise, standard JSON decoder is used.
+// respPtr must be a pointer.
+func (s *E2ETestSuite) TxREST(endpoint string, reqPtr, respPtr interface{}) error {
+	var bz []byte
+	var err error
+	if reqProto, ok := reqPtr.(proto.Message); ok {
+		bz, err = s.cdc.MarshalJSON(reqProto)
 		if err != nil {
-			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
-		}
-		if err = s.cdc.UnmarshalJSON(bz, valProto); err != nil {
-			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
+			return fmt.Errorf("failed to protoJSON.encode request body: %w, endpoint: %s", err, endpoint)
 		}
 	} else {
-		if err := json.NewDecoder(resp.Body).Decode(valPtr); err != nil {
-			return fmt.Errorf("failed to json.decode response body: %w, endpoint: %s", err, endpoint)
+		bz, err = json.Marshal(reqPtr)
+		if err != nil {
+			return fmt.Errorf("failed to json.Marshal request body: %w, endpoint: %s", err, endpoint)
 		}
 	}
 
-	return nil
+	resp, err := http.Post(endpoint, "application/json", bytes.NewReader(bz))
+	if err != nil {
+		return fmt.Errorf("failed to execute HTTP request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return fmt.Errorf("tx returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
+	}
+
+	return decodeRespBody(s.cdc, endpoint, resp.Body, respPtr)
 }
 
 func (s *E2ETestSuite) QueryUmeeTx(endpoint, txHash string) error {
@@ -245,6 +264,47 @@ func (s *E2ETestSuite) QueryUmeeBalance(
 	return umeeBalance, umeeAddr
 }
 
+func (s *E2ETestSuite) QueryMetokenBalances(endpoint, denom string) (metoken.QueryIndexBalancesResponse, error) {
+	endpoint = fmt.Sprintf("%s/umee/metoken/v1/index_balances?metoken=%s", endpoint, denom)
+	var resp metoken.QueryIndexBalancesResponse
+
+	return resp, s.QueryREST(endpoint, &resp)
+}
+
+func (s *E2ETestSuite) Swap(
+	endpoint, umeeAddr string,
+	asset sdk.Coin,
+	meTokenDenom string,
+) (metoken.MsgSwapResponse, error) {
+	endpoint = fmt.Sprintf("%s/umee/metoken/v1/swap", endpoint)
+	req := metoken.MsgSwap{
+		User:         umeeAddr,
+		Asset:        asset,
+		MetokenDenom: meTokenDenom,
+	}
+
+	var resp metoken.MsgSwapResponse
+
+	return resp, s.TxREST(endpoint, &req, &resp)
+}
+
+func (s *E2ETestSuite) Redeem(
+	endpoint, umeeAddr string,
+	meToken sdk.Coin,
+	assetDenom string,
+) (metoken.MsgRedeemResponse, error) {
+	endpoint = fmt.Sprintf("%s/umee/metoken/v1/redeem", endpoint)
+	req := metoken.MsgRedeem{
+		User:       umeeAddr,
+		Metoken:    meToken,
+		AssetDenom: assetDenom,
+	}
+
+	var resp metoken.MsgRedeemResponse
+
+	return resp, s.TxREST(endpoint, &req, &resp)
+}
+
 func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
 	var raw sdktx.TxRaw
 
@@ -280,4 +340,22 @@ func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
 		AuthInfo:   &authInfo,
 		Signatures: raw.Signatures,
 	}, nil
+}
+
+func decodeRespBody(cdc codec.Codec, endpoint string, body io.ReadCloser, valPtr interface{}) error {
+	if valProto, ok := valPtr.(proto.Message); ok {
+		bz, err := io.ReadAll(body)
+		if err != nil {
+			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
+		}
+		if err = cdc.UnmarshalJSON(bz, valProto); err != nil {
+			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
+		}
+	} else {
+		if err := json.NewDecoder(body).Decode(valPtr); err != nil {
+			return fmt.Errorf("failed to json.decode response body: %w, endpoint: %s", err, endpoint)
+		}
+	}
+
+	return nil
 }
