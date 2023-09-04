@@ -35,6 +35,8 @@ import (
 	"github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
@@ -300,6 +302,20 @@ func IntegrationTestNetworkConfig() network.Config {
 		panic(err)
 	}
 	appGenState[govtypes.ModuleName] = bz
+
+	var metokenGenState metoken.GenesisState
+	if err := cdc.UnmarshalJSON(appGenState[metoken.ModuleName], &metokenGenState); err != nil {
+		panic(err)
+	}
+
+	metokenGenState.Registry = []metoken.Index{mocks.BondIndex()}
+	metokenGenState.Balances = []metoken.IndexBalances{mocks.BondBalance()}
+
+	bz, err = cdc.MarshalJSON(&metokenGenState)
+	if err != nil {
+		panic(err)
+	}
+	appGenState[metoken.ModuleName] = bz
 
 	cfg.Codec = encCfg.Codec
 	cfg.TxConfig = encCfg.TxConfig
