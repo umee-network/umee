@@ -154,23 +154,19 @@ func (wdc WeightedDecCoins) Total(denom string) sdk.Dec {
 // Sub subtracts a sdk.DecCoin from a WeightedDecCoins. Panics if the result would be negative.
 // Does not sort or change the order of the input denoms, combine duplicates, or remove zero coins.
 func (wdc WeightedDecCoins) Sub(sub sdk.DecCoin) (diff WeightedDecCoins) {
-	found := false
-	for _, c := range wdc {
+	if !sub.IsPositive() {
+		return wdc
+	}
+	for i, c := range wdc {
 		if c.Asset.Denom == sub.Denom {
-			diff = append(diff, WeightedDecCoin{
+			wdc[i] = WeightedDecCoin{
 				Asset:  c.Asset.Sub(sub), // sdk.DecCoin.Sub panics on negative result
 				Weight: c.Weight,
-			})
-			found = true
-		} else {
-			diff = append(diff, c)
+			}
+			return wdc
 		}
 	}
-	if sub.IsPositive() && !found {
-		panic("WeightedDecCoins: sub denom not present")
-	}
-
-	return diff
+	panic("WeightedDecCoins: sub denom not present")
 }
 
 // Add returns the sum of a WeightedSpecialPairs and an additional WeightedSpecialPair.
