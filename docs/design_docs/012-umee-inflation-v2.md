@@ -25,8 +25,8 @@ Today, the token issuance follows standard Cosmos SDK mechanism. We want to prog
 
 We set the max inflation to 21 billion UMEE (the supply today is around 12.2 billions):
 
-- Block rewards are always adjusted (zeroed or reduced if necessary) so total supply never exceeds 12 billion UMEE.
-  - Supply is measured based on `bank/QueryTotalSupplyRequest`.
+- Block rewards are always adjusted (zeroed or reduced if necessary) so total supply never exceeds 21 billion UMEE.
+  - Supply is measured based on `bank/QueryTotalSupply`.
 - Minting resumes if supply drops below 21B (and stops again once 21B is reached).
 - Burn events will reduce the UMEE supply, enabling more staking rewards, according to the inflation rules. Burning events were included in the whitepaper, but the exact specification will be the subject of another design document.
 
@@ -45,13 +45,13 @@ The new inflation mechanism is build on top of the existing `x/mint` module by p
 
 ```protobuf
 message InflationParams {
-  // max_supply is the maximum supply for liquidation.
+  // max_supply is the maximum supply. Inflation will not increase the UMEE supply above this value.
   cosmos.base.v1beta1.Coin max_supply = 1;
 
   // inflation_cycle duration after which inflation rates are changed.
   google.protobuf.Duration inflation_cycle = 2;
 
-  // inflation_reduction_rate for every inflation cycle.
+  // inflation_reduction_rate for every inflation cycle in basis points.
   uint32 inflation_reduction_rate = 3;
 }
 ```
