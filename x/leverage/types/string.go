@@ -47,9 +47,10 @@ func (wdc WeightedDecCoin) String() string {
 // omitting the decimal point as well for whole numbers
 func sDec(d sdk.Dec) string {
 	// split string before and after decimal
-	parts := strings.Split(d.String(), ".")
+    dStr = d.String()
+	parts := strings.Split(dStr, ".")
 	if len(parts) != 2 {
-		return d.String()
+		return dStr
 	}
 	// remove all trailing zeroes after decimal
 	parts[1] = strings.TrimRight(parts[1], "0")
