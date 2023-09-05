@@ -2,9 +2,8 @@ package types
 
 import (
 	"fmt"
-	"strings"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v6/util/sdkutil"
 )
 
 func (ap *AccountPosition) String() string {
@@ -34,36 +33,11 @@ func (wnp WeightedNormalPair) String() string {
 // String represents a WeightedSpecialPair in the form [DecCoin, DecCoin] @ weight
 // e.g. [10 uumee, 3.5 uumee] @ 0.35
 func (wsp WeightedSpecialPair) String() string {
-	return "[" + sDecCoin(wsp.Collateral) + ", " + sDecCoin(wsp.Borrow) + "] @ " + sDec(wsp.SpecialWeight)
+	return "[" + sdkutil.FormatDecCoin(wsp.Collateral) + ", " + sdkutil.FormatDecCoin(wsp.Borrow) + "] @ " + sdkutil.FormatDec(wsp.SpecialWeight)
 }
 
 // String represents a WeightedDecCoin in the form coin @ weight
 // e.g. 10 uumee @ 0.35
 func (wdc WeightedDecCoin) String() string {
-	return sDecCoin(wdc.Asset) + " @ " + sDec(wdc.Weight)
-}
-
-// sDec formats a sdk.Dec as a string with no trailing zeroes after the decimal point,
-// omitting the decimal point as well for whole numbers
-func sDec(d sdk.Dec) string {
-	// split string before and after decimal
-	dStr := d.String()
-	parts := strings.Split(dStr, ".")
-	if len(parts) != 2 {
-		return dStr
-	}
-	// remove all trailing zeroes after decimal
-	parts[1] = strings.TrimRight(parts[1], "0")
-	// if input was a whole number, return without any decimal
-	if parts[1] == "" {
-		return parts[0]
-	}
-	// otherwise, return with decimal intact but trailing zeroes removed
-	return parts[0] + "." + parts[1]
-}
-
-// sDecCoin formats a sdk.DecCoin with no trailing zeroes after the decimal point in its amount,
-// omitting the decimal point as well for whole numbers
-func sDecCoin(c sdk.DecCoin) string {
-	return sDec(c.Amount) + " " + c.Denom
+	return sdkutil.FormatDecCoin(wdc.Asset) + " @ " + sdkutil.FormatDec(wdc.Weight)
 }
