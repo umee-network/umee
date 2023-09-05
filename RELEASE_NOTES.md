@@ -17,7 +17,7 @@ Highlights:
 
 The Upgrade Handler sets the following values to the Umee `x/ugov` Inflation Cycle parameters:
 
-- `max_supply = 21e18uumee` (12 billions UMEE)
+- `max_supply = 21e18uumee` (21 billions UMEE)
 - `inflation_cycle = time.Hour * 24 * 365 * 2` (2 years)
 - `inflation_reduction_rate = 2500 basis points` (25%)
 

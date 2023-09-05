@@ -23,7 +23,7 @@ Today, the token issuance follows standard Cosmos SDK mechanism. We want to prog
 
 ## Specification
 
-We set the max inflation to 12 billions UMEE (the supply today is around 12.2 billions):
+We set the max inflation to 21 billion UMEE (the supply today is around 12.2 billions):
 
 - Block rewards are always adjusted (zeroed or reduced if necessary) so total supply never exceeds 12 billion UMEE.
   - Supply is measured based on `bank/QueryTotalSupplyRequest`.
