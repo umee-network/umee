@@ -224,7 +224,12 @@ func init() {
 		oracletypes.ModuleName: nil,
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
-		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
+	}
+
+	if Experimental {
+		maccPerms[metoken.ModuleName] = []string{
+			authtypes.Minter, authtypes.Burner,
+		}
 	}
 }
 
