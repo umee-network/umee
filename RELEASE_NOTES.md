@@ -11,8 +11,15 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 Highlights:
 
 - TODO
+- New inflation mechanism (see below).
 
 [v6.0.0 CHANGELOG](https://github.com/umee-network/umee/blob/v6.0.0/CHANGELOG.md).
+
+### New Inflation Mechanism
+
+- Set max inflation to 12 billions UMEE (the supply today is around 12.2 billions).
+
+The **min and max inflation rates** decrease by `25%` every **two years**. We call it inflation cycles. In each inflation cycle, the yearly total amount of newly emitted tokens is a variable - At the end of each inflation cycle we need to decrease by 25%: the `min_inflation_rate`, `max_inflation_rate` and the `current_inflation_rate`. - Inflation rate change speed is changed from 1 year to **6 months**.
 
 ### Validators
 
