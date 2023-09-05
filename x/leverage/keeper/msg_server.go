@@ -602,3 +602,17 @@ func (s msgServer) GovUpdateSpecialAssets(
 
 	return &types.MsgGovUpdateSpecialAssetsResponse{}, nil
 }
+
+// GovSetParams updates module parameters.
+func (s msgServer) GovSetParams(
+	goCtx context.Context,
+	msg *types.MsgGovSetParams,
+) (*types.MsgGovSetParamsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	if err := s.keeper.SetParams(ctx, msg.Params); err != nil {
+		return nil, err
+	}
+
+	return &types.MsgGovSetParamsResponse{}, nil
+}

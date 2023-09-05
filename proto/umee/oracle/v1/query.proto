@@ -65,7 +65,7 @@ service Query {
   rpc AggregateVote(QueryAggregateVote)
       returns (QueryAggregateVoteResponse) {
     option (google.api.http).get =
-        "/umee/oracle/v1/valdiators/{validator_addr}/aggregate_vote";
+        "/umee/oracle/v1/validators/{validator_addr}/aggregate_vote";
   }
 
   // AggregateVotes returns aggregate votes of all validators

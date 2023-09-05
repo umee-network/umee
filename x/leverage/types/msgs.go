@@ -12,9 +12,38 @@ import (
 )
 
 var (
-	_, _ sdk.Msg            = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssets{}
-	_, _ legacytx.LegacyMsg = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssets{}
+	_, _, _ sdk.Msg            = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssets{}, &MsgGovSetParams{}
+	_, _, _ legacytx.LegacyMsg = &MsgGovUpdateRegistry{}, &MsgGovUpdateSpecialAssets{}, &MsgGovSetParams{}
 )
+
+// NewMsgGovSetParams will create a new MsgGovSetParams instance.
+// Authority must be a valid bech32 address.
+func NewMsgGovSetParams(authority string, params Params) *MsgGovSetParams {
+	return &MsgGovSetParams{
+		Authority: authority,
+		Params:    params,
+	}
+}
+
+// String implements the Stringer interface.
+func (msg MsgGovSetParams) String() string {
+	out, _ := yaml.Marshal(msg)
+	return string(out)
+}
+
+// ValidateBasic implements Msg
+func (msg MsgGovSetParams) ValidateBasic() error {
+	if err := checkers.Proposal(msg.Authority, ""); err != nil {
+		return err
+	}
+
+	return msg.Params.Validate()
+}
+
+// GetSigners implements Msg
+func (msg MsgGovSetParams) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
 
 // NewMsgGovUpdateRegistry will create a new MsgUpdateRegistry instance.
 // Authority must be a valid bech32 address.
@@ -155,13 +184,19 @@ func validateSpecialAssetPairs(pairs []SpecialAssetPair) error {
 
 func (msg MsgGovUpdateRegistry) Type() string       { return sdk.MsgTypeURL(&msg) }
 func (msg MsgGovUpdateSpecialAssets) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgGovSetParams) Type() string            { return sdk.MsgTypeURL(&msg) }
 func (msg MsgGovUpdateRegistry) Route() string      { return "" }
 func (msg MsgGovUpdateSpecialAssets) Route() string { return "" }
+func (msg MsgGovSetParams) Route() string           { return "" }
 
 func (msg MsgGovUpdateSpecialAssets) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func (msg MsgGovUpdateRegistry) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
+}
+
+func (msg MsgGovSetParams) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }

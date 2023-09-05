@@ -943,13 +943,7 @@ paths:
                       uTokens as liquidation rewards.
 
                       Valid values: 0-1.
-                description: >-
-                  Params defines the parameters for the leverage module.
-
-                  See
-                  https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
-
-                  for more details.
+                description: Params defines the parameters for the leverage module.
             description: >-
               QueryParamsResponse defines the response structure for the Params
               gRPC
@@ -1811,74 +1805,6 @@ paths:
                       format: byte
       tags:
         - Query
-  /umee/oracle/v1/valdiators/{validator_addr}/aggregate_vote:
-    get:
-      summary: AggregateVote returns an aggregate vote of a validator
-      operationId: AggregateVote
-      responses:
-        '200':
-          description: A successful response.
-          schema:
-            type: object
-            properties:
-              aggregate_vote:
-                title: >-
-                  aggregate_vote defines oracle aggregate vote submitted by a
-                  validator in
-
-                  the current vote period
-                type: object
-                properties:
-                  exchange_rate_tuples:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        denom:
-                          type: string
-                        exchange_rate:
-                          type: string
-                      title: >-
-                        ExchangeRateTuple - struct to store interpreted exchange
-                        rates data to store
-                  voter:
-                    type: string
-                description: |-
-                  AggregateExchangeRateVote - struct for voting on
-                  the exchange rates of USD denominated in various assets.
-            description: |-
-              QueryAggregateVoteResponse is response type for the
-              Query/AggregateVote RPC method.
-        default:
-          description: An unexpected error response.
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-              code:
-                type: integer
-                format: int32
-              message:
-                type: string
-              details:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    type_url:
-                      type: string
-                    value:
-                      type: string
-                      format: byte
-      parameters:
-        - name: validator_addr
-          description: validator defines the validator address to query for.
-          in: path
-          required: true
-          type: string
-      tags:
-        - Query
   /umee/oracle/v1/validators/aggregate_prevotes:
     get:
       summary: AggregatePrevotes returns aggregate prevotes of all validators
@@ -2042,6 +1968,74 @@ paths:
             description: |-
               QueryAggregatePrevoteResponse is response type for the
               Query/AggregatePrevote RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: validator_addr
+          description: validator defines the validator address to query for.
+          in: path
+          required: true
+          type: string
+      tags:
+        - Query
+  /umee/oracle/v1/validators/{validator_addr}/aggregate_vote:
+    get:
+      summary: AggregateVote returns an aggregate vote of a validator
+      operationId: AggregateVote
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              aggregate_vote:
+                type: object
+                properties:
+                  exchange_rate_tuples:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        denom:
+                          type: string
+                        exchange_rate:
+                          type: string
+                      title: >-
+                        ExchangeRateTuple - struct to store interpreted exchange
+                        rates data to store
+                  voter:
+                    type: string
+                description: |-
+                  AggregateExchangeRateVote - struct for voting on
+                  the exchange rates of USD denominated in various assets.
+                title: >-
+                  aggregate_vote defines oracle aggregate vote submitted by a
+                  validator in
+
+                  the current vote period
+            description: |-
+              QueryAggregateVoteResponse is response type for the
+              Query/AggregateVote RPC method.
         default:
           description: An unexpected error response.
           schema:
@@ -4164,11 +4158,7 @@ paths:
                       type: string
                       format: byte
       parameters:
-        - name: metoken.denom
-          in: query
-          required: false
-          type: string
-        - name: metoken.amount
+        - name: metoken
           in: query
           required: false
           type: string
@@ -4229,11 +4219,7 @@ paths:
                       type: string
                       format: byte
       parameters:
-        - name: asset.denom
-          in: query
-          required: false
-          type: string
-        - name: asset.amount
+        - name: asset
           in: query
           required: false
           type: string
@@ -4491,13 +4477,7 @@ definitions:
           uTokens as liquidation rewards.
 
           Valid values: 0-1.
-    description: >-
-      Params defines the parameters for the leverage module.
-
-      See
-      https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
-
-      for more details.
+    description: Params defines the parameters for the leverage module.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
     properties:
@@ -5025,13 +5005,7 @@ definitions:
               uTokens as liquidation rewards.
 
               Valid values: 0-1.
-        description: >-
-          Params defines the parameters for the leverage module.
-
-          See
-          https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
-
-          for more details.
+        description: Params defines the parameters for the leverage module.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
       service handler.
@@ -5814,11 +5788,6 @@ definitions:
     type: object
     properties:
       aggregate_vote:
-        title: >-
-          aggregate_vote defines oracle aggregate vote submitted by a validator
-          in
-
-          the current vote period
         type: object
         properties:
           exchange_rate_tuples:
@@ -5838,6 +5807,11 @@ definitions:
         description: |-
           AggregateExchangeRateVote - struct for voting on
           the exchange rates of USD denominated in various assets.
+        title: >-
+          aggregate_vote defines oracle aggregate vote submitted by a validator
+          in
+
+          the current vote period
     description: |-
       QueryAggregateVoteResponse is response type for the
       Query/AggregateVote RPC method.

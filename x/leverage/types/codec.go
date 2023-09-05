@@ -33,11 +33,14 @@ func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgBorrow{}, "umee/leverage/MsgBorrow", nil)
 	cdc.RegisterConcrete(&MsgRepay{}, "umee/leverage/MsgRepay", nil)
 	cdc.RegisterConcrete(&MsgLiquidate{}, "umee/leverage/MsgLiquidate", nil)
-	cdc.RegisterConcrete(&MsgGovUpdateRegistry{}, "umee/leverage/MsgGovUpdateRegistry", nil)
 	cdc.RegisterConcrete(&MsgSupplyCollateral{}, "umee/leverage/MsgSupplyCollateral", nil)
 	cdc.RegisterConcrete(&MsgMaxWithdraw{}, "umee/leverage/MsgMaxWithdraw", nil)
 	cdc.RegisterConcrete(&MsgMaxBorrow{}, "umee/leverage/MsgMaxBorrow", nil)
 	cdc.RegisterConcrete(&MsgLeveragedLiquidate{}, "umee/leverage/MsgLeveragedLiquidate", nil)
+
+	cdc.RegisterConcrete(&MsgGovUpdateRegistry{}, "umee/leverage/MsgGovUpdateRegistry", nil)
+	cdc.RegisterConcrete(&MsgGovSetParams{}, "umee/leverage/MsgGovSetParams", nil)
+	cdc.RegisterConcrete(&MsgGovUpdateSpecialAssets{}, "umee/leverage/MsgGovUpdateSpecialAssets", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -50,11 +53,14 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgBorrow{},
 		&MsgRepay{},
 		&MsgLiquidate{},
-		&MsgGovUpdateRegistry{},
 		&MsgSupplyCollateral{},
 		&MsgMaxWithdraw{},
 		&MsgMaxBorrow{},
 		&MsgLeveragedLiquidate{},
+
+		&MsgGovUpdateRegistry{},
+		&MsgGovUpdateSpecialAssets{},
+		&MsgGovSetParams{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
