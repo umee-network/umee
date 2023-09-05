@@ -29,5 +29,5 @@ func FormatDec(d sdk.Dec) string {
 // FormatDecCoin formats a sdk.DecCoin with no trailing zeroes after the decimal point in its amount,
 // omitting the decimal point as well for whole numbers.
 func FormatDecCoin(c sdk.DecCoin) string {
-	return FormatDec(c.Amount) + c.Denom
+	return fmt.Sprintf("%s %s", FormatDec(c.Amount), c.Denom)
 }
