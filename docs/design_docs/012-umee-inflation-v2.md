@@ -78,8 +78,9 @@ Another possible modification is to set a constant inflation rate during each In
 
 ## Test Case
 
-- Unit tests to verify the Inflation Cycle changes
-- Unit tests to verify the Umee
+- Unit tests to verify the Inflation Cycle changes.
+- Unit tests to verify the inflation change speed.
+- Integration test to verify the x/staking and x/ugov integration.
 
 ## Consequences
 
