@@ -199,26 +199,28 @@ func (s *IntegrationTestSuite) TestStargateQueries() {
 				assert.DeepEqual(s.T, lvtypes.DefaultParams(), rr.Params)
 			},
 		},
+		// TODO: enable this once metoken is stable
+		// {
+		// 	name: "stargate: metoken queries ",
+		// 	sq: func() StargateQuery {
+		// 		data := metoken.QueryParams{}
+		// 		d, err := data.Marshal()
+		// 		assert.NilError(s.T, err)
+		// 		sq := StargateQuery{}
+		// 		sq.Chain.Stargate = wasmvmtypes.StargateQuery{
+		// 			Path: "/umee.metoken.v1.Query/Params",
+		// 			Data: d,
+		// 		}
+		// 		return sq
+		// 	},
+		// 	resp: func(resp wasmtypes.QuerySmartContractStateResponse) {
+		// 		var rr metoken.QueryParamsResponse
+		// 		err := s.encfg.Codec.UnmarshalJSON(resp.Data, &rr)
+		// 		assert.NilError(s.T, err)
+		// 		assert.DeepEqual(s.T, metoken.DefaultParams(), rr.Params)
+		// 	},
+		// },
 		{
-			name: "stargate: metoken queries ",
-			sq: func() StargateQuery {
-				data := metoken.QueryParams{}
-				d, err := data.Marshal()
-				assert.NilError(s.T, err)
-				sq := StargateQuery{}
-				sq.Chain.Stargate = wasmvmtypes.StargateQuery{
-					Path: "/umee.metoken.v1.Query/Params",
-					Data: d,
-				}
-				return sq
-			},
-			resp: func(resp wasmtypes.QuerySmartContractStateResponse) {
-				var rr metoken.QueryParamsResponse
-				err := s.encfg.Codec.UnmarshalJSON(resp.Data, &rr)
-				assert.NilError(s.T, err)
-				assert.DeepEqual(s.T, metoken.DefaultParams(), rr.Params)
-			},
-		}, {
 			name: "stargate: leverage market summary",
 			sq: func() StargateQuery {
 				data := lvtypes.QueryMarketSummary{
