@@ -25,17 +25,17 @@ Today, the token issuance follows standard Cosmos SDK mechanism. We want to prog
 
 We set the max inflation to 12 billions UMEE (the supply today is around 12.2 billions):
 
-- Block rewards are always adjusted (zeroed or reduced if necessary) to never exceed 12 billions UMEE.
+- Block rewards are always adjusted (zeroed or reduced if necessary) so total supply never exceeds 12 billion UMEE.
   - Supply is measured based on `bank/QueryTotalSupplyRequest`.
 - Minting resumes if supply drops below 21B (and stops again once 21B is reached).
-- Burn events will reduce the ongoing UMEE supply, enabling more staking rewards, according to the inflation rules. Burning events were already introduced in the whitepaper and the exact specification is part of an ongoing discussion, and subject to another design document.
+- Burn events will reduce the UMEE supply, enabling more staking rewards, according to the inflation rules. Burning events were included in the whitepaper, but the exact specification will be the subject of another design document.
 
-The $UMEE v2 Inflation follows a similar Cosmos dynamic inflation mechanism based on the bonding rate in the `x/staking` module, to allow the Umee chain to naturally adjust inflation rate to drive staking activities to reach the target bonding rate. All the inflation tokens go to stakers and delegators as how it works now.
+The $UMEE v2 Inflation follows a similar Cosmos dynamic inflation mechanism based on the bonding rate in the `x/staking` module, to allow the Umee chain to naturally adjust inflation rate to drive staking activities to reach the target bonding rate.
 
 On top of that we introduce _inflation cycle_, which is initially set to 2 years and controlled by the UMEE governance. In each inflation cycle, the yearly total amount of newly emitted tokens is a variable as per the `x/staking` Cosmos SDK module.
 At the end of each inflation cycle, the `x/mint` module `inflation_min` and `inflation_max` parameters are automatically decreased by the `infaltion_reduction_rate` parameter, which is initially set to 25%.
 
-Finally, we increase the `x/mint` [inflation rate change](https://github.com/cosmos/cosmos-sdk/blob/v0.47.2/x/mint/README.md#nextinflationrate) speed from 1 year to **6 months**.
+Finally, we accelerate the `x/mint` [inflation rate change](https://github.com/cosmos/cosmos-sdk/blob/v0.47.2/x/mint/README.md#nextinflationrate) speed from 1 year to **6 months**.
 
 Umee governance at any time can vote and modify the inflation schedule if the external environment changes materially and requires a different plan.
 
@@ -89,7 +89,7 @@ Another possible modification is to set a constant inflation rate during each In
 
 ### Backwards Compatibility
 
-- The solution is backwards compatible with the existing Cosmos SDK stack. We don't need to for any Cosmos SDK module implementation, nor overwrite it.
+- The solution is backwards compatible with the existing Cosmos SDK stack. We don't need to fork any Cosmos SDK module implementation, nor overwrite it.
 - The implementation adds new method to the UMEE `x/ugov` module and new parameter set, which is additive.
 
 ## Further Discussions
