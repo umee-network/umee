@@ -3,6 +3,7 @@ package mocks
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v6/util/coin"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -25,6 +26,8 @@ const (
 	MeUSDDenom       = "me/USD"
 	MeNonStableDenom = "me/NonStable"
 	TestDenom1       = "testDenom1"
+	BondDenom        = "uumee"
+	MeBondDenom      = "me/" + BondDenom
 )
 
 var (
@@ -62,6 +65,36 @@ func NonStableIndex(denom string) metoken.Index {
 			acceptedAsset(ETHBaseDenom, "0.33"),
 		},
 	)
+}
+
+func BondIndex() metoken.Index {
+	return metoken.Index{
+		Denom:     MeBondDenom,
+		MaxSupply: sdk.NewInt(1000000_00000),
+		Exponent:  6,
+		Fee:       ValidFee(),
+		AcceptedAssets: []metoken.AcceptedAsset{
+			metoken.NewAcceptedAsset(
+				BondDenom, sdk.MustNewDecFromStr("0.2"),
+				sdk.MustNewDecFromStr("1.0"),
+			),
+		},
+	}
+}
+
+func BondBalance() metoken.IndexBalances {
+	return metoken.IndexBalances{
+		MetokenSupply: coin.Zero(MeBondDenom),
+		AssetBalances: []metoken.AssetBalance{
+			{
+				Denom:     BondDenom,
+				Leveraged: sdkmath.ZeroInt(),
+				Reserved:  sdkmath.ZeroInt(),
+				Fees:      sdkmath.ZeroInt(),
+				Interest:  sdkmath.ZeroInt(),
+			},
+		},
+	}
 }
 
 func acceptedAsset(denom, targetAllocation string) metoken.AcceptedAsset {

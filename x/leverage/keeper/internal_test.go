@@ -5,7 +5,6 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	paramtypes "github.com/cosmos/cosmos-sdk/x/params/types"
 
 	"github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -24,7 +23,6 @@ type TestKeeper struct {
 func NewTestKeeper(
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
-	paramSpace paramtypes.Subspace,
 	bk types.BankKeeper,
 	ok types.OracleKeeper,
 	enableLiquidatorQuery bool,
@@ -32,7 +30,6 @@ func NewTestKeeper(
 	k := NewKeeper(
 		cdc,
 		storeKey,
-		paramSpace,
 		bk,
 		ok,
 		ugovmocks.NewSimpleEmergencyGroupBuilder(),
