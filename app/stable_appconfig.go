@@ -5,4 +5,4 @@ package app
 
 // Experimental is a flag which determines experimental features.
 // It's set via build flag.
-const Experimental = false
+const Experimental = true

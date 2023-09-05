@@ -5,6 +5,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/umee-network/umee/v6/x/metoken"
+
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 
@@ -61,6 +65,45 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 		Authority:   checkers.GovModuleAddr,
 		Description: "",
 		IbcStatus:   status,
+	}
+
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
+}
+
+func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []ltypes.Token) error {
+	msg := ltypes.MsgGovUpdateRegistry{
+		Authority:    checkers.GovModuleAddr,
+		Description:  "",
+		AddTokens:    addTokens,
+		UpdateTokens: updateTokens,
+	}
+
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
+}
+
+func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes []metoken.Index) error {
+	msg := metoken.MsgGovUpdateRegistry{
+		Authority:   checkers.GovModuleAddr,
+		AddIndex:    addIndexes,
+		UpdateIndex: updateIndexes,
 	}
 
 	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
