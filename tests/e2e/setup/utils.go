@@ -265,8 +265,15 @@ func (s *E2ETestSuite) QueryUmeeBalance(
 }
 
 func (s *E2ETestSuite) QueryMetokenBalances(endpoint, denom string) (metoken.QueryIndexBalancesResponse, error) {
-	endpoint = fmt.Sprintf("%s/umee/metoken/v1/index_balances?metoken=%s", endpoint, denom)
+	endpoint = fmt.Sprintf("%s/umee/metoken/v1/index_balances?metoken_denom=%s", endpoint, denom)
 	var resp metoken.QueryIndexBalancesResponse
+
+	return resp, s.QueryREST(endpoint, &resp)
+}
+
+func (s *E2ETestSuite) QueryMetokenIndexes(endpoint, denom string) (metoken.QueryIndexesResponse, error) {
+	endpoint = fmt.Sprintf("%s/umee/metoken/v1/indexes?metoken_denom=%s", endpoint, denom)
+	var resp metoken.QueryIndexesResponse
 
 	return resp, s.QueryREST(endpoint, &resp)
 }
