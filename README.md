@@ -41,24 +41,24 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 
 ### Release Compatibility Matrix
 
-| Umee Version | Mainnet | Cosmos SDK |  IBC   |  Peggo  | Price Feeder |       Gravity Bridge       | libwasmvm |
-| :----------: | :-----: | :--------: | :----: | :-----: | :----------: | :------------------------: | :-------: |
-|    v0.8.x    |    ✗    |  v0.45.x   | v2.0.x | v0.2.x  |    v0.1.x    |                            |           |
-|    v1.x.x    |    ✓    |  v0.45.x   | v2.0.x | v0.2.x  |     N/A      | umee/v1 module/v1.4.x-umee |           |
-|    v2.x.x    |    ✗    |  v0.45.x   | v2.3.x | v0.2.x  |    v0.2.x    |   umee/v2 module/v1.4.x    |           |
-|   v3.0-1.x   |    ✓    |  v0.46.x   | v5.0.x | v1.3.x+ |    v1.0.x    | umee/v3 module/v1.5.x-umee |           |
-|  v3.1.0-cw1  |    ✗    |  v0.46.x   | v5.0.x | v1.3.x+ |    v2.0.x    | umee/v3 module/v1.5.x-umee |           |
-|    v3.2.x    |    ✓    |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.x    |   umee/v3 v1.5.3-umee-3    |  v1.1.1   |
-|    v3.3.x    |    ✓    |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.2    |   umee/v3 v1.5.3-umee-3    |  v1.1.1   |
-|    v4.0.x    |    ✓    |  v0.46.6+  | v5.1.x | v1.3.x+ |    v2.0.3    |   umee/v4 v1.5.3-umee-4    |  v1.1.1   |
-|    v4.1.x    |    ✓    |  v0.46.7+  | v5.2.x | v1.3.x+ |    v2.1.0    |   umee/v4 v1.5.3-umee-4    |  v1.1.1   |
-|    v4.2.x    |    ✓    | v0.46.10+  | v5.2.x | v1.3.x+ | umee/v2.1.1  |   umee/v4 v1.5.3-umee-4    |  v1.1.1   |
-|    v4.3.x    |    ✓    | v0.46.11+  | v6.1.x | v1.3.x+ | umee/v2.1.1  |   umee/v4 v1.5.3-umee-6    |  v1.2.1   |
-|    v4.4.x    |    ✓    | v0.46.11+  | v6.1.x | v1.3.x+ | umee/v2.1.4+ |   umee/v4 v1.5.3-umee-6    |  v1.2.3   |
-|    v5.0.x    |    ✓    | v0.46.13+  | v6.2.x | v1.3.x+ | umee/v2.1.4+ |   umee/v4 v1.5.3-umee-8    |  v1.2.4   |
-|    v5.1.x    |    ✓    | v0.46.13+  | v6.2.x |   ---   | umee/v2.1.6+ |   umee/v4 v1.5.3-umee-10   |  v1.2.4   |
-|    v5.2.x    |    ✓    | v0.46.13+  | v6.2.x |   ---   | umee/v2.1.6+ |   umee/v4 v1.5.3-umee-10   |  v1.2.4   |
-|    v6.0.x    |    ✓    | v0.46.14+  | v6.2.x |   ---   | umee/v2.1.6+ |            ---             |  v1.3.0   |
+| Umee Version | Mainnet | Cosmos SDK |  IBC   |  Peggo  |  Price Feeder  |       Gravity Bridge       | libwasmvm |
+| :----------: | :-----: | :--------: | :----: | :-----: | :------------: | :------------------------: | :-------: |
+|    v0.8.x    |    ✗    |  v0.45.x   | v2.0.x | v0.2.x  |     v0.1.x     |                            |           |
+|    v1.x.x    |    ✓    |  v0.45.x   | v2.0.x | v0.2.x  |      N/A       | umee/v1 module/v1.4.x-umee |           |
+|    v2.x.x    |    ✗    |  v0.45.x   | v2.3.x | v0.2.x  |     v0.2.x     |   umee/v2 module/v1.4.x    |           |
+|   v3.0-1.x   |    ✓    |  v0.46.x   | v5.0.x | v1.3.x+ |     v1.0.x     | umee/v3 module/v1.5.x-umee |           |
+|  v3.1.0-cw1  |    ✗    |  v0.46.x   | v5.0.x | v1.3.x+ |     v2.0.x     | umee/v3 module/v1.5.x-umee |           |
+|    v3.2.x    |    ✓    |  v0.46.6+  | v5.1.x | v1.3.x+ |     v2.0.x     |   umee/v3 v1.5.3-umee-3    |  v1.1.1   |
+|    v3.3.x    |    ✓    |  v0.46.6+  | v5.1.x | v1.3.x+ |     v2.0.2     |   umee/v3 v1.5.3-umee-3    |  v1.1.1   |
+|    v4.0.x    |    ✓    |  v0.46.6+  | v5.1.x | v1.3.x+ |     v2.0.3     |   umee/v4 v1.5.3-umee-4    |  v1.1.1   |
+|    v4.1.x    |    ✓    |  v0.46.7+  | v5.2.x | v1.3.x+ |     v2.1.0     |   umee/v4 v1.5.3-umee-4    |  v1.1.1   |
+|    v4.2.x    |    ✓    | v0.46.10+  | v5.2.x | v1.3.x+ |  umee/v2.1.1   |   umee/v4 v1.5.3-umee-4    |  v1.1.1   |
+|    v4.3.x    |    ✓    | v0.46.11+  | v6.1.x | v1.3.x+ |  umee/v2.1.1   |   umee/v4 v1.5.3-umee-6    |  v1.2.1   |
+|    v4.4.x    |    ✓    | v0.46.11+  | v6.1.x | v1.3.x+ |  umee/v2.1.4+  |   umee/v4 v1.5.3-umee-6    |  v1.2.3   |
+|    v5.0.x    |    ✓    | v0.46.13+  | v6.2.x | v1.3.x+ |  umee/v2.1.4+  |   umee/v4 v1.5.3-umee-8    |  v1.2.4   |
+|    v5.1.x    |    ✓    | v0.46.13+  | v6.2.x |   ---   |  umee/v2.1.6+  |   umee/v4 v1.5.3-umee-10   |  v1.2.4   |
+|    v5.2.x    |    ✓    | v0.46.13+  | v6.2.x |   ---   |  umee/v2.1.6+  |   umee/v4 v1.5.3-umee-10   |  v1.2.4   |
+|    v6.0.x    |    ✓    | v0.46.14+  | v6.2.x |   ---   | umee/v2.1.6-1+ |            ---             |  v1.3.0   |
 
 #### Price Feeder
 

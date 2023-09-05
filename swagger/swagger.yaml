@@ -2417,7 +2417,9 @@ paths:
                 type: object
                 properties:
                   max_supply:
-                    description: max_supply is the maximum supply for liquidation.
+                    description: >-
+                      max_supply is the maximum supply. Inflation will not
+                      increase the UMEE supply above this value.
                     type: object
                     properties:
                       denom:
@@ -2432,7 +2434,9 @@ paths:
                   inflation_reduction_rate:
                     type: integer
                     format: int64
-                    description: inflation_reduction_rate for every inflation cycle.
+                    description: >-
+                      inflation_reduction_rate for every inflation cycle in
+                      basis points.
                 description: >-
                   InflationParams params for changing the inflation min rate and
                   max rate of mint module params.
@@ -6143,7 +6147,9 @@ definitions:
     type: object
     properties:
       max_supply:
-        description: max_supply is the maximum supply for liquidation.
+        description: >-
+          max_supply is the maximum supply. Inflation will not increase the UMEE
+          supply above this value.
         type: object
         properties:
           denom:
@@ -6156,7 +6162,7 @@ definitions:
       inflation_reduction_rate:
         type: integer
         format: int64
-        description: inflation_reduction_rate for every inflation cycle.
+        description: inflation_reduction_rate for every inflation cycle in basis points.
     description: >-
       InflationParams params for changing the inflation min rate and max rate of
       mint module params.
@@ -6180,7 +6186,9 @@ definitions:
         type: object
         properties:
           max_supply:
-            description: max_supply is the maximum supply for liquidation.
+            description: >-
+              max_supply is the maximum supply. Inflation will not increase the
+              UMEE supply above this value.
             type: object
             properties:
               denom:
@@ -6193,7 +6201,9 @@ definitions:
           inflation_reduction_rate:
             type: integer
             format: int64
-            description: inflation_reduction_rate for every inflation cycle.
+            description: >-
+              inflation_reduction_rate for every inflation cycle in basis
+              points.
         description: >-
           InflationParams params for changing the inflation min rate and max
           rate of mint module params.
