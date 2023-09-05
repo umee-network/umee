@@ -15,14 +15,12 @@ func FormatDec(d sdk.Dec) string {
 	if len(parts) != 2 {
 		return dStr
 	}
-	// remove all trailing zeroes after decimal
-	parts[1] = strings.TrimRight(parts[1], "0")
-	// if input was a whole number, return without any decimal
-	if parts[1] == "" {
-		return parts[0]
+	integer, decimal := parts[0], parts[1]
+	decimal = strings.TrimRight(decimal, "0")  // no need for trailing zeros after the "."
+	if decimal == "" {
+		return integer
 	}
-	// otherwise, return with decimal intact but trailing zeroes removed
-	return fmt.Sprintf("%s.%s", parts[0], parts[1])
+	return fmt.Sprint(integer, ".", decimal)
 }
 
 // FormatDecCoin formats a sdk.DecCoin with no trailing zeroes after the decimal point in its amount,
