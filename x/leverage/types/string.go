@@ -25,19 +25,28 @@ func (ap *AccountPosition) String() string {
 }
 
 // String represents a WeightedNormalPair in the form [WeightedDecCoin, WeightedDecCoin]
-// e.g. [10 uumee @ 0.35, 3.5 uumee @ 0.35]
+// e.g. [10 uumee (0.35), 3.5 uumee (0.35)]
 func (wnp WeightedNormalPair) String() string {
 	return fmt.Sprintf("[%s, %s]", wnp.Collateral, wnp.Borrow)
 }
 
-// String represents a WeightedSpecialPair in the form [DecCoin, DecCoin] @ weight
-// e.g. [10 uumee, 3.5 uumee] @ 0.35
+// String represents a WeightedSpecialPair in the form [weight, DecCoin, DecCoin]
+// e.g. {0.35, 10 uumee, 3.5 uumee}
 func (wsp WeightedSpecialPair) String() string {
-	return "[" + sdkutil.FormatDecCoin(wsp.Collateral) + ", " + sdkutil.FormatDecCoin(wsp.Borrow) + "] @ " + sdkutil.FormatDec(wsp.SpecialWeight)
+	return fmt.Sprintf(
+		"{%s, %s, %s}",
+		sdkutil.FormatDec(wsp.SpecialWeight),
+		sdkutil.FormatDecCoin(wsp.Collateral),
+		sdkutil.FormatDecCoin(wsp.Borrow),
+	)
 }
 
-// String represents a WeightedDecCoin in the form coin @ weight
-// e.g. 10 uumee @ 0.35
+// String represents a WeightedDecCoin in the form coin (weight)
+// e.g. 10 uumee (0.35)
 func (wdc WeightedDecCoin) String() string {
-	return sdkutil.FormatDecCoin(wdc.Asset) + " @ " + sdkutil.FormatDec(wdc.Weight)
+	return fmt.Sprintf(
+		"%s (%s)",
+		sdkutil.FormatDecCoin(wdc.Asset),
+		sdkutil.FormatDec(wdc.Weight),
+	)
 }

@@ -42,14 +42,14 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t,
 		"special:\n"+
-			"  [40 AAAA, 20 BBBB] @ 0.5\n"+
-			"  [0 BBBB, 0 AAAA] @ 0.5\n"+
-			"  [50 AAAA, 20 CCCC] @ 0.4\n"+
-			"  [0 CCCC, 0 AAAA] @ 0.4\n"+
+			"  {0.5, 40 AAAA, 20 BBBB}\n"+
+			"  {0.5, 0 BBBB, 0 AAAA}\n"+
+			"  {0.4, 50 AAAA, 20 CCCC}\n"+
+			"  {0.4, 0 CCCC, 0 AAAA}\n"+
 			"normal:\n"+
-			"  [10 AAAA @ 0.4, 1 DDDD @ 0.1]\n"+
-			"  [40 DDDD @ 0.1, 4 DDDD @ 0.1]\n"+
-			"  [260 DDDD @ 0.1, -]\n",
+			"  [10 AAAA (0.4), 1 DDDD (0.1)]\n"+
+			"  [40 DDDD (0.1), 4 DDDD (0.1)]\n"+
+			"  [260 DDDD (0.1), -]\n",
 		initialPosition.String(),
 	)
 	borrowLimit := initialPosition.Limit()
@@ -64,13 +64,13 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	// pair with B, demoting the C borrow to ordinary assets.
 	assert.Equal(t,
 		"special:\n"+
-			"  [50 AAAA, 25 BBBB] @ 0.5\n"+
-			"  [0 BBBB, 0 AAAA] @ 0.5\n"+
-			"  [50 AAAA, 20 CCCC] @ 0.4\n"+
-			"  [0 CCCC, 0 AAAA] @ 0.4\n"+
+			"  {0.5, 50 AAAA, 25 BBBB}\n"+
+			"  {0.5, 0 BBBB, 0 AAAA}\n"+
+			"  {0.4, 50 AAAA, 20 CCCC}\n"+
+			"  {0.4, 0 CCCC, 0 AAAA}\n"+
 			"normal:\n"+
-			"  [250 DDDD @ 0.1, 25 BBBB @ 0.3]\n"+
-			"  [50 DDDD @ 0.1, 5 DDDD @ 0.1]\n",
+			"  [250 DDDD (0.1), 25 BBBB (0.3)]\n"+
+			"  [50 DDDD (0.1), 5 DDDD (0.1)]\n",
 		initialPosition.String(),
 	)
 
@@ -104,14 +104,14 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t,
 		"special:\n"+
-			"  [100 AAAA, 50 BBBB] @ 0.5\n"+
-			"  [0 BBBB, 0 AAAA] @ 0.5\n"+
-			"  [0 AAAA, 0 CCCC] @ 0.4\n"+
-			"  [0 CCCC, 0 AAAA] @ 0.4\n"+
+			"  {0.5, 100 AAAA, 50 BBBB}\n"+
+			"  {0.5, 0 BBBB, 0 AAAA}\n"+
+			"  {0.4, 0 AAAA, 0 CCCC}\n"+
+			"  {0.4, 0 CCCC, 0 AAAA}\n"+
 			"normal:\n"+
-			"  [50 DDDD @ 0.1, 5 BBBB @ 0.3]\n"+
-			"  [200 DDDD @ 0.1, 20 CCCC @ 0.2]\n"+
-			"  [50 DDDD @ 0.1, 5 DDDD @ 0.1]\n",
+			"  [50 DDDD (0.1), 5 BBBB (0.3)]\n"+
+			"  [200 DDDD (0.1), 20 CCCC (0.2)]\n"+
+			"  [50 DDDD (0.1), 5 DDDD (0.1)]\n",
 		finalPosition.String(),
 	)
 }
