@@ -10,27 +10,25 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 Highlights:
 
-- TODO
-- New inflation mechanism (see below).
-
-[v6.0.0 CHANGELOG](https://github.com/umee-network/umee/blob/v6.0.0/CHANGELOG.md).
+- TODO: special assets, new Gov messages
+- New [inflation mechanism](./docs/design_docs/012-umee-inflation-v2.md).
 
 ### New Inflation Mechanism
 
-- Set max inflation to 12 billions UMEE (the supply today is around 12.2 billions).
+The Upgrade Handler sets the following values to the Umee `x/ugov` Inflation Cycle parameters:
 
-The **min and max inflation rates** decrease by `25%` every **two years**. We call it inflation cycles. In each inflation cycle, the yearly total amount of newly emitted tokens is a variable - At the end of each inflation cycle we need to decrease by 25%: the `min_inflation_rate`, `max_inflation_rate` and the `current_inflation_rate`. - Inflation rate change speed is changed from 1 year to **6 months**.
+- `max_supply = 21e18uumee` (12 billions UMEE)
+- `inflation_cycle = time.Hour * 24 * 365 * 2` (2 years)
+- `inflation_reduction_rate = 2500bp` (25%)
+
+The new Inflation Cycle will start on 2023-10-15 15:00 UTC. This will mark the first inflation reduction from the current rates:
+
+- `inflation_min` 7% → 5.25%
+- `inflation_max` 14% → 10.5%
+
+The x/staking Bonded Goal stays the same: 33.00%.
 
 ### Validators
-
-#### libwasmvm update
-
-Our dependencies have been updated. Now the binary requires `libwasmvm v1.3.0`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
-
-- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.3.0/internal/api/libwasmvm.$(uname -m).so`
-- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.3.0/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
-
-You don't need to do anything if you are using our Docker image.
 
 #### Min Gas Prices
 
