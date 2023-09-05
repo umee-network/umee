@@ -37,15 +37,26 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 
 	hundredUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(100_000000))
 	fee := sdk.NewCoin(hundredUSDT.Denom, index.Fee.MinFee.MulInt(hundredUSDT.Amount).TruncateInt())
+
+	assetSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
+	s.Require().True(i >= 0)
+
 	amountToSwap := hundredUSDT.Amount.Sub(fee.Amount)
+	amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
+	amountToLeverage := amountToSwap.Sub(amountToReserves)
+
 	usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
 	s.Require().NoError(err)
-	expectedSwap := metoken.MsgSwapResponse{
-		Fee:      fee,
-		Returned: sdk.NewCoin(mocks.MeUSDDenom, usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()),
-	}
+	returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
 
-	s.executeSwap(umeeAPIEndpoint, valAddr.String(), hundredUSDT, mocks.MeUSDDenom, expectedSwap)
+	s.executeSwap(umeeAPIEndpoint, valAddr.String(), hundredUSDT, mocks.MeUSDDenom)
+
+	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
+	expectedBalance.MetokenSupply.Amount = expectedBalance.MetokenSupply.Amount.Add(returned)
+	usdtBalance, i := expectedBalance.AssetBalance(mocks.USDTBaseDenom)
+	s.Require().True(i >= 0)
+	usdtBalance.Fees = usdtBalance.Fees.Add(fee.Amount)
+	usdtBalance.Reserved.
 }
 
 func (s *E2ETest) checkMetokenBalance(
@@ -108,21 +119,15 @@ func (s *E2ETest) getIndex(umeeAPIEndpoint, denom string) metoken.Index {
 	return index
 }
 
-func (s *E2ETest) executeSwap(
-	umeeAPIEndpoint, umeeAddr string,
-	asset sdk.Coin,
-	meTokenDenom string,
-	expectedResponse metoken.MsgSwapResponse,
-) {
+func (s *E2ETest) executeSwap(umeeAPIEndpoint, umeeAddr string, asset sdk.Coin, meTokenDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.Swap(umeeAPIEndpoint, umeeAddr, asset, meTokenDenom)
+			err := s.TxSwap(umeeAPIEndpoint, umeeAddr, asset, meTokenDenom)
 			if err != nil {
 				fmt.Printf("ERROR: %s", err.Error())
 				return false
 			}
 
-			s.Require().Equal(expectedResponse, resp)
 			return true
 		},
 		30*time.Second,

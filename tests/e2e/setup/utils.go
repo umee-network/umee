@@ -140,37 +140,6 @@ func (s *E2ETestSuite) QueryREST(endpoint string, valPtr interface{}) error {
 	return decodeRespBody(s.cdc, endpoint, resp.Body, valPtr)
 }
 
-// TxREST make http tx to grpc-web endpoint and tries to decode respPtr using proto-JSON
-// decoder if respPtr implements proto.Message. Otherwise, standard JSON decoder is used.
-// respPtr must be a pointer.
-func (s *E2ETestSuite) TxREST(endpoint string, reqPtr, respPtr interface{}) error {
-	var bz []byte
-	var err error
-	if reqProto, ok := reqPtr.(proto.Message); ok {
-		bz, err = s.cdc.MarshalJSON(reqProto)
-		if err != nil {
-			return fmt.Errorf("failed to protoJSON.encode request body: %w, endpoint: %s", err, endpoint)
-		}
-	} else {
-		bz, err = json.Marshal(reqPtr)
-		if err != nil {
-			return fmt.Errorf("failed to json.Marshal request body: %w, endpoint: %s", err, endpoint)
-		}
-	}
-
-	resp, err := http.Post(endpoint, "application/json", bytes.NewReader(bz))
-	if err != nil {
-		return fmt.Errorf("failed to execute HTTP request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("tx returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
-	}
-
-	return decodeRespBody(s.cdc, endpoint, resp.Body, respPtr)
-}
-
 func (s *E2ETestSuite) QueryUmeeTx(endpoint, txHash string) error {
 	endpoint = fmt.Sprintf("%s/cosmos/tx/v1beta1/txs/%s", endpoint, txHash)
 	var result map[string]interface{}
@@ -278,38 +247,28 @@ func (s *E2ETestSuite) QueryMetokenIndexes(endpoint, denom string) (metoken.Quer
 	return resp, s.QueryREST(endpoint, &resp)
 }
 
-func (s *E2ETestSuite) Swap(
-	endpoint, umeeAddr string,
-	asset sdk.Coin,
-	meTokenDenom string,
-) (metoken.MsgSwapResponse, error) {
+func (s *E2ETestSuite) TxSwap(endpoint, umeeAddr string, asset sdk.Coin, meTokenDenom string) error {
 	endpoint = fmt.Sprintf("%s/umee/metoken/v1/swap", endpoint)
-	req := metoken.MsgSwap{
+	req := &metoken.MsgSwap{
 		User:         umeeAddr,
 		Asset:        asset,
 		MetokenDenom: meTokenDenom,
 	}
 
-	var resp metoken.MsgSwapResponse
-
-	return resp, s.TxREST(endpoint, &req, &resp)
+	_, err := s.Umee.Client.Tx.BroadcastTx(req)
+	return err
 }
 
-func (s *E2ETestSuite) Redeem(
-	endpoint, umeeAddr string,
-	meToken sdk.Coin,
-	assetDenom string,
-) (metoken.MsgRedeemResponse, error) {
+func (s *E2ETestSuite) TxRedeem(endpoint, umeeAddr string, meToken sdk.Coin, assetDenom string) error {
 	endpoint = fmt.Sprintf("%s/umee/metoken/v1/redeem", endpoint)
-	req := metoken.MsgRedeem{
+	req := &metoken.MsgRedeem{
 		User:       umeeAddr,
 		Metoken:    meToken,
 		AssetDenom: assetDenom,
 	}
 
-	var resp metoken.MsgRedeemResponse
-
-	return resp, s.TxREST(endpoint, &req, &resp)
+	_, err := s.Umee.Client.Tx.BroadcastTx(req)
+	return err
 }
 
 func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
