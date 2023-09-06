@@ -284,6 +284,8 @@ func TestWeightedDecCoinsAdd(t *testing.T) {
 		},
 	}
 
+	// no test case: different weight for the same denom (it is meant to panic)
+
 	for _, tc := range testCases {
 		sum := tc.initial.Add(tc.add)
 		assert.Equal(t, len(tc.sum), len(sum), tc.message)
@@ -313,6 +315,20 @@ func TestWeightedDecCoinsSub(t *testing.T) {
 				weightedDecCoin("CCCC", "0.0", "0.1"),
 			},
 			"sub equal weight assets",
+		},
+		{
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.1"),
+				weightedDecCoin("CCCC", "3.0", "0.1"),
+			},
+			weightedDecCoin("CCCC", "3.0", "0.9"),
+			WeightedDecCoins{
+				weightedDecCoin("AAAA", "1.0", "0.1"),
+				weightedDecCoin("BBBB", "2.0", "0.1"),
+				weightedDecCoin("CCCC", "0.0", "0.1"),
+			},
+			"on differing weight for the same asset, keep original weight",
 		},
 		{
 			WeightedDecCoins{
