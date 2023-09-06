@@ -58,7 +58,7 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 |    v5.0.x    |    ✓    | v0.46.13+  | v6.2.x | v1.3.x+ |  umee/v2.1.4+  |   umee/v4 v1.5.3-umee-8    |  v1.2.4   |
 |    v5.1.x    |    ✓    | v0.46.13+  | v6.2.x |   ---   |  umee/v2.1.6+  |   umee/v4 v1.5.3-umee-10   |  v1.2.4   |
 |    v5.2.x    |    ✓    | v0.46.13+  | v6.2.x |   ---   |  umee/v2.1.6+  |   umee/v4 v1.5.3-umee-10   |  v1.2.4   |
-|    v6.0.x    |    ✓    | v0.46.14+  | v6.2.x |   ---   | umee/v2.1.6-1+ |            ---             |  v1.4.0   |
+|    v6.0.x    |    ✓    | v0.46.14+  | v6.2.x |   ---   | umee/v2.1.6-1+ |            ---             |  v1.3.0   |
 
 #### Price Feeder
 

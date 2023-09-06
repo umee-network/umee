@@ -32,10 +32,10 @@ The x/staking Bonded Goal stays the same: 33.00%.
 
 #### libwasmvm update
 
-Our dependencies have been updated. Now the binary requires `libwasmvm v1.4.0`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+Our dependencies have been updated. Now the binary requires `libwasmvm v1.3.0`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
 
-- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.4.0/internal/api/libwasmvm.$(uname -m).so`
-- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.4.0/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
+- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.3.0/internal/api/libwasmvm.$(uname -m).so`
+- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.3.0/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
 
 You don't need to do anything if you are using our Docker image.
 
