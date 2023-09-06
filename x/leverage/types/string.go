@@ -2,26 +2,32 @@ package types
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/umee-network/umee/v6/util/sdkutil"
 )
 
 func (ap *AccountPosition) String() string {
-	s := "special:\n"
+	var special, normal []string
 	for _, wsp := range ap.specialPairs {
-		s += fmt.Sprintf("  %s\n", wsp)
+		special = append(special, wsp.String())
 	}
-	s += "normal:\n"
 	for _, wnp := range ap.normalPairs {
-		s += fmt.Sprintf("  %s\n", wnp)
+		normal = append(normal, wnp.String())
 	}
-	for _, sc := range ap.unpairedCollateral {
-		s += fmt.Sprintf("  [%s, -]\n", sc)
+	for _, c := range ap.unpairedCollateral {
+		normal = append(normal, fmt.Sprintf("[%s, -]", c))
 	}
-	for _, sb := range ap.unpairedBorrows {
-		s += fmt.Sprintf("  [-, %s]\n", sb)
+	for _, b := range ap.unpairedBorrows {
+		normal = append(normal, fmt.Sprintf("[-, %s]", b))
 	}
-	return s
+	sep := "\n  "
+	return fmt.Sprint(
+		"special:", sep,
+		strings.Join(special, sep),
+		"\nnormal:", sep,
+		strings.Join(normal, sep),
+	)
 }
 
 // String represents a WeightedNormalPair in the form [WeightedDecCoin, WeightedDecCoin]

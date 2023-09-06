@@ -49,7 +49,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 			"normal:\n"+
 			"  [10 AAAA (0.4), 1 DDDD (0.1)]\n"+
 			"  [40 DDDD (0.1), 4 DDDD (0.1)]\n"+
-			"  [260 DDDD (0.1), -]\n",
+			"  [260 DDDD (0.1), -]",
 		initialPosition.String(),
 	)
 	borrowLimit := initialPosition.Limit()
@@ -70,7 +70,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 			"  {0.4, 0 CCCC, 0 AAAA}\n"+
 			"normal:\n"+
 			"  [250 DDDD (0.1), 25 BBBB (0.3)]\n"+
-			"  [50 DDDD (0.1), 5 DDDD (0.1)]\n",
+			"  [50 DDDD (0.1), 5 DDDD (0.1)]",
 		initialPosition.String(),
 	)
 
@@ -111,7 +111,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 			"normal:\n"+
 			"  [50 DDDD (0.1), 5 BBBB (0.3)]\n"+
 			"  [200 DDDD (0.1), 20 CCCC (0.2)]\n"+
-			"  [50 DDDD (0.1), 5 DDDD (0.1)]\n",
+			"  [50 DDDD (0.1), 5 DDDD (0.1)]",
 		finalPosition.String(),
 	)
 }
