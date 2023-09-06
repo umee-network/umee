@@ -33,7 +33,7 @@ func validToken() types.Token {
 	}
 }
 
-func TestUpdateRegistryProposal_String(t *testing.T) {
+func TestUpdateRegistryProposalString(t *testing.T) {
 	token := validToken()
 	token.ReserveFactor = sdk.NewDec(40)
 	p := types.MsgGovUpdateRegistry{
@@ -68,7 +68,7 @@ updatetokens: []
 	assert.Equal(t, expected, p.String())
 }
 
-func TestToken_Validate(t *testing.T) {
+func TestTokenValidate(t *testing.T) {
 	invalidBaseToken := validToken()
 	invalidBaseToken.BaseDenom = "$$"
 	invalidBaseToken.SymbolDenom = ""
