@@ -8,7 +8,8 @@ import (
 )
 
 func (ap *AccountPosition) String() string {
-	var special, normal []string
+	special := []string{}
+	normal := []string{}
 	for _, wsp := range ap.specialPairs {
 		special = append(special, wsp.String())
 	}
