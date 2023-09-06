@@ -1,6 +1,7 @@
 package types
 
 import (
+	"strings"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,6 +14,17 @@ func weightedDecCoin(denom, amount, weight string) WeightedDecCoin {
 	return WeightedDecCoin{
 		Asset:  coin.Dec(denom, amount),
 		Weight: sdk.MustNewDecFromStr(weight),
+	}
+}
+
+// speicalPair creates a WeightedSpecialPair with given components, e.g, "10 uumee, 3.5 uatom, 0.35"
+func specialPair(collateral, borrow, weight string) WeightedSpecialPair {
+	c := strings.Split(collateral, " ")
+	b := strings.Split(borrow, " ")
+	return WeightedSpecialPair{
+		Collateral:    coin.Dec(c[1], c[0]),
+		Borrow:        coin.Dec(b[1], b[0]),
+		SpecialWeight: sdk.MustNewDecFromStr(weight),
 	}
 }
 
@@ -480,66 +492,22 @@ func TestWeightedSpecialPairBefore(t *testing.T) {
 	referencePairs := WeightedSpecialPairs{
 		// this section of V & W assets confirms alphabetical sorting of equal-weight pairs
 		// completely disregarding amount
-		{
-			Collateral:    coin.ZeroDec("VVVV"),
-			Borrow:        coin.ZeroDec("VVVV"),
-			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
-		},
-		{
-			Collateral:    coin.ZeroDec("VVVV"),
-			Borrow:        coin.ZeroDec("WWWW"),
-			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
-		},
-		{
-			Collateral:    coin.Dec("WWWW", "30.00"),
-			Borrow:        coin.Dec("VVVV", "30.00"),
-			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
-		},
-		{
-			Collateral:    coin.Dec("WWWW", "60.00"),
-			Borrow:        coin.Dec("WWWW", "60.00"),
-			SpecialWeight: sdk.MustNewDecFromStr("1.0"),
-		},
+		specialPair("0 VVVV", "0 VVVV", "1.0"),
+		specialPair("0 VVVV", "0 WWWW", "1.0"),
+		specialPair("30 WWWW", "30 VVVV", "1.0"),
+		specialPair("60 WWWW", "60 WWWW", "1.0"),
 		// this Y -> W pair confirms that weight of the pair
 		// take precedence over alphabetical
-		{
-			Collateral:    coin.ZeroDec("YYYY"),
-			Borrow:        coin.ZeroDec("WWWW"),
-			SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-		},
+		specialPair("0 YYYY", "0 WWWW", "0.6"),
 		// this section ensures regular sorting by collateral weight
-		{
-			Collateral:    coin.ZeroDec("DDDD"),
-			Borrow:        coin.ZeroDec("CCCC"),
-			SpecialWeight: sdk.MustNewDecFromStr("0.4"),
-		},
-		{
-			Collateral:    coin.ZeroDec("CCCC"),
-			Borrow:        coin.ZeroDec("BBBB"),
-			SpecialWeight: sdk.MustNewDecFromStr("0.3"),
-		},
-		{
-			Collateral:    coin.Dec("BBBB", "100.00"),
-			Borrow:        coin.Dec("AAAA", "20.00"),
-			SpecialWeight: sdk.MustNewDecFromStr("0.2"),
-		},
-		{
-			Collateral:    coin.ZeroDec("AAAA"),
-			Borrow:        coin.ZeroDec("DDDD"),
-			SpecialWeight: sdk.MustNewDecFromStr("0.1"),
-		},
+		specialPair("0 DDDD", "0 CCCC", "0.4"),
+		specialPair("0 CCCC", "0 BBBB", "0.3"),
+		specialPair("100 BBBB", "20 AAAA", "0.2"),
+		specialPair("0 AAAA", "0 DDDD", "0.1"),
 		// these zero-weight pairs should always be last,
 		// regardless of coin amounts
-		{
-			Collateral:    coin.ZeroDec("YYYY"),
-			Borrow:        coin.ZeroDec("YYYY"),
-			SpecialWeight: sdk.MustNewDecFromStr("0.0"),
-		},
-		{
-			Collateral:    coin.Dec("ZZZZ", "100.00"),
-			Borrow:        coin.Dec("ZZZZ", "0.00"),
-			SpecialWeight: sdk.MustNewDecFromStr("0.0"),
-		},
+		specialPair("0 YYYY", "0 YYYY", "0.0"),
+		specialPair("100 ZZZZ", "0 ZZZZ", "0.0"),
 	}
 
 	// check before() using referencePairs
@@ -551,6 +519,18 @@ func TestWeightedSpecialPairBefore(t *testing.T) {
 }
 
 func TestWeightedSpecialPairsAdd(t *testing.T) {
+	var (
+		// special pairs names for "Collateral, Borrow, Collateral Amount"
+		// weights are the following: A->B 0.7   A->C 0.6   A->A 0.5
+		ab0   = specialPair("0 AAAA", "0 BBBB", "0.7")
+		ab50  = specialPair("50 AAAA", "35 BBBB", "0.7")
+		ac0   = specialPair("0 AAAA", "0 CCCC", "0.6")
+		ac50  = specialPair("50 AAAA", "30 CCCC", "0.6")
+		ac100 = specialPair("100 AAAA", "60 CCCC", "0.6")
+		ac150 = specialPair("150 AAAA", "90 CCCC", "0.6")
+		aa20  = specialPair("20 AAAA", "10 AAAA", "0.5")
+	)
+
 	testCases := []struct {
 		initial WeightedSpecialPairs
 		add     WeightedSpecialPair
@@ -558,220 +538,42 @@ func TestWeightedSpecialPairsAdd(t *testing.T) {
 		message string
 	}{
 		{
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "100.0"),
-					Borrow:        coin.Dec("CCCC", "60.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
-			WeightedSpecialPair{
-				Collateral:    coin.Dec("AAAA", "50.0"),
-				Borrow:        coin.Dec("CCCC", "30.0"),
-				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-			},
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "150.0"),
-					Borrow:        coin.Dec("CCCC", "90.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
+			[]WeightedSpecialPair{ab0, ac100, aa20},
+			ac50,
+			[]WeightedSpecialPair{ab0, ac150, aa20},
 			"existing pair addition with zero values present",
 		},
 		{
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "100.0"),
-					Borrow:        coin.Dec("CCCC", "60.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
-			WeightedSpecialPair{
-				Collateral:    coin.Dec("AAAA", "0.0"),
-				Borrow:        coin.Dec("CCCC", "0.0"),
-				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-			},
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "100.0"),
-					Borrow:        coin.Dec("CCCC", "60.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
-			"survives existing pair zero valued input",
+			[]WeightedSpecialPair{ab0, ac100, aa20},
+			ac0,
+			[]WeightedSpecialPair{ab0, ac100, aa20},
+			"existing pair zero valued input",
 		},
 		{
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
-			WeightedSpecialPair{
-				Collateral:    coin.Dec("AAAA", "50.0"),
-				Borrow:        coin.Dec("CCCC", "30.0"),
-				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-			},
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "50.0"),
-					Borrow:        coin.Dec("CCCC", "30.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
+			[]WeightedSpecialPair{ab0, aa20},
+			ac50,
+			[]WeightedSpecialPair{ab0, ac50, aa20},
 			"new pair addition with zero values present",
 		},
-
 		{
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
-			WeightedSpecialPair{
-				Collateral:    coin.Dec("AAAA", "0.0"),
-				Borrow:        coin.Dec("CCCC", "0.0"),
-				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-			},
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "0.0"),
-					Borrow:        coin.Dec("CCCC", "0.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
+			[]WeightedSpecialPair{ab0, aa20},
+			ac0,
+			[]WeightedSpecialPair{ab0, ac0, aa20},
 			"new zero-valued pair addition with zero values present",
 		},
 		{
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-			},
-			WeightedSpecialPair{
-				Collateral:    coin.Dec("AAAA", "50.0"),
-				Borrow:        coin.Dec("CCCC", "30.0"),
-				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-			},
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "50.0"),
-					Borrow:        coin.Dec("CCCC", "30.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-				},
-				{
-					Collateral:    coin.Dec("AAAA", "20.0"),
-					Borrow:        coin.Dec("AAAA", "10.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
-				},
-			},
+			[]WeightedSpecialPair{aa20, ab0},
+			ac50,
+			[]WeightedSpecialPair{ab0, ac50, aa20},
 			"fixes unsorted input",
 		},
 		{
+			[]WeightedSpecialPair{ab50},
+			specialPair("50 AAAA", "30 BBBB", "0.6"), // AB weight is usually 0.7
 			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.ZeroDec("AAAA"),
-					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
-			},
-			WeightedSpecialPair{
-				Collateral:    coin.Dec("AAAA", "50.0"),
-				Borrow:        coin.Dec("BBBB", "30.0"),
-				SpecialWeight: sdk.MustNewDecFromStr("0.6"),
-			},
-			[]WeightedSpecialPair{
-				{
-					Collateral:    coin.Dec("AAAA", "50.0"),
-					Borrow:        coin.Dec("BBBB", "30.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
-				},
+				specialPair("100 AAAA", "65 BBBB", "0.7"),
+				// adds numbers but keeps original weight
+				// which is now inaccurate (65 != 0.7 * 100)
 			},
 			"differing weights (should never happen) keeps original weight",
 		},
