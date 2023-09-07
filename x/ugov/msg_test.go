@@ -97,7 +97,7 @@ func TestMsgGovUpdateInflationParams(t *testing.T) {
 	msg.Authority = "umee1yesmdu06f7strl67kjvg2w7t5kacc"
 	assert.ErrorIs(t, msg.ValidateBasic(), govtypes.ErrInvalidSigner, "must fail on a non gov account")
 	msg.Params.InflationReductionRate = bpmath.FixedBP(10)
-	assert.ErrorContains(t, msg.Params.Validate(), "inflation reduction must be between 100bp to 10'000bp")
+	assert.ErrorContains(t, msg.Params.Validate(), "inflation reduction must be between 100bp and 10'000bp")
 	msg.Params.MaxSupply = coin.Negative1("test")
 	assert.ErrorContains(t, msg.Params.Validate(), "max_supply must be positive")
 }

@@ -31,11 +31,11 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // InflationParams params for changing the inflation min rate and max rate of mint module params.
 type InflationParams struct {
-	// max_supply is the maximum supply for liquidation.
+	// max_supply is the maximum supply. Inflation will not increase the UMEE supply above this value.
 	MaxSupply types.Coin `protobuf:"bytes,1,opt,name=max_supply,json=maxSupply,proto3" json:"max_supply"`
 	// inflation_cycle duration after which inflation rates are changed.
 	InflationCycle time.Duration `protobuf:"bytes,2,opt,name=inflation_cycle,json=inflationCycle,proto3,stdduration" json:"inflation_cycle,omitempty" yaml:"inflation_cycle"`
-	// inflation_reduction_rate for every inflation cycle.
+	// inflation_reduction_rate for every inflation cycle in basis points.
 	InflationReductionRate github_com_umee_network_umee_v6_util_bpmath.FixedBP `protobuf:"varint,3,opt,name=inflation_reduction_rate,json=inflationReductionRate,proto3,customtype=github.com/umee-network/umee/v6/util/bpmath.FixedBP" json:"inflation_reduction_rate"`
 }
 

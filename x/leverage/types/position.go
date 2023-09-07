@@ -46,24 +46,6 @@ type AccountPosition struct {
 	minimumBorrowFactor sdk.Dec
 }
 
-func (ap *AccountPosition) String() string {
-	s := "special:\n"
-	for _, wsp := range ap.specialPairs {
-		s += fmt.Sprintf("  %s, %s, %s\n", wsp.Collateral, wsp.Borrow, wsp.SpecialWeight)
-	}
-	s += "normal:\n"
-	for _, wnp := range ap.normalPairs {
-		s += fmt.Sprintf("  %s, %s\n", wnp.Collateral, wnp.Borrow)
-	}
-	for _, sc := range ap.unpairedCollateral {
-		s += fmt.Sprintf("  %s, -\n", sc)
-	}
-	for _, sb := range ap.unpairedBorrows {
-		s += fmt.Sprintf("  - , %s\n", sb)
-	}
-	return s
-}
-
 // NewAccountPosition creates and sorts an account position based on token settings,
 // special asset pairs, and the collateral and borrowed value of each token in an account.
 // Once this structure is created, borrow limit calculations can be performed without

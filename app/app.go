@@ -224,7 +224,12 @@ func init() {
 		oracletypes.ModuleName: nil,
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
-		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
+	}
+
+	if Experimental {
+		maccPerms[metoken.ModuleName] = []string{
+			authtypes.Minter, authtypes.Burner,
+		}
 	}
 }
 
@@ -681,7 +686,7 @@ func New(
 	// we prefer to be more strict in what arguments the modules expect.
 	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
 
-	inflationClaculator := inflation.Calculator{
+	inflationCalculator := inflation.Calculator{
 		UgovKeeperB: app.UGovKeeperB.Params,
 		MintKeeper:  &app.MintKeeper,
 	}
@@ -708,7 +713,7 @@ func New(
 			app.interfaceRegistry,
 		),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper),
-		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, inflationClaculator.InflationRate),
+		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, inflationCalculator.InflationRate),
 		// need to dereference StakingKeeper because x/distribution uses interface casting :(
 		// TODO: in the next SDK version we can remove the dereference
 		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, *app.StakingKeeper),

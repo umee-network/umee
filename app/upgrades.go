@@ -25,6 +25,7 @@ import (
 
 	"github.com/umee-network/umee/v6/app/upgradev3"
 	"github.com/umee-network/umee/v6/app/upgradev3x3"
+	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/incentive"
 	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
@@ -61,6 +62,9 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.0"
 	gravityModuleName := "gravity" // hardcoded to avoid dependency on GB module
+	// TODO: update the address for the mainnet
+	emergencyGroup, err := sdk.AccAddressFromBech32("umee178nsnzse8capyfak4nwlntvfg64p4lmsau4t5n")
+	util.Panic(err)
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
@@ -68,7 +72,7 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 			if err := app.LeverageKeeper.SetParams(ctx, leveragetypes.DefaultParams()); err != nil {
 				return fromVM, err
 			}
-			// TODO: need to register emergency group
+			app.UGovKeeperB.Keeper(&ctx).SetEmergencyGroup(emergencyGroup)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
