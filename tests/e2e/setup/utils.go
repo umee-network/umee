@@ -255,8 +255,7 @@ func (s *E2ETestSuite) TxSwap(endpoint, umeeAddr string, asset sdk.Coin, meToken
 		MetokenDenom: meTokenDenom,
 	}
 
-	_, err := s.Umee.Client.Tx.BroadcastTx(req)
-	return err
+	return s.broadcastTxWithRetry(req)
 }
 
 func (s *E2ETestSuite) TxRedeem(endpoint, umeeAddr string, meToken sdk.Coin, assetDenom string) error {
@@ -267,7 +266,24 @@ func (s *E2ETestSuite) TxRedeem(endpoint, umeeAddr string, meToken sdk.Coin, ass
 		AssetDenom: assetDenom,
 	}
 
-	_, err := s.Umee.Client.Tx.BroadcastTx(req)
+	return s.broadcastTxWithRetry(req)
+}
+
+func (s *E2ETestSuite) broadcastTxWithRetry(msg sdk.Msg) error {
+	var err error
+	for retry := 0; retry < 5; retry++ {
+		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
+		_, err = s.Umee.Client.Tx.BroadcastTx(msg)
+		if err == nil {
+			return nil
+		}
+
+		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
+			return err
+		}
+		time.Sleep(time.Millisecond * 300)
+	}
+
 	return err
 }
 

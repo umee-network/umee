@@ -1,7 +1,10 @@
+//go:build experimental
+// +build experimental
+
 package e2e
 
 import (
-	"fmt"
+	"strings"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
@@ -15,48 +18,107 @@ import (
 )
 
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
-	tokens := []ltypes.Token{
-		mocks.ValidToken(mocks.USDTBaseDenom, mocks.USDTSymbolDenom, 6),
-		mocks.ValidToken(mocks.USDCBaseDenom, mocks.USDCSymbolDenom, 6),
-		mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
-	}
-
-	err := grpc.LeverageRegistryUpdate(s.Umee, tokens, nil)
-	s.Require().NoError(err)
-
-	meUSD := mocks.StableIndex(mocks.MeUSDDenom)
-	err = grpc.MetokenRegistryUpdate(s.Umee, []metoken.Index{meUSD}, nil)
-	s.Require().NoError(err)
-
+	var prices []metoken.IndexPrices
+	var index metoken.Index
 	umeeAPIEndpoint := s.UmeeREST()
-	prices := s.checkMetokenBalance(umeeAPIEndpoint, meUSD.Denom, mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom))
-	index := s.getIndex(umeeAPIEndpoint, meUSD.Denom)
-
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
-
-	hundredUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(100_000000))
-	fee := sdk.NewCoin(hundredUSDT.Denom, index.Fee.MinFee.MulInt(hundredUSDT.Amount).TruncateInt())
-
-	assetSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
-	s.Require().True(i >= 0)
-
-	amountToSwap := hundredUSDT.Amount.Sub(fee.Amount)
-	amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
-	amountToLeverage := amountToSwap.Sub(amountToReserves)
-
-	usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
-	s.Require().NoError(err)
-	returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
-
-	s.executeSwap(umeeAPIEndpoint, valAddr.String(), hundredUSDT, mocks.MeUSDDenom)
-
 	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
-	expectedBalance.MetokenSupply.Amount = expectedBalance.MetokenSupply.Amount.Add(returned)
-	usdtBalance, i := expectedBalance.AssetBalance(mocks.USDTBaseDenom)
-	s.Require().True(i >= 0)
-	usdtBalance.Fees = usdtBalance.Fees.Add(fee.Amount)
-	usdtBalance.Reserved.
+
+	s.Run(
+		"create_stable_index", func() {
+			tokens := []ltypes.Token{
+				mocks.ValidToken(mocks.USDTBaseDenom, mocks.USDTSymbolDenom, 6),
+				mocks.ValidToken(mocks.USDCBaseDenom, mocks.USDCSymbolDenom, 6),
+				mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
+			}
+
+			err = grpc.LeverageRegistryUpdate(s.Umee, tokens, nil)
+			s.Require().NoError(err)
+
+			meUSD := mocks.StableIndex(mocks.MeUSDDenom)
+			err = grpc.MetokenRegistryUpdate(s.Umee, []metoken.Index{meUSD}, nil)
+			s.Require().NoError(err)
+
+			prices = s.checkMetokenBalance(umeeAPIEndpoint, meUSD.Denom, expectedBalance)
+		},
+	)
+
+	s.Run(
+		"swap_100USDT_success", func() {
+			index = s.getIndex(umeeAPIEndpoint, mocks.MeUSDDenom)
+
+			hundredUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(100_000000))
+			fee := index.Fee.MinFee.MulInt(hundredUSDT.Amount).TruncateInt()
+
+			assetSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
+			s.Require().True(i >= 0)
+
+			amountToSwap := hundredUSDT.Amount.Sub(fee)
+			amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
+			amountToLeverage := amountToSwap.Sub(amountToReserves)
+
+			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
+			s.Require().NoError(err)
+			returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
+
+			s.executeSwap(umeeAPIEndpoint, valAddr.String(), hundredUSDT, mocks.MeUSDDenom)
+
+			expectedBalance.MetokenSupply.Amount = expectedBalance.MetokenSupply.Amount.Add(returned)
+			usdtBalance, i := expectedBalance.AssetBalance(mocks.USDTBaseDenom)
+			s.Require().True(i >= 0)
+			usdtBalance.Fees = usdtBalance.Fees.Add(fee)
+			usdtBalance.Reserved = usdtBalance.Reserved.Add(amountToReserves)
+			usdtBalance.Leveraged = usdtBalance.Leveraged.Add(amountToLeverage)
+			expectedBalance.SetAssetBalance(usdtBalance)
+
+			prices = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+		},
+	)
+
+	s.Run(
+		"redeem_200meUSD_failure", func() {
+			twoHundredsMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(200_000000))
+
+			s.executeRedeemWithFailure(
+				umeeAPIEndpoint,
+				valAddr.String(),
+				twoHundredsMeUSD,
+				mocks.USDTBaseDenom,
+				"not enough",
+			)
+
+			prices = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+		},
+	)
+
+	s.Run(
+		"redeem_50meUSD_success", func() {
+			fiftyMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(50_000000))
+
+			s.executeRedeemSuccess(umeeAPIEndpoint, valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
+
+			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
+			s.Require().NoError(err)
+			usdtToRedeem := usdtPrice.RedeemRate.MulInt(fiftyMeUSD.Amount).TruncateInt()
+			fee := index.Fee.MinFee.MulInt(usdtToRedeem).TruncateInt()
+
+			assetSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
+			s.Require().True(i >= 0)
+			amountFromReserves := assetSettings.ReservePortion.MulInt(usdtToRedeem).TruncateInt()
+			amountFromLeverage := usdtToRedeem.Sub(amountFromReserves)
+
+			expectedBalance.MetokenSupply.Amount = expectedBalance.MetokenSupply.Amount.Sub(fiftyMeUSD.Amount)
+			usdtBalance, i := expectedBalance.AssetBalance(mocks.USDTBaseDenom)
+			s.Require().True(i >= 0)
+			usdtBalance.Fees = usdtBalance.Fees.Add(fee)
+			usdtBalance.Reserved = usdtBalance.Reserved.Sub(amountFromReserves)
+			usdtBalance.Leveraged = usdtBalance.Leveraged.Sub(amountFromLeverage)
+			expectedBalance.SetAssetBalance(usdtBalance)
+
+			_ = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+		},
+	)
 }
 
 func (s *E2ETest) checkMetokenBalance(
@@ -124,11 +186,44 @@ func (s *E2ETest) executeSwap(umeeAPIEndpoint, umeeAddr string, asset sdk.Coin, 
 		func() bool {
 			err := s.TxSwap(umeeAPIEndpoint, umeeAddr, asset, meTokenDenom)
 			if err != nil {
-				fmt.Printf("ERROR: %s", err.Error())
 				return false
 			}
 
 			return true
+		},
+		30*time.Second,
+		500*time.Millisecond,
+	)
+}
+
+func (s *E2ETest) executeRedeemSuccess(umeeAPIEndpoint, umeeAddr string, meToken sdk.Coin, assetDenom string) {
+	s.Require().Eventually(
+		func() bool {
+			err := s.TxRedeem(umeeAPIEndpoint, umeeAddr, meToken, assetDenom)
+			if err != nil {
+				return false
+			}
+
+			return true
+		},
+		30*time.Second,
+		500*time.Millisecond,
+	)
+}
+
+func (s *E2ETest) executeRedeemWithFailure(
+	umeeAPIEndpoint, umeeAddr string,
+	meToken sdk.Coin,
+	assetDenom, errMsg string,
+) {
+	s.Require().Eventually(
+		func() bool {
+			err := s.TxRedeem(umeeAPIEndpoint, umeeAddr, meToken, assetDenom)
+			if err != nil && strings.Contains(err.Error(), errMsg) {
+				return true
+			}
+
+			return false
 		},
 		30*time.Second,
 		500*time.Millisecond,
