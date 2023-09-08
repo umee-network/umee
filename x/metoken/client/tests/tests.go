@@ -18,7 +18,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		{
 
 			Name:    "query swap fee - invalid asset for swap",
-			Command: cli.GetCmdSwapFee(),
+			Command: cli.SwapFee(),
 			Args: []string{
 				"{abcd}{100000000}",
 				"xyz",
@@ -29,7 +29,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query swap fee - index not found",
-			Command: cli.GetCmdSwapFee(),
+			Command: cli.SwapFee(),
 			Args: []string{
 				"1000abcd",
 				"xyz",
@@ -40,7 +40,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query redeem fee - invalid meToken for redemption",
-			Command: cli.GetCmdRedeemFee(),
+			Command: cli.RedeemFee(),
 			Args: []string{
 				"{abcd}{100000000}",
 				"xyz",
@@ -51,7 +51,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query redeem fee - index not found",
-			Command: cli.GetCmdRedeemFee(),
+			Command: cli.RedeemFee(),
 			Args: []string{
 				"1000xyz",
 				"abcd",
@@ -70,7 +70,7 @@ func (s *IntegrationTests) TestValidQueries() {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:     "query params",
-			Command:  cli.GetCmdQueryParams(),
+			Command:  cli.QueryParams(),
 			Args:     []string{},
 			Response: &metoken.QueryParamsResponse{},
 			ExpectedResponse: &metoken.QueryParamsResponse{
@@ -80,7 +80,7 @@ func (s *IntegrationTests) TestValidQueries() {
 		},
 		{
 			Name:     "query indexes",
-			Command:  cli.GetCmdIndexes(),
+			Command:  cli.Indexes(),
 			Args:     []string{},
 			Response: &metoken.QueryIndexesResponse{},
 			ExpectedResponse: &metoken.QueryIndexesResponse{
@@ -90,7 +90,7 @@ func (s *IntegrationTests) TestValidQueries() {
 		},
 		{
 			Name:     "query balances",
-			Command:  cli.GetCmdIndexBalances(),
+			Command:  cli.IndexBalances(),
 			Args:     []string{},
 			Response: &metoken.QueryIndexBalancesResponse{},
 			ExpectedResponse: &metoken.QueryIndexBalancesResponse{
@@ -117,7 +117,7 @@ func (s *IntegrationTests) TestValidQueries() {
 		},
 		{
 			Name:    "query swap fee for 1876 uumee",
-			Command: cli.GetCmdSwapFee(),
+			Command: cli.SwapFee(),
 			Args: []string{
 				"1876000000uumee",
 				mfixtures.MeBondDenom,
@@ -134,7 +134,7 @@ func (s *IntegrationTests) TestValidQueries() {
 		},
 		{
 			Name:    "query redeem fee for 100 meUSD to uumee",
-			Command: cli.GetCmdRedeemFee(),
+			Command: cli.RedeemFee(),
 			Args: []string{
 				"100000000me/uumee",
 				"uumee",
@@ -170,7 +170,7 @@ func (s *IntegrationTests) TestTransactions() {
 	txs := []itestsuite.TestTransaction{
 		{
 			Name:    "swap index not found",
-			Command: cli.GetCmdSwap(),
+			Command: cli.Swap(),
 			Args: []string{
 				"300000000" + mfixtures.BondDenom,
 				"me/Test",
@@ -179,7 +179,7 @@ func (s *IntegrationTests) TestTransactions() {
 		},
 		{
 			Name:    "swap 300uumee",
-			Command: cli.GetCmdSwap(),
+			Command: cli.Swap(),
 			Args: []string{
 				"300000000" + mfixtures.BondDenom,
 				mfixtures.MeBondDenom,
@@ -188,7 +188,7 @@ func (s *IntegrationTests) TestTransactions() {
 		},
 		{
 			Name:    "swap index not found",
-			Command: cli.GetCmdRedeem(),
+			Command: cli.Redeem(),
 			Args: []string{
 				"300000000" + "me/Test",
 				mfixtures.BondDenom,
@@ -197,7 +197,7 @@ func (s *IntegrationTests) TestTransactions() {
 		},
 		{
 			Name:    "redeem 100me/uumee",
-			Command: cli.GetCmdRedeem(),
+			Command: cli.Redeem(),
 			Args: []string{
 				"100000000" + mfixtures.MeBondDenom,
 				mfixtures.BondDenom,

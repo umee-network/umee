@@ -16,7 +16,7 @@ func (s *IntegrationTests) TestQueryParams(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Query params",
-			Command: cli.GetCmdQueryParams(),
+			Command: cli.QueryParams(),
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},

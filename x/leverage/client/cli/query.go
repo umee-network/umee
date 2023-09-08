@@ -28,25 +28,25 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdQueryParams(),
-		GetCmdQueryRegisteredTokens(),
-		GetCmdQuerySpecialAssets(),
-		GetCmdQueryMarketSummary(),
-		GetCmdQueryAccountBalances(),
-		GetCmdQueryAccountSummary(),
-		GetCmdQueryLiquidationTargets(),
-		GetCmdQueryBadDebts(),
-		GetCmdQueryMaxWithdraw(),
-		GetCmdQueryMaxBorrow(),
-		GetCmdQueryInspect(),
+		QueryParams(),
+		QueryRegisteredTokens(),
+		QuerySpecialAssets(),
+		QueryMarketSummary(),
+		QueryAccountBalances(),
+		QueryAccountSummary(),
+		QueryLiquidationTargets(),
+		QueryBadDebts(),
+		QueryMaxWithdraw(),
+		QueryMaxBorrow(),
+		QueryInspect(),
 	)
 
 	return cmd
 }
 
-// GetCmdQueryParams creates a Cobra command to query for the x/leverage
+// QueryParams creates a Cobra command to query for the x/leverage
 // module parameters.
-func GetCmdQueryParams() *cobra.Command {
+func QueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,
@@ -68,9 +68,9 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryRegisteredTokens creates a Cobra command to query for all
+// QueryRegisteredTokens creates a Cobra command to query for all
 // the registered tokens in the x/leverage module.
-func GetCmdQueryRegisteredTokens() *cobra.Command {
+func QueryRegisteredTokens() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "registered-tokens [base_denom]",
 		Args:  cobra.MaximumNArgs(1),
@@ -96,9 +96,9 @@ func GetCmdQueryRegisteredTokens() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQuerySpecialAssets creates a Cobra command to query for all
+// QuerySpecialAssets creates a Cobra command to query for all
 // the special asset pairs in the x/leverage module.
-func GetCmdQuerySpecialAssets() *cobra.Command {
+func QuerySpecialAssets() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "special-assets",
 		Args:  cobra.RangeArgs(0, 1),
@@ -124,9 +124,9 @@ func GetCmdQuerySpecialAssets() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMarketSummary creates a Cobra command to query for the
+// QueryMarketSummary creates a Cobra command to query for the
 // Market Summary of a specific token.
-func GetCmdQueryMarketSummary() *cobra.Command {
+func QueryMarketSummary() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "market-summary [denom]",
 		Args:  cobra.ExactArgs(1),
@@ -151,9 +151,9 @@ func GetCmdQueryMarketSummary() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAccountBalances creates a Cobra command to query for the
+// QueryAccountBalances creates a Cobra command to query for the
 // supply, collateral, and borrow positions of an account.
-func GetCmdQueryAccountBalances() *cobra.Command {
+func QueryAccountBalances() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "account-balances [addr]",
 		Args:  cobra.ExactArgs(1),
@@ -178,9 +178,9 @@ func GetCmdQueryAccountBalances() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAccountSummary creates a Cobra command to query for USD
+// QueryAccountSummary creates a Cobra command to query for USD
 // values representing an account's positions and borrowing limits.
-func GetCmdQueryAccountSummary() *cobra.Command {
+func QueryAccountSummary() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "account-summary [addr]",
 		Args:  cobra.ExactArgs(1),
@@ -205,9 +205,9 @@ func GetCmdQueryAccountSummary() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryLiquidationTargets creates a Cobra command to query for
+// QueryLiquidationTargets creates a Cobra command to query for
 // all eligible liquidation targets.
-func GetCmdQueryLiquidationTargets() *cobra.Command {
+func QueryLiquidationTargets() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "liquidation-targets",
 		Args:  cobra.ExactArgs(0),
@@ -230,9 +230,9 @@ func GetCmdQueryLiquidationTargets() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryBadDebts creates a Cobra command to query for
+// QueryBadDebts creates a Cobra command to query for
 // all bad debts.
-func GetCmdQueryBadDebts() *cobra.Command {
+func QueryBadDebts() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bad-debts",
 		Args:  cobra.ExactArgs(0),
@@ -255,9 +255,9 @@ func GetCmdQueryBadDebts() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMaxWithdraw creates a Cobra command to query for
+// QueryMaxWithdraw creates a Cobra command to query for
 // the maximum amount of a given token an address can withdraw.
-func GetCmdQueryMaxWithdraw() *cobra.Command {
+func QueryMaxWithdraw() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "max-withdraw [addr] [denom]",
 		Args:  cobra.RangeArgs(1, 2),
@@ -288,9 +288,9 @@ func GetCmdQueryMaxWithdraw() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMaxBorrow creates a Cobra command to query for
+// QueryMaxBorrow creates a Cobra command to query for
 // the maximum amount of a given token an address can borrow.
-func GetCmdQueryMaxBorrow() *cobra.Command {
+func QueryMaxBorrow() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "max-borrow [addr] [denom]",
 		Args:  cobra.RangeArgs(1, 2),
@@ -318,8 +318,8 @@ func GetCmdQueryMaxBorrow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryInspect creates a Cobra command to query for the inspector command.
-func GetCmdQueryInspect() *cobra.Command {
+// QueryInspect creates a Cobra command to query for the inspector command.
+func QueryInspect() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "inspect [symbol] [borrowed] [collateral [danger] [ltv]",
 		Args:    cobra.MinimumNArgs(2),
