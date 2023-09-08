@@ -21,16 +21,16 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdQueryParams(),
+		QueryParams(),
 		GetOutflows(),
 	)
 
 	return cmd
 }
 
-// GetCmdQueryParams creates a Cobra command to query for the x/uibc
+// QueryParams creates a Cobra command to query for the x/uibc
 // module parameters.
-func GetCmdQueryParams() *cobra.Command {
+func QueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,
