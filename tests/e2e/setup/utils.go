@@ -11,8 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/umee-network/umee/v6/x/metoken"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -233,59 +231,57 @@ func (s *E2ETestSuite) QueryUmeeBalance(
 	return umeeBalance, umeeAddr
 }
 
-func (s *E2ETestSuite) QueryMetokenBalances(endpoint, denom string) (metoken.QueryIndexBalancesResponse, error) {
-	endpoint = fmt.Sprintf("%s/umee/metoken/v1/index_balances?metoken_denom=%s", endpoint, denom)
-	var resp metoken.QueryIndexBalancesResponse
-
-	return resp, s.QueryREST(endpoint, &resp)
-}
-
-func (s *E2ETestSuite) QueryMetokenIndexes(endpoint, denom string) (metoken.QueryIndexesResponse, error) {
-	endpoint = fmt.Sprintf("%s/umee/metoken/v1/indexes?metoken_denom=%s", endpoint, denom)
-	var resp metoken.QueryIndexesResponse
-
-	return resp, s.QueryREST(endpoint, &resp)
-}
-
-func (s *E2ETestSuite) TxSwap(endpoint, umeeAddr string, asset sdk.Coin, meTokenDenom string) error {
-	endpoint = fmt.Sprintf("%s/umee/metoken/v1/swap", endpoint)
-	req := &metoken.MsgSwap{
-		User:         umeeAddr,
-		Asset:        asset,
-		MetokenDenom: meTokenDenom,
-	}
-
-	return s.broadcastTxWithRetry(req)
-}
-
-func (s *E2ETestSuite) TxRedeem(endpoint, umeeAddr string, meToken sdk.Coin, assetDenom string) error {
-	endpoint = fmt.Sprintf("%s/umee/metoken/v1/redeem", endpoint)
-	req := &metoken.MsgRedeem{
-		User:       umeeAddr,
-		Metoken:    meToken,
-		AssetDenom: assetDenom,
-	}
-
-	return s.broadcastTxWithRetry(req)
-}
-
-func (s *E2ETestSuite) broadcastTxWithRetry(msg sdk.Msg) error {
-	var err error
-	for retry := 0; retry < 5; retry++ {
-		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-		_, err = s.Umee.Client.Tx.BroadcastTx(msg)
-		if err == nil {
-			return nil
-		}
-
-		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
-			return err
-		}
-		time.Sleep(time.Millisecond * 300)
-	}
-
-	return err
-}
+//func (s *E2ETestSuite) QueryMetokenBalances(endpoint, denom string) (metoken.QueryIndexBalancesResponse, error) {
+//	endpoint = fmt.Sprintf("%s/umee/metoken/v1/index_balances?metoken_denom=%s", endpoint, denom)
+//	var resp metoken.QueryIndexBalancesResponse
+//
+//	return resp, s.QueryREST(endpoint, &resp)
+//}
+//
+//func (s *E2ETestSuite) QueryMetokenIndexes(endpoint, denom string) (metoken.QueryIndexesResponse, error) {
+//	endpoint = fmt.Sprintf("%s/umee/metoken/v1/indexes?metoken_denom=%s", endpoint, denom)
+//	var resp metoken.QueryIndexesResponse
+//
+//	return resp, s.QueryREST(endpoint, &resp)
+//}
+//
+//func (s *E2ETestSuite) TxMetokenSwap(umeeAddr string, asset sdk.Coin, meTokenDenom string) error {
+//	req := &metoken.MsgSwap{
+//		User:         umeeAddr,
+//		Asset:        asset,
+//		MetokenDenom: meTokenDenom,
+//	}
+//
+//	return s.broadcastTxWithRetry(req)
+//}
+//
+//func (s *E2ETestSuite) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetDenom string) error {
+//	req := &metoken.MsgRedeem{
+//		User:       umeeAddr,
+//		Metoken:    meToken,
+//		AssetDenom: assetDenom,
+//	}
+//
+//	return s.broadcastTxWithRetry(req)
+//}
+//
+//func (s *E2ETestSuite) broadcastTxWithRetry(msg sdk.Msg) error {
+//	var err error
+//	for retry := 0; retry < 3; retry++ {
+//		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
+//		_, err = s.Umee.Client.Tx.BroadcastTx(msg)
+//		if err == nil {
+//			return nil
+//		}
+//
+//		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
+//			return err
+//		}
+//		time.Sleep(time.Millisecond * 300)
+//	}
+//
+//	return err
+//}
 
 func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
 	var raw sdktx.TxRaw

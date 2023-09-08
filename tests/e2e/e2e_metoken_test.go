@@ -1,9 +1,7 @@
-//go:build experimental
-// +build experimental
-
 package e2e
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -20,7 +18,6 @@ import (
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
 	var prices []metoken.IndexPrices
 	var index metoken.Index
-	umeeAPIEndpoint := s.UmeeREST()
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
@@ -40,13 +37,13 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			err = grpc.MetokenRegistryUpdate(s.Umee, []metoken.Index{meUSD}, nil)
 			s.Require().NoError(err)
 
-			prices = s.checkMetokenBalance(umeeAPIEndpoint, meUSD.Denom, expectedBalance)
+			prices = s.checkMetokenBalance(meUSD.Denom, expectedBalance)
 		},
 	)
 
 	s.Run(
 		"swap_100USDT_success", func() {
-			index = s.getIndex(umeeAPIEndpoint, mocks.MeUSDDenom)
+			index = s.getIndex(mocks.MeUSDDenom)
 
 			hundredUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(100_000000))
 			fee := index.Fee.MinFee.MulInt(hundredUSDT.Amount).TruncateInt()
@@ -62,7 +59,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			s.Require().NoError(err)
 			returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
 
-			s.executeSwap(umeeAPIEndpoint, valAddr.String(), hundredUSDT, mocks.MeUSDDenom)
+			s.executeSwap(valAddr, hundredUSDT, mocks.MeUSDDenom)
 
 			expectedBalance.MetokenSupply.Amount = expectedBalance.MetokenSupply.Amount.Add(returned)
 			usdtBalance, i := expectedBalance.AssetBalance(mocks.USDTBaseDenom)
@@ -72,7 +69,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Add(amountToLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			prices = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 
@@ -81,14 +78,13 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			twoHundredsMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(200_000000))
 
 			s.executeRedeemWithFailure(
-				umeeAPIEndpoint,
-				valAddr.String(),
+				valAddr,
 				twoHundredsMeUSD,
 				mocks.USDTBaseDenom,
 				"not enough",
 			)
 
-			prices = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 
@@ -96,7 +92,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 		"redeem_50meUSD_success", func() {
 			fiftyMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(50_000000))
 
-			s.executeRedeemSuccess(umeeAPIEndpoint, valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
+			s.executeRedeemSuccess(valAddr, fiftyMeUSD, mocks.USDTBaseDenom)
 
 			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
 			s.Require().NoError(err)
@@ -116,19 +112,16 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Sub(amountFromLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			_ = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+			_ = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 }
 
-func (s *E2ETest) checkMetokenBalance(
-	umeeAPIEndpoint, denom string,
-	expectedBalance metoken.IndexBalances,
-) []metoken.IndexPrices {
+func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.IndexBalances) []metoken.IndexPrices {
 	var prices []metoken.IndexPrices
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.QueryMetokenBalances(umeeAPIEndpoint, denom)
+			resp, err := s.Umee.QueryMetokenBalances(denom)
 			if err != nil {
 				return false
 			}
@@ -153,11 +146,11 @@ func (s *E2ETest) checkMetokenBalance(
 	return prices
 }
 
-func (s *E2ETest) getIndex(umeeAPIEndpoint, denom string) metoken.Index {
+func (s *E2ETest) getIndex(denom string) metoken.Index {
 	index := metoken.Index{}
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.QueryMetokenIndexes(umeeAPIEndpoint, denom)
+			resp, err := s.Umee.QueryMetokenIndexes(denom)
 			if err != nil {
 				return false
 			}
@@ -181,11 +174,12 @@ func (s *E2ETest) getIndex(umeeAPIEndpoint, denom string) metoken.Index {
 	return index
 }
 
-func (s *E2ETest) executeSwap(umeeAPIEndpoint, umeeAddr string, asset sdk.Coin, meTokenDenom string) {
+func (s *E2ETest) executeSwap(umeeAddr sdk.AccAddress, asset sdk.Coin, meTokenDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxSwap(umeeAPIEndpoint, umeeAddr, asset, meTokenDenom)
+			err := s.Umee.TxMetokenSwap(umeeAddr, asset, meTokenDenom)
 			if err != nil {
+				fmt.Printf("SWAP ERR: %s\n", err.Error())
 				return false
 			}
 
@@ -196,11 +190,12 @@ func (s *E2ETest) executeSwap(umeeAPIEndpoint, umeeAddr string, asset sdk.Coin, 
 	)
 }
 
-func (s *E2ETest) executeRedeemSuccess(umeeAPIEndpoint, umeeAddr string, meToken sdk.Coin, assetDenom string) {
+func (s *E2ETest) executeRedeemSuccess(umeeAddr sdk.AccAddress, meToken sdk.Coin, assetDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxRedeem(umeeAPIEndpoint, umeeAddr, meToken, assetDenom)
+			err := s.Umee.TxMetokenRedeem(umeeAddr, meToken, assetDenom)
 			if err != nil {
+				fmt.Printf("REDEEM SCS ERR: %s\n", err.Error())
 				return false
 			}
 
@@ -211,18 +206,15 @@ func (s *E2ETest) executeRedeemSuccess(umeeAPIEndpoint, umeeAddr string, meToken
 	)
 }
 
-func (s *E2ETest) executeRedeemWithFailure(
-	umeeAPIEndpoint, umeeAddr string,
-	meToken sdk.Coin,
-	assetDenom, errMsg string,
-) {
+func (s *E2ETest) executeRedeemWithFailure(umeeAddr sdk.AccAddress, meToken sdk.Coin, assetDenom, errMsg string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxRedeem(umeeAPIEndpoint, umeeAddr, meToken, assetDenom)
+			err := s.Umee.TxMetokenRedeem(umeeAddr, meToken, assetDenom)
 			if err != nil && strings.Contains(err.Error(), errMsg) {
 				return true
 			}
 
+			fmt.Printf("REDEEM FAIL ERR: %s\n", err.Error())
 			return false
 		},
 		30*time.Second,
