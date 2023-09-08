@@ -6,6 +6,8 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
 	"github.com/umee-network/umee/v6/tests/grpc"
 )
@@ -16,6 +18,16 @@ type E2ETest struct {
 
 func TestE2ETestSuite(t *testing.T) {
 	suite.Run(t, new(E2ETest))
+}
+
+func (s *E2ETest) executeTx(msg sdk.Msg) {
+	s.Require().Eventually(
+		func() bool {
+			return s.BroadcastTxWithRetry(msg) == nil
+		},
+		30*time.Second,
+		500*time.Millisecond,
+	)
 }
 
 // TestMedians queries for the oracle params, collects historical

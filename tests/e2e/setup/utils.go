@@ -281,3 +281,21 @@ func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
 		Signatures: raw.Signatures,
 	}, nil
 }
+
+func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg) error {
+	var err error
+	for retry := 0; retry < 5; retry++ {
+		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
+		_, err = s.Umee.Client.Tx.BroadcastTx(msg)
+		if err == nil {
+			return nil
+		}
+
+		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
+			return err
+		}
+		time.Sleep(time.Millisecond * 300)
+	}
+
+	return err
+}
