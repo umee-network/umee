@@ -24,22 +24,22 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdQueryAggregatePrevote(),
-		GetCmdQueryAggregateVote(),
-		GetCmdQueryParams(),
-		GetCmdQueryExchangeRates(),
-		GetCmdQueryExchangeRate(),
-		GetCmdQueryFeederDelegation(),
-		GetCmdQueryMissCounter(),
-		GetCmdQuerySlashWindow(),
-		GetCmdQueryHistoricAvgPrice(),
+		QueryAggregatePrevote(),
+		QueryAggregateVote(),
+		QueryParams(),
+		QueryExchangeRates(),
+		QueryExchangeRate(),
+		QueryFeederDelegation(),
+		QueryMissCounter(),
+		QuerySlashWindow(),
+		QueryHistoricAvgPrice(),
 	)
 
 	return cmd
 }
 
-// GetCmdQueryParams implements the query params command.
-func GetCmdQueryParams() *cobra.Command {
+// QueryParams implements the query params command.
+func QueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,
@@ -61,9 +61,9 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAggregateVote implements the query aggregate prevote of the
+// QueryAggregateVote implements the query aggregate prevote of the
 // validator command.
-func GetCmdQueryAggregateVote() *cobra.Command {
+func QueryAggregateVote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "aggregate-votes [validator]",
 		Args:  cobra.RangeArgs(0, 1),
@@ -103,9 +103,9 @@ $ umeed query oracle aggregate-votes umeevaloper...
 	return cmd
 }
 
-// GetCmdQueryAggregatePrevote implements the query aggregate prevote of the
+// QueryAggregatePrevote implements the query aggregate prevote of the
 // validator command.
-func GetCmdQueryAggregatePrevote() *cobra.Command {
+func QueryAggregatePrevote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "aggregate-prevotes [validator]",
 		Args:  cobra.RangeArgs(0, 1),
@@ -145,8 +145,8 @@ $ umeed query oracle aggregate-prevotes umeevaloper...
 	return cmd
 }
 
-// GetCmdQueryExchangeRates implements the query rate command.
-func GetCmdQueryExchangeRates() *cobra.Command {
+// QueryExchangeRates implements the query rate command.
+func QueryExchangeRates() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "exchange-rates",
 		Args:  cobra.NoArgs,
@@ -172,8 +172,8 @@ $ umeed query oracle exchange-rates
 	return cmd
 }
 
-// GetCmdQueryExchangeRates implements the query rate command.
-func GetCmdQueryExchangeRate() *cobra.Command {
+// QueryExchangeRates implements the query rate command.
+func QueryExchangeRate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "exchange-rate [denom]",
 		Args:  cobra.ExactArgs(1),
@@ -203,8 +203,8 @@ $ umeed query oracle exchange-rate ATOM
 	return cmd
 }
 
-// GetCmdQueryFeederDelegation implements the query feeder delegation command.
-func GetCmdQueryFeederDelegation() *cobra.Command {
+// QueryFeederDelegation implements the query feeder delegation command.
+func QueryFeederDelegation() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "feeder-delegation [validator]",
 		Args:  cobra.ExactArgs(1),
@@ -230,8 +230,8 @@ func GetCmdQueryFeederDelegation() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryMissCounter implements the miss counter query command.
-func GetCmdQueryMissCounter() *cobra.Command {
+// QueryMissCounter implements the miss counter query command.
+func QueryMissCounter() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "miss-counter [validator]",
 		Args:  cobra.ExactArgs(1),
@@ -257,8 +257,8 @@ func GetCmdQueryMissCounter() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQuerySlashWindow implements the slash window query command.
-func GetCmdQuerySlashWindow() *cobra.Command {
+// QuerySlashWindow implements the slash window query command.
+func QuerySlashWindow() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "slash-window",
 		Short: "Query the current slash window progress",
@@ -278,8 +278,8 @@ func GetCmdQuerySlashWindow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryHistoricAvgPrice implements the historic avg price command.
-func GetCmdQueryHistoricAvgPrice() *cobra.Command {
+// QueryHistoricAvgPrice implements the historic avg price command.
+func QueryHistoricAvgPrice() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "avg-price [denom]",
 		Short:   "Query the historic avg price for denom",
