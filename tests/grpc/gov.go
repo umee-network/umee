@@ -97,6 +97,27 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
+// LeverageSpecialPairsUpdate submits a gov transaction to update leverage registry, votes, and waits for proposal to pass.
+func LeverageSpecialPairsUpdate(umeeClient client.Client, sets []ltypes.SpecialAssetSet, pairs []ltypes.SpecialAssetPair) error {
+	msg := ltypes.MsgGovUpdateSpecialAssets{
+		Authority:   checkers.GovModuleAddr,
+		Description: "",
+		Sets:        sets,
+		Pairs:       pairs,
+	}
+
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
+}
+
 func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) error {
 	var proposalID string
 	for _, event := range resp.Logs[0].Events {
