@@ -76,6 +76,7 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
+// LeverageRegistryUpdate submits a gov transaction to update leverage registry, votes, and waits for proposal to pass.
 func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []ltypes.Token) error {
 	msg := ltypes.MsgGovUpdateRegistry{
 		Authority:    checkers.GovModuleAddr,
