@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package e2e
 
 import (
@@ -8,9 +5,9 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v6/app"
 	"github.com/umee-network/umee/v6/tests/grpc"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -20,10 +17,13 @@ import (
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
 	var prices []metoken.IndexPrices
 	var index metoken.Index
-	umeeAPIEndpoint := s.UmeeREST()
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
+
+	if app.Experimental {
+		s.T().Skip("Skipping tests for experimental module x/metoken")
+	}
 
 	s.Run(
 		"create_stable_index", func() {
@@ -40,13 +40,13 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			err = grpc.MetokenRegistryUpdate(s.Umee, []metoken.Index{meUSD}, nil)
 			s.Require().NoError(err)
 
-			prices = s.checkMetokenBalance(umeeAPIEndpoint, meUSD.Denom, expectedBalance)
+			prices = s.checkMetokenBalance(meUSD.Denom, expectedBalance)
 		},
 	)
 
 	s.Run(
 		"swap_100USDT_success", func() {
-			index = s.getIndex(umeeAPIEndpoint, mocks.MeUSDDenom)
+			index = s.getMetokenIndex(mocks.MeUSDDenom)
 
 			hundredUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(100_000000))
 			fee := index.Fee.MinFee.MulInt(hundredUSDT.Amount).TruncateInt()
@@ -72,7 +72,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Add(amountToLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			prices = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 
@@ -87,7 +87,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 				"not enough",
 			)
 
-			prices = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 
@@ -115,19 +115,16 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Sub(amountFromLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			_ = s.checkMetokenBalance(umeeAPIEndpoint, mocks.MeUSDDenom, expectedBalance)
+			_ = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 }
 
-func (s *E2ETest) checkMetokenBalance(
-	umeeAPIEndpoint, denom string,
-	expectedBalance metoken.IndexBalances,
-) []metoken.IndexPrices {
+func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.IndexBalances) []metoken.IndexPrices {
 	var prices []metoken.IndexPrices
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.QueryMetokenBalances(umeeAPIEndpoint, denom)
+			resp, err := s.QueryMetokenBalances(denom)
 			if err != nil {
 				return false
 			}
@@ -152,11 +149,11 @@ func (s *E2ETest) checkMetokenBalance(
 	return prices
 }
 
-func (s *E2ETest) getIndex(umeeAPIEndpoint, denom string) metoken.Index {
+func (s *E2ETest) getMetokenIndex(denom string) metoken.Index {
 	index := metoken.Index{}
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.QueryMetokenIndexes(umeeAPIEndpoint, denom)
+			resp, err := s.QueryMetokenIndexes(denom)
 			if err != nil {
 				return false
 			}
