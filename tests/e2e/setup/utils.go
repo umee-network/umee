@@ -135,21 +135,7 @@ func (s *E2ETestSuite) QueryREST(endpoint string, valPtr interface{}) error {
 		return fmt.Errorf("tx query returned non-200 status: %d (%s)", resp.StatusCode, endpoint)
 	}
 
-	if valProto, ok := valPtr.(proto.Message); ok {
-		bz, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
-		}
-		if err = s.cdc.UnmarshalJSON(bz, valProto); err != nil {
-			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
-		}
-	} else {
-		if err := json.NewDecoder(resp.Body).Decode(valPtr); err != nil {
-			return fmt.Errorf("failed to json.decode response body: %w, endpoint: %s", err, endpoint)
-		}
-	}
-
-	return nil
+	return decodeRespBody(s.cdc, endpoint, resp.Body, valPtr)
 }
 
 func (s *E2ETestSuite) QueryUmeeTx(endpoint, txHash string) error {
@@ -245,6 +231,24 @@ func (s *E2ETestSuite) QueryUmeeBalance(
 	return umeeBalance, umeeAddr
 }
 
+func (s *E2ETestSuite) broadcastTxWithRetry(msg sdk.Msg) error {
+	var err error
+	for retry := 0; retry < 3; retry++ {
+		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
+		_, err = s.Umee.Client.Tx.BroadcastTx(msg)
+		if err == nil {
+			return nil
+		}
+
+		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
+			return err
+		}
+		time.Sleep(time.Millisecond * 300)
+	}
+
+	return err
+}
+
 func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
 	var raw sdktx.TxRaw
 
@@ -280,4 +284,22 @@ func decodeTx(cdc codec.Codec, txBytes []byte) (*sdktx.Tx, error) {
 		AuthInfo:   &authInfo,
 		Signatures: raw.Signatures,
 	}, nil
+}
+
+func decodeRespBody(cdc codec.Codec, endpoint string, body io.ReadCloser, valPtr interface{}) error {
+	if valProto, ok := valPtr.(proto.Message); ok {
+		bz, err := io.ReadAll(body)
+		if err != nil {
+			return fmt.Errorf("failed to read response body: %w, endpoint: %s", err, endpoint)
+		}
+		if err = cdc.UnmarshalJSON(bz, valProto); err != nil {
+			return fmt.Errorf("failed to protoJSON.decode response body: %w, endpoint: %s", err, endpoint)
+		}
+	} else {
+		if err := json.NewDecoder(body).Decode(valPtr); err != nil {
+			return fmt.Errorf("failed to json.decode response body: %w, endpoint: %s", err, endpoint)
+		}
+	}
+
+	return nil
 }
