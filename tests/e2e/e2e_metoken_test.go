@@ -62,7 +62,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			s.Require().NoError(err)
 			returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
 
-			s.executeSwap(umeeAPIEndpoint, valAddr.String(), hundredUSDT, mocks.MeUSDDenom)
+			s.executeSwap(valAddr.String(), hundredUSDT, mocks.MeUSDDenom)
 
 			expectedBalance.MetokenSupply.Amount = expectedBalance.MetokenSupply.Amount.Add(returned)
 			usdtBalance, i := expectedBalance.AssetBalance(mocks.USDTBaseDenom)
@@ -81,7 +81,6 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			twoHundredsMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(200_000000))
 
 			s.executeRedeemWithFailure(
-				umeeAPIEndpoint,
 				valAddr.String(),
 				twoHundredsMeUSD,
 				mocks.USDTBaseDenom,
@@ -96,7 +95,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 		"redeem_50meUSD_success", func() {
 			fiftyMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(50_000000))
 
-			s.executeRedeemSuccess(umeeAPIEndpoint, valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
+			s.executeRedeemSuccess(valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
 
 			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
 			s.Require().NoError(err)
@@ -181,10 +180,10 @@ func (s *E2ETest) getIndex(umeeAPIEndpoint, denom string) metoken.Index {
 	return index
 }
 
-func (s *E2ETest) executeSwap(umeeAPIEndpoint, umeeAddr string, asset sdk.Coin, meTokenDenom string) {
+func (s *E2ETest) executeSwap(umeeAddr string, asset sdk.Coin, meTokenDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxSwap(umeeAPIEndpoint, umeeAddr, asset, meTokenDenom)
+			err := s.TxMetokenSwap(umeeAddr, asset, meTokenDenom)
 			if err != nil {
 				return false
 			}
@@ -196,10 +195,10 @@ func (s *E2ETest) executeSwap(umeeAPIEndpoint, umeeAddr string, asset sdk.Coin, 
 	)
 }
 
-func (s *E2ETest) executeRedeemSuccess(umeeAPIEndpoint, umeeAddr string, meToken sdk.Coin, assetDenom string) {
+func (s *E2ETest) executeRedeemSuccess(umeeAddr string, meToken sdk.Coin, assetDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxRedeem(umeeAPIEndpoint, umeeAddr, meToken, assetDenom)
+			err := s.TxMetokenRedeem(umeeAddr, meToken, assetDenom)
 			if err != nil {
 				return false
 			}
@@ -211,14 +210,10 @@ func (s *E2ETest) executeRedeemSuccess(umeeAPIEndpoint, umeeAddr string, meToken
 	)
 }
 
-func (s *E2ETest) executeRedeemWithFailure(
-	umeeAPIEndpoint, umeeAddr string,
-	meToken sdk.Coin,
-	assetDenom, errMsg string,
-) {
+func (s *E2ETest) executeRedeemWithFailure(umeeAddr string, meToken sdk.Coin, assetDenom, errMsg string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxRedeem(umeeAPIEndpoint, umeeAddr, meToken, assetDenom)
+			err := s.TxMetokenRedeem(umeeAddr, meToken, assetDenom)
 			if err != nil && strings.Contains(err.Error(), errMsg) {
 				return true
 			}

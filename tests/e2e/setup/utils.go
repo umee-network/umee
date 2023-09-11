@@ -247,8 +247,7 @@ func (s *E2ETestSuite) QueryMetokenIndexes(endpoint, denom string) (metoken.Quer
 	return resp, s.QueryREST(endpoint, &resp)
 }
 
-func (s *E2ETestSuite) TxSwap(endpoint, umeeAddr string, asset sdk.Coin, meTokenDenom string) error {
-	endpoint = fmt.Sprintf("%s/umee/metoken/v1/swap", endpoint)
+func (s *E2ETestSuite) TxMetokenSwap(umeeAddr string, asset sdk.Coin, meTokenDenom string) error {
 	req := &metoken.MsgSwap{
 		User:         umeeAddr,
 		Asset:        asset,
@@ -258,8 +257,7 @@ func (s *E2ETestSuite) TxSwap(endpoint, umeeAddr string, asset sdk.Coin, meToken
 	return s.broadcastTxWithRetry(req)
 }
 
-func (s *E2ETestSuite) TxRedeem(endpoint, umeeAddr string, meToken sdk.Coin, assetDenom string) error {
-	endpoint = fmt.Sprintf("%s/umee/metoken/v1/redeem", endpoint)
+func (s *E2ETestSuite) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetDenom string) error {
 	req := &metoken.MsgRedeem{
 		User:       umeeAddr,
 		Metoken:    meToken,
@@ -271,7 +269,7 @@ func (s *E2ETestSuite) TxRedeem(endpoint, umeeAddr string, meToken sdk.Coin, ass
 
 func (s *E2ETestSuite) broadcastTxWithRetry(msg sdk.Msg) error {
 	var err error
-	for retry := 0; retry < 5; retry++ {
+	for retry := 0; retry < 3; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
 		_, err = s.Umee.Client.Tx.BroadcastTx(msg)
 		if err == nil {
