@@ -17,7 +17,15 @@ const (
 	PhotonDenom    = "photon"
 	InitBalanceStr = "510000000000" + appparams.BondDenom +
 		",100000000000" + PhotonDenom +
-		",100000000000" + "test1"
+		",100000000000" + "test1" +
+		",100000000000" + "test2" +
+		",100000000000" + "test3" +
+		",100000000000" + "test4" +
+		",100000000000" + "test5" +
+		",100000000000" + "test6" +
+		",100000000000" + "test7" +
+		",100000000000" + "test8" +
+		",100000000000" + "test9"
 	GaiaChainID = "test-gaia-chain"
 
 	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
