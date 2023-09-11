@@ -97,8 +97,13 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
-// LeverageSpecialPairsUpdate submits a gov transaction to update leverage registry, votes, and waits for proposal to pass.
-func LeverageSpecialPairsUpdate(umeeClient client.Client, sets []ltypes.SpecialAssetSet, pairs []ltypes.SpecialAssetPair) error {
+// LeverageSpecialPairsUpdate submits a gov transaction to update leverage registry,
+// votes, and waits for proposal to pass.
+func LeverageSpecialPairsUpdate(
+	umeeClient client.Client,
+	sets []ltypes.SpecialAssetSet,
+	pairs []ltypes.SpecialAssetPair,
+) error {
 	msg := ltypes.MsgGovUpdateSpecialAssets{
 		Authority:   checkers.GovModuleAddr,
 		Description: "",
