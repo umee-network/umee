@@ -91,11 +91,11 @@ func (s *E2ETest) TestLeverageScenario() {
 
 	s.Run(
 		"initial leverage supply", func() {
-			// Supply 1 WBTC, 1 ETH, 1 USDC, 1 UMEE
-			s.supply(val0, appparams.BondDenom, 1000000)
-			s.supply(val0, "test1", 100000000)
-			s.supply(val0, "test2", 1000000000000000000)
-			s.supply(val0, "test3", 1000000)
+			// Supply 100 UMEE, 1 WBTC, 10^-10 ETH, 100 USDC using 10^8 base denom each
+			s.supply(val0, appparams.BondDenom, 100_000_000)
+			s.supply(val0, "test1", 100_000_000)
+			s.supply(val0, "test2", 100_000_000)
+			s.supply(val0, "test3", 100_000_000)
 		},
 	)
 }
