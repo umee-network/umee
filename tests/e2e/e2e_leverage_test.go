@@ -98,4 +98,8 @@ func (s *E2ETest) TestLeverageScenario() {
 			s.supply(val0, "test3", 100_000_000)
 		},
 	)
+
+	// TODO: one of each transaction, optionally with some failing ones, and including
+	// liquidation by lowering the threshold on some existing tokens, assuming prices are up.
+	// Might also reduce sequence errors by using non-validator accounts.
 }
