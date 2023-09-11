@@ -5,13 +5,15 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/umee-network/umee/v6/x/metoken"
+
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/params/types/proposal"
+	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 
 	"github.com/umee-network/umee/v6/client"
 	"github.com/umee-network/umee/v6/util/checkers"
-	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
-	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -77,7 +79,6 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
-// LeverageRegistryUpdate submits a gov transaction to update leverage registry, votes, and waits for proposal to pass.
 func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []ltypes.Token) error {
 	msg := ltypes.MsgGovUpdateRegistry{
 		Authority:    checkers.GovModuleAddr,
@@ -98,7 +99,6 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
-// MetokenRegistryUpdate submits a gov transaction to update meToken registry, votes, and waits for proposal to pass.
 func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes []metoken.Index) error {
 	msg := metoken.MsgGovUpdateRegistry{
 		Authority:   checkers.GovModuleAddr,
