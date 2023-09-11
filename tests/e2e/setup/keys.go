@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
 	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 const (

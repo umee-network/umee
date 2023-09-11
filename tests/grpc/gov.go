@@ -6,11 +6,12 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
+	"github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 
 	"github.com/umee-network/umee/v6/client"
 	"github.com/umee-network/umee/v6/util/checkers"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -109,6 +110,26 @@ func LeverageSpecialPairsUpdate(
 		Description: "",
 		Sets:        sets,
 		Pairs:       pairs,
+	}
+
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
+}
+
+// MetokenRegistryUpdate submits a gov transaction to update metoken registry, votes, and waits for proposal to pass.
+func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes []metoken.Index) error {
+	msg := metoken.MsgGovUpdateRegistry{
+		Authority:   checkers.GovModuleAddr,
+		AddIndex:    addIndexes,
+		UpdateIndex: updateIndexes,
 	}
 
 	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
