@@ -15,19 +15,8 @@ const (
 	ATOMExponent  = 6
 
 	PhotonDenom    = "photon"
-	InitBalanceStr = "510000000000" + appparams.BondDenom +
-		",100000000000" + PhotonDenom +
-		// 10^10 of each token per account will not easily exceed the leverage fixtures maxSupply of 10^11
-		",10000000000" + "test1" +
-		",10000000000" + "test2" +
-		",10000000000" + "test3" +
-		",10000000000" + "test4" +
-		",10000000000" + "test5" +
-		",10000000000" + "test6" +
-		",10000000000" + "test7" +
-		",10000000000" + "test8" +
-		",10000000000" + "test9"
-	GaiaChainID = "test-gaia-chain"
+	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom
+	GaiaChainID    = "test-gaia-chain"
 
 	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
 	PriceFeederServerPort     = "7171/tcp"
