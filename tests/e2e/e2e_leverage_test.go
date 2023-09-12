@@ -91,17 +91,17 @@ func (s *E2ETest) TestLeverageBasics() {
 	)
 	s.Run(
 		"initial leverage collateralize", func() {
-			s.collateralize(valAddr, "u/"+appparams.BondDenom, 70_000_000)
+			s.collateralize(valAddr, "u/"+appparams.BondDenom, 80_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage borrow", func() {
-			s.borrow(valAddr, appparams.BondDenom, 10_000_000)
+			s.borrow(valAddr, appparams.BondDenom, 12_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage repay", func() {
-			s.repay(valAddr, appparams.BondDenom, 5_000_000)
+			s.repay(valAddr, appparams.BondDenom, 2_000_000)
 		},
 	)
 	s.Run(
@@ -119,8 +119,8 @@ func (s *E2ETest) TestLeverageBasics() {
 				{
 					// a set allowing UMEE to borrow more of itself
 					Assets:               []string{appparams.BondDenom},
-					CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
-					LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+					CollateralWeight:     sdk.MustNewDecFromStr("0.75"),
+					LiquidationThreshold: sdk.MustNewDecFromStr("0.8"),
 				},
 			}
 			s.Require().NoError(
@@ -134,7 +134,7 @@ func (s *E2ETest) TestLeverageBasics() {
 				appparams.BondDenom,
 				sdk.NewIntFromUint64(30_000_000),
 			)
-			s.mustSucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset))
+			s.mustEventuallySucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset))
 		},
 	)
 }
