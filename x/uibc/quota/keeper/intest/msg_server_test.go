@@ -30,7 +30,8 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 				Total:         sdk.NewDec(100),
 			},
 			errMsg: "total quota must be greater than or equal to per_denom quota",
-		}, {
+		},
+		{
 			name: "invalid quota in msg",
 			msg: uibc.MsgGovUpdateQuota{
 				Description:   "",

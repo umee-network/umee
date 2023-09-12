@@ -15,7 +15,7 @@ import (
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/cometbft/cometbft/libs/log"
 	tmtypes "github.com/cometbft/cometbft/types"
-	appparams "github.com/umee-network/umee/v5/app/params"
+	appparams "github.com/umee-network/umee/v6/app/params"
 	"gotest.tools/v3/assert"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"

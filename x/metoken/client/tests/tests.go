@@ -16,7 +16,6 @@ import (
 func (s *IntegrationTests) TestInvalidQueries() {
 	invalidQueries := []itestsuite.TestQuery{
 		{
-
 			Name:    "query swap fee - invalid asset for swap",
 			Command: cli.SwapFee(),
 			Args: []string{

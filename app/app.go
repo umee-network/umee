@@ -14,7 +14,7 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/spf13/cast"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
+	appparams "github.com/umee-network/umee/v6/app/params"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
@@ -733,7 +733,6 @@ func New(
 	}
 	if Experimental {
 		appModules = append(appModules, metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB))
-
 	}
 
 	app.mm = module.NewManager(appModules...)
