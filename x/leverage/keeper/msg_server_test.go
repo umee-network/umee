@@ -432,7 +432,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"acceptable withdrawal (dump borrower)",
 			dumpborrower,
@@ -448,7 +448,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"acceptable withdrawal (pump borrower)",
 			pumpborrower,
@@ -464,7 +464,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"borrow limit (undercollateralized due to borrow factor but not collateral weight)",
 			stableUmeeBorrower,
@@ -472,7 +472,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 	}
 
@@ -1074,7 +1074,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			"above borrow limit",
 			borrower,
 			coin.New("u/"+atomDenom, 100_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 
 		{
@@ -1087,7 +1087,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			"above borrow limit (undercollateralized under historic prices but ok with current prices)",
 			dumpborrower,
 			coin.New("u/"+pumpDenom, 20_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 		{
 			"acceptable decollateralize (pump borrower)",
@@ -1099,7 +1099,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			"above borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
 			coin.New("u/"+dumpDenom, 20_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 	}
 
@@ -1350,7 +1350,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"stable umee borrower (borrow factor limit)",
 			stableUmeeBorrower,
 			coin.New(umeeDenom, 1_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"max supply utilization",
 			borrower,
@@ -1365,12 +1365,12 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"borrow limit",
 			borrower,
 			coin.New(atomDenom, 100_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"zero collateral",
 			supplier,
 			coin.New(atomDenom, 1_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"dump borrower (acceptable)",
 			dumpborrower,
@@ -1380,7 +1380,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"dump borrower (borrow limit)",
 			dumpborrower,
 			coin.New(dumpDenom, 10_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"pump borrower (acceptable)",
 			pumpborrower,
@@ -1390,7 +1390,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"pump borrower (borrow limit)",
 			pumpborrower,
 			coin.New(pumpDenom, 2_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 	}
 
