@@ -69,7 +69,7 @@ func (s *E2ETest) TestLeverageBasics() {
 	}
 
 	s.Run(
-		"leverage gov update", func() {
+		"leverage update registry", func() {
 			s.Require().NoError(
 				grpc.LeverageRegistryUpdate(s.Umee, []leveragetypes.Token{}, updateTokens),
 			)
@@ -102,6 +102,39 @@ func (s *E2ETest) TestLeverageBasics() {
 	s.Run(
 		"initial leverage repay", func() {
 			s.repay(valAddr, appparams.BondDenom, 5_000_000)
+		},
+	)
+	s.Run(
+		"too high leverage borrow", func() {
+			asset := sdk.NewCoin(
+				appparams.BondDenom,
+				sdk.NewIntFromUint64(30_000_000),
+			)
+			s.mustFailTx(leveragetypes.NewMsgBorrow(valAddr, asset), "undercollateralized")
+		},
+	)
+	s.Run(
+		"leverage add special pairs", func() {
+			sets := []leveragetypes.SpecialAssetSet{
+				{
+					// a set allowing UMEE to borrow more of itself
+					Assets:               []string{appparams.BondDenom},
+					CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
+					LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+				},
+			}
+			s.Require().NoError(
+				grpc.LeverageSpecialPairsUpdate(s.Umee, sets, []leveragetypes.SpecialAssetPair{}),
+			)
+		},
+	)
+	s.Run(
+		"special pair leverage borrow", func() {
+			asset := sdk.NewCoin(
+				appparams.BondDenom,
+				sdk.NewIntFromUint64(30_000_000),
+			)
+			s.mustSucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset))
 		},
 	)
 }
