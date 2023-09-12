@@ -22,14 +22,14 @@ func TestE2ETestSuite(t *testing.T) {
 
 // mustEventuallySucceedTx executes an sdk.Msg, retrying several times if receiving any error,
 // and requires that the transaction eventually succeeded with nil error. Since this function
-// retries for 30 seconds and ignores errors, it is suitable for scenario setup transaction or
-// those which might require time elapsing before they succeed.
+// retries for 5 seconds and ignores errors, it is suitable for scenario setup transaction or
+// those which might require a few blocks elapsing before they succeed.
 func (s *E2ETest) mustEventuallySucceedTx(msg sdk.Msg) {
 	s.Require().Eventually(
 		func() bool {
 			return s.BroadcastTxWithRetry(msg) == nil
 		},
-		30*time.Second,
+		5*time.Second,
 		500*time.Millisecond,
 	)
 }
