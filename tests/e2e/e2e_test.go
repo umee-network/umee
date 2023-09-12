@@ -20,7 +20,7 @@ func TestE2ETestSuite(t *testing.T) {
 	suite.Run(t, new(E2ETest))
 }
 
-// mustEventuallySucceedTx executes an sdk.Msg (retrying several times if receiving any error,
+// mustEventuallySucceedTx executes an sdk.Msg, retrying several times if receiving any error,
 // and requires that the transaction eventually succeeded with nil error. Since this function
 // retries for 30 seconds and ignores errors, it is suitable for scenario setup transaction or
 // those which might require time elapsing before they succeed.
