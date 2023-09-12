@@ -60,32 +60,32 @@ func (s *E2ETest) leveragedLiquidate(addr, target sdk.AccAddress, repay, reward 
 }
 
 func (s *E2ETest) TestLeverageBasics() {
-	acc1, err := s.Chain.Accounts[0].KeyInfo.GetAddress()
+	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 
 	s.Run(
 		"initial leverage supply", func() {
-			s.supply(acc1, appparams.BondDenom, 100_000_000)
+			s.supply(valAddr, appparams.BondDenom, 100_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage withdraw", func() {
-			s.supply(acc1, "u/"+appparams.BondDenom, 10_000_000)
+			s.supply(valAddr, "u/"+appparams.BondDenom, 10_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage collateralize", func() {
-			s.collateralize(acc1, "u/"+appparams.BondDenom, 70_000_000)
+			s.collateralize(valAddr, "u/"+appparams.BondDenom, 70_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage borrow", func() {
-			s.borrow(acc1, appparams.BondDenom, 10_000_000)
+			s.borrow(valAddr, appparams.BondDenom, 10_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage repay", func() {
-			s.repay(acc1, appparams.BondDenom, 5_000_000)
+			s.repay(valAddr, appparams.BondDenom, 5_000_000)
 		},
 	)
 }
