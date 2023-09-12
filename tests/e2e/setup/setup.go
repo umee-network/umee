@@ -41,9 +41,6 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
-// the number of non-validator umee accounts to initialize during setup
-const numGenesisAccounts = 10
-
 type E2ETestSuite struct {
 	suite.Suite
 
