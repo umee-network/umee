@@ -11,8 +11,10 @@ import (
 	"github.com/umee-network/umee/v6/util/coin"
 )
 
-var halfDec = sdk.MustNewDecFromStr("0.5")
-var one = sdk.OneDec()
+var (
+	halfDec = sdk.MustNewDecFromStr("0.5")
+	one     = sdk.OneDec()
+)
 
 // ValidateBaseDenom validates a denom and ensures it is not a uToken.
 func ValidateBaseDenom(denom string) error {

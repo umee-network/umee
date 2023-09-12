@@ -8,8 +8,8 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
-	ibctransfer "github.com/umee-network/umee/v5/x/uibc"
 	"github.com/umee-network/umee/v6/util"
+	ibctransfer "github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/client/cli"
 	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 
