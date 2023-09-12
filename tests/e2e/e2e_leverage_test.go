@@ -86,20 +86,19 @@ func (s *E2ETest) TestLeverageScenario() {
 		},
 	)
 
-	val0, err := s.Chain.Validators[0].KeyInfo.GetAddress()
+	acc1, err := s.Chain.Accounts[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 
 	s.Run(
 		"initial leverage supply", func() {
 			// Supply 100 UMEE, 1 WBTC, 10^-10 ETH, 100 USDC using 10^8 base denom each
-			s.supply(val0, appparams.BondDenom, 100_000_000)
-			s.supply(val0, "test1", 100_000_000)
-			s.supply(val0, "test2", 100_000_000)
-			s.supply(val0, "test3", 100_000_000)
+			s.supply(acc1, appparams.BondDenom, 100_000_000)
+			s.supply(acc1, "test1", 100_000_000)
+			s.supply(acc1, "test2", 100_000_000)
+			s.supply(acc1, "test3", 100_000_000)
 		},
 	)
 
 	// TODO: one of each transaction, optionally with some failing ones, and including
 	// liquidation by lowering the threshold on some existing tokens, assuming prices are up.
-	// Might also reduce sequence errors by using non-validator accounts.
 }

@@ -41,6 +41,7 @@ type chain struct {
 	dataDir        string
 	ID             string
 	Validators     []*validator
+	Accounts       []*account
 	GaiaValidators []*gaiaValidator
 }
 
@@ -109,6 +110,16 @@ func (c *chain) createValidator(index int) *validator {
 		chain:   c,
 		index:   index,
 		moniker: "umee",
+	}
+}
+
+// createAccount creates a non-validator account for a chain.
+// Accounts require account.CreateKey before use, and a token balance
+// at genesis or later if performing transactions.
+func (c *chain) createAccount(index int) *account {
+	return &account{
+		chain: c,
+		name:  fmt.Sprint("account", index),
 	}
 }
 

@@ -41,6 +41,9 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
+// the number of non-validator umee accounts to initialize during setup
+const numGenesisAccounts = 10
+
 type E2ETestSuite struct {
 	suite.Suite
 
@@ -132,6 +135,22 @@ func (s *E2ETestSuite) initNodes() {
 		s.Require().NoError(err)
 		s.Require().NoError(
 			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, valAddr),
+		)
+	}
+
+	// create non-validator accounts which can be used for testing.
+	// since they don't vote for price feeder, these accounts are
+	// much less vulnerable to "incorrect account sequence" problems.
+	// Stores their keys in the same keyring as val[0]
+	for i := 1; i <= numGenesisAccounts; i++ {
+		acc := s.Chain.createAccount(i)
+		s.Require().NoError(
+			acc.createKey(s.cdc, val0ConfigDir),
+		)
+		accAddr, err := acc.KeyInfo.GetAddress()
+		s.Require().NoError(err)
+		s.Require().NoError(
+			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, accAddr),
 		)
 	}
 
@@ -668,6 +687,9 @@ func (s *E2ETestSuite) initUmeeClient() {
 	mnemonics := make(map[string]string)
 	for index, v := range s.Chain.Validators {
 		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
+	}
+	for _, a := range s.Chain.Accounts {
+		mnemonics[a.name] = a.mnemonic
 	}
 	ecfg := app.MakeEncodingConfig()
 	s.Umee, err = client.NewClient(
