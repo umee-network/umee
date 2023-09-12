@@ -15,6 +15,7 @@ import (
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/ugov"
 	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
@@ -229,46 +230,47 @@ func TestInflationRate(t *testing.T) {
 }
 
 func TestInflationRateChange(t *testing.T) {
-	mparams := minttypes.Params{
+	bondedRatio := sdk.NewDecWithPrec(1, 1) // 10% -> below the goal
+	mparamsStd := minttypes.Params{         // minting params for a standard x/mint minting process
 		MintDenom:           sdk.DefaultBondDenom,
 		InflationRateChange: sdk.NewDecWithPrec(1, 1), // 0.1
 		InflationMax:        sdk.NewDecWithPrec(5, 1), // 0.5
 		InflationMin:        sdk.NewDecWithPrec(1, 1), // 0.1
 		GoalBonded:          sdk.NewDecWithPrec(5, 1), // 0.5
-		BlocksPerYear:       1000,
+		BlocksPerYear:       5 * 60 * 24 * 365,        // 1 block per 6s => 5 blocks per min.
 	}
-	mparams.InflationRateChange = updateInflationRateChange(mparams)
-	minter := minttypes.Minter{
-		// Inflation: mparams.InflationMin, // sdk.NewDecWithPrec(10, 2), // current inflation
-		Inflation: sdk.NewDecWithPrec(1, 2), // current inflation
+	mparamsFast := mparamsStd // minting params for the umee inflation calculator
+	mparamsFast.InflationRateChange = doubleInflationRateChange(mparamsFast)
+	minterFast := minttypes.Minter{
+		Inflation: sdk.NewDecWithPrec(1, 2), // 0.01  -- less than InflationMin
 	}
-	bondedRatio := sdk.NewDecWithPrec(1, 1) // 10% -> below the goal
+	minterStd := minterFast
 
 	// Test1
-	// in half a year inflation should go from 0 to max.
-	ir := minter.NextInflationRate(mparams, bondedRatio)
-	assert.Equal(t, ir, mparams.InflationMin, "initial rate should immediately adjust to InflationMin")
-	tenth := int(mparams.BlocksPerYear / 2 / 10) // inflation change should adjust in half year
-	for i := 0; i <= tenth*9; i++ {
-		ir = minter.NextInflationRate(mparams, bondedRatio)
-		minter.Inflation = ir
-	}
-	assert.Assert(t, ir.LT(mparams.InflationMax), "current: %v", ir)
+	// in half a year inflation should go from 0 towards max. The algorithm doesn't drive the inflation
+	// to max, but usually to something like 80% of max. So in this test we compare the standard algorithm
+	// with "yearly" goal to our modification and see if it return a similar result.
 
+	ir := minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	assert.Equal(t, ir, mparamsFast.InflationMin, "initial rate should immediately adjust to InflationMin")
+
+	// in 4/10 of the year (so 4/5 of the half year expected inflation rate change) we should not reach the max yet.
+	tenth := int(mparamsFast.BlocksPerYear / 10)
+	for i := 0; i <= tenth*4; i++ {
+		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	}
+	assert.Assert(t, ir.LT(mparamsFast.InflationMax), "current: %v", ir)
+
+	// continue 1/10th more to get to the half year
 	for i := 0; i <= tenth; i++ {
-		ir = minter.NextInflationRate(mparams, bondedRatio)
-		minter.Inflation = ir
+		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
 	}
-	assert.Equal(t, mparams.InflationMax, ir)
 
-	// current bonded ratio =1 then inflation rate change per year will be negative
-	// so after the 50 blocks inflation will be minimum
-	minter.Inflation = sdk.NewDecWithPrec(2, 2)
-	bondedRatio = sdk.NewDec(1)
-	for i := 0; i < 50; i++ {
-		ir = minter.NextInflationRate(mparams, bondedRatio)
-		minter.Inflation = ir
+	// now let's run with a standard x/mint yearly params
+	for i := 0; i <= int(mparamsStd.BlocksPerYear); i++ {
+		minterStd.Inflation = minterStd.NextInflationRate(mparamsStd, bondedRatio)
 	}
-	// it should be minimum , because inflationRateChangePerYear will be negative
-	assert.Equal(t, ir, mparams.InflationMin)
+
+	checkers.DecMaxDiff(minterStd.Inflation, minterFast.Inflation, sdk.NewDecWithPrec(1, 4),
+		"fast minter and standard minter should end up with similar inflation change after half year and full year repectively")
 }
