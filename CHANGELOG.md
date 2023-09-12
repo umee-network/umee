@@ -46,6 +46,8 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v6.0.0](https://github.com/umee-network/umee/releases/tag/v6.0.0) - 2023-09-14
+
 ### Features
 
 - [2128](https://github.com/umee-network/umee/pull/2128) CW transaction and query handlers for the incentive module.
