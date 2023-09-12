@@ -4,6 +4,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/tests/grpc"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
@@ -60,6 +62,20 @@ func (s *E2ETest) leveragedLiquidate(addr, target sdk.AccAddress, repay, reward 
 }
 
 func (s *E2ETest) TestLeverageBasics() {
+	umeeNoMedians := fixtures.Token(appparams.BondDenom, "UMEE", 6)
+	umeeNoMedians.HistoricMedians = 0
+	updateTokens := []leveragetypes.Token{
+		umeeNoMedians,
+	}
+
+	s.Run(
+		"leverage gov update", func() {
+			s.Require().NoError(
+				grpc.LeverageRegistryUpdate(s.Umee, []leveragetypes.Token{}, updateTokens),
+			)
+		},
+	)
+
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 
