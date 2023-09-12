@@ -107,7 +107,7 @@ func LeverageSpecialPairsUpdate(
 ) error {
 	msg := ltypes.MsgGovUpdateSpecialAssets{
 		Authority:   checkers.GovModuleAddr,
-		Description: "",
+		Description: "Special Assets Proposal",
 		Sets:        sets,
 		Pairs:       pairs,
 	}
