@@ -2,8 +2,10 @@ package checkers
 
 import (
 	"fmt"
+	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/constraints"
 )
 
@@ -31,6 +33,11 @@ func DecMaxDiff(a, b, maxDiff sdk.Dec, note string) error {
 		return fmt.Errorf("%s, diff (=%v) is too big", note, diff)
 	}
 	return nil
+}
+
+func RequireDecMaxDiff(t *testing.T, a, b, maxDiff sdk.Dec, note string) {
+	err := DecMaxDiff(a, b, maxDiff, note)
+	require.NoError(t, err)
 }
 
 // DecInZeroOne asserts that 0 <= a <= 1 when oneInclusive=True, otherwise asserts

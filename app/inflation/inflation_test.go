@@ -232,45 +232,103 @@ func TestInflationRate(t *testing.T) {
 func TestInflationRateChange(t *testing.T) {
 	bondedRatio := sdk.NewDecWithPrec(1, 1) // 10% -> below the goal
 	mparamsStd := minttypes.Params{         // minting params for a standard x/mint minting process
-		MintDenom:           sdk.DefaultBondDenom,
-		InflationRateChange: sdk.NewDecWithPrec(1, 1), // 0.1
-		InflationMax:        sdk.NewDecWithPrec(5, 1), // 0.5
-		InflationMin:        sdk.NewDecWithPrec(1, 1), // 0.1
-		GoalBonded:          sdk.NewDecWithPrec(5, 1), // 0.5
-		BlocksPerYear:       5 * 60 * 24 * 365,        // 1 block per 6s => 5 blocks per min.
+		MintDenom:     sdk.DefaultBondDenom,
+		InflationMax:  sdk.NewDecWithPrec(5, 1), // 0.5
+		InflationMin:  sdk.NewDecWithPrec(1, 1), // 0.1
+		GoalBonded:    sdk.NewDecWithPrec(5, 1), // 0.5
+		BlocksPerYear: 5 * 60 * 24 * 365,        // 1 block per 6s => 5 blocks per min.
 	}
 	mparamsFast := mparamsStd // minting params for the umee inflation calculator
-	mparamsFast.InflationRateChange = doubleInflationRateChange(mparamsFast)
+	mparamsFast.InflationRateChange = fastInflationRateChange(mparamsFast)
+	mparamsStd.InflationRateChange = mparamsFast.InflationRateChange.Quo(two)
 	minterFast := minttypes.Minter{
 		Inflation: sdk.NewDecWithPrec(1, 2), // 0.01  -- less than InflationMin
 	}
 	minterStd := minterFast
 
-	// Test1
-	// in half a year inflation should go from 0 towards max. The algorithm doesn't drive the inflation
-	// to max, but usually to something like 80% of max. So in this test we compare the standard algorithm
-	// with "yearly" goal to our modification and see if it return a similar result.
-
+	//
+	// Test1: inflation rate should jump to InflationMin in the first round.
+	//
 	ir := minterFast.NextInflationRate(mparamsFast, bondedRatio)
 	assert.Equal(t, ir, mparamsFast.InflationMin, "initial rate should immediately adjust to InflationMin")
 
-	// in 4/10 of the year (so 4/5 of the half year expected inflation rate change) we should not reach the max yet.
-	tenth := int(mparamsFast.BlocksPerYear / 10)
-	for i := 0; i <= tenth*4; i++ {
+	//
+	// Test2
+	// in half a year inflation should go from 0 towards max. Note: with the existing Cosmos SDK
+	// algorithm, we won't reach max. So we compare our settings with the standard minter, and check
+	// if it's almost the same.
+	//
+
+	// in 5 months, the fast minter should not reach the max.
+	month := int(mparamsFast.BlocksPerYear / 12)
+	for i := 0; i <= month*5; i++ {
 		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
 	}
-	assert.Assert(t, ir.LT(mparamsFast.InflationMax), "current: %v", ir)
+	assert.Assert(t, minterFast.Inflation.LT(mparamsFast.InflationMax), "current: %v", minterFast.Inflation)
 
-	// continue 1/10th more to get to the half year
-	for i := 0; i <= tenth; i++ {
-		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
-	}
-
-	// now let's run with a standard x/mint yearly params
-	for i := 0; i <= int(mparamsStd.BlocksPerYear); i++ {
+	// we should get similar result to the standard minter after 10 months
+	for i := 0; i <= month*10; i++ {
 		minterStd.Inflation = minterStd.NextInflationRate(mparamsStd, bondedRatio)
 	}
 
-	checkers.DecMaxDiff(minterStd.Inflation, minterFast.Inflation, sdk.NewDecWithPrec(1, 4),
-		"fast minter and standard minter should end up with similar inflation change after half year and full year repectively")
+	checkers.RequireDecMaxDiff(t, minterStd.Inflation, minterFast.Inflation, sdk.NewDecWithPrec(1, 5),
+		"fast minter and standard minter should end up with similar inflation change after 5months and 10months repectively")
+
+	// continue one more month
+	for i := 0; i <= month; i++ {
+		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	}
+	checkers.RequireDecMaxDiff(t, mparamsFast.InflationMax, minterFast.Inflation,
+		mparamsFast.InflationRateChange.QuoInt64(10),
+		"fast minter, afer 6 months should go close enough to max")
+
+	//
+	// test3, let's see with smaller min and max.
+	//
+	mparamsFast.InflationMin = sdk.NewDecWithPrec(3, 2) // 0.03
+	mparamsFast.InflationMax = sdk.NewDecWithPrec(7, 2) // 0.07
+	minterFast.Inflation = sdk.NewDecWithPrec(1, 2)     // 0.01
+	for i := 0; i <= month*6; i++ {
+		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	}
+	checkers.RequireDecMaxDiff(t, mparamsFast.InflationMax, minterFast.Inflation,
+		mparamsFast.InflationRateChange.QuoInt64(10),
+		"fast minter, afer 6 months should go close enough to max")
+
+	//
+	// test 4 check going from max towards min
+	//
+	bondedRatio = sdk.NewDecWithPrec(9, 1)          // 0.7
+	minterFast.Inflation = sdk.NewDecWithPrec(9, 1) // 0.9
+	mparamsFast.InflationRateChange = fastInflationRateChange(mparamsFast)
+
+	ir = minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	assert.Equal(t, ir, mparamsFast.InflationMax, "initial rate should immediately adjust to InflationMin")
+
+	// in 5 months, the fast minter should not reach the min.
+	for i := 0; i <= month*5; i++ {
+		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	}
+	assert.Assert(t, minterFast.Inflation.GT(mparamsFast.InflationMin), "current: %v", minterFast.Inflation)
+
+	// continue one more month
+	for i := 0; i <= month; i++ {
+		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	}
+	checkers.RequireDecMaxDiff(t, mparamsFast.InflationMin, minterFast.Inflation,
+		mparamsFast.InflationRateChange.QuoInt64(10),
+		"fast minter, afer 6 months should go close enough to min")
+
+	//
+	// test 5, when bondedRatio is closer to the goal bonded we should still go fast.
+	//
+	bondedRatio = sdk.NewDecWithPrec(7, 1)          // 0.7
+	minterFast.Inflation = sdk.NewDecWithPrec(9, 1) // 0.9
+	// continue one more month
+	for i := 0; i <= month*6; i++ {
+		minterFast.Inflation = minterFast.NextInflationRate(mparamsFast, bondedRatio)
+	}
+	checkers.RequireDecMaxDiff(t, mparamsFast.InflationMin, minterFast.Inflation,
+		mparamsFast.InflationRateChange.QuoInt64(3), // TODO: the diff should be smaller, but it will require to change the standard cosmos infation rate algorithm
+		"fast minter, afer 6 months should go close enough to min")
 }

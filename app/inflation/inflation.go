@@ -34,7 +34,7 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		factor := bpmath.One - inflationParams.InflationReductionRate
 		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
 		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
-		mintParams.InflationRateChange = doubleInflationRateChange(mintParams)
+		mintParams.InflationRateChange = fastInflationRateChange(mintParams)
 		c.MintKeeper.SetParams(ctx, mintParams)
 
 		err := ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
@@ -51,9 +51,8 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 
 var two = sdk.NewDec(2)
 
-// inflation rate change = (max rate - min rate) * 2 // to
-func doubleInflationRateChange(p minttypes.Params) sdk.Dec {
-	// return p.InflationMax.Sub(p.InflationMin)
+// inflation rate change = (max_rate - min_rate) * 2
+func fastInflationRateChange(p minttypes.Params) sdk.Dec {
 	return two.Mul(p.InflationMax.Sub(p.InflationMin))
 }
 
