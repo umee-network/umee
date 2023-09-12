@@ -130,6 +130,7 @@ func (s *E2ETestSuite) initNodes() {
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := s.Chain.Validators[0].configDir()
+	val0Moniker := s.Chain.Validators[0].moniker
 	for _, val := range s.Chain.Validators {
 		valAddr, err := val.KeyInfo.GetAddress()
 		s.Require().NoError(err)
@@ -150,8 +151,9 @@ func (s *E2ETestSuite) initNodes() {
 		accAddr, err := acc.KeyInfo.GetAddress()
 		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, accAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, val0Moniker, InitBalanceStr, accAddr),
 		)
+		s.Chain.Accounts = append(s.Chain.Accounts, acc)
 	}
 
 	// copy the genesis file to the remaining validators

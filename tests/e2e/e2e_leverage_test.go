@@ -4,8 +4,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
-	"github.com/umee-network/umee/v6/tests/grpc"
-	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
@@ -61,44 +59,33 @@ func (s *E2ETest) leveragedLiquidate(addr, target sdk.AccAddress, repay, reward 
 	s.mustSucceedTx(leveragetypes.NewMsgLeveragedLiquidate(addr, target, repay, reward))
 }
 
-func (s *E2ETest) TestLeverageScenario() {
-	s.Run(
-		"register leverage tokens", func() {
-			tokens := []leveragetypes.Token{
-				fixtures.Token("test1", "WBTC", 8),
-				fixtures.Token("test2", "WETH", 18),
-				fixtures.Token("test3", "USDT", 6),
-			}
-
-			err := grpc.LeverageRegistryUpdate(s.Umee, tokens, nil)
-			s.Require().NoError(err)
-
-			sets := []leveragetypes.SpecialAssetSet{
-				{
-					Assets:               []string{"test1", "test2"},
-					CollateralWeight:     sdk.MustNewDecFromStr("0.4"),
-					LiquidationThreshold: sdk.MustNewDecFromStr("0.5"),
-				},
-			}
-
-			err = grpc.LeverageSpecialPairsUpdate(s.Umee, sets, []leveragetypes.SpecialAssetPair{})
-			s.Require().NoError(err)
-		},
-	)
-
+func (s *E2ETest) TestLeverageBasics() {
 	acc1, err := s.Chain.Accounts[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 
 	s.Run(
 		"initial leverage supply", func() {
-			// Supply 100 UMEE, 1 WBTC, 10^-10 ETH, 100 USDC using 10^8 base denom each
 			s.supply(acc1, appparams.BondDenom, 100_000_000)
-			s.supply(acc1, "test1", 100_000_000)
-			s.supply(acc1, "test2", 100_000_000)
-			s.supply(acc1, "test3", 100_000_000)
 		},
 	)
-
-	// TODO: one of each transaction, optionally with some failing ones, and including
-	// liquidation by lowering the threshold on some existing tokens, assuming prices are up.
+	s.Run(
+		"initial leverage withdraw", func() {
+			s.supply(acc1, "u/"+appparams.BondDenom, 10_000_000)
+		},
+	)
+	s.Run(
+		"initial leverage collateralize", func() {
+			s.collateralize(acc1, "u/"+appparams.BondDenom, 70_000_000)
+		},
+	)
+	s.Run(
+		"initial leverage borrow", func() {
+			s.borrow(acc1, appparams.BondDenom, 10_000_000)
+		},
+	)
+	s.Run(
+		"initial leverage repay", func() {
+			s.repay(acc1, appparams.BondDenom, 5_000_000)
+		},
+	)
 }
