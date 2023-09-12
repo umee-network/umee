@@ -9,55 +9,55 @@ import (
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
-func (s *E2ETest) supply(addr sdk.AccAddress, denom string, amount uint64) {
+func (s *E2ETest) leverageSupply(addr sdk.AccAddress, denom string, amount uint64) {
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgSupply(addr, asset))
 }
 
-func (s *E2ETest) withdraw(addr sdk.AccAddress, denom string, amount uint64) {
+func (s *E2ETest) leverageWithdraw(addr sdk.AccAddress, denom string, amount uint64) {
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgWithdraw(addr, asset))
 }
 
-func (s *E2ETest) maxWithdraw(addr sdk.AccAddress, denom string) {
+func (s *E2ETest) leverageMaxWithdraw(addr sdk.AccAddress, denom string) {
 	s.mustSucceedTx(leveragetypes.NewMsgMaxWithdraw(addr, denom))
 }
 
-func (s *E2ETest) collateralize(addr sdk.AccAddress, denom string, amount uint64) {
+func (s *E2ETest) leverageCollateralize(addr sdk.AccAddress, denom string, amount uint64) {
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgCollateralize(addr, asset))
 }
 
-func (s *E2ETest) decollateralize(addr sdk.AccAddress, denom string, amount uint64) {
+func (s *E2ETest) leverageDecollateralize(addr sdk.AccAddress, denom string, amount uint64) {
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgDecollateralize(addr, asset))
 }
 
-func (s *E2ETest) supplyCollateral(addr sdk.AccAddress, denom string, amount uint64) {
+func (s *E2ETest) leverageSupplyCollateral(addr sdk.AccAddress, denom string, amount uint64) {
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgSupplyCollateral(addr, asset))
 }
 
-func (s *E2ETest) borrow(addr sdk.AccAddress, denom string, amount uint64) {
+func (s *E2ETest) leverageBorrow(addr sdk.AccAddress, denom string, amount uint64) {
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgBorrow(addr, asset))
 }
 
-func (s *E2ETest) maxBorrow(addr sdk.AccAddress, denom string) {
+func (s *E2ETest) leverageMaxBorrow(addr sdk.AccAddress, denom string) {
 	s.mustSucceedTx(leveragetypes.NewMsgMaxBorrow(addr, denom))
 }
 
-func (s *E2ETest) repay(addr sdk.AccAddress, denom string, amount uint64) {
+func (s *E2ETest) leverageRepay(addr sdk.AccAddress, denom string, amount uint64) {
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgRepay(addr, asset))
 }
 
-func (s *E2ETest) liquidate(addr, target sdk.AccAddress, repayDenom string, repayAmount uint64, reward string) {
+func (s *E2ETest) leverageLiquidate(addr, target sdk.AccAddress, repayDenom string, repayAmount uint64, reward string) {
 	repay := sdk.NewCoin(repayDenom, sdk.NewIntFromUint64(repayAmount))
 	s.mustSucceedTx(leveragetypes.NewMsgLiquidate(addr, target, repay, reward))
 }
 
-func (s *E2ETest) leveragedLiquidate(addr, target sdk.AccAddress, repay, reward string) {
+func (s *E2ETest) leverageLeveragedLiquidate(addr, target sdk.AccAddress, repay, reward string) {
 	s.mustSucceedTx(leveragetypes.NewMsgLeveragedLiquidate(addr, target, repay, reward))
 }
 
@@ -81,27 +81,27 @@ func (s *E2ETest) TestLeverageBasics() {
 
 	s.Run(
 		"initial leverage supply", func() {
-			s.supply(valAddr, appparams.BondDenom, 100_000_000)
+			s.leverageSupply(valAddr, appparams.BondDenom, 100_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage withdraw", func() {
-			s.withdraw(valAddr, "u/"+appparams.BondDenom, 10_000_000)
+			s.leverageWithdraw(valAddr, "u/"+appparams.BondDenom, 10_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage collateralize", func() {
-			s.collateralize(valAddr, "u/"+appparams.BondDenom, 80_000_000)
+			s.leverageCollateralize(valAddr, "u/"+appparams.BondDenom, 80_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage borrow", func() {
-			s.borrow(valAddr, appparams.BondDenom, 12_000_000)
+			s.leverageBorrow(valAddr, appparams.BondDenom, 12_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage repay", func() {
-			s.repay(valAddr, appparams.BondDenom, 2_000_000)
+			s.leverageRepay(valAddr, appparams.BondDenom, 2_000_000)
 		},
 	)
 	s.Run(
