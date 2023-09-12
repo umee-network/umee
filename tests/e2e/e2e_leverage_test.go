@@ -115,16 +115,17 @@ func (s *E2ETest) TestLeverageBasics() {
 	)
 	s.Run(
 		"leverage add special pairs", func() {
-			sets := []leveragetypes.SpecialAssetSet{
+			pairs := []leveragetypes.SpecialAssetPair{
 				{
 					// a set allowing UMEE to borrow more of itself
-					Assets:               []string{appparams.BondDenom},
+					Borrow:               appparams.BondDenom,
+					Collateral:           appparams.BondDenom,
 					CollateralWeight:     sdk.MustNewDecFromStr("0.75"),
 					LiquidationThreshold: sdk.MustNewDecFromStr("0.8"),
 				},
 			}
 			s.Require().NoError(
-				grpc.LeverageSpecialPairsUpdate(s.Umee, sets, []leveragetypes.SpecialAssetPair{}),
+				grpc.LeverageSpecialPairsUpdate(s.Umee, []leveragetypes.SpecialAssetSet{}, pairs),
 			)
 		},
 	)
