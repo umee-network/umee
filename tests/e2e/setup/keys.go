@@ -6,7 +6,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
+
 	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 const (
@@ -15,7 +17,7 @@ const (
 	ATOMExponent  = 6
 
 	PhotonDenom    = "photon"
-	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom
+	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
 	GaiaChainID    = "test-gaia-chain"
 
 	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
