@@ -134,7 +134,7 @@ func (s *E2ETest) TestLeverageBasics() {
 				appparams.BondDenom,
 				sdk.NewIntFromUint64(30_000_000),
 			)
-			s.mustEventuallySucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset))
+			s.mustSucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset))
 		},
 	)
 }
