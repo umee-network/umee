@@ -29,7 +29,7 @@ func (s *E2ETestSuite) TxMetokenSwap(umeeAddr string, asset sdk.Coin, meTokenDen
 		MetokenDenom: meTokenDenom,
 	}
 
-	return s.broadcastTxWithRetry(req)
+	return s.BroadcastTxWithRetry(req)
 }
 
 func (s *E2ETestSuite) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetDenom string) error {
@@ -39,5 +39,5 @@ func (s *E2ETestSuite) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetD
 		AssetDenom: assetDenom,
 	}
 
-	return s.broadcastTxWithRetry(req)
+	return s.BroadcastTxWithRetry(req)
 }
