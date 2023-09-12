@@ -17,10 +17,10 @@ import (
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
-	"github.com/umee-network/umee/v5/x/leverage/client/cli"
-	"github.com/umee-network/umee/v5/x/leverage/keeper"
-	"github.com/umee-network/umee/v5/x/leverage/simulation"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/leverage/client/cli"
+	"github.com/umee-network/umee/v6/x/leverage/keeper"
+	"github.com/umee-network/umee/v6/x/leverage/simulation"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 var (

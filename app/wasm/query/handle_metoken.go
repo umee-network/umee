@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/gogo/protobuf/proto"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // HandleMeTokenParams handles the get for x/metoken module's parameters.
@@ -56,6 +56,6 @@ func (q UmeeQuery) HandleMeTokenIndexPrice(
 	ctx context.Context,
 	qs metoken.QueryServer,
 ) (proto.Message, error) {
-	req := metoken.QueryIndexPrice{MetokenDenom: q.IndexPrice.MetokenDenom}
-	return qs.IndexPrice(ctx, &req)
+	req := metoken.QueryIndexPrices{MetokenDenom: q.IndexPrice.MetokenDenom}
+	return qs.IndexPrices(ctx, &req)
 }

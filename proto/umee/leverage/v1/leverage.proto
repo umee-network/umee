@@ -3,15 +3,13 @@ package umee.leverage.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/leverage/types";
+option go_package = "github.com/umee-network/umee/v6/x/leverage/types";
 
 option (gogoproto.goproto_getters_all) = false;
 
 // Params defines the parameters for the leverage module.
-// See https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
-// for more details.
 message Params {
-  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.equal) = true;
 
   // Complete Liquidation Threshold determines how far between
   // liquidation_threshold (LT) and collateral_value (CV) a borrower's

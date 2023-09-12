@@ -5,7 +5,7 @@ import (
 
 	"github.com/cosmos/gogoproto/proto"
 
-	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // HandleSupply handles the Supply value of an address.

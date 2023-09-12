@@ -1,3 +1,6 @@
+//go:build experimental
+// +build experimental
+
 package intest
 
 import (
@@ -8,11 +11,12 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/app"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/metoken/keeper"
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"github.com/umee-network/umee/v6/app"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/keeper"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 func TestRebalanceReserves(t *testing.T) {
@@ -23,7 +27,7 @@ func TestRebalanceReserves(t *testing.T) {
 
 	_, err := msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(s.ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    []metoken.Index{index},
 			UpdateIndex: nil,
 		},
@@ -69,21 +73,21 @@ func TestRebalanceReserves(t *testing.T) {
 	// change index setting modifying the reserve_portion
 	// usdt_reserve_portion from 0.2 to 0.25
 	usdtReservePortion := sdk.MustNewDecFromStr("0.25")
-	i, usdtSettings := index.AcceptedAsset(mocks.USDTBaseDenom)
+	usdtSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)
 	usdtSettings.ReservePortion = usdtReservePortion
 	index.SetAcceptedAsset(usdtSettings)
 
 	// usdc_reserve_portion from 0.2 to 0.5
 	usdcReservePortion := sdk.MustNewDecFromStr("0.5")
-	i, usdcSettings := index.AcceptedAsset(mocks.USDCBaseDenom)
+	usdcSettings, i := index.AcceptedAsset(mocks.USDCBaseDenom)
 	require.True(t, i >= 0)
 	usdcSettings.ReservePortion = usdcReservePortion
 	index.SetAcceptedAsset(usdcSettings)
 
 	// ist_reserve_portion from 0.2 to 0.035
 	istReservePortion := sdk.MustNewDecFromStr("0.035")
-	i, istSettings := index.AcceptedAsset(mocks.ISTBaseDenom)
+	istSettings, i := index.AcceptedAsset(mocks.ISTBaseDenom)
 	require.True(t, i >= 0)
 	istSettings.ReservePortion = istReservePortion
 	index.SetAcceptedAsset(istSettings)
@@ -91,7 +95,7 @@ func TestRebalanceReserves(t *testing.T) {
 	// update index
 	_, err = msgServer.GovUpdateRegistry(
 		ctx, &metoken.MsgGovUpdateRegistry{
-			Authority:   app.GovKeeper.GetGovernanceAccount(ctx).GetAddress().String(),
+			Authority:   checkers.GovModuleAddr,
 			AddIndex:    nil,
 			UpdateIndex: []metoken.Index{index},
 		},
@@ -130,7 +134,7 @@ func checkBalances(
 
 	for _, balance := range balances.AssetBalances {
 		// confirm the index is balanced as required in the configuration
-		i, assetSettings := index.AcceptedAsset(balance.Denom)
+		assetSettings, i := index.AcceptedAsset(balance.Denom)
 		require.True(t, i >= 0)
 
 		desiredReserves := assetSettings.ReservePortion.MulInt(balance.AvailableSupply()).TruncateInt()

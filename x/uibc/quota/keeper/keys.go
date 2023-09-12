@@ -1,7 +1,7 @@
 package keeper
 
 import (
-	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v6/util"
 )
 
 var (

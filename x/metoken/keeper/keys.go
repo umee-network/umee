@@ -1,6 +1,6 @@
 package keeper
 
-import "github.com/umee-network/umee/v5/util"
+import "github.com/umee-network/umee/v6/util"
 
 var (
 	// Regular state

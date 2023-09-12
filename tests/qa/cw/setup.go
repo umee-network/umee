@@ -1,7 +1,7 @@
 package cw
 
 import (
-	"github.com/umee-network/umee/v5/tests/e2e/setup"
+	"github.com/umee-network/umee/v6/tests/e2e/setup"
 )
 
 type QATest struct {

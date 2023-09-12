@@ -8,8 +8,8 @@ import (
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	lvkeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
-	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
+	lvkeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
+	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // Plugin wraps the msg plugin with Messengers.

@@ -27,11 +27,11 @@ import (
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	wm "github.com/umee-network/umee/v5/app/wasm/msg"
-	wq "github.com/umee-network/umee/v5/app/wasm/query"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	wm "github.com/umee-network/umee/v6/app/wasm/msg"
+	wq "github.com/umee-network/umee/v6/app/wasm/query"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 const (

@@ -17,13 +17,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/x/oracle/client/cli"
-	"github.com/umee-network/umee/v5/x/oracle/keeper"
-	simulation "github.com/umee-network/umee/v5/x/oracle/simulations"
-	"github.com/umee-network/umee/v5/x/oracle/types"
-
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/x/oracle/client/cli"
+	"github.com/umee-network/umee/v6/x/oracle/keeper"
+	simulation "github.com/umee-network/umee/v6/x/oracle/simulations"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 var (

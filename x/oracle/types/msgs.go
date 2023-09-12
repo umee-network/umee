@@ -6,7 +6,7 @@ import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 
-	"github.com/umee-network/umee/v5/util/checkers"
+	"github.com/umee-network/umee/v6/util/checkers"
 )
 
 var (

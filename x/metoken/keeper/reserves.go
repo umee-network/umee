@@ -6,8 +6,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/x/metoken"
-	lerrors "github.com/umee-network/umee/v5/x/metoken/errors"
+	"github.com/umee-network/umee/v6/x/metoken"
+	lerrors "github.com/umee-network/umee/v6/x/metoken/errors"
 )
 
 // RebalanceReserves checks if the portion of reserves is below the desired and transfer the missing amount from
@@ -32,7 +32,7 @@ func (k Keeper) RebalanceReserves() error {
 		updatedBalances := make([]metoken.AssetBalance, 0)
 		for _, balance := range balances.AssetBalances {
 			if balance.AvailableSupply().IsPositive() {
-				i, assetSettings := index.AcceptedAsset(balance.Denom)
+				assetSettings, i := index.AcceptedAsset(balance.Denom)
 				if i < 0 {
 					k.Logger().Debug(
 						"rebalancing reserves: failed getting accepted asset",

@@ -3,7 +3,7 @@ package keeper
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // swapFee to be charged to the user, given a specific Index configuration and asset amount.
@@ -11,7 +11,7 @@ func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, as
 	sdk.Coin,
 	error,
 ) {
-	i, assetSettings := index.AcceptedAsset(asset.Denom)
+	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
 		return sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
@@ -41,7 +41,7 @@ func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, 
 	sdk.Coin,
 	error,
 ) {
-	i, assetSettings := index.AcceptedAsset(asset.Denom)
+	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
 		return sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
@@ -76,7 +76,7 @@ func (k Keeper) currentAllocation(
 		return sdk.Dec{}, err
 	}
 
-	i, balance := balances.AssetBalance(assetDenom)
+	balance, i := balances.AssetBalance(assetDenom)
 	if i < 0 {
 		return sdk.Dec{}, sdkerrors.ErrNotFound.Wrapf("balance for denom %s not found", assetDenom)
 	}
@@ -91,7 +91,7 @@ func (k Keeper) currentAllocation(
 		return sdk.ZeroDec(), nil
 	}
 
-	assetPrice, err := indexPrices.Price(assetDenom)
+	assetPrice, err := indexPrices.PriceByBaseDenom(assetDenom)
 	if err != nil {
 		return sdk.Dec{}, err
 	}
@@ -100,11 +100,7 @@ func (k Keeper) currentAllocation(
 		return sdk.Dec{}, err
 	}
 
-	meTokenPrice, err := indexPrices.Price(index.Denom)
-	if err != nil {
-		return sdk.Dec{}, err
-	}
-	meTokenUSD, err := valueInUSD(balances.MetokenSupply.Amount, meTokenPrice.Price, meTokenPrice.Exponent)
+	meTokenUSD, err := valueInUSD(balances.MetokenSupply.Amount, indexPrices.Price, indexPrices.Exponent)
 	if err != nil {
 		return sdk.Dec{}, err
 	}

@@ -10,7 +10,7 @@ import (
 
 	types "github.com/cosmos/cosmos-sdk/types"
 	gomock "github.com/golang/mock/gomock"
-	ugov "github.com/umee-network/umee/v5/x/ugov"
+	ugov "github.com/umee-network/umee/v6/x/ugov"
 )
 
 // MockKeeper is a mock of Keeper interface.

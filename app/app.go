@@ -123,34 +123,35 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 
-	customante "github.com/umee-network/umee/v5/ante"
-	"github.com/umee-network/umee/v5/app/inflation"
-	"github.com/umee-network/umee/v5/swagger"
-	"github.com/umee-network/umee/v5/util/genmap"
-	"github.com/umee-network/umee/v5/x/incentive"
-	incentivekeeper "github.com/umee-network/umee/v5/x/incentive/keeper"
-	incentivemodule "github.com/umee-network/umee/v5/x/incentive/module"
-	"github.com/umee-network/umee/v5/x/leverage"
-	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/oracle"
-	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/ugov"
-	ugovkeeper "github.com/umee-network/umee/v5/x/ugov/keeper"
-	ugovmodule "github.com/umee-network/umee/v5/x/ugov/module"
+	customante "github.com/umee-network/umee/v6/ante"
+	"github.com/umee-network/umee/v6/app/inflation"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/swagger"
+	"github.com/umee-network/umee/v6/util/genmap"
+	"github.com/umee-network/umee/v6/x/incentive"
+	incentivekeeper "github.com/umee-network/umee/v6/x/incentive/keeper"
+	incentivemodule "github.com/umee-network/umee/v6/x/incentive/module"
+	"github.com/umee-network/umee/v6/x/leverage"
+	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/oracle"
+	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/ugov"
+	ugovkeeper "github.com/umee-network/umee/v6/x/ugov/keeper"
+	ugovmodule "github.com/umee-network/umee/v6/x/ugov/module"
 
 	// umee ibc-transfer and quota for ibc-transfer
-	uwasm "github.com/umee-network/umee/v5/app/wasm"
-	"github.com/umee-network/umee/v5/x/uibc"
-	uibcmodule "github.com/umee-network/umee/v5/x/uibc/module"
-	uibcoracle "github.com/umee-network/umee/v5/x/uibc/oracle"
-	uibcquota "github.com/umee-network/umee/v5/x/uibc/quota"
-	uibcquotakeeper "github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	uwasm "github.com/umee-network/umee/v6/app/wasm"
+	"github.com/umee-network/umee/v6/x/uibc"
+	uibcmodule "github.com/umee-network/umee/v6/x/uibc/module"
+	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
+	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
+	uibcquotakeeper "github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 
-	"github.com/umee-network/umee/v5/x/metoken"
-	metokenkeeper "github.com/umee-network/umee/v5/x/metoken/keeper"
-	metokenmodule "github.com/umee-network/umee/v5/x/metoken/module"
+	"github.com/umee-network/umee/v6/x/metoken"
+	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
+	metokenmodule "github.com/umee-network/umee/v6/x/metoken/module"
 )
 
 var (
@@ -201,7 +202,9 @@ func init() {
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
 		incentivemodule.AppModuleBasic{},
-		metokenmodule.AppModuleBasic{},
+	}
+	if Experimental {
+		moduleBasics = append(moduleBasics, metokenmodule.AppModuleBasic{})
 	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
@@ -225,7 +228,12 @@ func init() {
 		oracletypes.ModuleName: nil,
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
-		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
+	}
+
+	if Experimental {
+		maccPerms[metoken.ModuleName] = []string{
+			authtypes.Minter, authtypes.Burner,
+		}
 	}
 }
 
@@ -341,7 +349,10 @@ func New(
 		wasm.StoreKey,
 		incentive.StoreKey,
 		consensusparamstypes.StoreKey, crisistypes.StoreKey,
-		metoken.StoreKey,
+	}
+
+	if Experimental {
+		storeKeys = append(storeKeys, metoken.StoreKey)
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -473,12 +484,13 @@ func New(
 		app.StakingKeeper,
 		distrtypes.ModuleName,
 	)
+
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
-		app.GetSubspace(leveragetypes.ModuleName),
 		app.BankKeeper,
 		app.OracleKeeper,
+		app.UGovKeeperB.EmergencyGroup,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
 		authtypes.NewModuleAddress(metoken.ModuleName),
 	)
@@ -493,13 +505,15 @@ func New(
 	)
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
-	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
-		appCodec,
-		keys[metoken.StoreKey],
-		app.BankKeeper,
-		app.LeverageKeeper,
-		app.OracleKeeper,
-	)
+	if Experimental {
+		app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
+			appCodec,
+			keys[metoken.StoreKey],
+			app.BankKeeper,
+			app.LeverageKeeper,
+			app.OracleKeeper,
+		)
+	}
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
@@ -539,7 +553,7 @@ func New(
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquotakeeper.NewKeeperBuilder(
 		appCodec, keys[uibc.StoreKey],
-		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper),
+		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
 
 	/**********
@@ -716,7 +730,10 @@ func New(
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)),
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
-		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
+	}
+	if Experimental {
+		appModules = append(appModules, metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB))
+
 	}
 
 	app.mm = module.NewManager(appModules...)
@@ -754,9 +771,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
 	}
-
 	endBlockers := []string{
 		crisistypes.ModuleName,
 		oracletypes.ModuleName, // must be before gov and staking
@@ -773,7 +788,6 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -797,9 +811,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
 	}
-
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
@@ -814,7 +826,13 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
+	}
+
+	if Experimental {
+		beginBlockers = append(beginBlockers, metoken.ModuleName)
+		endBlockers = append(endBlockers, metoken.ModuleName)
+		initGenesis = append(initGenesis, metoken.ModuleName)
+		orderMigrations = append(orderMigrations, metoken.ModuleName)
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
@@ -828,7 +846,7 @@ func New(
 
 	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
 	// Make sure it's called after `app.mm` and `app.configurator` are set.
-	app.RegisterUpgradeHandlers(Experimental)
+	app.RegisterUpgradeHandlers()
 
 	autocliv1.RegisterQueryServer(app.GRPCQueryRouter(), runtimeservices.NewAutoCLIQueryService(app.mm.Modules))
 

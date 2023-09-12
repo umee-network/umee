@@ -34,7 +34,7 @@ import (
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
+	umeeapp "github.com/umee-network/umee/v6/app"
 )
 
 // GenesisState of the blockchain is represented here as a map of raw json

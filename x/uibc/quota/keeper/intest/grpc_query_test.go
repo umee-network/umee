@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 	"gotest.tools/v3/assert"
 )
 
@@ -24,11 +24,12 @@ func TestGRPCQueryParams(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		_, err := client.Params(ctx, &tc.req)
+		resp, err := client.Params(ctx, &tc.req)
 		if tc.errExpected {
 			assert.Error(t, err, "")
 		} else {
 			assert.NilError(t, err)
+			assert.DeepEqual(t, uibc.DefaultParams(), resp.Params)
 		}
 	}
 }

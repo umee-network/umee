@@ -8,8 +8,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v5/util/cli"
-	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v6/util/cli"
+	"github.com/umee-network/umee/v6/x/incentive"
 )
 
 // Flag constants
@@ -28,25 +28,25 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdQueryParams(),
-		GetCmdQueryAccountBonds(),
-		GetCmdQueryCurrentRates(),
-		GetCmdQueryActualRates(),
-		GetCmdQueryTotalBonded(),
-		GetCmdQueryTotalUnbonding(),
-		GetCmdQueryPendingRewards(),
-		GetCmdQueryUpcomingIncentivePrograms(),
-		GetCmdQueryOngoingIncentivePrograms(),
-		GetCmdQueryCompletedIncentivePrograms(),
-		GetCmdQueryIncentiveProgram(),
+		QueryParams(),
+		QueryAccountBonds(),
+		QueryCurrentRates(),
+		QueryActualRates(),
+		QueryTotalBonded(),
+		QueryTotalUnbonding(),
+		QueryPendingRewards(),
+		QueryUpcomingIncentivePrograms(),
+		QueryOngoingIncentivePrograms(),
+		QueryCompletedIncentivePrograms(),
+		QueryIncentiveProgram(),
 	)
 
 	return cmd
 }
 
-// GetCmdQueryParams creates a Cobra command to query for the x/incentive
+// QueryParams creates a Cobra command to query for the x/incentive
 // module parameters.
-func GetCmdQueryParams() *cobra.Command {
+func QueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,
@@ -67,8 +67,8 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryAccountBonds creates a Cobra command to query all bonds and unbondings associated with a single account.
-func GetCmdQueryAccountBonds() *cobra.Command {
+// QueryAccountBonds creates a Cobra command to query all bonds and unbondings associated with a single account.
+func QueryAccountBonds() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "account-bonds [address]",
 		Args:  cobra.ExactArgs(1),
@@ -90,8 +90,8 @@ func GetCmdQueryAccountBonds() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryPendingRewards creates a Cobra command to query the pending incentive rewards of a single account.
-func GetCmdQueryPendingRewards() *cobra.Command {
+// QueryPendingRewards creates a Cobra command to query the pending incentive rewards of a single account.
+func QueryPendingRewards() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pending-rewards [address]",
 		Args:  cobra.ExactArgs(1),
@@ -112,9 +112,9 @@ func GetCmdQueryPendingRewards() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCurrentRates creates a Cobra command to query current annual rewards for a reference amount
+// QueryCurrentRates creates a Cobra command to query current annual rewards for a reference amount
 // of a given bonded uToken.
-func GetCmdQueryCurrentRates() *cobra.Command {
+func QueryCurrentRates() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "current-rates [denom]",
 		Args:  cobra.RangeArgs(0, 1),
@@ -139,9 +139,9 @@ func GetCmdQueryCurrentRates() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryActualRates creates a Cobra command to query current annual rewards for a reference amount
+// QueryActualRates creates a Cobra command to query current annual rewards for a reference amount
 // of a given bonded uToken.
-func GetCmdQueryActualRates() *cobra.Command {
+func QueryActualRates() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "actual-rates [denom]",
 		Args:  cobra.RangeArgs(0, 1),
@@ -166,8 +166,8 @@ func GetCmdQueryActualRates() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryTotalBonded creates a Cobra command to query bonded tokens across all users.
-func GetCmdQueryTotalBonded() *cobra.Command {
+// QueryTotalBonded creates a Cobra command to query bonded tokens across all users.
+func QueryTotalBonded() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "total-bonded [denom]",
 		Args:  cobra.RangeArgs(0, 1),
@@ -192,8 +192,8 @@ func GetCmdQueryTotalBonded() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryTotalUnbonding creates a Cobra command to query unbonding tokens across all users.
-func GetCmdQueryTotalUnbonding() *cobra.Command {
+// QueryTotalUnbonding creates a Cobra command to query unbonding tokens across all users.
+func QueryTotalUnbonding() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "total-unbonding [denom]",
 		Args:  cobra.RangeArgs(0, 1),
@@ -218,9 +218,9 @@ func GetCmdQueryTotalUnbonding() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryUpcomingIncentivePrograms creates a Cobra command to query for all upcoming
+// QueryUpcomingIncentivePrograms creates a Cobra command to query for all upcoming
 // incentive programs.
-func GetCmdQueryUpcomingIncentivePrograms() *cobra.Command {
+func QueryUpcomingIncentivePrograms() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "upcoming",
 		Args:  cobra.NoArgs,
@@ -242,9 +242,9 @@ func GetCmdQueryUpcomingIncentivePrograms() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryOngoingIncentivePrograms creates a Cobra command to query for all ongoing
+// QueryOngoingIncentivePrograms creates a Cobra command to query for all ongoing
 // incentive programs.
-func GetCmdQueryOngoingIncentivePrograms() *cobra.Command {
+func QueryOngoingIncentivePrograms() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ongoing",
 		Args:  cobra.NoArgs,
@@ -266,9 +266,9 @@ func GetCmdQueryOngoingIncentivePrograms() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryCompletedIncentivePrograms creates a Cobra command to query for all completed
+// QueryCompletedIncentivePrograms creates a Cobra command to query for all completed
 // incentive programs.
-func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
+func QueryCompletedIncentivePrograms() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "completed",
 		Args:  cobra.NoArgs,
@@ -291,9 +291,9 @@ func GetCmdQueryCompletedIncentivePrograms() *cobra.Command {
 	return cmd
 }
 
-// GetCmdQueryIncentiveProgram creates a Cobra command to query a single incentive program
+// QueryIncentiveProgram creates a Cobra command to query a single incentive program
 // by its ID.
-func GetCmdQueryIncentiveProgram() *cobra.Command {
+func QueryIncentiveProgram() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "program [id]",
 		Args:  cobra.ExactArgs(1),

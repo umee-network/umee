@@ -9,7 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/oracle module.
@@ -23,17 +23,17 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdDelegateFeedConsent(),
-		GetCmdAggregateExchangeRatePrevote(),
-		GetCmdAggregateExchangeRateVote(),
+		DelegateFeedConsent(),
+		AggregateExchangeRatePrevote(),
+		AggregateExchangeRateVote(),
 	)
 
 	return cmd
 }
 
-// GetCmdDelegateFeedConsent creates a Cobra command to generate or
+// DelegateFeedConsent creates a Cobra command to generate or
 // broadcast a transaction with a MsgDelegateFeedConsent message.
-func GetCmdDelegateFeedConsent() *cobra.Command {
+func DelegateFeedConsent() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delegate-feed-consent [operator] [feeder]",
 		Args:  cobra.ExactArgs(2),
@@ -68,9 +68,9 @@ func GetCmdDelegateFeedConsent() *cobra.Command {
 	return cmd
 }
 
-// GetCmdAggregateExchangeRatePrevote creates a Cobra command to generate or
+// AggregateExchangeRatePrevote creates a Cobra command to generate or
 // broadcast a transaction with a MsgAggregateExchangeRatePrevote message.
-func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
+func AggregateExchangeRatePrevote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "exchange-rate-prevote [hash] [validator-address]",
 		Args:  cobra.MinimumNArgs(1),
@@ -117,9 +117,9 @@ func GetCmdAggregateExchangeRatePrevote() *cobra.Command {
 	return cmd
 }
 
-// GetCmdAggregateExchangeRateVote creates a Cobra command to generate or
+// AggregateExchangeRateVote creates a Cobra command to generate or
 // broadcast a transaction with a NewMsgAggregateExchangeRateVote message.
-func GetCmdAggregateExchangeRateVote() *cobra.Command {
+func AggregateExchangeRateVote() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "exchange-rate-vote [salt] [exchange-rates] [validator-address]",
 		Args:  cobra.MinimumNArgs(2),

@@ -11,14 +11,14 @@ import (
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/app/inflation"
-	mocks "github.com/umee-network/umee/v5/app/inflation/mocks"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/util/bpmath"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/ugov"
-	ugovmocks "github.com/umee-network/umee/v5/x/ugov/mocks"
+	"github.com/umee-network/umee/v6/app/inflation"
+	mocks "github.com/umee-network/umee/v6/app/inflation/mocks"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/ugov"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
 func TestAdjustInflation(t *testing.T) {
@@ -217,7 +217,7 @@ func TestInflationRate(t *testing.T) {
 
 			calc := inflation.Calculator{
 				MintKeeper:  mockMintKeeper,
-				UgovKeeperB: ugovmocks.NewUgovParamsBuilder(mockUGovKeeper),
+				UgovKeeperB: ugovmocks.NewParamsBuilder(mockUGovKeeper),
 			}
 			result := calc.InflationRate(test.ctx(), test.minter, test.mintParams(mintParams), test.bondedRatio)
 
@@ -226,4 +226,67 @@ func TestInflationRate(t *testing.T) {
 			ctrl.Finish()
 		})
 	}
+}
+
+func TestNextInflationRate(t *testing.T) {
+	minter := minttypes.Minter{
+		Inflation: sdk.NewDecWithPrec(0, 2),
+	}
+
+	mintParams := minttypes.DefaultParams()
+	mintParams.InflationMax = sdk.NewDecWithPrec(40, 2)
+	mintParams.InflationMin = sdk.NewDecWithPrec(1, 2)
+	mintParams.InflationRateChange = sdk.NewDec(1)
+	mintParams.BlocksPerYear = 100
+	mintParams.GoalBonded = sdk.NewDec(33)
+
+	bondedRatio := sdk.NewDec(20)
+
+	// default inflation rate (1 year inflation rate change speed )
+	ir := minter.NextInflationRate(mintParams, bondedRatio)
+	assert.DeepEqual(t, mintParams.InflationMin, ir)
+
+	// changing inflation rate speed from 1 year to 6 months
+	mintParams.BlocksPerYear = mintParams.BlocksPerYear * 2
+	nir := minter.NextInflationRate(mintParams, bondedRatio)
+
+	assert.DeepEqual(t, mintParams.InflationMin, nir)
+}
+
+func TestInflationRateChange(t *testing.T) {
+	minter := minttypes.Minter{
+		Inflation: sdk.NewDecWithPrec(0, 2),
+	}
+
+	mintParams := minttypes.DefaultParams()
+	mintParams.InflationMax = sdk.NewDecWithPrec(5, 1) // 0.5
+	mintParams.InflationMin = sdk.NewDecWithPrec(2, 2) // 0.02
+	mintParams.InflationRateChange = sdk.NewDec(1)     // will be overwritten in the `NextInflationRate`
+	mintParams.BlocksPerYear = 100
+
+	bondedRatio := sdk.NewDecWithPrec(1, 2)
+	// after 50 blocks (half the year) inflation will be updated
+	// every block, inflation = prevInflation + currentInflationRateChange
+	var ir sdk.Dec
+	ir = minter.NextInflationRate(mintParams, bondedRatio)
+	// at initial based on bondedRatio and GoalBonded , the inflation will be at mintParams.InflationMin
+	assert.Equal(t, ir, mintParams.InflationMin)
+	for i := 0; i < 50; i++ {
+		ir = minter.NextInflationRate(mintParams, bondedRatio)
+		minter.Inflation = ir
+	}
+	// current inflation after the 50 blocks will be increased to MaxInflationRate
+	nir := minter.NextInflationRate(mintParams, bondedRatio)
+	assert.Equal(t, nir, mintParams.InflationMax)
+
+	// current bonded ratio =1 then inflation rate change per year will be negative
+	// so after the 50 blocks inflation will be minimum
+	minter.Inflation = sdk.NewDecWithPrec(2, 2)
+	bondedRatio = sdk.NewDec(1)
+	for i := 0; i < 50; i++ {
+		ir = minter.NextInflationRate(mintParams, bondedRatio)
+		minter.Inflation = ir
+	}
+	// it should be minimum , because inflationRateChangePerYear will be negative
+	assert.Equal(t, ir, mintParams.InflationMin)
 }

@@ -4,7 +4,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // BankKeeper defines the expected x/bank keeper interface.

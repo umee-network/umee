@@ -4,18 +4,18 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	itestsuite "github.com/umee-network/umee/v5/tests/cli"
-	"github.com/umee-network/umee/v5/x/incentive"
-	"github.com/umee-network/umee/v5/x/incentive/client/cli"
-	leveragecli "github.com/umee-network/umee/v5/x/leverage/client/cli"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	itestsuite "github.com/umee-network/umee/v6/tests/cli"
+	"github.com/umee-network/umee/v6/x/incentive"
+	"github.com/umee-network/umee/v6/x/incentive/client/cli"
+	leveragecli "github.com/umee-network/umee/v6/x/leverage/client/cli"
 )
 
 func (s *IntegrationTests) TestInvalidQueries() {
 	invalidQueries := []itestsuite.TestQuery{
 		{
 			Name:    "query pending rewards (invalid address)",
-			Command: cli.GetCmdQueryPendingRewards(),
+			Command: cli.QueryPendingRewards(),
 			Args: []string{
 				"xyz",
 			},
@@ -25,7 +25,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query current rates (not uToken)",
-			Command: cli.GetCmdQueryCurrentRates(),
+			Command: cli.QueryCurrentRates(),
 			Args: []string{
 				"uumee",
 			},
@@ -35,7 +35,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query actual rates (not uToken)",
-			Command: cli.GetCmdQueryActualRates(),
+			Command: cli.QueryActualRates(),
 			Args: []string{
 				"uumee",
 			},
@@ -54,7 +54,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 	zeroQueries := []itestsuite.TestQuery{
 		{
 			Name:     "query params",
-			Command:  cli.GetCmdQueryParams(),
+			Command:  cli.QueryParams(),
 			Args:     []string{},
 			Response: &incentive.QueryParamsResponse{},
 			ExpectedResponse: &incentive.QueryParamsResponse{
@@ -64,7 +64,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:     "query upcoming incentive programs",
-			Command:  cli.GetCmdQueryUpcomingIncentivePrograms(),
+			Command:  cli.QueryUpcomingIncentivePrograms(),
 			Args:     []string{},
 			Response: &incentive.QueryUpcomingIncentiveProgramsResponse{},
 			ExpectedResponse: &incentive.QueryUpcomingIncentiveProgramsResponse{
@@ -74,7 +74,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:     "query ongoing incentive programs",
-			Command:  cli.GetCmdQueryUpcomingIncentivePrograms(),
+			Command:  cli.QueryUpcomingIncentivePrograms(),
 			Args:     []string{},
 			Response: &incentive.QueryOngoingIncentiveProgramsResponse{},
 			ExpectedResponse: &incentive.QueryOngoingIncentiveProgramsResponse{
@@ -84,7 +84,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:     "query completed incentive programs",
-			Command:  cli.GetCmdQueryCompletedIncentivePrograms(),
+			Command:  cli.QueryCompletedIncentivePrograms(),
 			Args:     []string{},
 			Response: &incentive.QueryCompletedIncentiveProgramsResponse{},
 			ExpectedResponse: &incentive.QueryCompletedIncentiveProgramsResponse{
@@ -94,7 +94,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:     "query total bonded - no denom",
-			Command:  cli.GetCmdQueryTotalBonded(),
+			Command:  cli.QueryTotalBonded(),
 			Args:     []string{},
 			Response: &incentive.QueryTotalBondedResponse{},
 			ExpectedResponse: &incentive.QueryTotalBondedResponse{
@@ -103,7 +103,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:    "query total bonded - specific denom",
-			Command: cli.GetCmdQueryTotalBonded(),
+			Command: cli.QueryTotalBonded(),
 			Args: []string{
 				"u/" + appparams.BondDenom,
 			},
@@ -114,7 +114,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:     "query total unbonding - no denom",
-			Command:  cli.GetCmdQueryTotalUnbonding(),
+			Command:  cli.QueryTotalUnbonding(),
 			Args:     []string{},
 			Response: &incentive.QueryTotalUnbondingResponse{},
 			ExpectedResponse: &incentive.QueryTotalUnbondingResponse{
@@ -123,7 +123,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:    "query total unbonding - specific denom",
-			Command: cli.GetCmdQueryTotalUnbonding(),
+			Command: cli.QueryTotalUnbonding(),
 			Args: []string{
 				"u/" + appparams.BondDenom,
 			},
@@ -134,7 +134,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:    "query current rates (zero)",
-			Command: cli.GetCmdQueryCurrentRates(),
+			Command: cli.QueryCurrentRates(),
 			Args: []string{
 				"u/" + appparams.BondDenom,
 			},
@@ -147,7 +147,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:    "query actual rates (zero)",
-			Command: cli.GetCmdQueryActualRates(),
+			Command: cli.QueryActualRates(),
 			Args: []string{
 				"u/" + appparams.BondDenom,
 			},
@@ -159,7 +159,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 		},
 		{
 			Name:    "query pending rewards (zero)",
-			Command: cli.GetCmdQueryPendingRewards(),
+			Command: cli.QueryPendingRewards(),
 			Args: []string{
 				val.Address.String(),
 			},
@@ -173,7 +173,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 
 	supplyCollateral := itestsuite.TestTransaction{
 		Name:    "(setup) supply collateral",
-		Command: leveragecli.GetCmdSupplyCollateral(),
+		Command: leveragecli.SupplyCollateral(),
 		Args: []string{
 			"300uumee",
 		},
@@ -182,7 +182,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 
 	bond := itestsuite.TestTransaction{
 		Name:    "bond",
-		Command: cli.GetCmdBond(),
+		Command: cli.Bond(),
 		Args: []string{
 			"300u/uumee",
 		},
@@ -191,7 +191,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 
 	beingUnbonding := itestsuite.TestTransaction{
 		Name:    "begin unbonding",
-		Command: cli.GetCmdBeginUnbonding(),
+		Command: cli.BeginUnbonding(),
 		Args: []string{
 			"100u/uumee",
 		},
@@ -200,7 +200,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 
 	emergencyUnbond := itestsuite.TestTransaction{
 		Name:    "emergency unbond",
-		Command: cli.GetCmdEmergencyUnbond(),
+		Command: cli.EmergencyUnbond(),
 		Args: []string{
 			"100u/uumee",
 		},
@@ -209,14 +209,14 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 
 	claim := itestsuite.TestTransaction{
 		Name:        "claim",
-		Command:     cli.GetCmdClaim(),
+		Command:     cli.Claim(),
 		Args:        []string{},
 		ExpectedErr: nil,
 	}
 
 	sponsor := itestsuite.TestTransaction{
 		Name:        "sponsor (program does not exist)",
-		Command:     cli.GetCmdSponsor(),
+		Command:     cli.Sponsor(),
 		Args:        []string{"1"},
 		ExpectedErr: sdkerrors.ErrNotFound,
 	}

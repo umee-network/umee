@@ -9,7 +9,7 @@ import "google/protobuf/timestamp.proto";
 
 import "umee/ugov/v1/ugov.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/ugov";
+option go_package = "github.com/umee-network/umee/v6/x/ugov";
 
 option (gogoproto.goproto_getters_all) = false;
 

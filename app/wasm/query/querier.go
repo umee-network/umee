@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	// stargate client
-	"github.com/umee-network/umee/v5/client"
+	"github.com/umee-network/umee/v6/client"
 )
 
 // StargateQuerier dispatches whitelisted stargate queries

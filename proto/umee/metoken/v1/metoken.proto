@@ -3,7 +3,7 @@ package umee.metoken.v1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/metoken";
+option go_package = "github.com/umee-network/umee/v6/x/metoken";
 
 // Params defines the parameters for the metoken module.
 message Params {
@@ -104,8 +104,8 @@ message AcceptedAsset {
   ];
 }
 
-// Price is used to inform meToken price and exponent.
-message Price {
+// IndexPrices provides meToken price related index information.
+message IndexPrices {
   option (gogoproto.equal) = true;
 
   // meToken denom.
@@ -120,4 +120,37 @@ message Price {
   // Exponent is the power of ten by which to multiply, in order to convert
   // an amount of the meToken for the exchange operations.
   uint32 exponent = 3;
+
+  repeated AssetPrice assets = 4 [(gogoproto.nullable) = false];
+}
+
+// AssetPrice information related to the index operations.
+message AssetPrice {
+  option (gogoproto.equal) = true;
+
+  string base_denom = 1;
+
+  string symbol_denom = 2;
+
+  // Price in USD of one unit of asset, expressed in decimals.
+  string price = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // Exponent is the power of ten by which to multiply, in order to convert
+  // an amount of the asset for the exchange operations.
+  uint32 exponent = 4;
+
+  // SwapRate used for exchange calculations asset -> meToken.
+  string swap_rate = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // RedeemRate used for exchange calculations meToken -> asset.
+  string redeem_rate = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }

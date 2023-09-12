@@ -10,9 +10,23 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 Highlights:
 
-- TODO
+- TODO: special assets, new Gov messages
+- New [inflation mechanism](./docs/design_docs/012-umee-inflation-v2.md).
 
-[v6.0.0 CHANGELOG](https://github.com/umee-network/umee/blob/v6.0.0/CHANGELOG.md).
+### New Inflation Mechanism
+
+The Upgrade Handler sets the following values to the Umee `x/ugov` Inflation Cycle parameters:
+
+- `max_supply = 21e18uumee` (21 billions UMEE)
+- `inflation_cycle = time.Hour * 24 * 365 * 2` (2 years)
+- `inflation_reduction_rate = 2500 basis points` (25%)
+
+The new Inflation Cycle will start on 2023-10-15 15:00 UTC. This will mark the first inflation reduction from the current rates:
+
+- `inflation_min` 7% → 5.25%
+- `inflation_max` 14% → 10.5%
+
+The x/staking Bonded Goal stays the same: 33.00%.
 
 ### Validators
 

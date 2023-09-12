@@ -16,11 +16,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/staking/testutil"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/decmath"
-	"github.com/umee-network/umee/v5/x/oracle"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/decmath"
+	"github.com/umee-network/umee/v6/x/oracle"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 const (

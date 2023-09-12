@@ -1,9 +1,9 @@
 package keeper_test
 
 import (
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/keeper"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/keeper"
 )
 
 func (s *IntegrationTestSuite) TestReserveAmountInvariant() {

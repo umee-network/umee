@@ -7,16 +7,16 @@ import (
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	itestsuite "github.com/umee-network/umee/v5/tests/cli"
-	"github.com/umee-network/umee/v5/x/uibc"
-	"github.com/umee-network/umee/v5/x/uibc/client/cli"
+	itestsuite "github.com/umee-network/umee/v6/tests/cli"
+	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/client/cli"
 )
 
 func (s *IntegrationTests) TestQueryParams(_ *testing.T) {
 	queries := []itestsuite.TestQuery{
 		{
 			Name:    "Query params",
-			Command: cli.GetCmdQueryParams(),
+			Command: cli.QueryParams(),
 			Args: []string{
 				fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 			},

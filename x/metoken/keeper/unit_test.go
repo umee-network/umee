@@ -3,9 +3,9 @@ package keeper
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 
 	"github.com/stretchr/testify/require"
 
@@ -13,7 +13,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
+	"github.com/umee-network/umee/v6/tests/tsdk"
 )
 
 // initSimpleKeeper creates a simple keeper without external dependencies.

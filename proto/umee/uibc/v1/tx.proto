@@ -7,7 +7,7 @@ import "cosmos/msg/v1/msg.proto";
 import "cosmos_proto/cosmos.proto";
 import "umee/uibc/v1/quota.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/uibc";
+option go_package = "github.com/umee-network/umee/v6/x/uibc";
 
 option (gogoproto.goproto_getters_all) = false;
 option (gogoproto.messagename_all)     = true;
@@ -28,12 +28,16 @@ message MsgGovUpdateQuota {
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
 
-  // authority is the address of the governance account.
+  // field 2 (title) is removed. Proposal metadata should be used instead.
+  reserved 2;
+
+  // authority is the address of the governance account or the Emergency Group.
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // Deprecated: use proposal metadata instead.
-  string title = 2 [deprecated = true];
-  // Deprecated: use proposal metadata instead.
-  string description = 3 [deprecated = true];
+
+  // description motivating the change. Should be used only when executing by the
+  // Emergency Group. Otherwise the x/gov Proposal metadata should be used.
+  string description = 3;
+
   // total quota defines the total outflow of ibc-transfer in USD
   string total = 4 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
@@ -63,12 +67,17 @@ message MsgGovSetIBCStatus {
   option (gogoproto.goproto_getters)  = false;
   option (gogoproto.goproto_stringer) = false;
   option (cosmos.msg.v1.signer)       = "authority";
-  // authority is the address of the governance account.
+
+  // field 2 (title) is removed. Proposal metadata should be used instead.
+  reserved 2;
+
+  // authority is the address of the governance account or the Emergency Group.
   string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-  // Deprecated: use proposal metadata instead.
-  string title = 2 [deprecated = true];
-  // Deprecated: use proposal metadata instead.
-  string description = 3 [deprecated = true];
+
+  // description motivating the change. Should be used only when executing by the
+  // Emergency Group. Otherwise the x/gov Proposal metadata should be used.
+  string description = 3;
+
   // ibc_status defines status for ibc transfers
   IBCTransferStatus ibc_status = 4;
 }

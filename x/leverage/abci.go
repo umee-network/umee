@@ -4,8 +4,8 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/x/leverage/keeper"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/x/leverage/keeper"
 )
 
 // EndBlocker implements EndBlock for the x/leverage module.

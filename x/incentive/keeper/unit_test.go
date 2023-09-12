@@ -13,9 +13,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
-	"github.com/umee-network/umee/v5/tests/tsdk"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/incentive"
 )
 
 // creates keeper with mock leverage keeper
@@ -132,7 +132,6 @@ func (k *testKeeper) initCommunityFund(funds ...sdk.Coin) {
 // and requires no errors. Use when setting up incentive scenarios.
 func (k *testKeeper) addIncentiveProgram(uDenom string, start, duration int64, reward sdk.Coin, fromCommunity bool,
 ) {
-	// govAccAddr := s.app.GovKeeper.GetGovernanceAccount(ctx).GetAddress().String()
 	govAccAddr := "govAcct"
 
 	program := incentive.IncentiveProgram{

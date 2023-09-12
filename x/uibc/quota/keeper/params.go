@@ -1,10 +1,11 @@
 package keeper
 
 import (
+	"errors"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // SetParams sets the x/uibc module's parameters.
@@ -31,13 +32,34 @@ func (k Keeper) GetParams() (params uibc.Params) {
 
 // UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
 func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom sdk.Dec, quotaDuration time.Duration,
-) error {
-	params := k.GetParams()
-	params.TotalQuota = totalQuota
-	params.QuotaDuration = quotaDuration
-	params.TokenQuota = quotaPerDenom
+	byEmergencyGroup bool) error {
 
-	return k.SetParams(params)
+	pOld := k.GetParams()
+	pNew := pOld
+	pNew.TotalQuota = totalQuota
+	pNew.QuotaDuration = quotaDuration
+	pNew.TokenQuota = quotaPerDenom
+	if byEmergencyGroup {
+		if err := validateEmergencyQuotaParamsUpdate(pOld, pNew); err != nil {
+			return err
+		}
+	}
+
+	return k.SetParams(pNew)
+}
+
+func validateEmergencyQuotaParamsUpdate(pOld, pNew uibc.Params) error {
+	var errs []error
+	if pNew.TotalQuota.GT(pOld.TotalQuota) || pNew.TokenQuota.GT(pOld.TokenQuota) {
+		errs = append(errs, errors.New("emergency group can't increase TotalQuota nor TokenQuota"))
+	}
+	if pNew.QuotaDuration != pOld.QuotaDuration {
+		errs = append(errs, errors.New("emergency group can't change QuotaDuration"))
+	}
+	if len(errs) != 0 {
+		return errors.Join(errs...)
+	}
+	return nil
 }
 
 // SetIBCStatus update the ibc-transfer status in module params.

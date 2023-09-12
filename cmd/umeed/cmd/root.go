@@ -6,7 +6,6 @@ import (
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/spf13/cobra"
-	appparams "github.com/umee-network/umee/v5/app/params"
 
 	rosettacmd "cosmossdk.io/tools/rosetta/cmd"
 
@@ -26,8 +25,9 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
-	"github.com/umee-network/umee/v5/x/leverage"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/x/leverage"
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.

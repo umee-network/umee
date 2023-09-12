@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/suite"
 
-	setup "github.com/umee-network/umee/v5/tests/e2e/setup"
-	"github.com/umee-network/umee/v5/tests/grpc"
+	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
+	"github.com/umee-network/umee/v6/tests/grpc"
 )
 
 type E2ETest struct {

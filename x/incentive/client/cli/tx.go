@@ -10,7 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/spf13/cobra"
 
-	"github.com/umee-network/umee/v5/x/incentive"
+	"github.com/umee-network/umee/v6/x/incentive"
 )
 
 // GetTxCmd returns the CLI transaction commands for the x/incentive module.
@@ -24,19 +24,19 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdClaim(),
-		GetCmdBond(),
-		GetCmdBeginUnbonding(),
-		GetCmdEmergencyUnbond(),
-		GetCmdSponsor(),
+		Claim(),
+		Bond(),
+		BeginUnbonding(),
+		EmergencyUnbond(),
+		Sponsor(),
 	)
 
 	return cmd
 }
 
-// GetCmdClaim creates a Cobra command to generate or broadcast a
+// Claim creates a Cobra command to generate or broadcast a
 // transaction with a MsgClaim message.
-func GetCmdClaim() *cobra.Command {
+func Claim() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "claim",
 		Args:  cobra.ExactArgs(0),
@@ -59,7 +59,7 @@ func GetCmdClaim() *cobra.Command {
 }
 
 // transaction with a MsgBond message.
-func GetCmdBond() *cobra.Command {
+func Bond() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "bond [utokens]",
 		Args:  cobra.ExactArgs(1),
@@ -87,7 +87,7 @@ func GetCmdBond() *cobra.Command {
 }
 
 // transaction with a MsgBeginUnbonding message.
-func GetCmdBeginUnbonding() *cobra.Command {
+func BeginUnbonding() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "begin-unbonding [utokens]",
 		Args:  cobra.ExactArgs(1),
@@ -115,7 +115,7 @@ func GetCmdBeginUnbonding() *cobra.Command {
 }
 
 // transaction with a MsgEmergencyUnbond message.
-func GetCmdEmergencyUnbond() *cobra.Command {
+func EmergencyUnbond() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "emergency-unbond [utokens]",
 		Args:  cobra.ExactArgs(1),
@@ -143,7 +143,7 @@ func GetCmdEmergencyUnbond() *cobra.Command {
 }
 
 // transaction with a MsgSponsor message.
-func GetCmdSponsor() *cobra.Command {
+func Sponsor() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "sponsor [program-id]",
 		Args:  cobra.ExactArgs(1),

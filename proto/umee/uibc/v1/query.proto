@@ -7,7 +7,7 @@ import "cosmos_proto/cosmos.proto";
 import "umee/uibc/v1/quota.proto";
 import "cosmos/base/v1beta1/coin.proto";
 
-option go_package = "github.com/umee-network/umee/v5/x/uibc";
+option go_package = "github.com/umee-network/umee/v6/x/uibc";
 
 option (gogoproto.goproto_getters_all) = false;
 

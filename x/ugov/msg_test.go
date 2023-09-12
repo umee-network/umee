@@ -5,20 +5,18 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/tests/accs"
-	"github.com/umee-network/umee/v5/util/bpmath"
-	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v6/tests/accs"
+	"github.com/umee-network/umee/v6/util/bpmath"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/coin"
 )
-
-var govAddr = authtypes.NewModuleAddress("gov").String()
 
 func validMsgGovUpdateMinGasPrice() MsgGovUpdateMinGasPrice {
 	return MsgGovUpdateMinGasPrice{
-		Authority:   govAddr,
+		Authority:   checkers.GovModuleAddr,
 		MinGasPrice: coin.Atom1_25dec,
 	}
 }
@@ -54,7 +52,7 @@ func TestMsgGovUpdateMinGasPrice(t *testing.T) {
 
 func validMsgGovSetEmergencyGroup() MsgGovSetEmergencyGroup {
 	return MsgGovSetEmergencyGroup{
-		Authority:      govAddr,
+		Authority:      checkers.GovModuleAddr,
 		EmergencyGroup: accs.Alice.String(),
 	}
 }
@@ -81,7 +79,7 @@ func TestMsgGovSetEmergencyGroup(t *testing.T) {
 
 func validMsgGovUpdateInflationParams() MsgGovUpdateInflationParams {
 	return MsgGovUpdateInflationParams{
-		Authority: govAddr,
+		Authority: checkers.GovModuleAddr,
 		Params:    DefaultInflationParams(),
 	}
 }
@@ -99,7 +97,7 @@ func TestMsgGovUpdateInflationParams(t *testing.T) {
 	msg.Authority = "umee1yesmdu06f7strl67kjvg2w7t5kacc"
 	assert.ErrorIs(t, msg.ValidateBasic(), govtypes.ErrInvalidSigner, "must fail on a non gov account")
 	msg.Params.InflationReductionRate = bpmath.FixedBP(10)
-	assert.ErrorContains(t, msg.Params.Validate(), "inflation reduction must be between 100bp to 10'000bp")
+	assert.ErrorContains(t, msg.Params.Validate(), "inflation reduction must be between 100bp and 10'000bp")
 	msg.Params.MaxSupply = coin.Negative1("test")
 	assert.ErrorContains(t, msg.Params.Validate(), "max_supply must be positive")
 }

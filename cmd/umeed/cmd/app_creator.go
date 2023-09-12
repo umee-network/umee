@@ -13,7 +13,6 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cast"
-	appparams "github.com/umee-network/umee/v5/app/params"
 
 	tmtypes "github.com/cometbft/cometbft/types"
 
@@ -28,8 +27,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 
-	"github.com/umee-network/umee/v5/ante"
-	umeeapp "github.com/umee-network/umee/v5/app"
+	"github.com/umee-network/umee/v6/ante"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	appparams "github.com/umee-network/umee/v6/app/params"
 )
 
 type appCreator struct {

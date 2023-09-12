@@ -8,8 +8,8 @@ import (
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 
 	"github.com/rs/zerolog"
-	"github.com/umee-network/umee/v5/sdkclient/query"
-	"github.com/umee-network/umee/v5/sdkclient/tx"
+	"github.com/umee-network/umee/v6/sdkclient/query"
+	"github.com/umee-network/umee/v6/sdkclient/tx"
 
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )

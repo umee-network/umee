@@ -1,7 +1,7 @@
 package store
 
 import (
-	"github.com/umee-network/umee/v5/util"
+	"github.com/umee-network/umee/v6/util"
 
 	db "github.com/cometbft/cometbft-db"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"

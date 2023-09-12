@@ -3,7 +3,7 @@ package coin
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
+	appparams "github.com/umee-network/umee/v6/app/params"
 )
 
 const umee = appparams.BondDenom
@@ -47,7 +47,7 @@ func UmeeDec(amount string) sdk.DecCoin {
 	return Dec(appparams.BondDenom, amount)
 }
 
-// Utoken creates a uToken DecCoin.
+// Utoken creates a uToken Coin.
 func Utoken(denom string, amount int64) sdk.Coin {
 	return New(ToUTokenDenom(denom), amount)
 }

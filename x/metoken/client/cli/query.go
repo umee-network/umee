@@ -7,10 +7,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
-	"github.com/umee-network/umee/v5/util/cli"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/util/cli"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // GetQueryCmd returns the CLI query commands for the x/metoken module.
@@ -24,19 +22,19 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdQueryParams(),
-		GetCmdIndexes(),
-		GetCmdIndexBalances(),
-		GetCmdSwapFee(),
-		GetCmdRedeemFee(),
-		GetCmdIndexPrice(),
+		QueryParams(),
+		Indexes(),
+		IndexBalances(),
+		SwapFee(),
+		RedeemFee(),
+		IndexPrice(),
 	)
 
 	return cmd
 }
 
-// GetCmdQueryParams creates a Cobra command to query for the x/metoken module parameters.
-func GetCmdQueryParams() *cobra.Command {
+// QueryParams creates a Cobra command to query for the x/metoken module parameters.
+func QueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,
@@ -57,9 +55,9 @@ func GetCmdQueryParams() *cobra.Command {
 	return cmd
 }
 
-// GetCmdIndexes creates a Cobra command to query for the x/metoken module registered Indexes.
+// Indexes creates a Cobra command to query for the x/metoken module registered Indexes.
 // metoken_denom is optional, if it isn't provided then all the indexes will be returned.
-func GetCmdIndexes() *cobra.Command {
+func Indexes() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "indexes [metoken_denom]",
 		Args: cobra.MaximumNArgs(1),
@@ -86,10 +84,10 @@ func GetCmdIndexes() *cobra.Command {
 	return cmd
 }
 
-// GetCmdSwapFee creates a Cobra command to query for the SwapFee
+// SwapFee creates a Cobra command to query for the SwapFee
 // Both arguments are required:
 // coin: the coin that is taken as base for the fee calculation.
-func GetCmdSwapFee() *cobra.Command {
+func SwapFee() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "swap-fee [coin] [metoken_denom]",
 		Args:  cobra.ExactArgs(2),
@@ -103,11 +101,7 @@ func GetCmdSwapFee() *cobra.Command {
 			queryClient := metoken.NewQueryClient(clientCtx)
 			queryReq := metoken.QuerySwapFee{}
 
-			asset, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
-			}
-			queryReq.Asset = asset
+			queryReq.Asset = args[0]
 			queryReq.MetokenDenom = args[1]
 
 			resp, err := queryClient.SwapFee(cmd.Context(), &queryReq)
@@ -119,10 +113,10 @@ func GetCmdSwapFee() *cobra.Command {
 	return cmd
 }
 
-// GetCmdRedeemFee creates a Cobra command to query for the RedeemFee
+// RedeemFee creates a Cobra command to query for the RedeemFee
 // Both arguments are required:
 // metoken: the meToken coin that is taken as base for the fee calculation.
-func GetCmdRedeemFee() *cobra.Command {
+func RedeemFee() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "redeem-fee [metoken] [asset_denom]",
 		Args:  cobra.ExactArgs(2),
@@ -136,11 +130,7 @@ func GetCmdRedeemFee() *cobra.Command {
 			queryClient := metoken.NewQueryClient(clientCtx)
 			queryReq := metoken.QueryRedeemFee{}
 
-			metoken, err := sdk.ParseCoinNormalized(args[0])
-			if err != nil {
-				return err
-			}
-			queryReq.Metoken = metoken
+			queryReq.Metoken = args[0]
 			queryReq.AssetDenom = args[1]
 
 			resp, err := queryClient.RedeemFee(cmd.Context(), &queryReq)
@@ -152,9 +142,9 @@ func GetCmdRedeemFee() *cobra.Command {
 	return cmd
 }
 
-// GetCmdIndexBalances creates a Cobra command to query for the x/metoken module Indexes assets balances
+// IndexBalances creates a Cobra command to query for the x/metoken module Indexes assets balances
 // metoken_denom is optional, if it isn't provided then all the balances will be returned.
-func GetCmdIndexBalances() *cobra.Command {
+func IndexBalances() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "index-balance [metoken_denom]",
 		Args: cobra.MaximumNArgs(1),
@@ -180,9 +170,9 @@ func GetCmdIndexBalances() *cobra.Command {
 	return cmd
 }
 
-// GetCmdIndexPrice creates a Cobra command to query for the x/metoken module Index Price.
+// IndexPrice creates a Cobra command to query for the x/metoken module Index Prices.
 // metoken_denom is optional, if it isn't provided then prices for all the registered indexes will be returned.
-func GetCmdIndexPrice() *cobra.Command {
+func IndexPrice() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "index-price [metoken_denom]",
 		Args: cobra.MaximumNArgs(1),
@@ -195,11 +185,11 @@ func GetCmdIndexPrice() *cobra.Command {
 			}
 
 			queryClient := metoken.NewQueryClient(clientCtx)
-			queryReq := metoken.QueryIndexPrice{}
+			queryReq := metoken.QueryIndexPrices{}
 			if len(args) > 0 {
 				queryReq.MetokenDenom = args[0]
 			}
-			resp, err := queryClient.IndexPrice(cmd.Context(), &queryReq)
+			resp, err := queryClient.IndexPrices(cmd.Context(), &queryReq)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}

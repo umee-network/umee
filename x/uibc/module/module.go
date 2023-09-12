@@ -8,10 +8,10 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
-	"github.com/umee-network/umee/v5/util"
 	ibctransfer "github.com/umee-network/umee/v5/x/uibc"
-	"github.com/umee-network/umee/v5/x/uibc/client/cli"
-	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/x/uibc/client/cli"
+	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"

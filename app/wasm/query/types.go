@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
-	"github.com/umee-network/umee/v5/x/incentive"
-	lvtypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	octypes "github.com/umee-network/umee/v5/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/incentive"
+	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	octypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // UmeeQuery wraps all the queries availables for cosmwasm smartcontracts.
@@ -98,7 +98,7 @@ type UmeeQuery struct {
 	SwapFee           *metoken.QuerySwapFee       `json:"metoken_swapfee,omitempty"`
 	RedeemFee         *metoken.QueryRedeemFee     `json:"metoken_redeemfee,omitempty"`
 	IndexBalances     *metoken.QueryIndexBalances `json:"metoken_indexbalances,omitempty"`
-	IndexPrice        *metoken.QueryIndexPrice    `json:"metoken_indexprice,omitempty"`
+	IndexPrice        *metoken.QueryIndexPrices   `json:"metoken_indexprice,omitempty"`
 }
 
 // MarshalResponse marshals any response.

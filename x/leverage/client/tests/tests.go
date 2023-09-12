@@ -3,19 +3,19 @@ package tests
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	itestsuite "github.com/umee-network/umee/v5/tests/cli"
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/client/cli"
-	"github.com/umee-network/umee/v5/x/leverage/fixtures"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	itestsuite "github.com/umee-network/umee/v6/tests/cli"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/client/cli"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func (s *IntegrationTests) TestInvalidQueries() {
 	invalidQueries := []itestsuite.TestQuery{
 		{
 			Name:    "query market summary - denom not registered",
-			Command: cli.GetCmdQueryMarketSummary(),
+			Command: cli.QueryMarketSummary(),
 			Args: []string{
 				"abcd",
 			},
@@ -25,7 +25,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query account balances - invalid address",
-			Command: cli.GetCmdQueryAccountBalances(),
+			Command: cli.QueryAccountBalances(),
 			Args: []string{
 				"xyz",
 			},
@@ -35,7 +35,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query account summary - invalid address",
-			Command: cli.GetCmdQueryAccountSummary(),
+			Command: cli.QueryAccountSummary(),
 			Args: []string{
 				"xyz",
 			},
@@ -45,7 +45,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:    "query max withdraw - invalid address",
-			Command: cli.GetCmdQueryMaxWithdraw(),
+			Command: cli.QueryMaxWithdraw(),
 			Args: []string{
 				"xyz",
 				"uumee",
@@ -56,7 +56,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 		},
 		{
 			Name:             "query registered token - denom not registered",
-			Command:          cli.GetCmdQueryRegisteredTokens(),
+			Command:          cli.QueryRegisteredTokens(),
 			Args:             []string{"umm"},
 			Response:         nil,
 			ExpectedResponse: nil,
@@ -76,7 +76,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	initialQueries := []itestsuite.TestQuery{
 		{
 			Name:     "query params",
-			Command:  cli.GetCmdQueryParams(),
+			Command:  cli.QueryParams(),
 			Args:     []string{},
 			Response: &types.QueryParamsResponse{},
 			ExpectedResponse: &types.QueryParamsResponse{
@@ -86,7 +86,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:     "query registered tokens",
-			Command:  cli.GetCmdQueryRegisteredTokens(),
+			Command:  cli.QueryRegisteredTokens(),
 			Args:     []string{},
 			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
@@ -98,7 +98,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:     "query special assets",
-			Command:  cli.GetCmdQuerySpecialAssets(),
+			Command:  cli.QuerySpecialAssets(),
 			Args:     []string{"uumee"},
 			Response: &types.QuerySpecialAssetsResponse{},
 			ExpectedResponse: &types.QuerySpecialAssetsResponse{
@@ -108,7 +108,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:     "query registered token info by base_denom",
-			Command:  cli.GetCmdQueryRegisteredTokens(),
+			Command:  cli.QueryRegisteredTokens(),
 			Args:     []string{appparams.BondDenom},
 			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
@@ -120,7 +120,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query market summary - zero supply",
-			Command: cli.GetCmdQueryMarketSummary(),
+			Command: cli.QueryMarketSummary(),
 			Args: []string{
 				appparams.BondDenom,
 			},
@@ -154,7 +154,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:     "query bad debts",
-			Command:  cli.GetCmdQueryBadDebts(),
+			Command:  cli.QueryBadDebts(),
 			Args:     []string{},
 			Response: &types.QueryBadDebtsResponse{},
 			ExpectedResponse: &types.QueryBadDebtsResponse{
@@ -164,7 +164,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query max withdraw (zero)",
-			Command: cli.GetCmdQueryMaxWithdraw(),
+			Command: cli.QueryMaxWithdraw(),
 			Args: []string{
 				val.Address.String(),
 				"uumee",
@@ -178,7 +178,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query max borrow (zero)",
-			Command: cli.GetCmdQueryMaxBorrow(),
+			Command: cli.QueryMaxBorrow(),
 			Args: []string{
 				val.Address.String(),
 				"uumee",
@@ -193,7 +193,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	supply := itestsuite.TestTransaction{
 		Name:    "supply",
-		Command: cli.GetCmdSupply(),
+		Command: cli.Supply(),
 		Args: []string{
 			"700uumee",
 		},
@@ -202,7 +202,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	addCollateral := itestsuite.TestTransaction{
 		Name:    "add collateral",
-		Command: cli.GetCmdCollateralize(),
+		Command: cli.Collateralize(),
 		Args: []string{
 			"700u/uumee",
 		},
@@ -211,7 +211,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	supplyCollateral := itestsuite.TestTransaction{
 		Name:    "supply collateral",
-		Command: cli.GetCmdSupplyCollateral(),
+		Command: cli.SupplyCollateral(),
 		Args: []string{
 			"300uumee",
 		},
@@ -220,7 +220,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	borrow := itestsuite.TestTransaction{
 		Name:    "borrow",
-		Command: cli.GetCmdBorrow(),
+		Command: cli.Borrow(),
 		Args: []string{
 			"150uumee",
 		},
@@ -229,7 +229,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	maxborrow := itestsuite.TestTransaction{
 		Name:    "max-borrow",
-		Command: cli.GetCmdMaxBorrow(),
+		Command: cli.MaxBorrow(),
 		Args: []string{
 			"uumee", // should borrow up to the max of 250 uumee, which will become 251 due to rounding
 		},
@@ -238,7 +238,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	liquidate := itestsuite.TestTransaction{
 		Name:    "liquidate",
-		Command: cli.GetCmdLiquidate(),
+		Command: cli.Liquidate(),
 		Args: []string{
 			val.Address.String(),
 			"5uumee", // borrower attempts to liquidate itself, but is ineligible
@@ -248,7 +248,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	}
 	leveragedLiquidate := itestsuite.TestTransaction{
 		Name:    "liquidate",
-		Command: cli.GetCmdLeveragedLiquidate(),
+		Command: cli.LeveragedLiquidate(),
 		Args: []string{
 			val.Address.String(),
 			"uumee", // borrower attempts to liquidate itself, but is ineligible
@@ -259,7 +259,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	repay := itestsuite.TestTransaction{
 		Name:    "repay",
-		Command: cli.GetCmdRepay(),
+		Command: cli.Repay(),
 		Args: []string{
 			"255uumee", // repays only the remaining borrowed balance, reduced automatically from 255
 		},
@@ -268,7 +268,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	removeCollateral := itestsuite.TestTransaction{
 		Name:    "remove collateral",
-		Command: cli.GetCmdDecollateralize(),
+		Command: cli.Decollateralize(),
 		Args: []string{
 			"900u/uumee", // 100 u/uumee will remain
 		},
@@ -277,7 +277,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	withdraw := itestsuite.TestTransaction{
 		Name:    "withdraw",
-		Command: cli.GetCmdWithdraw(),
+		Command: cli.Withdraw(),
 		Args: []string{
 			"800u/uumee", // 200 u/uumee will remain
 		},
@@ -286,7 +286,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 	withdrawMax := itestsuite.TestTransaction{
 		Name:    "withdraw max",
-		Command: cli.GetCmdMaxWithdraw(),
+		Command: cli.MaxWithdraw(),
 		Args: []string{
 			"uumee",
 		},
@@ -298,7 +298,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	nonzeroQueries := []itestsuite.TestQuery{
 		{
 			Name:    "query account balances",
-			Command: cli.GetCmdQueryAccountBalances(),
+			Command: cli.QueryAccountBalances(),
 			Args: []string{
 				val.Address.String(),
 			},
@@ -318,7 +318,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query account summary",
-			Command: cli.GetCmdQueryAccountSummary(),
+			Command: cli.QueryAccountSummary(),
 			Args: []string{
 				val.Address.String(),
 			},
@@ -342,7 +342,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query max withdraw (borrow limit reached)",
-			Command: cli.GetCmdQueryMaxWithdraw(),
+			Command: cli.QueryMaxWithdraw(),
 			Args: []string{
 				val.Address.String(),
 				"uumee",
@@ -356,7 +356,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query max borrow (borrow limit reached)",
-			Command: cli.GetCmdQueryMaxBorrow(),
+			Command: cli.QueryMaxBorrow(),
 			Args: []string{
 				val.Address.String(),
 				"uumee",
@@ -372,7 +372,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	postQueries := []itestsuite.TestQuery{
 		{
 			Name:    "query account balances",
-			Command: cli.GetCmdQueryAccountBalances(),
+			Command: cli.QueryAccountBalances(),
 			Args: []string{
 				val.Address.String(),
 			},
@@ -390,7 +390,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query max withdraw (after repay)",
-			Command: cli.GetCmdQueryMaxWithdraw(),
+			Command: cli.QueryMaxWithdraw(),
 			Args: []string{
 				val.Address.String(),
 				"uumee",
@@ -408,7 +408,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query max borrow (after repay)",
-			Command: cli.GetCmdQueryMaxBorrow(),
+			Command: cli.QueryMaxBorrow(),
 			Args: []string{
 				val.Address.String(),
 				"uumee",
@@ -423,7 +423,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query all max withdraw (after repay)",
-			Command: cli.GetCmdQueryMaxWithdraw(),
+			Command: cli.QueryMaxWithdraw(),
 			Args: []string{
 				val.Address.String(),
 			},
@@ -440,7 +440,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		},
 		{
 			Name:    "query all max borrow (after repay)",
-			Command: cli.GetCmdQueryMaxBorrow(),
+			Command: cli.QueryMaxBorrow(),
 			Args: []string{
 				val.Address.String(),
 			},
@@ -457,7 +457,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	lastQueries := []itestsuite.TestQuery{
 		{
 			Name:    "query account balances (empty after withdraw max)",
-			Command: cli.GetCmdQueryAccountBalances(),
+			Command: cli.QueryAccountBalances(),
 			Args: []string{
 				val.Address.String(),
 			},
@@ -472,7 +472,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 
 		{
 			Name:    "query max withdraw (after withdraw max)",
-			Command: cli.GetCmdQueryMaxWithdraw(),
+			Command: cli.QueryMaxWithdraw(),
 			Args: []string{
 				val.Address.String(),
 				"uumee",

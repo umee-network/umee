@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func validToken() types.Token {
@@ -33,17 +33,15 @@ func validToken() types.Token {
 	}
 }
 
-func TestUpdateRegistryProposal_String(t *testing.T) {
+func TestUpdateRegistryProposalString(t *testing.T) {
 	token := validToken()
 	token.ReserveFactor = sdk.NewDec(40)
 	p := types.MsgGovUpdateRegistry{
 		Authority:   "authority",
-		Title:       "test",
 		Description: "test",
 		AddTokens:   []types.Token{token},
 	}
 	expected := `authority: authority
-title: test
 description: test
 addtokens:
     - base_denom: uumee
@@ -70,7 +68,7 @@ updatetokens: []
 	assert.Equal(t, expected, p.String())
 }
 
-func TestToken_Validate(t *testing.T) {
+func TestTokenValidate(t *testing.T) {
 	invalidBaseToken := validToken()
 	invalidBaseToken.BaseDenom = "$$"
 	invalidBaseToken.SymbolDenom = ""

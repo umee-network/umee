@@ -13,9 +13,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	appparams "github.com/umee-network/umee/v5/app/params"
-	"github.com/umee-network/umee/v5/x/oracle/client/cli"
-	"github.com/umee-network/umee/v5/x/oracle/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/x/oracle/client/cli"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 type IntegrationTestSuite struct {
@@ -96,7 +96,7 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 		s.Run(tc.name, func() {
 			clientCtx := val.ClientCtx
 
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdDelegateFeedConsent(), tc.args)
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.DelegateFeedConsent(), tc.args)
 			if tc.expectErr {
 				s.Require().Error(err)
 			} else {
@@ -152,7 +152,7 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 
 		s.Run(tc.name, func() {
 			tc.args = append(tc.args, fmt.Sprintf("--%s=json", tmcli.OutputFlag))
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryFeederDelegation(), tc.args)
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.QueryFeederDelegation(), tc.args)
 			if tc.expectErr {
 				s.Require().Error(err)
 			} else {
@@ -170,7 +170,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRates() {
 	args := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRates(), args)
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.QueryExchangeRates(), args)
 	s.Require().NoError(err)
 
 	var res types.QueryExchangeRatesResponse
@@ -188,7 +188,7 @@ func (s *IntegrationTestSuite) TestQueryParams() {
 	args := []string{
 		fmt.Sprintf("--%s=json", tmcli.OutputFlag),
 	}
-	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryParams(), args)
+	out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.QueryParams(), args)
 	s.Require().NoError(err)
 
 	var res types.QueryParamsResponse
@@ -222,7 +222,7 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 		tc := tc
 
 		s.Run(tc.name, func() {
-			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.GetCmdQueryExchangeRate(), tc.args)
+			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.QueryExchangeRate(), tc.args)
 			if tc.expectErr {
 				s.Require().Error(err)
 			} else {

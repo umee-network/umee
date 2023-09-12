@@ -31,21 +31,21 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
-	"github.com/umee-network/umee/v5/app/upgradev3x3"
-	"github.com/umee-network/umee/v5/x/incentive"
-	leveragekeeper "github.com/umee-network/umee/v5/x/leverage/keeper"
-	leveragetypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/app/upgradev3"
+	"github.com/umee-network/umee/v6/app/upgradev3x3"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/x/incentive"
+	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 
-	oraclekeeper "github.com/umee-network/umee/v5/x/oracle/keeper"
-	oracletypes "github.com/umee-network/umee/v5/x/oracle/types"
-	"github.com/umee-network/umee/v5/x/ugov"
-	"github.com/umee-network/umee/v5/x/uibc"
+	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
+	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
+	"github.com/umee-network/umee/v6/x/ugov"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
-// It takes a boolean parameter to enable or disable experimental features.
-func (app UmeeApp) RegisterUpgradeHandlers(bool) {
+func (app UmeeApp) RegisterUpgradeHandlers() {
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
 		panic(err)
@@ -63,6 +63,7 @@ func (app UmeeApp) RegisterUpgradeHandlers(bool) {
 	app.registerUpgrade("v4.4", upgradeInfo)
 	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
 	app.registerUpgrade5_1(upgradeInfo)
+	app.registerUpgrade("v5.2", upgradeInfo) // v5.2 migration is not compatible with v6, so leaving default here.
 	app.registerUpgrade6(upgradeInfo)
 	app.registerUpgrade7(upgradeInfo)
 }
@@ -126,29 +127,21 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 	// app.registerNewTokenEmissionUpgrade(upgradeInfo)
 }
 
-// TODO: this upgrade registration is just for testing purpose, once we finalize the release for new token emission
-// then we need to change planName and storeUpgrades
-// func (app *UmeeApp) registerNewTokenEmissionUpgrade(upgradeInfo upgradetypes.Plan) {
-// 	// TODO:finalize the name
-// 	planName := "token_emission"
-// 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-// 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-// 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-// 		},
-// 	)
-
-// 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-// 		Added:   []string{metoken.ModuleName},
-// 		Deleted: []string{"gravity"},
-// 	})
-// }
-
 func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.0"
 	gravityModuleName := "gravity" // hardcoded to avoid dependency on GB module
+	// TODO: update the address for the mainnet
+	emergencyGroup, err := sdk.AccAddressFromBech32("umee178nsnzse8capyfak4nwlntvfg64p4lmsau4t5n")
+	util.Panic(err)
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("-----------------------------\n---------------")
+			if err := app.LeverageKeeper.SetParams(ctx, leveragetypes.DefaultParams()); err != nil {
+				return fromVM, err
+			}
+			app.UGovKeeperB.Keeper(&ctx).SetEmergencyGroup(emergencyGroup)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)

@@ -15,12 +15,12 @@ import (
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
-	"github.com/umee-network/umee/v5/x/incentive"
-	ltypes "github.com/umee-network/umee/v5/x/leverage/types"
-	"github.com/umee-network/umee/v5/x/metoken"
-	otypes "github.com/umee-network/umee/v5/x/oracle/types"
-	ugovtypes "github.com/umee-network/umee/v5/x/ugov"
-	uibctypes "github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/x/incentive"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	otypes "github.com/umee-network/umee/v6/x/oracle/types"
+	ugovtypes "github.com/umee-network/umee/v6/x/ugov"
+	uibctypes "github.com/umee-network/umee/v6/x/uibc"
 )
 
 // stargateWhitelist keeps whitelist and its deterministic
@@ -144,7 +144,7 @@ func init() {
 	setWhitelistedQuery(metokenBaseQueryPath+"SwapFee", &metoken.QuerySwapFeeResponse{})
 	setWhitelistedQuery(metokenBaseQueryPath+"RedeemFee", &metoken.QueryRedeemFeeResponse{})
 	setWhitelistedQuery(metokenBaseQueryPath+"IndexBalances", &metoken.QueryIndexBalancesResponse{})
-	setWhitelistedQuery(metokenBaseQueryPath+"IndexPrice", &metoken.QueryIndexPriceResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+"IndexPrices", &metoken.QueryIndexPricesResponse{})
 }
 
 // GetWhitelistedQuery returns the whitelisted query at the provided path.

@@ -6,12 +6,13 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	gtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
-	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
+	"github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 
-	"github.com/umee-network/umee/v5/client"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/client"
+	"github.com/umee-network/umee/v6/util/checkers"
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 var govDeposit sdk.Coins
@@ -73,9 +74,8 @@ func OracleParamChanges(
 
 func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransferStatus) error {
 	msg := uibc.MsgGovSetIBCStatus{
-		Authority:   authtypes.NewModuleAddress(gtypes.ModuleName).String(),
-		Title:       "Update the ibc transfer status",
-		Description: "Update the ibc transfer status",
+		Authority:   checkers.GovModuleAddr,
+		Description: "",
 		IbcStatus:   status,
 	}
 
@@ -100,6 +100,47 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 
 	if len(resp.Events) == 0 {
 		return fmt.Errorf("no events in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
+}
+
+// LeverageRegistryUpdate submits a gov transaction to update leverage registry, votes, and waits for proposal to pass.
+func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []ltypes.Token) error {
+	msg := ltypes.MsgGovUpdateRegistry{
+		Authority:    checkers.GovModuleAddr,
+		Description:  "",
+		AddTokens:    addTokens,
+		UpdateTokens: updateTokens,
+	}
+
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
+}
+
+// MetokenRegistryUpdate submits a gov transaction to update metoken registry, votes, and waits for proposal to pass.
+func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes []metoken.Index) error {
+	msg := metoken.MsgGovUpdateRegistry{
+		Authority:   checkers.GovModuleAddr,
+		AddIndex:    addIndexes,
+		UpdateIndex: updateIndexes,
+	}
+
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
 	}
 
 	return MakeVoteAndCheckProposal(umeeClient, *resp)

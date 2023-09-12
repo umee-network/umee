@@ -9,8 +9,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 
-	ibcutil "github.com/umee-network/umee/v5/util/ibc"
-	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	ibcutil "github.com/umee-network/umee/v6/util/ibc"
+	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 
 // ICS4 wraps SendPacket to check IBC quota.

@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 var _ types.QueryServer = Querier{}
@@ -260,10 +260,11 @@ func (q Querier) AccountSummary(
 	// borrow limit shown here as it is used in leverage logic:
 	// using the lower of spot or historic prices for each collateral token
 	// skips collateral tokens with missing oracle prices
-	borrowLimit, err := q.Keeper.VisibleBorrowLimit(ctx, collateral)
+	ap, err := q.Keeper.GetAccountPosition(ctx, addr, false)
 	if err != nil {
 		return nil, err
 	}
+	borrowLimit := ap.Limit()
 
 	resp := &types.QueryAccountSummaryResponse{
 		SuppliedValue:   suppliedValue,
@@ -272,10 +273,14 @@ func (q Querier) AccountSummary(
 		BorrowLimit:     borrowLimit,
 	}
 
-	// liquidation always uses spot prices. This response field will be null
-	// if a price is missing
-	liquidationThreshold, err := q.Keeper.CalculateLiquidationThreshold(ctx, collateral)
+	// borrow limit shown here as it is used in leverage logic:
+	// using the lower of spot or historic prices for each collateral token
+	// error on collateral tokens with missing oracle prices, but skips
+	// borrow tokens missing collateral prices
+	ap, err = q.Keeper.GetAccountPosition(ctx, addr, true)
 	if err == nil {
+		// on an error here, simply skip setting the response field
+		liquidationThreshold := ap.Limit()
 		resp.LiquidationThreshold = &liquidationThreshold
 	}
 

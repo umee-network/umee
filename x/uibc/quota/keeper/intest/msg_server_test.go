@@ -5,10 +5,11 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"gotest.tools/v3/assert"
 
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/tests/accs"
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 func TestMsgServer_GovUpdateQuota(t *testing.T) {
@@ -20,22 +21,20 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 		errMsg string
 	}{
 		{
-			name: "invalid authority address in msg",
+			name: "invalid authority",
 			msg: uibc.MsgGovUpdateQuota{
-				Title:       "title",
-				Description: "desc",
-				Authority:   authtypes.NewModuleAddress("govv").String(),
-				Total:       sdk.NewDec(10),
-				PerDenom:    sdk.NewDec(1),
+				Description:   "some description",
+				Authority:     accs.Alice.String(),
+				QuotaDuration: time.Duration(time.Minute * 100),
+				PerDenom:      sdk.NewDec(1000),
+				Total:         sdk.NewDec(100),
 			},
-			errMsg: "expected gov account as only signer for proposal message",
-		},
-		{
+			errMsg: "total quota must be greater than or equal to per_denom quota",
+		}, {
 			name: "invalid quota in msg",
 			msg: uibc.MsgGovUpdateQuota{
-				Title:         "title",
-				Description:   "desc",
-				Authority:     authtypes.NewModuleAddress("gov").String(),
+				Description:   "",
+				Authority:     checkers.GovModuleAddr,
 				QuotaDuration: time.Duration(time.Minute * 100),
 				PerDenom:      sdk.NewDec(1000),
 				Total:         sdk.NewDec(100),
@@ -45,9 +44,8 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 		{
 			name: "valid msg",
 			msg: uibc.MsgGovUpdateQuota{
-				Title:         "title",
-				Description:   "desc",
-				Authority:     authtypes.NewModuleAddress("gov").String(),
+				Description:   "",
+				Authority:     checkers.GovModuleAddr,
 				QuotaDuration: time.Duration(time.Minute * 100),
 				PerDenom:      sdk.NewDec(1000),
 				Total:         sdk.NewDec(10000),
@@ -55,11 +53,10 @@ func TestMsgServer_GovUpdateQuota(t *testing.T) {
 			errMsg: "",
 		},
 		{
-			name: "valid msg with new update <update the new params again>",
+			name: "valid update the new params again",
 			msg: uibc.MsgGovUpdateQuota{
-				Title:         "override new params",
-				Description:   "desc",
-				Authority:     authtypes.NewModuleAddress("gov").String(),
+				Description:   "",
+				Authority:     checkers.GovModuleAddr,
 				QuotaDuration: time.Duration(time.Minute * 1000),
 				PerDenom:      sdk.NewDec(10000),
 				Total:         sdk.NewDec(100000),
@@ -97,27 +94,24 @@ func TestMsgServer_GovSetIBCStatus(t *testing.T) {
 		{
 			name: "invalid authority address in msg",
 			msg: uibc.MsgGovSetIBCStatus{
-				Title:       "title",
 				Description: "desc",
-				Authority:   authtypes.NewModuleAddress("govv").String(),
+				Authority:   accs.Alice.String(),
 				IbcStatus:   1,
 			},
-			errMsg: "expected gov account as only signer for proposal message",
+			errMsg: "unauthorized",
 		}, {
 			name: "invalid ibc-transfer status in msg",
 			msg: uibc.MsgGovSetIBCStatus{
-				Title:       "title",
-				Description: "desc",
-				Authority:   authtypes.NewModuleAddress("gov").String(),
+				Description: "",
+				Authority:   checkers.GovModuleAddr,
 				IbcStatus:   10,
 			},
 			errMsg: "invalid ibc-transfer status",
 		}, {
-			name: "valid in msg <enable the ibc-transfer pause",
+			name: "valid ibc-transfer pause",
 			msg: uibc.MsgGovSetIBCStatus{
-				Title:       "title",
-				Description: "desc",
-				Authority:   authtypes.NewModuleAddress("gov").String(),
+				Description: "",
+				Authority:   checkers.GovModuleAddr,
 				IbcStatus:   2,
 			},
 			errMsg: "",

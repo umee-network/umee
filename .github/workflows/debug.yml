@@ -20,7 +20,7 @@ jobs:
           go-version: "1.20"
           cache: true
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 90

@@ -6,8 +6,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/spf13/cobra"
-	"github.com/umee-network/umee/v5/util/cli"
-	"github.com/umee-network/umee/v5/x/uibc"
+	"github.com/umee-network/umee/v6/util/cli"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // GetQueryCmd returns the CLI query commands for the x/uibc module.
@@ -21,16 +21,16 @@ func GetQueryCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdQueryParams(),
+		QueryParams(),
 		GetOutflows(),
 	)
 
 	return cmd
 }
 
-// GetCmdQueryParams creates a Cobra command to query for the x/uibc
+// QueryParams creates a Cobra command to query for the x/uibc
 // module parameters.
-func GetCmdQueryParams() *cobra.Command {
+func QueryParams() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "params",
 		Args:  cobra.NoArgs,

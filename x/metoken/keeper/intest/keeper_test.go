@@ -1,3 +1,6 @@
+//go:build experimental
+// +build experimental
+
 package intest
 
 import (
@@ -15,10 +18,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/metoken/keeper"
-	"github.com/umee-network/umee/v5/x/metoken/mocks"
+	umeeapp "github.com/umee-network/umee/v6/app"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/keeper"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 type KeeperTestSuite struct {
@@ -70,36 +73,38 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	metoken.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.MetokenKeeperB))
 
+	require := require.New(t)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.USDTBaseDenom, mocks.USDTSymbolDenom, 6),
 		),
 	)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.USDCBaseDenom, mocks.USDCSymbolDenom, 6),
 		),
 	)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
 		),
 	)
 	require.NoError(
-		t,
+		app.LeverageKeeper.SetTokenSettings(
+			ctx,
+			mocks.ValidToken(mocks.CMSTBaseDenom, mocks.CMSTSymbolDenom, 6),
+		),
+	)
+	require.NoError(
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.WBTCBaseDenom, mocks.WBTCSymbolDenom, 8),
 		),
 	)
 	require.NoError(
-		t,
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.ETHBaseDenom, mocks.ETHSymbolDenom, 18),

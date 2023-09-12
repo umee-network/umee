@@ -3,7 +3,7 @@ package uibc
 import (
 	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v5/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 
 // BeginBlock implements BeginBlock for the x/uibc module.

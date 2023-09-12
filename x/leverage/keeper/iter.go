@@ -1,15 +1,17 @@
 package keeper
 
 import (
+	"sort"
+
 	sdkmath "cosmossdk.io/math"
 	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v5/util"
-	"github.com/umee-network/umee/v5/util/keys"
-	"github.com/umee-network/umee/v5/util/store"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/util/keys"
+	"github.com/umee-network/umee/v6/util/store"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 // iterate through all keys with a given prefix using a provided function.
@@ -45,14 +47,22 @@ func (k Keeper) GetAllRegisteredTokens(ctx sdk.Context) []types.Token {
 // GetAllSpecialAssetPairs returns all the special asset pairs from the x/leverage
 // module's KVStore.
 func (k Keeper) GetAllSpecialAssetPairs(ctx sdk.Context) []types.SpecialAssetPair {
-	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
+	pairs := store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), types.KeyPrefixSpecialAssetPair)
+	sort.SliceStable(pairs, func(i, j int) bool {
+		return pairs[i].CollateralWeight.LT(pairs[j].CollateralWeight)
+	})
+	return pairs
 }
 
 // GetSpecialAssetPairs returns all the special asset pairs from the x/leverage
 // module's KVStore which match a single asset.
 func (k Keeper) GetSpecialAssetPairs(ctx sdk.Context, denom string) []types.SpecialAssetPair {
 	prefix := types.KeySpecialAssetPairOneDenom(denom)
-	return store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), prefix)
+	pairs := store.MustLoadAll[*types.SpecialAssetPair](ctx.KVStore(k.storeKey), prefix)
+	sort.SliceStable(pairs, func(i, j int) bool {
+		return pairs[i].CollateralWeight.LT(pairs[j].CollateralWeight)
+	})
+	return pairs
 }
 
 // GetBorrowerBorrows returns an sdk.Coins object containing all open borrows
@@ -117,29 +127,19 @@ func (k Keeper) GetEligibleLiquidationTargets(ctx sdk.Context) ([]sdk.AccAddress
 		}
 		checkedAddrs[borrowerAddr.String()] = struct{}{}
 
-		// get borrower's total borrowed
-		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
-
-		// get borrower's total collateral
-		collateral := k.GetBorrowerCollateral(ctx, borrowerAddr)
-
-		// use oracle helper functions to find total borrowed value in USD
-		// skips denoms without prices
-		borrowValue, err := k.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
-		if err != nil {
-			return err
+		position, err := k.GetAccountPosition(ctx, borrowerAddr, true)
+		if err == nil {
+			borrowValue := position.BorrowedValue()
+			liquidationThreshold := position.Limit()
+			if liquidationThreshold.LT(borrowValue) {
+				// If liquidation threshold is smaller than borrowed value then the
+				// address is eligible for liquidation.
+				liquidationTargets = append(liquidationTargets, borrowerAddr)
+			}
 		}
 
-		// compute liquidation threshold from enabled collateral
-		// in this case, we can't reasonably skip missing prices but can move on
-		// to the next borrower instead of stopping the entire query
-		liquidationLimit, err := k.CalculateLiquidationThreshold(ctx, collateral)
-		if err == nil && liquidationLimit.LT(borrowValue) {
-			// If liquidation limit is smaller than borrowed value then the
-			// address is eligible for liquidation.
-			liquidationTargets = append(liquidationTargets, borrowerAddr)
-		}
-		// Non-price errors will cause the query itself to fail
+		// Non-price errors will cause the query itself to fail, whereas oracle errors
+		// simply cause the address to be skipped
 		if nonOracleError(err) {
 			return err
 		}

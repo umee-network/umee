@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/umee-network/umee/v5/sdkclient"
+	"github.com/umee-network/umee/v6/sdkclient"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"

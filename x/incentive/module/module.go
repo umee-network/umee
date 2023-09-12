@@ -16,9 +16,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
-	"github.com/umee-network/umee/v5/x/incentive"
-	"github.com/umee-network/umee/v5/x/incentive/client/cli"
-	"github.com/umee-network/umee/v5/x/incentive/keeper"
+	"github.com/umee-network/umee/v6/x/incentive"
+	"github.com/umee-network/umee/v6/x/incentive/client/cli"
+	"github.com/umee-network/umee/v6/x/incentive/keeper"
 )
 
 var (

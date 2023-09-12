@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 var _ metoken.QueryServer = Querier{}
@@ -51,7 +51,12 @@ func (q Querier) SwapFee(goCtx context.Context, req *metoken.QuerySwapFee) (*met
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k := q.Keeper(&ctx)
 
-	if err := req.Asset.Validate(); err != nil {
+	asset, err := sdk.ParseCoinNormalized(req.Asset)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := asset.Validate(); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +72,7 @@ func (q Querier) SwapFee(goCtx context.Context, req *metoken.QuerySwapFee) (*met
 	}
 
 	// calculate the fee for the asset amount
-	swapFee, err := k.swapFee(index, indexPrices, req.Asset)
+	swapFee, err := k.swapFee(index, indexPrices, asset)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +88,16 @@ func (q Querier) RedeemFee(goCtx context.Context, req *metoken.QueryRedeemFee) (
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k := q.Keeper(&ctx)
 
-	if err := req.Metoken.Validate(); err != nil {
+	meToken, err := sdk.ParseCoinNormalized(req.Metoken)
+	if err != nil {
 		return nil, err
 	}
 
-	index, err := k.RegisteredIndex(req.Metoken.Denom)
+	if err := meToken.Validate(); err != nil {
+		return nil, err
+	}
+
+	index, err := k.RegisteredIndex(meToken.Denom)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +109,7 @@ func (q Querier) RedeemFee(goCtx context.Context, req *metoken.QueryRedeemFee) (
 	}
 
 	// calculate amount to withdraw from x/metoken and x/leverage
-	amountFromReserves, amountFromLeverage, err := k.calculateRedeem(index, indexPrices, req.Metoken, req.AssetDenom)
+	amountFromReserves, amountFromLeverage, err := k.calculateRedeem(index, indexPrices, meToken, req.AssetDenom)
 	if err != nil {
 		return nil, err
 	}
@@ -134,30 +144,46 @@ func (q Querier) IndexBalances(
 		balances = []metoken.IndexBalances{balance}
 	}
 
+	prices, err := q.getPrices(k, req.MetokenDenom)
+	if err != nil {
+		return nil, err
+	}
+
 	return &metoken.QueryIndexBalancesResponse{
 		IndexBalances: balances,
+		Prices:        prices,
 	}, nil
 }
 
-// IndexPrice returns Index price from the x/metoken module. If index denom is not specified,
+// IndexPrices returns Index price from the x/metoken module. If index denom is not specified,
 // returns prices for all the registered indexes.
-func (q Querier) IndexPrice(
+func (q Querier) IndexPrices(
 	goCtx context.Context,
-	req *metoken.QueryIndexPrice,
-) (*metoken.QueryIndexPriceResponse, error) {
+	req *metoken.QueryIndexPrices,
+) (*metoken.QueryIndexPricesResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	k := q.Keeper(&ctx)
 
+	prices, err := q.getPrices(q.Keeper(&ctx), req.MetokenDenom)
+	if err != nil {
+		return nil, err
+	}
+
+	return &metoken.QueryIndexPricesResponse{
+		Prices: prices,
+	}, nil
+}
+
+func (q Querier) getPrices(k Keeper, meTokenDenom string) ([]metoken.IndexPrices, error) {
 	var indexes []metoken.Index
-	if len(req.MetokenDenom) > 0 {
-		if !metoken.IsMeToken(req.MetokenDenom) {
+	if len(meTokenDenom) > 0 {
+		if !metoken.IsMeToken(meTokenDenom) {
 			return nil, sdkerrors.ErrInvalidRequest.Wrapf(
 				"meToken denom %s should have the following format: me/<TokenName>",
-				req.MetokenDenom,
+				meTokenDenom,
 			)
 		}
 
-		index, err := k.RegisteredIndex(req.MetokenDenom)
+		index, err := k.RegisteredIndex(meTokenDenom)
 		if err != nil {
 			return nil, err
 		}
@@ -167,24 +193,17 @@ func (q Querier) IndexPrice(
 		indexes = k.GetAllRegisteredIndexes()
 	}
 
-	prices := make([]metoken.Price, len(indexes))
+	prices := make([]metoken.IndexPrices, len(indexes))
 	for i, index := range indexes {
 		ip, err := k.Prices(index)
 		if err != nil {
 			return nil, err
 		}
 
-		price, err := ip.Price(index.Denom)
-		if err != nil {
-			return nil, err
-		}
-
-		prices[i] = price
+		prices[i] = ip.QueryExport()
 	}
 
-	return &metoken.QueryIndexPriceResponse{
-		Prices: prices,
-	}, nil
+	return prices, nil
 }
 
 // NewQuerier returns Querier object.

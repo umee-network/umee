@@ -1,11 +1,11 @@
-package keeper
+package keeper_test
 
 import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/umee-network/umee/v5/x/ugov"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 func TestGenesis(t *testing.T) {

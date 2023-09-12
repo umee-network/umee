@@ -17,7 +17,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	xauthsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 
-	umeeapp "github.com/umee-network/umee/v5/app"
+	umeeapp "github.com/umee-network/umee/v6/app"
 )
 
 type IntegrationTestSuite struct {

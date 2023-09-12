@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/leverage/types"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 type tokenExchangeRate struct {
@@ -66,11 +66,16 @@ func (q Querier) Inspect(
 		}
 		checkedAddrs[addr.String()] = struct{}{}
 
+		borrowedValue, collateralValue, liquidationThreshold := sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()
+		position, err := k.GetAccountPosition(ctx, addr, true)
+		if err == nil {
+			borrowedValue = position.BorrowedValue()
+			collateralValue = position.CollateralValue()
+			liquidationThreshold = position.Limit()
+		}
+
 		borrowed := k.GetBorrowerBorrows(ctx, addr)
-		borrowedValue, _ := k.TotalTokenValue(ctx, borrowed, types.PriceModeSpot)
 		collateral := k.GetBorrowerCollateral(ctx, addr)
-		collateralValue, _ := k.CalculateCollateralValue(ctx, collateral, types.PriceModeSpot)
-		liquidationThreshold, _ := k.CalculateLiquidationThreshold(ctx, collateral)
 
 		account := types.InspectAccount{
 			Address: addr.String(),

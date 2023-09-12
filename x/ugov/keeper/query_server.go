@@ -3,9 +3,8 @@ package keeper
 import (
 	context "context"
 
-	"github.com/umee-network/umee/v5/x/ugov"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 var _ ugov.QueryServer = Querier{}

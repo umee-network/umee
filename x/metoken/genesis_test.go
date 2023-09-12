@@ -3,7 +3,7 @@ package metoken
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v5/util/coin"
+	"github.com/umee-network/umee/v6/util/coin"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"

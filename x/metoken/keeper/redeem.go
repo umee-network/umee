@@ -7,9 +7,9 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
-	"github.com/umee-network/umee/v5/util/coin"
-	"github.com/umee-network/umee/v5/x/metoken"
-	"github.com/umee-network/umee/v5/x/metoken/errors"
+	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/errors"
 )
 
 // redeemResponse wraps all the coins of a successful redemption
@@ -64,6 +64,10 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 		return redeemResponse{}, err
 	}
 
+	if amountFromReserves.IsZero() && amountFromLeverage.IsZero() {
+		return redeemResponse{}, fmt.Errorf("insufficient %s for redemption", meToken.Denom)
+	}
+
 	tokensWithdrawn, err := k.withdrawFromLeverage(sdk.NewCoin(assetDenom, amountFromLeverage))
 	if err != nil {
 		return redeemResponse{}, err
@@ -71,14 +75,13 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 
 	// if there is a difference between the desired to withdraw from x/leverage and the withdrawn,
 	// take it from x/metoken reserves
-
 	if tokensWithdrawn.Amount.LT(amountFromLeverage) {
 		tokenDiff := amountFromLeverage.Sub(tokensWithdrawn.Amount)
 		amountFromReserves = amountFromReserves.Add(tokenDiff)
 		amountFromLeverage = amountFromLeverage.Sub(tokenDiff)
 	}
 
-	i, balance := balances.AssetBalance(assetDenom)
+	balance, i := balances.AssetBalance(assetDenom)
 	if i < 0 {
 		return redeemResponse{}, sdkerrors.ErrNotFound.Wrapf(
 			"balance for denom %s not found",
@@ -191,7 +194,7 @@ func (k Keeper) calculateRedeem(
 	meToken sdk.Coin,
 	assetDenom string,
 ) (sdkmath.Int, sdkmath.Int, error) {
-	i, assetSettings := index.AcceptedAsset(assetDenom)
+	assetSettings, i := index.AcceptedAsset(assetDenom)
 	if i < 0 {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkerrors.ErrNotFound.Wrapf(
 			"asset %s is not accepted in the index",
@@ -199,9 +202,13 @@ func (k Keeper) calculateRedeem(
 		)
 	}
 
-	amountToWithdraw, err := indexPrices.SwapRate(meToken, assetDenom)
+	amountToWithdraw, err := indexPrices.RedeemRate(meToken, assetDenom)
 	if err != nil {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), err
+	}
+
+	if amountToWithdraw.IsZero() {
+		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), nil
 	}
 
 	amountFromReserves := assetSettings.ReservePortion.MulInt(amountToWithdraw).TruncateInt()

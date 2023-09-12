@@ -171,13 +171,13 @@ func (aa AcceptedAsset) Validate() error {
 
 // AcceptedAsset returns an accepted asset and its index in the list, given a specific denom. If it isn't present,
 // returns -1.
-func (i Index) AcceptedAsset(denom string) (int, AcceptedAsset) {
+func (i Index) AcceptedAsset(denom string) (AcceptedAsset, int) {
 	for index, aa := range i.AcceptedAssets {
 		if aa.Denom == denom {
-			return index, aa
+			return aa, index
 		}
 	}
-	return -1, AcceptedAsset{}
+	return AcceptedAsset{}, -1
 }
 
 // HasAcceptedAsset returns true if an accepted asset is present in the index. Otherwise returns false.
@@ -192,7 +192,7 @@ func (i Index) HasAcceptedAsset(denom string) bool {
 
 // SetAcceptedAsset overrides an accepted asset if exists in the list, otherwise add it to the list.
 func (i *Index) SetAcceptedAsset(acceptedAsset AcceptedAsset) {
-	index, _ := i.AcceptedAsset(acceptedAsset.Denom)
+	_, index := i.AcceptedAsset(acceptedAsset.Denom)
 	if index < 0 {
 		i.AcceptedAssets = append(i.AcceptedAssets, acceptedAsset)
 		return
