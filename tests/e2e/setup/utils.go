@@ -231,7 +231,7 @@ func (s *E2ETestSuite) QueryUmeeBalance(
 	return umeeBalance, umeeAddr
 }
 
-func (s *E2ETestSuite) broadcastTxWithRetry(msg sdk.Msg) error {
+func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg) error {
 	var err error
 	for retry := 0; retry < 3; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
