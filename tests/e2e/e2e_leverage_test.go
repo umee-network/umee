@@ -70,7 +70,7 @@ func (s *E2ETest) TestLeverageBasics() {
 	)
 	s.Run(
 		"initial leverage withdraw", func() {
-			s.supply(valAddr, "u/"+appparams.BondDenom, 10_000_000)
+			s.withdraw(valAddr, "u/"+appparams.BondDenom, 10_000_000)
 		},
 	)
 	s.Run(
