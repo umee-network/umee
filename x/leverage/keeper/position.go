@@ -21,7 +21,7 @@ var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
 func (k Keeper) GetAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLiquidation bool,
 ) (types.AccountPosition, error) {
 	tokenSettings := k.GetAllRegisteredTokens(ctx)
-	specialPairs := []types.SpecialAssetPair{}
+	specialPairs := k.GetAllSpecialAssetPairs(ctx)
 	collateral := k.GetBorrowerCollateral(ctx, addr)
 	collateralValue := sdk.NewDecCoins()
 	borrowed := k.GetBorrowerBorrows(ctx, addr)

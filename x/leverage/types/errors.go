@@ -37,7 +37,7 @@ var (
 	// 4XX = Price Sensitive
 	ErrBadValue              = errors.Register(ModuleName, 400, "bad USD value")
 	ErrInvalidOraclePrice    = errors.Register(ModuleName, 401, "invalid oracle price")
-	ErrUndercollaterized     = errors.Register(ModuleName, 402, "borrow positions are undercollaterized")
+	ErrUndercollateralized   = errors.Register(ModuleName, 402, "borrow positions are undercollateralized")
 	ErrLiquidationIneligible = errors.Register(ModuleName, 403, "borrower not eligible for liquidation")
 	ErrNoHistoricMedians     = errors.Register(ModuleName, 405, "insufficient historic medians available")
 
