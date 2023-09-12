@@ -24,25 +24,25 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdSupply(),
-		GetCmdWithdraw(),
-		GetCmdMaxWithdraw(),
-		GetCmdCollateralize(),
-		GetCmdDecollateralize(),
-		GetCmdBorrow(),
-		GetCmdMaxBorrow(),
-		GetCmdRepay(),
-		GetCmdLiquidate(),
-		GetCmdLeveragedLiquidate(),
-		GetCmdSupplyCollateral(),
+		Supply(),
+		Withdraw(),
+		MaxWithdraw(),
+		Collateralize(),
+		Decollateralize(),
+		Borrow(),
+		MaxBorrow(),
+		Repay(),
+		Liquidate(),
+		LeveragedLiquidate(),
+		SupplyCollateral(),
 	)
 
 	return cmd
 }
 
-// GetCmdSupply creates a Cobra command to generate or broadcast a
+// Supply creates a Cobra command to generate or broadcast a
 // transaction with a MsgSupply message.
-func GetCmdSupply() *cobra.Command {
+func Supply() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "supply [amount]",
 		Args:  cobra.ExactArgs(1),
@@ -69,9 +69,9 @@ func GetCmdSupply() *cobra.Command {
 	return cmd
 }
 
-// GetCmdWithdraw creates a Cobra command to generate or broadcast a
+// Withdraw creates a Cobra command to generate or broadcast a
 // transaction with a MsgWithdraw message.
-func GetCmdWithdraw() *cobra.Command {
+func Withdraw() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "withdraw [amount]",
 		Args:  cobra.ExactArgs(1),
@@ -98,9 +98,9 @@ func GetCmdWithdraw() *cobra.Command {
 	return cmd
 }
 
-// GetCmdMaxWithdraw creates a Cobra command to generate or broadcast a
+// MaxWithdraw creates a Cobra command to generate or broadcast a
 // transaction with a MsgMaxWithdraw message.
-func GetCmdMaxWithdraw() *cobra.Command {
+func MaxWithdraw() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "withdraw-max [denom]",
 		Args:  cobra.ExactArgs(1),
@@ -124,9 +124,9 @@ func GetCmdMaxWithdraw() *cobra.Command {
 	return cmd
 }
 
-// GetCmdCollateralize creates a Cobra command to generate or broadcast a
+// Collateralize creates a Cobra command to generate or broadcast a
 // transaction with a MsgCollateralize message.
-func GetCmdCollateralize() *cobra.Command {
+func Collateralize() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "collateralize [coin]",
 		Args:  cobra.ExactArgs(1),
@@ -155,9 +155,9 @@ func GetCmdCollateralize() *cobra.Command {
 	return cmd
 }
 
-// GetCmdDecollateralize returns a CLI command handler to generate or broadcast a
+// Decollateralize returns a CLI command handler to generate or broadcast a
 // transaction with a MsgDecollateralize message.
-func GetCmdDecollateralize() *cobra.Command {
+func Decollateralize() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "decollateralize [coin]",
 		Args:  cobra.ExactArgs(1),
@@ -186,9 +186,9 @@ func GetCmdDecollateralize() *cobra.Command {
 	return cmd
 }
 
-// GetCmdBorrow creates a Cobra command to generate or broadcast a
+// Borrow creates a Cobra command to generate or broadcast a
 // transaction with a MsgBorrow message.
-func GetCmdBorrow() *cobra.Command {
+func Borrow() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "borrow [amount]",
 		Args:  cobra.ExactArgs(1),
@@ -215,9 +215,9 @@ func GetCmdBorrow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdMaxBorrow creates a Cobra command to generate or broadcast a
+// MaxBorrow creates a Cobra command to generate or broadcast a
 // transaction with a MsgBorrow message.
-func GetCmdMaxBorrow() *cobra.Command {
+func MaxBorrow() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "max-borrow [denom]",
 		Args:  cobra.ExactArgs(1),
@@ -239,9 +239,9 @@ func GetCmdMaxBorrow() *cobra.Command {
 	return cmd
 }
 
-// GetCmdRepay creates a Cobra command to generate or broadcast a
+// Repay creates a Cobra command to generate or broadcast a
 // transaction with a MsgRepay message.
-func GetCmdRepay() *cobra.Command {
+func Repay() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "repay [amount]",
 		Args:  cobra.ExactArgs(1),
@@ -268,9 +268,9 @@ func GetCmdRepay() *cobra.Command {
 	return cmd
 }
 
-// GetCmdLiquidate creates a Cobra command to generate or broadcast a
+// Liquidate creates a Cobra command to generate or broadcast a
 // transaction with a MsgLiquidate message.
-func GetCmdLiquidate() *cobra.Command {
+func Liquidate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "liquidate [borrower] [amount] [reward-denom]",
 		Args:  cobra.ExactArgs(3),
@@ -317,9 +317,9 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 	return cmd
 }
 
-// GetCmdLeveragedLiquidate creates a Cobra command to generate or broadcast a
+// LeveragedLiquidate creates a Cobra command to generate or broadcast a
 // transaction with a MsgLeveragedLiquidate message.
-func GetCmdLeveragedLiquidate() *cobra.Command {
+func LeveragedLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lev-liquidate [borrower] [repay-denom] [reward-denom]",
 		Args:  cobra.RangeArgs(1, 3),
@@ -372,9 +372,9 @@ $ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
 	return cmd
 }
 
-// GetCmdSupplyCollateral creates a Cobra command to generate or broadcast a
+// SupplyCollateral creates a Cobra command to generate or broadcast a
 // transaction with a MsgSupply message.
-func GetCmdSupplyCollateral() *cobra.Command {
+func SupplyCollateral() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "supply-collateral [amount]",
 		Args:  cobra.ExactArgs(1),

@@ -35,7 +35,7 @@ jobs:
           make proto-update-swagger-docs
       
       - name: goreleaser test-build
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')
         with:
           version: latest
@@ -43,7 +43,7 @@ jobs:
         env:
           TM_VERSION: ${{ env.TM_VERSION }}
       - name: Release
-        uses: goreleaser/goreleaser-action@v4
+        uses: goreleaser/goreleaser-action@v5
         if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest

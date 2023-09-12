@@ -23,16 +23,16 @@ func GetTxCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		GetCmdSwap(),
-		GetCmdRedeem(),
+		Swap(),
+		Redeem(),
 	)
 
 	return cmd
 }
 
-// GetCmdSwap creates a Cobra command to generate or broadcast a transaction with a MsgSwap message.
+// Swap creates a Cobra command to generate or broadcast a transaction with a MsgSwap message.
 // Both arguments are required.
-func GetCmdSwap() *cobra.Command {
+func Swap() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "swap [coin] [metoken_denom]",
 		Args:  cobra.ExactArgs(2),
@@ -57,9 +57,9 @@ func GetCmdSwap() *cobra.Command {
 	return cmd
 }
 
-// GetCmdRedeem creates a Cobra command to generate or broadcast a transaction with a MsgRedeem message.
+// Redeem creates a Cobra command to generate or broadcast a transaction with a MsgRedeem message.
 // Both arguments are required.
-func GetCmdRedeem() *cobra.Command {
+func Redeem() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "redeem [metoken] [redeem_denom]",
 		Args:  cobra.ExactArgs(2),
