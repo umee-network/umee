@@ -98,7 +98,7 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
-// LeverageSpecialPairsUpdate submits a gov transaction to update leverage registry,
+// LeverageSpecialPairsUpdate submits a gov transaction to update leverage special assets,
 // votes, and waits for proposal to pass.
 func LeverageSpecialPairsUpdate(
 	umeeClient client.Client,
