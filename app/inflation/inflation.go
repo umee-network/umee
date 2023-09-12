@@ -34,8 +34,7 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		factor := bpmath.One - inflationParams.InflationReductionRate
 		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
 		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
-		// inflation rate change = (max rate - min rate) / 6months
-		mintParams.InflationRateChange = sdk.NewDec(2).Mul(mintParams.InflationMax.Sub(mintParams.InflationMin))
+		mintParams.InflationRateChange = fastInflationRateChange(mintParams)
 		c.MintKeeper.SetParams(ctx, mintParams)
 
 		err := ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
@@ -48,6 +47,13 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 
 	minter.Inflation = minter.NextInflationRate(mintParams, bondedRatio)
 	return c.AdjustInflation(stakingTokenSupply, inflationParams.MaxSupply.Amount, minter, mintParams)
+}
+
+var two = sdk.NewDec(2)
+
+// inflation rate change = (max_rate - min_rate) * 2
+func fastInflationRateChange(p minttypes.Params) sdk.Dec {
+	return two.Mul(p.InflationMax.Sub(p.InflationMin))
 }
 
 // AdjustInflation checks if newly minting coins will execeed the MaxSupply then it will adjust the inflation with
