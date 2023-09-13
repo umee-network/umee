@@ -285,8 +285,8 @@ func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
 			return err
 		}
 	}
-	if !msg.MaxRepay.IsNil() && msg.MaxRepay.LT(sdk.OneDec()) {
-		return fmt.Errorf("max repay %s is less than one", msg.MaxRepay)
+	if !msg.MaxRepay.IsZero() && msg.MaxRepay.LT(sdk.OneDec()) {
+		return fmt.Errorf("nonzero max repay %s is less than one", msg.MaxRepay)
 	}
 	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {

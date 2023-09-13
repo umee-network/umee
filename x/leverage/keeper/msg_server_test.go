@@ -2143,6 +2143,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 		borrower       sdk.AccAddress
 		repayDenom     string
 		rewardDenom    string
+		maxRepay       sdk.Dec
 		expectedRepay  sdk.Coin
 		expectedReward sdk.Coin
 		err            error
@@ -2153,6 +2154,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			healthyBorrower,
 			atomDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationIneligible,
@@ -2162,6 +2164,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			"u/" + umeeDenom,
 			umeeDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
@@ -2171,6 +2174,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			umeeDenom,
 			"u/" + umeeDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
@@ -2180,6 +2184,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			"foo",
 			umeeDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
@@ -2189,6 +2194,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			atomDenom,
 			"foo",
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
@@ -2198,6 +2204,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			atomDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationRepayZero,
@@ -2207,6 +2214,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			atomBorrower,
 			atomDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			coin.New(atomDenom, 500_000000),
 			coin.New("u/"+atomDenom, 550_000000),
 			nil,
@@ -2216,6 +2224,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			umeeDenom,
 			umeeDenom,
+			sdk.ZeroDec(),
 			coin.New(umeeDenom, 100_000000),
 			coin.New("u/"+umeeDenom, 110_000000),
 			nil,
@@ -2225,6 +2234,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			complexBorrower,
 			umeeDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			coin.New(umeeDenom, 30_000000),
 			coin.New("u/"+atomDenom, 3_527933),
 			nil,
@@ -2234,6 +2244,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			closeBorrower,
 			"",
 			"",
+			sdk.ZeroDec(),
 			coin.New(umeeDenom, 8_150541),
 			coin.New("u/"+umeeDenom, 8_965596),
 			nil,
@@ -2246,6 +2257,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			Borrower:    tc.borrower.String(),
 			RepayDenom:  tc.repayDenom,
 			RewardDenom: tc.rewardDenom,
+			MaxRepay:    tc.maxRepay,
 		}
 		if tc.err != nil {
 			_, err := srv.LeveragedLiquidate(ctx, msg)
@@ -2281,7 +2293,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			liCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.liquidator)
 			liBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.liquidator)
 
-			// verify the output of fast-liquidate function
+			// verify the output of leveraged-liquidate function
 			resp, err := srv.LeveragedLiquidate(ctx, msg)
 			require.NoError(err, tc.msg)
 			require.Equal(tc.expectedRepay.String(), resp.Repaid.String(), tc.msg)

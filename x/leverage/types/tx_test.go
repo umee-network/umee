@@ -35,7 +35,7 @@ func TestTxs(t *testing.T) {
 		types.NewMsgRepay(testAddr, token),
 		types.NewMsgLiquidate(testAddr, testAddr, token, uDenom),
 		types.NewMsgLeveragedLiquidate(testAddr, testAddr, token.Denom, uDenom, sdk.OneDec()),
-		types.NewMsgLeveragedLiquidate(testAddr, testAddr, "", "", sdk.Dec{}), // empty optional fields
+		types.NewMsgLeveragedLiquidate(testAddr, testAddr, "", "", sdk.ZeroDec()), // empty optional fields
 	}
 
 	for _, tx := range txs {

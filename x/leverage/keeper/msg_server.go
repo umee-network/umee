@@ -503,7 +503,8 @@ func (s msgServer) LeveragedLiquidate(
 		return nil, err
 	}
 
-	repaid, reward, err := s.keeper.LeveragedLiquidate(ctx, liquidator, borrower, msg.RepayDenom, msg.RewardDenom)
+	repaid, reward, err := s.keeper.LeveragedLiquidate(
+		ctx, liquidator, borrower, msg.RepayDenom, msg.RewardDenom, msg.MaxRepay)
 	if err != nil {
 		return nil, err
 	}

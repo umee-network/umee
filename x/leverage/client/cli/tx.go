@@ -350,7 +350,7 @@ $ umeed tx leverage lev-liquidate %s uumee uumee 123.4 --from mykey`,
 			}
 
 			var repayDenom, rewardDenom string
-			var maxRepay sdk.Dec
+			maxRepay := sdk.ZeroDec()
 			if len(args) > 1 {
 				repayDenom = args[1]
 			}
