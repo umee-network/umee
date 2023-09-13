@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/binary"
+	time "time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
@@ -28,12 +29,20 @@ var (
 	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
 	KeyPrefixAvgCounter                   = []byte{0x09} // prefix for each key to a historic avg price counter
 	KeyLatestAvgCounter                   = []byte{0x10} // key where we store the latest avg price counter
+	KeyPrefixExchangeRateWithTimeStamp    = []byte{0x11}
 )
 
 // KeyExchangeRate - stored by *denom*
 func KeyExchangeRate(denom string) []byte {
 	// append 0 for null-termination
 	return util.ConcatBytes(1, KeyPrefixExchangeRate, []byte(denom))
+}
+
+// KeyExchangeRate - stored by *denom*
+func KeyExchangeRateWithTimestamp(denom string, t time.Time) []byte {
+	// append 0 for null-termination
+	tbz, _ := t.MarshalBinary()
+	return util.ConcatBytes(1, KeyPrefixExchangeRateWithTimeStamp, []byte(denom), tbz)
 }
 
 // KeyFeederDelegation - stored by *Validator* address

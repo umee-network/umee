@@ -118,6 +118,17 @@ message AggregateExchangeRateVote {
   string voter = 2 [(gogoproto.moretags) = "yaml:\"voter\""];
 }
 
+// ExchangeRatesWithTimestamp - store the exchange rate of denom with price timestamp
+message ExchangeRatesWithTimestamp {
+  ExchangeRateTuple exchange_rate_tuples = 1 [
+    (gogoproto.moretags)     = "yaml:\"exchange_rate_tuples\"",
+    (gogoproto.castrepeated) = "ExchangeRateTuples",
+    (gogoproto.nullable)     = false
+  ];
+  // Unix timestamp when the first price was aggregated in the counter
+  google.protobuf.Timestamp timestamp = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+}
+
 // ExchangeRateTuple - struct to store interpreted exchange rates data to store
 message ExchangeRateTuple {
   option (gogoproto.equal)            = false;

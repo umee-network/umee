@@ -19,6 +19,30 @@ type querier struct {
 	Keeper
 }
 
+// ExgRateWithTimestamps implements types.QueryServer.
+func (q querier) ExgRateWithTimestamps(goCtx context.Context, req *types.QueryExgRateWithTimestamps) (
+	*types.QueryExgRateWithTimestampsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	exgRatesWithTimestamp := make([]*types.ExchangeRatesWithTimestamp, 0)
+	if len(req.Denom) != 0 {
+		q.IterateExgRatesWithTimestampForDenom(ctx, req.Denom, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
+			// exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+			exgRatesWithTimestamp = append(exgRatesWithTimestamp, &exgRate)
+			return false
+		})
+	} else {
+		q.IterateExchangeRatesWithTimestamp(ctx, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
+			// exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+			exgRatesWithTimestamp = append(exgRatesWithTimestamp, &exgRate)
+			return false
+		})
+	}
+	return &types.QueryExgRateWithTimestampsResponse{ExgRatesTimestamps: exgRatesWithTimestamp}, nil
+}
+
 // NewQuerier returns an implementation of the oracle QueryServer interface
 // for the provided Keeper.
 func NewQuerier(keeper Keeper) types.QueryServer {

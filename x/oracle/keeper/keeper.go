@@ -2,7 +2,9 @@ package keeper
 
 import (
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -12,6 +14,7 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
@@ -73,17 +76,14 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
-	store := ctx.KVStore(k.storeKey)
 	symbol = strings.ToUpper(symbol)
-	b := store.Get(types.KeyExchangeRate(symbol))
-	if b == nil {
+
+	exgRates := k.ExgRatesWithTimestampForDenom(ctx, symbol)
+	if len(exgRates) == 0 {
 		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
 	}
-
-	decProto := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &decProto)
-
-	return decProto.Dec, nil
+	// return latest exchange rate
+	return exgRates[0].ExchangeRateTuples.ExchangeRate, nil
 }
 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
@@ -113,6 +113,113 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 	return exchangeRate.Quo(powerReduction), nil
 }
 
+// SetExchangeRateWithTimestamp
+func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, exchangeRate sdk.Dec, t time.Time) {
+	store := ctx.KVStore(k.storeKey)
+	bz := k.cdc.MustMarshal(&types.ExchangeRatesWithTimestamp{
+		ExchangeRateTuples: types.ExchangeRateTuple{
+			Denom:        denom,
+			ExchangeRate: exchangeRate,
+		},
+		Timestamp: t,
+	})
+	denom = strings.ToUpper(denom)
+	store.Set(types.KeyExchangeRateWithTimestamp(denom, t), bz)
+}
+
+// ExgRatesWithTimestamp returns all exchange rates with timestamps
+func (k Keeper) ExgRatesWithTimestamp(ctx sdk.Context) []types.ExchangeRatesWithTimestamp {
+
+	exchangeRatesWithTimestamps := make([]types.ExchangeRatesWithTimestamp, 0)
+	k.IterateExchangeRatesWithTimestamp(ctx, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
+		exchangeRatesWithTimestamps = append(exchangeRatesWithTimestamps, exgRate)
+		return false
+	})
+
+	return exchangeRatesWithTimestamps
+}
+
+// ExgRatesWithTimestampForDenom returns exchange rates of given denom with timestamps
+func (k Keeper) ExgRatesWithTimestampForDenom(ctx sdk.Context, denom string) []types.ExchangeRatesWithTimestamp {
+
+	exchangeRatesWithTimestamps := make([]types.ExchangeRatesWithTimestamp, 0)
+	k.IterateExgRatesWithTimestampForDenom(ctx, denom, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
+		// exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		exchangeRatesWithTimestamps = append(exchangeRatesWithTimestamps, exgRate)
+		return false
+	})
+
+	sort.Slice(exchangeRatesWithTimestamps, func(i, j int) bool {
+		return exchangeRatesWithTimestamps[i].Timestamp.After(exchangeRatesWithTimestamps[j].Timestamp)
+	},
+	)
+
+	return exchangeRatesWithTimestamps
+}
+
+// IterateExchangeRates iterates over all USD rates in the store.
+func (k Keeper) IterateExgRatesWithTimestampForDenom(ctx sdk.Context, denom string,
+	handler func(types.ExchangeRatesWithTimestamp) bool) {
+	store := ctx.KVStore(k.storeKey)
+	prefix := util.ConcatBytes(0, types.KeyPrefixExchangeRateWithTimeStamp, []byte(denom))
+	iter := sdk.KVStorePrefixIterator(store, prefix)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		dp := types.ExchangeRatesWithTimestamp{}
+		k.cdc.MustUnmarshal(iter.Value(), &dp)
+
+		if handler(dp) {
+			break
+		}
+	}
+}
+
+// IterateExchangeRates iterates over all USD rates in the store.
+func (k Keeper) IterateExchangeRatesWithTimestamp(ctx sdk.Context,
+	handler func(types.ExchangeRatesWithTimestamp) bool) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRateWithTimeStamp)
+	defer iter.Close()
+
+	for ; iter.Valid(); iter.Next() {
+		dp := types.ExchangeRatesWithTimestamp{}
+		k.cdc.MustUnmarshal(iter.Value(), &dp)
+
+		if handler(dp) {
+			break
+		}
+	}
+}
+
+// PruneExgRates will delete exg rates of denoms and keep only latest timestamp noOfRecords
+func (k Keeper) PruneExgRates(ctx sdk.Context, noOfRecords uint64) {
+	exgRates := k.ExgRatesWithTimestamp(ctx)
+	exgRatesForDenom := make(map[string][]types.ExchangeRatesWithTimestamp, 0)
+	for _, er := range exgRates {
+		denom := er.ExchangeRateTuples.Denom
+		exgRatesForDenom[denom] = append(exgRatesForDenom[denom], er)
+	}
+
+	for _, v := range exgRatesForDenom {
+		if len(v) > int(noOfRecords) {
+			ers := v
+			// sort the list with descending order by timestamp
+			// only keep latest noOfRecords
+			sort.Slice(ers, func(i, j int) bool { return ers[i].Timestamp.After(ers[j].Timestamp) })
+			// exgRatesForDenom[k] = ers
+			for _, d := range ers[noOfRecords:] {
+				k.DeleteExgRateWithTimestamp(ctx, d.ExchangeRateTuples.Denom, d.Timestamp)
+			}
+		}
+	}
+}
+
+func (k Keeper) DeleteExgRateWithTimestamp(ctx sdk.Context, denom string, t time.Time) {
+	store := ctx.KVStore(k.storeKey)
+	store.Delete(types.KeyExchangeRateWithTimestamp(denom, t))
+}
+
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
 // denom asset to the store.
 func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
@@ -126,6 +233,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.
 // exchange rate to the store with ABCI event
 func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
 	k.SetExchangeRate(ctx, denom, exchangeRate)
+	k.SetExchangeRateWithTimestamp(ctx, denom, exchangeRate, ctx.BlockTime())
 	sdkutil.Emit(&ctx, &types.EventSetFxRate{
 		Denom: denom, Rate: exchangeRate,
 	})

@@ -24,6 +24,9 @@ func (k *Keeper) PruneAllPrices(ctx sdk.Context) {
 			}
 		}
 	}
+
+	// Deleting the old exchange rates of denoms and keep latest rates
+	k.PruneExgRates(ctx, params.HistoricStampPeriod)
 }
 
 // IsPeriodLastBlock returns true if we are at the last block of the period

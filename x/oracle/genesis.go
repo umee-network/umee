@@ -22,6 +22,12 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 		keeper.SetFeederDelegation(ctx, voter, feeder)
 	}
 
+	for _, ex := range genState.ExchangeRatesTimestamps {
+		keeper.SetExchangeRateWithTimestamp(ctx, ex.ExchangeRateTuples.Denom,
+			ex.ExchangeRateTuples.ExchangeRate, ex.Timestamp,
+		)
+	}
+
 	for _, ex := range genState.ExchangeRates {
 		keeper.SetExchangeRate(ctx, ex.Denom, ex.ExchangeRate)
 	}
@@ -133,6 +139,7 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	medianPrices := keeper.AllMedianPrices(ctx)
 	medianDeviationPrices := keeper.AllMedianDeviationPrices(ctx)
 	hacp := keeper.GetHistoricAvgCounterParams(ctx)
+	exgRatesWithTimestamps := keeper.ExgRatesWithTimestamp(ctx)
 
 	return types.NewGenesisState(
 		params,
@@ -145,5 +152,6 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		medianPrices,
 		medianDeviationPrices,
 		hacp,
+		exgRatesWithTimestamps,
 	)
 }

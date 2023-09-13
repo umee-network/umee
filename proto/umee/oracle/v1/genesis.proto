@@ -30,6 +30,9 @@ message GenesisState {
     (gogoproto.moretags) = "yaml:\"avg_counter_params\"",
     (gogoproto.nullable) = false
   ];
+  repeated ExchangeRatesWithTimestamp exchange_rates_timestamps = 11 [
+    (gogoproto.nullable) = false
+  ];
 }
 
 // FeederDelegation is the address for where oracle feeder authority are

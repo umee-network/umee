@@ -101,6 +101,24 @@ service Query {
     option (google.api.http).get =
         "/umee/historacle/v1/avg_price/{denom}";
   }
+
+  // ExgRateWithTimestamps returns exchange prices.
+  rpc ExgRateWithTimestamps(QueryExgRateWithTimestamps)
+      returns (QueryExgRateWithTimestampsResponse) {
+    option (google.api.http).get =
+        "/umee/historacle/v1/exg_rates";
+  }
+}
+
+// QueryExgRateWithTimestamps
+message QueryExgRateWithTimestamps {
+  // denom defines the denomination to query for.
+  string denom = 1;
+}
+
+// QueryHistoricPricesResponse
+message QueryExgRateWithTimestampsResponse {
+  repeated ExchangeRatesWithTimestamp exg_rates_timestamps = 1;
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC

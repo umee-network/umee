@@ -19,6 +19,7 @@ func NewGenesisState(
 	medianPrices []Price,
 	medianDeviationPrices []Price,
 	acp AvgCounterParams,
+	exgRatesWithTimestamps []ExchangeRatesWithTimestamp,
 ) *GenesisState {
 	return &GenesisState{
 		Params:                        params,
@@ -31,6 +32,7 @@ func NewGenesisState(
 		Medians:                       medianPrices,
 		MedianDeviations:              medianDeviationPrices,
 		AvgCounterParams:              acp,
+		ExchangeRatesTimestamps:       exgRatesWithTimestamps,
 	}
 }
 
@@ -48,6 +50,7 @@ func DefaultGenesisState() *GenesisState {
 		Medians:                       []Price{},
 		MedianDeviations:              []Price{},
 		AvgCounterParams:              DefaultAvgCounterParams(),
+		ExchangeRatesTimestamps:       []ExchangeRatesWithTimestamp{},
 	}
 }
 
