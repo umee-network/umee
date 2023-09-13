@@ -1,6 +1,8 @@
 package types
 
 import (
+	"fmt"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/checkers"
@@ -255,13 +257,17 @@ func (msg *MsgLiquidate) GetSignBytes() []byte {
 	return sdk.MustSortJSON(bz)
 }
 
-func NewMsgLeveragedLiquidate(liquidator, borrower sdk.AccAddress, repayDenom, rewardDenom string,
+func NewMsgLeveragedLiquidate(
+	liquidator, borrower sdk.AccAddress,
+	repayDenom, rewardDenom string,
+	maxRepay sdk.Dec,
 ) *MsgLeveragedLiquidate {
 	return &MsgLeveragedLiquidate{
 		Liquidator:  liquidator.String(),
 		Borrower:    borrower.String(),
 		RepayDenom:  repayDenom,
 		RewardDenom: rewardDenom,
+		MaxRepay:    maxRepay,
 	}
 }
 
@@ -278,6 +284,9 @@ func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
 		if err := sdk.ValidateDenom(msg.RewardDenom); err != nil {
 			return err
 		}
+	}
+	if !msg.MaxRepay.IsNil() && msg.MaxRepay.LT(sdk.OneDec()) {
+		return fmt.Errorf("max repay %s is less than one", msg.MaxRepay)
 	}
 	_, err := sdk.AccAddressFromBech32(msg.Borrower)
 	if err != nil {

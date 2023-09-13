@@ -34,8 +34,8 @@ func TestTxs(t *testing.T) {
 		types.NewMsgMaxBorrow(testAddr, denom),
 		types.NewMsgRepay(testAddr, token),
 		types.NewMsgLiquidate(testAddr, testAddr, token, uDenom),
-		types.NewMsgLeveragedLiquidate(testAddr, testAddr, token.Denom, uDenom),
-		types.NewMsgLeveragedLiquidate(testAddr, testAddr, "", ""),
+		types.NewMsgLeveragedLiquidate(testAddr, testAddr, token.Denom, uDenom, sdk.OneDec()),
+		types.NewMsgLeveragedLiquidate(testAddr, testAddr, "", "", sdk.Dec{}), // empty optional fields
 	}
 
 	for _, tx := range txs {
@@ -66,7 +66,7 @@ func TestRoutes(t *testing.T) {
 		types.NewMsgMaxBorrow(testAddr, denom),
 		types.NewMsgRepay(testAddr, token),
 		types.NewMsgLiquidate(testAddr, testAddr, token, uDenom),
-		types.NewMsgLeveragedLiquidate(testAddr, testAddr, token.Denom, uDenom),
+		types.NewMsgLeveragedLiquidate(testAddr, testAddr, token.Denom, uDenom, sdk.OneDec()),
 	}
 
 	for _, tx := range txs {
