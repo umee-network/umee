@@ -328,7 +328,7 @@ func LeveragedLiquidate() *cobra.Command {
 			fmt.Sprintf(`
 Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.
 
-Will attempt to repay the maximum amount allowed by the targeted borrower's debt and collateral positions unless a max repay (USD) is specified.
+Will attempt to repay the maximum amount allowed by the targeted borrower's position unless a max repay (USD) is specified.
 
 The transaction will fail if the liquidator, with new borrow and collateral positions, would be above 0.8 borrow limit.
 
