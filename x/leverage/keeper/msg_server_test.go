@@ -17,7 +17,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 	govAccAddr := checkers.GovModuleAddr
 	registeredUmee := fixtures.Token("uumee", "UMEE", 6)
 	ntA := fixtures.Token("unta", "ABCD", 6)
-	// new token with existed symbol denom
+	// new token with existing symbol denom
 	ntB := fixtures.Token("untb", "ABCD", 6)
 	testCases := []struct {
 		name        string
@@ -55,7 +55,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			"",
-			7,
+			8,
 		}, {
 			"regisering new token with existed symbol denom",
 			types.MsgGovUpdateRegistry{
@@ -66,7 +66,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			"",
-			8,
+			9,
 		},
 	}
 
@@ -173,7 +173,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 6)
+				s.Require().Len(tokens, 7)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uumee")
 				s.Require().NoError(err)
@@ -432,7 +432,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"acceptable withdrawal (dump borrower)",
 			dumpborrower,
@@ -448,7 +448,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"acceptable withdrawal (pump borrower)",
 			pumpborrower,
@@ -464,7 +464,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"borrow limit (undercollateralized due to borrow factor but not collateral weight)",
 			stableUmeeBorrower,
@@ -472,7 +472,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			nil,
 			sdk.Coin{},
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 	}
 
@@ -580,6 +580,17 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
 	// UMEE and STABLE have the same price but different collateral weights
 
+	// supply some DAI ($1 at e18)
+	daiSupplier := s.newAccount(coin.New(daiDenom, 1_000000_000000_000000))
+	s.supply(daiSupplier, coin.New(daiDenom, 1_000000_000000_000000))
+
+	// create a $0.4 DAI borrower using $1.0 PAIRED collateral
+	specialBorrower := s.newAccount(coin.New(pairedDenom, 1_000000))
+	s.supply(specialBorrower, coin.New(pairedDenom, 1_000000))
+	s.collateralize(specialBorrower, coin.New("u/"+pairedDenom, 1_000000))
+	s.borrow(specialBorrower, coin.New(daiDenom, 400000_000000_000000))
+	// PAIRED and DAI have the same price, 0.25 collateral weight, but 0.5 special pair weight
+
 	zeroUmee := coin.Zero(umeeDenom)
 	zeroUUmee := coin.New("u/"+umeeDenom, 0)
 	tcs := []struct {
@@ -661,6 +672,15 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+stableDenom, 40_000000),
 			coin.New("u/"+stableDenom, 40_000000),
 			coin.New(stableDenom, 40_000000),
+			nil,
+		},
+		{
+			"max withdraw with special pair",
+			specialBorrower,
+			pairedDenom,
+			coin.New("u/"+pairedDenom, 200000),
+			coin.New("u/"+pairedDenom, 200000),
+			coin.New(pairedDenom, 200000),
 			nil,
 		},
 	}
@@ -1074,7 +1094,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			"above borrow limit",
 			borrower,
 			coin.New("u/"+atomDenom, 100_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 
 		{
@@ -1087,7 +1107,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			"above borrow limit (undercollateralized under historic prices but ok with current prices)",
 			dumpborrower,
 			coin.New("u/"+pumpDenom, 20_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 		{
 			"acceptable decollateralize (pump borrower)",
@@ -1099,7 +1119,7 @@ func (s *IntegrationTestSuite) TestMsgDecollateralize() {
 			"above borrow limit (undercollateralized under current prices but ok with historic prices)",
 			pumpborrower,
 			coin.New("u/"+dumpDenom, 20_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		},
 	}
 
@@ -1320,6 +1340,17 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 3_000000))
 	// UMEE and STABLE have the same price but different collateral weights
 
+	// supply some DAI ($1 at e18)
+	daiSupplier := s.newAccount(coin.New(daiDenom, 1_000000_000000_000000))
+	s.supply(daiSupplier, coin.New(daiDenom, 1_000000_000000_000000))
+
+	// create a $0.4 DAI borrower using $1.0 PAIRED collateral
+	specialBorrower := s.newAccount(coin.New(pairedDenom, 1_000000))
+	s.supply(specialBorrower, coin.New(pairedDenom, 1_000000))
+	s.collateralize(specialBorrower, coin.New("u/"+pairedDenom, 1_000000))
+	s.borrow(specialBorrower, coin.New(daiDenom, 200000_000000_000000))
+	// PAIRED and DAI have the same price, 0.25 collateral weight, but 0.5 special pair weight
+
 	tcs := []testCase{
 		{
 			"uToken",
@@ -1350,7 +1381,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"stable umee borrower (borrow factor limit)",
 			stableUmeeBorrower,
 			coin.New(umeeDenom, 1_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"max supply utilization",
 			borrower,
@@ -1365,12 +1396,12 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"borrow limit",
 			borrower,
 			coin.New(atomDenom, 100_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"zero collateral",
 			supplier,
 			coin.New(atomDenom, 1_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"dump borrower (acceptable)",
 			dumpborrower,
@@ -1380,7 +1411,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"dump borrower (borrow limit)",
 			dumpborrower,
 			coin.New(dumpDenom, 10_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
 		}, {
 			"pump borrower (acceptable)",
 			pumpborrower,
@@ -1390,7 +1421,22 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"pump borrower (borrow limit)",
 			pumpborrower,
 			coin.New(pumpDenom, 2_000000),
-			types.ErrUndercollaterized,
+			types.ErrUndercollateralized,
+		}, {
+			"special borrower (up to regular limit)",
+			specialBorrower,
+			coin.New(daiDenom, 50000_000000_000000),
+			nil,
+		}, {
+			"special borrower (up to special limit)",
+			specialBorrower,
+			coin.New(daiDenom, 250000_000000_000000),
+			nil,
+		}, {
+			"special borrower (past special limit)",
+			specialBorrower,
+			coin.New(daiDenom, 50000_000000_000000),
+			types.ErrUndercollateralized,
 		},
 	}
 

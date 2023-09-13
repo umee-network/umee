@@ -178,7 +178,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 		Asset:    coin.New("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Withdraw(ctx, msg4)
-	require.ErrorIs(err, types.ErrUndercollaterized, "withdraw collateral umee")
+	require.ErrorIs(err, types.ErrUndercollateralized, "withdraw collateral umee")
 
 	// UMEE can still be collateralized
 	s.supply(umeeSupplier, coin.New(umeeDenom, 50_000000))
@@ -203,7 +203,7 @@ func (s *IntegrationTestSuite) TestCollateralPriceOutage() {
 		Asset:    coin.New("u/"+umeeDenom, 1),
 	}
 	_, err = srv.Decollateralize(ctx, msg7)
-	require.ErrorIs(err, types.ErrUndercollaterized, "decollateralize collateral umee")
+	require.ErrorIs(err, types.ErrUndercollateralized, "decollateralize collateral umee")
 
 	// UMEE cannot be borrowed since UMEE value is unknown
 	msg8 := &types.MsgBorrow{

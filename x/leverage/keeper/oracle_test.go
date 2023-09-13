@@ -68,6 +68,7 @@ func (m *mockOracleKeeper) Reset() {
 		"DUMP":   sdk.MustNewDecFromStr("0.50"), // A token which has recently halved in price
 		"PUMP":   sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
 		"STABLE": sdk.MustNewDecFromStr("4.21"), // Same price as umee
+		"PAIRED": sdk.MustNewDecFromStr("1.00"),
 	}
 	m.historicExchangeRates = map[string]sdk.Dec{
 		"UMEE":   sdk.MustNewDecFromStr("4.21"),
@@ -76,6 +77,7 @@ func (m *mockOracleKeeper) Reset() {
 		"DUMP":   sdk.MustNewDecFromStr("1.00"),
 		"PUMP":   sdk.MustNewDecFromStr("1.00"),
 		"STABLE": sdk.MustNewDecFromStr("4.21"),
+		"PAIRED": sdk.MustNewDecFromStr("1.00"),
 	}
 }
 
