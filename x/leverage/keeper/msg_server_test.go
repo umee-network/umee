@@ -2145,9 +2145,21 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a liquidator which supplies plenty of UMEE and ATOM to the module
-	liquidator := s.newAccount(coin.New(umeeDenom, 10000_000000), coin.New(atomDenom, 10000_000000))
-	s.supply(liquidator, coin.New(umeeDenom, 10000_000000), coin.New(atomDenom, 10000_000000))
-	s.collateralize(liquidator, coin.New("u/"+umeeDenom, 10000_000000), coin.New("u/"+atomDenom, 10000_000000))
+	liquidator := s.newAccount(
+		coin.New(umeeDenom, 10000_000000),
+		coin.New(atomDenom, 10000_000000),
+		coin.New(daiDenom, 10000_000000),
+	)
+	s.supply(liquidator,
+		coin.New(umeeDenom, 10000_000000),
+		coin.New(atomDenom, 10000_000000),
+		coin.New(daiDenom, 10000_000000),
+	)
+	s.collateralize(liquidator,
+		coin.New("u/"+umeeDenom, 10000_000000),
+		coin.New("u/"+atomDenom, 10000_000000),
+		coin.New("u/"+daiDenom, 10000_000000),
+	)
 
 	// create a healthy borrower
 	healthyBorrower := s.newAccount(coin.New(umeeDenom, 100_000000))
@@ -2182,6 +2194,20 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 	s.collateralize(closeBorrower, coin.New("u/"+umeeDenom, 400_000000))
 	// artificially borrow just barely above liquidation threshold to simulate interest accruing
 	s.forceBorrow(closeBorrower, coin.New(umeeDenom, 106_000000))
+
+	// creates a borrower with $10 PAIRED (stablecoin) collateral which will have a close factor = 1
+	daiBorrower := s.newAccount(coin.New(pairedDenom, 10_000000))
+	s.supply(daiBorrower, coin.New(pairedDenom, 10_000000))
+	s.collateralize(daiBorrower, coin.New("u/"+pairedDenom, 10_000000))
+	// artificially borrow an amount much greater than liquidation threshold
+	s.forceBorrow(daiBorrower, coin.New(pairedDenom, 7_000000))
+
+	// creates another realistic borrower with 400 UMEE collateral which will have a close factor < 1
+	closeBorrower2 := s.newAccount(coin.New(umeeDenom, 400_000000))
+	s.supply(closeBorrower2, coin.New(umeeDenom, 400_000000))
+	s.collateralize(closeBorrower2, coin.New("u/"+umeeDenom, 400_000000))
+	// artificially borrow just barely above liquidation threshold to simulate interest accruing
+	s.forceBorrow(closeBorrower2, coin.New(umeeDenom, 106_000000))
 
 	tcs := []struct {
 		msg            string
@@ -2293,6 +2319,36 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			sdk.ZeroDec(),
 			coin.New(umeeDenom, 8_150541),
 			coin.New("u/"+umeeDenom, 8_965596),
+			nil,
+		}, {
+			"stable borrower with nonzero max repay",
+			liquidator,
+			daiBorrower,
+			"",
+			"",
+			sdk.OneDec(),
+			coin.New(pairedDenom, 1_000000),
+			coin.New("u/"+pairedDenom, 1_100000),
+			nil,
+		}, {
+			"stable borrower with nonzero max repay (again)",
+			liquidator,
+			daiBorrower,
+			"",
+			"",
+			sdk.MustNewDecFromStr("2.0"),
+			coin.New(pairedDenom, 2_000000),
+			coin.New("u/"+pairedDenom, 2_200000),
+			nil,
+		}, {
+			"umee borrower with nonzero max repay and close factor < 1",
+			liquidator,
+			closeBorrower2,
+			"",
+			"",
+			sdk.MustNewDecFromStr("10.00"),
+			coin.New(umeeDenom, 2_375296), // $10 of UMEE at price $4.21
+			coin.New("u/"+umeeDenom, 2_612826),
 			nil,
 		},
 	}
