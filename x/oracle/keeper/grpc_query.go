@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -17,30 +18,6 @@ var _ types.QueryServer = querier{}
 // Querier implements a QueryServer for the x/oracle module.
 type querier struct {
 	Keeper
-}
-
-// ExgRateWithTimestamps implements types.QueryServer.
-func (q querier) ExgRateWithTimestamps(goCtx context.Context, req *types.QueryExgRateWithTimestamps) (
-	*types.QueryExgRateWithTimestampsResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	exgRatesWithTimestamp := make([]*types.ExchangeRatesWithTimestamp, 0)
-	if len(req.Denom) != 0 {
-		q.IterateExgRatesWithTimestampForDenom(ctx, req.Denom, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
-			// exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
-			exgRatesWithTimestamp = append(exgRatesWithTimestamp, &exgRate)
-			return false
-		})
-	} else {
-		q.IterateExchangeRatesWithTimestamp(ctx, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
-			// exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
-			exgRatesWithTimestamp = append(exgRatesWithTimestamp, &exgRate)
-			return false
-		})
-	}
-	return &types.QueryExgRateWithTimestampsResponse{ExgRatesTimestamps: exgRatesWithTimestamp}, nil
 }
 
 // NewQuerier returns an implementation of the oracle QueryServer interface
@@ -350,4 +327,32 @@ func (q querier) AvgPrice(
 		return nil, err
 	}
 	return &types.QueryAvgPriceResponse{Price: p}, nil
+}
+
+// ExgRateWithTimestamps queries exchange rates of denoms with timestamp.
+func (q querier) ExgRatesWithTimestamps(goCtx context.Context, req *types.QueryExgRatesWithTimestamps) (
+	*types.QueryExgRatesWithTimestampsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	exgRates := make([]*types.ExchangeRatesWithTimestamp, 0)
+	if len(req.Denom) != 0 {
+		q.IterateExgRatesWithTimestampForDenom(ctx, req.Denom, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
+			exgRates = append(exgRates, &exgRate)
+			return false
+		})
+	} else {
+		q.IterateExchangeRatesWithTimestamp(ctx, func(exgRate types.ExchangeRatesWithTimestamp) (stop bool) {
+			exgRates = append(exgRates, &exgRate)
+			return false
+		})
+	}
+
+	sort.Slice(exgRates, func(i, j int) bool {
+		return exgRates[i].Timestamp.After(exgRates[j].Timestamp)
+	})
+
+	return &types.QueryExgRatesWithTimestampsResponse{ExgRates: exgRates}, nil
 }

@@ -269,6 +269,13 @@ func IntegrationTestNetworkConfig() network.Config {
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
 		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
 	))
+
+	oracleGenState.ExchangeRatesTimestamps = append(oracleGenState.ExchangeRatesTimestamps,
+		oracletypes.ExchangeRatesWithTimestamp{
+			ExchangeRateTuples: oracletypes.NewExchangeRateTuple(params.DisplayDenom, sdk.MustNewDecFromStr("34.21")),
+			Timestamp:          time.Now(),
+		})
+
 	// Set mock historic medians to satisfy leverage module's 24 median requirement
 	for i := 1; i <= 24; i++ {
 		median := oracletypes.Price{

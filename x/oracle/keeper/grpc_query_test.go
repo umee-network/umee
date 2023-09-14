@@ -19,7 +19,7 @@ func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRateWithEvent(s.ctx, displayDenom, sdk.OneDec())
 	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{

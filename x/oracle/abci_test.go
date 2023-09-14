@@ -162,7 +162,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	// Test: only val2 votes (has 39% vote power).
 	// Total voting power per denom must be bigger or equal than 40% (see SetupTest).
-	// So if only val2 votes, we won't have any prices next block.
+	// So if only val2 votes, we won't have any prices next block but we retive price of denom with
+	// latest timestamp from store
+	// Note: GetExchangeRate now retrive the exchange rate from previous latest price
 	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
@@ -176,8 +178,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
-		s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, denom.SymbolDenom))
-		s.Require().Equal(sdk.ZeroDec(), rate)
+		s.Require().NoError(err)
+		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
 	}
 
 	// Test: val2 and val3 votes.
