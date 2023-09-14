@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
@@ -72,6 +73,7 @@ func (k Keeper) setNextInterestClaimTime(nextInterestClaimTime time.Time) {
 func (k Keeper) UpdateIndexes(
 	addIndexes []metoken.Index,
 	updateIndexes []metoken.Index,
+	byEmergencyGroup bool,
 ) error {
 	registry := k.GetAllRegisteredIndexes()
 
@@ -84,11 +86,34 @@ func (k Keeper) UpdateIndexes(
 		}
 	}
 
-	if err := k.addIndexes(addIndexes, registeredIndexes, registeredAssets); err != nil {
-		return err
+	var errs []error
+	if byEmergencyGroup {
+		if len(addIndexes) > 0 {
+			errs = append(errs, sdkerrors.ErrInvalidRequest.Wrapf("Emergency Group cannot register new indexes"))
+		}
+
+		if updErrs := validateEmergencyIndexUpdate(updateIndexes, registeredIndexes); len(updErrs) > 0 {
+			errs = append(errs, updErrs...)
+		}
+
+		if len(errs) > 0 {
+			return errors.Join(errs...)
+		}
 	}
 
-	return k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets)
+	if addErrs := k.addIndexes(addIndexes, registeredIndexes, registeredAssets); len(addErrs) > 0 {
+		errs = append(errs, addErrs...)
+	}
+
+	if updErrs := k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets); len(updErrs) > 0 {
+		errs = append(errs, updErrs...)
+	}
+
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+
+	return nil
 }
 
 // addIndexes handles addition of the indexes from the request along with their validations.
@@ -96,20 +121,32 @@ func (k Keeper) addIndexes(
 	indexes []metoken.Index,
 	registeredIndexes map[string]metoken.Index,
 	registeredAssets map[string]string,
-) error {
+) []error {
+	var allErrs []error
 	for _, index := range indexes {
+		var indexErrs []error
 		if _, present := registeredIndexes[index.Denom]; present {
-			return sdkerrors.ErrInvalidRequest.Wrapf(
-				"add: index with denom %s already exists",
-				index.Denom,
+			allErrs = append(
+				allErrs, sdkerrors.ErrInvalidRequest.Wrapf(
+					"add: index with denom %s already exists",
+					index.Denom,
+				),
 			)
 		}
 
-		var errs []error
+		if exists := k.hasIndexBalance(index.Denom); exists {
+			allErrs = append(
+				allErrs, sdkerrors.ErrInvalidRequest.Wrapf(
+					"can't add index %s - it already exists and is active",
+					index.Denom,
+				),
+			)
+		}
+
 		for _, aa := range index.AcceptedAssets {
 			if _, present := registeredAssets[aa.Denom]; present {
-				errs = append(
-					errs, sdkerrors.ErrInvalidRequest.Wrapf(
+				indexErrs = append(
+					indexErrs, sdkerrors.ErrInvalidRequest.Wrapf(
 						"add: asset %s is already accepted in another index",
 						aa.Denom,
 					),
@@ -117,24 +154,18 @@ func (k Keeper) addIndexes(
 			}
 		}
 
-		if len(errs) != 0 {
-			return errors.Join(errs...)
+		if errs := k.validateInLeverage(index); len(errs) > 0 {
+			indexErrs = append(indexErrs, errs...)
 		}
 
-		if err := k.validateInLeverage(index); err != nil {
-			return err
-		}
-
-		if exists := k.hasIndexBalance(index.Denom); exists {
-			return sdkerrors.ErrInvalidRequest.Wrapf(
-				"can't add index %s - it already exists and is active",
-				index.Denom,
-			)
+		if len(indexErrs) > 0 {
+			allErrs = append(allErrs, indexErrs...)
+			continue
 		}
 
 		// adding index
 		if err := k.setRegisteredIndex(index); err != nil {
-			return err
+			return []error{err}
 		}
 
 		assetBalances := make([]metoken.AssetBalance, 0)
@@ -151,8 +182,12 @@ func (k Keeper) addIndexes(
 				), assetBalances,
 			),
 		); err != nil {
-			return err
+			return []error{err}
 		}
+	}
+
+	if len(allErrs) != 0 {
+		return allErrs
 	}
 
 	return nil
@@ -163,21 +198,25 @@ func (k Keeper) updateIndexes(
 	indexes []metoken.Index,
 	registeredIndexes map[string]metoken.Index,
 	registeredAssets map[string]string,
-) error {
+) []error {
+	var allErrs []error
 	for _, index := range indexes {
+		var indexErrs []error
 		oldIndex, present := registeredIndexes[index.Denom]
 		if !present {
-			return sdkerrors.ErrNotFound.Wrapf(
-				"update: index with denom %s not found",
-				index.Denom,
+			allErrs = append(
+				allErrs, sdkerrors.ErrNotFound.Wrapf(
+					"update: index with denom %s not found",
+					index.Denom,
+				),
 			)
+			continue
 		}
 
-		var errs []error
 		for _, aa := range index.AcceptedAssets {
 			if indexDenom, present := registeredAssets[aa.Denom]; present && indexDenom != index.Denom {
-				errs = append(
-					errs, sdkerrors.ErrInvalidRequest.Wrapf(
+				indexErrs = append(
+					indexErrs, sdkerrors.ErrInvalidRequest.Wrapf(
 						"add: asset %s is already accepted in another index",
 						aa.Denom,
 					),
@@ -185,43 +224,48 @@ func (k Keeper) updateIndexes(
 			}
 		}
 
-		if len(errs) != 0 {
-			return errors.Join(errs...)
-		}
-
 		if oldIndex.Exponent != index.Exponent {
 			balances, err := k.IndexBalances(index.Denom)
 			if err != nil {
-				return err
+				return []error{err}
 			}
 
 			if balances.MetokenSupply.IsPositive() {
-				return sdkerrors.ErrInvalidRequest.Wrapf(
-					"update: index %s exponent cannot be changed when supply is greater than zero",
-					index.Denom,
+				indexErrs = append(
+					indexErrs, sdkerrors.ErrInvalidRequest.Wrapf(
+						"update: index %s exponent cannot be changed when supply is greater than zero",
+						index.Denom,
+					),
 				)
 			}
 		}
 
 		for _, aa := range oldIndex.AcceptedAssets {
 			if exists := index.HasAcceptedAsset(aa.Denom); !exists {
-				return sdkerrors.ErrInvalidRequest.Wrapf(
-					"update: an asset %s cannot be deleted from an index %s",
-					aa.Denom,
-					index.Denom,
+				indexErrs = append(
+					indexErrs, sdkerrors.ErrInvalidRequest.Wrapf(
+						"update: an asset %s cannot be deleted from an index %s",
+						aa.Denom,
+						index.Denom,
+					),
 				)
 			}
 		}
 
-		if err := k.validateInLeverage(index); err != nil {
-			return err
+		if errs := k.validateInLeverage(index); len(errs) > 0 {
+			indexErrs = append(indexErrs, errs...)
+		}
+
+		if len(indexErrs) > 0 {
+			allErrs = append(allErrs, indexErrs...)
+			continue
 		}
 
 		// updating balances if there is a new accepted asset
 		if len(index.AcceptedAssets) > len(oldIndex.AcceptedAssets) {
 			balances, err := k.IndexBalances(index.Denom)
 			if err != nil {
-				return err
+				return []error{err}
 			}
 
 			for _, aa := range index.AcceptedAssets {
@@ -231,27 +275,74 @@ func (k Keeper) updateIndexes(
 			}
 
 			if err := k.setIndexBalances(balances); err != nil {
-				return err
+				return []error{err}
 			}
 		}
 
 		if err := k.setRegisteredIndex(index); err != nil {
-			return err
+			return []error{err}
 		}
+	}
+
+	if len(allErrs) != 0 {
+		return allErrs
 	}
 
 	return nil
 }
 
-// validateInLeverage validate the existence of every accepted asset in x/leverage
-func (k Keeper) validateInLeverage(index metoken.Index) error {
-	for _, aa := range index.AcceptedAssets {
-		if _, err := k.leverageKeeper.GetTokenSettings(*k.ctx, aa.Denom); err != nil {
-			return err
+func validateEmergencyIndexUpdate(indexes []metoken.Index, registeredIndexes map[string]metoken.Index) []error {
+	var errs []error
+	for _, newIndex := range indexes {
+		oldIndex, ok := registeredIndexes[newIndex.Denom]
+		if !ok {
+			errs = append(
+				errs, sdkerrors.ErrNotFound.Wrapf(
+					"update: index with denom %s not found",
+					newIndex.Denom,
+				),
+			)
+			continue
+		}
+
+		if newIndex.Exponent != oldIndex.Exponent {
+			errs = append(errs, errors.New("exponent cannot be changed"))
+		}
+
+		if !newIndex.Fee.Equal(oldIndex.Fee) {
+			errs = append(errs, errors.New("fee cannot be changed"))
+		}
+
+		if !newIndex.MaxSupply.Equal(oldIndex.MaxSupply) {
+			errs = append(errs, errors.New("max_supply cannot be changed"))
+		}
+
+		for _, newAsset := range newIndex.AcceptedAssets {
+			oldAsset, i := oldIndex.AcceptedAsset(newAsset.Denom)
+			if i < 0 {
+				errs = append(errs, fmt.Errorf("new asset %s cannot be added", newAsset.Denom))
+				continue
+			}
+
+			if !newAsset.ReservePortion.Equal(oldAsset.ReservePortion) {
+				errs = append(errs, fmt.Errorf("reserve_portion of %s cannot be changed", newAsset.Denom))
+			}
 		}
 	}
 
-	return nil
+	return errs
+}
+
+// validateInLeverage validate the existence of every accepted asset in x/leverage
+func (k Keeper) validateInLeverage(index metoken.Index) []error {
+	var errs []error
+	for _, aa := range index.AcceptedAssets {
+		if _, err := k.leverageKeeper.GetTokenSettings(*k.ctx, aa.Denom); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	return errs
 }
 
 func ModuleAddr() sdk.AccAddress {

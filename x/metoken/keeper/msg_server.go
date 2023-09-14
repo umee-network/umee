@@ -3,6 +3,8 @@ package keeper
 import (
 	"context"
 
+	"github.com/umee-network/umee/v6/util/checkers"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/util/sdkutil"
 
@@ -134,12 +136,18 @@ func (m msgServer) GovUpdateRegistry(
 	msg *metoken.MsgGovUpdateRegistry,
 ) (*metoken.MsgGovUpdateRegistryResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
+	k := m.kb.Keeper(&ctx)
+
+	byEmergencyGroup, err := checkers.EmergencyGroupAuthority(msg.Authority, k.ugov(&ctx))
+	if err != nil {
+		return nil, err
+	}
 
 	if err := msg.ValidateBasic(); err != nil {
 		return nil, err
 	}
 
-	if err := m.kb.Keeper(&ctx).UpdateIndexes(msg.AddIndex, msg.UpdateIndex); err != nil {
+	if err := k.UpdateIndexes(msg.AddIndex, msg.UpdateIndex, byEmergencyGroup); err != nil {
 		return nil, err
 	}
 
