@@ -15,10 +15,10 @@ Mention whether you follow Semantic Versioning.
 Usage:
 
 Change log entries are to be added to the Unreleased section under the
-appropriate stanza (see below). Each entry should ideally include a tag and
-the Github PR referenced in the following format:
+appropriate stanza (see below). Each entry should ideally include the Github
+PR referenced in the following format:
 
-* (<tag>) [PR-number](https://github.com/umee-network/umee/pull/PR-number) <changelog entry>
+* [PR-number](https://github.com/umee-network/umee/pull/PR-number) description
 
 Types of changes (Stanzas):
 
