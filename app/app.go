@@ -125,7 +125,6 @@ import (
 
 	customante "github.com/umee-network/umee/v6/ante"
 	"github.com/umee-network/umee/v6/app/inflation"
-	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/swagger"
 	"github.com/umee-network/umee/v6/util/genmap"
 	"github.com/umee-network/umee/v6/x/incentive"
