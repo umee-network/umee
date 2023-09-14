@@ -58,7 +58,7 @@ func (s *E2ETest) leverageLiquidate(addr, target sdk.AccAddress, repayDenom stri
 }
 
 func (s *E2ETest) leverageLeveragedLiquidate(addr, target sdk.AccAddress, repay, reward string) {
-	s.mustSucceedTx(leveragetypes.NewMsgLeveragedLiquidate(addr, target, repay, reward))
+	s.mustSucceedTx(leveragetypes.NewMsgLeveragedLiquidate(addr, target, repay, reward, sdk.ZeroDec()))
 }
 
 func (s *E2ETest) TestLeverageBasics() {

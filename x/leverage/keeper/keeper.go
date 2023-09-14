@@ -463,12 +463,13 @@ func (k Keeper) Liquidate(
 
 // LeveragedLiquidate
 func (k Keeper) LeveragedLiquidate(
-	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress, repayDenom, rewardDenom string,
+	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress,
+	repayDenom, rewardDenom string, maxRepay sdk.Dec,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
 	// If the message did not specify repay or reward denoms, select one arbitrarily (first in
 	// denom alphabetical order) from borrower position. Then proceed normally with the transaction.
+	borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 	if repayDenom == "" {
-		borrowed := k.GetBorrowerBorrows(ctx, borrowerAddr)
 		if !borrowed.IsZero() {
 			repayDenom = borrowed[0].Denom
 		}
@@ -488,11 +489,21 @@ func (k Keeper) LeveragedLiquidate(
 	}
 	uRewardDenom := coin.ToUTokenDenom(rewardDenom)
 
+	// If the message did not specify max repay, attempt to liquidate the full amount
+	maxRepayCoin := sdk.NewCoin(repayDenom, borrowed.AmountOf(repayDenom))
+	if !maxRepay.IsZero() {
+		// Otherwise, convert from max USD repay to token
+		maxRepayCoin, err = k.TokenWithValue(ctx, repayDenom, maxRepay, types.PriceModeSpot)
+		if err != nil {
+			return sdk.Coin{}, sdk.Coin{}, err
+		}
+	}
+
 	tokenRepay, uTokenReward, _, err := k.getLiquidationAmounts(
 		ctx,
 		liquidatorAddr,
 		borrowerAddr,
-		sdk.NewCoin(repayDenom, sdk.OneInt()), // amount is ignored for LeveragedLiquidate
+		maxRepayCoin,
 		rewardDenom,
 		false,
 		true,
