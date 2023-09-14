@@ -12,8 +12,9 @@ Highlights:
 
 - We introduce [Special Assets](https://github.com/umee-network/umee/blob/v6.0.0-beta2/x/leverage/README.md#special-asset-pairs): a new primitive to optimize positions in x/leverage.
 - New [inflation mechanism](./docs/design_docs/012-umee-inflation-v2.md).
-- Emergency Groups.
+- [Emergency Groups](#emergency-groups).
 - Full Gravity Bridge removal. We don't include GB module any more in Umee.
+- New `MsgLeveragedLiquidate.MaxRepay` which allows to limit the liquidation size using the leveraged liquidation mechanism.
 - Renamed ugov `EventMinTxFees` to `EventMinGasPrice`.
 
 ### New Inflation Mechanism

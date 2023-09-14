@@ -60,11 +60,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2159](https://github.com/umee-network/umee/pull/2159) Add hard market cap for token emission.
 - [2155](https://github.com/umee-network/umee/pull/2155) `bpmath`: basis points math package.
 - [2166](https://github.com/umee-network/umee/pull/2166) Basis Points: `MulDec`
-- [2170](https://github.com/umee-network/umee/pull/2170) Add SupplyFromModule and WithdrawToModule to leverage keeper.
+- [2170](https://github.com/umee-network/umee/pull/2170) Add `SupplyFromModule` and `WithdrawToModule` to leverage keeper.
 - [2177](https://github.com/umee-network/umee/pull/2177) metoken queries to cosmwasm and stargate queries.
 - [2187](https://github.com/umee-network/umee/pull/2187) New CMD: `ibc_denom`. It creates ibc denom by base denom and channel-id.
 - [2188](https://github.com/umee-network/umee/pull/2188) Emergency Group support for `x/leverage`.
 - [2191](https://github.com/umee-network/umee/pull/2191) Emergency Group support for IBC Quota.
+- [2242](https://github.com/umee-network/umee/pull/2242) New `MsgLeveragedLiquidate.MaxRepay` which allows to limit the liquidation size using the leveraged liquidation mechanism.
 
 ### Improvements
 
