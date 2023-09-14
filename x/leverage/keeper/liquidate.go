@@ -95,9 +95,9 @@ func (k Keeper) getLiquidationAmounts(
 		// for traditional liquidations, liquidator account balance limits repayment
 		availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
 		maxRepay = sdk.MinInt(maxRepay, availableRepay)
-		// maximum requested by liquidator
-		maxRepay = sdk.MinInt(maxRepay, requestedRepay.Amount)
 	}
+	// maximum requested by liquidator
+	maxRepay = sdk.MinInt(maxRepay, requestedRepay.Amount)
 	maxRepay = sdk.MinInt(maxRepay, maxRepayAfterCloseFactor) // close factor
 
 	// compute final liquidation amounts
