@@ -321,19 +321,19 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 // transaction with a MsgLeveragedLiquidate message.
 func LeveragedLiquidate() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "lev-liquidate [borrower] [repay-denom] [reward-denom]",
+		Use:   "lev-liquidate [borrower] [repay-denom] [reward-denom] [max-repay]",
 		Args:  cobra.RangeArgs(1, 3),
 		Short: "Liquidates by moving borrower debt to the liquidator and immediately collateralizes the reward.",
 		Long: strings.TrimSpace(
 			fmt.Sprintf(`
 Borrow tokens to liquidate a borrower's debt and immediately collateralize the reward.
 
-Will attempt to repay the maximum amount allowed by the targeted borrower's debt and collateral positions.
+Will attempt to repay the max amount allowed by the targeted borrower's position unless max repay (USD) is specified.
 
 The transaction will fail if the liquidator, with new borrow and collateral positions, would be above 0.8 borrow limit.
 
 Example:
-$ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
+$ umeed tx leverage lev-liquidate %s uumee uumee 123.4 --from mykey`,
 				"umee1qqy7cst5qm83ldupph2dcq0wypprkfpc9l3jg2",
 			),
 		),
@@ -350,6 +350,7 @@ $ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
 			}
 
 			var repayDenom, rewardDenom string
+			maxRepay := sdk.ZeroDec()
 			if len(args) > 1 {
 				repayDenom = args[1]
 			}
@@ -358,7 +359,11 @@ $ umeed tx leverage lev-liquidate %s uumee uumee --from mykey`,
 				rewardDenom = args[2]
 			}
 
-			msg := types.NewMsgLeveragedLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom)
+			if len(args) > 3 {
+				maxRepay = sdk.MustNewDecFromStr(args[3])
+			}
+
+			msg := types.NewMsgLeveragedLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom, maxRepay)
 			if err = msg.ValidateBasic(); err != nil {
 				return err
 			}
