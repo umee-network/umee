@@ -53,12 +53,6 @@ func NewExchangeRateTuple(denom string, exchangeRate sdk.Dec) ExchangeRateTuple 
 	}
 }
 
-// String implement stringify
-func (v ExchangeRateTuple) String() string {
-	out, _ := yaml.Marshal(v)
-	return string(out)
-}
-
 // ExchangeRateTuples - array of ExchangeRateTuple
 type ExchangeRateTuples []ExchangeRateTuple
 

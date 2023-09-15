@@ -13,6 +13,7 @@ import (
 	"github.com/tendermint/tendermint/libs/log"
 
 	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
@@ -72,18 +73,13 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
-func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
-	store := ctx.KVStore(k.storeKey)
-	symbol = strings.ToUpper(symbol)
-	b := store.Get(types.KeyExchangeRate(symbol))
-	if b == nil {
-		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
+func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (types.ExchangeRate, error) {
+	v := store.GetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), types.KeyExchangeRate(symbol),
+		"exchange_rate")
+	if v == nil {
+		return types.ExchangeRate{}, types.ErrUnknownDenom.Wrap(symbol)
 	}
-
-	decProto := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &decProto)
-
-	return decProto.Dec, nil
+	return *v, nil
 }
 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
@@ -115,11 +111,10 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
 // denom asset to the store.
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
-	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
-	denom = strings.ToUpper(denom)
-	store.Set(types.KeyExchangeRate(denom), bz)
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
+	key := types.KeyExchangeRate(denom)
+	val := types.ExchangeRate{Rate: rate, Timestamp: ctx.BlockTime()}
+	store.SetValue(ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
 }
 
 // SetExchangeRateWithEvent sets an consensus

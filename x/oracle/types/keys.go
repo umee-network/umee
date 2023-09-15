@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/binary"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
@@ -33,7 +34,7 @@ var (
 // KeyExchangeRate - stored by *denom*
 func KeyExchangeRate(denom string) []byte {
 	// append 0 for null-termination
-	return util.ConcatBytes(1, KeyPrefixExchangeRate, []byte(denom))
+	return util.ConcatBytes(1, KeyPrefixExchangeRate, []byte(strings.ToUpper(denom)))
 }
 
 // KeyFeederDelegation - stored by *Validator* address
