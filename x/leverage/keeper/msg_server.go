@@ -579,9 +579,10 @@ func (s msgServer) GovUpdateSpecialAssets(
 			for _, b := range set.Assets {
 				if a != b {
 					pair := types.SpecialAssetPair{
-						Collateral:       a,
-						Borrow:           b,
-						CollateralWeight: set.CollateralWeight,
+						Collateral:           a,
+						Borrow:               b,
+						CollateralWeight:     set.CollateralWeight,
+						LiquidationThreshold: set.LiquidationThreshold,
 					}
 					// sets or overrides (or deletes on zero collateral weight) each pair
 					if err := s.keeper.SetSpecialAssetPair(ctx, pair); err != nil {

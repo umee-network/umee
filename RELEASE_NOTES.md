@@ -6,6 +6,13 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v6.0.1
+
+This is a bug fix release for the `leverage.MsgGovUpdateSpecialAssets` handler.
+We also added `umeed q ugov emergency-group` CLI query. Users were able to query the Emergency Group address using REST.
+
+[CHANGELOG](CHANGELOG.md)
+
 ## v6.0.0
 
 Highlights:
