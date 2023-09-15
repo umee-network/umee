@@ -208,6 +208,22 @@ func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
 			"empty",
 		},
 		{
+			"invalid set",
+			&types.MsgGovUpdateSpecialAssets{
+				Authority:   govAccAddr,
+				Description: "test",
+				Sets: []types.SpecialAssetSet{
+					{
+						Assets:           []string{"test1", "test2"},
+						CollateralWeight: sdk.MustNewDecFromStr("0.8"),
+					},
+				},
+				Pairs: []types.SpecialAssetPair{},
+			},
+			true,
+			"nil",
+		},
+		{
 			"valid set",
 			&types.MsgGovUpdateSpecialAssets{
 				Authority:   govAccAddr,
@@ -223,6 +239,23 @@ func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
 			},
 			false,
 			"",
+		},
+		{
+			"invalid pair",
+			&types.MsgGovUpdateSpecialAssets{
+				Authority:   govAccAddr,
+				Description: "test",
+				Sets:        []types.SpecialAssetSet{},
+				Pairs: []types.SpecialAssetPair{
+					{
+						Borrow:           "test1",
+						Collateral:       "test2",
+						CollateralWeight: sdk.MustNewDecFromStr("0.8"),
+					},
+				},
+			},
+			true,
+			"nil",
 		},
 		{
 			"valid pair",
