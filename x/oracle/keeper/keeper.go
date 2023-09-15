@@ -11,6 +11,7 @@ import (
 	gogotypes "github.com/gogo/protobuf/types"
 	"github.com/tendermint/tendermint/libs/log"
 
+	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -114,7 +115,8 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
 	key := types.KeyExchangeRate(denom)
 	val := types.ExchangeRate{Rate: rate, Timestamp: ctx.BlockTime()}
-	store.SetValue(ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
+	err := store.SetValue(ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
+	util.Panic(err)
 }
 
 // SetExchangeRateWithEvent sets an consensus
