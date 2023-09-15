@@ -57,6 +57,8 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		}
 	}
 
+	// TODO: need to use spotPrice.Timestamp to make a decision about the price
+
 	switch mode {
 	case types.PriceModeSpot:
 		price = spotPrice.Rate
