@@ -187,6 +187,102 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 	}
 }
 
+func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
+	govAccAddr := checkers.GovModuleAddr
+
+	testCases := []struct {
+		name      string
+		req       *types.MsgGovUpdateSpecialAssets
+		expectErr bool
+		errMsg    string
+	}{
+		{
+			"empty",
+			&types.MsgGovUpdateSpecialAssets{
+				Authority:   govAccAddr,
+				Description: "test",
+				Sets:        []types.SpecialAssetSet{},
+				Pairs:       []types.SpecialAssetPair{},
+			},
+			true,
+			"empty",
+		},
+		{
+			"valid set",
+			&types.MsgGovUpdateSpecialAssets{
+				Authority:   govAccAddr,
+				Description: "test",
+				Sets: []types.SpecialAssetSet{
+					{
+						Assets:               []string{"test1", "test2"},
+						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+					},
+				},
+				Pairs: []types.SpecialAssetPair{},
+			},
+			false,
+			"",
+		},
+		{
+			"valid pair",
+			&types.MsgGovUpdateSpecialAssets{
+				Authority:   govAccAddr,
+				Description: "test",
+				Sets:        []types.SpecialAssetSet{},
+				Pairs: []types.SpecialAssetPair{
+					{
+						Borrow:               "test1",
+						Collateral:           "test2",
+						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+					},
+				},
+			},
+			false,
+			"",
+		},
+		{
+			"valid set and pair",
+			&types.MsgGovUpdateSpecialAssets{
+				Authority:   govAccAddr,
+				Description: "test",
+				Sets: []types.SpecialAssetSet{
+					{
+						Assets:               []string{"test1", "test2"},
+						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+					},
+				},
+				Pairs: []types.SpecialAssetPair{
+					{
+						Borrow:               "test1",
+						Collateral:           "test2",
+						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+					},
+				},
+			},
+			false,
+			"",
+		},
+	}
+
+	for _, tc := range testCases {
+		s.Run(tc.name, func() {
+			err := tc.req.ValidateBasic()
+			if err == nil {
+				_, err = s.msgSrvr.GovUpdateSpecialAssets(s.ctx, tc.req)
+			}
+			if tc.expectErr {
+				s.Require().ErrorContains(err, tc.errMsg)
+			} else {
+				s.Require().NoError(err)
+			}
+		})
+	}
+}
+
 func (s *IntegrationTestSuite) TestMsgSupply() {
 	type testCase struct {
 		msg             string
