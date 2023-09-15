@@ -2145,9 +2145,21 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// create and fund a liquidator which supplies plenty of UMEE and ATOM to the module
-	liquidator := s.newAccount(coin.New(umeeDenom, 10000_000000), coin.New(atomDenom, 10000_000000))
-	s.supply(liquidator, coin.New(umeeDenom, 10000_000000), coin.New(atomDenom, 10000_000000))
-	s.collateralize(liquidator, coin.New("u/"+umeeDenom, 10000_000000), coin.New("u/"+atomDenom, 10000_000000))
+	liquidator := s.newAccount(
+		coin.New(umeeDenom, 10000_000000),
+		coin.New(atomDenom, 10000_000000),
+		coin.New(daiDenom, 10000_000000),
+	)
+	s.supply(liquidator,
+		coin.New(umeeDenom, 10000_000000),
+		coin.New(atomDenom, 10000_000000),
+		coin.New(daiDenom, 10000_000000),
+	)
+	s.collateralize(liquidator,
+		coin.New("u/"+umeeDenom, 10000_000000),
+		coin.New("u/"+atomDenom, 10000_000000),
+		coin.New("u/"+daiDenom, 10000_000000),
+	)
 
 	// create a healthy borrower
 	healthyBorrower := s.newAccount(coin.New(umeeDenom, 100_000000))
@@ -2183,12 +2195,27 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 	// artificially borrow just barely above liquidation threshold to simulate interest accruing
 	s.forceBorrow(closeBorrower, coin.New(umeeDenom, 106_000000))
 
+	// creates a borrower with $10 PAIRED (stablecoin) collateral which will have a close factor = 1
+	daiBorrower := s.newAccount(coin.New(pairedDenom, 10_000000))
+	s.supply(daiBorrower, coin.New(pairedDenom, 10_000000))
+	s.collateralize(daiBorrower, coin.New("u/"+pairedDenom, 10_000000))
+	// artificially borrow an amount much greater than liquidation threshold
+	s.forceBorrow(daiBorrower, coin.New(pairedDenom, 7_000000))
+
+	// creates another realistic borrower with 400 UMEE collateral which will have a close factor < 1
+	closeBorrower2 := s.newAccount(coin.New(umeeDenom, 400_000000))
+	s.supply(closeBorrower2, coin.New(umeeDenom, 400_000000))
+	s.collateralize(closeBorrower2, coin.New("u/"+umeeDenom, 400_000000))
+	// artificially borrow just barely above liquidation threshold to simulate interest accruing
+	s.forceBorrow(closeBorrower2, coin.New(umeeDenom, 106_000000))
+
 	tcs := []struct {
 		msg            string
 		liquidator     sdk.AccAddress
 		borrower       sdk.AccAddress
 		repayDenom     string
 		rewardDenom    string
+		maxRepay       sdk.Dec
 		expectedRepay  sdk.Coin
 		expectedReward sdk.Coin
 		err            error
@@ -2199,6 +2226,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			healthyBorrower,
 			atomDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationIneligible,
@@ -2208,6 +2236,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			"u/" + umeeDenom,
 			umeeDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
@@ -2217,6 +2246,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			umeeDenom,
 			"u/" + umeeDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
@@ -2226,6 +2256,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			"foo",
 			umeeDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
@@ -2235,6 +2266,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			atomDenom,
 			"foo",
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
@@ -2244,6 +2276,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			atomDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationRepayZero,
@@ -2253,6 +2286,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			atomBorrower,
 			atomDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			coin.New(atomDenom, 500_000000),
 			coin.New("u/"+atomDenom, 550_000000),
 			nil,
@@ -2262,6 +2296,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			umeeDenom,
 			umeeDenom,
+			sdk.ZeroDec(),
 			coin.New(umeeDenom, 100_000000),
 			coin.New("u/"+umeeDenom, 110_000000),
 			nil,
@@ -2271,6 +2306,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			complexBorrower,
 			umeeDenom,
 			atomDenom,
+			sdk.ZeroDec(),
 			coin.New(umeeDenom, 30_000000),
 			coin.New("u/"+atomDenom, 3_527933),
 			nil,
@@ -2280,8 +2316,39 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			closeBorrower,
 			"",
 			"",
+			sdk.ZeroDec(),
 			coin.New(umeeDenom, 8_150541),
 			coin.New("u/"+umeeDenom, 8_965596),
+			nil,
+		}, {
+			"stable borrower with nonzero max repay",
+			liquidator,
+			daiBorrower,
+			"",
+			"",
+			sdk.OneDec(),
+			coin.New(pairedDenom, 1_000000),
+			coin.New("u/"+pairedDenom, 1_100000),
+			nil,
+		}, {
+			"stable borrower with nonzero max repay (again)",
+			liquidator,
+			daiBorrower,
+			"",
+			"",
+			sdk.MustNewDecFromStr("2.0"),
+			coin.New(pairedDenom, 2_000000),
+			coin.New("u/"+pairedDenom, 2_200000),
+			nil,
+		}, {
+			"umee borrower with nonzero max repay and close factor < 1",
+			liquidator,
+			closeBorrower2,
+			"",
+			"",
+			sdk.MustNewDecFromStr("10.00"),
+			coin.New(umeeDenom, 2_375296), // $10 of UMEE at price $4.21
+			coin.New("u/"+umeeDenom, 2_612826),
 			nil,
 		},
 	}
@@ -2292,6 +2359,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			Borrower:    tc.borrower.String(),
 			RepayDenom:  tc.repayDenom,
 			RewardDenom: tc.rewardDenom,
+			MaxRepay:    tc.maxRepay,
 		}
 		if tc.err != nil {
 			_, err := srv.LeveragedLiquidate(ctx, msg)
@@ -2327,7 +2395,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			liCollateral := app.LeverageKeeper.GetBorrowerCollateral(ctx, tc.liquidator)
 			liBorrowed := app.LeverageKeeper.GetBorrowerBorrows(ctx, tc.liquidator)
 
-			// verify the output of fast-liquidate function
+			// verify the output of leveraged-liquidate function
 			resp, err := srv.LeveragedLiquidate(ctx, msg)
 			require.NoError(err, tc.msg)
 			require.Equal(tc.expectedRepay.String(), resp.Repaid.String(), tc.msg)

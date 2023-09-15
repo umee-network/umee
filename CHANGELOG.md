@@ -15,10 +15,10 @@ Mention whether you follow Semantic Versioning.
 Usage:
 
 Change log entries are to be added to the Unreleased section under the
-appropriate stanza (see below). Each entry should ideally include a tag and
-the Github PR referenced in the following format:
+appropriate stanza (see below). Each entry should ideally include the Github
+PR referenced in the following format:
 
-* (<tag>) [#<PR-number>](https://github.com/umee-network/umee/pull/<PR-number>) <changelog entry>
+* [PR-number](https://github.com/umee-network/umee/pull/PR-number) description
 
 Types of changes (Stanzas):
 
@@ -34,7 +34,7 @@ To release a new version, ensure an appropriate release branch exists. Add a
 release version and date to the existing Unreleased section which takes the form
 of:
 
-## [<version>](https://github.com/umee-network/umee/releases/tag/<version>) - YYYY-MM-DD
+## [version](https://github.com/umee-network/umee/releases/tag/version) - YYYY-MM-DD
 
 Once the version is tagged and released, a PR should be made against the main
 branch to incorporate the new changelog updates.
@@ -46,22 +46,61 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v6.0.0](https://github.com/umee-network/umee/releases/tag/v6.0.0) - 2023-09-14
+
 ### Features
 
+- [2128](https://github.com/umee-network/umee/pull/2128) CW transaction and query handlers for the incentive module.
 - [2129](https://github.com/umee-network/umee/pull/2129) Emergency Group x/ugov proto.
+- [2145](https://github.com/umee-network/umee/pull/2145) UMEE v2 Inflation.
 - [2146](https://github.com/umee-network/umee/pull/2146) Add store `GetTimeMs` and `SetTimeMs`.
 - [2157](https://github.com/umee-network/umee/pull/2157) Add `x/metoken` module.
-- [2150](https://github.com/umee-network/umee/pull/2150) Add gov message to create Special Asset Pairs
+- [2150](https://github.com/umee-network/umee/pull/2150), [2178](https://github.com/umee-network/umee/pull/2178) `x/leverage` Special Asset Pairs.
 - [2145](https://github.com/umee-network/umee/pull/2145) Add New `Inflation Parms` to x/ugov proto and added `inflation rate` change logic to umint
 - [2159](https://github.com/umee-network/umee/pull/2159) Add hard market cap for token emission.
 - [2155](https://github.com/umee-network/umee/pull/2155) `bpmath`: basis points math package.
 - [2166](https://github.com/umee-network/umee/pull/2166) Basis Points: `MulDec`
-- [2170](https://github.com/umee-network/umee/pull/2170) Add SupplyFromModule and WithdrawToModule to leverage keeper.
+- [2170](https://github.com/umee-network/umee/pull/2170) Add `SupplyFromModule` and `WithdrawToModule` to leverage keeper.
+- [2177](https://github.com/umee-network/umee/pull/2177) metoken queries to cosmwasm and stargate queries.
+- [2187](https://github.com/umee-network/umee/pull/2187) New CMD: `ibc_denom`. It creates ibc denom by base denom and channel-id.
+- [2188](https://github.com/umee-network/umee/pull/2188) Emergency Group support for `x/leverage`.
+- [2191](https://github.com/umee-network/umee/pull/2191) Emergency Group support for IBC Quota.
+- [2242](https://github.com/umee-network/umee/pull/2242) New `MsgLeveragedLiquidate.MaxRepay` which allows to limit the liquidation size using the leveraged liquidation mechanism.
+
+### Improvements
+
+- [2135](https://github.com/umee-network/umee/pull/2135) Remove Gravity Bridge module.
+- [2209](https://github.com/umee-network/umee/pull/2209) Move leverage module params from paramspace to regular leverage module state.
+
+### State Machine Breaking
+
+- [2145](https://github.com/umee-network/umee/pull/2145) new UMEE inflation schedule.
+- [2176](https://github.com/umee-network/umee/pull/2176) x/ugov module v2: adding token emission params.
+
+### Bug Fixes
+
+- [2185](https://github.com/umee-network/umee/pull/2185) `x/oracle` end_blocker panic.
+
+### API Breaking
+
+- [2135](https://github.com/umee-network/umee/pull/2135) Gravity Bridge API is removed.
+- [2140](https://github.com/umee-network/umee/pull/2140) Renamed ugov EventMinTxFees to EventMinGasPrice.
+- [2165](https://github.com/umee-network/umee/pull/2165) Use underscore for message part in the web gRPC path format:
+  - `/umee/ugov/v1/min-gas-price` --> `/umee/ugov/v1/min_gas_price`
+  - `/umee/ugov/v1/emergency-group` --> `/umee/ugov/v1/emergency_group`
+  - `/umee/uibc/v1/all-outflows` --> `/umee/uibc/v1/all_outflows`
+- [2169](https://github.com/umee-network/umee/pull/2169) Update numeric store getters (`util/store` package) to return bool if value is missing.
+- [2180](https://github.com/umee-network/umee/pull/2180) Rename leverage `Keeper.ExchangeToken -> ToUToken`, `Keeper.ExchangeUToken -> ToToken` and `Keeper.ExchangeUTokens -> ToTokens`.
+- [2183](https://github.com/umee-network/umee/pull/2183) Move `ToUTokenDenom`, `StripUTokenDenom` and `HasUTokenPrefix` from `leverage/keeper` to `coin` package.
+- [2203](https://github.com/umee-network/umee/pull/2203) Rework proposal messages. Remove Title from `ugov/MsgGovSetIBCStatus`, `ugov/MsgGovUpdateQuota`, `leverage/MsgGovUpdateRegistry`
+- [2234](https://github.com/umee-network/umee/pull/2234) Remove "Get" prefix from cli/ ref tests.
+
+## [v5.2.0](https://github.com/umee-network/umee/releases/tag/v5.2.0) - 2023-08-31
 
 ### Improvements
 
 - [2134](https://github.com/umee-network/umee/pull/2134) Bump CometBFT to 34.29.
-- [2209](https://github.com/umee-network/umee/pull/2209) Move leverage module params from paramspace to regular leverage module state.
+- [2196](https://github.com/umee-network/umee/pull/2196) Adding Amino support to `x/leverage.MsgLeveragedLiquidate`.
 
 ### State Machine Breaking
 
@@ -72,17 +111,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgBeginUnbonding counting existing unbondings against max unbond twice.
 - [2148](https://github.com/umee-network/umee/pull/2148) Fix MsgLeverageLiquidate CLI not actually allowing wildcard denoms.
 - [2197](https://github.com/umee-network/umee/pull/2197) Allowing duplicate symbols on leverage token registry. Fix the oracle voting miss counter on duplicate symbol denoms.
-- [2212](https://github.com/umee-network/umee/pull/2212) Fixes an x/oracle RPC endpoint spelling, changing "/umee/oracle/v1/valdiators/{validator_addr}/aggregate_vote" to "/umee/oracle/v1/validators/{validator_addr}/aggregate_vote"
 
 ### API Breaking
 
-- [2140](https://github.com/umee-network/umee/pull/2140) Renamed ugov EventMinTxFees to EventMinGasPrice.
-- [2165](https://github.com/umee-network/umee/pull/2165) Use underscore for message part in the web gRPC path format:
-  - `/umee/ugov/v1/min-gas-price` --> `/umee/ugov/v1/min_gas_price`
-  - `/umee/ugov/v1/emergency-group` --> `/umee/ugov/v1/emergency_group`
-  - `/umee/uibc/v1/all-outflows` --> `/umee/uibc/v1/all_outflows`
-- [2180](https://github.com/umee-network/umee/pull/2180) Rename leverage `Keeper.ExchangeToken -> ToUToken`, `Keeper.ExchangeUToken -> ToToken` and `Keeper.ExchangeUTokens -> ToTokens`.
-- [2183](https://github.com/umee-network/umee/pull/2183) Move `ToUTokenDenom`, `StripUTokenDenom` and `HasUTokenPrefix` from `leverage/keeper` to `coin` package.
+- [2212](https://github.com/umee-network/umee/pull/2212) Fixes an x/oracle RPC endpoint spelling, changing "/umee/oracle/v1/valdiators/{validator_addr}/aggregate_vote" to "/umee/oracle/v1/validators/{validator_addr}/aggregate_vote"
 
 ## [v5.1.0](https://github.com/umee-network/umee/releases/tag/v5.1.0) - 2023-07-07
 

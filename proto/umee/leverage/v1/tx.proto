@@ -58,6 +58,8 @@ service Msg {
   // executing this transaction, instead of the regular 100%. Also allows repayment and reward denoms to
   // be left blank - if not specified, the module will automatically select the first (alphabetically by denom)
   // borrow and/or collateral on the target account and the proceed normally.
+  // After v6.0, includes a MaxRepay field which limits repay value in USD. To prevent dust exploits, this
+  // value cannot be below $1.00
   rpc LeveragedLiquidate(MsgLeveragedLiquidate) returns (MsgLeveragedLiquidateResponse);
 
   // SupplyCollateral combines the Supply and Collateralize actions.
@@ -174,6 +176,11 @@ message MsgLeveragedLiquidate {
   // RewardDenom is the uToken denom that the liquidator will receive as a liquidation reward
   // and immediately collateralize.
   string reward_denom = 4;
+  // MaxRepay optionally limits the USD value to repay. If specified, this cannot be below $1.00
+  string max_repay = 5 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // MsgSupplyCollateral represents a user's request to supply and collateralize assets to the module.
