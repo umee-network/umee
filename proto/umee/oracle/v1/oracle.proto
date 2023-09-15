@@ -146,9 +146,7 @@ message AvgCounter {
 
 // ExchangeRate stores exchange rate with timestamp
 message ExchangeRate {
-  option (gogoproto.equal)            = false;
-  option (gogoproto.goproto_getters)  = false;
-  option (gogoproto.goproto_stringer) = false;
+  option (gogoproto.equal) = false;
 
   string rate = 1 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",

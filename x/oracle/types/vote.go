@@ -7,8 +7,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"gopkg.in/yaml.v3"
-
-	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func NewAggregateExchangeRatePrevote(
@@ -83,7 +81,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 			return nil, err
 		}
 		if !decCoin.IsPositive() {
-			return nil, types.ErrInvalidOraclePrice
+			return nil, fmt.Errorf("exchange rate can't be negative: %s", tupleStr)
 		}
 
 		denom := strings.ToUpper(denomAmountStr[0])

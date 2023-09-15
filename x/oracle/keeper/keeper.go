@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -84,6 +83,7 @@ func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (types.ExchangeR
 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
 // in the base denom (e.g. ATOM -> uatom)
+// TODO: needs to return timestamp as well
 func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	var symbol string
 	var exponent uint64
@@ -106,7 +106,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 	}
 
 	powerReduction := ten.Power(exponent)
-	return exchangeRate.Quo(powerReduction), nil
+	return exchangeRate.Rate.Quo(powerReduction), nil
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
@@ -127,6 +127,7 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchange
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.
+// TODO: handler should use ExchangeRate type rather than Dec
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
@@ -136,10 +137,10 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
 		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
-		dp := sdk.DecProto{}
-		k.cdc.MustUnmarshal(iter.Value(), &dp)
+		var er types.ExchangeRate
+		k.cdc.MustUnmarshal(iter.Value(), &er)
 
-		if handler(denom, dp.Dec) {
+		if handler(denom, er.Rate) {
 			break
 		}
 	}
