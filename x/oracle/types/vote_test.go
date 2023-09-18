@@ -2,9 +2,10 @@ package types
 
 import (
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"gotest.tools/v3/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAggregateExchangeRatePrevoteString(t *testing.T) {
@@ -45,7 +46,7 @@ func TestExchangeRateTuplesString(t *testing.T) {
 func TestParseExchangeRateTuples(t *testing.T) {
 	valid := "uumee:123.0,uatom:123.123"
 	_, err := ParseExchangeRateTuples(valid)
-	assert.NilError(t, err)
+	assert.NoError(t, err)
 
 	duplicatedDenom := "uumee:100.0,uatom:123.123,uatom:121233.123"
 	_, err = ParseExchangeRateTuples(duplicatedDenom)
@@ -72,5 +73,11 @@ func TestParseExchangeRateTuples(t *testing.T) {
 	assert.ErrorContains(t, err, "invalid exchange rate")
 
 	_, err = ParseExchangeRateTuples("")
-	assert.NilError(t, err)
+	assert.NoError(t, err)
+}
+
+func TestExchangeRateString(t *testing.T) {
+	t1 := time.Date(2022, 9, 18, 15, 55, 01, 0, time.UTC)
+	er := ExchangeRate{Rate: sdk.MustNewDecFromStr("1.5"), Timestamp: t1}
+	assert.Equal(t, `{"rate":"1.500000000000000000","timestamp":"2022-09-18T15:55:01Z"}`, er.String())
 }
