@@ -31,19 +31,18 @@ func TestAggregateExchangeRateVoteString(t *testing.T) {
 }
 
 func TestExchangeRateTuplesString(t *testing.T) {
+	t.Parallel()
 	exchangeRateTuple := NewExchangeRateTuple(UmeeDenom, sdk.OneDec())
-	assert.Equal(t, exchangeRateTuple.String(), "denom: uumee\nexchange_rate: \"1.000000000000000000\"\n")
+	assert.Equal(t, exchangeRateTuple.String(), `{"denom":"uumee", "exchange_rate":"1"}`)
 
 	exchangeRateTuples := ExchangeRateTuples{
 		exchangeRateTuple,
 		NewExchangeRateTuple(IbcDenomAtom, sdk.SmallestDec()),
 	}
-	assert.Equal(t, "- denom: uumee\n  exchange_rate: \"1.000000000000000000\"\n- denom: ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2\n  exchange_rate: \"0.000000000000000001\"\n", exchangeRateTuples.String())
+	assert.Equal(t, `[{"denom":"uumee","exchange_rate":"1"},{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2","exchange_rate":"0.000000000000000001"}]`, exchangeRateTuples.String())
 }
 
 func TestParseExchangeRateTuples(t *testing.T) {
-	errMsg := "invalid oracle price"
-
 	valid := "uumee:123.0,uatom:123.123"
 	_, err := ParseExchangeRateTuples(valid)
 	assert.NilError(t, err)
@@ -62,11 +61,11 @@ func TestParseExchangeRateTuples(t *testing.T) {
 
 	zeroCoinsWithValid := "uumee:0.0,uatom:123.1"
 	_, err = ParseExchangeRateTuples(zeroCoinsWithValid)
-	assert.ErrorContains(t, err, errMsg)
+	assert.ErrorContains(t, err, "can't be negative")
 
 	negativeCoinsWithValid := "uumee:-1234.5,uatom:123.1"
 	_, err = ParseExchangeRateTuples(negativeCoinsWithValid)
-	assert.ErrorContains(t, err, errMsg)
+	assert.ErrorContains(t, err, "can't be negative")
 
 	multiplePricesPerRate := "uumee:123: uumee:456,uusdc:789"
 	_, err = ParseExchangeRateTuples(multiplePricesPerRate)

@@ -1,11 +1,13 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/umee-network/umee/v6/util/sdkutil"
 	"gopkg.in/yaml.v3"
 )
 
@@ -51,13 +53,21 @@ func NewExchangeRateTuple(denom string, exchangeRate sdk.Dec) ExchangeRateTuple 
 	}
 }
 
+func (v ExchangeRateTuple) String() string {
+	return fmt.Sprintf("{\"denom\":%q, \"exchange_rate\":%q}", v.Denom, sdkutil.FormatDec(v.ExchangeRate))
+}
+
+func (v ExchangeRateTuple) MarshalJSON() ([]byte, error) {
+	return []byte(v.String()), nil
+}
+
 // ExchangeRateTuples - array of ExchangeRateTuple
 type ExchangeRateTuples []ExchangeRateTuple
 
 // String implements fmt.Stringer interface
 func (tuples ExchangeRateTuples) String() string {
-	out, _ := yaml.Marshal(tuples)
-	return string(out)
+	bz, _ := json.Marshal(tuples)
+	return string(bz) // fmt.Sprint([]ExchangeRateTuple(tuples))
 }
 
 // ParseExchangeRateTuples ExchangeRateTuple parser
