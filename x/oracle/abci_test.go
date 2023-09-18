@@ -157,7 +157,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
+		s.Require().Equal(types.ExchangeRate{Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()},
+			rate)
 	}
 
 	// Test: only val2 votes (has 39% vote power).
