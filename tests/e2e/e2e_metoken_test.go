@@ -47,7 +47,6 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 	s.Run(
 		"swap_100USDT_success", func() {
 			index = s.getMetokenIndex(mocks.MeUSDDenom)
-
 			hundredUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(100_000000))
 			fee := index.Fee.MinFee.MulInt(hundredUSDT.Amount).TruncateInt()
 
