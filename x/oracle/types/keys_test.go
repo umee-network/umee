@@ -1,7 +1,6 @@
 package types
 
 import (
-	"fmt"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -52,9 +51,7 @@ func TestKeyFeederDelegation(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyFeederDelegation(testCase.val)
-		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
-			assert.Equal(t, testCase.expectedKey, actualKey)
-		})
+		assert.Equal(t, testCase.expectedKey, actualKey, "test: %v", i)
 	}
 }
 
@@ -72,9 +69,7 @@ func TestKeyMissCounter(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyMissCounter(testCase.val)
-		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
-			assert.Equal(t, testCase.expectedKey, actualKey)
-		})
+		assert.Equal(t, testCase.expectedKey, actualKey, "test: %v", i)
 	}
 }
 
@@ -92,9 +87,7 @@ func TestKeyAggregateExchangeRatePrevote(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyAggregateExchangeRatePrevote(testCase.val)
-		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
-			assert.Equal(t, testCase.expectedKey, actualKey)
-		})
+		assert.Equal(t, testCase.expectedKey, actualKey, "test: %v", i)
 	}
 }
 
@@ -112,9 +105,7 @@ func TestKeyAggregateExchangeRateVote(t *testing.T) {
 
 	for i, testCase := range testCases {
 		actualKey := KeyAggregateExchangeRateVote(testCase.val)
-		t.Run(fmt.Sprintf("test %d - expected key: %s should be the same as actual key: %s", i, testCase.expectedKey, actualKey), func(t *testing.T) {
-			assert.Equal(t, testCase.expectedKey, actualKey)
-		})
+		assert.Equal(t, testCase.expectedKey, actualKey, "test: %v", i)
 	}
 }
 
