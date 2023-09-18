@@ -233,8 +233,8 @@ test-e2e-cov: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
 
 test-e2e-clean:
-	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder || \
-		docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
+	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder || true
+	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 
 test-qa: 
 	@go test ./tests/qa/... -timeout 30m -v -tags='test_qa'
