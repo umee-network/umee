@@ -1,13 +1,13 @@
 package e2e
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v6/app"
 	"github.com/umee-network/umee/v6/tests/grpc"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -15,15 +15,14 @@ import (
 )
 
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
-	var prices []metoken.IndexPrices
 	var index metoken.Index
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
 
-	if app.Experimental {
-		s.T().Skip("Skipping tests for experimental module x/metoken")
-	}
+	//if !app.Experimental {
+	//	s.T().Skip("Skipping tests for experimental module x/metoken")
+	//}
 
 	s.Run(
 		"create_stable_index", func() {
@@ -40,7 +39,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			err = grpc.MetokenRegistryUpdate(s.Umee, []metoken.Index{meUSD}, nil)
 			s.Require().NoError(err)
 
-			prices = s.checkMetokenBalance(meUSD.Denom, expectedBalance)
+			s.checkMetokenBalance(meUSD.Denom, expectedBalance)
 		},
 	)
 
@@ -57,6 +56,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
 			amountToLeverage := amountToSwap.Sub(amountToReserves)
 
+			prices := s.getPrices(mocks.MeUSDDenom)
 			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
 			s.Require().NoError(err)
 			returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
@@ -71,7 +71,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Add(amountToLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
+			s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 
@@ -86,19 +86,22 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 				"not enough",
 			)
 
-			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
+			s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 
 	s.Run(
 		"redeem_50meUSD_success", func() {
-			s.T().Skip("test never succeeds, need to be updated")
+			prices := s.getPrices(mocks.MeUSDDenom)
 
 			fiftyMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(50_000000))
 
 			s.executeRedeemSuccess(valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
 
 			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
+			fmt.Printf("fiftyMeUSD: %s\n", fiftyMeUSD.String())
+			fmt.Printf("usdtPrice: %s\n", usdtPrice.Price.String())
+			fmt.Printf("usdtPrice.RedeemRate: %s\n", usdtPrice.RedeemRate.String())
 			s.Require().NoError(err)
 			usdtToRedeem := usdtPrice.RedeemRate.MulInt(fiftyMeUSD.Amount).TruncateInt()
 			fee := index.Fee.MinFee.MulInt(usdtToRedeem).TruncateInt()
@@ -116,13 +119,12 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Sub(amountFromLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			_ = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
+			s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
 		},
 	)
 }
 
-func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.IndexBalances) []metoken.IndexPrices {
-	var prices []metoken.IndexPrices
+func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.IndexBalances) {
 	s.Require().Eventually(
 		func() bool {
 			resp, err := s.QueryMetokenBalances(denom)
@@ -133,6 +135,31 @@ func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.Inde
 			var exist bool
 			for _, balance := range resp.IndexBalances {
 				if balance.MetokenSupply.Denom == expectedBalance.MetokenSupply.Denom {
+					fmt.Printf("expected[0].Fees: %s\n", expectedBalance.AssetBalances[0].Fees)
+					fmt.Printf("expected[0].Reserved: %s\n", expectedBalance.AssetBalances[0].Reserved)
+					fmt.Printf("expected[0].Leveraged: %s\n", expectedBalance.AssetBalances[0].Leveraged)
+					fmt.Printf("expected[0].Interest: %s\n", expectedBalance.AssetBalances[0].Interest)
+					fmt.Printf("expected[1].Fees: %s\n", expectedBalance.AssetBalances[1].Fees)
+					fmt.Printf("expected[1].Reserved: %s\n", expectedBalance.AssetBalances[1].Reserved)
+					fmt.Printf("expected[1].Leveraged: %s\n", expectedBalance.AssetBalances[1].Leveraged)
+					fmt.Printf("expected[1].Interest: %s\n", expectedBalance.AssetBalances[1].Interest)
+					fmt.Printf("expected[2].Fees: %s\n", expectedBalance.AssetBalances[2].Fees)
+					fmt.Printf("expected[2].Reserved: %s\n", expectedBalance.AssetBalances[2].Reserved)
+					fmt.Printf("expected[2].Leveraged: %s\n", expectedBalance.AssetBalances[2].Leveraged)
+					fmt.Printf("expected[2].Interest: %s\n", expectedBalance.AssetBalances[2].Interest)
+					fmt.Printf("----------------------\n")
+					fmt.Printf("balance[0].Fees: %s\n", balance.AssetBalances[0].Fees)
+					fmt.Printf("balance[0].Reserved: %s\n", balance.AssetBalances[0].Reserved)
+					fmt.Printf("balance[0].Leveraged: %s\n", balance.AssetBalances[0].Leveraged)
+					fmt.Printf("balance[0].Interest: %s\n", balance.AssetBalances[0].Interest)
+					fmt.Printf("balance[1].Fees: %s\n", balance.AssetBalances[1].Fees)
+					fmt.Printf("balance[1].Reserved: %s\n", balance.AssetBalances[1].Reserved)
+					fmt.Printf("balance[1].Leveraged: %s\n", balance.AssetBalances[1].Leveraged)
+					fmt.Printf("balance[1].Interest: %s\n", balance.AssetBalances[1].Interest)
+					fmt.Printf("balance[2].Fees: %s\n", balance.AssetBalances[2].Fees)
+					fmt.Printf("balance[2].Reserved: %s\n", balance.AssetBalances[2].Reserved)
+					fmt.Printf("balance[2].Leveraged: %s\n", balance.AssetBalances[2].Leveraged)
+					fmt.Printf("balance[2].Interest: %s\n", balance.AssetBalances[2].Interest)
 					exist = true
 					s.Require().Equal(expectedBalance, balance)
 					break
@@ -140,13 +167,28 @@ func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.Inde
 			}
 
 			s.Require().True(exist)
+			return true
+		},
+		30*time.Second,
+		500*time.Millisecond,
+	)
+}
+
+func (s *E2ETest) getPrices(denom string) []metoken.IndexPrices {
+	var prices []metoken.IndexPrices
+	s.Require().Eventually(
+		func() bool {
+			resp, err := s.QueryMetokenPrices(denom)
+			if err != nil {
+				return false
+			}
+
 			prices = resp.Prices
 			return true
 		},
 		30*time.Second,
 		500*time.Millisecond,
 	)
-
 	return prices
 }
 

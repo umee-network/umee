@@ -50,14 +50,7 @@ func (ip IndexPrices) SwapRate(from sdk.Coin) (sdkmath.Int, error) {
 		return sdkmath.Int{}, err
 	}
 
-	exchangeRate := fromPrice.Price.Quo(ip.Price)
-
-	exponentFactor, err := ExponentFactor(fromPrice.Exponent, ip.Exponent)
-	if err != nil {
-		return sdkmath.Int{}, err
-	}
-
-	return exchangeRate.MulInt(from.Amount).Mul(exponentFactor).TruncateInt(), nil
+	return fromPrice.SwapRate.MulInt(from.Amount).TruncateInt(), nil
 }
 
 // RedeemRate converts meToken to an asset applying exchange_rate and normalizing the exponent.
@@ -67,32 +60,22 @@ func (ip IndexPrices) RedeemRate(from sdk.Coin, to string) (sdkmath.Int, error) 
 		return sdkmath.Int{}, err
 	}
 
-	exchangeRate := ip.Price.Quo(toPrice.Price)
+	fmt.Printf("from.Amount: %s\n", from.Amount.String())
+	fmt.Printf("toPrice: %s\n", toPrice.Price.String())
+	fmt.Printf("toPrice.RedeemRate: %s\n", toPrice.RedeemRate.String())
 
-	exponentFactor, err := ExponentFactor(ip.Exponent, toPrice.Exponent)
-	if err != nil {
-		return sdkmath.Int{}, err
-	}
-
-	return exchangeRate.MulInt(from.Amount).Mul(exponentFactor).TruncateInt(), nil
+	return toPrice.RedeemRate.MulInt(from.Amount).TruncateInt(), nil
 }
 
-// QueryExport completes the structure with missing data for the query.
-func (ip IndexPrices) QueryExport() IndexPrices {
-	assets := make([]AssetPrice, len(ip.Assets))
-	for i := 0; i < len(ip.Assets); i++ {
-		asset := ip.Assets[i]
-		asset.SwapRate = asset.Price.Quo(ip.Price)
-		asset.RedeemRate = ip.Price.Quo(asset.Price)
-		assets[i] = asset
+func Rate(fromPrice, toPrice sdk.Dec, fromExponent, toExponent uint32) (sdk.Dec, error) {
+	exchangeRate := fromPrice.Quo(toPrice)
+
+	exponentFactor, err := ExponentFactor(fromExponent, toExponent)
+	if err != nil {
+		return sdk.Dec{}, err
 	}
 
-	return IndexPrices{
-		Denom:    ip.Denom,
-		Price:    ip.Price,
-		Exponent: ip.Exponent,
-		Assets:   assets,
-	}
+	return exchangeRate.Mul(exponentFactor), nil
 }
 
 // ExponentFactor calculates the factor to multiply by which the assets with different exponents.
