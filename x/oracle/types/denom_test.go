@@ -14,7 +14,7 @@ func TestDenomString(t *testing.T) {
 	}{
 		{
 			denom:       types.DenomUmee,
-			expectedStr: "base_denom: uumee\nsymbol_denom: umee\nexponent: 6\n",
+			expectedStr: "base_denom: uumee\nsymbol_denom: UMEE\nexponent: 6\n",
 		},
 		{
 			denom:       types.DenomLuna,
@@ -76,7 +76,7 @@ func TestDenomListString(t *testing.T) {
 	}{
 		{
 			denomList:   types.DenomList{types.DenomUmee},
-			expectedStr: "base_denom: uumee\nsymbol_denom: umee\nexponent: 6",
+			expectedStr: "base_denom: uumee\nsymbol_denom: UMEE\nexponent: 6",
 		},
 		{
 			denomList:   types.DenomList{types.DenomAtom, types.DenomLuna},

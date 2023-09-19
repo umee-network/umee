@@ -10,22 +10,15 @@ option (gogoproto.goproto_getters_all) = false;
 
 // GenesisState defines the oracle module's genesis state.
 message GenesisState {
-  Params                    params             = 1 [(gogoproto.nullable) = false];
-  repeated FeederDelegation feeder_delegations = 2
-      [(gogoproto.nullable) = false];
-  // TODO: need to update this to save data with timestamp
-  repeated ExchangeRateTuple exchange_rates = 3 [
-    (gogoproto.castrepeated) = "ExchangeRateTuples",
-    (gogoproto.nullable)     = false
-  ];
+  Params                                params                           = 1 [(gogoproto.nullable) = false];
+  repeated FeederDelegation             feeder_delegations               = 2 [(gogoproto.nullable) = false];
+  repeated ExchangeRate                 exchange_rates                   = 3 [(gogoproto.nullable) = false];
   repeated MissCounter                  miss_counters                    = 4 [(gogoproto.nullable) = false];
-  repeated AggregateExchangeRatePrevote aggregate_exchange_rate_prevotes = 5
-      [(gogoproto.nullable) = false];
-  repeated AggregateExchangeRateVote aggregate_exchange_rate_votes = 6
-      [(gogoproto.nullable) = false];
-  repeated Price medians          = 7 [(gogoproto.nullable) = false];
-  repeated Price historic_prices  = 8 [(gogoproto.nullable) = false];
-  repeated Price medianDeviations = 9 [(gogoproto.nullable) = false];
+  repeated AggregateExchangeRatePrevote aggregate_exchange_rate_prevotes = 5 [(gogoproto.nullable) = false];
+  repeated AggregateExchangeRateVote    aggregate_exchange_rate_votes    = 6 [(gogoproto.nullable) = false];
+  repeated Price                        medians                          = 7 [(gogoproto.nullable) = false];
+  repeated Price                        historic_prices                  = 8 [(gogoproto.nullable) = false];
+  repeated Price                        medianDeviations                 = 9 [(gogoproto.nullable) = false];
   // Historic Avg Counter params
   AvgCounterParams avg_counter_params = 10 [
     (gogoproto.moretags) = "yaml:\"avg_counter_params\"",

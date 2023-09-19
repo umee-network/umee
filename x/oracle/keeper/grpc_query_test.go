@@ -12,14 +12,14 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
 	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal([]string{displayDenom}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
 	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
@@ -193,8 +193,13 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
+	exgRateTuples := types.ExchangeRateTuples{}
+
+	for _, er := range types.DefaultGenesisState().ExchangeRates {
+		exgRateTuples = append(exgRateTuples, types.ExchangeRateTuple{Denom: er.Denom, ExchangeRate: er.Rate})
+	}
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, types.NewAggregateExchangeRateVote(
-		types.DefaultGenesisState().ExchangeRates,
+		exgRateTuples,
 		valAddr,
 	))
 

@@ -64,8 +64,8 @@ func (q querier) ExchangeRates(
 
 		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate.Rate))
 	} else {
-		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		q.IterateExchangeRates(ctx, func(exgRate types.ExchangeRate) (stop bool) {
+			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(exgRate.Denom, exgRate.Rate))
 			return false
 		})
 	}
@@ -85,8 +85,8 @@ func (q querier) ActiveExchangeRates(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec) (stop bool) {
-		denoms = append(denoms, denom)
+	q.IterateExchangeRates(ctx, func(exgRate types.ExchangeRate) (stop bool) {
+		denoms = append(denoms, exgRate.Denom)
 		return false
 	})
 

@@ -23,7 +23,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	}
 
 	for _, ex := range genState.ExchangeRates {
-		keeper.SetExchangeRate(ctx, ex.Denom, ex.ExchangeRate)
+		keeper.SetExchangeRate(ctx, ex.Denom, ex.Rate, ex.Timestamp)
 	}
 
 	for _, mc := range genState.MissCounters {
@@ -91,13 +91,9 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		return false
 	})
 
-	exchangeRates := []types.ExchangeRateTuple{}
-	keeper.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-		exchangeRates = append(exchangeRates, types.ExchangeRateTuple{
-			Denom:        denom,
-			ExchangeRate: rate,
-		})
-
+	exchangeRates := []types.ExchangeRate{}
+	keeper.IterateExchangeRates(ctx, func(er types.ExchangeRate) (stop bool) {
+		exchangeRates = append(exchangeRates, er)
 		return false
 	})
 

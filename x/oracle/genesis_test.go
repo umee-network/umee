@@ -54,10 +54,11 @@ func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 			"valid",
 			types.GenesisState{
 				Params: types.DefaultParams(),
-				ExchangeRates: types.ExchangeRateTuples{
-					types.ExchangeRateTuple{
-						Denom:        denom,
-						ExchangeRate: exchangeRate,
+				ExchangeRates: []types.ExchangeRate{
+					{
+						Denom:     denom,
+						Rate:      exchangeRate,
+						Timestamp: ctx.BlockTime(),
 					},
 				},
 				HistoricPrices: types.Prices{
@@ -152,10 +153,11 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 			ValidatorAddress: umeevaloperAddr,
 		},
 	}
-	exchangeRateTuples := types.ExchangeRateTuples{
-		types.ExchangeRateTuple{
-			Denom:        upperDenom,
-			ExchangeRate: exchangeRate,
+	exchangeRateTuples := []types.ExchangeRate{
+		{
+			Denom:     upperDenom,
+			Rate:      exchangeRate,
+			Timestamp: ctx.BlockTime(),
 		},
 	}
 	missCounters := []types.MissCounter{

@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
@@ -111,38 +112,35 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
-// denom asset to the store.
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
+// denom asset to the store with timestamp
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
 	key := types.KeyExchangeRate(denom)
-	val := types.ExchangeRate{Rate: rate, Timestamp: ctx.BlockTime()}
-	err := store.SetValue(ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
+	val := types.ExchangeRate{Denom: denom, Rate: rate, Timestamp: t}
+	err := store.SetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
 	util.Panic(err)
 }
 
 // SetExchangeRateWithEvent sets an consensus
 // exchange rate to the store with ABCI event
-func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
-	k.SetExchangeRate(ctx, denom, exchangeRate)
+func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
+	k.SetExchangeRate(ctx, denom, rate, t)
 	sdkutil.Emit(&ctx, &types.EventSetFxRate{
-		Denom: denom, Rate: exchangeRate,
+		Denom: denom, Rate: rate,
 	})
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.
 // TODO: handler should use ExchangeRate type rather than Dec
-func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
+func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(types.ExchangeRate) bool) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
-	prefixLen := len(types.KeyPrefixExchangeRate)
 
 	for ; iter.Valid(); iter.Next() {
-		key := iter.Key()
-		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
 		var er types.ExchangeRate
 		k.cdc.MustUnmarshal(iter.Value(), &er)
 
-		if handler(denom, er.Rate) {
+		if handler(er) {
 			break
 		}
 	}

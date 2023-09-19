@@ -149,8 +149,8 @@ message AvgCounter {
 message ExchangeRate {
   option (gogoproto.equal)            = false;
   option (gogoproto.goproto_stringer) = false;
-
-  string rate = 1 [
+  string denom                        = 1 [(gogoproto.moretags) = "yaml:\"denom\""];
+  string rate                         = 2 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
