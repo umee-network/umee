@@ -130,8 +130,7 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.0"
 	gravityModuleName := "gravity" // hardcoded to avoid dependency on GB module
-	// TODO: update the address for the mainnet
-	emergencyGroup, err := sdk.AccAddressFromBech32("umee178nsnzse8capyfak4nwlntvfg64p4lmsau4t5n")
+	emergencyGroup, err := sdk.AccAddressFromBech32("umee1gy3c8n2xysawysq2xf2hxn253srx4ehduevq6c")
 	util.Panic(err)
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,

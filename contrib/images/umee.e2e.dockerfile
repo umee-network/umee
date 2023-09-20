@@ -2,7 +2,7 @@
 # Creates dynamic binaries, by building from the latest version of umeed
 
 FROM golang:1.20-bookworm AS builder
-ARG EXPERIMENTAL=false
+ARG EXPERIMENTAL=true
 
 ## Download go module dependencies for umeed
 WORKDIR /src/umee
@@ -15,7 +15,7 @@ ENV EXPERIMENTAL $EXPERIMENTAL
 WORKDIR /src/umee
 COPY . .
 RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";else echo "Installing stable build";fi
-RUN BUILD_TAGS=badgerdb make install
+RUN make install
 
 ## Prepare the final clear binary
 FROM ubuntu:23.04

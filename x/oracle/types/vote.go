@@ -1,14 +1,14 @@
 package types
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/umee-network/umee/v6/util/sdkutil"
 	"gopkg.in/yaml.v3"
-
-	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
 func NewAggregateExchangeRatePrevote(
@@ -53,10 +53,12 @@ func NewExchangeRateTuple(denom string, exchangeRate sdk.Dec) ExchangeRateTuple 
 	}
 }
 
-// String implement stringify
 func (v ExchangeRateTuple) String() string {
-	out, _ := yaml.Marshal(v)
-	return string(out)
+	return fmt.Sprintf("{\"denom\":%q, \"exchange_rate\":%q}", v.Denom, sdkutil.FormatDec(v.ExchangeRate))
+}
+
+func (v ExchangeRateTuple) MarshalJSON() ([]byte, error) {
+	return []byte(v.String()), nil
 }
 
 // ExchangeRateTuples - array of ExchangeRateTuple
@@ -64,8 +66,8 @@ type ExchangeRateTuples []ExchangeRateTuple
 
 // String implements fmt.Stringer interface
 func (tuples ExchangeRateTuples) String() string {
-	out, _ := yaml.Marshal(tuples)
-	return string(out)
+	bz, _ := json.Marshal(tuples)
+	return string(bz) // fmt.Sprint([]ExchangeRateTuple(tuples))
 }
 
 // ParseExchangeRateTuples ExchangeRateTuple parser
@@ -89,7 +91,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 			return nil, err
 		}
 		if !decCoin.IsPositive() {
-			return nil, types.ErrInvalidOraclePrice
+			return nil, fmt.Errorf("exchange rate can't be negative: %s", tupleStr)
 		}
 
 		denom := strings.ToUpper(denomAmountStr[0])
@@ -105,4 +107,9 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 	}
 
 	return tuples, nil
+}
+
+func (v ExchangeRate) String() string {
+	bz, _ := json.Marshal(v)
+	return string(bz)
 }

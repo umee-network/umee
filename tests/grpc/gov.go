@@ -126,6 +126,32 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
 }
 
+// LeverageSpecialPairsUpdate submits a gov transaction to update leverage special assets,
+// votes, and waits for proposal to pass.
+func LeverageSpecialPairsUpdate(
+	umeeClient client.Client,
+	sets []ltypes.SpecialAssetSet,
+	pairs []ltypes.SpecialAssetPair,
+) error {
+	msg := ltypes.MsgGovUpdateSpecialAssets{
+		Authority:   checkers.GovModuleAddr,
+		Description: "Special Assets Proposal",
+		Sets:        sets,
+		Pairs:       pairs,
+	}
+
+	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Logs) == 0 {
+		return fmt.Errorf("no logs in response")
+	}
+
+	return MakeVoteAndCheckProposal(umeeClient, *resp)
+}
+
 // MetokenRegistryUpdate submits a gov transaction to update metoken registry, votes, and waits for proposal to pass.
 func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes []metoken.Index) error {
 	msg := metoken.MsgGovUpdateRegistry{

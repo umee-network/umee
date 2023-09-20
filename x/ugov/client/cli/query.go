@@ -24,7 +24,31 @@ func GetQueryCmd() *cobra.Command {
 		QueryMinGasPrice(),
 		QueryInflationParams(),
 		QueryInflationCyleEnd(),
+		QueryEmergencyGroup(),
 	)
+
+	return cmd
+}
+
+// QueryEmergencyGroup creates the Msg/QueryEmergencyGroup CLI.
+func QueryEmergencyGroup() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "emergency-group",
+		Args:  cobra.NoArgs,
+		Short: "Query the emergency group address.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := ugov.NewQueryClient(clientCtx)
+			resp, err := queryClient.EmergencyGroup(cmd.Context(), &ugov.QueryEmergencyGroup{})
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }

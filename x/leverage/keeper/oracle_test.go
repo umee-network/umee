@@ -43,14 +43,15 @@ func (m *mockOracleKeeper) MedianOfHistoricMedians(ctx sdk.Context, denom string
 	return p, uint32(numStamps), nil
 }
 
-func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (sdk.Dec, error) {
+func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (oracletypes.ExchangeRate, error) {
 	p, ok := m.symbolExchangeRates[denom]
 	if !ok {
 		// This error matches oracle behavior on missing asset price
-		return sdk.ZeroDec(), oracletypes.ErrUnknownDenom.Wrap(denom)
+		return oracletypes.ExchangeRate{}, oracletypes.ErrUnknownDenom.Wrap(denom)
 	}
 
-	return p, nil
+	// TODO: add timestamp
+	return oracletypes.ExchangeRate{Rate: p}, nil
 }
 
 // Clear clears a denom from the mock oracle, simulating an outage.
@@ -68,6 +69,7 @@ func (m *mockOracleKeeper) Reset() {
 		"DUMP":   sdk.MustNewDecFromStr("0.50"), // A token which has recently halved in price
 		"PUMP":   sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
 		"STABLE": sdk.MustNewDecFromStr("4.21"), // Same price as umee
+		"PAIRED": sdk.MustNewDecFromStr("1.00"),
 	}
 	m.historicExchangeRates = map[string]sdk.Dec{
 		"UMEE":   sdk.MustNewDecFromStr("4.21"),
@@ -76,6 +78,7 @@ func (m *mockOracleKeeper) Reset() {
 		"DUMP":   sdk.MustNewDecFromStr("1.00"),
 		"PUMP":   sdk.MustNewDecFromStr("1.00"),
 		"STABLE": sdk.MustNewDecFromStr("4.21"),
+		"PAIRED": sdk.MustNewDecFromStr("1.00"),
 	}
 }
 

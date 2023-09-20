@@ -169,9 +169,6 @@ go.sum: go.mod
 ###############################################################################
 
 docker-build-e2e:
-	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile .
-
-docker-build-e2e-experimental:
 	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed-e2e -f contrib/images/umee.e2e.dockerfile --build-arg EXPERIMENTAL=true .
 
 docker-build:
@@ -196,14 +193,12 @@ TEST_COVERAGE_PROFILE=coverage.txt
 
 UNIT_TEST_TAGS = norace
 TEST_RACE_TAGS = ""
-TEST_E2E_TAGS = "e2e"
+TEST_E2E_TAGS = "e2e experimental"
 TEST_E2E_DEPS = docker-build-e2e
 
 ifeq ($(EXPERIMENTAL),true)
 	UNIT_TEST_TAGS += experimental
 	TEST_RACE_TAGS += experimental
-	TEST_E2E_TAGS += experimental
-	TEST_E2E_DEPS = docker-build-e2e-experimental
 endif
 
 test-unit: ARGS=-timeout=10m -tags='$(UNIT_TEST_TAGS)'
@@ -238,7 +233,7 @@ test-e2e-cov: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
 
 test-e2e-clean:
-	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
+	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder || true
 	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder
 
 test-qa: 

@@ -3,6 +3,8 @@ package types
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+
+	oracle "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // AccountKeeper defines the expected account keeper used for leverage simulations (noalias)
@@ -31,6 +33,6 @@ type BankKeeper interface {
 
 // OracleKeeper defines the expected x/oracle keeper interface.
 type OracleKeeper interface {
-	GetExchangeRate(ctx sdk.Context, denom string) (sdk.Dec, error)
+	GetExchangeRate(ctx sdk.Context, denom string) (oracle.ExchangeRate, error)
 	MedianOfHistoricMedians(ctx sdk.Context, denom string, numStamps uint64) (sdk.Dec, uint32, error)
 }

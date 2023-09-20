@@ -31,7 +31,8 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		mode = types.PriceModeSpot
 	}
 
-	var price, spotPrice, historicPrice sdk.Dec
+	var price, historicPrice sdk.Dec
+	var spotPrice oracletypes.ExchangeRate
 	if mode != types.PriceModeHistoric {
 		// spot price is required for modes other than historic
 		spotPrice, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
@@ -56,15 +57,17 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		}
 	}
 
+	// TODO: need to use spotPrice.Timestamp to make a decision about the price
+
 	switch mode {
 	case types.PriceModeSpot:
-		price = spotPrice
+		price = spotPrice.Rate
 	case types.PriceModeHistoric:
 		price = historicPrice
 	case types.PriceModeHigh:
-		price = sdk.MaxDec(spotPrice, historicPrice)
+		price = sdk.MaxDec(spotPrice.Rate, historicPrice)
 	case types.PriceModeLow:
-		price = sdk.MinDec(spotPrice, historicPrice)
+		price = sdk.MinDec(spotPrice.Rate, historicPrice)
 	default:
 		return sdk.ZeroDec(), t.Exponent, types.ErrInvalidPriceMode.Wrapf("%d", mode)
 	}

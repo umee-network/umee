@@ -11,7 +11,6 @@ import (
 
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/staking/testutil"
@@ -158,7 +157,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
+		s.Require().Equal(types.ExchangeRate{Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()},
+			rate)
 	}
 
 	// Test: only val2 votes (has 39% vote power).
@@ -177,8 +177,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
-		s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, denom.SymbolDenom))
-		s.Require().Equal(sdk.ZeroDec(), rate)
+		s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap(denom.SymbolDenom))
+		s.Require().Equal(types.ExchangeRate{}, rate)
 	}
 
 	// Test: val2 and val3 votes.
@@ -200,7 +200,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(sdk.MustNewDecFromStr("0.5"), rate)
+		s.Require().Equal(types.ExchangeRate{Rate: sdk.NewDecWithPrec(5, 1), Timestamp: ctx.BlockTime()}, rate)
 	}
 
 	// TODO: check reward distribution
@@ -237,10 +237,10 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "umee")
 	s.Require().NoError(err)
-	s.Require().Equal(sdk.MustNewDecFromStr("1.0"), rate)
+	s.Require().Equal(types.ExchangeRate{Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()}, rate)
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
-	s.Require().ErrorIs(err, sdkerrors.Wrap(types.ErrUnknownDenom, "atom"))
-	s.Require().Equal(sdk.ZeroDec(), rate)
+	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
+	s.Require().Equal(types.ExchangeRate{}, rate)
 }
 
 var exchangeRates = map[string][]sdk.Dec{
