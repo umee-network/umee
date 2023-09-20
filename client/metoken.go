@@ -14,6 +14,9 @@ func (c Client) QueryMetokenParams() (metoken.Params, error) {
 	defer cancel()
 
 	resp, err := c.MetokenQClient().Params(ctx, &metoken.QueryParams{})
+	if err != nil {
+		return metoken.Params{}, err
+	}
 	return resp.Params, err
 }
 
