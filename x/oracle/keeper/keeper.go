@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/cometbft/cometbft/libs/log"
 	gogotypes "github.com/cosmos/gogoproto/types"
@@ -13,7 +12,9 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
+	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
@@ -73,22 +74,18 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
-func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (sdk.Dec, error) {
-	store := ctx.KVStore(k.storeKey)
-	symbol = strings.ToUpper(symbol)
-	b := store.Get(types.KeyExchangeRate(symbol))
-	if b == nil {
-		return sdk.ZeroDec(), types.ErrUnknownDenom.Wrap(symbol)
+func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (types.ExchangeRate, error) {
+	v := store.GetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), types.KeyExchangeRate(symbol),
+		"exchange_rate")
+	if v == nil {
+		return types.ExchangeRate{}, types.ErrUnknownDenom.Wrap(symbol)
 	}
-
-	decProto := sdk.DecProto{}
-	k.cdc.MustUnmarshal(b, &decProto)
-
-	return decProto.Dec, nil
+	return *v, nil
 }
 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
 // in the base denom (e.g. ATOM -> uatom)
+// TODO: needs to return timestamp as well
 func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, error) {
 	var symbol string
 	var exponent uint64
@@ -111,16 +108,16 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 	}
 
 	powerReduction := ten.Power(exponent)
-	return exchangeRate.Quo(powerReduction), nil
+	return exchangeRate.Rate.Quo(powerReduction), nil
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
 // denom asset to the store.
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
-	store := ctx.KVStore(k.storeKey)
-	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})
-	denom = strings.ToUpper(denom)
-	store.Set(types.KeyExchangeRate(denom), bz)
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
+	key := types.KeyExchangeRate(denom)
+	val := types.ExchangeRate{Rate: rate, Timestamp: ctx.BlockTime()}
+	err := store.SetValue(ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
+	util.Panic(err)
 }
 
 // SetExchangeRateWithEvent sets an consensus
@@ -133,6 +130,7 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchange
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.
+// TODO: handler should use ExchangeRate type rather than Dec
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
@@ -142,10 +140,10 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
 		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
-		dp := sdk.DecProto{}
-		k.cdc.MustUnmarshal(iter.Value(), &dp)
+		var er types.ExchangeRate
+		k.cdc.MustUnmarshal(iter.Value(), &er)
 
-		if handler(denom, dp.Dec) {
+		if handler(denom, er.Rate) {
 			break
 		}
 	}

@@ -28,6 +28,7 @@ const (
 	pumpDenom   = "upump"
 	dumpDenom   = "udump"
 	stableDenom = "stable"
+	pairedDenom = "upaired"
 )
 
 type IntegrationTestSuite struct {
@@ -78,15 +79,29 @@ func (s *IntegrationTestSuite) SetupTest() {
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(daiDenom, "DAI", 18)))
+	daiToken := newToken(daiDenom, "DAI", 18) // high exponent token will need bigger maxSupply for testing
+	daiToken.MaxSupply = daiToken.MaxSupply.Mul(sdk.NewInt(1_000_000_000_000))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, daiToken))
 	// additional tokens for historacle testing
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(dumpDenom, "DUMP", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pumpDenom, "PUMP", 6)))
+	// additional token for special pairs
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pairedDenom, "PAIRED", 6)))
 	// additional tokens for borrow factor testing
 	stable := newToken(stableDenom, "STABLE", 6)
 	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
 	stable.LiquidationThreshold = sdk.MustNewDecFromStr("0.9")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, stable))
+
+	// override DefaultGenesis params with some special asset pairs
+	app.LeverageKeeper.SetSpecialAssetPair(ctx,
+		types.SpecialAssetPair{
+			Collateral:           pairedDenom,
+			Borrow:               daiDenom,
+			CollateralWeight:     sdk.MustNewDecFromStr("0.5"),
+			LiquidationThreshold: sdk.MustNewDecFromStr("0.75"),
+		},
+	)
 
 	// override DefaultGenesis params with fixtures.Params
 	app.LeverageKeeper.SetParams(ctx, fixtures.Params())

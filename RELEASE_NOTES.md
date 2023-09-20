@@ -6,12 +6,23 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v6.0.1
+
+This is a bug fix release for the `leverage.MsgGovUpdateSpecialAssets` handler.
+We also added `umeed q ugov emergency-group` CLI query. Users were able to query the Emergency Group address using REST.
+
+[CHANGELOG](CHANGELOG.md)
+
 ## v6.0.0
 
 Highlights:
 
-- TODO: special assets, new Gov messages
+- We introduce [Special Assets](https://github.com/umee-network/umee/blob/v6.0.0-beta2/x/leverage/README.md#special-asset-pairs): a new primitive to optimize positions in x/leverage.
 - New [inflation mechanism](./docs/design_docs/012-umee-inflation-v2.md).
+- [Emergency Groups](#emergency-groups).
+- Full Gravity Bridge removal. We don't include GB module any more in Umee.
+- New `MsgLeveragedLiquidate.MaxRepay` which allows to limit the liquidation size using the leveraged liquidation mechanism.
+- Renamed ugov `EventMinTxFees` to `EventMinGasPrice`.
 
 ### New Inflation Mechanism
 
@@ -27,6 +38,15 @@ The new Inflation Cycle will start on 2023-10-15 15:00 UTC. This will mark the f
 - `inflation_max` 14% → 10.5%
 
 The x/staking Bonded Goal stays the same: 33.00%.
+
+### Emergency Groups
+
+Currently, any parameter update requires going through a standard governance process, which takes 4 days. In a critical situation we need to act immediately:
+
+- Control IBC Quota parameters (eg disable IBC)
+- apply safe updates to oracle, leverage or incentive module parameters.
+
+Emergency Group can trigger safe parameter updates at any time as a standard transaction. The Emergency Group address is controlled by the Umee Chain governance (`x/gov`) and can be disabled at any time.
 
 ### Validators
 

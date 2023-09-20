@@ -13,6 +13,7 @@ message GenesisState {
   Params                    params             = 1 [(gogoproto.nullable) = false];
   repeated FeederDelegation feeder_delegations = 2
       [(gogoproto.nullable) = false];
+  // TODO: need to update this to save data with timestamp
   repeated ExchangeRateTuple exchange_rates = 3 [
     (gogoproto.castrepeated) = "ExchangeRateTuples",
     (gogoproto.nullable)     = false

@@ -158,6 +158,11 @@ func (s *E2ETestSuite) initNodes() {
 		)
 	}
 
+	// TODO:
+	// create non-validator accounts which can be used for testing.
+	// since they don't vote for price feeder, these accounts are
+	// much less vulnerable to "incorrect account sequence" problems.
+
 	// copy the genesis file to the remaining validators
 	for _, val := range s.Chain.Validators[1:] {
 		_, err := copyFile(

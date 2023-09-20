@@ -25,7 +25,7 @@ func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddres
 	borrowedValue := position.BorrowedValue()
 	borrowLimit := position.Limit()
 	if borrowedValue.GT(borrowLimit.Mul(maxUsage)) {
-		return types.ErrUndercollaterized.Wrapf(
+		return types.ErrUndercollateralized.Wrapf(
 			"borrowed: %s, limit: %s, max usage %s", borrowedValue, borrowLimit, maxUsage,
 		)
 	}
