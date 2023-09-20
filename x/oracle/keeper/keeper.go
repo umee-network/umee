@@ -111,11 +111,20 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 	return exchangeRate.Rate.Quo(powerReduction), nil
 }
 
-// SetExchangeRate sets the consensus exchange rate of USD denominated in the
-// denom asset to the store with timestamp
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
+// SetExchangeRateWithTimestamp sets the consensus exchange rate of USD denominated in the
+// denom asset to the store with timestamp but with passing timestamp to func
+func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
 	key := types.KeyExchangeRate(denom)
 	val := types.ExchangeRate{Denom: denom, Rate: rate, Timestamp: t}
+	err := store.SetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
+	util.Panic(err)
+}
+
+// SetExchangeRate sets the consensus exchange rate of USD denominated in the
+// denom asset to the store with timestamp
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
+	key := types.KeyExchangeRate(denom)
+	val := types.ExchangeRate{Denom: denom, Rate: rate, Timestamp: ctx.BlockTime()}
 	err := store.SetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
 	util.Panic(err)
 }
@@ -123,7 +132,7 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec, t t
 // SetExchangeRateWithEvent sets an consensus
 // exchange rate to the store with ABCI event
 func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, rate sdk.Dec) {
-	k.SetExchangeRate(ctx, denom, rate, ctx.BlockTime())
+	k.SetExchangeRate(ctx, denom, rate)
 	sdkutil.Emit(&ctx, &types.EventSetFxRate{
 		Denom: denom, Rate: rate,
 	})

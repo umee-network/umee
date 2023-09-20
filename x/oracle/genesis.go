@@ -23,7 +23,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	}
 
 	for _, ex := range genState.ExchangeRates {
-		keeper.SetExchangeRate(ctx, ex.Denom, ex.Rate, ex.Timestamp)
+		keeper.SetExchangeRateWithTimestamp(ctx, ex.Denom, ex.Rate, ex.Timestamp)
 	}
 
 	for _, mc := range genState.MissCounters {

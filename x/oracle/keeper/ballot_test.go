@@ -8,7 +8,7 @@ import (
 
 func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	require := s.Require()
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	claimMap := make(map[string]types.Claim)
 
 	// Empty Map

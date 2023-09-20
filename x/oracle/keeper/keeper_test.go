@@ -229,12 +229,12 @@ func (s *IntegrationTestSuite) TestGetExchangeRate_NotSet() {
 func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
 	v := sdk.OneDec()
 	expected := types.ExchangeRate{Rate: v, Timestamp: s.ctx.BlockTime(), Denom: displayDenom}
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, v, s.ctx.BlockTime())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, v)
 	rate, err := s.app.OracleKeeper.GetExchangeRate(s.ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, expected)
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	rate, err = s.app.OracleKeeper.GetExchangeRate(s.ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, expected)
@@ -252,12 +252,12 @@ func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
 
 	power := sdk.MustNewDecFromStr("10").Power(exponent)
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	rate, err := s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate.Mul(power), sdk.OneDec())
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), sdk.OneDec(), s.ctx.BlockTime())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), sdk.OneDec())
 	rate, err = s.app.OracleKeeper.GetExchangeRateBase(s.ctx, bondDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate.Mul(power), sdk.OneDec())
@@ -266,7 +266,7 @@ func (s *IntegrationTestSuite) TestGetExchangeRateBase() {
 func (s *IntegrationTestSuite) TestClearExchangeRate() {
 	app, ctx := s.app, s.ctx
 
-	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
+	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
 	app.OracleKeeper.ClearExchangeRates(ctx)
 	_, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
 	s.Require().Error(err)

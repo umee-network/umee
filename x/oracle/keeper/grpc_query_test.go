@@ -12,14 +12,14 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal([]string{displayDenom}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec(), s.ctx.BlockTime())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
