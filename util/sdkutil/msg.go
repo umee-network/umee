@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/golang/protobuf/proto"
 )
 
 // StartMsg unpacks sdk.Context and validates msg.
@@ -21,4 +22,18 @@ func StartMsg(ctx context.Context, msg sdk.Msg) (sdk.Context, error) {
 
 type fullValidate interface {
 	Validate(*sdk.Context) error
+}
+
+type validateBasic interface {
+	ValidateBasic() error
+}
+
+// ValidateProtoMsg tries to run msg.ValidateBasic
+func ValidateProtoMsg(msg proto.Message) error {
+	if vm, ok := msg.(validateBasic); ok {
+		if err := vm.ValidateBasic(); err != nil {
+			return err
+		}
+	}
+	return nil
 }

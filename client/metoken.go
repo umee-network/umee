@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/x/metoken"
 )
 
@@ -21,6 +22,9 @@ func (c Client) QueryMetokenIndexBalances(denom string) (*metoken.QueryIndexBala
 	defer cancel()
 
 	msg := &metoken.QueryIndexBalances{MetokenDenom: denom}
+	if err := sdkutil.ValidateProtoMsg(msg); err != nil {
+		return nil, err
+	}
 	return c.MetokenQClient().IndexBalances(ctx, msg)
 }
 
@@ -29,6 +33,9 @@ func (c Client) QueryMetokenIndexes(denom string) (*metoken.QueryIndexesResponse
 	defer cancel()
 
 	msg := &metoken.QueryIndexes{MetokenDenom: denom}
+	if err := sdkutil.ValidateProtoMsg(msg); err != nil {
+		return nil, err
+	}
 	return c.MetokenQClient().Indexes(ctx, msg)
 }
 
