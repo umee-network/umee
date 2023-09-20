@@ -8,7 +8,7 @@ func (c Client) MetokenQClient() metoken.QueryClient {
 	return metoken.NewQueryClient(c.Query.GrpcConn)
 }
 
-func (c Client) QueryMetoken() (metoken.Params, error) {
+func (c Client) QueryMetokenParams() (metoken.Params, error) {
 	ctx, cancel := c.NewQCtx()
 	defer cancel()
 
@@ -16,10 +16,22 @@ func (c Client) QueryMetoken() (metoken.Params, error) {
 	return resp.Params, err
 }
 
+func (c Client) QueryMetokenIndexBalances(denom string) (*metoken.QueryIndexBalancesResponse, error) {
+	ctx, cancel := c.NewQCtx()
+	defer cancel()
+
+	msg := &metoken.QueryIndexBalances{MetokenDenom: denom}
+	return c.MetokenQClient().IndexBalances(ctx, msg)
+}
+
+func (c Client) QueryMetokenIndexes(denom string) (*metoken.QueryIndexesResponse, error) {
+	ctx, cancel := c.NewQCtx()
+	defer cancel()
+
+	msg := &metoken.QueryIndexes{MetokenDenom: denom}
+	return c.MetokenQClient().Indexes(ctx, msg)
+}
+
 //
 // Tx
 //
-
-// func (c Client) MetokenTxClient() metoken.QueryClient {
-// 	return metoken.NewMsgClient(c.Tx.ClientContext)
-// }
