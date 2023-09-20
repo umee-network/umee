@@ -26,7 +26,7 @@ func init() {
 }
 
 func SubmitAndPassProposal(umee client.Client, changes []proposal.ParamChange) error {
-	resp, err := umee.Tx.GovSubmitProposal(changes, govDeposit)
+	resp, err := umee.Tx.GovSubmitParamProposal(changes, govDeposit)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransfe
 		IbcStatus:   status,
 	}
 
-	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
 	if err != nil {
 		return err
 	}
@@ -86,7 +86,7 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 		UpdateTokens: updateTokens,
 	}
 
-	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func LeverageSpecialPairsUpdate(
 		Pairs:       pairs,
 	}
 
-	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes [
 		UpdateIndex: updateIndexes,
 	}
 
-	resp, err := umeeClient.Tx.TxSubmitProposalWithMsg([]sdk.Msg{&msg})
+	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
 	if err != nil {
 		return err
 	}
@@ -165,7 +165,7 @@ func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) err
 		return err
 	}
 
-	err = umeeClient.Tx.TxGovVoteYesAll(proposalIDInt)
+	err = umeeClient.Tx.GovVoteAllYes(proposalIDInt)
 	if err != nil {
 		return err
 	}

@@ -21,10 +21,10 @@ func (c *Client) GovParamChange(title, description string, changes []proposal.Pa
 		return nil, err
 	}
 
-	return c.BroadcastTx(msg)
+	return c.BroadcastTx(0, msg)
 }
 
-func (c *Client) GovSubmitProposal(changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
+func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
 	content := proposal.NewParameterChangeProposal(
 		"update historic stamp period",
 		"auto grpc proposal",
@@ -40,10 +40,10 @@ func (c *Client) GovSubmitProposal(changes []proposal.ParamChange, deposit sdk.C
 		return nil, err
 	}
 
-	return c.BroadcastTx(msg)
+	return c.BroadcastTx(0, msg)
 }
 
-func (c *Client) TxSubmitProposalWithMsg(msgs []sdk.Msg) (*sdk.TxResponse, error) {
+func (c *Client) GovSubmitProposal(msgs []sdk.Msg) (*sdk.TxResponse, error) {
 	deposit, err := sdk.ParseCoinsNormalized("1000uumee")
 	if err != nil {
 		return nil, err
@@ -59,11 +59,11 @@ func (c *Client) TxSubmitProposalWithMsg(msgs []sdk.Msg) (*sdk.TxResponse, error
 		return nil, err
 	}
 
-	return c.BroadcastTx(submitProposal)
+	return c.BroadcastTx(0, submitProposal)
 }
 
-// TxGovVoteYesAll creates transactions (one for each registered account) to approve a given proposal.
-func (c *Client) TxGovVoteYesAll(proposalID uint64) error {
+// GovVoteAllYes creates transactions (one for each account in the keyring) to approve a given proposal.
+func (c *Client) GovVoteAllYes(proposalID uint64) error {
 	for index := range c.keyringRecord {
 		voter, err := c.keyringRecord[index].GetAddress()
 		if err != nil {
@@ -80,16 +80,12 @@ func (c *Client) TxGovVoteYesAll(proposalID uint64) error {
 			proposalID,
 			voteType,
 		)
-
-		c.ClientContext.From = c.keyringRecord[index].Name
-		c.ClientContext.FromName = c.keyringRecord[index].Name
-		c.ClientContext.FromAddress, _ = c.keyringRecord[index].GetAddress()
-
-		for retry := 0; retry < 5; retry++ {
+		for retry := 0; retry < 3; retry++ {
 			// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-			if _, err = BroadcastTx(*c.ClientContext, *c.txFactory, []sdk.Msg{msg}...); err == nil {
+			if _, err = c.BroadcastTx(index, msg); err == nil {
 				break
 			}
+			c.logger.Println("Tx broadcast failed. RETRYING. Err: ", err)
 			time.Sleep(time.Millisecond * 300)
 		}
 
