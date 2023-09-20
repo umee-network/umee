@@ -60,10 +60,6 @@ func (ip IndexPrices) RedeemRate(from sdk.Coin, to string) (sdkmath.Int, error) 
 		return sdkmath.Int{}, err
 	}
 
-	fmt.Printf("from.Amount: %s\n", from.Amount.String())
-	fmt.Printf("toPrice: %s\n", toPrice.Price.String())
-	fmt.Printf("toPrice.RedeemRate: %s\n", toPrice.RedeemRate.String())
-
 	return toPrice.RedeemRate.MulInt(from.Amount).TruncateInt(), nil
 }
 
