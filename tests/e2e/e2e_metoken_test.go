@@ -125,7 +125,7 @@ func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.Inde
 	var prices []metoken.IndexPrices
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.QueryMetokenBalances(denom)
+			resp, err := s.Umee.QueryMetokenIndexBalances(denom)
 			if err != nil {
 				return false
 			}
@@ -143,7 +143,7 @@ func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.Inde
 			prices = resp.Prices
 			return true
 		},
-		30*time.Second,
+		20*time.Second,
 		500*time.Millisecond,
 	)
 
@@ -154,7 +154,7 @@ func (s *E2ETest) getMetokenIndex(denom string) metoken.Index {
 	index := metoken.Index{}
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.QueryMetokenIndexes(denom)
+			resp, err := s.Umee.QueryMetokenIndexes(denom)
 			if err != nil {
 				return false
 			}
@@ -171,7 +171,7 @@ func (s *E2ETest) getMetokenIndex(denom string) metoken.Index {
 			s.Require().True(exist)
 			return true
 		},
-		30*time.Second,
+		20*time.Second,
 		500*time.Millisecond,
 	)
 
@@ -182,11 +182,7 @@ func (s *E2ETest) executeSwap(umeeAddr string, asset sdk.Coin, meTokenDenom stri
 	s.Require().Eventually(
 		func() bool {
 			err := s.TxMetokenSwap(umeeAddr, asset, meTokenDenom)
-			if err != nil {
-				return false
-			}
-
-			return true
+			return err != nil
 		},
 		30*time.Second,
 		500*time.Millisecond,
@@ -197,13 +193,9 @@ func (s *E2ETest) executeRedeemSuccess(umeeAddr string, meToken sdk.Coin, assetD
 	s.Require().Eventually(
 		func() bool {
 			err := s.TxMetokenRedeem(umeeAddr, meToken, assetDenom)
-			if err != nil {
-				return false
-			}
-
-			return true
+			return err != nil
 		},
-		30*time.Second,
+		20*time.Second,
 		500*time.Millisecond,
 	)
 }
