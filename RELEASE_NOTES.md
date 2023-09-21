@@ -6,6 +6,10 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v6.0.2
+
+This fixes a crash shortly after the 6.0.1 upgrade. The crash occurred at height `8427849` but this binary works even if you switch to it immediately after the gov upgrade. Patch must be applied **as soon as possible**.
+
 ## v6.0.1
 
 This is a bug fix release for the `leverage.MsgGovUpdateSpecialAssets` handler.
