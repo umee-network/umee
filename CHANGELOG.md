@@ -46,6 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+## [v6.0.2](https://github.com/umee-network/umee/releases/tag/v6.0.2) - 2023-09-20
+
+### BugFix
+
+- [2257](https://github.com/umee-network/umee/pull/2257) fix(oracle): missing avg params.
+
 ## [v6.0.1](https://github.com/umee-network/umee/releases/tag/v6.0.1) - 2023-09-15
 
 ### Features
