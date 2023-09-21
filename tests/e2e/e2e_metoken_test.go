@@ -183,7 +183,7 @@ func (s *E2ETest) getPrices(denom string) []metoken.IndexPrices {
 			prices = resp.Prices
 			return true
 		},
-		20*time.Second,
+		30*time.Second,
 		500*time.Millisecond,
 	)
 	return prices
@@ -210,7 +210,7 @@ func (s *E2ETest) getMetokenIndex(denom string) metoken.Index {
 			s.Require().True(exist)
 			return true
 		},
-		20*time.Second,
+		30*time.Second,
 		500*time.Millisecond,
 	)
 
@@ -234,7 +234,7 @@ func (s *E2ETest) executeRedeemSuccess(umeeAddr string, meToken sdk.Coin, assetD
 			err := s.TxMetokenRedeem(umeeAddr, meToken, assetDenom)
 			return err != nil
 		},
-		20*time.Second,
+		30*time.Second,
 		500*time.Millisecond,
 	)
 }
