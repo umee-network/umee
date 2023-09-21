@@ -5,11 +5,13 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
-func (c *Client) TxSend(fromAddress, toAddress string, amount sdk.Coins) (*sdk.TxResponse, error) {
+// BankSend creates and broadcasts bank send tx. `fromIdx` is an account index in the client
+// keyring.
+func (c *Client) BankSend(fromIdx int, toAddress string, amount sdk.Coins) (*sdk.TxResponse, error) {
 	msg := &banktypes.MsgSend{
-		FromAddress: fromAddress,
+		FromAddress: c.KeyringAddress(fromIdx).String(),
 		ToAddress:   toAddress,
 		Amount:      amount,
 	}
-	return c.BroadcastTx(msg)
+	return c.BroadcastTx(fromIdx, msg)
 }
