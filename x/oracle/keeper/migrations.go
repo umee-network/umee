@@ -21,8 +21,6 @@ func (m Migrator) Migrate1to2(ctx sdk.Context) error {
 	m.keeper.SetMedianStampPeriod(ctx, 1)
 	m.keeper.SetMaximumPriceStamps(ctx, 1)
 	m.keeper.SetMaximumMedianStamps(ctx, 1)
-	// NOTE: call to m.SetAvgPeriodAndShift is missing here, and caused a chain halt
-	// related to v6.0.1.
 	return nil
 }
 
@@ -35,12 +33,6 @@ func (m Migrator) HistoracleParams3x4(ctx sdk.Context) error {
 	m.keeper.SetMaximumPriceStamps(ctx, p.MaximumPriceStamps)
 	m.keeper.SetMaximumMedianStamps(ctx, p.MaximumMedianStamps)
 	return nil
-}
-
-// SetAvgPeriodAndShift updates the avg shift and period params
-func (m Migrator) SetAvgPeriodAndShift(ctx sdk.Context) error {
-	p := types.DefaultAvgCounterParams()
-	return m.keeper.SetHistoricAvgCounterParams(ctx, p)
 }
 
 // MigrateBNB fixes the BNB base denom for the 4.1 upgrade without using leverage hooks
