@@ -149,12 +149,12 @@ func (k AvgKeeper) getCounter(denom string, idx byte) (types.AvgCounter, error) 
 // SetHistoricAvgCounterParams sets avg period and avg shift time duration
 func (k Keeper) SetHistoricAvgCounterParams(ctx sdk.Context, acp types.AvgCounterParams) error {
 	kvs := ctx.KVStore(k.storeKey)
-	return store.SetValue(kvs, types.KeyHistoricAvgCounterParams, &acp, "historic avg counter params")
+	return store.SetValue(kvs, types.KeyAvgCounterParams, &acp, "historic avg counter params")
 }
 
 // GetHistoricAvgCounterParams gets the avg period and avg shift time duration from store
 func (k Keeper) GetHistoricAvgCounterParams(ctx sdk.Context) types.AvgCounterParams {
 	kvs := ctx.KVStore(k.storeKey)
-	return *store.GetValue[*types.AvgCounterParams](kvs, types.KeyHistoricAvgCounterParams,
+	return *store.GetValue[*types.AvgCounterParams](kvs, types.KeyAvgCounterParams,
 		"historic avg counter params")
 }
