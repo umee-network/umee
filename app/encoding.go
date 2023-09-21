@@ -1,6 +1,7 @@
 package app
 
 import (
+	"github.com/cosmos/cosmos-sdk/std"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/umee-network/umee/v6/app/params"
 )
@@ -11,5 +12,7 @@ func MakeEncodingConfig() testutil.TestEncodingConfig {
 	encodingConfig := params.MakeEncodingConfig()
 	ModuleBasics.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	ModuleBasics.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+	std.RegisterLegacyAminoCodec(encodingConfig.Amino)
+	std.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	return encodingConfig
 }
