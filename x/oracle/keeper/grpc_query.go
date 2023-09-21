@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -64,8 +65,8 @@ func (q querier) ExchangeRates(
 
 		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate.Rate))
 	} else {
-		q.IterateExchangeRates(ctx, func(exgRate types.ExchangeRate) (stop bool) {
-			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(exgRate.Denom, exgRate.Rate))
+		q.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, _ time.Time) (stop bool) {
+			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, exgRate))
 			return false
 		})
 	}
@@ -85,8 +86,8 @@ func (q querier) ActiveExchangeRates(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(exgRate types.ExchangeRate) (stop bool) {
-		denoms = append(denoms, exgRate.Denom)
+	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec, _ time.Time) (stop bool) {
+		denoms = append(denoms, denom)
 		return false
 	})
 

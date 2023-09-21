@@ -2,6 +2,7 @@ package oracle
 
 import (
 	"fmt"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -92,8 +93,8 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	})
 
 	exchangeRates := []types.ExchangeRate{}
-	keeper.IterateExchangeRates(ctx, func(er types.ExchangeRate) (stop bool) {
-		exchangeRates = append(exchangeRates, er)
+	keeper.IterateExchangeRates(ctx, func(denom string, er sdk.Dec, t time.Time) (stop bool) {
+		exchangeRates = append(exchangeRates, types.NewExchangeRate(denom, er, t))
 		return false
 	})
 
