@@ -37,7 +37,6 @@ var (
 	KeyMedianStampPeriod        = []byte("MedianStampPeriod")
 	KeyMaximumPriceStamps       = []byte("MaximumPriceStamps")
 	KeyMaximumMedianStamps      = []byte("MedianStampAmount")
-	KeyHistoricAvgCounterParams = []byte("HistoricAvgCounterParams")
 )
 
 var _ paramstypes.ParamSet = &Params{}
