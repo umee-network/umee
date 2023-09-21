@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
+
 ## [v6.0.2](https://github.com/umee-network/umee/releases/tag/v6.0.2) - 2023-09-20
 
 ### BugFix
