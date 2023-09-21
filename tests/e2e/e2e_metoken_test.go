@@ -6,6 +6,7 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v6/app"
 	"github.com/umee-network/umee/v6/tests/grpc"
@@ -15,7 +16,6 @@ import (
 )
 
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
-	var prices []metoken.IndexPrices
 	var index metoken.Index
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
@@ -40,7 +40,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			err = grpc.MetokenRegistryUpdate(s.Umee, []metoken.Index{meUSD}, nil)
 			s.Require().NoError(err)
 
-			prices = s.checkMetokenBalance(meUSD.Denom, expectedBalance)
+			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 
@@ -57,6 +57,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
 			amountToLeverage := amountToSwap.Sub(amountToReserves)
 
+			prices := s.getPrices(mocks.MeUSDDenom)
 			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
 			s.Require().NoError(err)
 			returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
@@ -71,7 +72,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Add(amountToLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
+			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 
@@ -86,25 +87,24 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 				"not enough",
 			)
 
-			prices = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
+			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 
 	s.Run(
 		"redeem_50meUSD_success", func() {
-			s.T().Skip("test never succeeds, need to be updated")
-
+			prices := s.getPrices(mocks.MeUSDDenom)
 			fiftyMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(50_000000))
 
 			s.executeRedeemSuccess(valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
 
-			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
+			usdtToRedeem, err := prices[0].RedeemRate(fiftyMeUSD, mocks.USDTBaseDenom)
 			s.Require().NoError(err)
-			usdtToRedeem := usdtPrice.RedeemRate.MulInt(fiftyMeUSD.Amount).TruncateInt()
 			fee := index.Fee.MinFee.MulInt(usdtToRedeem).TruncateInt()
 
 			assetSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
 			s.Require().True(i >= 0)
+
 			amountFromReserves := assetSettings.ReservePortion.MulInt(usdtToRedeem).TruncateInt()
 			amountFromLeverage := usdtToRedeem.Sub(amountFromReserves)
 
@@ -116,13 +116,12 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Sub(amountFromLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			_ = s.checkMetokenBalance(mocks.MeUSDDenom, expectedBalance)
+			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 }
 
-func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.IndexBalances) []metoken.IndexPrices {
-	var prices []metoken.IndexPrices
+func (s *E2ETest) checkMetokenBalance(valAddr, denom string) {
 	s.Require().Eventually(
 		func() bool {
 			resp, err := s.Umee.QueryMetokenIndexBalances(denom)
@@ -130,23 +129,63 @@ func (s *E2ETest) checkMetokenBalance(denom string, expectedBalance metoken.Inde
 				return false
 			}
 
-			var exist bool
-			for _, balance := range resp.IndexBalances {
-				if balance.MetokenSupply.Denom == expectedBalance.MetokenSupply.Denom {
-					exist = true
-					s.Require().Equal(expectedBalance, balance)
-					break
+			coins, err := s.QueryUmeeAllBalances(s.UmeeREST(), authtypes.NewModuleAddress(metoken.ModuleName).String())
+			if err != nil {
+				return false
+			}
+
+			for _, coin := range coins {
+				var exist bool
+				for _, balance := range resp.IndexBalances[0].AssetBalances {
+					if balance.Denom == coin.Denom {
+						exist = true
+						expectedBalance := balance.Interest.Add(balance.Fees).Add(balance.Reserved)
+						s.Require().Equal(coin.Amount, expectedBalance)
+						continue
+					}
+
+					if "u/"+balance.Denom == coin.Denom {
+						exist = true
+						s.Require().Equal(coin.Amount, balance.Leveraged)
+						continue
+					}
+				}
+				s.Require().True(exist)
+			}
+
+			coins, err = s.QueryUmeeAllBalances(s.UmeeREST(), valAddr)
+			if err != nil {
+				return false
+			}
+
+			for _, coin := range coins {
+				if coin.Denom == mocks.MeUSDDenom {
+					s.Require().Equal(coin.Amount, resp.IndexBalances[0].MetokenSupply.Amount)
 				}
 			}
 
-			s.Require().True(exist)
+			return true
+		},
+		30*time.Second,
+		500*time.Millisecond,
+	)
+}
+
+func (s *E2ETest) getPrices(denom string) []metoken.IndexPrices {
+	var prices []metoken.IndexPrices
+	s.Require().Eventually(
+		func() bool {
+			resp, err := s.QueryMetokenPrices(denom)
+			if err != nil {
+				return false
+			}
+
 			prices = resp.Prices
 			return true
 		},
 		20*time.Second,
 		500*time.Millisecond,
 	)
-
 	return prices
 }
 
