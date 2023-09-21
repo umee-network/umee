@@ -42,6 +42,17 @@ func (c Client) QueryMetokenIndexes(denom string) (*metoken.QueryIndexesResponse
 	return c.MetokenQClient().Indexes(ctx, msg)
 }
 
+func (c Client) QueryMetokenIndexPrices(denom string) (*metoken.QueryIndexPricesResponse, error) {
+	ctx, cancel := c.NewQCtx()
+	defer cancel()
+
+	msg := &metoken.QueryIndexPrices{MetokenDenom: denom}
+	if err := sdkutil.ValidateProtoMsg(msg); err != nil {
+		return nil, err
+	}
+	return c.MetokenQClient().IndexPrices(ctx, msg)
+}
+
 //
 // Tx
 //

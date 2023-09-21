@@ -175,7 +175,7 @@ func (s *E2ETest) getPrices(denom string) []metoken.IndexPrices {
 	var prices []metoken.IndexPrices
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.QueryMetokenPrices(denom)
+			resp, err := s.Umee.QueryMetokenIndexPrices(denom)
 			if err != nil {
 				return false
 			}
