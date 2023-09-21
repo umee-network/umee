@@ -21,6 +21,8 @@ func (m Migrator) Migrate1to2(ctx sdk.Context) error {
 	m.keeper.SetMedianStampPeriod(ctx, 1)
 	m.keeper.SetMaximumPriceStamps(ctx, 1)
 	m.keeper.SetMaximumMedianStamps(ctx, 1)
+	// NOTE: call to m.SetAvgPeriodAndShift is missing here, and caused a chain halt
+	// related to v6.0.1.
 	return nil
 }
 
