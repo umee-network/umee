@@ -220,8 +220,7 @@ func (s *E2ETest) getMetokenIndex(denom string) metoken.Index {
 func (s *E2ETest) executeSwap(umeeAddr string, asset sdk.Coin, meTokenDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxMetokenSwap(umeeAddr, asset, meTokenDenom)
-			return err != nil
+			return s.TxMetokenSwap(umeeAddr, asset, meTokenDenom) == nil
 		},
 		30*time.Second,
 		500*time.Millisecond,
@@ -231,8 +230,7 @@ func (s *E2ETest) executeSwap(umeeAddr string, asset sdk.Coin, meTokenDenom stri
 func (s *E2ETest) executeRedeemSuccess(umeeAddr string, meToken sdk.Coin, assetDenom string) {
 	s.Require().Eventually(
 		func() bool {
-			err := s.TxMetokenRedeem(umeeAddr, meToken, assetDenom)
-			return err != nil
+			return s.TxMetokenRedeem(umeeAddr, meToken, assetDenom) == nil
 		},
 		30*time.Second,
 		500*time.Millisecond,
