@@ -2,6 +2,7 @@ package query
 
 import (
 	"context"
+	"log"
 	"net"
 	"strings"
 	"time"
@@ -14,10 +15,12 @@ type Client struct {
 	GrpcConn     *grpc.ClientConn
 	grpcEndpoint string
 	QueryTimeout time.Duration
+
+	logger *log.Logger
 }
 
-func NewClient(grpcEndpoint string, queryTimeout time.Duration) (*Client, error) {
-	qc := &Client{grpcEndpoint: grpcEndpoint, QueryTimeout: queryTimeout}
+func NewClient(logger *log.Logger, grpcEndpoint string, queryTimeout time.Duration) (*Client, error) {
+	qc := &Client{logger: logger, grpcEndpoint: grpcEndpoint, QueryTimeout: queryTimeout}
 	return qc, qc.dialGrpcConn()
 }
 

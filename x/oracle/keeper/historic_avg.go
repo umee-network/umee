@@ -153,7 +153,7 @@ func (k Keeper) SetHistoricAvgCounterParams(ctx sdk.Context, acp types.AvgCounte
 }
 
 // GetHistoricAvgCounterParams gets the avg period and avg shift time duration from store
-func (k Keeper) GetHistoricAvgCounterParams(ctx sdk.Context) types.AvgCounterParams {
+func (k Keeper) GetHistoricAvgCounterParams(_ sdk.Context) types.AvgCounterParams {
 	return types.DefaultAvgCounterParams()
 	// TODO: investigate why we don't have record!
 	// kvs := ctx.KVStore(k.storeKey)
