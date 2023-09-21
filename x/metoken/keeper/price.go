@@ -37,6 +37,7 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 		if err != nil {
 			return indexPrices, err
 		}
+
 		indexPrices.SetPrice(
 			metoken.AssetPrice{
 				BaseDenom:   aa.Denom,
@@ -74,6 +75,22 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 			return indexPrices, err
 		}
 		indexPrices.Price = meTokenPrice
+	}
+
+	for i := 0; i < len(indexPrices.Assets); i++ {
+		asset := indexPrices.Assets[i]
+		swapRate, err := metoken.Rate(asset.Price, indexPrices.Price, asset.Exponent, indexPrices.Exponent)
+		if err != nil {
+			return indexPrices, err
+		}
+
+		redeemRate, err := metoken.Rate(indexPrices.Price, asset.Price, indexPrices.Exponent, asset.Exponent)
+		if err != nil {
+			return indexPrices, err
+		}
+
+		indexPrices.Assets[i].SwapRate = swapRate
+		indexPrices.Assets[i].RedeemRate = redeemRate
 	}
 
 	return indexPrices, nil
