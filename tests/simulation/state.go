@@ -14,7 +14,7 @@ import (
 	dbm "github.com/cometbft/cometbft-db"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	"github.com/cometbft/cometbft/libs/log"
-	tmtypes "github.com/cometbft/cometbft/types"
+	cmttypes "github.com/cometbft/cometbft/types"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"gotest.tools/v3/assert"
 
@@ -254,14 +254,14 @@ func appStateFromGenesisFileFn(
 	r io.Reader,
 	cdc codec.JSONCodec,
 	genesisFile string,
-) (tmtypes.GenesisDoc, []simtypes.Account) {
+) (cmttypes.GenesisDoc, []simtypes.Account) {
 	bytes, err := ioutil.ReadFile(genesisFile)
 	if err != nil {
 		panic(err)
 	}
 
 	// NOTE: Tendermint uses a custom JSON decoder for GenesisDoc
-	var genesis tmtypes.GenesisDoc
+	var genesis cmttypes.GenesisDoc
 	if err := tmjson.Unmarshal(bytes, &genesis); err != nil {
 		panic(err)
 	}
