@@ -10,9 +10,9 @@ import (
 // types and interfaces registered.
 func MakeEncodingConfig() testutil.TestEncodingConfig {
 	encodingConfig := params.MakeEncodingConfig()
+	// std.RegisterLegacyAminoCodec(encodingConfig.Amino) // removed because it gets called on init of codec/legacy
+	std.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	ModuleBasics.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	ModuleBasics.RegisterInterfaces(encodingConfig.InterfaceRegistry)
-	std.RegisterLegacyAminoCodec(encodingConfig.Amino)
-	std.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 	return encodingConfig
 }
