@@ -3,6 +3,7 @@ package metoken
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v6/x/incentive"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	otypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
@@ -34,4 +35,12 @@ type LeverageKeeper interface {
 // OracleKeeper interface for price feed.
 type OracleKeeper interface {
 	AllMedianPrices(ctx sdk.Context) otypes.Prices
+}
+
+// IncentiveKeeper interface for interacting with x/incentive.
+type IncentiveKeeper interface {
+	GetParams(ctx sdk.Context) incentive.Params
+	HasOngoingProgramsForDenom(ctx sdk.Context, denom string) (bool, error)
+	BondForModule(ctx sdk.Context, forModule string, coin sdk.Coin) (bool, error)
+	UnbondForModule(ctx sdk.Context, forModule string, coin sdk.Coin) (bool, error)
 }

@@ -496,6 +496,7 @@ func New(
 		keys[incentive.StoreKey],
 		app.BankKeeper,
 		app.LeverageKeeper,
+		authtypes.NewModuleAddress(metoken.ModuleName),
 	)
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 

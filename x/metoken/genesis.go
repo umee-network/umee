@@ -16,6 +16,7 @@ func NewGenesisState(
 	balances []IndexBalances,
 	nextRebalancingTime time.Time,
 	nextInterestClaimTime time.Time,
+	nextBondingTime time.Time,
 ) *GenesisState {
 	return &GenesisState{
 		Params:                params,
@@ -23,6 +24,7 @@ func NewGenesisState(
 		Balances:              balances,
 		NextRebalancingTime:   nextRebalancingTime,
 		NextInterestClaimTime: nextInterestClaimTime,
+		NextBondingTime:       nextBondingTime,
 	}
 }
 
@@ -34,6 +36,7 @@ func DefaultGenesisState() *GenesisState {
 		Balances:              nil,
 		NextRebalancingTime:   time.Time{},
 		NextInterestClaimTime: time.Time{},
+		NextBondingTime:       time.Time{},
 	}
 }
 

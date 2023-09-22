@@ -2,8 +2,43 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/umee-network/umee/v6/x/incentive"
 )
+
+// UnbondForModule attempts to unbond tokens bonded from a module account. In addition to the regular error
+// return, also returns a boolean which indicates whether the error was recoverable.
+// A recoverable = true error means UnbondForModule was aborted without harming state.
+func (k Keeper) UnbondForModule(ctx sdk.Context, forModule string, coin sdk.Coin) (bool, error) {
+	moduleAddr := authtypes.NewModuleAddress(forModule)
+	// get current account state for the requested uToken denom only
+	bonded, _, unbondings := k.BondSummary(ctx, moduleAddr, coin.Denom)
+
+	maxUnbondings := int(k.GetParams(ctx).MaxUnbondings)
+	if maxUnbondings > 0 && len(unbondings) >= maxUnbondings {
+		// reject concurrent unbondings that would exceed max unbondings - zero is unlimited
+		return true, incentive.ErrMaxUnbondings.Wrapf("%d", len(unbondings))
+	}
+
+	// reject unbondings greater than maximum available amount
+	if coin.Amount.GT(bonded.Amount) {
+		return true, incentive.ErrInsufficientBonded.Wrapf(
+			"bonded: %s, requested: %s",
+			bonded,
+			coin,
+		)
+	}
+
+	// clear completed unbondings and claim all rewards
+	// this must happen before unbonding is created, as rewards are for the previously bonded amount
+	_, err := k.UpdateAccount(ctx, moduleAddr)
+	if err != nil {
+		return false, err
+	}
+
+	// start the unbonding
+	return false, k.addUnbonding(ctx, moduleAddr, coin)
+}
 
 // addUnbonding creates an unbonding and adds it to the account's current unbondings in the store.
 // Assumes the validity of the unbonding has already been checked. Also updates unbonding amounts

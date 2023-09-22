@@ -19,6 +19,7 @@ func (k Keeper) InitGenesis(genState metoken.GenesisState) {
 
 	k.setNextRebalancingTime(genState.NextRebalancingTime)
 	k.setNextInterestClaimTime(genState.NextInterestClaimTime)
+	k.setNextBondingTime(genState.NextBondingTime)
 }
 
 // ExportGenesis returns the x/metoken module's exported genesis state.
@@ -29,5 +30,6 @@ func (k Keeper) ExportGenesis() *metoken.GenesisState {
 		Balances:              k.GetAllIndexesBalances(),
 		NextRebalancingTime:   k.getNextRebalancingTime(),
 		NextInterestClaimTime: k.getNextInterestClaimTime(),
+		NextBondingTime:       k.getNextBondingTime(),
 	}
 }

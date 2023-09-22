@@ -11,11 +11,12 @@ import (
 
 // Builder constructs Keeper by preparing all related dependencies (notably the store).
 type Builder struct {
-	cdc            codec.Codec
-	storeKey       storetypes.StoreKey
-	bankKeeper     metoken.BankKeeper
-	leverageKeeper metoken.LeverageKeeper
-	oracleKeeper   metoken.OracleKeeper
+	cdc             codec.Codec
+	storeKey        storetypes.StoreKey
+	bankKeeper      metoken.BankKeeper
+	leverageKeeper  metoken.LeverageKeeper
+	oracleKeeper    metoken.OracleKeeper
+	incentiveKeeper metoken.IncentiveKeeper
 }
 
 // NewKeeperBuilder returns Builder object.
@@ -25,22 +26,25 @@ func NewKeeperBuilder(
 	bankKeeper metoken.BankKeeper,
 	leverageKeeper metoken.LeverageKeeper,
 	oracleKeeper metoken.OracleKeeper,
+	incentiveKeeper metoken.IncentiveKeeper,
 ) Builder {
 	return Builder{
-		cdc:            cdc,
-		storeKey:       storeKey,
-		bankKeeper:     bankKeeper,
-		leverageKeeper: leverageKeeper,
-		oracleKeeper:   oracleKeeper,
+		cdc:             cdc,
+		storeKey:        storeKey,
+		bankKeeper:      bankKeeper,
+		leverageKeeper:  leverageKeeper,
+		oracleKeeper:    oracleKeeper,
+		incentiveKeeper: incentiveKeeper,
 	}
 }
 
 type Keeper struct {
-	cdc            codec.Codec
-	store          sdk.KVStore
-	bankKeeper     metoken.BankKeeper
-	leverageKeeper metoken.LeverageKeeper
-	oracleKeeper   metoken.OracleKeeper
+	cdc             codec.Codec
+	store           sdk.KVStore
+	bankKeeper      metoken.BankKeeper
+	leverageKeeper  metoken.LeverageKeeper
+	oracleKeeper    metoken.OracleKeeper
+	incentiveKeeper metoken.IncentiveKeeper
 
 	// TODO: ctx should be removed when we migrate leverageKeeper and oracleKeeper
 	ctx *sdk.Context
@@ -49,12 +53,13 @@ type Keeper struct {
 // Keeper creates a new Keeper object
 func (b Builder) Keeper(ctx *sdk.Context) Keeper {
 	return Keeper{
-		cdc:            b.cdc,
-		store:          ctx.KVStore(b.storeKey),
-		bankKeeper:     b.bankKeeper,
-		leverageKeeper: b.leverageKeeper,
-		oracleKeeper:   b.oracleKeeper,
-		ctx:            ctx,
+		cdc:             b.cdc,
+		store:           ctx.KVStore(b.storeKey),
+		bankKeeper:      b.bankKeeper,
+		leverageKeeper:  b.leverageKeeper,
+		oracleKeeper:    b.oracleKeeper,
+		incentiveKeeper: b.incentiveKeeper,
+		ctx:             ctx,
 	}
 }
 

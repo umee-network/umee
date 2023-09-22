@@ -2,6 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v6/x/metoken"
 
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/incentive"
@@ -85,10 +86,28 @@ func (k Keeper) claimRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, e
 		// skips updating its reward tracker to prevent wasting of fractional rewards.
 		// If nonzero, proceed to claim.
 		if !tokens.IsZero() {
-			// send claimed rewards from incentive module to user account
-			if err := k.bankKeeper.SendCoinsFromModuleToAccount(ctx, incentive.ModuleName, addr, tokens); err != nil {
-				return sdk.NewCoins(), err
+			if addr.Equals(k.meTokenAddr) {
+				// send claimed rewards from incentive module meToken module
+				if err := k.bankKeeper.SendCoinsFromModuleToModule(
+					ctx,
+					incentive.ModuleName,
+					metoken.ModuleName,
+					tokens,
+				); err != nil {
+					return sdk.NewCoins(), err
+				}
+			} else {
+				// send claimed rewards from incentive module to user account
+				if err := k.bankKeeper.SendCoinsFromModuleToAccount(
+					ctx,
+					incentive.ModuleName,
+					addr,
+					tokens,
+				); err != nil {
+					return sdk.NewCoins(), err
+				}
 			}
+
 			// update the user's reward tracker to indicate that they last claimed rewards at the current
 			// value of rewardAccumulator
 			if err := k.updateRewardTracker(ctx, addr, bondDenom); err != nil {

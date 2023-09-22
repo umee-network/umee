@@ -16,6 +16,9 @@ message Params {
   // Interest claiming frequency in seconds, determines how often metoken module will claim accrued interest from
   // leverage module
   int64 claiming_frequency = 2;
+
+  // Bonding frequency in seconds, determines how often metoken module try to bond collateral in the incentive module.
+  int64 bonding_frequency = 3;
 }
 
 // Index defines an index of assets that are allowed to swap and redeem for the Index's meToken,

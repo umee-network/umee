@@ -2,6 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/incentive"
@@ -43,6 +44,32 @@ func (k Keeper) BondSummary(ctx sdk.Context, addr sdk.AccAddress, denom string) 
 
 	// returned values reflect the real situation (after completed unbondings), not what is currently stored in state
 	return bonded, unbonding, unbondings
+}
+
+// BondForModule attempts to bond uToken from a module account. In addition to the regular error
+// return, also returns a boolean which indicates whether the error was recoverable.
+// A recoverable = true error means BondForModule was aborted without harming state.
+func (k Keeper) BondForModule(ctx sdk.Context, forModule string, coin sdk.Coin) (bool, error) {
+	moduleAddr := authtypes.NewModuleAddress(forModule)
+	// get current account state for the requested uToken denom only
+	bonded := k.GetBonded(ctx, moduleAddr, coin.Denom)
+	// ensure account has enough collateral to bond the new amount on top of its current amount
+	collateral := k.leverageKeeper.GetCollateral(ctx, moduleAddr, coin.Denom)
+	if collateral.IsLT(bonded.Add(coin)) {
+		return true, incentive.ErrInsufficientCollateral.Wrapf(
+			"collateral: %s bonded: %s requested: %s",
+			collateral, bonded, coin,
+		)
+	}
+
+	// clear completed unbondings and claim all rewards
+	// this must happen before bonded amount is increased, as rewards are for the previously bonded amount only
+	_, err := k.UpdateAccount(ctx, moduleAddr)
+	if err != nil {
+		return false, err
+	}
+
+	return false, k.increaseBond(ctx, moduleAddr, coin)
 }
 
 // increaseBond increases the bonded uToken amount for an account, and updates the module's total.

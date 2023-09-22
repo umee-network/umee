@@ -11,7 +11,8 @@ import (
 // getAllIncentivePrograms returns all incentive programs
 // that have been passed by governance and have a particular status.
 // The status of an incentive program is either Upcoming, Ongoing, or Completed.
-func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.ProgramStatus,
+func (k Keeper) getAllIncentivePrograms(
+	ctx sdk.Context, status incentive.ProgramStatus,
 ) ([]incentive.IncentiveProgram, error) {
 	var prefix []byte
 	switch status {
@@ -26,6 +27,37 @@ func (k Keeper) getAllIncentivePrograms(ctx sdk.Context, status incentive.Progra
 	}
 
 	return store.LoadAll[*incentive.IncentiveProgram](k.KVStore(ctx), prefix)
+}
+
+// getIncentiveProgramsByStatusAndDenom returns all incentive programs with a specified status and uToken denom.
+func (k Keeper) getIncentiveProgramsByStatusAndDenom(
+	ctx sdk.Context,
+	status incentive.ProgramStatus,
+	denom string,
+) ([]incentive.IncentiveProgram, error) {
+	var result []incentive.IncentiveProgram
+	programs, err := k.getAllIncentivePrograms(ctx, status)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, program := range programs {
+		if program.UToken == denom {
+			result = append(result, program)
+		}
+	}
+
+	return result, nil
+
+}
+
+func (k Keeper) HasOngoingProgramsForDenom(ctx sdk.Context, denom string) (bool, error) {
+	programs, err := k.getIncentiveProgramsByStatusAndDenom(ctx, incentive.ProgramStatusOngoing, denom)
+	if err != nil {
+		return false, err
+	}
+
+	return len(programs) > 0, nil
 }
 
 // getAllBondDenoms gets all uToken denoms for which an account has nonzero bonded amounts.

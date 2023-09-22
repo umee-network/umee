@@ -68,6 +68,18 @@ func (k Keeper) setNextInterestClaimTime(nextInterestClaimTime time.Time) {
 	store.SetTimeMs(k.store, keyPrefixNextInterestClaimTime, nextInterestClaimTime)
 }
 
+// getNextBondingTime returns next x/metoken bonding time in Milliseconds.
+// Returns 0 unix time if the time was not set before.
+func (k Keeper) getNextBondingTime() time.Time {
+	t, _ := store.GetTimeMs(k.store, keyPrefixNextBondingTime)
+	return t
+}
+
+// setNextBondingTime next x/metoken bonding time in Milliseconds.
+func (k Keeper) setNextBondingTime(nextBondingTime time.Time) {
+	store.SetTimeMs(k.store, keyPrefixNextBondingTime, nextBondingTime)
+}
+
 // UpdateIndexes registers `addIndexes` and processes `updateIndexes` to update existing indexes.
 func (k Keeper) UpdateIndexes(
 	addIndexes []metoken.Index,

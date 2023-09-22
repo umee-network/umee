@@ -8,6 +8,7 @@ var (
 	keyPrefixBalances              = []byte{0x02}
 	keyPrefixNextRebalancingTime   = []byte{0x03}
 	keyPrefixNextInterestClaimTime = []byte{0x04}
+	keyPrefixNextBondingTime       = []byte{0x04}
 	// keyPrefixParams is the key to query all gov params
 	keyPrefixParams = []byte{0x05}
 )

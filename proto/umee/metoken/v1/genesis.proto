@@ -22,6 +22,11 @@ message GenesisState {
     (gogoproto.nullable) = false,
     (gogoproto.stdtime)  = true
   ];
+
+  google.protobuf.Timestamp next_bonding_time = 6 [
+    (gogoproto.nullable) = false,
+    (gogoproto.stdtime)  = true
+  ];
 }
 
 // IndexBalances is the state of an Index, containing its meToken supply and all underlying asset balances.

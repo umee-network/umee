@@ -17,6 +17,7 @@ type Keeper struct {
 	storeKey       storetypes.StoreKey
 	bankKeeper     incentive.BankKeeper
 	leverageKeeper incentive.LeverageKeeper
+	meTokenAddr    sdk.AccAddress
 }
 
 func NewKeeper(
@@ -24,12 +25,14 @@ func NewKeeper(
 	storeKey storetypes.StoreKey,
 	bk incentive.BankKeeper,
 	lk incentive.LeverageKeeper,
+	meTokenAddr sdk.AccAddress,
 ) Keeper {
 	return Keeper{
 		cdc:            cdc,
 		storeKey:       storeKey,
 		bankKeeper:     bk,
 		leverageKeeper: lk,
+		meTokenAddr:    meTokenAddr,
 	}
 }
 
