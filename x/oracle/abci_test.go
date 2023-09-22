@@ -158,7 +158,6 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().NoError(err)
 		s.Require().Equal(types.ExchangeRate{
 			Rate:      sdk.OneDec(),
-			Denom:     denom.SymbolDenom,
 			Timestamp: ctx.BlockTime()},
 			rate)
 	}
@@ -202,8 +201,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(types.ExchangeRate{
-			Denom: denom.SymbolDenom, Rate: sdk.NewDecWithPrec(5, 1), Timestamp: ctx.BlockTime()}, rate)
+		s.Require().Equal(types.ExchangeRate{Rate: sdk.NewDecWithPrec(5, 1), Timestamp: ctx.BlockTime()}, rate)
 	}
 
 	// TODO: check reward distribution
@@ -240,7 +238,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "umee")
 	s.Require().NoError(err)
-	s.Require().Equal(types.ExchangeRate{Denom: "UMEE", Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()}, rate)
+	s.Require().Equal(types.ExchangeRate{Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()}, rate)
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "ATOM")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("ATOM"))
 	s.Require().Equal(types.ExchangeRate{}, rate)

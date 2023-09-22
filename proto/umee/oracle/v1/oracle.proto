@@ -145,8 +145,8 @@ message AvgCounter {
   google.protobuf.Timestamp start = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
 
-// ExchangeRate stores exchange rate with timestamp
-message ExchangeRate {
+// DenomExchangeRate stores exchange rate with timestamp
+message DenomExchangeRate {
   option (gogoproto.equal)            = false;
   option (gogoproto.goproto_stringer) = false;
   string denom                        = 1 [(gogoproto.moretags) = "yaml:\"denom\""];

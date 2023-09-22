@@ -12,7 +12,7 @@ option (gogoproto.goproto_getters_all) = false;
 message GenesisState {
   Params                                params                           = 1 [(gogoproto.nullable) = false];
   repeated FeederDelegation             feeder_delegations               = 2 [(gogoproto.nullable) = false];
-  repeated ExchangeRate                 exchange_rates                   = 3 [(gogoproto.nullable) = false];
+  repeated DenomExchangeRate            exchange_rates                   = 3 [(gogoproto.nullable) = false];
   repeated MissCounter                  miss_counters                    = 4 [(gogoproto.nullable) = false];
   repeated AggregateExchangeRatePrevote aggregate_exchange_rate_prevotes = 5 [(gogoproto.nullable) = false];
   repeated AggregateExchangeRateVote    aggregate_exchange_rate_votes    = 6 [(gogoproto.nullable) = false];

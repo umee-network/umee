@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -76,12 +75,12 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 // GetExchangeRate gets the consensus exchange rate of USD denominated in the
 // denom asset from the store.
 func (k Keeper) GetExchangeRate(ctx sdk.Context, symbol string) (types.ExchangeRate, error) {
-	v := store.GetValue[*types.DenomExchangeRate](ctx.KVStore(k.storeKey), types.KeyExchangeRate(symbol),
+	v := store.GetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), types.KeyExchangeRate(symbol),
 		"exchange_rate")
 	if v == nil {
 		return types.ExchangeRate{}, types.ErrUnknownDenom.Wrap(symbol)
 	}
-	return types.NewExchangeRate(strings.ToUpper(symbol), sdk.MustNewDecFromStr(v.Rate), v.Timestamp), nil
+	return *v, nil
 }
 
 // GetExchangeRateBase gets the consensus exchange rate of an asset
@@ -116,8 +115,8 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 // denom asset to the store with timestamp but with passing timestamp to func
 func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
 	key := types.KeyExchangeRate(denom)
-	val := types.DenomExchangeRate{Rate: rate.String(), Timestamp: t}
-	err := store.SetValue[*types.DenomExchangeRate](ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
+	val := types.ExchangeRate{Rate: rate, Timestamp: t}
+	err := store.SetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
 	util.Panic(err)
 }
 
@@ -146,11 +145,11 @@ func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.D
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
 		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
-		var exgRate types.DenomExchangeRate
+		var exgRate types.ExchangeRate
 		err := exgRate.Unmarshal(iter.Value())
 		util.Panic(err)
 
-		if handler(denom, sdk.MustNewDecFromStr(exgRate.Rate), exgRate.Timestamp) {
+		if handler(denom, exgRate.Rate, exgRate.Timestamp) {
 			break
 		}
 	}

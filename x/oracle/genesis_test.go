@@ -54,7 +54,7 @@ func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 			"valid",
 			types.GenesisState{
 				Params: types.DefaultParams(),
-				ExchangeRates: []types.ExchangeRate{
+				ExchangeRates: []types.DenomExchangeRate{
 					{
 						Denom:     denom,
 						Rate:      exchangeRate,
@@ -153,7 +153,7 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 			ValidatorAddress: umeevaloperAddr,
 		},
 	}
-	exchangeRateTuples := []types.ExchangeRate{
+	exchangeRateTuples := []types.DenomExchangeRate{
 		{
 			Denom:     upperDenom,
 			Rate:      exchangeRate,

@@ -92,9 +92,9 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		return false
 	})
 
-	exchangeRates := []types.ExchangeRate{}
+	exchangeRates := []types.DenomExchangeRate{}
 	keeper.IterateExchangeRates(ctx, func(denom string, er sdk.Dec, t time.Time) (stop bool) {
-		exchangeRates = append(exchangeRates, types.NewExchangeRate(denom, er, t))
+		exchangeRates = append(exchangeRates, types.NewDenomExchangeRate(denom, er, t))
 		return false
 	})
 
