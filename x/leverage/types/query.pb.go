@@ -1042,7 +1042,8 @@ type InspectAccount struct {
 	Analysis *RiskInfo `protobuf:"bytes,2,opt,name=analysis,proto3" json:"analysis,omitempty"`
 	// Collateral and borrowed tokens, denoted in human-readable symbol denom instead of ibc denom.
 	Position *DecBalances `protobuf:"bytes,3,opt,name=position,proto3" json:"position,omitempty"`
-	// Info is a string which can be used to report additional information of any type
+	// Info is a string which can be used to report additional information of any type.
+	// UNSTABLE: We do not guarantee consistency of any data structures contained within the string.
 	Info string `protobuf:"bytes,4,opt,name=info,proto3" json:"info,omitempty"`
 }
 

@@ -399,7 +399,8 @@ message InspectAccount {
   RiskInfo analysis = 2;
   // Collateral and borrowed tokens, denoted in human-readable symbol denom instead of ibc denom.
   DecBalances position = 3;
-  // Info is a string which can be used to report additional information of any type
+  // Info is a string which can be used to report additional information of any type.
+  // UNSTABLE: We do not guarantee consistency of any data structures contained within the string.
   string info = 4;
 }
 

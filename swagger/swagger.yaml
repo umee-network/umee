@@ -372,9 +372,12 @@ paths:
                             borrowed, including interest owed.
                     info:
                       type: string
-                      title: >-
+                      description: >-
                         Info is a string which can be used to report additional
-                        information of any type
+                        information of any type.
+
+                        UNSTABLE: We do not guarantee consistency of any data
+                        structures contained within the string.
                   description: >-
                     InspectAccount contains risk and balance info for a single
                     account for the inspector query.
@@ -533,9 +536,12 @@ paths:
                           including interest owed.
                   info:
                     type: string
-                    title: >-
+                    description: >-
                       Info is a string which can be used to report additional
-                      information of any type
+                      information of any type.
+
+                      UNSTABLE: We do not guarantee consistency of any data
+                      structures contained within the string.
                 description: >-
                   InspectAccount contains risk and balance info for a single
                   account for the inspector query.
@@ -4534,9 +4540,12 @@ definitions:
               interest owed.
       info:
         type: string
-        title: >-
+        description: >-
           Info is a string which can be used to report additional information of
-          any type
+          any type.
+
+          UNSTABLE: We do not guarantee consistency of any data structures
+          contained within the string.
     description: >-
       InspectAccount contains risk and balance info for a single account for the
       inspector query.
@@ -4834,9 +4843,12 @@ definitions:
                   including interest owed.
           info:
             type: string
-            title: >-
+            description: >-
               Info is a string which can be used to report additional
-              information of any type
+              information of any type.
+
+              UNSTABLE: We do not guarantee consistency of any data structures
+              contained within the string.
         description: >-
           InspectAccount contains risk and balance info for a single account for
           the inspector query.
@@ -4923,9 +4935,12 @@ definitions:
                     including interest owed.
             info:
               type: string
-              title: >-
+              description: >-
                 Info is a string which can be used to report additional
-                information of any type
+                information of any type.
+
+                UNSTABLE: We do not guarantee consistency of any data structures
+                contained within the string.
           description: >-
             InspectAccount contains risk and balance info for a single account
             for the inspector query.
