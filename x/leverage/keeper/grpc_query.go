@@ -237,47 +237,56 @@ func (q Querier) AccountSummary(
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	// supplied value always uses spot prices, and skips supplied assets that are missing prices
-	suppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeSpot)
+	// the following spot price calculations skip assets missing prices, but otherwise always
+	// use the most up to date prices
+	spotSuppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeSpot)
+	if err != nil {
+		return nil, err
+	}
+	spotBorrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+	if err != nil {
+		return nil, err
+	}
+	spotCollateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeSpot)
 	if err != nil {
 		return nil, err
 	}
 
-	// borrowed value uses spot prices here, but leverage logic instead uses
-	// the higher of spot or historic prices for each borrowed token when comparing it
-	// to borrow limit. This line also skips borrowed assets that are missing prices.
-	borrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+	// this supplied value uses leverage-like prices: the lower of spot or historic price for supplied tokens
+	suppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeLow)
 	if err != nil {
 		return nil, err
 	}
-
-	// collateral value always uses spot prices, and this line skips assets that are missing prices
-	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeSpot)
-	if err != nil {
-		return nil, err
-	}
-
-	// borrow limit shown here as it is used in leverage logic:
-	// using the lower of spot or historic prices for each collateral token
-	// skips collateral tokens with missing oracle prices
-	ap, err := q.Keeper.GetAccountPosition(ctx, addr, false)
-	if err != nil {
-		return nil, err
-	}
-	borrowLimit := ap.Limit()
 
 	resp := &types.QueryAccountSummaryResponse{
-		SuppliedValue:   suppliedValue,
-		CollateralValue: collateralValue,
-		BorrowedValue:   borrowedValue,
-		BorrowLimit:     borrowLimit,
+		SuppliedValue: suppliedValue,
+		SpotSuppliedValue:   spotSuppliedValue,
+		SpotCollateralValue: spotCollateralValue,
+		SpotBorrowedValue:   spotBorrowedValue,
 	}
 
-	// borrow limit shown here as it is used in leverage logic:
+	// values computed from position use the same prices found in leverage logic:
 	// using the lower of spot or historic prices for each collateral token
-	// error on collateral tokens with missing oracle prices, but skips
-	// borrow tokens missing collateral prices
+	// and the higher of spot or historic prices for each borrowed token
+	// skips collateral tokens with missing prices, but errors on borrow tokens missing prices
+	// (for oracle errors only the relevant response fields will be left nil)
+	ap, err := q.Keeper.GetAccountPosition(ctx, addr, false)
+	if nonOracleError(err) {
+		return nil, err
+	}
+	if err == nil {
+		resp.BorrowedValue = ap.BorrowedValue()
+		resp.CollateralValue = ap.CollateralValue()
+		resp.BorrowLimit = ap.Limit()
+	}
+
+	// liquidation threshold shown here as it is used in leverage logic: using spot prices.
+	// skips borrowed tokens with missing prices, but errors on collateral missing prices
+	// (for oracle errors only the relevant response fields will be left nil)
 	ap, err = q.Keeper.GetAccountPosition(ctx, addr, true)
+	if nonOracleError(err) {
+		return nil, err
+	}
 	if err == nil {
 		// on an error here, simply skip setting the response field
 		liquidationThreshold := ap.Limit()

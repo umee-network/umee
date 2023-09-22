@@ -133,6 +133,8 @@ paths:
                   Supplied Value is the sum of the USD value of all tokens the
                   account has supplied, including interest earned.
 
+                  It uses the lower of spot or historic price for each token.
+
                   Computation skips assets which are missing oracle prices,
                   potentially resulting in a lower supplied
 
@@ -142,6 +144,8 @@ paths:
                 description: >-
                   Collateral Value is the sum of the USD value of all uTokens
                   the account has collateralized.
+
+                  It uses the lower of spot or historic price for each token.
 
                   Computation skips collateral which is missing an oracle price,
                   potentially resulting in a lower collateral
@@ -153,7 +157,7 @@ paths:
                   Borrowed Value is the sum of the USD value of all tokens the
                   account has borrowed, including interest owed.
 
-                  It always uses spot prices.
+                  It uses the higher of spot or historic price for each token.
 
                   Computation skips borrows which are missing oracle prices,
                   potentially resulting in a lower borrowed
@@ -180,6 +184,21 @@ paths:
 
                   Will be null if an oracle price required for computation is
                   missing.
+              spot_supplied_value:
+                type: string
+                description: >-
+                  Spot Supplied Value is supplied value but always uses spot
+                  prices.
+              spot_collateral_value:
+                type: string
+                description: >-
+                  Spot Collateral Value is collateral value but always uses spot
+                  prices.
+              spot_borrowed_value:
+                type: string
+                description: >-
+                  Spot Borrowed Value is borrowed value but always uses spot
+                  prices.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -4696,6 +4715,8 @@ definitions:
           Supplied Value is the sum of the USD value of all tokens the account
           has supplied, including interest earned.
 
+          It uses the lower of spot or historic price for each token.
+
           Computation skips assets which are missing oracle prices, potentially
           resulting in a lower supplied
 
@@ -4705,6 +4726,8 @@ definitions:
         description: >-
           Collateral Value is the sum of the USD value of all uTokens the
           account has collateralized.
+
+          It uses the lower of spot or historic price for each token.
 
           Computation skips collateral which is missing an oracle price,
           potentially resulting in a lower collateral
@@ -4716,7 +4739,7 @@ definitions:
           Borrowed Value is the sum of the USD value of all tokens the account
           has borrowed, including interest owed.
 
-          It always uses spot prices.
+          It uses the higher of spot or historic price for each token.
 
           Computation skips borrows which are missing oracle prices, potentially
           resulting in a lower borrowed
@@ -4742,6 +4765,15 @@ definitions:
           becomes eligible for liquidation.
 
           Will be null if an oracle price required for computation is missing.
+      spot_supplied_value:
+        type: string
+        description: Spot Supplied Value is supplied value but always uses spot prices.
+      spot_collateral_value:
+        type: string
+        description: Spot Collateral Value is collateral value but always uses spot prices.
+      spot_borrowed_value:
+        type: string
+        description: Spot Borrowed Value is borrowed value but always uses spot prices.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
