@@ -82,6 +82,12 @@ service Query {
       returns (QueryInspectResponse) {
     option (google.api.http).get = "/umee/leverage/v1/inspect";
   }
+
+  // InspectAccount runs the inspect query on a single address
+  rpc InspectAccount(QueryInspectAccount)
+      returns (QueryInspectAccountResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/inspect-account";
+  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -366,9 +372,21 @@ message QueryInspect {
   double ltv = 5;
 }
 
+// QueryInspectAccount defines the request structure for the InspectAccount gRPC service handler.
+message QueryInspectAccount {
+  string address = 1;
+}
+
 // QueryInspectResponse defines the response structure for the Inspect gRPC service handler.
 message QueryInspectResponse {
   repeated InspectAccount borrowers = 1 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryInspectAccountResponse defines the response structure for the InspectAccount gRPC service handler.
+message QueryInspectAccountResponse {
+  InspectAccount borrower = 1 [
     (gogoproto.nullable) = false
   ];
 }
@@ -381,6 +399,8 @@ message InspectAccount {
   RiskInfo analysis = 2;
   // Collateral and borrowed tokens, denoted in human-readable symbol denom instead of ibc denom.
   DecBalances position = 3;
+  // Info is a string which can be used to report additional information of any type
+  string info = 4;
 }
 
 // RiskInfo defines a borrower's account health without requiring sdk.Dec formatting.
