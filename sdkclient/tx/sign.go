@@ -52,7 +52,6 @@ func BroadcastTx(clientCtx client.Context, txf tx.Factory, msgs ...sdk.Msg) (*sd
 // the updated fields will be returned.
 func prepareFactory(clientCtx client.Context, txf tx.Factory) (tx.Factory, error) {
 	from := clientCtx.GetFromAddress()
-
 	if err := txf.AccountRetriever().EnsureExists(clientCtx, from); err != nil {
 		return txf, err
 	}
