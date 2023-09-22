@@ -19,16 +19,18 @@ const (
 
 // KVStore key prefixes
 var (
-	KeyPrefixExchangeRate                 = []byte{0x01} // prefix for each key to a rate
-	KeyPrefixFeederDelegation             = []byte{0x02} // prefix for each key to a feeder delegation
-	KeyPrefixMissCounter                  = []byte{0x03} // prefix for each key to a miss counter
-	KeyPrefixAggregateExchangeRatePrevote = []byte{0x04} // prefix for each key to a aggregate prevote
-	KeyPrefixAggregateExchangeRateVote    = []byte{0x05} // prefix for each key to a aggregate vote
-	KeyPrefixMedian                       = []byte{0x06} // prefix for each key to a price median
-	KeyPrefixMedianDeviation              = []byte{0x07} // prefix for each key to a price median standard deviation
-	KeyPrefixHistoricPrice                = []byte{0x08} // prefix for each key to a historic price
-	KeyPrefixAvgCounter                   = []byte{0x09} // prefix for each key to a historic avg price counter
-	KeyLatestAvgCounter                   = []byte{0x10} // key where we store the latest avg price counter
+	KeyPrefixExchangeRate                 = []byte{1} // prefix for each key to a rate
+	KeyPrefixFeederDelegation             = []byte{2} // prefix for each key to a feeder delegation
+	KeyPrefixMissCounter                  = []byte{3} // prefix for each key to a miss counter
+	KeyPrefixAggregateExchangeRatePrevote = []byte{4} // prefix for each key to a aggregate prevote
+	KeyPrefixAggregateExchangeRateVote    = []byte{5} // prefix for each key to a aggregate vote
+	KeyPrefixMedian                       = []byte{6} // prefix for each key to a price median
+	KeyPrefixMedianDeviation              = []byte{7} // prefix for each key to a price median standard deviation
+	KeyPrefixHistoricPrice                = []byte{8} // prefix for each key to a historic price
+	KeyPrefixAvgCounter                   = []byte{9} // prefix for each key to a historic avg price counter
+	KeyAvgCounterParams                   = []byte{10}
+
+	KeyLatestAvgCounter = []byte{16} // it was set as 0x10 and breaking the order
 )
 
 // KeyExchangeRate - stored by *denom*
