@@ -1,6 +1,6 @@
 module github.com/umee-network/umee/v6
 
-go 1.20
+go 1.21
 
 require (
 	cosmossdk.io/errors v1.0.0
