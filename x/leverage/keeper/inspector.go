@@ -88,7 +88,7 @@ func (q Querier) Inspect(
 				Collateral: symbolDecCoins(collateral, exchangeRates),
 				Borrowed:   symbolDecCoins(borrowed, exchangeRates),
 			},
-			Info: position.String(),
+			Info: "",
 		}
 		ok := account.Analysis.Borrowed > req.Borrowed
 		ok = ok && account.Analysis.Value > req.Collateral
