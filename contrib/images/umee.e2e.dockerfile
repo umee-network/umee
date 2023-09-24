@@ -1,7 +1,7 @@
 # Docker for e2e testing
 # Creates dynamic binaries, by building from the latest version of umeed
 
-FROM golang:1.20-bookworm AS builder
+FROM golang:1.21-bookworm AS builder
 ARG EXPERIMENTAL=true
 
 ## Download go module dependencies for umeed
