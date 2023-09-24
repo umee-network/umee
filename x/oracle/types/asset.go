@@ -8,7 +8,7 @@ import (
 
 const (
 	UmeeDenom       = appparams.BondDenom
-	UmeeSymbol      = "UMEE"
+	UmeeSymbol      = "umee"
 	UmeeExponent    = uint32(6)
 	USDDenom        = "USD"
 	BlocksPerMinute = uint64(10)

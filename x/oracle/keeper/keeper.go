@@ -112,7 +112,7 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 }
 
 // SetExchangeRateWithTimestamp sets the consensus exchange rate of USD denominated in the
-// denom asset to the store with timestamp but with passing timestamp to func
+// denom asset to the store with a timestamp specified instead of using ctx
 func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
 	key := types.KeyExchangeRate(denom)
 	val := types.ExchangeRate{Rate: rate, Timestamp: t}
@@ -121,7 +121,7 @@ func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, rate
 }
 
 // SetExchangeRate sets the consensus exchange rate of USD denominated in the
-// denom asset to the store with timestamp
+// denom asset to the store using timestamp from ctx
 func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
 	k.SetExchangeRateWithTimestamp(ctx, denom, rate, ctx.BlockTime())
 }
