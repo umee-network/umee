@@ -57,6 +57,21 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade5_1(upgradeInfo)
 	app.registerUpgrade("v5.2", upgradeInfo) // v5.2 migration is not compatible with v6, so leaving default here.
 	app.registerUpgrade6(upgradeInfo)
+	app.registerUpgrade6_1("v6.1", upgradeInfo)
+}
+
+func (app *UmeeApp) registerUpgrade6_1(planName string, _ upgradetypes.Plan) {
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			ctx.Logger().Info("-----------------------------\n-----------------------------")
+			err := app.OracleKeeper.SetHistoricAvgCounterParams(ctx, oracletypes.DefaultAvgCounterParams())
+			if err != nil {
+				return fromVM, err
+			}
+
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {

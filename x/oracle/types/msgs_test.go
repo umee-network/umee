@@ -122,9 +122,9 @@ func TestMsgAggregateExchangeRateVote(t *testing.T) {
 	for i, tc := range tests {
 		msg := NewMsgAggregateExchangeRateVote(tc.salt, tc.exchangeRates, tc.feeder, sdk.ValAddress(tc.validator))
 		if tc.expectPass {
-			assert.NilError(t, msg.ValidateBasic(), "test: %v", i)
+			assert.NilError(t, msg.ValidateBasic(), "test: %d", i)
 		} else {
-			assert.ErrorContains(t, msg.ValidateBasic(), tc.expectedErrorMsg)
+			assert.ErrorContains(t, msg.ValidateBasic(), "", "test", i, "expected_err", tc.expectedErrorMsg)
 		}
 	}
 }

@@ -52,6 +52,8 @@ func (q querier) ExchangeRates(
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
+	// TODO: need to decide if we want to return DecCoins here or list of ExchangeRates with denoms (we
+	// need the latter for genesis anyway)
 	var exchangeRates sdk.DecCoins
 
 	if len(req.Denom) > 0 {
@@ -60,7 +62,7 @@ func (q querier) ExchangeRates(
 			return nil, err
 		}
 
-		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate))
+		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate.Rate))
 	} else {
 		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
 			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))

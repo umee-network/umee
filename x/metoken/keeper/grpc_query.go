@@ -200,7 +200,7 @@ func (q Querier) getPrices(k Keeper, meTokenDenom string) ([]metoken.IndexPrices
 			return nil, err
 		}
 
-		prices[i] = ip.QueryExport()
+		prices[i] = ip
 	}
 
 	return prices, nil

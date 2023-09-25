@@ -11,8 +11,10 @@ import (
 	"github.com/umee-network/umee/v6/util/coin"
 )
 
-var halfDec = sdk.MustNewDecFromStr("0.5")
-var one = sdk.OneDec()
+var (
+	halfDec = sdk.MustNewDecFromStr("0.5")
+	one     = sdk.OneDec()
+)
 
 // ValidateBaseDenom validates a denom and ensures it is not a uToken.
 func ValidateBaseDenom(denom string) error {
@@ -175,6 +177,11 @@ func (p SpecialAssetPair) Validate() error {
 		return err
 	}
 
+	if p.CollateralWeight.IsNil() || p.LiquidationThreshold.IsNil() {
+		return fmt.Errorf("nil collateral weight or liquidation threshold for asset pair (%s,%s)",
+			p.Borrow, p.Collateral)
+	}
+
 	// Collateral Weight is non-negative and less than 1.
 	if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
 		return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
@@ -200,6 +207,10 @@ func (s SpecialAssetSet) Validate() error {
 			return fmt.Errorf("duplicate special asset pair: %s", a)
 		}
 		denoms[a] = true
+	}
+
+	if s.CollateralWeight.IsNil() || s.LiquidationThreshold.IsNil() {
+		return fmt.Errorf("nil collateral weight or liquidation threshold for asset set %s)", s.Assets)
 	}
 
 	// Collateral Weight is non-negative and less than 1.

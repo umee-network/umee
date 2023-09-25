@@ -205,11 +205,11 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
 }
 
 func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
-	app, ctx := s.app, s.ctx
-	app.OracleKeeper.SetExchangeRateWithEvent(ctx, displayDenom, sdk.OneDec())
-	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
+	v := sdk.OneDec()
+	s.app.OracleKeeper.SetExchangeRateWithEvent(s.ctx, displayDenom, v)
+	rate, err := s.app.OracleKeeper.GetExchangeRate(s.ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().Equal(rate, types.ExchangeRate{Rate: v, Timestamp: s.ctx.BlockTime()})
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRate_InvalidDenom() {
@@ -227,17 +227,17 @@ func (s *IntegrationTestSuite) TestGetExchangeRate_NotSet() {
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
-	app, ctx := s.app, s.ctx
-
-	app.OracleKeeper.SetExchangeRate(ctx, displayDenom, sdk.OneDec())
-	rate, err := app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
+	v := sdk.OneDec()
+	expected := types.ExchangeRate{Rate: v, Timestamp: s.ctx.BlockTime()}
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, v)
+	rate, err := s.app.OracleKeeper.GetExchangeRate(s.ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().Equal(rate, expected)
 
-	app.OracleKeeper.SetExchangeRate(ctx, strings.ToLower(displayDenom), sdk.OneDec())
-	rate, err = app.OracleKeeper.GetExchangeRate(ctx, displayDenom)
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	rate, err = s.app.OracleKeeper.GetExchangeRate(s.ctx, displayDenom)
 	s.Require().NoError(err)
-	s.Require().Equal(rate, sdk.OneDec())
+	s.Require().Equal(rate, expected)
 }
 
 func (s *IntegrationTestSuite) TestGetExchangeRateBase() {

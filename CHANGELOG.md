@@ -46,6 +46,30 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
+
+### Bug Fixes
+
+- [2260](https://github.com/umee-network/umee/pull/2260) fix(oracle): avg params storage.
+
+## [v6.0.2](https://github.com/umee-network/umee/releases/tag/v6.0.2) - 2023-09-20
+
+### BugFix
+
+- [2257](https://github.com/umee-network/umee/pull/2257) fix(oracle): missing avg params.
+
+## [v6.0.1](https://github.com/umee-network/umee/releases/tag/v6.0.1) - 2023-09-15
+
+### Features
+
+- [2245](https://github.com/umee-network/umee/pull/2245) cli x/ugov: emergency group query.
+
+### Bug Fixes
+
+- [2247](https://github.com/umee-network/umee/pull/2247) `leverage.GovUpdateSpecialAssets`: set missing `LiquidationThreshold` attribute.
+
 ## [v6.0.0](https://github.com/umee-network/umee/releases/tag/v6.0.0) - 2023-09-14
 
 ### Features
