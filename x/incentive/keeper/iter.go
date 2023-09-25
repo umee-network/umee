@@ -51,7 +51,16 @@ func (k Keeper) getIncentiveProgramsByStatusAndDenom(
 
 }
 
-func (k Keeper) HasOngoingProgramsForDenom(ctx sdk.Context, denom string) (bool, error) {
+func (k Keeper) HasOngoingPrograms(ctx sdk.Context) (bool, error) {
+	programs, err := k.getAllIncentivePrograms(ctx, incentive.ProgramStatusOngoing)
+	if err != nil {
+		return false, err
+	}
+
+	return len(programs) > 0, nil
+}
+
+func (k Keeper) HasOngoingProgramsByDenom(ctx sdk.Context, denom string) (bool, error) {
 	programs, err := k.getIncentiveProgramsByStatusAndDenom(ctx, incentive.ProgramStatusOngoing, denom)
 	if err != nil {
 		return false, err

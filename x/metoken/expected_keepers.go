@@ -29,7 +29,11 @@ type LeverageKeeper interface {
 	WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Coin) (sdk.Coin, bool, error)
 	ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (sdkmath.Int, error)
 	GetTotalSupply(ctx sdk.Context, denom string) (sdk.Coin, error)
+	GetSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress, denom string) (sdk.Coin, error)
 	GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sdk.Coins, error)
+	GetCollateral(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom string) sdk.Coin
+	CollateralizeForModule(ctx sdk.Context, forModule string, uToken sdk.Coin) (bool, error)
+	DecollateralizeForModule(ctx sdk.Context, forModule string, uToken sdk.Coin) (bool, error)
 }
 
 // OracleKeeper interface for price feed.
@@ -40,7 +44,9 @@ type OracleKeeper interface {
 // IncentiveKeeper interface for interacting with x/incentive.
 type IncentiveKeeper interface {
 	GetParams(ctx sdk.Context) incentive.Params
-	HasOngoingProgramsForDenom(ctx sdk.Context, denom string) (bool, error)
+	GetBonded(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Coin
+	HasOngoingPrograms(ctx sdk.Context) (bool, error)
+	HasOngoingProgramsByDenom(ctx sdk.Context, denom string) (bool, error)
 	BondForModule(ctx sdk.Context, forModule string, coin sdk.Coin) (bool, error)
 	UnbondForModule(ctx sdk.Context, forModule string, coin sdk.Coin) (bool, error)
 }

@@ -507,6 +507,7 @@ func New(
 			app.BankKeeper,
 			app.LeverageKeeper,
 			app.OracleKeeper,
+			app.IncentiveKeeper,
 		)
 	}
 

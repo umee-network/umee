@@ -87,7 +87,7 @@ func (k Keeper) claimRewards(ctx sdk.Context, addr sdk.AccAddress) (sdk.Coins, e
 		// If nonzero, proceed to claim.
 		if !tokens.IsZero() {
 			if addr.Equals(k.meTokenAddr) {
-				// send claimed rewards from incentive module meToken module
+				// send claimed rewards from incentive module to meToken module
 				if err := k.bankKeeper.SendCoinsFromModuleToModule(
 					ctx,
 					incentive.ModuleName,
