@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [Unreleased]
 
+### Improvements
+
+- [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
+
 ### Bug Fixes
 
 - [2260](https://github.com/umee-network/umee/pull/2260) fix(oracle): avg params storage.
