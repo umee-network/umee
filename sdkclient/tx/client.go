@@ -1,6 +1,7 @@
 package tx
 
 import (
+	"log"
 	"os"
 
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
@@ -27,12 +28,15 @@ type Client struct {
 	keyringRecord  []*keyring.Record
 	txFactory      *tx.Factory
 	encCfg         testutil.TestEncodingConfig
+
+	logger *log.Logger
 }
 
 // Initializes a cosmos sdk client context and transaction factory for
 // signing and broadcasting transactions by passing chainDataDir and remaining func arguments
 // Note: For signing the transactions accounts are created by names like this val0, val1....
 func NewClient(
+	logger *log.Logger,
 	chainDataDir,
 	chainID,
 	tmrpcEndpoint string,
@@ -45,6 +49,7 @@ func NewClient(
 		TMRPCEndpoint: tmrpcEndpoint,
 		gasAdjustment: gasAdjustment,
 		encCfg:        encCfg,
+		logger:        logger,
 	}
 
 	c.keyringKeyring, err = keyring.New(keyringAppName, keyring.BackendTest, chainDataDir, nil, encCfg.Codec)
@@ -121,10 +126,15 @@ func (c *Client) initTxFactory() {
 	c.txFactory = &f
 }
 
-func (c *Client) BroadcastTx(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
-	c.ClientContext.From = c.keyringRecord[0].Name
-	c.ClientContext.FromName = c.keyringRecord[0].Name
-	c.ClientContext.FromAddress, _ = c.keyringRecord[0].GetAddress()
+func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) {
+	var err error
+	r := c.keyringRecord[idx]
+	c.ClientContext.From = r.Name
+	c.ClientContext.FromName = r.Name
+	c.ClientContext.FromAddress, err = r.GetAddress()
+	if err != nil {
+		c.logger.Fatalln("can't get keyring record, idx=", idx, err)
+	}
 	return BroadcastTx(*c.ClientContext, *c.txFactory, msgs...)
 }
 

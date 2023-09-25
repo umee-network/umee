@@ -1,6 +1,6 @@
 module github.com/umee-network/umee/v6
 
-go 1.20
+go 1.21
 
 require (
 	cosmossdk.io/api v0.3.1

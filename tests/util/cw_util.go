@@ -33,7 +33,7 @@ func NewCosmwasmTestSuite(t *testing.T, umee client.Client) *Cosmwasm {
 
 func (cw *Cosmwasm) DeployWasmContract(path string) {
 	cw.T.Logf("ℹ️ deploying smart contract %s", path)
-	resp, err := cw.umee.Tx.TxSubmitWasmContract(path)
+	resp, err := cw.umee.Tx.WasmDeployContract(path)
 	assert.NilError(cw.T, err)
 	storeCode := cw.GetAttributeValue(*resp, "store_code", "code_id")
 	cw.StoreCode, err = strconv.ParseUint(storeCode, 10, 64)
@@ -49,7 +49,7 @@ func (cw *Cosmwasm) MarshalAny(any interface{}) []byte {
 
 func (cw *Cosmwasm) InstantiateContract(initMsg []byte) {
 	cw.T.Log("ℹ️ smart contract is instantiating...")
-	resp, err := cw.umee.Tx.TxWasmInstantiateContract(cw.StoreCode, initMsg)
+	resp, err := cw.umee.Tx.WasmInitContract(cw.StoreCode, initMsg)
 	assert.NilError(cw.T, err)
 	cw.ContractAddr = cw.GetAttributeValue(*resp, "instantiate", "_contract_address")
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
@@ -64,19 +64,19 @@ func (cw *Cosmwasm) CWQuery(query []byte) wasmtypes.QuerySmartContractStateRespo
 }
 
 func (cw *Cosmwasm) CWExecute(execMsg []byte) {
-	resp, err := cw.umee.Tx.TxWasmExecuteContract(cw.ContractAddr, execMsg)
+	resp, err := cw.umee.Tx.WasmExecuteContract(cw.ContractAddr, execMsg)
 	assert.NilError(cw.T, err)
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
 }
 
 func (cw *Cosmwasm) CWExecuteWithSeqAndAsync(execMsg []byte, accSeq uint64) {
-	resp, err := cw.umee.Tx.TxWasmExecuteContractByAccSeq(cw.ContractAddr, execMsg, accSeq)
+	resp, err := cw.umee.Tx.WasmExecContractWithAccSeq(cw.ContractAddr, execMsg, accSeq)
 	assert.NilError(cw.T, err)
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
 }
 
 func (cw *Cosmwasm) CWExecuteWithSeqAndAsyncResp(execMsg []byte, accSeq uint64) (*sdk.TxResponse, error) {
-	return cw.umee.Tx.TxWasmExecuteContractByAccSeq(cw.ContractAddr, execMsg, accSeq)
+	return cw.umee.Tx.WasmExecContractWithAccSeq(cw.ContractAddr, execMsg, accSeq)
 }
 
 func (cw *Cosmwasm) GetAttributeValue(resp sdk.TxResponse, eventName, attrKey string) string {
