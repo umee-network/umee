@@ -2,6 +2,8 @@ package sdkclient
 
 import (
 	"context"
+	"log"
+	"os"
 	"time"
 
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
@@ -35,11 +37,12 @@ func NewClient(
 	encCfg testutil.TestEncodingConfig,
 ) (uc Client, err error) {
 	uc = Client{}
-	uc.Query, err = query.NewClient(grpcEndpoint, 15*time.Second)
+	logger := log.New(os.Stderr, "chain-client", log.LstdFlags)
+	uc.Query, err = query.NewClient(logger, grpcEndpoint, 15*time.Second)
 	if err != nil {
 		return Client{}, err
 	}
-	uc.Tx, err = tx.NewClient(chainDataDir, chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
+	uc.Tx, err = tx.NewClient(logger, chainDataDir, chainID, tmrpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	return uc, err
 }
 

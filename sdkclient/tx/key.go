@@ -25,3 +25,12 @@ func CreateAccountFromMnemonic(kb keyring.Keyring, name, mnemonic string) (*keyr
 
 	return account, nil
 }
+
+// Returns account address stored at give index
+func (c *Client) KeyringAddress(idx int) sdk.AccAddress {
+	addr, err := c.keyringRecord[idx].GetAddress()
+	if err != nil {
+		c.logger.Fatalln("can't get keyring record, idx=", idx, err)
+	}
+	return addr
+}

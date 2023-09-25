@@ -1,4 +1,4 @@
-FROM golang:1.20-alpine
+FROM golang:1.21-alpine
 ARG GAIA_VERSION=v10.0.2
 
 ENV PACKAGES curl make git libc-dev bash gcc linux-headers
