@@ -259,7 +259,7 @@ func (q Querier) AccountSummary(
 	}
 
 	resp := &types.QueryAccountSummaryResponse{
-		SuppliedValue: suppliedValue,
+		SuppliedValue:       suppliedValue,
 		SpotSuppliedValue:   spotSuppliedValue,
 		SpotCollateralValue: spotCollateralValue,
 		SpotBorrowedValue:   spotBorrowedValue,
