@@ -25,7 +25,7 @@ func BeginBlock(ctx sdk.Context, k keeper.Keeper) {
 		} else {
 			logger.Info("IBC Quota Reset")
 			ctx.EventManager().EmitEvent(
-				sdk.NewEvent("/umee/uibc/v1/QuotaReset",
+				sdk.NewEvent("/umee/uibc/v1/EventQuotaReset",
 					sdk.NewAttribute("next_expire", quotaExpires.UTC().Format(time.RFC3339))))
 		}
 	}
