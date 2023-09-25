@@ -19,6 +19,8 @@ func BeginBlock(ctx sdk.Context, k keeper.Keeper) {
 	if quotaExpires == nil || quotaExpires.Before(ctx.BlockTime()) {
 		if err = k.ResetAllQuotas(); err != nil {
 			ctx.Logger().Error("can't get quota exipre", "error", err)
+		} else {
+			ctx.Logger().With("module", "uibc").Info("IBC Quota Reset")
 		}
 	}
 }
