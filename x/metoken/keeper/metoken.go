@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/umee-network/umee/v6/util/checkers"
+
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -92,22 +94,16 @@ func (k Keeper) UpdateIndexes(
 			errs = append(errs, sdkerrors.ErrInvalidRequest.Wrapf("Emergency Group cannot register new indexes"))
 		}
 
-		if updErrs := validateEmergencyIndexUpdate(updateIndexes, registeredIndexes); len(updErrs) > 0 {
-			errs = append(errs, updErrs...)
-		}
+		errs = checkers.MergeErrors(errs, validateEGIndexUpdate(updateIndexes, registeredIndexes))
 
 		if len(errs) > 0 {
 			return errors.Join(errs...)
 		}
 	}
 
-	if addErrs := k.addIndexes(addIndexes, registeredIndexes, registeredAssets); len(addErrs) > 0 {
-		errs = append(errs, addErrs...)
-	}
+	errs = checkers.MergeErrors(errs, k.addIndexes(addIndexes, registeredIndexes, registeredAssets))
 
-	if updErrs := k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets); len(updErrs) > 0 {
-		errs = append(errs, updErrs...)
-	}
+	errs = checkers.MergeErrors(errs, k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets))
 
 	if len(errs) > 0 {
 		return errors.Join(errs...)
@@ -132,6 +128,7 @@ func (k Keeper) addIndexes(
 					index.Denom,
 				),
 			)
+			continue
 		}
 
 		if exists := k.hasIndexBalance(index.Denom); exists {
@@ -151,12 +148,11 @@ func (k Keeper) addIndexes(
 						aa.Denom,
 					),
 				)
+				continue
 			}
 		}
 
-		if errs := k.validateInLeverage(index); len(errs) > 0 {
-			indexErrs = append(indexErrs, errs...)
-		}
+		checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
 
 		if len(indexErrs) > 0 {
 			allErrs = append(allErrs, indexErrs...)
@@ -252,9 +248,7 @@ func (k Keeper) updateIndexes(
 			}
 		}
 
-		if errs := k.validateInLeverage(index); len(errs) > 0 {
-			indexErrs = append(indexErrs, errs...)
-		}
+		checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
 
 		if len(indexErrs) > 0 {
 			allErrs = append(allErrs, indexErrs...)
@@ -291,41 +285,38 @@ func (k Keeper) updateIndexes(
 	return nil
 }
 
-func validateEmergencyIndexUpdate(indexes []metoken.Index, registeredIndexes map[string]metoken.Index) []error {
+// validateEGIndexUpdate checks if emergency group can perform updates.
+func validateEGIndexUpdate(indexes []metoken.Index, registeredIndexes map[string]metoken.Index) []error {
 	var errs []error
 	for _, newIndex := range indexes {
-		oldIndex, ok := registeredIndexes[newIndex.Denom]
+		d := newIndex.Denom
+		oldIndex, ok := registeredIndexes[d]
 		if !ok {
-			errs = append(
-				errs, sdkerrors.ErrNotFound.Wrapf(
-					"update: index with denom %s not found",
-					newIndex.Denom,
-				),
-			)
+			errs = append(errs, sdkerrors.ErrNotFound.Wrapf("update: index with denom %s not found", d))
 			continue
 		}
 
 		if newIndex.Exponent != oldIndex.Exponent {
-			errs = append(errs, errors.New("exponent cannot be changed"))
+			errs = append(errs, errors.New(d+": exponent cannot be changed"))
 		}
 
 		if !newIndex.Fee.Equal(oldIndex.Fee) {
-			errs = append(errs, errors.New("fee cannot be changed"))
+			errs = append(errs, errors.New(d+": fee cannot be changed"))
 		}
 
 		if !newIndex.MaxSupply.Equal(oldIndex.MaxSupply) {
-			errs = append(errs, errors.New("max_supply cannot be changed"))
+			errs = append(errs, errors.New(d+": max_supply cannot be changed"))
 		}
 
 		for _, newAsset := range newIndex.AcceptedAssets {
 			oldAsset, i := oldIndex.AcceptedAsset(newAsset.Denom)
 			if i < 0 {
-				errs = append(errs, fmt.Errorf("new asset %s cannot be added", newAsset.Denom))
+				errs = append(errs, fmt.Errorf("%s: new asset %s cannot be added", d, newAsset.Denom))
 				continue
 			}
 
 			if !newAsset.ReservePortion.Equal(oldAsset.ReservePortion) {
-				errs = append(errs, fmt.Errorf("reserve_portion of %s cannot be changed", newAsset.Denom))
+				errs = append(errs, fmt.Errorf("%s: reserve_portion of %s cannot be changed", d, newAsset.Denom))
 			}
 		}
 	}
