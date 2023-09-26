@@ -50,7 +50,7 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 	addDuplicatedAsset := mocks.StableIndex("me/Test")
 
 	egUpdateFailure := mocks.StableIndex(mocks.MeUSDDenom)
-	egUpdateFailure.Exponent -= 1
+	egUpdateFailure.Exponent--
 	egUpdateFailure.Fee.BalancedFee = sdk.MustNewDecFromStr("0.3")
 	egUpdateFailure.MaxSupply = egUpdateFailure.MaxSupply.Add(sdkmath.NewInt(1000))
 	egUpdateFailure.AcceptedAssets = append(
