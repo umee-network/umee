@@ -33,7 +33,7 @@ func (m msgServer) Swap(goCtx context.Context, msg *metoken.MsgSwap) (*metoken.M
 	if err != nil {
 		return nil, err
 	}
-	
+
 	k := m.kb.Keeper(&ctx)
 	resp, err := k.swap(userAddr, msg.MetokenDenom, msg.Asset)
 	if err != nil {
