@@ -152,7 +152,7 @@ func (k Keeper) addIndexes(
 			}
 		}
 
-		checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
+		indexErrs = checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
 
 		if len(indexErrs) > 0 {
 			allErrs = append(allErrs, indexErrs...)
@@ -248,7 +248,7 @@ func (k Keeper) updateIndexes(
 			}
 		}
 
-		checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
+		indexErrs = checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
 
 		if len(indexErrs) > 0 {
 			allErrs = append(allErrs, indexErrs...)
