@@ -7,17 +7,17 @@ import (
 )
 
 const (
-	UmeeDenom       string = appparams.BondDenom
-	UmeeSymbol      string = "umee"
-	UmeeExponent           = uint32(6)
-	USDDenom        string = "USD"
-	BlocksPerMinute        = uint64(10)
-	BlocksPerHour          = BlocksPerMinute * 60
-	BlocksPerDay           = BlocksPerHour * 24
-	BlocksPerWeek          = BlocksPerDay * 7
-	BlocksPerMonth         = BlocksPerDay * 30
-	BlocksPerYear          = BlocksPerDay * 365
-	MicroUnit              = int64(1e6)
+	UmeeDenom       = appparams.BondDenom
+	UmeeSymbol      = "umee"
+	UmeeExponent    = uint32(6)
+	USDDenom        = "USD"
+	BlocksPerMinute = uint64(10)
+	BlocksPerHour   = BlocksPerMinute * 60
+	BlocksPerDay    = BlocksPerHour * 24
+	BlocksPerWeek   = BlocksPerDay * 7
+	BlocksPerMonth  = BlocksPerDay * 30
+	BlocksPerYear   = BlocksPerDay * 365
+	MicroUnit       = int64(1e6)
 )
 
 type (

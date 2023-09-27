@@ -1,6 +1,8 @@
 package oracle_test
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/oracle"
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -54,10 +56,11 @@ func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 			"valid",
 			types.GenesisState{
 				Params: types.DefaultParams(),
-				ExchangeRates: types.ExchangeRateTuples{
-					types.ExchangeRateTuple{
-						Denom:        denom,
-						ExchangeRate: exchangeRate,
+				ExchangeRates: []types.DenomExchangeRate{
+					{
+						Denom:     denom,
+						Rate:      exchangeRate,
+						Timestamp: time.Now(),
 					},
 				},
 				HistoricPrices: types.Prices{
@@ -152,10 +155,11 @@ func (s *IntegrationTestSuite) TestGenesis_ExportGenesis() {
 			ValidatorAddress: umeevaloperAddr,
 		},
 	}
-	exchangeRateTuples := types.ExchangeRateTuples{
-		types.ExchangeRateTuple{
-			Denom:        upperDenom,
-			ExchangeRate: exchangeRate,
+	exchangeRateTuples := []types.DenomExchangeRate{
+		{
+			Denom:     upperDenom,
+			Rate:      exchangeRate,
+			Timestamp: ctx.BlockTime(),
 		},
 	}
 	missCounters := []types.MissCounter{

@@ -266,9 +266,8 @@ func IntegrationTestNetworkConfig() network.Config {
 	// execute ballot voting and thus clear out previous exchange rates, since we
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 1000
-	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewExchangeRateTuple(
-		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"),
-	))
+	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewDenomExchangeRate(
+		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"), time.Now()))
 	// Set mock historic medians to satisfy leverage module's 24 median requirement
 	for i := 1; i <= 24; i++ {
 		median := oracletypes.Price{

@@ -3,6 +3,7 @@ package oracle_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -43,6 +44,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T())
 	ctx := app.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
+		Time:    time.Now(),
 	})
 
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
@@ -156,7 +158,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(types.ExchangeRate{Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()},
+		s.Require().Equal(types.ExchangeRate{
+			Rate:      sdk.OneDec(),
+			Timestamp: ctx.BlockTime()},
 			rate)
 	}
 
@@ -237,8 +241,8 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "umee")
 	s.Require().NoError(err)
 	s.Require().Equal(types.ExchangeRate{Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()}, rate)
-	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "atom")
-	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("atom"))
+	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "ATOM")
+	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("ATOM"))
 	s.Require().Equal(types.ExchangeRate{}, rate)
 }
 

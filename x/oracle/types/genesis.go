@@ -10,7 +10,7 @@ import (
 // NewGenesisState creates a new GenesisState object
 func NewGenesisState(
 	params Params,
-	rates []ExchangeRateTuple,
+	rates []DenomExchangeRate,
 	feederDelegations []FeederDelegation,
 	missCounters []MissCounter,
 	aggregateExchangeRatePrevotes []AggregateExchangeRatePrevote,
@@ -39,7 +39,7 @@ func NewGenesisState(
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:                        DefaultParams(),
-		ExchangeRates:                 []ExchangeRateTuple{},
+		ExchangeRates:                 []DenomExchangeRate{},
 		FeederDelegations:             []FeederDelegation{},
 		MissCounters:                  []MissCounter{},
 		AggregateExchangeRatePrevotes: []AggregateExchangeRatePrevote{},
