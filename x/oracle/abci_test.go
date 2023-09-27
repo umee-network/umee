@@ -3,6 +3,7 @@ package oracle_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -43,6 +44,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	app := umeeapp.Setup(s.T())
 	ctx := app.NewContext(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
+		Time:    time.Now(),
 	})
 
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
