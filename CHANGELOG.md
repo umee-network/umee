@@ -49,7 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
-- [22XX](https://github.com/umee-network/umee/pull/22XX) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recet spot price when required.
+- [2267](https://github.com/umee-network/umee/pull/2267) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recet spot price when required.
 
 ### Bug Fixes
 
