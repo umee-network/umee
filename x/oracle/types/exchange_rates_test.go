@@ -20,4 +20,18 @@ func TestExchangeRateMarshalAndUnmarshal(t *testing.T) {
 	err = newExgRate.Unmarshal(md)
 	assert.NilError(t, err)
 	assert.DeepEqual(t, der, newExgRate)
+
+	// error expected
+	der = ExchangeRate{Timestamp: time.Now()}
+
+	// Marshal the exchange rate
+	_, err = der.Marshal()
+	assert.ErrorContains(t, err, "rate should not be nil")
+
+	// error expected
+	der = ExchangeRate{Rate: sdk.NewDec(1)}
+
+	// Marshal the exchange rate
+	_, err = der.Marshal()
+	assert.ErrorContains(t, err, "timestamp in exchange_rate should not be nil")
 }

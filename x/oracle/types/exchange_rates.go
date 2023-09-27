@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 	time "time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -29,6 +30,12 @@ type ExchangeRate struct {
 
 // Marshal implements store.Marshalable.
 func (d *ExchangeRate) Marshal() ([]byte, error) {
+	if d.Rate.IsNil() {
+		return nil, fmt.Errorf("rate should not be nil")
+	}
+	if d.Timestamp.IsZero() {
+		return nil, fmt.Errorf("timestamp in exchange_rate should not be nil")
+	}
 	return json.Marshal(d)
 }
 

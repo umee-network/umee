@@ -330,3 +330,35 @@ func (q querier) AvgPrice(
 	}
 	return &types.QueryAvgPriceResponse{Price: p}, nil
 }
+
+// ExgRatesWithTimestamp queries exchange rates of all denoms with timestamp, or, if specified, returns
+// a single denom.
+func (q querier) ExgRatesWithTimestamp(
+	goCtx context.Context,
+	req *types.QueryExgRatesWithTimestamp,
+) (*types.QueryExgRatesWithTimestampResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// TODO: need to decide if we want to return DecCoins here or list of ExchangeRates with denoms (we
+	// need the latter for genesis anyway)
+	var exgRates []types.DenomExchangeRate
+
+	if len(req.Denom) > 0 {
+		exchangeRate, err := q.GetExchangeRate(ctx, req.Denom)
+		if err != nil {
+			return nil, err
+		}
+		exgRates = append(exgRates, types.NewDenomExchangeRate(req.Denom, exchangeRate.Rate, exchangeRate.Timestamp))
+	} else {
+		q.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, t time.Time) (stop bool) {
+			exgRates = append(exgRates, types.NewDenomExchangeRate(denom, exgRate, t))
+			return false
+		})
+	}
+
+	return &types.QueryExgRatesWithTimestampResponse{ExgRates: exgRates}, nil
+}
