@@ -14,8 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     name: Run govulncheck
     steps:
-      - id: govulncheck
-        uses: golang/govulncheck-action@v1.0.1
+      - uses: actions/checkout@v4
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          PATTERNS: |
+            **/**.go
+            go.mod
+            go.sum
+      - uses: golang/govulncheck-action@v1.0.1
+        id: govulncheck
         if: env.GIT_DIFF
         with:
           go-version-input: 1.21
