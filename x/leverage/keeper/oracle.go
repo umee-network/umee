@@ -12,6 +12,9 @@ import (
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
+// TODO: parameterize this
+const maxSpotPriceAge = 180 // 3 minutes
+
 var ten = sdk.MustNewDecFromStr("10")
 
 // TokenPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`).
@@ -26,8 +29,9 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
 	}
 
-	// if a token is exempt from historic pricing, all price modes return Spot price
-	if t.HistoricMedians == 0 {
+	// if a token is exempt from historic pricing, all price modes return Spot price.
+	// price mode last is unaffected.
+	if t.HistoricMedians == 0 && mode != types.PriceModeLast {
 		mode = types.PriceModeSpot
 	}
 
@@ -39,9 +43,20 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		if err != nil {
 			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
+		if mode != types.PriceModeLast {
+			// unless price mode is last price, require spot price to be recent
+			blockTime := ctx.BlockTime().Unix()
+			priceTime := spotPrice.Timestamp.Unix()
+			priceAge := blockTime - priceTime
+			if priceAge < 0 || priceAge > maxSpotPriceAge {
+				return sdk.ZeroDec(), t.Exponent, types.ErrExpiredOraclePrice.Wrapf(
+					"price: %d, block: %d", priceTime, blockTime)
+			}
+		}
 	}
-	if mode != types.PriceModeSpot {
-		// historic price is required for modes other than spot
+
+	if mode != types.PriceModeSpot && mode != types.PriceModeLast {
+		// historic price is required for modes other than spot and last
 		var numStamps uint32
 		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(
 			ctx, strings.ToUpper(t.SymbolDenom), uint64(t.HistoricMedians))
@@ -57,10 +72,8 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		}
 	}
 
-	// TODO: need to use spotPrice.Timestamp to make a decision about the price
-
 	switch mode {
-	case types.PriceModeSpot:
+	case types.PriceModeSpot, types.PriceModeLast:
 		price = spotPrice.Rate
 	case types.PriceModeHistoric:
 		price = historicPrice
