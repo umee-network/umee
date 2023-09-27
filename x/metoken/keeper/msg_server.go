@@ -4,8 +4,9 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v6/util/sdkutil"
 
+	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/x/metoken"
 )
 
@@ -23,10 +24,8 @@ func NewMsgServerImpl(kb Builder) metoken.MsgServer {
 
 // Swap handles the request for the swap, delegates the execution and returns the response.
 func (m msgServer) Swap(goCtx context.Context, msg *metoken.MsgSwap) (*metoken.MsgSwapResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	k := m.kb.Keeper(&ctx)
-
-	if err := msg.ValidateBasic(); err != nil {
+	ctx, err := sdkutil.StartMsg(goCtx, msg)
+	if err != nil {
 		return nil, err
 	}
 
@@ -35,6 +34,7 @@ func (m msgServer) Swap(goCtx context.Context, msg *metoken.MsgSwap) (*metoken.M
 		return nil, err
 	}
 
+	k := m.kb.Keeper(&ctx)
 	resp, err := k.swap(userAddr, msg.MetokenDenom, msg.Asset)
 	if err != nil {
 		return nil, err
@@ -66,10 +66,8 @@ func (m msgServer) Swap(goCtx context.Context, msg *metoken.MsgSwap) (*metoken.M
 
 // Redeem handles the request for the redemption, delegates the execution and returns the response.
 func (m msgServer) Redeem(goCtx context.Context, msg *metoken.MsgRedeem) (*metoken.MsgRedeemResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	k := m.kb.Keeper(&ctx)
-
-	if err := msg.ValidateBasic(); err != nil {
+	ctx, err := sdkutil.StartMsg(goCtx, msg)
+	if err != nil {
 		return nil, err
 	}
 
@@ -78,6 +76,7 @@ func (m msgServer) Redeem(goCtx context.Context, msg *metoken.MsgRedeem) (*metok
 		return nil, err
 	}
 
+	k := m.kb.Keeper(&ctx)
 	resp, err := k.redeem(userAddr, msg.Metoken, msg.AssetDenom)
 	if err != nil {
 		return nil, err
@@ -116,12 +115,12 @@ func (m msgServer) GovSetParams(goCtx context.Context, msg *metoken.MsgGovSetPar
 	*metoken.MsgGovSetParamsResponse,
 	error,
 ) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-	if err := msg.ValidateBasic(); err != nil {
+	ctx, err := sdkutil.StartMsg(goCtx, msg)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := m.kb.Keeper(&ctx).SetParams(msg.Params); err != nil {
+	if err = m.kb.Keeper(&ctx).SetParams(msg.Params); err != nil {
 		return nil, err
 	}
 
@@ -133,13 +132,18 @@ func (m msgServer) GovUpdateRegistry(
 	goCtx context.Context,
 	msg *metoken.MsgGovUpdateRegistry,
 ) (*metoken.MsgGovUpdateRegistryResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	if err := msg.ValidateBasic(); err != nil {
+	ctx, err := sdkutil.StartMsg(goCtx, msg)
+	if err != nil {
 		return nil, err
 	}
 
-	if err := m.kb.Keeper(&ctx).UpdateIndexes(msg.AddIndex, msg.UpdateIndex); err != nil {
+	k := m.kb.Keeper(&ctx)
+	byEmergencyGroup, err := checkers.EmergencyGroupAuthority(msg.Authority, k.ugov(&ctx))
+	if err != nil {
+		return nil, err
+	}
+
+	if err := k.UpdateIndexes(msg.AddIndex, msg.UpdateIndex, byEmergencyGroup); err != nil {
 		return nil, err
 	}
 
