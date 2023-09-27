@@ -71,11 +71,7 @@ func (k Keeper) setNextInterestClaimTime(nextInterestClaimTime time.Time) {
 }
 
 // UpdateIndexes registers `addIndexes` and processes `updateIndexes` to update existing indexes.
-func (k Keeper) UpdateIndexes(
-	addIndexes []metoken.Index,
-	updateIndexes []metoken.Index,
-	byEmergencyGroup bool,
-) error {
+func (k Keeper) UpdateIndexes(toAdd, toUpdate []metoken.Index, byEmergencyGroup bool) error {
 	registry := k.GetAllRegisteredIndexes()
 
 	registeredIndexes := make(map[string]metoken.Index)
@@ -89,26 +85,21 @@ func (k Keeper) UpdateIndexes(
 
 	var errs []error
 	if byEmergencyGroup {
-		if len(addIndexes) > 0 {
+		if len(toAdd) > 0 {
 			errs = append(errs, sdkerrors.ErrInvalidRequest.Wrapf("Emergency Group cannot register new indexes"))
 		}
 
-		errs = checkers.Merge(errs, validateEGIndexUpdate(updateIndexes, registeredIndexes))
+		errs = checkers.Merge(errs, validateEGIndexUpdate(toUpdate, registeredIndexes))
 
 		if len(errs) > 0 {
 			return errors.Join(errs...)
 		}
 	}
 
-	errs = checkers.Merge(errs, k.addIndexes(addIndexes, registeredIndexes, registeredAssets))
+	errs = checkers.Merge(errs, k.addIndexes(toAdd, registeredIndexes, registeredAssets))
+	errs = checkers.Merge(errs, k.updateIndexes(toUpdate, registeredIndexes, registeredAssets))
 
-	errs = checkers.Merge(errs, k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets))
-
-	if len(errs) > 0 {
-		return errors.Join(errs...)
-	}
-
-	return nil
+	return errors.Join(errs...)
 }
 
 // addIndexes handles addition of the indexes from the request along with their validations.
@@ -139,17 +130,7 @@ func (k Keeper) addIndexes(
 			)
 		}
 
-		for _, aa := range index.AcceptedAssets {
-			if _, present := registeredAssets[aa.Denom]; present {
-				indexErrs = append(
-					indexErrs, sdkerrors.ErrInvalidRequest.Wrapf(
-						"add: asset %s is already accepted in another index",
-						aa.Denom,
-					),
-				)
-			}
-		}
-
+		indexErrs = checkers.Merge(indexErrs, checkDuplicatedAssets(index.AcceptedAssets, registeredAssets, ""))
 		indexErrs = checkers.Merge(indexErrs, k.validateInLeverage(index))
 
 		if len(indexErrs) > 0 {
@@ -207,16 +188,10 @@ func (k Keeper) updateIndexes(
 			continue
 		}
 
-		for _, aa := range index.AcceptedAssets {
-			if indexDenom, present := registeredAssets[aa.Denom]; present && indexDenom != index.Denom {
-				indexErrs = append(
-					indexErrs, sdkerrors.ErrInvalidRequest.Wrapf(
-						"add: asset %s is already accepted in another index",
-						aa.Denom,
-					),
-				)
-			}
-		}
+		indexErrs = checkers.Merge(
+			indexErrs,
+			checkDuplicatedAssets(index.AcceptedAssets, registeredAssets, index.Denom),
+		)
 
 		if oldIndex.Exponent != index.Exponent {
 			balances, err := k.IndexBalances(index.Denom)
@@ -281,6 +256,28 @@ func (k Keeper) updateIndexes(
 	}
 
 	return nil
+}
+
+func checkDuplicatedAssets(
+	assets []metoken.AcceptedAsset,
+	registeredAssets map[string]string,
+	indexDenom string,
+) []error {
+	var errs []error
+	for _, aa := range assets {
+		if d, present := registeredAssets[aa.Denom]; present && (len(indexDenom) == 0 || d != indexDenom) {
+			errs = append(
+				errs,
+				sdkerrors.ErrInvalidRequest.Wrapf(
+					"add: asset %s is already accepted in another index %s",
+					aa.Denom,
+					d,
+				),
+			)
+		}
+	}
+
+	return errs
 }
 
 // validateEGIndexUpdate checks if emergency group can perform updates.
