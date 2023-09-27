@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/umee-network/umee/v6/util/checkers"
-
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
+	"github.com/umee-network/umee/v6/util/checkers"
 	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/metoken"
 )
@@ -94,16 +93,16 @@ func (k Keeper) UpdateIndexes(
 			errs = append(errs, sdkerrors.ErrInvalidRequest.Wrapf("Emergency Group cannot register new indexes"))
 		}
 
-		errs = checkers.MergeErrors(errs, validateEGIndexUpdate(updateIndexes, registeredIndexes))
+		errs = checkers.Merge(errs, validateEGIndexUpdate(updateIndexes, registeredIndexes))
 
 		if len(errs) > 0 {
 			return errors.Join(errs...)
 		}
 	}
 
-	errs = checkers.MergeErrors(errs, k.addIndexes(addIndexes, registeredIndexes, registeredAssets))
+	errs = checkers.Merge(errs, k.addIndexes(addIndexes, registeredIndexes, registeredAssets))
 
-	errs = checkers.MergeErrors(errs, k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets))
+	errs = checkers.Merge(errs, k.updateIndexes(updateIndexes, registeredIndexes, registeredAssets))
 
 	if len(errs) > 0 {
 		return errors.Join(errs...)
@@ -148,11 +147,10 @@ func (k Keeper) addIndexes(
 						aa.Denom,
 					),
 				)
-				continue
 			}
 		}
 
-		indexErrs = checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
+		indexErrs = checkers.Merge(indexErrs, k.validateInLeverage(index))
 
 		if len(indexErrs) > 0 {
 			allErrs = append(allErrs, indexErrs...)
@@ -248,7 +246,7 @@ func (k Keeper) updateIndexes(
 			}
 		}
 
-		indexErrs = checkers.MergeErrors(indexErrs, k.validateInLeverage(index))
+		indexErrs = checkers.Merge(indexErrs, k.validateInLeverage(index))
 
 		if len(indexErrs) > 0 {
 			allErrs = append(allErrs, indexErrs...)
