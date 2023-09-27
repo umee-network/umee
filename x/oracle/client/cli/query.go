@@ -33,6 +33,7 @@ func GetQueryCmd() *cobra.Command {
 		QueryMissCounter(),
 		QuerySlashWindow(),
 		QueryHistoricAvgPrice(),
+		QueryExchangeRatesWithTimestamp(),
 	)
 
 	return cmd
@@ -293,6 +294,37 @@ func QueryHistoricAvgPrice() *cobra.Command {
 			queryClient := types.NewQueryClient(clientCtx)
 
 			res, err := queryClient.AvgPrice(cmd.Context(), &types.QueryAvgPrice{Denom: strings.ToUpper(args[0])})
+			return cli.PrintOrErr(res, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+// QueryExchangeRatesWithTimestamp implements the query rate command.
+func QueryExchangeRatesWithTimestamp() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "exg-rates-timestamp [denom]",
+		Args:  cobra.MaximumNArgs(1),
+		Short: "Query the exchange rates with timestamp",
+		Long: strings.TrimSpace(`
+Query the current exchange rates of assets based on USD with timestamp.
+You can find the current list of active denoms by running
+
+$ umeed query oracle exg-rates-timestamp
+`),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := types.NewQueryClient(clientCtx)
+			query := &types.QueryExgRatesWithTimestamp{}
+			if len(args) > 0 {
+				query.Denom = args[0]
+			}
+			res, err := queryClient.ExgRatesWithTimestamp(cmd.Context(), query)
 			return cli.PrintOrErr(res, err, clientCtx)
 		},
 	}
