@@ -141,11 +141,14 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		// times the amount of umee, then sometimes times params
 		// from newToken in x/leverage/keeper/keeper_test.go
 		// (1000) * 4.21 = 4210
-		SuppliedValue: sdk.MustNewDecFromStr("4210"),
+		SuppliedValue:     sdk.MustNewDecFromStr("4210"),
+		SpotSuppliedValue: sdk.MustNewDecFromStr("4210"),
 		// (1000) * 4.21 = 4210
-		CollateralValue: sdk.MustNewDecFromStr("4210"),
+		CollateralValue:     sdk.MustNewDecFromStr("4210"),
+		SpotCollateralValue: sdk.MustNewDecFromStr("4210"),
 		// Nothing borrowed
-		BorrowedValue: sdk.ZeroDec(),
+		BorrowedValue:     sdk.ZeroDec(),
+		SpotBorrowedValue: sdk.ZeroDec(),
 		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: sdk.MustNewDecFromStr("1052.5"),
 		// (1000) * 4.21 * 0.26 = 1094.6
