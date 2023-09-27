@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -86,7 +87,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	staking.EndBlocker(ctx, *app.StakingKeeper)
 
 	s.app = app
-	s.ctx = ctx
+	s.ctx = ctx.WithBlockTime(time.Now())
 	s.queryClient = types.NewQueryClient(queryHelper)
 	s.msgServer = keeper.NewMsgServerImpl(app.OracleKeeper)
 }

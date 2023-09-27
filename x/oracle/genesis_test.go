@@ -1,6 +1,8 @@
 package oracle_test
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/oracle"
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -58,7 +60,7 @@ func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 					{
 						Denom:     denom,
 						Rate:      exchangeRate,
-						Timestamp: ctx.BlockTime(),
+						Timestamp: time.Now(),
 					},
 				},
 				HistoricPrices: types.Prices{
