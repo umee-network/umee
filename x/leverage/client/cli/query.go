@@ -39,6 +39,7 @@ func GetQueryCmd() *cobra.Command {
 		QueryMaxWithdraw(),
 		QueryMaxBorrow(),
 		QueryInspect(),
+		QueryInspectAccount(),
 	)
 
 	return cmd
@@ -358,6 +359,32 @@ func QueryInspect() *cobra.Command {
 				}
 			}
 			resp, err := queryClient.Inspect(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// QueryInspectAccount creates a Cobra command to inspect a single account.
+func QueryInspectAccount() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "inspect-account [addr]",
+		Args:  cobra.ExactArgs(1),
+		Short: "Inspect a single account",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+			req := &types.QueryInspectAccount{
+				Address: args[0],
+			}
+			resp, err := queryClient.InspectAccount(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
