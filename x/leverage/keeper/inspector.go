@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -175,7 +176,7 @@ func (q Querier) InspectAccount(
 			Collateral: symbolDecCoins(collateral, exchangeRates),
 			Borrowed:   symbolDecCoins(borrowed, exchangeRates),
 		},
-		Info: fmt.Sprint(position.String(),  "\n", borrowPosition.String())
+		Info: fmt.Sprint(position.String(), "\n", borrowPosition.String()),
 	}
 
 	return &types.QueryInspectAccountResponse{Borrower: account}, nil
