@@ -3,6 +3,7 @@ package simulation_test
 import (
 	"math/rand"
 	"testing"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
@@ -32,8 +33,7 @@ type SimTestSuite struct {
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
 	app := umeeapp.Setup(s.T())
-	ctx := app.NewContext(checkTx, tmproto.Header{})
-
+	ctx := app.NewContext(checkTx, tmproto.Header{Time: time.Now()})
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
 
 	// Use default umee token for sim tests

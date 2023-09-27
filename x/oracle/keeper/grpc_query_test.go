@@ -2,6 +2,7 @@ package keeper_test
 
 import (
 	"math/rand"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/crypto/secp256k1"
@@ -193,8 +194,13 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotesAppendVotes() {
 }
 
 func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
+	exgRateTuples := types.ExchangeRateTuples{}
+
+	for _, er := range types.DefaultGenesisState().ExchangeRates {
+		exgRateTuples = append(exgRateTuples, types.ExchangeRateTuple{Denom: er.Denom, ExchangeRate: er.Rate})
+	}
 	s.app.OracleKeeper.SetAggregateExchangeRateVote(s.ctx, valAddr, types.NewAggregateExchangeRateVote(
-		types.DefaultGenesisState().ExchangeRates,
+		exgRateTuples,
 		valAddr,
 	))
 
@@ -367,4 +373,28 @@ func (s *IntegrationTestSuite) TestQuerier_AvgPrice() {
 
 	_, err = s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: "12"})
 	s.Require().ErrorContains(err, "malformed denom")
+}
+
+func (s *IntegrationTestSuite) TestQuerier_ExchangeRatesWithTimestamp() {
+	s.ctx = s.ctx.WithBlockTime(time.Now())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	res, err := s.queryClient.ExgRatesWithTimestamp(s.ctx.Context(), &types.QueryExgRatesWithTimestamp{})
+	s.Require().NoError(err)
+	s.Require().Equal([]types.DenomExchangeRate{
+		{
+			Denom:     displayDenom,
+			Rate:      sdk.OneDec(),
+			Timestamp: s.ctx.BlockTime(),
+		},
+	}, res.ExgRates)
+
+	res, err = s.queryClient.ExgRatesWithTimestamp(s.ctx.Context(), &types.QueryExgRatesWithTimestamp{
+		Denom: displayDenom,
+	})
+	s.Require().NoError(err)
+	s.Require().Equal(types.DenomExchangeRate{
+		Denom:     displayDenom,
+		Rate:      sdk.OneDec(),
+		Timestamp: s.ctx.BlockTime(),
+	}, res.ExgRates[0])
 }
