@@ -70,7 +70,7 @@ func (k Keeper) setNextInterestClaimTime(nextInterestClaimTime time.Time) {
 	store.SetTimeMs(k.store, keyPrefixNextInterestClaimTime, nextInterestClaimTime)
 }
 
-// UpdateIndexes registers `addIndexes` and processes `updateIndexes` to update existing indexes.
+// UpdateIndexes registers `toAdd` and processes `toUpdate` to update existing indexes.
 func (k Keeper) UpdateIndexes(toAdd, toUpdate []metoken.Index, byEmergencyGroup bool) error {
 	registry := k.GetAllRegisteredIndexes()
 
