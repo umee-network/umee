@@ -43,7 +43,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			resp, err := s.queryClient.RegisteredTokens(ctx.Context(), &tc.req)
+			resp, err := s.queryClient.RegisteredTokens(ctx, &tc.req)
 			if tc.errMsg == "" {
 				assert.NilError(s.T(), err)
 				assert.Equal(s.T(), tc.expectedTokens, len(resp.Registry))
@@ -57,7 +57,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 func (s *IntegrationTestSuite) TestQuerier_Params() {
 	ctx, require := s.ctx, s.Require()
 
-	resp, err := s.queryClient.Params(ctx.Context(), &types.QueryParams{})
+	resp, err := s.queryClient.Params(ctx, &types.QueryParams{})
 	require.NoError(err)
 	require.Equal(fixtures.Params(), resp.Params)
 }
@@ -107,7 +107,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountBalances() {
 	s.supply(addr, coin.New(umeeDenom, 1000))
 	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000))
 
-	resp, err := s.queryClient.AccountBalances(ctx.Context(), &types.QueryAccountBalances{Address: addr.String()})
+	resp, err := s.queryClient.AccountBalances(ctx, &types.QueryAccountBalances{Address: addr.String()})
 	require.NoError(err)
 
 	expected := types.QueryAccountBalancesResponse{
@@ -131,7 +131,7 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	s.supply(addr, coin.New(umeeDenom, 1000_000000))
 	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000_000000))
 
-	resp, err := s.queryClient.AccountSummary(ctx.Context(), &types.QueryAccountSummary{Address: addr.String()})
+	resp, err := s.queryClient.AccountSummary(ctx, &types.QueryAccountSummary{Address: addr.String()})
 	require.NoError(err)
 
 	lt := sdk.MustNewDecFromStr("1094.600000000000000000")
@@ -156,6 +156,28 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	}
 
 	require.Equal(expected, *resp)
+
+	// creates account which has supplied and collateralized 1000 OUTAGE and 500 PAIRED (these are $1, 6 exponent tokens)
+	addr = s.newAccount(coin.New(outageDenom, 1000_000000), coin.New(pairedDenom, 500_000000))
+	s.supply(addr, coin.New(outageDenom, 1000_000000), coin.New(pairedDenom, 500_000000))
+	s.collateralize(addr, coin.Utoken(outageDenom, 1000_000000), coin.Utoken(pairedDenom, 500_000000))
+
+	resp, err = s.queryClient.AccountSummary(ctx, &types.QueryAccountSummary{Address: addr.String()})
+	require.NoError(err)
+	lt = sdk.MustNewDecFromStr("150")
+	expected = types.QueryAccountSummaryResponse{
+		// Both prices should show up in spot fields, but only PAIRED token in leverage limits.
+		SuppliedValue:       sdk.MustNewDecFromStr("500"),
+		SpotSuppliedValue:   sdk.MustNewDecFromStr("1500"),
+		CollateralValue:     sdk.MustNewDecFromStr("500"),
+		SpotCollateralValue: sdk.MustNewDecFromStr("1500"),
+		// Nothing borrowed
+		BorrowedValue:        sdk.ZeroDec(),
+		SpotBorrowedValue:    sdk.ZeroDec(),
+		BorrowLimit:          sdk.MustNewDecFromStr("125"),
+		LiquidationThreshold: nil, // missing collateral price: no threshold can be displayed
+	}
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Inspect() {
@@ -175,7 +197,7 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 	s.collateralize(addr3, coin.New("u/"+umeeDenom, 600_000000))
 	s.borrow(addr3, coin.New(umeeDenom, 15_000000))
 
-	resp, err := s.queryClient.Inspect(ctx.Context(), &types.QueryInspect{})
+	resp, err := s.queryClient.Inspect(ctx, &types.QueryInspect{})
 	require.NoError(err)
 
 	expected := types.QueryInspectResponse{
@@ -224,7 +246,7 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
 	ctx, require := s.ctx, s.Require()
 
-	resp, err := s.queryClient.LiquidationTargets(ctx.Context(), &types.QueryLiquidationTargets{})
+	resp, err := s.queryClient.LiquidationTargets(ctx, &types.QueryLiquidationTargets{})
 	require.NoError(err)
 
 	expected := types.QueryLiquidationTargetsResponse{
@@ -237,7 +259,7 @@ func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {
 func (s *IntegrationTestSuite) TestQuerier_BadDebts() {
 	ctx, require := s.ctx, s.Require()
 
-	resp, err := s.queryClient.BadDebts(ctx.Context(), &types.QueryBadDebts{})
+	resp, err := s.queryClient.BadDebts(ctx, &types.QueryBadDebts{})
 	require.NoError(err)
 
 	expected := types.QueryBadDebtsResponse{
@@ -255,7 +277,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	s.supply(addr, coin.New(umeeDenom, 1000_000000))
 	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000_000000))
 
-	resp, err := s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+	resp, err := s.queryClient.MaxWithdraw(ctx, &types.QueryMaxWithdraw{
 		Address: addr.String(),
 		Denom:   umeeDenom,
 	})
@@ -268,7 +290,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.Equal(expected, *resp)
 
 	// Also test all-denoms
-	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+	resp, err = s.queryClient.MaxWithdraw(ctx, &types.QueryMaxWithdraw{
 		Address: addr.String(),
 	})
 	require.NoError(err)
@@ -282,7 +304,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	// borrow 100 UMEE for non-trivial query
 	s.borrow(addr, coin.New(umeeDenom, 100_000000))
 
-	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+	resp, err = s.queryClient.MaxWithdraw(ctx, &types.QueryMaxWithdraw{
 		Address: addr.String(),
 		Denom:   umeeDenom,
 	})
@@ -295,7 +317,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.Equal(expected, *resp)
 
 	// Also test all-denoms
-	resp, err = s.queryClient.MaxWithdraw(ctx.Context(), &types.QueryMaxWithdraw{
+	resp, err = s.queryClient.MaxWithdraw(ctx, &types.QueryMaxWithdraw{
 		Address: addr.String(),
 	})
 	require.NoError(err)
@@ -315,7 +337,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	s.supply(addr, coin.New(umeeDenom, 1000_000000))
 	s.collateralize(addr, coin.New("u/"+umeeDenom, 1000_000000))
 
-	resp, err := s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+	resp, err := s.queryClient.MaxBorrow(ctx, &types.QueryMaxBorrow{
 		Address: addr.String(),
 		Denom:   umeeDenom,
 	})
@@ -327,7 +349,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.Equal(expected, *resp)
 
 	// Also test all-denoms
-	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+	resp, err = s.queryClient.MaxBorrow(ctx, &types.QueryMaxBorrow{
 		Address: addr.String(),
 	})
 	require.NoError(err)
@@ -340,7 +362,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	// borrow 100 UMEE for non-trivial query
 	s.borrow(addr, coin.New(umeeDenom, 100_000000))
 
-	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+	resp, err = s.queryClient.MaxBorrow(ctx, &types.QueryMaxBorrow{
 		Address: addr.String(),
 		Denom:   umeeDenom,
 	})
@@ -352,7 +374,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.Equal(expected, *resp)
 
 	// Also test all-denoms
-	resp, err = s.queryClient.MaxBorrow(ctx.Context(), &types.QueryMaxBorrow{
+	resp, err = s.queryClient.MaxBorrow(ctx, &types.QueryMaxBorrow{
 		Address: addr.String(),
 	})
 	require.NoError(err)
