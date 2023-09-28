@@ -237,17 +237,16 @@ func (q Querier) AccountSummary(
 	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
 	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
 
-	// the following spot price calculations skip assets missing prices, but otherwise always
-	// use the most up to date prices
-	spotSuppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeSpot)
+	// the following price calculations use the most recent prices if spot prices are missing
+	lastSuppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeLast)
 	if err != nil {
 		return nil, err
 	}
-	spotBorrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeSpot)
+	lastBorrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeLast)
 	if err != nil {
 		return nil, err
 	}
-	spotCollateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeSpot)
+	lastCollateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeLast)
 	if err != nil {
 		return nil, err
 	}
@@ -260,9 +259,9 @@ func (q Querier) AccountSummary(
 
 	resp := &types.QueryAccountSummaryResponse{
 		SuppliedValue:       suppliedValue,
-		SpotSuppliedValue:   spotSuppliedValue,
-		SpotCollateralValue: spotCollateralValue,
-		SpotBorrowedValue:   spotBorrowedValue,
+		SpotSuppliedValue:   lastSuppliedValue,
+		SpotCollateralValue: lastCollateralValue,
+		SpotBorrowedValue:   lastBorrowedValue,
 	}
 
 	// values computed from position use the same prices found in leverage logic:
