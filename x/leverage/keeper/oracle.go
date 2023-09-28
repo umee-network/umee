@@ -13,7 +13,7 @@ import (
 )
 
 // TODO: parameterize this
-const maxSpotPriceAge = 180 // 3 minutes
+const MaxSpotPriceAge = 180 // 3 minutes
 
 var ten = sdk.MustNewDecFromStr("10")
 
@@ -48,7 +48,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 			moduleTime := k.getLastInterestTime(ctx)
 			priceTime := spotPrice.Timestamp.Unix()
 			priceAge := moduleTime - priceTime
-			if priceAge < 0 || priceAge > maxSpotPriceAge {
+			if priceAge < 0 || priceAge > MaxSpotPriceAge {
 				return sdk.ZeroDec(), t.Exponent, types.ErrExpiredOraclePrice.Wrapf(
 					"price: %d, module: %d", priceTime, moduleTime)
 			}

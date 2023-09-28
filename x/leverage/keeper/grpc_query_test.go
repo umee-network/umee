@@ -25,7 +25,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 			"valid: get the all registered tokens",
 			"",
 			types.QueryRegisteredTokens{},
-			7,
+			leverage_initial_registry_length,
 		},
 		{
 			"valid: get the registered token info by base_denom",

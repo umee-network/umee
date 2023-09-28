@@ -29,6 +29,7 @@ const (
 	dumpDenom   = "udump"
 	stableDenom = "stable"
 	pairedDenom = "upaired"
+	outageDenom = "uoutage"
 )
 
 var leverage_initial_registry_length = 0
@@ -89,6 +90,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pumpDenom, "PUMP", 6)))
 	// additional token for special pairs
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pairedDenom, "PAIRED", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(outageDenom, "OUTAGE", 6)))
 	// additional tokens for borrow factor testing
 	stable := newToken(stableDenom, "STABLE", 6)
 	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
