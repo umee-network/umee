@@ -178,6 +178,32 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 		LiquidationThreshold: nil, // missing collateral price: no threshold can be displayed
 	}
 	require.Equal(expected, *resp)
+
+	// creates account which has supplied and collateralized 1000 OUTAGE and 500 PAIRED (these are $1, 6 exponent tokens)
+	addr = s.newAccount(coin.New(outageDenom, 1000_000000), coin.New(pairedDenom, 500_000000))
+	s.supply(addr, coin.New(outageDenom, 1000_000000), coin.New(pairedDenom, 500_000000))
+	s.collateralize(addr, coin.Utoken(outageDenom, 1000_000000), coin.Utoken(pairedDenom, 500_000000))
+	// also borrow some PAIRED normally
+	s.borrow(addr, coin.New(pairedDenom, 100_000000))
+	// and force-borrow (cannot normally because due to missing price) some OUTAGE
+	s.forceBorrow(addr, coin.New(outageDenom, 200_000000))
+
+	resp, err = s.queryClient.AccountSummary(ctx, &types.QueryAccountSummary{Address: addr.String()})
+	require.NoError(err)
+	lt = sdk.MustNewDecFromStr("150")
+	expected = types.QueryAccountSummaryResponse{
+		// Both prices should show up in spot fields, but only PAIRED token in leverage limits.
+		SuppliedValue:       sdk.MustNewDecFromStr("500"),
+		SpotSuppliedValue:   sdk.MustNewDecFromStr("1500"),
+		CollateralValue:     sdk.ZeroDec(), // todo: not desired behavior
+		SpotCollateralValue: sdk.MustNewDecFromStr("1500"),
+		// Borrowed 1/5 of collateral values
+		BorrowedValue:        sdk.ZeroDec(), // todo: not desired behavior
+		SpotBorrowedValue:    sdk.MustNewDecFromStr("300"),
+		BorrowLimit:          sdk.ZeroDec(), // todo: not desired behavior
+		LiquidationThreshold: nil,           // missing collateral price: no threshold can be displayed
+	}
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_Inspect() {
