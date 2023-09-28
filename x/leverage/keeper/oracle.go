@@ -45,12 +45,12 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		}
 		if mode != types.PriceModeLast {
 			// unless price mode is last price, require spot price to be recent
-			blockTime := ctx.BlockTime().Unix()
+			moduleTime := k.getLastInterestTime(ctx)
 			priceTime := spotPrice.Timestamp.Unix()
-			priceAge := blockTime - priceTime
+			priceAge := moduleTime - priceTime
 			if priceAge < 0 || priceAge > maxSpotPriceAge {
 				return sdk.ZeroDec(), t.Exponent, types.ErrExpiredOraclePrice.Wrapf(
-					"price: %d, block: %d", priceTime, blockTime)
+					"price: %d, module: %d", priceTime, moduleTime)
 			}
 		}
 	}

@@ -43,15 +43,15 @@ func (m *mockOracleKeeper) MedianOfHistoricMedians(ctx sdk.Context, denom string
 	return p, uint32(numStamps), nil
 }
 
-func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (oracletypes.ExchangeRate, error) {
+func (m *mockOracleKeeper) GetExchangeRate(ctx sdk.Context, denom string) (oracletypes.ExchangeRate, error) {
 	p, ok := m.symbolExchangeRates[denom]
 	if !ok {
 		// This error matches oracle behavior on missing asset price
 		return oracletypes.ExchangeRate{}, oracletypes.ErrUnknownDenom.Wrap(denom)
 	}
 
-	// TODO: add timestamp
-	return oracletypes.ExchangeRate{Rate: p}, nil
+	// Emulates completely up to date prices
+	return oracletypes.ExchangeRate{Rate: p, Timestamp: ctx.BlockTime()}, nil
 }
 
 // Clear clears a denom from the mock oracle, simulating an outage.
