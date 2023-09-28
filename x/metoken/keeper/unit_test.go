@@ -22,7 +22,7 @@ func initSimpleKeeper(t *testing.T) Keeper {
 	interfaceRegistry := types.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 	storeKey := storetypes.NewMemoryStoreKey("metoken")
-	kb := NewKeeperBuilder(cdc, storeKey, nil, nil, nil)
+	kb := NewKeeperBuilder(cdc, storeKey, nil, nil, nil, nil)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 
 	return kb.Keeper(&ctx)

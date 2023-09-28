@@ -5,6 +5,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/tendermint/tendermint/libs/log"
+	"github.com/umee-network/umee/v6/x/ugov"
 
 	"github.com/umee-network/umee/v6/x/metoken"
 )
@@ -16,6 +17,7 @@ type Builder struct {
 	bankKeeper     metoken.BankKeeper
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
+	ugov           ugov.EmergencyGroupBuilder
 }
 
 // NewKeeperBuilder returns Builder object.
@@ -25,6 +27,7 @@ func NewKeeperBuilder(
 	bankKeeper metoken.BankKeeper,
 	leverageKeeper metoken.LeverageKeeper,
 	oracleKeeper metoken.OracleKeeper,
+	ugov ugov.EmergencyGroupBuilder,
 ) Builder {
 	return Builder{
 		cdc:            cdc,
@@ -32,6 +35,7 @@ func NewKeeperBuilder(
 		bankKeeper:     bankKeeper,
 		leverageKeeper: leverageKeeper,
 		oracleKeeper:   oracleKeeper,
+		ugov:           ugov,
 	}
 }
 
@@ -41,6 +45,7 @@ type Keeper struct {
 	bankKeeper     metoken.BankKeeper
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
+	ugov           ugov.EmergencyGroupBuilder
 
 	// TODO: ctx should be removed when we migrate leverageKeeper and oracleKeeper
 	ctx *sdk.Context
@@ -54,6 +59,7 @@ func (b Builder) Keeper(ctx *sdk.Context) Keeper {
 		bankKeeper:     b.bankKeeper,
 		leverageKeeper: b.leverageKeeper,
 		oracleKeeper:   b.oracleKeeper,
+		ugov:           b.ugov,
 		ctx:            ctx,
 	}
 }
