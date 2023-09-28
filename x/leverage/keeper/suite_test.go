@@ -31,6 +31,8 @@ const (
 	pairedDenom = "upaired"
 )
 
+var leverage_initial_registry_length = 0
+
 type IntegrationTestSuite struct {
 	suite.Suite
 
@@ -92,6 +94,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
 	stable.LiquidationThreshold = sdk.MustNewDecFromStr("0.9")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, stable))
+
+	// set the initial token registry length used in update registry tests
+	leverage_initial_registry_length = len(app.LeverageKeeper.GetAllRegisteredTokens(ctx))
 
 	// override DefaultGenesis params with some special asset pairs
 	app.LeverageKeeper.SetSpecialAssetPair(ctx,

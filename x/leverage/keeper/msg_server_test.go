@@ -55,9 +55,9 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			"",
-			8,
+			leverage_initial_registry_length + 1, // 1 new token added this case
 		}, {
-			"regisering new token with existed symbol denom",
+			"registering new token with existing symbol denom",
 			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
 				Description: "",
@@ -66,7 +66,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			"",
-			9,
+			leverage_initial_registry_length + 2, // 1 token added this case, and 1 from previous cases
 		},
 	}
 
@@ -173,7 +173,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 7)
+				s.Require().Len(tokens, leverage_initial_registry_length)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uumee")
 				s.Require().NoError(err)
