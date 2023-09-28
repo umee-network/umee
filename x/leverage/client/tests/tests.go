@@ -294,6 +294,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 	}
 
 	lt1 := sdk.MustNewDecFromStr("0.0089034946")
+	bl1 := sdk.MustNewDecFromStr("0.0085610525")
 
 	nonzeroQueries := []itestsuite.TestQuery{
 		{
@@ -337,7 +338,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				BorrowedValue:     sdk.MustNewDecFromStr("0.00858671"),
 				SpotBorrowedValue: sdk.MustNewDecFromStr("0.00858671"),
 				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
-				BorrowLimit: sdk.MustNewDecFromStr("0.0085610525"),
+				BorrowLimit: &bl1,
 				// (1001 / 1000000) * 0.26 * 34.21 = 0.008903494600000000
 				LiquidationThreshold: &lt1,
 			},
