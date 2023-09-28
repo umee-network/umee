@@ -2,8 +2,6 @@ package wasm_test
 
 import (
 	"testing"
-
-	"github.com/umee-network/umee/v6/app"
 )
 
 func TestCosmwasm(t *testing.T) {
@@ -24,9 +22,7 @@ func TestCosmwasm(t *testing.T) {
 	its.TestOracleQueries()
 	its.TestLeverageTxs()
 	its.TestIncentiveQueries()
-	if app.Experimental {
-		its.TestMetokenQueries()
-	}
+	its.TestMetokenQueries()
 
 	// stargate queries
 	its.TestStargateQueries()
