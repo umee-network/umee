@@ -200,8 +200,7 @@ func init() {
 		incentivemodule.AppModuleBasic{},
 		metokenmodule.AppModuleBasic{},
 	}
-	if Experimental {
-	}
+	// if Experimental {}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
 
@@ -226,8 +225,7 @@ func init() {
 		ugov.ModuleName:        nil,
 		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
 	}
-	if Experimental {
-	}
+	// if Experimental {}
 }
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of
@@ -342,8 +340,7 @@ func New(
 		incentive.StoreKey,
 		metoken.StoreKey,
 	}
-	if Experimental {
-	}
+	// if Experimental {}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -735,8 +732,7 @@ func New(
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
 	}
-	if Experimental {
-	}
+	// if Experimental {}
 
 	app.mm = module.NewManager(appModules...)
 
@@ -837,8 +833,7 @@ func New(
 		incentive.ModuleName,
 		metoken.ModuleName,
 	}
-	if Experimental {
-	}
+	// if Experimental {}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
 	app.mm.SetOrderEndBlockers(endBlockers...)

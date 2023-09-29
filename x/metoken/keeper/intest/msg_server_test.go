@@ -1,6 +1,7 @@
 package intest
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -247,6 +248,9 @@ func TestMsgServer_Swap_NonStableAssets_DiffExponents(t *testing.T) {
 			require.NoError(err)
 
 			// verify the outputs of swap function
+			if tc.name == "valid - swap 1.435125562353141231 ETH" {
+				fmt.Printf("\n")
+			}
 			resp, err := msgServer.Swap(ctx, msg)
 			require.NoError(err, tc.name)
 
@@ -897,11 +901,12 @@ func verifySwap(
 
 	assetExponentFactorVsMeToken, err := metoken.ExponentFactor(assetPrice.Exponent, prices.Exponent)
 	assert.NilError(t, err)
+	rate := exchangeRate.Mul(assetExponentFactorVsMeToken)
 
 	// expected_metokens = amount_to_swap * exchange_rate * exponent_factor
 	expectedMeTokens := sdk.NewCoin(
 		meTokenDenom,
-		exchangeRate.MulInt(amountToSwap).Mul(assetExponentFactorVsMeToken).TruncateInt(),
+		rate.MulInt(amountToSwap).TruncateInt(),
 	)
 
 	// calculating reserved and leveraged
@@ -1862,8 +1867,12 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 	}{
 		{
 			"invalid authority",
-			metoken.NewMsgGovUpdateRegistry("invalid_authority", nil, nil),
-			"invalid_authority",
+			metoken.NewMsgGovUpdateRegistry(
+				"umee156hsyuvssklaekm57qy0pcehlfhzpclclaadwq",
+				nil,
+				[]metoken.Index{existingIndex},
+			),
+			"unauthorized",
 		},
 		{
 			"invalid - empty add and update indexes",
