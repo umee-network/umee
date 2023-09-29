@@ -47,6 +47,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ## [Unreleased]
 
 ### API-Breaking
+
 - [2267](https://github.com/umee-network/umee/pull/2267) `BorrowLimit` field in QueryAccountSummaryResponse can be nil on missing borrow price (behavior now matches `LiquidationThreshold` field)
 
 ### Improvements
