@@ -225,7 +225,7 @@ func init() {
 		ugov.ModuleName:        nil,
 		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
 	}
-	// if Experimental {}
+	// if Experimental  {}
 }
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of
