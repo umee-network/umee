@@ -55,6 +55,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
 - [2267](https://github.com/umee-network/umee/pull/2267) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recent spot price when required.
 - [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary.
+- [2270](https://github.com/umee-network/umee/pull/2270) Increase free oracle tx limit to 200k gas.
 
 ### Bug Fixes
 
