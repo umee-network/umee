@@ -6,6 +6,15 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v6.1.0
+
+- Enable [meToken module](https://github.com/umee-network/umee/blob/main/x/metoken/README.md): allows to create an
+  index composed of a list of assets and realize operations such as swap and redeem between the assets and the
+  index token.
+- Bump go version to 1.21.
+- Add spot price fields to account summary, and ensure all other fields use leverage logic prices.
+- Fix avg params storage for x/oracle.
+
 ## v6.0.2
 
 This fixes a crash shortly after the 6.0.1 upgrade. The crash occurred at height `8427849` but this binary works even if you switch to it immediately after the gov upgrade. Patch must be applied **as soon as possible**.
