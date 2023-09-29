@@ -8,8 +8,8 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 
 ## v6.1.0
 
-- Enable [meToken module](https://github.com/umee-network/umee/blob/main/x/metoken/README.md): allows to create an 
-  index composed of a list of assets and realize operations such as swap and redeem between the assets and the 
+- Enable [meToken module](https://github.com/umee-network/umee/blob/main/x/metoken/README.md): allows to create an
+  index composed of a list of assets and realize operations such as swap and redeem between the assets and the
   index token.
 - Bump go version to 1.21.
 - Add spot price fields to account summary, and ensure all other fields use leverage logic prices.
