@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package intest
 
 import (
@@ -612,6 +609,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 		app.BankKeeper,
 		app.LeverageKeeper,
 		oracleMock,
+		app.UGovKeeperB.EmergencyGroup,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)
@@ -708,6 +706,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 		app.BankKeeper,
 		app.LeverageKeeper,
 		oracleMock,
+		app.UGovKeeperB.EmergencyGroup,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)
@@ -1350,6 +1349,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		app.BankKeeper,
 		app.LeverageKeeper,
 		oracleMock,
+		app.UGovKeeperB.EmergencyGroup,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)
@@ -1446,6 +1446,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		app.BankKeeper,
 		app.LeverageKeeper,
 		oracleMock,
+		app.UGovKeeperB.EmergencyGroup,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)

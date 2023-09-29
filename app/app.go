@@ -200,6 +200,8 @@ func init() {
 		incentivemodule.AppModuleBasic{},
 		metokenmodule.AppModuleBasic{},
 	}
+	if Experimental {
+	}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
 
@@ -223,6 +225,8 @@ func init() {
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
 		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
+	}
+	if Experimental {
 	}
 }
 
@@ -337,6 +341,8 @@ func New(
 		wasm.StoreKey,
 		incentive.StoreKey,
 		metoken.StoreKey,
+	}
+	if Experimental {
 	}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
@@ -729,6 +735,8 @@ func New(
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
 	}
+	if Experimental {
+	}
 
 	app.mm = module.NewManager(appModules...)
 
@@ -828,6 +836,8 @@ func New(
 		wasm.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
+	}
+	if Experimental {
 	}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
