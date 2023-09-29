@@ -44,7 +44,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## v6.1.0 - 2023-09-29
+## v6.1.0-beta1 - 2023-09-29
 
 ### Improvements
 
