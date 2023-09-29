@@ -50,6 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
 - [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary, and ensure all other fields use leverage logic prices.
+- [2270](https://github.com/umee-network/umee/pull/2270) Increase free oracle tx limit to 200k gas.
 
 ### Bug Fixes
 
