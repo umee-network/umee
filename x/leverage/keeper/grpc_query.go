@@ -163,8 +163,9 @@ func (q Querier) MarketSummary(
 		AvailableCollateralize: availableCollateralize,
 	}
 
-	// Oracle prices in response will be nil if it is unavailable
-	oraclePrice, _, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeSpot)
+	// Oracle price in response will be nil if the oracle module has no price at all, but will instead
+	// show the most recent price if one existed.
+	oraclePrice, _, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeQuery)
 	if oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	} else {
