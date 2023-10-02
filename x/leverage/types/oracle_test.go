@@ -18,6 +18,30 @@ func TestPriceModes(t *testing.T) {
 			types.PriceModeSpot,
 			types.PriceModeSpot,
 			false,
+		}, {
+			types.PriceModeQuery,
+			types.PriceModeQuery,
+			true,
+		}, {
+			types.PriceModeHistoric,
+			types.PriceModeSpot,
+			false,
+		}, {
+			types.PriceModeHigh,
+			types.PriceModeSpot,
+			false,
+		}, {
+			types.PriceModeLow,
+			types.PriceModeSpot,
+			false,
+		}, {
+			types.PriceModeQueryHigh,
+			types.PriceModeQuery,
+			true,
+		}, {
+			types.PriceModeQueryLow,
+			types.PriceModeQuery,
+			true,
 		},
 	}
 
