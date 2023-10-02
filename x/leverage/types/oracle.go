@@ -7,16 +7,19 @@ const (
 	// Spot mode requests the most recent prices from oracle, unless they are too old.
 	PriceModeSpot PriceMode = iota
 	// Query mode requests the most recent price, regardless of price age.
+	// These potentially expired prices should only be used for queries, not transactions.
 	PriceModeQuery
 	// Historic mode requests the median of the most recent historic medians
 	PriceModeHistoric
 	// High mode uses the higher of either Spot or Historic prices
 	PriceModeHigh
 	// QueryHigh mode uses the higher of either Spot or Historic prices, allowing expired spot prices.
+	// These potentially expired prices should only be used for queries, not transactions.
 	PriceModeQueryHigh
 	// Low mode uses the lower of either Spot or Historic prices
 	PriceModeLow
 	// QueryLow mode uses the lower of either Spot or Historic prices, allowing expired spot prices.
+	// These potentially expired prices should only be used for queries, not transactions.
 	PriceModeQueryLow
 )
 
@@ -35,7 +38,8 @@ func (mode PriceMode) IgnoreHistoric() PriceMode {
 	return mode
 }
 
-// AllowsExpired returns true if a price mode allows expired spot prices to be used
+// AllowsExpired returns true if a price mode allows expired spot prices to be used.
+// Price modes with potentially expired prices should only be used for queries, not transactions.
 func (mode PriceMode) AllowsExpired() bool {
 	switch mode {
 	case PriceModeQuery, PriceModeQueryHigh, PriceModeQueryLow:
