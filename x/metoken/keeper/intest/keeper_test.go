@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package intest
 
 import (
@@ -62,6 +59,7 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		app.BankKeeper,
 		app.LeverageKeeper,
 		oracleMock,
+		app.UGovKeeperB.EmergencyGroup,
 	)
 	app.MetokenKeeperB = kb
 
