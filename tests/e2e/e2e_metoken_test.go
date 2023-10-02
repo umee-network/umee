@@ -8,7 +8,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
-	"github.com/umee-network/umee/v6/app"
 	"github.com/umee-network/umee/v6/tests/grpc"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -20,10 +19,6 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	s.Require().NoError(err)
 	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
-
-	if app.Experimental {
-		s.T().Skip("Skipping tests for experimental module x/metoken")
-	}
 
 	s.Run(
 		"create_stable_index", func() {
