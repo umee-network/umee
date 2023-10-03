@@ -14,6 +14,26 @@ import (
 	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
+func (s *E2ETest) TxMetokenSwap(umeeAddr string, asset sdk.Coin, meTokenDenom string) error {
+	req := &metoken.MsgSwap{
+		User:         umeeAddr,
+		Asset:        asset,
+		MetokenDenom: meTokenDenom,
+	}
+
+	return s.BroadcastTxWithRetry(req)
+}
+
+func (s *E2ETest) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetDenom string) error {
+	req := &metoken.MsgRedeem{
+		User:       umeeAddr,
+		Metoken:    meToken,
+		AssetDenom: assetDenom,
+	}
+
+	return s.BroadcastTxWithRetry(req)
+}
+
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
 	var index metoken.Index
 	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
