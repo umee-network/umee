@@ -52,7 +52,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
 			amountToLeverage := amountToSwap.Sub(amountToReserves)
 
-			prices := s.getPrices(mocks.MeUSDDenom)
+			prices := s.getMetokenPrices(mocks.MeUSDDenom)
 			usdtPrice, err := prices[0].PriceByBaseDenom(mocks.USDTBaseDenom)
 			s.Require().NoError(err)
 			returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
@@ -88,7 +88,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 
 	s.Run(
 		"redeem_50meUSD_success", func() {
-			prices := s.getPrices(mocks.MeUSDDenom)
+			prices := s.getMetokenPrices(mocks.MeUSDDenom)
 			fiftyMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(50_000000))
 
 			s.executeRedeemSuccess(valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
@@ -166,7 +166,7 @@ func (s *E2ETest) checkMetokenBalance(valAddr, denom string) {
 	)
 }
 
-func (s *E2ETest) getPrices(denom string) []metoken.IndexPrices {
+func (s *E2ETest) getMetokenPrices(denom string) []metoken.IndexPrices {
 	var prices []metoken.IndexPrices
 	s.Require().Eventually(
 		func() bool {
