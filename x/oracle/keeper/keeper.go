@@ -136,7 +136,6 @@ func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, rate sdk
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.
-// TODO: handler should use ExchangeRate type rather than Dec
 func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec, time.Time) bool) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
@@ -392,4 +391,24 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 	}
 
 	return nil
+}
+
+// IterateOldExchangeRates iterates over all old exchange rates from store and returns them.
+// Note: this is only used for v6.1 Migrations
+func (k Keeper) IterateOldExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
+	defer iter.Close()
+	prefixLen := len(types.KeyPrefixExchangeRate)
+
+	for ; iter.Valid(); iter.Next() {
+		key := iter.Key()
+		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
+		dp := sdk.DecProto{}
+		k.cdc.MustUnmarshal(iter.Value(), &dp)
+
+		if handler(denom, dp.Dec) {
+			break
+		}
+	}
 }
