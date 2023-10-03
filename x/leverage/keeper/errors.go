@@ -21,6 +21,7 @@ func nonOracleError(err error) bool {
 	if errors.IsOf(err,
 		leveragetypes.ErrInvalidOraclePrice,
 		leveragetypes.ErrNoHistoricMedians,
+		leveragetypes.ErrExpiredOraclePrice,
 		oracletypes.ErrUnknownDenom,
 	) {
 		return false
