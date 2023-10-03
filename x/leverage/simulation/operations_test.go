@@ -33,8 +33,11 @@ type SimTestSuite struct {
 func (s *SimTestSuite) SetupTest() {
 	checkTx := false
 	app := umeeapp.Setup(s.T())
-	ctx := app.NewContext(checkTx, tmproto.Header{Time: time.Now()})
-	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
+	t := time.Now()
+	ctx := app.NewContext(checkTx, tmproto.Header{Time: t})
+	genesis := *types.DefaultGenesis()
+	genesis.LastInterestTime = t.Unix()
+	leverage.InitGenesis(ctx, app.LeverageKeeper, genesis)
 
 	// Use default umee token for sim tests
 	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, fixtures.Token("uumee", "UMEE", 6)))

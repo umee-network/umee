@@ -40,6 +40,7 @@ var (
 	ErrUndercollateralized   = errors.Register(ModuleName, 402, "borrow positions are undercollateralized")
 	ErrLiquidationIneligible = errors.Register(ModuleName, 403, "borrower not eligible for liquidation")
 	ErrNoHistoricMedians     = errors.Register(ModuleName, 405, "insufficient historic medians available")
+	ErrExpiredOraclePrice    = errors.Register(ModuleName, 406, "no recent oracle price")
 
 	// 5XX = Market Conditions
 	ErrLendingPoolInsufficient = errors.Register(ModuleName, 500, "lending pool insufficient")
