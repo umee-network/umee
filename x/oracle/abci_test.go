@@ -102,9 +102,16 @@ var (
 
 func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app, ctx := s.app, s.ctx
-	ctx = ctx.WithBlockHeight(1)
+	ctx = ctx.WithBlockHeight(1).WithBlockTime(time.Unix(1000, 0)) // block 1, t = 1000
 	preVoteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx) / 2)
 	voteBlockDiff := int64(app.OracleKeeper.VotePeriod(ctx)/2 + 1)
+
+	advanceTime := func(oldCtx sdk.Context, blocks int64) sdk.Context {
+		return oldCtx.WithBlockHeight(
+			ctx.BlockHeight() + blocks).WithBlockTime(
+			time.Unix(ctx.BlockTime().Unix()+5*voteBlockDiff, 0),
+		) // block number increased, and time advanced 5 seconds per block
+	}
 
 	var (
 		val1Tuples types.ExchangeRateTuples
@@ -126,7 +133,9 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		})
 	}
 
-	createVote := func(hash string, val sdk.ValAddress, rates types.ExchangeRateTuples, blockHeight uint64) (types.AggregateExchangeRatePrevote, types.AggregateExchangeRateVote) {
+	createVote := func(hash string, val sdk.ValAddress, rates types.ExchangeRateTuples, blockHeight uint64) (
+		types.AggregateExchangeRatePrevote, types.AggregateExchangeRateVote,
+	) {
 		preVote := types.AggregateExchangeRatePrevote{
 			Hash:        "hash1",
 			Voter:       val.String(),
@@ -149,7 +158,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = advanceTime(ctx, voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
@@ -160,33 +169,41 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		s.Require().NoError(err)
 		s.Require().Equal(types.ExchangeRate{
 			Rate:      sdk.OneDec(),
-			Timestamp: ctx.BlockTime()},
-			rate)
+			Timestamp: ctx.BlockTime(),
+		}, rate)
 	}
+
+	// prices during next case will still have this old timestamp
+	expiredTime := ctx.BlockTime()
 
 	// Test: only val2 votes (has 39% vote power).
 	// Total voting power per denom must be bigger or equal than 40% (see SetupTest).
-	// So if only val2 votes, we won't have any prices next block.
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	// So if only val2 votes, we won't update any prices next block.
+	// (prices will still exist with old timestamps)
+	ctx = advanceTime(ctx, preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
 
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = advanceTime(ctx, voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
-		s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap(denom.SymbolDenom))
-		s.Require().Equal(types.ExchangeRate{}, rate)
+		// price must exist, but with old timestamp
+		s.Require().NoError(err)
+		s.Require().Equal(types.ExchangeRate{
+			Rate:      sdk.OneDec(),
+			Timestamp: expiredTime,
+		}, rate)
 	}
 
 	// Test: val2 and val3 votes.
 	// now we will have 40% of the power, so now we should have prices
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = advanceTime(ctx, preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val2PreVotes.SubmitBlock = h
 	val3PreVotes.SubmitBlock = h
@@ -195,7 +212,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr3, val3PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = advanceTime(ctx, voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr3, val3Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
@@ -211,7 +228,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	// Test: val1 and val2 vote again
 	// umee has 69.9% power, and atom has 30%, so we should have price for umee, but not for atom
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + preVoteBlockDiff)
+	ctx = advanceTime(ctx, preVoteBlockDiff)
 	h = uint64(ctx.BlockHeight())
 	val1PreVotes.SubmitBlock = h
 	val2PreVotes.SubmitBlock = h
@@ -233,7 +250,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	app.OracleKeeper.SetAggregateExchangeRatePrevote(ctx, valAddr2, val2PreVotes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
 
-	ctx = ctx.WithBlockHeight(ctx.BlockHeight() + voteBlockDiff)
+	ctx = advanceTime(ctx, voteBlockDiff)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr1, val1Votes)
 	app.OracleKeeper.SetAggregateExchangeRateVote(ctx, valAddr2, val2Votes)
 	oracle.EndBlocker(ctx, app.OracleKeeper)
