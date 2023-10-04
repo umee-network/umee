@@ -14,6 +14,11 @@ type E2ETest struct {
 	setup.E2ETestSuite
 }
 
+// TestE2ETestSuite is the entry point for e2e testing. It runs after the docker build commands
+// listed in Makefile as prerequisites to test-e2e. It first calls E2ETestSuite.SetupSuite() and
+// then runs all public methods on the suite whose names match regex "^Test". These tests appear
+// to run in series (and in alphabetical order), so the only other transactions being submitted
+// while they run are the price feeder votes by the validators running in docker containers.
 func TestE2ETestSuite(t *testing.T) {
 	suite.Run(t, new(E2ETest))
 }
