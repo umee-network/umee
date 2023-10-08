@@ -400,6 +400,8 @@ func (s *E2ETestSuite) runValidators() {
 		s.T().Logf("started Umee validator container: %s", resource.Container.ID)
 	}
 
+	// TODO: if these exit after 2 seconds, don't wait for 30 minutes before teardown!
+
 	rpcClient, err := rpchttp.New("tcp://localhost:26657", "/websocket")
 	s.Require().NoError(err)
 
