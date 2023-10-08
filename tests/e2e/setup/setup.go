@@ -89,7 +89,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initValidatorConfigs() // modify config.toml and app.toml for each validator
 	s.runValidators()
 	if !s.MinNetwork {
-		s.runPriceFeeder(2)
+		s.runPriceFeeder(2) // index of the validator which will be voting on prices
 		s.runGaiaNetwork()
 		time.Sleep(3 * time.Second) // wait for gaia to start
 		s.runIBCRelayer()
