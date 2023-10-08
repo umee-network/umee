@@ -19,10 +19,12 @@ const (
 	PriceFeederMaxStartupTime = 20 // seconds
 )
 
-func (s *E2ETestSuite) runPriceFeeder() {
+// runPriceFeeder runs the price feeder using one of the chain's validators to vote on prices.
+// The container accesses the validator's key using the test keyring located in the validator's config directory.
+func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	s.T().Log("starting price-feeder container...")
 
-	umeeVal := s.Chain.Validators[2]
+	umeeVal := s.Chain.Validators[valIndex]
 	umeeValAddr, err := umeeVal.KeyInfo.GetAddress()
 	s.Require().NoError(err)
 

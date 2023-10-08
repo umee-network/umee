@@ -89,7 +89,7 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initValidatorConfigs() // modify config.toml and app.toml for each validator
 	s.runValidators()
 	if !s.MinNetwork {
-		s.runPriceFeeder()
+		s.runPriceFeeder(2)
 		s.runGaiaNetwork()
 		time.Sleep(3 * time.Second) // wait for gaia to start
 		s.runIBCRelayer()
@@ -426,7 +426,6 @@ func (s *E2ETestSuite) runValidators() {
 	)
 }
 
-
 func (s *E2ETestSuite) initUmeeClient() {
 	var err error
 	mnemonics := make(map[string]string)
@@ -445,8 +444,6 @@ func (s *E2ETestSuite) initUmeeClient() {
 	)
 	s.Require().NoError(err)
 }
-
-
 
 func noRestart(config *docker.HostConfig) {
 	// in this case we don't want the nodes to restart on failure

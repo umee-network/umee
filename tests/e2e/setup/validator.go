@@ -132,7 +132,8 @@ func (v *validator) createConsensusKey() error {
 	return nil
 }
 
-// generate a random key and save to keyring-backend-test in the validator's config directory
+// generate a random key and save to keyring-backend-test in the validator's config directory.
+// Uses test keyring passphrase so that the price feeder can vote using this key.
 func (v *validator) createKey(cdc codec.Codec, name string) error {
 	mnemonic, err := createMnemonic()
 	if err != nil {
