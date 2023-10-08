@@ -39,6 +39,11 @@ func getGenDoc(path string) (*tmtypes.GenesisDoc, error) {
 	return doc, nil
 }
 
+// addGenesisAccount inserts an address and initial balances for an account into a genesis file on disk
+// before the chain has started. The genesis file is stored in the config directory of a single validator.
+// In practice, this function is used during setup when modifying the genesis file stored in the first
+// validator's path, before the completed genesis file is copied to all validators. Note that path and
+// moniker refer to the first validator - they do not relate to the account being added.
 func addGenesisAccount(cdc codec.Codec, path, moniker, amountStr string, accAddr sdk.AccAddress) error {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config

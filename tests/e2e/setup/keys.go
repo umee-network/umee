@@ -30,6 +30,7 @@ var (
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
 	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
 
+	// TODO: reduce
 	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
 	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
