@@ -17,20 +17,20 @@ type testAccount struct {
 
 const (
 	// Initial coins to give to validators. Staking only (test txs should use testAccounts instead of validators.
-	ValidatorInitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
+	ValidatorInitBalanceStr = "100000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
 
 	// Number of test accounts to initialize in chain.TestAccounts
 	numTestAccounts = 3
 	// Initial balance of test accounts
-	AccountInitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
+	AccountInitBalanceStr = "100000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
 )
 
 var (
-	stakeAmount, _  = sdk.NewIntFromString("100000000000")
+	stakeAmount, _  = sdk.NewIntFromString("1000")
 	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
 
 	// TODO: reduce
-	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
+	stakeAmount2, _  = sdk.NewIntFromString("5000")
 	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
 
