@@ -127,7 +127,7 @@ func (s *E2ETestSuite) initNodes() {
 		valAddr, err := val.KeyInfo.GetAddress()
 		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, valAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", valCoins, valAddr),
 		)
 	}
 

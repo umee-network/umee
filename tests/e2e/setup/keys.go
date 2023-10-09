@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/go-bip39"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
@@ -17,13 +18,17 @@ const (
 	ATOMExponent  = 6
 	PhotonDenom   = "photon"
 
-	// TODO: validator initial balances can be only uumee. Non-validaotr accounts get other tokens for testing.
-	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
-
 	GaiaChainID = "test-gaia-chain"
 )
 
 var (
+	// Initial coins to give to validators
+	valCoins = sdk.NewCoins(
+		coin.New(appparams.BondDenom, 1_000000_000000),
+		coin.New(PhotonDenom, 1_000000_000000),
+		coin.New(mocks.USDTBaseDenom, 1_000000_000000),
+	)
+
 	minGasPrice = appparams.ProtocolMinGasPrice.String()
 
 	// TODO: stake less on the validators, and instead delegate from a non-validator account
