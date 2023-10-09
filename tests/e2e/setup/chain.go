@@ -86,34 +86,10 @@ func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
 	return nil
 }
 
-func (c *chain) createAndInitGaiaValidator(cdc codec.Codec) error {
-	// create gaia validator
-	gaiaVal := c.createGaiaValidator(0)
-
-	// create keys
-	mnemonic, info, err := createMemoryKey(cdc)
-	if err != nil {
-		return err
-	}
-
-	gaiaVal.keyInfo = *info
-	gaiaVal.mnemonic = mnemonic
-
-	c.GaiaValidators = append(c.GaiaValidators, gaiaVal)
-
-	return nil
-}
-
 func (c *chain) createValidator(index int) *validator {
 	return &validator{
 		chain:   c,
 		index:   index,
 		moniker: "umee",
-	}
-}
-
-func (c *chain) createGaiaValidator(index int) *gaiaValidator {
-	return &gaiaValidator{
-		index: index,
 	}
 }
