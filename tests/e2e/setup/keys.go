@@ -38,6 +38,7 @@ var (
 	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
 )
 
+// createMnemonic generates a random mnemonic to be used in key generation
 func createMnemonic() (string, error) {
 	entropySeed, err := bip39.NewEntropy(256)
 	if err != nil {
@@ -52,36 +53,28 @@ func createMnemonic() (string, error) {
 	return mnemonic, nil
 }
 
+// createMemoryKey generates a random key which will be stored only in memory
 func createMemoryKey(cdc codec.Codec) (mnemonic string, info *keyring.Record, err error) {
 	mnemonic, err = createMnemonic()
 	if err != nil {
 		return "", nil, err
 	}
 
-	account, err := createMemoryKeyFromMnemonic(cdc, mnemonic)
-	if err != nil {
-		return "", nil, err
-	}
-
-	return mnemonic, account, nil
-}
-
-func createMemoryKeyFromMnemonic(cdc codec.Codec, mnemonic string) (*keyring.Record, error) {
 	kb, err := keyring.New("testnet", keyring.BackendMemory, "", nil, cdc)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	keyringAlgos, _ := kb.SupportedAlgorithms()
 	algo, err := keyring.NewSigningAlgoFromString(string(hd.Secp256k1Type), keyringAlgos)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
 	account, err := kb.NewAccount("", mnemonic, "", sdk.FullFundraiserPath, algo)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	return account, nil
+	return mnemonic, account, nil
 }

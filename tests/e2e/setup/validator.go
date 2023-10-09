@@ -40,21 +40,25 @@ type validator struct {
 	nodeKey      p2p.NodeKey
 }
 
+// instanceName is <v.moniker><v.index>
 func (v *validator) instanceName() string {
 	return fmt.Sprintf("%s%d", v.moniker, v.index)
 }
 
+// configDir is <chain.configDir()>/<val.instanceName>
 func (v *validator) configDir() string {
 	return fmt.Sprintf("%s/%s", v.chain.configDir(), v.instanceName())
 }
 
-func (v *validator) createConfig() error {
+// // createConfigDir makes the validator's config directory at <chain.configDir()>/<val.instanceName>/config
+func (v *validator) createConfigDir() error {
 	p := path.Join(v.configDir(), "config")
 	return os.MkdirAll(p, 0o755)
 }
 
+// init creates the validator's config directory and creates its genesis.json and config.toml
 func (v *validator) init(cdc codec.Codec) error {
-	if err := v.createConfig(); err != nil {
+	if err := v.createConfigDir(); err != nil {
 		return err
 	}
 
@@ -64,6 +68,7 @@ func (v *validator) init(cdc codec.Codec) error {
 	config.SetRoot(v.configDir())
 	config.Moniker = v.moniker
 
+	// TODO: We just created the directory. Isn't this just returning empty genesis doc? If so, replace this code.
 	genDoc, err := getGenDoc(v.configDir())
 	if err != nil {
 		return err
@@ -86,6 +91,7 @@ func (v *validator) init(cdc codec.Codec) error {
 	return nil
 }
 
+// loads or generates a node key in the validator's config directory
 func (v *validator) createNodeKey() error {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
@@ -102,6 +108,7 @@ func (v *validator) createNodeKey() error {
 	return nil
 }
 
+// loads or generates a consensus key in the validator's config directory
 func (v *validator) createConsensusKey() error {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
@@ -125,7 +132,13 @@ func (v *validator) createConsensusKey() error {
 	return nil
 }
 
-func (v *validator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string) error {
+// generate a random key and save to keyring-backend-test in the validator's config directory
+func (v *validator) createKey(cdc codec.Codec, name string) error {
+	mnemonic, err := createMnemonic()
+	if err != nil {
+		return err
+	}
+
 	kb, err := keyring.New(keyringAppName, keyring.BackendTest, v.configDir(), nil, cdc)
 	if err != nil {
 		return err
@@ -157,15 +170,6 @@ func (v *validator) createKeyFromMnemonic(cdc codec.Codec, name, mnemonic string
 	v.privateKey = privKey
 
 	return nil
-}
-
-func (v *validator) createKey(cdc codec.Codec, name string) error {
-	mnemonic, err := createMnemonic()
-	if err != nil {
-		return err
-	}
-
-	return v.createKeyFromMnemonic(cdc, name, mnemonic)
 }
 
 func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
