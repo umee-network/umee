@@ -16,7 +16,7 @@ type testAccount struct {
 }
 
 var (
-	// Initial coins to give to validator 0 (which it uses to fund test accounts)
+	// Initial coins to give to validators
 	valCoins = sdk.NewCoins(
 		coin.New(appparams.BondDenom, 1_000000_000000),
 		coin.New(PhotonDenom, 1_000000_000000),
