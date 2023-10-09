@@ -15,10 +15,12 @@ const (
 	ATOM          = "ATOM"
 	ATOMBaseDenom = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
 	ATOMExponent  = 6
+	PhotonDenom   = "photon"
 
-	PhotonDenom    = "photon"
+	// TODO: validator initial balances can be only uumee. Non-validaotr accounts get other tokens for testing.
 	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
-	GaiaChainID    = "test-gaia-chain"
+
+	GaiaChainID = "test-gaia-chain"
 
 	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
 	PriceFeederServerPort     = "7171/tcp"
@@ -26,7 +28,9 @@ const (
 )
 
 var (
-	minGasPrice     = appparams.ProtocolMinGasPrice.String()
+	minGasPrice = appparams.ProtocolMinGasPrice.String()
+
+	// TODO: stake less on the validators, and instead delegate from a non-validator account
 	stakeAmount, _  = sdk.NewIntFromString("100000000000")
 	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
 
