@@ -50,7 +50,7 @@ func (v *validator) configDir() string {
 	return fmt.Sprintf("%s/%s", v.chain.configDir(), v.instanceName())
 }
 
-// // createConfigDir makes the validator's config directory at <chain.configDir()>/<val.instanceName>/config
+// createConfigDir makes the validator's config directory at <chain.configDir()>/<val.instanceName>/config
 func (v *validator) createConfigDir() error {
 	p := path.Join(v.configDir(), "config")
 	return os.MkdirAll(p, 0o755)
