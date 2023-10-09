@@ -129,11 +129,17 @@ func (s *E2ETestSuite) initNodes() {
 
 	// initialize a genesis file for the first validator
 	val0ConfigDir := s.Chain.Validators[0].configDir()
-	for _, val := range s.Chain.Validators {
+	for i, val := range s.Chain.Validators {
+		// set first validator's balance to a bunch of test tokens, and all other validators to only uumee
+		coins := val1Coins
+		if i == 0 {
+			coins = val0Coins
+		}
 		valAddr, err := val.KeyInfo.GetAddress()
 		s.Require().NoError(err)
+		// modify genesis file to include new balances
 		s.Require().NoError(
-			addGenesisAccount(s.cdc, val0ConfigDir, "", ValidatorInitBalanceStr, valAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", coins, valAddr),
 		)
 	}
 

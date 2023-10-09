@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
@@ -15,23 +16,31 @@ type testAccount struct {
 	addr     sdk.AccAddress
 }
 
-const (
-	// Initial coins to give to validators.
-	// TODO: Staking only (test txs should use testAccounts instead of validators.
-	ValidatorInitBalanceStr = "100000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
+var (
+	// Initial coins to give to validator 0 (which it uses to fund test accounts)
+	val0Coins = sdk.NewCoins(
+		coin.New(appparams.BondDenom, 1_000000_000000),
+		coin.New(PhotonDenom, 1_000000_000000),
+		coin.New(mocks.USDTBaseDenom, 1_000000_000000),
+	)
+	// Initial coins to give to all other validators
+	val1Coins = sdk.NewCoins(
+		coin.New(appparams.BondDenom, 1_000000_000000),
+	)
 
 	// Number of test accounts to initialize in chain.TestAccounts
 	numTestAccounts = 1
-	// Initial balance of test accounts
-	AccountInitBalanceStr = "100000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
-)
 
-var (
-	// TODO: stake less on the validators, and instead delegate from a non-validator account
-	stakeAmount, _   = sdk.NewIntFromString("1000")
-	stakeAmountCoin  = sdk.NewCoin(appparams.BondDenom, stakeAmount)
-	stakeAmount2, _  = sdk.NewIntFromString("5000")
-	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
+	// Initial coins to give to each test account. Ensure that this * numTestAccounts < val0Coins
+	testAccountCoins = sdk.NewCoins(
+		coin.New(appparams.BondDenom, 100000_000000),
+		coin.New(PhotonDenom, 100000_000000),
+		coin.New(mocks.USDTBaseDenom, 100000_000000),
+	)
+
+	// TODO: stake less on the validators, and instead delegate from a test account
+	stakeAmountCoin  = coin.New(appparams.BondDenom, 1000)
+	stakeAmountCoin2 = coin.New(appparams.BondDenom, 5000)
 )
 
 // create a test account, which is an address with a mnemonic stored only in memory, to be used with the network.

@@ -46,17 +46,12 @@ func getGenDoc(path string) (*tmtypes.GenesisDoc, error) {
 // In practice, this function is used during setup when modifying the genesis file stored in the first
 // validator's path, before the completed genesis file is copied to all validators. Note that path and
 // moniker refer to the first validator - they do not relate to the account being added.
-func addGenesisAccount(cdc codec.Codec, path, moniker, amountStr string, accAddr sdk.AccAddress) error {
+func addGenesisAccount(cdc codec.Codec, path, moniker string, coins sdk.Coins, accAddr sdk.AccAddress) error {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
 
 	config.SetRoot(path)
 	config.Moniker = moniker
-
-	coins, err := sdk.ParseCoinsNormalized(amountStr)
-	if err != nil {
-		return fmt.Errorf("failed to parse coins: %w", err)
-	}
 
 	balances := banktypes.Balance{Address: accAddr.String(), Coins: coins.Sort()}
 	genAccount := authtypes.NewBaseAccount(accAddr, nil, 0, 0)
