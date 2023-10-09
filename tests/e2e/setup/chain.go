@@ -41,6 +41,7 @@ type chain struct {
 	dataDir        string
 	ID             string
 	Validators     []*validator
+	TestAccounts   []*testAccount
 	GaiaValidators []*gaiaValidator
 }
 

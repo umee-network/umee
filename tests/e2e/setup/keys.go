@@ -8,7 +8,6 @@ import (
 	"github.com/cosmos/go-bip39"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
-	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 const (
@@ -17,22 +16,10 @@ const (
 	ATOMExponent  = 6
 	PhotonDenom   = "photon"
 
-	// TODO: validator initial balances can be only uumee. Non-validaotr accounts get other tokens for testing.
-	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
-
 	GaiaChainID = "test-gaia-chain"
 )
 
-var (
-	minGasPrice = appparams.ProtocolMinGasPrice.String()
-
-	// TODO: stake less on the validators, and instead delegate from a non-validator account
-	stakeAmount, _  = sdk.NewIntFromString("100000000000")
-	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
-
-	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
-	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
-)
+var minGasPrice = appparams.ProtocolMinGasPrice.String()
 
 // createMnemonic generates a random mnemonic to be used in key generation
 func createMnemonic() (string, error) {

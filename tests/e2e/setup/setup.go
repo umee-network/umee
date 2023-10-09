@@ -127,7 +127,16 @@ func (s *E2ETestSuite) initNodes() {
 		valAddr, err := val.KeyInfo.GetAddress()
 		s.Require().NoError(err)
 		s.Require().NoError(
-			addGenesisAccount(s.cdc, val0ConfigDir, "", InitBalanceStr, valAddr),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", ValidatorInitBalanceStr, valAddr),
+		)
+	}
+
+	// modify genesis file of the first validator to include all test account initial bank balances
+	for i := 0; i < numTestAccounts; i++ {
+		s.Require().NoError(s.Chain.createTestAccount(s.cdc)) // create account and key
+		s.Require().NoError(
+			// add balance at newly created address
+			addGenesisAccount(s.cdc, val0ConfigDir, "", AccountInitBalanceStr, s.Chain.TestAccounts[i].addr),
 		)
 	}
 
