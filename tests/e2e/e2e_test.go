@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/suite"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
 )
