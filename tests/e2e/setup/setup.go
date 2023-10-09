@@ -76,9 +76,9 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.DkrNet, err = s.DkrPool.CreateNetwork(fmt.Sprintf("%s-testnet", s.Chain.ID))
 	s.Require().NoError(err)
 
-	s.initNodes() // init validator nodes
-	s.initGenesis()
-	s.initValidatorConfigs()
+	s.initNodes()            // create umee validator nodes and their config.toml, genesis.json
+	s.initGenesis()          // modify genesis file, add gentxs, and save to each validator
+	s.initValidatorConfigs() // modify config.toml and app.toml for each validator
 	s.runValidators()
 	if !s.MinNetwork {
 		s.runPriceFeeder()
@@ -135,11 +135,6 @@ func (s *E2ETestSuite) initNodes() {
 		)
 	}
 
-	// TODO:
-	// create non-validator accounts which can be used for testing.
-	// since they don't vote for price feeder, these accounts are
-	// much less vulnerable to "incorrect account sequence" problems.
-
 	// copy the genesis file to the remaining validators
 	for _, val := range s.Chain.Validators[1:] {
 		_, err := copyFile(
@@ -150,6 +145,10 @@ func (s *E2ETestSuite) initNodes() {
 	}
 }
 
+// initGenesis modifies the genesis.json in s.Chain.Validators[0]'s config directory
+// to include new initial parameters and state for multiple modules, then adds the
+// gentxs from all validators, and overwrites genesis.json on each validator
+// with the new file.
 func (s *E2ETestSuite) initGenesis() {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
@@ -158,7 +157,7 @@ func (s *E2ETestSuite) initGenesis() {
 	config.Moniker = s.Chain.Validators[0].moniker
 
 	genFilePath := config.GenesisFile()
-	s.T().Log("starting e2e infrastructure; validator_0 config:", genFilePath)
+	s.T().Log("modifying genesis file; validator_0 config:", genFilePath)
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
@@ -257,6 +256,7 @@ func (s *E2ETestSuite) initGenesis() {
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[genutiltypes.ModuleName], &genUtilGenState))
 
 	// generate genesis txs
+	s.T().Log("creating genesis txs")
 	genTxs := make([]json.RawMessage, len(s.Chain.Validators))
 	for i, val := range s.Chain.Validators {
 		var createValmsg sdk.Msg
@@ -291,11 +291,13 @@ func (s *E2ETestSuite) initGenesis() {
 	s.Require().NoError(err)
 
 	// write the updated genesis file to each validator
+	s.T().Log("writing updated genesis file to each validator")
 	for _, val := range s.Chain.Validators {
 		writeFile(filepath.Join(val.configDir(), "config", "genesis.json"), bz)
 	}
 }
 
+// initValidatorConfigs modifies config.toml and app.toml for all s.Chain.Validators
 func (s *E2ETestSuite) initValidatorConfigs() {
 	for i, val := range s.Chain.Validators {
 		tmCfgPath := filepath.Join(val.configDir(), "config", "config.toml")
