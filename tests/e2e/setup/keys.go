@@ -19,7 +19,23 @@ const (
 	GaiaChainID = "test-gaia-chain"
 )
 
-var minGasPrice = appparams.ProtocolMinGasPrice.String()
+var (
+	// Initial coins to give to validators
+	valCoins = sdk.NewCoins(
+		coin.New(appparams.BondDenom, 1_000000_000000),
+		coin.New(PhotonDenom, 1_000000_000000),
+		coin.New(mocks.USDTBaseDenom, 1_000000_000000),
+	)
+
+	minGasPrice = appparams.ProtocolMinGasPrice.String()
+
+	// TODO: stake less on the validators, and instead delegate from a non-validator account
+	stakeAmount, _  = sdk.NewIntFromString("100000000000")
+	stakeAmountCoin = sdk.NewCoin(appparams.BondDenom, stakeAmount)
+
+	stakeAmount2, _  = sdk.NewIntFromString("500000000000")
+	stakeAmountCoin2 = sdk.NewCoin(appparams.BondDenom, stakeAmount2)
+)
 
 // createMnemonic generates a random mnemonic to be used in key generation
 func createMnemonic() (string, error) {
