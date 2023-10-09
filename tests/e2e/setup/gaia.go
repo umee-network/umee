@@ -16,6 +16,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
+const GaiaChainID = "test-gaia-chain"
+
 type gaiaValidator struct {
 	index    int
 	mnemonic string
