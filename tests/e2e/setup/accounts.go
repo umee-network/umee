@@ -39,8 +39,8 @@ var (
 	)
 
 	// TODO: stake less on the validators, and instead delegate from a test account
-	stakeAmountCoin  = coin.New(appparams.BondDenom, 1000)
-	stakeAmountCoin2 = coin.New(appparams.BondDenom, 5000)
+	stakeAmountCoin  = coin.New(appparams.BondDenom, 1_000000)
+	stakeAmountCoin2 = coin.New(appparams.BondDenom, 5_000000)
 )
 
 // create a test account, which is an address with a mnemonic stored only in memory, to be used with the network.
