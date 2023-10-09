@@ -21,10 +21,6 @@ const (
 	InitBalanceStr = "510000000000" + appparams.BondDenom + ",100000000000" + PhotonDenom + ",100000000000" + mocks.USDTBaseDenom
 
 	GaiaChainID = "test-gaia-chain"
-
-	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
-	PriceFeederServerPort     = "7171/tcp"
-	PriceFeederMaxStartupTime = 20 // seconds
 )
 
 var (
