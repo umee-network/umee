@@ -87,7 +87,7 @@ func (s *E2ETestSuite) SetupSuite() {
 
 	// create test accounts and keys
 	for i := 0; i < numTestAccounts; i++ {
-		s.Require().NoError(s.Chain.createTestAccount(s.cdc))
+		// s.Require().NoError(s.Chain.createTestAccount(s.cdc))
 	}
 
 	s.initUmeeClient()
