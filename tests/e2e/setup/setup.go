@@ -84,6 +84,12 @@ func (s *E2ETestSuite) SetupSuite() {
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
 	}
+
+	// create test accounts and keys
+	for i := 0; i < numTestAccounts; i++ {
+		s.Require().NoError(s.Chain.createTestAccount(s.cdc))
+	}
+
 	s.initUmeeClient()
 }
 
@@ -128,15 +134,6 @@ func (s *E2ETestSuite) initNodes() {
 		s.Require().NoError(err)
 		s.Require().NoError(
 			addGenesisAccount(s.cdc, val0ConfigDir, "", ValidatorInitBalanceStr, valAddr),
-		)
-	}
-
-	// modify genesis file of the first validator to include all test account initial bank balances
-	for i := 0; i < numTestAccounts; i++ {
-		s.Require().NoError(s.Chain.createTestAccount(s.cdc)) // create account and key
-		s.Require().NoError(
-			// add balance at newly created address
-			addGenesisAccount(s.cdc, val0ConfigDir, "", AccountInitBalanceStr, s.Chain.TestAccounts[i].addr),
 		)
 	}
 
@@ -418,6 +415,9 @@ func (s *E2ETestSuite) initUmeeClient() {
 	mnemonics := make(map[string]string)
 	for index, v := range s.Chain.Validators {
 		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
+	}
+	for index, a := range s.Chain.TestAccounts {
+		mnemonics[fmt.Sprintf("acct%d", index)] = a.mnemonic
 	}
 	ecfg := app.MakeEncodingConfig()
 	s.Umee, err = client.NewClient(
