@@ -36,28 +36,20 @@ func (s *E2ETestSuite) GaiaREST() string {
 }
 
 // Delegates an amount of uumee from the test account at a given index to a specified validator.
-// Note that the validator is specified by the index it appears at in the "staking/validators" query.
-// Requires a grpc-web endpoint to query validators from.
-func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64, endpoint string) error {
+func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error {
 	addr := s.AccountAddr(testAccount)
 
-	var validatorsResp stakingtypes.QueryValidatorsResponse
-	err := s.QueryREST(fmt.Sprintf("%s/cosmos/staking/v1beta1/validators", endpoint), &validatorsResp)
-	if err != nil {
-		return err
-	}
-
-	if len(validatorsResp.Validators) <= valIndex {
+	if len(s.Chain.Validators) <= valIndex {
 		return fmt.Errorf("validator %d not found", valIndex)
 	}
-	valAddrString := validatorsResp.Validators[valIndex].OperatorAddress
-	valAddr, err := sdk.ValAddressFromBech32(valAddrString)
+	valAddr, err := s.Chain.Validators[valIndex].KeyInfo.GetAddress()
 	if err != nil {
 		return err
 	}
+	valOperAddr := sdk.ValAddress(valAddr)
 
 	asset := sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(amount))
-	msg := stakingtypes.NewMsgDelegate(addr, valAddr, asset)
+	msg := stakingtypes.NewMsgDelegate(addr, valOperAddr, asset)
 
 	return s.BroadcastTxWithRetry(msg, s.AccountClient(testAccount))
 }
