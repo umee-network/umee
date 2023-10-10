@@ -46,7 +46,7 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64, endpoi
 		return err
 	}
 
-	if len(validatorsResp.Validators) >= valIndex {
+	if len(validatorsResp.Validators) <= valIndex {
 		return fmt.Errorf("validator %d not found", valIndex)
 	}
 	valAddrString := validatorsResp.Validators[valIndex].OperatorAddress
