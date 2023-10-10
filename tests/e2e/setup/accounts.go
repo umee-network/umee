@@ -6,6 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/client"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
@@ -14,6 +15,7 @@ type testAccount struct {
 	mnemonic string
 	keyInfo  keyring.Record
 	addr     sdk.AccAddress
+	client   client.Client
 }
 
 var (
@@ -54,7 +56,11 @@ func (c *chain) createTestAccount(cdc codec.Codec) error {
 	ta := testAccount{}
 	ta.keyInfo = *info
 	ta.mnemonic = mnemonic
-	ta.addr, err = info.GetAddress() // TODO: verify this address starts with "umee1"
+	ta.addr, err = info.GetAddress()
+	if err != nil {
+		return err
+	}
+	ta.client, err = c.initDedicatedClient("testAccount"+ta.addr.String(), mnemonic)
 	if err != nil {
 		return err
 	}

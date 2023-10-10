@@ -87,7 +87,7 @@ func (s *E2ETestSuite) SetupSuite() {
 
 	// create test accounts and keys
 	for i := 0; i < numTestAccounts; i++ {
-		// s.Require().NoError(s.Chain.createTestAccount(s.cdc))
+		s.Require().NoError(s.Chain.createTestAccount(s.cdc))
 	}
 
 	s.initUmeeClient()
@@ -422,9 +422,6 @@ func (s *E2ETestSuite) initUmeeClient() {
 	for index, v := range s.Chain.Validators {
 		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
 	}
-	for index, a := range s.Chain.TestAccounts {
-		mnemonics[fmt.Sprintf("acct%d", index)] = a.mnemonic
-	}
 	ecfg := app.MakeEncodingConfig()
 	s.Umee, err = client.NewClient(
 		s.Chain.dataDir,
@@ -436,6 +433,22 @@ func (s *E2ETestSuite) initUmeeClient() {
 		ecfg,
 	)
 	s.Require().NoError(err)
+}
+
+// create a client which has only a single mnemonic stored. This client can be safely
+// passed into e2e functions which use a single unspecified key (i.e. client.keyringRecord[0])
+// to submit their transactions, as is currently the case.
+func (c *chain) initDedicatedClient(name, mnemonic string) (client.Client, error) {
+	mnemonics := map[string]string{name: mnemonic}
+	return client.NewClient(
+		c.dataDir,
+		c.ID,
+		"tcp://localhost:26657",
+		"tcp://localhost:9090",
+		mnemonics,
+		1,
+		app.MakeEncodingConfig(),
+	)
 }
 
 func noRestart(config *docker.HostConfig) {
