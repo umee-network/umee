@@ -44,13 +44,22 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## [Unreleased]
+## v6.1.0-beta1 - 2023-09-29
+
+### API-Breaking
+
+- [2267](https://github.com/umee-network/umee/pull/2267) `BorrowLimit` field in QueryAccountSummaryResponse can be nil on missing borrow price (behavior now matches `LiquidationThreshold` field)
 
 ### Improvements
 
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
-- [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary, and ensure all other fields use leverage logic prices.
+- [2267](https://github.com/umee-network/umee/pull/2267) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recent spot price when required.
+- [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary.
 - [2270](https://github.com/umee-network/umee/pull/2270) Increase free oracle tx limit to 200k gas.
+
+### Features
+
+- [2269](https://github.com/umee-network/umee/pull/2269) Enable x/metoken module.
 
 ### Bug Fixes
 

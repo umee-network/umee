@@ -286,28 +286,31 @@ message QueryAccountSummaryResponse {
   // Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
   // The lower of spot or historic price for each collateral token is used when calculating borrow limits.
   // Computation skips collateral which is missing an oracle price, potentially resulting in a lower borrow
-  // limit than if prices were all available.
+  // limit than if prices were all available. Will be null if an oracle price required for computation is
+  // missing.
   string borrow_limit = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = true
   ];
   // Liquidation Threshold is the Borrowed Value at which the account becomes eligible for liquidation.
-  // Will be null if an oracle price required for computation is missing.
+  // Computation skips borrows which are missing an oracle price, potentially resulting in a lower borrow
+  // limit than if prices were all available. Will be null if an oracle price required for computation is
+  // missing.
   string liquidation_threshold = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = true
   ];
-  // Spot Supplied Value is supplied value but always uses spot prices.
+  // Spot Supplied Value is supplied value but always uses the most recent available spot prices.
   string spot_supplied_value = 6 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  // Spot Collateral Value is collateral value but always uses spot prices.
+  // Spot Collateral Value is collateral value but always uses the most recent available spot prices.
   string spot_collateral_value = 7 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  // Spot Borrowed Value is borrowed value but always uses spot prices.
+  // Spot Borrowed Value is borrowed value but always uses the most recent available spot prices.
   string spot_borrowed_value = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false

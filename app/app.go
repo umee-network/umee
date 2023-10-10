@@ -198,10 +198,9 @@ func init() {
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
 		incentivemodule.AppModuleBasic{},
+		metokenmodule.AppModuleBasic{},
 	}
-	if Experimental {
-		moduleBasics = append(moduleBasics, metokenmodule.AppModuleBasic{})
-	}
+	// if Experimental {}
 
 	ModuleBasics = module.NewBasicManager(moduleBasics...)
 
@@ -224,13 +223,9 @@ func init() {
 		oracletypes.ModuleName: nil,
 		uibc.ModuleName:        nil,
 		ugov.ModuleName:        nil,
+		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
 	}
-
-	if Experimental {
-		maccPerms[metoken.ModuleName] = []string{
-			authtypes.Minter, authtypes.Burner,
-		}
-	}
+	// if Experimental {}
 }
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of
@@ -343,10 +338,9 @@ func New(
 		bech32ibctypes.StoreKey, uibc.StoreKey, ugov.StoreKey,
 		wasm.StoreKey,
 		incentive.StoreKey,
+		metoken.StoreKey,
 	}
-	if Experimental {
-		storeKeys = append(storeKeys, metoken.StoreKey)
-	}
+	// if Experimental {}
 
 	keys := sdk.NewKVStoreKeys(storeKeys...)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -499,16 +493,14 @@ func New(
 	)
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
-	if Experimental {
-		app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
-			appCodec,
-			keys[metoken.StoreKey],
-			app.BankKeeper,
-			app.LeverageKeeper,
-			app.OracleKeeper,
-			app.UGovKeeperB.EmergencyGroup,
-		)
-	}
+	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
+		appCodec,
+		keys[metoken.StoreKey],
+		app.BankKeeper,
+		app.LeverageKeeper,
+		app.OracleKeeper,
+		app.UGovKeeperB.EmergencyGroup,
+	)
 
 	// register the staking hooks
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
@@ -738,11 +730,9 @@ func New(
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper),
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
+		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
 	}
-	if Experimental {
-		appModules = append(appModules, metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB))
-
-	}
+	// if Experimental {}
 
 	app.mm = module.NewManager(appModules...)
 
@@ -780,6 +770,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
 	endBlockers := []string{
 		crisistypes.ModuleName,
@@ -798,6 +789,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -822,6 +814,7 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
@@ -838,14 +831,9 @@ func New(
 		ugov.ModuleName,
 		wasm.ModuleName,
 		incentive.ModuleName,
+		metoken.ModuleName,
 	}
-
-	if Experimental {
-		beginBlockers = append(beginBlockers, metoken.ModuleName)
-		endBlockers = append(endBlockers, metoken.ModuleName)
-		initGenesis = append(initGenesis, metoken.ModuleName)
-		orderMigrations = append(orderMigrations, metoken.ModuleName)
-	}
+	// if Experimental {}
 
 	app.mm.SetOrderBeginBlockers(beginBlockers...)
 	app.mm.SetOrderEndBlockers(endBlockers...)

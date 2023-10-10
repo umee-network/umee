@@ -175,30 +175,38 @@ paths:
                   Computation skips collateral which is missing an oracle price,
                   potentially resulting in a lower borrow
 
-                  limit than if prices were all available.
+                  limit than if prices were all available. Will be null if an
+                  oracle price required for computation is
+
+                  missing.
               liquidation_threshold:
                 type: string
                 description: >-
                   Liquidation Threshold is the Borrowed Value at which the
                   account becomes eligible for liquidation.
 
-                  Will be null if an oracle price required for computation is
+                  Computation skips borrows which are missing an oracle price,
+                  potentially resulting in a lower borrow
+
+                  limit than if prices were all available. Will be null if an
+                  oracle price required for computation is
+
                   missing.
               spot_supplied_value:
                 type: string
                 description: >-
-                  Spot Supplied Value is supplied value but always uses spot
-                  prices.
+                  Spot Supplied Value is supplied value but always uses the most
+                  recent available spot prices.
               spot_collateral_value:
                 type: string
                 description: >-
-                  Spot Collateral Value is collateral value but always uses spot
-                  prices.
+                  Spot Collateral Value is collateral value but always uses the
+                  most recent available spot prices.
               spot_borrowed_value:
                 type: string
                 description: >-
-                  Spot Borrowed Value is borrowed value but always uses spot
-                  prices.
+                  Spot Borrowed Value is borrowed value but always uses the most
+                  recent available spot prices.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -1806,6 +1814,71 @@ paths:
           description: denom defines the denomination to query for.
           in: path
           required: true
+          type: string
+      tags:
+        - Query
+  /umee/oracle/v1/denoms/exg_rates_timestamp:
+    get:
+      summary: >-
+        ExgRatesWithTimestamp returns exchange rates of all denoms with
+        timestamp,
+
+        or, if specified, returns a single denom
+      operationId: ExgRatesWithTimestamp
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              exg_rates:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    rate:
+                      type: string
+                    timestamp:
+                      type: string
+                      format: date-time
+                  title: DenomExchangeRate stores exchange rate with timestamp
+                title: >-
+                  exchange_rates defines a list of the exchange rate for all
+                  whitelisted
+
+                  denoms with timestamp
+            description: |-
+              QueryExgRatesWithTimestampResponse is response type for the
+              Query/ExchangeRatesWithTimestamp RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: denom defines the denomination to query for.
+          in: query
+          required: false
           type: string
       tags:
         - Query
@@ -4757,23 +4830,38 @@ definitions:
           Computation skips collateral which is missing an oracle price,
           potentially resulting in a lower borrow
 
-          limit than if prices were all available.
+          limit than if prices were all available. Will be null if an oracle
+          price required for computation is
+
+          missing.
       liquidation_threshold:
         type: string
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
 
-          Will be null if an oracle price required for computation is missing.
+          Computation skips borrows which are missing an oracle price,
+          potentially resulting in a lower borrow
+
+          limit than if prices were all available. Will be null if an oracle
+          price required for computation is
+
+          missing.
       spot_supplied_value:
         type: string
-        description: Spot Supplied Value is supplied value but always uses spot prices.
+        description: >-
+          Spot Supplied Value is supplied value but always uses the most recent
+          available spot prices.
       spot_collateral_value:
         type: string
-        description: Spot Collateral Value is collateral value but always uses spot prices.
+        description: >-
+          Spot Collateral Value is collateral value but always uses the most
+          recent available spot prices.
       spot_borrowed_value:
         type: string
-        description: Spot Borrowed Value is borrowed value but always uses spot prices.
+        description: >-
+          Spot Borrowed Value is borrowed value but always uses the most recent
+          available spot prices.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
@@ -5897,6 +5985,17 @@ definitions:
         type: integer
         format: int64
     title: Denom - the object to hold configurations of each denom
+  umee.oracle.v1.DenomExchangeRate:
+    type: object
+    properties:
+      denom:
+        type: string
+      rate:
+        type: string
+      timestamp:
+        type: string
+        format: date-time
+    title: DenomExchangeRate stores exchange rate with timestamp
   umee.oracle.v1.ExchangeRateTuple:
     type: object
     properties:
@@ -6152,6 +6251,28 @@ definitions:
     description: |-
       QueryExchangeRatesResponse is response type for the
       Query/ExchangeRates RPC method.
+  umee.oracle.v1.QueryExgRatesWithTimestampResponse:
+    type: object
+    properties:
+      exg_rates:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            rate:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+          title: DenomExchangeRate stores exchange rate with timestamp
+        title: |-
+          exchange_rates defines a list of the exchange rate for all whitelisted
+          denoms with timestamp
+    description: |-
+      QueryExgRatesWithTimestampResponse is response type for the
+      Query/ExchangeRatesWithTimestamp RPC method.
   umee.oracle.v1.QueryFeederDelegationResponse:
     type: object
     properties:

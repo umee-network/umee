@@ -55,9 +55,9 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			"",
-			8,
+			leverage_initial_registry_length + 1, // 1 new token added this case
 		}, {
-			"regisering new token with existed symbol denom",
+			"registering new token with existing symbol denom",
 			types.MsgGovUpdateRegistry{
 				Authority:   govAccAddr,
 				Description: "",
@@ -66,7 +66,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 				},
 			},
 			"",
-			9,
+			leverage_initial_registry_length + 2, // 1 token added this case, and 1 from previous cases
 		},
 	}
 
@@ -173,7 +173,7 @@ func (s *IntegrationTestSuite) TestUpdateRegistry() {
 				s.Require().NoError(err)
 				// no tokens should have been deleted
 				tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
-				s.Require().Len(tokens, 7)
+				s.Require().Len(tokens, leverage_initial_registry_length)
 
 				token, err := s.app.LeverageKeeper.GetTokenSettings(s.ctx, "uumee")
 				s.Require().NoError(err)
@@ -340,6 +340,9 @@ func (s *IntegrationTestSuite) TestMsgSupply() {
 	// create a supplier that will exceed token's default MaxSupply
 	whale := s.newAccount(coin.New(umeeDenom, 1_000_000_000000))
 
+	// create and fund a supplier with 100 tokens suffering from price outage
+	outageSupplier := s.newAccount(coin.New(outageDenom, 100_000000))
+
 	tcs := []testCase{
 		{
 			"unregistered denom",
@@ -389,6 +392,12 @@ func (s *IntegrationTestSuite) TestMsgSupply() {
 			coin.New(umeeDenom, 1_000_000_000000),
 			sdk.Coin{},
 			types.ErrMaxSupply,
+		}, {
+			"valid outage supply",
+			outageSupplier,
+			coin.New(outageDenom, 80_000000),
+			coin.New("u/"+outageDenom, 80_000000),
+			nil,
 		},
 	}
 
@@ -489,6 +498,16 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
 	// UMEE and STABLE have the same price but different collateral weights
 
+	// create and fund a supplier with 100 tokens suffering from price outage
+	outageSupplier := s.newAccount(coin.New(outageDenom, 100_000000))
+	s.supply(outageSupplier, coin.New(outageDenom, 100_000000))
+
+	// create and fund a looped borrower suffering from price outage
+	outageBorrower := s.newAccount(coin.New(outageDenom, 100_000000))
+	s.supply(outageBorrower, coin.New(outageDenom, 100_000000))
+	s.collateralize(outageBorrower, coin.New("u/"+outageDenom, 50_000000))
+	s.forceBorrow(outageBorrower, coin.New(outageDenom, 20_000000))
+
 	tcs := []struct {
 		msg                  string
 		addr                 sdk.AccAddress
@@ -570,6 +589,30 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			sdk.NewCoins(coin.New("u/"+pumpDenom, 20_000000)),
 			coin.New(pumpDenom, 20_000000),
 			nil,
+		}, {
+			"acceptable withdrawal (outage supplier)",
+			outageSupplier,
+			coin.New("u/"+outageDenom, 100_000000),
+			sdk.NewCoins(coin.New("u/"+outageDenom, 100_000000)),
+			nil,
+			coin.New(outageDenom, 100_000000),
+			nil,
+		}, {
+			"can withdraw wallet uTokens (outage borrower)",
+			outageBorrower,
+			coin.New("u/"+outageDenom, 50_000000),
+			sdk.NewCoins(coin.New("u/"+outageDenom, 50_000000)),
+			nil,
+			coin.New(outageDenom, 50_000000),
+			nil,
+		}, {
+			"cannot withdraw collateral (outage borrower)",
+			outageBorrower,
+			coin.New("u/"+outageDenom, 1_000000),
+			nil,
+			nil,
+			sdk.Coin{},
+			types.ErrExpiredOraclePrice,
 		}, {
 			"borrow limit (undercollateralized under historic prices but ok with current prices)",
 			dumpborrower,
@@ -720,6 +763,17 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	s.borrow(specialBorrower, coin.New(daiDenom, 400000_000000_000000))
 	// PAIRED and DAI have the same price, 0.25 collateral weight, but 0.5 special pair weight
 
+	// create and fund a supplier with 100 tokens suffering from price outage
+	outageSupplier := s.newAccount(coin.New(outageDenom, 100_000000))
+	s.supply(outageSupplier, coin.New(outageDenom, 100_000000))
+	s.collateralize(outageSupplier, coin.New("u/"+outageDenom, 50_000000))
+
+	// create and fund a looped borrower suffering from price outage, with some uToken balance
+	outageBorrower := s.newAccount(coin.New(outageDenom, 100_000000))
+	s.supply(outageBorrower, coin.New(outageDenom, 100_000000))
+	s.collateralize(outageBorrower, coin.New("u/"+outageDenom, 50_000000))
+	s.forceBorrow(outageBorrower, coin.New(outageDenom, 10_000000))
+
 	zeroUmee := coin.Zero(umeeDenom)
 	zeroUUmee := coin.New("u/"+umeeDenom, 0)
 	tcs := []struct {
@@ -810,6 +864,24 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+pairedDenom, 200000),
 			coin.New("u/"+pairedDenom, 200000),
 			coin.New(pairedDenom, 200000),
+			nil,
+		},
+		{
+			"max withdraw with price outage (but no borrows)",
+			outageSupplier,
+			outageDenom,
+			coin.New("u/"+outageDenom, 100_000000),
+			coin.New("u/"+outageDenom, 50_000000),
+			coin.New(outageDenom, 100_000000),
+			nil,
+		},
+		{
+			"max withdraw with price outage and borrow",
+			outageBorrower,
+			outageDenom,
+			coin.New("u/"+outageDenom, 50_000000),
+			coin.Zero("u/" + outageDenom),
+			coin.New(outageDenom, 50_000000),
 			nil,
 		},
 	}
@@ -1480,6 +1552,16 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 	s.borrow(specialBorrower, coin.New(daiDenom, 200000_000000_000000))
 	// PAIRED and DAI have the same price, 0.25 collateral weight, but 0.5 special pair weight
 
+	// create and fund a supplier with 100 tokens suffering from price outage
+	outageSupplier := s.newAccount(coin.New(outageDenom, 100_000000))
+	s.supply(outageSupplier, coin.New(outageDenom, 100_000000))
+	s.collateralize(outageSupplier, coin.New("u/"+outageDenom, 50_000000))
+
+	// create and fund a supplier with 100 tokens suffering from price outage, but also some atom collateral
+	atomOutageSupplier := s.newAccount(coin.New(outageDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.supply(atomOutageSupplier, coin.New(outageDenom, 100_000000), coin.New(atomDenom, 100_000000))
+	s.collateralize(atomOutageSupplier, coin.New("u/"+outageDenom, 50_000000), coin.New("u/"+atomDenom, 50_000000))
+
 	tcs := []testCase{
 		{
 			"uToken",
@@ -1566,6 +1648,21 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			specialBorrower,
 			coin.New(daiDenom, 50000_000000_000000),
 			types.ErrUndercollateralized,
+		}, {
+			"price outage",
+			outageSupplier,
+			coin.New(outageDenom, 5_000000),
+			types.ErrExpiredOraclePrice,
+		}, {
+			"price outage, but sufficient priced collateral",
+			atomOutageSupplier,
+			coin.New(atomDenom, 5_000000),
+			nil,
+		}, {
+			"price outage, but sufficient priced collateral, but borrowing outage asset",
+			atomOutageSupplier,
+			coin.New(outageDenom, 5_000000),
+			types.ErrExpiredOraclePrice,
 		},
 	}
 
@@ -1654,6 +1751,22 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 	s.borrow(stableUmeeBorrower, coin.New(umeeDenom, 30_000000))
 	// UMEE and STABLE have the same price but different collateral weights
 
+	// create and fund a supplier with 100 tokens suffering from price outage
+	outageSupplier := s.newAccount(coin.New(outageDenom, 100_000000))
+	s.supply(outageSupplier, coin.New(outageDenom, 100_000000))
+	s.collateralize(outageSupplier, coin.New("u/"+outageDenom, 50_000000))
+
+	// create and fund a supplier with 100 tokens suffering from price outage, but also some umee collateral
+	umeeOutageSupplier := s.newAccount(coin.New(outageDenom, 100_000000), coin.New(umeeDenom, 100_000000))
+	s.supply(umeeOutageSupplier, coin.New(outageDenom, 100_000000), coin.New(umeeDenom, 100_000000))
+	s.collateralize(umeeOutageSupplier, coin.New("u/"+outageDenom, 50_000000), coin.New("u/"+umeeDenom, 50_000000))
+
+	// create an umee supplier with an existing borrow of an asset with a price outage
+	outageBorrower := s.newAccount(coin.New(umeeDenom, 100_000000))
+	s.supply(outageBorrower, coin.New(umeeDenom, 100_000000))
+	s.collateralize(outageBorrower, coin.New("u/"+umeeDenom, 50_000000))
+	s.forceBorrow(outageBorrower, coin.New(outageDenom, 1_000000))
+
 	tcs := []struct {
 		msg  string
 		addr sdk.AccAddress
@@ -1699,6 +1812,36 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 			"stable umee borrower",
 			stableUmeeBorrower,
 			coin.New(umeeDenom, 20_000000),
+			nil,
+		}, {
+			"outage supplier tries to borrow umee",
+			outageSupplier,
+			coin.Zero(umeeDenom),
+			nil,
+		}, {
+			"outage supplier tries to borrow outage asset",
+			outageSupplier,
+			coin.Zero(outageDenom),
+			nil,
+		}, {
+			"umee + outage supplier tries to borrow umee",
+			umeeOutageSupplier,
+			coin.New(umeeDenom, 12_500000),
+			nil,
+		}, {
+			"umee + outage supplier tries to borrow outage asset",
+			umeeOutageSupplier,
+			coin.Zero(outageDenom),
+			nil,
+		}, {
+			"outage borrower tries to borrow umee",
+			outageBorrower,
+			coin.Zero(umeeDenom),
+			nil,
+		}, {
+			"outage borrower tries to borrow outage asset",
+			outageBorrower,
+			coin.Zero(outageDenom),
 			nil,
 		},
 	}

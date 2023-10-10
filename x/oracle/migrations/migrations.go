@@ -1,17 +1,18 @@
-package keeper
+package migrations
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v6/x/oracle/keeper"
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // Migrator is a struct for handling in-place store migrations.
 type Migrator struct {
-	keeper *Keeper
+	keeper *keeper.Keeper
 }
 
 // NewMigrator creates a Migrator.
-func NewMigrator(keeper *Keeper) Migrator {
+func NewMigrator(keeper *keeper.Keeper) Migrator {
 	return Migrator{keeper: keeper}
 }
 

@@ -12,6 +12,9 @@ import (
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
+// TODO: parameterize this
+const MaxSpotPriceAge = 180 // 180 seconds = 3 minutes
+
 var ten = sdk.MustNewDecFromStr("10")
 
 // TokenPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`).
@@ -26,9 +29,10 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
 	}
 
-	// if a token is exempt from historic pricing, all price modes return Spot price
+	// if a token is exempt from historic pricing, all price modes ignore historic prices
+	// and use spot prices instead, sometimes also allowing expired prices.
 	if t.HistoricMedians == 0 {
-		mode = types.PriceModeSpot
+		mode = mode.IgnoreHistoric()
 	}
 
 	var price, historicPrice sdk.Dec
@@ -39,9 +43,20 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		if err != nil {
 			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
+		if !mode.AllowsExpired() {
+			// with the exception of account summary queries, require spot prices to be recent
+			moduleTime := k.getLastInterestTime(ctx)
+			priceTime := spotPrice.Timestamp.Unix()
+			priceAge := moduleTime - priceTime
+			if priceAge < 0 || priceAge > MaxSpotPriceAge {
+				return sdk.ZeroDec(), t.Exponent, types.ErrExpiredOraclePrice.Wrapf(
+					"price: %d, module: %d", priceTime, moduleTime)
+			}
+		}
 	}
-	if mode != types.PriceModeSpot {
-		// historic price is required for modes other than spot
+
+	if mode != types.PriceModeSpot && mode != types.PriceModeQuery {
+		// historic price is required for modes other than spot and query
 		var numStamps uint32
 		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(
 			ctx, strings.ToUpper(t.SymbolDenom), uint64(t.HistoricMedians))
@@ -57,16 +72,14 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		}
 	}
 
-	// TODO: need to use spotPrice.Timestamp to make a decision about the price
-
 	switch mode {
-	case types.PriceModeSpot:
+	case types.PriceModeSpot, types.PriceModeQuery:
 		price = spotPrice.Rate
 	case types.PriceModeHistoric:
 		price = historicPrice
-	case types.PriceModeHigh:
+	case types.PriceModeHigh, types.PriceModeQueryHigh:
 		price = sdk.MaxDec(spotPrice.Rate, historicPrice)
-	case types.PriceModeLow:
+	case types.PriceModeLow, types.PriceModeQueryLow:
 		price = sdk.MinDec(spotPrice.Rate, historicPrice)
 	default:
 		return sdk.ZeroDec(), t.Exponent, types.ErrInvalidPriceMode.Wrapf("%d", mode)
