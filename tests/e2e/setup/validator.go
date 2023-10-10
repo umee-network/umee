@@ -39,7 +39,7 @@ type validator struct {
 	privateKey   cryptotypes.PrivKey
 	consensusKey privval.FilePVKey
 	nodeKey      p2p.NodeKey
-	client       client.Client
+	Client       client.Client
 }
 
 // instanceName is <v.moniker><v.index>

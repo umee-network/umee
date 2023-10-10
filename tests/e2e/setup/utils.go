@@ -16,9 +16,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/ory/dockertest/v3/docker"
 
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/client"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
@@ -29,6 +32,33 @@ func (s *E2ETestSuite) UmeeREST() string {
 
 func (s *E2ETestSuite) GaiaREST() string {
 	return fmt.Sprintf("http://%s", s.GaiaResource.GetHostPort("1317/tcp"))
+}
+
+// Delegates an amount of uumee from the test account at a given index to a specified validator.
+// Note that the validator is specified by the index it appears at in the "staking/validators" query.
+// Requires a grpc-web endpoint to query validators from.
+func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64, endpoint string) error {
+	addr := s.TestAddr(testAccount)
+
+	var validatorsResp stakingtypes.QueryValidatorsResponse
+	err := s.QueryREST(fmt.Sprintf("%s/cosmos/staking/v1beta1/validators", endpoint), &validatorsResp)
+	if err != nil {
+		return err
+	}
+
+	if len(validatorsResp.Validators) >= valIndex {
+		return fmt.Errorf("validator %d not found", valIndex)
+	}
+	valAddrString := validatorsResp.Validators[valIndex].OperatorAddress
+	valAddr, err := sdk.ValAddressFromBech32(valAddrString)
+	if err != nil {
+		return err
+	}
+
+	asset := sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(amount))
+	msg := stakingtypes.NewMsgDelegate(addr, valAddr, asset)
+
+	return s.BroadcastTxWithRetry(msg, s.TestClient(testAccount))
 }
 
 func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool) {
@@ -231,11 +261,11 @@ func (s *E2ETestSuite) QueryUmeeBalance(
 	return umeeBalance, umeeAddr
 }
 
-func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg) error {
+func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) error {
 	var err error
 	for retry := 0; retry < 3; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-		_, err = s.Umee.Tx.BroadcastTx(0, msg)
+		_, err = cli.Tx.BroadcastTx(0, msg)
 		if err == nil {
 			return nil
 		}

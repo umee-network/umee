@@ -28,11 +28,11 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 				mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
 			}
 
-			err = grpc.LeverageRegistryUpdate(s.Umee, tokens, nil)
+			err = grpc.LeverageRegistryUpdate(s.TestClient(0), tokens, nil)
 			s.Require().NoError(err)
 
 			meUSD := mocks.StableIndex(mocks.MeUSDDenom)
-			err = grpc.MetokenRegistryUpdate(s.Umee, []metoken.Index{meUSD}, nil)
+			err = grpc.MetokenRegistryUpdate(s.TestClient(0), []metoken.Index{meUSD}, nil)
 			s.Require().NoError(err)
 
 			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
@@ -119,7 +119,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 func (s *E2ETest) checkMetokenBalance(valAddr, denom string) {
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.Umee.QueryMetokenIndexBalances(denom)
+			resp, err := s.TestClient(0).QueryMetokenIndexBalances(denom)
 			if err != nil {
 				return false
 			}
@@ -170,7 +170,7 @@ func (s *E2ETest) getPrices(denom string) []metoken.IndexPrices {
 	var prices []metoken.IndexPrices
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.Umee.QueryMetokenIndexPrices(denom)
+			resp, err := s.TestClient(0).QueryMetokenIndexPrices(denom)
 			if err != nil {
 				return false
 			}
@@ -188,7 +188,7 @@ func (s *E2ETest) getMetokenIndex(denom string) metoken.Index {
 	index := metoken.Index{}
 	s.Require().Eventually(
 		func() bool {
-			resp, err := s.Umee.QueryMetokenIndexes(denom)
+			resp, err := s.TestClient(0).QueryMetokenIndexes(denom)
 			if err != nil {
 				return false
 			}
@@ -254,7 +254,7 @@ func (s *E2ETest) TxMetokenSwap(umeeAddr string, asset sdk.Coin, meTokenDenom st
 		MetokenDenom: meTokenDenom,
 	}
 
-	return s.BroadcastTxWithRetry(req)
+	return s.BroadcastTxWithRetry(req, s.TestClient(0))
 }
 
 func (s *E2ETest) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetDenom string) error {
@@ -264,5 +264,5 @@ func (s *E2ETest) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetDenom 
 		AssetDenom: assetDenom,
 	}
 
-	return s.BroadcastTxWithRetry(req)
+	return s.BroadcastTxWithRetry(req, s.TestClient(0))
 }

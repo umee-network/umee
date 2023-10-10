@@ -8,6 +8,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v6/client"
 	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
 )
 
@@ -28,10 +29,10 @@ func TestE2ETestSuite(t *testing.T) {
 // and requires that the transaction eventually succeeded with nil error. Since this function
 // retries for 5 seconds and ignores errors, it is suitable for scenario setup transaction or
 // those which might require a few blocks elapsing before they succeed.
-func (s *E2ETest) mustEventuallySucceedTx(msg sdk.Msg) {
+func (s *E2ETest) mustEventuallySucceedTx(msg sdk.Msg, cli client.Client) {
 	s.Require().Eventually(
 		func() bool {
-			return s.BroadcastTxWithRetry(msg) == nil
+			return s.BroadcastTxWithRetry(msg, cli) == nil
 		},
 		5*time.Second,
 		500*time.Millisecond,
@@ -40,16 +41,16 @@ func (s *E2ETest) mustEventuallySucceedTx(msg sdk.Msg) {
 
 // mustSucceedTx executes an sdk.Msg (retrying several times if receiving incorrect account sequence) and
 // requires that the error returned is nil.
-func (s *E2ETest) mustSucceedTx(msg sdk.Msg) {
-	s.Require().NoError(s.BroadcastTxWithRetry(msg))
+func (s *E2ETest) mustSucceedTx(msg sdk.Msg, cli client.Client) {
+	s.Require().NoError(s.BroadcastTxWithRetry(msg, cli))
 }
 
 // mustFailTx executes an sdk.Msg (retrying several times if receiving incorrect account sequence) and
 // requires that the error returned contains a given substring. If the substring is empty, simply requires
 // non-nil error.
-func (s *E2ETest) mustFailTx(msg sdk.Msg, errSubstring string) {
+func (s *E2ETest) mustFailTx(msg sdk.Msg, cli client.Client, errSubstring string) {
 	s.Require().ErrorContains(
-		s.BroadcastTxWithRetry(msg),
+		s.BroadcastTxWithRetry(msg, cli),
 		errSubstring,
 	)
 }

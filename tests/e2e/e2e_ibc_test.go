@@ -189,7 +189,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 
 		for i := 0; i < 5; i++ {
 			err = grpc.UIBCIBCTransferSatusUpdate(
-				s.Umee,
+				s.Chain.Validators[0].Client,
 				uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED,
 			)
 
@@ -202,7 +202,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 
 		s.Require().NoError(err)
 		// Get the uibc params for quota checking
-		uibcParams, err := s.Umee.QueryUIBCParams()
+		uibcParams, err := s.TestClient(0).QueryUIBCParams()
 		s.Require().NoError(err)
 		s.Require().Equal(uibcParams.IbcStatus, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED)
 		token = sdk.NewInt64Coin("uumee", 100000000) // 100 Umee

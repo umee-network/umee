@@ -94,8 +94,9 @@ func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
 			return err
 		}
 
+		// create a client which contains only this validator's keys
 		var err error
-		node.client, err = c.initDedicatedClient(fmt.Sprint("val", i), node.mnemonic)
+		node.Client, err = c.initDedicatedClient(fmt.Sprint("val", i), node.mnemonic)
 		if err != nil {
 			return err
 		}
