@@ -56,7 +56,7 @@ type E2ETestSuite struct {
 // TestClient returns the client associated with the a (non-validator) test account
 // at the given index, panicking if the account does not exist.
 func (s *E2ETestSuite) TestClient(index int) client.Client {
-	if s.Chain == nil || len(s.Chain.TestAccounts) >= index {
+	if s.Chain == nil || len(s.Chain.TestAccounts) <= index {
 		panic(fmt.Sprint("no test client at index", index))
 	}
 	return s.Chain.TestAccounts[index].client
@@ -65,7 +65,7 @@ func (s *E2ETestSuite) TestClient(index int) client.Client {
 // TestAddr returns the address associated with the a (non-validator) test account
 // at the given index, panicking if the account does not exist.
 func (s *E2ETestSuite) TestAddr(index int) sdk.AccAddress {
-	if s.Chain == nil || len(s.Chain.TestAccounts) >= index {
+	if s.Chain == nil || len(s.Chain.TestAccounts) <= index {
 		panic(fmt.Sprint("no test client at index", index))
 	}
 	return s.Chain.TestAccounts[index].addr
