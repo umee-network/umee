@@ -94,9 +94,9 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// Note : gaia -> umee (ibc_quota will not check token limit)
 		atomPrice, err := s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
 		s.Require().NoError(err)
+		s.Require().True(atomPrice.GT(sdk.OneDec()), "price should be non zero, and expecting higher than 1, got: %s", atomPrice)
 		emOfAtom := sdk.NewDecFromInt(totalQuota).Quo(atomPrice)
 		c := sdk.NewInt64Coin("uatom", emOfAtom.Mul(powerReduction).RoundInt64())
-		s.Require().True(atomPrice.GT(sdk.OneDec()), "price should be non zero, and expecting higher than 1, got: %s", atomPrice)
 		s.Require().True(c.Amount.GT(sdk.NewInt(2_000_000)), "amount should be non zero, and expecting much higher than 2 atom = 2e6 uatom, got: %s", c.Amount)
 
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", c, false)
