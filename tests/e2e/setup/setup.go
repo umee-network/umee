@@ -410,7 +410,7 @@ func (s *E2ETestSuite) runValidators() {
 
 			return true
 		},
-		5*time.Minute,
+		1*time.Minute,
 		time.Second,
 		"umee node failed to produce blocks",
 	)
