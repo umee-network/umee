@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -273,6 +274,16 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
 			return err
 		}
+
+		// if we were told an expected account sequence, we should use it next time
+		s := err.Error()
+		re := regexp.MustCompile("expected [\\d]+")
+		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(s), "expected "))
+		if err == nil {
+			return nil
+		}
+		cli.WithAccSeq(uint64(n))
+
 		time.Sleep(time.Millisecond * 300)
 	}
 
