@@ -246,3 +246,23 @@ func (s *E2ETest) executeRedeemWithFailure(umeeAddr string, meToken sdk.Coin, as
 		500*time.Millisecond,
 	)
 }
+
+func (s *E2ETest) TxMetokenSwap(umeeAddr string, asset sdk.Coin, meTokenDenom string) error {
+	req := &metoken.MsgSwap{
+		User:         umeeAddr,
+		Asset:        asset,
+		MetokenDenom: meTokenDenom,
+	}
+
+	return s.BroadcastTxWithRetry(req)
+}
+
+func (s *E2ETest) TxMetokenRedeem(umeeAddr string, meToken sdk.Coin, assetDenom string) error {
+	req := &metoken.MsgRedeem{
+		User:       umeeAddr,
+		Metoken:    meToken,
+		AssetDenom: assetDenom,
+	}
+
+	return s.BroadcastTxWithRetry(req)
+}
