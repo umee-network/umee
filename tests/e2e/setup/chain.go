@@ -94,6 +94,12 @@ func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
 			return err
 		}
 
+		var err error
+		node.client, err = c.initDedicatedClient(node.moniker, node.mnemonic)
+		if err != nil {
+			return err
+		}
+
 		c.Validators = append(c.Validators, &node)
 	}
 
