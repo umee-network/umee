@@ -21,6 +21,7 @@ import (
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/oracle/client/cli"
 	"github.com/umee-network/umee/v6/x/oracle/keeper"
+	"github.com/umee-network/umee/v6/x/oracle/migrations"
 	simulation "github.com/umee-network/umee/v6/x/oracle/simulations"
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
@@ -127,7 +128,7 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 	types.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
 
-	m := keeper.NewMigrator(&am.keeper)
+	m := migrations.NewMigrator(&am.keeper)
 
 	if err := cfg.RegisterMigration(types.ModuleName, 1, m.Migrate1to2); err != nil {
 		panic(fmt.Sprintf("failed to migrate x/oracle from version 1 to 2: %v", err))

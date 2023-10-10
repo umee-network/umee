@@ -2,11 +2,13 @@ package keeper_test
 
 import (
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/keeper"
 	"github.com/umee-network/umee/v6/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
@@ -43,15 +45,20 @@ func (m *mockOracleKeeper) MedianOfHistoricMedians(ctx sdk.Context, denom string
 	return p, uint32(numStamps), nil
 }
 
-func (m *mockOracleKeeper) GetExchangeRate(_ sdk.Context, denom string) (oracletypes.ExchangeRate, error) {
+func (m *mockOracleKeeper) GetExchangeRate(ctx sdk.Context, denom string) (oracletypes.ExchangeRate, error) {
 	p, ok := m.symbolExchangeRates[denom]
 	if !ok {
 		// This error matches oracle behavior on missing asset price
 		return oracletypes.ExchangeRate{}, oracletypes.ErrUnknownDenom.Wrap(denom)
 	}
 
-	// TODO: add timestamp
-	return oracletypes.ExchangeRate{Rate: p}, nil
+	// Emulates completely up to date prices
+	t := ctx.BlockTime()
+	if denom == "OUTAGE" {
+		// except for one denom, whose most recent price is twice as old as leverage logic allows
+		t = t.Add(-2 * time.Second * keeper.MaxSpotPriceAge)
+	}
+	return oracletypes.ExchangeRate{Rate: p, Timestamp: t}, nil
 }
 
 // Clear clears a denom from the mock oracle, simulating an outage.
@@ -70,6 +77,7 @@ func (m *mockOracleKeeper) Reset() {
 		"PUMP":   sdk.MustNewDecFromStr("2.00"), // A token which has recently doubled in price
 		"STABLE": sdk.MustNewDecFromStr("4.21"), // Same price as umee
 		"PAIRED": sdk.MustNewDecFromStr("1.00"),
+		"OUTAGE": sdk.MustNewDecFromStr("1.00"),
 	}
 	m.historicExchangeRates = map[string]sdk.Dec{
 		"UMEE":   sdk.MustNewDecFromStr("4.21"),
@@ -79,6 +87,7 @@ func (m *mockOracleKeeper) Reset() {
 		"PUMP":   sdk.MustNewDecFromStr("1.00"),
 		"STABLE": sdk.MustNewDecFromStr("4.21"),
 		"PAIRED": sdk.MustNewDecFromStr("1.00"),
+		"OUTAGE": sdk.MustNewDecFromStr("1.00"),
 	}
 }
 

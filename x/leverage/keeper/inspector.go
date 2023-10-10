@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"sort"
 	"strings"
@@ -88,6 +89,7 @@ func (q Querier) Inspect(
 				Collateral: symbolDecCoins(collateral, exchangeRates),
 				Borrowed:   symbolDecCoins(borrowed, exchangeRates),
 			},
+			Info: "",
 		}
 		ok := account.Analysis.Borrowed > req.Borrowed
 		ok = ok && account.Analysis.Value > req.Collateral
@@ -119,6 +121,65 @@ func (q Querier) Inspect(
 		sortedBorrowers = append(sortedBorrowers, *b)
 	}
 	return &types.QueryInspectResponse{Borrowers: sortedBorrowers}, nil
+}
+
+// Separated from grpc_query.go
+func (q Querier) InspectAccount(
+	goCtx context.Context,
+	req *types.QueryInspectAccount,
+) (*types.QueryInspectAccountResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	k, ctx := q.Keeper, sdk.UnwrapSDKContext(goCtx)
+	tokens := k.GetAllRegisteredTokens(ctx)
+
+	exchangeRates := map[string]tokenExchangeRate{}
+	for _, t := range tokens {
+		exchangeRates[t.BaseDenom] = tokenExchangeRate{
+			symbol:       t.SymbolDenom,
+			exponent:     t.Exponent,
+			exchangeRate: k.DeriveExchangeRate(ctx, t.BaseDenom),
+		}
+	}
+
+	addr, err := sdk.AccAddressFromBech32(req.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	position, err := k.GetAccountPosition(ctx, addr, true)
+	if err != nil {
+		return nil, err
+	}
+	borrowedValue := position.BorrowedValue()
+	collateralValue := position.CollateralValue()
+	liquidationThreshold := position.Limit()
+
+	borrowPosition, err := k.GetAccountPosition(ctx, addr, false)
+	if err != nil {
+		return nil, err
+	}
+
+	borrowed := k.GetBorrowerBorrows(ctx, addr)
+	collateral := k.GetBorrowerCollateral(ctx, addr)
+
+	account := types.InspectAccount{
+		Address: addr.String(),
+		Analysis: &types.RiskInfo{
+			Borrowed:    neat(borrowedValue),
+			Liquidation: neat(liquidationThreshold),
+			Value:       neat(collateralValue),
+		},
+		Position: &types.DecBalances{
+			Collateral: symbolDecCoins(collateral, exchangeRates),
+			Borrowed:   symbolDecCoins(borrowed, exchangeRates),
+		},
+		Info: fmt.Sprint(position.String(), "\n", borrowPosition.String()),
+	}
+
+	return &types.QueryInspectAccountResponse{Borrower: account}, nil
 }
 
 // symbolDecCoins converts an sdk.Coins containing base tokens or uTokens into an sdk.DecCoins containing symbol denom

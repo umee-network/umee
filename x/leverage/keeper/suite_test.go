@@ -29,7 +29,10 @@ const (
 	dumpDenom   = "udump"
 	stableDenom = "stable"
 	pairedDenom = "upaired"
+	outageDenom = "uoutage"
 )
+
+var leverage_initial_registry_length = 0
 
 type IntegrationTestSuite struct {
 	suite.Suite
@@ -87,11 +90,15 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pumpDenom, "PUMP", 6)))
 	// additional token for special pairs
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(pairedDenom, "PAIRED", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(outageDenom, "OUTAGE", 6)))
 	// additional tokens for borrow factor testing
 	stable := newToken(stableDenom, "STABLE", 6)
 	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
 	stable.LiquidationThreshold = sdk.MustNewDecFromStr("0.9")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, stable))
+
+	// set the initial token registry length used in update registry tests
+	leverage_initial_registry_length = len(app.LeverageKeeper.GetAllRegisteredTokens(ctx))
 
 	// override DefaultGenesis params with some special asset pairs
 	app.LeverageKeeper.SetSpecialAssetPair(ctx,

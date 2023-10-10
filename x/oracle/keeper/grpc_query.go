@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
@@ -64,8 +65,8 @@ func (q querier) ExchangeRates(
 
 		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate.Rate))
 	} else {
-		q.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, rate))
+		q.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, _ time.Time) (stop bool) {
+			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, exgRate))
 			return false
 		})
 	}
@@ -85,7 +86,7 @@ func (q querier) ActiveExchangeRates(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec) (stop bool) {
+	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec, _ time.Time) (stop bool) {
 		denoms = append(denoms, denom)
 		return false
 	})
@@ -328,4 +329,36 @@ func (q querier) AvgPrice(
 		return nil, err
 	}
 	return &types.QueryAvgPriceResponse{Price: p}, nil
+}
+
+// ExgRatesWithTimestamp queries exchange rates of all denoms with timestamp, or, if specified, returns
+// a single denom.
+func (q querier) ExgRatesWithTimestamp(
+	goCtx context.Context,
+	req *types.QueryExgRatesWithTimestamp,
+) (*types.QueryExgRatesWithTimestampResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	// TODO: need to decide if we want to return DecCoins here or list of ExchangeRates with denoms (we
+	// need the latter for genesis anyway)
+	var exgRates []types.DenomExchangeRate
+
+	if len(req.Denom) > 0 {
+		exchangeRate, err := q.GetExchangeRate(ctx, req.Denom)
+		if err != nil {
+			return nil, err
+		}
+		exgRates = append(exgRates, types.NewDenomExchangeRate(req.Denom, exchangeRate.Rate, exchangeRate.Timestamp))
+	} else {
+		q.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, t time.Time) (stop bool) {
+			exgRates = append(exgRates, types.NewDenomExchangeRate(denom, exgRate, t))
+			return false
+		})
+	}
+
+	return &types.QueryExgRatesWithTimestampResponse{ExgRates: exgRates}, nil
 }

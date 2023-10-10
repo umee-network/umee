@@ -101,6 +101,34 @@ service Query {
     option (google.api.http).get =
         "/umee/historacle/v1/avg_price/{denom}";
   }
+
+  // ExgRatesWithTimestamp returns exchange rates of all denoms with timestamp,
+  // or, if specified, returns a single denom
+  rpc ExgRatesWithTimestamp(QueryExgRatesWithTimestamp)
+      returns (QueryExgRatesWithTimestampResponse) {
+    option (google.api.http).get =
+        "/umee/oracle/v1/denoms/exg_rates_timestamp";
+  }
+}
+
+// QueryExgRatesWithTimestamp is the request type for the Query/ExchangeRatesWithTimestamp RPC
+// method.
+message QueryExgRatesWithTimestamp {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+
+  // denom defines the denomination to query for.
+  string denom = 1;
+}
+
+// QueryExgRatesWithTimestampResponse is response type for the
+// Query/ExchangeRatesWithTimestamp RPC method.
+message QueryExgRatesWithTimestampResponse {
+  // exchange_rates defines a list of the exchange rate for all whitelisted
+  // denoms with timestamp
+  repeated DenomExchangeRate exg_rates = 1 [
+    (gogoproto.nullable) = false
+  ];
 }
 
 // QueryExchangeRates is the request type for the Query/ExchangeRate RPC

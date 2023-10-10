@@ -54,8 +54,6 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		voteTargetDenoms = append(voteTargetDenoms, v.BaseDenom)
 	}
 
-	k.ClearExchangeRates(ctx)
-
 	// NOTE: it filters out inactive or jailed validators
 	// ballotDenomSlice is oracle votes of the symbol denoms, those are stored by AggregateExchangeRateVote
 	ballotDenomSlice := k.OrganizeBallotByDenom(ctx, validatorClaimMap)
@@ -77,6 +75,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		if err != nil {
 			return err
 		}
+		// save the exchange rate to store with denom and timestamp
 		k.SetExchangeRateWithEvent(ctx, denom, exchangeRate)
 
 		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
