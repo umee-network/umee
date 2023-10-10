@@ -104,9 +104,11 @@ func (s *E2ETestSuite) SetupSuite() {
 
 	// Delegate to validators so that test account 0 has majority voting power on the network,
 	// allowing gov actions without validator votes.
+	s.T().Log("Delegating from test account 0 to validators")
 	s.Require().NoError(s.Delegate(0, 0, 10_000000, s.UmeeREST()))
 	s.Require().NoError(s.Delegate(0, 1, 10_000000, s.UmeeREST()))
 	s.Require().NoError(s.Delegate(0, 2, 50_000000, s.UmeeREST())) // majority to validator 2, as it votes on prices
+	s.T().Log("Setup Complete")
 }
 
 func (s *E2ETestSuite) TearDownSuite() {
