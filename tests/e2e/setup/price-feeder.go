@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
+	PriceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-umee-47"
 	PriceFeederServerPort     = "7171/tcp"
 	PriceFeederMaxStartupTime = 20 // seconds
 )
