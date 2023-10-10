@@ -133,6 +133,8 @@ paths:
                   Supplied Value is the sum of the USD value of all tokens the
                   account has supplied, including interest earned.
 
+                  It uses the lower of spot or historic price for each token.
+
                   Computation skips assets which are missing oracle prices,
                   potentially resulting in a lower supplied
 
@@ -142,6 +144,8 @@ paths:
                 description: >-
                   Collateral Value is the sum of the USD value of all uTokens
                   the account has collateralized.
+
+                  It uses the lower of spot or historic price for each token.
 
                   Computation skips collateral which is missing an oracle price,
                   potentially resulting in a lower collateral
@@ -153,7 +157,7 @@ paths:
                   Borrowed Value is the sum of the USD value of all tokens the
                   account has borrowed, including interest owed.
 
-                  It always uses spot prices.
+                  It uses the higher of spot or historic price for each token.
 
                   Computation skips borrows which are missing oracle prices,
                   potentially resulting in a lower borrowed
@@ -171,15 +175,38 @@ paths:
                   Computation skips collateral which is missing an oracle price,
                   potentially resulting in a lower borrow
 
-                  limit than if prices were all available.
+                  limit than if prices were all available. Will be null if an
+                  oracle price required for computation is
+
+                  missing.
               liquidation_threshold:
                 type: string
                 description: >-
                   Liquidation Threshold is the Borrowed Value at which the
                   account becomes eligible for liquidation.
 
-                  Will be null if an oracle price required for computation is
+                  Computation skips borrows which are missing an oracle price,
+                  potentially resulting in a lower borrow
+
+                  limit than if prices were all available. Will be null if an
+                  oracle price required for computation is
+
                   missing.
+              spot_supplied_value:
+                type: string
+                description: >-
+                  Spot Supplied Value is supplied value but always uses the most
+                  recent available spot prices.
+              spot_collateral_value:
+                type: string
+                description: >-
+                  Spot Collateral Value is collateral value but always uses the
+                  most recent available spot prices.
+              spot_borrowed_value:
+                type: string
+                description: >-
+                  Spot Borrowed Value is borrowed value but always uses the most
+                  recent available spot prices.
             description: >-
               QueryAccountSummaryResponse defines the response structure for the
               AccountSummary gRPC service handler.
@@ -370,6 +397,14 @@ paths:
                           description: >-
                             Borrowed contains all tokens the account has
                             borrowed, including interest owed.
+                    info:
+                      type: string
+                      description: >-
+                        Info is a string which can be used to report additional
+                        information of any type.
+
+                        UNSTABLE: We do not guarantee consistency of any data
+                        structures contained within the string.
                   description: >-
                     InspectAccount contains risk and balance info for a single
                     account for the inspector query.
@@ -441,6 +476,132 @@ paths:
           required: false
           type: number
           format: double
+      tags:
+        - Query
+  /umee/leverage/v1/inspect-account:
+    get:
+      summary: InspectAccount runs the inspect query on a single address
+      operationId: InspectAccount
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              borrower:
+                type: object
+                properties:
+                  address:
+                    type: string
+                    title: Address of a borrower
+                  analysis:
+                    description: >-
+                      USD totals of borrower's collateral, debt, and liquidation
+                      threshold.
+                    type: object
+                    properties:
+                      Borrowed:
+                        type: number
+                        format: double
+                        description: Borrowed is account's borrowed value in USD.
+                      Liquidation:
+                        type: number
+                        format: double
+                        description: Liquidation is account's liquidation threshold in USD.
+                      Value:
+                        type: number
+                        format: double
+                        description: Value is account's collateral value in USD.
+                  position:
+                    description: >-
+                      Collateral and borrowed tokens, denoted in human-readable
+                      symbol denom instead of ibc denom.
+                    type: object
+                    properties:
+                      collateral:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            denom:
+                              type: string
+                            amount:
+                              type: string
+                          description: >-
+                            DecCoin defines a token with a denomination and a
+                            decimal amount.
+
+
+                            NOTE: The amount field is an Dec which implements
+                            the custom method
+
+                            signatures required by gogoproto.
+                        description: >-
+                          Collateral contains all uTokens the account has
+                          collateralized. It has been converted from uTokens to
+                          tokens.
+                      borrowed:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            denom:
+                              type: string
+                            amount:
+                              type: string
+                          description: >-
+                            DecCoin defines a token with a denomination and a
+                            decimal amount.
+
+
+                            NOTE: The amount field is an Dec which implements
+                            the custom method
+
+                            signatures required by gogoproto.
+                        description: >-
+                          Borrowed contains all tokens the account has borrowed,
+                          including interest owed.
+                  info:
+                    type: string
+                    description: >-
+                      Info is a string which can be used to report additional
+                      information of any type.
+
+                      UNSTABLE: We do not guarantee consistency of any data
+                      structures contained within the string.
+                description: >-
+                  InspectAccount contains risk and balance info for a single
+                  account for the inspector query.
+            description: >-
+              QueryInspectAccountResponse defines the response structure for the
+              InspectAccount gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: address
+          in: query
+          required: false
+          type: string
       tags:
         - Query
   /umee/leverage/v1/liquidation_targets:
@@ -1653,6 +1814,71 @@ paths:
           description: denom defines the denomination to query for.
           in: path
           required: true
+          type: string
+      tags:
+        - Query
+  /umee/oracle/v1/denoms/exg_rates_timestamp:
+    get:
+      summary: >-
+        ExgRatesWithTimestamp returns exchange rates of all denoms with
+        timestamp,
+
+        or, if specified, returns a single denom
+      operationId: ExgRatesWithTimestamp
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              exg_rates:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    rate:
+                      type: string
+                    timestamp:
+                      type: string
+                      format: date-time
+                  title: DenomExchangeRate stores exchange rate with timestamp
+                title: >-
+                  exchange_rates defines a list of the exchange rate for all
+                  whitelisted
+
+                  denoms with timestamp
+            description: |-
+              QueryExgRatesWithTimestampResponse is response type for the
+              Query/ExchangeRatesWithTimestamp RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          description: denom defines the denomination to query for.
+          in: query
+          required: false
           type: string
       tags:
         - Query
@@ -4404,6 +4630,14 @@ definitions:
             description: >-
               Borrowed contains all tokens the account has borrowed, including
               interest owed.
+      info:
+        type: string
+        description: >-
+          Info is a string which can be used to report additional information of
+          any type.
+
+          UNSTABLE: We do not guarantee consistency of any data structures
+          contained within the string.
     description: >-
       InspectAccount contains risk and balance info for a single account for the
       inspector query.
@@ -4554,6 +4788,8 @@ definitions:
           Supplied Value is the sum of the USD value of all tokens the account
           has supplied, including interest earned.
 
+          It uses the lower of spot or historic price for each token.
+
           Computation skips assets which are missing oracle prices, potentially
           resulting in a lower supplied
 
@@ -4563,6 +4799,8 @@ definitions:
         description: >-
           Collateral Value is the sum of the USD value of all uTokens the
           account has collateralized.
+
+          It uses the lower of spot or historic price for each token.
 
           Computation skips collateral which is missing an oracle price,
           potentially resulting in a lower collateral
@@ -4574,7 +4812,7 @@ definitions:
           Borrowed Value is the sum of the USD value of all tokens the account
           has borrowed, including interest owed.
 
-          It always uses spot prices.
+          It uses the higher of spot or historic price for each token.
 
           Computation skips borrows which are missing oracle prices, potentially
           resulting in a lower borrowed
@@ -4592,14 +4830,38 @@ definitions:
           Computation skips collateral which is missing an oracle price,
           potentially resulting in a lower borrow
 
-          limit than if prices were all available.
+          limit than if prices were all available. Will be null if an oracle
+          price required for computation is
+
+          missing.
       liquidation_threshold:
         type: string
         description: >-
           Liquidation Threshold is the Borrowed Value at which the account
           becomes eligible for liquidation.
 
-          Will be null if an oracle price required for computation is missing.
+          Computation skips borrows which are missing an oracle price,
+          potentially resulting in a lower borrow
+
+          limit than if prices were all available. Will be null if an oracle
+          price required for computation is
+
+          missing.
+      spot_supplied_value:
+        type: string
+        description: >-
+          Spot Supplied Value is supplied value but always uses the most recent
+          available spot prices.
+      spot_collateral_value:
+        type: string
+        description: >-
+          Spot Collateral Value is collateral value but always uses the most
+          recent available spot prices.
+      spot_borrowed_value:
+        type: string
+        description: >-
+          Spot Borrowed Value is borrowed value but always uses the most recent
+          available spot prices.
     description: >-
       QueryAccountSummaryResponse defines the response structure for the
       AccountSummary gRPC service handler.
@@ -4624,6 +4886,95 @@ definitions:
     description: >-
       QueryBadDebtsResponse defines the response structure for the BedDebts gRPC
       service handler.
+  umee.leverage.v1.QueryInspectAccountResponse:
+    type: object
+    properties:
+      borrower:
+        type: object
+        properties:
+          address:
+            type: string
+            title: Address of a borrower
+          analysis:
+            description: >-
+              USD totals of borrower's collateral, debt, and liquidation
+              threshold.
+            type: object
+            properties:
+              Borrowed:
+                type: number
+                format: double
+                description: Borrowed is account's borrowed value in USD.
+              Liquidation:
+                type: number
+                format: double
+                description: Liquidation is account's liquidation threshold in USD.
+              Value:
+                type: number
+                format: double
+                description: Value is account's collateral value in USD.
+          position:
+            description: >-
+              Collateral and borrowed tokens, denoted in human-readable symbol
+              denom instead of ibc denom.
+            type: object
+            properties:
+              collateral:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: >-
+                  Collateral contains all uTokens the account has
+                  collateralized. It has been converted from uTokens to tokens.
+              borrowed:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+                description: >-
+                  Borrowed contains all tokens the account has borrowed,
+                  including interest owed.
+          info:
+            type: string
+            description: >-
+              Info is a string which can be used to report additional
+              information of any type.
+
+              UNSTABLE: We do not guarantee consistency of any data structures
+              contained within the string.
+        description: >-
+          InspectAccount contains risk and balance info for a single account for
+          the inspector query.
+    description: >-
+      QueryInspectAccountResponse defines the response structure for the
+      InspectAccount gRPC service handler.
   umee.leverage.v1.QueryInspectResponse:
     type: object
     properties:
@@ -4702,6 +5053,14 @@ definitions:
                   description: >-
                     Borrowed contains all tokens the account has borrowed,
                     including interest owed.
+            info:
+              type: string
+              description: >-
+                Info is a string which can be used to report additional
+                information of any type.
+
+                UNSTABLE: We do not guarantee consistency of any data structures
+                contained within the string.
           description: >-
             InspectAccount contains risk and balance info for a single account
             for the inspector query.
@@ -5626,6 +5985,17 @@ definitions:
         type: integer
         format: int64
     title: Denom - the object to hold configurations of each denom
+  umee.oracle.v1.DenomExchangeRate:
+    type: object
+    properties:
+      denom:
+        type: string
+      rate:
+        type: string
+      timestamp:
+        type: string
+        format: date-time
+    title: DenomExchangeRate stores exchange rate with timestamp
   umee.oracle.v1.ExchangeRateTuple:
     type: object
     properties:
@@ -5881,6 +6251,28 @@ definitions:
     description: |-
       QueryExchangeRatesResponse is response type for the
       Query/ExchangeRates RPC method.
+  umee.oracle.v1.QueryExgRatesWithTimestampResponse:
+    type: object
+    properties:
+      exg_rates:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            rate:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+          title: DenomExchangeRate stores exchange rate with timestamp
+        title: |-
+          exchange_rates defines a list of the exchange rate for all whitelisted
+          denoms with timestamp
+    description: |-
+      QueryExgRatesWithTimestampResponse is response type for the
+      Query/ExchangeRatesWithTimestamp RPC method.
   umee.oracle.v1.QueryFeederDelegationResponse:
     type: object
     properties:

@@ -38,7 +38,7 @@ import (
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
 
-	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
+	oraclemigrator "github.com/umee-network/umee/v6/x/oracle/migrations"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 	"github.com/umee-network/umee/v6/x/uibc"
@@ -132,10 +132,15 @@ func (app *UmeeApp) registerUpgrade6_1(planName string, _ upgradetypes.Plan) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("-----------------------------\n-----------------------------")
+			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+			ctx.Logger().Info("Run v6.1 migration")
 			err := app.OracleKeeper.SetHistoricAvgCounterParams(ctx, oracletypes.DefaultAvgCounterParams())
 			if err != nil {
 				return fromVM, err
 			}
+
+			oracleUpgrader := oraclemigrator.NewMigrator(&app.OracleKeeper)
+			oracleUpgrader.MigrateOldExgRatesToExgRatesWithTimestamp(ctx)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
@@ -249,7 +254,7 @@ func (app *UmeeApp) registerUpgrade4_1(_ upgradetypes.Plan) {
 			}
 			if migrated {
 				// If leverage BNB migration was skipped, also skip oracle so they stay in sync
-				oracleUpgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
+				oracleUpgrader := oraclemigrator.NewMigrator(&app.OracleKeeper)
 				oracleUpgrader.MigrateBNB(ctx)
 			}
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
@@ -264,7 +269,7 @@ func (app *UmeeApp) registerUpgrade3_3to4_0(_ upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("Upgrade handler execution", "name", planName)
 			ctx.Logger().Info("Run v4.0 migration")
-			upgrader := oraclekeeper.NewMigrator(&app.OracleKeeper)
+			upgrader := oraclemigrator.NewMigrator(&app.OracleKeeper)
 			err := upgrader.HistoracleParams3x4(ctx)
 			if err != nil {
 				ctx.Logger().Error("Unable to run v4.0 Migration!", "err", err)

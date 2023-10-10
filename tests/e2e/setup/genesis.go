@@ -15,6 +15,8 @@ import (
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 )
 
+// getGenDoc loads a genesis file from a given configDir path, or returns
+// empty if file does not exist
 func getGenDoc(path string) (*cmttypes.GenesisDoc, error) {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
@@ -39,17 +41,17 @@ func getGenDoc(path string) (*cmttypes.GenesisDoc, error) {
 	return doc, nil
 }
 
-func addGenesisAccount(cdc codec.Codec, path, moniker, amountStr string, accAddr sdk.AccAddress) error {
+// addGenesisAccount inserts an address and initial balances for an account into a genesis file on disk
+// before the chain has started. The genesis file is stored in the config directory of a single validator.
+// In practice, this function is used during setup when modifying the genesis file stored in the first
+// validator's path, before the completed genesis file is copied to all validators. Note that path and
+// moniker refer to the first validator - they do not relate to the account being added.
+func addGenesisAccount(cdc codec.Codec, path, moniker string, coins sdk.Coins, accAddr sdk.AccAddress) error {
 	serverCtx := server.NewDefaultContext()
 	config := serverCtx.Config
 
 	config.SetRoot(path)
 	config.Moniker = moniker
-
-	coins, err := sdk.ParseCoinsNormalized(amountStr)
-	if err != nil {
-		return fmt.Errorf("failed to parse coins: %w", err)
-	}
 
 	balances := banktypes.Balance{Address: accAddr.String(), Coins: coins.Sort()}
 	genAccount := authtypes.NewBaseAccount(accAddr, nil, 0, 0)

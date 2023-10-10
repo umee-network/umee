@@ -101,10 +101,6 @@ func NewMsgGovUpdateRegistry(authority string, addIndex, updateIndex []Index) *M
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateRegistry) ValidateBasic() error {
-	if err := checkers.AssertGovAuthority(msg.Authority); err != nil {
-		return err
-	}
-
 	if len(msg.AddIndex) == 0 && len(msg.UpdateIndex) == 0 {
 		return sdkerrors.ErrInvalidRequest.Wrap("empty add and update indexes")
 	}

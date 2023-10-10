@@ -76,6 +76,12 @@ func TestParseExchangeRateTuples(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestDenomExchangeRateString(t *testing.T) {
+	t1 := time.Date(2022, 9, 18, 15, 55, 01, 0, time.UTC)
+	er := DenomExchangeRate{Denom: "ABCD", Rate: sdk.MustNewDecFromStr("1.5"), Timestamp: t1}
+	assert.Equal(t, `{"denom":"ABCD","rate":"1.500000000000000000","timestamp":"2022-09-18T15:55:01Z"}`, er.String())
+}
+
 func TestExchangeRateString(t *testing.T) {
 	t1 := time.Date(2022, 9, 18, 15, 55, 01, 0, time.UTC)
 	er := ExchangeRate{Rate: sdk.MustNewDecFromStr("1.5"), Timestamp: t1}

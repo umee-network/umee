@@ -82,6 +82,12 @@ service Query {
       returns (QueryInspectResponse) {
     option (google.api.http).get = "/umee/leverage/v1/inspect";
   }
+
+  // InspectAccount runs the inspect query on a single address
+  rpc InspectAccount(QueryInspectAccount)
+      returns (QueryInspectAccountResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/inspect-account";
+  }
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -254,6 +260,7 @@ message QueryAccountSummary {
 // QueryAccountSummaryResponse defines the response structure for the AccountSummary gRPC service handler.
 message QueryAccountSummaryResponse {
   // Supplied Value is the sum of the USD value of all tokens the account has supplied, including interest earned.
+  // It uses the lower of spot or historic price for each token.
   // Computation skips assets which are missing oracle prices, potentially resulting in a lower supplied
   // value than if prices were all available.
   string supplied_value = 1 [
@@ -261,6 +268,7 @@ message QueryAccountSummaryResponse {
     (gogoproto.nullable)   = false
   ];
   // Collateral Value is the sum of the USD value of all uTokens the account has collateralized.
+  // It uses the lower of spot or historic price for each token.
   // Computation skips collateral which is missing an oracle price, potentially resulting in a lower collateral
   // value than if prices were all available.
   string collateral_value = 2 [
@@ -268,7 +276,7 @@ message QueryAccountSummaryResponse {
     (gogoproto.nullable)   = false
   ];
   // Borrowed Value is the sum of the USD value of all tokens the account has borrowed, including interest owed.
-  // It always uses spot prices.
+  // It uses the higher of spot or historic price for each token.
   // Computation skips borrows which are missing oracle prices, potentially resulting in a lower borrowed
   // value than if prices were all available.
   string borrowed_value = 3 [
@@ -278,16 +286,34 @@ message QueryAccountSummaryResponse {
   // Borrow Limit is the maximum Borrowed Value the account is allowed to reach through direct borrowing.
   // The lower of spot or historic price for each collateral token is used when calculating borrow limits.
   // Computation skips collateral which is missing an oracle price, potentially resulting in a lower borrow
-  // limit than if prices were all available.
+  // limit than if prices were all available. Will be null if an oracle price required for computation is
+  // missing.
   string borrow_limit = 4 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
-    (gogoproto.nullable)   = false
+    (gogoproto.nullable)   = true
   ];
   // Liquidation Threshold is the Borrowed Value at which the account becomes eligible for liquidation.
-  // Will be null if an oracle price required for computation is missing.
+  // Computation skips borrows which are missing an oracle price, potentially resulting in a lower borrow
+  // limit than if prices were all available. Will be null if an oracle price required for computation is
+  // missing.
   string liquidation_threshold = 5 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = true
+  ];
+  // Spot Supplied Value is supplied value but always uses the most recent available spot prices.
+  string spot_supplied_value = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Spot Collateral Value is collateral value but always uses the most recent available spot prices.
+  string spot_collateral_value = 7 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Spot Borrowed Value is borrowed value but always uses the most recent available spot prices.
+  string spot_borrowed_value = 8 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
   ];
 }
 
@@ -366,9 +392,21 @@ message QueryInspect {
   double ltv = 5;
 }
 
+// QueryInspectAccount defines the request structure for the InspectAccount gRPC service handler.
+message QueryInspectAccount {
+  string address = 1;
+}
+
 // QueryInspectResponse defines the response structure for the Inspect gRPC service handler.
 message QueryInspectResponse {
   repeated InspectAccount borrowers = 1 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// QueryInspectAccountResponse defines the response structure for the InspectAccount gRPC service handler.
+message QueryInspectAccountResponse {
+  InspectAccount borrower = 1 [
     (gogoproto.nullable) = false
   ];
 }
@@ -381,6 +419,9 @@ message InspectAccount {
   RiskInfo analysis = 2;
   // Collateral and borrowed tokens, denoted in human-readable symbol denom instead of ibc denom.
   DecBalances position = 3;
+  // Info is a string which can be used to report additional information of any type.
+  // UNSTABLE: We do not guarantee consistency of any data structures contained within the string.
+  string info = 4;
 }
 
 // RiskInfo defines a borrower's account health without requiring sdk.Dec formatting.

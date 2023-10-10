@@ -2,6 +2,7 @@ package oracle
 
 import (
 	"fmt"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -23,7 +24,7 @@ func InitGenesis(ctx sdk.Context, keeper keeper.Keeper, genState types.GenesisSt
 	}
 
 	for _, ex := range genState.ExchangeRates {
-		keeper.SetExchangeRate(ctx, ex.Denom, ex.ExchangeRate)
+		keeper.SetExchangeRateWithTimestamp(ctx, ex.Denom, ex.Rate, ex.Timestamp)
 	}
 
 	for _, mc := range genState.MissCounters {
@@ -91,13 +92,9 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 		return false
 	})
 
-	exchangeRates := []types.ExchangeRateTuple{}
-	keeper.IterateExchangeRates(ctx, func(denom string, rate sdk.Dec) (stop bool) {
-		exchangeRates = append(exchangeRates, types.ExchangeRateTuple{
-			Denom:        denom,
-			ExchangeRate: rate,
-		})
-
+	exchangeRates := []types.DenomExchangeRate{}
+	keeper.IterateExchangeRates(ctx, func(denom string, er sdk.Dec, t time.Time) (stop bool) {
+		exchangeRates = append(exchangeRates, types.NewDenomExchangeRate(denom, er, t))
 		return false
 	})
 

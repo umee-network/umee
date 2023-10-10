@@ -108,8 +108,3 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 
 	return tuples, nil
 }
-
-func (v ExchangeRate) String() string {
-	bz, _ := json.Marshal(v)
-	return string(bz)
-}

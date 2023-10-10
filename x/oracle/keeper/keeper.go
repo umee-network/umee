@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/cometbft/cometbft/libs/log"
 	gogotypes "github.com/cosmos/gogoproto/types"
@@ -111,39 +112,44 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 	return exchangeRate.Rate.Quo(powerReduction), nil
 }
 
-// SetExchangeRate sets the consensus exchange rate of USD denominated in the
-// denom asset to the store.
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
+// SetExchangeRateWithTimestamp sets the consensus exchange rate of USD denominated in the
+// denom asset to the store with a timestamp specified instead of using ctx
+func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
 	key := types.KeyExchangeRate(denom)
-	val := types.ExchangeRate{Rate: rate, Timestamp: ctx.BlockTime()}
-	err := store.SetValue(ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
+	val := types.ExchangeRate{Rate: rate, Timestamp: t}
+	err := store.SetValue[*types.ExchangeRate](ctx.KVStore(k.storeKey), key, &val, "exchange_rate")
 	util.Panic(err)
+}
+
+// SetExchangeRate sets the consensus exchange rate of USD denominated in the
+// denom asset to the store using timestamp from ctx
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
+	k.SetExchangeRateWithTimestamp(ctx, denom, rate, ctx.BlockTime())
 }
 
 // SetExchangeRateWithEvent sets an consensus
 // exchange rate to the store with ABCI event
-func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, exchangeRate sdk.Dec) {
-	k.SetExchangeRate(ctx, denom, exchangeRate)
+func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, rate sdk.Dec) {
+	k.SetExchangeRateWithTimestamp(ctx, denom, rate, ctx.BlockTime())
 	sdkutil.Emit(&ctx, &types.EventSetFxRate{
-		Denom: denom, Rate: exchangeRate,
+		Denom: denom, Rate: rate,
 	})
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.
-// TODO: handler should use ExchangeRate type rather than Dec
-func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
+func (k Keeper) IterateExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec, time.Time) bool) {
 	store := ctx.KVStore(k.storeKey)
 	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
 	defer iter.Close()
 	prefixLen := len(types.KeyPrefixExchangeRate)
-
 	for ; iter.Valid(); iter.Next() {
 		key := iter.Key()
 		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
-		var er types.ExchangeRate
-		k.cdc.MustUnmarshal(iter.Value(), &er)
+		var exgRate types.ExchangeRate
+		err := exgRate.Unmarshal(iter.Value())
+		util.Panic(err)
 
-		if handler(denom, er.Rate) {
+		if handler(denom, exgRate.Rate, exgRate.Timestamp) {
 			break
 		}
 	}
@@ -386,4 +392,24 @@ func (k Keeper) ValidateFeeder(ctx sdk.Context, feederAddr sdk.AccAddress, valAd
 	}
 
 	return nil
+}
+
+// IterateOldExchangeRates iterates over all old exchange rates from store and returns them.
+// Note: this is only used for v6.1 Migrations
+func (k Keeper) IterateOldExchangeRates(ctx sdk.Context, handler func(string, sdk.Dec) bool) {
+	store := ctx.KVStore(k.storeKey)
+	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixExchangeRate)
+	defer iter.Close()
+	prefixLen := len(types.KeyPrefixExchangeRate)
+
+	for ; iter.Valid(); iter.Next() {
+		key := iter.Key()
+		denom := string(key[prefixLen : len(key)-1]) // -1 to remove the null suffix
+		dp := sdk.DecProto{}
+		k.cdc.MustUnmarshal(iter.Value(), &dp)
+
+		if handler(denom, dp.Dec) {
+			break
+		}
+	}
 }

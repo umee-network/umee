@@ -11,7 +11,7 @@ import (
 )
 
 // MaxOracleGasUsage defines the maximum gas allowed for an oracle transaction.
-const MaxOracleGasUsage = uint64(140_000)
+const MaxOracleGasUsage = uint64(200_000)
 
 // FeeAndPriority ensures tx has enough fee coins to pay for the gas at the CheckTx time
 // to early remove transactions from the mempool without enough attached fee.

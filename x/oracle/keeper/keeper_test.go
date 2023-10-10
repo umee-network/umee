@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
@@ -87,7 +88,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	staking.EndBlocker(ctx, app.StakingKeeper)
 
 	s.app = app
-	s.ctx = ctx
+	s.ctx = ctx.WithBlockTime(time.Now())
 	s.queryClient = types.NewQueryClient(queryHelper)
 	s.msgServer = keeper.NewMsgServerImpl(app.OracleKeeper)
 }
@@ -235,7 +236,7 @@ func (s *IntegrationTestSuite) TestGetExchangeRate_Valid() {
 	s.Require().NoError(err)
 	s.Require().Equal(rate, expected)
 
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, strings.ToLower(displayDenom), sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
 	rate, err = s.app.OracleKeeper.GetExchangeRate(s.ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, expected)
