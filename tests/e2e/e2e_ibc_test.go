@@ -94,7 +94,8 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// Note : gaia -> umee (ibc_quota will not check token limit)
 		atomPrice, err := s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
 		s.Require().NoError(err)
-		s.Require().True(atomPrice.GT(sdk.OneDec()), "price should be non zero, and expecting higher than 1, got: %s", atomPrice)
+		s.Require().True(atomPrice.GT(sdk.OneDec()),
+			"atom price should be non zero, and expecting higher than 1, got: %s", atomPrice)
 		emOfAtom := sdk.NewDecFromInt(totalQuota).Quo(atomPrice)
 		c := sdk.NewInt64Coin("uatom", emOfAtom.Mul(powerReduction).RoundInt64())
 		s.Require().True(c.Amount.GT(sdk.NewInt(2_000_000)), "amount should be non zero, and expecting much higher than 2 atom = 2e6 uatom, got: %s", c.Amount)
@@ -105,6 +106,8 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// sending more tokens than token_quota limit of umee (token_quota is 100$)
 		histoAvgPriceOfUmee, err := s.QueryHistAvgPrice(umeeAPIEndpoint, umeeSymbol)
 		s.Require().NoError(err)
+		s.Require().True(histoAvgPriceOfUmee.GT(sdk.OneDec()),
+			"umee price should be non zero, and expecting higher than 1, got: %s", histoAvgPriceOfUmee)
 		exceedAmountOfUmee := sdk.NewDecFromInt(totalQuota).Quo(histoAvgPriceOfUmee)
 		s.T().Logf("sending %s amount %s more than %s", umeeSymbol, exceedAmountOfUmee.String(), totalQuota.String())
 		exceedAmountCoin := sdk.NewInt64Coin(appparams.BondDenom, exceedAmountOfUmee.Mul(powerReduction).RoundInt64())
