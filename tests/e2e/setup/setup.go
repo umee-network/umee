@@ -53,18 +53,18 @@ type E2ETestSuite struct {
 	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
 }
 
-// TestClient returns the client associated with the a (non-validator) test account
+// AccountClient returns the client associated with the a (non-validator) test account
 // at the given index, panicking if the account does not exist.
-func (s *E2ETestSuite) TestClient(index int) client.Client {
+func (s *E2ETestSuite) AccountClient(index int) client.Client {
 	if s.Chain == nil || len(s.Chain.TestAccounts) <= index {
 		panic(fmt.Sprint("no test client at index", index))
 	}
 	return s.Chain.TestAccounts[index].client
 }
 
-// TestAddr returns the address associated with the a (non-validator) test account
+// AccountAddr returns the address associated with the a (non-validator) test account
 // at the given index, panicking if the account does not exist.
-func (s *E2ETestSuite) TestAddr(index int) sdk.AccAddress {
+func (s *E2ETestSuite) AccountAddr(index int) sdk.AccAddress {
 	if s.Chain == nil || len(s.Chain.TestAccounts) <= index {
 		panic(fmt.Sprint("no test client at index", index))
 	}
@@ -160,7 +160,7 @@ func (s *E2ETestSuite) initNodes() {
 	for i := 0; i < numTestAccounts; i++ {
 		s.Require().NoError(s.Chain.createTestAccount(s.cdc))
 		s.Require().NoError(
-			addGenesisAccount(s.cdc, val0ConfigDir, "", testAccountCoins, s.TestAddr(i)),
+			addGenesisAccount(s.cdc, val0ConfigDir, "", testAccountCoins, s.AccountAddr(i)),
 		)
 	}
 

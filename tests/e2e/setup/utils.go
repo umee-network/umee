@@ -38,7 +38,7 @@ func (s *E2ETestSuite) GaiaREST() string {
 // Note that the validator is specified by the index it appears at in the "staking/validators" query.
 // Requires a grpc-web endpoint to query validators from.
 func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64, endpoint string) error {
-	addr := s.TestAddr(testAccount)
+	addr := s.AccountAddr(testAccount)
 
 	var validatorsResp stakingtypes.QueryValidatorsResponse
 	err := s.QueryREST(fmt.Sprintf("%s/cosmos/staking/v1beta1/validators", endpoint), &validatorsResp)
@@ -58,7 +58,7 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64, endpoi
 	asset := sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(amount))
 	msg := stakingtypes.NewMsgDelegate(addr, valAddr, asset)
 
-	return s.BroadcastTxWithRetry(msg, s.TestClient(testAccount))
+	return s.BroadcastTxWithRetry(msg, s.AccountClient(testAccount))
 }
 
 func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool) {

@@ -205,7 +205,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 
 		s.Require().NoError(err)
 		// Get the uibc params for quota checking
-		uibcParams, err := s.TestClient(0).QueryUIBCParams()
+		uibcParams, err := s.AccountClient(0).QueryUIBCParams()
 		s.Require().NoError(err)
 		s.Require().Equal(uibcParams.IbcStatus, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED)
 		token = sdk.NewInt64Coin("uumee", 100000000) // 100 Umee

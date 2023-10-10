@@ -11,12 +11,12 @@ import (
 // medians deviations are correct, updates the oracle params with
 // a gov prop, then checks the medians and median deviations again.
 func (s *E2ETest) TestMedians() {
-	err := grpc.MedianCheck(s.TestClient(0))
+	err := grpc.MedianCheck(s.AccountClient(0))
 	s.Require().NoError(err)
 }
 
 func (s *E2ETest) TestUpdateOracleParams() {
-	params, err := s.TestClient(0).QueryOracleParams()
+	params, err := s.AccountClient(0).QueryOracleParams()
 	s.Require().NoError(err)
 
 	s.Require().Equal(uint64(5), params.HistoricStampPeriod)
@@ -26,7 +26,7 @@ func (s *E2ETest) TestUpdateOracleParams() {
 	// simple retry loop to submit and pass a proposal
 	for i := 0; i < 3; i++ {
 		err = grpc.SubmitAndPassProposal(
-			s.TestClient(0),
+			s.AccountClient(0),
 			grpc.OracleParamChanges(10, 2, 20),
 		)
 		if err == nil {
@@ -38,7 +38,7 @@ func (s *E2ETest) TestUpdateOracleParams() {
 
 	s.Require().NoError(err, "submit and pass proposal")
 
-	params, err = s.TestClient(0).QueryOracleParams()
+	params, err = s.AccountClient(0).QueryOracleParams()
 	s.Require().NoError(err)
 
 	s.Require().Equal(uint64(10), params.HistoricStampPeriod)
