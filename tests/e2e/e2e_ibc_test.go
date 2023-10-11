@@ -100,7 +100,8 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 			"atom price should be non zero, and expecting higher than 1, got: %s", atomPrice)
 		emOfAtom := sdk.NewDecFromInt(totalQuota).Quo(atomPrice)
 		c := sdk.NewInt64Coin("uatom", emOfAtom.Mul(powerReduction).RoundInt64())
-		s.Require().True(c.Amount.GT(sdk.NewInt(2_000_000)), "amount should be non zero, and expecting much higher than 2 atom = 2e6 uatom, got: %s", c.Amount)
+		s.Require().True(c.Amount.GT(sdk.NewInt(2_000_000)),
+			"amount should be non zero, and expecting much higher than 2 atom = 2e6 uatom, got: %s", c.Amount)
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", c, false, "uatom from gaia to umee")
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, c.Amount)
 

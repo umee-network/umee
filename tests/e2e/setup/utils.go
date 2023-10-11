@@ -55,7 +55,7 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error 
 }
 
 func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool, desc string) {
-	s.T().Logf("sending %s from %s to %s (exceed quota: %t) - %s", token, srcChainID, dstChainID, failDueToQuota, desc)
+	s.T().Logf("sending %s from %s to %s (exceed quota: %t) %s", token, srcChainID, dstChainID, failDueToQuota, desc)
 	// ibctransfertypes.NewMsgTransfer()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
