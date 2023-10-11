@@ -343,6 +343,7 @@ func New(
 		wasm.StoreKey,
 		incentive.StoreKey,
 		metoken.StoreKey,
+		consensusparamstypes.StoreKey, crisistypes.StoreKey,
 	}
 	// if Experimental {}
 
