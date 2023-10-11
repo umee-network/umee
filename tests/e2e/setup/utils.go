@@ -62,7 +62,10 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 
 	// retry up to 5 times
 	for i := 0; i < 5; i++ {
-		s.T().Logf("sending %s from %s to %s (%s). Try %d", token, srcChainID, dstChainID, recipient, i+1)
+		if i > 0 {
+			s.T().Logf("...try %d", i+1)
+		}
+
 		cmd := []string{
 			"hermes",
 			"tx",
@@ -126,9 +129,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 			continue
 		}
 
-		s.T().Log("successfully sent IBC tokens")
 		s.Require().NotEmptyf(txHash, "failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
-		s.T().Log("Waiting for Tx to be included in a block", txHash, srcChainID)
 		endpoint := s.UmeeREST()
 		if strings.Contains(srcChainID, "gaia") {
 			endpoint = s.GaiaREST()
@@ -140,7 +141,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 				s.T().Log("Tx Query Error", err)
 			}
 			return err == nil
-		}, 5*time.Second, 200*time.Millisecond)
+		}, 5*time.Second, 200*time.Millisecond, "require tx to be included in block")
 		return
 	}
 }
