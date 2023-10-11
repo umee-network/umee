@@ -16,8 +16,7 @@ import (
 
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
 	var index metoken.Index
-	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
-	s.Require().NoError(err)
+	testAddr := s.AccountAddr(0)
 	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
 
 	s.Run(
@@ -28,14 +27,14 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 				mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
 			}
 
-			err = grpc.LeverageRegistryUpdate(s.AccountClient(0), tokens, nil)
+			err := grpc.LeverageRegistryUpdate(s.AccountClient(0), tokens, nil)
 			s.Require().NoError(err)
 
 			meUSD := mocks.StableIndex(mocks.MeUSDDenom)
 			err = grpc.MetokenRegistryUpdate(s.AccountClient(0), []metoken.Index{meUSD}, nil)
 			s.Require().NoError(err)
 
-			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
+			s.checkMetokenBalance(testAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 
@@ -57,7 +56,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			s.Require().NoError(err)
 			returned := usdtPrice.SwapRate.MulInt(amountToSwap).TruncateInt()
 
-			s.executeSwap(valAddr.String(), hundredUSDT, mocks.MeUSDDenom)
+			s.executeSwap(testAddr.String(), hundredUSDT, mocks.MeUSDDenom)
 
 			expectedBalance.MetokenSupply.Amount = expectedBalance.MetokenSupply.Amount.Add(returned)
 			usdtBalance, i := expectedBalance.AssetBalance(mocks.USDTBaseDenom)
@@ -67,7 +66,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Add(amountToLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
+			s.checkMetokenBalance(testAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 
@@ -76,13 +75,13 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			twoHundredsMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(200_000000))
 
 			s.executeRedeemWithFailure(
-				valAddr.String(),
+				testAddr.String(),
 				twoHundredsMeUSD,
 				mocks.USDTBaseDenom,
 				"not enough",
 			)
 
-			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
+			s.checkMetokenBalance(testAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 
@@ -91,7 +90,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			prices := s.getPrices(mocks.MeUSDDenom)
 			fiftyMeUSD := sdk.NewCoin(mocks.MeUSDDenom, sdkmath.NewInt(50_000000))
 
-			s.executeRedeemSuccess(valAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
+			s.executeRedeemSuccess(testAddr.String(), fiftyMeUSD, mocks.USDTBaseDenom)
 
 			usdtToRedeem, err := prices[0].RedeemRate(fiftyMeUSD, mocks.USDTBaseDenom)
 			s.Require().NoError(err)
@@ -111,7 +110,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			usdtBalance.Leveraged = usdtBalance.Leveraged.Sub(amountFromLeverage)
 			expectedBalance.SetAssetBalance(usdtBalance)
 
-			s.checkMetokenBalance(valAddr.String(), mocks.MeUSDDenom)
+			s.checkMetokenBalance(testAddr.String(), mocks.MeUSDDenom)
 		},
 	)
 }
