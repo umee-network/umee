@@ -69,7 +69,9 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		stakeIBCHash := "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
 		umeeAPIEndpoint := s.UmeeREST()
 
-		recipient := s.AccountAddr(0).String()
+		valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
+		s.Require().NoError(err)
+		recipient := valAddr.String()
 
 		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false, "")
