@@ -29,6 +29,7 @@ import (
 	"github.com/umee-network/umee/v6/x/incentive"
 	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
 
 	oraclemigrator "github.com/umee-network/umee/v6/x/oracle/migrations"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
@@ -60,7 +61,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_1("v6.1", upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade6_1(planName string, _ upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade6_1(planName string, upgradeInfo upgradetypes.Plan) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			ctx.Logger().Info("-----------------------------\n-----------------------------")
@@ -77,6 +78,10 @@ func (app *UmeeApp) registerUpgrade6_1(planName string, _ upgradetypes.Plan) {
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{metoken.ModuleName},
+	})
 }
 
 func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
