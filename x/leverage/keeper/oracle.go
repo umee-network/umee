@@ -13,7 +13,7 @@ import (
 )
 
 // TODO: parameterize this
-const MaxSpotPriceAge = 180 // 180 seconds = 3 minutes
+const MaxSpotPriceAge = 360 // 360 seconds = 6 minutes
 
 var ten = sdk.MustNewDecFromStr("10")
 
