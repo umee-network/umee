@@ -55,11 +55,21 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 }
 
 func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
+	errString := ""
 	s.Require().Eventually(
 		func() bool {
 			supply, err := s.QueryTotalSupply(endpoint)
 			if err != nil {
 				return false
+			}
+
+			if !supply.AmountOf(ibcDenom).Equal(amount) {
+				str := fmt.Sprintf("check supply: %s (expected %s, got %s)",
+					ibcDenom, amount, supply.AmountOf(ibcDenom))
+				if errString != str {
+					s.T().Log(str)
+					errString = str
+				}
 			}
 
 			return supply.AmountOf(ibcDenom).Equal(amount)
@@ -119,7 +129,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// check the ibc (umee) quota after ibc txs
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
 
-		// send 100UMEE from umee to gaia
+		// send $90 UMEE from umee to gaia
 		// Note: receiver is null means hermes will default send to key_name (from config) of target chain (gaia)
 		// umee -> gaia (ibc_quota will check)
 		umeeInitialQuota := math.NewInt(90)
