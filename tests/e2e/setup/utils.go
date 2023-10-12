@@ -23,6 +23,7 @@ import (
 
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/client"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
@@ -205,6 +206,16 @@ func (s *E2ETestSuite) QueryExchangeRate(endpoint, denom string) (sdk.DecCoins, 
 	}
 
 	return resp.ExchangeRates, nil
+}
+
+func (s *E2ETestSuite) QueryRegisteredTokens(endpoint string) ([]leveragetypes.Token, error) {
+	endpoint = fmt.Sprintf("%s/umee/leverage/v1/registered_tokens", endpoint)
+	var resp leveragetypes.QueryRegisteredTokensResponse
+	if err := s.QueryREST(endpoint, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Registry, nil
 }
 
 func (s *E2ETestSuite) QueryHistAvgPrice(endpoint, denom string) (sdk.Dec, error) {

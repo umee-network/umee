@@ -4,7 +4,39 @@ import (
 	"time"
 
 	"github.com/umee-network/umee/v6/tests/grpc"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
+
+// TestAllPrices wairs for all tokens in the leverage registry to have prices.
+func (s *E2ETest) TestAllPrices() {
+	tokens := []leveragetypes.Token{}
+	s.Require().Eventually(
+		func() bool {
+			var err error
+			tokens, err = s.QueryRegisteredTokens(s.UmeeREST())
+			if err != nil {
+				return false
+			}
+			return true
+		},
+		time.Minute, time.Second, "get registered tokens",
+	)
+	s.Require().Eventually(
+		func() bool {
+			exchangeRates, err := s.QueryExchangeRate(s.UmeeREST(), "")
+			if err != nil {
+				return false
+			}
+			for _, t := range tokens {
+				if exchangeRates.AmountOf(t.SymbolDenom).IsZero() {
+					return false
+				}
+			}
+			return true
+		},
+		time.Minute, time.Second, "ensure all tokens have prices",
+	)
+}
 
 // TestMedians queries for the oracle params, collects historical
 // prices based on those params, checks that the stored medians and
