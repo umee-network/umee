@@ -61,17 +61,25 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 }
 
 func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
+	attempt := 1
 	s.Require().Eventually(
 		func() bool {
+			attempt++
 			supply, err := s.QueryTotalSupply(endpoint)
 			if err != nil {
 				return false
 			}
-
-			return supply.AmountOf(ibcDenom).Equal(amount)
+			if supply.AmountOf(ibcDenom).Equal(amount) {
+				return true
+			}
+			if attempt == 59 {
+				// if we're nearing the end of our attempts, print expected and actual values
+				s.T().Logf("expected: %s, got: %s", amount, supply.AmountOf(ibcDenom))
+			}
+			return false
 		},
 		2*time.Minute,
-		time.Second,
+		2*time.Second,
 		fmt.Sprintf("check supply: %s (expected %s)", ibcDenom, amount),
 	)
 }
@@ -122,12 +130,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 			sdk.NewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
 		)
 
-		// send $110 UMEE from umee to gaia (token_quota is 100$)
-		exceedUmee := mulCoin(umeeQuota, "1.1")
-		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, true, "")
-		// check the ibc (umee) quota after ibc txs - this one should have failed
-		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
-
 		// send $90 UMEE from umee to gaia (ibc_quota will check)
 		// Note: receiver is null so hermes will default send to key_name (from config) of target chain (gaia)
 		sendUmee := mulCoin(umeeQuota, "0.9")
@@ -141,6 +143,12 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// supply will be not be decreased because sending amount is more than token quota so it will fail
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedAtom, true, "uatom from umee to gaia")
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount)
+
+		// send $110 UMEE from umee to gaia (token_quota is 100$)
+		exceedUmee := mulCoin(umeeQuota, "1.1")
+		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, true, "")
+		// check the ibc (umee) quota after ibc txs - this one should have failed
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
 
 		// send $40 ATOM from umee to gaia
 		atom40 := mulCoin(atomQuota, "0.4")
