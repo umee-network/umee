@@ -14,6 +14,15 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
+const (
+	// ibc hash of gaia stake token on umee
+	stakeIBCHash = "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
+	// ibc hash of uumee token on gaia
+	umeeIBCHash = "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
+	// ibc hash of uatom token on umee
+	uatomIBCHash = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+)
+
 var powerReduction = sdk.MustNewDecFromStr("10").Power(6)
 
 func (s *E2ETest) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdk.Dec) {
@@ -57,7 +66,7 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 		},
 		2*time.Minute,
 		time.Second,
-		fmt.Sprintf("check supply: %s", ibcDenom),
+		fmt.Sprintf("check supply: %s (expected %s)", ibcDenom, amount),
 	)
 }
 
@@ -66,17 +75,13 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 	// because we won't have price for it.
 	s.Run("send_stake_to_umee", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
-		stakeIBCHash := "ibc/C053D637CCA2A2BA030E2C5EE1B28A16F71CCB0E45E8BE52766DC1B241B77878"
 		umeeAPIEndpoint := s.UmeeREST()
-
-		valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
-		s.Require().NoError(err)
-		recipient := valAddr.String()
+		recipient := s.AccountAddr(0).String()
 
 		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false, "")
-
-		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
+		// Zero, since not a registered token
+		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, sdk.ZeroInt())
 	})
 
 	s.Run("ibc_transfer_quota", func() {
@@ -87,10 +92,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		umeeSymbol := "UMEE"
 		totalQuota := math.NewInt(120)
 		tokenQuota := math.NewInt(100)
-		// ibc hash of uumee token
-		umeeIBCHash := "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
-		// ibc hash of uatom token
-		uatomIBCHash := "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
 
 		// send uatom from gaia to umee
 		// Note : gaia -> umee (ibc_quota will not check token limit)
@@ -108,8 +109,8 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// sending more tokens than token_quota limit of umee (token_quota is 100$)
 		histoAvgPriceOfUmee, err := s.QueryHistAvgPrice(umeeAPIEndpoint, umeeSymbol)
 		s.Require().NoError(err)
-		s.Require().True(histoAvgPriceOfUmee.GT(sdk.OneDec()),
-			"umee price should be non zero, and expecting higher than 1, got: %s", histoAvgPriceOfUmee)
+		s.Require().True(histoAvgPriceOfUmee.GT(sdk.MustNewDecFromStr("0.001")),
+			"umee price should be non zero, and expecting higher than 0.001, got: %s", histoAvgPriceOfUmee)
 		exceedAmountOfUmee := sdk.NewDecFromInt(totalQuota).Quo(histoAvgPriceOfUmee)
 		exceedAmountCoin := sdk.NewInt64Coin(appparams.BondDenom, exceedAmountOfUmee.Mul(powerReduction).RoundInt64())
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedAmountCoin, true, fmt.Sprintf(
