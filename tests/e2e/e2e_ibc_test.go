@@ -106,12 +106,14 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", c, false, "uatom from gaia to umee")
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, c.Amount)
 
-		// sending more tokens than token_quota limit of umee (token_quota is 100$ - we send double)
+		// sending more tokens than token_quota limit of umee (token_quota is 100$)
 		histoAvgPriceOfUmee, err := s.QueryHistAvgPrice(umeeAPIEndpoint, umeeSymbol)
 		s.Require().NoError(err)
 		s.Require().True(histoAvgPriceOfUmee.GT(sdk.MustNewDecFromStr("0.001")),
 			"umee price should be non zero, and expecting higher than 0.001, got: %s", histoAvgPriceOfUmee)
-		exceedAmountOfUmee := sdk.NewDecFromInt(totalQuota).Quo(histoAvgPriceOfUmee).MulInt64(2)
+		exceedAmountOfUmee := sdk.NewDecFromInt(totalQuota).Quo(histoAvgPriceOfUmee).Mul(
+			sdk.MustNewDecFromStr("1.1"), // send 110% the quota amount
+		)
 		exceedAmountCoin := sdk.NewInt64Coin(appparams.BondDenom, exceedAmountOfUmee.Mul(powerReduction).RoundInt64())
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedAmountCoin, true, fmt.Sprintf(
 			"sending %s amount %s more than %s", umeeSymbol, exceedAmountOfUmee.String(), totalQuota.String(),
