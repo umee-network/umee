@@ -55,21 +55,11 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 }
 
 func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
-	errString := ""
 	s.Require().Eventually(
 		func() bool {
 			supply, err := s.QueryTotalSupply(endpoint)
 			if err != nil {
 				return false
-			}
-
-			if !supply.AmountOf(ibcDenom).Equal(amount) {
-				str := fmt.Sprintf("check supply: %s (expected %s, got %s)",
-					ibcDenom, amount, supply.AmountOf(ibcDenom))
-				if errString != str {
-					s.T().Log(str)
-					errString = str
-				}
 			}
 
 			return supply.AmountOf(ibcDenom).Equal(amount)
@@ -205,19 +195,10 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		***/
 		// Make gov proposal to disable the quota check on ibc-transfer
 
-		for i := 0; i < 5; i++ {
-			err = grpc.UIBCIBCTransferSatusUpdate(
-				s.Chain.Validators[0].Client,
-				uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED,
-			)
-
-			if err == nil {
-				break
-			}
-
-			time.Sleep(1 * time.Second)
-		}
-
+		err = grpc.UIBCIBCTransferStatusUpdate(
+			s.AccountClient(0),
+			uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED,
+		)
 		s.Require().NoError(err)
 		// Get the uibc params for quota checking
 		uibcParams, err := s.AccountClient(0).QueryUIBCParams()
