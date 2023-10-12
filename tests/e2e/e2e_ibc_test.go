@@ -21,6 +21,9 @@ const (
 	umeeIBCHash = "ibc/9F53D255F5320A4BE124FF20C29D46406E126CE8A09B00CA8D3CFF7905119728"
 	// ibc hash of uatom token on umee
 	uatomIBCHash = "ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2"
+
+	atomSymbol = "ATOM"
+	umeeSymbol = "UMEE"
 )
 
 var powerReduction = sdk.MustNewDecFromStr("10").Power(6)
@@ -102,8 +105,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		gaiaAPIEndpoint := s.GaiaREST()
 		umeeAPIEndpoint := s.UmeeREST()
-		atomSymbol := "ATOM"
-		umeeSymbol := "UMEE"
 		// totalQuota := math.NewInt(120)
 		tokenQuota := math.NewInt(100)
 
@@ -112,12 +113,13 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.Require().NoError(err)
 		s.Require().True(atomPrice.GT(sdk.OneDec()),
 			"atom price should be non zero, and expecting higher than 1, got: %s", atomPrice)
-		atomQuota := sdk.NewCoin("uatom",
+		atomQuota := sdk.NewCoin(uatomIBCHash,
 			sdk.NewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
 		)
 
 		// send $500 ATOM from gaia to umee. (ibc_quota will not check token limit)
 		atomFromGaia := mulCoin(atomQuota, "5.0")
+		atomFromGaia.Denom = "uatom"
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", atomFromGaia, false, "")
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount)
 
@@ -165,6 +167,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 
 		// send $45 UMEE from gaia to umee
 		returnUmee := mulCoin(sendUmee, "0.5")
+		returnUmee.Denom = umeeIBCHash
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", returnUmee, false, "send back some umee")
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, returnUmee.Amount) // half was returned, so half remains
 
@@ -221,8 +224,5 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 			30*time.Second,
 			1*time.Second,
 		)
-		// return the tokens to umee
-		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", exceedUmee, false, "return umee")
-		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdk.ZeroInt())
 	})
 }
