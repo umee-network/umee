@@ -96,7 +96,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		umeeAPIEndpoint := s.UmeeREST()
 		atomSymbol := "ATOM"
 		umeeSymbol := "UMEE"
-		totalQuota := math.NewInt(120)
+		// totalQuota := math.NewInt(120)
 		tokenQuota := math.NewInt(100)
 
 		// compute the amount of ATOM sent from umee to gaia which would meet atom's token quota
