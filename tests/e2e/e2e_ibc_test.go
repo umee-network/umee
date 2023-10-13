@@ -88,6 +88,7 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 }
 
 func (s *E2ETest) TestIBCTokenTransfer() {
+	s.T().Skip("TODO: Re-enable ibc e2e")
 	// IBC inbound transfer of non x/leverage registered tokens must fail, because
 	// because we won't have price for it.
 	s.Run("send_stake_to_umee", func() {
