@@ -27,6 +27,7 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/client"
 )
 
 type validator struct {
@@ -38,6 +39,7 @@ type validator struct {
 	privateKey   cryptotypes.PrivKey
 	consensusKey privval.FilePVKey
 	nodeKey      p2p.NodeKey
+	Client       client.Client
 }
 
 // instanceName is <v.moniker><v.index>

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,9 +17,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/gogo/protobuf/proto"
 	"github.com/ory/dockertest/v3/docker"
 
+	appparams "github.com/umee-network/umee/v6/app/params"
+	"github.com/umee-network/umee/v6/client"
+	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
@@ -31,14 +36,37 @@ func (s *E2ETestSuite) GaiaREST() string {
 	return fmt.Sprintf("http://%s", s.GaiaResource.GetHostPort("1317/tcp"))
 }
 
-func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool) {
+// Delegates an amount of uumee from the test account at a given index to a specified validator.
+func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error {
+	addr := s.AccountAddr(testAccount)
+
+	if len(s.Chain.Validators) <= valIndex {
+		return fmt.Errorf("validator %d not found", valIndex)
+	}
+	valAddr, err := s.Chain.Validators[valIndex].KeyInfo.GetAddress()
+	if err != nil {
+		return err
+	}
+	valOperAddr := sdk.ValAddress(valAddr)
+
+	asset := sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(amount))
+	msg := stakingtypes.NewMsgDelegate(addr, valOperAddr, asset)
+
+	return s.BroadcastTxWithRetry(msg, s.AccountClient(testAccount))
+}
+
+func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool, desc string) {
+	s.T().Logf("sending %s from %s to %s (exceed quota: %t) %s", token, srcChainID, dstChainID, failDueToQuota, desc)
 	// ibctransfertypes.NewMsgTransfer()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
 	// retry up to 5 times
 	for i := 0; i < 5; i++ {
-		s.T().Logf("sending %s from %s to %s (%s). Try %d", token, srcChainID, dstChainID, recipient, i+1)
+		if i > 0 {
+			s.T().Logf("...try %d", i+1)
+		}
+
 		cmd := []string{
 			"hermes",
 			"tx",
@@ -102,9 +130,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 			continue
 		}
 
-		s.T().Log("successfully sent IBC tokens")
 		s.Require().NotEmptyf(txHash, "failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
-		s.T().Log("Waiting for Tx to be included in a block", txHash, srcChainID)
 		endpoint := s.UmeeREST()
 		if strings.Contains(srcChainID, "gaia") {
 			endpoint = s.GaiaREST()
@@ -116,7 +142,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 				s.T().Log("Tx Query Error", err)
 			}
 			return err == nil
-		}, 5*time.Second, 200*time.Millisecond)
+		}, 5*time.Second, 200*time.Millisecond, "require tx to be included in block")
 		return
 	}
 }
@@ -182,6 +208,16 @@ func (s *E2ETestSuite) QueryExchangeRate(endpoint, denom string) (sdk.DecCoins, 
 	return resp.ExchangeRates, nil
 }
 
+func (s *E2ETestSuite) QueryRegisteredTokens(endpoint string) ([]leveragetypes.Token, error) {
+	endpoint = fmt.Sprintf("%s/umee/leverage/v1/registered_tokens", endpoint)
+	var resp leveragetypes.QueryRegisteredTokensResponse
+	if err := s.QueryREST(endpoint, &resp); err != nil {
+		return nil, err
+	}
+
+	return resp.Registry, nil
+}
+
 func (s *E2ETestSuite) QueryHistAvgPrice(endpoint, denom string) (sdk.Dec, error) {
 	endpoint = fmt.Sprintf("%s/umee/historacle/v1/avg_price/%s", endpoint, strings.ToUpper(denom))
 	var resp oracletypes.QueryAvgPriceResponse
@@ -231,11 +267,11 @@ func (s *E2ETestSuite) QueryUmeeBalance(
 	return umeeBalance, umeeAddr
 }
 
-func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg) error {
+func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) error {
 	var err error
 	for retry := 0; retry < 3; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-		_, err = s.Umee.Tx.BroadcastTx(0, msg)
+		_, err = cli.Tx.BroadcastTx(0, msg)
 		if err == nil {
 			return nil
 		}
@@ -243,6 +279,16 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg) error {
 		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
 			return err
 		}
+
+		// if we were told an expected account sequence, we should use it next time
+		s := err.Error()
+		re := regexp.MustCompile("expected [\\d]+")
+		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(s), "expected "))
+		if err == nil {
+			return nil
+		}
+		cli.WithAccSeq(uint64(n))
+
 		time.Sleep(time.Millisecond * 300)
 	}
 
