@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## v6.1.0 - 2023-10-17
 
+### Improvements
+
+- [2285](https://github.com/umee-network/umee/pull/2285) Upgrade Cosmos SDK to v0.46.15. 
+
 ### Bug Fixes
 
 - [2276](https://github.com/umee-network/umee/pull/2276) e2e test reliability.
