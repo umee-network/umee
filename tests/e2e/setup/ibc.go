@@ -45,9 +45,9 @@ func (s *E2ETestSuite) runIBCRelayer() {
 			Mounts: []string{
 				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
 			},
-			ExposedPorts: []string{"3031"},
+			ExposedPorts: []string{"3000"},
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
+				"3000/tcp": {{HostIP: "", HostPort: "3000"}},
 			},
 			Env: []string{
 				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", GaiaChainID),
@@ -66,15 +66,30 @@ func (s *E2ETestSuite) runIBCRelayer() {
 		noRestart,
 	)
 	s.Require().NoError(err)
+	s.T().Logf("ℹ️ Waiting for ibc channel creation...")
+	s.Require().Eventually(
+		func() bool {
+			s.T().Log("We are waiting for channel creation...")
+			channels, err := s.QueryIBCChannels(s.UmeeREST())
+			if channels {
+				s.T().Log("✅ IBC Channel is created among the the chains")
+			}
+			if err != nil {
+				return false
+			}
+			return channels
+		},
+		10*time.Minute,
+		3*time.Second,
+	)
 
-	endpoint := fmt.Sprintf("http://%s/state", s.HermesResource.GetHostPort("3031/tcp"))
+	endpoint := fmt.Sprintf("http://%s/state", s.HermesResource.GetHostPort("3000/tcp"))
 	s.Require().Eventually(
 		func() bool {
 			resp, err := http.Get(endpoint)
 			if err != nil {
 				return false
 			}
-
 			defer resp.Body.Close()
 
 			bz, err := io.ReadAll(resp.Body)
@@ -97,10 +112,11 @@ func (s *E2ETestSuite) runIBCRelayer() {
 		"hermes relayer not healthy",
 	)
 
-	s.T().Logf("started Hermes relayer container: %s", s.HermesResource.Container.ID)
+	s.T().Logf("✅ Started Hermes relayer container: %s", s.HermesResource.Container.ID)
 
 	// create the client, connection and channel between the Umee and Gaia chains
-	s.connectIBCChains()
+	// Note: we are creating ibc channels on entrypoint of relayer container
+	// s.connectIBCChains()
 }
 
 func (s *E2ETestSuite) connectIBCChains() {
@@ -119,10 +135,18 @@ func (s *E2ETestSuite) connectIBCChains() {
 			"hermes",
 			"create",
 			"channel",
+			"--order",
+			"unordered",
+			"--a-chain",
 			s.Chain.ID,
+			"--b-chain",
 			GaiaChainID,
-			"--port-a=transfer",
-			"--port-b=transfer",
+			"--a-port",
+			"transfer",
+			"--b-port",
+			"transfer",
+			"--new-client-connection",
+			"--yes",
 		},
 	})
 	s.Require().NoError(err)

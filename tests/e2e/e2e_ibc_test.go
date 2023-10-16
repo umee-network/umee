@@ -64,10 +64,8 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 }
 
 func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
-	attempt := 1
 	s.Require().Eventually(
 		func() bool {
-			attempt++
 			supply, err := s.QueryTotalSupply(endpoint)
 			if err != nil {
 				return false
@@ -75,20 +73,15 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 			if supply.AmountOf(ibcDenom).Equal(amount) {
 				return true
 			}
-			if attempt == 59 {
-				// if we're nearing the end of our attempts, print expected and actual values
-				s.T().Logf("expected: %s, got: %s", amount, supply.AmountOf(ibcDenom))
-			}
 			return false
 		},
-		2*time.Minute,
+		5*time.Minute,
 		2*time.Second,
 		fmt.Sprintf("check supply: %s (expected %s)", ibcDenom, amount),
 	)
 }
 
 func (s *E2ETest) TestIBCTokenTransfer() {
-	s.T().Skip("TODO: Re-enable ibc e2e")
 	// IBC inbound transfer of non x/leverage registered tokens must fail, because
 	// because we won't have price for it.
 	s.Run("send_stake_to_umee", func() {
