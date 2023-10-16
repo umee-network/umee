@@ -44,14 +44,29 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v6.1.0 - 2023-10-17
+
+### Bug Fixes
+
+- [2276](https://github.com/umee-network/umee/pull/2276) e2e test reliability.
+- [2278](https://github.com/umee-network/umee/pull/2278) Fix the store upgrade for metoken.
+
 ## v6.1.0-beta1 - 2023-09-29
+
+### Features
+
+- [2264](https://github.com/umee-network/umee/pull/2264) Emitting event when IBC Quota is reset. 
+- [2254](https://github.com/umee-network/umee/pull/2254) Oracle: added timestamp to prices, added `QueryExgRatesWithTimestamp` method.
+- [2246](https://github.com/umee-network/umee/pull/2246) Emergency Group: support metoken index updates. 
 
 ### API-Breaking
 
-- [2267](https://github.com/umee-network/umee/pull/2267) `BorrowLimit` field in QueryAccountSummaryResponse can be nil on missing borrow price (behavior now matches `LiquidationThreshold` field)
+- [2267](https://github.com/umee-network/umee/pull/2267) `BorrowLimit` field in QueryAccountSummaryResponse can be nil on missing borrow price (behavior now matches `LiquidationThreshold` field).
+- [2254](https://github.com/umee-network/umee/pull/2254) Oracle: `DenomExchangeRate` is renamed to `ExchangeRate`.
 
 ### Improvements
 
+- [2256](https://github.com/umee-network/umee/pull/2256) unify and refactore `client` package. 
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
 - [2267](https://github.com/umee-network/umee/pull/2267) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recent spot price when required.
 - [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary.
