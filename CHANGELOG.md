@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [2285](https://github.com/umee-network/umee/pull/2285) Upgrade Cosmos SDK to v0.46.15.
+- [2288](https://github.com/umee-network/umee/pull/2288) Change `consensus.block.max_size` to 6MB.
 
 ### Bug Fixes
 
