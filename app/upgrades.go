@@ -74,6 +74,12 @@ func (app *UmeeApp) registerUpgrade6_1(planName string, upgradeInfo upgradetypes
 			oracleUpgrader := oraclemigrator.NewMigrator(&app.OracleKeeper)
 			oracleUpgrader.ExgRatesWithTimestamp(ctx)
 
+			var newMaxBytes int64 = 10_000_000 // 10 MB
+			p := app.GetConsensusParams(ctx)
+			ctx.Logger().Info("Changing consensus params", "prev", p.Block.MaxBytes, "new", newMaxBytes)
+			p.Block.MaxBytes = newMaxBytes
+			app.StoreConsensusParams(ctx, p)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
