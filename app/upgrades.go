@@ -74,7 +74,10 @@ func (app *UmeeApp) registerUpgrade6_1(planName string, upgradeInfo upgradetypes
 			oracleUpgrader := oraclemigrator.NewMigrator(&app.OracleKeeper)
 			oracleUpgrader.ExgRatesWithTimestamp(ctx)
 
-			var newMaxBytes int64 = 10_000_000 // 10 MB
+			// reference: (today) avg block size in Ethereum is 170kb
+			// Cosmwasm binaries can be few hundreds KB up to 3MB
+			// our blocks with oracle txs as JSON are about 80kB, so protobuf should be less than 40kB.
+			var newMaxBytes int64 = 6_000_000 // 6 MB
 			p := app.GetConsensusParams(ctx)
 			ctx.Logger().Info("Changing consensus params", "prev", p.Block.MaxBytes, "new", newMaxBytes)
 			p.Block.MaxBytes = newMaxBytes
