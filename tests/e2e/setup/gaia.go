@@ -72,8 +72,9 @@ func (s *E2ETestSuite) runGaiaNetwork() {
 
 	s.GaiaResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:       gaiaVal.instanceName(),
-			Repository: "ghcr.io/umee-network/gaia-e2e",
+			Name: gaiaVal.instanceName(),
+			// Note: we are using this image for testing purpose
+			Repository: "us-central1-docker.pkg.dev/umee-testnet-alpha/gaiad/gaiad",
 			Tag:        "latest",
 			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
