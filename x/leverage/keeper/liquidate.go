@@ -168,7 +168,7 @@ func ComputeLiquidation(
 	}
 
 	// Catch edge cases
-	if !ratio.IsPositive() || ratio.GTE(sdk.OneDec()) {
+	if !ratio.IsPositive() || ratio.GT(sdk.OneDec()) {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
 	}
 
