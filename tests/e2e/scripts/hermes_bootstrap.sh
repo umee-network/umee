@@ -55,7 +55,7 @@ max_gas = 3000000
 gas_price = { price = 0.05, denom = 'uumee' }
 gas_multiplier = 1.1
 max_msg_num = 30
-trusted_node = true
+trusted_node = false
 max_tx_size = 2097152
 max_block_time = '5s'
 trusting_period = '14days'
@@ -73,7 +73,7 @@ key_name = 'val01-gaia'
 address_type = { derivation = 'cosmos' }
 store_prefix = 'ibc'
 default_gas = 100000
-trusted_node = true
+trusted_node = false
 max_gas = 3000000
 gas_price = { price = 0.001, denom = 'stake' }
 gas_multiplier = 1.1

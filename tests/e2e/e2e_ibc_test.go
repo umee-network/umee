@@ -75,7 +75,7 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 			}
 			return false
 		},
-		5*time.Minute,
+		10*time.Minute,
 		2*time.Second,
 		fmt.Sprintf("check supply: %s (expected %s)", ibcDenom, amount),
 	)
