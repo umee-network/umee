@@ -26,7 +26,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 	gaiaVal := s.Chain.GaiaValidators[0]
 	// umeeVal for the relayer needs to be a different account
 	// than what we use for runPriceFeeder.
-	umeeVal := s.Chain.Validators[1]
+	umeeVal := s.Chain.Validators[0]
 	hermesCfgPath := path.Join(tmpDir, "hermes")
 
 	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0o755))
