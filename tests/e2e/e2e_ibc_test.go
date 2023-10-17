@@ -123,7 +123,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.Require().True(umeePrice.GT(sdk.MustNewDecFromStr("0.001")),
 			"umee price should be non zero, and expecting higher than 0.001, got: %s", umeePrice)
 		umeeQuota := sdk.NewCoin(appparams.BondDenom,
-			sdk.NewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
+			sdk.NewDecFromInt(tokenQuota).Quo(umeePrice).Mul(powerReduction).RoundInt(),
 		)
 
 		// send $90 UMEE from umee to gaia (ibc_quota will check)
