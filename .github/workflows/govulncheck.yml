@@ -1,4 +1,4 @@
-name: Tests
+name: Vuln
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
