@@ -15,17 +15,15 @@ Highlights:
 - Add spot price fields to account summary, and ensure all other fields use leverage logic prices.
 - Fix avg params storage for x/oracle.
 - Emergency Groups are able to do security adjustments in x/metoken.
+- Reduced `consensus.block.max_size` to 6MB.
 
 [CHANGELOG](CHANGELOG.md)
 
-### Emergency Groups
+### meTokens
 
-Currently, any parameter update requires going through a standard governance process, which takes 4 days. In a critical situation we need to act immediately:
+_meTokens_ is an abbreviation for Multi-Variant Elastic Tokens. We describe them as a general-purpose packaged asset builder. Simply put, they are tools to index multiple assets, which allows holders to build composable indexes that spread the risk associated with each asset bundled in an index.
 
-- Control IBC Quota parameters (eg disable IBC)
-- apply safe updates to oracle, leverage or incentive module parameters.
-
-Emergency Group can trigger safe parameter updates at any time as a standard transaction. The Emergency Group address is controlled by the Umee Chain governance (`x/gov`) and can be disabled at any time.
+MeTokens offer a way to build DeFi alternatives to TradFi and Web2 financial products. Think of a better, more liquid version of ETFs or mortgage-backed securities. The scope of buildable products will vary from builder to builder as the protocol allows for the creation of some of the most diverse use cases in the Cosmos Ecosystem.
 
 ### Upgrade instructions
 
