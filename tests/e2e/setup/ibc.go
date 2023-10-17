@@ -40,7 +40,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 		&dockertest.RunOptions{
 			Name: "umee-gaia-relayer",
 			// Note: we are using this image for testing purpose
-			Repository: "ghcr.io/umee-network/hermes-e2e",
+			Repository: "us-central1-docker.pkg.dev/umee-testnet-alpha/hermes/hermes",
 			Tag:        "latest",
 			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
