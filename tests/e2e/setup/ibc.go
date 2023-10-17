@@ -40,7 +40,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 		&dockertest.RunOptions{
 			Name: "umee-gaia-relayer",
 			// Note: we are using this image for testing purpose
-			Repository: "us-central1-docker.pkg.dev/umee-testnet-alpha/hermes/hermes",
+			Repository: "ghcr.io/umee-network/hermes-e2e",
 			Tag:        "latest",
 			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
@@ -56,7 +56,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.GaiaResource.Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.ValResources[1].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.ValResources[0].Container.Name[1:]),
 			},
 			Entrypoint: []string{
 				"sh",
