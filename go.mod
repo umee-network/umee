@@ -8,7 +8,7 @@ require (
 	github.com/CosmWasm/wasmd v0.31.0
 	github.com/CosmWasm/wasmvm v1.3.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3
-	github.com/cosmos/cosmos-sdk v0.46.14
+	github.com/cosmos/cosmos-sdk v0.46.15
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/ibc-go/v6 v6.2.0
 	github.com/gogo/protobuf v1.3.3
@@ -330,7 +330,7 @@ require (
 
 replace (
 	github.com/CosmWasm/wasmd => github.com/notional-labs/wasmd v0.31.0-umee.46
-	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.14-umee
+	github.com/cosmos/cosmos-sdk => github.com/umee-network/cosmos-sdk v0.46.15-umee
 	// dgrijalva/jwt-go is deprecated and doesn't receive security updates.
 	github.com/dgrijalva/jwt-go => github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/gogo/protobuf => github.com/regen-network/protobuf v1.3.3-alpha.regen.1
