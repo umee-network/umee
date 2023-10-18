@@ -40,12 +40,13 @@ func (s *E2ETestSuite) runIBCRelayer() {
 		&dockertest.RunOptions{
 			Name: "umee-gaia-relayer",
 			// Note: we are using this image for testing purpose
-			Repository: "us-central1-docker.pkg.dev/umee-testnet-alpha/hermes/hermes",
-			Tag:        "latest",
+			Repository: "informalsystems/hermes",
+			Tag:        "1.6.0",
 			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
 			},
+			User:         "root",
 			ExposedPorts: []string{"3000"},
 			PortBindings: map[docker.Port][]docker.PortBinding{
 				"3000/tcp": {{HostIP: "", HostPort: "3000"}},
