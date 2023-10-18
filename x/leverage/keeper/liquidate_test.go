@@ -19,6 +19,7 @@ func TestComputeLiquidation(t *testing.T) {
 		rewardTokenPrice     sdk.Dec
 		uTokenExchangeRate   sdk.Dec
 		liquidationIncentive sdk.Dec
+		leveragedLiquidate   bool
 	}
 
 	baseCase := func() testCase {
@@ -30,6 +31,7 @@ func TestComputeLiquidation(t *testing.T) {
 			sdk.OneDec(),                 // price(B) = $1
 			sdk.OneDec(),                 // utoken exchange rate 1 u/B => 1 B
 			sdk.MustNewDecFromStr("0.1"), // reward value is 110% repay value
+			false,
 		}
 	}
 
@@ -42,6 +44,7 @@ func TestComputeLiquidation(t *testing.T) {
 			priceRatio,
 			tc.uTokenExchangeRate,
 			tc.liquidationIncentive,
+			tc.leveragedLiquidate,
 		)
 
 		assert.Equal(t, true, sdkmath.NewInt(expectedRepay).Equal(repay),
@@ -73,6 +76,12 @@ func TestComputeLiquidation(t *testing.T) {
 	rewardLimited := baseCase()
 	rewardLimited.availableReward = sdk.NewInt(330)
 	runTestCase(rewardLimited, 300, 330, 330, "reward limited")
+
+	// limiting factor would be available reward, but leveraged liquidation is not limited by base tokens
+	rewardNotLimited := baseCase()
+	rewardNotLimited.availableReward = sdk.NewInt(330)
+	rewardNotLimited.leveragedLiquidate = true
+	runTestCase(rewardNotLimited, 1000, 1100, 1100, "reward not limited")
 
 	// repay token is worth more
 	expensiveRepay := baseCase()
