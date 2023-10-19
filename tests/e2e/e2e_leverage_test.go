@@ -9,56 +9,82 @@ import (
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
-func (s *E2ETest) leverageSupply(addr sdk.AccAddress, denom string, amount uint64) {
+// sends a msgSupply from one of the suite's test accounts
+func (s *E2ETest) leverageSupply(accountIndex int, denom string, amount uint64) {
+	addr := s.AccountAddr(accountIndex)
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
-	s.mustSucceedTx(leveragetypes.NewMsgSupply(addr, asset))
+	s.mustSucceedTx(leveragetypes.NewMsgSupply(addr, asset), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageWithdraw(addr sdk.AccAddress, denom string, amount uint64) {
+// sends a msgWithdraw from one of the suite's test accounts
+func (s *E2ETest) leverageWithdraw(accountIndex int, denom string, amount uint64) {
+	addr := s.AccountAddr(accountIndex)
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
-	s.mustSucceedTx(leveragetypes.NewMsgWithdraw(addr, asset))
+	s.mustSucceedTx(leveragetypes.NewMsgWithdraw(addr, asset), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageMaxWithdraw(addr sdk.AccAddress, denom string) {
-	s.mustSucceedTx(leveragetypes.NewMsgMaxWithdraw(addr, denom))
+// sends a msgMaxWithdraw from one of the suite's test accounts
+func (s *E2ETest) leverageMaxWithdraw(accountIndex int, denom string) {
+	addr := s.AccountAddr(accountIndex)
+	s.mustSucceedTx(leveragetypes.NewMsgMaxWithdraw(addr, denom), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageCollateralize(addr sdk.AccAddress, denom string, amount uint64) {
+// sends a msgCollateralize from one of the suite's test accounts
+func (s *E2ETest) leverageCollateralize(accountIndex int, denom string, amount uint64) {
+	addr := s.AccountAddr(accountIndex)
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
-	s.mustSucceedTx(leveragetypes.NewMsgCollateralize(addr, asset))
+	s.mustSucceedTx(leveragetypes.NewMsgCollateralize(addr, asset), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageDecollateralize(addr sdk.AccAddress, denom string, amount uint64) {
+// sends a msgDecollateralize from one of the suite's test accounts
+func (s *E2ETest) leverageDecollateralize(accountIndex int, denom string, amount uint64) {
+	addr := s.AccountAddr(accountIndex)
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
-	s.mustSucceedTx(leveragetypes.NewMsgDecollateralize(addr, asset))
+	s.mustSucceedTx(leveragetypes.NewMsgDecollateralize(addr, asset), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageSupplyCollateral(addr sdk.AccAddress, denom string, amount uint64) {
+// sends a msgSupplyCollateral from one of the suite's test accounts
+func (s *E2ETest) leverageSupplyCollateral(accountIndex int, denom string, amount uint64) {
+	addr := s.AccountAddr(accountIndex)
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
-	s.mustSucceedTx(leveragetypes.NewMsgSupplyCollateral(addr, asset))
+	s.mustSucceedTx(leveragetypes.NewMsgSupplyCollateral(addr, asset), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageBorrow(addr sdk.AccAddress, denom string, amount uint64) {
+// sends a msgBorrow from one of the suite's test accounts
+func (s *E2ETest) leverageBorrow(accountIndex int, denom string, amount uint64) {
+	addr := s.AccountAddr(accountIndex)
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
-	s.mustSucceedTx(leveragetypes.NewMsgBorrow(addr, asset))
+	s.mustSucceedTx(leveragetypes.NewMsgBorrow(addr, asset), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageMaxBorrow(addr sdk.AccAddress, denom string) {
-	s.mustSucceedTx(leveragetypes.NewMsgMaxBorrow(addr, denom))
+// sends a msgMaxBorrow from one of the suite's test accounts
+func (s *E2ETest) leverageMaxBorrow(accountIndex int, denom string) {
+	addr := s.AccountAddr(accountIndex)
+	s.mustSucceedTx(leveragetypes.NewMsgMaxBorrow(addr, denom), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageRepay(addr sdk.AccAddress, denom string, amount uint64) {
+// sends a msgRepay from one of the suite's test accounts
+func (s *E2ETest) leverageRepay(accountIndex int, denom string, amount uint64) {
+	addr := s.AccountAddr(accountIndex)
 	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
-	s.mustSucceedTx(leveragetypes.NewMsgRepay(addr, asset))
+	s.mustSucceedTx(leveragetypes.NewMsgRepay(addr, asset), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageLiquidate(addr, target sdk.AccAddress, repayDenom string, repayAmount uint64, reward string) {
+// sends a msgLiquidate from one of the suite's test accounts targeting another
+func (s *E2ETest) leverageLiquidate(accountIndex, targetIndex int, repayDenom string, repayAmount uint64, reward string) {
+	addr := s.AccountAddr(accountIndex)
+	target := s.AccountAddr(targetIndex)
 	repay := sdk.NewCoin(repayDenom, sdk.NewIntFromUint64(repayAmount))
-	s.mustSucceedTx(leveragetypes.NewMsgLiquidate(addr, target, repay, reward))
+	s.mustSucceedTx(leveragetypes.NewMsgLiquidate(addr, target, repay, reward), s.AccountClient(accountIndex))
 }
 
-func (s *E2ETest) leverageLeveragedLiquidate(addr, target sdk.AccAddress, repay, reward string) {
-	s.mustSucceedTx(leveragetypes.NewMsgLeveragedLiquidate(addr, target, repay, reward, sdk.ZeroDec()))
+// sends a msgLeveragedLiquidate from one of the suite's test accounts targeting another
+func (s *E2ETest) leverageLeveragedLiquidate(accountIndex, targetIndex int, repay, reward string) {
+	addr := s.AccountAddr(accountIndex)
+	target := s.AccountAddr(targetIndex)
+	s.mustSucceedTx(leveragetypes.NewMsgLeveragedLiquidate(
+		addr, target, repay, reward, sdk.ZeroDec()), s.AccountClient(accountIndex),
+	)
 }
 
 func (s *E2ETest) TestLeverageBasics() {
@@ -71,7 +97,7 @@ func (s *E2ETest) TestLeverageBasics() {
 	s.Run(
 		"leverage update registry", func() {
 			s.Require().NoError(
-				grpc.LeverageRegistryUpdate(s.Umee, []leveragetypes.Token{}, updateTokens),
+				grpc.LeverageRegistryUpdate(s.AccountClient(0), []leveragetypes.Token{}, updateTokens),
 			)
 		},
 	)
@@ -81,27 +107,27 @@ func (s *E2ETest) TestLeverageBasics() {
 
 	s.Run(
 		"initial leverage supply", func() {
-			s.leverageSupply(valAddr, appparams.BondDenom, 100_000_000)
+			s.leverageSupply(0, appparams.BondDenom, 100_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage withdraw", func() {
-			s.leverageWithdraw(valAddr, "u/"+appparams.BondDenom, 10_000_000)
+			s.leverageWithdraw(0, "u/"+appparams.BondDenom, 10_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage collateralize", func() {
-			s.leverageCollateralize(valAddr, "u/"+appparams.BondDenom, 80_000_000)
+			s.leverageCollateralize(0, "u/"+appparams.BondDenom, 80_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage borrow", func() {
-			s.leverageBorrow(valAddr, appparams.BondDenom, 12_000_000)
+			s.leverageBorrow(0, appparams.BondDenom, 12_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage repay", func() {
-			s.leverageRepay(valAddr, appparams.BondDenom, 2_000_000)
+			s.leverageRepay(0, appparams.BondDenom, 2_000_000)
 		},
 	)
 	s.Run(
@@ -110,7 +136,11 @@ func (s *E2ETest) TestLeverageBasics() {
 				appparams.BondDenom,
 				sdk.NewIntFromUint64(30_000_000),
 			)
-			s.mustFailTx(leveragetypes.NewMsgBorrow(valAddr, asset), "undercollateralized")
+			s.mustFailTx(
+				leveragetypes.NewMsgBorrow(s.AccountAddr(0), asset),
+				s.AccountClient(0),
+				"undercollateralized",
+			)
 		},
 	)
 	s.Run(
@@ -125,7 +155,7 @@ func (s *E2ETest) TestLeverageBasics() {
 				},
 			}
 			s.Require().NoError(
-				grpc.LeverageSpecialPairsUpdate(s.Umee, []leveragetypes.SpecialAssetSet{}, pairs),
+				grpc.LeverageSpecialPairsUpdate(s.AccountClient(0), []leveragetypes.SpecialAssetSet{}, pairs),
 			)
 		},
 	)
@@ -135,7 +165,7 @@ func (s *E2ETest) TestLeverageBasics() {
 				appparams.BondDenom,
 				sdk.NewIntFromUint64(30_000_000),
 			)
-			s.mustSucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset))
+			s.mustSucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset), s.AccountClient(0))
 		},
 	)
 }

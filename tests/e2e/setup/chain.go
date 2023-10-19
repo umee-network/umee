@@ -21,6 +21,7 @@ type chain struct {
 	dataDir        string
 	ID             string
 	Validators     []*validator
+	TestAccounts   []*testAccount
 	GaiaValidators []*gaiaValidator
 }
 
@@ -70,6 +71,13 @@ func (c *chain) createAndInitValidators(cdc codec.Codec, count int) error {
 		// loads or generates a consensus key in the validator's config directory
 		// TODO (comment): which are we doing? loading or generating?
 		if err := node.createConsensusKey(); err != nil {
+			return err
+		}
+
+		// create a client which contains only this validator's keys
+		var err error
+		node.Client, err = c.initDedicatedClient(fmt.Sprint("val", i), node.mnemonic)
+		if err != nil {
 			return err
 		}
 

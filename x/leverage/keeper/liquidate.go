@@ -108,6 +108,7 @@ func (k Keeper) getLiquidationAmounts(
 		priceRatio,
 		exchangeRate,
 		liqudationIncentive,
+		leveragedLiquidate,
 	)
 
 	return sdk.NewCoin(repayDenom, repay), sdk.NewCoin(collateralDenom, burn), sdk.NewCoin(rewardDenom, reward), nil
@@ -123,6 +124,7 @@ func (k Keeper) getLiquidationAmounts(
 // - priceRatio: The ratio of repayPrice / rewardPrice, which is used when computing rewards
 // - uTokenExchangeRate: The uToken exchange rate from collateral uToken denom to reward base denom
 // - liquidationIncentive: The liquidation incentive of the token reward denomination
+// - leverageLiquidate: whether liquidation is leveraged (in which case it can disregard availableReward)
 func ComputeLiquidation(
 	availableRepay,
 	availableCollateral,
@@ -130,6 +132,7 @@ func ComputeLiquidation(
 	priceRatio,
 	uTokenExchangeRate,
 	liquidationIncentive sdk.Dec,
+	leverageLiquidate bool,
 ) (tokenRepay sdkmath.Int, collateralBurn sdkmath.Int, tokenReward sdkmath.Int) {
 	// Prevent division by zero
 	if uTokenExchangeRate.IsZero() || priceRatio.IsZero() {
@@ -157,12 +160,15 @@ func ComputeLiquidation(
 	ratio = sdk.MinDec(ratio,
 		toDec(availableCollateral).Quo(maxCollateral),
 	)
-	// Base token reward cannot exceed available unreserved module balance
-	ratio = sdk.MinDec(ratio,
-		toDec(availableReward).Quo(maxReward),
-	)
+	if !leverageLiquidate {
+		// Base token reward cannot exceed available unreserved module balance
+		ratio = sdk.MinDec(ratio,
+			toDec(availableReward).Quo(maxReward),
+		)
+	}
+
 	// Catch edge cases
-	if !ratio.IsPositive() {
+	if !ratio.IsPositive() || ratio.GT(sdk.OneDec()) {
 		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
 	}
 

@@ -19,56 +19,68 @@ refresh = true
 misbehaviour = true
 
 [mode.connections]
-enabled = false
+enabled = true
 
 [mode.channels]
-enabled = false
+enabled = true
 
 [mode.packets]
 enabled = true
-clear_interval = 10
-clear_on_start = true
+clear_interval = 100
+clear_on_start = false
 tx_confirmation = true
 
 [rest]
 enabled = true
 host = '0.0.0.0'
-port = 3031
+port = 3000
 
 [telemetry]
-enabled = true
-host = '127.0.0.1'
+enabled = false
+host = '0.0.0.0'
 port = 3001
 
 [[chains]]
 id = '$UMEE_E2E_UMEE_CHAIN_ID'
 rpc_addr = 'http://$UMEE_E2E_UMEE_VAL_HOST:26657'
 grpc_addr = 'http://$UMEE_E2E_UMEE_VAL_HOST:9090'
-websocket_addr = 'ws://$UMEE_E2E_UMEE_VAL_HOST:26657/websocket'
+event_source = { mode = 'push', url = 'ws://$UMEE_E2E_UMEE_VAL_HOST:26657/websocket', batch_delay = '500ms' }
 rpc_timeout = '10s'
 account_prefix = 'umee'
 key_name = 'val01-umee'
+address_type = { derivation = 'cosmos' }
 store_prefix = 'ibc'
-max_gas = 6000000
+default_gas = 100000
+max_gas = 3000000
 gas_price = { price = 0.05, denom = 'uumee' }
-gas_multiplier = 2
-clock_drift = '3m' # to accommodate docker containers
+gas_multiplier = 1.1
+max_msg_num = 30
+trusted_node = false
+max_tx_size = 2097152
+max_block_time = '5s'
 trusting_period = '14days'
+clock_drift = '5s' # to accommodate docker containers
 trust_threshold = { numerator = '1', denominator = '3' }
 
 [[chains]]
 id = '$UMEE_E2E_GAIA_CHAIN_ID'
 rpc_addr = 'http://$UMEE_E2E_GAIA_VAL_HOST:26657'
 grpc_addr = 'http://$UMEE_E2E_GAIA_VAL_HOST:9090'
-websocket_addr = 'ws://$UMEE_E2E_GAIA_VAL_HOST:26657/websocket'
+event_source = { mode = 'push', url = 'ws://$UMEE_E2E_GAIA_VAL_HOST:26657/websocket', batch_delay = '500ms' }
 rpc_timeout = '10s'
 account_prefix = 'cosmos'
 key_name = 'val01-gaia'
+address_type = { derivation = 'cosmos' }
 store_prefix = 'ibc'
-max_gas = 6000000
+default_gas = 100000
+trusted_node = false
+max_gas = 3000000
 gas_price = { price = 0.001, denom = 'stake' }
-gas_multiplier = 2
-clock_drift = '3m' # to accommodate docker containers
+gas_multiplier = 1.1
+max_msg_num = 30
+max_tx_size = 2097152
+clock_drift = '5s'
+max_block_time = '5s'
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
 EOF
@@ -77,8 +89,22 @@ echo $UMEE_E2E_GAIA_VAL_MNEMONIC > gaia_val_mnemonic.txt
 echo $UMEE_E2E_UMEE_VAL_MNEMONIC > umee_val_mnemonic.txt
 
 # import gaia and umee keys
-hermes keys add --chain ${UMEE_E2E_GAIA_CHAIN_ID} --key-name "val01-gaia" --mnemonic-file gaia_val_mnemonic.txt
-hermes keys add --chain ${UMEE_E2E_UMEE_CHAIN_ID} --key-name "val01-umee" --mnemonic-file umee_val_mnemonic.txt
+echo ${UMEE_E2E_GAIA_VAL_MNEMONIC} > /root/.hermes/val01-gaia
+echo ${UMEE_E2E_UMEE_VAL_MNEMONIC} > /root/.hermes/val01-umee
+
+cat /root/.hermes/val01-umee
+cat /root/.hermes/val01-gaia 
+
+hermes keys add --chain ${UMEE_E2E_GAIA_CHAIN_ID} --key-name "val01-gaia" --mnemonic-file /root/.hermes/val01-gaia
+hermes keys add --chain ${UMEE_E2E_UMEE_CHAIN_ID} --key-name "val01-umee" --mnemonic-file /root/.hermes/val01-umee
+
+
+### Configure the clients and connection
+echo "Initiating connection handshake..."
+hermes create connection --a-chain $UMEE_E2E_UMEE_CHAIN_ID --b-chain $UMEE_E2E_GAIA_CHAIN_ID
+sleep 2 
+echo "Creating the channels..."
+hermes create channel --order unordered --a-chain $UMEE_E2E_UMEE_CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer
 
 # start Hermes relayer
-hermes start
+hermes start 
