@@ -53,7 +53,7 @@ store_prefix = 'ibc'
 default_gas = 100000
 max_gas = 3000000
 gas_price = { price = 0.05, denom = 'uumee' }
-gas_multiplier = 1.1
+gas_multiplier = 1.2
 max_msg_num = 30
 trusted_node = false
 max_tx_size = 2097152
@@ -76,7 +76,7 @@ default_gas = 100000
 trusted_node = false
 max_gas = 3000000
 gas_price = { price = 0.001, denom = 'stake' }
-gas_multiplier = 1.1
+gas_multiplier = 1.2
 max_msg_num = 30
 max_tx_size = 2097152
 clock_drift = '5s'
@@ -101,10 +101,11 @@ hermes keys add --chain ${UMEE_E2E_UMEE_CHAIN_ID} --key-name "val01-umee" --mnem
 
 ### Configure the clients and connection
 echo "Initiating connection handshake..."
+sleep 3
 hermes create connection --a-chain $UMEE_E2E_UMEE_CHAIN_ID --b-chain $UMEE_E2E_GAIA_CHAIN_ID
 sleep 2 
 echo "Creating the channels..."
 hermes create channel --order unordered --a-chain $UMEE_E2E_UMEE_CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer
 
 # start Hermes relayer
-hermes start 
+hermes start
