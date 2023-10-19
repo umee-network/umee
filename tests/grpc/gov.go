@@ -72,7 +72,7 @@ func OracleParamChanges(
 	}
 }
 
-func UIBCIBCTransferSatusUpdate(umeeClient client.Client, status uibc.IBCTransferStatus) error {
+func UIBCIBCTransferStatusUpdate(umeeClient client.Client, status uibc.IBCTransferStatus) error {
 	msg := uibc.MsgGovSetIBCStatus{
 		Authority:   checkers.GovModuleAddr,
 		Description: "",

@@ -54,7 +54,6 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 			},
 			Cmd: []string{
 				"--skip-provider-check",
-				"--log-level=debug",
 			},
 		},
 		noRestart,

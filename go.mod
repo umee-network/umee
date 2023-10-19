@@ -11,7 +11,7 @@ require (
 	github.com/CosmWasm/wasmvm v1.3.0
 	github.com/cometbft/cometbft v0.37.2
 	github.com/cometbft/cometbft-db v0.8.0
-	github.com/cosmos/cosmos-proto v1.0.0-beta.2
+	github.com/cosmos/cosmos-proto v1.0.0-beta.3
 	github.com/cosmos/cosmos-sdk v0.47.5
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.4.10
@@ -43,8 +43,8 @@ require (
 require (
 	4d63.com/gocheckcompilerdirectives v1.2.1 // indirect
 	4d63.com/gochecknoglobals v0.2.1 // indirect
-	cloud.google.com/go v0.110.4 // indirect
-	cloud.google.com/go/compute v1.21.0 // indirect
+	cloud.google.com/go v0.110.7 // indirect
+	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.1 // indirect
 	cloud.google.com/go/storage v1.30.1 // indirect
@@ -167,7 +167,7 @@ require (
 	github.com/google/orderedcode v0.0.1 // indirect
 	github.com/google/s2a-go v0.1.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/google/uuid v1.3.0 // indirect
+	github.com/google/uuid v1.3.1 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20230610083614-0e73809eb601 // indirect
@@ -314,21 +314,21 @@ require (
 	go.uber.org/goleak v1.1.12 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.24.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
+	golang.org/x/crypto v0.14.0 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20230307190834-24139beb5833 // indirect
 	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.15.0 // indirect
-	golang.org/x/oauth2 v0.10.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+	golang.org/x/oauth2 v0.12.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
-	golang.org/x/term v0.12.0 // indirect
+	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/api v0.126.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20230711160842-782d3b101e98 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
+	google.golang.org/genproto v0.0.0-20230822172742-b8732ec3820d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	honnef.co/go/tools v0.4.5 // indirect

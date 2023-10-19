@@ -52,9 +52,26 @@ type E2ETestSuite struct {
 	HermesResource      *dockertest.Resource
 	priceFeederResource *dockertest.Resource
 	ValResources        []*dockertest.Resource
-	Umee                client.Client
 	cdc                 codec.Codec
 	MinNetwork          bool // MinNetwork defines which runs only validator wihtout price-feeder, gaia and ibc-relayer
+}
+
+// AccountClient returns the client associated with the a (non-validator) test account
+// at the given index, panicking if the account does not exist.
+func (s *E2ETestSuite) AccountClient(index int) client.Client {
+	if s.Chain == nil || len(s.Chain.TestAccounts) <= index {
+		panic(fmt.Sprint("no test client at index", index))
+	}
+	return s.Chain.TestAccounts[index].client
+}
+
+// AccountAddr returns the address associated with the a (non-validator) test account
+// at the given index, panicking if the account does not exist.
+func (s *E2ETestSuite) AccountAddr(index int) sdk.AccAddress {
+	if s.Chain == nil || len(s.Chain.TestAccounts) <= index {
+		panic(fmt.Sprint("no test client at index", index))
+	}
+	return s.Chain.TestAccounts[index].addr
 }
 
 func (s *E2ETestSuite) SetupSuite() {
@@ -107,7 +124,14 @@ func (s *E2ETestSuite) SetupSuite() {
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
 	}
-	s.initUmeeClient()
+
+	// Delegate to validators so that test account 0 has majority voting power on the network,
+	// allowing gov actions without validator votes.
+	s.T().Log("Delegating from test account 0 to validators")
+	s.Require().NoError(s.Delegate(0, 0, 10_000000))
+	s.Require().NoError(s.Delegate(0, 1, 10_000000))
+	s.Require().NoError(s.Delegate(0, 2, 50_000000)) // majority to validator 2, as it votes on prices
+	s.T().Log("Setup Complete")
 }
 
 func (s *E2ETestSuite) TearDownSuite() {
@@ -149,8 +173,17 @@ func (s *E2ETestSuite) initNodes() {
 	for _, val := range s.Chain.Validators {
 		valAddr, err := val.KeyInfo.GetAddress()
 		s.Require().NoError(err)
+		// modify genesis file to include new balances
 		s.Require().NoError(
 			addGenesisAccount(s.cdc, val0ConfigDir, "", valCoins, valAddr),
+		)
+	}
+
+	// create test accounts and keys, and fund with multiple tokens
+	for i := 0; i < numTestAccounts; i++ {
+		s.Require().NoError(s.Chain.createTestAccount(s.cdc))
+		s.Require().NoError(
+			addGenesisAccount(s.cdc, val0ConfigDir, "", testAccountCoins, s.AccountAddr(i)),
 		)
 	}
 
@@ -268,12 +301,7 @@ func (s *E2ETestSuite) initGenesis() {
 	s.T().Log("creating genesis txs")
 	genTxs := make([]json.RawMessage, len(s.Chain.Validators))
 	for i, val := range s.Chain.Validators {
-		var createValmsg sdk.Msg
-		if i == 2 {
-			createValmsg, err = val.buildCreateValidatorMsg(stakeAmountCoin2)
-		} else {
-			createValmsg, err = val.buildCreateValidatorMsg(stakeAmountCoin)
-		}
+		createValmsg, err := val.buildCreateValidatorMsg(stakeAmountCoin)
 		s.Require().NoError(err)
 
 		signedTx, err := val.signMsg(s.cdc, createValmsg)
@@ -413,29 +441,26 @@ func (s *E2ETestSuite) runValidators() {
 
 			return true
 		},
-		5*time.Minute,
+		1*time.Minute,
 		time.Second,
 		"umee node failed to produce blocks",
 	)
 }
 
-func (s *E2ETestSuite) initUmeeClient() {
-	var err error
-	mnemonics := make(map[string]string)
-	for index, v := range s.Chain.Validators {
-		mnemonics[fmt.Sprintf("val%d", index)] = v.mnemonic
-	}
-	ecfg := app.MakeEncodingConfig()
-	s.Umee, err = client.NewClient(
-		s.Chain.dataDir,
-		s.Chain.ID,
+// create a client which has only a single mnemonic stored. This client can be safely
+// passed into e2e functions which use a single unspecified key (i.e. client.keyringRecord[0])
+// to submit their transactions, as is currently the case.
+func (c *chain) initDedicatedClient(name, mnemonic string) (client.Client, error) {
+	mnemonics := map[string]string{name: mnemonic}
+	return client.NewClient(
+		c.dataDir,
+		c.ID,
 		"tcp://localhost:26657",
 		"tcp://localhost:9090",
 		mnemonics,
 		1,
-		ecfg,
+		app.MakeEncodingConfig(),
 	)
-	s.Require().NoError(err)
 }
 
 func noRestart(config *docker.HostConfig) {
