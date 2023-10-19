@@ -1,5 +1,6 @@
 FROM informalsystems/hermes:1.6.0 AS hermes-builder
 
+FROM debian:buster-slim
 USER root
 
 COPY --from=hermes-builder /usr/bin/hermes /usr/local/bin/
