@@ -64,20 +64,19 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 }
 
 func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
+	actualSupply := math.ZeroInt()
 	s.Require().Eventually(
 		func() bool {
 			supply, err := s.QueryTotalSupply(endpoint)
 			if err != nil {
 				return false
 			}
-			if supply.AmountOf(ibcDenom).Equal(amount) {
-				return true
-			}
-			return false
+			actualSupply = supply.AmountOf(ibcDenom)
+			return supply.AmountOf(ibcDenom).Equal(amount)
 		},
 		10*time.Minute,
 		2*time.Second,
-		fmt.Sprintf("check supply: %s (expected %s)", ibcDenom, amount),
+		fmt.Sprintf("check supply: %s (expected %s, actual %s)", ibcDenom, amount, actualSupply),
 	)
 }
 
@@ -102,11 +101,19 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// totalQuota := math.NewInt(120)
 		tokenQuota := math.NewInt(100)
 
+		var atomPrice math.LegacyDec
 		// compute the amount of ATOM sent from umee to gaia which would meet atom's token quota
-		atomPrice, err := s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
-		s.Require().NoError(err)
-		s.Require().True(atomPrice.GT(sdk.OneDec()),
-			"atom price should be non zero, and expecting higher than 1, got: %s", atomPrice)
+		s.Require().Eventually(func() bool {
+			atomPrice, err := s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
+			if err != nil {
+				return false
+			}
+			return atomPrice.GT(sdk.OneDec())
+		},
+			3*time.Minute,
+			1*time.Second,
+		)
+
 		atomQuota := sdk.NewCoin(uatomIBCHash,
 			sdk.NewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
 		)

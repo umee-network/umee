@@ -119,11 +119,16 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
+	fullResp, err := GetTxResponse(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
+	}
+
+	if len(fullResp.Logs) == 0 {
 		return fmt.Errorf("no logs in response")
 	}
 
-	return MakeVoteAndCheckProposal(umeeClient, *resp)
+	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
 }
 
 // LeverageSpecialPairsUpdate submits a gov transaction to update leverage special assets,
@@ -223,4 +228,17 @@ func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) err
 	}
 
 	return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
+}
+
+func GetTxResponse(umeeClient client.Client, txHash string) (resp *sdk.TxResponse, err error) {
+	for i := 0; i < 5; i++ {
+		resp, err = umeeClient.QueryTxHash(txHash)
+		if err == nil {
+			break
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	return resp, err
 }
