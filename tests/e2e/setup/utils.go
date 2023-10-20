@@ -84,7 +84,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 			"--amount",
 			token.Amount.String(),
 			fmt.Sprintf("--denom=%s", token.Denom),
-			"--timeout-height-offset=1000",
+			"--timeout-height-offset=3000",
 		}
 
 		if len(recipient) != 0 {
@@ -114,6 +114,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 
 		// retry if we got an error
 		if err != nil && i < 4 {
+			time.Sleep(1 * time.Second)
 			continue
 		}
 
