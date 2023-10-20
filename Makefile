@@ -180,6 +180,9 @@ docker-push-hermes:
 docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
 
+docker-push-gorelayer:
+	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gorelayer-e2e:latest -f gorelayer.Dockerfile .;  docker push ghcr.io/umee-network/gorelayer-e2e:latest
+
 .PHONY: docker-build docker-push-hermes docker-push-gaia
 
 ###############################################################################

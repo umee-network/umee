@@ -12,5 +12,5 @@ gaiad collect-gentxs
 sed -i 's/127.0.0.1:26657/0.0.0.0:26657/g' /root/.gaia/config/config.toml
 sed -i -e 's/enable = false/enable = true/g' /root/.gaia/config/app.toml
 sed -i -e 's/pruning = "default"/pruning = "nothing"/g' /root/.gaia/config/app.toml
-sed -i 's/timeout_commit = "5s"/timeout_commit = "1s"/g' /root/.gaia/config/config.toml
+sed -i 's/timeout_commit = "5s"/timeout_commit = "2s"/g' /root/.gaia/config/config.toml
 gaiad start --x-crisis-skip-assert-invariants

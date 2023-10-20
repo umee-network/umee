@@ -97,7 +97,7 @@ func (s *E2ETestSuite) SetupSuite() {
 		s.runPriceFeeder(2) // index of the validator voting on prices
 		s.runGaiaNetwork()
 		time.Sleep(3 * time.Second) // wait for gaia to start
-		s.runIBCRelayer()
+		s.runIBCGoRelayer()
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
 	}

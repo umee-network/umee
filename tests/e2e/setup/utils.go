@@ -68,26 +68,41 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 			s.T().Logf("...try %d", i+1)
 		}
 
+		// cmd := []string{
+		// 	"hermes",
+		// 	"tx",
+		// 	"ft-transfer",
+		// 	"--dst-chain",
+		// 	dstChainID,
+		// 	"--src-chain",
+		// 	srcChainID,
+		// 	"--src-port",
+		// 	"transfer", // source chain port ID
+		// 	"--src-channel",
+		// 	"channel-0", // since only one connection/channel exists, assume 0
+		// 	"--amount",
+		// 	token.Amount.String(),
+		// 	fmt.Sprintf("--denom=%s", token.Denom),
+		// 	"--timeout-height-offset=3000",
+		// }
+
+		umeeRecipient := "umee1eejjg35ktj7ftgr832vkvjtjvv85cmqt6zyet8"
+		gaiaRecipient := "cosmos1t80cauvuz7w2hz68l9ya0rhqnx5sx23urptfsx"
+		var receiver string
+		if dstChainID == "test-gaia-chain" {
+			receiver = gaiaRecipient
+		} else {
+			receiver = umeeRecipient
+		}
+
 		cmd := []string{
-			"hermes",
-			"tx",
-			"ft-transfer",
-			"--dst-chain",
-			dstChainID,
-			"--src-chain",
-			srcChainID,
-			"--src-port",
-			"transfer", // source chain port ID
-			"--src-channel",
-			"channel-0", // since only one connection/channel exists, assume 0
-			"--amount",
-			token.Amount.String(),
-			fmt.Sprintf("--denom=%s", token.Denom),
-			"--timeout-height-offset=3000",
+			"rly", "tx", "transfer", srcChainID, dstChainID, token.String(),
 		}
 
 		if len(recipient) != 0 {
-			cmd = append(cmd, fmt.Sprintf("--receiver=%s", recipient))
+			cmd = append(cmd, recipient, "channel-0")
+		} else {
+			cmd = append(cmd, receiver, "channel-0")
 		}
 
 		exec, err := s.DkrPool.Client.CreateExec(docker.CreateExecOptions{
