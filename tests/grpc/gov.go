@@ -150,11 +150,16 @@ func LeverageSpecialPairsUpdate(
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
+	fullResp, err := GetTxResponse(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
+	}
+
+	if len(fullResp.Logs) == 0 {
 		return fmt.Errorf("no logs in response")
 	}
 
-	return MakeVoteAndCheckProposal(umeeClient, *resp)
+	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
 }
 
 // MetokenRegistryUpdate submits a gov transaction to update metoken registry, votes, and waits for proposal to pass.
@@ -170,11 +175,16 @@ func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes [
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
+	fullResp, err := GetTxResponse(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
+	}
+
+	if len(fullResp.Logs) == 0 {
 		return fmt.Errorf("no logs in response")
 	}
 
-	return MakeVoteAndCheckProposal(umeeClient, *resp)
+	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
 }
 
 func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) error {
