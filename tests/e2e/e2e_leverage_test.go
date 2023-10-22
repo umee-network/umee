@@ -102,8 +102,8 @@ func (s *E2ETest) TestLeverageBasics() {
 		},
 	)
 
-	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
-	s.Require().NoError(err)
+	// valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
+	// s.Require().NoError(err)
 
 	s.Run(
 		"initial leverage supply", func() {
