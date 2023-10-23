@@ -38,8 +38,7 @@ func (s *E2ETestSuite) runIBCGoRelayer() {
 
 	s.GoRelayerResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name: "umee-gaia-gorelayer",
-			// Note: we are using this image for testing purpose
+			Name:       "umee-gaia-gorelayer",
 			Repository: "ghcr.io/cosmos/relayer",
 			Tag:        "v2.4.2",
 			NetworkID:  s.DkrNet.Network.ID,
@@ -62,6 +61,7 @@ func (s *E2ETestSuite) runIBCGoRelayer() {
 		},
 		noRestart,
 	)
+
 	s.Require().NoError(err)
 	s.T().Logf("✅ Started gorelayer container: %s", s.GoRelayerResource.Container.ID)
 
@@ -78,7 +78,7 @@ func (s *E2ETestSuite) runIBCGoRelayer() {
 			}
 			return channels
 		},
-		10*time.Minute,
+		5*time.Minute,
 		3*time.Second,
 	)
 	return
