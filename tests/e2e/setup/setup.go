@@ -116,6 +116,14 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initGenesis()          // modify genesis file, add gentxs, and save to each validator
 	s.initValidatorConfigs() // modify config.toml and app.toml for each validator
 	s.runValidators()
+
+	// Delegate to validators so that test account 0 has majority voting power on the network,
+	// allowing gov actions without validator votes.
+	s.T().Log("Delegating from test account 0 to validators")
+	s.Require().NoError(s.Delegate(0, 0, 10_000000))
+	s.Require().NoError(s.Delegate(0, 1, 10_000000))
+	s.Require().NoError(s.Delegate(0, 2, 50_000000)) // majority to validator 2, as it votes on prices
+
 	if !s.MinNetwork {
 		s.runPriceFeeder(2) // index of the validator voting on prices
 		s.runGaiaNetwork()
@@ -124,13 +132,6 @@ func (s *E2ETestSuite) SetupSuite() {
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
 	}
-
-	// Delegate to validators so that test account 0 has majority voting power on the network,
-	// allowing gov actions without validator votes.
-	s.T().Log("Delegating from test account 0 to validators")
-	s.Require().NoError(s.Delegate(0, 0, 10_000000))
-	s.Require().NoError(s.Delegate(0, 1, 10_000000))
-	s.Require().NoError(s.Delegate(0, 2, 50_000000)) // majority to validator 2, as it votes on prices
 	s.T().Log("Setup Complete")
 }
 
