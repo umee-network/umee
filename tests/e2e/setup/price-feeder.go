@@ -62,7 +62,7 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	s.Require().NoError(err)
 
 	hostport := getHostPort(s.priceFeederResource, PriceFeederServerPort)
-	s.T().Log("result from gethostport:", hostport)
+	s.T().Log("result from gethostport:", hostport, err)
 	if hostport == "" {
 		hostport = "localhost:7171"
 	}
