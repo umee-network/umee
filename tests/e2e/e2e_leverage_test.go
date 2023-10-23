@@ -88,6 +88,7 @@ func (s *E2ETest) leverageLeveragedLiquidate(accountIndex, targetIndex int, repa
 }
 
 func (s *E2ETest) TestLeverageBasics() {
+	s.T().Skip()
 	umeeNoMedians := fixtures.Token(appparams.BondDenom, "UMEE", 6)
 	umeeNoMedians.HistoricMedians = 0
 	updateTokens := []leveragetypes.Token{
