@@ -60,7 +60,16 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	)
 	s.Require().NoError(err)
 
-	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort(PriceFeederServerPort))
+	var endpoint string
+	switch os.Getenv("DOCKER_HOST") {
+	case "":
+		endpoint = s.priceFeederResource.GetHostPort(PriceFeederServerPort)
+	default:
+		endpoint = s.priceFeederResource.Container.NetworkSettings.Networks["bridge"].IPAddress + ":" + s.priceFeederResource.GetPort(PriceFeederServerPort)
+	}
+
+	endpoint = fmt.Sprintf("http://%s/api/v1/prices", endpoint)
+	s.T().Log("this is the endpoint:", endpoint, PriceFeederContainerRepo)
 
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
