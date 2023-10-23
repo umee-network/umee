@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -60,15 +61,7 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	)
 	s.Require().NoError(err)
 
-	var endpoint string
-	switch os.Getenv("DOCKER_HOST") {
-	case "":
-		endpoint = s.priceFeederResource.GetHostPort(PriceFeederServerPort)
-	default:
-		endpoint = s.priceFeederResource.Container.NetworkSettings.Networks["bridge"].IPAddress + ":" + s.priceFeederResource.GetPort(PriceFeederServerPort)
-	}
-
-	endpoint = fmt.Sprintf("http://%s/api/v1/prices", endpoint)
+	endpoint := fmt.Sprintf("http://%s/api/v1/prices", getHostPort(s.priceFeederResource, PriceFeederServerPort))
 	s.T().Log("this is the endpoint:", endpoint, PriceFeederContainerRepo)
 
 	checkHealth := func() bool {
@@ -127,4 +120,16 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	}
 
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
+}
+
+func getHostPort(resource *dockertest.Resource, id string) string {
+	dockerURL := os.Getenv("DOCKER_HOST")
+	if dockerURL == "" {
+		return resource.GetHostPort(id)
+	}
+	u, err := url.Parse(dockerURL)
+	if err != nil {
+		panic(err)
+	}
+	return u.Hostname() + ":" + resource.GetPort(id)
 }
