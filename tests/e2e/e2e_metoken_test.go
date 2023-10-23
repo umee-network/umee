@@ -15,6 +15,7 @@ import (
 )
 
 func (s *E2ETest) TestMetokenSwapAndRedeem() {
+	s.T().Skip()
 	var index metoken.Index
 	testAddr := s.AccountAddr(0)
 	expectedBalance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)

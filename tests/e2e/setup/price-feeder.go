@@ -61,7 +61,6 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	s.Require().NoError(err)
 
 	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort(PriceFeederServerPort))
-	s.T().Log("this is the endpoint:", endpoint, PriceFeederContainerRepo)
 
 	checkHealth := func() bool {
 		resp, err := http.Get(endpoint)
