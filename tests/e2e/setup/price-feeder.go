@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"time"
 
@@ -61,12 +60,7 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	)
 	s.Require().NoError(err)
 
-	hostport := getHostPort(s.priceFeederResource, PriceFeederServerPort)
-	s.T().Log("result from gethostport:", hostport, err)
-	if hostport == "" {
-		hostport = "localhost:7171"
-	}
-	endpoint := fmt.Sprintf("http://%s/api/v1/prices", hostport)
+	endpoint := fmt.Sprintf("http://%s/api/v1/prices", s.priceFeederResource.GetHostPort(PriceFeederServerPort))
 	s.T().Log("this is the endpoint:", endpoint, PriceFeederContainerRepo)
 
 	checkHealth := func() bool {
@@ -109,6 +103,7 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	}
 
 	if !isHealthy {
+
 		err := s.DkrPool.Client.Logs(docker.LogsOptions{
 			Container:    s.priceFeederResource.Container.ID,
 			OutputStream: os.Stdout,
@@ -125,16 +120,4 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	}
 
 	s.T().Logf("started price-feeder container: %s", s.priceFeederResource.Container.ID)
-}
-
-func getHostPort(resource *dockertest.Resource, id string) string {
-	dockerURL := os.Getenv("DOCKER_HOST")
-	if dockerURL == "" {
-		return resource.GetHostPort(id)
-	}
-	u, err := url.Parse(dockerURL)
-	if err != nil {
-		panic(err)
-	}
-	return u.Hostname() + ":" + resource.GetPort(id)
 }
