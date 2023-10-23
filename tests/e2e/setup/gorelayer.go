@@ -3,12 +3,12 @@ package setup
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"time"
 
 	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
 )
 
 func (s *E2ETestSuite) runIBCGoRelayer() {
@@ -31,21 +31,22 @@ func (s *E2ETestSuite) runIBCGoRelayer() {
 	)
 	s.Require().NoError(err)
 
-	s.HermesResource, err = s.DkrPool.RunWithOptions(
+	c := exec.Command("cp", "-r", filepath.Join("./scripts/", "relayer"), rlyCfgPath)
+	if err = c.Run(); err == nil {
+		s.T().Log("rly config files copied from ", filepath.Join("./scripts/", "relayer"), " to ", rlyCfgPath)
+	}
+
+	s.GoRelayerResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name: "umee-gaia-go-relayer",
+			Name: "umee-gaia-gorelayer",
 			// Note: we are using this image for testing purpose
-			Repository: "ghcr.io/umee-network/gorelayer-e2e",
-			Tag:        "latest",
+			Repository: "ghcr.io/cosmos/relayer",
+			Tag:        "v2.4.2",
 			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/home/relayer", rlyCfgPath),
 			},
-			User:         "root",
-			ExposedPorts: []string{"3000"},
-			PortBindings: map[docker.Port][]docker.PortBinding{
-				"3000/tcp": {{HostIP: "", HostPort: "3000"}},
-			},
+			User: "relayer",
 			Env: []string{
 				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", GaiaChainID),
 				fmt.Sprintf("UMEE_E2E_UMEE_CHAIN_ID=%s", s.Chain.ID),
@@ -56,14 +57,13 @@ func (s *E2ETestSuite) runIBCGoRelayer() {
 			},
 			Entrypoint: []string{
 				"sh",
-				"-c",
-				"chmod +x /home/relayer/gorelayer.sh && /home/relayer/gorelayer.sh",
+				"/home/relayer/gorelayer.sh",
 			},
 		},
 		noRestart,
 	)
 	s.Require().NoError(err)
-	s.T().Logf("✅ Started gorelayer container: %s", s.HermesResource.Container.ID)
+	s.T().Logf("✅ Started gorelayer container: %s", s.GoRelayerResource.Container.ID)
 
 	s.T().Logf("ℹ️ Waiting for ibc channel creation...")
 	s.Require().Eventually(
@@ -81,4 +81,5 @@ func (s *E2ETestSuite) runIBCGoRelayer() {
 		10*time.Minute,
 		3*time.Second,
 	)
+	return
 }

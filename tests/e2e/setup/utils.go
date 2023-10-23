@@ -68,42 +68,43 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 			s.T().Logf("...try %d", i+1)
 		}
 
-		// cmd := []string{
-		// 	"hermes",
-		// 	"tx",
-		// 	"ft-transfer",
-		// 	"--dst-chain",
-		// 	dstChainID,
-		// 	"--src-chain",
-		// 	srcChainID,
-		// 	"--src-port",
-		// 	"transfer", // source chain port ID
-		// 	"--src-channel",
-		// 	"channel-0", // since only one connection/channel exists, assume 0
-		// 	"--amount",
-		// 	token.Amount.String(),
-		// 	fmt.Sprintf("--denom=%s", token.Denom),
-		// 	"--timeout-height-offset=3000",
+		cmd := []string{
+			"hermes",
+			"tx",
+			"ft-transfer",
+			"--dst-chain",
+			dstChainID,
+			"--src-chain",
+			srcChainID,
+			"--src-port",
+			"transfer", // source chain port ID
+			"--src-channel",
+			"channel-0", // since only one connection/channel exists, assume 0
+			"--amount",
+			token.Amount.String(),
+			fmt.Sprintf("--denom=%s", token.Denom),
+			"--timeout-height-offset=3000",
+		}
+
+		// This section for gorelayer txn
+		// umeeRecipient := "umee1eejjg35ktj7ftgr832vkvjtjvv85cmqt6zyet8"
+		// gaiaRecipient := "cosmos1t80cauvuz7w2hz68l9ya0rhqnx5sx23urptfsx"
+		// var receiver string
+		// if dstChainID == GaiaChainID {
+		// 	receiver = gaiaRecipient
+		// } else {
+		// 	receiver = umeeRecipient
 		// }
 
-		umeeRecipient := "umee1eejjg35ktj7ftgr832vkvjtjvv85cmqt6zyet8"
-		gaiaRecipient := "cosmos1t80cauvuz7w2hz68l9ya0rhqnx5sx23urptfsx"
-		var receiver string
-		if dstChainID == "test-gaia-chain" {
-			receiver = gaiaRecipient
-		} else {
-			receiver = umeeRecipient
-		}
+		// cmd := []string{
+		// 	"rly", "tx", "transfer", srcChainID, dstChainID, token.String(),
+		// }
 
-		cmd := []string{
-			"rly", "tx", "transfer", srcChainID, dstChainID, token.String(),
-		}
-
-		if len(recipient) != 0 {
-			cmd = append(cmd, recipient, "channel-0")
-		} else {
-			cmd = append(cmd, receiver, "channel-0")
-		}
+		// if len(recipient) != 0 {
+		// 	cmd = append(cmd, recipient, "channel-0")
+		// } else {
+		// 	cmd = append(cmd, receiver, "channel-0")
+		// }
 
 		exec, err := s.DkrPool.Client.CreateExec(docker.CreateExecOptions{
 			Context:      ctx,
@@ -139,15 +140,14 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 		// Note: we are cchecking only one side of ibc , we don't know whethever ibc transfer is succeed on one side
 		// some times relayer can't send the packets to another chain
 
-		// // don't check for the tx hash if we expect this to fail due to quota
-		// if strings.Contains(errBuf.String(), "quota transfer exceeded") {
-		// 	s.Require().True(failDueToQuota)
-		// 	return
-		// }
+		// don't check for the tx hash if we expect this to fail due to quota
+		if strings.Contains(errBuf.String(), "quota transfer exceeded") {
+			s.Require().True(failDueToQuota)
+			return
+		}
 
 		// re := regexp.MustCompile(`[0-9A-Fa-f]{64}`)
 		// txHash := re.FindString(errBuf.String() + outBuf.String())
-
 		// // retry if we didn't get a txHash
 		// if len(txHash) == 0 && i < 4 {
 		// 	continue
@@ -166,6 +166,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 		// 	}
 		// 	return err == nil
 		// }, 5*time.Second, 200*time.Millisecond, "require tx to be included in block")
+		// time.Sleep(time.Second * )
 		return
 	}
 }

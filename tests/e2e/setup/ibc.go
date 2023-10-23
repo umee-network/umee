@@ -16,7 +16,7 @@ import (
 	"github.com/ory/dockertest/v3/docker"
 )
 
-func (s *E2ETestSuite) runIBCRelayer() {
+func (s *E2ETestSuite) runIBCHermesRelayer() {
 	s.T().Log("starting Hermes relayer container...")
 
 	tmpDir, err := os.MkdirTemp("", "umee-e2e-testnet-hermes-")
@@ -81,7 +81,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 			}
 			return channels
 		},
-		10*time.Minute,
+		1*time.Minute,
 		3*time.Second,
 	)
 

@@ -96,12 +96,13 @@ hermes keys add --chain ${UMEE_E2E_GAIA_CHAIN_ID} --key-name "val01-gaia" --mnem
 hermes keys add --chain ${UMEE_E2E_UMEE_CHAIN_ID} --key-name "val01-umee" --mnemonic-file /root/.hermes/val01-umee
 
 
-### Configure the clients and connection
-echo "Initiating connection handshake..."
-hermes create connection --a-chain $UMEE_E2E_UMEE_CHAIN_ID --b-chain $UMEE_E2E_GAIA_CHAIN_ID
-sleep 2 
-echo "Creating the channels..."
-hermes create channel --order unordered --a-chain $UMEE_E2E_UMEE_CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer
+# ### Configure the clients and connection
+# echo "Initiating connection handshake..."
+# hermes create connection --a-chain $UMEE_E2E_UMEE_CHAIN_ID --b-chain $UMEE_E2E_GAIA_CHAIN_ID
+# sleep 2 
+# echo "Creating the channels..."
+# hermes create channel --order unordered --a-chain $UMEE_E2E_UMEE_CHAIN_ID --a-connection connection-0 --a-port transfer --b-port transfer
 
+# Note: we are using gorelayer for creating ibc channels 
 # start Hermes relayer
-hermes start 
+hermes start --full-scan

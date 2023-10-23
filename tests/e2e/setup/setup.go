@@ -47,6 +47,7 @@ type E2ETestSuite struct {
 	DkrNet              *dockertest.Network
 	GaiaResource        *dockertest.Resource
 	HermesResource      *dockertest.Resource
+	GoRelayerResource   *dockertest.Resource
 	priceFeederResource *dockertest.Resource
 	ValResources        []*dockertest.Resource
 	cdc                 codec.Codec
@@ -98,6 +99,7 @@ func (s *E2ETestSuite) SetupSuite() {
 		s.runGaiaNetwork()
 		time.Sleep(3 * time.Second) // wait for gaia to start
 		s.runIBCGoRelayer()
+		s.runIBCHermesRelayer()
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
 	}
@@ -125,6 +127,7 @@ func (s *E2ETestSuite) TearDownSuite() {
 
 	if !s.MinNetwork {
 		s.Require().NoError(s.DkrPool.Purge(s.GaiaResource))
+		s.Require().NoError(s.DkrPool.Purge(s.GoRelayerResource))
 		s.Require().NoError(s.DkrPool.Purge(s.HermesResource))
 		s.Require().NoError(s.DkrPool.Purge(s.priceFeederResource))
 	}
@@ -274,8 +277,8 @@ func (s *E2ETestSuite) initGenesis() {
 	uibcGenState.Params.TokenQuota = sdk.NewDec(100)
 	// 120$ for all tokens on quota duration
 	uibcGenState.Params.TotalQuota = sdk.NewDec(120)
-	// quotas will reset every 300 seconds
-	uibcGenState.Params.QuotaDuration = time.Second * 300
+	// quotas will reset every 120 seconds
+	uibcGenState.Params.QuotaDuration = time.Second * 120
 
 	bz, err = s.cdc.MarshalJSON(&uibcGenState)
 	s.Require().NoError(err)

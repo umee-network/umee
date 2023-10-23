@@ -11,7 +11,6 @@ import (
 	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 )
@@ -53,7 +52,7 @@ func newChain() (*chain, error) {
 	}
 
 	return &chain{
-		ID:      "chain-" + tmrand.NewRand().Str(6),
+		ID:      "umee-test-1",
 		dataDir: tmpDir,
 	}, nil
 }

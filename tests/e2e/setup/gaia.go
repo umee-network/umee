@@ -16,7 +16,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 )
 
-const GaiaChainID = "test-gaia-chain"
+const GaiaChainID = "gaia-test-1"
 
 type gaiaValidator struct {
 	index    int

@@ -174,16 +174,10 @@ docker-build-e2e:
 docker-build:
 	@DOCKER_BUILDKIT=1 docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
 
-docker-push-hermes:
-	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/hermes-e2e:latest -f hermes.Dockerfile .; docker push ghcr.io/umee-network/hermes-e2e:latest
-
 docker-push-gaia:
 	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gaia-e2e:latest -f gaia.Dockerfile .; docker push ghcr.io/umee-network/gaia-e2e:latest
 
-docker-push-gorelayer:
-	@cd tests/e2e/docker; docker build -t ghcr.io/umee-network/gorelayer-e2e:latest -f gorelayer.Dockerfile .;  docker push ghcr.io/umee-network/gorelayer-e2e:latest
-
-.PHONY: docker-build docker-push-hermes docker-push-gaia
+.PHONY: docker-build docker-push-gaia
 
 ###############################################################################
 ##                                   Tests                                   ##
@@ -236,8 +230,8 @@ test-e2e-cov: $(TEST_E2E_DEPS)
 	go test ./tests/e2e/... -mod=readonly -timeout 30m -race -v -tags='$(TEST_E2E_TAGS)' -coverpkg=./... -coverprofile=e2e-profile.out -covermode=atomic
 
 test-e2e-clean:
-	docker stop umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder || true
-	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder || true
+	docker stop umee0 umee1 umee2 umee-gaia-gorelayer umee-gaia-relayer gaiaval0 umee-price-feeder || true
+	docker rm umee0 umee1 umee2 umee-gaia-gorelayer umee-gaia-relayer gaiaval0 umee-price-feeder || true
 	docker network prune -f
 
 test-qa: 

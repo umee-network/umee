@@ -1,0 +1,19 @@
+{
+  "type": "cosmos",
+  "value": {
+    "key": "ibc",
+    "chain-id": "gaia-test-1",
+    "rpc-addr": "http://gaiaval0:26657",
+    "grpc-addr": "http://gaiaval0:9090",
+    "account-prefix": "cosmos",
+    "keyring-backend": "test",
+    "gas-adjustment": 1.5,
+    "gas-prices": "0.01stake",
+    "min-gas-amount": 1000000,
+    "max-gas-amount": 3000000,
+    "debug": true,
+    "timeout": "10s",
+    "output-format": "json",
+    "sign-mode": "direct"
+  }
+}
