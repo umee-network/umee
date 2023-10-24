@@ -9,6 +9,7 @@ import (
 	icatypes "github.com/cosmos/ibc-go/v6/modules/apps/27-interchain-accounts/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
 	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
+	"github.com/tendermint/tendermint/libs/log"
 
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -64,16 +65,23 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 func (app *UmeeApp) registerUpgrade6_1(planName string, upgradeInfo upgradetypes.Plan) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("-----------------------------\n-----------------------------")
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			ctx.Logger().Info("Run v6.1 migration")
+			printPlanName(planName, ctx.Logger())
 			err := app.OracleKeeper.SetHistoricAvgCounterParams(ctx, oracletypes.DefaultAvgCounterParams())
 			if err != nil {
 				return fromVM, err
 			}
 
 			oracleUpgrader := oraclemigrator.NewMigrator(&app.OracleKeeper)
-			oracleUpgrader.MigrateOldExgRatesToExgRatesWithTimestamp(ctx)
+			oracleUpgrader.ExgRatesWithTimestamp(ctx)
+
+			// reference: (today) avg block size in Ethereum is 170kb
+			// Cosmwasm binaries can be few hundreds KB up to 3MB
+			// our blocks with oracle txs as JSON are about 80kB, so protobuf should be less than 40kB.
+			var newMaxBytes int64 = 4_000_000 // 4 MB
+			p := app.GetConsensusParams(ctx)
+			ctx.Logger().Info("Changing consensus params", "prev", p.Block.MaxBytes, "new", newMaxBytes)
+			p.Block.MaxBytes = newMaxBytes
+			app.StoreConsensusParams(ctx, p)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
@@ -92,7 +100,7 @@ func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("-----------------------------\n---------------")
+			printPlanName(planName, ctx.Logger())
 			if err := app.LeverageKeeper.SetParams(ctx, leveragetypes.DefaultParams()); err != nil {
 				return fromVM, err
 			}
@@ -309,6 +317,8 @@ func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
 
 func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		printPlanName(planName, ctx.Logger())
+		ctx.Logger().Info("-----------------------------\n-----------------------------")
 		ctx.Logger().Info("Upgrade handler execution", "name", planName)
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	}
@@ -333,4 +343,9 @@ func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Pl
 			Added: newStores,
 		})
 	}
+}
+
+func printPlanName(planName string, logger log.Logger) {
+	logger.Info("-----------------------------\n-----------------------------")
+	logger.Info("Upgrade handler execution", "name", planName)
 }

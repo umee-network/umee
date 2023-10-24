@@ -26,7 +26,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 	gaiaVal := s.Chain.GaiaValidators[0]
 	// umeeVal for the relayer needs to be a different account
 	// than what we use for runPriceFeeder.
-	umeeVal := s.Chain.Validators[1]
+	umeeVal := s.Chain.Validators[0]
 	hermesCfgPath := path.Join(tmpDir, "hermes")
 
 	s.Require().NoError(os.MkdirAll(hermesCfgPath, 0o755))
@@ -38,16 +38,18 @@ func (s *E2ETestSuite) runIBCRelayer() {
 
 	s.HermesResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:       "umee-gaia-relayer",
-			Repository: "ghcr.io/umee-network/hermes-e2e",
-			Tag:        "latest",
+			Name: "umee-gaia-relayer",
+			// Note: we are using this image for testing purpose
+			Repository: "informalsystems/hermes",
+			Tag:        "1.6.0",
 			NetworkID:  s.DkrNet.Network.ID,
 			Mounts: []string{
 				fmt.Sprintf("%s/:/home/hermes", hermesCfgPath),
 			},
-			ExposedPorts: []string{"3031"},
+			User:         "root",
+			ExposedPorts: []string{"3000"},
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				"3031/tcp": {{HostIP: "", HostPort: "3031"}},
+				"3000/tcp": {{HostIP: "", HostPort: "3000"}},
 			},
 			Env: []string{
 				fmt.Sprintf("UMEE_E2E_GAIA_CHAIN_ID=%s", GaiaChainID),
@@ -55,7 +57,7 @@ func (s *E2ETestSuite) runIBCRelayer() {
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_MNEMONIC=%s", gaiaVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_UMEE_VAL_MNEMONIC=%s", umeeVal.mnemonic),
 				fmt.Sprintf("UMEE_E2E_GAIA_VAL_HOST=%s", s.GaiaResource.Container.Name[1:]),
-				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.ValResources[1].Container.Name[1:]),
+				fmt.Sprintf("UMEE_E2E_UMEE_VAL_HOST=%s", s.ValResources[0].Container.Name[1:]),
 			},
 			Entrypoint: []string{
 				"sh",
@@ -66,15 +68,30 @@ func (s *E2ETestSuite) runIBCRelayer() {
 		noRestart,
 	)
 	s.Require().NoError(err)
+	s.T().Logf("ℹ️ Waiting for ibc channel creation...")
+	s.Require().Eventually(
+		func() bool {
+			s.T().Log("We are waiting for channel creation...")
+			channels, err := s.QueryIBCChannels(s.UmeeREST())
+			if channels {
+				s.T().Log("✅ IBC Channel is created among the the chains")
+			}
+			if err != nil {
+				return false
+			}
+			return channels
+		},
+		10*time.Minute,
+		3*time.Second,
+	)
 
-	endpoint := fmt.Sprintf("http://%s/state", s.HermesResource.GetHostPort("3031/tcp"))
+	endpoint := fmt.Sprintf("http://%s/state", s.HermesResource.GetHostPort("3000/tcp"))
 	s.Require().Eventually(
 		func() bool {
 			resp, err := http.Get(endpoint)
 			if err != nil {
 				return false
 			}
-
 			defer resp.Body.Close()
 
 			bz, err := io.ReadAll(resp.Body)
@@ -97,10 +114,11 @@ func (s *E2ETestSuite) runIBCRelayer() {
 		"hermes relayer not healthy",
 	)
 
-	s.T().Logf("started Hermes relayer container: %s", s.HermesResource.Container.ID)
+	s.T().Logf("✅ Started Hermes relayer container: %s", s.HermesResource.Container.ID)
 
 	// create the client, connection and channel between the Umee and Gaia chains
-	s.connectIBCChains()
+	// Note: we are creating ibc channels on entrypoint of relayer container
+	// s.connectIBCChains()
 }
 
 func (s *E2ETestSuite) connectIBCChains() {
@@ -119,10 +137,18 @@ func (s *E2ETestSuite) connectIBCChains() {
 			"hermes",
 			"create",
 			"channel",
+			"--order",
+			"unordered",
+			"--a-chain",
 			s.Chain.ID,
+			"--b-chain",
 			GaiaChainID,
-			"--port-a=transfer",
-			"--port-b=transfer",
+			"--a-port",
+			"transfer",
+			"--b-port",
+			"transfer",
+			"--new-client-connection",
+			"--yes",
 		},
 	})
 	s.Require().NoError(err)
