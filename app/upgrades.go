@@ -68,16 +68,15 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade("v5.2", upgradeInfo) // v5.2 migration is not compatible with v6, so leaving default here.
 	app.registerUpgrade6(upgradeInfo)
 	app.registerUpgrade6_1("v6.1", upgradeInfo)
-	app.registerUpgrade7(upgradeInfo)
+	app.registerUpgrade6_2(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
-	planName := "v7.0"
+func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
+	planName := "v6.2"
 
 	// Set param key table for params module migration
 	for _, subspace := range app.ParamsKeeper.GetSubspaces() {
 		subspace := subspace
-
 		found := true
 		var keyTable paramstypes.KeyTable
 		switch subspace.Name() {
@@ -103,7 +102,6 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 			// subspace not handled
 			found = false
 		}
-
 		if found && !subspace.HasKeyTable() {
 			subspace.WithKeyTable(keyTable)
 		}
