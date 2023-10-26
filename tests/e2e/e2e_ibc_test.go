@@ -184,7 +184,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		remainingTokens := coins.AmountOf(umeeIBCHash).Sub(returnUmee.Amount)
 		s.Require().NoError(err)
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", returnUmee, false, "send back some umee")
-		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, remainingTokens) // half was returned, so half remains
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, remainingTokens)
 
 		// sending back remaining amount
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewCoin(umeeIBCHash, remainingTokens), false, "send back remaining umee")
