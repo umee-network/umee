@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	rootCmd, _ := cmd.NewRootCmd()
+	rootCmd := cmd.NewRootCmd()
 	if err := svrcmd.Execute(rootCmd, strings.ToUpper(appparams.Name), umeeapp.DefaultNodeHome); err != nil {
 		os.Exit(1)
 	}

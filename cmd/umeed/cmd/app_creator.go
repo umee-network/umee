@@ -9,12 +9,6 @@ import (
 
 	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	dbm "github.com/cometbft/cometbft-db"
-	"github.com/cometbft/cometbft/libs/log"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/spf13/cast"
-
-	cmttypes "github.com/cometbft/cometbft/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -26,6 +20,11 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	dbm "github.com/cometbft/cometbft-db"
+	"github.com/cometbft/cometbft/libs/log"
+	cmttypes "github.com/cometbft/cometbft/types"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/spf13/cast"
 
 	"github.com/umee-network/umee/v6/ante"
 	umeeapp "github.com/umee-network/umee/v6/app"
