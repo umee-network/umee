@@ -3,12 +3,9 @@ package cmd
 import (
 	"os"
 
+	rosettacmd "cosmossdk.io/tools/rosetta/cmd"
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
-	"github.com/spf13/cobra"
-
-	rosettacmd "cosmossdk.io/tools/rosetta/cmd"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -16,7 +13,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/rpc"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
-	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -24,6 +20,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/spf13/cobra"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -31,7 +28,7 @@ import (
 )
 
 // NewRootCmd returns the root command handler for the Umee daemon.
-func NewRootCmd() (*cobra.Command, testutil.TestEncodingConfig) {
+func NewRootCmd() *cobra.Command {
 	encodingConfig := umeeapp.MakeEncodingConfig()
 	moduleManager := umeeapp.ModuleBasics
 
@@ -83,7 +80,7 @@ towards borrowing assets on another blockchain.`,
 
 	initRootCmd(rootCmd, ac)
 
-	return rootCmd, encodingConfig
+	return rootCmd
 }
 
 // initTendermintConfig helps to override default Tendermint Config values.

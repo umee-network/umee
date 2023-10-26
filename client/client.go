@@ -3,10 +3,9 @@ package client
 import (
 	"context"
 
-	"github.com/umee-network/umee/v6/sdkclient"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
+	"github.com/umee-network/umee/v6/sdkclient"
 )
 
 // Client sdkclient.Client and provides umee chain specific transactions and queries.
