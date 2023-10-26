@@ -12,15 +12,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cosmos/gogoproto/proto"
-	"github.com/ory/dockertest/v3/docker"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/cosmos/gogoproto/proto"
+	"github.com/ory/dockertest/v3/docker"
 
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -294,6 +293,7 @@ func (s *E2ETestSuite) QueryIBCChannels(endpoint string) (bool, error) {
 
 func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) error {
 	var err error
+	// TODO: decrease it when possible
 	for retry := 0; retry < 10; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
 		_, err = cli.Tx.BroadcastTx(0, msg)

@@ -31,18 +31,9 @@ func SubmitAndPassProposal(umee client.Client, changes []proposal.ParamChange) e
 		return err
 	}
 
-	// retry
-	for i := 0; i < 5; i++ {
-		newResp, err := umee.QueryTxHash(resp.TxHash)
-		if err != nil && i == 4 {
-			return err
-		}
-		if err == nil {
-			resp = newResp
-			break
-		}
-
-		time.Sleep(time.Second * (1 + time.Duration(i)))
+	resp, err = GetTxResponse(umee, resp.TxHash)
+	if err != nil {
+		return err
 	}
 
 	return MakeVoteAndCheckProposal(umee, *resp)
@@ -84,18 +75,9 @@ func UIBCIBCTransferStatusUpdate(umeeClient client.Client, status uibc.IBCTransf
 		return err
 	}
 
-	// retry
-	for i := 0; i < 5; i++ {
-		newResp, err := umeeClient.QueryTxHash(resp.TxHash)
-		if err != nil && i == 4 {
-			return err
-		}
-		if err == nil {
-			resp = newResp
-			break
-		}
-
-		time.Sleep(time.Second * (1 + time.Duration(i)))
+	resp, err = GetTxResponse(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
 	}
 
 	if len(resp.Events) == 0 {
