@@ -19,7 +19,7 @@ func (s *E2ETest) TestAllPrices() {
 			}
 			return true
 		},
-		3*time.Minute, 3*time.Second, "get registered tokens",
+		3*time.Minute, time.Second, "get registered tokens",
 	)
 	s.Require().Eventually(
 		func() bool {
@@ -34,7 +34,7 @@ func (s *E2ETest) TestAllPrices() {
 			}
 			return true
 		},
-		2*time.Minute, 3*time.Second, "ensure all tokens have prices",
+		2*time.Minute, time.Second, "ensure all tokens have prices",
 	)
 }
 
