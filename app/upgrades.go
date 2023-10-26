@@ -8,6 +8,7 @@ import (
 	icahosttypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/types"
 	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 
@@ -115,6 +116,11 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 			// Migrate CometBFT consensus parameters from x/params module to a dedicated x/consensus module.
 			baseapp.MigrateParams(ctx, baseAppLegacySS, &app.ConsensusParamsKeeper)
 
+			// explicitly update the IBC 02-client params, adding the localhost client type
+			params := app.IBCKeeper.ClientKeeper.GetParams(ctx)
+			params.AllowedClients = append(params.AllowedClients, ibcexported.Localhost)
+			app.IBCKeeper.ClientKeeper.SetParams(ctx, params)
+
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
@@ -122,7 +128,6 @@ func (app *UmeeApp) registerUpgrade7(upgradeInfo upgradetypes.Plan) {
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
 		Added: []string{
 			consensustypes.ModuleName,
-			metoken.ModuleName,
 			crisistypes.ModuleName,
 		},
 	})
