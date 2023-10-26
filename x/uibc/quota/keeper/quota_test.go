@@ -43,7 +43,9 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	//
 	k.setQuotaParams(10, 100)
 	k.SetTokenOutflow(sdk.NewInt64DecCoin(umee, 6))
+	k.SetTokenInflow(sdk.NewInt64DecCoin(umee, 6))
 	k.SetTotalOutflowSum(sdk.NewDec(50))
+	k.SetTotalInflowSum(sdk.NewDec(50))
 
 	err := k.CheckAndUpdateQuota(umee, sdk.NewInt(1))
 	require.NoError(t, err)

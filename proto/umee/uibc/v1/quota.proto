@@ -30,6 +30,12 @@ message Params {
     (gogoproto.jsontag)     = "quota_duration,omitempty",
     (gogoproto.moretags)    = "yaml:\"quota_duration\""
   ];
+  // total_inflow_quota defines the total inflow limit of ibc-transfer in USD
+  string total_inflow_quota = 5 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // IBCTransferStatus status of ibc-transfer quota check for inflow and outflow
