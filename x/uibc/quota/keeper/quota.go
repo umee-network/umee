@@ -184,7 +184,7 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	totalOutflowSum := k.GetTotalOutflow().Add(exchangePrice)
 	ttlInSum := k.GetTotalInflow()
 	if !(!params.TotalQuota.IsZero() && totalOutflowSum.LTE(params.TotalQuota) ||
-		!ttlInSum.IsZero() && totalOutflowSum.LTE(sdk.NewDec(10_000_000).Mul(ttlInSum).Add(params.TotalInflowQuota))) {
+		!ttlInSum.IsZero() && totalOutflowSum.LTE(sdk.NewDec(10_00_000).Mul(ttlInSum).Add(params.TotalInflowQuota))) {
 		return uibc.ErrQuotaExceeded
 	}
 	k.SetTokenOutflow(o)
