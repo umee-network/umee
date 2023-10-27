@@ -70,24 +70,31 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	require.NoError(t, err)
 	k.checkOutflows(umee, 50, 94)
 
-	// transferring additional 5 umee => 10USD, will fail total quota check
+	// transferring additional 5 umee => 10USD, will fail total quota check but it will pass inflow quota check
+	// sum of outflows <= $1M +  params.InflowOutflowQuota * sum of all inflows =  (10_000_000) * 50 + (0) = 500000000
+	// 104 <= 500000000
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(5))
+	require.NoError(t, err)
+	k.checkOutflows(umee, 60, 104)
+
+	// it will fail total quota check and inflow quota check also
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(5000000000))
 	require.ErrorContains(t, err, "quota")
-	k.checkOutflows(umee, 50, 94)
+	k.checkOutflows(umee, 60, 104)
 
 	// 3. Setting TotalQuota param to 0 should unlimit the total quota check
 	//
 	k.setQuotaParams(0, 0)
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(5))
 	require.NoError(t, err)
-	k.checkOutflows(umee, 60, 104)
+	k.checkOutflows(umee, 70, 114)
 
-	// 4. Setting TokenQuota to 65
+	// 4. Setting TokenQuota to 75
 	//
-	k.setQuotaParams(65, 0)
+	k.setQuotaParams(75, 0)
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(1))
 	require.NoError(t, err)
-	k.checkOutflows(umee, 62, 106)
+	k.checkOutflows(umee, 72, 116)
 
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(2)) // exceeds token quota
 	require.ErrorContains(t, err, "quota")

@@ -18,8 +18,10 @@ func NewGenesisState(params Params, outflows sdk.DecCoins, outflowSum sdk.Dec) *
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:          DefaultParams(),
+		Inflows:         nil,
 		Outflows:        nil,
 		TotalOutflowSum: sdk.NewDec(0),
+		TotalInflowSum:  sdk.NewDec(0),
 	}
 }
 
@@ -38,8 +40,21 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
+	for _, o := range gs.Inflows {
+		if o.Amount.IsNil() {
+			return sdkerrors.ErrInvalidRequest.Wrap("ibc denom inflow must be defined")
+		}
+		if err := o.Validate(); err != nil {
+			return err
+		}
+	}
+
 	if gs.TotalOutflowSum.IsNegative() {
 		return fmt.Errorf("total outflow sum cannot be negative : %s ", gs.TotalOutflowSum.String())
+	}
+
+	if gs.TotalInflowSum.IsNegative() {
+		return fmt.Errorf("total inflow sum cannot be negative : %s ", gs.TotalInflowSum.String())
 	}
 
 	return nil

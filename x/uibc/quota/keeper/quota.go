@@ -42,7 +42,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 func (k Keeper) GetAllInflows() (sdk.DecCoins, error) {
 	var inflows sdk.DecCoins
 	// creating PrefixStore upfront will remove the prefix from the key when running the iterator.
-	store := k.PrefixStore(keyPrefixDenomOutflows)
+	store := k.PrefixStore(keyPrefixDenomInflows)
 	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 
@@ -177,23 +177,19 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	if !params.TokenQuota.IsZero() && o.Amount.GT(params.TokenQuota) {
 		return uibc.ErrQuotaExceeded
 	}
-
 	// Allow outflow either of two conditions
 	// 1. Total Outflow Sum <= Total Outflow Quota
 	// or
 	// 2 . Total Outflow Sum <= $1M + params.TotalInflowQuota * sum of all inflows
 	totalOutflowSum := k.GetTotalOutflow().Add(exchangePrice)
-	if !params.TotalQuota.IsZero() && totalOutflowSum.GT(params.TotalQuota) {
+	ttlInSum := k.GetTotalInflow()
+	if !(!params.TotalQuota.IsZero() && totalOutflowSum.LTE(params.TotalQuota) ||
+		!ttlInSum.IsZero() && totalOutflowSum.LTE(sdk.NewDec(10_000_000).Mul(ttlInSum).Add(params.TotalInflowQuota))) {
 		return uibc.ErrQuotaExceeded
 	}
-
-	totalInflowSum := k.GetTotalInflow()
-	if totalOutflowSum.GT(sdk.NewDec(10_000_000).Mul(totalInflowSum).Add(params.TotalInflowQuota)) {
-		return uibc.ErrQuotaExceeded
-	}
-
 	k.SetTokenOutflow(o)
 	k.SetTotalOutflowSum(totalOutflowSum)
+
 	return nil
 }
 
