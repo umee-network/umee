@@ -101,13 +101,9 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 		return err
 	}
 
-	fullResp, err := GetTxResponse(umeeClient, resp.TxHash)
+	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
 	if err != nil {
 		return err
-	}
-
-	if len(fullResp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
 	}
 
 	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
@@ -132,13 +128,9 @@ func LeverageSpecialPairsUpdate(
 		return err
 	}
 
-	fullResp, err := GetTxResponse(umeeClient, resp.TxHash)
+	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
 	if err != nil {
 		return err
-	}
-
-	if len(fullResp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
 	}
 
 	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
@@ -157,13 +149,9 @@ func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes [
 		return err
 	}
 
-	fullResp, err := GetTxResponse(umeeClient, resp.TxHash)
+	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
 	if err != nil {
 		return err
-	}
-
-	if len(fullResp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
 	}
 
 	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
@@ -233,4 +221,17 @@ func GetTxResponse(umeeClient client.Client, txHash string) (resp *sdk.TxRespons
 	}
 
 	return resp, err
+}
+
+func GetTxResponseAndCheckLogs(umeeClient client.Client, txHash string) (*sdk.TxResponse, error) {
+	fullResp, err := GetTxResponse(umeeClient, txHash)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(fullResp.Logs) == 0 {
+		return nil, fmt.Errorf("no logs in response")
+	}
+
+	return fullResp, nil
 }
