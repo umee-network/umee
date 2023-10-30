@@ -35,9 +35,10 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
 		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
 		mintParams.InflationRateChange = fastInflationRateChange(mintParams)
-		c.MintKeeper.SetParams(ctx, mintParams)
+		err := c.MintKeeper.SetParams(ctx, mintParams)
+		util.Panic(err)
 
-		err := ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
+		err = ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
 		util.Panic(err)
 		ctx.Logger().Info("inflation min and max rates are updated",
 			"inflation_max", mintParams.InflationMax, "inflation_min", mintParams.InflationMin,

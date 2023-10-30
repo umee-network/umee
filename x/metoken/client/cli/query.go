@@ -59,10 +59,9 @@ func QueryParams() *cobra.Command {
 // metoken_denom is optional, if it isn't provided then all the indexes will be returned.
 func Indexes() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "indexes [metoken_denom]",
-		Args: cobra.MaximumNArgs(1),
-		Short: "Get all the registered indexes in the x/metoken module or search for a specific index with" +
-			" metoken_denom.",
+		Use:   "indexes [metoken_denom]",
+		Args:  cobra.MaximumNArgs(1),
+		Short: "Get all the registered indexes in the x/metoken module or search for a specific index with metoken_denom.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -146,10 +145,9 @@ func RedeemFee() *cobra.Command {
 // metoken_denom is optional, if it isn't provided then all the balances will be returned.
 func IndexBalances() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "index-balance [metoken_denom]",
-		Args: cobra.MaximumNArgs(1),
-		Short: "Get all the indexes' balances in the x/metoken module or search for a specific index with" +
-			" metoken_denom.",
+		Use:   "index-balance [metoken_denom]",
+		Args:  cobra.MaximumNArgs(1),
+		Short: "Get all the indexes' balances in the x/metoken module or search for a specific index with metoken_denom.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -174,10 +172,9 @@ func IndexBalances() *cobra.Command {
 // metoken_denom is optional, if it isn't provided then prices for all the registered indexes will be returned.
 func IndexPrice() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "index-price [metoken_denom]",
-		Args: cobra.MaximumNArgs(1),
-		Short: "Get price of all registered indexes in the x/metoken module or search for a specific price with" +
-			" metoken_denom.",
+		Use:   "index-price [metoken_denom]",
+		Args:  cobra.MaximumNArgs(1),
+		Short: "Get price of all registered indexes in the x/metoken module or search for a specific price with metoken_denom.", //nolint: lll
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {

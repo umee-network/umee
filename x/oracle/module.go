@@ -182,7 +182,7 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 
 // ProposalContents returns all the oracle content functions used to
 // simulate governance proposals.
-func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalContent {
+func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalMsg {
 	return nil
 }
 

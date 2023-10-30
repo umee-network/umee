@@ -45,6 +45,8 @@ const (
 	uibcBaseQueryPath      = "/umee.uibc.v1.Query/"
 	incentiveBaseQueryPath = "/umee.incentive.v1.Query/"
 	metokenBaseQueryPath   = "/umee.metoken.v1.Query/" // #nosec G101
+
+	params = "params"
 )
 
 func init() {
@@ -55,16 +57,16 @@ func init() {
 
 	// auth
 	setWhitelistedQuery(authBaseQueryPath+"Account", &authtypes.QueryAccountResponse{})
-	setWhitelistedQuery(authBaseQueryPath+"Params", &authtypes.QueryParamsResponse{})
+	setWhitelistedQuery(authBaseQueryPath+params, &authtypes.QueryParamsResponse{})
 
 	// bank
 	setWhitelistedQuery(bankBaseQueryPath+"Balance", &banktypes.QueryBalanceResponse{})
 	setWhitelistedQuery(bankBaseQueryPath+"DenomMetadata", &banktypes.QueryDenomsMetadataResponse{})
-	setWhitelistedQuery(bankBaseQueryPath+"Params", &banktypes.QueryParamsResponse{})
+	setWhitelistedQuery(bankBaseQueryPath+params, &banktypes.QueryParamsResponse{})
 	setWhitelistedQuery(bankBaseQueryPath+"SupplyOf", &banktypes.QuerySupplyOfResponse{})
 
 	// distribution
-	setWhitelistedQuery(distrBaseQueryPath+"Params", &distributiontypes.QueryParamsResponse{})
+	setWhitelistedQuery(distrBaseQueryPath+params, &distributiontypes.QueryParamsResponse{})
 	setWhitelistedQuery(distrBaseQueryPath+"DelegatorWithdrawAddress",
 		&distributiontypes.QueryDelegatorWithdrawAddressResponse{})
 	setWhitelistedQuery(distrBaseQueryPath+"ValidatorCommission",
@@ -72,16 +74,16 @@ func init() {
 
 	// gov
 	setWhitelistedQuery(govBaseQueryPath+"Deposit", &govtypes.QueryDepositResponse{})
-	setWhitelistedQuery(govBaseQueryPath+"Params", &govtypes.QueryParamsResponse{})
+	setWhitelistedQuery(govBaseQueryPath+params, &govtypes.QueryParamsResponse{})
 	setWhitelistedQuery(govBaseQueryPath+"Vote", &govtypes.QueryVoteResponse{})
 
 	// slashing
-	setWhitelistedQuery(slashingBaseQueryPath+"Params", &slashingtypes.QueryParamsResponse{})
+	setWhitelistedQuery(slashingBaseQueryPath+params, &slashingtypes.QueryParamsResponse{})
 	setWhitelistedQuery(slashingBaseQueryPath+"SigningInfo", &slashingtypes.QuerySigningInfoResponse{})
 
 	// staking
 	setWhitelistedQuery(stakingQueryPath+"Delegation", &stakingtypes.QueryDelegationResponse{})
-	setWhitelistedQuery(stakingQueryPath+"Params", &stakingtypes.QueryParamsResponse{})
+	setWhitelistedQuery(stakingQueryPath+params, &stakingtypes.QueryParamsResponse{})
 	setWhitelistedQuery(stakingQueryPath+"Validator", &stakingtypes.QueryValidatorResponse{})
 
 	// umee native module queries
@@ -90,7 +92,7 @@ func init() {
 	setWhitelistedQuery(ugovBaseQueryPath+"MinGasPrice", &ugovtypes.QueryMinGasPriceResponse{})
 
 	// leverage
-	setWhitelistedQuery(leverageBaseQueryPath+"Params", &ltypes.QueryParamsResponse{})
+	setWhitelistedQuery(leverageBaseQueryPath+params, &ltypes.QueryParamsResponse{})
 	setWhitelistedQuery(leverageBaseQueryPath+"RegisteredTokens", &ltypes.QueryRegisteredTokensResponse{})
 	setWhitelistedQuery(leverageBaseQueryPath+"MarketSummary", &ltypes.QueryMarketSummaryResponse{})
 	setWhitelistedQuery(leverageBaseQueryPath+"AccountBalances", &ltypes.QueryAccountBalancesResponse{})
@@ -110,18 +112,18 @@ func init() {
 	setWhitelistedQuery(oracleBaseQueryPath+"AggregatePrevotes", &otypes.QueryAggregatePrevotesResponse{})
 	setWhitelistedQuery(oracleBaseQueryPath+"AggregateVote", &otypes.QueryAggregateVoteResponse{})
 	setWhitelistedQuery(oracleBaseQueryPath+"AggregateVotes", &otypes.QueryAggregateVotesResponse{})
-	setWhitelistedQuery(oracleBaseQueryPath+"Params", &otypes.QueryParamsResponse{})
+	setWhitelistedQuery(oracleBaseQueryPath+params, &otypes.QueryParamsResponse{})
 	setWhitelistedQuery(oracleBaseQueryPath+"Medians", &otypes.QueryMediansResponse{})
 	setWhitelistedQuery(oracleBaseQueryPath+"MedianDeviations", &otypes.QueryMedianDeviationsResponse{})
 	setWhitelistedQuery(oracleBaseQueryPath+"AvgPrice", &otypes.QueryAvgPriceResponse{})
 
 	// uibc
-	setWhitelistedQuery(uibcBaseQueryPath+"Params", &uibctypes.QueryParamsResponse{})
+	setWhitelistedQuery(uibcBaseQueryPath+params, &uibctypes.QueryParamsResponse{})
 	setWhitelistedQuery(uibcBaseQueryPath+"Outflows", &uibctypes.QueryOutflowsResponse{})
 	setWhitelistedQuery(uibcBaseQueryPath+"AllOutflows", &uibctypes.QueryAllOutflowsResponse{})
 
 	// incentive
-	setWhitelistedQuery(incentiveBaseQueryPath+"Params", &incentive.QueryParamsResponse{})
+	setWhitelistedQuery(incentiveBaseQueryPath+params, &incentive.QueryParamsResponse{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"TotalBonded", &incentive.QueryTotalBondedResponse{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"TotalUnbonding", &incentive.QueryTotalUnbondingResponse{})
 	setWhitelistedQuery(incentiveBaseQueryPath+"AccountBonds", &incentive.QueryAccountBondsResponse{})
@@ -138,7 +140,7 @@ func init() {
 	setWhitelistedQuery(incentiveBaseQueryPath+"LastRewardTime", &incentive.QueryLastRewardTimeResponse{})
 
 	// metoken
-	setWhitelistedQuery(metokenBaseQueryPath+"Params", &metoken.QueryParamsResponse{})
+	setWhitelistedQuery(metokenBaseQueryPath+params, &metoken.QueryParamsResponse{})
 	setWhitelistedQuery(metokenBaseQueryPath+"Indexes", &metoken.QueryIndexesResponse{})
 	setWhitelistedQuery(metokenBaseQueryPath+"SwapFee", &metoken.QuerySwapFeeResponse{})
 	setWhitelistedQuery(metokenBaseQueryPath+"RedeemFee", &metoken.QueryRedeemFeeResponse{})
