@@ -81,23 +81,23 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 		var keyTable paramstypes.KeyTable
 		switch subspace.Name() {
 		case authtypes.ModuleName:
-			keyTable = authtypes.ParamKeyTable()
+			keyTable = authtypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case banktypes.ModuleName:
-			keyTable = banktypes.ParamKeyTable()
+			keyTable = banktypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case stakingtypes.ModuleName:
 			keyTable = stakingtypes.ParamKeyTable()
 		case minttypes.ModuleName:
-			keyTable = minttypes.ParamKeyTable()
+			keyTable = minttypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case distrtypes.ModuleName:
-			keyTable = distrtypes.ParamKeyTable()
+			keyTable = distrtypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case slashingtypes.ModuleName:
-			keyTable = slashingtypes.ParamKeyTable()
+			keyTable = slashingtypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case govtypes.ModuleName:
-			keyTable = govv1.ParamKeyTable()
+			keyTable = govv1.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case crisistypes.ModuleName:
-			keyTable = crisistypes.ParamKeyTable()
+			keyTable = crisistypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case wasm.ModuleName:
-			keyTable = wasmtypes.ParamKeyTable()
+			keyTable = wasmtypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		default:
 			// subspace not handled
 			found = false
@@ -215,7 +215,6 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 
 			// set the ICS27 consensus version so InitGenesis is not run
 			oldIcaVersion := fromVM[icatypes.ModuleName]
-			// fromVM[icatypes.ModuleName] = app.mm.Modules[icatypes.ModuleName].ConsensusVersion() // ConsensusVersion doesn't exist anymore
 			g := icagenesis.GenesisState{HostGenesisState: icagenesis.DefaultHostGenesis()}
 			g.HostGenesisState.Params.AllowMessages = []string{
 				sdk.MsgTypeURL(&banktypes.MsgSend{}),
