@@ -8,10 +8,10 @@ import (
 
 	rpcclient "github.com/cometbft/cometbft/rpc/client"
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/rs/zerolog"
 	"github.com/umee-network/umee/v6/sdkclient/query"
 	"github.com/umee-network/umee/v6/sdkclient/tx"
-	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 )
 
 // Client provides basic capabilities to connect to a Cosmos SDK based chain and execute

@@ -308,7 +308,6 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 		// if we were told an expected account sequence, we should use it next time
 		re := regexp.MustCompile(`expected [\d]+`)
 		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(err.Error()), "expected "))
-
 		if err != nil {
 			return err
 		}
