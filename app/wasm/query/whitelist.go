@@ -46,7 +46,7 @@ const (
 	incentiveBaseQueryPath = "/umee.incentive.v1.Query/"
 	metokenBaseQueryPath   = "/umee.metoken.v1.Query/" // #nosec G101
 
-	params = "params"
+	params = "Params"
 )
 
 func init() {
