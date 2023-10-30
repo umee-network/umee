@@ -7,9 +7,9 @@ import (
 	fmt "fmt"
 	_ "github.com/cosmos/cosmos-proto"
 	types "github.com/cosmos/cosmos-sdk/types"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
+	_ "github.com/cosmos/gogoproto/gogoproto"
+	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
@@ -129,7 +129,7 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	n1, err1 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.InflationCycleEnd, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.InflationCycleEnd):])
+	n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.InflationCycleEnd, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.InflationCycleEnd):])
 	if err1 != nil {
 		return 0, err1
 	}
@@ -192,7 +192,7 @@ func (m *GenesisState) Size() (n int) {
 	}
 	l = m.InflationParams.Size()
 	n += 1 + l + sovGenesis(uint64(l))
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.InflationCycleEnd)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.InflationCycleEnd)
 	n += 1 + l + sovGenesis(uint64(l))
 	return n
 }
@@ -359,7 +359,7 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.InflationCycleEnd, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.InflationCycleEnd, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

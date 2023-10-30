@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	"github.com/spf13/cobra"
 )
 
@@ -18,7 +18,6 @@ func ibcDenomCmd() *cobra.Command {
 Example:
 $ ibc-denom uumee channel-22`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			ibcDenom, err := ibcDenom(args[0], args[1])
 			if err != nil {
 				return err

@@ -44,6 +44,6 @@ func TestIntegrationSuite(t *testing.T) {
 	s.TestInvalidQueries()
 	s.TestValidQueries()
 
-	//test cli transactions
+	// test cli transactions
 	s.TestTransactions()
 }

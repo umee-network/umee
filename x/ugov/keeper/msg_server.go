@@ -56,8 +56,8 @@ func (m msgServer) GovSetEmergencyGroup(ctx context.Context, msg *ugov.MsgGovSet
 
 // GovUpdateInflationParams implements ugov.MsgServer.
 func (m msgServer) GovUpdateInflationParams(ctx context.Context, msg *ugov.MsgGovUpdateInflationParams) (
-	*ugov.GovUpdateInflationParamsResponse, error) {
-
+	*ugov.GovUpdateInflationParamsResponse, error,
+) {
 	sdkCtx, err := sdkutil.StartMsg(ctx, msg)
 	if err != nil {
 		return nil, err

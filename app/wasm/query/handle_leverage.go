@@ -3,7 +3,7 @@ package query
 import (
 	"context"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 
 	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
 )

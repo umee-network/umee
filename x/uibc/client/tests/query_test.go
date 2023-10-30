@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	tmcli "github.com/cometbft/cometbft/libs/cli"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	tmcli "github.com/tendermint/tendermint/libs/cli"
 
 	itestsuite "github.com/umee-network/umee/v6/tests/cli"
 	"github.com/umee-network/umee/v6/x/uibc"

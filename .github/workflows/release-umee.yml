@@ -26,7 +26,7 @@ jobs:
           cache: true
 
       - name: Set Env
-        run: echo "TM_VERSION=$(go list -m github.com/tendermint/tendermint | sed 's:.* ::')" >> $GITHUB_ENV
+        run: echo "TM_VERSION=$(go list -m github.com/cometbft/cometbft | sed 's:.* ::')" >> $GITHUB_ENV
 
       # useful to test builds. However will require to add "push" rule to the "on" section
       - name: generate and update swagger docs 

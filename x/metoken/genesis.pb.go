@@ -7,9 +7,9 @@ import (
 	cosmossdk_io_math "cosmossdk.io/math"
 	fmt "fmt"
 	types "github.com/cosmos/cosmos-sdk/types"
-	_ "github.com/gogo/protobuf/gogoproto"
-	proto "github.com/gogo/protobuf/proto"
-	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
+	_ "github.com/cosmos/gogoproto/gogoproto"
+	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
@@ -275,7 +275,7 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	n1, err1 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.NextInterestClaimTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.NextInterestClaimTime):])
+	n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.NextInterestClaimTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.NextInterestClaimTime):])
 	if err1 != nil {
 		return 0, err1
 	}
@@ -283,7 +283,7 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i = encodeVarintGenesis(dAtA, i, uint64(n1))
 	i--
 	dAtA[i] = 0x2a
-	n2, err2 := github_com_gogo_protobuf_types.StdTimeMarshalTo(m.NextRebalancingTime, dAtA[i-github_com_gogo_protobuf_types.SizeOfStdTime(m.NextRebalancingTime):])
+	n2, err2 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.NextRebalancingTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.NextRebalancingTime):])
 	if err2 != nil {
 		return 0, err2
 	}
@@ -480,9 +480,9 @@ func (m *GenesisState) Size() (n int) {
 			n += 1 + l + sovGenesis(uint64(l))
 		}
 	}
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.NextRebalancingTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.NextRebalancingTime)
 	n += 1 + l + sovGenesis(uint64(l))
-	l = github_com_gogo_protobuf_types.SizeOfStdTime(m.NextInterestClaimTime)
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.NextInterestClaimTime)
 	n += 1 + l + sovGenesis(uint64(l))
 	return n
 }
@@ -690,7 +690,7 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.NextRebalancingTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.NextRebalancingTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -723,7 +723,7 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := github_com_gogo_protobuf_types.StdTimeUnmarshal(&m.NextInterestClaimTime, dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.NextInterestClaimTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
