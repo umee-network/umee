@@ -3,7 +3,7 @@ package query
 import (
 	"context"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/umee-network/umee/v6/x/incentive"
 )
 

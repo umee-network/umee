@@ -3,9 +3,9 @@ package store
 import (
 	"github.com/umee-network/umee/v6/util"
 
+	db "github.com/cometbft/cometbft-db"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	db "github.com/tendermint/tm-db"
 )
 
 // Iterate through all keys in a kvStore that start with a given prefix

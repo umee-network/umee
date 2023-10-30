@@ -2,8 +2,9 @@ package keeper
 
 import (
 	sdkmath "cosmossdk.io/math"
+	gogotypes "github.com/cosmos/gogoproto/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	gogotypes "github.com/gogo/protobuf/types"
 
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/store"

@@ -7,7 +7,6 @@ import (
 )
 
 func TestIBCDenom(t *testing.T) {
-
 	tests := []struct {
 		name           string
 		baseDenom      string

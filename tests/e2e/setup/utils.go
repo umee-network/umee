@@ -18,10 +18,10 @@ import (
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/ory/dockertest/v3/docker"
 
-	channeltypes "github.com/cosmos/ibc-go/v6/modules/core/04-channel/types"
+	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/client"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
@@ -52,7 +52,6 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error 
 
 	asset := sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(amount))
 	msg := stakingtypes.NewMsgDelegate(addr, valOperAddr, asset)
-
 	return s.BroadcastTxWithRetry(msg, s.AccountClient(testAccount))
 }
 
@@ -113,6 +112,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 
 		// retry if we got an error
 		if err != nil && i < 4 {
+			time.Sleep(1 * time.Second)
 			continue
 		}
 
@@ -125,18 +125,18 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 		// some times relayer can't send the packets to another chain
 
 		// // don't check for the tx hash if we expect this to fail due to quota
-		// if strings.Contains(errBuf.String(), "quota transfer exceeded") {
-		// 	s.Require().True(failDueToQuota)
-		// 	return
-		// }
+		if strings.Contains(errBuf.String(), "quota transfer exceeded") {
+			s.Require().True(failDueToQuota)
+			return
+		}
 
-		// re := regexp.MustCompile(`[0-9A-Fa-f]{64}`)
-		// txHash := re.FindString(errBuf.String() + outBuf.String())
-
-		// // retry if we didn't get a txHash
-		// if len(txHash) == 0 && i < 4 {
-		// 	continue
-		// }
+		// retry if we didn't succeed
+		if !strings.Contains(outBuf.String(), "SUCCESS") {
+			if i < 4 {
+				continue
+			}
+			s.Require().Failf("failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
+		}
 
 		// s.Require().NotEmptyf(txHash, "failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
 		// endpoint := s.UmeeREST()
@@ -293,7 +293,8 @@ func (s *E2ETestSuite) QueryIBCChannels(endpoint string) (bool, error) {
 
 func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) error {
 	var err error
-	for retry := 0; retry < 3; retry++ {
+	// TODO: decrease it when possible
+	for retry := 0; retry < 10; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
 		_, err = cli.Tx.BroadcastTx(0, msg)
 		if err == nil {
@@ -305,11 +306,10 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 		}
 
 		// if we were told an expected account sequence, we should use it next time
-		s := err.Error()
-		re := regexp.MustCompile("expected [\\d]+")
-		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(s), "expected "))
-		if err == nil {
-			return nil
+		re := regexp.MustCompile(`expected [\d]+`)
+		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(err.Error()), "expected "))
+		if err != nil {
+			return err
 		}
 		cli.WithAccSeq(uint64(n))
 

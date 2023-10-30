@@ -1,7 +1,7 @@
 package module
 
 import (
-	abci "github.com/tendermint/tendermint/abci/types"
+	abci "github.com/cometbft/cometbft/abci/types"
 
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/metoken/keeper"

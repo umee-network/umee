@@ -10,7 +10,6 @@ import (
 )
 
 // HistoricMedians returns a list of a given denom's last numStamps medians.
-
 func (k Keeper) HistoricMedians(
 	ctx sdk.Context,
 	denom string,
@@ -46,7 +45,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
-		return errors.Wrap(err, "denom: "+denom)
+		return errors.Wrap(err, "denom: "+denom) //nolint: goconst
 	}
 
 	block := uint64(ctx.BlockHeight())

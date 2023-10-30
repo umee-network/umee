@@ -5,11 +5,11 @@ import (
 	"math/big"
 
 	sdkmath "cosmossdk.io/math"
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	tmprotocrypto "github.com/cometbft/cometbft/proto/tendermint/crypto"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	tmprotocrypto "github.com/tendermint/tendermint/proto/tendermint/crypto"
 )
 
 const (

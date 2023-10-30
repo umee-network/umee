@@ -407,7 +407,7 @@ where `proposal.json` contains:
 {
   "messages": [
     {
-      "@type": "/umeenetwork.umee.metoken.v1.MsgGovUpdateRegistry",
+      "@type": "/umee.metoken.v1.MsgGovUpdateRegistry",
       "authority": "umee10d07y265gmmuvt4z0w9aw880jnsr700jg5w6jp",
       "title": "Update the meToken Index Registry",
       "description": "Add me/USD Index, Update me/EUR Index",

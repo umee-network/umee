@@ -5,10 +5,11 @@ import (
 	"strings"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v6/modules/apps/transfer/types"
-	"github.com/tendermint/tendermint/crypto"
+	"github.com/cometbft/cometbft/crypto"
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	"gotest.tools/v3/assert"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestGetFundsFromPacket(t *testing.T) {

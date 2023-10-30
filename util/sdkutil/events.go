@@ -1,8 +1,9 @@
 package sdkutil
 
 import (
+	"github.com/cosmos/gogoproto/proto"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
 )
 
 // Emit proto event and log on error

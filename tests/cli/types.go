@@ -2,7 +2,7 @@ package itest
 
 import (
 	"cosmossdk.io/errors"
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/spf13/cobra"
 )
 

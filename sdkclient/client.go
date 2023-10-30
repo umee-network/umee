@@ -6,9 +6,10 @@ import (
 	"os"
 	"time"
 
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	rpcclient "github.com/cometbft/cometbft/rpc/client"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/rs/zerolog"
-	rpcclient "github.com/tendermint/tendermint/rpc/client"
 	"github.com/umee-network/umee/v6/sdkclient/query"
 	"github.com/umee-network/umee/v6/sdkclient/tx"
 )
@@ -31,7 +32,7 @@ func NewClient(
 	grpcEndpoint string,
 	mnemonics map[string]string,
 	gasAdjustment float64,
-	encCfg sdkparams.EncodingConfig,
+	encCfg testutil.TestEncodingConfig,
 ) (uc Client, err error) {
 	uc = Client{}
 	logger := log.New(os.Stderr, "chain-client", log.LstdFlags)
@@ -44,7 +45,7 @@ func NewClient(
 }
 
 func (c Client) NewChainHeightListener(ctx context.Context, logger zerolog.Logger) (*ChainHeightListener, error) {
-	return NewChainHeightListener(ctx, c.Tx.ClientContext.Client, logger)
+	return NewChainHeightListener(ctx, c.TmClient(), logger)
 }
 
 func (c Client) QueryTimeout() time.Duration {
@@ -52,5 +53,5 @@ func (c Client) QueryTimeout() time.Duration {
 }
 
 func (c Client) TmClient() rpcclient.Client {
-	return c.Tx.ClientContext.Client
+	return c.Tx.ClientContext.Client.(*rpchttp.HTTP)
 }

@@ -40,7 +40,6 @@ func (ip *IndexPrices) SetPrice(price AssetPrice) {
 	}
 
 	ip.Assets = append(ip.Assets, price)
-
 }
 
 // SwapRate converts an asset to meToken applying exchange_rate and normalizing the exponent.
