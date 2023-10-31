@@ -124,7 +124,7 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 				return fromVM, err
 			}
 			govParams := app.GovKeeper.GetParams(ctx)
-			govParams.MinInitialDepositRatio = sdk.NewDecWithPrec(1, 2).String()
+			govParams.MinInitialDepositRatio = sdk.NewDecWithPrec(1, 1).String()
 			err = app.GovKeeper.SetParams(ctx, govParams)
 			return fromVM, err
 		},
