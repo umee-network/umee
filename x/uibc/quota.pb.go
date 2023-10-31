@@ -198,6 +198,16 @@ func (m *Params) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	{
+		size := m.TotalInflowQuota.Size()
+		i -= size
+		if _, err := m.TotalInflowQuota.MarshalTo(dAtA[i:]); err != nil {
+			return 0, err
+		}
+		i = encodeVarintQuota(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x2a
 	n1, err1 := github_com_cosmos_gogoproto_types.StdDurationMarshalTo(m.QuotaDuration, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.QuotaDuration):])
 	if err1 != nil {
 		return 0, err1
@@ -259,6 +269,8 @@ func (m *Params) Size() (n int) {
 	l = m.TokenQuota.Size()
 	n += 1 + l + sovQuota(uint64(l))
 	l = github_com_cosmos_gogoproto_types.SizeOfStdDuration(m.QuotaDuration)
+	n += 1 + l + sovQuota(uint64(l))
+	l = m.TotalInflowQuota.Size()
 	n += 1 + l + sovQuota(uint64(l))
 	return n
 }
@@ -415,6 +427,40 @@ func (m *Params) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := github_com_cosmos_gogoproto_types.StdDurationUnmarshal(&m.QuotaDuration, dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TotalInflowQuota", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuota
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuota
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuota
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.TotalInflowQuota.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
