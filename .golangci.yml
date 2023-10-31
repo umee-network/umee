@@ -25,7 +25,7 @@ linters:
     - dogsled
     - errcheck
     - exportloopref
-    # - goconst
+    - goconst
     - gocritic
     - gofmt
     - goimports
