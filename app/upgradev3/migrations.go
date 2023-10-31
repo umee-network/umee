@@ -2,7 +2,6 @@ package upgradev3
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	bech32ibckeeper "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/keeper"
 )
 
 var minCommissionRate = sdk.MustNewDecFromStr("0.05")
@@ -37,11 +36,4 @@ func SetMinimumCommissionRateToValidators(ctx sdk.Context, keeper StakingKeeper,
 	}
 
 	return nil
-}
-
-// SetupBech32ibcKeeper updates keeper by setting the native account prefix to "umee".
-// Failing to set the native prefix will cause a chain halt on init genesis or
-// in the firstBeginBlocker assertions.
-func SetupBech32ibcKeeper(bech32IbcKeeper *bech32ibckeeper.Keeper, ctx sdk.Context) error {
-	return bech32IbcKeeper.SetNativeHrp(ctx, sdk.GetConfig().GetBech32AccountAddrPrefix())
 }

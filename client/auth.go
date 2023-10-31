@@ -1,6 +1,8 @@
 package client
 
 import (
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
@@ -26,4 +28,8 @@ func (c Client) QueryAuthSeq(accAddr string) (uint64, error) {
 	}
 	accSeq := baseAccount.GetSequence()
 	return accSeq, nil
+}
+
+func (c Client) QueryTxHash(hash string) (*sdk.TxResponse, error) {
+	return authtx.QueryTx(*c.Tx.ClientContext, hash)
 }

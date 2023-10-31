@@ -10,23 +10,23 @@ import (
 	"strings"
 	"time"
 
+	dbm "github.com/cometbft/cometbft-db"
+	tmconfig "github.com/cometbft/cometbft/config"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/ory/dockertest/v3"
-	"github.com/ory/dockertest/v3/docker"
-	bech32ibctypes "github.com/osmosis-labs/bech32-ibc/x/bech32ibc/types"
-	"github.com/spf13/viper"
-	"github.com/stretchr/testify/suite"
-	tmconfig "github.com/tendermint/tendermint/config"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
-
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govtypesv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
+	"github.com/ory/dockertest/v3"
+	"github.com/ory/dockertest/v3/docker"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -75,6 +75,26 @@ func (s *E2ETestSuite) SetupSuite() {
 	var err error
 	s.T().Log("setting up e2e integration test suite...")
 
+	db := dbm.NewMemDB()
+	app := app.New(
+		nil,
+		db,
+		nil,
+		true,
+		map[int64]bool{},
+		"",
+		0,
+		app.EmptyAppOptions{},
+		nil,
+		nil,
+	)
+	encodingConfig = testutil.TestEncodingConfig{
+		InterfaceRegistry: app.InterfaceRegistry(),
+		Codec:             app.AppCodec(),
+		TxConfig:          app.GetTxConfig(),
+		Amino:             app.LegacyAmino(),
+	}
+
 	// codec
 	s.cdc = encodingConfig.Codec
 
@@ -93,6 +113,14 @@ func (s *E2ETestSuite) SetupSuite() {
 	s.initGenesis()          // modify genesis file, add gentxs, and save to each validator
 	s.initValidatorConfigs() // modify config.toml and app.toml for each validator
 	s.runValidators()
+
+	// Delegate to validators so that test account 0 has majority voting power on the network,
+	// allowing gov actions without validator votes.
+	s.T().Log("Delegating from test account 0 to validators")
+	s.Require().NoError(s.Delegate(0, 0, 10_000000))
+	s.Require().NoError(s.Delegate(0, 1, 10_000000))
+	s.Require().NoError(s.Delegate(0, 2, 50_000000)) // majority to validator 2, as it votes on prices
+
 	if !s.MinNetwork {
 		s.runPriceFeeder(2) // index of the validator voting on prices
 		s.runGaiaNetwork()
@@ -101,13 +129,6 @@ func (s *E2ETestSuite) SetupSuite() {
 	} else {
 		s.T().Log("running minimum network withut gaia,price-feeder and ibc-relayer")
 	}
-
-	// Delegate to validators so that test account 0 has majority voting power on the network,
-	// allowing gov actions without validator votes.
-	s.T().Log("Delegating from test account 0 to validators")
-	s.Require().NoError(s.Delegate(0, 0, 10_000000))
-	s.Require().NoError(s.Delegate(0, 1, 10_000000))
-	s.Require().NoError(s.Delegate(0, 2, 50_000000)) // majority to validator 2, as it votes on prices
 	s.T().Log("Setup Complete")
 }
 
@@ -190,16 +211,6 @@ func (s *E2ETestSuite) initGenesis() {
 	appGenState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genFilePath)
 	s.Require().NoError(err)
 
-	var bech32GenState bech32ibctypes.GenesisState
-	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[bech32ibctypes.ModuleName], &bech32GenState))
-
-	// bech32
-	bech32GenState.NativeHRP = sdk.GetConfig().GetBech32AccountAddrPrefix()
-
-	bz, err := s.cdc.MarshalJSON(&bech32GenState)
-	s.Require().NoError(err)
-	appGenState[bech32ibctypes.ModuleName] = bz
-
 	// Leverage
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
@@ -209,7 +220,7 @@ func (s *E2ETestSuite) initGenesis() {
 		fixtures.Token(ATOMBaseDenom, ATOM, uint32(ATOMExponent)),
 	)
 
-	bz, err = s.cdc.MarshalJSON(&leverageGenState)
+	bz, err := s.cdc.MarshalJSON(&leverageGenState)
 	s.Require().NoError(err)
 	appGenState[leveragetypes.ModuleName] = bz
 
@@ -237,8 +248,8 @@ func (s *E2ETestSuite) initGenesis() {
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	votingPeriod := 5 * time.Second
-	govGenState.VotingParams.VotingPeriod = &votingPeriod
-	govGenState.DepositParams.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
+	govGenState.Params.VotingPeriod = &votingPeriod
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
 
 	bz, err = s.cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)
@@ -362,7 +373,9 @@ func (s *E2ETestSuite) initValidatorConfigs() {
 
 		appConfig := srvconfig.DefaultConfig()
 		appConfig.API.Enable = true
+		appConfig.API.Address = "tcp://0.0.0.0:1317"
 		appConfig.MinGasPrices = minGasPrice
+		appConfig.GRPC.Address = "0.0.0.0:9090"
 		appConfig.Pruning = "nothing"
 
 		srvconfig.WriteConfigFile(appCfgPath, appConfig)

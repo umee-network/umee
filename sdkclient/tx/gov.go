@@ -54,7 +54,14 @@ func (c *Client) GovSubmitProposal(msgs []sdk.Msg) (*sdk.TxResponse, error) {
 		return nil, err
 	}
 
-	submitProposal, err := v1.NewMsgSubmitProposal(msgs, deposit, fromAddr.String(), "")
+	submitProposal, err := v1.NewMsgSubmitProposal(
+		msgs,
+		deposit,
+		fromAddr.String(),
+		"metadata",
+		"sometitle",
+		"somesummary",
+	)
 	if err != nil {
 		return nil, err
 	}

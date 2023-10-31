@@ -2,7 +2,7 @@ package query
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 
 	octypes "github.com/umee-network/umee/v6/x/oracle/types"
 )

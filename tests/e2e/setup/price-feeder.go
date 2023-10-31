@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	PriceFeederContainerRepo  = "ghcr.io/umee-network/price-feeder-umee"
+	PriceFeederContainerRepo  = "ghcr.io/ojo-network/price-feeder-umee-47"
 	PriceFeederServerPort     = "7171/tcp"
 	PriceFeederMaxStartupTime = 20 // seconds
 )
@@ -102,6 +102,7 @@ func (s *E2ETestSuite) runPriceFeeder(valIndex int) {
 	}
 
 	if !isHealthy {
+
 		err := s.DkrPool.Client.Logs(docker.LogsOptions{
 			Container:    s.priceFeederResource.Container.ID,
 			OutputStream: os.Stdout,

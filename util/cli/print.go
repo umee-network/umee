@@ -1,8 +1,9 @@
 package cli
 
 import (
+	"github.com/cosmos/gogoproto/proto"
+
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/gogo/protobuf/proto"
 )
 
 // PrintOrErr formats and print proto message to the standard output, unless the error

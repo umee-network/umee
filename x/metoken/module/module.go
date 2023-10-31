@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	abci "github.com/cometbft/cometbft/abci/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/umee-network/umee/v6/x/metoken/client/cli"
 
 	"github.com/umee-network/umee/v6/util"
@@ -131,9 +131,3 @@ func NewAppModule(cdc codec.Codec, kb keeper.Builder) AppModule {
 		kb:             kb,
 	}
 }
-
-// DEPRECATED
-
-func (AppModule) LegacyQuerierHandler(*codec.LegacyAmino) sdk.Querier { return nil }
-func (AppModule) QuerierRoute() string                                { return "" }
-func (AppModule) Route() sdk.Route                                    { return sdk.Route{} }

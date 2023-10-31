@@ -5,15 +5,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cosmos/cosmos-sdk/simapp"
+	"github.com/cometbft/cometbft/crypto/secp256k1"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	"github.com/stretchr/testify/suite"
+
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
-	"github.com/cosmos/cosmos-sdk/x/staking/teststaking"
-	"github.com/stretchr/testify/suite"
-	"github.com/tendermint/tendermint/crypto/secp256k1"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
+	"github.com/cosmos/cosmos-sdk/x/staking/testutil"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -54,7 +55,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.Require().Len(setupVals, 1)
 	s.Require().Equal(int64(1), setupVals[0].GetConsensusPower(app.StakingKeeper.PowerReduction(ctx)))
 
-	sh := teststaking.NewHelper(s.T(), ctx, *app.StakingKeeper)
+	sh := testutil.NewHelper(s.T(), ctx, app.StakingKeeper)
 	sh.Denom = bondDenom
 
 	// mint and send coins to validators
@@ -68,7 +69,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 398, true)
 	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 2, true)
 
-	staking.EndBlocker(ctx, *app.StakingKeeper)
+	staking.EndBlocker(ctx, app.StakingKeeper)
 
 	err := app.OracleKeeper.SetVoteThreshold(ctx, sdk.MustNewDecFromStr("0.4"))
 	s.Require().NoError(err)
@@ -79,7 +80,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(3)
+	valPubKeys = simtestutil.CreateTestPubKeys(3)
 
 	valPubKey1 = valPubKeys[0]
 	pubKey1    = secp256k1.GenPrivKey().PubKey()

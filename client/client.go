@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdkparams "github.com/cosmos/cosmos-sdk/simapp/params"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/umee-network/umee/v6/sdkclient"
 )
 
@@ -24,7 +24,7 @@ func NewClient(
 	grpcEndpoint string,
 	mnemonics map[string]string,
 	gasAdjustment float64,
-	encCfg sdkparams.EncodingConfig,
+	encCfg testutil.TestEncodingConfig,
 ) (Client, error) {
 	c, err := sdkclient.NewClient(chainDataDir, chainID, tmrpcEndpoint, grpcEndpoint, mnemonics, gasAdjustment, encCfg)
 	if err != nil {

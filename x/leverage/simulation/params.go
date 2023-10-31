@@ -8,8 +8,8 @@ import (
 
 // ParamChanges defines the parameters that can be modified by param change proposals
 // on the simulation
-func ParamChanges(*rand.Rand) []simtypes.ParamChange {
-	return []simtypes.ParamChange{
+func ParamChanges(*rand.Rand) []simtypes.LegacyParamChange {
+	return []simtypes.LegacyParamChange{
 		// empty: leverage params are in regular state
 	}
 }
