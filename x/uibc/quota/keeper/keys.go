@@ -18,7 +18,7 @@ func KeyTotalOutflows(ibcDenom string) []byte {
 	return util.ConcatBytes(0, keyPrefixDenomOutflows, []byte(ibcDenom))
 }
 
-func KeyTotalInflows(ibcDenom string) []byte {
+func KeyTokenInflow(ibcDenom string) []byte {
 	//  keyPrefixDenomInflows | denom
 	return util.ConcatBytes(0, keyPrefixDenomInflows, []byte(ibcDenom))
 }

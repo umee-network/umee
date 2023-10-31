@@ -3,8 +3,10 @@ package keeper
 import (
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
+	"gotest.tools/v3/assert"
 
 	ibcutil "github.com/umee-network/umee/v6/util/ibc"
 )
@@ -45,7 +47,7 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	k.SetTokenOutflow(sdk.NewInt64DecCoin(umee, 6))
 	k.SetTokenInflow(sdk.NewInt64DecCoin(umee, 6))
 	k.SetTotalOutflowSum(sdk.NewDec(50))
-	k.SetTotalInflowSum(sdk.NewDec(50))
+	k.SetTotalInflow(sdk.NewDec(50))
 
 	err := k.CheckAndUpdateQuota(umee, sdk.NewInt(1))
 	require.NoError(t, err)
@@ -112,4 +114,24 @@ func TestUnitGetExchangePrice(t *testing.T) {
 
 	_, err = k.getExchangePrice("notexisting", sdk.NewInt(10))
 	require.ErrorContains(t, err, "not found")
+}
+
+func TestSetAndGetIBCInflows(t *testing.T) {
+	k := initKeeperSimpleMock(t)
+	inflowSum := sdk.MustNewDecFromStr("123123")
+	k.SetTotalInflow(inflowSum)
+
+	rv := k.GetTotalInflow()
+	assert.DeepEqual(t, inflowSum, rv)
+
+	// inflow of token
+	inflowOfToken := sdk.NewDecCoin("abcd", math.NewInt(1000000))
+	k.SetTokenInflow(inflowOfToken)
+
+	val := k.GetTokenInflow(inflowOfToken.Denom)
+	assert.DeepEqual(t, val, inflowOfToken)
+
+	inflows, err := k.GetAllInflows()
+	assert.NilError(t, err)
+	assert.DeepEqual(t, inflows[0], inflowOfToken)
 }

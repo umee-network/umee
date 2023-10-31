@@ -30,7 +30,7 @@ message GenesisState {
     (gogoproto.jsontag)  = "quota_duration,omitempty",
     (gogoproto.moretags) = "yaml:\"quota_expires\""
   ];
-  // inflows defines inflow amount of denoms
+  // inflows defines inflow amount per denom denoms
   repeated cosmos.base.v1beta1.DecCoin inflows = 5 [
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable)     = false

@@ -25,12 +25,18 @@ func TestResetQuota(t *testing.T) {
 	q := k.GetTokenOutflows(umeeQuota.Denom)
 	assert.DeepEqual(t, q, umeeQuota)
 
+	k.SetTokenInflow(umeeQuota)
+	i := k.GetTokenInflow(umeeQuota.Denom)
+	assert.DeepEqual(t, i, umeeQuota)
+
 	// reset the quota
 	k.ResetAllQuotas()
 
 	// check the quota after reset
 	q = k.GetTokenOutflows(umeeQuota.Denom)
 	assert.DeepEqual(t, q.Amount, sdk.NewDec(0))
+	i = k.GetTokenInflow(umeeQuota.Denom)
+	assert.DeepEqual(t, i.Amount, sdk.NewDec(0))
 }
 
 func TestKeeper_CheckAndUpdateQuota(t *testing.T) {

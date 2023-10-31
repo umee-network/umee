@@ -55,7 +55,7 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		}
 
 		isSourceChain := transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
-		ackErr := im.kb.Keeper(&ctx).CheckIBCInflow(ctx, packet, data.Denom, data.Amount, isSourceChain)
+		ackErr := im.kb.Keeper(&ctx).RecordIBCInflow(ctx, packet, data.Denom, data.Amount, isSourceChain)
 		if ackErr != nil {
 			return ackErr
 		}

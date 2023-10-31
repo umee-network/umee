@@ -22,7 +22,9 @@ func TestUnitParams(t *testing.T) {
 	params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED
 	params.TokenQuota = sdk.MustNewDecFromStr("12.23")
 	params.TotalQuota = sdk.MustNewDecFromStr("3.4321")
-	params.TotalInflowQuota = sdk.MustNewDecFromStr("3.4321")
+	params.InflowOutflowQuotaBase = sdk.MustNewDecFromStr("3.4321")
+	params.InflowOutflowQuotaRate = sdk.MustNewDecFromStr("0.2")
+
 	err := k.SetParams(params)
 	require.NoError(err)
 	// check the updated params
