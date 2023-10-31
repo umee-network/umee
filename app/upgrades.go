@@ -119,7 +119,14 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 			params.AllowedClients = append(params.AllowedClients, ibcexported.Localhost)
 			app.IBCKeeper.ClientKeeper.SetParams(ctx, params)
 
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+			fromVM, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
+			if err != nil {
+				return fromVM, err
+			}
+			govParams := app.GovKeeper.GetParams(ctx)
+			govParams.MinInitialDepositRatio = sdk.NewDecWithPrec(1, 2).String()
+			err = app.GovKeeper.SetParams(ctx, govParams)
+			return fromVM, err
 		},
 	)
 
