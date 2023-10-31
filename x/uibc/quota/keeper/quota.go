@@ -253,7 +253,7 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 	return nil
 }
 
-// RecordIBCInflow validates if inflow token is registered in x/leverage
+// RecordIBCInflow will save the inflow amount if token is registered otherwise it will skip
 func (k Keeper) RecordIBCInflow(ctx sdk.Context,
 	packet channeltypes.Packet, dataDenom, dataAmount string, isSourceChain bool,
 ) exported.Acknowledgement {

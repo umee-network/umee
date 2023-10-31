@@ -73,8 +73,8 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	k.checkOutflows(umee, 50, 94)
 
 	// transferring additional 5 umee => 10USD, will fail total quota check but it will pass inflow quota check
-	// sum of outflows <= $1M +  params.InflowOutflowQuota * sum of all inflows =  (10_000_000) * 50 + (0) = 500000000
-	// 104 <= 500000000
+	// sum of outflows <= $1M +  params.InflowOutflowQuotaRate * sum of all inflows =  (10_000_000)+  (50*0) = 10_000_000
+	// 104 <= 10_000_000
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(5))
 	require.NoError(t, err)
 	k.checkOutflows(umee, 60, 104)

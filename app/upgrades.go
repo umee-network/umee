@@ -126,6 +126,22 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 			govParams := app.GovKeeper.GetParams(ctx)
 			govParams.MinInitialDepositRatio = sdk.NewDecWithPrec(1, 2).String()
 			err = app.GovKeeper.SetParams(ctx, govParams)
+			if err != nil {
+				return fromVM, err
+			}
+
+			// uibc params
+			uibcParams := app.UIbcQuotaKeeperB.Keeper(&ctx).GetParams()
+			uibcParams.TotalQuota = sdk.NewDec(1_600_000)
+			uibcParams.TokenQuota = sdk.NewDec(900_000)
+			uibcParams.InflowOutflowQuotaBase = sdk.NewDec(1_000_000)
+			// TODO: needs to finalize quota rate
+			uibcParams.InflowOutflowQuotaRate = sdk.MustNewDecFromStr("0.1")
+
+			err = app.UIbcQuotaKeeperB.Keeper(&ctx).SetParams(uibcParams)
+			if err != nil {
+				return fromVM, err
+			}
 			return fromVM, err
 		},
 	)
