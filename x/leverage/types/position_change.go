@@ -324,7 +324,7 @@ func (ap *AccountPosition) withdrawFromSpecialPair(index int) (sdk.Dec, error) {
 	// note that with the new borrow (from fillOrdinaryCollateral) increasing and
 	// the special borrow decreasing, this position's total borrowed did not change
 	ap.specialPairs[index].Collateral.Amount = sp.Collateral.Amount.Sub(withdrawn)
-	ap.specialPairs[index].Borrow.Amount = sp.Borrow.Amount.Sub(borrowed)
+	ap.specialPairs[index].Borrow.Amount = sp.Borrow.Amount.Sub(borrowed) // todo: cap these subs
 	ap.borrowedValue = ap.borrowedValue.Sub(borrowed)
 	ap.collateralValue = ap.collateralValue.Sub(withdrawn)
 	return withdrawn, ap.Validate()
