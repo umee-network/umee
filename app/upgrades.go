@@ -1,7 +1,6 @@
 package app
 
 import (
-	"github.com/CosmWasm/wasmd/x/wasm"
 	"github.com/cometbft/cometbft/libs/log"
 	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
 	icagenesis "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/genesis/types"
@@ -63,7 +62,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade("v4.2", upgradeInfo, uibc.ModuleName)
 	app.registerUpgrade4_3(upgradeInfo)
 	app.registerUpgrade("v4.4", upgradeInfo)
-	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasm.ModuleName)
+	app.registerUpgrade("v5.0", upgradeInfo, ugov.ModuleName, wasmtypes.ModuleName)
 	app.registerUpgrade5_1(upgradeInfo)
 	app.registerUpgrade("v5.2", upgradeInfo) // v5.2 migration is not compatible with v6, so leaving default here.
 	app.registerUpgrade6(upgradeInfo)
@@ -96,7 +95,7 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 			keyTable = govv1.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		case crisistypes.ModuleName:
 			keyTable = crisistypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
-		case wasm.ModuleName:
+		case wasmtypes.ModuleName:
 			keyTable = wasmtypes.ParamKeyTable() //nolint: staticcheck // deprecated but required for upgrade
 		default:
 			// subspace not handled

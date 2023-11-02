@@ -48,9 +48,9 @@ func (c *Client) WasmExecContractWithAccSeq(contractAddr string, execMsg []byte,
 		Msg:      execMsg,
 	}
 	if accSeq != 0 {
-		return c.WithAccSeq(accSeq).WithAsyncBlock().BroadcastTx(fromIdx, &msg)
+		return c.WithAccSeq(accSeq).BroadcastTx(fromIdx, &msg)
 	}
-	return c.WithAsyncBlock().BroadcastTx(fromIdx, &msg)
+	return c.BroadcastTx(fromIdx, &msg)
 }
 
 func (c *Client) WasmExecuteContract(contractAddr string, execMsg []byte) (*sdk.TxResponse, error) {
