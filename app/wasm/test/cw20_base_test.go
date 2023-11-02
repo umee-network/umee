@@ -20,7 +20,6 @@ import (
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
-	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"gotest.tools/v3/assert"
@@ -129,9 +128,8 @@ type IntegrationTestSuite struct {
 	ctx sdk.Context
 	app *umeeapp.UmeeApp
 
-	wasmMsgServer       wasmtypes.MsgServer
-	wasmQueryClient     wasmtypes.QueryClient
-	wasmProposalHandler govv1.Handler
+	wasmMsgServer   wasmtypes.MsgServer
+	wasmQueryClient wasmtypes.QueryClient
 
 	codeID       uint64
 	contractAddr string
@@ -162,7 +160,6 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	grpc := wasmkeeper.Querier(&app.WasmKeeper)
 	wasmtypes.RegisterQueryServer(queryHelper, grpc)
 	s.wasmQueryClient = wasmtypes.NewQueryClient(queryHelper)
-	s.wasmProposalHandler = wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, umeeapp.GetWasmEnabledProposals())
 	s.encfg = umeeapp.MakeEncodingConfig()
 }
 
@@ -180,22 +177,15 @@ func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey
 func (s *IntegrationTestSuite) cw20StoreCode(sender sdk.AccAddress, cwArtifacePath string) (codeId uint64) {
 	cw20Code, err := os.ReadFile(cwArtifacePath)
 	assert.NilError(s.T, err)
-	storeCodeProposal := wasmtypes.StoreCodeProposal{
-		Title:                 cwArtifacePath,
-		Description:           cwArtifacePath,
-		RunAs:                 sender.String(),
+	storeCodeMsg := wasmtypes.MsgStoreCode{
+		Sender:                sender.String(),
 		WASMByteCode:          cw20Code,
 		InstantiatePermission: &wasmtypes.AllowEverybody,
 	}
 
-	err = s.wasmProposalHandler(s.ctx, &storeCodeProposal)
+	resp, err := s.wasmMsgServer.StoreCode(sdk.WrapSDKContext(s.ctx), &storeCodeMsg)
 	assert.NilError(s.T, err)
-
-	codes, err := s.wasmQueryClient.PinnedCodes(sdk.WrapSDKContext(s.ctx), &wasmtypes.QueryPinnedCodesRequest{})
-	assert.NilError(s.T, err)
-	assert.Equal(s.T, true, len(codes.CodeIDs) > 0)
-
-	return codes.CodeIDs[len(codes.CodeIDs)-1]
+	return resp.CodeID
 }
 
 func (s *IntegrationTestSuite) transfer(contracAddr string, amount uint64, from, to sdk.AccAddress) {

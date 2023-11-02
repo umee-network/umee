@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -220,7 +221,7 @@ func init() {
 		icatypes.ModuleName:         nil,
 
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
-		wasm.ModuleName:          {authtypes.Burner},
+		wasmtypes.ModuleName:     {authtypes.Burner},
 
 		incentive.ModuleName:   nil,
 		oracletypes.ModuleName: nil,
@@ -266,7 +267,7 @@ type UmeeApp struct {
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
 	NFTKeeper             nftkeeper.Keeper
-	WasmKeeper            wasm.Keeper
+	WasmKeeper            wasmkeeper.Keeper
 
 	IBCTransferKeeper ibctransferkeeper.Keeper
 	IBCKeeper         *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
@@ -295,7 +296,7 @@ type UmeeApp struct {
 	configurator module.Configurator
 
 	// wasm
-	wasmCfg wasm.Config
+	wasmCfg wasmtypes.WasmConfig
 }
 
 func init() {
@@ -316,8 +317,7 @@ func New(
 	homePath string,
 	invCheckPeriod uint,
 	appOpts servertypes.AppOptions,
-	wasmEnabledProposals []wasm.ProposalType,
-	wasmOpts []wasm.Option,
+	wasmOpts []wasmkeeper.Option,
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *UmeeApp {
 	encCfg := MakeEncodingConfig()
@@ -340,7 +340,7 @@ func New(
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey,
 		uibc.StoreKey, ugov.StoreKey,
-		wasm.StoreKey,
+		wasmtypes.StoreKey,
 		incentive.StoreKey,
 		metoken.StoreKey,
 		consensusparamstypes.StoreKey, crisistypes.StoreKey,
@@ -389,7 +389,7 @@ func New(
 	app.ScopedIBCKeeper = app.CapabilityKeeper.ScopeToModule(ibcexported.ModuleName)
 	app.ScopedTransferKeeper = app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
-	app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasm.ModuleName)
+	app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
 
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
@@ -623,11 +623,6 @@ func New(
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
 		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
 
-	// The wasm gov proposal types can be individually enabled
-	if len(wasmEnabledProposals) != 0 {
-		govRouter.AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, wasmEnabledProposals))
-	}
-
 	govConfig := govtypes.DefaultConfig()
 	govConfig.MaxMetadataLen = 800
 	app.GovKeeper = govkeeper.NewKeeper(
@@ -645,20 +640,15 @@ func New(
 		panic(fmt.Sprintf("error while reading wasm config: %s", err))
 	}
 
-	// The last arguments can contain custom message handlers, and custom query handlers,
-	// if we want to allow any custom callbacks
-	// default available capabilities https://github.com/CosmWasm/cosmwasm/blob/main/docs/CAPABILITIES-BUILT-IN.md
-	availableCapabilities := "iterator,staking,stargate,cosmwasm_1_1,cosmwasm_1_2,umee"
-
 	// Register umee custom plugin to wasm
 	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper,
 		app.MetokenKeeperB), wasmOpts...)
 	// Register stargate queries
 	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
-
-	app.WasmKeeper = wasm.NewKeeper(
+	availableCapabilities := strings.Join(AllCapabilities(), ",")
+	app.WasmKeeper = wasmkeeper.NewKeeper(
 		appCodec,
-		keys[wasm.StoreKey],
+		keys[wasmtypes.StoreKey],
 		app.AccountKeeper,
 		app.BankKeeper,
 		app.StakingKeeper,
@@ -760,7 +750,7 @@ func New(
 		oracletypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
-		wasm.ModuleName,
+		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
 	}
@@ -778,7 +768,7 @@ func New(
 		leveragetypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
-		wasm.ModuleName,
+		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
 	}
@@ -802,7 +792,7 @@ func New(
 		leveragetypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
-		wasm.ModuleName,
+		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
 	}
@@ -818,7 +808,7 @@ func New(
 		leveragetypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
-		wasm.ModuleName,
+		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
 	}
@@ -883,7 +873,7 @@ func New(
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.setAnteHandler(txConfig, &app.wasmCfg, keys[wasm.StoreKey])
+	app.setAnteHandler(txConfig, &app.wasmCfg, keys[wasmtypes.StoreKey])
 	// In v0.46, the SDK introduces _postHandlers_. PostHandlers are like
 	// antehandlers, but are run _after_ the `runMsgs` execution. They are also
 	// defined as a chain, and have the same signature as antehandlers.
@@ -1148,7 +1138,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
-	paramsKeeper.Subspace(wasm.ModuleName)
+	paramsKeeper.Subspace(wasmtypes.ModuleName)
 
 	return paramsKeeper
 }
