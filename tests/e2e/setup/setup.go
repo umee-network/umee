@@ -85,8 +85,7 @@ func (s *E2ETestSuite) SetupSuite() {
 		"",
 		0,
 		app.EmptyAppOptions{},
-		nil,
-		nil,
+		app.EmptyWasmOpts,
 	)
 	encodingConfig = testutil.TestEncodingConfig{
 		InterfaceRegistry: app.InterfaceRegistry(),
