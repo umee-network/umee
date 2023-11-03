@@ -4,25 +4,11 @@
 
 The `x/uibc` is a Cosmos Module providing:
 
-- IBC Denom Metadata Tracker for [ICS-20](https://github.com/cosmos/ibc/tree/main/spec/app/ics-020-fungible-token-transfer) transferred tokens to backfill denom metadata into the x/bank standard Cosmos SDK module.
 - IBC Quota is an ICS-4 middleware for the ICS-20 token transfer app to apply quota mechanism.
 
 ## Content
 
-- [IBC Denom Metadata Tracker](#ibc-denom-metadata-tracker)
 - [IBC Quota](#ibc-quota)
-
-## IBC Denom Metadata Tracker
-
-`x/bank.types.Metadata` is a structure which provides essential information about denom, such as display denom name, description, symbol, list of units (unit name and decimal exponent), and the default unit (`Base`).
-
-ICS-20 is a x/bank token transfer protocol over IBC.
-The core implementation doesn't create bank `Metadata` when a new token is transferred for the very first time. It's worth to note that token received through IBC is identified by the port ID, channel ID and the source denom ID.
-The purpose of the `x/uibc/ics20` module is to wrap the core IBC module and create a denom `Metadata` whenever it is missing. Look at the [`TrackDenomMetadata`](ics20/keeper/keeper.go) function for more details.
-
-### Considerations
-
-The IBC ICS-20 doesn't carry any metadata information, so we only fill up the base denom. Importantly, we don't know about the `Exponent`, and we set `Exponent := 0`. In many cases this is wrong, and should be overwritten by chain governance.
 
 ## IBC Quota
 
