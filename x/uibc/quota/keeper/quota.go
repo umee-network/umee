@@ -22,20 +22,17 @@ var ten = sdk.MustNewDecFromStr("10")
 // GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 	var outflows sdk.DecCoins
-	// creating PrefixStore upfront will remove the prefix from the key when running the iterator.
-	store := k.PrefixStore(keyPrefixDenomOutflows)
-	iter := sdk.KVStorePrefixIterator(store, nil)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		o := sdk.DecCoin{Denom: string(iter.Key())}
-		if err := o.Amount.Unmarshal(iter.Value()); err != nil {
-			return nil, err
+	iter := func(key, val []byte) error {
+		o := sdk.DecCoin{Denom: DenomFromKey(key, keyPrefixDenomOutflows)}
+		if err := o.Amount.Unmarshal(val); err != nil {
+			return err
 		}
 		outflows = append(outflows, o)
+		return nil
 	}
 
-	return outflows, nil
+	err := store.Iterate(k.store, keyPrefixDenomOutflows, iter)
+	return outflows, err
 }
 
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
@@ -74,20 +71,16 @@ func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
 // GetAllInflows returns inflows of all registered tokens in USD value.
 func (k Keeper) GetAllInflows() (sdk.DecCoins, error) {
 	var inflows sdk.DecCoins
-	// creating PrefixStore upfront will remove the prefix from the key when running the iterator.
-	store := k.PrefixStore(keyPrefixDenomInflows)
-	iter := sdk.KVStorePrefixIterator(store, nil)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		o := sdk.DecCoin{Denom: string(iter.Key())}
-		if err := o.Amount.Unmarshal(iter.Value()); err != nil {
-			return nil, err
+	iter := func(key, val []byte) error {
+		o := sdk.DecCoin{Denom: DenomFromKey(key, keyPrefixDenomInflows)}
+		if err := o.Amount.Unmarshal(val); err != nil {
+			return err
 		}
 		inflows = append(inflows, o)
+		return nil
 	}
-
-	return inflows, nil
+	err := store.Iterate(k.store, keyPrefixDenomInflows, iter)
+	return inflows, err
 }
 
 // SetTokenInflows saves provided updated IBC inflows as a pair: USD value, denom name in the
@@ -186,10 +179,11 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	// 2 . Total Outflow Sum <= $1M + params.TotalInflowQuota * sum of all inflows
 	totalOutflowSum := k.GetTotalOutflow().Add(exchangePrice)
 	ttlInSum := k.GetTotalInflow()
-	if !(!params.TotalQuota.IsZero() && totalOutflowSum.LTE(params.TotalQuota) ||
-		!ttlInSum.IsZero() &&
-			totalOutflowSum.LTE(params.InflowOutflowQuotaBase.Add(ttlInSum.Mul(params.InflowOutflowQuotaRate)))) {
-		return uibc.ErrQuotaExceeded
+	if !params.TotalQuota.IsZero() {
+		if totalOutflowSum.GT(params.TotalQuota) ||
+			totalOutflowSum.GT(params.InflowOutflowQuotaBase.Add(ttlInSum.Mul(params.InflowOutflowQuotaRate))) {
+			return uibc.ErrQuotaExceeded
+		}
 	}
 	k.SetTokenOutflow(o)
 	k.SetTotalOutflowSum(totalOutflowSum)
@@ -281,13 +275,20 @@ func (k Keeper) RecordIBCInflow(ctx sdk.Context,
 		}
 		// calculate total exchange rate
 		powerReduction := ten.Power(uint64(ts.Exponent))
-		inflowinUSD := sdk.MustNewDecFromStr(dataAmount).Quo(powerReduction).Mul(exchangeRate)
+		inflowInUSD := sdk.MustNewDecFromStr(dataAmount).Quo(powerReduction).Mul(exchangeRate)
 
-		tokenInflow := sdk.NewDecCoinFromDec(ibcDenom, inflowinUSD)
+		tokenInflow := sdk.NewDecCoinFromDec(ibcDenom, inflowInUSD)
 		k.SetTokenInflow(tokenInflow)
 		totalInflowSum := k.GetTotalInflow()
-		k.SetTotalInflow(totalInflowSum.Add(inflowinUSD))
+		k.SetTotalInflow(totalInflowSum.Add(inflowInUSD))
 	}
 
 	return nil
+}
+
+// GetOldTotalOutflow returns the total outflow of ibc-transfer amount.
+// Note: only using for migration
+func (k Keeper) GetOldTotalOutflow() sdk.Dec {
+	bz := k.store.Get(keyTotalOutflows)
+	return sdk.MustNewDecFromStr(string(bz))
 }

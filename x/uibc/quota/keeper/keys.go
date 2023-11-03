@@ -22,3 +22,9 @@ func KeyTokenInflow(ibcDenom string) []byte {
 	//  keyPrefixDenomInflows | denom
 	return util.ConcatBytes(0, keyPrefixDenomInflows, []byte(ibcDenom))
 }
+
+// DenomFromKey extracts denom from a key with the form
+// prefix | denom
+func DenomFromKey(key, prefix []byte) string {
+	return string(key[len(prefix):])
+}

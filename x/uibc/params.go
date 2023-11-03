@@ -15,7 +15,7 @@ func DefaultParams() Params {
 		TokenQuota:             sdk.NewDec(900_000),        // $900K
 		QuotaDuration:          time.Second * 60 * 60 * 24, // 24h
 		InflowOutflowQuotaBase: sdk.NewDec(1_000_000),      // 1M
-		InflowOutflowQuotaRate: sdk.MustNewDecFromStr("0.1"),
+		InflowOutflowQuotaRate: sdk.MustNewDecFromStr("0.25"),
 	}
 }
 

@@ -48,7 +48,7 @@ type Oracle struct {
 func (o Oracle) Price(_ sdk.Context, denom string) (sdk.Dec, error) {
 	p, ok := o.prices[denom]
 	if !ok {
-		return p, ltypes.ErrNotRegisteredToken.Wrap(denom)
+		return sdk.ZeroDec(), nil
 	}
 	return p, nil
 }

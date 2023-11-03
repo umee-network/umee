@@ -35,7 +35,6 @@ func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
 func initKeeperSimpleMock(t *testing.T) TestKeeper {
 	lmock := NewLeverageKeeperMock(umee, atom)
 	omock := NewOracleMock(umee, sdk.NewDec(2))
-	omock.prices[atom] = sdk.NewDec(10)
 	return initKeeper(t, lmock, omock)
 }
 
