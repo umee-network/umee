@@ -165,10 +165,9 @@ func (ap *AccountPosition) Validate() error {
 }
 
 // MaxBorrow finds the maximum additional amount of an asset a position can
-// borrow without exceeding its borrow limit. Does not interact with
-// special asset pairs. Returns the amount of borrows added.
+// borrow without exceeding its borrow limit. Does not mutate position.
 // If the requested token denom did not exist or the borrower was already
-// at or over their borrow limit, this is a no-op which returns zero.
+// at or over their borrow limit, returns zero.
 // Returns zero if a position was computed with liquidation in mind.
 func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	if ap.isForLiquidation {
@@ -179,7 +178,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 }
 
 // MaxWithdraw finds the maximum additional amount of an asset a position can
-// withdraw without exceeding its borrow limit.
+// withdraw without exceeding its borrow limit. Does not mutate position.
 // Returns zero if a position was computed with liquidation in mind.
 func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	if ap.isForLiquidation {
@@ -198,8 +197,7 @@ func (ap *AccountPosition) HasCollateral(denom string) bool {
 // Limit calculates the borrow limit of an account position
 // (or liquidation threshold if ap.isForLiquidation is true).
 func (ap *AccountPosition) Limit() sdk.Dec {
-	// TODO
-	return sdk.ZeroDec()
+	return ap.normalBorrowLimit().Add(ap.borrowLimitIncrease())
 }
 
 // BorrowedValue sums the total borrowed value in a position.
