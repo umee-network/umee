@@ -173,7 +173,6 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	if ap.isForLiquidation {
 		return sdk.ZeroDec()
 	}
-	// TODO
 	return sdk.ZeroDec()
 }
 
@@ -197,7 +196,22 @@ func (ap *AccountPosition) HasCollateral(denom string) bool {
 // Limit calculates the borrow limit of an account position
 // (or liquidation threshold if ap.isForLiquidation is true).
 func (ap *AccountPosition) Limit() sdk.Dec {
-	return ap.normalBorrowLimit().Add(ap.borrowLimitIncrease())
+	// compute limit due to collateral weights
+	limit := ap.normalBorrowLimit().Add(ap.borrowLimitIncrease())
+
+	// compute collateral utilization due to borrow factors
+	usage := ap.normalCollateralUsage().Sub(ap.collateralUsageDecrease())
+	unusedCollateralValue := ap.CollateralValue().Sub(usage) // can be negative
+
+	// average collateral weight before special pairs
+	avgWeight := ap.normalBorrowLimit().Quo(ap.CollateralValue())
+
+	// compute limit based on borrow factor and average collateral weight
+	borrowFactorLimit := ap.BorrowedValue().Add(
+		unusedCollateralValue.Mul(avgWeight),
+	)
+
+	return sdk.MinDec(limit, borrowFactorLimit)
 }
 
 // BorrowedValue sums the total borrowed value in a position.
@@ -247,12 +261,12 @@ func (ap *AccountPosition) borrowFactor(denom string) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-// normalWeightedBorrowedValue sums the total borrowed value in a position,
+// normalCollateralUsage sums the total borrowed value in a position,
 // increased according to each token's borrow factor (collateral weight or liquidation threshold),
-// or ap.minimumBorrowFacgor if greater. Does not use special asset weights for paired assets.
+// or ap.minimumBorrowFactor if greater. Does not use special asset weights for paired assets.
 // The resulting value is the total collateral value which would be required to support all
 // borrowed assets, without any special asset pairs being applied.
-func (ap *AccountPosition) normalWeightedBorrowedValue() sdk.Dec {
+func (ap *AccountPosition) normalCollateralUsage() sdk.Dec {
 	sum := sdk.ZeroDec()
 	for _, b := range ap.borrowedValue {
 		sum = sum.Add(
@@ -296,19 +310,19 @@ func (ap *AccountPosition) borrowLimitIncrease() sdk.Dec {
 	return increase
 }
 
-// borrowValueDecrease calculates amount below an account's normalWeightedBorrowedValue
-// its borrow factor will indicate due to the effects of existing special asset pairs.
-func (ap *AccountPosition) borrowValueDecrease() sdk.Dec {
+// collateralUsageDecrease calculates amount below an account's normalCollateralUsage
+// its effective utilization is due to the effects of existing special asset pairs.
+func (ap *AccountPosition) collateralUsageDecrease() sdk.Dec {
 	decrease := sdk.ZeroDec()
 	for _, wsp := range ap.specialPairs {
 		// initial borrow factor comes from token settings (and minimum)
 		borrowFactor := ap.borrowFactor(wsp.Borrow.Denom)
 		// ignore negative effects
 		if borrowFactor.LT(wsp.SpecialWeight) {
-			// decreases effective borrowed value due to the difference in parameters
+			// decreases effective collateral usage due to the difference in parameters
 			decrease = decrease.Add(
-				wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub( // original effective borrow minus
-					wsp.Borrow.Amount.Quo(wsp.SpecialWeight)), // new effective borrow
+				wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub(
+					wsp.Borrow.Amount.Quo(wsp.SpecialWeight)),
 			)
 		}
 	}
