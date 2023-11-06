@@ -174,10 +174,20 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 		return sdk.ZeroDec()
 	}
 
-	// TODO:
-	// - improve for cases with special assets
-	// - check restrictive borrow factor cases
-	return sdk.ZeroDec()
+	limit := ap.totalBorrowLimit()     // borrow limit after special pairs
+	usage := ap.totalCollateralUsage() // collateral usage after special pairs
+
+	maxNormalBorrow := sdk.MinDec(
+		// limited by collateral weight: borrow up to remaining limit
+		limit.Sub(ap.BorrowedValue()),
+		// limited by borrow factor: borrow up to unused collateral / borrow factor
+		ap.CollateralValue().Sub(usage).Quo(
+			ap.borrowFactor(denom),
+		),
+	)
+
+	// TODO: improve for cases where new special assets can be paired
+	return sdk.MaxDec(sdk.ZeroDec(), maxNormalBorrow)
 }
 
 // MaxWithdraw finds the maximum additional amount of an asset a position can
@@ -203,17 +213,11 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	// compute limit due to collateral weights
 	limit := ap.totalBorrowLimit()
 
-	// compute collateral usage due to borrow factors
+	// compute limit due to borrow factors
 	usage := ap.totalCollateralUsage()
-
-	// average collateral weight before special pairs
 	avgWeight := ap.normalBorrowLimit().Quo(ap.CollateralValue())
-
-	// compute limit based on borrow factor and average collateral weight
 	unusedCollateralValue := ap.CollateralValue().Sub(usage) // can be negative
-	borrowFactorLimit := ap.BorrowedValue().Add(
-		unusedCollateralValue.Mul(avgWeight),
-	)
+	borrowFactorLimit := ap.BorrowedValue().Add(unusedCollateralValue.Mul(avgWeight))
 
 	return sdk.MinDec(limit, borrowFactorLimit)
 }
