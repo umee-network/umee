@@ -197,10 +197,16 @@ func (ap *AccountPosition) HasCollateral(denom string) bool {
 // (or liquidation threshold if ap.isForLiquidation is true).
 func (ap *AccountPosition) Limit() sdk.Dec {
 	// compute limit due to collateral weights
-	limit := ap.normalBorrowLimit().Add(ap.borrowLimitIncrease())
+	limit := ap.normalBorrowLimit()
+	for _, wsp := range ap.specialPairs {
+		limit = limit.Add(ap.borrowLimitIncrease(wsp))
+	}
 
 	// compute collateral utilization due to borrow factors
-	usage := ap.normalCollateralUsage().Sub(ap.collateralUsageDecrease())
+	usage := ap.normalCollateralUsage()
+	for _, wsp := range ap.specialPairs {
+		usage = usage.Sub(ap.collateralUsageDecrease(wsp))
+	}
 	unusedCollateralValue := ap.CollateralValue().Sub(usage) // can be negative
 
 	// average collateral weight before special pairs
@@ -293,38 +299,29 @@ func (ap *AccountPosition) normalBorrowLimit() sdk.Dec {
 }
 
 // borrowLimitIncrease calculates the amount above an account's normalBorrowLimit
-// it is allowed to borrow due to the effects of existing special asset pairs.
-func (ap *AccountPosition) borrowLimitIncrease() sdk.Dec {
-	increase := sdk.ZeroDec()
-	for _, wsp := range ap.specialPairs {
-		additionalWeight := sdk.MaxDec(
-			// collateral weight (or liquidation threshold) is increased if the
-			// special pair's weight is greater than that of the collateral token
-			wsp.SpecialWeight.Sub(ap.tokenWeight(wsp.Collateral.Denom)),
-			sdk.ZeroDec(), // prevent negative effects
-		)
-		// the increase in borrow limit is each affected collateral amount times
-		// the additional weight.
-		increase = increase.Add(wsp.Collateral.Amount.Mul(additionalWeight))
-	}
-	return increase
+// it is allowed to borrow due to the effects of a single special asset pair.
+func (ap *AccountPosition) borrowLimitIncrease(wsp WeightedSpecialPair) sdk.Dec {
+	additionalWeight := sdk.MaxDec(
+		// collateral weight (or liquidation threshold) is increased if the
+		// special pair's weight is greater than that of the collateral token
+		wsp.SpecialWeight.Sub(ap.tokenWeight(wsp.Collateral.Denom)),
+		sdk.ZeroDec(), // prevent negative effects
+	)
+	// the increase in borrow limit is each affected collateral amount times
+	// the additional weight.
+	return wsp.Collateral.Amount.Mul(additionalWeight)
 }
 
 // collateralUsageDecrease calculates amount below an account's normalCollateralUsage
 // its effective utilization is due to the effects of existing special asset pairs.
-func (ap *AccountPosition) collateralUsageDecrease() sdk.Dec {
-	decrease := sdk.ZeroDec()
-	for _, wsp := range ap.specialPairs {
-		// initial borrow factor comes from token settings (and minimum)
-		borrowFactor := ap.borrowFactor(wsp.Borrow.Denom)
-		// ignore negative effects
-		if borrowFactor.LT(wsp.SpecialWeight) {
-			// decreases effective collateral usage due to the difference in parameters
-			decrease = decrease.Add(
-				wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub( // original usage
-					wsp.Borrow.Amount.Quo(wsp.SpecialWeight)), // special usage
-			)
-		}
+func (ap *AccountPosition) collateralUsageDecrease(wsp WeightedSpecialPair) sdk.Dec {
+	// initial borrow factor comes from token settings (and minimum)
+	borrowFactor := ap.borrowFactor(wsp.Borrow.Denom)
+	// ignore negative effects
+	if borrowFactor.GTE(wsp.SpecialWeight) {
+		return sdk.ZeroDec()
 	}
-	return decrease
+	// decreases effective collateral usage due to the difference in parameters
+	return wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub( // original usage
+		wsp.Borrow.Amount.Quo(wsp.SpecialWeight)) // special usage
 }
