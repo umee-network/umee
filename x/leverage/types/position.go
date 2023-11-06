@@ -321,8 +321,8 @@ func (ap *AccountPosition) collateralUsageDecrease() sdk.Dec {
 		if borrowFactor.LT(wsp.SpecialWeight) {
 			// decreases effective collateral usage due to the difference in parameters
 			decrease = decrease.Add(
-				wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub(
-					wsp.Borrow.Amount.Quo(wsp.SpecialWeight)),
+				wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub( // original usage
+					wsp.Borrow.Amount.Quo(wsp.SpecialWeight)), // special usage
 			)
 		}
 	}
