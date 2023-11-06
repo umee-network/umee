@@ -235,6 +235,18 @@ func (ap *AccountPosition) tokenWeight(denom string) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
+// borrowFactor gets a token's collateral weight or liquidation threshold (or minimumBorrowFactor if greater)
+// if the token is registered, else zero.
+func (ap *AccountPosition) borrowFactor(denom string) sdk.Dec {
+	if t, ok := ap.tokens[denom]; ok {
+		if ap.isForLiquidation {
+			return sdk.MaxDec(t.LiquidationThreshold, ap.minimumBorrowFactor)
+		}
+		return sdk.MaxDec(t.CollateralWeight, ap.minimumBorrowFactor)
+	}
+	return sdk.ZeroDec()
+}
+
 // normalWeightedBorrowedValue sums the total borrowed value in a position,
 // increased according to each token's borrow factor (collateral weight or liquidation threshold),
 // or ap.minimumBorrowFacgor if greater. Does not use special asset weights for paired assets.
@@ -290,15 +302,12 @@ func (ap *AccountPosition) borrowValueDecrease() sdk.Dec {
 	decrease := sdk.ZeroDec()
 	for _, wsp := range ap.specialPairs {
 		// initial borrow factor comes from token settings (and minimum)
-		borrowFactor := sdk.MaxDec(
-			ap.tokenWeight(wsp.Borrow.Denom),
-			ap.minimumBorrowFactor,
-		)
+		borrowFactor := ap.borrowFactor(wsp.Borrow.Denom)
 		// ignore negative effects
 		if borrowFactor.LT(wsp.SpecialWeight) {
 			// decreases effective borrowed value due to the difference in parameters
 			decrease = decrease.Add(
-				wsp.Borrow.Amount.Quo(borrowFactor).Sub( // original effective borrow minus
+				wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub( // original effective borrow minus
 					wsp.Borrow.Amount.Quo(wsp.SpecialWeight)), // new effective borrow
 			)
 		}
