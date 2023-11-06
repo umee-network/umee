@@ -22,9 +22,9 @@ type AccountPosition struct {
 	// but will still be initialized with the proper weight, and sorted in order.
 	// Special pairs which would reduce an asset's weight are included, but have no effect.
 	specialPairs WeightedSpecialPairs
-	// account's collateralValue USD value of each token, excluding that which is in special pairs above
+	// account's collateralValue USD value of each token, including that which is in special pairs above
 	collateralValue sdk.DecCoins
-	// account's borrowedValue USD value of each token, excluding that which is in special pairs above
+	// account's borrowedValue USD value of each token, including that which is in special pairs above
 	borrowedValue sdk.DecCoins
 	// tracks whether the position was built using collateral weight or liquidation threshold
 	isForLiquidation bool
