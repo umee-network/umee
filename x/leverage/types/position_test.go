@@ -549,8 +549,7 @@ func TestMaxBorrowNoSpecialPairs(t *testing.T) {
 			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
-		maxborrow, err := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
-		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
+		maxborrow := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
@@ -620,8 +619,7 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
-		maxborrow, err := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
-		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
+		maxborrow := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
@@ -760,8 +758,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+borrowPosition.String())
-		maxWithdraw, err := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
-		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+borrowPosition.String())
+		maxWithdraw := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxWithdraw).String(),
 			maxWithdraw.String(),

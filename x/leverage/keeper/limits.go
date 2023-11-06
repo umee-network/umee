@@ -32,16 +32,16 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
-	maxWithdrawValue, err := position.MaxWithdraw(denom)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
-	}
+	maxWithdrawValue := position.MaxWithdraw(denom)
 
 	maxWithdraw := coin.Zero(uDenom)
 	if position.IsHealthy() && !position.HasCollateral(denom) {
 		// if after max withdraw, the position has no more collateral of the requested denom
 		// but is still under its borrow limit, then withdraw everything.
 		// this works with missing collateral price
+
+		// TODO: since max withdraw no longer mutates, this needs refactor
+
 		maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
 	} else {
 		// for partial withdrawal, must have collateral price to withdraw anything more than wallet uTokens
@@ -89,10 +89,7 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
 
-	maxBorrowValue, err := position.MaxBorrow(denom)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
+	maxBorrowValue := position.MaxBorrow(denom)
 	maxBorrow, err := k.TokenWithValue(ctx, denom, maxBorrowValue, types.PriceModeHigh)
 	if nonOracleError(err) {
 		// non-oracle errors fail the transaction (or query)

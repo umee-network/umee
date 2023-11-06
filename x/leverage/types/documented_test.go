@@ -56,8 +56,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	assert.DeepEqual(t, sdk.MustNewDecFromStr("71.00"), borrowLimit) // $45 borrowed + $26 generic max borrow
 
 	// the current naive implementation of maxBorrow produces a result below the optimal 35.00
-	maxBorrow, err := initialPosition.MaxBorrow("BBBB")
-	assert.NilError(t, err)
+	maxBorrow := initialPosition.MaxBorrow("BBBB")
 	assert.DeepEqual(t, sdk.MustNewDecFromStr("30.00"), maxBorrow)
 	// TODO: perfect the behavior of MaxBorrow and test that it matches finalPosition below.
 	// It would need to move the collateral A in the special pair with C to the more efficient
