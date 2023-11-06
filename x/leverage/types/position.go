@@ -202,17 +202,17 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 		limit = limit.Add(ap.borrowLimitIncrease(wsp))
 	}
 
-	// compute collateral utilization due to borrow factors
+	// compute collateral usage due to borrow factors
 	usage := ap.normalCollateralUsage()
 	for _, wsp := range ap.specialPairs {
 		usage = usage.Sub(ap.collateralUsageDecrease(wsp))
 	}
-	unusedCollateralValue := ap.CollateralValue().Sub(usage) // can be negative
 
 	// average collateral weight before special pairs
 	avgWeight := ap.normalBorrowLimit().Quo(ap.CollateralValue())
 
 	// compute limit based on borrow factor and average collateral weight
+	unusedCollateralValue := ap.CollateralValue().Sub(usage) // can be negative
 	borrowFactorLimit := ap.BorrowedValue().Add(
 		unusedCollateralValue.Mul(avgWeight),
 	)
