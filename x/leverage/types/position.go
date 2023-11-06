@@ -174,6 +174,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	if ap.isForLiquidation {
 		return sdk.ZeroDec()
 	}
+	// TODO
 	return sdk.ZeroDec()
 }
 
@@ -184,18 +185,20 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	if ap.isForLiquidation {
 		return sdk.ZeroDec()
 	}
+	// TODO
 	return sdk.ZeroDec()
 }
 
 // HasCollateral returns true if a position contains any collateral of a given
 // type.
 func (ap *AccountPosition) HasCollateral(denom string) bool {
-	return false
+	return ap.collateralValue.AmountOf(denom).IsPositive()
 }
 
 // Limit calculates the borrow limit of an account position
 // (or liquidation threshold if ap.isForLiquidation is true).
 func (ap *AccountPosition) Limit() sdk.Dec {
+	// TODO
 	return sdk.ZeroDec()
 }
 
@@ -220,7 +223,7 @@ func (ap *AccountPosition) CollateralValue() sdk.Dec {
 // IsHealthy() returns true if a position's borrowed value is below
 // its borrow limit (or liquidation threshold if ap.isForLiquidation is true).
 func (ap *AccountPosition) IsHealthy() bool {
-	return false
+	return ap.BorrowedValue().LTE(ap.Limit())
 }
 
 // tokenWeight gets a token's collateral weight or liquidation threshold if it is registered, else zero
@@ -252,15 +255,55 @@ func (ap *AccountPosition) normalWeightedBorrowedValue() sdk.Dec {
 	return sum
 }
 
-// normalWeightedCollateralValue sums the total collateral value in a position,
+// normalBorrowLimit sums the total collateral value in a position,
 // reduced according to each token's collateral weight or liquidation threshold.
 // Does not use special asset weights for paired assets.
 // The resulting value is the total borrowed value which could be supported by
 // these collateral assets, without any special asset pairs being applied.
-func (ap *AccountPosition) normalWeightedCollateralValue() sdk.Dec {
+func (ap *AccountPosition) normalBorrowLimit() sdk.Dec {
 	sum := sdk.ZeroDec()
 	for _, b := range ap.collateralValue {
 		sum = sum.Add(b.Amount.Mul(ap.tokenWeight(b.Denom)))
 	}
 	return sum
+}
+
+// borrowLimitIncrease calculates the amount above an account's normalBorrowLimit
+// it is allowed to borrow due to the effects of existing special asset pairs.
+func (ap *AccountPosition) borrowLimitIncrease() sdk.Dec {
+	increase := sdk.ZeroDec()
+	for _, wsp := range ap.specialPairs {
+		additionalWeight := sdk.MaxDec(
+			// collateral weight (or liquidation threshold) is increased if the
+			// special pair's weight is greater than that of the collateral token
+			wsp.SpecialWeight.Sub(ap.tokenWeight(wsp.Collateral.Denom)),
+			sdk.ZeroDec(), // prevent negative effects
+		)
+		// the increase in borrow limit is each affected collateral amount times
+		// the additional weight.
+		increase = increase.Add(wsp.Collateral.Amount.Mul(additionalWeight))
+	}
+	return increase
+}
+
+// borrowValueDecrease calculates amount below an account's normalWeightedBorrowedValue
+// its borrow factor will indicate due to the effects of existing special asset pairs.
+func (ap *AccountPosition) borrowValueDecrease() sdk.Dec {
+	decrease := sdk.ZeroDec()
+	for _, wsp := range ap.specialPairs {
+		// initial borrow factor comes from token settings (and minimum)
+		borrowFactor := sdk.MaxDec(
+			ap.tokenWeight(wsp.Borrow.Denom),
+			ap.minimumBorrowFactor,
+		)
+		// ignore negative effects
+		if borrowFactor.LT(wsp.SpecialWeight) {
+			// decreases effective borrowed value due to the difference in parameters
+			decrease = decrease.Add(
+				wsp.Borrow.Amount.Quo(borrowFactor).Sub( // original effective borrow minus
+					wsp.Borrow.Amount.Quo(wsp.SpecialWeight)), // new effective borrow
+			)
+		}
+	}
+	return decrease
 }
