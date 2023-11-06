@@ -14,10 +14,10 @@ func (ap *AccountPosition) String() string {
 	for _, wsp := range ap.specialPairs {
 		special = append(special, wsp.String())
 	}
-	for _, c := range ap.normalCollateral {
+	for _, c := range ap.collateralValue {
 		collateral = append(collateral, c.String())
 	}
-	for _, b := range ap.normalBorrowed {
+	for _, b := range ap.borrowedValue {
 		borrowed = append(borrowed, b.String())
 	}
 	sep := "\n  "

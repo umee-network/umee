@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"sort"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -19,6 +20,16 @@ type WeightedSpecialPair struct {
 	Borrow sdk.DecCoin
 	// the collateral weight (or liquidation treshold) of the special pair
 	SpecialWeight sdk.Dec
+}
+
+func (wsp WeightedSpecialPair) Validate() error {
+	if wsp.SpecialWeight.IsNil() || !wsp.SpecialWeight.IsPositive() {
+		return fmt.Errorf("invalid special weight: %s", wsp.SpecialWeight)
+	}
+	if err := wsp.Collateral.Validate(); err != nil {
+		return err
+	}
+	return wsp.Borrow.Validate()
 }
 
 // before returns true if a WeightedSpecialPair should be sorted before
