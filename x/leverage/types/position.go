@@ -199,14 +199,22 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	return sdk.ZeroDec()
 }
 
-// BorrowedValue() sums the total borrowed value in a position.
+// BorrowedValue sums the total borrowed value in a position.
 func (ap *AccountPosition) BorrowedValue() sdk.Dec {
-	return sdk.ZeroDec()
+	sum := sdk.ZeroDec()
+	for _, b := range ap.borrowedValue {
+		sum = sum.Add(b.Amount)
+	}
+	return sum
 }
 
-// CollateralValue() sums the total collateral value in a position.
+// CollateralValue sums the total collateral value in a position.
 func (ap *AccountPosition) CollateralValue() sdk.Dec {
-	return sdk.ZeroDec()
+	sum := sdk.ZeroDec()
+	for _, c := range ap.collateralValue {
+		sum = sum.Add(c.Amount)
+	}
+	return sum
 }
 
 // IsHealthy() returns true if a position's borrowed value is below
@@ -224,4 +232,35 @@ func (ap *AccountPosition) tokenWeight(denom string) sdk.Dec {
 		return t.CollateralWeight
 	}
 	return sdk.ZeroDec()
+}
+
+// normalWeightedBorrowedValue sums the total borrowed value in a position,
+// increased according to each token's borrow factor (collateral weight or liquidation threshold),
+// or ap.minimumBorrowFacgor if greater. Does not use special asset weights for paired assets.
+// The resulting value is the total collateral value which would be required to support all
+// borrowed assets, without any special asset pairs being applied.
+func (ap *AccountPosition) normalWeightedBorrowedValue() sdk.Dec {
+	sum := sdk.ZeroDec()
+	for _, b := range ap.borrowedValue {
+		sum = sum.Add(
+			b.Amount.Quo(sdk.MaxDec(
+				ap.tokenWeight(b.Denom),
+				ap.minimumBorrowFactor,
+			)),
+		)
+	}
+	return sum
+}
+
+// normalWeightedCollateralValue sums the total collateral value in a position,
+// reduced according to each token's collateral weight or liquidation threshold.
+// Does not use special asset weights for paired assets.
+// The resulting value is the total borrowed value which could be supported by
+// these collateral assets, without any special asset pairs being applied.
+func (ap *AccountPosition) normalWeightedCollateralValue() sdk.Dec {
+	sum := sdk.ZeroDec()
+	for _, b := range ap.collateralValue {
+		sum = sum.Add(b.Amount.Mul(ap.tokenWeight(b.Denom)))
+	}
+	return sum
 }
