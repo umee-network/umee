@@ -173,6 +173,10 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	if ap.isForLiquidation {
 		return sdk.ZeroDec()
 	}
+
+	// TODO:
+	// - improve for cases with special assets
+	// - check restrictive borrow factor cases
 	return sdk.ZeroDec()
 }
 
@@ -197,16 +201,10 @@ func (ap *AccountPosition) HasCollateral(denom string) bool {
 // (or liquidation threshold if ap.isForLiquidation is true).
 func (ap *AccountPosition) Limit() sdk.Dec {
 	// compute limit due to collateral weights
-	limit := ap.normalBorrowLimit()
-	for _, wsp := range ap.specialPairs {
-		limit = limit.Add(ap.borrowLimitIncrease(wsp))
-	}
+	limit := ap.totalBorrowLimit()
 
 	// compute collateral usage due to borrow factors
-	usage := ap.normalCollateralUsage()
-	for _, wsp := range ap.specialPairs {
-		usage = usage.Sub(ap.collateralUsageDecrease(wsp))
-	}
+	usage := ap.totalCollateralUsage()
 
 	// average collateral weight before special pairs
 	avgWeight := ap.normalBorrowLimit().Quo(ap.CollateralValue())
@@ -267,6 +265,15 @@ func (ap *AccountPosition) borrowFactor(denom string) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
+// totalCollateralUsage computes normalCollateralUsage and then applies the effects of special asset pairs.
+func (ap *AccountPosition) totalCollateralUsage() sdk.Dec {
+	usage := ap.normalCollateralUsage()
+	for _, wsp := range ap.specialPairs {
+		usage = usage.Sub(ap.collateralUsageDecrease(wsp))
+	}
+	return usage
+}
+
 // normalCollateralUsage sums the total borrowed value in a position,
 // increased according to each token's borrow factor (collateral weight or liquidation threshold),
 // or ap.minimumBorrowFactor if greater. Does not use special asset weights for paired assets.
@@ -283,6 +290,15 @@ func (ap *AccountPosition) normalCollateralUsage() sdk.Dec {
 		)
 	}
 	return sum
+}
+
+// totalBorrowLimit computes normalBorrowLimit and then applies the effects of special asset pairs.
+func (ap *AccountPosition) totalBorrowLimit() sdk.Dec {
+	limit := ap.normalBorrowLimit()
+	for _, wsp := range ap.specialPairs {
+		limit = limit.Add(ap.borrowLimitIncrease(wsp))
+	}
+	return limit
 }
 
 // normalBorrowLimit sums the total collateral value in a position,
