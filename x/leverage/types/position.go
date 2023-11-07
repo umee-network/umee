@@ -187,6 +187,8 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 	)
 
 	// TODO: improve for cases where new special assets can be paired
+
+	// Prevent over-limit accounts from returning negative max borrow
 	return sdk.MaxDec(sdk.ZeroDec(), maxNormalBorrow)
 }
 
@@ -197,8 +199,27 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	if ap.isForLiquidation {
 		return sdk.ZeroDec()
 	}
-	// TODO
-	return sdk.ZeroDec()
+
+	limit := ap.totalBorrowLimit()     // borrow limit after special pairs
+	usage := ap.totalCollateralUsage() // collateral usage after special pairs
+	owned := ap.collateralValue.AmountOf(denom)
+
+	// TODO: withdraw first from normal, then from special pairs, one at a time.
+
+	// - for borrow limit, subtracting [collat * weight] from borrow limit
+	//		- TODO: for special pairs, subtracting additional [collateral * delta weight]
+	unusedLimit := limit.Sub(ap.BorrowedValue())
+	max1 := unusedLimit.Quo(ap.tokenWeight(denom))
+
+	// - for borrow factor, subtracting [collat] from TC
+	//		- TODO: for special pairs, adding additional [borrow * delta factor] to collateral usage
+	unusedCollateral := ap.CollateralValue().Sub(usage)
+	max2 := unusedCollateral
+
+	maxWithdraw := sdk.MinDec(max1, max2)                // lower of borrow limit anf borrow factor results
+	maxWithdraw = sdk.MinDec(maxWithdraw, owned)         // capped at owned amount
+	maxWithdraw = sdk.MaxDec(maxWithdraw, sdk.ZeroDec()) // prevent negative value
+	return maxWithdraw
 }
 
 // HasCollateral returns true if a position contains any collateral of a given
