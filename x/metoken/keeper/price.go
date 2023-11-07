@@ -111,7 +111,18 @@ func (k Keeper) SetPricesToOracle() error {
 			continue
 		}
 
-		k.oracleKeeper.SetExchangeRateWithEvent(*k.ctx, index.Denom, iPrice.Price)
+		indexToken, err := k.leverageKeeper.GetTokenSettings(*k.ctx, index.Denom)
+		if err != nil {
+			k.Logger().Debug(
+				"setting price to oracle: couldn't get token settings",
+				"denom", index.Denom,
+				"error", err.Error(),
+				"block_time", k.ctx.BlockTime(),
+			)
+			continue
+		}
+
+		k.oracleKeeper.SetExchangeRateWithEvent(*k.ctx, indexToken.SymbolDenom, iPrice.Price)
 	}
 
 	return nil
