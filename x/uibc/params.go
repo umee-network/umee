@@ -10,12 +10,13 @@ import (
 // DefaultParams returns default genesis params
 func DefaultParams() Params {
 	return Params{
-		IbcStatus:              IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED,
-		TotalQuota:             sdk.NewDec(1_600_000),      // $1.6M
-		TokenQuota:             sdk.NewDec(900_000),        // $900K
-		QuotaDuration:          time.Second * 60 * 60 * 24, // 24h
-		InflowOutflowQuotaBase: sdk.NewDec(1_000_000),      // 1M
-		InflowOutflowQuotaRate: sdk.MustNewDecFromStr("0.25"),
+		IbcStatus:                   IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED,
+		TotalQuota:                  sdk.NewDec(1_600_000),      // $1.6M
+		TokenQuota:                  sdk.NewDec(1_200_000),      // $1.2M
+		QuotaDuration:               time.Second * 60 * 60 * 24, // 24h
+		InflowOutflowQuotaBase:      sdk.NewDec(1_000_000),      // 1M
+		InflowOutflowQuotaRate:      sdk.MustNewDecFromStr("0.25"),
+		InflowOutflowQuotaTokenBase: sdk.NewDec(900_000), // $0.9M
 	}
 }
 
@@ -36,6 +37,9 @@ func (p Params) Validate() error {
 		return err
 	}
 	if err := validateQuota(p.InflowOutflowQuotaRate, "total inflow outflow quota rate"); err != nil {
+		return err
+	}
+	if err := validateQuota(p.InflowOutflowQuotaTokenBase, "total inflow outflow quota token base"); err != nil {
 		return err
 	}
 	if p.TotalQuota.LT(p.TokenQuota) {

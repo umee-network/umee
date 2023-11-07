@@ -42,6 +42,12 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+  // inflow_outflow_quota_token_base defines the inflow outflow quota base for token
+  string inflow_outflow_quota_token_base = 7 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // IBCTransferStatus status of ibc-transfer quota check for inflow and outflow
