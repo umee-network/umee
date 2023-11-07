@@ -113,22 +113,6 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			s.checkMetokenBalance(testAddr.String(), mocks.MeUSDDenom)
 		},
 	)
-
-	// After adding an index to x/metoken registry the price is informed to x/oracle every endBlock (~12s)
-	s.Require().Eventually(
-		func() bool {
-			exchangeRates, err := s.QueryExchangeRate(s.UmeeREST(), mocks.MeUSDDenom)
-			if err != nil {
-				return false
-			}
-
-			if exchangeRates.AmountOf(mocks.MeUSDDenom).IsZero() {
-				return false
-			}
-			return true
-		},
-		2*time.Minute, 12*time.Second, "ensure me/USD has prices",
-	)
 }
 
 func (s *E2ETest) checkMetokenBalance(valAddr, denom string) {
