@@ -170,7 +170,8 @@ func (ap *AccountPosition) Validate() error {
 // at or over their borrow limit, returns zero.
 // Returns zero if a position was computed with liquidation in mind.
 func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
-	if ap.isForLiquidation {
+	borrowFactor := ap.borrowFactor(denom)
+	if ap.isForLiquidation || !borrowFactor.IsPositive() {
 		return sdk.ZeroDec()
 	}
 
@@ -182,7 +183,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 		limit.Sub(ap.BorrowedValue()),
 		// limited by borrow factor: borrow up to unused collateral / borrow factor
 		ap.CollateralValue().Sub(usage).Quo(
-			ap.borrowFactor(denom),
+			borrowFactor,
 		),
 	)
 
@@ -206,6 +207,11 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	usage := ap.totalCollateralUsage() // collateral usage after special pairs
 	owned := ap.collateralValue.AmountOf(denom)
 
+	collateralWeight := ap.tokenWeight(denom)
+	if !collateralWeight.IsPositive() {
+		return owned
+	}
+
 	//
 	// TODO: withdraw first from normal, then from special pairs, one at a time.
 	//
@@ -213,7 +219,7 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	// - for borrow limit, subtracting [collat * weight] from borrow limit
 	//		- TODO: for special pairs, subtracting additional [collateral * delta weight]
 	unusedLimit := limit.Sub(ap.BorrowedValue())
-	max1 := unusedLimit.Quo(ap.tokenWeight(denom))
+	max1 := unusedLimit.Quo(collateralWeight)
 
 	// - for borrow factor, subtracting [collat] from TC
 	//		- TODO: for special pairs, adding additional [borrow * delta factor] to collateral usage
@@ -235,12 +241,17 @@ func (ap *AccountPosition) HasCollateral(denom string) bool {
 // Limit calculates the borrow limit of an account position
 // (or liquidation threshold if ap.isForLiquidation is true).
 func (ap *AccountPosition) Limit() sdk.Dec {
+	collateralValue := ap.CollateralValue()
+	if !collateralValue.IsPositive() {
+		return sdk.ZeroDec()
+	}
+
 	// compute limit due to collateral weights
 	limit := ap.totalBorrowLimit()
 
 	// compute limit due to borrow factors
 	usage := ap.totalCollateralUsage()
-	avgWeight := ap.normalBorrowLimit().Quo(ap.CollateralValue())
+	avgWeight := ap.normalBorrowLimit().Quo(collateralValue)
 	unusedCollateralValue := ap.CollateralValue().Sub(usage) // can be negative
 	borrowFactorLimit := ap.BorrowedValue().Add(unusedCollateralValue.Mul(avgWeight))
 
@@ -367,6 +378,6 @@ func (ap *AccountPosition) collateralUsageDecrease(wsp WeightedSpecialPair) sdk.
 		return sdk.ZeroDec()
 	}
 	// decreases effective collateral usage due to the difference in parameters
-	return wsp.Borrow.Amount.Quo(ap.borrowFactor(wsp.Borrow.Denom)).Sub( // original usage
+	return wsp.Borrow.Amount.Quo(borrowFactor).Sub( // original usage
 		wsp.Borrow.Amount.Quo(wsp.SpecialWeight)) // special usage
 }
