@@ -127,7 +127,7 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			}
 			return true
 		},
-		2*time.Minute, time.Second, "ensure me/USD has prices",
+		2*time.Minute, 12*time.Second, "ensure me/USD has prices",
 	)
 }
 
