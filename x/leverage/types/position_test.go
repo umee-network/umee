@@ -164,17 +164,17 @@ func TestBorrowLimit(t *testing.T) {
 		{
 			// multiple assets, one with zero weight, at borrow limit
 			sdk.NewDecCoins(
-				coin.Dec("AAAA", "100"),
-				coin.Dec("GGGG", "100"),
-				coin.Dec("IIII", "100"),
+				coin.Dec("AAAA", "100"), // $10, $15
+				coin.Dec("GGGG", "100"), // $70, $75
+				coin.Dec("IIII", "100"), // $0, $95
 			),
 			sdk.NewDecCoins(
-				coin.Dec("GGGG", "80"),
+				coin.Dec("GGGG", "80"), // uses $114.2 or $106.6 of collateral
 			),
-			// effectiveness of I collateral is reduced to due to G liquidation threshold, thus leading
-			// to a lower liquidation threshold than "simple AGI" test case above
+			// effectiveness of I collateral would be reduced to due to G liquidation threshold,
+			// but ordinary liquidation threshold is already more restrictive than borrow factor here
 			"80.00",
-			"165.00",
+			"185.00",
 			"AGI -> G at borrow limit",
 		},
 		{
@@ -185,12 +185,12 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("IIII", "100"),
 			),
 			sdk.NewDecCoins(
-				coin.Dec("GGGG", "165"),
+				coin.Dec("GGGG", "185"),
 			),
 			// significantly over borrow limit, so calculation subtracts value of unpaired borrows
-			// from total borrowed value to determine borrow limit
+			// from total borrowed value to determine borrow limit to arrive at the same result
 			"80.00",
-			"165.00",
+			"185.00",
 			"AGI -> G at liquidation threshold",
 		},
 		{
@@ -206,7 +206,7 @@ func TestBorrowLimit(t *testing.T) {
 			// significantly over borrow limit and liquidation threshold, but calculation still reaches
 			// the same values for them
 			"80.00",
-			"165.00",
+			"185.00",
 			"AGI -> G above liquidation threshold",
 		},
 		{
@@ -251,6 +251,36 @@ func TestBorrowLimit(t *testing.T) {
 			"F -> A",
 		},
 		{
+			// single asset with unused special pair (borrowFactor reducing weight, minimumBorrowFactor, at limit)
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "50"),
+			),
+			// 50 A consumes 100 F collateral (weight 0.5 due to MinimumBorrowFactor)
+			// the F <-> H special pair has no effect
+			"50.00",
+			"50.00",
+			"F -> A",
+		},
+		{
+			// single asset with unused special pair (borrowFactor, minimumBorrowFactor, over limits)
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "80"),
+			),
+			// 80 A would consume 160 F collateral (weight 0.5 due to MinimumBorrowFactor),
+			// meanwhile 100F on its own would have 60, 65 borrow limit and liquidation threshold.
+			// The calculation works backwards from the 160/80 collateral usage to find the limit at 100
+			// the F <-> H special pair has no effect
+			"50.00",
+			"50.00",
+			"F -> A over limits",
+		},
+		{
 			// single asset with special pair in effect
 			sdk.NewDecCoins(
 				coin.Dec("FFFF", "100"),
@@ -291,7 +321,7 @@ func TestBorrowLimit(t *testing.T) {
 			),
 			// 60 H consumes all 100 F collateral (weight 0.6 due to Special Pair).
 			// A remaining 20H is unpaired borrowed value. Borrow limit equals value minus unpaired.
-			// Meanwhile, 80A consumes 100 F collateral (liquidation threshold 0.8 due to special pair).
+			// Meanwhile, 80 H consumes 100 F collateral (liquidation threshold 0.8 due to special pair).
 			// Liquidation threshold is exactly borrowed value.
 			"60.00",
 			"80.00",
