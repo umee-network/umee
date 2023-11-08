@@ -12,6 +12,7 @@ import (
 )
 
 func TestMaxBorrowScenarioA(t *testing.T) {
+	// TODO: update the table to reflect normal asset groupings
 	// This borrow position reproduces the initial table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
 	initialPosition, err := types.NewAccountPosition(
 		[]types.Token{
@@ -42,36 +43,27 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t,
 		"special:\n"+
-			"  {0.5, 40 AAAA, 20 BBBB}\n"+
-			"  {0.5, 0 BBBB, 0 AAAA}\n"+
-			"  {0.4, 50 AAAA, 20 CCCC}\n"+
-			"  {0.4, 0 CCCC, 0 AAAA}\n"+
-			"normal:\n"+
-			"  [10 AAAA (0.4), 1 DDDD (0.1)]\n"+
-			"  [40 DDDD (0.1), 4 DDDD (0.1)]\n"+
-			"  [260 DDDD (0.1), -]",
+			"  {0.5, 40 AAAA, 20 BBBB}\n"+ // $20 instead of $16 borrowed
+			"  {0.4, 50 AAAA, 20 CCCC}\n"+ // no effect
+			"collateral:\n"+
+			"  100.000000000000000000AAAA\n"+ // +$40 ordinary borrow limit
+			"  300.000000000000000000DDDD\n"+ // +$30 ordinary borrow limit
+			"borrowed:\n"+
+			"  20.000000000000000000BBBB\n"+
+			"  20.000000000000000000CCCC\n"+
+			"  5.000000000000000000DDDD",
 		initialPosition.String(),
 	)
 	borrowLimit := initialPosition.Limit()
-	assert.DeepEqual(t, sdk.MustNewDecFromStr("71.00"), borrowLimit) // $45 borrowed + $26 generic max borrow
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("74.00"), borrowLimit) // 40 + 30 + (20 - 16) borrow limit
 
-	// the current naive implementation of maxBorrow produces a result below the optimal 35.00
+	// maxBorrow is more efficient than borrow limit predicts due to special pairs
 	maxBorrow := initialPosition.MaxBorrow("BBBB")
-	assert.DeepEqual(t, sdk.MustNewDecFromStr("30.00"), maxBorrow)
-	// TODO: perfect the behavior of MaxBorrow and test that it matches finalPosition below.
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("29.00"), maxBorrow) // > $24
+
+	// TODO: perfect the behavior of MaxBorrow and test that it matches finalPosition below (+$35)
 	// It would need to move the collateral A in the special pair with C to the more efficient
 	// pair with B, demoting the C borrow to ordinary assets.
-	assert.Equal(t,
-		"special:\n"+
-			"  {0.5, 50 AAAA, 25 BBBB}\n"+
-			"  {0.5, 0 BBBB, 0 AAAA}\n"+
-			"  {0.4, 50 AAAA, 20 CCCC}\n"+
-			"  {0.4, 0 CCCC, 0 AAAA}\n"+
-			"normal:\n"+
-			"  [250 DDDD (0.1), 25 BBBB (0.3)]\n"+
-			"  [50 DDDD (0.1), 5 DDDD (0.1)]",
-		initialPosition.String(),
-	)
 
 	// This borrow position reproduces the final table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
 	finalPosition, err := types.NewAccountPosition(
@@ -104,13 +96,13 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	assert.Equal(t,
 		"special:\n"+
 			"  {0.5, 100 AAAA, 50 BBBB}\n"+
-			"  {0.5, 0 BBBB, 0 AAAA}\n"+
-			"  {0.4, 0 AAAA, 0 CCCC}\n"+
-			"  {0.4, 0 CCCC, 0 AAAA}\n"+
-			"normal:\n"+
-			"  [50 DDDD (0.1), 5 BBBB (0.3)]\n"+
-			"  [200 DDDD (0.1), 20 CCCC (0.2)]\n"+
-			"  [50 DDDD (0.1), 5 DDDD (0.1)]",
+			"collateral:\n"+
+			"  100.000000000000000000AAAA\n"+
+			"  300.000000000000000000DDDD\n"+
+			"borrowed:\n"+
+			"  55.000000000000000000BBBB\n"+
+			"  20.000000000000000000CCCC\n"+
+			"  5.000000000000000000DDDD",
 		finalPosition.String(),
 	)
 }

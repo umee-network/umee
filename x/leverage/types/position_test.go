@@ -8,6 +8,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
@@ -17,11 +18,10 @@ var (
 )
 
 func testToken(denom, cw, lt string) types.Token {
-	return types.Token{
-		BaseDenom:            denom,
-		CollateralWeight:     sdk.MustNewDecFromStr(cw),
-		LiquidationThreshold: sdk.MustNewDecFromStr(lt),
-	}
+	token := fixtures.Token(denom, denom, 6)
+	token.CollateralWeight = sdk.MustNewDecFromStr(cw)
+	token.LiquidationThreshold = sdk.MustNewDecFromStr(lt)
+	return token
 }
 
 func testPair(collateral, borrow, cw, lt string) types.SpecialAssetPair {
@@ -758,7 +758,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+borrowPosition.String())
-		maxWithdraw := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
+		maxWithdraw, _ := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxWithdraw).String(),
 			maxWithdraw.String(),

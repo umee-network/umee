@@ -198,18 +198,25 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 // MaxWithdraw finds the maximum additional amount of an asset a position can
 // withdraw without exceeding its borrow limit. Does not mutate position.
 // Returns zero if a position was computed with liquidation in mind.
-func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
+// Also returns a boolean indicating whether total withdrawal is possible,
+// to prevent downstream rounding errors when converting back to tokens.
+func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, bool) {
 	if ap.isForLiquidation {
-		return sdk.ZeroDec()
+		return sdk.ZeroDec(), false
+	}
+	owned := ap.collateralValue.AmountOf(denom)
+	if ap.borrowedValue.IsZero() {
+		// return early on trivial case
+		return owned, true
 	}
 
 	limit := ap.totalBorrowLimit()     // borrow limit after special pairs
 	usage := ap.totalCollateralUsage() // collateral usage after special pairs
-	owned := ap.collateralValue.AmountOf(denom)
 
 	collateralWeight := ap.tokenWeight(denom)
 	if !collateralWeight.IsPositive() {
-		return owned
+		// TODO: might not be accurate if special pairs exist - move this statement lower.
+		return owned, false
 	}
 
 	//
@@ -226,10 +233,10 @@ func (ap *AccountPosition) MaxWithdraw(denom string) sdk.Dec {
 	unusedCollateral := ap.CollateralValue().Sub(usage)
 	max2 := unusedCollateral
 
-	maxWithdraw := sdk.MinDec(max1, max2)                // lower of borrow limit anf borrow factor results
+	maxWithdraw := sdk.MinDec(max1, max2)                // lower of borrow limit and borrow factor results
 	maxWithdraw = sdk.MinDec(maxWithdraw, owned)         // capped at owned amount
 	maxWithdraw = sdk.MaxDec(maxWithdraw, sdk.ZeroDec()) // prevent negative value
-	return maxWithdraw
+	return maxWithdraw, maxWithdraw.GTE(owned)
 }
 
 // HasCollateral returns true if a position contains any collateral of a given

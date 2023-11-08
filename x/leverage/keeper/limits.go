@@ -22,7 +22,18 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	walletUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
 	unbondedCollateral := k.unbondedCollateral(ctx, addr, uDenom)
 
+	maxWithdrawValue := sdk.ZeroDec()
+	maxWithdraw := coin.Zero(uDenom)
+	fullWithdrawal := false
 	position, err := k.GetAccountPosition(ctx, addr, false)
+	if err == nil {
+		maxWithdrawValue, fullWithdrawal = position.MaxWithdraw(denom)
+		if fullWithdrawal {
+			maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
+		} else {
+			maxWithdraw, err = k.UTokenWithValue(ctx, uDenom, maxWithdrawValue, types.PriceModeLow)
+		}
+	}
 	if nonOracleError(err) {
 		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, sdk.Coin{}, err
@@ -31,30 +42,6 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		// oracle errors cause max withdraw to only be wallet uTokens
 		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
-	}
-	maxWithdrawValue := position.MaxWithdraw(denom)
-
-	maxWithdraw := coin.Zero(uDenom)
-	if position.IsHealthy() && !position.HasCollateral(denom) {
-		// if after max withdraw, the position has no more collateral of the requested denom
-		// but is still under its borrow limit, then withdraw everything.
-		// this works with missing collateral price
-
-		// TODO: since max withdraw no longer mutates, this needs refactor
-
-		maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
-	} else {
-		// for partial withdrawal, must have collateral price to withdraw anything more than wallet uTokens
-		maxWithdraw, err = k.UTokenWithValue(ctx, uDenom, maxWithdrawValue, types.PriceModeLow)
-		if nonOracleError(err) {
-			// non-oracle errors fail the transaction (or query)
-			return sdk.Coin{}, sdk.Coin{}, err
-		}
-		if err != nil {
-			// oracle errors cause max withdraw to only be wallet uTokens
-			withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
-			return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
-		}
 	}
 
 	// find the minimum of max withdraw (from positions) or unbonded collateral (incentive module)
