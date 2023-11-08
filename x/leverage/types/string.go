@@ -12,7 +12,9 @@ func (ap *AccountPosition) String() string {
 	collateral := []string{}
 	borrowed := []string{}
 	for _, wsp := range ap.specialPairs {
-		special = append(special, wsp.String())
+		if wsp.Borrow.IsPositive() || wsp.Collateral.IsPositive() {
+			special = append(special, wsp.String())
+		}
 	}
 	for _, c := range ap.collateralValue {
 		collateral = append(collateral, c.String())
