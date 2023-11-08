@@ -276,6 +276,7 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	}
 	borrowFactorLimit := ap.BorrowedValue().Add(unusedCollateralValue.Mul(avgWeight))
 
+	// TODO: clean this up (used to trace through tests)
 	if len(ap.collateralValue) == 1 && ap.collateralValue[0].Denom == "FFFF" {
 		if len(ap.borrowedValue) == 1 && ap.borrowedValue[0].Denom == "HHHH" {
 			fmt.Printf("%s -> %s (%t)\n  %s, %s\n    >>> %s\n",
