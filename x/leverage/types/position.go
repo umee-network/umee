@@ -182,7 +182,7 @@ func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
 		// limited by collateral weight: borrow up to remaining limit
 		limit.Sub(ap.BorrowedValue()),
 		// limited by borrow factor: borrow up to unused collateral / borrow factor
-		ap.CollateralValue().Sub(usage).Quo(
+		ap.CollateralValue().Sub(usage).Mul(
 			borrowFactor,
 		),
 	)
