@@ -267,28 +267,16 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	unusedCollateralValue := ap.CollateralValue().Sub(usage) // can be negative
 
 	var avgWeight sdk.Dec
-	if unusedCollateralValue.IsPositive() {
-		// if user is below limit, unused collateral can be borrowed against at its average collateral weight at most
-		avgWeight = ap.averageWeight(ap.collateralValue)
+	if unusedCollateralValue.IsNegative() {
+		// if user if above limit, overused collateral is being borrowed against at
+		// the borrow factor of the surplus borrows (which are by definition not paired)
+		avgWeight = ap.averageBorrowFactor(ap.unpairedBorrows())
 	} else {
-		// if user if above limit, overused collateral is being borrowed against at borrow factor
-		avgWeight = borrowedValue.Quo(usage)
+		// if user is below limit, unused collateral can be borrowed against at the
+		// average collateral weight of its unpaired collateral at most
+		avgWeight = ap.averageWeight(ap.unpairedCollateral())
 	}
 	borrowFactorLimit := ap.BorrowedValue().Add(unusedCollateralValue.Mul(avgWeight))
-
-	// TODO: clean this up (used to trace through tests)
-	if len(ap.collateralValue) == 1 && ap.collateralValue[0].Denom == "FFFF" {
-		if len(ap.borrowedValue) == 1 && ap.borrowedValue[0].Denom == "HHHH" {
-			fmt.Printf("%s -> %s (%t)\n  %s, %s\n    >>> %s\n",
-				ap.collateralValue,
-				ap.borrowedValue,
-				ap.isForLiquidation,
-				limit,
-				borrowFactorLimit,
-				usage,
-			)
-		}
-	}
 
 	// return the minimum of the two limits
 	return sdk.MinDec(limit, borrowFactorLimit)
@@ -329,6 +317,26 @@ func (ap *AccountPosition) tokenWeight(denom string) sdk.Dec {
 	return sdk.ZeroDec()
 }
 
+// unpairedBorrows returns an account's borrowed value minus any borrows tied up in special asset pairs
+func (ap *AccountPosition) unpairedBorrows() sdk.DecCoins {
+	total := sdk.NewDecCoins(ap.borrowedValue...)
+	special := sdk.NewDecCoins()
+	for _, wsp := range ap.specialPairs {
+		special = special.Add(wsp.Borrow)
+	}
+	return total.Sub(special)
+}
+
+// unpairedCollateral returns an account's collateral value minus any collateral tied up in special asset pairs
+func (ap *AccountPosition) unpairedCollateral() sdk.DecCoins {
+	total := sdk.NewDecCoins(ap.collateralValue...)
+	special := sdk.NewDecCoins()
+	for _, wsp := range ap.specialPairs {
+		special = special.Add(wsp.Collateral)
+	}
+	return total.Sub(special)
+}
+
 // averageWeight gets the weighted average collateral weight (or liquidation threshold) of a set of tokens
 func (ap *AccountPosition) averageWeight(coins sdk.DecCoins) sdk.Dec {
 	if coins.IsZero() {
@@ -338,6 +346,20 @@ func (ap *AccountPosition) averageWeight(coins sdk.DecCoins) sdk.Dec {
 	weightSum := sdk.ZeroDec()
 	for _, c := range coins {
 		weightSum = weightSum.Add(c.Amount.Mul(ap.tokenWeight(c.Denom)))
+		valueSum = valueSum.Add(c.Amount)
+	}
+	return weightSum.Quo(valueSum)
+}
+
+// averageBorrowFactor gets the weighted average borrow factor of a set of tokens
+func (ap *AccountPosition) averageBorrowFactor(coins sdk.DecCoins) sdk.Dec {
+	if coins.IsZero() {
+		return sdk.OneDec()
+	}
+	valueSum := sdk.ZeroDec()
+	weightSum := sdk.ZeroDec()
+	for _, c := range coins {
+		weightSum = weightSum.Add(c.Amount.Mul(ap.borrowFactor(c.Denom)))
 		valueSum = valueSum.Add(c.Amount)
 	}
 	return weightSum.Quo(valueSum)

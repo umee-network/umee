@@ -273,8 +273,7 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("AAAA", "80"),
 			),
 			// 80 A would consume 160 F collateral (weight 0.5 due to MinimumBorrowFactor),
-			// meanwhile 100F on its own would have 60, 65 borrow limit and liquidation threshold.
-			// The calculation works backwards from the 160/80 collateral usage to find the limit at 100
+			// The calculation works backwards from the 160/80 collateral usage to find the limit at 100 F
 			// the F <-> H special pair has no effect
 			"50.00",
 			"50.00",
