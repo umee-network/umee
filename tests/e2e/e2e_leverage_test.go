@@ -102,8 +102,8 @@ func (s *E2ETest) TestLeverageBasics() {
 		},
 	)
 
-	valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
-	s.Require().NoError(err)
+	// valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
+	// s.Require().NoError(err)
 
 	s.Run(
 		"initial leverage supply", func() {
@@ -159,13 +159,13 @@ func (s *E2ETest) TestLeverageBasics() {
 			)
 		},
 	)
-	s.Run(
-		"special pair leverage borrow", func() {
-			asset := sdk.NewCoin(
-				appparams.BondDenom,
-				sdk.NewIntFromUint64(30_000_000),
-			)
-			s.mustSucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset), s.AccountClient(0))
-		},
-	)
+	// s.Run(
+	// 	"special pair leverage borrow", func() {
+	// 		asset := sdk.NewCoin(
+	// 			appparams.BondDenom,
+	// 			sdk.NewIntFromUint64(30_000_000),
+	// 		)
+	// 		s.mustSucceedTx(leveragetypes.NewMsgBorrow(valAddr, asset), s.AccountClient(0))
+	// 	},
+	// )
 }

@@ -7,7 +7,7 @@ import (
 	sdkerrors "cosmossdk.io/errors"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 
 	"github.com/umee-network/umee/v6/x/incentive"
 	inckeeper "github.com/umee-network/umee/v6/x/incentive/keeper"
@@ -124,7 +124,7 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 		case smartcontractQuery.LastRewardTime != nil:
 			resp, err = smartcontractQuery.HandleLastRewardTime(ctx, plugin.incQueryServer)
 
-			// metoken
+		// metoken
 		case smartcontractQuery.MeTokenParameters != nil:
 			resp, err = smartcontractQuery.HandleMeTokenParams(ctx, plugin.metokenQueryServer)
 		case smartcontractQuery.Indexes != nil:
@@ -135,8 +135,8 @@ func (plugin *Plugin) CustomQuerier() func(ctx sdk.Context, request json.RawMess
 			resp, err = smartcontractQuery.HandleMeTokenRedeemFee(ctx, plugin.metokenQueryServer)
 		case smartcontractQuery.IndexBalances != nil:
 			resp, err = smartcontractQuery.HandleMeTokenIndexBalances(ctx, plugin.metokenQueryServer)
-		case smartcontractQuery.IndexPrice != nil:
-			resp, err = smartcontractQuery.HandleMeTokenIndexPrice(ctx, plugin.metokenQueryServer)
+		case smartcontractQuery.IndexPrices != nil:
+			resp, err = smartcontractQuery.HandleMeTokenIndexPrices(ctx, plugin.metokenQueryServer)
 
 		default:
 			return nil, wasmvmtypes.UnsupportedRequest{Kind: "invalid umee query"}

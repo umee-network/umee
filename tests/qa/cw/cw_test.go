@@ -46,11 +46,12 @@ func (qaTest *QATest) TestCWPlusGroup() {
 		accAddrs = append(accAddrs, sdk.AccAddress(pubKey.Address()))
 	}
 
-	cw := cwutil.NewCosmwasmTestSuite(qaTest.T(), qaTest.Umee)
+	umeeClient := qaTest.Chain.Validators[0].Client
+	cw := cwutil.NewCosmwasmTestSuite(qaTest.T(), umeeClient)
 	cw.DeployWasmContract(cwGroupPath)
 
 	// sender is intital account
-	admin := qaTest.Umee.Tx.SenderAddr()
+	admin := umeeClient.Tx.SenderAddr()
 	// instantiate Contract
 	initMsg := GroupInitMsg{
 		Admin:   admin.String(),
@@ -85,7 +86,7 @@ func (qaTest *QATest) TestCWPlusGroup() {
 
 	// doing random txs to flood the cosmwasm network
 	wg := &sync.WaitGroup{}
-	accSeq, err := qaTest.Umee.QueryAuthSeq(admin.String())
+	accSeq, err := umeeClient.QueryAuthSeq(admin.String())
 	assert.NilError(t, err)
 	total := 0
 

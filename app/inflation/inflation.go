@@ -16,8 +16,8 @@ type Calculator struct {
 }
 
 func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mintParams minttypes.Params,
-	bondedRatio sdk.Dec) sdk.Dec {
-
+	bondedRatio sdk.Dec,
+) sdk.Dec {
 	ugovKeeper := c.UgovKeeperB(&ctx)
 	inflationParams := ugovKeeper.InflationParams()
 	maxSupplyAmount := inflationParams.MaxSupply.Amount
@@ -35,9 +35,10 @@ func (c Calculator) InflationRate(ctx sdk.Context, minter minttypes.Minter, mint
 		mintParams.InflationMax = factor.MulDec(mintParams.InflationMax)
 		mintParams.InflationMin = factor.MulDec(mintParams.InflationMin)
 		mintParams.InflationRateChange = fastInflationRateChange(mintParams)
-		c.MintKeeper.SetParams(ctx, mintParams)
+		err := c.MintKeeper.SetParams(ctx, mintParams)
+		util.Panic(err)
 
-		err := ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
+		err = ugovKeeper.SetInflationCycleEnd(ctx.BlockTime().Add(inflationParams.InflationCycle))
 		util.Panic(err)
 		ctx.Logger().Info("inflation min and max rates are updated",
 			"inflation_max", mintParams.InflationMax, "inflation_min", mintParams.InflationMin,
@@ -59,7 +60,8 @@ func fastInflationRateChange(p minttypes.Params) sdk.Dec {
 // AdjustInflation checks if newly minting coins will execeed the MaxSupply then it will adjust the inflation with
 // respect to MaxSupply
 func (c Calculator) AdjustInflation(stakingTokenSupply, maxSupply math.Int, minter minttypes.Minter,
-	params minttypes.Params) sdk.Dec {
+	params minttypes.Params,
+) sdk.Dec {
 	minter.AnnualProvisions = minter.NextAnnualProvisions(params, stakingTokenSupply)
 	newMintingAmount := minter.BlockProvision(params).Amount
 	newTotalSupply := stakingTokenSupply.Add(newMintingAmount)

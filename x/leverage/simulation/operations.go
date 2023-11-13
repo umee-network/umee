@@ -5,8 +5,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
-	simappparams "github.com/cosmos/cosmos-sdk/simapp/params"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
@@ -402,7 +402,7 @@ func randomLiquidateFields(
 func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.AccountKeeper,
 	bk bankkeeper.Keeper, from simtypes.Account, msg sdk.Msg, coins sdk.Coins,
 ) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
-	cfg := simappparams.MakeTestEncodingConfig()
+	cfg := testutil.MakeTestEncodingConfig()
 	o := simulation.OperationInput{
 		R:               r,
 		App:             app,

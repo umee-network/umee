@@ -10,6 +10,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/client"
+	"github.com/umee-network/umee/v6/tests/grpc"
 )
 
 const (
@@ -35,6 +36,8 @@ func (cw *Cosmwasm) DeployWasmContract(path string) {
 	cw.T.Logf("ℹ️ deploying smart contract %s", path)
 	resp, err := cw.umee.Tx.WasmDeployContract(path)
 	assert.NilError(cw.T, err)
+	resp, err = grpc.GetTxResponseAndCheckLogs(cw.umee, resp.TxHash)
+	assert.NilError(cw.T, err)
 	storeCode := cw.GetAttributeValue(*resp, "store_code", "code_id")
 	cw.StoreCode, err = strconv.ParseUint(storeCode, 10, 64)
 	assert.NilError(cw.T, err)
@@ -50,6 +53,8 @@ func (cw *Cosmwasm) MarshalAny(any interface{}) []byte {
 func (cw *Cosmwasm) InstantiateContract(initMsg []byte) {
 	cw.T.Log("ℹ️ smart contract is instantiating...")
 	resp, err := cw.umee.Tx.WasmInitContract(cw.StoreCode, initMsg)
+	assert.NilError(cw.T, err)
+	resp, err = grpc.GetTxResponseAndCheckLogs(cw.umee, resp.TxHash)
 	assert.NilError(cw.T, err)
 	cw.ContractAddr = cw.GetAttributeValue(*resp, "instantiate", "_contract_address")
 	assert.Equal(cw.T, SucceessRespCode, resp.Code)
@@ -86,6 +91,7 @@ func (cw *Cosmwasm) GetAttributeValue(resp sdk.TxResponse, eventName, attrKey st
 			for _, attribute := range event.Attributes {
 				if attribute.Key == attrKey {
 					attrVal = attribute.Value
+					break
 				}
 			}
 		}

@@ -12,17 +12,16 @@ import (
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
+	tmrand "github.com/cometbft/cometbft/libs/rand"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
-	"github.com/cosmos/cosmos-sdk/simapp/params"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	tmrand "github.com/tendermint/tendermint/libs/rand"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
 	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
@@ -41,7 +40,7 @@ const (
 
 // Test addresses
 var (
-	valPubKeys = simapp.CreateTestPubKeys(2)
+	valPubKeys = simtestutil.CreateTestPubKeys(2)
 
 	valPubKey = valPubKeys[0]
 	pubKey    = secp256k1.GenPrivKey().PubKey()
@@ -129,13 +128,12 @@ type IntegrationTestSuite struct {
 	ctx sdk.Context
 	app *umeeapp.UmeeApp
 
-	wasmMsgServer       wasmtypes.MsgServer
-	wasmQueryClient     wasmtypes.QueryClient
-	wasmProposalHandler govv1.Handler
+	wasmMsgServer   wasmtypes.MsgServer
+	wasmQueryClient wasmtypes.QueryClient
 
 	codeID       uint64
 	contractAddr string
-	encfg        params.EncodingConfig
+	encfg        testutil.TestEncodingConfig
 }
 
 func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
@@ -154,7 +152,7 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	s.T = t
 	s.app = app
 	s.ctx = ctx
-	s.wasmMsgServer = wasmkeeper.NewMsgServerImpl(wasmkeeper.NewDefaultPermissionKeeper(app.WasmKeeper))
+	s.wasmMsgServer = wasmkeeper.NewMsgServerImpl(&app.WasmKeeper)
 	querier := app.GRPCQueryRouter()
 	wasmtypes.RegisterMsgServer(querier, s.wasmMsgServer)
 
@@ -162,7 +160,6 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	grpc := wasmkeeper.Querier(&app.WasmKeeper)
 	wasmtypes.RegisterQueryServer(queryHelper, grpc)
 	s.wasmQueryClient = wasmtypes.NewQueryClient(queryHelper)
-	s.wasmProposalHandler = wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, umeeapp.GetWasmEnabledProposals())
 	s.encfg = umeeapp.MakeEncodingConfig()
 }
 
@@ -180,22 +177,15 @@ func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey
 func (s *IntegrationTestSuite) cw20StoreCode(sender sdk.AccAddress, cwArtifacePath string) (codeId uint64) {
 	cw20Code, err := os.ReadFile(cwArtifacePath)
 	assert.NilError(s.T, err)
-	storeCodeProposal := wasmtypes.StoreCodeProposal{
-		Title:                 cwArtifacePath,
-		Description:           cwArtifacePath,
-		RunAs:                 sender.String(),
+	storeCodeMsg := wasmtypes.MsgStoreCode{
+		Sender:                sender.String(),
 		WASMByteCode:          cw20Code,
 		InstantiatePermission: &wasmtypes.AllowEverybody,
 	}
 
-	err = s.wasmProposalHandler(s.ctx, &storeCodeProposal)
+	resp, err := s.wasmMsgServer.StoreCode(sdk.WrapSDKContext(s.ctx), &storeCodeMsg)
 	assert.NilError(s.T, err)
-
-	codes, err := s.wasmQueryClient.PinnedCodes(sdk.WrapSDKContext(s.ctx), &wasmtypes.QueryPinnedCodesRequest{})
-	assert.NilError(s.T, err)
-	assert.Equal(s.T, true, len(codes.CodeIDs) > 0)
-
-	return codes.CodeIDs[len(codes.CodeIDs)-1]
+	return resp.CodeID
 }
 
 func (s *IntegrationTestSuite) transfer(contracAddr string, amount uint64, from, to sdk.AccAddress) {

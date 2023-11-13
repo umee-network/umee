@@ -3,7 +3,7 @@ package query
 import (
 	"context"
 
-	"github.com/gogo/protobuf/proto"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/umee-network/umee/v6/x/metoken"
 )
 
@@ -51,11 +51,11 @@ func (q UmeeQuery) HandleMeTokenIndexBalances(
 	return qs.IndexBalances(ctx, &req)
 }
 
-// HandleMeTokenIndexPrice handles the get for x/metoken indexe price.
-func (q UmeeQuery) HandleMeTokenIndexPrice(
+// HandleMeTokenIndexPrices handles the get for x/metoken indexe price.
+func (q UmeeQuery) HandleMeTokenIndexPrices(
 	ctx context.Context,
 	qs metoken.QueryServer,
 ) (proto.Message, error) {
-	req := metoken.QueryIndexPrices{MetokenDenom: q.IndexPrice.MetokenDenom}
+	req := metoken.QueryIndexPrices{MetokenDenom: q.IndexPrices.MetokenDenom}
 	return qs.IndexPrices(ctx, &req)
 }

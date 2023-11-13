@@ -3,8 +3,9 @@ package uibc
 import (
 	"time"
 
+	abci "github.com/cometbft/cometbft/abci/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 

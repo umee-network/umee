@@ -4,33 +4,37 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"testing"
 	"time"
 
 	"cosmossdk.io/math"
+	dbm "github.com/cometbft/cometbft-db"
+	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cometbft/cometbft/libs/log"
+	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	cmttypes "github.com/cometbft/cometbft/types"
+	"gotest.tools/v3/assert"
+
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	pruningtypes "github.com/cosmos/cosmos-sdk/pruning/types"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
+	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	abci "github.com/tendermint/tendermint/abci/types"
-	"github.com/tendermint/tendermint/libs/log"
-	tmproto "github.com/tendermint/tendermint/proto/tendermint/types"
-	tmtypes "github.com/tendermint/tendermint/types"
-	dbm "github.com/tendermint/tm-db"
-	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
@@ -40,10 +44,10 @@ import (
 
 // DefaultConsensusParams defines the default Tendermint consensus params used
 // in UmeeApp testing.
-var DefaultConsensusParams = &abci.ConsensusParams{
-	Block: &abci.BlockParams{
+var DefaultConsensusParams = &tmproto.ConsensusParams{
+	Block: &tmproto.BlockParams{
 		MaxBytes: 200000,
-		MaxGas:   2000000,
+		MaxGas:   10000000,
 	},
 	Evidence: &tmproto.EvidenceParams{
 		MaxAgeNumBlocks: 302400,
@@ -52,7 +56,7 @@ var DefaultConsensusParams = &abci.ConsensusParams{
 	},
 	Validator: &tmproto.ValidatorParams{
 		PubKeyTypes: []string{
-			tmtypes.ABCIPubKeyTypeEd25519,
+			cmttypes.ABCIPubKeyTypeEd25519,
 		},
 	},
 }
@@ -69,8 +73,8 @@ func Setup(t *testing.T) *UmeeApp {
 	assert.NilError(t, err)
 
 	// create validator set with single validator
-	validator := tmtypes.NewValidator(pubKey, 1)
-	valSet := tmtypes.NewValidatorSet([]*tmtypes.Validator{validator})
+	validator := cmttypes.NewValidator(pubKey, 1)
+	valSet := cmttypes.NewValidatorSet([]*cmttypes.Validator{validator})
 
 	// generate genesis account
 	senderPrivKey := secp256k1.GenPrivKey()
@@ -90,7 +94,7 @@ func Setup(t *testing.T) *UmeeApp {
 // account. A Nop logger is set in app.
 func SetupWithGenesisValSet(
 	t *testing.T,
-	valSet *tmtypes.ValidatorSet,
+	valSet *cmttypes.ValidatorSet,
 	genAccs []authtypes.GenesisAccount,
 	balances ...banktypes.Balance,
 ) *UmeeApp {
@@ -125,7 +129,7 @@ func SetupWithGenesisValSet(
 
 // GenesisStateWithValSet returns a new genesis state with the validator set
 func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawMessage,
-	valSet *tmtypes.ValidatorSet, genAccs []authtypes.GenesisAccount,
+	valSet *cmttypes.ValidatorSet, genAccs []authtypes.GenesisAccount,
 	balances ...banktypes.Balance,
 ) (map[string]json.RawMessage, error) {
 	// set genesis accounts
@@ -203,6 +207,7 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 		balances,
 		totalSupply,
 		[]banktypes.Metadata{},
+		[]banktypes.SendEnabled{},
 	)
 	genesisState[banktypes.ModuleName] = codec.MustMarshalJSON(bankGenesis)
 
@@ -211,7 +216,6 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 
 func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 	db := dbm.NewMemDB()
-	encCdc := MakeEncodingConfig()
 	app := New(
 		log.NewNopLogger(),
 		db,
@@ -220,13 +224,11 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		map[int64]bool{},
 		DefaultNodeHome,
 		invCheckPeriod,
-		encCdc,
 		EmptyAppOptions{},
-		GetWasmEnabledProposals(),
 		EmptyWasmOpts,
 	)
 	if withGenesis {
-		return app, NewDefaultGenesisState(encCdc.Codec)
+		return app, NewDefaultGenesisState(app.appCodec)
 	}
 
 	return app, GenesisState{}
@@ -235,7 +237,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 // IntegrationTestNetworkConfig returns a networking configuration used for
 // integration tests using the SDK's in-process network test suite.
 func IntegrationTestNetworkConfig() network.Config {
-	cfg := network.DefaultConfig()
+	cfg := network.DefaultConfig(NewTestNetworkFixture)
 	encCfg := MakeEncodingConfig()
 	cdc := encCfg.Codec
 
@@ -292,7 +294,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	}
 
 	votingPeriod := time.Minute
-	govGenState.VotingParams.VotingPeriod = &votingPeriod
+	govGenState.Params.VotingPeriod = &votingPeriod
 
 	bz, err = cdc.MarshalJSON(&govGenState)
 	if err != nil {
@@ -307,23 +309,6 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.GenesisState = appGenState
 	cfg.BondDenom = params.BondDenom
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
-	cfg.AppConstructor = func(val network.Validator) servertypes.Application {
-		return New(
-			val.Ctx.Logger,
-			dbm.NewMemDB(),
-			nil,
-			true,
-			make(map[int64]bool),
-			val.Ctx.Config.RootDir,
-			0,
-			encCfg,
-			EmptyAppOptions{},
-			GetWasmEnabledProposals(),
-			EmptyWasmOpts,
-			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.AppConfig.Pruning)),
-			baseapp.SetMinGasPrices(val.AppConfig.MinGasPrices),
-		)
-	}
 
 	return cfg
 }
@@ -403,5 +388,43 @@ func initAccountWithCoins(app *UmeeApp, ctx sdk.Context, addr sdk.AccAddress, co
 	err = app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, coins)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func NewTestNetworkFixture() network.TestFixture {
+	dir, err := os.MkdirTemp("", "simapp")
+	if err != nil {
+		panic(fmt.Sprintf("failed creating temporary directory: %v", err))
+	}
+	defer os.RemoveAll(dir)
+
+	app, genState := setup(true, 100)
+
+	appCtr := func(val network.ValidatorI) servertypes.Application {
+		return New(
+			val.GetCtx().Logger,
+			dbm.NewMemDB(),
+			nil,
+			true,
+			make(map[int64]bool),
+			val.GetCtx().Config.RootDir,
+			0,
+			EmptyAppOptions{},
+			EmptyWasmOpts,
+			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
+			baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),
+			baseapp.SetChainID(val.GetCtx().Viper.GetString(flags.FlagChainID)),
+		)
+	}
+
+	return network.TestFixture{
+		AppConstructor: appCtr,
+		GenesisState:   genState,
+		EncodingConfig: testutil.TestEncodingConfig{
+			InterfaceRegistry: app.InterfaceRegistry(),
+			Codec:             app.AppCodec(),
+			TxConfig:          app.txConfig,
+			Amino:             app.LegacyAmino(),
+		},
 	}
 }

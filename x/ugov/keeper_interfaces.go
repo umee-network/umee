@@ -29,5 +29,7 @@ type WithEmergencyGroup interface {
 
 // Builder functions
 
-type EmergencyGroupBuilder func(*sdk.Context) WithEmergencyGroup
-type ParamsKeeperBuilder func(*sdk.Context) ParamsKeeper
+type (
+	EmergencyGroupBuilder func(*sdk.Context) WithEmergencyGroup
+	ParamsKeeperBuilder   func(*sdk.Context) ParamsKeeper
+)

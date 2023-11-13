@@ -1,44 +1,23 @@
 package app
 
-import (
-	"strings"
-
-	"github.com/CosmWasm/wasmd/x/wasm"
-)
-
-// WasmProposalsEnabled enables all x/wasm proposals when it's value is "true"
-// and EnableSpecificWasmProposals is empty. Otherwise, all x/wasm proposals
-// are disabled.
-const WasmProposalsEnabled = "true"
+import wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 
 var (
-	// EnableSpecificWasmProposals, if set, must be comma-separated list of values
-	// that are all a subset of "EnableAllProposals", which takes precedence over
-	// WasmProposalsEnabled.
-	//
-	// See: https://github.com/CosmWasm/wasmd/blob/02a54d33ff2c064f3539ae12d75d027d9c665f05/x/wasm/internal/types/proposal.go#L28-L34
-	EnableSpecificWasmProposals = ""
-
-	// EmptyWasmOpts defines a type alias for a list of wasm options.
-	EmptyWasmOpts []wasm.Option
+	EmptyWasmOpts []wasmkeeper.Option
 )
 
-// GetWasmEnabledProposals parses the WasmProposalsEnabled and
-// EnableSpecificWasmProposals values to produce a list of enabled proposals to
-// pass into the application.
-func GetWasmEnabledProposals() []wasm.ProposalType {
-	if EnableSpecificWasmProposals == "" {
-		if WasmProposalsEnabled == "true" {
-			return wasm.EnableAllProposals
-		}
-		return wasm.DisableAllProposals
+// AllCapabilities returns all capabilities available with the current wasmvm
+// See https://github.com/CosmWasm/cosmwasm/blob/main/docs/CAPABILITIES-BUILT-IN.md
+// This functionality is going to be moved upstream: https://github.com/CosmWasm/wasmvm/issues/425
+func AllCapabilities() []string {
+	return []string{
+		"iterator",
+		"staking",
+		"stargate",
+		"cosmwasm_1_1",
+		"cosmwasm_1_2",
+		"cosmwasm_1_3",
+		"cosmwasm_1_4",
+		"umee",
 	}
-
-	chunks := strings.Split(EnableSpecificWasmProposals, ",")
-	proposals, err := wasm.ConvertToProposals(chunks)
-	if err != nil {
-		panic(err)
-	}
-
-	return proposals
 }

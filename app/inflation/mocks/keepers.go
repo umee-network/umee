@@ -37,9 +37,11 @@ func (m *MockMintKeeper) EXPECT() *MockMintKeeperMockRecorder {
 }
 
 // SetParams mocks base method.
-func (m *MockMintKeeper) SetParams(ctx types.Context, params types0.Params) {
+func (m *MockMintKeeper) SetParams(ctx types.Context, params types0.Params) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetParams", ctx, params)
+	ret := m.ctrl.Call(m, "SetParams", ctx, params)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // SetParams indicates an expected call of SetParams.

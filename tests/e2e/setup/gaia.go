@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"time"
 
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
@@ -72,7 +72,8 @@ func (s *E2ETestSuite) runGaiaNetwork() {
 
 	s.GaiaResource, err = s.DkrPool.RunWithOptions(
 		&dockertest.RunOptions{
-			Name:       gaiaVal.instanceName(),
+			Name: gaiaVal.instanceName(),
+			// Note: we are using this image for testing purpose
 			Repository: "ghcr.io/umee-network/gaia-e2e",
 			Tag:        "latest",
 			NetworkID:  s.DkrNet.Network.ID,
@@ -114,7 +115,7 @@ func (s *E2ETestSuite) runGaiaNetwork() {
 			}
 
 			// let the node produce a few blocks
-			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 3 {
+			if status.SyncInfo.CatchingUp || status.SyncInfo.LatestBlockHeight < 1 {
 				return false
 			}
 
@@ -125,5 +126,5 @@ func (s *E2ETestSuite) runGaiaNetwork() {
 		"gaia node failed to produce blocks",
 	)
 
-	s.T().Logf("started Gaia network container: %s", s.GaiaResource.Container.ID)
+	s.T().Logf("✅ Started Gaia network container: %s", s.GaiaResource.Container.ID)
 }

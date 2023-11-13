@@ -31,6 +31,11 @@ func SubmitAndPassProposal(umee client.Client, changes []proposal.ParamChange) e
 		return err
 	}
 
+	resp, err = GetTxResponse(umee, resp.TxHash)
+	if err != nil {
+		return err
+	}
+
 	return MakeVoteAndCheckProposal(umee, *resp)
 }
 
@@ -70,8 +75,13 @@ func UIBCIBCTransferStatusUpdate(umeeClient client.Client, status uibc.IBCTransf
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
+	resp, err = GetTxResponse(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
+	}
+
+	if len(resp.Events) == 0 {
+		return fmt.Errorf("no events in response")
 	}
 
 	return MakeVoteAndCheckProposal(umeeClient, *resp)
@@ -91,11 +101,12 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
+	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
 	}
 
-	return MakeVoteAndCheckProposal(umeeClient, *resp)
+	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
 }
 
 // LeverageSpecialPairsUpdate submits a gov transaction to update leverage special assets,
@@ -117,11 +128,12 @@ func LeverageSpecialPairsUpdate(
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
+	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
 	}
 
-	return MakeVoteAndCheckProposal(umeeClient, *resp)
+	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
 }
 
 // MetokenRegistryUpdate submits a gov transaction to update metoken registry, votes, and waits for proposal to pass.
@@ -137,16 +149,17 @@ func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes [
 		return err
 	}
 
-	if len(resp.Logs) == 0 {
-		return fmt.Errorf("no logs in response")
+	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
+	if err != nil {
+		return err
 	}
 
-	return MakeVoteAndCheckProposal(umeeClient, *resp)
+	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
 }
 
 func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) error {
 	var proposalID string
-	for _, event := range resp.Logs[0].Events {
+	for _, event := range resp.Events {
 		if event.Type == "submit_proposal" {
 			for _, attribute := range event.Attributes {
 				if attribute.Key == "proposal_id" {

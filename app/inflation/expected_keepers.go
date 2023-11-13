@@ -8,5 +8,5 @@ import (
 
 type MintKeeper interface {
 	StakingTokenSupply(ctx sdk.Context) math.Int
-	SetParams(ctx sdk.Context, params minttypes.Params)
+	SetParams(ctx sdk.Context, params minttypes.Params) error
 }
