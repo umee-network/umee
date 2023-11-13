@@ -323,10 +323,7 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, bool) {
 			// for special pairs matching collateral denom to withdraw, starting at the lowest weighted
 			if sp.Collateral.Denom == denom {
 				// test if the collateral in this pair can be fully withdrawn
-				if ap.canHealthyWithdraw(denom, maxWithdraw.Add(sp.Collateral.Amount)) {
-					// add to maxWithdraw and proceed to next special pair
-					maxWithdraw = maxWithdraw.Add(sp.Collateral.Amount)
-				} else {
+				if !ap.canHealthyWithdraw(denom, maxWithdraw.Add(sp.Collateral.Amount)) {
 					// prepare for partial withdrawal from this pair by simulating withdrawal of
 					// normal collateral and any previous special pairs which were completely withdrawn
 					intermediatePosition, err := newAccountPosition(
@@ -351,22 +348,23 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, bool) {
 					// partially withdraw from this special pair in addition to completed unpaired and special withdrawals
 					return maxWithdraw.Add(partialWithdraw), false
 				}
+				// if full withdraw was possible, add to maxWithdraw and proceed to next special pair
+				maxWithdraw = maxWithdraw.Add(sp.Collateral.Amount)
 			}
 		}
 		return maxWithdraw, true
-	} else {
-		// position would not be healthy after withdrawing all unpaired collateral of this denom
-		// only calculate unpaired collateral max withdraw
-		unusedLimit := ap.totalBorrowLimit().Sub(ap.BorrowedValue())            // unused borrow limit by collateral weight
-		unusedCollateral := ap.CollateralValue().Sub(ap.totalCollateralUsage()) // unused collateral by borrow factor
-		// - for borrow limit, withdraw subtracts [collat * weight] from borrow limit
-		max1 := unusedLimit.Quo(ap.tokenWeight(denom))
-		// - for borrow factor, withdraw subtracts [collat] from TC
-		max2 := unusedCollateral
-		// replace maxWithdraw with the lower of borrow limit and borrow factor results
-		maxWithdraw = sdk.MinDec(max1, max2)
-		return maxWithdraw, false
 	}
+	// position would not be healthy after withdrawing all unpaired collateral of this denom
+	// only calculate unpaired collateral max withdraw
+	unusedLimit := ap.totalBorrowLimit().Sub(ap.BorrowedValue())            // unused borrow limit by collateral weight
+	unusedCollateral := ap.CollateralValue().Sub(ap.totalCollateralUsage()) // unused collateral by borrow factor
+	// - for borrow limit, withdraw subtracts [collat * weight] from borrow limit
+	max1 := unusedLimit.Quo(ap.tokenWeight(denom))
+	// - for borrow factor, withdraw subtracts [collat] from TC
+	max2 := unusedCollateral
+	// replace maxWithdraw with the lower of borrow limit and borrow factor results
+	maxWithdraw = sdk.MinDec(max1, max2)
+	return maxWithdraw, false
 }
 
 // canHealthyWithdraw simulates an account position with a specified amount of
@@ -493,20 +491,6 @@ func (ap *AccountPosition) unpairedCollateral() sdk.DecCoins {
 	total := sdk.NewDecCoins(ap.collateralValue...)
 	special := ap.specialCollateral()
 	return total.Sub(special)
-}
-
-// averageWeight gets the weighted average collateral weight (or liquidation threshold) of a set of tokens
-func (ap *AccountPosition) averageWeight(coins sdk.DecCoins) sdk.Dec {
-	if coins.IsZero() {
-		return sdk.OneDec()
-	}
-	amountSum := sdk.ZeroDec()
-	weightedSum := sdk.ZeroDec()
-	for _, c := range coins {
-		weightedSum = weightedSum.Add(c.Amount.Mul(ap.tokenWeight(c.Denom)))
-		amountSum = amountSum.Add(c.Amount)
-	}
-	return weightedSum.Quo(amountSum)
 }
 
 // averageBorrowFactor gets the weighted average borrow factor of a set of tokens

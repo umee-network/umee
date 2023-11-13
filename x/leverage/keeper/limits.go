@@ -22,12 +22,10 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	walletUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
 	unbondedCollateral := k.unbondedCollateral(ctx, addr, uDenom)
 
-	maxWithdrawValue := sdk.ZeroDec()
 	maxWithdraw := coin.Zero(uDenom)
-	fullWithdrawal := false
 	position, err := k.GetAccountPosition(ctx, addr, false)
 	if err == nil {
-		maxWithdrawValue, fullWithdrawal = position.MaxWithdraw(denom)
+		maxWithdrawValue, fullWithdrawal := position.MaxWithdraw(denom)
 		if fullWithdrawal {
 			maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
 		} else {
