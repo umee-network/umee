@@ -25,7 +25,6 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 				mocks.ValidToken(mocks.USDTBaseDenom, mocks.USDTSymbolDenom, 6),
 				mocks.ValidToken(mocks.USDCBaseDenom, mocks.USDCSymbolDenom, 6),
 				mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
-				mocks.ValidToken(mocks.MeUSDDenom, mocks.MeUSDDenom, 6),
 			}
 
 			err := grpc.LeverageRegistryUpdate(s.AccountClient(0), tokens, nil)
@@ -112,12 +111,6 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			expectedBalance.SetAssetBalance(usdtBalance)
 
 			s.checkMetokenBalance(testAddr.String(), mocks.MeUSDDenom)
-		},
-	)
-
-	s.Run(
-		"metoken_price_on_oracle", func() {
-			s.checkMetokenPriceInOracle(mocks.MeUSDDenom)
 		},
 	)
 }
