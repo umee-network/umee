@@ -102,7 +102,7 @@ func (k Keeper) SetPricesToOracle() error {
 	for _, index := range indexes {
 		iPrice, err := k.Prices(index)
 		if err != nil {
-			k.Logger().Debug(
+			k.Logger().Error(
 				"setting price to oracle: couldn't calculate the price",
 				"denom", index.Denom,
 				"error", err.Error(),
@@ -113,7 +113,7 @@ func (k Keeper) SetPricesToOracle() error {
 
 		indexToken, err := k.leverageKeeper.GetTokenSettings(*k.ctx, index.Denom)
 		if err != nil {
-			k.Logger().Debug(
+			k.Logger().Error(
 				"setting price to oracle: couldn't get token settings",
 				"denom", index.Denom,
 				"error", err.Error(),
