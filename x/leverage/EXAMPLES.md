@@ -48,10 +48,10 @@ Unpaired assets are the remainder after special pairs are created.
 Suppose I wish to compute `MaxBorrow(B)` on this position.
 Naively, I would simply see how much `B` can be borrowed in addition to the existing borrowed `D` by the unused collateral `D` and `A` at the bottom row.
 
-This would consume `$140 D` collateral at a weight of `0.1` for a max borrow of `$14`. 
+This would consume `$140 D` collateral at a weight of `0.1` for a max borrow of `$14`.
 However, this actually underestimates the max borrow amount because asset `B` qualifies for a special asset pair.
 
-(Note that `$10 A * 0.4` and `$160 D * 0.1` can cover a borrow of `$20 D` using their collateral weights, which is why `$140 D` collateral is the maximum we used above.) 
+(Note that `$10 A * 0.4` and `$160 D * 0.1` can cover a borrow of `$20 D` using their collateral weights, which is why `$140 D` collateral is the maximum we used above.)
 
 What will actually happen, is any newly borrowed `B` will be paired with collateral `A` in the highest priority special asset pair (and also any collateral `A` that is floating around in regular assets) before being matched with leftover collateral.
 
@@ -106,7 +106,7 @@ Overall Result:
 - By moving normal assets to special pairs, leverage module can increase max borrow to `$15`
 - A more perfect algorithm would rearrange special pairs to give a result of `MaxBorrow(B) = $17.5`.
 
-Practical notes on the edge case: 
+Practical notes on the edge case:
 
 - Max borrow will only be underestimated if an existing special pair can be cannibalized by new borrows into a higher weighted special pair.
 - A user can approach the theoretical limit by executing multiple max borrow transactions in a row without doing any calculations.
