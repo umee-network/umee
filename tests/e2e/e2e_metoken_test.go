@@ -113,6 +113,34 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 			s.checkMetokenBalance(testAddr.String(), mocks.MeUSDDenom)
 		},
 	)
+
+	s.Run(
+		"add_metoken_to_leverage", func() {
+			tokens := []ltypes.Token{
+				mocks.ValidToken(mocks.MeUSDDenom, mocks.MeUSDDenom, 6),
+			}
+
+			err := grpc.LeverageRegistryUpdate(s.AccountClient(0), tokens, nil)
+			s.Require().NoError(err)
+			s.checkMetokenPriceInOracle(mocks.MeUSDDenom)
+		},
+	)
+}
+
+func (s *E2ETest) checkMetokenPriceInOracle(denom string) {
+	s.Require().Eventually(
+		func() bool {
+			exchangeRates, err := s.QueryExchangeRate(s.UmeeREST(), denom)
+			if err != nil {
+				return false
+			}
+			if exchangeRates.AmountOf(denom).IsZero() {
+				return false
+			}
+			return true
+		},
+		2*time.Minute, 12*time.Second, "fetching metoken price",
+	)
 }
 
 func (s *E2ETest) checkMetokenBalance(valAddr, denom string) {
