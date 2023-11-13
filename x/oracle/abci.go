@@ -76,7 +76,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 			return err
 		}
 		// save the exchange rate to store with denom and timestamp
-		k.SetExchangeRateWithEvent(ctx, denom, exchangeRate)
+		k.SetExchangeRate(ctx, denom, exchangeRate)
 
 		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
 			k.AddHistoricPrice(ctx, denom, exchangeRate)
