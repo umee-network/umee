@@ -231,7 +231,7 @@ func (ap *AccountPosition) maxBorrowFromBorrowFactor(denom string) sdk.Dec {
 	// if restricted by borrow factor, each special pair frees up additional collateral
 	// for a given amount borrowed
 	for _, wsp := range ap.specialPairs {
-		if wsp.Borrow.Denom == denom {
+		if wsp.Borrow.Denom == denom && unusedCollateral.IsPositive() {
 			collateralToPair := sdk.MinDec(
 				unusedCollateral,
 				unpairedCollateral.AmountOf(wsp.Collateral.Denom),
