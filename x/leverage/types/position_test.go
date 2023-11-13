@@ -236,7 +236,7 @@ func TestBorrowLimit(t *testing.T) {
 			"F loop",
 		},
 		{
-			// single asset with unused special pair (borrowFactor reducing weight, minimumBorrowFactor active)
+			// single asset with unused special pair (borrowFactor LT, minimumBorrowFactor active)
 			sdk.NewDecCoins(
 				coin.Dec("FFFF", "100"),
 			),
@@ -245,7 +245,8 @@ func TestBorrowLimit(t *testing.T) {
 			),
 			// 40 A consumes 80 F collateral (weight 0.5 due to MinimumBorrowFactor), leaving 20 F collateral unused.
 			// Total borrow limit and liquidation thresholds are 40 + 20 * 1.0 since borrow limit assumes unused
-			// Collateral can be borrowed by the most efficient possible asset. Actual max borrow will be lower.
+			// collateral can be borrowed by the most efficient possible asset. Actual max borrow will be lower.
+			// Liquidation threshold is capped by borrow factor here, otherwise it would be $65.
 			// The F <-> H special pair has no effect
 			"60.00",
 			"60.00",
