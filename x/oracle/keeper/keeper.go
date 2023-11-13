@@ -113,7 +113,8 @@ func (k Keeper) GetExchangeRateBase(ctx sdk.Context, denom string) (sdk.Dec, err
 }
 
 // SetExchangeRateWithTimestamp sets the consensus exchange rate of USD denominated in the
-// denom asset to the store with a timestamp specified instead of using ctx
+// denom asset to the store with a timestamp specified instead of using ctx.
+// NOTE: must not be used outside of genesis import.
 func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, rate sdk.Dec, t time.Time) {
 	key := types.KeyExchangeRate(denom)
 	val := types.ExchangeRate{Rate: rate, Timestamp: t}
@@ -121,19 +122,14 @@ func (k Keeper) SetExchangeRateWithTimestamp(ctx sdk.Context, denom string, rate
 	util.Panic(err)
 }
 
-// SetExchangeRate sets the consensus exchange rate of USD denominated in the
-// denom asset to the store using timestamp from ctx
-func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
-	k.SetExchangeRateWithTimestamp(ctx, denom, rate, ctx.BlockTime())
-}
-
-// SetExchangeRateWithEvent sets an consensus
+// SetExchangeRate sets an consensus
 // exchange rate to the store with ABCI event
-func (k Keeper) SetExchangeRateWithEvent(ctx sdk.Context, denom string, rate sdk.Dec) {
+func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
 	k.SetExchangeRateWithTimestamp(ctx, denom, rate, ctx.BlockTime())
 	sdkutil.Emit(&ctx, &types.EventSetFxRate{
 		Denom: denom, Rate: rate,
 	})
+
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.
