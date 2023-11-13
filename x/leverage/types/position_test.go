@@ -644,8 +644,6 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 			"30.00",
 			"simple B max(D)",
 		},
-
-		// TODO: confirm effects of minimum borrow factor
 	}
 
 	for _, tc := range testCases {
