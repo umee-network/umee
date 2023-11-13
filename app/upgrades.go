@@ -53,10 +53,11 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 		panic(err)
 	}
 
-	app.registerUpgrade3_0(upgradeInfo)
+	app.registerOutdatedPlaceholderUpgrade("v1.1-v3.0") // upgrade from v1->v3.0
+
 	app.registerUpgrade("v3.1.0", upgradeInfo)
 	app.registerUpgrade3_1to3_3(upgradeInfo)
-	app.registerUpgrade3_2to3_3(upgradeInfo)
+	app.registerOutdatedPlaceholderUpgrade("v3.2-v3.3") // upgrade from v3.2 -> v3.3
 	app.registerUpgrade3_3to4_0(upgradeInfo)
 	app.registerUpgrade("v4.0.1", upgradeInfo)
 	app.registerUpgrade4_1(upgradeInfo)
@@ -323,74 +324,6 @@ func (app *UmeeApp) registerUpgrade3_1to3_3(_ upgradetypes.Plan) {
 		})
 }
 
-// performs upgrade from v3.2 -> v3.3
-func (app *UmeeApp) registerUpgrade3_2to3_3(_ upgradetypes.Plan) {
-	const planName = "v3.2-v3.3"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			ctx.Logger().Info("Run v3.3 migrator")
-			err := upgradev3x3.Migrator(*app.GovKeeper, app.interfaceRegistry)(ctx)
-			if err != nil {
-				return fromVM, err
-			}
-			ctx.Logger().Info("Run module migrations")
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		})
-}
-
-// performs upgrade from v1->v3
-func (app *UmeeApp) registerUpgrade3_0(upgradeInfo upgradetypes.Plan) {
-	const planName = "v1.1-v3.0"
-	app.UpgradeKeeper.SetUpgradeHandler(
-		planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
-			// ctx.Logger().Info("Running setupBech32ibcKeeper")
-			// err := upgradev3.SetupBech32ibcKeeper(&app.bech32IbcKeeper, ctx)
-			// if err != nil {
-			// 	return nil, errors.Wrapf(
-			// 		err, "%q Upgrade: Unable to upgrade, bech32ibc module not initialized", planName)
-			// }
-
-			ctx.Logger().Info("Running module migrations")
-			vm, err := app.mm.RunMigrations(ctx, app.configurator, fromVM)
-			if err != nil {
-				return vm, err
-			}
-
-			// ctx.Logger().Info("Updating validator minimum commission rate param of staking module")
-			// minCommissionRate, err := upgradev3.UpdateMinimumCommissionRateParam(ctx, app.StakingKeeper)
-			// if err != nil {
-			// 	return vm, errors.Wrapf(
-			// 		err, "%q Upgrade: failed to update minimum commission rate param of staking module",
-			// 		planName)
-			// }
-
-			// ctx.Logger().Info("Upgrade handler execution finished, updating minimum commission rate of all validators",
-			// 	"name", planName)
-			// err = upgradev3.SetMinimumCommissionRateToValidators(ctx, app.StakingKeeper, minCommissionRate)
-			// if err != nil {
-			// 	return vm, errors.Wrapf(
-			// 		err, "%q Upgrade: failed to update minimum commission rate for validators",
-			// 		planName)
-			// }
-
-			return vm, err
-		})
-
-	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-		Added: []string{
-			group.ModuleName,
-			nft.ModuleName,
-			// bech32ibctypes.ModuleName, // removed dependency
-			oracletypes.ModuleName,
-			leveragetypes.ModuleName,
-		},
-	})
-}
-
 func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
 	return func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		printPlanName(planName, ctx.Logger())
@@ -419,6 +352,15 @@ func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Pl
 			Added: newStores,
 		})
 	}
+}
+
+// oldUpgradePlan is a noop, placeholder handler required for old (completed) upgrade plans.
+func (app *UmeeApp) registerOutdatedPlaceholderUpgrade(planName string) {
+	app.UpgradeKeeper.SetUpgradeHandler(
+		planName,
+		func(_ sdk.Context, _ upgradetypes.Plan, _ module.VersionMap) (module.VersionMap, error) {
+			panic("Can't migrate state < 'head - 2' while running a logic with the 'head' version")
+		})
 }
 
 func printPlanName(planName string, logger log.Logger) {
