@@ -992,9 +992,3 @@ func TestArbitraryCases(t *testing.T) {
 		}
 	}
 }
-
-// TODO: a few +/- cases relative to current amounts to confirm limits, etc remain constant
-// TODO: for max borrow test cases, add logic to actually do the borrow, recompute position, and check at exact limit
-// TODO: more cases for positions with multiple borrow and collateral types
-// TODO: max withdraw tests with special pairs involved
-// TODO: clever zero cases, such as max withdraw something that does not exist and missing prices (zero amounts)
