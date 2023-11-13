@@ -871,6 +871,11 @@ func TestArbitraryCases(t *testing.T) {
 										coin.Dec("BBBB", collateralB),
 										coin.Dec("CCCC", collateralC),
 									)
+									collat2 := append(collat,
+										coin.Dec("GGGG", collateralA),
+										coin.Dec("HHHH", collateralB),
+										coin.Dec("IIII", collateralC),
+									)
 									borrow := sdk.NewDecCoins(
 										coin.Dec("AAAA", borrowA),
 										coin.Dec("BBBB", borrowB),
@@ -883,6 +888,13 @@ func TestArbitraryCases(t *testing.T) {
 										denom,
 										fmt.Sprintf("\narbitrary position\n [%s]\n-> \n[%s]\n at %s, w: %s\n",
 											collat, borrow, min, denom),
+									}, testCase{
+										collat2,
+										borrow,
+										min,
+										denom,
+										fmt.Sprintf("\narbitrary position\n [%s]\n-> \n[%s]\n at %s, w: %s\n",
+											collat2, borrow, min, denom),
 									})
 									// Ensure we aren't making an excessive number of cases
 									if len(testCases) > 100000 {

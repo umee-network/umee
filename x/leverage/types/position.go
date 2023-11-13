@@ -361,7 +361,10 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, bool) {
 	unusedLimit := ap.totalBorrowLimit().Sub(ap.BorrowedValue())            // unused borrow limit by collateral weight
 	unusedCollateral := ap.CollateralValue().Sub(ap.totalCollateralUsage()) // unused collateral by borrow factor
 	// - for borrow limit, withdraw subtracts [collat * weight] from borrow limit
-	max1 := unusedLimit.Quo(ap.tokenWeight(denom))
+	max1 := sdk.ZeroDec()
+	if ap.tokenWeight(denom).IsPositive() {
+		max1 = unusedLimit.Quo(ap.tokenWeight(denom))
+	}
 	// - for borrow factor, withdraw subtracts [collat] from TC
 	max2 := unusedCollateral
 	// replace maxWithdraw with the lower of borrow limit and borrow factor results
