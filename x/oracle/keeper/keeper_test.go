@@ -206,9 +206,9 @@ func (s *IntegrationTestSuite) TestAggregateExchangeRateVoteError() {
 	s.Require().Errorf(err, types.ErrNoAggregateVote.Error())
 }
 
-func (s *IntegrationTestSuite) TestSetExchangeRateWithEvent() {
+func (s *IntegrationTestSuite) TestSetExchangeRate() {
 	v := sdk.OneDec()
-	s.app.OracleKeeper.SetExchangeRateWithEvent(s.ctx, displayDenom, v)
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, v)
 	rate, err := s.app.OracleKeeper.GetExchangeRate(s.ctx, displayDenom)
 	s.Require().NoError(err)
 	s.Require().Equal(rate, types.ExchangeRate{Rate: v, Timestamp: s.ctx.BlockTime()})
