@@ -244,10 +244,11 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("AAAA", "40"),
 			),
 			// 40 A consumes 80 F collateral (weight 0.5 due to MinimumBorrowFactor), leaving 20 F collateral unused.
-			// Total borrow limit and liquidation thresholds are 40 + [0.6 and 0.65] * 20
-			// the F <-> H special pair has no effect
-			"52.00",
-			"53.00",
+			// Total borrow limit and liquidation thresholds are 40 + 20 * 1.0 since borrow limit assumes unused
+			// Collateral can be borrowed by the most efficient possible asset. Actual max borrow will be lower.
+			// The F <-> H special pair has no effect
+			"60.00",
+			"60.00",
 			"F -> A",
 		},
 		{

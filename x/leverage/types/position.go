@@ -337,6 +337,7 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 		// borrow limit logic. Borrow factor considers the maximum possible borrow factor,
 		// which if we are not specifying a borrow denom, is 1.0.
 		avgWeight = sdk.OneDec()
+		// TODO: this is an overestimate, which is dangerous when computing liquidation threshold.
 	}
 	borrowFactorLimit := ap.BorrowedValue().Add(unusedCollateralValue.Mul(avgWeight))
 
