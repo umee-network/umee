@@ -333,8 +333,10 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 		avgWeight = ap.averageBorrowFactor(ap.unpairedBorrows())
 	} else {
 		// if user is below limit, unused collateral can be borrowed against at the
-		// average collateral weight of its unpaired collateral at most
-		avgWeight = ap.averageWeight(ap.unpairedCollateral())
+		// average collateral weight of its unpaired collateral at most. But that is
+		// borrow limit logic. Borrow factor considers the maximum possible borrow factor,
+		// which if we are not specifying a borrow denom, is 1.0.
+		avgWeight = sdk.OneDec()
 	}
 	borrowFactorLimit := ap.BorrowedValue().Add(unusedCollateralValue.Mul(avgWeight))
 

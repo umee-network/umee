@@ -12,7 +12,6 @@ import (
 )
 
 func TestMaxBorrowScenarioA(t *testing.T) {
-	// TODO: update the table to reflect normal asset groupings
 	// This borrow position reproduces the initial table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
 	initialPosition, err := types.NewAccountPosition(
 		[]types.Token{
@@ -35,7 +34,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 		sdk.NewDecCoins(
 			coin.Dec("BBBB", "20"),
 			coin.Dec("CCCC", "20"),
-			coin.Dec("DDDD", "5"),
+			coin.Dec("DDDD", "20"),
 		),
 		false,
 		noMinimumBorrowFactor,
@@ -51,7 +50,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 			"borrowed:\n"+
 			"  20.000000000000000000BBBB\n"+
 			"  20.000000000000000000CCCC\n"+
-			"  5.000000000000000000DDDD",
+			"  20.000000000000000000DDDD",
 		initialPosition.String(),
 	)
 	borrowLimit := initialPosition.Limit()
@@ -59,11 +58,7 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 
 	// maxBorrow is more efficient than borrow limit predicts due to special pairs
 	maxBorrow := initialPosition.MaxBorrow("BBBB")
-	assert.DeepEqual(t, sdk.MustNewDecFromStr("29.00"), maxBorrow) // > $24
-
-	// TODO: perfect the behavior of MaxBorrow and test that it matches finalPosition below (+$35)
-	// It would need to move the collateral A in the special pair with C to the more efficient
-	// pair with B, demoting the C borrow to ordinary assets.
+	assert.DeepEqual(t, sdk.MustNewDecFromStr("15.00"), maxBorrow) // $17.5 (optimal) >= maxB > $14 (no special pairs)
 
 	// This borrow position reproduces the final table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
 	finalPosition, err := types.NewAccountPosition(
@@ -85,9 +80,9 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 			coin.Dec("DDDD", "300"),
 		),
 		sdk.NewDecCoins(
-			coin.Dec("BBBB", "55"),
+			coin.Dec("BBBB", "37.5"),
 			coin.Dec("CCCC", "20"),
-			coin.Dec("DDDD", "5"),
+			coin.Dec("DDDD", "20"),
 		),
 		false,
 		noMinimumBorrowFactor,
@@ -95,14 +90,15 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t,
 		"special:\n"+
-			"  {0.5, 100 AAAA, 50 BBBB}\n"+
+			"  {0.5, 75 AAAA, 37.5 BBBB}\n"+
+			"  {0.4, 25 AAAA, 10 CCCC}\n"+
 			"collateral:\n"+
 			"  100.000000000000000000AAAA\n"+
 			"  300.000000000000000000DDDD\n"+
 			"borrowed:\n"+
-			"  55.000000000000000000BBBB\n"+
+			"  37.500000000000000000BBBB\n"+
 			"  20.000000000000000000CCCC\n"+
-			"  5.000000000000000000DDDD",
+			"  20.000000000000000000DDDD",
 		finalPosition.String(),
 	)
 }
