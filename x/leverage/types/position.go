@@ -269,9 +269,11 @@ func (ap *AccountPosition) maxBorrowFromBorrowLimit(denom string) sdk.Dec {
 			// attempt to pair the maximum amount of collateral available
 			collateralToPair := unpairedCollateral.AmountOf(cDenom)
 			// limit to that collateral which is not being used by normal borrows
-			collateralToPair = sdk.MinDec(collateralToPair,
-				unusedLimit.Quo(cWeight),
-			)
+			if cWeight.IsPositive() {
+				collateralToPair = sdk.MinDec(collateralToPair,
+					unusedLimit.Quo(cWeight),
+				)
+			}
 			// pair the assets and update totals
 			unpairedCollateral = unpairedCollateral.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
 				cDenom, collateralToPair,

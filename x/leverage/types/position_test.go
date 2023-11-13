@@ -845,10 +845,14 @@ func TestArbitraryCases(t *testing.T) {
 		msg                 string
 	}
 
-	arbitraryDenoms := []string{"AAAA", "BBBB", "CCCC", "DDDD"}
+	// even includes a zero-weight token and an unregistered token
+	arbitraryDenoms := []string{"AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ"}
 	arbitraryCollateral := []string{"0", "30", "100"}
 	arbitraryBorrow := []string{"0", "5", "10"}
-	arbitraryMinimumFactor := []sdk.Dec{sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.3")}
+	arbitraryMinimumFactor := []sdk.Dec{
+		sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.3"),
+		sdk.MustNewDecFromStr("0.5"), sdk.MustNewDecFromStr("0.7"),
+	}
 
 	testCases := []testCase{}
 
@@ -881,8 +885,8 @@ func TestArbitraryCases(t *testing.T) {
 											collat, borrow, min, denom),
 									})
 									// Ensure we aren't making an excessive number of cases
-									if len(testCases) > 10000 {
-										// 10k cases runs in under a second locally, so
+									if len(testCases) > 100000 {
+										// 29k cases runs in under 3 seconds locally, so
 										// this is a sane upper bound
 										t.Error("too many arbitrary cases")
 										t.FailNow()
