@@ -582,18 +582,19 @@ func TestMaxBorrowNoSpecialPairs(t *testing.T) {
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
-			tc.msg+" max borrow\n\n"+borrowPosition.String(),
+			tc.msg+" max borrow",
 		)
 	}
 }
 
 func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 	type testCase struct {
-		collateral     sdk.DecCoins
-		borrow         sdk.DecCoins
-		maxBorrowDenom string
-		maxBorrow      string
-		msg            string
+		collateral          sdk.DecCoins
+		borrow              sdk.DecCoins
+		minimumBorrowFactor string
+		maxBorrowDenom      string
+		maxBorrow           string
+		msg                 string
 	}
 
 	// Reminder:
@@ -609,6 +610,7 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 				coin.Dec("BBBB", "100"),
 			),
 			sdk.NewDecCoins(),
+			"0.5",
 			// no special pair with A. collateral weight 0.2
 			"AAAA",
 			"20.00",
@@ -620,6 +622,7 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 				coin.Dec("BBBB", "100"),
 			),
 			sdk.NewDecCoins(),
+			"0.5",
 			// special pair with B at 0.3
 			"BBBB",
 			"30.00",
@@ -631,11 +634,14 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 				coin.Dec("BBBB", "100"),
 			),
 			sdk.NewDecCoins(),
+			"0.5",
 			// special pair with B at 0.3
 			"DDDD",
 			"30.00",
 			"simple B max(D)",
 		},
+
+		// TODO: confirm effects of minimum borrow factor
 	}
 
 	for _, tc := range testCases {
@@ -645,14 +651,14 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 			tc.collateral,
 			tc.borrow,
 			false,
-			highMinimumBorrowFactor,
+			sdk.MustNewDecFromStr(tc.minimumBorrowFactor),
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
 		maxborrow := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
-			tc.msg+" max borrow\n\n"+borrowPosition.String(),
+			tc.msg+" max borrow",
 		)
 	}
 }
@@ -791,11 +797,13 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxWithdraw).String(),
 			maxWithdraw.String(),
-			tc.msg+" max withdraw\n\n"+borrowPosition.String(),
+			tc.msg+" max withdraw",
 		)
 	}
 }
 
+// TODO: a few +/- cases relative to current amounts to confirm limits, etc remain constant
+// TODO: for max borrow test cases, add logic to actually do the borrow, recompute position, and check at exact limit
 // TODO: more cases for positions with multiple borrow and collateral types
-// TODO: max borrow and max withdraw tests with special pairs involved
+// TODO: max withdraw tests with special pairs involved
 // TODO: clever zero cases, such as max withdraw something that does not exist and missing prices (zero amounts)
