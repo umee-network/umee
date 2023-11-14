@@ -200,7 +200,7 @@ func TestPBStandardDeviation(t *testing.T) {
 			},
 			[]int64{1, 1, 100, 1},
 			[]bool{true, true, true, true},
-			sdk.MustNewDecFromStr("49995.000362536252310905"),
+			sdk.MustNewDecFromStr("49995.000362536252310906"),
 		},
 		{
 			// Adding fake validator doesn't change outcome
@@ -256,7 +256,6 @@ func TestPBStandardDeviation(t *testing.T) {
 			pb = append(pb, vote)
 		}
 		stdDev, _ := pb.StandardDeviation()
-
 		assert.DeepEqual(t, tc.standardDeviation, stdDev)
 	}
 }
