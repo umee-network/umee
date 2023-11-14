@@ -129,7 +129,6 @@ func (k Keeper) SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec) {
 	sdkutil.Emit(&ctx, &types.EventSetFxRate{
 		Denom: denom, Rate: rate,
 	})
-
 }
 
 // IterateExchangeRates iterates over all USD rates in the store.
