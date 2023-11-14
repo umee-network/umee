@@ -18,7 +18,7 @@ func (o Oracle) AllMedianPrices(_ sdk.Context) otypes.Prices {
 	return o.prices
 }
 
-func (o Oracle) SetExchangeRateWithEvent(_ sdk.Context, denom string, rate sdk.Dec) {
+func (o *Oracle) SetExchangeRateWithEvent(_ sdk.Context, denom string, rate sdk.Dec) {
 	o.prices = append(
 		o.prices, otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
