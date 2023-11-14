@@ -22,7 +22,7 @@ var ten = sdk.MustNewDecFromStr("10")
 // GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 	var outflows sdk.DecCoins
-	iter := func(key, val []byte) error {
+	cb := func(key, val []byte) error {
 		o := sdk.DecCoin{Denom: DenomFromKey(key, keyPrefixDenomOutflows)}
 		if err := o.Amount.Unmarshal(val); err != nil {
 			return err
@@ -31,7 +31,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 		return nil
 	}
 
-	err := store.Iterate(k.store, keyPrefixDenomOutflows, iter)
+	err := store.Iterate(k.store, keyPrefixDenomOutflows, cb)
 	return outflows, err
 }
 
@@ -71,7 +71,7 @@ func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
 // GetAllInflows returns inflows of all registered tokens in USD value.
 func (k Keeper) GetAllInflows() (sdk.DecCoins, error) {
 	var inflows sdk.DecCoins
-	iter := func(key, val []byte) error {
+	cb := func(key, val []byte) error {
 		o := sdk.DecCoin{Denom: DenomFromKey(key, keyPrefixDenomInflows)}
 		if err := o.Amount.Unmarshal(val); err != nil {
 			return err
@@ -79,7 +79,7 @@ func (k Keeper) GetAllInflows() (sdk.DecCoins, error) {
 		inflows = append(inflows, o)
 		return nil
 	}
-	err := store.Iterate(k.store, keyPrefixDenomInflows, iter)
+	err := store.Iterate(k.store, keyPrefixDenomInflows, cb)
 	return inflows, err
 }
 
@@ -137,21 +137,15 @@ func (k Keeper) ResetAllQuotas() error {
 	zero := sdk.NewDec(0)
 	// outflows
 	k.SetTotalOutflowSum(zero)
-	store := k.PrefixStore(keyPrefixDenomOutflows)
-	iter := sdk.KVStorePrefixIterator(store, nil)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
+	ps := k.PrefixStore(keyPrefixDenomOutflows)
+	iter := sdk.KVStorePrefixIterator(ps, nil)
+	store.DeleteByIterator(ps, iter)
 
 	// inflows
 	k.SetTotalInflow(zero)
-	store = k.PrefixStore(keyPrefixDenomInflows)
-	iter = sdk.KVStorePrefixIterator(store, nil)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Delete(iter.Key())
-	}
+	ps = k.PrefixStore(keyPrefixDenomInflows)
+	iter = sdk.KVStorePrefixIterator(ps, nil)
+	store.DeleteByIterator(ps, iter)
 	return nil
 }
 
@@ -273,7 +267,7 @@ func (k Keeper) RecordIBCInflow(ctx sdk.Context,
 			}
 		}
 
-		// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE` (uumee)
+		// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE`
 		exchangeRate, err := k.oracle.Price(*k.ctx, strings.ToUpper(ts.SymbolDenom))
 		if err != nil {
 			return channeltypes.NewErrorAcknowledgement(err)
@@ -289,11 +283,4 @@ func (k Keeper) RecordIBCInflow(ctx sdk.Context,
 	}
 
 	return nil
-}
-
-// GetOldTotalOutflow returns the total outflow of ibc-transfer amount.
-// Note: only using for migration
-func (k Keeper) GetOldTotalOutflow() sdk.Dec {
-	bz := k.store.Get(keyTotalOutflows)
-	return sdk.MustNewDecFromStr(string(bz))
 }

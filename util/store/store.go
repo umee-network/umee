@@ -15,6 +15,7 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	db "github.com/cometbft/cometbft-db"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -208,4 +209,11 @@ func GetInteger[T Integer](store sdk.KVStore, key []byte) (T, bool) {
 		return T(bz[0]), true
 	}
 	panic("not possible: all types must be covered above")
+}
+
+func DeleteByIterator(store sdk.KVStore, iter db.Iterator) {
+	defer iter.Close()
+	for ; iter.Valid(); iter.Next() {
+		store.Delete(iter.Key())
+	}
 }

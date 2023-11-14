@@ -132,16 +132,9 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 			// uibc migrations
 			uIBCKeeper := app.UIbcQuotaKeeperB.Keeper(&ctx)
 			// migrating outflow
-			oldTotalOutflow := uIBCKeeper.GetOldTotalOutflow()
-			uIBCKeeper.SetTotalOutflowSum(oldTotalOutflow)
+			uIBCKeeper.MigrateTotalOutflowSum()
 			// uibc params
-			uibcParams := uIBCKeeper.GetParams()
-			uibcParams.TotalQuota = sdk.NewDec(1_600_000)
-			uibcParams.TokenQuota = sdk.NewDec(900_000)
-			uibcParams.InflowOutflowQuotaBase = sdk.NewDec(1_000_000)
-			uibcParams.InflowOutflowQuotaRate = sdk.MustNewDecFromStr("0.25")
-
-			err = uIBCKeeper.SetParams(uibcParams)
+			err = uIBCKeeper.SetParams(uibc.DefaultParams())
 			return fromVM, err
 		},
 	)
