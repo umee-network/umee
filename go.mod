@@ -28,7 +28,7 @@ require (
 	github.com/rakyll/statik v0.1.7
 	github.com/rs/zerolog v1.31.0
 	github.com/spf13/cast v1.5.1
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/exp v0.0.0-20230711153332-06a737ee72cb // must be v0.0.0-20230711153332-06a737ee72cb for gogoproto v1.4.10
