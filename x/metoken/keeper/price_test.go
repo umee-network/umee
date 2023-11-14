@@ -157,6 +157,13 @@ func TestIndexPrices_Convert(t *testing.T) {
 	)
 }
 
+func TestIndexPrices_SetPricesToOracle(t *testing.T) {
+	o := NewOracleMock()
+	l := NewLeverageMock()
+	k := initMeUSDKeeper(t, nil, l, o)
+	require.NoError(t, k.SetPricesToOracle())
+}
+
 func meUSDIndexPricesAdjustedToBalance(t *testing.T, balance metoken.IndexBalances) metoken.IndexPrices {
 	usdtSupply, i := balance.AssetBalance(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)

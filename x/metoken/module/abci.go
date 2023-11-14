@@ -11,5 +11,6 @@ import (
 func EndBlocker(k keeper.Keeper) []abci.ValidatorUpdate {
 	util.Panic(k.ClaimLeverageInterest())
 	util.Panic(k.RebalanceReserves())
+	util.Panic(k.SetPricesToOracle())
 	return []abci.ValidatorUpdate{}
 }

@@ -34,4 +34,5 @@ type LeverageKeeper interface {
 // OracleKeeper interface for price feed.
 type OracleKeeper interface {
 	AllMedianPrices(ctx sdk.Context) otypes.Prices
+	SetExchangeRate(ctx sdk.Context, denom string, rate sdk.Dec)
 }

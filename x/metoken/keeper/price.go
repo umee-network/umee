@@ -96,6 +96,38 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 	return indexPrices, nil
 }
 
+// SetPricesToOracle of every registered index.
+func (k Keeper) SetPricesToOracle() error {
+	indexes := k.GetAllRegisteredIndexes()
+	for _, index := range indexes {
+		iPrice, err := k.Prices(index)
+		if err != nil {
+			k.Logger().Error(
+				"setting price to oracle: couldn't calculate the price",
+				"denom", index.Denom,
+				"error", err.Error(),
+				"block_time", k.ctx.BlockTime(),
+			)
+			continue
+		}
+
+		indexToken, err := k.leverageKeeper.GetTokenSettings(*k.ctx, index.Denom)
+		if err != nil {
+			k.Logger().Error(
+				"setting price to oracle: couldn't get token settings",
+				"denom", index.Denom,
+				"error", err.Error(),
+				"block_time", k.ctx.BlockTime(),
+			)
+			continue
+		}
+
+		k.oracleKeeper.SetExchangeRate(*k.ctx, indexToken.SymbolDenom, iPrice.Price)
+	}
+
+	return nil
+}
+
 // latestPrice from the list of medians, based on the block number.
 func latestPrice(prices otypes.Prices, symbolDenom string) (sdk.Dec, error) {
 	latestPrice := otypes.Price{}

@@ -52,6 +52,7 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		AllMedianPrices(gomock.Any()).
 		Return(mocks.ValidPrices()).
 		AnyTimes()
+	oracleMock.EXPECT().SetExchangeRate(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
 	kb := keeper.NewKeeperBuilder(
 		app.AppCodec(),
@@ -106,6 +107,12 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		app.LeverageKeeper.SetTokenSettings(
 			ctx,
 			mocks.ValidToken(mocks.ETHBaseDenom, mocks.ETHSymbolDenom, 18),
+		),
+	)
+	require.NoError(
+		app.LeverageKeeper.SetTokenSettings(
+			ctx,
+			mocks.ValidToken(mocks.MeUSDDenom, mocks.MeUSDDenom, 6),
 		),
 	)
 
