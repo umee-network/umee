@@ -275,14 +275,14 @@ func (mr *MockOracleKeeperMockRecorder) AllMedianPrices(ctx interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllMedianPrices", reflect.TypeOf((*MockOracleKeeper)(nil).AllMedianPrices), ctx)
 }
 
-// SetExchangeRateWithEvent mocks base method.
-func (m *MockOracleKeeper) SetExchangeRateWithEvent(ctx types.Context, denom string, rate types.Dec) {
+// SetExchangeRate mocks base method.
+func (m *MockOracleKeeper) SetExchangeRate(ctx types.Context, denom string, rate types.Dec) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "SetExchangeRateWithEvent", ctx, denom, rate)
+	m.ctrl.Call(m, "SetExchangeRate", ctx, denom, rate)
 }
 
-// SetExchangeRateWithEvent indicates an expected call of SetExchangeRateWithEvent.
-func (mr *MockOracleKeeperMockRecorder) SetExchangeRateWithEvent(ctx, denom, rate interface{}) *gomock.Call {
+// SetExchangeRate indicates an expected call of SetExchangeRate.
+func (mr *MockOracleKeeperMockRecorder) SetExchangeRate(ctx, denom, rate interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetExchangeRateWithEvent", reflect.TypeOf((*MockOracleKeeper)(nil).SetExchangeRateWithEvent), ctx, denom, rate)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetExchangeRate", reflect.TypeOf((*MockOracleKeeper)(nil).SetExchangeRate), ctx, denom, rate)
 }
