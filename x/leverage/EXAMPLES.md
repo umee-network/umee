@@ -75,7 +75,7 @@ Since the existing `$20 D` borrowed can be covered by `$200 D` collateral at a w
 
 The total max borrow returned by the leverage module will be `$5B` (special) `+ $10B` (normal) = `$15`. This is greater than the original `$14`.
 
-However, there is an edge case present here, which the max borrow calculation will not consider (but which will apply to the borrower's position if they `MaxBorrow(B)` repeatedly): displacing assets for an existing special pair to one of higher weight.
+However, there is an edge case present here: repeating `MaxBorrow(B)` would displace assets from an existing special pair to one of higher weight, increasing the total borrowed further.
 
 We could take collateral `A` from the special pair `($50 A, $20 C)` since that pair has lower weight than `A <-> B`.
 
