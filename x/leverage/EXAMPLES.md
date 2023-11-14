@@ -69,7 +69,7 @@ Position after first pairing of new borrow `B` with collateral `A`:
 | $300 D     | -      | 0.1               |                    |
 |            | $20 D  | 0.1               |                    |
 
-But there is still unused borrow limit available after the step above., so the `B` looks for any more collateral `A` that can be moved to the topmost special pair.
+But there is still unused borrow limit available after the step above, so the `B` looks for any more collateral `A` that can be moved to the topmost special pair.
 
 Since the existing `$20 D` borrowed can be covered by `$200 D` collateral at a weight of `0.1`, an additional `$100 D` can borrow `$10 B`.
 
