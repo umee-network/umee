@@ -115,6 +115,22 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 	)
 }
 
+func (s *E2ETest) checkMetokenPriceInOracle(denom string) {
+	s.Require().Eventually(
+		func() bool {
+			exchangeRates, err := s.QueryExchangeRate(s.UmeeREST(), denom)
+			if err != nil {
+				return false
+			}
+			if exchangeRates.AmountOf(denom).IsZero() {
+				return false
+			}
+			return true
+		},
+		2*time.Minute, 12*time.Second, "fetching metoken price",
+	)
+}
+
 func (s *E2ETest) checkMetokenBalance(valAddr, denom string) {
 	s.Require().Eventually(
 		func() bool {
