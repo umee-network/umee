@@ -85,7 +85,7 @@ type StrExtractor func([]byte) string
 func LoadAllDecCoins(iter db.Iterator, prefixLen int) (sdk.DecCoins, error) {
 	var coins sdk.DecCoins
 	cb := func(key, val []byte) error {
-		o := sdk.DecCoin{Denom: rmPrefix(key, prefixLen)}
+		o := sdk.DecCoin{Denom: string(key[prefixLen:])}
 		if err := o.Amount.Unmarshal(val); err != nil {
 			return err
 		}
@@ -96,12 +96,5 @@ func LoadAllDecCoins(iter db.Iterator, prefixLen int) (sdk.DecCoins, error) {
 	if err := iterate(iter, cb); err != nil {
 		return nil, err
 	}
-
 	return coins, nil
-}
-
-// rmPrefix extracts denom from a key with the form
-// prefix | denom
-func rmPrefix(key []byte, prefixLen int) string {
-	return string(key[prefixLen:])
 }
