@@ -122,7 +122,7 @@ func (k Keeper) SetPricesToOracle() error {
 			continue
 		}
 
-		k.oracleKeeper.SetExchangeRateWithEvent(*k.ctx, indexToken.SymbolDenom, iPrice.Price)
+		k.oracleKeeper.SetExchangeRate(*k.ctx, indexToken.SymbolDenom, iPrice.Price)
 	}
 
 	return nil
