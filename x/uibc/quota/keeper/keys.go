@@ -13,18 +13,18 @@ var (
 	keyTotalInflows        = []byte{0x06}
 )
 
-func KeyTotalOutflows(ibcDenom string) []byte {
+func keyTotalOutflow(ibcDenom string) []byte {
 	//  keyPrefixDenomOutflows | denom
 	return util.ConcatBytes(0, keyPrefixDenomOutflows, []byte(ibcDenom))
 }
 
-func KeyTokenInflow(ibcDenom string) []byte {
+func keyTokenInflow(ibcDenom string) []byte {
 	//  keyPrefixDenomInflows | denom
 	return util.ConcatBytes(0, keyPrefixDenomInflows, []byte(ibcDenom))
 }
 
-// DenomFromKey extracts denom from a key with the form
+// denomFromKey extracts denom from a key with the form
 // prefix | denom
-func DenomFromKey(key, prefix []byte) string {
+func denomFromKey(key, prefix []byte) string {
 	return string(key[len(prefix):])
 }

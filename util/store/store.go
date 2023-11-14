@@ -15,7 +15,6 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
-	db "github.com/cometbft/cometbft-db"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -211,7 +210,9 @@ func GetInteger[T Integer](store sdk.KVStore, key []byte) (T, bool) {
 	panic("not possible: all types must be covered above")
 }
 
-func DeleteByIterator(store sdk.KVStore, iter db.Iterator) {
+// DeleteByPrefixStoreIterator will delete all keys stored in prefix store
+func DeleteByPrefixStoreIterator(store sdk.KVStore) {
+	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		store.Delete(iter.Key())

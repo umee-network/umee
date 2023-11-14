@@ -29,9 +29,9 @@ All outflows are measured in token average USD value using our x/oracle `AvgKeep
 
 We define 2 Quotas for ICS-20 transfers. Each quota only tracks tokens x/leverage Token Registry.
 
-- `Params.TokenQuota`: upper limit of a sum of all outflows per token. Initially it's set to 0.9M USD per token. It limits the outflows value for each token.
+- `Params.TokenQuota`: upper limit of a sum of all outflows per token. It's set to 1.2M USD per token. It limits the outflows value for each token.
   NOTE: we measure per token as defined in the x/leverage, not the IBC Denom Path (there can be multiple paths). Since creating a channel is permission less, we want to use same quota token.
-- `Params.TotalQuota`: upper limit of a sum of all token outflows combined. Initially it's set to 1.6M USD. Example of IBC outflows reaching the total quota: 600k USD worth of ATOM, 500k USD worth of STATOM, 250k USD worth of UMEE and 250k USD worth JUNO.
+- `Params.TotalQuota`: upper limit of a sum of all token outflows combined. For example if it's set to 1.6M USD then IBC outflows reaching the total quota will be 600k USD worth of ATOM, 500k USD worth of STATOM, 250k USD worth of UMEE and 250k USD worth JUNO.
 
 If a quota parameter is set to zero then we consider it as unlimited.
 
@@ -46,8 +46,8 @@ Transfer of tokens, which are not registered in the x/leverage Token Registry ar
 All inflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over 16h window.
 We are only tracking inflows for tokens which are registered in x/leverage Token Registry.
 
-- `Genesis.TotalInflowSum` : Sum of all inflows per token which are registered in x/leverage Token Registry
-- `Genesis.Inflows`: Inflows of registered tokens.
+- `Genesis.TotalInflowSum` : Sum of all IBC Tokens Inflows which are registered in x/leverage Token Registry.
+- `Genesis.Inflows`: IBC Inflow of each registered token.
 
 #### ICS-20 Quota control
 
