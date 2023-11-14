@@ -18,7 +18,7 @@ func (o Oracle) AllMedianPrices(_ sdk.Context) otypes.Prices {
 	return o.prices
 }
 
-func (o Oracle) SetExchangeRateWithEvent(_ sdk.Context, _ string, _ sdk.Dec) {
+func (o Oracle) SetExchangeRate(_ sdk.Context, _ string, _ sdk.Dec) {
 }
 
 func NewOracleMock() Oracle {
