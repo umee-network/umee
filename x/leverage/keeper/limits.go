@@ -208,10 +208,7 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 		return spendableUTokens.Amount.Add(totalTokenCollateral.AmountOf(denom)), nil
 	}
 
-	// Get module liquidity for the denom
 	liquidity := k.AvailableLiquidity(ctx, denom)
-
-	// Get min_collateral_liquidity for the denom
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
