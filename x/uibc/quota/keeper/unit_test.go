@@ -53,11 +53,9 @@ func (k TestKeeper) checkOutflows(denom string, perToken, total int64) {
 }
 
 func (k TestKeeper) setQuotaParams(perToken, total int64) {
-	err := k.SetParams(uibc.Params{
-		TokenQuota:                  sdk.NewDec(perToken),
-		TotalQuota:                  sdk.NewDec(total),
-		InflowOutflowQuotaBase:      sdk.NewDec(1_000_000),
-		InflowOutflowQuotaTokenBase: sdk.NewDec(9_00_000),
-	})
+	dp := uibc.DefaultParams()
+	dp.TokenQuota = sdk.NewDec(perToken)
+	dp.TotalQuota = sdk.NewDec(total)
+	err := k.SetParams(dp)
 	require.NoError(k.t, err)
 }

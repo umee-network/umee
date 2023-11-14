@@ -8,6 +8,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	ibcutil "github.com/umee-network/umee/v6/util/ibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 func TestUnitGetQuotas(t *testing.T) {
@@ -100,6 +101,46 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(2)) // exceeds token quota
 	assert.ErrorContains(t, err, "quota")
+
+	// Checking ibc outflow quota with  ibc inflows
+	dp := uibc.DefaultParams()
+	dp.TotalQuota = sdk.NewDec(200)
+	dp.TokenQuota = sdk.NewDec(500)
+	dp.InflowOutflowQuotaTokenBase = sdk.NewDec(100)
+	err = k.SetParams(dp)
+	assert.NilError(t, err)
+
+	k.SetTokenOutflow(sdk.NewDecCoin(umee, math.NewInt(80)))
+	k.SetTokenInflow(sdk.NewDecCoin(umee, math.NewInt(80)))
+	// 80*2 (160) > InflowOutflowQuotaTokenBase(100) + 25% of Token Inflow (80) = 160 > 100+20
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(80)) // exceeds token quota
+	assert.ErrorContains(t, err, "quota")
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(5))
+	assert.NilError(t, err)
+
+	// Unlimited token quota but limit the total outflow
+	dp.TokenQuota = sdk.NewDec(0)
+	dp.InflowOutflowQuotaBase = sdk.NewDec(100)
+	dp.TotalQuota = sdk.NewDec(100)
+	err = k.SetParams(dp)
+	k.SetTotalOutflowSum(sdk.NewDec(80))
+	// 80+(20*2) > Total Outflow Quota Limit (100)
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(20)) // exceeds token quota
+	assert.ErrorContains(t, err, "quota")
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(10))
+	assert.NilError(t, err)
+
+	k.ResetAllQuotas()
+
+	err = k.SetParams(dp)
+	assert.NilError(t, err)
+	k.SetTotalInflow(sdk.NewDec(100))
+	// 80+(80*2) > InflowOutflowQuotaBase(100) + 25% of Total Inflow Sum  (100) = 240 > 100+25
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(80)) // exceeds token quota
+	assert.ErrorContains(t, err, "quota")
+	// 80+(5*2) > InflowOutflowQuotaBase(100) + 25% of Total Inflow Sum  (100) = 90 < 100+25
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(5))
+	assert.NilError(t, err)
 }
 
 func TestUnitGetExchangePrice(t *testing.T) {

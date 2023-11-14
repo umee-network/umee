@@ -65,6 +65,8 @@ In the state we store:
 - Running sum of total outflow values, serialized as `sdk.Dec`.
 - Running sum of per token outflow values, serialized as `sdk.Dec`.
 - Next quota expire time (after which the quota reset happens).
+- Running sum of total inflow values, serialized as `sdk.Dec`.
+- Running sum of per token inflow values, serialized as `sdk.Dec`.
 
 ### Messages
 

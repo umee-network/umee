@@ -171,7 +171,7 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	inToken := k.GetTokenInflow(denom)
 	if !params.TokenQuota.IsZero() {
 		if o.Amount.GT(params.TokenQuota) ||
-			o.Amount.GT(params.InflowOutflowQuotaTokenBase.Add((sdk.MustNewDecFromStr("0.25").Mul(inToken.Amount)))) {
+			o.Amount.GT(params.InflowOutflowQuotaTokenBase.Add((params.InflowOutflowQuotaRate.Mul(inToken.Amount)))) {
 			return uibc.ErrQuotaExceeded
 		}
 	}
@@ -179,7 +179,7 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	// Allow outflow either of two conditions
 	// 1. Total Outflow Sum <= Total Outflow Quota
 	// or
-	// 2. Total Outflow Sum <= params.InflowOutflowQuotaBase($1M) + (params.InflowOutflowQuotaRate * sum of all inflows)
+	// 2. Total Outflow Sum <= params.InflowOutflowQuotaBase + (params.InflowOutflowQuotaRate * sum of all inflows)
 	totalOutflowSum := k.GetTotalOutflow().Add(exchangePrice)
 	ttlInSum := k.GetTotalInflow()
 	if !params.TotalQuota.IsZero() {
