@@ -52,7 +52,7 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		AllMedianPrices(gomock.Any()).
 		Return(mocks.ValidPrices()).
 		AnyTimes()
-	oracleMock.EXPECT().SetExchangeRateWithEvent(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
+	oracleMock.EXPECT().SetExchangeRate(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
 	kb := keeper.NewKeeperBuilder(
 		app.AppCodec(),
