@@ -183,13 +183,6 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 		return sdk.ZeroInt(), err
 	}
 
-	// If module_available_liquidity is zero, we cannot withdraw anything
-	if !moduleAvailableLiquidity.IsPositive() {
-		return sdkmath.ZeroInt(), nil
-	}
-
-	// If user_spendable_utokens >= module_available_liquidity we can only withdraw
-	// module_available_liquidity.
 	if spendableUTokens.Amount.GTE(moduleAvailableLiquidity) {
 		return moduleAvailableLiquidity, nil
 	}
