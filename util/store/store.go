@@ -210,8 +210,8 @@ func GetInteger[T Integer](store sdk.KVStore, key []byte) (T, bool) {
 	panic("not possible: all types must be covered above")
 }
 
-// DeleteByPrefixStoreIterator will delete all keys stored in prefix store
-func DeleteByPrefixStoreIterator(store sdk.KVStore) {
+// DeleteByPrefixStore will delete all keys stored in prefix store
+func DeleteByPrefixStore(store sdk.KVStore) {
 	iter := sdk.KVStorePrefixIterator(store, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {

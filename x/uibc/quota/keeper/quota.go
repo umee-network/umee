@@ -21,18 +21,8 @@ var ten = sdk.MustNewDecFromStr("10")
 
 // GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
-	var outflows sdk.DecCoins
-	cb := func(key, val []byte) error {
-		o := sdk.DecCoin{Denom: denomFromKey(key, keyPrefixDenomOutflows)}
-		if err := o.Amount.Unmarshal(val); err != nil {
-			return err
-		}
-		outflows = append(outflows, o)
-		return nil
-	}
-
-	err := store.Iterate(k.store, keyPrefixDenomOutflows, cb)
-	return outflows, err
+	iter := sdk.KVStorePrefixIterator(k.store, keyPrefixDenomOutflows)
+	return store.LoadAllDecCoins(iter, len(keyPrefixDenomOutflows))
 }
 
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
@@ -72,19 +62,8 @@ func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
 
 // GetAllInflows returns inflows of all registered tokens in USD value.
 func (k Keeper) GetAllInflows() (sdk.DecCoins, error) {
-	var inflows sdk.DecCoins
-	cb := func(key, val []byte) error {
-		o := sdk.DecCoin{Denom: denomFromKey(key, keyPrefixDenomInflows)}
-		if err := o.Amount.Unmarshal(val); err != nil {
-			k.ctx.Logger().Error("error while unmarshal the ibc inflow for denom", "denom", o.Denom,
-				"amount", o.Amount.String())
-			return err
-		}
-		inflows = append(inflows, o)
-		return nil
-	}
-	err := store.Iterate(k.store, keyPrefixDenomInflows, cb)
-	return inflows, err
+	iter := sdk.KVStorePrefixIterator(k.store, keyPrefixDenomInflows)
+	return store.LoadAllDecCoins(iter, len(keyPrefixDenomInflows))
 }
 
 // SetTokenInflows saves provided updated IBC inflows as a pair: USD value, denom name in the
@@ -144,12 +123,12 @@ func (k Keeper) ResetAllQuotas() error {
 	// outflows
 	k.SetTotalOutflowSum(zero)
 	ps := k.PrefixStore(keyPrefixDenomOutflows)
-	store.DeleteByPrefixStoreIterator(ps)
+	store.DeleteByPrefixStore(ps)
 
 	// inflows
 	k.SetTotalInflow(zero)
 	ps = k.PrefixStore(keyPrefixDenomInflows)
-	store.DeleteByPrefixStoreIterator(ps)
+	store.DeleteByPrefixStore(ps)
 	return nil
 }
 

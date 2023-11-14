@@ -80,3 +80,28 @@ func SumCoins(s storetypes.KVStore, f StrExtractor) sdk.Coins {
 // StrExtractor is a function type which will take a bytes string value and extracts
 // string out of it.
 type StrExtractor func([]byte) string
+
+// LoadAllDecCoins iterates over all records in the prefix store and unmarshals value into the dec coin list.
+func LoadAllDecCoins(iter db.Iterator, prefixLen int) (sdk.DecCoins, error) {
+	var coins sdk.DecCoins
+	cb := func(key, val []byte) error {
+		o := sdk.DecCoin{Denom: rmPrefix(key, prefixLen)}
+		if err := o.Amount.Unmarshal(val); err != nil {
+			return err
+		}
+		coins = append(coins, o)
+		return nil
+	}
+
+	if err := iterate(iter, cb); err != nil {
+		return nil, err
+	}
+
+	return coins, nil
+}
+
+// rmPrefix extracts denom from a key with the form
+// prefix | denom
+func rmPrefix(key []byte, prefixLen int) string {
+	return string(key[prefixLen:])
+}

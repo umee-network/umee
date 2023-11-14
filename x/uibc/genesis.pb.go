@@ -38,7 +38,7 @@ type GenesisState struct {
 	TotalOutflowSum github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,3,opt,name=total_outflow_sum,json=totalOutflowSum,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"total_outflow_sum"`
 	// quota_expires defines quota expire time (as unix timestamp) for ibc-transfer denom.
 	QuotaExpires time.Time `protobuf:"bytes,4,opt,name=quota_expires,json=quotaExpires,proto3,stdtime" json:"quota_duration,omitempty" yaml:"quota_expires"`
-	// inflows tracks IBC inflow transfers (in USD) during quota period.
+	// inflows tracks IBC inflow transfers (in USD) for each denom during quota period.
 	Inflows github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,5,rep,name=inflows,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"inflows"`
 	// total_inflow_sum defines tracks total sum of IBC inflow transfers (in USD) during quota period.
 	TotalInflowSum github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,6,opt,name=total_inflow_sum,json=totalInflowSum,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"total_inflow_sum"`

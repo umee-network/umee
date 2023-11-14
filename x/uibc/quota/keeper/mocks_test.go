@@ -49,7 +49,7 @@ func (o Oracle) Price(_ sdk.Context, denom string) (sdk.Dec, error) {
 	p, ok := o.prices[denom]
 	if !ok {
 		// When token exists in leverage registry but price is not found we are returning `0`
-		// https://github.com/umee-network/umee/tree/main/x/oracle/keeper/historic_avg.go#L126
+		// https: //github.com/umee-network/umee/blob/v6.1.0/x/oracle/keeper/historic_avg.go#L126
 		return sdk.ZeroDec(), nil
 	}
 	return p, nil
