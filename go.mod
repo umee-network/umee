@@ -11,7 +11,7 @@ require (
 	github.com/CosmWasm/wasmvm v1.5.0
 	github.com/cometbft/cometbft v0.37.2
 	github.com/cometbft/cometbft-db v0.8.0
-	github.com/cosmos/cosmos-proto v1.0.0-beta.2 // NOTE: v1.0.0-beta.2+ is not compatible with sdk v0.47
+	github.com/cosmos/cosmos-proto v1.0.0-beta.3 // NOTE: v1.0.0-beta.2+ is not compatible with sdk v0.47
 	github.com/cosmos/cosmos-sdk v0.47.5
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.4.10 // NOTE: v1.4.11+ is not compatible with sdk v0.47
