@@ -7,7 +7,6 @@ import (
 	stdlog "log"
 	"path/filepath"
 
-	"github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	dbm "github.com/cometbft/cometbft-db"
 	"github.com/cometbft/cometbft/libs/log"
@@ -75,7 +74,7 @@ func (a appCreator) newApp(
 	minGasPrices := cast.ToString(appOpts.Get(server.FlagMinGasPrices))
 	mustMinUmeeGasPrice(minGasPrices)
 
-	var wasmOpts []wasm.Option
+	var wasmOpts []wasmkeeper.Option
 	if cast.ToBool(appOpts.Get("telemetry.enabled")) {
 		wasmOpts = append(wasmOpts, wasmkeeper.WithVMCacheMetrics(prometheus.DefaultRegisterer))
 	}
@@ -97,7 +96,6 @@ func (a appCreator) newApp(
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
 		appOpts,
-		umeeapp.GetWasmEnabledProposals(),
 		wasmOpts,
 		baseapp.SetPruning(pruningOpts),
 		baseapp.SetMinGasPrices(minGasPrices),
@@ -153,7 +151,6 @@ func (a appCreator) appExport(
 		homePath,
 		uint(1),
 		appOpts,
-		umeeapp.GetWasmEnabledProposals(),
 		umeeapp.EmptyWasmOpts,
 	)
 

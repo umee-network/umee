@@ -322,7 +322,6 @@ func appExportAndImport(t *testing.T) (
 		dir,
 		simcli.FlagPeriodValue,
 		umeeapp.EmptyAppOptions{},
-		umeeapp.GetWasmEnabledProposals(),
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)
@@ -369,7 +368,6 @@ func appExportAndImport(t *testing.T) (
 		newDir,
 		simcli.FlagPeriodValue,
 		umeeapp.EmptyAppOptions{},
-		umeeapp.GetWasmEnabledProposals(),
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)

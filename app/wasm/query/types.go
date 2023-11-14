@@ -98,7 +98,7 @@ type UmeeQuery struct {
 	SwapFee           *metoken.QuerySwapFee       `json:"metoken_swapfee,omitempty"`
 	RedeemFee         *metoken.QueryRedeemFee     `json:"metoken_redeemfee,omitempty"`
 	IndexBalances     *metoken.QueryIndexBalances `json:"metoken_indexbalances,omitempty"`
-	IndexPrice        *metoken.QueryIndexPrices   `json:"metoken_indexprice,omitempty"`
+	IndexPrices       *metoken.QueryIndexPrices   `json:"metoken_indexprices,omitempty"`
 }
 
 // MarshalResponse marshals any response.
