@@ -32,6 +32,7 @@ import (
 
 	"github.com/umee-network/umee/v6/util"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
@@ -117,6 +118,14 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 			govParams := app.GovKeeper.GetParams(ctx)
 			govParams.MinInitialDepositRatio = sdk.NewDecWithPrec(1, 1).String()
 			err = app.GovKeeper.SetParams(ctx, govParams)
+			if err != nil {
+				return fromVM, err
+			}
+
+			// uibc migrations
+			uIBCKeeper := app.UIbcQuotaKeeperB.Keeper(&ctx)
+			uIBCKeeper.MigrateTotalOutflowSum()
+			err = uIBCKeeper.SetParams(uibc.DefaultParams())
 			return fromVM, err
 		},
 	)
