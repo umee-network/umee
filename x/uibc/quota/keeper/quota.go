@@ -21,26 +21,14 @@ var ten = sdk.MustNewDecFromStr("10")
 
 // GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
-	var outflows sdk.DecCoins
-	// creating PrefixStore upfront will remove the prefix from the key when running the iterator.
-	store := k.PrefixStore(keyPrefixDenomOutflows)
-	iter := sdk.KVStorePrefixIterator(store, nil)
-	defer iter.Close()
-
-	for ; iter.Valid(); iter.Next() {
-		o := sdk.DecCoin{Denom: string(iter.Key())}
-		if err := o.Amount.Unmarshal(iter.Value()); err != nil {
-			return nil, err
-		}
-		outflows = append(outflows, o)
-	}
-
-	return outflows, nil
+	iter := sdk.KVStorePrefixIterator(k.store, keyPrefixDenomOutflows)
+	return store.LoadAllDecCoins(iter, len(keyPrefixDenomOutflows))
 }
 
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
 func (k Keeper) GetTokenOutflows(denom string) sdk.DecCoin {
-	amount, _ := store.GetDec(k.store, KeyTotalOutflows(denom), "total_outflow")
+	// When token outflow is not stored in store it will return 0
+	amount, _ := store.GetDec(k.store, keyTotalOutflow(denom), "total_outflow")
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 
@@ -52,23 +40,66 @@ func (k Keeper) SetTokenOutflows(outflows sdk.DecCoins) {
 	}
 }
 
-// SetTokenOutflow save the outflows of denom into store.
-func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
-	key := KeyTotalOutflows(outflow.Denom)
-	err := store.SetDec(k.store, key, outflow.Amount, "total_outflow")
+// SetTotalOutflowSum save the total outflow of ibc-transfer amount.
+func (k Keeper) SetTotalOutflowSum(amount sdk.Dec) {
+	err := store.SetDec(k.store, keyTotalOutflows, amount, "total_outflow_sum")
 	util.Panic(err)
 }
 
 // GetTotalOutflow returns the total outflow of ibc-transfer amount.
 func (k Keeper) GetTotalOutflow() sdk.Dec {
-	// TODO: use store.Get/SetDec
-	bz := k.store.Get(keyTotalOutflows)
-	return sdk.MustNewDecFromStr(string(bz))
+	// When total outflow is not stored in store it will return 0
+	amount, _ := store.GetDec(k.store, keyTotalOutflows, "total_outflow")
+	return amount
 }
 
-// SetTotalOutflowSum save the total outflow of ibc-transfer amount.
-func (k Keeper) SetTotalOutflowSum(amount sdk.Dec) {
-	k.store.Set(keyTotalOutflows, []byte(amount.String()))
+// SetTokenOutflow save the outflows of denom into store.
+func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
+	key := keyTotalOutflow(outflow.Denom)
+	err := store.SetDec(k.store, key, outflow.Amount, "total_outflow")
+	util.Panic(err)
+}
+
+// GetAllInflows returns inflows of all registered tokens in USD value.
+func (k Keeper) GetAllInflows() (sdk.DecCoins, error) {
+	iter := sdk.KVStorePrefixIterator(k.store, keyPrefixDenomInflows)
+	return store.LoadAllDecCoins(iter, len(keyPrefixDenomInflows))
+}
+
+// SetTokenInflows saves provided updated IBC inflows as a pair: USD value, denom name in the
+// DecCoin structure.
+func (k Keeper) SetTokenInflows(inflows sdk.DecCoins) {
+	for _, q := range inflows {
+		k.SetTokenInflow(q)
+	}
+}
+
+// SetTokenInflow save the inflow of denom into store.
+func (k Keeper) SetTokenInflow(inflow sdk.DecCoin) {
+	key := keyTokenInflow(inflow.Denom)
+	err := store.SetDec(k.store, key, inflow.Amount, "token_inflow")
+	util.Panic(err)
+}
+
+// GetTokenInflow returns the inflow of denom from store.
+func (k Keeper) GetTokenInflow(denom string) sdk.DecCoin {
+	key := keyTokenInflow(denom)
+	// When token inflow is not stored in store it will return 0
+	amount, _ := store.GetDec(k.store, key, "token_inflow")
+	return sdk.NewDecCoinFromDec(denom, amount)
+}
+
+// GetTotalInflow returns the total inflow of ibc-transfer amount.
+func (k Keeper) GetTotalInflow() sdk.Dec {
+	// When total inflow is not stored in store it will return 0
+	amount, _ := store.GetDec(k.store, keyTotalInflows, "total_inflows")
+	return amount
+}
+
+// SetTotalInflow save the total inflow of ibc-transfer amount.
+func (k Keeper) SetTotalInflow(amount sdk.Dec) {
+	err := store.SetDec(k.store, keyTotalInflows, amount, "total_inflows")
+	util.Panic(err)
 }
 
 // SetExpire save the quota expire time of ibc denom into.
@@ -89,17 +120,15 @@ func (k Keeper) ResetAllQuotas() error {
 		return err
 	}
 	zero := sdk.NewDec(0)
-	zeroBz, err := zero.Marshal()
-	if err != nil {
-		return err
-	}
+	// outflows
 	k.SetTotalOutflowSum(zero)
-	store := k.PrefixStore(keyPrefixDenomOutflows)
-	iter := sdk.KVStorePrefixIterator(store, nil)
-	defer iter.Close()
-	for ; iter.Valid(); iter.Next() {
-		store.Set(iter.Key(), zeroBz)
-	}
+	ps := k.PrefixStore(keyPrefixDenomOutflows)
+	store.DeleteByPrefixStore(ps)
+
+	// inflows
+	k.SetTotalInflow(zero)
+	ps = k.PrefixStore(keyPrefixDenomInflows)
+	store.DeleteByPrefixStore(ps)
 	return nil
 }
 
@@ -118,17 +147,29 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 
 	o := k.GetTokenOutflows(denom)
 	o.Amount = o.Amount.Add(exchangePrice)
-	if !params.TokenQuota.IsZero() && o.Amount.GT(params.TokenQuota) {
-		return uibc.ErrQuotaExceeded
+	inToken := k.GetTokenInflow(denom)
+	if !params.TokenQuota.IsZero() {
+		if o.Amount.GT(params.TokenQuota) ||
+			o.Amount.GT(params.InflowOutflowQuotaTokenBase.Add((params.InflowOutflowQuotaRate.Mul(inToken.Amount)))) {
+			return uibc.ErrQuotaExceeded
+		}
 	}
 
+	// Allow outflow either of two conditions
+	// 1. Total Outflow Sum <= Total Outflow Quota
+	// or
+	// 2. Total Outflow Sum <= params.InflowOutflowQuotaBase + (params.InflowOutflowQuotaRate * sum of all inflows)
 	totalOutflowSum := k.GetTotalOutflow().Add(exchangePrice)
-	if !params.TotalQuota.IsZero() && totalOutflowSum.GT(params.TotalQuota) {
-		return uibc.ErrQuotaExceeded
+	ttlInSum := k.GetTotalInflow()
+	if !params.TotalQuota.IsZero() {
+		if totalOutflowSum.GT(params.TotalQuota) ||
+			totalOutflowSum.GT(params.InflowOutflowQuotaBase.Add(ttlInSum.Mul(params.InflowOutflowQuotaRate))) {
+			return uibc.ErrQuotaExceeded
+		}
 	}
-
 	k.SetTokenOutflow(o)
 	k.SetTotalOutflowSum(totalOutflowSum)
+
 	return nil
 }
 
@@ -188,9 +229,9 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 	return nil
 }
 
-// CheckIBCInflow validates if inflow token is registered in x/leverage
-func (k Keeper) CheckIBCInflow(ctx sdk.Context,
-	packet channeltypes.Packet, dataDenom string, isSourceChain bool,
+// RecordIBCInflow will save the inflow amount if token is registered otherwise it will skip
+func (k Keeper) RecordIBCInflow(ctx sdk.Context,
+	packet channeltypes.Packet, dataDenom, dataAmount string, isSourceChain bool,
 ) exported.Acknowledgement {
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
 	// check ibc_denom is exists in leverage token registry
@@ -201,14 +242,27 @@ func (k Keeper) CheckIBCInflow(ctx sdk.Context,
 		prefixedDenom := sourcePrefix + dataDenom
 		// construct the denomination trace from the full raw denomination and get the ibc_denom
 		ibcDenom := transfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
-		_, err := k.leverage.GetTokenSettings(ctx, ibcDenom)
+		ts, err := k.leverage.GetTokenSettings(ctx, ibcDenom)
 		if err != nil {
+			// skip if token is not a registered token on leverage
 			if ltypes.ErrNotRegisteredToken.Is(err) {
-				return channeltypes.NewErrorAcknowledgement(err)
+				return nil
 			}
-			// other leverage keeper error -> log the error  and allow the inflow transfer.
-			ctx.Logger().Error("IBC inflows: can't load token registry", "err", err)
 		}
+
+		// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE`
+		exchangeRate, err := k.oracle.Price(*k.ctx, strings.ToUpper(ts.SymbolDenom))
+		if err != nil {
+			return channeltypes.NewErrorAcknowledgement(err)
+		}
+		// calculate total exchange rate
+		powerReduction := ten.Power(uint64(ts.Exponent))
+		inflowInUSD := sdk.MustNewDecFromStr(dataAmount).Quo(powerReduction).Mul(exchangeRate)
+
+		tokenInflow := sdk.NewDecCoinFromDec(ibcDenom, inflowInUSD)
+		k.SetTokenInflow(tokenInflow)
+		totalInflowSum := k.GetTotalInflow()
+		k.SetTotalInflow(totalInflowSum.Add(inflowInUSD))
 	}
 
 	return nil

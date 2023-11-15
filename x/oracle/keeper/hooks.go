@@ -2,6 +2,7 @@ package keeper
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/umee-network/umee/v6/x/metoken"
 
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -26,6 +27,11 @@ func (k Keeper) Hooks() Hooks {
 func (h Hooks) AfterTokenRegistered(ctx sdk.Context, token leveragetypes.Token) {
 	if token.Blacklist {
 		// Blacklisted tokens should not trigger updates to the oracle accept list
+		return
+	}
+
+	// Metokens shouldn't be part of oracle accept list. Every index informs its price to oracle each endBlock.
+	if metoken.IsMeToken(token.BaseDenom) {
 		return
 	}
 

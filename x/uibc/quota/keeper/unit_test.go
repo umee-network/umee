@@ -35,7 +35,6 @@ func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
 func initKeeperSimpleMock(t *testing.T) TestKeeper {
 	lmock := NewLeverageKeeperMock(umee, atom)
 	omock := NewOracleMock(umee, sdk.NewDec(2))
-	omock.prices[atom] = sdk.NewDec(10)
 	return initKeeper(t, lmock, omock)
 }
 
@@ -54,6 +53,9 @@ func (k TestKeeper) checkOutflows(denom string, perToken, total int64) {
 }
 
 func (k TestKeeper) setQuotaParams(perToken, total int64) {
-	err := k.SetParams(uibc.Params{TokenQuota: sdk.NewDec(perToken), TotalQuota: sdk.NewDec(total)})
+	dp := uibc.DefaultParams()
+	dp.TokenQuota = sdk.NewDec(perToken)
+	dp.TotalQuota = sdk.NewDec(total)
+	err := k.SetParams(dp)
 	require.NoError(k.t, err)
 }

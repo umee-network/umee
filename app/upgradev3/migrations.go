@@ -9,9 +9,7 @@ var minCommissionRate = sdk.MustNewDecFromStr("0.05")
 // UpdateMinimumCommissionRateParam is update the minimum commission rate param of staking.
 func UpdateMinimumCommissionRateParam(ctx sdk.Context, keeper StakingKeeper) (sdk.Dec, error) {
 	params := keeper.GetParams(ctx)
-	// update the minCommissionRate param
 	params.MinCommissionRate = minCommissionRate
-
 	keeper.SetParams(ctx, params)
 
 	return minCommissionRate, nil
