@@ -32,6 +32,7 @@ import (
 
 	"github.com/umee-network/umee/v6/util"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
