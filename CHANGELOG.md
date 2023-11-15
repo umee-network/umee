@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Bug Fixes
+
+- [2315](https://github.com/umee-network/umee/pull/2215) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
+
 ### Improvements
 
 - [2299](https://github.com/umee-network/umee/pull/2299) Upgrade Cosmos SDK to v0.47.
