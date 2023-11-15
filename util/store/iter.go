@@ -84,17 +84,14 @@ type StrExtractor func([]byte) string
 // LoadAllDecCoins iterates over all records in the prefix store and unmarshals value into the dec coin list.
 func LoadAllDecCoins(iter db.Iterator, prefixLen int) (sdk.DecCoins, error) {
 	var coins sdk.DecCoins
-	cb := func(key, val []byte) error {
+	for ; iter.Valid(); iter.Next() {
+		key, val := iter.Key(), iter.Value()
 		o := sdk.DecCoin{Denom: string(key[prefixLen:])}
 		if err := o.Amount.Unmarshal(val); err != nil {
-			return err
+			return nil, err
 		}
 		coins = append(coins, o)
-		return nil
 	}
 
-	if err := iterate(iter, cb); err != nil {
-		return nil, err
-	}
 	return coins, nil
 }
