@@ -22,7 +22,16 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	walletUtokens := k.bankKeeper.SpendableCoins(ctx, addr).AmountOf(uDenom)
 	unbondedCollateral := k.unbondedCollateral(ctx, addr, uDenom)
 
+	maxWithdraw := coin.Zero(uDenom)
 	position, err := k.GetAccountPosition(ctx, addr, false)
+	if err == nil {
+		maxWithdrawValue, fullWithdrawal := position.MaxWithdraw(denom)
+		if fullWithdrawal {
+			maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
+		} else {
+			maxWithdraw, err = k.UTokenWithValue(ctx, uDenom, maxWithdrawValue, types.PriceModeLow)
+		}
+	}
 	if nonOracleError(err) {
 		// non-oracle errors fail the transaction (or query)
 		return sdk.Coin{}, sdk.Coin{}, err
@@ -31,30 +40,6 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 		// oracle errors cause max withdraw to only be wallet uTokens
 		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
-	}
-	maxWithdrawValue, err := position.MaxWithdraw(denom)
-	if err != nil {
-		return sdk.Coin{}, sdk.Coin{}, err
-	}
-
-	maxWithdraw := coin.Zero(uDenom)
-	if position.IsHealthy() && !position.HasCollateral(denom) {
-		// if after max withdraw, the position has no more collateral of the requested denom
-		// but is still under its borrow limit, then withdraw everything.
-		// this works with missing collateral price
-		maxWithdraw = k.GetCollateral(ctx, addr, uDenom)
-	} else {
-		// for partial withdrawal, must have collateral price to withdraw anything more than wallet uTokens
-		maxWithdraw, err = k.UTokenWithValue(ctx, uDenom, maxWithdrawValue, types.PriceModeLow)
-		if nonOracleError(err) {
-			// non-oracle errors fail the transaction (or query)
-			return sdk.Coin{}, sdk.Coin{}, err
-		}
-		if err != nil {
-			// oracle errors cause max withdraw to only be wallet uTokens
-			withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
-			return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
-		}
 	}
 
 	// find the minimum of max withdraw (from positions) or unbonded collateral (incentive module)
@@ -89,10 +74,7 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
 	}
 
-	maxBorrowValue, err := position.MaxBorrow(denom)
-	if err != nil {
-		return sdk.Coin{}, err
-	}
+	maxBorrowValue := position.MaxBorrow(denom)
 	maxBorrow, err := k.TokenWithValue(ctx, denom, maxBorrowValue, types.PriceModeHigh)
 	if nonOracleError(err) {
 		// non-oracle errors fail the transaction (or query)
@@ -187,4 +169,60 @@ func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	)
 
 	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
+}
+
+// ModuleMaxWithdraw calculates the maximum available amount of uToken to withdraw from the module given the amount of
+// user's spendable tokens. The calculation first finds the maximum amount of non-collateral uTokens the user can
+// withdraw up to the amount in their wallet, then determines how much collateral can be withdrawn in addition to that.
+// The returned value is the sum of the two values.
+func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (sdkmath.Int, error) {
+	denom := coin.StripUTokenDenom(spendableUTokens.Denom)
+
+	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	if spendableUTokens.Amount.GTE(moduleAvailableLiquidity) {
+		return moduleAvailableLiquidity, nil
+	}
+
+	// Get module collateral for the uDenom
+	totalCollateral := k.GetTotalCollateral(ctx, spendableUTokens.Denom)
+	totalTokenCollateral, err := k.ToTokens(ctx, sdk.NewCoins(totalCollateral))
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	// If after subtracting all the user_spendable_utokens from the module_available_liquidity,
+	// the result is higher than the total module_collateral,
+	// we can withdraw user_spendable_utokens + module_collateral.
+	if moduleAvailableLiquidity.Sub(spendableUTokens.Amount).GTE(totalTokenCollateral.AmountOf(denom)) {
+		return spendableUTokens.Amount.Add(totalTokenCollateral.AmountOf(denom)), nil
+	}
+
+	liquidity := k.AvailableLiquidity(ctx, denom)
+	token, err := k.GetTokenSettings(ctx, denom)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+	minCollateralLiquidity := token.MinCollateralLiquidity
+
+	// At this point we know that there is enough module_available_liquidity to withdraw user_spendable_utokens.
+	// Now we need to get the module_available_collateral after withdrawing user_spendable_utokens:
+	//
+	// min_collateral_liquidity = (module_liquidity - user_spendable_utokens - module_available_collateral)
+	//									/ (module_collateral  - module_available_collateral)
+	//
+	// module_available_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity
+	//									* module_collateral) / (1 - min_collateral_liquidity)
+	moduleAvailableCollateral := (sdk.NewDecFromInt(liquidity.Sub(spendableUTokens.Amount)).Sub(
+		minCollateralLiquidity.MulInt(
+			totalTokenCollateral.AmountOf(denom),
+		),
+	)).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
+
+	// Adding (user_spendable_utokens + module_available_collateral) we obtain the max uTokens the account can
+	// withdraw from the module.
+	return spendableUTokens.Amount.Add(moduleAvailableCollateral.TruncateInt()), nil
 }

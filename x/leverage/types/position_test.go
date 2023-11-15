@@ -1,6 +1,8 @@
 package types_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -8,6 +10,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
@@ -17,11 +20,10 @@ var (
 )
 
 func testToken(denom, cw, lt string) types.Token {
-	return types.Token{
-		BaseDenom:            denom,
-		CollateralWeight:     sdk.MustNewDecFromStr(cw),
-		LiquidationThreshold: sdk.MustNewDecFromStr(lt),
-	}
+	token := fixtures.Token(denom, denom, 6)
+	token.CollateralWeight = sdk.MustNewDecFromStr(cw)
+	token.LiquidationThreshold = sdk.MustNewDecFromStr(lt)
+	return token
 }
 
 func testPair(collateral, borrow, cw, lt string) types.SpecialAssetPair {
@@ -164,17 +166,17 @@ func TestBorrowLimit(t *testing.T) {
 		{
 			// multiple assets, one with zero weight, at borrow limit
 			sdk.NewDecCoins(
-				coin.Dec("AAAA", "100"),
-				coin.Dec("GGGG", "100"),
-				coin.Dec("IIII", "100"),
+				coin.Dec("AAAA", "100"), // $10, $15
+				coin.Dec("GGGG", "100"), // $70, $75
+				coin.Dec("IIII", "100"), // $0, $95
 			),
 			sdk.NewDecCoins(
-				coin.Dec("GGGG", "80"),
+				coin.Dec("GGGG", "80"), // uses $114.2 or $106.6 of collateral
 			),
-			// effectiveness of I collateral is reduced to due to G liquidation threshold, thus leading
-			// to a lower liquidation threshold than "simple AGI" test case above
+			// effectiveness of I collateral would be reduced to due to G liquidation threshold,
+			// but ordinary liquidation threshold is already more restrictive than borrow factor here
 			"80.00",
-			"165.00",
+			"185.00",
 			"AGI -> G at borrow limit",
 		},
 		{
@@ -185,12 +187,12 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("IIII", "100"),
 			),
 			sdk.NewDecCoins(
-				coin.Dec("GGGG", "165"),
+				coin.Dec("GGGG", "185"),
 			),
 			// significantly over borrow limit, so calculation subtracts value of unpaired borrows
-			// from total borrowed value to determine borrow limit
+			// from total borrowed value to determine borrow limit to arrive at the same result
 			"80.00",
-			"165.00",
+			"185.00",
 			"AGI -> G at liquidation threshold",
 		},
 		{
@@ -206,7 +208,7 @@ func TestBorrowLimit(t *testing.T) {
 			// significantly over borrow limit and liquidation threshold, but calculation still reaches
 			// the same values for them
 			"80.00",
-			"165.00",
+			"185.00",
 			"AGI -> G above liquidation threshold",
 		},
 		{
@@ -236,7 +238,7 @@ func TestBorrowLimit(t *testing.T) {
 			"F loop",
 		},
 		{
-			// single asset with unused special pair (borrowFactor reducing weight, minimumBorrowFactor active)
+			// single asset with unused special pair (borrowFactor LT, minimumBorrowFactor active)
 			sdk.NewDecCoins(
 				coin.Dec("FFFF", "100"),
 			),
@@ -244,11 +246,42 @@ func TestBorrowLimit(t *testing.T) {
 				coin.Dec("AAAA", "40"),
 			),
 			// 40 A consumes 80 F collateral (weight 0.5 due to MinimumBorrowFactor), leaving 20 F collateral unused.
-			// Total borrow limit and liquidation thresholds are 40 + [0.6 and 0.65] * 20
-			// the F <-> H special pair has no effect
-			"52.00",
-			"53.00",
+			// Total borrow limit and liquidation thresholds are 40 + 20 * 1.0 since borrow limit assumes unused
+			// collateral can be borrowed by the most efficient possible asset. Actual max borrow will be lower.
+			// Liquidation threshold is capped by borrow factor here, otherwise it would be $65.
+			// The F <-> H special pair has no effect
+			"60.00",
+			"60.00",
 			"F -> A",
+		},
+		{
+			// single asset with unused special pair (borrowFactor reducing weight, minimumBorrowFactor, at limit)
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "50"),
+			),
+			// 50 A consumes 100 F collateral (weight 0.5 due to MinimumBorrowFactor)
+			// the F <-> H special pair has no effect
+			"50.00",
+			"50.00",
+			"F -> A",
+		},
+		{
+			// single asset with unused special pair (borrowFactor, minimumBorrowFactor, over limits)
+			sdk.NewDecCoins(
+				coin.Dec("FFFF", "100"),
+			),
+			sdk.NewDecCoins(
+				coin.Dec("AAAA", "80"),
+			),
+			// 80 A would consume 160 F collateral (weight 0.5 due to MinimumBorrowFactor),
+			// The calculation works backwards from the 160/80 collateral usage to find the limit at 100 F
+			// the F <-> H special pair has no effect
+			"50.00",
+			"50.00",
+			"F -> A over limits",
 		},
 		{
 			// single asset with special pair in effect
@@ -291,7 +324,7 @@ func TestBorrowLimit(t *testing.T) {
 			),
 			// 60 H consumes all 100 F collateral (weight 0.6 due to Special Pair).
 			// A remaining 20H is unpaired borrowed value. Borrow limit equals value minus unpaired.
-			// Meanwhile, 80A consumes 100 F collateral (liquidation threshold 0.8 due to special pair).
+			// Meanwhile, 80 H consumes 100 F collateral (liquidation threshold 0.8 due to special pair).
 			// Liquidation threshold is exactly borrowed value.
 			"60.00",
 			"80.00",
@@ -549,23 +582,23 @@ func TestMaxBorrowNoSpecialPairs(t *testing.T) {
 			highMinimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
-		maxborrow, err := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
-		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
+		maxborrow := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
-			tc.msg+" max borrow\n\n"+borrowPosition.String(),
+			tc.msg+" max borrow",
 		)
 	}
 }
 
 func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 	type testCase struct {
-		collateral     sdk.DecCoins
-		borrow         sdk.DecCoins
-		maxBorrowDenom string
-		maxBorrow      string
-		msg            string
+		collateral          sdk.DecCoins
+		borrow              sdk.DecCoins
+		minimumBorrowFactor string
+		maxBorrowDenom      string
+		maxBorrow           string
+		msg                 string
 	}
 
 	// Reminder:
@@ -581,6 +614,7 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 				coin.Dec("BBBB", "100"),
 			),
 			sdk.NewDecCoins(),
+			"0.5",
 			// no special pair with A. collateral weight 0.2
 			"AAAA",
 			"20.00",
@@ -592,6 +626,7 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 				coin.Dec("BBBB", "100"),
 			),
 			sdk.NewDecCoins(),
+			"0.5",
 			// special pair with B at 0.3
 			"BBBB",
 			"30.00",
@@ -603,6 +638,7 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 				coin.Dec("BBBB", "100"),
 			),
 			sdk.NewDecCoins(),
+			"0.5",
 			// special pair with B at 0.3
 			"DDDD",
 			"30.00",
@@ -617,26 +653,26 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 			tc.collateral,
 			tc.borrow,
 			false,
-			highMinimumBorrowFactor,
+			sdk.MustNewDecFromStr(tc.minimumBorrowFactor),
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
-		maxborrow, err := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
-		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
+		maxborrow := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
 		assert.Equal(t,
 			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
-			tc.msg+" max borrow\n\n"+borrowPosition.String(),
+			tc.msg+" max borrow",
 		)
 	}
 }
 
 func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 	type testCase struct {
-		collateral       sdk.DecCoins
-		borrow           sdk.DecCoins
-		maxWithdrawDenom string
-		maxWithdraw      string
-		msg              string
+		collateral          sdk.DecCoins
+		borrow              sdk.DecCoins
+		minimumBorrowFactor sdk.Dec
+		maxWithdrawDenom    string
+		maxWithdraw         string
+		msg                 string
 	}
 
 	testCases := []testCase{
@@ -646,6 +682,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 				coin.Dec("AAAA", "100"),
 			),
 			sdk.NewDecCoins(),
+			highMinimumBorrowFactor,
 			// can withdraw all
 			"AAAA",
 			"100.00",
@@ -659,6 +696,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 			sdk.NewDecCoins(
 				coin.Dec("AAAA", "7"),
 			),
+			highMinimumBorrowFactor,
 			// collateral weight 0.1, should be able to withdraw 30
 			"AAAA",
 			"30.00",
@@ -672,6 +710,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 			sdk.NewDecCoins(
 				coin.Dec("IIII", "4"),
 			),
+			highMinimumBorrowFactor,
 			// collateral weight 0.1, should be able to withdraw 60 total
 			"AAAA",
 			"60.00",
@@ -688,6 +727,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 				coin.Dec("EEEE", "1"),
 				coin.Dec("IIII", "1"),
 			),
+			highMinimumBorrowFactor,
 			// collateral weight 0.1, should be able to withdraw 60 total
 			"AAAA",
 			"60.00",
@@ -700,6 +740,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 				coin.Dec("GGGG", "100"),
 			),
 			sdk.NewDecCoins(),
+			highMinimumBorrowFactor,
 			// can withdraw all
 			"GGGG",
 			"100.00",
@@ -713,6 +754,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 			sdk.NewDecCoins(
 				coin.Dec("AAAA", "7"),
 			),
+			highMinimumBorrowFactor,
 			// collateral weight 0.5 due to minimum borrow factor, should be able to withdraw 100 - 14
 			"GGGG",
 			"86.00",
@@ -726,6 +768,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 			sdk.NewDecCoins(
 				coin.Dec("GGGG", "7"),
 			),
+			highMinimumBorrowFactor,
 			// collateral weight 0.7, should be able to withdraw 100 - (7 / 0.7)
 			"GGGG",
 			"90.00",
@@ -742,6 +785,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 				coin.Dec("GGGG", "14"),
 				coin.Dec("IIII", "10"),
 			),
+			highMinimumBorrowFactor,
 			// collateral weight 0.5 for A,C,I and 0.7 for G means (30 / 0.5 + 14 / 0.7) collateral
 			// is reserved. Max withdraw is thus 100 - (60 + 20)
 			"GGGG",
@@ -757,19 +801,208 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 			tc.collateral,
 			tc.borrow,
 			false,
-			highMinimumBorrowFactor,
+			tc.minimumBorrowFactor,
 		)
 		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+borrowPosition.String())
-		maxWithdraw, err := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
-		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+borrowPosition.String())
+		maxWithdraw, full := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
 		assert.Equal(t,
+			// Ensure max withdraw is expected value
 			sdk.MustNewDecFromStr(tc.maxWithdraw).String(),
 			maxWithdraw.String(),
-			tc.msg+" max withdraw\n\n"+borrowPosition.String(),
+			tc.msg+" max withdraw",
 		)
+		assert.Equal(t,
+			full,
+			// If marked as a full withdrawal, ensure maxWithdraw equals starting collateral
+			tc.collateral.AmountOf(tc.maxWithdrawDenom).Equal(maxWithdraw),
+			tc.msg+" full boolean",
+		)
+		if maxWithdraw.IsPositive() {
+			// If max withdraw was > 0, simulate position after executing it and confirm various results
+			afterPosition, err := types.NewAccountPosition(
+				orderedTokens,
+				orderedPairs,
+				tc.collateral.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
+					tc.maxWithdrawDenom, sdk.MustNewDecFromStr(tc.maxWithdraw),
+				))),
+				tc.borrow,
+				false,
+				tc.minimumBorrowFactor,
+			)
+			assert.NilError(t, err, tc.msg+" simulate max withdraw\n\n"+afterPosition.String())
+			assert.Equal(t, afterPosition.IsHealthy(), true, tc.msg+" health after withdraw")
+			assert.Equal(t, afterPosition.BorrowedValue().String(), afterPosition.Limit().String(), tc.msg+" at limit")
+		}
 	}
 }
 
-// TODO: more cases for positions with multiple borrow and collateral types
-// TODO: max borrow and max withdraw tests with special pairs involved
-// TODO: clever zero cases, such as max withdraw something that does not exist and missing prices (zero amounts)
+func TestArbitraryCases(t *testing.T) {
+	type testCase struct {
+		collateral          sdk.DecCoins
+		borrow              sdk.DecCoins
+		minimumBorrowFactor sdk.Dec
+		queryDenom          string
+		msg                 string
+	}
+
+	// even includes a zero-weight token and an unregistered token
+	arbitraryDenoms := []string{"AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ"}
+	arbitraryCollateral := []string{"0", "30", "100"}
+	arbitraryBorrow := []string{"0", "5", "10"}
+	arbitraryMinimumFactor := []sdk.Dec{
+		sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.3"),
+		sdk.MustNewDecFromStr("0.5"), sdk.MustNewDecFromStr("0.7"),
+	}
+
+	testCases := []testCase{}
+
+	// This tests a LOT of cases. Upper limit on case quantity is ensured in body.
+	// Consider this to be similar to a simulation / QA test, but confined to account position logic.
+	for _, collateralA := range arbitraryCollateral {
+		for _, collateralB := range arbitraryCollateral {
+			for _, collateralC := range arbitraryCollateral {
+				for _, borrowA := range arbitraryBorrow {
+					for _, borrowB := range arbitraryBorrow {
+						for _, borrowC := range arbitraryBorrow {
+							for _, min := range arbitraryMinimumFactor {
+								for _, denom := range arbitraryDenoms {
+									collat := sdk.NewDecCoins(
+										coin.Dec("AAAA", collateralA),
+										coin.Dec("BBBB", collateralB),
+										coin.Dec("CCCC", collateralC),
+									)
+									collat2 := append(collat,
+										coin.Dec("GGGG", collateralA),
+										coin.Dec("HHHH", collateralB),
+										coin.Dec("IIII", collateralC),
+									)
+									borrow := sdk.NewDecCoins(
+										coin.Dec("AAAA", borrowA),
+										coin.Dec("BBBB", borrowB),
+										coin.Dec("CCCC", borrowC),
+									)
+									testCases = append(testCases, testCase{
+										collat,
+										borrow,
+										min,
+										denom,
+										fmt.Sprintf("\narbitrary position\n [%s]\n-> \n[%s]\n at %s, w: %s\n",
+											collat, borrow, min, denom),
+									}, testCase{
+										collat2,
+										borrow,
+										min,
+										denom,
+										fmt.Sprintf("\narbitrary position\n [%s]\n-> \n[%s]\n at %s, w: %s\n",
+											collat2, borrow, min, denom),
+									})
+									// Ensure we aren't making an excessive number of cases
+									if len(testCases) > 100000 {
+										// 29k cases runs in under 3 seconds locally, so
+										// this is a sane upper bound
+										t.Error("too many arbitrary cases")
+										t.FailNow()
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	for _, tc := range testCases {
+		initialPosition, err := types.NewAccountPosition(
+			orderedTokens,
+			orderedPairs,
+			tc.collateral,
+			tc.borrow,
+			false,
+			tc.minimumBorrowFactor,
+		)
+		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+initialPosition.String())
+		maxWithdraw, full := initialPosition.MaxWithdraw(tc.queryDenom)
+		if full {
+			assert.Equal(t,
+				full,
+				// If marked as a full withdrawal, ensure maxWithdraw equals starting collateral
+				tc.collateral.AmountOf(tc.queryDenom).Equal(maxWithdraw),
+				tc.msg+" full boolean",
+			)
+		}
+		if maxWithdraw.IsPositive() {
+			dust := sdk.SmallestDec().Mul(sdk.MustNewDecFromStr("10"))
+			// For partial maxwithdraw amounts which are not exact, reduce by a dust amount to prevent case failure.
+			// This is accurate because is mimics userMaxWithdraw rounding down from uTokenWithValue in practice.
+			if !full && !strings.HasSuffix(maxWithdraw.String(), "000") {
+				maxWithdraw = maxWithdraw.Sub(dust)
+			}
+			// If max withdraw was > 0, simulate position after executing it and confirm various results
+			afterPosition, err := types.NewAccountPosition(
+				orderedTokens,
+				orderedPairs,
+				tc.collateral.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
+					tc.queryDenom, maxWithdraw,
+				))),
+				tc.borrow,
+				false,
+				tc.minimumBorrowFactor,
+			)
+			assert.NilError(t, err, tc.msg+" simulate max withdraw\n\n"+afterPosition.String())
+			bv := afterPosition.BorrowedValue()
+			lim := afterPosition.Limit()
+
+			assert.Equal(t, afterPosition.IsHealthy(), true,
+				fmt.Sprintf("%s health after withdraw %s\n%s > %s", tc.msg, maxWithdraw, bv, lim),
+			)
+			if !full {
+				// positive, but not full, withdrawals must leave position exactly at its borrow limit
+				// (within an acceptable dust amount)
+				assert.Equal(t,
+					true,
+					bv.LTE(lim) && lim.Sub(bv).LTE(dust.Add(dust)),
+					fmt.Sprintf("%s limit %s: borrowed %s", tc.msg, lim, bv),
+				)
+			}
+		}
+		assert.NilError(t, err, tc.msg+" max withdraw\n\n"+initialPosition.String())
+
+		// Also simulate MaxBorrow if MaxWithdraw succeeded
+		maxBorrow := initialPosition.MaxBorrow(tc.queryDenom)
+
+		if maxBorrow.IsPositive() {
+			dust := sdk.SmallestDec().Mul(sdk.MustNewDecFromStr("10"))
+			// Reduce by a dust amount to prevent case failure due to rounding.
+			// This is accurate because is mimics userMaxBorrow rounding down from tokenWithValue in practice.
+			if !strings.HasSuffix(maxBorrow.String(), "000") {
+				maxBorrow = maxBorrow.Sub(dust)
+			}
+			// If max borrow was > 0, simulate position after executing it and confirm various results
+			afterPosition, err := types.NewAccountPosition(
+				orderedTokens,
+				orderedPairs,
+				tc.collateral,
+				tc.borrow.Add(sdk.NewDecCoinFromDec(
+					tc.queryDenom, maxBorrow,
+				)),
+				false,
+				tc.minimumBorrowFactor,
+			)
+			assert.NilError(t, err, tc.msg+" simulate max borrow\n\n"+afterPosition.String())
+			bv := afterPosition.BorrowedValue()
+			lim := afterPosition.Limit()
+
+			assert.Equal(t, afterPosition.IsHealthy(), true,
+				fmt.Sprintf("%s health after borrow %s\n%s > %s", tc.msg, maxBorrow, bv, lim),
+			)
+			// max borrows must leave position exactly at its borrow limit
+			// (within an acceptable dust amount)
+			assert.Equal(t,
+				true,
+				bv.LTE(lim) && lim.Sub(bv).LTE(dust.Mul(sdk.MustNewDecFromStr("100"))),
+				fmt.Sprintf("%s limit %s: borrowed %s", tc.msg, lim, bv),
+			)
+		}
+	}
+}

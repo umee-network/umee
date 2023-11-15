@@ -221,16 +221,15 @@ A user's borrow limit is the sum of the contributions from each collateral they 
 
 The full calculation of a user's borrow limit is as follows:
 
-1. Calculate the USD value of the user's collateral assets, using the _lower_ of either spot price or historic price for each asset. Collateral with missing prices is treated as zero-valued.
-2. Calculate the USD value of the user's borrowed assets, using the _higher_ of either spot price or historic price for each asset. Borrowed assets with missing prices cause any transaction which could increased borrowed value or decrease borrow limit to fail.
+1. Calculate the USD value of the user's collateral assets, using the _lower_ of either spot price or historic price for each asset. Collateral with missing prices is treated as zero-valued when attempting to borrow new assets or withdraw collateral, but will block any liquidations until collateral price returns.
+2. Calculate the USD value of the user's borrowed assets, using the _higher_ of either spot price or historic price for each asset. Borrowed assets with missing prices block any new borrowing or withdrawing of collateral, but are trated as zero valued during liquidations.
 3. Sort all `Special Asset Pairs` with assets matching parts of the user's position, starting with the highest `Special Collateral Weight`.
 4. For each special asser pair, match collateral tokens with borrowed tokens until one of the two runs out. The matched amounts satisfy `Collateral Value (A) * Special Collateral Weight (A,B) = Borrowed Value (B)` for each special asset pair `[A,B,CW]`. Subtract the collateral and borrowed tokens from the user's remaining position.
-5. Then sort the user's remaining collateral tokens by `Collateral Weight` and sort their remaining borrowed tokens by  the same.
-6. Starting with the highest collateral weight in each list, match collateral tokens with borrowed tokens until either collateral or borrowed tokens are exhausted. The matched amounts satisfy `Collateral Value (A) * Minimum Collateral Weight (A,B) = Borrowed Value (B)`
-7. If collateral tokens remain after the matching is complete, then the user has borrowed less than their borrow limit. `Borrow Limit = Borrowed Value + sum(collateral value * collateral weight)` summed over all remaining collateral tokens.
-8. If borrowed tokens remain after the matching is complete, then the user has borrowed more than their borrow limit. `Borrow Limit = Borrowed Value - sum(borrowed value)` summed over all remaining borrowed tokens.
+5. Then sum the `CollateralValue * CollateralWeight` for each unpaired collateral token, and subtract the sum of `BorrowedValue` for each unpaired borrow token. This value is the user's unused borrow limit (and is negative if they are over limit.)
+6. Also sum `CollateralValue` for each collateral token, and subtract the sum of `BorrowedValue / max(0.5,CollateralWeight)` for each borrowed token. This value is the user's unused collateral according to borrow factor (and can also be negative, in which case it should be multiplied by the weighted average collateral weight of the collateral to reflect actual usage).
+7. The user's current borrowed value, plus the lower of their unused borrow limit or unused collateral, is their borrow limit.
 
-Note that the borrow limit described in step 7 is the user's ideal borrow limit, their maximum borrowed value if all additional borrowed tokens had collateral weight equal to the weight of the remaining collateral.
+Note that the result of step 7 is the user's ideal borrow limit, their maximum borrowed value if all additional borrowed tokens had collateral weight greater than or equal to the weight of the remaining collateral, so as not to be limited by borrow factor.
 When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow limit will be lower.
 
 #### Example Borrow Limit Calculation
@@ -245,54 +244,18 @@ When borrowing tokens with inferior `Borrow Factor`, the user's actual borrow li
 > Collateral: $20 ATOM (0.6) + $20 UMEE (0.35)
 > Borrowed: $20 ATOM (0.6)
 >
-> Then collateral is matched with borrowed assets starting with the highest weights. First, $20 ATOM collateral is matched with $12 borrowed ATOM. Then, $20 UMEE collateral is matched with $7 borrowed ATOM.
-> Collateral is now exhausted, and $1 borrowed ATOM remains. Thus the user is $1 above their borrow limit. Their borrow limit must be $50 - $1 = $49.
+> Using collateral weights on the unpaired position, `$20 * 0.6 + $20 * 0.35 = $19`, and `$19 - $20 = $-1`, so the user's borrow limit is one dollar less than their current total borrowed value. `BorrowLimit = $49`.
+>
+> Using borrow factor on the unpaired position, `$20 + $20 - ($20 / 0.6) = $6.67`, which is greater than `$-1` so borrow factor does not cause any additional restrictions.
 
 #### Max Borrow
 
 This calculation must sometimes be done in reverse, for example when computing `MaxWithdraw` or `MaxBorrow` based on what change in the user's position would produce a `Borrow Limit` exactly equal to their borrowed value.
-The result of these calculations will vary depending on the asset requested, and where its collateral weight would be sorted in the lists mentioned in step 5, or if it is part of any special pairs.
+The result of these calculations will vary depending on the asset requested, or if it is part of any special pairs.
 
 #### Example Max Borrow Calculation
 
-> Assume the following collateral weights: AKT 0.3, BNB 0.4, CSMT 0.5, DOT 0.6, ETH 0.7, hereby abbreviated as denoms `A,B,C,D,E` and special asset pairs [AKT, BNB, 0.5] and [CSMT, DOT, 0.8] abbreviated as `[A,B,0.5]` and `[C,D,0.8]`. We will calculate the `MaxBorrow(B)` of a borrower with the following existing position:
->
-> Collateral: $20 A, $20 B, $50 C, $20 D, $30 E
-> Borrowed: $5 B, $45 D
->
-> The new borrow of B will appear here on the user's position (ordered by by special pairs first, then collateral weight from highest to lowest, as the algortihm would match assets):
->
-> | Collateral | Borrowed | Effective Collateral Weight |
-> | - | - | - |
-> | $50 C | $40 D | 0.8 |
-> | $10 A | $5 B | 0.5 <--- 1st insertion |
-> | $8.33 E | $5 D | min(0.7,0.6) |
-> | $41.66 E | - | <--- 2nd insertion |
-> | $20 D | - | <--- 3rd insertion |
-> | $50 C | - | <--- 4th insertion |
-> | $20 B | - | <--- 5th insertion |
-> | $10 A | - | <--- 1st deletion |
->
-> A new borrow of B will be matched with some collateral of A (row marked `1st Deletion`) and add an additional $10 A, $5 B to an existing special pair (`1st insertion`). Then, it will match with unused collateral (`2nd - 5th insertion`).
-> The resulting sorted position would be:
->
-> | Collateral | Borrowed | Effective Collateral Weight |
-> | - | - | - |
-> | $50 C | $40 D | 0.8 |
-> | $20 A | $10 B | 0.5 |
-> | $8.33 E | $5 D | min(0.7,0.6) |
-> | $41.66 E | $16.66 B | min(0.7,0.4) |
-> | $20 D | $8 B | min(0.6,0.4) |
-> | $50 C | $20 B | min(0.5,0.4) |
-> | $20 B | $8 B | min(0.4,0.4) |
->
-> Since the borrowed amount of B increased from $5 to ($10 + $16.66 + $8 + $20 + $8) = $62.66, we determine that `MaxBorrow(B) = $57.66` (and then convert from dollars back to tokens in queries.)
-> Note that the calculation first had to locate the collateral A which would be moved from its regular row to a special asset row (and would have done so even if that meant orphaning some collateral that was previousy matched with it or a borrow from a lower priority special pair with collateral A)
-> After such displaced assets are dealt with, including chain reactions, remaining borrowed B is inserted into the regular rows.
-> It cannot bump borrowed assets with a greater or equal collateral weight, but will displace lower-weighted borrows down to the bottom, then fill all emptry rows.
-
-The computation above for max borrow will behave differently for different tokens, given the presence or absence of special asset pairs and the collateral weight of the new borrow and the existing borrows being displaced.
-It will abort and return zero if all collateral is in use.
+See [EXAMPLES.md](./EXAMPLES.md) for an example of a max borrow calculation, including an edge case that would cause the module to return less than the true maximum after special pairs.
 
 #### Liquidation Threshold
 
