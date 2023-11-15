@@ -17,7 +17,6 @@ message GenesisState {
     (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
     (gogoproto.nullable)     = false
   ];
-
   // total_outflow_sum defines the total outflow sum of ibc-transfer in USD.
   string total_outflow_sum = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
@@ -30,5 +29,16 @@ message GenesisState {
     (gogoproto.stdtime)  = true,
     (gogoproto.jsontag)  = "quota_duration,omitempty",
     (gogoproto.moretags) = "yaml:\"quota_expires\""
+  ];
+  // inflows tracks IBC inflow transfers (in USD) for each denom during quota period.
+  repeated cosmos.base.v1beta1.DecCoin inflows = 5 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable)     = false
+  ];
+  // total_inflow_sum defines tracks total sum of IBC inflow transfers (in USD) during quota period.
+  string total_inflow_sum = 6 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
   ];
 }

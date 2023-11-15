@@ -47,20 +47,19 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return channeltypes.NewErrorAcknowledgement(transfertypes.ErrReceiveDisabled)
 	}
 
-	// TODO: re-enable inflow checks
-	// if params.IbcStatus.InflowQuotaEnabled() {
-	// 	var data transfertypes.FungibleTokenPacketData
-	// 	if err := transfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-	// 		ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
-	// 		return channeltypes.NewErrorAcknowledgement(ackErr)
-	// 	}
+	if params.IbcStatus.OutflowQuotaEnabled() {
+		var data transfertypes.FungibleTokenPacketData
+		if err := transfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+			ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
+			return channeltypes.NewErrorAcknowledgement(ackErr)
+		}
 
-	// 	isSourceChain := transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
-	// 	ackErr := im.kb.Keeper(&ctx).CheckIBCInflow(ctx, packet, data.Denom, isSourceChain)
-	// 	if ackErr != nil {
-	// 		return ackErr
-	// 	}
-	// }
+		isSourceChain := transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+		ackErr := im.kb.Keeper(&ctx).RecordIBCInflow(ctx, packet, data.Denom, data.Amount, isSourceChain)
+		if ackErr != nil {
+			return ackErr
+		}
+	}
 
 	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 }

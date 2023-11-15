@@ -169,8 +169,8 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// supply will be not be decreased because sending more than total quota from umee to gaia
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount)
 
-		// ✅ << BELOW TOKEN QUTOA 5$ but ATOM_QUOTA (5$)+ UMEE_QUOTA(90$) <= TOTAL QUOTA (120$) >>
-		// send $15 ATOM from umee to gaia
+		// ✅ << BELOW TOKEN QUTOA 5$ but ATOM_QUOTA (5$)+ UMEE_QUOTA(90$) <= TOTAL QUOTA (120$)
+		// send $5 ATOM from umee to gaia
 		sendAtom := mulCoin(atomQuota, "0.05")
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", sendAtom, false, "below both quotas")
 		// remaing supply decreased uatom on umee
