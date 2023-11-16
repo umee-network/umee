@@ -10,7 +10,6 @@
 [![License: Apache-2.0](https://img.shields.io/github/license/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/blob/main/LICENSE)
 [![GitHub Super-Linter](https://img.shields.io/github/actions/workflow/status/umee-network/umee/lint.yml?branch=main)](https://github.com/marketplace/actions/super-linter)
 
-
 > A Golang implementation of the Umee network, a decentralized universal capital
 > facility in the Cosmos ecosystem.
 
@@ -30,6 +29,7 @@ Umee will allow a multitude of decentralized debt products.
     - [libwasmvm](#libwasmvm)
   - [Active Networks](#active-networks)
 - [Build](#build)
+  - [Docker build](#docker-build)
   - [Recommended Database Backend](#recommended-database-backend)
   - [Swagger](#swagger)
   - [Cosmovisor](#cosmovisor)
