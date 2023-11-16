@@ -115,6 +115,11 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 			if err != nil {
 				return fromVM, err
 			}
+
+			// migration UMEE -> UX token metadata
+			app.BankKeeper.SetDenomMetaData(ctx, umeeTokenMetadata())
+
+			// Initialize a new Cosmos SDK 0.47 parameter: MinInitialDepositRatio
 			govParams := app.GovKeeper.GetParams(ctx)
 			govParams.MinInitialDepositRatio = sdk.NewDecWithPrec(1, 1).String()
 			err = app.GovKeeper.SetParams(ctx, govParams)
@@ -126,6 +131,7 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 			uIBCKeeper := app.UIbcQuotaKeeperB.Keeper(&ctx)
 			uIBCKeeper.MigrateTotalOutflowSum()
 			err = uIBCKeeper.SetParams(uibc.DefaultParams())
+
 			return fromVM, err
 		},
 	)
