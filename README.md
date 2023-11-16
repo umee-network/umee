@@ -30,7 +30,6 @@ Umee will allow a multitude of decentralized debt products.
     - [libwasmvm](#libwasmvm)
   - [Active Networks](#active-networks)
 - [Build](#build)
-  - [Docker build](#docker-build)
   - [Recommended Database Backend](#recommended-database-backend)
   - [Swagger](#swagger)
   - [Cosmovisor](#cosmovisor)
