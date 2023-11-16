@@ -44,13 +44,12 @@ func (BankModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 				Denom:    appparams.BondDenom,
 				Exponent: 0,
 				Aliases: []string{
-					"microumee",
+					"microumee", appparams.DefaultBaseDenom,
 				},
-			},
-			{
+			}, {
 				Denom:    appparams.DisplayDenom,
 				Exponent: 6,
-				Aliases:  []string{},
+				Aliases:  []string{appparams.LegacyDisplayDenom},
 			},
 		},
 	}

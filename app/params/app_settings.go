@@ -11,10 +11,16 @@ const (
 	Name = "umee"
 
 	// BondDenom defines the native staking token denomination.
+	// NOTE: it is used by IBC, and must not change to avoid token migration in all IBC chains.
 	BondDenom = "uumee"
 
+	DefaultBaseDenom = "uux"
+
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
-	DisplayDenom = "UMEE"
+	DisplayDenom = "UX"
+
+	// Old dispaly name. We renamed UMEE to UX.
+	LegacyDisplayDenom = "UMEE"
 
 	// DefaultGasLimit - set to the same value as cosmos-sdk flags.DefaultGasLimit
 	// this value is currently only used in tests.
