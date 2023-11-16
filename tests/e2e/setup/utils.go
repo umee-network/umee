@@ -50,7 +50,7 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error 
 	}
 	valOperAddr := sdk.ValAddress(valAddr)
 
-	asset := sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(appparams.BaseDenom, sdk.NewIntFromUint64(amount))
 	msg := stakingtypes.NewMsgDelegate(addr, valOperAddr, asset)
 	return s.BroadcastTxWithRetry(msg, s.AccountClient(testAccount))
 }

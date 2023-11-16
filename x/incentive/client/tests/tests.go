@@ -105,7 +105,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 			Name:    "query total bonded - specific denom",
 			Command: cli.QueryTotalBonded(),
 			Args: []string{
-				"u/" + appparams.BondDenom,
+				"u/" + appparams.BaseDenom,
 			},
 			Response: &incentive.QueryTotalBondedResponse{},
 			ExpectedResponse: &incentive.QueryTotalBondedResponse{
@@ -125,7 +125,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 			Name:    "query total unbonding - specific denom",
 			Command: cli.QueryTotalUnbonding(),
 			Args: []string{
-				"u/" + appparams.BondDenom,
+				"u/" + appparams.BaseDenom,
 			},
 			Response: &incentive.QueryTotalUnbondingResponse{},
 			ExpectedResponse: &incentive.QueryTotalUnbondingResponse{
@@ -136,11 +136,11 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 			Name:    "query current rates (zero)",
 			Command: cli.QueryCurrentRates(),
 			Args: []string{
-				"u/" + appparams.BondDenom,
+				"u/" + appparams.BaseDenom,
 			},
 			Response: &incentive.QueryCurrentRatesResponse{},
 			ExpectedResponse: &incentive.QueryCurrentRatesResponse{
-				ReferenceBond: sdk.NewInt64Coin("u/"+appparams.BondDenom, 1),
+				ReferenceBond: sdk.NewInt64Coin("u/"+appparams.BaseDenom, 1),
 				Rewards:       sdk.NewCoins(),
 			},
 			ErrMsg: "",
@@ -149,7 +149,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 			Name:    "query actual rates (zero)",
 			Command: cli.QueryActualRates(),
 			Args: []string{
-				"u/" + appparams.BondDenom,
+				"u/" + appparams.BaseDenom,
 			},
 			Response: &incentive.QueryActualRatesResponse{},
 			ExpectedResponse: &incentive.QueryActualRatesResponse{

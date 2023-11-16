@@ -12,7 +12,7 @@ import (
 
 func DefaultInflationParams() InflationParams {
 	return InflationParams{
-		MaxSupply:              coin.New(appparams.BondDenom, 21_000_000_000_000000), // 21 Billion Maximum
+		MaxSupply:              coin.New(appparams.BaseDenom, 21_000_000_000_000000), // 21 Billion Maximum
 		InflationCycle:         time.Hour * 24 * 365 * 2,                             // 2 years for default inflation cycle
 		InflationReductionRate: bpmath.FixedBP(2500),                                 // 25% reduction rate for inflation cyle
 	}

@@ -94,7 +94,7 @@ func (m *mockOracleKeeper) Reset() {
 func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	p, e, err := app.LeverageKeeper.TokenPrice(ctx, appparams.BondDenom, types.PriceModeSpot)
+	p, e, err := app.LeverageKeeper.TokenPrice(ctx, appparams.BaseDenom, types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.21"), p)
 	require.Equal(uint32(6), e)
@@ -121,7 +121,7 @@ func (s *IntegrationTestSuite) TestOracle_TokenPrice() {
 
 	// Now with historic = true
 
-	p, e, err = app.LeverageKeeper.TokenPrice(ctx, appparams.BondDenom, types.PriceModeHistoric)
+	p, e, err = app.LeverageKeeper.TokenPrice(ctx, appparams.BaseDenom, types.PriceModeHistoric)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("4.21"), p)
 	require.Equal(uint32(6), e)
@@ -179,7 +179,7 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
 	// 2.4 UMEE * $4.21
-	v, err := app.LeverageKeeper.TokenValue(ctx, coin.New(appparams.BondDenom, 2_400000), types.PriceModeSpot)
+	v, err := app.LeverageKeeper.TokenValue(ctx, coin.New(appparams.BaseDenom, 2_400000), types.PriceModeSpot)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
@@ -200,7 +200,7 @@ func (s *IntegrationTestSuite) TestOracle_TokenValue() {
 	// Now with historic = true
 
 	// 2.4 UMEE * $4.21
-	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(appparams.BondDenom, 2_400000), types.PriceModeHistoric)
+	v, err = app.LeverageKeeper.TokenValue(ctx, coin.New(appparams.BaseDenom, 2_400000), types.PriceModeHistoric)
 	require.NoError(err)
 	require.Equal(sdk.MustNewDecFromStr("10.104"), v)
 
@@ -253,7 +253,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err := app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			coin.New(appparams.BondDenom, 2_400000),
+			coin.New(appparams.BaseDenom, 2_400000),
 			coin.New(atomDenom, 4_700000),
 		),
 		types.PriceModeSpot,
@@ -265,7 +265,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			coin.New(appparams.BondDenom, 2_400000),
+			coin.New(appparams.BaseDenom, 2_400000),
 			coin.New(atomDenom, 4_700000),
 			coin.New("foo", 4_700000),
 		),
@@ -278,7 +278,7 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 	v, err = app.LeverageKeeper.TotalTokenValue(
 		ctx,
 		sdk.NewCoins(
-			coin.New(appparams.BondDenom, 2_400000),
+			coin.New(appparams.BaseDenom, 2_400000),
 			coin.New(atomDenom, 4_700000),
 			coin.New("foo", 4_700000),
 			coin.New(dumpDenom, 2_000000),
@@ -316,17 +316,17 @@ func (s *IntegrationTestSuite) TestOracle_TotalTokenValue() {
 func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	r, err := app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, atomDenom, types.PriceModeSpot)
+	r, err := app.LeverageKeeper.PriceRatio(ctx, appparams.BaseDenom, atomDenom, types.PriceModeSpot)
 	require.NoError(err)
 	// $4.21 / $39.38 at same exponent
 	require.Equal(sdk.MustNewDecFromStr("0.106907059421025901"), r)
 
-	r, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, daiDenom, types.PriceModeSpot)
+	r, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BaseDenom, daiDenom, types.PriceModeSpot)
 	require.NoError(err)
 	// $4.21 / $1.00 at a difference of 12 exponent
 	require.Equal(sdk.MustNewDecFromStr("4210000000000"), r)
 
-	r, err = app.LeverageKeeper.PriceRatio(ctx, daiDenom, appparams.BondDenom, types.PriceModeSpot)
+	r, err = app.LeverageKeeper.PriceRatio(ctx, daiDenom, appparams.BaseDenom, types.PriceModeSpot)
 	require.NoError(err)
 	// $1.00 / $4.21 at a difference of -12 exponent
 	require.Equal(sdk.MustNewDecFromStr("0.000000000000237530"), r)
@@ -334,7 +334,7 @@ func (s *IntegrationTestSuite) TestOracle_PriceRatio() {
 	_, err = app.LeverageKeeper.PriceRatio(ctx, "foo", atomDenom, types.PriceModeSpot)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 
-	_, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BondDenom, "foo", types.PriceModeSpot)
+	_, err = app.LeverageKeeper.PriceRatio(ctx, appparams.BaseDenom, "foo", types.PriceModeSpot)
 	require.ErrorIs(err, types.ErrNotRegisteredToken)
 
 	// current price of volatile assets

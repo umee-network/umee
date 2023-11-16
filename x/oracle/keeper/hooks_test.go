@@ -11,7 +11,7 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 
 	// require that an existing token does not change the accept list
 	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
-		BaseDenom:   appparams.BondDenom,
+		BaseDenom:   appparams.BaseDenom,
 		SymbolDenom: appparams.DisplayDenom,
 		Exponent:    6,
 	})

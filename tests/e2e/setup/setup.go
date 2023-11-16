@@ -215,7 +215,7 @@ func (s *E2ETestSuite) initGenesis() {
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
 	leverageGenState.Registry = append(leverageGenState.Registry,
-		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+		fixtures.Token(appparams.BaseDenom, appparams.DisplayDenom, 6),
 		fixtures.Token(ATOMBaseDenom, ATOM, uint32(ATOMExponent)),
 	)
 
@@ -248,7 +248,7 @@ func (s *E2ETestSuite) initGenesis() {
 
 	votingPeriod := 5 * time.Second
 	govGenState.Params.VotingPeriod = &votingPeriod
-	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BaseDenom, sdk.NewInt(100)))
 
 	bz, err = s.cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)

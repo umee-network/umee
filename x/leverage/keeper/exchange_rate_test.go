@@ -28,6 +28,6 @@ func (s *IntegrationTestSuite) TestDeriveExchangeRate() {
 	//    = 2.7
 
 	// get derived exchange rate
-	rate := app.LeverageKeeper.DeriveExchangeRate(ctx, appparams.BondDenom)
+	rate := app.LeverageKeeper.DeriveExchangeRate(ctx, appparams.BaseDenom)
 	require.Equal(sdk.MustNewDecFromStr("2.7"), rate)
 }

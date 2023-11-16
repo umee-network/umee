@@ -17,7 +17,7 @@ func TestKeyExchangeRate(t *testing.T) {
 	}{
 		{
 			// converts uumee to UUMEE
-			denom:       appparams.BondDenom,
+			denom:       appparams.BaseDenom,
 			expectedKey: []byte{0x1, 0x55, 0x55, 0x4d, 0x45, 0x45, 0x0},
 		},
 		{

@@ -50,7 +50,7 @@ func TestLiquidationParams(t *testing.T) {
 	k.SetInflationParams(dip)
 	p := k.InflationParams()
 	require.Equal(dip, p)
-	require.Equal(dip.MaxSupply.GetDenom(), appparams.BondDenom)
+	require.Equal(dip.MaxSupply.GetDenom(), appparams.BaseDenom)
 }
 
 func TestInflationCycleEnd(t *testing.T) {

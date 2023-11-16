@@ -53,7 +53,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 			Name: "query registered token",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
 				RegisteredTokens: &lvtypes.QueryRegisteredTokens{
-					BaseDenom: appparams.BondDenom,
+					BaseDenom: appparams.BaseDenom,
 				},
 			}),
 			ResponseCheck: func(data []byte) {
@@ -61,14 +61,14 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 				err := json.Unmarshal(data, &rr)
 				assert.NilError(s.T, err)
 				assert.Equal(s.T, true, len(rr.Registry) > 0)
-				assert.Equal(s.T, appparams.BondDenom, rr.Registry[0].BaseDenom)
+				assert.Equal(s.T, appparams.BaseDenom, rr.Registry[0].BaseDenom)
 			},
 		},
 		{
 			Name: "market summary",
 			CQ: s.genCustomQuery(wq.UmeeQuery{
 				MarketSummary: &lvtypes.QueryMarketSummary{
-					Denom: appparams.BondDenom,
+					Denom: appparams.BaseDenom,
 				},
 			}),
 			ResponseCheck: func(data []byte) {
@@ -95,7 +95,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 			CQ: s.genCustomQuery(wq.UmeeQuery{
 				MaxWithdraw: &lvtypes.QueryMaxWithdraw{
 					Address: addr.String(),
-					Denom:   appparams.BondDenom,
+					Denom:   appparams.BaseDenom,
 				},
 			}),
 			ResponseCheck: func(data []byte) {
@@ -111,7 +111,7 @@ func (s *IntegrationTestSuite) TestLeverageQueries() {
 			CQ: s.genCustomQuery(wq.UmeeQuery{
 				MaxBorrow: &lvtypes.QueryMaxBorrow{
 					Address: addr.String(),
-					Denom:   appparams.BondDenom,
+					Denom:   appparams.BaseDenom,
 				},
 			}),
 			ResponseCheck: func(data []byte) {
@@ -223,7 +223,7 @@ func (s *IntegrationTestSuite) TestStargateQueries() {
 			name: "stargate: leverage market summary",
 			sq: func() StargateQuery {
 				data := lvtypes.QueryMarketSummary{
-					Denom: appparams.BondDenom,
+					Denom: appparams.BaseDenom,
 				}
 				d, err := data.Marshal()
 				assert.NilError(s.T, err)
@@ -258,7 +258,7 @@ func (s *IntegrationTestSuite) TestStargateQueries() {
 
 func (s *IntegrationTestSuite) TestLeverageTxs() {
 	accAddr := sdk.MustAccAddressFromBech32(s.contractAddr)
-	err := s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, accAddr, sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100000))))
+	err := s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, accAddr, sdk.NewCoins(sdk.NewCoin(appparams.BaseDenom, sdk.NewInt(100000))))
 	assert.NilError(s.T, err)
 	txTests := []struct {
 		Name string
@@ -269,7 +269,7 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 			Msg: s.genCustomTx(wm.UmeeMsg{
 				Supply: &lvtypes.MsgSupply{
 					Supplier: s.contractAddr,
-					Asset:    sdk.NewCoin(appparams.BondDenom, sdk.NewInt(700)),
+					Asset:    sdk.NewCoin(appparams.BaseDenom, sdk.NewInt(700)),
 				},
 			}),
 		},

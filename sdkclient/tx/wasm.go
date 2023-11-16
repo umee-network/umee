@@ -24,7 +24,7 @@ func (c *Client) WasmDeployContract(contractPath string) (*sdk.TxResponse, error
 
 func (c *Client) WasmInitContract(storeCode uint64, initMsg []byte) (*sdk.TxResponse, error) {
 	fromIdx := 0
-	amount := sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1)))
+	amount := sdk.NewCoins(sdk.NewCoin(appparams.BaseDenom, sdk.NewInt(1)))
 	msg := types.MsgInstantiateContract{
 		Sender: c.KeyringAddress(fromIdx).String(),
 		CodeID: storeCode,

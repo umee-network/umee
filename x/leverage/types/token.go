@@ -139,7 +139,7 @@ func (t Token) BorrowFactor() sdk.Dec {
 
 func defaultUmeeToken() Token {
 	return Token{
-		BaseDenom:       appparams.BondDenom,
+		BaseDenom:       appparams.BaseDenom,
 		SymbolDenom:     "UMEE",
 		Exponent:        6,
 		EnableMsgSupply: true,
