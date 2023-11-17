@@ -14,7 +14,7 @@ const (
 	// NOTE: it is used by IBC, and must not change to avoid token migration in all IBC chains.
 	BondDenom = "uumee"
 
-	DefaultBaseDenom = "uux"
+	BaseExtraDenom = "uux"
 
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
 	DisplayDenom = "UX"
