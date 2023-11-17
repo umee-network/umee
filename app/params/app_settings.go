@@ -42,4 +42,9 @@ func init() {
 	if AccountAddressPrefix != Name {
 		log.Fatal("AccountAddresPrefix must equal Name")
 	}
+
+	sdk.SetCoinDenomRegex(func() string {
+		// allow "ux" token. Default regexp requires denom to be at least 3 characters long.
+		return `[a-zA-Z][a-zA-Z0-9/:._-]{1,127}`
+	})
 }
