@@ -8,8 +8,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/umee-network/umee?style=flat-square)](https://goreportcard.com/report/github.com/umee-network/umee)
 [![Version](https://img.shields.io/github/tag/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/releases/latest)
 [![License: Apache-2.0](https://img.shields.io/github/license/umee-network/umee.svg?style=flat-square)](https://github.com/umee-network/umee/blob/main/LICENSE)
-[![Lines Of Code](https://img.shields.io/tokei/lines/github/umee-network/umee?style=flat-square)](https://github.com/umee-network/umee)
-[![GitHub Super-Linter](https://img.shields.io/github/workflow/status/umee-network/umee/Lint?style=flat-square&label=Lint)](https://github.com/marketplace/actions/super-linter)
+[![GitHub Super-Linter](https://img.shields.io/github/actions/workflow/status/umee-network/umee/lint.yml?branch=main)](https://github.com/marketplace/actions/super-linter)
 
 > A Golang implementation of the Umee network, a decentralized universal capital
 > facility in the Cosmos ecosystem.
@@ -30,6 +29,7 @@ Umee will allow a multitude of decentralized debt products.
     - [libwasmvm](#libwasmvm)
   - [Active Networks](#active-networks)
 - [Build](#build)
+  - [Docker build](#docker-build)
   - [Recommended Database Backend](#recommended-database-backend)
   - [Swagger](#swagger)
   - [Cosmovisor](#cosmovisor)
