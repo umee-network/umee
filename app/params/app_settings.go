@@ -8,15 +8,13 @@ import (
 
 const (
 	// Name defines the application name of the Umee network.
-	// NOTE: do not change this.
 	Name = "umee"
 
-	// IBC denom is the base denom for IBC and Metadata.Base.
+	// BondDenom defines the native staking token denomination.
 	// NOTE: it is used by IBC, and must not change to avoid token migration in all IBC chains.
-	IBCBaseDenom = "uumee"
+	BondDenom = "uumee"
 
-	// BaseDenom defines the native staking an d fee token denom.
-	BaseDenom = "uux"
+	DefaultBaseDenom = "uux"
 
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
 	DisplayDenom = "UX"
@@ -32,7 +30,7 @@ const (
 // ProtocolMinGasPrice is a consensus controlled gas price. Each validator must set his
 // `minimum-gas-prices` in app.toml config to value above ProtocolMinGasPrice.
 // Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
-var ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BaseDenom, sdk.MustNewDecFromStr("0.00"))
+var ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
 
 func init() {
 	// XXX: If other upstream or external application's depend on any of Umee's

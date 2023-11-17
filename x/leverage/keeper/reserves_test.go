@@ -15,7 +15,7 @@ func (s *IntegrationTestSuite) TestSetReserves() {
 	// artificially reserve 200 umee
 	s.setReserves(coin.New(umeeDenom, 200_000000))
 	// get new reserves
-	reserves = app.LeverageKeeper.GetReserves(ctx, appparams.BaseDenom)
+	reserves = app.LeverageKeeper.GetReserves(ctx, appparams.BondDenom)
 	require.Equal(coin.New(umeeDenom, 200_000000), reserves)
 }
 

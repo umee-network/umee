@@ -29,7 +29,7 @@ import (
 
 const (
 	displayDenom string = appparams.DisplayDenom
-	bondDenom    string = appparams.BaseDenom
+	bondDenom    string = appparams.BondDenom
 	initialPower        = int64(10000000000)
 )
 
@@ -48,7 +48,7 @@ var (
 	valAddr2   = sdk.ValAddress(pubKey2.Address())
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BaseDenom, initTokens))
+	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
 )
 
 type IntegrationTestSuite struct {

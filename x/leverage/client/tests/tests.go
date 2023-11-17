@@ -91,7 +91,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
-					fixtures.Token(appparams.BaseDenom, appparams.DisplayDenom, 6),
+					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
 			},
 			ErrMsg: "",
@@ -109,11 +109,11 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		{
 			Name:     "query registered token info by base_denom",
 			Command:  cli.QueryRegisteredTokens(),
-			Args:     []string{appparams.BaseDenom},
+			Args:     []string{appparams.BondDenom},
 			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
-					fixtures.Token(appparams.BaseDenom, appparams.DisplayDenom, 6),
+					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
 				},
 			},
 			ErrMsg: "",
@@ -122,7 +122,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Name:    "query market summary - zero supply",
 			Command: cli.QueryMarketSummary(),
 			Args: []string{
-				appparams.BaseDenom,
+				appparams.BondDenom,
 			},
 			Response: &types.QueryMarketSummaryResponse{},
 			ExpectedResponse: &types.QueryMarketSummaryResponse{
@@ -306,13 +306,13 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(appparams.BaseDenom, 1001),
+					sdk.NewInt64Coin(appparams.BondDenom, 1001),
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(coin.ToUTokenDenom(appparams.BaseDenom), 1000),
+					sdk.NewInt64Coin(coin.ToUTokenDenom(appparams.BondDenom), 1000),
 				),
 				Borrowed: sdk.NewCoins(
-					sdk.NewInt64Coin(appparams.BaseDenom, 251),
+					sdk.NewInt64Coin(appparams.BondDenom, 251),
 				),
 			},
 			ErrMsg: "",
@@ -383,10 +383,10 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryAccountBalancesResponse{},
 			ExpectedResponse: &types.QueryAccountBalancesResponse{
 				Supplied: sdk.NewCoins(
-					sdk.NewInt64Coin(appparams.BaseDenom, 201), // slightly increased uToken exchange rate
+					sdk.NewInt64Coin(appparams.BondDenom, 201), // slightly increased uToken exchange rate
 				),
 				Collateral: sdk.NewCoins(
-					sdk.NewInt64Coin(coin.ToUTokenDenom(appparams.BaseDenom), 100),
+					sdk.NewInt64Coin(coin.ToUTokenDenom(appparams.BondDenom), 100),
 				),
 				Borrowed: sdk.NewCoins(),
 			},

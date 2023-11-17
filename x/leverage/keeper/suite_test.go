@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	umeeDenom   = appparams.BaseDenom
+	umeeDenom   = appparams.BondDenom
 	atomDenom   = fixtures.AtomDenom
 	daiDenom    = fixtures.DaiDenom
 	pumpDenom   = "upump"
@@ -80,7 +80,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 
 	// override DefaultGenesis token registry with fixtures.Token
 	leverage.InitGenesis(ctx, app.LeverageKeeper, *types.DefaultGenesis())
-	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BaseDenom, "UMEE", 6)))
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
 	daiToken := newToken(daiDenom, "DAI", 18) // high exponent token will need bigger maxSupply for testing
 	daiToken.MaxSupply = daiToken.MaxSupply.Mul(sdk.NewInt(1_000_000_000_000))

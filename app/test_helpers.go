@@ -81,7 +81,7 @@ func Setup(t *testing.T) *UmeeApp {
 	acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
 	balance := banktypes.Balance{
 		Address: acc.GetAddress().String(),
-		Coins:   sdk.NewCoins(sdk.NewCoin(params.BaseDenom, sdk.NewInt(10000000000000000))),
+		Coins:   sdk.NewCoins(sdk.NewCoin(params.BondDenom, sdk.NewInt(10000000000000000))),
 	}
 
 	app := SetupWithGenesisValSet(t, valSet, []authtypes.GenesisAccount{acc}, balance)
@@ -177,7 +177,7 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 		defaultStParams.MaxValidators,
 		defaultStParams.MaxEntries,
 		defaultStParams.HistoricalEntries,
-		params.BaseDenom,
+		params.BondDenom,
 		defaultStParams.MinCommissionRate,
 	)
 	// set validators and delegations
@@ -192,13 +192,13 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 
 	for range delegations {
 		// add delegated tokens to total supply
-		totalSupply = totalSupply.Add(sdk.NewCoin(params.BaseDenom, bondAmt))
+		totalSupply = totalSupply.Add(sdk.NewCoin(params.BondDenom, bondAmt))
 	}
 
 	// add bonded amount to bonded pool module account
 	balances = append(balances, banktypes.Balance{
 		Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-		Coins:   sdk.Coins{sdk.NewCoin(params.BaseDenom, bondAmt)},
+		Coins:   sdk.Coins{sdk.NewCoin(params.BondDenom, bondAmt)},
 	})
 
 	// update total supply
@@ -250,7 +250,7 @@ func IntegrationTestNetworkConfig() network.Config {
 		panic(err)
 	}
 	leverageGenState.Registry = []leveragetypes.Token{
-		fixtures.Token(params.BaseDenom, params.DisplayDenom, 6),
+		fixtures.Token(params.BondDenom, params.DisplayDenom, 6),
 	}
 
 	bz, err := cdc.MarshalJSON(&leverageGenState)
@@ -307,7 +307,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.LegacyAmino = encCfg.Amino
 	cfg.InterfaceRegistry = encCfg.InterfaceRegistry
 	cfg.GenesisState = appGenState
-	cfg.BondDenom = params.BaseDenom
+	cfg.BondDenom = params.BondDenom
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
 
 	return cfg

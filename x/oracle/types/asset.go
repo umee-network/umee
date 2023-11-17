@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	UmeeDenom       = appparams.BaseDenom
+	UmeeDenom       = appparams.BondDenom
 	UmeeSymbol      = "umee"
 	UmeeExponent    = uint32(6)
 	USDDenom        = "USD"

@@ -13,7 +13,7 @@ import (
 
 func TestAddressFromKey(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
-	key := types.KeyAdjustedBorrow(address, appparams.BaseDenom)
+	key := types.KeyAdjustedBorrow(address, appparams.BondDenom)
 	expectedAddress := types.AddressFromKey(key, types.KeyPrefixAdjustedBorrow)
 
 	assert.DeepEqual(t, address, expectedAddress)
@@ -27,7 +27,7 @@ func TestAddressFromKey(t *testing.T) {
 
 func TestDenomFromKeyWithAddress(t *testing.T) {
 	address := sdk.AccAddress([]byte("addr________________"))
-	denom := appparams.BaseDenom
+	denom := appparams.BondDenom
 	key := types.KeyAdjustedBorrow(address, denom)
 	expectedDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
 
@@ -41,7 +41,7 @@ func TestDenomFromKeyWithAddress(t *testing.T) {
 }
 
 func TestDenomFromKey(t *testing.T) {
-	denom := appparams.BaseDenom
+	denom := appparams.BondDenom
 	key := types.KeyReserveAmount(denom)
 	expectedDenom := types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 

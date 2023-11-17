@@ -34,16 +34,16 @@ type BankModule struct {
 func umeeTokenMetadata() banktypes.Metadata {
 	return banktypes.Metadata{
 		Description: "The native staking token of the Umee network.",
-		Base:        appparams.IBCBaseDenom, // NOTE: do not change
+		Base:        appparams.BondDenom, // NOTE: must not change
 		Name:        appparams.DisplayDenom,
 		Display:     appparams.DisplayDenom,
 		Symbol:      appparams.DisplayDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
-				Denom:    appparams.BaseDenom,
+				Denom:    appparams.BondDenom,
 				Exponent: 0,
 				Aliases: []string{
-					"microumee", appparams.BaseDenom,
+					"microumee", appparams.DefaultBaseDenom,
 				},
 			}, {
 				Denom:    appparams.DisplayDenom,
@@ -72,7 +72,7 @@ type StakingModule struct {
 // DefaultGenesis returns custom Umee x/staking module genesis state.
 func (StakingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	p := stakingtypes.DefaultParams()
-	p.BondDenom = appparams.BaseDenom
+	p.BondDenom = appparams.BondDenom
 	return cdc.MustMarshalJSON(&stakingtypes.GenesisState{
 		Params: p,
 	})
@@ -87,7 +87,7 @@ type CrisisModule struct {
 // DefaultGenesis returns custom Umee x/crisis module genesis state.
 func (CrisisModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&crisistypes.GenesisState{
-		ConstantFee: sdk.NewCoin(appparams.BaseDenom, sdk.NewInt(1000)),
+		ConstantFee: sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1000)),
 	})
 }
 
@@ -100,7 +100,7 @@ type MintModule struct {
 // DefaultGenesis returns custom Umee x/mint module genesis state.
 func (MintModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	genState := minttypes.DefaultGenesisState()
-	genState.Params.MintDenom = appparams.BaseDenom
+	genState.Params.MintDenom = appparams.BondDenom
 
 	return cdc.MustMarshalJSON(genState)
 }
@@ -113,7 +113,7 @@ type GovModule struct {
 
 // DefaultGenesis returns custom Umee x/gov module genesis state.
 func (GovModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	minDeposit := sdk.NewCoins(sdk.NewCoin(appparams.BaseDenom, govv1.DefaultMinDepositTokens))
+	minDeposit := sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, govv1.DefaultMinDepositTokens))
 	genState := govv1.DefaultGenesisState()
 	genState.Params.MinDeposit = minDeposit
 

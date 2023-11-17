@@ -53,7 +53,7 @@ var (
 	valAddr2   = sdk.ValAddress(pubKey2.Address())
 
 	initTokens = sdk.TokensFromConsensusPower(initialPower, sdk.DefaultPowerReduction)
-	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BaseDenom, initTokens))
+	initCoins  = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, initTokens))
 )
 
 type cw20InitMsg struct {
@@ -270,7 +270,7 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, init inte
 		Sender: sender.String(),
 		CodeID: s.codeID,
 		Label:  cw20Label,
-		Funds:  sdk.Coins{sdk.NewCoin(appparams.BaseDenom, sdk.NewIntFromUint64(10))},
+		Funds:  sdk.Coins{sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(10))},
 		Msg:    initBz,
 		Admin:  sender.String(),
 	}

@@ -30,7 +30,7 @@ func (s *IntegrationTestSuite) TestQuerier_RegisteredTokens() {
 		{
 			"valid: get the registered token info by base_denom",
 			"",
-			types.QueryRegisteredTokens{BaseDenom: appparams.BaseDenom},
+			types.QueryRegisteredTokens{BaseDenom: appparams.BondDenom},
 			1,
 		},
 		{

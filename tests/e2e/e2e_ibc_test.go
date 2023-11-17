@@ -135,7 +135,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.Require().NoError(err)
 		s.Require().True(umeePrice.GT(sdk.MustNewDecFromStr("0.001")),
 			"umee price should be non zero, and expecting higher than 0.001, got: %s", umeePrice)
-		umeeQuota := sdk.NewCoin(appparams.BaseDenom,
+		umeeQuota := sdk.NewCoin(appparams.BondDenom,
 			sdk.NewDecFromInt(tokenQuota).Quo(umeePrice).Mul(powerReduction).RoundInt(),
 		)
 
@@ -159,7 +159,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		sendUmee := mulCoin(umeeQuota, "0.9")
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", sendUmee, false, fmt.Sprintf(
 			"sending %s (less than token quota) ", sendUmee.String()))
-		s.checkOutflows(umeeAPIEndpoint, appparams.BaseDenom, true, sdk.NewDecFromInt(sendUmee.Amount), appparams.Name)
+		s.checkOutflows(umeeAPIEndpoint, appparams.BondDenom, true, sdk.NewDecFromInt(sendUmee.Amount), appparams.Name)
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sendUmee.Amount)
 
 		// << BELOW TOKEN QUOTA 40$ but ATOM_QUOTA (40$)+ UMEE_QUOTA(90$) >= TOTAL QUOTA (120$) >>
@@ -194,12 +194,12 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.T().Logf("waiting until quota reset, basically it will take around 300 seconds to do quota reset")
 		s.Require().Eventually(
 			func() bool {
-				amount, err := s.QueryOutflows(umeeAPIEndpoint, appparams.BaseDenom)
+				amount, err := s.QueryOutflows(umeeAPIEndpoint, appparams.BondDenom)
 				if err != nil {
 					return false
 				}
 				if amount.IsZero() {
-					s.T().Logf("quota is reset : %s is 0", appparams.BaseDenom)
+					s.T().Logf("quota is reset : %s is 0", appparams.BondDenom)
 					return true
 				}
 				return false
@@ -239,7 +239,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// Check the outflows
 		s.Require().Eventually(
 			func() bool {
-				a, err := s.QueryOutflows(umeeAPIEndpoint, appparams.BaseDenom)
+				a, err := s.QueryOutflows(umeeAPIEndpoint, appparams.BondDenom)
 				if err != nil {
 					return false
 				}

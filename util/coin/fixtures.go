@@ -6,7 +6,7 @@ import (
 	appparams "github.com/umee-network/umee/v6/app/params"
 )
 
-const umee = appparams.BaseDenom
+const umee = appparams.BondDenom
 
 // common coins used in tests
 var (
@@ -44,7 +44,7 @@ func UmeeCoins(amount int64) sdk.Coins {
 
 // UmeeDec creates a Umee (uumee) DecCoin with given amount
 func UmeeDec(amount string) sdk.DecCoin {
-	return Dec(appparams.BaseDenom, amount)
+	return Dec(appparams.BondDenom, amount)
 }
 
 // Utoken creates a uToken Coin.

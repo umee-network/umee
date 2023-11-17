@@ -25,7 +25,7 @@ import (
 
 const (
 	displayDenom string = appparams.DisplayDenom
-	bondDenom    string = appparams.BaseDenom
+	bondDenom    string = appparams.BondDenom
 )
 
 type IntegrationTestSuite struct {

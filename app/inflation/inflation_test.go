@@ -81,7 +81,7 @@ func TestInflationRate(t *testing.T) {
 	mintParams := minttypes.DefaultParams()
 	mockMinter := minttypes.NewMinter(sdk.MustNewDecFromStr("0.15"), sdk.NewDec(0))
 	mockInflationParams := ugov.InflationParams{
-		MaxSupply:              coin.New(appparams.BaseDenom, 100000000),
+		MaxSupply:              coin.New(appparams.BondDenom, 100000000),
 		InflationCycle:         time.Hour * 1,
 		InflationReductionRate: bpmath.FixedBP(2500),
 	}
@@ -187,7 +187,7 @@ func TestInflationRate(t *testing.T) {
 				return mintParams
 			},
 			inflationParams: func(ip ugov.InflationParams) ugov.InflationParams {
-				ip.MaxSupply = coin.New(appparams.BaseDenom, 1149885)
+				ip.MaxSupply = coin.New(appparams.BondDenom, 1149885)
 				return ip
 			},
 			bondedRatio: sdk.NewDecWithPrec(20, 2),

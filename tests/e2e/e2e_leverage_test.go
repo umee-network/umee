@@ -88,7 +88,7 @@ func (s *E2ETest) leverageLeveragedLiquidate(accountIndex, targetIndex int, repa
 }
 
 func (s *E2ETest) TestLeverageBasics() {
-	umeeNoMedians := fixtures.Token(appparams.BaseDenom, "UMEE", 6)
+	umeeNoMedians := fixtures.Token(appparams.BondDenom, "UMEE", 6)
 	umeeNoMedians.HistoricMedians = 0
 	updateTokens := []leveragetypes.Token{
 		umeeNoMedians,
@@ -107,33 +107,33 @@ func (s *E2ETest) TestLeverageBasics() {
 
 	s.Run(
 		"initial leverage supply", func() {
-			s.leverageSupply(0, appparams.BaseDenom, 100_000_000)
+			s.leverageSupply(0, appparams.BondDenom, 100_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage withdraw", func() {
-			s.leverageWithdraw(0, "u/"+appparams.BaseDenom, 10_000_000)
+			s.leverageWithdraw(0, "u/"+appparams.BondDenom, 10_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage collateralize", func() {
-			s.leverageCollateralize(0, "u/"+appparams.BaseDenom, 80_000_000)
+			s.leverageCollateralize(0, "u/"+appparams.BondDenom, 80_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage borrow", func() {
-			s.leverageBorrow(0, appparams.BaseDenom, 12_000_000)
+			s.leverageBorrow(0, appparams.BondDenom, 12_000_000)
 		},
 	)
 	s.Run(
 		"initial leverage repay", func() {
-			s.leverageRepay(0, appparams.BaseDenom, 2_000_000)
+			s.leverageRepay(0, appparams.BondDenom, 2_000_000)
 		},
 	)
 	s.Run(
 		"too high leverage borrow", func() {
 			asset := sdk.NewCoin(
-				appparams.BaseDenom,
+				appparams.BondDenom,
 				sdk.NewIntFromUint64(30_000_000),
 			)
 			s.mustFailTx(
@@ -148,8 +148,8 @@ func (s *E2ETest) TestLeverageBasics() {
 			pairs := []leveragetypes.SpecialAssetPair{
 				{
 					// a set allowing UMEE to borrow more of itself
-					Borrow:               appparams.BaseDenom,
-					Collateral:           appparams.BaseDenom,
+					Borrow:               appparams.BondDenom,
+					Collateral:           appparams.BondDenom,
 					CollateralWeight:     sdk.MustNewDecFromStr("0.75"),
 					LiquidationThreshold: sdk.MustNewDecFromStr("0.8"),
 				},

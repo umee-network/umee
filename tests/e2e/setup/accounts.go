@@ -21,7 +21,7 @@ type testAccount struct {
 var (
 	// Initial coins to give to each validator
 	valCoins = sdk.NewCoins(
-		coin.New(appparams.BaseDenom, 1_000000_000000),
+		coin.New(appparams.BondDenom, 1_000000_000000),
 	)
 
 	// Number of test accounts to initialize in chain.TestAccounts
@@ -29,13 +29,13 @@ var (
 
 	// Initial coins to give to each test account.
 	testAccountCoins = sdk.NewCoins(
-		coin.New(appparams.BaseDenom, 100000_000000),
+		coin.New(appparams.BondDenom, 100000_000000),
 		coin.New(PhotonDenom, 100000_000000),
 		coin.New(mocks.USDTBaseDenom, 100000_000000),
 	)
 
 	// initial validator stakes (before delegation from test account 0)
-	stakeAmountCoin = coin.New(appparams.BaseDenom, 1_000000)
+	stakeAmountCoin = coin.New(appparams.BondDenom, 1_000000)
 )
 
 // create a test account, which is an address with a mnemonic stored only in memory, to be used with the network.
