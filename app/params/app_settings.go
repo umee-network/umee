@@ -19,7 +19,7 @@ const (
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
 	DisplayDenom = "UX"
 
-	// Old dispaly name. We renamed UMEE to UX.
+	// Old display name. We renamed UMEE to UX.
 	LegacyDisplayDenom = "UMEE"
 
 	// DefaultGasLimit - set to the same value as cosmos-sdk flags.DefaultGasLimit
