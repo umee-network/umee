@@ -2524,6 +2524,21 @@ paths:
                     title: >-
                       quota_duration defines quota expires for each ibc-transfer
                       denom in seconds
+                  inflow_outflow_quota_base:
+                    type: string
+                    title: >-
+                      inflow_outflow_quota_base defines the inflow outflow quota
+                      base of ibc-transfer in USD
+                  inflow_outflow_quota_rate:
+                    type: string
+                    title: >-
+                      inflow_outflow_quota_rate defines the rate of total
+                      inflows
+                  inflow_outflow_quota_token_base:
+                    type: string
+                    title: >-
+                      inflow_outflow_quota_token_base defines the inflow outflow
+                      quota base for token
                 title: Params of x/uibc module
             description: >-
               QueryParamsResponse defines the response structure for the Params
@@ -6473,6 +6488,19 @@ definitions:
         title: >-
           quota_duration defines quota expires for each ibc-transfer denom in
           seconds
+      inflow_outflow_quota_base:
+        type: string
+        title: >-
+          inflow_outflow_quota_base defines the inflow outflow quota base of
+          ibc-transfer in USD
+      inflow_outflow_quota_rate:
+        type: string
+        title: inflow_outflow_quota_rate defines the rate of total inflows
+      inflow_outflow_quota_token_base:
+        type: string
+        title: >-
+          inflow_outflow_quota_token_base defines the inflow outflow quota base
+          for token
     title: Params of x/uibc module
   umee.uibc.v1.QueryAllOutflowsResponse:
     type: object
@@ -6531,6 +6559,19 @@ definitions:
             title: >-
               quota_duration defines quota expires for each ibc-transfer denom
               in seconds
+          inflow_outflow_quota_base:
+            type: string
+            title: >-
+              inflow_outflow_quota_base defines the inflow outflow quota base of
+              ibc-transfer in USD
+          inflow_outflow_quota_rate:
+            type: string
+            title: inflow_outflow_quota_rate defines the rate of total inflows
+          inflow_outflow_quota_token_base:
+            type: string
+            title: >-
+              inflow_outflow_quota_token_base defines the inflow outflow quota
+              base for token
         title: Params of x/uibc module
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
