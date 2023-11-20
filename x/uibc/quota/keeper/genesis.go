@@ -35,7 +35,7 @@ func (kb Builder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 	return &uibc.GenesisState{
 		Params:       k.GetParams(),
 		Outflows:     outflows,
-		OutflowSum:   k.GetTotalOutflow(),
+		OutflowSum:   k.GetOutflowSum(),
 		QuotaExpires: *quotaExpires,
 		Inflows:      inflows,
 		InflowSum:    k.GetInflowSum(),

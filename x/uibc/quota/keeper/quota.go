@@ -46,8 +46,8 @@ func (k Keeper) SetOutflowSum(amount sdk.Dec) {
 	util.Panic(err)
 }
 
-// GetTotalOutflow returns the total outflow of ibc-transfer amount.
-func (k Keeper) GetTotalOutflow() sdk.Dec {
+// GetOutflowSum returns the total outflow of ibc-transfer amount.
+func (k Keeper) GetOutflowSum() sdk.Dec {
 	// When total outflow is not stored in store it will return 0
 	amount, _ := store.GetDec(k.store, keyTotalOutflows, "total_outflow")
 	return amount
@@ -158,7 +158,7 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	// Allow outflow either of two conditions
 	// 1. Outflow Sum <= Total Outflow Quota
 	// 2. OR Outflow Sum <= params.InflowOutflowQuotaBase + (params.InflowOutflowQuotaRate * sum of all inflows)
-	outflowSum := k.GetTotalOutflow().Add(exchangePrice)
+	outflowSum := k.GetOutflowSum().Add(exchangePrice)
 	inflowSum := k.GetInflowSum()
 	if !params.TotalQuota.IsZero() {
 		if outflowSum.GT(params.TotalQuota) ||
@@ -223,7 +223,7 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 	}
 	k.SetTokenOutflow(o)
 
-	totalOutflowSum := k.GetTotalOutflow()
+	totalOutflowSum := k.GetOutflowSum()
 	k.SetOutflowSum(totalOutflowSum.Sub(exchangePrice))
 	return nil
 }
