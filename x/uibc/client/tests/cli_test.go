@@ -22,7 +22,7 @@ func TestIntegrationSuite(t *testing.T) {
 	var uibcGenState uibc.GenesisState
 	assert.NilError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[uibc.ModuleName], &uibcGenState))
 	uibcGenState.Outflows = sdk.DecCoins{sdk.NewInt64DecCoin("uumee", 0)}
-	uibcGenState.TotalOutflowSum = sdk.NewDec(10)
+	uibcGenState.OutflowSum = sdk.NewDec(10)
 
 	bz, err := cfg.Codec.MarshalJSON(&uibcGenState)
 	assert.NilError(t, err)

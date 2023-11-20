@@ -40,8 +40,8 @@ func (k Keeper) SetTokenOutflows(outflows sdk.DecCoins) {
 	}
 }
 
-// SetTotalOutflowSum save the total outflow of ibc-transfer amount.
-func (k Keeper) SetTotalOutflowSum(amount sdk.Dec) {
+// SetOutflowSum save the total outflow of ibc-transfer amount.
+func (k Keeper) SetOutflowSum(amount sdk.Dec) {
 	err := store.SetDec(k.store, keyTotalOutflows, amount, "total_outflow_sum")
 	util.Panic(err)
 }
@@ -121,7 +121,7 @@ func (k Keeper) ResetAllQuotas() error {
 	}
 	zero := sdk.NewDec(0)
 	// outflows
-	k.SetTotalOutflowSum(zero)
+	k.SetOutflowSum(zero)
 	ps := k.PrefixStore(keyPrefixDenomOutflows)
 	store.DeleteByPrefixStore(ps)
 
@@ -150,7 +150,7 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	inToken := k.GetTokenInflow(denom)
 	if !params.TokenQuota.IsZero() {
 		if o.Amount.GT(params.TokenQuota) ||
-			o.Amount.GT(params.InflowOutflowQuotaTokenBase.Add((params.InflowOutflowQuotaRate.Mul(inToken.Amount)))) {
+			o.Amount.GT(params.InflowOutflowTokenQuotaBase.Add((params.InflowOutflowQuotaRate.Mul(inToken.Amount)))) {
 			return uibc.ErrQuotaExceeded
 		}
 	}
@@ -168,7 +168,7 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 		}
 	}
 	k.SetTokenOutflow(o)
-	k.SetTotalOutflowSum(totalOutflowSum)
+	k.SetOutflowSum(totalOutflowSum)
 
 	return nil
 }
@@ -225,7 +225,7 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 	k.SetTokenOutflow(o)
 
 	totalOutflowSum := k.GetTotalOutflow()
-	k.SetTotalOutflowSum(totalOutflowSum.Sub(exchangePrice))
+	k.SetOutflowSum(totalOutflowSum.Sub(exchangePrice))
 	return nil
 }
 

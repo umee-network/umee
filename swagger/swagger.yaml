@@ -2534,10 +2534,10 @@ paths:
                     title: >-
                       inflow_outflow_quota_rate defines the rate of total
                       inflows
-                  inflow_outflow_quota_token_base:
+                  inflow_outflow_token_quota_base:
                     type: string
                     title: >-
-                      inflow_outflow_quota_token_base defines the inflow outflow
+                      inflow_outflow_token_quota_base defines the inflow outflow
                       quota base for token
                 title: Params of x/uibc module
             description: >-
@@ -6496,10 +6496,10 @@ definitions:
       inflow_outflow_quota_rate:
         type: string
         title: inflow_outflow_quota_rate defines the rate of total inflows
-      inflow_outflow_quota_token_base:
+      inflow_outflow_token_quota_base:
         type: string
         title: >-
-          inflow_outflow_quota_token_base defines the inflow outflow quota base
+          inflow_outflow_token_quota_base defines the inflow outflow quota base
           for token
     title: Params of x/uibc module
   umee.uibc.v1.QueryAllOutflowsResponse:
@@ -6567,10 +6567,10 @@ definitions:
           inflow_outflow_quota_rate:
             type: string
             title: inflow_outflow_quota_rate defines the rate of total inflows
-          inflow_outflow_quota_token_base:
+          inflow_outflow_token_quota_base:
             type: string
             title: >-
-              inflow_outflow_quota_token_base defines the inflow outflow quota
+              inflow_outflow_token_quota_base defines the inflow outflow quota
               base for token
         title: Params of x/uibc module
     description: |-

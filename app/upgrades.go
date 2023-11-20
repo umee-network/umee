@@ -124,7 +124,7 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 
 			// uibc migrations
 			uIBCKeeper := app.UIbcQuotaKeeperB.Keeper(&ctx)
-			uIBCKeeper.MigrateTotalOutflowSum()
+			uIBCKeeper.MigrateOutflowSum()
 			err = uIBCKeeper.SetParams(uibc.DefaultParams())
 			return fromVM, err
 		},
