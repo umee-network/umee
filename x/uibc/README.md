@@ -23,6 +23,15 @@ IBC Quota is an upper limit in USD amount.
 
 ### Design
 
+All inflows and outflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over 16h window.
+
+We are only tracking inflows for tokens which are registered in x/leverage Token Registry.
+
+#### Inflow
+
+- `Inflows`: metric per token.
+- `TotalInflowSum` : Sum of all `Inflows` from the previous point.
+
 #### Outflows
 
 All outflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over 16h window.
@@ -40,14 +49,6 @@ All quotas are reset in `BeginBlocker` whenever a time difference between the ne
 Transfer is reverted whenever it breaks any quota.
 
 Transfer of tokens, which are not registered in the x/leverage Token Registry are not subject to the quota limit.
-
-#### Inflows
-
-All inflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over 16h window.
-We are only tracking inflows for tokens which are registered in x/leverage Token Registry.
-
-- `Genesis.TotalInflowSum` : Sum of all IBC Tokens Inflows which are registered in x/leverage Token Registry.
-- `Genesis.Inflows`: IBC Inflow of each registered token.
 
 #### ICS-20 Quota control
 
