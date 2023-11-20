@@ -28,7 +28,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
 func (k Keeper) GetTokenOutflows(denom string) sdk.DecCoin {
 	// When token outflow is not stored in store it will return 0
-	amount, _ := store.GetDec(k.store, keyTotalOutflow(denom), "total_outflow")
+	amount, _ := store.GetDec(k.store, keyTokenOutflow(denom), "total_outflow")
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 
@@ -42,20 +42,20 @@ func (k Keeper) SetTokenOutflows(outflows sdk.DecCoins) {
 
 // SetOutflowSum save the total outflow of ibc-transfer amount.
 func (k Keeper) SetOutflowSum(amount sdk.Dec) {
-	err := store.SetDec(k.store, keyTotalOutflows, amount, "total_outflow_sum")
+	err := store.SetDec(k.store, keyOutflowSum, amount, "total_outflow_sum")
 	util.Panic(err)
 }
 
 // GetOutflowSum returns the total outflow of ibc-transfer amount.
 func (k Keeper) GetOutflowSum() sdk.Dec {
 	// When total outflow is not stored in store it will return 0
-	amount, _ := store.GetDec(k.store, keyTotalOutflows, "total_outflow")
+	amount, _ := store.GetDec(k.store, keyOutflowSum, "total_outflow")
 	return amount
 }
 
 // SetTokenOutflow save the outflows of denom into store.
 func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
-	key := keyTotalOutflow(outflow.Denom)
+	key := keyTokenOutflow(outflow.Denom)
 	err := store.SetDec(k.store, key, outflow.Amount, "total_outflow")
 	util.Panic(err)
 }
@@ -92,13 +92,13 @@ func (k Keeper) GetTokenInflow(denom string) sdk.DecCoin {
 // GetInflowSum returns the total inflow of ibc-transfer amount.
 func (k Keeper) GetInflowSum() sdk.Dec {
 	// When total inflow is not stored in store it will return 0
-	amount, _ := store.GetDec(k.store, keyTotalInflows, "total_inflows")
+	amount, _ := store.GetDec(k.store, keyInflowSum, "total_inflows")
 	return amount
 }
 
 // SetInflowSum save the total inflow of ibc-transfer amount.
 func (k Keeper) SetInflowSum(amount sdk.Dec) {
-	err := store.SetDec(k.store, keyTotalInflows, amount, "total_inflows")
+	err := store.SetDec(k.store, keyInflowSum, amount, "total_inflows")
 	util.Panic(err)
 }
 
