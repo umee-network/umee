@@ -37,7 +37,7 @@ func umeeTokenMetadata() banktypes.Metadata {
 		Base:        appparams.BondDenom, // NOTE: must not change
 		Name:        appparams.DisplayDenom,
 		Display:     appparams.DisplayDenom,
-		Symbol:      appparams.DisplayDenom,
+		Symbol:      appparams.LegacyDisplayDenom,
 		DenomUnits: []*banktypes.DenomUnit{
 			{
 				Denom:    appparams.BondDenom,
