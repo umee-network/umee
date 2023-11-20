@@ -40,7 +40,7 @@ Similarly to inflows, we measure outflows per token and aggregates (sum):
 The metrics above are reset every `params.quota_duration` in Begin Blocker.
 Example: if the reset was done at 14:00 UTC, then the next reset will be done `quota_duration` later. You can observe the reset with `/umee/uibc/v1/EventQuotaReset` event, which will contain `next_expire` attribute.
 
-#### Outflow Quota.
+#### Outflow Quota
 
 Inflows and outflows metrics above are used to **limit ICS-20 transfers** of tokens in the x/leverage Token Registry. The outflow transfer of token `X` is possible when:
 
