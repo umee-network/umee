@@ -223,8 +223,8 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 	}
 	k.SetTokenOutflow(o)
 
-	totalOutflowSum := k.GetOutflowSum()
-	k.SetOutflowSum(totalOutflowSum.Sub(exchangePrice))
+	outflowSum := k.GetOutflowSum()
+	k.SetOutflowSum(outflowSum.Sub(exchangePrice))
 	return nil
 }
 
