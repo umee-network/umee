@@ -37,7 +37,7 @@ func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 	k := q.Keeper(&ctx)
 	var o sdk.Dec
 	if len(req.Denom) == 0 {
-		o = k.GetTotalOutflow()
+		o = k.GetOutflowSum()
 	} else {
 		d := k.GetTokenOutflows(req.Denom)
 		o = d.Amount

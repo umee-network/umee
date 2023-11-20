@@ -28,7 +28,7 @@ func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
 // GetTokenOutflows returns sum of denom outflows in USD value in the DecCoin structure.
 func (k Keeper) GetTokenOutflows(denom string) sdk.DecCoin {
 	// When token outflow is not stored in store it will return 0
-	amount, _ := store.GetDec(k.store, keyTotalOutflow(denom), "total_outflow")
+	amount, _ := store.GetDec(k.store, keyTokenOutflow(denom), "total_outflow")
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 
@@ -40,22 +40,22 @@ func (k Keeper) SetTokenOutflows(outflows sdk.DecCoins) {
 	}
 }
 
-// SetTotalOutflowSum save the total outflow of ibc-transfer amount.
-func (k Keeper) SetTotalOutflowSum(amount sdk.Dec) {
-	err := store.SetDec(k.store, keyTotalOutflows, amount, "total_outflow_sum")
+// SetOutflowSum save the total outflow of ibc-transfer amount.
+func (k Keeper) SetOutflowSum(amount sdk.Dec) {
+	err := store.SetDec(k.store, keyOutflowSum, amount, "total_outflow_sum")
 	util.Panic(err)
 }
 
-// GetTotalOutflow returns the total outflow of ibc-transfer amount.
-func (k Keeper) GetTotalOutflow() sdk.Dec {
+// GetOutflowSum returns the total outflow of ibc-transfer amount.
+func (k Keeper) GetOutflowSum() sdk.Dec {
 	// When total outflow is not stored in store it will return 0
-	amount, _ := store.GetDec(k.store, keyTotalOutflows, "total_outflow")
+	amount, _ := store.GetDec(k.store, keyOutflowSum, "total_outflow")
 	return amount
 }
 
 // SetTokenOutflow save the outflows of denom into store.
 func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
-	key := keyTotalOutflow(outflow.Denom)
+	key := keyTokenOutflow(outflow.Denom)
 	err := store.SetDec(k.store, key, outflow.Amount, "total_outflow")
 	util.Panic(err)
 }
@@ -89,16 +89,16 @@ func (k Keeper) GetTokenInflow(denom string) sdk.DecCoin {
 	return sdk.NewDecCoinFromDec(denom, amount)
 }
 
-// GetTotalInflow returns the total inflow of ibc-transfer amount.
-func (k Keeper) GetTotalInflow() sdk.Dec {
+// GetInflowSum returns the total inflow of ibc-transfer amount.
+func (k Keeper) GetInflowSum() sdk.Dec {
 	// When total inflow is not stored in store it will return 0
-	amount, _ := store.GetDec(k.store, keyTotalInflows, "total_inflows")
+	amount, _ := store.GetDec(k.store, keyInflowSum, "total_inflows")
 	return amount
 }
 
-// SetTotalInflow save the total inflow of ibc-transfer amount.
-func (k Keeper) SetTotalInflow(amount sdk.Dec) {
-	err := store.SetDec(k.store, keyTotalInflows, amount, "total_inflows")
+// SetInflowSum save the total inflow of ibc-transfer amount.
+func (k Keeper) SetInflowSum(amount sdk.Dec) {
+	err := store.SetDec(k.store, keyInflowSum, amount, "total_inflows")
 	util.Panic(err)
 }
 
@@ -121,12 +121,12 @@ func (k Keeper) ResetAllQuotas() error {
 	}
 	zero := sdk.NewDec(0)
 	// outflows
-	k.SetTotalOutflowSum(zero)
+	k.SetOutflowSum(zero)
 	ps := k.PrefixStore(keyPrefixDenomOutflows)
 	store.DeleteByPrefixStore(ps)
 
 	// inflows
-	k.SetTotalInflow(zero)
+	k.SetInflowSum(zero)
 	ps = k.PrefixStore(keyPrefixDenomInflows)
 	store.DeleteByPrefixStore(ps)
 	return nil
@@ -150,25 +150,24 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	inToken := k.GetTokenInflow(denom)
 	if !params.TokenQuota.IsZero() {
 		if o.Amount.GT(params.TokenQuota) ||
-			o.Amount.GT(params.InflowOutflowQuotaTokenBase.Add((params.InflowOutflowQuotaRate.Mul(inToken.Amount)))) {
+			o.Amount.GT(params.InflowOutflowTokenQuotaBase.Add((params.InflowOutflowQuotaRate.Mul(inToken.Amount)))) {
 			return uibc.ErrQuotaExceeded
 		}
 	}
 
 	// Allow outflow either of two conditions
-	// 1. Total Outflow Sum <= Total Outflow Quota
-	// or
-	// 2. Total Outflow Sum <= params.InflowOutflowQuotaBase + (params.InflowOutflowQuotaRate * sum of all inflows)
-	totalOutflowSum := k.GetTotalOutflow().Add(exchangePrice)
-	ttlInSum := k.GetTotalInflow()
+	// 1. Outflow Sum <= Total Outflow Quota
+	// 2. OR Outflow Sum <= params.InflowOutflowQuotaBase + (params.InflowOutflowQuotaRate * sum of all inflows)
+	outflowSum := k.GetOutflowSum().Add(exchangePrice)
+	inflowSum := k.GetInflowSum()
 	if !params.TotalQuota.IsZero() {
-		if totalOutflowSum.GT(params.TotalQuota) ||
-			totalOutflowSum.GT(params.InflowOutflowQuotaBase.Add(ttlInSum.Mul(params.InflowOutflowQuotaRate))) {
+		if outflowSum.GT(params.TotalQuota) ||
+			outflowSum.GT(params.InflowOutflowQuotaBase.Add(inflowSum.Mul(params.InflowOutflowQuotaRate))) {
 			return uibc.ErrQuotaExceeded
 		}
 	}
 	k.SetTokenOutflow(o)
-	k.SetTotalOutflowSum(totalOutflowSum)
+	k.SetOutflowSum(outflowSum)
 
 	return nil
 }
@@ -224,8 +223,8 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 	}
 	k.SetTokenOutflow(o)
 
-	totalOutflowSum := k.GetTotalOutflow()
-	k.SetTotalOutflowSum(totalOutflowSum.Sub(exchangePrice))
+	outflowSum := k.GetOutflowSum()
+	k.SetOutflowSum(outflowSum.Sub(exchangePrice))
 	return nil
 }
 
@@ -261,8 +260,8 @@ func (k Keeper) RecordIBCInflow(ctx sdk.Context,
 
 		tokenInflow := sdk.NewDecCoinFromDec(ibcDenom, inflowInUSD)
 		k.SetTokenInflow(tokenInflow)
-		totalInflowSum := k.GetTotalInflow()
-		k.SetTotalInflow(totalInflowSum.Add(inflowInUSD))
+		totalInflowSum := k.GetInflowSum()
+		k.SetInflowSum(totalInflowSum.Add(inflowInUSD))
 	}
 
 	return nil

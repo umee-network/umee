@@ -16,7 +16,7 @@ func DefaultParams() Params {
 		QuotaDuration:               time.Second * 60 * 60 * 24, // 24h
 		InflowOutflowQuotaBase:      sdk.NewDec(1_000_000),      // 1M
 		InflowOutflowQuotaRate:      sdk.MustNewDecFromStr("0.25"),
-		InflowOutflowQuotaTokenBase: sdk.NewDec(900_000), // $0.9M
+		InflowOutflowTokenQuotaBase: sdk.NewDec(900_000), // $0.9M
 	}
 }
 
@@ -39,7 +39,7 @@ func (p Params) Validate() error {
 	if err := validateQuotaRate(p.InflowOutflowQuotaRate, "total inflow outflow quota rate"); err != nil {
 		return err
 	}
-	if err := validateQuota(p.InflowOutflowQuotaTokenBase, "total inflow outflow quota token base"); err != nil {
+	if err := validateQuota(p.InflowOutflowTokenQuotaBase, "total inflow outflow quota token base"); err != nil {
 		return err
 	}
 	if p.TotalQuota.LT(p.TokenQuota) {

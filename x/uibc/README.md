@@ -25,28 +25,37 @@ IBC Quota is an upper limit in USD amount.
 
 All inflows and outflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over 16h window.
 
-We are only tracking inflows for tokens which are registered in x/leverage Token Registry.
+We are tracking inflows and outflows for tokens which are registered in x/leverage Token Registry.
+NOTE: we measure per token as defined in the x/leverage, not the IBC Denom Path (there can be multiple paths). Since creating a channel is permission less, we want to use the same quota token.
+For inflows:
 
-#### Inflow
+- `inflows`: metric per token.
+- `inflow_sum` : sum of all `inflows` from the previous point.
 
-- `Inflows`: metric per token.
-- `TotalInflowSum` : Sum of all `Inflows` from the previous point.
+Similarly to inflows, we measure outflows per token and aggregates (sum):
 
-#### Outflows
+- `outflows`: metric per token.
+- `outflow_sum`: sum of `outflows` from the previous point.
 
-All outflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over 16h window.
+The metrics above are reset every `params.quota_duration` in Begin Blocker.
+Example: if the reset was done at 14:00 UTC, then the next reset will be done `quota_duration` later. You can observe the reset with `/umee/uibc/v1/EventQuotaReset` event, which will contain `next_expire` attribute.
 
-We define 2 Quotas for ICS-20 transfers. Each quota only tracks tokens x/leverage Token Registry.
+#### Outflow Quota
 
-- `Params.TokenQuota`: upper limit of a sum of all outflows per token. It's set to 1.2M USD per token. It limits the outflows value for each token.
-  NOTE: we measure per token as defined in the x/leverage, not the IBC Denom Path (there can be multiple paths). Since creating a channel is permission less, we want to use same quota token.
-- `Params.TotalQuota`: upper limit of a sum of all token outflows combined. For example if it's set to 1.6M USD then IBC outflows reaching the total quota will be 600k USD worth of ATOM, 500k USD worth of STATOM, 250k USD worth of UMEE and 250k USD worth JUNO.
+Inflows and outflows metrics above are used to **limit ICS-20 transfers** of tokens in the x/leverage Token Registry. The outflow transfer of token `X` is possible when:
 
-If a quota parameter is set to zero then we consider it as unlimited.
+1. Outflow quota after the transfer is not suppressed:
+1. `outflow_sum <= params.total_quota`. For example if it's set to 1.6M USD then IBC outflows reaching the total quota will be 600k USD worth of ATOM, 500k USD worth of STATOM, 250k USD worth of UMEE and 250k USD worth JUNO.
+1. `token_quota[X] <= params.token_quota` - the token X quota is not suppressed.
+1. OR Outflow quota lifted by inflows is not reached:
+1. `outflow_sum <= params.inflow_outflow_quota_base + params.inflow_outflow_quota_rate * inflow_sum`
+1. `token_quota[X] <= params.inflow_outflow_token_quota_base + params.inflow_outflow_token_quota_rate * inflows[X]`
 
-All quotas are reset in `BeginBlocker` whenever a time difference between the new block, and the previous reset is more than `Params.QuotaDuration` in seconds (initially set to 24h).
+See `../../proto/umee/uibc/v1/quota.proto` for the list of all params.
 
-Transfer is reverted whenever it breaks any quota.
+If a any `total_quota` or `token_quota` parameter is set to zero then we consider it as unlimited.
+
+Transfer is **reverted** whenever it breaks any quota.
 
 Transfer of tokens, which are not registered in the x/leverage Token Registry are not subject to the quota limit.
 

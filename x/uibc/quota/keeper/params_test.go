@@ -24,7 +24,7 @@ func TestUnitParams(t *testing.T) {
 	params.TotalQuota = sdk.MustNewDecFromStr("3.4321")
 	params.InflowOutflowQuotaBase = sdk.MustNewDecFromStr("3.4321")
 	params.InflowOutflowQuotaRate = sdk.MustNewDecFromStr("0.2")
-	params.InflowOutflowQuotaTokenBase = sdk.MustNewDecFromStr("0.2")
+	params.InflowOutflowTokenQuotaBase = sdk.MustNewDecFromStr("0.2")
 
 	err := k.SetParams(params)
 	require.NoError(err)

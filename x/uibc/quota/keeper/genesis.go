@@ -15,8 +15,8 @@ func (kb Builder) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 
 	k.SetTokenOutflows(genState.Outflows)
 	k.SetTokenInflows(genState.Inflows)
-	k.SetTotalOutflowSum(genState.TotalOutflowSum)
-	k.SetTotalInflow(genState.TotalInflowSum)
+	k.SetOutflowSum(genState.OutflowSum)
+	k.SetInflowSum(genState.InflowSum)
 
 	err = k.SetExpire(genState.QuotaExpires)
 	util.Panic(err)
@@ -33,11 +33,11 @@ func (kb Builder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 	util.Panic(err)
 
 	return &uibc.GenesisState{
-		Params:          k.GetParams(),
-		Outflows:        outflows,
-		TotalOutflowSum: k.GetTotalOutflow(),
-		QuotaExpires:    *quotaExpires,
-		Inflows:         inflows,
-		TotalInflowSum:  k.GetTotalInflow(),
+		Params:       k.GetParams(),
+		Outflows:     outflows,
+		OutflowSum:   k.GetOutflowSum(),
+		QuotaExpires: *quotaExpires,
+		Inflows:      inflows,
+		InflowSum:    k.GetInflowSum(),
 	}
 }

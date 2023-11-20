@@ -12,9 +12,9 @@ func TestGenesisValidation(t *testing.T) {
 	err := gs.Validate()
 	assert.NilError(t, err)
 
-	gs.TotalOutflowSum = sdk.NewDec(-123123)
+	gs.OutflowSum = sdk.NewDec(-123123)
 	err = gs.Validate()
-	assert.ErrorContains(t, err, "total outflow sum cannot be negative")
+	assert.ErrorContains(t, err, "outflow sum cannot be negative")
 
 	gs.Outflows = []sdk.DecCoin{{Denom: "umee", Amount: sdk.NewDec(-11123123)}}
 	err = gs.Validate()
