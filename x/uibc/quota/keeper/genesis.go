@@ -33,11 +33,11 @@ func (kb Builder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 	util.Panic(err)
 
 	return &uibc.GenesisState{
-		Params:          k.GetParams(),
-		Outflows:        outflows,
-		OutflowSum: k.GetTotalOutflow(),
-		QuotaExpires:    *quotaExpires,
-		Inflows:         inflows,
-		InflowSum:  k.GetTotalInflow(),
+		Params:       k.GetParams(),
+		Outflows:     outflows,
+		OutflowSum:   k.GetTotalOutflow(),
+		QuotaExpires: *quotaExpires,
+		Inflows:      inflows,
+		InflowSum:    k.GetTotalInflow(),
 	}
 }

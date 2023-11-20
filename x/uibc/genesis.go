@@ -9,17 +9,17 @@ import (
 
 func NewGenesisState(params Params, outflows sdk.DecCoins, outflowSum sdk.Dec) *GenesisState {
 	return &GenesisState{
-		Params:          params,
-		Outflows:        outflows,
+		Params:     params,
+		Outflows:   outflows,
 		OutflowSum: outflowSum,
 	}
 }
 
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
-		Params:          DefaultParams(),
-		Inflows:         nil,
-		Outflows:        nil,
+		Params:     DefaultParams(),
+		Inflows:    nil,
+		Outflows:   nil,
 		OutflowSum: sdk.NewDec(0),
 		InflowSum:  sdk.NewDec(0),
 	}
