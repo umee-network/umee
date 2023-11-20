@@ -35,7 +35,7 @@ For inflows:
 Similarly to inflows, we measure outflows per token and aggregates (sum):
 
 - `outflows`: metric per token.
-- `total_outflow_sum`: sum of `outflows` from the previous point.
+- `outflow_sum`: sum of `outflows` from the previous point.
 
 The metrics above are reset every `params.quota_duration` in Begin Blocker.
 Example: if the reset was done at 14:00 UTC, then the next reset will be done `quota_duration` later. You can observe the reset with `/umee/uibc/v1/EventQuotaReset` event, which will contain `next_expire` attribute.
@@ -45,10 +45,10 @@ Example: if the reset was done at 14:00 UTC, then the next reset will be done `q
 Inflows and outflows metrics above are used to **limit ICS-20 transfers** of tokens in the x/leverage Token Registry. The outflow transfer of token `X` is possible when:
 
 1. Outflow quota after the transfer is not suppressed:
-1. `total_outflow_sum <= params.total_quota`. For example if it's set to 1.6M USD then IBC outflows reaching the total quota will be 600k USD worth of ATOM, 500k USD worth of STATOM, 250k USD worth of UMEE and 250k USD worth JUNO.
+1. `outflow_sum <= params.total_quota`. For example if it's set to 1.6M USD then IBC outflows reaching the total quota will be 600k USD worth of ATOM, 500k USD worth of STATOM, 250k USD worth of UMEE and 250k USD worth JUNO.
 1. `token_quota[X] <= params.token_quota` - the token X quota is not suppressed.
 1. OR Outflow quota lifted by inflows is not reached:
-1. `total_outflow_sum <= params.inflow_outflow_quota_base + params.inflow_outflow_quota_rate * total_inflow_sum`
+1. `outflow_sum <= params.inflow_outflow_quota_base + params.inflow_outflow_quota_rate * inflow_sum`
 1. `token_quota[X] <= params.inflow_outflow_token_quota_base + params.inflow_outflow_token_quota_rate * inflows[X]`
 
 See `../../proto/umee/uibc/v1/quota.proto` for the list of all params.
