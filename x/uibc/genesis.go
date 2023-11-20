@@ -50,11 +50,11 @@ func (gs GenesisState) Validate() error {
 	}
 
 	if gs.OutflowSum.IsNegative() {
-		return fmt.Errorf("total outflow sum cannot be negative : %s ", gs.OutflowSum.String())
+		return fmt.Errorf("outflow sum cannot be negative : %s ", gs.OutflowSum.String())
 	}
 
 	if gs.InflowSum.IsNegative() {
-		return fmt.Errorf("total inflow sum cannot be negative : %s ", gs.InflowSum.String())
+		return fmt.Errorf("inflow sum cannot be negative : %s ", gs.InflowSum.String())
 	}
 
 	return nil
