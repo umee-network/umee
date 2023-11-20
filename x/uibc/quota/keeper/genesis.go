@@ -15,7 +15,7 @@ func (kb Builder) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 
 	k.SetTokenOutflows(genState.Outflows)
 	k.SetTokenInflows(genState.Inflows)
-	k.SetOutflowSum(genState.TotalOutflowSum)
+	k.SetOutflowSum(genState.OutflowSum)
 	k.SetTotalInflow(genState.InflowSum)
 
 	err = k.SetExpire(genState.QuotaExpires)
