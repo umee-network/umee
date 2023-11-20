@@ -34,7 +34,7 @@ For inflows:
 
 Similarly to inflows, we measure outflows per token and aggregates (sum):
 
-- `iutflows`: metric per token.
+- `outflows`: metric per token.
 - `total_outflow_sum`: sum of `outflows` from the previous point.
 
 The metrics above are reset every `params.quota_duration` in Begin Blocker.
