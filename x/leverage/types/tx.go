@@ -15,9 +15,6 @@ func NewMsgSupply(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupply {
 	}
 }
 
-func (msg MsgSupply) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgSupply) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgSupply) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
 }
@@ -26,10 +23,12 @@ func (msg *MsgSupply) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Supplier)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgSupply) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+
+func (msg MsgSupply) Route() string { return "" }
+func (msg MsgSupply) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgSupply) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
@@ -39,9 +38,6 @@ func NewMsgWithdraw(supplier sdk.AccAddress, asset sdk.Coin) *MsgWithdraw {
 	}
 }
 
-func (msg MsgWithdraw) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgWithdraw) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
 }
@@ -50,10 +46,12 @@ func (msg *MsgWithdraw) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Supplier)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgWithdraw) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+
+func (msg MsgWithdraw) Route() string { return "" }
+func (msg MsgWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgWithdraw) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgMaxWithdraw(supplier sdk.AccAddress, denom string) *MsgMaxWithdraw {
@@ -63,9 +61,6 @@ func NewMsgMaxWithdraw(supplier sdk.AccAddress, denom string) *MsgMaxWithdraw {
 	}
 }
 
-func (msg MsgMaxWithdraw) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgMaxWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgMaxWithdraw) ValidateBasic() error {
 	return validateSenderAndDenom(msg.Supplier, msg.Denom)
 }
@@ -74,10 +69,12 @@ func (msg *MsgMaxWithdraw) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Supplier)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgMaxWithdraw) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+
+func (msg MsgMaxWithdraw) Route() string { return "" }
+func (msg MsgMaxWithdraw) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgMaxWithdraw) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateralize {
@@ -87,9 +84,6 @@ func NewMsgCollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgCollateral
 	}
 }
 
-func (msg MsgCollateralize) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgCollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgCollateralize) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
@@ -98,10 +92,12 @@ func (msg *MsgCollateralize) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Borrower)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgCollateralize) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+
+func (msg MsgCollateralize) Route() string { return "" }
+func (msg MsgCollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgCollateralize) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgSupplyCollateral(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupplyCollateral {
@@ -111,9 +107,6 @@ func NewMsgSupplyCollateral(supplier sdk.AccAddress, asset sdk.Coin) *MsgSupplyC
 	}
 }
 
-func (msg MsgSupplyCollateral) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgSupplyCollateral) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgSupplyCollateral) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Supplier, &msg.Asset)
 }
@@ -122,10 +115,12 @@ func (msg *MsgSupplyCollateral) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Supplier)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgSupplyCollateral) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+
+func (msg MsgSupplyCollateral) Route() string { return "" }
+func (msg MsgSupplyCollateral) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgSupplyCollateral) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgDecollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgDecollateralize {
@@ -135,9 +130,6 @@ func NewMsgDecollateralize(borrower sdk.AccAddress, asset sdk.Coin) *MsgDecollat
 	}
 }
 
-func (msg MsgDecollateralize) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgDecollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgDecollateralize) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
@@ -146,10 +138,11 @@ func (msg *MsgDecollateralize) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Borrower)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgDecollateralize) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+func (msg MsgDecollateralize) Route() string { return "" }
+func (msg MsgDecollateralize) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgDecollateralize) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
@@ -159,9 +152,6 @@ func NewMsgBorrow(borrower sdk.AccAddress, asset sdk.Coin) *MsgBorrow {
 	}
 }
 
-func (msg MsgBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgBorrow) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
@@ -170,10 +160,11 @@ func (msg *MsgBorrow) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Borrower)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgBorrow) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+func (msg MsgBorrow) Route() string { return "" }
+func (msg MsgBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgBorrow) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgMaxBorrow(borrower sdk.AccAddress, denom string) *MsgMaxBorrow {
@@ -183,9 +174,6 @@ func NewMsgMaxBorrow(borrower sdk.AccAddress, denom string) *MsgMaxBorrow {
 	}
 }
 
-func (msg MsgMaxBorrow) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgMaxBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgMaxBorrow) ValidateBasic() error {
 	return validateSenderAndDenom(msg.Borrower, msg.Denom)
 }
@@ -194,10 +182,11 @@ func (msg *MsgMaxBorrow) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Borrower)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgMaxBorrow) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+func (msg MsgMaxBorrow) Route() string { return "" }
+func (msg MsgMaxBorrow) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgMaxBorrow) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
@@ -207,9 +196,6 @@ func NewMsgRepay(borrower sdk.AccAddress, asset sdk.Coin) *MsgRepay {
 	}
 }
 
-func (msg MsgRepay) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgRepay) Type() string  { return sdk.MsgTypeURL(&msg) }
-
 func (msg *MsgRepay) ValidateBasic() error {
 	return validateSenderAndAsset(msg.Borrower, &msg.Asset)
 }
@@ -218,10 +204,11 @@ func (msg *MsgRepay) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Borrower)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgRepay) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+func (msg MsgRepay) Route() string { return "" }
+func (msg MsgRepay) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgRepay) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, rewardDenom string) *MsgLiquidate {
@@ -232,9 +219,6 @@ func NewMsgLiquidate(liquidator, borrower sdk.AccAddress, repayment sdk.Coin, re
 		RewardDenom: rewardDenom,
 	}
 }
-
-func (msg MsgLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgLiquidate) ValidateBasic() error {
 	if err := validateSenderAndAsset(msg.Borrower, &msg.Repayment); err != nil {
@@ -251,10 +235,11 @@ func (msg *MsgLiquidate) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Liquidator)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgLiquidate) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+func (msg MsgLiquidate) Route() string { return "" }
+func (msg MsgLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgLiquidate) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
 
 func NewMsgLeveragedLiquidate(
@@ -270,9 +255,6 @@ func NewMsgLeveragedLiquidate(
 		MaxRepay:    maxRepay,
 	}
 }
-
-func (msg MsgLeveragedLiquidate) Route() string { return sdk.MsgTypeURL(&msg) }
-func (msg MsgLeveragedLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
 
 func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
 	if msg.RepayDenom != "" {
@@ -300,11 +282,14 @@ func (msg *MsgLeveragedLiquidate) GetSigners() []sdk.AccAddress {
 	return checkers.Signers(msg.Liquidator)
 }
 
-// GetSignBytes get the bytes for the message signer to sign on
-func (msg *MsgLeveragedLiquidate) GetSignBytes() []byte {
-	bz := ModuleCdc.MustMarshalJSON(msg)
-	return sdk.MustSortJSON(bz)
+// LegacyMsg.Type implementations
+func (msg MsgLeveragedLiquidate) Route() string { return "" }
+func (msg MsgLeveragedLiquidate) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg MsgLeveragedLiquidate) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&msg))
 }
+
+// -- helper methods -- //
 
 func validateSenderAndAsset(sender string, asset *sdk.Coin) error {
 	_, err := sdk.AccAddressFromBech32(sender)
