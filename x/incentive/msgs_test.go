@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -57,33 +58,22 @@ func TestMsgs(t *testing.T) {
 	}
 }
 
-// functions required in msgs.go which are not part of sdk.Msg
-type sdkmsg interface {
-	Route() string
-	Type() string
-	GetSignBytes() []byte
-}
-
-func TestRoutes(t *testing.T) {
+func TestLegacyMsg(t *testing.T) {
 	t.Parallel()
 
-	msgs := []sdkmsg{
-		*incentive.NewMsgBond(testAddr, uToken),
-		*incentive.NewMsgBeginUnbonding(testAddr, uToken),
-		*incentive.NewMsgEmergencyUnbond(testAddr, uToken),
-		*incentive.NewMsgClaim(testAddr),
-		*incentive.NewMsgSponsor(testAddr, 3),
-		*incentive.NewMsgGovCreatePrograms(govAddr, []incentive.IncentiveProgram{program}),
-		*incentive.NewMsgGovSetParams(govAddr, incentive.DefaultParams()),
+	msgs := []legacytx.LegacyMsg{
+		incentive.NewMsgBond(testAddr, uToken),
+		incentive.NewMsgBeginUnbonding(testAddr, uToken),
+		incentive.NewMsgEmergencyUnbond(testAddr, uToken),
+		incentive.NewMsgClaim(testAddr),
+		incentive.NewMsgSponsor(testAddr, 3),
+		incentive.NewMsgGovCreatePrograms(govAddr, []incentive.IncentiveProgram{program}),
+		incentive.NewMsgGovSetParams(govAddr, incentive.DefaultParams()),
 	}
 
 	for _, msg := range msgs {
-		// check for non-empty returns for now
 		assert.Assert(t, len(msg.GetSignBytes()) != 0)
-		// exact match required
 		assert.Equal(t,
-			// example: "/umee.incentive.v1.MsgBond"
-			// with %T returning "incentive.MsgBond"
 			addV1ToType(fmt.Sprintf("/umee.%T", msg)),
 			msg.Type(),
 		)
@@ -92,5 +82,5 @@ func TestRoutes(t *testing.T) {
 
 // addV1ToType replaces "incentive." with "incentive.v1."
 func addV1ToType(s string) string {
-	return strings.Replace(s, "incentive", "incentive.v1", 1)
+	return strings.Replace(s, "*incentive", "incentive.v1", 1)
 }
