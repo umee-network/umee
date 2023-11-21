@@ -180,12 +180,6 @@ func (am AppModule) WeightedOperations(simState module.SimulationState) []simtyp
 	)
 }
 
-// ProposalContents returns all the oracle content functions used to
-// simulate governance proposals.
-func (am AppModule) ProposalContents(_ module.SimulationState) []simtypes.WeightedProposalMsg {
-	return nil
-}
-
 // RandomizedParams creates randomized oracle param changes for the simulator.
 func (AppModule) RandomizedParams(*rand.Rand) []simtypes.LegacyParamChange {
 	return simulation.ParamChanges()

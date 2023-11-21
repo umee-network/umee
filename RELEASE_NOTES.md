@@ -25,6 +25,8 @@ Highlights:
 
 ### Validators
 
+**Upgrade Title** (for Cosmovisor): **v6.2**.
+
 #### Price Feeder
 
 Price Feeder `< umee/v2.3.0` is not compatible with Cosmos SDK v0.47. Validators must update to `umee/v2.3.0` or newer.
