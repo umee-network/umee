@@ -1,6 +1,7 @@
 package oracle
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -65,9 +66,48 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		// same multiplier as the `threshold` computed above
 		support := ballotDenom.Ballot.Power() * types.MaxVoteThresholdMultiplier / totalBondedPower
 		if support < threshold {
-			ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
+			// ctx.Logger().Info("Ballot voting power is under vote threshold, dropping ballot", "denom", ballotDenom)
+			for _, v := range ballotDenom.Ballot {
+				fmt.Print("mark C")
+				fmt.Println("not enough support has been achieved for an asset")
+				fmt.Println("denom:", v.Denom)
+				fmt.Println("power in ballot:", v.Power)
+				fmt.Println("support:", support)
+				fmt.Println("threshold:", threshold)
+
+				// get votes for each of the major 4 validators
+				val1, _ := sdk.ValAddressFromBech32("umeevaloper1hd4zwgmu2uax5pp43mqdnn09720qmvuqjenkr4")
+				val2, _ := sdk.ValAddressFromBech32("umeevaloper1aswcvpju7ff2gturf2r6whx25p0j0apu5kuvg0")
+				val3, _ := sdk.ValAddressFromBech32("umeevaloper16952kyr062e7l0a7ssxfzmur05tjmknvh7kax3")
+				vote, err := k.GetAggregateExchangeRateVote(ctx, val1)
+				if err != nil || len(vote.ExchangeRateTuples) == 0 {
+					fmt.Println("val 1 did not vote!")
+				} else {
+					fmt.Println("val 1 voted!")
+				}
+				vote, err = k.GetAggregateExchangeRateVote(ctx, val2)
+				if err != nil || len(vote.ExchangeRateTuples) == 0 {
+					fmt.Println("val 2 did not vote!")
+				} else {
+					fmt.Println("val 2 voted!")
+				}
+				vote, err = k.GetAggregateExchangeRateVote(ctx, val3)
+				if err != nil || len(vote.ExchangeRateTuples) == 0 {
+					fmt.Println("val 3 did not vote!")
+				} else {
+					fmt.Println("val 3 voted!")
+				}
+
+			}
+
 			continue
 		}
+
+		fmt.Println("mark D")
+		fmt.Println("ballot made it through!")
+		fmt.Println("denom:", ballotDenom.Denom)
+		fmt.Println("support:", support)
+		fmt.Println("threshold:", threshold)
 
 		denom := strings.ToUpper(ballotDenom.Denom)
 		// Get weighted median of exchange rates
@@ -98,6 +138,13 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		// in MsgAggregateExchangeRateVote we filter tokens from the AcceptList.
 		if int(claim.TokensVoted) == voteTargetsLen {
 			continue
+		}
+
+		if claim.Validator.String() == "umeevaloper13s987upqqy3cqkvy4gtclwej2kljg39qyajv7m" {
+			fmt.Println("mark A")
+			fmt.Println(claim.Validator.String())
+			fmt.Println(claim.TokensVoted)
+			fmt.Println(voteTargetsLen)
 		}
 
 		// Increase miss counter
@@ -151,6 +198,14 @@ func Tally(
 			claim.Weight += tallyVote.Power
 			claim.TokensVoted++
 			validatorClaimMap[key] = claim
+		} else {
+			if tallyVote.Voter.String() == "umeevaloper13s987upqqy3cqkvy4gtclwej2kljg39qyajv7m" {
+				fmt.Print("mark B")
+				fmt.Println(tallyVote.Voter.String())
+				fmt.Println(tallyVote.ExchangeRate)
+				fmt.Println(weightedMedian.Sub(rewardSpread))
+				fmt.Println(weightedMedian.Add(rewardSpread))
+			}
 		}
 	}
 
