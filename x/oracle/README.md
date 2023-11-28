@@ -79,7 +79,7 @@ A `VotePeriod` during which either of the following events occur is considered a
 
 - The validator fails to submits a vote for **each and every** exchange rate specified in `AcceptList`.
 - The validator fails to vote within the `reward band` around the weighted median for one or more denominations.
-- Validators don't provide enough price votes for a given denom (ballot denom support is less than the required `VoteThreshold`) - in that case all validators will receive a miss.
+- Validators don't provide enough price votes for a given denom (ballot denom support is less than the required `VoteThreshold`) - **in that case all validators will receive a miss.**
 
 A `SlashWindow` is a window of time during which validators can miss votes. At the end of this period, the amount of misses are tallied and the proper reward or punishment is carried out.
 
