@@ -50,7 +50,7 @@ Validators must first pre-commit to a set of exchange rates, then in the subsequ
 
   For each exchange rate, if the total voting power of submitted votes exceeds 50%, the weighted median of the votes is recorded on-chain as the effective rate for that denomination against USD for the following `VotePeriod` `P_t+1`.
 
-  Exchange rates receiving fewer than `VoteThreshold` total voting power have their exchange rates deleted from the store.
+  Exchange rates receiving fewer than `VoteThreshold` total voting power will not be updated (will keep the old price with the old timestamp).
 
 - Ballot Rewards
 
@@ -78,8 +78,8 @@ The reward pool is not distributed all at once, but instead over a period of tim
 A `VotePeriod` during which either of the following events occur is considered a "miss":
 
 - The validator fails to submits a vote for **each and every** exchange rate specified in `AcceptList`.
-
 - The validator fails to vote within the `reward band` around the weighted median for one or more denominations.
+- Validators don't provide enough price votes for a given denom (ballot denom support is less than the required `VoteThreshold`) - **in that case all validators will receive a miss.**
 
 A `SlashWindow` is a window of time during which validators can miss votes. At the end of this period, the amount of misses are tallied and the proper reward or punishment is carried out.
 
