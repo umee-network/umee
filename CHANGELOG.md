@@ -56,7 +56,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2301](https://github.com/umee-network/umee/pull/2301) use gov/v1 MinInitialDepositRatio and set it to 0.1.
 - [2341](https://github.com/umee-network/umee/pull/2341) inspect query also returns a list of accounts whose positions could not be calculated
 
-
 ### Breaking Changes
 
 - [2332](https://github.com/umee-network/umee/pull/2332) Rename: `TotalOutflowSum` to `OutflowSum`, `TotalInflowSum` to `InflowSum`.
