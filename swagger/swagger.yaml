@@ -408,6 +408,10 @@ paths:
                   description: >-
                     InspectAccount contains risk and balance info for a single
                     account for the inspector query.
+              failures:
+                type: array
+                items:
+                  type: string
             description: >-
               QueryInspectResponse defines the response structure for the
               Inspect gRPC service handler.
@@ -5079,6 +5083,10 @@ definitions:
           description: >-
             InspectAccount contains risk and balance info for a single account
             for the inspector query.
+      failures:
+        type: array
+        items:
+          type: string
     description: >-
       QueryInspectResponse defines the response structure for the Inspect gRPC
       service handler.
