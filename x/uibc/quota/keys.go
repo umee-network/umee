@@ -1,4 +1,4 @@
-package keeper
+package quota
 
 import (
 	"github.com/umee-network/umee/v6/util"

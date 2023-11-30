@@ -1,4 +1,4 @@
-package quota
+package uibc
 
 import (
 	"encoding/json"
@@ -16,22 +16,23 @@ import (
 
 	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/x/uibc"
-	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
 var _ porttypes.IBCModule = ICS20Module{}
 
-// ICS20Module overwrites OnAcknowledgementPacket and OnTimeoutPacket to revert
+// ICS20Module implements ibcporttypes.IBCModule for ICS20 transfer middleware.
+// It overwrites OnAcknowledgementPacket and OnTimeoutPacket to revert
 // quota update on acknowledgement error or timeout.
 type ICS20Module struct {
 	porttypes.IBCModule
-	kb  keeper.Builder
+	kb  quota.Builder
 	cdc codec.JSONCodec
 }
 
 // NewICS20Module is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Module(app porttypes.IBCModule, k keeper.Builder, cdc codec.JSONCodec) ICS20Module {
+func NewICS20Module(app porttypes.IBCModule, k quota.Builder, cdc codec.JSONCodec) ICS20Module {
 	return ICS20Module{
 		IBCModule: app,
 		kb:        k,

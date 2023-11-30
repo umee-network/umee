@@ -1,4 +1,4 @@
-package keeper
+package quota
 
 import (
 	"time"
@@ -14,6 +14,7 @@ import (
 )
 
 // Builder constructs Keeper by perparing all related dependencies (notably the store).
+// TODO: rename to KeeperBuilder
 type Builder struct {
 	storeKey storetypes.StoreKey
 	cdc      codec.BinaryCodec

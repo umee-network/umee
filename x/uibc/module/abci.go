@@ -6,15 +6,14 @@ import (
 	abci "github.com/cometbft/cometbft/abci/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
 // BeginBlock implements BeginBlock for the x/uibc module.
-func BeginBlock(ctx sdk.Context, k keeper.Keeper) {
+func BeginBlock(ctx sdk.Context, k quota.Keeper) {
 	logger := ctx.Logger().With("module", "uibc")
 	quotaExpires, err := k.GetExpire()
 	if err != nil {
-		// TODO, use logger as argument
 		logger.Error("can't get quota exipre", "error", err)
 		return
 	}

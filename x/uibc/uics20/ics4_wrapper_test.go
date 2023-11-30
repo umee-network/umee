@@ -1,4 +1,4 @@
-package quota_test
+package uibc_test
 
 import (
 	"testing"
@@ -23,7 +23,6 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/mocks"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
-	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
 )
 
 type MockICS4Wrapper struct {
@@ -53,7 +52,7 @@ func TestSendPacket(t *testing.T) {
 
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	kb := keeper.NewKeeperBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock, eg)
+	kb := quota.NewKeeperBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock, eg)
 	dp := uibc.DefaultParams()
 	keeper := kb.Keeper(&ctx)
 	keeper.SetParams(dp)

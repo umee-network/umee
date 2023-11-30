@@ -1,4 +1,4 @@
-package quota
+package uibc
 
 import (
 	"cosmossdk.io/errors"
@@ -10,17 +10,17 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 
 	ibcutil "github.com/umee-network/umee/v6/util/ibc"
-	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
-// ICS4 wraps SendPacket to check IBC quota.
+// ICS4 implements porttypes.ICS4Wrapper and overwrites SendPacket to check IBC quota.
 type ICS4 struct {
 	porttypes.ICS4Wrapper
 
-	kb keeper.Builder
+	kb quota.Builder
 }
 
-func NewICS4(parent porttypes.ICS4Wrapper, kb keeper.Builder) ICS4 {
+func NewICS4(parent porttypes.ICS4Wrapper, kb quota.Builder) ICS4 {
 	return ICS4{parent, kb}
 }
 

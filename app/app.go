@@ -581,7 +581,7 @@ func New(
 	var transferStack ibcporttypes.IBCModule
 	transferStack = ibctransfer.NewIBCModule(app.IBCTransferKeeper)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
-	transferStack = uibcquota.NewICS20Module(transferStack, app.UIbcQuotaKeeperB, appCodec)
+	transferStack = uibc.NewICS20Module(transferStack, app.UIbcQuotaKeeperB, appCodec)
 
 	// Create Interchain Accounts Controller Stack
 	// SendPacket, since it is originating from the application to core IBC:
