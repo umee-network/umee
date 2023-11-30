@@ -83,10 +83,10 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingCo
 // AppModule represents the AppModule for this module
 type AppModule struct {
 	AppModuleBasic
-	kb quota.Builder
+	kb quota.KeeperBuilder
 }
 
-func NewAppModule(cdc codec.Codec, kb quota.Builder) AppModule {
+func NewAppModule(cdc codec.Codec, kb quota.KeeperBuilder) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		kb:             kb,

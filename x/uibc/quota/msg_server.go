@@ -11,11 +11,11 @@ import (
 var _ uibc.MsgServer = msgServer{}
 
 type msgServer struct {
-	kb Builder
+	kb KeeperBuilder
 }
 
 // NewMsgServerImpl returns an implementation of uibc.MsgServer
-func NewMsgServerImpl(kb Builder) uibc.MsgServer {
+func NewMsgServerImpl(kb KeeperBuilder) uibc.MsgServer {
 	return &msgServer{kb: kb}
 }
 

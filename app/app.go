@@ -275,7 +275,7 @@ type UmeeApp struct {
 	LeverageKeeper    leveragekeeper.Keeper
 	IncentiveKeeper   incentivekeeper.Keeper
 	OracleKeeper      oraclekeeper.Keeper
-	UIbcQuotaKeeperB  uibcquota.Builder
+	UIbcQuotaKeeperB  uibcquota.KeeperBuilder
 	UGovKeeperB       ugovkeeper.Builder
 	MetokenKeeperB    metokenkeeper.Builder
 
