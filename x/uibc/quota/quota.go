@@ -229,7 +229,7 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 }
 
 // RecordIBCInflow will save the inflow amount if token is registered otherwise it will skip
-func (k Keeper) RecordIBCInflow(ctx sdk.Context,
+func (k Keeper) RecordIBCInflow(
 	packet channeltypes.Packet, dataDenom, dataAmount string, isSourceChain bool,
 ) exported.Acknowledgement {
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
@@ -241,7 +241,7 @@ func (k Keeper) RecordIBCInflow(ctx sdk.Context,
 		prefixedDenom := sourcePrefix + dataDenom
 		// construct the denomination trace from the full raw denomination and get the ibc_denom
 		ibcDenom := transfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
-		ts, err := k.leverage.GetTokenSettings(ctx, ibcDenom)
+		ts, err := k.leverage.GetTokenSettings(*k.ctx, ibcDenom)
 		if err != nil {
 			// skip if token is not a registered token on leverage
 			if ltypes.ErrNotRegisteredToken.Is(err) {
