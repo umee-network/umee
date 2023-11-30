@@ -19,6 +19,7 @@ jobs:
         with:
           PATTERNS: |
             **/**.go
+          FILES: |
             go.mod
             go.sum
       - uses: golang/govulncheck-action@v1.0.1
