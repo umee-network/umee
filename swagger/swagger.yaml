@@ -412,6 +412,9 @@ paths:
                 type: array
                 items:
                   type: string
+                description: >-
+                  Failures is a list of addresses for which the position
+                  calculation failed.
             description: >-
               QueryInspectResponse defines the response structure for the
               Inspect gRPC service handler.
@@ -5087,6 +5090,9 @@ definitions:
         type: array
         items:
           type: string
+        description: >-
+          Failures is a list of addresses for which the position calculation
+          failed.
     description: >-
       QueryInspectResponse defines the response structure for the Inspect gRPC
       service handler.

@@ -972,7 +972,8 @@ var xxx_messageInfo_QueryInspectAccount proto.InternalMessageInfo
 // QueryInspectResponse defines the response structure for the Inspect gRPC service handler.
 type QueryInspectResponse struct {
 	Borrowers []InspectAccount `protobuf:"bytes,1,rep,name=borrowers,proto3" json:"borrowers"`
-	Failures  []string         `protobuf:"bytes,2,rep,name=failures,proto3" json:"failures,omitempty"`
+	// Failures is a list of addresses for which the position calculation failed.
+	Failures []string `protobuf:"bytes,2,rep,name=failures,proto3" json:"failures,omitempty"`
 }
 
 func (m *QueryInspectResponse) Reset()         { *m = QueryInspectResponse{} }

@@ -402,6 +402,7 @@ message QueryInspectResponse {
   repeated InspectAccount borrowers = 1 [
     (gogoproto.nullable) = false
   ];
+  // Failures is a list of addresses for which the position calculation failed.
   repeated string failures = 2;
 }
 
