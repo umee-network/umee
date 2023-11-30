@@ -1,4 +1,4 @@
-package uibc_test
+package uics20_test
 
 import (
 	"testing"

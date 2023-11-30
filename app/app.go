@@ -147,7 +147,7 @@ import (
 	uibcmodule "github.com/umee-network/umee/v6/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
-	uibcquotakeeper "github.com/umee-network/umee/v6/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/uics20"
 
 	"github.com/umee-network/umee/v6/x/metoken"
 	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
@@ -275,7 +275,7 @@ type UmeeApp struct {
 	LeverageKeeper    leveragekeeper.Keeper
 	IncentiveKeeper   incentivekeeper.Keeper
 	OracleKeeper      oraclekeeper.Keeper
-	UIbcQuotaKeeperB  uibcquotakeeper.Builder
+	UIbcQuotaKeeperB  uibcquota.Builder
 	UGovKeeperB       ugovkeeper.Builder
 	MetokenKeeperB    metokenkeeper.Builder
 
@@ -549,7 +549,7 @@ func New(
 	)
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
-	app.UIbcQuotaKeeperB = uibcquotakeeper.NewKeeperBuilder(
+	app.UIbcQuotaKeeperB = uibcquota.NewKeeperBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
@@ -566,7 +566,7 @@ func New(
 	  - IBC Rate Limit Middleware
 	 **********/
 
-	quotaICS4 := uibcquota.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
+	quotaICS4 := uics20.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
 
 	// Create Transfer Keeper and pass IBCFeeKeeper as expected Channel and PortKeeper
 	// since fee middleware will wrap the IBCKeeper for underlying application.
@@ -581,7 +581,7 @@ func New(
 	var transferStack ibcporttypes.IBCModule
 	transferStack = ibctransfer.NewIBCModule(app.IBCTransferKeeper)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
-	transferStack = uibc.NewICS20Module(transferStack, app.UIbcQuotaKeeperB, appCodec)
+	transferStack = uics20.NewICS20Module(transferStack, app.UIbcQuotaKeeperB, appCodec)
 
 	// Create Interchain Accounts Controller Stack
 	// SendPacket, since it is originating from the application to core IBC:

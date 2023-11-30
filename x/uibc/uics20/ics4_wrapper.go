@@ -1,4 +1,4 @@
-package uibc
+package uics20
 
 import (
 	"cosmossdk.io/errors"

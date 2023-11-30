@@ -16,7 +16,7 @@ import (
 	"github.com/umee-network/umee/v6/util"
 	ibctransfer "github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/client/cli"
-	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
 var (
@@ -83,10 +83,10 @@ func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingCo
 // AppModule represents the AppModule for this module
 type AppModule struct {
 	AppModuleBasic
-	kb keeper.Builder
+	kb quota.Builder
 }
 
-func NewAppModule(cdc codec.Codec, kb keeper.Builder) AppModule {
+func NewAppModule(cdc codec.Codec, kb quota.Builder) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
 		kb:             kb,
@@ -118,8 +118,8 @@ func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
 // RegisterServices implements module.AppModule
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	ibctransfer.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.kb))
-	ibctransfer.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.kb))
+	ibctransfer.RegisterMsgServer(cfg.MsgServer(), quota.NewMsgServerImpl(am.kb))
+	ibctransfer.RegisterQueryServer(cfg.QueryServer(), quota.NewQuerier(am.kb))
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
