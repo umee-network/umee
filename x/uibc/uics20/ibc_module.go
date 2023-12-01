@@ -37,7 +37,7 @@ func NewICS20Module(app porttypes.IBCModule, k quota.KeeperBuilder, cdc codec.JS
 	}
 }
 
-// OnRecvPacket implements types.Middleware
+// OnRecvPacket is called when a receiver chain receives a packet from SendPacket.
 func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
 	qk := im.kb.Keeper(&ctx)
@@ -48,17 +48,16 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 }
 
-// OnAcknowledgementPacket implements types.Middleware
-func (im ICS20Module) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte,
-	relayer sdk.AccAddress,
-) error {
+// OnAcknowledgementPacket is called on the packet sender chain, once the receiver acknowledged
+// the packet reception.
+func (im ICS20Module) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte, relayer sdk.AccAddress) error {
 	var ack channeltypes.Acknowledgement
 	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
 		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
-	qk := im.kb.Keeper(&ctx)
-	if err := qk.IBCOnAckPacket(ack, packet); err != nil {
-		return err
+	if _, isErr := ack.Response.(*channeltypes.Acknowledgement_Error); isErr {
+		// we don't return to propagate the ack error to the other layers
+		im.onAckErr(&ctx, packet)
 	}
 
 	return im.IBCModule.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
@@ -66,12 +65,26 @@ func (im ICS20Module) OnAcknowledgementPacket(ctx sdk.Context, packet channeltyp
 
 // OnTimeoutPacket implements types.Middleware
 func (im ICS20Module) OnTimeoutPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress) error {
-	qk := im.kb.Keeper(&ctx)
-	if err := qk.IBCOnTimeout(packet); err != nil {
-		return err
-	}
-
+	im.onAckErr(&ctx, packet)
 	return im.IBCModule.OnTimeoutPacket(ctx, packet, relayer)
+}
+
+func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
+	ftData, err := im.deserializeFTData(packet)
+	if err != nil {
+		// we only log error, because we want to propagate the ack to other layers.
+		ctx.Logger().Error("can't revert quota update", "err", err)
+	}
+	qk := im.kb.Keeper(ctx)
+	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
+}
+
+func (im ICS20Module) deserializeFTData(packet channeltypes.Packet) (d transfertypes.FungibleTokenPacketData, err error) {
+	if err = im.cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
+		err = errors.Wrap(err,
+			"cannot unmarshal ICS-20 transfer packet data")
+	}
+	return
 }
 
 func ValidateReceiverAddress(packet channeltypes.Packet) error {

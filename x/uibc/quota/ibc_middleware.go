@@ -3,7 +3,6 @@ package quota
 import (
 	"cosmossdk.io/errors"
 	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
@@ -59,49 +58,26 @@ func (k Keeper) IBCOnRecvPacket(packet channeltypes.Packet) exported.Acknowledge
 	return nil
 }
 
-func (k Keeper) IBCOnAckPacket(ack channeltypes.Acknowledgement, packet channeltypes.Packet) error {
-	if _, isErr := ack.Response.(*channeltypes.Acknowledgement_Error); isErr {
-		params := k.GetParams()
-		if !params.IbcStatus.OutflowQuotaEnabled() {
-			return nil
-		}
-		err := k.revertQuotaUpdate(packet.Data)
-		emitOnRevertQuota(k.ctx, "acknowledgement", packet.Data, err)
-	}
-	return nil
-}
-
-func (k Keeper) IBCOnTimeout(packet channeltypes.Packet) error {
-	err := k.revertQuotaUpdate(packet.Data)
-	emitOnRevertQuota(k.ctx, "timeout", packet.Data, err)
-	return nil
-}
-
-// revertQuotaUpdate must be called on packet acknnowledgemenet error to revert necessary changes.
-func (k Keeper) revertQuotaUpdate(packetData []byte) error {
-	var data transfertypes.FungibleTokenPacketData
-	if err := k.cdc.UnmarshalJSON(packetData, &data); err != nil {
-		return errors.Wrap(err,
-			"cannot unmarshal ICS-20 transfer packet data")
-	}
-
-	amount, ok := sdkmath.NewIntFromString(data.Amount)
-	if !ok {
-		return sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", data.Amount)
-	}
-
-	return k.UndoUpdateQuota(data.Denom, amount)
-}
-
-// emitOnRevertQuota emits events related to quota update revert.
-// packetData is ICS 20 packet data bytes.
-func emitOnRevertQuota(ctx *sdk.Context, failureType string, packetData []byte, err error) {
-	if err == nil {
+// IBCRevertQuotaUpdate must be called on packet acknnowledgemenet error or timeout to revert
+// necessary changes.
+func (k Keeper) IBCRevertQuotaUpdate(amount, denom string) {
+	params := k.GetParams()
+	if !params.IbcStatus.OutflowQuotaEnabled() {
 		return
 	}
-	ctx.Logger().Error("revert quota update error", "err", err)
-	sdkutil.Emit(ctx, &uibc.EventBadRevert{
-		FailureType: failureType,
-		Packet:      string(packetData),
-	})
+	if err := k.revertQuotaUpdateStr(amount, denom); err != nil {
+		k.ctx.Logger().Error("revert quota update error", "err", err)
+		sdkutil.Emit(k.ctx, &uibc.EventBadRevert{
+			FailureType: "ibc-ack",
+			Packet:      amount + denom,
+		})
+	}
+}
+
+func (k Keeper) revertQuotaUpdateStr(amount, denom string) error {
+	amountInt, ok := sdkmath.NewIntFromString(amount)
+	if !ok {
+		return sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", amount)
+	}
+	return k.UndoUpdateQuota(denom, amountInt)
 }
