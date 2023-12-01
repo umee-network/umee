@@ -51,6 +51,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [2315](https://github.com/umee-network/umee/pull/2215) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
+- [2346](https://github.com/umee-network/umee/pull/2346) Fix an issue where metokens were not included in historic data.
 
 ### Improvements
 
