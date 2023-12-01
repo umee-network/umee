@@ -5,7 +5,6 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 
@@ -38,17 +37,17 @@ func (k Keeper) IBCOnSendPacket(packet []byte) error {
 func (k Keeper) IBCOnRecvPacket(packet channeltypes.Packet) exported.Acknowledgement {
 	params := k.GetParams()
 	if !params.IbcStatus.IBCTransferEnabled() {
-		return channeltypes.NewErrorAcknowledgement(transfertypes.ErrReceiveDisabled)
+		return channeltypes.NewErrorAcknowledgement(ics20types.ErrReceiveDisabled)
 	}
 
 	if params.IbcStatus.OutflowQuotaEnabled() {
-		var data transfertypes.FungibleTokenPacketData
-		if err := transfertypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		var data ics20types.FungibleTokenPacketData
+		if err := ics20types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
 			ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
 			return channeltypes.NewErrorAcknowledgement(ackErr)
 		}
 
-		isSourceChain := transfertypes.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
+		isSourceChain := ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
 		ackErr := k.RecordIBCInflow(packet, data.Denom, data.Amount, isSourceChain)
 		if ackErr != nil {
 			return ackErr
