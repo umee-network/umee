@@ -1,8 +1,6 @@
 package uics20
 
 import (
-	"encoding/json"
-
 	"cosmossdk.io/errors"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
@@ -89,7 +87,7 @@ func (im ICS20Module) deserializeFTData(packet channeltypes.Packet) (d transfert
 
 func ValidateReceiverAddress(packet channeltypes.Packet) error {
 	var packetData transfertypes.FungibleTokenPacketData
-	if err := json.Unmarshal(packet.GetData(), &packetData); err != nil {
+	if err := im.json.Unmarshal(packet.GetData(), &packetData); err != nil {
 		return err
 	}
 	if len(packetData.Receiver) >= 4096 {

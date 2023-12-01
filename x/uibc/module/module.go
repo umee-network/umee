@@ -14,7 +14,7 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"github.com/spf13/cobra"
 	"github.com/umee-network/umee/v6/util"
-	ibctransfer "github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/client/cli"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
@@ -35,7 +35,7 @@ func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
 
 // DefaultGenesis implements module.AppModuleBasic
 func (AppModuleBasic) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(ibctransfer.DefaultGenesisState())
+	return cdc.MustMarshalJSON(uibc.DefaultGenesisState())
 }
 
 // GetQueryCmd implements module.AppModuleBasic
