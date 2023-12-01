@@ -45,6 +45,7 @@ jobs:
         with:
           PATTERNS: |
             **/**.go
+          FILES: |
             go.mod
             go.sum
       - name: Setup go
@@ -71,6 +72,7 @@ jobs:
         with:
           PATTERNS: |
             **/**.go
+          FILES: |
             go.mod
             go.sum
       - uses: actions/setup-go@v4
@@ -102,6 +104,7 @@ jobs:
         with:
           PATTERNS: |
             **/**.go
+          FILES: |
             go.mod
             go.sum
       - uses: actions/setup-go@v4
@@ -127,6 +130,7 @@ jobs:
         with:
           PATTERNS: |
             **/**.go
+          FILES: |
             go.mod
             go.sum
 
