@@ -77,14 +77,23 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 		}
 		// save the exchange rate to store with denom and timestamp
 		k.SetExchangeRate(ctx, denom, exchangeRate)
+	}
 
-		if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-			k.AddHistoricPrice(ctx, denom, exchangeRate)
-		}
-
-		// Calculate and stamp median/median deviation if median stamp period has passed
-		if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
-			if err = k.CalcAndSetHistoricMedian(ctx, denom); err != nil {
+	if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
+		k.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, _ time.Time) (stop bool) {
+			k.AddHistoricPrice(ctx, denom, exgRate)
+			return false
+		})
+	}
+	// Calculate and stamp median/median deviation if median stamp period has passed
+	if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
+		var exchangeRates sdk.DecCoins
+		k.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, _ time.Time) (stop bool) {
+			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, exgRate))
+			return false
+		})
+		for _, rate := range exchangeRates {
+			if err := k.CalcAndSetHistoricMedian(ctx, rate.Denom); err != nil {
 				return err
 			}
 		}
