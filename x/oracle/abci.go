@@ -87,13 +87,14 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	}
 	// Calculate and stamp median/median deviation if median stamp period has passed
 	if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
+		var err error
 		k.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec, _ time.Time) (stop bool) {
-			err := k.CalcAndSetHistoricMedian(ctx, denom)
-			if err != nil {
-				ctx.Logger().Error("error calculating historic median", "denom", denom, "error", err)
-			}
+			err = k.CalcAndSetHistoricMedian(ctx, denom)
 			return err != nil
 		})
+		if err != nil {
+			return err
+		}
 	}
 
 	// update miss counting & slashing
