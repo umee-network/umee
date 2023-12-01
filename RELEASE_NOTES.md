@@ -31,6 +31,8 @@ Highlights:
 
 Price Feeder `< umee/v2.3.0` is not compatible with Cosmos SDK v0.47. Validators must update to `umee/v2.3.0` or newer.
 
+Please make sure your transactions are going through. If you see _out of gas_ in your transactions ([example](https://explorer.network.umee.cc/Canon-4/tx/74078158E2739CBF7EEA30D6BE673D207338E6686129717A4CED546F36F07CD7)). If you see out of gas errors, please increase `gas_adjustment` in your `price-feeder.toml`.
+
 #### libwasmvm update
 
 Our dependencies have been updated. Now the binary requires `libwasmvm v1.5.0`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
