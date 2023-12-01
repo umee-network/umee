@@ -6,7 +6,7 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.2.0-beta
+## v6.2.0
 
 Highlights:
 
@@ -31,7 +31,9 @@ Highlights:
 
 Price Feeder `< umee/v2.3.0` is not compatible with Cosmos SDK v0.47. Validators must update to `umee/v2.3.0` or newer.
 
-Please make sure your transactions are going through. If you see _out of gas_ in your transactions ([example](https://explorer.network.umee.cc/Canon-4/tx/74078158E2739CBF7EEA30D6BE673D207338E6686129717A4CED546F36F07CD7)). If you see out of gas errors, please increase `gas_adjustment` in your `price-feeder.toml`.
+During the testnet upgrade, we noticed miss counters increasing dramatically. Please make sure your transactions are going through. If you see _out of gas_ in your transactions ([example](https://explorer.network.umee.cc/Canon-4/tx/74078158E2739CBF7EEA30D6BE673D207338E6686129717A4CED546F36F07CD7)), please increase `gas_adjustment` to `2.0` in your `price-feeder.toml`. 
+
+We recommend to actively track your miss counters and making sure you follow the [latest currency-pairs config](https://github.com/ojo-network/price-feeder/blob/umee/umee-provider-config/currency-pairs.toml) (note the `umee` branch).
 
 #### libwasmvm update
 
