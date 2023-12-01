@@ -29,6 +29,7 @@ func (q Querier) Inspect(
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
+	failures := []string{}
 
 	// This query is also disabled by default as a safety measure. Enable with liquidator queries.
 	if !q.Keeper.liquidatorQueryEnabled {
@@ -73,6 +74,8 @@ func (q Querier) Inspect(
 			borrowedValue = position.BorrowedValue()
 			collateralValue = position.CollateralValue()
 			liquidationThreshold = position.Limit()
+		} else {
+			failures = append(failures, addr.String())
 		}
 
 		borrowed := k.GetBorrowerBorrows(ctx, addr)
@@ -120,7 +123,7 @@ func (q Querier) Inspect(
 	for _, b := range borrowers {
 		sortedBorrowers = append(sortedBorrowers, *b)
 	}
-	return &types.QueryInspectResponse{Borrowers: sortedBorrowers}, nil
+	return &types.QueryInspectResponse{Borrowers: sortedBorrowers, Failures: failures}, nil
 }
 
 // Separated from grpc_query.go
