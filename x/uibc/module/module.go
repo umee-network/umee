@@ -50,31 +50,31 @@ func (AppModuleBasic) GetTxCmd() *cobra.Command {
 
 // Name implements module.AppModuleBasic
 func (AppModuleBasic) Name() string {
-	return ibctransfer.ModuleName
+	return uibc.ModuleName
 }
 
 // RegisterGRPCGatewayRoutes implements module.AppModuleBasic
 func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *runtime.ServeMux) {
-	err := ibctransfer.RegisterQueryHandlerClient(
-		context.Background(), mux, ibctransfer.NewQueryClient(clientCtx))
+	err := uibc.RegisterQueryHandlerClient(
+		context.Background(), mux, uibc.NewQueryClient(clientCtx))
 	util.Panic(err)
 }
 
 // RegisterInterfaces implements module.AppModuleBasic
 func (AppModuleBasic) RegisterInterfaces(registry codectypes.InterfaceRegistry) {
-	ibctransfer.RegisterInterfaces(registry)
+	uibc.RegisterInterfaces(registry)
 }
 
 // RegisterLegacyAminoCodec implements module.AppModuleBasic
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	ibctransfer.RegisterLegacyAminoCodec(cdc)
+	uibc.RegisterLegacyAminoCodec(cdc)
 }
 
 // ValidateGenesis implements module.AppModuleBasic
 func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig, bz json.RawMessage) error {
-	var gs ibctransfer.GenesisState
+	var gs uibc.GenesisState
 	if err := cdc.UnmarshalJSON(bz, &gs); err != nil {
-		return fmt.Errorf("failed to unmarshal %s genesis state: %w", ibctransfer.ModuleName, err)
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", uibc.ModuleName, err)
 	}
 
 	return gs.Validate()
@@ -101,7 +101,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 
 // InitGenesis implements module.AppModule
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
-	var genState ibctransfer.GenesisState
+	var genState uibc.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
 	am.kb.InitGenesis(ctx, genState)
 
@@ -118,8 +118,8 @@ func (AppModule) RegisterInvariants(sdk.InvariantRegistry) {}
 
 // RegisterServices implements module.AppModule
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	ibctransfer.RegisterMsgServer(cfg.MsgServer(), quota.NewMsgServerImpl(am.kb))
-	ibctransfer.RegisterQueryServer(cfg.QueryServer(), quota.NewQuerier(am.kb))
+	uibc.RegisterMsgServer(cfg.MsgServer(), quota.NewMsgServerImpl(am.kb))
+	uibc.RegisterQueryServer(cfg.QueryServer(), quota.NewQuerier(am.kb))
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.

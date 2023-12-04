@@ -9,7 +9,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
@@ -48,7 +47,9 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 
 // OnAcknowledgementPacket is called on the packet sender chain, once the receiver acknowledged
 // the packet reception.
-func (im ICS20Module) OnAcknowledgementPacket(ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte, relayer sdk.AccAddress) error {
+func (im ICS20Module) OnAcknowledgementPacket(
+	ctx sdk.Context, packet channeltypes.Packet, acknowledgement []byte, relayer sdk.AccAddress,
+) error {
 	var ack channeltypes.Acknowledgement
 	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
 		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
@@ -77,7 +78,9 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
 }
 
-func (im ICS20Module) deserializeFTData(packet channeltypes.Packet) (d transfertypes.FungibleTokenPacketData, err error) {
+func (im ICS20Module) deserializeFTData(
+	packet channeltypes.Packet,
+) (d transfertypes.FungibleTokenPacketData, err error) {
 	if err = im.cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
 		err = errors.Wrap(err,
 			"cannot unmarshal ICS-20 transfer packet data")
