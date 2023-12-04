@@ -84,16 +84,3 @@ func (im ICS20Module) deserializeFTData(packet channeltypes.Packet) (d transfert
 	}
 	return
 }
-
-func ValidateReceiverAddress(packet channeltypes.Packet) error {
-	var packetData transfertypes.FungibleTokenPacketData
-	if err := im.json.Unmarshal(packet.GetData(), &packetData); err != nil {
-		return err
-	}
-	if len(packetData.Receiver) >= 4096 {
-		return sdkerrors.ErrInvalidAddress.Wrapf(
-			"IBC Receiver address too long. Max supported length is %d", 4096,
-		)
-	}
-	return nil
-}
