@@ -1,6 +1,6 @@
 // Simple mocks for unit tests
 
-package keeper
+package quota
 
 import (
 	"errors"
