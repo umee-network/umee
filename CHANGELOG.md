@@ -46,14 +46,18 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+## v6.2.0 - 2023-12-01
+
 ### Bug Fixes
 
 - [2315](https://github.com/umee-network/umee/pull/2215) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
+- [2346](https://github.com/umee-network/umee/pull/2346) Fix an issue where metokens were not included in historic data.
 
 ### Improvements
 
 - [2299](https://github.com/umee-network/umee/pull/2299) Upgrade Cosmos SDK to v0.47.
 - [2301](https://github.com/umee-network/umee/pull/2301) use gov/v1 MinInitialDepositRatio and set it to 0.1.
+- [2341](https://github.com/umee-network/umee/pull/2341) inspect query also returns a list of accounts whose positions could not be calculated
 
 ### Breaking Changes
 

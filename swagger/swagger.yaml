@@ -408,6 +408,13 @@ paths:
                   description: >-
                     InspectAccount contains risk and balance info for a single
                     account for the inspector query.
+              failures:
+                type: array
+                items:
+                  type: string
+                description: >-
+                  Failures is a list of addresses for which the position
+                  calculation failed.
             description: >-
               QueryInspectResponse defines the response structure for the
               Inspect gRPC service handler.
@@ -5079,6 +5086,13 @@ definitions:
           description: >-
             InspectAccount contains risk and balance info for a single account
             for the inspector query.
+      failures:
+        type: array
+        items:
+          type: string
+        description: >-
+          Failures is a list of addresses for which the position calculation
+          failed.
     description: >-
       QueryInspectResponse defines the response structure for the Inspect gRPC
       service handler.
