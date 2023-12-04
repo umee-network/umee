@@ -24,7 +24,7 @@ import (
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 	"github.com/umee-network/umee/v6/x/uibc"
-	"github.com/umee-network/umee/v6/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
 const (
@@ -71,7 +71,7 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 	})
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
-	uibc.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.UIbcQuotaKeeperB))
+	uibc.RegisterQueryServer(queryHelper, quota.NewQuerier(app.UIbcQuotaKeeperB))
 
 	sh := testutil.NewHelper(t, ctx, app.StakingKeeper)
 	sh.Denom = bondDenom
@@ -93,7 +93,7 @@ func initTestSuite(t *testing.T) *IntTestSuite {
 	s.app = app
 	s.ctx = ctx
 	s.queryClient = uibc.NewQueryClient(queryHelper)
-	s.msgServer = keeper.NewMsgServerImpl(app.UIbcQuotaKeeperB)
+	s.msgServer = quota.NewMsgServerImpl(app.UIbcQuotaKeeperB)
 
 	return s
 }
@@ -104,10 +104,10 @@ func initKeeper(
 	cdc codec.BinaryCodec,
 	leverage uibc.Leverage,
 	oracle uibc.Oracle,
-) (sdk.Context, keeper.Keeper) {
+) (sdk.Context, quota.Keeper) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
-	kb := keeper.NewKeeperBuilder(cdc, storeKey, leverage, oracle, eg)
+	kb := quota.NewKeeperBuilder(cdc, storeKey, leverage, oracle, eg)
 	return ctx, kb.Keeper(&ctx)
 }
