@@ -15,7 +15,6 @@ import (
 
 func (k Keeper) IBCOnSendPacket(packet []byte) error {
 	params := k.GetParams()
-
 	if !params.IbcStatus.IBCTransferEnabled() {
 		return ics20types.ErrSendDisabled
 	}
@@ -34,21 +33,14 @@ func (k Keeper) IBCOnSendPacket(packet []byte) error {
 	return nil
 }
 
-func (k Keeper) IBCOnRecvPacket(packet channeltypes.Packet) exported.Acknowledgement {
+func (k Keeper) IBCOnRecvPacket(ft ics20types.FungibleTokenPacketData, packet channeltypes.Packet) exported.Acknowledgement {
 	params := k.GetParams()
 	if !params.IbcStatus.IBCTransferEnabled() {
 		return channeltypes.NewErrorAcknowledgement(ics20types.ErrReceiveDisabled)
 	}
 
 	if params.IbcStatus.OutflowQuotaEnabled() {
-		var data ics20types.FungibleTokenPacketData
-		if err := ics20types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-			ackErr := sdkerrors.ErrInvalidType.Wrap("cannot unmarshal ICS-20 transfer packet data")
-			return channeltypes.NewErrorAcknowledgement(ackErr)
-		}
-
-		isSourceChain := ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), data.Denom)
-		ackErr := k.RecordIBCInflow(packet, data.Denom, data.Amount, isSourceChain)
+		ackErr := k.RecordIBCInflow(packet, ft.Denom, ft.Amount)
 		if ackErr != nil {
 			return ackErr
 		}

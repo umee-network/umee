@@ -2,14 +2,17 @@ package uics20
 
 import (
 	"cosmossdk.io/errors"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/tx"
+	gogoproto "github.com/cosmos/gogoproto/proto"
 
+	"github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
@@ -37,9 +40,24 @@ func NewICS20Module(app porttypes.IBCModule, k quota.KeeperBuilder, cdc codec.JS
 // OnRecvPacket is called when a receiver chain receives a packet from SendPacket.
 func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
+	ftData, err := im.deserializeFTData(packet)
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
 	qk := im.kb.Keeper(&ctx)
-	if ackResp := qk.IBCOnRecvPacket(packet); ackResp != nil && !ackResp.Success() {
+	if ackResp := qk.IBCOnRecvPacket(ftData, packet); ackResp != nil && !ackResp.Success() {
 		return ackResp
+	}
+
+	if ftData.Memo != "" {
+		msgs, err := deserializeMemoMsgs([]byte(ftData.Memo), im.cdc)
+		if err != nil {
+			// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf
+			ctx.Logger().Error("can't JSON deserialize ftData Memo, expecting list of Msg", "err", err)
+		} else {
+			// TODO: need to handle fees!
+			im.dispatchMemoMsgs(msgs)
+		}
 	}
 
 	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
@@ -78,12 +96,31 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
 }
 
+func (im ICS20Module) dispatchMemoMsgs(ctx sdk.Context, msgs []sdk.Msg) error {
+	// Caching context so that we don't update the store in case of failure.
+	cacheCtx, flush := ctx.CacheContext()
+	// TODO: call flush on success
+}
+
 func (im ICS20Module) deserializeFTData(
 	packet channeltypes.Packet,
-) (d transfertypes.FungibleTokenPacketData, err error) {
+) (d ics20types.FungibleTokenPacketData, err error) {
+
 	if err = im.cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
 		err = errors.Wrap(err,
 			"cannot unmarshal ICS-20 transfer packet data")
 	}
 	return
+}
+
+func deserializeMemoMsgs(data []byte, cdc codec.JSONCodec) ([]sdk.Msg, error) {
+	var m uibc.ICS20Memo
+	if err := cdc.UnmarshalJSON(data, &m); err != nil {
+		return nil, err
+	}
+	return tx.GetMsgs(m.Messages, "memo messages")
+	var msgs = make([]sdk.Msg, len(m.Messages))
+	// for _, any := range m.Messages {
+	// }
+	return msgs, nil
 }
