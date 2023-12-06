@@ -60,6 +60,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 
 	app.registerUpgrade6_2(upgradeInfo)
+	app.registerUpgrade("v6.2-canon", upgradeInfo)
 }
 
 func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
