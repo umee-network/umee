@@ -23,7 +23,65 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		QueryParams(),
 		GetOutflows(),
+		GetInflows(),
+		GetAllInflows(),
 	)
+
+	return cmd
+}
+
+// GetAllInflows returns registered IBC denoms inflows in the current quota period.
+func GetAllInflows() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "all-inflows [denom]",
+		Args:  cobra.MaximumNArgs(1),
+		Short: "Get the ibc inflows of the registered tokens.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := uibc.NewQueryClient(clientCtx)
+
+			req := &uibc.QueryAllInflows{}
+			if len(args[0]) != 0 {
+				req.Denom = args[0]
+			}
+
+			resp, err := queryClient.AllInflows(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+// GetInflows returns total inflow sum, if denom specified it will return quota inflow of the denom.
+func GetInflows() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "inflows [denom]",
+		Args:  cobra.MaximumNArgs(1),
+		Short: "Get the total ibc inflow sum of registered tokens.",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+			queryClient := uibc.NewQueryClient(clientCtx)
+
+			req := &uibc.QueryInflows{}
+			if len(args[0]) != 0 {
+				req.Denom = args[0]
+			}
+
+			resp, err := queryClient.Inflows(cmd.Context(), req)
+			return cli.PrintOrErr(resp, err, clientCtx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
 
 	return cmd
 }

@@ -79,7 +79,8 @@ func (q Querier) AllInflows(goCtx context.Context, req *uibc.QueryAllInflows) (*
 	return &uibc.QueryAllInflowsResponse{Inflows: inflows}, nil
 }
 
-// Inflows implements uibc.QueryServer.
+// Inflows returns registered IBC denoms inflows in the current quota period.
+// If denom is not specified, returns sum of all registered inflows.
 func (q Querier) Inflows(goCtx context.Context, req *uibc.QueryInflows) (*uibc.QueryInflowsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	var amount sdk.Dec
