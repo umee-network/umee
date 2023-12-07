@@ -109,6 +109,35 @@ service Query {
     option (google.api.http).get =
         "/umee/oracle/v1/denoms/exg_rates_timestamp";
   }
+
+  // MissCounters returns oracle missing votes count of validators.
+  rpc MissCounters(QueryMissCounters)
+      returns (QueryMissCountersResponse) {
+    option (google.api.http).get =
+        "/umee/oracle/v1/miss_counters";
+  }
+}
+
+// QueryMissCounters is the request type for the Query/MissCounters RPC
+// method.
+message QueryMissCounters {
+  option (gogoproto.equal)           = false;
+  option (gogoproto.goproto_getters) = false;
+  string validator                   = 1;
+}
+
+// QueryMissCountersResponse is response type for the Query/MissCounters RPC method.
+message QueryMissCountersResponse {
+  repeated PriceMissCounter miss_counters = 1 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// PriceMissCounter is the validator's oracle price votes missing count.
+message PriceMissCounter {
+  string validator = 1;
+  // miss_counter defines the oracle miss counter of a validator
+  uint64 miss_counter = 2;
 }
 
 // QueryExgRatesWithTimestamp is the request type for the Query/ExchangeRatesWithTimestamp RPC

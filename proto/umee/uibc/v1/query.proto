@@ -28,6 +28,44 @@ service Query {
   rpc AllOutflows(QueryAllOutflows) returns (QueryAllOutflowsResponse) {
     option (google.api.http).get = "/umee/uibc/v1/all_outflows";
   }
+
+  // Inflows returns registered IBC denoms inflows in the current quota period.
+  // If denom is not specified, returns sum of all registered inflows.
+  rpc Inflows(QueryInflows) returns (QueryInflowsResponse) {
+    option (google.api.http).get = "/umee/uibc/v1/inflows";
+  }
+
+  // AllInflows returns inflows for each registered denom in the current quota period.
+  rpc AllInflows(QueryAllInflows) returns (QueryAllInflowsResponse) {
+    option (google.api.http).get = "/umee/uibc/v1/all_inflows";
+  }
+}
+
+// QueryAllInflows defines request type for query the inflow quota of registered denoms.
+message QueryAllInflows {
+  string denom = 1;
+}
+
+// QueryAllInflowsResponse defines response type of Query/AllInflows
+message QueryAllInflowsResponse {
+  repeated cosmos.base.v1beta1.DecCoin inflows = 1 [
+    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
+    (gogoproto.nullable)     = false
+  ];
+}
+
+// QueryInflows defines request type for query the inflow quota of denoms
+message QueryInflows {
+  string denom = 1;
+}
+
+// QueryInflowsResponse defines response type of Query/Inflows
+message QueryInflowsResponse {
+  string amount = 1 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // QueryParams defines the request structure for the Params gRPC service

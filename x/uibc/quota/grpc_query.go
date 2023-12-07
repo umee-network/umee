@@ -57,3 +57,37 @@ func (q Querier) AllOutflows(goCtx context.Context, _ *uibc.QueryAllOutflows) (
 	}
 	return &uibc.QueryAllOutflowsResponse{Outflows: o}, nil
 }
+
+// AllInflows implements uibc.QueryServer.
+func (q Querier) AllInflows(goCtx context.Context, req *uibc.QueryAllInflows) (*uibc.QueryAllInflowsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	var (
+		inflows []sdk.DecCoin
+		err     error
+	)
+
+	if len(req.Denom) != 0 {
+		tokenInflow := q.Keeper(&ctx).GetTokenInflow(req.Denom)
+		inflows = append(inflows, tokenInflow)
+	} else {
+		inflows, err = q.Keeper(&ctx).GetAllInflows()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &uibc.QueryAllInflowsResponse{Inflows: inflows}, nil
+}
+
+// Inflows implements uibc.QueryServer.
+func (q Querier) Inflows(goCtx context.Context, req *uibc.QueryInflows) (*uibc.QueryInflowsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	var amount sdk.Dec
+	if len(req.Denom) != 0 {
+		tokenInflow := q.Keeper(&ctx).GetTokenInflow(req.Denom)
+		amount = tokenInflow.Amount
+	} else {
+		amount = q.Keeper(&ctx).GetInflowSum()
+	}
+	return &uibc.QueryInflowsResponse{Amount: amount}, nil
+}
