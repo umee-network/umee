@@ -44,7 +44,7 @@ func GetAllInflows() *cobra.Command {
 			queryClient := uibc.NewQueryClient(clientCtx)
 
 			req := &uibc.QueryAllInflows{}
-			if len(args[0]) != 0 {
+			if len(args) > 0 && len(args[0]) != 0 {
 				req.Denom = args[0]
 			}
 
@@ -72,7 +72,7 @@ func GetInflows() *cobra.Command {
 			queryClient := uibc.NewQueryClient(clientCtx)
 
 			req := &uibc.QueryInflows{}
-			if len(args[0]) != 0 {
+			if len(args) > 0 && len(args[0]) != 0 {
 				req.Denom = args[0]
 			}
 
@@ -124,7 +124,7 @@ func GetOutflows() *cobra.Command {
 
 			queryClient := uibc.NewQueryClient(clientCtx)
 			queryReq := uibc.QueryOutflows{}
-			if len(args) > 0 {
+			if len(args) > 0 && len(args[0]) != 0 {
 				queryReq.Denom = args[0]
 			}
 			resp, err := queryClient.Outflows(cmd.Context(), &queryReq)
