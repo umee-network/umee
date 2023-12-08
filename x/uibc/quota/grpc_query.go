@@ -58,37 +58,33 @@ func (q Querier) AllOutflows(goCtx context.Context, _ *uibc.QueryAllOutflows) (
 	return &uibc.QueryAllOutflowsResponse{Outflows: o}, nil
 }
 
-// AllInflows implements uibc.QueryServer.
-func (q Querier) AllInflows(goCtx context.Context, req *uibc.QueryAllInflows) (*uibc.QueryAllInflowsResponse, error) {
+// Inflows returns sum of inflows and registered IBC denoms inflows in the current quota period.
+func (q Querier) Inflows(goCtx context.Context, req *uibc.QueryInflows) (*uibc.QueryInflowsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	var (
-		inflows []sdk.DecCoin
+		inflows sdk.DecCoins
 		err     error
 	)
 
 	if len(req.Denom) != 0 {
-		tokenInflow := q.Keeper(&ctx).GetTokenInflow(req.Denom)
-		inflows = append(inflows, tokenInflow)
+		inflows = append(inflows, q.Keeper(&ctx).GetTokenInflow(req.Denom))
 	} else {
 		inflows, err = q.Keeper(&ctx).GetAllInflows()
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	return &uibc.QueryAllInflowsResponse{Inflows: inflows}, nil
+	return &uibc.QueryInflowsResponse{Sum: q.Keeper(&ctx).GetInflowSum(), Inflows: inflows}, nil
 }
 
-// Inflows returns registered IBC denoms inflows in the current quota period.
-// If denom is not specified, returns sum of all registered inflows.
-func (q Querier) Inflows(goCtx context.Context, req *uibc.QueryInflows) (*uibc.QueryInflowsResponse, error) {
+// QuotaExpires returns the current ibc quota end time.
+func (q Querier) QuotaExpires(goCtx context.Context, _ *uibc.QueryQuotaExpires) (*uibc.QueryQuotaExpiresResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	var amount sdk.Dec
-	if len(req.Denom) != 0 {
-		tokenInflow := q.Keeper(&ctx).GetTokenInflow(req.Denom)
-		amount = tokenInflow.Amount
-	} else {
-		amount = q.Keeper(&ctx).GetInflowSum()
+
+	quotaExpireTime, err := q.Keeper(&ctx).GetExpire()
+	if err != nil {
+		return nil, err
 	}
-	return &uibc.QueryInflowsResponse{Amount: amount}, nil
+
+	return &uibc.QueryQuotaExpiresResponse{EndTime: *quotaExpireTime}, nil
 }

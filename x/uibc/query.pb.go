@@ -12,19 +12,23 @@ import (
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
+	github_com_cosmos_gogoproto_types "github.com/cosmos/gogoproto/types"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	io "io"
 	math "math"
 	math_bits "math/bits"
+	time "time"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+var _ = time.Kitchen
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the proto package it is being compiled against.
@@ -33,22 +37,21 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 // QueryAllInflows defines request type for query the inflow quota of registered denoms.
-type QueryAllInflows struct {
-	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+type QueryQuotaExpires struct {
 }
 
-func (m *QueryAllInflows) Reset()         { *m = QueryAllInflows{} }
-func (m *QueryAllInflows) String() string { return proto.CompactTextString(m) }
-func (*QueryAllInflows) ProtoMessage()    {}
-func (*QueryAllInflows) Descriptor() ([]byte, []int) {
+func (m *QueryQuotaExpires) Reset()         { *m = QueryQuotaExpires{} }
+func (m *QueryQuotaExpires) String() string { return proto.CompactTextString(m) }
+func (*QueryQuotaExpires) ProtoMessage()    {}
+func (*QueryQuotaExpires) Descriptor() ([]byte, []int) {
 	return fileDescriptor_2ca7e17b0958935d, []int{0}
 }
-func (m *QueryAllInflows) XXX_Unmarshal(b []byte) error {
+func (m *QueryQuotaExpires) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryAllInflows) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryQuotaExpires) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryAllInflows.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryQuotaExpires.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -58,35 +61,35 @@ func (m *QueryAllInflows) XXX_Marshal(b []byte, deterministic bool) ([]byte, err
 		return b[:n], nil
 	}
 }
-func (m *QueryAllInflows) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryAllInflows.Merge(m, src)
+func (m *QueryQuotaExpires) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryQuotaExpires.Merge(m, src)
 }
-func (m *QueryAllInflows) XXX_Size() int {
+func (m *QueryQuotaExpires) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryAllInflows) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryAllInflows.DiscardUnknown(m)
+func (m *QueryQuotaExpires) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryQuotaExpires.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryAllInflows proto.InternalMessageInfo
+var xxx_messageInfo_QueryQuotaExpires proto.InternalMessageInfo
 
 // QueryAllInflowsResponse defines response type of Query/AllInflows
-type QueryAllInflowsResponse struct {
-	Inflows github_com_cosmos_cosmos_sdk_types.DecCoins `protobuf:"bytes,1,rep,name=inflows,proto3,castrepeated=github.com/cosmos/cosmos-sdk/types.DecCoins" json:"inflows"`
+type QueryQuotaExpiresResponse struct {
+	EndTime time.Time `protobuf:"bytes,4,opt,name=end_time,json=endTime,proto3,stdtime" json:"end_time,omitempty" yaml:"end_time"`
 }
 
-func (m *QueryAllInflowsResponse) Reset()         { *m = QueryAllInflowsResponse{} }
-func (m *QueryAllInflowsResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryAllInflowsResponse) ProtoMessage()    {}
-func (*QueryAllInflowsResponse) Descriptor() ([]byte, []int) {
+func (m *QueryQuotaExpiresResponse) Reset()         { *m = QueryQuotaExpiresResponse{} }
+func (m *QueryQuotaExpiresResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryQuotaExpiresResponse) ProtoMessage()    {}
+func (*QueryQuotaExpiresResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_2ca7e17b0958935d, []int{1}
 }
-func (m *QueryAllInflowsResponse) XXX_Unmarshal(b []byte) error {
+func (m *QueryQuotaExpiresResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryAllInflowsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryQuotaExpiresResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryAllInflowsResponse.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryQuotaExpiresResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -96,17 +99,17 @@ func (m *QueryAllInflowsResponse) XXX_Marshal(b []byte, deterministic bool) ([]b
 		return b[:n], nil
 	}
 }
-func (m *QueryAllInflowsResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryAllInflowsResponse.Merge(m, src)
+func (m *QueryQuotaExpiresResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryQuotaExpiresResponse.Merge(m, src)
 }
-func (m *QueryAllInflowsResponse) XXX_Size() int {
+func (m *QueryQuotaExpiresResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryAllInflowsResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryAllInflowsResponse.DiscardUnknown(m)
+func (m *QueryQuotaExpiresResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryQuotaExpiresResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryAllInflowsResponse proto.InternalMessageInfo
+var xxx_messageInfo_QueryQuotaExpiresResponse proto.InternalMessageInfo
 
 // QueryInflows defines request type for query the inflow quota of denoms
 type QueryInflows struct {
@@ -148,7 +151,8 @@ var xxx_messageInfo_QueryInflows proto.InternalMessageInfo
 
 // QueryInflowsResponse defines response type of Query/Inflows
 type QueryInflowsResponse struct {
-	Amount github_com_cosmos_cosmos_sdk_types.Dec `protobuf:"bytes,1,opt,name=amount,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"amount"`
+	Sum     github_com_cosmos_cosmos_sdk_types.Dec       `protobuf:"bytes,1,opt,name=sum,proto3,customtype=github.com/cosmos/cosmos-sdk/types.Dec" json:"sum"`
+	Inflows []github_com_cosmos_cosmos_sdk_types.DecCoin `protobuf:"bytes,2,rep,name=inflows,proto3,customtype=github.com/cosmos/cosmos-sdk/types.DecCoin" json:"inflows"`
 }
 
 func (m *QueryInflowsResponse) Reset()         { *m = QueryInflowsResponse{} }
@@ -413,8 +417,8 @@ func (m *QueryAllOutflowsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_QueryAllOutflowsResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*QueryAllInflows)(nil), "umee.uibc.v1.QueryAllInflows")
-	proto.RegisterType((*QueryAllInflowsResponse)(nil), "umee.uibc.v1.QueryAllInflowsResponse")
+	proto.RegisterType((*QueryQuotaExpires)(nil), "umee.uibc.v1.QueryQuotaExpires")
+	proto.RegisterType((*QueryQuotaExpiresResponse)(nil), "umee.uibc.v1.QueryQuotaExpiresResponse")
 	proto.RegisterType((*QueryInflows)(nil), "umee.uibc.v1.QueryInflows")
 	proto.RegisterType((*QueryInflowsResponse)(nil), "umee.uibc.v1.QueryInflowsResponse")
 	proto.RegisterType((*QueryParams)(nil), "umee.uibc.v1.QueryParams")
@@ -428,45 +432,53 @@ func init() {
 func init() { proto.RegisterFile("umee/uibc/v1/query.proto", fileDescriptor_2ca7e17b0958935d) }
 
 var fileDescriptor_2ca7e17b0958935d = []byte{
-	// 602 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x94, 0x31, 0x6f, 0xd3, 0x40,
-	0x14, 0xc7, 0x63, 0x68, 0xd3, 0xf2, 0xd2, 0x0a, 0x74, 0xa4, 0x6d, 0xe2, 0xa6, 0x4e, 0x6b, 0x68,
-	0xa9, 0x84, 0xe2, 0x53, 0x52, 0x89, 0x89, 0x85, 0x90, 0xa5, 0x13, 0x10, 0x31, 0xb1, 0x54, 0x8e,
-	0x73, 0xa4, 0x56, 0x6c, 0x5f, 0xc8, 0xd9, 0x29, 0x59, 0x19, 0x90, 0xd8, 0x90, 0xf8, 0x16, 0xcc,
-	0x48, 0x7c, 0x85, 0x8c, 0x15, 0x2c, 0x88, 0xa1, 0x40, 0xc2, 0x07, 0x41, 0xbe, 0x3b, 0x5b, 0x76,
-	0x48, 0xad, 0x2e, 0x9d, 0xe2, 0x7b, 0xff, 0x97, 0xf7, 0xfb, 0xbf, 0xbb, 0x7b, 0x07, 0xa5, 0xc0,
-	0x25, 0x04, 0x07, 0x76, 0xc7, 0xc2, 0xa3, 0x3a, 0x7e, 0x13, 0x90, 0xe1, 0xd8, 0x18, 0x0c, 0xa9,
-	0x4f, 0xd1, 0x5a, 0xa8, 0x18, 0xa1, 0x62, 0x8c, 0xea, 0x6a, 0xa5, 0x47, 0x69, 0xcf, 0x21, 0xd8,
-	0x1c, 0xd8, 0xd8, 0xf4, 0x3c, 0xea, 0x9b, 0xbe, 0x4d, 0x3d, 0x26, 0x72, 0xd5, 0x62, 0x8f, 0xf6,
-	0x28, 0xff, 0xc4, 0xe1, 0x97, 0x8c, 0x96, 0x2d, 0xca, 0x5c, 0xca, 0x4e, 0x84, 0x20, 0x16, 0x52,
-	0x9a, 0xc7, 0x52, 0xdf, 0x94, 0x8a, 0x26, 0xf2, 0x70, 0xc7, 0x64, 0x04, 0x8f, 0xea, 0x1d, 0xe2,
-	0x9b, 0x75, 0x6c, 0x51, 0xdb, 0x13, 0xba, 0xfe, 0x00, 0x6e, 0xbf, 0x08, 0x5d, 0x3e, 0x71, 0x9c,
-	0x63, 0xef, 0xb5, 0x43, 0xcf, 0x18, 0x2a, 0xc2, 0x72, 0x97, 0x78, 0xd4, 0x2d, 0x29, 0xbb, 0xca,
-	0xe1, 0xad, 0xb6, 0x58, 0xe8, 0xef, 0x15, 0xd8, 0x9a, 0xcb, 0x6c, 0x13, 0x36, 0xa0, 0x1e, 0x23,
-	0xa8, 0x0f, 0x2b, 0xb6, 0x08, 0x95, 0x94, 0xdd, 0x9b, 0x87, 0x85, 0x46, 0xc5, 0x90, 0xf6, 0x42,
-	0xac, 0x21, 0xb1, 0x46, 0x8b, 0x58, 0x4f, 0xa9, 0xed, 0x35, 0x8f, 0x26, 0x17, 0xd5, 0xdc, 0xe7,
-	0x5f, 0xd5, 0x87, 0x3d, 0xdb, 0x3f, 0x0d, 0x3a, 0x86, 0x45, 0x5d, 0xd9, 0x8e, 0xfc, 0xa9, 0xb1,
-	0x6e, 0x1f, 0xfb, 0xe3, 0x01, 0x61, 0xd1, 0x7f, 0x58, 0x3b, 0x22, 0xe8, 0xf7, 0x61, 0x8d, 0xfb,
-	0xc8, 0xb6, 0xeb, 0x40, 0x31, 0x99, 0x15, 0x5b, 0x7d, 0x09, 0x79, 0xd3, 0xa5, 0x81, 0xe7, 0x8b,
-	0xf4, 0xe6, 0xe3, 0xd0, 0xcb, 0xcf, 0x8b, 0xea, 0xc1, 0xd5, 0xbc, 0x7c, 0xfb, 0x52, 0x03, 0xd9,
-	0x5a, 0x8b, 0x58, 0x6d, 0x59, 0x4b, 0x5f, 0x87, 0x02, 0xa7, 0x3d, 0x37, 0x87, 0xa6, 0xcb, 0xf4,
-	0x63, 0xb8, 0x9b, 0x58, 0xc6, 0xec, 0x06, 0xe4, 0x07, 0x3c, 0xc2, 0xd9, 0x85, 0x46, 0xd1, 0x48,
-	0xde, 0x09, 0x43, 0x64, 0x37, 0x97, 0x42, 0x47, 0x6d, 0x99, 0xa9, 0xef, 0xc3, 0x3a, 0x2f, 0xf5,
-	0x2c, 0xf0, 0xb3, 0xda, 0x75, 0x61, 0x23, 0x95, 0x76, 0xcd, 0xfd, 0x22, 0xb8, 0x13, 0xdd, 0x85,
-	0x88, 0xa8, 0x7f, 0x50, 0xa0, 0x34, 0x1f, 0x8c, 0x6d, 0xb8, 0xb0, 0x4a, 0x65, 0xec, 0xfa, 0xae,
-	0x48, 0x8c, 0x68, 0x7c, 0x5d, 0x82, 0x65, 0xee, 0x05, 0x75, 0x21, 0x2f, 0xf6, 0x15, 0x95, 0xd3,
-	0xbb, 0x9d, 0x38, 0x20, 0x75, 0xef, 0x52, 0x29, 0x6a, 0x40, 0xaf, 0xbc, 0xfb, 0xfe, 0xf7, 0xd3,
-	0x8d, 0x4d, 0x54, 0xc4, 0xa9, 0x51, 0x13, 0xa7, 0x84, 0x1c, 0x58, 0x8d, 0x0f, 0x68, 0x7b, 0x41,
-	0xb1, 0x48, 0x54, 0xef, 0x65, 0x88, 0x31, 0x4b, 0xe3, 0xac, 0x12, 0xda, 0x4c, 0xb3, 0xa2, 0xee,
-	0xd0, 0x18, 0x0a, 0x89, 0x3d, 0x46, 0xda, 0x82, 0x9a, 0x09, 0x5d, 0x3d, 0xc8, 0xd6, 0x63, 0xac,
-	0xce, 0xb1, 0x15, 0xa4, 0xa6, 0xb1, 0xa6, 0xe3, 0x9c, 0xc4, 0xe8, 0x53, 0x58, 0x89, 0xe6, 0x4e,
-	0x5d, 0x50, 0x56, 0x6a, 0xaa, 0x7e, 0xb9, 0x16, 0xe3, 0x76, 0x38, 0x6e, 0x0b, 0x6d, 0xa4, 0x71,
-	0x72, 0xcc, 0x51, 0x00, 0x90, 0x78, 0x93, 0x76, 0x16, 0xf7, 0x10, 0xf1, 0xf6, 0x33, 0xe5, 0x18,
-	0xb9, 0xc7, 0x91, 0xdb, 0xa8, 0xfc, 0x7f, 0x87, 0x12, 0xdb, 0x6c, 0x4d, 0xfe, 0x68, 0xb9, 0xc9,
-	0x54, 0x53, 0xce, 0xa7, 0x9a, 0xf2, 0x7b, 0xaa, 0x29, 0x1f, 0x67, 0x5a, 0xee, 0x7c, 0xa6, 0xe5,
-	0x7e, 0xcc, 0xb4, 0xdc, 0xab, 0xe4, 0xd4, 0x84, 0x25, 0x6a, 0x1e, 0xf1, 0xcf, 0xe8, 0xb0, 0x2f,
-	0xea, 0x8d, 0x1e, 0xe1, 0xb7, 0xbc, 0x68, 0x27, 0xcf, 0x1f, 0xd7, 0xa3, 0x7f, 0x01, 0x00, 0x00,
-	0xff, 0xff, 0xfe, 0x3d, 0x2e, 0x90, 0x0f, 0x06, 0x00, 0x00,
+	// 721 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0xbf, 0x53, 0x13, 0x4d,
+	0x18, 0xc7, 0x73, 0xfc, 0x08, 0xbc, 0x1b, 0x98, 0xf7, 0x7d, 0x97, 0x80, 0xe1, 0x08, 0x77, 0xb8,
+	0x28, 0x32, 0x2a, 0xb7, 0x93, 0x30, 0x63, 0xe1, 0xd8, 0x18, 0xb1, 0xa0, 0x51, 0xc9, 0x50, 0xd9,
+	0x64, 0x2e, 0xc9, 0x12, 0x4e, 0xee, 0x6e, 0xcf, 0xec, 0x5e, 0x20, 0x85, 0x8d, 0x33, 0x16, 0x76,
+	0xcc, 0xf8, 0x5f, 0x58, 0xdb, 0xdb, 0x52, 0x32, 0xd8, 0x38, 0x16, 0x41, 0xc1, 0xca, 0xd2, 0xbf,
+	0xc0, 0xd9, 0xbd, 0xbd, 0xf3, 0x02, 0x01, 0x29, 0xac, 0xc8, 0xee, 0xf7, 0x7b, 0xdf, 0xcf, 0xb3,
+	0xcf, 0xc3, 0x2e, 0x28, 0x84, 0x1e, 0x21, 0x38, 0x74, 0xea, 0x0d, 0xdc, 0x29, 0xe1, 0x97, 0x21,
+	0x69, 0x77, 0xad, 0xa0, 0x4d, 0x39, 0x85, 0x13, 0x42, 0xb1, 0x84, 0x62, 0x75, 0x4a, 0x7a, 0xb1,
+	0x45, 0x69, 0xcb, 0x25, 0xd8, 0x0e, 0x1c, 0x6c, 0xfb, 0x3e, 0xe5, 0x36, 0x77, 0xa8, 0xcf, 0x22,
+	0xaf, 0x9e, 0x6f, 0xd1, 0x16, 0x95, 0x3f, 0xb1, 0xf8, 0xa5, 0x76, 0x67, 0x1b, 0x94, 0x79, 0x94,
+	0xd5, 0x22, 0x21, 0x5a, 0x28, 0xe9, 0x2c, 0x96, 0x72, 0x5b, 0x29, 0xa6, 0x02, 0xc9, 0x55, 0x3d,
+	0xdc, 0xc2, 0xdc, 0xf1, 0x08, 0xe3, 0xb6, 0x17, 0x28, 0x83, 0x11, 0x05, 0xe1, 0xba, 0xcd, 0x08,
+	0xee, 0x94, 0xea, 0x84, 0xdb, 0x25, 0xdc, 0xa0, 0x8e, 0x1f, 0xe9, 0x68, 0x0a, 0xfc, 0xbf, 0x21,
+	0x8e, 0xb1, 0x21, 0x42, 0x1f, 0xef, 0x05, 0x4e, 0x9b, 0x30, 0xf4, 0x46, 0x03, 0xb3, 0xe7, 0x76,
+	0xab, 0x84, 0x05, 0xd4, 0x67, 0x04, 0x6e, 0x83, 0x71, 0xe2, 0x37, 0x6b, 0x82, 0x54, 0x18, 0x59,
+	0xd0, 0x96, 0x73, 0x65, 0xdd, 0x8a, 0xca, 0xb0, 0xe2, 0x32, 0xac, 0xcd, 0xb8, 0x8c, 0x4a, 0xe9,
+	0xa0, 0x67, 0x66, 0x7e, 0xf4, 0x4c, 0x18, 0x7f, 0x73, 0x97, 0x7a, 0x0e, 0x27, 0x5e, 0xc0, 0xbb,
+	0x3f, 0x7b, 0xe6, 0xbf, 0x5d, 0xdb, 0x73, 0xef, 0xa3, 0x58, 0x43, 0xfb, 0xc7, 0xa6, 0x56, 0x1d,
+	0x23, 0x7e, 0x53, 0x04, 0xa0, 0x1b, 0x60, 0x42, 0x96, 0xb1, 0xee, 0x6f, 0xb9, 0x74, 0x97, 0xc1,
+	0x3c, 0x18, 0x6d, 0x12, 0x9f, 0x7a, 0x05, 0x6d, 0x41, 0x5b, 0xfe, 0xa7, 0x1a, 0x2d, 0xd0, 0x91,
+	0x06, 0xf2, 0x69, 0x5b, 0x52, 0xe8, 0x13, 0x30, 0xcc, 0x42, 0x65, 0xae, 0x3c, 0x10, 0x75, 0x7c,
+	0xe9, 0x99, 0x4b, 0x2d, 0x87, 0x6f, 0x87, 0x75, 0xab, 0x41, 0x3d, 0xd5, 0x64, 0xf5, 0x67, 0x85,
+	0x35, 0x77, 0x30, 0xef, 0x06, 0x84, 0x59, 0x6b, 0xa4, 0x71, 0xf4, 0x61, 0x05, 0xa8, 0x19, 0xac,
+	0x91, 0x46, 0x55, 0x04, 0xc1, 0x17, 0x60, 0xcc, 0x89, 0x10, 0x85, 0xa1, 0x85, 0xe1, 0xe5, 0x5c,
+	0xb9, 0x68, 0x29, 0x8b, 0xe8, 0xae, 0xa5, 0xba, 0x2b, 0xfc, 0x8f, 0xa8, 0xe3, 0x57, 0xca, 0x8a,
+	0x78, 0xfb, 0x6a, 0x44, 0xf1, 0x4d, 0x35, 0x06, 0xa0, 0x49, 0x90, 0x93, 0x67, 0x7a, 0x66, 0xb7,
+	0x6d, 0x8f, 0xa1, 0x75, 0x30, 0x95, 0x5a, 0x26, 0x27, 0x2c, 0x83, 0x6c, 0x20, 0x77, 0xe4, 0x21,
+	0x73, 0xe5, 0xbc, 0x95, 0xfe, 0x37, 0xb4, 0x22, 0x77, 0x65, 0x44, 0x14, 0x52, 0x55, 0x4e, 0x74,
+	0x13, 0x4c, 0xca, 0xa8, 0xa7, 0x21, 0xbf, 0xac, 0xab, 0x1e, 0x98, 0xee, 0xb3, 0x25, 0xcc, 0x4d,
+	0x90, 0xb5, 0x3d, 0x1a, 0xfa, 0xfc, 0xaf, 0x34, 0x56, 0x65, 0x21, 0x08, 0xfe, 0x93, 0xb8, 0x87,
+	0xae, 0x1b, 0x13, 0xd1, 0x5b, 0x0d, 0x14, 0xce, 0x6e, 0x26, 0x65, 0x78, 0x60, 0x9c, 0xaa, 0xbd,
+	0x82, 0x76, 0x85, 0x69, 0xac, 0x8a, 0x32, 0xdf, 0x1f, 0x9b, 0x77, 0xae, 0x3e, 0x0d, 0x56, 0x4d,
+	0x10, 0xe5, 0x8f, 0x23, 0x60, 0x54, 0xd6, 0x02, 0x9b, 0x20, 0x1b, 0xf5, 0x15, 0xce, 0xf6, 0x77,
+	0x3b, 0x35, 0x20, 0xfd, 0xfa, 0x85, 0x52, 0x7c, 0x00, 0x54, 0x7c, 0xfd, 0xe9, 0xfb, 0xbb, 0xa1,
+	0x19, 0x98, 0xc7, 0x7d, 0xb7, 0x3b, 0x9a, 0x12, 0x74, 0xc1, 0x78, 0x32, 0xa0, 0xb9, 0x01, 0x61,
+	0xb1, 0xa8, 0x2f, 0x5e, 0x22, 0x26, 0x2c, 0x43, 0xb2, 0x0a, 0x70, 0xa6, 0x9f, 0x15, 0x9f, 0x0e,
+	0x76, 0x41, 0x2e, 0xd5, 0x63, 0x68, 0x0c, 0xc8, 0x4c, 0xe9, 0xfa, 0xd2, 0xe5, 0x7a, 0x82, 0x45,
+	0x12, 0x5b, 0x84, 0x7a, 0x3f, 0xd6, 0x76, 0xdd, 0x5a, 0x82, 0xde, 0x06, 0x63, 0xf1, 0xf5, 0xd6,
+	0x07, 0xc4, 0x2a, 0x4d, 0x47, 0x17, 0x6b, 0x09, 0x6e, 0x5e, 0xe2, 0xae, 0xc1, 0xe9, 0x7e, 0x9c,
+	0xba, 0x52, 0xf0, 0x95, 0x78, 0x4d, 0x7e, 0xbf, 0x67, 0xd0, 0x1c, 0x10, 0x99, 0x36, 0xe8, 0xb7,
+	0xfe, 0x60, 0x48, 0xc0, 0x8b, 0x12, 0x3c, 0x0f, 0xe7, 0xf0, 0xf9, 0x87, 0xba, 0x46, 0x22, 0x73,
+	0x65, 0xed, 0xe0, 0x9b, 0x91, 0x39, 0x38, 0x31, 0xb4, 0xc3, 0x13, 0x43, 0xfb, 0x7a, 0x62, 0x68,
+	0xfb, 0xa7, 0x46, 0xe6, 0xf0, 0xd4, 0xc8, 0x7c, 0x3e, 0x35, 0x32, 0xcf, 0xd3, 0xb7, 0x47, 0x84,
+	0xac, 0xf8, 0x84, 0xef, 0xd2, 0xf6, 0x4e, 0x94, 0xd8, 0xb9, 0x87, 0xf7, 0x64, 0x6c, 0x3d, 0x2b,
+	0x9f, 0xd8, 0xd5, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xaa, 0x0f, 0x0f, 0xc9, 0x8a, 0x06, 0x00,
+	0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -491,8 +503,8 @@ type QueryClient interface {
 	// Inflows returns registered IBC denoms inflows in the current quota period.
 	// If denom is not specified, returns sum of all registered inflows.
 	Inflows(ctx context.Context, in *QueryInflows, opts ...grpc.CallOption) (*QueryInflowsResponse, error)
-	// AllInflows returns inflows for each registered denom in the current quota period.
-	AllInflows(ctx context.Context, in *QueryAllInflows, opts ...grpc.CallOption) (*QueryAllInflowsResponse, error)
+	// QuotaExpires returns when current ibc quota will end.
+	QuotaExpires(ctx context.Context, in *QueryQuotaExpires, opts ...grpc.CallOption) (*QueryQuotaExpiresResponse, error)
 }
 
 type queryClient struct {
@@ -539,9 +551,9 @@ func (c *queryClient) Inflows(ctx context.Context, in *QueryInflows, opts ...grp
 	return out, nil
 }
 
-func (c *queryClient) AllInflows(ctx context.Context, in *QueryAllInflows, opts ...grpc.CallOption) (*QueryAllInflowsResponse, error) {
-	out := new(QueryAllInflowsResponse)
-	err := c.cc.Invoke(ctx, "/umee.uibc.v1.Query/AllInflows", in, out, opts...)
+func (c *queryClient) QuotaExpires(ctx context.Context, in *QueryQuotaExpires, opts ...grpc.CallOption) (*QueryQuotaExpiresResponse, error) {
+	out := new(QueryQuotaExpiresResponse)
+	err := c.cc.Invoke(ctx, "/umee.uibc.v1.Query/QuotaExpires", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -560,8 +572,8 @@ type QueryServer interface {
 	// Inflows returns registered IBC denoms inflows in the current quota period.
 	// If denom is not specified, returns sum of all registered inflows.
 	Inflows(context.Context, *QueryInflows) (*QueryInflowsResponse, error)
-	// AllInflows returns inflows for each registered denom in the current quota period.
-	AllInflows(context.Context, *QueryAllInflows) (*QueryAllInflowsResponse, error)
+	// QuotaExpires returns when current ibc quota will end.
+	QuotaExpires(context.Context, *QueryQuotaExpires) (*QueryQuotaExpiresResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -580,8 +592,8 @@ func (*UnimplementedQueryServer) AllOutflows(ctx context.Context, req *QueryAllO
 func (*UnimplementedQueryServer) Inflows(ctx context.Context, req *QueryInflows) (*QueryInflowsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Inflows not implemented")
 }
-func (*UnimplementedQueryServer) AllInflows(ctx context.Context, req *QueryAllInflows) (*QueryAllInflowsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AllInflows not implemented")
+func (*UnimplementedQueryServer) QuotaExpires(ctx context.Context, req *QueryQuotaExpires) (*QueryQuotaExpiresResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method QuotaExpires not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -660,20 +672,20 @@ func _Query_Inflows_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_AllInflows_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryAllInflows)
+func _Query_QuotaExpires_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryQuotaExpires)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).AllInflows(ctx, in)
+		return srv.(QueryServer).QuotaExpires(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.uibc.v1.Query/AllInflows",
+		FullMethod: "/umee.uibc.v1.Query/QuotaExpires",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).AllInflows(ctx, req.(*QueryAllInflows))
+		return srv.(QueryServer).QuotaExpires(ctx, req.(*QueryQuotaExpires))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -699,15 +711,15 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_Inflows_Handler,
 		},
 		{
-			MethodName: "AllInflows",
-			Handler:    _Query_AllInflows_Handler,
+			MethodName: "QuotaExpires",
+			Handler:    _Query_QuotaExpires_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "umee/uibc/v1/query.proto",
 }
 
-func (m *QueryAllInflows) Marshal() (dAtA []byte, err error) {
+func (m *QueryQuotaExpires) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -717,27 +729,20 @@ func (m *QueryAllInflows) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryAllInflows) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryQuotaExpires) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryAllInflows) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryQuotaExpires) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Denom) > 0 {
-		i -= len(m.Denom)
-		copy(dAtA[i:], m.Denom)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryAllInflowsResponse) Marshal() (dAtA []byte, err error) {
+func (m *QueryQuotaExpiresResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -747,30 +752,24 @@ func (m *QueryAllInflowsResponse) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryAllInflowsResponse) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryQuotaExpiresResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryAllInflowsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryQuotaExpiresResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Inflows) > 0 {
-		for iNdEx := len(m.Inflows) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.Inflows[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintQuery(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
+	n1, err1 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(m.EndTime, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(m.EndTime):])
+	if err1 != nil {
+		return 0, err1
 	}
+	i -= n1
+	i = encodeVarintQuery(dAtA, i, uint64(n1))
+	i--
+	dAtA[i] = 0x22
 	return len(dAtA) - i, nil
 }
 
@@ -824,10 +823,24 @@ func (m *QueryInflowsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Inflows) > 0 {
+		for iNdEx := len(m.Inflows) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size := m.Inflows[iNdEx].Size()
+				i -= size
+				if _, err := m.Inflows[iNdEx].MarshalTo(dAtA[i:]); err != nil {
+					return 0, err
+				}
+				i = encodeVarintQuery(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
 	{
-		size := m.Amount.Size()
+		size := m.Sum.Size()
 		i -= size
-		if _, err := m.Amount.MarshalTo(dAtA[i:]); err != nil {
+		if _, err := m.Sum.MarshalTo(dAtA[i:]); err != nil {
 			return 0, err
 		}
 		i = encodeVarintQuery(dAtA, i, uint64(size))
@@ -1027,31 +1040,23 @@ func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *QueryAllInflows) Size() (n int) {
+func (m *QueryQuotaExpires) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	l = len(m.Denom)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
 	return n
 }
 
-func (m *QueryAllInflowsResponse) Size() (n int) {
+func (m *QueryQuotaExpiresResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if len(m.Inflows) > 0 {
-		for _, e := range m.Inflows {
-			l = e.Size()
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
+	l = github_com_cosmos_gogoproto_types.SizeOfStdTime(m.EndTime)
+	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
 
@@ -1074,8 +1079,14 @@ func (m *QueryInflowsResponse) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = m.Amount.Size()
+	l = m.Sum.Size()
 	n += 1 + l + sovQuery(uint64(l))
+	if len(m.Inflows) > 0 {
+		for _, e := range m.Inflows {
+			l = e.Size()
+			n += 1 + l + sovQuery(uint64(l))
+		}
+	}
 	return n
 }
 
@@ -1153,7 +1164,7 @@ func sovQuery(x uint64) (n int) {
 func sozQuery(x uint64) (n int) {
 	return sovQuery(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *QueryAllInflows) Unmarshal(dAtA []byte) error {
+func (m *QueryQuotaExpires) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1176,44 +1187,12 @@ func (m *QueryAllInflows) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryAllInflows: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryQuotaExpires: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryAllInflows: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryQuotaExpires: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Denom = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipQuery(dAtA[iNdEx:])
@@ -1235,7 +1214,7 @@ func (m *QueryAllInflows) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryAllInflowsResponse) Unmarshal(dAtA []byte) error {
+func (m *QueryQuotaExpiresResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1258,15 +1237,15 @@ func (m *QueryAllInflowsResponse) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryAllInflowsResponse: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryQuotaExpiresResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryAllInflowsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryQuotaExpiresResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 1:
+		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Inflows", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field EndTime", wireType)
 			}
 			var msglen int
 			for shift := uint(0); ; shift += 7 {
@@ -1293,8 +1272,7 @@ func (m *QueryAllInflowsResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Inflows = append(m.Inflows, types.DecCoin{})
-			if err := m.Inflows[len(m.Inflows)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := github_com_cosmos_gogoproto_types.StdTimeUnmarshal(&m.EndTime, dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex
@@ -1432,7 +1410,7 @@ func (m *QueryInflowsResponse) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Sum", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1460,7 +1438,41 @@ func (m *QueryInflowsResponse) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if err := m.Amount.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+			if err := m.Sum.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Inflows", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Inflows = append(m.Inflows, github_com_cosmos_cosmos_sdk_types.DecCoin{})
+			if err := m.Inflows[len(m.Inflows)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -24,18 +24,18 @@ func GetQueryCmd() *cobra.Command {
 		QueryParams(),
 		GetOutflows(),
 		GetInflows(),
-		GetAllInflows(),
+		GetQuotaEndTime(),
 	)
 
 	return cmd
 }
 
-// GetAllInflows returns registered IBC denoms inflows in the current quota period.
-func GetAllInflows() *cobra.Command {
+// GetQuotaEndTime returns end time for the current quota period.
+func GetQuotaEndTime() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "all-inflows [denom]",
-		Args:  cobra.MaximumNArgs(1),
-		Short: "Get the ibc inflows of the registered tokens.",
+		Use:   "quota-end-time",
+		Args:  cobra.NoArgs,
+		Short: "Get the current ibc quota end time.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
@@ -43,12 +43,7 @@ func GetAllInflows() *cobra.Command {
 			}
 			queryClient := uibc.NewQueryClient(clientCtx)
 
-			req := &uibc.QueryAllInflows{}
-			if len(args) > 0 && len(args[0]) != 0 {
-				req.Denom = args[0]
-			}
-
-			resp, err := queryClient.AllInflows(cmd.Context(), req)
+			resp, err := queryClient.QuotaExpires(cmd.Context(), &uibc.QueryQuotaExpires{})
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
