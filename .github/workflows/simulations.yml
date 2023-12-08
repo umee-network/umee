@@ -13,7 +13,7 @@ jobs:
   install-dependencies:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
           go-version: "1.21"
 
@@ -37,7 +37,7 @@ jobs:
           FILES: |
             go.mod
             go.sum
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
           go-version: "1.21"
@@ -62,7 +62,7 @@ jobs:
           FILES: |
             go.mod
             go.sum
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
           go-version: "1.21"
@@ -92,7 +92,7 @@ jobs:
           FILES: |
             go.mod
             go.sum
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
           go-version: "1.21"
@@ -121,7 +121,7 @@ jobs:
           FILES: |
             go.mod
             go.sum
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
           go-version: "1.21"
