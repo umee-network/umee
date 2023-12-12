@@ -24,18 +24,18 @@ func GetQueryCmd() *cobra.Command {
 		QueryParams(),
 		GetOutflows(),
 		GetInflows(),
-		GetQuotaEndTime(),
+		GetQuotaExpireTime(),
 	)
 
 	return cmd
 }
 
-// GetQuotaEndTime returns end time for the current quota period.
-func GetQuotaEndTime() *cobra.Command {
+// GetQuotaExpireTime returns end time for the current quota period.
+func GetQuotaExpireTime() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "quota-end-time",
+		Use:   "quota-expire-time",
 		Args:  cobra.NoArgs,
-		Short: "Get the current ibc quota end time.",
+		Short: "Get the current ibc quota expire time.",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			clientCtx, err := client.GetClientQueryContext(cmd)
 			if err != nil {
