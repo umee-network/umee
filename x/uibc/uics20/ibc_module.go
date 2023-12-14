@@ -56,7 +56,7 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 			ctx.Logger().Error("can't JSON deserialize ftData Memo, expecting list of Msg", "err", err)
 		} else {
 			// TODO: need to handle fees!
-			im.dispatchMemoMsgs(msgs)
+			im.dispatchMemoMsgs(ctx, msgs)
 		}
 	}
 
@@ -101,8 +101,12 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // messages are supported. Otherwise the fork storage is discarded.
 func (im ICS20Module) dispatchMemoMsgs(ctx sdk.Context, msgs []sdk.Msg) {
 	// Caching context so that we don't update the store in case of failure.
-	cacheCtx, flush := ctx.CacheContext()
+	///cacheCtx, flush := ctx.CacheContext()
 	// TODO: call flush on success
+
+	for _, m := range msgs {
+		ctx.Logger().Info("dispatching", "msg", m)
+	}
 
 }
 
