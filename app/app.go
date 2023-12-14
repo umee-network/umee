@@ -747,15 +747,16 @@ func New(
 		vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
+		metoken.ModuleName,
 		oracletypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
 	}
 	endBlockers := []string{
 		crisistypes.ModuleName,
+		metoken.ModuleName,     // must be before oracle
 		oracletypes.ModuleName, // must be before gov and staking
 		govtypes.ModuleName, stakingtypes.ModuleName,
 		ibcexported.ModuleName, ibctransfertypes.ModuleName,
@@ -770,7 +771,6 @@ func New(
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
