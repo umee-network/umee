@@ -3,8 +3,6 @@ package uics20_test
 import (
 	"testing"
 
-	"gotest.tools/v3/assert"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -14,6 +12,7 @@ import (
 	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	"github.com/golang/mock/gomock"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	lfixtures "github.com/umee-network/umee/v6/x/leverage/fixtures"

@@ -10,7 +10,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
-	gogoproto "github.com/cosmos/gogoproto/proto"
 
 	"github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
@@ -50,7 +49,7 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	}
 
 	if ftData.Memo != "" {
-		msgs, err := deserializeMemoMsgs(im.cdc, []byte(ftData.Memo))
+		msgs, err := DeserializeMemoMsgs(im.cdc, []byte(ftData.Memo))
 		if err != nil {
 			// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf
 			ctx.Logger().Error("can't JSON deserialize ftData Memo, expecting list of Msg", "err", err)
@@ -120,7 +119,7 @@ func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
 	return
 }
 
-func deserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
+func DeserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
 	var m uibc.ICS20Memo
 	if err := cdc.UnmarshalJSON(data, &m); err != nil {
 		return nil, err
