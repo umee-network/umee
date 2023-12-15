@@ -2,15 +2,16 @@ package uics20
 
 import (
 	"cosmossdk.io/errors"
+	"github.com/cosmos/cosmos-sdk/codec"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/cosmos/cosmos-sdk/types/tx"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/tx"
-
+	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
@@ -22,8 +23,9 @@ var _ porttypes.IBCModule = ICS20Module{}
 // quota update on acknowledgement error or timeout.
 type ICS20Module struct {
 	porttypes.IBCModule
-	kb  quota.KeeperBuilder
-	cdc codec.JSONCodec
+	kb       quota.KeeperBuilder
+	leverage ltypes.MsgServer
+	cdc      codec.JSONCodec
 }
 
 // NewICS20Module is an IBCMiddlware constructor.
@@ -52,10 +54,11 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		msgs, err := DeserializeMemoMsgs(im.cdc, []byte(ftData.Memo))
 		if err != nil {
 			// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf
+			//   -> same logic in dispatchMemoMsgs
 			ctx.Logger().Error("can't JSON deserialize ftData Memo, expecting list of Msg", "err", err)
 		} else {
 			// TODO: need to handle fees!
-			im.dispatchMemoMsgs(ctx, msgs)
+			im.dispatchMemoMsgs(&ctx, msgs)
 		}
 	}
 
@@ -98,15 +101,40 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // runs messages encoded in the ICS20 memo.
 // NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
 // messages are supported. Otherwise the fork storage is discarded.
-func (im ICS20Module) dispatchMemoMsgs(ctx sdk.Context, msgs []sdk.Msg) {
-	// Caching context so that we don't update the store in case of failure.
-	///cacheCtx, flush := ctx.CacheContext()
-	// TODO: call flush on success
+func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, msgs []sdk.Msg) {
 
-	for _, m := range msgs {
-		ctx.Logger().Info("dispatching", "msg", m)
+	if len(msgs) > 2 {
+		ctx.Logger().Error("ics20 memo with more than 2 messages are not supported")
+		return
 	}
 
+	// Caching context so that we don't update the store in case of failure.
+	cacheCtx, flush := ctx.CacheContext()
+	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
+	for _, m := range msgs {
+		if err := im.handleMemoMsg(&cacheCtx, m); err != nil {
+			// ignore changes in cacheCtx and return
+			logger.Error("error dispatching", "msg: %v\t\t err: %v", m, err)
+			return
+		}
+		logger.Debug("dispatching", "msg", m)
+	}
+	// TODO: check errors, call flush on success
+	flush()
+}
+
+func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
+	switch msg := msg.(type) {
+	case *ltypes.MsgSupply:
+		_, err = im.leverage.Supply(*ctx, msg)
+	case *ltypes.MsgSupplyCollateral:
+		_, err = im.leverage.SupplyCollateral(*ctx, msg)
+	case *ltypes.MsgBorrow:
+		_, err = im.leverage.Borrow(*ctx, msg)
+	default:
+		err = sdkerrors.ErrInvalidRequest.Wrapf("unsupported type in the ICS20 memo: %T", msg)
+	}
+	return err
 }
 
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
