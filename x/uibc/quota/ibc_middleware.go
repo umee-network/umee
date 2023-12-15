@@ -33,7 +33,8 @@ func (k Keeper) IBCOnSendPacket(packet []byte) error {
 	return nil
 }
 
-func (k Keeper) IBCOnRecvPacket(ft ics20types.FungibleTokenPacketData, packet channeltypes.Packet) exported.Acknowledgement {
+func (k Keeper) IBCOnRecvPacket(ft ics20types.FungibleTokenPacketData, packet channeltypes.Packet,
+) exported.Acknowledgement {
 	params := k.GetParams()
 	if !params.IbcStatus.IBCTransferEnabled() {
 		return channeltypes.NewErrorAcknowledgement(ics20types.ErrReceiveDisabled)

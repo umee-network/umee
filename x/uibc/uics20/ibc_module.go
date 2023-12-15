@@ -30,7 +30,8 @@ type ICS20Module struct {
 
 // NewICS20Module is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.KeeperBuilder, l ltypes.MsgServer) ICS20Module {
+func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.KeeperBuilder, l ltypes.MsgServer,
+) ICS20Module {
 	return ICS20Module{
 		IBCModule: app,
 		kb:        k,
@@ -120,7 +121,6 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, msgs []sdk.Msg) {
 		}
 		logger.Debug("dispatching", "msg", m)
 	}
-	// TODO: check errors, call flush on success
 	flush()
 }
 
