@@ -6,7 +6,7 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 
@@ -229,24 +229,25 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 }
 
 // RecordIBCInflow will save the inflow amount if token is registered otherwise it will skip
-func (k Keeper) RecordIBCInflow(
-	packet channeltypes.Packet, dataDenom, dataAmount string, isSourceChain bool,
+func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string,
 ) exported.Acknowledgement {
+
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
 	// check ibc_denom is exists in leverage token registry
-	if isSourceChain {
+	if !ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
 		// since SendPacket did not prefix the denomination, we must prefix denomination here
-		sourcePrefix := transfertypes.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
+		sourcePrefix := ics20types.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
 		// NOTE: sourcePrefix contains the trailing "/"
-		prefixedDenom := sourcePrefix + dataDenom
+		prefixedDenom := sourcePrefix + denom
 		// construct the denomination trace from the full raw denomination and get the ibc_denom
-		ibcDenom := transfertypes.ParseDenomTrace(prefixedDenom).IBCDenom()
+		ibcDenom := ics20types.ParseDenomTrace(prefixedDenom).IBCDenom()
 		ts, err := k.leverage.GetTokenSettings(*k.ctx, ibcDenom)
 		if err != nil {
-			// skip if token is not a registered token on leverage
 			if ltypes.ErrNotRegisteredToken.Is(err) {
-				return nil
+				return nil // skip recording inflow if the token is not registered
 			}
+			k.ctx.Logger().Error("can't get x/leverage token settings", "error", err)
+			return channeltypes.NewErrorAcknowledgement(err)
 		}
 
 		// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE`
@@ -256,7 +257,7 @@ func (k Keeper) RecordIBCInflow(
 		}
 		// calculate total exchange rate
 		powerReduction := ten.Power(uint64(ts.Exponent))
-		inflowInUSD := sdk.MustNewDecFromStr(dataAmount).Quo(powerReduction).Mul(exchangeRate)
+		inflowInUSD := sdk.MustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
 
 		tokenInflow := sdk.NewDecCoinFromDec(ibcDenom, inflowInUSD)
 		k.SetTokenInflow(tokenInflow)

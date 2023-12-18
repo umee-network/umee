@@ -1,0 +1,16 @@
+syntax = "proto3";
+package umee.uibc.v1;
+
+import "cosmos_proto/cosmos.proto";
+import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
+
+option go_package = "github.com/umee-network/umee/v6/x/uibc";
+
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.messagename_all)     = true;
+
+message ICS20Memo {
+  // messages is a list of `sdk.Msg`s that will be executed when handling ICS20 transfer.
+  repeated google.protobuf.Any messages = 1;
+}

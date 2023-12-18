@@ -11,7 +11,7 @@ import (
 // typically a RegisterInterfaces function in Cosmos SDK modules)
 func NewCodec(registrars ...func(types.InterfaceRegistry)) codec.Codec {
 	interfaceRegistry := types.NewInterfaceRegistry()
-	std.RegisterInterfaces(interfaceRegistry)
+	std.RegisterInterfaces(interfaceRegistry) // register SDK interfaces
 	for _, f := range registrars {
 		f(interfaceRegistry)
 	}
