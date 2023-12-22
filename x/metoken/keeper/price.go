@@ -13,9 +13,7 @@ import (
 	otypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
-var (
-	usdExponent = uint32(0)
-)
+var usdExponent = uint32(0)
 
 // Prices calculates meToken price as an avg of median prices of all index accepted assets.
 func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
