@@ -4133,6 +4133,11 @@ paths:
                             description: >-
                               SwapRate used for exchange calculations asset ->
                               meToken.
+                          redeem_rate:
+                            type: string
+                            description: >-
+                              RedeemRate used for exchange calculations meToken
+                              -> asset.
                           swap_fee:
                             type: string
                             description: >-
@@ -4140,11 +4145,6 @@ paths:
                               in fraction.
 
                               Valid values: 0-1.
-                          redeem_rate:
-                            type: string
-                            description: >-
-                              RedeemRate used for exchange calculations meToken
-                              -> asset.
                           redeem_fee:
                             type: string
                             description: >-
@@ -4253,6 +4253,11 @@ paths:
                             description: >-
                               SwapRate used for exchange calculations asset ->
                               meToken.
+                          redeem_rate:
+                            type: string
+                            description: >-
+                              RedeemRate used for exchange calculations meToken
+                              -> asset.
                           swap_fee:
                             type: string
                             description: >-
@@ -4260,11 +4265,6 @@ paths:
                               in fraction.
 
                               Valid values: 0-1.
-                          redeem_rate:
-                            type: string
-                            description: >-
-                              RedeemRate used for exchange calculations meToken
-                              -> asset.
                           redeem_fee:
                             type: string
                             description: >-
@@ -7733,14 +7733,14 @@ definitions:
       swap_rate:
         type: string
         description: SwapRate used for exchange calculations asset -> meToken.
+      redeem_rate:
+        type: string
+        description: RedeemRate used for exchange calculations meToken -> asset.
       swap_fee:
         type: string
         description: |-
           SwapFee charged to the user on a swap, expressed in fraction.
           Valid values: 0-1.
-      redeem_rate:
-        type: string
-        description: RedeemRate used for exchange calculations meToken -> asset.
       redeem_fee:
         type: string
         description: |-
@@ -7980,14 +7980,14 @@ definitions:
             swap_rate:
               type: string
               description: SwapRate used for exchange calculations asset -> meToken.
+            redeem_rate:
+              type: string
+              description: RedeemRate used for exchange calculations meToken -> asset.
             swap_fee:
               type: string
               description: |-
                 SwapFee charged to the user on a swap, expressed in fraction.
                 Valid values: 0-1.
-            redeem_rate:
-              type: string
-              description: RedeemRate used for exchange calculations meToken -> asset.
             redeem_fee:
               type: string
               description: >-
@@ -8103,6 +8103,11 @@ definitions:
                   swap_rate:
                     type: string
                     description: SwapRate used for exchange calculations asset -> meToken.
+                  redeem_rate:
+                    type: string
+                    description: >-
+                      RedeemRate used for exchange calculations meToken ->
+                      asset.
                   swap_fee:
                     type: string
                     description: >-
@@ -8110,11 +8115,6 @@ definitions:
                       fraction.
 
                       Valid values: 0-1.
-                  redeem_rate:
-                    type: string
-                    description: >-
-                      RedeemRate used for exchange calculations meToken ->
-                      asset.
                   redeem_fee:
                     type: string
                     description: >-
@@ -8172,6 +8172,11 @@ definitions:
                   swap_rate:
                     type: string
                     description: SwapRate used for exchange calculations asset -> meToken.
+                  redeem_rate:
+                    type: string
+                    description: >-
+                      RedeemRate used for exchange calculations meToken ->
+                      asset.
                   swap_fee:
                     type: string
                     description: >-
@@ -8179,11 +8184,6 @@ definitions:
                       fraction.
 
                       Valid values: 0-1.
-                  redeem_rate:
-                    type: string
-                    description: >-
-                      RedeemRate used for exchange calculations meToken ->
-                      asset.
                   redeem_fee:
                     type: string
                     description: >-
