@@ -24,6 +24,12 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/registered_tokens";
   }
 
+  // RegisteredTokenMarkets queries for all the registered tokens and their market summaries.
+  rpc RegisteredTokenMarkets(QueryRegisteredTokenMarkets)
+      returns (QueryRegisteredTokenMarketsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/registered_token_markets";
+  }
+
   // SpecialAssets queries for all special asset pairs.
   rpc SpecialAssets(QuerySpecialAssets)
       returns (QuerySpecialAssetsResponse) {
@@ -110,6 +116,24 @@ message QueryRegisteredTokens {
 // RegisteredTokens gRPC service handler.
 message QueryRegisteredTokensResponse {
   repeated Token registry = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryRegisteredTokenMarkets defines the request structure for the RegisteredTokenMarkets
+// gRPC service handler.
+message QueryRegisteredTokenMarkets {}
+
+// QueryRegisteredTokenMarketsResponse defines the response structure for the
+// RegisteredTokenMarkets gRPC service handler.
+message QueryRegisteredTokenMarketsResponse {
+  repeated TokenMarket markets = 1 [(gogoproto.nullable) = false];
+}
+
+// TokenMarket is a token and its market summary.
+message TokenMarket {
+  // Token is a registered token and its parameters.
+  Token token = 1;
+  // Market is the market summary for the token.
+  QueryMarketSummaryResponse market = 2;
 }
 
 // QuerySpecialAssets defines the request structure for the SpecialAssets
