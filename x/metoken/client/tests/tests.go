@@ -1,6 +1,3 @@
-//go:build experimental
-// +build experimental
-
 package tests
 
 import (
@@ -106,7 +103,9 @@ func (s *IntegrationTests) TestValidQueries() {
 								Price:       sdk.MustNewDecFromStr("34.21"),
 								Exponent:    6,
 								SwapRate:    sdk.OneDec(),
+								SwapFee:     sdk.MustNewDecFromStr("0.01"),
 								RedeemRate:  sdk.OneDec(),
+								RedeemFee:   sdk.MustNewDecFromStr("0.4"),
 							},
 						},
 					},

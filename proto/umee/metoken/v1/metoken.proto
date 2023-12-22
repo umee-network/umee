@@ -148,8 +148,22 @@ message AssetPrice {
     (gogoproto.nullable)   = false
   ];
 
+  // SwapFee charged to the user on a swap, expressed in fraction.
+  // Valid values: 0-1.
+  string swap_fee = 6 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
   // RedeemRate used for exchange calculations meToken -> asset.
-  string redeem_rate = 6 [
+  string redeem_rate = 7 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+
+  // RedeemFee charged to the user on a redemption, expressed in fraction.
+  // Valid values: 0-1.
+  string redeem_fee = 8 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];

@@ -3,6 +3,8 @@ package keeper
 import (
 	"fmt"
 
+	"github.com/umee-network/umee/v6/util/coin"
+
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -11,7 +13,9 @@ import (
 	otypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
 
-var usdExponent = uint32(0)
+var (
+	usdExponent = uint32(0)
+)
 
 // Prices calculates meToken price as an avg of median prices of all index accepted assets.
 func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
@@ -83,14 +87,24 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 		if err != nil {
 			return indexPrices, err
 		}
+		swapFee, _, err := k.swapFee(index, indexPrices, coin.One(asset.BaseDenom))
+		if err != nil {
+			return indexPrices, err
+		}
 
 		redeemRate, err := metoken.Rate(indexPrices.Price, asset.Price, indexPrices.Exponent, asset.Exponent)
 		if err != nil {
 			return indexPrices, err
 		}
+		redeemFee, _, err := k.redeemFee(index, indexPrices, coin.One(asset.BaseDenom))
+		if err != nil {
+			return indexPrices, err
+		}
 
 		indexPrices.Assets[i].SwapRate = swapRate
+		indexPrices.Assets[i].SwapFee = swapFee
 		indexPrices.Assets[i].RedeemRate = redeemRate
+		indexPrices.Assets[i].RedeemFee = redeemFee
 	}
 
 	return indexPrices, nil

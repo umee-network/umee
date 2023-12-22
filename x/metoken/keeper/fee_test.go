@@ -22,7 +22,7 @@ func TestSwapFee(t *testing.T) {
 	require.NoError(t, err)
 	prices := meUSDIndexPricesAdjustedToBalance(t, balance)
 
-	_, err = k.swapFee(index, prices, sdk.NewCoin("inexistingAsset", sdkmath.ZeroInt()))
+	_, _, err = k.swapFee(index, prices, sdk.NewCoin("inexistingAsset", sdkmath.ZeroInt()))
 	require.ErrorIs(t, err, sdkerrors.ErrNotFound)
 
 	// target_allocation = 0 -> fee = max_fee * coin_amount
@@ -34,20 +34,22 @@ func TestSwapFee(t *testing.T) {
 	index.SetAcceptedAsset(usdtAsset)
 	tenUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(10_000000))
 
-	fee, err := k.swapFee(index, prices, tenUSDT)
+	feeFraction, feeAmount, err := k.swapFee(index, prices, tenUSDT)
 	require.NoError(t, err)
-	require.True(t, fee.Amount.Equal(sdkmath.NewInt(5_000000)))
+	require.True(t, feeAmount.Amount.Equal(sdkmath.NewInt(5_000000)))
+	require.True(t, feeFraction.Equal(sdk.MustNewDecFromStr("0.5")))
 
 	// swap_fee = balanced_fee + delta_allocation * balanced_fee
-	// swap_fee = 0.2 + (-0.276727736549164797) * 0.2 = 0.144654452690167041
+	// swap_fee = 0.2 + (-0.276727736549164797) * 0.2 = 0.144654452690166976
 	// fee = swap_fee * coin_amount
-	// fee = 0.144654452690167041 * 10 = 1.44654452690167041
+	// fee = 0.144654452690166976 * 10 = 1.44654452690166976
 	usdtAsset.TargetAllocation = sdk.MustNewDecFromStr("0.33")
 	index.SetAcceptedAsset(usdtAsset)
 
-	fee, err = k.swapFee(index, prices, tenUSDT)
+	feeFraction, feeAmount, err = k.swapFee(index, prices, tenUSDT)
 	require.NoError(t, err)
-	require.True(t, fee.Amount.Equal(sdkmath.NewInt(1_446544)))
+	require.True(t, feeAmount.Amount.Equal(sdkmath.NewInt(1_446544)))
+	require.True(t, feeFraction.Equal(sdk.MustNewDecFromStr("0.144654452690166976")))
 }
 
 func TestRedeemFee(t *testing.T) {
@@ -60,7 +62,7 @@ func TestRedeemFee(t *testing.T) {
 	require.NoError(t, err)
 	prices := meUSDIndexPricesAdjustedToBalance(t, balance)
 
-	_, err = k.redeemFee(index, prices, sdk.NewCoin("inexistingAsset", sdkmath.ZeroInt()))
+	_, _, err = k.redeemFee(index, prices, sdk.NewCoin("inexistingAsset", sdkmath.ZeroInt()))
 	require.ErrorIs(t, err, sdkerrors.ErrNotFound)
 
 	// target_allocation = 0 -> fee = min_fee * coin_amount
@@ -72,18 +74,20 @@ func TestRedeemFee(t *testing.T) {
 	index.SetAcceptedAsset(usdtAsset)
 	tenUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(10_000000))
 
-	fee, err := k.redeemFee(index, prices, tenUSDT)
+	feeFraction, feeAmount, err := k.redeemFee(index, prices, tenUSDT)
 	require.NoError(t, err)
-	require.True(t, fee.Amount.Equal(sdkmath.NewInt(100000)))
+	require.True(t, feeAmount.Amount.Equal(sdkmath.NewInt(100000)))
+	require.True(t, feeFraction.Equal(sdk.MustNewDecFromStr("0.01")))
 
 	// redeem_fee = balanced_fee + delta_allocation * balanced_fee
-	// redeem_fee = 0.2 + (0.276727736549164797) * 0.2 = 0.255345547309832959
+	// redeem_fee = 0.2 + (0.276727736549164797) * 0.2 = 0.255345547309833024
 	// fee = redeem_fee * coin_amount
-	// fee = 0.255345547309832959 * 10 = 2.55345547309832959
+	// fee = 0.255345547309833024 * 10 = 2.55345547309833024
 	usdtAsset.TargetAllocation = sdk.MustNewDecFromStr("0.33")
 	index.SetAcceptedAsset(usdtAsset)
 
-	fee, err = k.redeemFee(index, prices, tenUSDT)
+	feeFraction, feeAmount, err = k.redeemFee(index, prices, tenUSDT)
 	require.NoError(t, err)
-	require.True(t, fee.Amount.Equal(sdkmath.NewInt(2_553455)))
+	require.True(t, feeAmount.Amount.Equal(sdkmath.NewInt(2_553455)))
+	require.True(t, feeFraction.Equal(sdk.MustNewDecFromStr("0.255345547309833024")))
 }

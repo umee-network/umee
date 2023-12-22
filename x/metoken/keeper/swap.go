@@ -203,12 +203,12 @@ func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPric
 		)
 	}
 
-	fee, err := k.swapFee(index, indexPrices, asset)
+	_, feeAmount, err := k.swapFee(index, indexPrices, asset)
 	if err != nil {
 		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), err
 	}
 
-	amountToSwap := asset.Amount.Sub(fee.Amount)
+	amountToSwap := asset.Amount.Sub(feeAmount.Amount)
 
 	meTokens, err := indexPrices.SwapRate(sdk.NewCoin(asset.Denom, amountToSwap))
 	if err != nil {
@@ -218,5 +218,5 @@ func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPric
 	amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
 	amountToLeverage := amountToSwap.Sub(amountToReserves)
 
-	return meTokens, fee.Amount, amountToReserves, amountToLeverage, nil
+	return meTokens, feeAmount.Amount, amountToReserves, amountToLeverage, nil
 }
