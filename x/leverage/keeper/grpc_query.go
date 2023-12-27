@@ -62,6 +62,35 @@ func (q Querier) RegisteredTokens(
 	}, nil
 }
 
+func (q Querier) RegisteredTokenMarkets(
+	goCtx context.Context,
+	req *types.QueryRegisteredTokenMarkets,
+) (*types.QueryRegisteredTokenMarketsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	tokens := q.Keeper.GetAllRegisteredTokens(ctx)
+	markets := []types.TokenMarket{}
+
+	for _, token := range tokens {
+		marketSumnmary, err := q.MarketSummary(goCtx, &types.QueryMarketSummary{Denom: token.BaseDenom})
+		if err != nil {
+			// absorb error overall query error into struct, which may be empty, but proceed with this query
+			marketSumnmary.Errors = marketSumnmary.Errors + err.Error()
+		}
+		markets = append(markets, types.TokenMarket{
+			Token:  &token,
+			Market: marketSumnmary,
+		})
+	}
+
+	return &types.QueryRegisteredTokenMarketsResponse{
+		Markets: markets,
+	}, nil
+}
+
 func (q Querier) SpecialAssets(
 	goCtx context.Context,
 	req *types.QuerySpecialAssets,
