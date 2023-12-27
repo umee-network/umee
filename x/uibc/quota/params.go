@@ -31,14 +31,17 @@ func (k Keeper) GetParams() (params uibc.Params) {
 }
 
 // UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
-func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom sdk.Dec, quotaDuration time.Duration,
-	byEmergencyGroup bool,
-) error {
+func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom, inOutBase, inOutTokenBase, inOutRate sdk.Dec,
+	quotaDuration time.Duration, byEmergencyGroup bool) error {
+
 	pOld := k.GetParams()
 	pNew := pOld
 	pNew.TotalQuota = totalQuota
 	pNew.QuotaDuration = quotaDuration
 	pNew.TokenQuota = quotaPerDenom
+	pNew.InflowOutflowQuotaBase = inOutBase
+	pNew.InflowOutflowTokenQuotaBase = inOutTokenBase
+	pNew.InflowOutflowQuotaRate = inOutRate
 	if byEmergencyGroup {
 		if err := validateEmergencyQuotaParamsUpdate(pOld, pNew); err != nil {
 			return err
@@ -50,8 +53,11 @@ func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom sdk.Dec, quotaDurati
 
 func validateEmergencyQuotaParamsUpdate(pOld, pNew uibc.Params) error {
 	var errs []error
-	if pNew.TotalQuota.GT(pOld.TotalQuota) || pNew.TokenQuota.GT(pOld.TokenQuota) {
-		errs = append(errs, errors.New("emergency group can't increase TotalQuota nor TokenQuota"))
+	if pNew.TotalQuota.GT(pOld.TotalQuota) || pNew.TokenQuota.GT(pOld.TokenQuota) ||
+		pNew.InflowOutflowQuotaBase.GT(pOld.InflowOutflowQuotaBase) ||
+		pNew.InflowOutflowTokenQuotaBase.GT(pOld.InflowOutflowTokenQuotaBase) ||
+		pNew.InflowOutflowQuotaRate.GT(pOld.InflowOutflowQuotaRate) {
+		errs = append(errs, errors.New("emergency group can't increase any of the quota parameters"))
 	}
 	if pNew.QuotaDuration != pOld.QuotaDuration {
 		errs = append(errs, errors.New("emergency group can't change QuotaDuration"))
