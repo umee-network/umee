@@ -77,7 +77,7 @@ func (q Querier) RegisteredTokenMarkets(
 	for _, token := range tokens {
 		marketSumnmary, err := q.MarketSummary(goCtx, &types.QueryMarketSummary{Denom: token.BaseDenom})
 		if err != nil {
-			// absorb error overall query error into struct, which may be empty, but proceed with this query
+			// absorb overall query error into struct, which may be empty, but proceed with this query
 			marketSumnmary.Errors = marketSumnmary.Errors + err.Error()
 		}
 		markets = append(markets, types.TokenMarket{
