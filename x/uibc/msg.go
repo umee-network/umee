@@ -2,10 +2,9 @@ package uibc
 
 import (
 	"encoding/json"
+	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-
 	"github.com/umee-network/umee/v6/util/checkers"
 )
 
@@ -26,21 +25,24 @@ func (msg *MsgGovUpdateQuota) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateQuota) ValidateBasic() error {
+	var errs []error
 	if err := checkers.Proposal(msg.Authority, msg.Description); err != nil {
-		return err
+		errs = append(errs, err)
 	}
 
-	if msg.Total.IsNil() || !msg.Total.IsPositive() {
-		return sdkerrors.ErrInvalidRequest.Wrap("total quota must be positive")
-	}
-	if msg.PerDenom.IsNil() || !msg.PerDenom.IsPositive() {
-		return sdkerrors.ErrInvalidRequest.Wrap("quota per denom must be positive")
-	}
+	errs = checkers.DecPositive(msg.Total, "total quota", errs)
+	errs = checkers.DecPositive(msg.PerDenom, "per_denom quota", errs)
+	errs = checkers.DecNotNegative(msg.InflowOutflowQuotaBase, "inflow_outflow_quota_base", errs)
+	errs = checkers.DecNotNegative(msg.InflowOutflowTokenQuotaBase, "inflow_outflow_token_quota_base", errs)
+	errs = checkers.DecNotNegative(msg.InflowOutflowQuotaRate, "inflow_outflow_quota_rate", errs)
 	if msg.Total.LT(msg.PerDenom) {
-		return sdkerrors.ErrInvalidRequest.Wrap("total quota must be greater than or equal to per_denom quota")
+		errs = append(errs, errors.New("total quota must be greater than or equal to per_denom quota"))
+	}
+	if msg.InflowOutflowQuotaBase.LT(msg.InflowOutflowTokenQuotaBase) {
+		errs = append(errs, errors.New("inflow_outflow_quota_base must be greater than or equal than inflow_outflow_token_quota_base"))
 	}
 
-	return nil
+	return errors.Join(errs...)
 }
 
 func (msg *MsgGovUpdateQuota) GetSigners() []sdk.AccAddress {

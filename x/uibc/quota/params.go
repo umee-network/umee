@@ -2,9 +2,7 @@ package quota
 
 import (
 	"errors"
-	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -31,17 +29,16 @@ func (k Keeper) GetParams() (params uibc.Params) {
 }
 
 // UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
-func (k Keeper) UpdateQuotaParams(totalQuota, quotaPerDenom, inOutBase, inOutTokenBase, inOutRate sdk.Dec,
-	quotaDuration time.Duration, byEmergencyGroup bool) error {
+func (k Keeper) UpdateQuotaParams(msg *uibc.MsgGovUpdateQuota, byEmergencyGroup bool) error {
 
 	pOld := k.GetParams()
 	pNew := pOld
-	pNew.TotalQuota = totalQuota
-	pNew.QuotaDuration = quotaDuration
-	pNew.TokenQuota = quotaPerDenom
-	pNew.InflowOutflowQuotaBase = inOutBase
-	pNew.InflowOutflowTokenQuotaBase = inOutTokenBase
-	pNew.InflowOutflowQuotaRate = inOutRate
+	pNew.TotalQuota = msg.Total
+	pNew.QuotaDuration = msg.QuotaDuration
+	pNew.TokenQuota = msg.PerDenom
+	pNew.InflowOutflowQuotaBase = msg.InflowOutflowQuotaBase
+	pNew.InflowOutflowTokenQuotaBase = msg.InflowOutflowTokenQuotaBase
+	pNew.InflowOutflowQuotaRate = msg.InflowOutflowQuotaRate
 	if byEmergencyGroup {
 		if err := validateEmergencyQuotaParamsUpdate(pOld, pNew); err != nil {
 			return err
