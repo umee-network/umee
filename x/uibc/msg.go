@@ -39,7 +39,8 @@ func (msg *MsgGovUpdateQuota) ValidateBasic() error {
 		errs = append(errs, errors.New("total quota must be greater than or equal to per_denom quota"))
 	}
 	if msg.InflowOutflowQuotaBase.LT(msg.InflowOutflowTokenQuotaBase) {
-		errs = append(errs, errors.New("inflow_outflow_quota_base must be greater than or equal than inflow_outflow_token_quota_base"))
+		errs = append(errs, errors.New(
+			"inflow_outflow_quota_base must be greater than or equal than inflow_outflow_token_quota_base"))
 	}
 
 	return errors.Join(errs...)

@@ -65,7 +65,7 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 			msg:    invalidTotalQuota,
 			errMsg: "total quota must be greater than or equal to per_denom quota",
 		}, {
-			name:   "invalid inflow outflow quota abse with respect to per denom",
+			name:   "invalid inflow outflow quota base with respect to per denom",
 			msg:    invalidInflowOutflow,
 			errMsg: "inflow_outflow_quota_base must be greater than",
 		},
