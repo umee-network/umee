@@ -54,7 +54,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [2370](https://github.com/umee-network/umee/pull/2370) Add missing params to `uic/MsgGovUpdateQuota`.`
+- [2370](https://github.com/umee-network/umee/pull/2370) Add missing params to `uic/MsgGovUpdateQuota`.
 
 ### Bug Fixes
 
