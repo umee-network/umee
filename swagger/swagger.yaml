@@ -1889,6 +1889,64 @@ paths:
           type: string
       tags:
         - Query
+  /umee/oracle/v1/miss_counters:
+    get:
+      summary: MissCounters returns oracle missing votes count of validators.
+      operationId: MissCounters
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              miss_counters:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    validator:
+                      type: string
+                    miss_counter:
+                      type: string
+                      format: uint64
+                      title: >-
+                        miss_counter defines the oracle miss counter of a
+                        validator
+                  description: >-
+                    PriceMissCounter is the validator's oracle price votes
+                    missing count.
+            description: >-
+              QueryMissCountersResponse is response type for the
+              Query/MissCounters RPC method.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: validator
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
   /umee/oracle/v1/params:
     get:
       summary: Params queries all parameters.
@@ -2445,6 +2503,70 @@ paths:
                       format: byte
       tags:
         - Query
+  /umee/uibc/v1/inflows:
+    get:
+      summary: >-
+        Inflows returns registered IBC denoms inflows in the current quota
+        period.
+
+        If denom is not specified, returns sum of all registered inflows.
+      operationId: Inflows
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              sum:
+                type: string
+              inflows:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    denom:
+                      type: string
+                    amount:
+                      type: string
+                  description: >-
+                    DecCoin defines a token with a denomination and a decimal
+                    amount.
+
+
+                    NOTE: The amount field is an Dec which implements the custom
+                    method
+
+                    signatures required by gogoproto.
+            title: QueryInflowsResponse defines response type of Query/Inflows
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      parameters:
+        - name: denom
+          in: query
+          required: false
+          type: string
+      tags:
+        - Query
   /umee/uibc/v1/outflows:
     get:
       summary: |-
@@ -2552,6 +2674,44 @@ paths:
               gRPC
 
               service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
+  /umee/uibc/v1/quota_expires:
+    get:
+      summary: QuotaExpires returns when current ibc quota will end.
+      operationId: QuotaExpires
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              end_time:
+                type: string
+                format: date-time
+            title: QueryAllInflowsResponse defines response type of Query/AllInflows
         default:
           description: An unexpected error response.
           schema:
@@ -3978,6 +4138,20 @@ paths:
                             description: >-
                               RedeemRate used for exchange calculations meToken
                               -> asset.
+                          swap_fee:
+                            type: string
+                            description: >-
+                              SwapFee charged to the user on a swap, expressed
+                              in fraction.
+
+                              Valid values: 0-1.
+                          redeem_fee:
+                            type: string
+                            description: >-
+                              RedeemFee charged to the user on a redemption,
+                              expressed in fraction.
+
+                              Valid values: 0-1.
                         description: >-
                           AssetPrice information related to the index
                           operations.
@@ -4084,6 +4258,20 @@ paths:
                             description: >-
                               RedeemRate used for exchange calculations meToken
                               -> asset.
+                          swap_fee:
+                            type: string
+                            description: >-
+                              SwapFee charged to the user on a swap, expressed
+                              in fraction.
+
+                              Valid values: 0-1.
+                          redeem_fee:
+                            type: string
+                            description: >-
+                              RedeemFee charged to the user on a redemption,
+                              expressed in fraction.
+
+                              Valid values: 0-1.
                         description: >-
                           AssetPrice information related to the index
                           operations.
@@ -6111,6 +6299,16 @@ definitions:
         type: string
         format: uint64
     title: Price is an instance of a price "stamp"
+  umee.oracle.v1.PriceMissCounter:
+    type: object
+    properties:
+      validator:
+        type: string
+      miss_counter:
+        type: string
+        format: uint64
+        title: miss_counter defines the oracle miss counter of a validator
+    description: PriceMissCounter is the validator's oracle price votes missing count.
   umee.oracle.v1.QueryActiveExchangeRatesResponse:
     type: object
     properties:
@@ -6375,6 +6573,26 @@ definitions:
     description: |-
       QueryMissCounterResponse is response type for the
       Query/MissCounter RPC method.
+  umee.oracle.v1.QueryMissCountersResponse:
+    type: object
+    properties:
+      miss_counters:
+        type: array
+        items:
+          type: object
+          properties:
+            validator:
+              type: string
+            miss_counter:
+              type: string
+              format: uint64
+              title: miss_counter defines the oracle miss counter of a validator
+          description: >-
+            PriceMissCounter is the validator's oracle price votes missing
+            count.
+    description: >-
+      QueryMissCountersResponse is response type for the Query/MissCounters RPC
+      method.
   umee.oracle.v1.QueryParamsResponse:
     type: object
     properties:
@@ -6534,6 +6752,26 @@ definitions:
             NOTE: The amount field is an Dec which implements the custom method
             signatures required by gogoproto.
     title: QueryOutflowResponse defines response type of Query/Outflow
+  umee.uibc.v1.QueryInflowsResponse:
+    type: object
+    properties:
+      sum:
+        type: string
+      inflows:
+        type: array
+        items:
+          type: object
+          properties:
+            denom:
+              type: string
+            amount:
+              type: string
+          description: |-
+            DecCoin defines a token with a denomination and a decimal amount.
+
+            NOTE: The amount field is an Dec which implements the custom method
+            signatures required by gogoproto.
+    title: QueryInflowsResponse defines response type of Query/Inflows
   umee.uibc.v1.QueryOutflowsResponse:
     type: object
     properties:
@@ -6590,6 +6828,13 @@ definitions:
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
       service handler.
+  umee.uibc.v1.QueryQuotaExpiresResponse:
+    type: object
+    properties:
+      end_time:
+        type: string
+        format: date-time
+    title: QueryAllInflowsResponse defines response type of Query/AllInflows
   umee.ugov.v1.InflationParams:
     type: object
     properties:
@@ -7491,6 +7736,16 @@ definitions:
       redeem_rate:
         type: string
         description: RedeemRate used for exchange calculations meToken -> asset.
+      swap_fee:
+        type: string
+        description: |-
+          SwapFee charged to the user on a swap, expressed in fraction.
+          Valid values: 0-1.
+      redeem_fee:
+        type: string
+        description: |-
+          RedeemFee charged to the user on a redemption, expressed in fraction.
+          Valid values: 0-1.
     description: AssetPrice information related to the index operations.
   umee.metoken.v1.Fee:
     type: object
@@ -7728,6 +7983,18 @@ definitions:
             redeem_rate:
               type: string
               description: RedeemRate used for exchange calculations meToken -> asset.
+            swap_fee:
+              type: string
+              description: |-
+                SwapFee charged to the user on a swap, expressed in fraction.
+                Valid values: 0-1.
+            redeem_fee:
+              type: string
+              description: >-
+                RedeemFee charged to the user on a redemption, expressed in
+                fraction.
+
+                Valid values: 0-1.
           description: AssetPrice information related to the index operations.
     description: IndexPrices provides meToken price related index information.
   umee.metoken.v1.Params:
@@ -7841,6 +8108,20 @@ definitions:
                     description: >-
                       RedeemRate used for exchange calculations meToken ->
                       asset.
+                  swap_fee:
+                    type: string
+                    description: >-
+                      SwapFee charged to the user on a swap, expressed in
+                      fraction.
+
+                      Valid values: 0-1.
+                  redeem_fee:
+                    type: string
+                    description: >-
+                      RedeemFee charged to the user on a redemption, expressed
+                      in fraction.
+
+                      Valid values: 0-1.
                 description: AssetPrice information related to the index operations.
           description: IndexPrices provides meToken price related index information.
     description: >-
@@ -7896,6 +8177,20 @@ definitions:
                     description: >-
                       RedeemRate used for exchange calculations meToken ->
                       asset.
+                  swap_fee:
+                    type: string
+                    description: >-
+                      SwapFee charged to the user on a swap, expressed in
+                      fraction.
+
+                      Valid values: 0-1.
+                  redeem_fee:
+                    type: string
+                    description: >-
+                      RedeemFee charged to the user on a redemption, expressed
+                      in fraction.
+
+                      Valid values: 0-1.
                 description: AssetPrice information related to the index operations.
           description: IndexPrices provides meToken price related index information.
     description: >-
