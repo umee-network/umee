@@ -1443,6 +1443,489 @@ paths:
           type: string
       tags:
         - Query
+  /umee/leverage/v1/registered_tokens_with_markets:
+    get:
+      summary: >-
+        RegisteredTokensWithMarkets queries for all the registered tokens and
+        their market summaries.
+      operationId: RegisteredTokensWithMarkets
+      responses:
+        '200':
+          description: A successful response.
+          schema:
+            type: object
+            properties:
+              markets:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    token:
+                      type: object
+                      properties:
+                        base_denom:
+                          type: string
+                          description: >-
+                            Base Denom is the denomination of the underlying
+                            base token. Must be the base
+
+                            denom as registered in the Bank module (so IBC denom
+                            for IBC tokens).
+                        reserve_factor:
+                          type: string
+                          description: >-
+                            Reserve Factor defines what portion of accrued
+                            interest goes to reserves
+
+                            when this token is borrowed.
+
+                            Valid values: 0-1.
+                        collateral_weight:
+                          type: string
+                          description: >-
+                            Collateral Weight defines what portion of the total
+                            value of the asset
+
+                            can contribute to a users borrowing power. If the
+                            collateral weight is
+
+                            zero, using this asset as collateral against
+                            borrowing will be disabled.
+
+                            Must be smaller than `liquidation_threshold`.
+
+                            Valid values: 0-1.
+                        liquidation_threshold:
+                          type: string
+                          description: >-
+                            Liquidation Threshold defines what amount of the
+                            total value of the
+
+                            asset as a collateral can contribute to a user's
+                            liquidation threshold
+
+                            (above which they become eligible for liquidation).
+
+                            Must be bigger than `collateral_weight`.
+
+                            Valid values: 0-1.
+
+                            See also: min_close_factor.
+                        base_borrow_rate:
+                          type: string
+                          title: >-
+                            Base Borrow Rate defines the minimum interest rate
+                            for borrowing this
+
+                            asset.
+
+                            Valid values: 0-∞
+                        kink_borrow_rate:
+                          type: string
+                          title: >-
+                            Kink Borrow Rate defines the interest rate for
+                            borrowing this
+
+                            asset when supply utilization is equal to
+                            'kink_utilization'.
+
+                            Valid values: 0-∞
+                        max_borrow_rate:
+                          type: string
+                          title: >-
+                            Max Borrow Rate defines the interest rate for
+                            borrowing this
+
+                            asset when supply utilization is at its maximum.
+
+                            Valid values: 0-∞
+                        kink_utilization:
+                          type: string
+                          description: >-
+                            Kink Utilization defines the supply utilization
+                            value where
+
+                            the kink in the borrow interest rate function
+                            occurs.
+
+                            Valid values: 0-1.
+                        liquidation_incentive:
+                          type: string
+                          description: >-
+                            Liquidation Incentive determines the portion of
+                            bonus collateral of
+
+                            a token type liquidators receive as a liquidation
+                            reward.
+
+                            Valid values: 0-1.
+                        symbol_denom:
+                          type: string
+                          description: >-
+                            Symbol Denom is the human readable denomination of
+                            this token.
+                        exponent:
+                          type: integer
+                          format: int64
+                          description: >-
+                            Exponent is the power of ten by which to multiply,
+                            in order to convert
+
+                            an amount of the token denoted in its symbol denom
+                            to the actual amount
+
+                            of its base denom.
+                        enable_msg_supply:
+                          type: boolean
+                          description: >-
+                            Enable Msg Supply allows supplying for lending or
+                            collateral using this
+
+                            token. `false` means that a token can no longer be
+                            supplied.
+
+                            Note that withdrawing is always enabled. Disabling
+                            supply would
+
+                            be one step in phasing out an asset type.
+                        enable_msg_borrow:
+                          type: boolean
+                          description: >-
+                            Enable Msg Borrow allows borrowing of this token.
+                            Note that repaying is
+
+                            always enabled. Disabling borrowing would be one
+                            step in phasing out an
+
+                            asset type, but could also be used from the start
+                            for asset types meant
+
+                            to be collateral only, like meTokens.
+                        blacklist:
+                          type: boolean
+                          description: >-
+                            Blacklist should only be used to eliminate an asset
+                            completely. A blacklisted
+
+                            asset is treated as though its oracle price is zero,
+                            and thus ignored by
+
+                            calculations such as collateral value and borrow
+                            limit. Can still be repaid
+
+                            or withdrawn, but not liquidated. A blacklisted
+                            token must have enable_msg_supply
+
+                            and enable_msg_borrow set to false. Such tokens can
+                            be safely removed from the
+
+                            oracle and price feeder as well.
+                        max_collateral_share:
+                          type: string
+                          description: >-
+                            Max Collateral Share specifies how much of the
+                            system's overall collateral
+
+                            can be provided by a given token. 1.0 means that the
+                            token has no restriction.
+
+                            0.1 means maximum 10% of system's total collateral
+                            value can be provided by this token.
+
+                            Valid values: 0-1.
+                        max_supply_utilization:
+                          type: string
+                          description: >-
+                            Max Supply Utilization specifies the maximum supply
+                            utilization a token is
+
+                            allowed to reach as a direct result of user
+                            borrowing. New borrows are not allowed when
+
+                            the supply utilization is above
+                            `max_supply_utilization`.
+                               supply_utilization(token) = total_borrowed(token) / total_supply(token)
+                            Valid values: 0-1.
+                        min_collateral_liquidity:
+                          type: string
+                          title: >-
+                            Min Collateral Liquidity specifies min limit for the
+                            following function:
+                               collateral_liquidity(token) = available(token) / total_collateral(token)
+                            Borrowing, collateralizing, or withdrawing assets is
+                            not allowed when the
+
+                            result of such action invalidates
+                            min_collateral_liquidity.
+
+                            Liquidity can only drop below this value due to
+                            interest or liquidations.
+
+                            The goal is to assure that there is enough available
+                            (not borrowed) token to be available
+
+                            for withdraw when there is a collateral liquidation
+                            and the liquidator needs to
+
+                            withdraw uToken.
+
+                            Valid values: 0 - inf
+                        max_supply:
+                          type: string
+                          description: >-
+                            Max Supply is the maximum amount of tokens the
+                            protocol can hold.
+
+                            Adding more supply of the given token to the
+                            protocol will return an error.
+
+                            Must be a non negative value. 0 means that there is
+                            no limit.
+
+                            To mark a token as not valid for supply,
+                            `msg_supply` must be set to false.
+                        historic_medians:
+                          type: integer
+                          format: int64
+                          description: >-
+                            Historic Medians is the number of median historic
+                            prices to request from
+
+                            the oracle module when evaluating new borrow
+                            positions containing this token.
+
+                            All MsgBorrow, MsgWithdraw, and MsgDecollateralize
+                            must result in healthy
+
+                            borrow positions under both current and historic
+                            prices. The default value of
+
+                            zero for this field causes current price to be used
+                            in those calculations
+
+                            for the affected Token.
+
+                            The time span covered by the historic median will
+                            be:
+                                oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
+                      description: >-
+                        Token defines a token, along with its metadata and
+                        parameters, in the Umee
+
+                        capital facility that can be supplied and borrowed.
+
+                        See
+                        https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+                        for more details.
+                    market:
+                      type: object
+                      properties:
+                        symbol_denom:
+                          type: string
+                          description: >-
+                            Symbol Denom is the human-readable representation of
+                            a token denom, for example "UMEE" or "ATOM".
+                        exponent:
+                          type: integer
+                          format: int64
+                          description: >-
+                            Exponent is the power of ten required to get from
+                            base denom to symbol denom. For example, an exponent
+                            of 6 means 10^6 uumee = 1 UMEE.
+                        oracle_price:
+                          type: string
+                          description: >-
+                            Oracle Price is the current USD value of a token.
+                            Oracle price is nil when the oracle is down.
+                        uToken_exchange_rate:
+                          type: string
+                          description: >-
+                            uToken Exchange Rate is the amount of base tokens
+                            received when withdrawing 1 uToken. For example, a
+                            uToken exchange rate of 1.5 means a supplier
+                            receives 3 uumee for every 2 u/uumee they wish to
+                            withdraw. The same applies in reverse: supplying 3
+                            uumee would award 2 u/uumee at that time.
+                        supply_APY:
+                          type: string
+                          description: >-
+                            Supply APY is the current interest rate suppliers
+                            are receiving for their deposits. For example, 0.11
+                            would mean 11% APY. Supply APY is always less than
+                            borrow APY.
+                        borrow_APY:
+                          type: string
+                          description: >-
+                            Borrow APY is the current interest rate borrowers
+                            are being charged on their loans. For example, 0.2
+                            would mean 20% APY.
+                        supplied:
+                          type: string
+                          description: >-
+                            Supplied is the total amount of tokens supplied to
+                            the the system by all suppliers, including any
+                            interest earned. This includes that tokens which
+                            have been borrowed out or enabled as collateral, but
+                            excludes reserves. Supplied is denominated in base
+                            tokens, so exponent must be applied to convert to
+                            symbol denom.
+                        reserved:
+                          type: string
+                          description: >-
+                            Reserved is the total amount of tokens held in
+                            reserve by the module for emergencies. Reserves are
+                            always excluded from total supply, borrow,
+                            collateral, and liqduidity queries. Reserves are
+                            denominated in base tokens, so exponent must be
+                            applied to convert to symbol denom.
+                        collateral:
+                          type: string
+                          description: >-
+                            Collateral is the total amount of uTokens
+                            collateralized by all borrowers. Collateral is
+                            denominated in uTokenso, so both uToken exchange
+                            rate and exponent must also be applied to convert to
+                            symbol denom. For example, if collateral is 4000000
+                            u/uumee and uToken exchange rate is 1.2, then 5 UMEE
+                            have been collateralized.
+                        borrowed:
+                          type: string
+                          description: >-
+                            Borrowed is the total amount of debt in this token
+                            held across all borrowers. It is denominated in base
+                            tokens, so exponent must be applied to convert to
+                            symbol denom.
+                        liquidity:
+                          type: string
+                          description: >-
+                            Liquidity is the amount of a token that has been
+                            supplied but not yet borrowed or reserved. It is
+                            denominated in base tokens, so exponent must be
+                            applied to convert to symbol denom.
+                        maximum_borrow:
+                          type: string
+                          description: >-
+                            Maximum Borrow is the amount of a token that is
+                            available for borrowing, including that which has
+                            already been borrowed out. This amount is less than
+                            total supply due to safety limits. It is denominated
+                            in base tokens, so exponent must be applied to
+                            convert to symbol denom. For example, if borrowed is
+                            3000000 uumee and maximum borrow is 4000000 uumee,
+                            then 1 UMEE is currently available for borrowing.
+                        maximum_collateral:
+                          type: string
+                          description: >-
+                            Maximum Collateral is the amount of a token that can
+                            be collateralized, including that which is already
+                            collateral. This amount is less than total supply
+                            due to safety limits. It is denominated in uTokens,
+                            so both uToken exchange rate and exponent must be
+                            applied to convert to symbol denom. For example, if
+                            collateral is 4000000 u/uumee, uToken exchange rate
+                            is 1.2, and maximum borrow is 7000000 uumee, then a
+                            maximum of 2 additional UMEE is permitted to be
+                            collateralized.
+                        minimum_liquidity:
+                          type: string
+                          description: >-
+                            Minimum Liquidity is the minimum amount of liquidity
+                            in the module required by safety limits, based on
+                            the current collateral. It is denominated in base
+                            tokens, so exponent must be applied to convert to
+                            symbol denom. For example, if liquidity is 9000000
+                            uumee and minimum liquidity is 8000000 uumee, then a
+                            maximum of 1 additional UMEE is currently available
+                            for borrowing or withdrawal.
+                        uToken_supply:
+                          type: string
+                          description: >-
+                            uToken Supply is the total amount of a base token's
+                            associated uToken in circulation.
+                        available_borrow:
+                          type: string
+                          description: >-
+                            Available Borrow is the maximum additional amount of
+                            base tokens than can be borrowed based on current
+                            liquidity and system safety limits. It can also be
+                            calculated by MIN(maximum_borrow - borrowed,
+                            liquidity - minimum_liquidity). It is denominated in
+                            base tokens, so exponent must be applied to convert
+                            to symbol denom. A negative availability means
+                            safety limits have been exceeded and borrowing is
+                            temporarily unavailable.
+                        available_withdraw:
+                          type: string
+                          description: >-
+                            Available Withdraw is the maximum amount of uTokens
+                            than can currently be withdrawn based on liquidity
+                            and system safety limits. It can also be calculated
+                            by (liquidity - minimum_liquidity). It is
+                            denominated in uTokens, so both uToken exchange rate
+                            and exponent must be applied to convert to symbol
+                            denom. A negative availability means safety limits
+                            have been exceeded and withdrawal is temporarily
+                            unavailable.
+                        available_collateralize:
+                          type: string
+                          description: >-
+                            Available Collateralize is the maximum additional
+                            amount of uTokens than can be collateralized based
+                            on current liquidity and system safety limits. It
+                            can also be calculated by (maximum_collateral, -
+                            collateral). It is denominated in uTokens, so both
+                            uToken exchange rate and exponent must be applied to
+                            convert to symbol denom. A negative availability
+                            means safety limits have been exceeded and
+                            additional collateral cannot be created until more
+                            liquidity is present.
+                        oracle_historic_price:
+                          type: string
+                          description: >-
+                            Oracle Historic Price is the historic USD value of a
+                            token. Historic price is defined as the median of
+                            the last N historic median prices from the oracle
+                            module, with N being this token's HistoricMedians in
+                            the leverage registry. Current price is used if
+                            required medians is zero. Price is nil when the
+                            oracle is down or insufficient historic medians are
+                            available.
+                        errors:
+                          type: string
+                      description: >-
+                        QueryMarketSummaryResponse defines the response
+                        structure for the MarketSummary gRPC service handler.
+                  description: TokenMarket is a token and its market summary.
+            description: >-
+              QueryRegisteredTokensWithMarketsResponse defines the response
+              structure for the
+
+              RegisteredTokensWithMarkets gRPC service handler.
+        default:
+          description: An unexpected error response.
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              code:
+                type: integer
+                format: int32
+              message:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type_url:
+                      type: string
+                    value:
+                      type: string
+                      format: byte
+      tags:
+        - Query
   /umee/leverage/v1/special_assets:
     get:
       summary: SpecialAssets queries for all special asset pairs.
@@ -5835,6 +6318,430 @@ definitions:
     description: |-
       QueryRegisteredTokensResponse defines the response structure for the
       RegisteredTokens gRPC service handler.
+  umee.leverage.v1.QueryRegisteredTokensWithMarketsResponse:
+    type: object
+    properties:
+      markets:
+        type: array
+        items:
+          type: object
+          properties:
+            token:
+              type: object
+              properties:
+                base_denom:
+                  type: string
+                  description: >-
+                    Base Denom is the denomination of the underlying base token.
+                    Must be the base
+
+                    denom as registered in the Bank module (so IBC denom for IBC
+                    tokens).
+                reserve_factor:
+                  type: string
+                  description: >-
+                    Reserve Factor defines what portion of accrued interest goes
+                    to reserves
+
+                    when this token is borrowed.
+
+                    Valid values: 0-1.
+                collateral_weight:
+                  type: string
+                  description: >-
+                    Collateral Weight defines what portion of the total value of
+                    the asset
+
+                    can contribute to a users borrowing power. If the collateral
+                    weight is
+
+                    zero, using this asset as collateral against borrowing will
+                    be disabled.
+
+                    Must be smaller than `liquidation_threshold`.
+
+                    Valid values: 0-1.
+                liquidation_threshold:
+                  type: string
+                  description: >-
+                    Liquidation Threshold defines what amount of the total value
+                    of the
+
+                    asset as a collateral can contribute to a user's liquidation
+                    threshold
+
+                    (above which they become eligible for liquidation).
+
+                    Must be bigger than `collateral_weight`.
+
+                    Valid values: 0-1.
+
+                    See also: min_close_factor.
+                base_borrow_rate:
+                  type: string
+                  title: >-
+                    Base Borrow Rate defines the minimum interest rate for
+                    borrowing this
+
+                    asset.
+
+                    Valid values: 0-∞
+                kink_borrow_rate:
+                  type: string
+                  title: >-
+                    Kink Borrow Rate defines the interest rate for borrowing
+                    this
+
+                    asset when supply utilization is equal to
+                    'kink_utilization'.
+
+                    Valid values: 0-∞
+                max_borrow_rate:
+                  type: string
+                  title: |-
+                    Max Borrow Rate defines the interest rate for borrowing this
+                    asset when supply utilization is at its maximum.
+                    Valid values: 0-∞
+                kink_utilization:
+                  type: string
+                  description: |-
+                    Kink Utilization defines the supply utilization value where
+                    the kink in the borrow interest rate function occurs.
+                    Valid values: 0-1.
+                liquidation_incentive:
+                  type: string
+                  description: >-
+                    Liquidation Incentive determines the portion of bonus
+                    collateral of
+
+                    a token type liquidators receive as a liquidation reward.
+
+                    Valid values: 0-1.
+                symbol_denom:
+                  type: string
+                  description: >-
+                    Symbol Denom is the human readable denomination of this
+                    token.
+                exponent:
+                  type: integer
+                  format: int64
+                  description: >-
+                    Exponent is the power of ten by which to multiply, in order
+                    to convert
+
+                    an amount of the token denoted in its symbol denom to the
+                    actual amount
+
+                    of its base denom.
+                enable_msg_supply:
+                  type: boolean
+                  description: >-
+                    Enable Msg Supply allows supplying for lending or collateral
+                    using this
+
+                    token. `false` means that a token can no longer be supplied.
+
+                    Note that withdrawing is always enabled. Disabling supply
+                    would
+
+                    be one step in phasing out an asset type.
+                enable_msg_borrow:
+                  type: boolean
+                  description: >-
+                    Enable Msg Borrow allows borrowing of this token. Note that
+                    repaying is
+
+                    always enabled. Disabling borrowing would be one step in
+                    phasing out an
+
+                    asset type, but could also be used from the start for asset
+                    types meant
+
+                    to be collateral only, like meTokens.
+                blacklist:
+                  type: boolean
+                  description: >-
+                    Blacklist should only be used to eliminate an asset
+                    completely. A blacklisted
+
+                    asset is treated as though its oracle price is zero, and
+                    thus ignored by
+
+                    calculations such as collateral value and borrow limit. Can
+                    still be repaid
+
+                    or withdrawn, but not liquidated. A blacklisted token must
+                    have enable_msg_supply
+
+                    and enable_msg_borrow set to false. Such tokens can be
+                    safely removed from the
+
+                    oracle and price feeder as well.
+                max_collateral_share:
+                  type: string
+                  description: >-
+                    Max Collateral Share specifies how much of the system's
+                    overall collateral
+
+                    can be provided by a given token. 1.0 means that the token
+                    has no restriction.
+
+                    0.1 means maximum 10% of system's total collateral value can
+                    be provided by this token.
+
+                    Valid values: 0-1.
+                max_supply_utilization:
+                  type: string
+                  description: >-
+                    Max Supply Utilization specifies the maximum supply
+                    utilization a token is
+
+                    allowed to reach as a direct result of user borrowing. New
+                    borrows are not allowed when
+
+                    the supply utilization is above `max_supply_utilization`.
+                       supply_utilization(token) = total_borrowed(token) / total_supply(token)
+                    Valid values: 0-1.
+                min_collateral_liquidity:
+                  type: string
+                  title: >-
+                    Min Collateral Liquidity specifies min limit for the
+                    following function:
+                       collateral_liquidity(token) = available(token) / total_collateral(token)
+                    Borrowing, collateralizing, or withdrawing assets is not
+                    allowed when the
+
+                    result of such action invalidates min_collateral_liquidity.
+
+                    Liquidity can only drop below this value due to interest or
+                    liquidations.
+
+                    The goal is to assure that there is enough available (not
+                    borrowed) token to be available
+
+                    for withdraw when there is a collateral liquidation and the
+                    liquidator needs to
+
+                    withdraw uToken.
+
+                    Valid values: 0 - inf
+                max_supply:
+                  type: string
+                  description: >-
+                    Max Supply is the maximum amount of tokens the protocol can
+                    hold.
+
+                    Adding more supply of the given token to the protocol will
+                    return an error.
+
+                    Must be a non negative value. 0 means that there is no
+                    limit.
+
+                    To mark a token as not valid for supply, `msg_supply` must
+                    be set to false.
+                historic_medians:
+                  type: integer
+                  format: int64
+                  description: >-
+                    Historic Medians is the number of median historic prices to
+                    request from
+
+                    the oracle module when evaluating new borrow positions
+                    containing this token.
+
+                    All MsgBorrow, MsgWithdraw, and MsgDecollateralize must
+                    result in healthy
+
+                    borrow positions under both current and historic prices. The
+                    default value of
+
+                    zero for this field causes current price to be used in those
+                    calculations
+
+                    for the affected Token.
+
+                    The time span covered by the historic median will be:
+                        oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
+              description: >-
+                Token defines a token, along with its metadata and parameters,
+                in the Umee
+
+                capital facility that can be supplied and borrowed.
+
+                See
+                https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+                for more details.
+            market:
+              type: object
+              properties:
+                symbol_denom:
+                  type: string
+                  description: >-
+                    Symbol Denom is the human-readable representation of a token
+                    denom, for example "UMEE" or "ATOM".
+                exponent:
+                  type: integer
+                  format: int64
+                  description: >-
+                    Exponent is the power of ten required to get from base denom
+                    to symbol denom. For example, an exponent of 6 means 10^6
+                    uumee = 1 UMEE.
+                oracle_price:
+                  type: string
+                  description: >-
+                    Oracle Price is the current USD value of a token. Oracle
+                    price is nil when the oracle is down.
+                uToken_exchange_rate:
+                  type: string
+                  description: >-
+                    uToken Exchange Rate is the amount of base tokens received
+                    when withdrawing 1 uToken. For example, a uToken exchange
+                    rate of 1.5 means a supplier receives 3 uumee for every 2
+                    u/uumee they wish to withdraw. The same applies in reverse:
+                    supplying 3 uumee would award 2 u/uumee at that time.
+                supply_APY:
+                  type: string
+                  description: >-
+                    Supply APY is the current interest rate suppliers are
+                    receiving for their deposits. For example, 0.11 would mean
+                    11% APY. Supply APY is always less than borrow APY.
+                borrow_APY:
+                  type: string
+                  description: >-
+                    Borrow APY is the current interest rate borrowers are being
+                    charged on their loans. For example, 0.2 would mean 20% APY.
+                supplied:
+                  type: string
+                  description: >-
+                    Supplied is the total amount of tokens supplied to the the
+                    system by all suppliers, including any interest earned. This
+                    includes that tokens which have been borrowed out or enabled
+                    as collateral, but excludes reserves. Supplied is
+                    denominated in base tokens, so exponent must be applied to
+                    convert to symbol denom.
+                reserved:
+                  type: string
+                  description: >-
+                    Reserved is the total amount of tokens held in reserve by
+                    the module for emergencies. Reserves are always excluded
+                    from total supply, borrow, collateral, and liqduidity
+                    queries. Reserves are denominated in base tokens, so
+                    exponent must be applied to convert to symbol denom.
+                collateral:
+                  type: string
+                  description: >-
+                    Collateral is the total amount of uTokens collateralized by
+                    all borrowers. Collateral is denominated in uTokenso, so
+                    both uToken exchange rate and exponent must also be applied
+                    to convert to symbol denom. For example, if collateral is
+                    4000000 u/uumee and uToken exchange rate is 1.2, then 5 UMEE
+                    have been collateralized.
+                borrowed:
+                  type: string
+                  description: >-
+                    Borrowed is the total amount of debt in this token held
+                    across all borrowers. It is denominated in base tokens, so
+                    exponent must be applied to convert to symbol denom.
+                liquidity:
+                  type: string
+                  description: >-
+                    Liquidity is the amount of a token that has been supplied
+                    but not yet borrowed or reserved. It is denominated in base
+                    tokens, so exponent must be applied to convert to symbol
+                    denom.
+                maximum_borrow:
+                  type: string
+                  description: >-
+                    Maximum Borrow is the amount of a token that is available
+                    for borrowing, including that which has already been
+                    borrowed out. This amount is less than total supply due to
+                    safety limits. It is denominated in base tokens, so exponent
+                    must be applied to convert to symbol denom. For example, if
+                    borrowed is 3000000 uumee and maximum borrow is 4000000
+                    uumee, then 1 UMEE is currently available for borrowing.
+                maximum_collateral:
+                  type: string
+                  description: >-
+                    Maximum Collateral is the amount of a token that can be
+                    collateralized, including that which is already collateral.
+                    This amount is less than total supply due to safety limits.
+                    It is denominated in uTokens, so both uToken exchange rate
+                    and exponent must be applied to convert to symbol denom. For
+                    example, if collateral is 4000000 u/uumee, uToken exchange
+                    rate is 1.2, and maximum borrow is 7000000 uumee, then a
+                    maximum of 2 additional UMEE is permitted to be
+                    collateralized.
+                minimum_liquidity:
+                  type: string
+                  description: >-
+                    Minimum Liquidity is the minimum amount of liquidity in the
+                    module required by safety limits, based on the current
+                    collateral. It is denominated in base tokens, so exponent
+                    must be applied to convert to symbol denom. For example, if
+                    liquidity is 9000000 uumee and minimum liquidity is 8000000
+                    uumee, then a maximum of 1 additional UMEE is currently
+                    available for borrowing or withdrawal.
+                uToken_supply:
+                  type: string
+                  description: >-
+                    uToken Supply is the total amount of a base token's
+                    associated uToken in circulation.
+                available_borrow:
+                  type: string
+                  description: >-
+                    Available Borrow is the maximum additional amount of base
+                    tokens than can be borrowed based on current liquidity and
+                    system safety limits. It can also be calculated by
+                    MIN(maximum_borrow - borrowed, liquidity -
+                    minimum_liquidity). It is denominated in base tokens, so
+                    exponent must be applied to convert to symbol denom. A
+                    negative availability means safety limits have been exceeded
+                    and borrowing is temporarily unavailable.
+                available_withdraw:
+                  type: string
+                  description: >-
+                    Available Withdraw is the maximum amount of uTokens than can
+                    currently be withdrawn based on liquidity and system safety
+                    limits. It can also be calculated by (liquidity -
+                    minimum_liquidity). It is denominated in uTokens, so both
+                    uToken exchange rate and exponent must be applied to convert
+                    to symbol denom. A negative availability means safety limits
+                    have been exceeded and withdrawal is temporarily
+                    unavailable.
+                available_collateralize:
+                  type: string
+                  description: >-
+                    Available Collateralize is the maximum additional amount of
+                    uTokens than can be collateralized based on current
+                    liquidity and system safety limits. It can also be
+                    calculated by (maximum_collateral, - collateral). It is
+                    denominated in uTokens, so both uToken exchange rate and
+                    exponent must be applied to convert to symbol denom. A
+                    negative availability means safety limits have been exceeded
+                    and additional collateral cannot be created until more
+                    liquidity is present.
+                oracle_historic_price:
+                  type: string
+                  description: >-
+                    Oracle Historic Price is the historic USD value of a token.
+                    Historic price is defined as the median of the last N
+                    historic median prices from the oracle module, with N being
+                    this token's HistoricMedians in the leverage registry.
+                    Current price is used if required medians is zero. Price is
+                    nil when the oracle is down or insufficient historic medians
+                    are available.
+                errors:
+                  type: string
+              description: >-
+                QueryMarketSummaryResponse defines the response structure for
+                the MarketSummary gRPC service handler.
+          description: TokenMarket is a token and its market summary.
+    description: >-
+      QueryRegisteredTokensWithMarketsResponse defines the response structure
+      for the
+
+      RegisteredTokensWithMarkets gRPC service handler.
   umee.leverage.v1.QuerySpecialAssetsResponse:
     type: object
     properties:
@@ -6155,6 +7062,402 @@ definitions:
       https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
 
       for more details.
+  umee.leverage.v1.TokenMarket:
+    type: object
+    properties:
+      token:
+        type: object
+        properties:
+          base_denom:
+            type: string
+            description: >-
+              Base Denom is the denomination of the underlying base token. Must
+              be the base
+
+              denom as registered in the Bank module (so IBC denom for IBC
+              tokens).
+          reserve_factor:
+            type: string
+            description: >-
+              Reserve Factor defines what portion of accrued interest goes to
+              reserves
+
+              when this token is borrowed.
+
+              Valid values: 0-1.
+          collateral_weight:
+            type: string
+            description: >-
+              Collateral Weight defines what portion of the total value of the
+              asset
+
+              can contribute to a users borrowing power. If the collateral
+              weight is
+
+              zero, using this asset as collateral against borrowing will be
+              disabled.
+
+              Must be smaller than `liquidation_threshold`.
+
+              Valid values: 0-1.
+          liquidation_threshold:
+            type: string
+            description: >-
+              Liquidation Threshold defines what amount of the total value of
+              the
+
+              asset as a collateral can contribute to a user's liquidation
+              threshold
+
+              (above which they become eligible for liquidation).
+
+              Must be bigger than `collateral_weight`.
+
+              Valid values: 0-1.
+
+              See also: min_close_factor.
+          base_borrow_rate:
+            type: string
+            title: >-
+              Base Borrow Rate defines the minimum interest rate for borrowing
+              this
+
+              asset.
+
+              Valid values: 0-∞
+          kink_borrow_rate:
+            type: string
+            title: |-
+              Kink Borrow Rate defines the interest rate for borrowing this
+              asset when supply utilization is equal to 'kink_utilization'.
+              Valid values: 0-∞
+          max_borrow_rate:
+            type: string
+            title: |-
+              Max Borrow Rate defines the interest rate for borrowing this
+              asset when supply utilization is at its maximum.
+              Valid values: 0-∞
+          kink_utilization:
+            type: string
+            description: |-
+              Kink Utilization defines the supply utilization value where
+              the kink in the borrow interest rate function occurs.
+              Valid values: 0-1.
+          liquidation_incentive:
+            type: string
+            description: >-
+              Liquidation Incentive determines the portion of bonus collateral
+              of
+
+              a token type liquidators receive as a liquidation reward.
+
+              Valid values: 0-1.
+          symbol_denom:
+            type: string
+            description: Symbol Denom is the human readable denomination of this token.
+          exponent:
+            type: integer
+            format: int64
+            description: >-
+              Exponent is the power of ten by which to multiply, in order to
+              convert
+
+              an amount of the token denoted in its symbol denom to the actual
+              amount
+
+              of its base denom.
+          enable_msg_supply:
+            type: boolean
+            description: >-
+              Enable Msg Supply allows supplying for lending or collateral using
+              this
+
+              token. `false` means that a token can no longer be supplied.
+
+              Note that withdrawing is always enabled. Disabling supply would
+
+              be one step in phasing out an asset type.
+          enable_msg_borrow:
+            type: boolean
+            description: >-
+              Enable Msg Borrow allows borrowing of this token. Note that
+              repaying is
+
+              always enabled. Disabling borrowing would be one step in phasing
+              out an
+
+              asset type, but could also be used from the start for asset types
+              meant
+
+              to be collateral only, like meTokens.
+          blacklist:
+            type: boolean
+            description: >-
+              Blacklist should only be used to eliminate an asset completely. A
+              blacklisted
+
+              asset is treated as though its oracle price is zero, and thus
+              ignored by
+
+              calculations such as collateral value and borrow limit. Can still
+              be repaid
+
+              or withdrawn, but not liquidated. A blacklisted token must have
+              enable_msg_supply
+
+              and enable_msg_borrow set to false. Such tokens can be safely
+              removed from the
+
+              oracle and price feeder as well.
+          max_collateral_share:
+            type: string
+            description: >-
+              Max Collateral Share specifies how much of the system's overall
+              collateral
+
+              can be provided by a given token. 1.0 means that the token has no
+              restriction.
+
+              0.1 means maximum 10% of system's total collateral value can be
+              provided by this token.
+
+              Valid values: 0-1.
+          max_supply_utilization:
+            type: string
+            description: >-
+              Max Supply Utilization specifies the maximum supply utilization a
+              token is
+
+              allowed to reach as a direct result of user borrowing. New borrows
+              are not allowed when
+
+              the supply utilization is above `max_supply_utilization`.
+                 supply_utilization(token) = total_borrowed(token) / total_supply(token)
+              Valid values: 0-1.
+          min_collateral_liquidity:
+            type: string
+            title: >-
+              Min Collateral Liquidity specifies min limit for the following
+              function:
+                 collateral_liquidity(token) = available(token) / total_collateral(token)
+              Borrowing, collateralizing, or withdrawing assets is not allowed
+              when the
+
+              result of such action invalidates min_collateral_liquidity.
+
+              Liquidity can only drop below this value due to interest or
+              liquidations.
+
+              The goal is to assure that there is enough available (not
+              borrowed) token to be available
+
+              for withdraw when there is a collateral liquidation and the
+              liquidator needs to
+
+              withdraw uToken.
+
+              Valid values: 0 - inf
+          max_supply:
+            type: string
+            description: >-
+              Max Supply is the maximum amount of tokens the protocol can hold.
+
+              Adding more supply of the given token to the protocol will return
+              an error.
+
+              Must be a non negative value. 0 means that there is no limit.
+
+              To mark a token as not valid for supply, `msg_supply` must be set
+              to false.
+          historic_medians:
+            type: integer
+            format: int64
+            description: >-
+              Historic Medians is the number of median historic prices to
+              request from
+
+              the oracle module when evaluating new borrow positions containing
+              this token.
+
+              All MsgBorrow, MsgWithdraw, and MsgDecollateralize must result in
+              healthy
+
+              borrow positions under both current and historic prices. The
+              default value of
+
+              zero for this field causes current price to be used in those
+              calculations
+
+              for the affected Token.
+
+              The time span covered by the historic median will be:
+                  oracle.Params.median_stamp_period * oracle.Params.historic_stamp_period * historic_medians.
+        description: >-
+          Token defines a token, along with its metadata and parameters, in the
+          Umee
+
+          capital facility that can be supplied and borrowed.
+
+          See
+          https://github.com/umee-network/umee/blob/main/docs/design_docs/010-market-params.md
+
+          for more details.
+      market:
+        type: object
+        properties:
+          symbol_denom:
+            type: string
+            description: >-
+              Symbol Denom is the human-readable representation of a token
+              denom, for example "UMEE" or "ATOM".
+          exponent:
+            type: integer
+            format: int64
+            description: >-
+              Exponent is the power of ten required to get from base denom to
+              symbol denom. For example, an exponent of 6 means 10^6 uumee = 1
+              UMEE.
+          oracle_price:
+            type: string
+            description: >-
+              Oracle Price is the current USD value of a token. Oracle price is
+              nil when the oracle is down.
+          uToken_exchange_rate:
+            type: string
+            description: >-
+              uToken Exchange Rate is the amount of base tokens received when
+              withdrawing 1 uToken. For example, a uToken exchange rate of 1.5
+              means a supplier receives 3 uumee for every 2 u/uumee they wish to
+              withdraw. The same applies in reverse: supplying 3 uumee would
+              award 2 u/uumee at that time.
+          supply_APY:
+            type: string
+            description: >-
+              Supply APY is the current interest rate suppliers are receiving
+              for their deposits. For example, 0.11 would mean 11% APY. Supply
+              APY is always less than borrow APY.
+          borrow_APY:
+            type: string
+            description: >-
+              Borrow APY is the current interest rate borrowers are being
+              charged on their loans. For example, 0.2 would mean 20% APY.
+          supplied:
+            type: string
+            description: >-
+              Supplied is the total amount of tokens supplied to the the system
+              by all suppliers, including any interest earned. This includes
+              that tokens which have been borrowed out or enabled as collateral,
+              but excludes reserves. Supplied is denominated in base tokens, so
+              exponent must be applied to convert to symbol denom.
+          reserved:
+            type: string
+            description: >-
+              Reserved is the total amount of tokens held in reserve by the
+              module for emergencies. Reserves are always excluded from total
+              supply, borrow, collateral, and liqduidity queries. Reserves are
+              denominated in base tokens, so exponent must be applied to convert
+              to symbol denom.
+          collateral:
+            type: string
+            description: >-
+              Collateral is the total amount of uTokens collateralized by all
+              borrowers. Collateral is denominated in uTokenso, so both uToken
+              exchange rate and exponent must also be applied to convert to
+              symbol denom. For example, if collateral is 4000000 u/uumee and
+              uToken exchange rate is 1.2, then 5 UMEE have been collateralized.
+          borrowed:
+            type: string
+            description: >-
+              Borrowed is the total amount of debt in this token held across all
+              borrowers. It is denominated in base tokens, so exponent must be
+              applied to convert to symbol denom.
+          liquidity:
+            type: string
+            description: >-
+              Liquidity is the amount of a token that has been supplied but not
+              yet borrowed or reserved. It is denominated in base tokens, so
+              exponent must be applied to convert to symbol denom.
+          maximum_borrow:
+            type: string
+            description: >-
+              Maximum Borrow is the amount of a token that is available for
+              borrowing, including that which has already been borrowed out.
+              This amount is less than total supply due to safety limits. It is
+              denominated in base tokens, so exponent must be applied to convert
+              to symbol denom. For example, if borrowed is 3000000 uumee and
+              maximum borrow is 4000000 uumee, then 1 UMEE is currently
+              available for borrowing.
+          maximum_collateral:
+            type: string
+            description: >-
+              Maximum Collateral is the amount of a token that can be
+              collateralized, including that which is already collateral. This
+              amount is less than total supply due to safety limits. It is
+              denominated in uTokens, so both uToken exchange rate and exponent
+              must be applied to convert to symbol denom. For example, if
+              collateral is 4000000 u/uumee, uToken exchange rate is 1.2, and
+              maximum borrow is 7000000 uumee, then a maximum of 2 additional
+              UMEE is permitted to be collateralized.
+          minimum_liquidity:
+            type: string
+            description: >-
+              Minimum Liquidity is the minimum amount of liquidity in the module
+              required by safety limits, based on the current collateral. It is
+              denominated in base tokens, so exponent must be applied to convert
+              to symbol denom. For example, if liquidity is 9000000 uumee and
+              minimum liquidity is 8000000 uumee, then a maximum of 1 additional
+              UMEE is currently available for borrowing or withdrawal.
+          uToken_supply:
+            type: string
+            description: >-
+              uToken Supply is the total amount of a base token's associated
+              uToken in circulation.
+          available_borrow:
+            type: string
+            description: >-
+              Available Borrow is the maximum additional amount of base tokens
+              than can be borrowed based on current liquidity and system safety
+              limits. It can also be calculated by MIN(maximum_borrow -
+              borrowed, liquidity - minimum_liquidity). It is denominated in
+              base tokens, so exponent must be applied to convert to symbol
+              denom. A negative availability means safety limits have been
+              exceeded and borrowing is temporarily unavailable.
+          available_withdraw:
+            type: string
+            description: >-
+              Available Withdraw is the maximum amount of uTokens than can
+              currently be withdrawn based on liquidity and system safety
+              limits. It can also be calculated by (liquidity -
+              minimum_liquidity). It is denominated in uTokens, so both uToken
+              exchange rate and exponent must be applied to convert to symbol
+              denom. A negative availability means safety limits have been
+              exceeded and withdrawal is temporarily unavailable.
+          available_collateralize:
+            type: string
+            description: >-
+              Available Collateralize is the maximum additional amount of
+              uTokens than can be collateralized based on current liquidity and
+              system safety limits. It can also be calculated by
+              (maximum_collateral, - collateral). It is denominated in uTokens,
+              so both uToken exchange rate and exponent must be applied to
+              convert to symbol denom. A negative availability means safety
+              limits have been exceeded and additional collateral cannot be
+              created until more liquidity is present.
+          oracle_historic_price:
+            type: string
+            description: >-
+              Oracle Historic Price is the historic USD value of a token.
+              Historic price is defined as the median of the last N historic
+              median prices from the oracle module, with N being this token's
+              HistoricMedians in the leverage registry. Current price is used if
+              required medians is zero. Price is nil when the oracle is down or
+              insufficient historic medians are available.
+          errors:
+            type: string
+        description: >-
+          QueryMarketSummaryResponse defines the response structure for the
+          MarketSummary gRPC service handler.
+    description: TokenMarket is a token and its market summary.
   umee.oracle.v1.AggregateExchangeRatePrevote:
     type: object
     properties:
