@@ -25,25 +25,24 @@ func (msg *MsgGovUpdateQuota) String() string {
 
 // ValidateBasic implements Msg
 func (msg *MsgGovUpdateQuota) ValidateBasic() error {
-	var errs []error
-	if err := checkers.Proposal(msg.Authority, msg.Description); err != nil {
-		errs = append(errs, err)
-	}
-
-	errs = checkers.DecPositive(msg.Total, "total quota", errs)
-	errs = checkers.DecPositive(msg.PerDenom, "per_denom quota", errs)
-	errs = checkers.DecNotNegative(msg.InflowOutflowQuotaBase, "inflow_outflow_quota_base", errs)
-	errs = checkers.DecNotNegative(msg.InflowOutflowTokenQuotaBase, "inflow_outflow_token_quota_base", errs)
-	errs = checkers.DecNotNegative(msg.InflowOutflowQuotaRate, "inflow_outflow_quota_rate", errs)
+	errs := checkers.Proposal(msg.Authority, msg.Description)
+	errs = errors.Join(errs, checkers.DecPositive(msg.Total, "total quota"))
+	errs = errors.Join(errs, checkers.DecPositive(msg.PerDenom, "per_denom quota"))
+	errs = errors.Join(errs, checkers.DecNotNegative(msg.InflowOutflowQuotaBase,
+		"inflow_outflow_quota_base"))
+	errs = errors.Join(errs, checkers.DecNotNegative(msg.InflowOutflowTokenQuotaBase,
+		"inflow_outflow_token_quota_base"))
+	errs = errors.Join(errs, checkers.DecNotNegative(msg.InflowOutflowQuotaRate,
+		"inflow_outflow_quota_rate"))
 	if msg.Total.LT(msg.PerDenom) {
-		errs = append(errs, errors.New("total quota must be greater than or equal to per_denom quota"))
+		errs = errors.Join(errs, errors.New("total quota must be greater than or equal to per_denom quota"))
 	}
 	if msg.InflowOutflowQuotaBase.LT(msg.InflowOutflowTokenQuotaBase) {
-		errs = append(errs, errors.New(
+		errs = errors.Join(errs, errors.New(
 			"inflow_outflow_quota_base must be greater than or equal than inflow_outflow_token_quota_base"))
 	}
 
-	return errors.Join(errs...)
+	return errs
 }
 
 func (msg *MsgGovUpdateQuota) GetSigners() []sdk.AccAddress {
