@@ -105,7 +105,7 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	umeeAmount := sdkmath.NewInt(100_000000)
 	umeePrice := sdk.MustNewDecFromStr("0.37")
 	umeeQuota := sdkmath.NewInt(10000)
-	atomToken := sdk.NewCoin("umee", umeeAmount)
+	umeeToken := sdk.NewCoin("umee", umeeAmount)
 	umeeExponent := 6
 
 	ctrl := gomock.NewController(t)
@@ -125,26 +125,26 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	).AnyTimes()
 	oracleMock.EXPECT().Price(ctx, "UMEE").Return(umeePrice, nil).AnyTimes()
 
-	err = k.UndoUpdateQuota(atomToken.Denom, atomToken.Amount)
+	err = k.UndoUpdateQuota(umeeToken.Denom, umeeToken.Amount)
 	// the result is ignored due to quota reset
 	assert.NilError(t, err)
 
-	o := k.GetTokenOutflows(atomToken.Denom)
+	o := k.GetTokenOutflows(umeeToken.Denom)
 	assert.DeepEqual(t, o.Amount, sdk.ZeroDec())
 
 	setQuotas := sdk.DecCoins{sdk.NewInt64DecCoin("umee", umeeQuota.Int64())}
 	k.SetTokenOutflows(setQuotas)
 
-	err = k.UndoUpdateQuota(atomToken.Denom, atomToken.Amount)
+	err = k.UndoUpdateQuota(umeeToken.Denom, umeeToken.Amount)
 	assert.NilError(t, err)
 
-	o = k.GetTokenOutflows(atomToken.Denom)
+	o = k.GetTokenOutflows(umeeToken.Denom)
 
 	// the expected quota is calculated as follows:
 	// umee_value = umee_amount * umee_price
 	// expected_quota = current_quota - umee_value
 	powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(umeeExponent))
-	expectedQuota := sdk.NewDec(umeeQuota.Int64()).Sub(sdk.NewDecFromInt(atomToken.Amount).Quo(powerReduction).Mul(umeePrice))
+	expectedQuota := sdk.NewDec(umeeQuota.Int64()).Sub(sdk.NewDecFromInt(umeeToken.Amount).Quo(powerReduction).Mul(umeePrice))
 	assert.DeepEqual(t, o.Amount, expectedQuota)
 }
 
