@@ -7,6 +7,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v6/util/genmap"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
@@ -23,13 +24,7 @@ func (k LeverageKeeper) GetTokenSettings(_ sdk.Context, baseDenom string) (ltype
 }
 
 func (k LeverageKeeper) GetAllRegisteredTokens(_ sdk.Context) []ltypes.Token {
-	tokens := make([]ltypes.Token, len(k.tokenSettings))
-	i := 0
-	for _, t := range k.tokenSettings {
-		tokens[i] = t
-		i++
-	}
-	return tokens
+	return genmap.MapToSlice(k.tokenSettings)
 }
 
 func (k LeverageKeeper) ToToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
