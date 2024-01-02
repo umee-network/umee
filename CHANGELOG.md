@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Bug Fixes
+
+- [2368](https://github.com/umee-network/umee/pull/2368) Add inflow amount to registered token. Previously, the inflow amount of the token was being overridden by the new inflow amount.
+
 ## v6.2.0 - 2023-12-01
 
 ### Bug Fixes
