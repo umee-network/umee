@@ -24,7 +24,7 @@ func (k LeverageKeeper) GetTokenSettings(_ sdk.Context, baseDenom string) (ltype
 }
 
 func (k LeverageKeeper) GetAllRegisteredTokens(_ sdk.Context) []ltypes.Token {
-	return genmap.MapToSlice(k.tokenSettings)
+	return genmap.MapValues(k.tokenSettings)
 }
 
 func (k LeverageKeeper) ToToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
