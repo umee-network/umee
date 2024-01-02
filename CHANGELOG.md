@@ -46,16 +46,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Improvements
+
+- [2370](https://github.com/umee-network/umee/pull/2370) Add missing params to `uic/MsgGovUpdateQuota`.
+- [2374](https://github.com/umee-network/umee/pull/2374) Add symbol name to the x/uibc QueryAllOutflowsResponse `outflows` entry.
+
 ### Features
 
 - [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/MissCounters` query
 - [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/Inflows` query.
 - [2349](https://github.com/umee-network/umee/pull/2349) UIBC: adding ICS 20 memo handler.
 - [2369](https://github.com/umee-network/umee/pull/2369) Add query `leverage/RegisteredTokenMarkets` to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
-
-### Improvements
-
-- [2370](https://github.com/umee-network/umee/pull/2370) Add missing params to `uic/MsgGovUpdateQuota`.
 
 ### Bug Fixes
 

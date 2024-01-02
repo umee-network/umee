@@ -51,11 +51,22 @@ func (q Querier) AllOutflows(goCtx context.Context, _ *uibc.QueryAllOutflows) (
 	*uibc.QueryAllOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	o, err := q.Keeper(&ctx).GetAllOutflows()
+	k := q.Keeper(&ctx)
+	o, err := k.GetAllOutflows()
 	if err != nil {
 		return nil, err
 	}
-	return &uibc.QueryAllOutflowsResponse{Outflows: o}, nil
+	tokenSymbols := map[string]string{}
+	for _, t := range k.leverage.GetAllRegisteredTokens(ctx) {
+		tokenSymbols[t.BaseDenom] = t.SymbolDenom
+	}
+	outflows := make([]uibc.DecCoinSymbol, len(o))
+	for i := range o {
+		outflows[i].Denom = o[i].Denom
+		outflows[i].Amount = o[i].Amount
+		outflows[i].Symbol = tokenSymbols[o[i].Denom]
+	}
+	return &uibc.QueryAllOutflowsResponse{Outflows: outflows}, nil
 }
 
 // Inflows returns sum of inflows and registered IBC denoms inflows in the current quota period.

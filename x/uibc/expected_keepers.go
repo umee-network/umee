@@ -16,6 +16,7 @@ type BankKeeper interface {
 
 type Leverage interface {
 	GetTokenSettings(ctx sdk.Context, baseDenom string) (ltypes.Token, error)
+	GetAllRegisteredTokens(ctx sdk.Context) []ltypes.Token
 	ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
 	DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec
 }
