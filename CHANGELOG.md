@@ -63,6 +63,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [2358](https://github.com/umee-network/umee/pull/2358) metoken endblocker should be before oracle.
 - [2368](https://github.com/umee-network/umee/pull/2368) Add inflow amount to registered token. Previously, the inflow amount of the token was being overridden by the new inflow amount.
+- [2375](https://github.com/umee-network/umee/pull/2378) Ensure Umee and SDK account sequence setting changes the calling client.
+
+### API Breaking
+
+- [2375](https://github.com/umee-network/umee/pull/2378) Rename Umee and SDK client `WithAccSeq` to `SetAccSeq`.
 
 ## v6.2.0 - 2023-12-01
 
