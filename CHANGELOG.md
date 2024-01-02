@@ -46,13 +46,21 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
-### Bug Fixes
-
-- [2368](https://github.com/umee-network/umee/pull/2368) Add inflow amount to registered token. Previously, the inflow amount of the token was being overridden by the new inflow amount.
-
 ### Features
 
-- [2369](https://github.com/umee-network/umee/pull/2369) Add query RegisteredTokenMarkets to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
+- [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/MissCounters` query
+- [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/Inflows` query.
+- [2349](https://github.com/umee-network/umee/pull/2349) UIBC: adding ICS 20 memo handler.
+- [2369](https://github.com/umee-network/umee/pull/2369) Add query `leverage/RegisteredTokenMarkets` to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
+
+### Improvements
+
+- [2370](https://github.com/umee-network/umee/pull/2370) Add missing params to `uic/MsgGovUpdateQuota`.
+
+### Bug Fixes
+
+- [2358](https://github.com/umee-network/umee/pull/2358) metoken endblocker should be before oracle.
+- [2368](https://github.com/umee-network/umee/pull/2368) Add inflow amount to registered token. Previously, the inflow amount of the token was being overridden by the new inflow amount.
 
 ## v6.2.0 - 2023-12-01
 
