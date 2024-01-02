@@ -118,13 +118,13 @@ message QueryRegisteredTokensResponse {
   repeated Token registry = 1 [(gogoproto.nullable) = false];
 }
 
-// QueryRegisteredTokenMarkets defines the request structure for the RegisteredTokenMarkets
+// QueryRegisteredTokensWithMarkets defines the request structure for the RegisteredTokenMarkets
 // gRPC service handler.
-message QueryRegisteredTokenMarkets {}
+message QueryRegisteredTokensWithMarkets {}
 
-// QueryRegisteredTokenMarketsResponse defines the response structure for the
-// RegisteredTokenMarkets gRPC service handler.
-message QueryRegisteredTokenMarketsResponse {
+// QueryRegisteredTokensWithMarketsResponse defines the response structure for the
+// RegisteredTokensWithMarkets gRPC service handler.
+message QueryRegisteredTokensWithMarketsResponse {
   repeated TokenMarket markets = 1 [(gogoproto.nullable) = false];
 }
 

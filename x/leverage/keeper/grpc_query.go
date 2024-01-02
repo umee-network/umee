@@ -62,10 +62,10 @@ func (q Querier) RegisteredTokens(
 	}, nil
 }
 
-func (q Querier) RegisteredTokenMarkets(
+func (q Querier) RegisteredTokensWithMarkets(
 	goCtx context.Context,
-	req *types.QueryRegisteredTokenMarkets,
-) (*types.QueryRegisteredTokenMarketsResponse, error) {
+	req *types.QueryRegisteredTokensWithMarkets,
+) (*types.QueryRegisteredTokensWithMarketsResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
@@ -86,7 +86,7 @@ func (q Querier) RegisteredTokenMarkets(
 		})
 	}
 
-	return &types.QueryRegisteredTokenMarketsResponse{
+	return &types.QueryRegisteredTokensWithMarketsResponse{
 		Markets: markets,
 	}, nil
 }

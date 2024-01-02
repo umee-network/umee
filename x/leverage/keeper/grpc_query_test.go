@@ -102,11 +102,11 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 func (s *IntegrationTestSuite) TestQuerier_TokenMarkets() {
 	require := s.Require()
 
-	req := &types.QueryRegisteredTokenMarkets{}
-	resp, err := s.queryClient.RegisteredTokenMarkets(context.Background(), req)
+	req := &types.QueryRegisteredTokensWithMarkets{}
+	resp, err := s.queryClient.RegisteredTokensWithMarkets(context.Background(), req)
 	require.NoError(err)
 
-	expected := types.QueryRegisteredTokenMarketsResponse{
+	expected := types.QueryRegisteredTokensWithMarketsResponse{
 		Markets: []types.TokenMarket{},
 	}
 	tokens := s.tk.GetAllRegisteredTokens(s.ctx)
