@@ -1,6 +1,7 @@
 package genmap
 
 import (
+	"sort"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -28,4 +29,18 @@ func TestPick(t *testing.T) {
 
 	m2 = Pick(m, []string{"other"})
 	assert.DeepEqual(t, map[string]int{}, m2)
+}
+
+func TestMapToSlice(t *testing.T) {
+	m := map[string]int{
+		"one": 1, "two": 2, "thirty": 30,
+	}
+	ls := MapToSlice(m)
+	sort.Ints(ls)
+	assert.DeepEqual(t, []int{1, 2, 30}, ls)
+
+	m = map[string]int{}
+	ls = MapToSlice(m)
+	assert.DeepEqual(t, []int{}, ls)
+
 }

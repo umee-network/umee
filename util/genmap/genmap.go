@@ -12,3 +12,13 @@ func Pick[K comparable, V any](m map[K]V, keys []K) map[K]V {
 	}
 	return picked
 }
+
+func MapToSlice[K comparable, V any](m map[K]V) []V {
+	ls := make([]V, len(m))
+	i := 0
+	for _, o := range m {
+		ls[i] = o
+		i++
+	}
+	return ls
+}
