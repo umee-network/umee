@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Improvements
+
+- [2374](https://github.com/umee-network/umee/pull/2374) Add symbol name to the x/uibc QueryAllOutflowsResponse `outflows` entry.
+
 ## v6.2.0 - 2023-12-01
 
 ### Bug Fixes
