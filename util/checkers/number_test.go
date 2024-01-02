@@ -84,9 +84,9 @@ func TestDecInZeroOne(t *testing.T) {
 }
 
 func TestDecNotNegative(t *testing.T) {
-	assert.NotNil(t, DecNotNegative(tsdk.DecF(-1), "", nil))
-	assert.NotNil(t, DecNotNegative(sdk.Dec{}, "", nil))
+	assert.NotNil(t, DecNotNegative(tsdk.DecF(-1), ""))
+	assert.NotNil(t, DecNotNegative(sdk.Dec{}, ""))
 
-	assert.Nil(t, DecNotNegative(sdk.ZeroDec(), "", nil))
-	assert.Nil(t, DecNotNegative(tsdk.DecF(5), "", nil))
+	assert.Nil(t, DecNotNegative(sdk.ZeroDec(), ""))
+	assert.Nil(t, DecNotNegative(tsdk.DecF(5), ""))
 }
