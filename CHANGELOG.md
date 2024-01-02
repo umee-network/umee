@@ -52,6 +52,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [2315](https://github.com/umee-network/umee/pull/2215) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
 - [2346](https://github.com/umee-network/umee/pull/2346) Fix an issue where metokens were not included in historic data.
+- [2365](https://github.com/umee-network/umee/pull/2365) Add fee to metoken price and balances query.
 
 ### Improvements
 

@@ -7,6 +7,7 @@ import (
 )
 
 // swapFee to be charged to the user, given a specific Index configuration and asset amount.
+// It returns fee in fraction, fee amount (fee fraction applied to the swap amount) and error.
 func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
 	sdk.Dec,
 	sdk.Coin,
@@ -38,6 +39,7 @@ func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, as
 }
 
 // redeemFee to be charged to the user, given a specific Index configuration and asset amount.
+// It returns fee in fraction, fee amount (fee fraction applied to the redemption amount) and error.
 func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
 	sdk.Dec,
 	sdk.Coin,
