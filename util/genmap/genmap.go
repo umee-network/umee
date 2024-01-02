@@ -12,3 +12,15 @@ func Pick[K comparable, V any](m map[K]V, keys []K) map[K]V {
 	}
 	return picked
 }
+
+// MapValues constructs a list of all values of the map in a non-deterministic order.
+// NOTE: when used in the protocol functions, the values must be sorted.
+func MapValues[K comparable, V any](m map[K]V) []V {
+	ls := make([]V, len(m))
+	i := 0
+	for _, o := range m {
+		ls[i] = o
+		i++
+	}
+	return ls
+}

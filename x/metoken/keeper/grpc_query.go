@@ -72,12 +72,12 @@ func (q Querier) SwapFee(goCtx context.Context, req *metoken.QuerySwapFee) (*met
 	}
 
 	// calculate the fee for the asset amount
-	swapFee, err := k.swapFee(index, indexPrices, asset)
+	_, feeAmount, err := k.swapFee(index, indexPrices, asset)
 	if err != nil {
 		return nil, err
 	}
 
-	return &metoken.QuerySwapFeeResponse{Asset: swapFee}, nil
+	return &metoken.QuerySwapFeeResponse{Asset: feeAmount}, nil
 }
 
 // RedeemFee returns the fee for the redeem operation, given a specific amount of meTokens and the asset denom.
@@ -116,12 +116,12 @@ func (q Querier) RedeemFee(goCtx context.Context, req *metoken.QueryRedeemFee) (
 
 	// calculate the fee for the asset amount that would be given for a redemption
 	toRedeem := sdk.NewCoin(req.AssetDenom, amountFromReserves.Add(amountFromLeverage))
-	redeemFee, err := k.redeemFee(index, indexPrices, toRedeem)
+	_, feeAmount, err := k.redeemFee(index, indexPrices, toRedeem)
 	if err != nil {
 		return nil, err
 	}
 
-	return &metoken.QueryRedeemFeeResponse{Asset: redeemFee}, nil
+	return &metoken.QueryRedeemFeeResponse{Asset: feeAmount}, nil
 }
 
 // IndexBalances returns balances from the x/metoken module. If index balance denom is not specified,

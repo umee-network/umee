@@ -368,7 +368,9 @@ func TestQuerier_IndexPrices(t *testing.T) {
 					for _, i := range resp.Prices {
 						for _, a := range i.Assets {
 							assert.Check(t, a.SwapRate.GT(sdk.ZeroDec()))
+							assert.Check(t, a.SwapFee.GT(sdk.ZeroDec()))
 							assert.Check(t, a.RedeemRate.GT(sdk.ZeroDec()))
+							assert.Check(t, a.RedeemFee.GT(sdk.ZeroDec()))
 						}
 					}
 				} else {

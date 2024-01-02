@@ -124,7 +124,7 @@ func EmptyNonStableIndexBalances(denom string) metoken.IndexBalances {
 	return metoken.NewIndexBalances(
 		sdk.NewCoin(denom, sdkmath.ZeroInt()),
 		[]metoken.AssetBalance{
-			metoken.NewZeroAssetBalance(USDTBaseDenom),
+			metoken.NewZeroAssetBalance(CMSTBaseDenom),
 			metoken.NewZeroAssetBalance(WBTCBaseDenom),
 			metoken.NewZeroAssetBalance(ETHBaseDenom),
 		},
