@@ -24,10 +24,10 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/registered_tokens";
   }
 
-  // RegisteredTokenMarkets queries for all the registered tokens and their market summaries.
-  rpc RegisteredTokenMarkets(QueryRegisteredTokenMarkets)
-      returns (QueryRegisteredTokenMarketsResponse) {
-    option (google.api.http).get = "/umee/leverage/v1/registered_token_markets";
+  // RegisteredTokensWithMarkets queries for all the registered tokens and their market summaries.
+  rpc RegisteredTokensWithMarkets(QueryRegisteredTokensWithMarkets)
+      returns (QueryRegisteredTokensWithMarketsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/registered_tokens_with_markets";
   }
 
   // SpecialAssets queries for all special asset pairs.
