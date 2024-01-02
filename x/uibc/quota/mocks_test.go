@@ -22,6 +22,16 @@ func (k LeverageKeeper) GetTokenSettings(_ sdk.Context, baseDenom string) (ltype
 	return ts, nil
 }
 
+func (k LeverageKeeper) GetAllRegisteredTokens(_ sdk.Context) []ltypes.Token {
+	tokens := make([]ltypes.Token, len(k.tokenSettings))
+	i := 0
+	for _, t := range k.tokenSettings {
+		tokens[i] = t
+		i++
+	}
+	return tokens
+}
+
 func (k LeverageKeeper) ToToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {
 	panic("not implemented")
 }
