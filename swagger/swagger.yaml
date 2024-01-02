@@ -4138,6 +4138,20 @@ paths:
                             description: >-
                               RedeemRate used for exchange calculations meToken
                               -> asset.
+                          swap_fee:
+                            type: string
+                            description: >-
+                              SwapFee charged to the user on a swap, expressed
+                              in fraction.
+
+                              Valid values: 0-1.
+                          redeem_fee:
+                            type: string
+                            description: >-
+                              RedeemFee charged to the user on a redemption,
+                              expressed in fraction.
+
+                              Valid values: 0-1.
                         description: >-
                           AssetPrice information related to the index
                           operations.
@@ -4244,6 +4258,20 @@ paths:
                             description: >-
                               RedeemRate used for exchange calculations meToken
                               -> asset.
+                          swap_fee:
+                            type: string
+                            description: >-
+                              SwapFee charged to the user on a swap, expressed
+                              in fraction.
+
+                              Valid values: 0-1.
+                          redeem_fee:
+                            type: string
+                            description: >-
+                              RedeemFee charged to the user on a redemption,
+                              expressed in fraction.
+
+                              Valid values: 0-1.
                         description: >-
                           AssetPrice information related to the index
                           operations.
@@ -7708,6 +7736,16 @@ definitions:
       redeem_rate:
         type: string
         description: RedeemRate used for exchange calculations meToken -> asset.
+      swap_fee:
+        type: string
+        description: |-
+          SwapFee charged to the user on a swap, expressed in fraction.
+          Valid values: 0-1.
+      redeem_fee:
+        type: string
+        description: |-
+          RedeemFee charged to the user on a redemption, expressed in fraction.
+          Valid values: 0-1.
     description: AssetPrice information related to the index operations.
   umee.metoken.v1.Fee:
     type: object
@@ -7945,6 +7983,18 @@ definitions:
             redeem_rate:
               type: string
               description: RedeemRate used for exchange calculations meToken -> asset.
+            swap_fee:
+              type: string
+              description: |-
+                SwapFee charged to the user on a swap, expressed in fraction.
+                Valid values: 0-1.
+            redeem_fee:
+              type: string
+              description: >-
+                RedeemFee charged to the user on a redemption, expressed in
+                fraction.
+
+                Valid values: 0-1.
           description: AssetPrice information related to the index operations.
     description: IndexPrices provides meToken price related index information.
   umee.metoken.v1.Params:
@@ -8058,6 +8108,20 @@ definitions:
                     description: >-
                       RedeemRate used for exchange calculations meToken ->
                       asset.
+                  swap_fee:
+                    type: string
+                    description: >-
+                      SwapFee charged to the user on a swap, expressed in
+                      fraction.
+
+                      Valid values: 0-1.
+                  redeem_fee:
+                    type: string
+                    description: >-
+                      RedeemFee charged to the user on a redemption, expressed
+                      in fraction.
+
+                      Valid values: 0-1.
                 description: AssetPrice information related to the index operations.
           description: IndexPrices provides meToken price related index information.
     description: >-
@@ -8113,6 +8177,20 @@ definitions:
                     description: >-
                       RedeemRate used for exchange calculations meToken ->
                       asset.
+                  swap_fee:
+                    type: string
+                    description: >-
+                      SwapFee charged to the user on a swap, expressed in
+                      fraction.
+
+                      Valid values: 0-1.
+                  redeem_fee:
+                    type: string
+                    description: >-
+                      RedeemFee charged to the user on a redemption, expressed
+                      in fraction.
+
+                      Valid values: 0-1.
                 description: AssetPrice information related to the index operations.
           description: IndexPrices provides meToken price related index information.
     description: >-

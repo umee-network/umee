@@ -259,7 +259,8 @@ func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string
 		powerReduction := ten.Power(uint64(ts.Exponent))
 		inflowInUSD := sdk.MustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
 
-		tokenInflow := sdk.NewDecCoinFromDec(ibcDenom, inflowInUSD)
+		tokenInflow := k.GetTokenInflow(ibcDenom)
+		tokenInflow.Amount = tokenInflow.Amount.Add(inflowInUSD)
 		k.SetTokenInflow(tokenInflow)
 		totalInflowSum := k.GetInflowSum()
 		k.SetInflowSum(totalInflowSum.Add(inflowInUSD))

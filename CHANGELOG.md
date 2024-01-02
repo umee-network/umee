@@ -51,6 +51,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/MissCounters` query
 - [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/Inflows` query. 
 - [2349](https://github.com/umee-network/umee/pull/2349) UIBC: adding ICS 20 memo handler.
+- [2369](https://github.com/umee-network/umee/pull/2369) Add query RegisteredTokenMarkets to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
 
 ### Improvements
 
@@ -59,13 +60,15 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [2358](https://github.com/umee-network/umee/pull/2358) metoken endblocker should be before oracle.
+- [2368](https://github.com/umee-network/umee/pull/2368) Add inflow amount to registered token. Previously, the inflow amount of the token was being overridden by the new inflow amount.
 
 ## v6.2.0 - 2023-12-01
 
 ### Bug Fixes
 
-- [2315](https://github.com/umee-network/umee/pull/2215) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
+- [2315](https://github.com/umee-network/umee/pull/2315) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
 - [2346](https://github.com/umee-network/umee/pull/2346) Fix an issue where metokens were not included in historic data.
+- [2365](https://github.com/umee-network/umee/pull/2365) Add fee to metoken price and balances query.
 
 ### Improvements
 
