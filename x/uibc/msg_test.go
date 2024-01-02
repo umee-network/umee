@@ -12,11 +12,14 @@ import (
 func TestMsgGovUpdateQuota(t *testing.T) {
 	t.Parallel()
 	validMsg := MsgGovUpdateQuota{
-		Authority:     checkers.GovModuleAddr,
-		Description:   "",
-		Total:         sdk.MustNewDecFromStr("1000"),
-		PerDenom:      sdk.MustNewDecFromStr("1000"),
-		QuotaDuration: 100,
+		Authority:                   checkers.GovModuleAddr,
+		Description:                 "",
+		Total:                       sdk.MustNewDecFromStr("1000"),
+		PerDenom:                    sdk.MustNewDecFromStr("1000"),
+		InflowOutflowQuotaBase:      sdk.MustNewDecFromStr("500"),
+		InflowOutflowTokenQuotaBase: sdk.MustNewDecFromStr("500"),
+		InflowOutflowQuotaRate:      sdk.MustNewDecFromStr("5"),
+		QuotaDuration:               100,
 	}
 
 	validEmergencyGroup := validMsg
@@ -32,6 +35,9 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 	invalidTotalQuota := validMsg
 	invalidTotalQuota.PerDenom = sdk.NewDec(10)
 	invalidTotalQuota.Total = sdk.NewDec(2)
+
+	invalidInflowOutflow := validMsg
+	invalidInflowOutflow.InflowOutflowTokenQuotaBase = sdk.MustNewDecFromStr("501")
 
 	tests := []struct {
 		name   string
@@ -58,6 +64,10 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 			name:   "invalid total quota with respect to per denom",
 			msg:    invalidTotalQuota,
 			errMsg: "total quota must be greater than or equal to per_denom quota",
+		}, {
+			name:   "invalid inflow outflow quota base with respect to per denom",
+			msg:    invalidInflowOutflow,
+			errMsg: "inflow_outflow_quota_base must be greater than",
 		},
 	}
 

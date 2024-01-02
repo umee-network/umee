@@ -7,48 +7,56 @@ import (
 )
 
 // swapFee to be charged to the user, given a specific Index configuration and asset amount.
+// It returns fee in fraction, fee amount and error.
+// The fee in fraction represents the percentage of the fee, while the fee amount is the actual
+// fee applied to the asset amount.
 func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
+	sdk.Dec,
 	sdk.Coin,
 	error,
 ) {
 	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
-		return sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
+		return sdk.Dec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
 
 	// charge max fee if we don't want the token in the index.
 	if assetSettings.TargetAllocation.IsZero() {
-		return sdk.NewCoin(asset.Denom, index.Fee.MaxFee.MulInt(asset.Amount).TruncateInt()), nil
+		return index.Fee.MaxFee, sdk.NewCoin(asset.Denom, index.Fee.MaxFee.MulInt(asset.Amount).TruncateInt()), nil
 	}
 
 	currentAllocation, err := k.currentAllocation(index, indexPrices, asset.Denom)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.Dec{}, sdk.Coin{}, err
 	}
 
 	// when current_allocation is zero, we incentivize the swap by charging only min_fee
 	if currentAllocation.IsZero() {
-		return sdk.NewCoin(asset.Denom, index.Fee.MinFee.MulInt(asset.Amount).TruncateInt()), nil
+		return index.Fee.MinFee, sdk.NewCoin(asset.Denom, index.Fee.MinFee.MulInt(asset.Amount).TruncateInt()), nil
 	}
 
 	allocationDeviation := currentAllocation.Sub(assetSettings.TargetAllocation).Quo(assetSettings.TargetAllocation)
 	fee := index.Fee.CalculateFee(allocationDeviation)
-	return sdk.NewCoin(asset.Denom, fee.MulInt(asset.Amount).TruncateInt()), nil
+	return fee, sdk.NewCoin(asset.Denom, fee.MulInt(asset.Amount).TruncateInt()), nil
 }
 
 // redeemFee to be charged to the user, given a specific Index configuration and asset amount.
+// It returns fee in fraction, fee amount and error.
+// The fee in fraction indicates the fee percentage, while the fee amount is the computed
+// fee based on the asset amount being redeemed.
 func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
+	sdk.Dec,
 	sdk.Coin,
 	error,
 ) {
 	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
-		return sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
+		return sdk.Dec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
 
 	// charge min fee if we don't want the token in the index.
 	if assetSettings.TargetAllocation.IsZero() {
-		return sdk.NewCoin(asset.Denom, index.Fee.MinFee.MulInt(asset.Amount).TruncateInt()), nil
+		return index.Fee.MinFee, sdk.NewCoin(asset.Denom, index.Fee.MinFee.MulInt(asset.Amount).TruncateInt()), nil
 	}
 
 	allocationDeviation, err := k.redeemAllocationDeviation(
@@ -58,11 +66,11 @@ func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, 
 		assetSettings.TargetAllocation,
 	)
 	if err != nil {
-		return sdk.Coin{}, err
+		return sdk.Dec{}, sdk.Coin{}, err
 	}
 
 	fee := index.Fee.CalculateFee(allocationDeviation)
-	return sdk.NewCoin(asset.Denom, fee.MulInt(asset.Amount).TruncateInt()), nil
+	return fee, sdk.NewCoin(asset.Denom, fee.MulInt(asset.Amount).TruncateInt()), nil
 }
 
 // currentAllocation returns a factor of the assetDenom supply in the index based on the USD price value.

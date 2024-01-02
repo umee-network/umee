@@ -34,7 +34,7 @@ func (m msgServer) GovUpdateQuota(ctx context.Context, msg *uibc.MsgGovUpdateQuo
 		return nil, err
 	}
 
-	if err := k.UpdateQuotaParams(msg.Total, msg.PerDenom, msg.QuotaDuration, byEmergencyGroup); err != nil {
+	if err := k.UpdateQuotaParams(msg, byEmergencyGroup); err != nil {
 		return nil, err
 	}
 	return &uibc.MsgGovUpdateQuotaResponse{}, nil

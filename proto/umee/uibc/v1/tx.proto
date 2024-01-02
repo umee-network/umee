@@ -57,6 +57,24 @@ message MsgGovUpdateQuota {
     (gogoproto.jsontag)     = "quota_duration,omitempty",
     (gogoproto.moretags)    = "yaml:\"quota_duration\""
   ];
+  // Params.inflow_outflow_quota_base
+  string inflow_outflow_quota_base = 7 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Params.inflow_outflow_quota_rate
+  string inflow_outflow_quota_rate = 8 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
+  // Params.inflow_outflow_token_quota_base
+  string inflow_outflow_token_quota_base = 9 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // MsgGovUpdateQuotaResponse defines response type for the Msg/GovUpdateQuota for with x/gov proposals.

@@ -112,6 +112,20 @@ func (mr *MockLeverageMockRecorder) DeriveExchangeRate(ctx, denom interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeriveExchangeRate", reflect.TypeOf((*MockLeverage)(nil).DeriveExchangeRate), ctx, denom)
 }
 
+// GetAllRegisteredTokens mocks base method.
+func (m *MockLeverage) GetAllRegisteredTokens(ctx types.Context) []types1.Token {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllRegisteredTokens", ctx)
+	ret0, _ := ret[0].([]types1.Token)
+	return ret0
+}
+
+// GetAllRegisteredTokens indicates an expected call of GetAllRegisteredTokens.
+func (mr *MockLeverageMockRecorder) GetAllRegisteredTokens(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllRegisteredTokens", reflect.TypeOf((*MockLeverage)(nil).GetAllRegisteredTokens), ctx)
+}
+
 // GetTokenSettings mocks base method.
 func (m *MockLeverage) GetTokenSettings(ctx types.Context, baseDenom string) (types1.Token, error) {
 	m.ctrl.T.Helper()
