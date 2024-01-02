@@ -36,8 +36,8 @@ func NewClient(
 	}, nil
 }
 
-func (c Client) WithAccSeq(seq uint64) {
-	c.Client.Tx = c.Client.Tx.WithAccSeq(seq)
+func (c Client) SetAccSeq(seq uint64) {
+	c.Client.Tx.SetAccSeq(seq)
 }
 
 func (c Client) NewQCtx() (context.Context, context.CancelFunc) {
