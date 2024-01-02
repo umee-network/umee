@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/metoken"
 	otypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
@@ -83,14 +84,24 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 		if err != nil {
 			return indexPrices, err
 		}
+		swapFee, _, err := k.swapFee(index, indexPrices, coin.One(asset.BaseDenom))
+		if err != nil {
+			return indexPrices, err
+		}
 
 		redeemRate, err := metoken.Rate(indexPrices.Price, asset.Price, indexPrices.Exponent, asset.Exponent)
 		if err != nil {
 			return indexPrices, err
 		}
+		redeemFee, _, err := k.redeemFee(index, indexPrices, coin.One(asset.BaseDenom))
+		if err != nil {
+			return indexPrices, err
+		}
 
 		indexPrices.Assets[i].SwapRate = swapRate
+		indexPrices.Assets[i].SwapFee = swapFee
 		indexPrices.Assets[i].RedeemRate = redeemRate
+		indexPrices.Assets[i].RedeemFee = redeemFee
 	}
 
 	return indexPrices, nil

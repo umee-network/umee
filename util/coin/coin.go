@@ -55,6 +55,11 @@ func ZeroDec(denom string) sdk.DecCoin {
 	return sdk.NewInt64DecCoin(denom, 0)
 }
 
+// One returns new coin with one amount
+func One(denom string) sdk.Coin {
+	return sdk.NewInt64Coin(denom, 1)
+}
+
 // Normalize transform nil coins to empty list
 func Normalize(cs sdk.Coins) sdk.Coins {
 	if cs == nil {
