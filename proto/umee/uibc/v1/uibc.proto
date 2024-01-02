@@ -1,6 +1,7 @@
 syntax = "proto3";
 package umee.uibc.v1;
 
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/protobuf/any.proto";
 
