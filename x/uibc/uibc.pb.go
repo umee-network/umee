@@ -67,6 +67,7 @@ func (*ICS20Memo) XXX_MessageName() string {
 	return "umee.uibc.v1.ICS20Memo"
 }
 
+// DecCoinSymbol extends the Cosmos SDK DecCoin type and adds symbol name.
 type DecCoinSymbol struct {
 	Denom  string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	Amount Dec    `protobuf:"bytes,2,opt,name=amount,proto3,customtype=Dec" json:"amount"`

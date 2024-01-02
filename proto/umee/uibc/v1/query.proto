@@ -103,5 +103,5 @@ message QueryAllOutflows {}
 
 // QueryOutflowResponse defines response type of Query/Outflow
 message QueryAllOutflowsResponse {
-  repeated DecCoinSymbol outflows = 1;
+  repeated DecCoinSymbol outflows = 1 [(gogoproto.nullable)   = false];
 }
