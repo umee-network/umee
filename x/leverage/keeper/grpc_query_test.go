@@ -114,8 +114,8 @@ func (s *IntegrationTestSuite) TestQuerier_TokenMarkets() {
 		ms, err := s.queryClient.MarketSummary(context.Background(), &types.QueryMarketSummary{Denom: token.BaseDenom})
 		require.NoError(err)
 		expected.Markets = append(expected.Markets, types.TokenMarket{
-			Token:  &token,
-			Market: ms,
+			Token:  token,
+			Market: *ms,
 		})
 	}
 

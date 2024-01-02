@@ -131,9 +131,9 @@ message QueryRegisteredTokenMarketsResponse {
 // TokenMarket is a token and its market summary.
 message TokenMarket {
   // Token is a registered token and its parameters.
-  Token token = 1;
+  Token token = 1 [(gogoproto.nullable) = false];
   // Market is the market summary for the token.
-  QueryMarketSummaryResponse market = 2;
+  QueryMarketSummaryResponse market = 2 [(gogoproto.nullable) = false];
 }
 
 // QuerySpecialAssets defines the request structure for the SpecialAssets
