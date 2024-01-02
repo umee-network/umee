@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Improvements
+
+- [2363](https://github.com/umee-network/umee/pull/2363) Upgrade Cosmos SDK to v0.47.7.
+
 ## v6.2.0 - 2023-12-01
 
 ### Bug Fixes
