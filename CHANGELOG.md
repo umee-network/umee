@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Bug Fixes
+
+- [2368](https://github.com/umee-network/umee/pull/2368) Add inflow amount to registered token. Previously, the inflow amount of the token was being overridden by the new inflow amount.
+
 ### Features
 
 - [2369](https://github.com/umee-network/umee/pull/2369) Add query RegisteredTokenMarkets to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
