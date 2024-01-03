@@ -1,7 +1,6 @@
 syntax = "proto3";
 package umee.uibc.v1;
 
-import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
@@ -68,10 +67,7 @@ message QueryInflowsResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  repeated cosmos.base.v1beta1.DecCoin inflows = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.DecCoin",
-    (gogoproto.nullable)   = false
-  ];
+  repeated DecCoinSymbol inflows = 2 [(gogoproto.nullable) = false];
 }
 
 // QueryParams defines the request structure for the Params gRPC service
