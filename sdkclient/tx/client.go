@@ -138,9 +138,8 @@ func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) 
 	return BroadcastTx(cctx, f, msgs...)
 }
 
-func (c *Client) WithAccSeq(seq uint64) *Client {
-	c.txFactory.WithSequence(seq)
-	return c
+func (c *Client) SetAccSeq(seq uint64) {
+	*c.txFactory = c.txFactory.WithSequence(seq)
 }
 
 func (c *Client) WithAsyncBlock() *Client {
