@@ -56,10 +56,10 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v5.0")
 	app.registerOutdatedPlaceholderUpgrade("v5.1")
 	app.registerOutdatedPlaceholderUpgrade("v5.2")
-	app.registerUpgrade6(upgradeInfo)
+	app.registerUpgrade6_0(upgradeInfo)
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
-
 	app.registerUpgrade6_2(upgradeInfo)
+	app.registerUpgrade("v6.3", upgradeInfo)
 }
 
 func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
@@ -129,7 +129,7 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 
 			// uibc migrations
 			uIBCKeeper := app.UIbcQuotaKeeperB.Keeper(&ctx)
-			uIBCKeeper.MigrateTotalOutflowSum()
+			uIBCKeeper.MigrateOutflowSum()
 			err = uIBCKeeper.SetParams(uibc.DefaultParams())
 
 			return fromVM, err
@@ -145,7 +145,7 @@ func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
 	// app.registerNewTokenEmissionUpgrade(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade6(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade6_0(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.0"
 	gravityModuleName := "gravity" // hardcoded to avoid dependency on GB module
 	emergencyGroup, err := sdk.AccAddressFromBech32("umee1gy3c8n2xysawysq2xf2hxn253srx4ehduevq6c")
@@ -237,8 +237,6 @@ func (app *UmeeApp) storeUpgrade(planName string, ui upgradetypes.Plan, stores s
 
 // registerUpgrade sets an upgrade handler which only runs module migrations
 // and adds new storages storages
-//
-//nolint:unused
 func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Plan, newStores ...string) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 

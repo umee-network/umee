@@ -1,4 +1,4 @@
-package keeper
+package quota
 
 import (
 	"testing"
@@ -46,8 +46,8 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	k.setQuotaParams(10, 100)
 	k.SetTokenOutflow(sdk.NewInt64DecCoin(umee, 6))
 	k.SetTokenInflow(sdk.NewInt64DecCoin(umee, 6))
-	k.SetTotalOutflowSum(sdk.NewDec(50))
-	k.SetTotalInflow(sdk.NewDec(50))
+	k.SetOutflowSum(sdk.NewDec(50))
+	k.SetInflowSum(sdk.NewDec(50))
 	k.SetTokenInflow(sdk.NewDecCoin(umee, math.NewInt(50)))
 
 	err := k.CheckAndUpdateQuota(umee, sdk.NewInt(1))
@@ -106,13 +106,13 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	dp := uibc.DefaultParams()
 	dp.TotalQuota = sdk.NewDec(200)
 	dp.TokenQuota = sdk.NewDec(500)
-	dp.InflowOutflowQuotaTokenBase = sdk.NewDec(100)
+	dp.InflowOutflowTokenQuotaBase = sdk.NewDec(100)
 	err = k.SetParams(dp)
 	assert.NilError(t, err)
 
 	k.SetTokenOutflow(sdk.NewDecCoin(umee, math.NewInt(80)))
 	k.SetTokenInflow(sdk.NewDecCoin(umee, math.NewInt(80)))
-	// 80*2 (160) > InflowOutflowQuotaTokenBase(100) + 25% of Token Inflow (80) = 160 > 100+20
+	// 80*2 (160) > InflowOutflowTokenQuotaBase(100) + 25% of Token Inflow (80) = 160 > 100+20
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(80)) // exceeds token quota
 	assert.ErrorContains(t, err, "quota")
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(5))
@@ -123,9 +123,9 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	dp.InflowOutflowQuotaBase = sdk.NewDec(100)
 	dp.TotalQuota = sdk.NewDec(100)
 	err = k.SetParams(dp)
-	k.SetTotalOutflowSum(sdk.NewDec(80))
+	k.SetOutflowSum(sdk.NewDec(80))
 	// 80+(20*2) > Total Outflow Quota Limit (100)
-	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(20)) // exceeds token quota
+	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(20))
 	assert.ErrorContains(t, err, "quota")
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(10))
 	assert.NilError(t, err)
@@ -134,7 +134,7 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 
 	err = k.SetParams(dp)
 	assert.NilError(t, err)
-	k.SetTotalInflow(sdk.NewDec(100))
+	k.SetInflowSum(sdk.NewDec(100))
 	// 80+(80*2) > InflowOutflowQuotaBase(100) + 25% of Total Inflow Sum  (100) = 240 > 100+25
 	err = k.CheckAndUpdateQuota(umee, sdk.NewInt(80)) // exceeds token quota
 	assert.ErrorContains(t, err, "quota")
@@ -161,9 +161,9 @@ func TestUnitGetExchangePrice(t *testing.T) {
 func TestSetAndGetIBCInflows(t *testing.T) {
 	k := initKeeperSimpleMock(t)
 	inflowSum := sdk.MustNewDecFromStr("123123")
-	k.SetTotalInflow(inflowSum)
+	k.SetInflowSum(inflowSum)
 
-	rv := k.GetTotalInflow()
+	rv := k.GetInflowSum()
 	assert.DeepEqual(t, inflowSum, rv)
 
 	// inflow of token

@@ -9,19 +9,19 @@ import (
 
 func NewGenesisState(params Params, outflows sdk.DecCoins, outflowSum sdk.Dec) *GenesisState {
 	return &GenesisState{
-		Params:          params,
-		Outflows:        outflows,
-		TotalOutflowSum: outflowSum,
+		Params:     params,
+		Outflows:   outflows,
+		OutflowSum: outflowSum,
 	}
 }
 
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
-		Params:          DefaultParams(),
-		Inflows:         nil,
-		Outflows:        nil,
-		TotalOutflowSum: sdk.NewDec(0),
-		TotalInflowSum:  sdk.NewDec(0),
+		Params:     DefaultParams(),
+		Inflows:    nil,
+		Outflows:   nil,
+		OutflowSum: sdk.NewDec(0),
+		InflowSum:  sdk.NewDec(0),
 	}
 }
 
@@ -49,12 +49,12 @@ func (gs GenesisState) Validate() error {
 		}
 	}
 
-	if gs.TotalOutflowSum.IsNegative() {
-		return fmt.Errorf("total outflow sum cannot be negative : %s ", gs.TotalOutflowSum.String())
+	if gs.OutflowSum.IsNegative() {
+		return fmt.Errorf("outflow sum cannot be negative : %s ", gs.OutflowSum.String())
 	}
 
-	if gs.TotalInflowSum.IsNegative() {
-		return fmt.Errorf("total inflow sum cannot be negative : %s ", gs.TotalInflowSum.String())
+	if gs.InflowSum.IsNegative() {
+		return fmt.Errorf("inflow sum cannot be negative : %s ", gs.InflowSum.String())
 	}
 
 	return nil

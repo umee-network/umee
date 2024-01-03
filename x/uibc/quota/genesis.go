@@ -1,4 +1,4 @@
-package keeper
+package quota
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -8,22 +8,22 @@ import (
 
 // InitGenesis initializes the x/uibc module's state from a provided genesis
 // state.
-func (kb Builder) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
+func (kb KeeperBuilder) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 	k := kb.Keeper(&ctx)
 	err := k.SetParams(genState.Params)
 	util.Panic(err)
 
 	k.SetTokenOutflows(genState.Outflows)
 	k.SetTokenInflows(genState.Inflows)
-	k.SetTotalOutflowSum(genState.TotalOutflowSum)
-	k.SetTotalInflow(genState.TotalInflowSum)
+	k.SetOutflowSum(genState.OutflowSum)
+	k.SetInflowSum(genState.InflowSum)
 
 	err = k.SetExpire(genState.QuotaExpires)
 	util.Panic(err)
 }
 
 // ExportGenesis returns the x/uibc module's exported genesis state.
-func (kb Builder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
+func (kb KeeperBuilder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 	k := kb.Keeper(&ctx)
 	outflows, err := k.GetAllOutflows()
 	util.Panic(err)
@@ -33,11 +33,11 @@ func (kb Builder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 	util.Panic(err)
 
 	return &uibc.GenesisState{
-		Params:          k.GetParams(),
-		Outflows:        outflows,
-		TotalOutflowSum: k.GetTotalOutflow(),
-		QuotaExpires:    *quotaExpires,
-		Inflows:         inflows,
-		TotalInflowSum:  k.GetTotalInflow(),
+		Params:       k.GetParams(),
+		Outflows:     outflows,
+		OutflowSum:   k.GetOutflowSum(),
+		QuotaExpires: *quotaExpires,
+		Inflows:      inflows,
+		InflowSum:    k.GetInflowSum(),
 	}
 }

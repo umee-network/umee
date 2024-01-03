@@ -9,6 +9,7 @@ import (
 	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 )
 
 const (
@@ -47,15 +48,8 @@ func TestTxs(t *testing.T) {
 	}
 }
 
-// functions required in msgs.go which are not part of sdk.Msg
-type sdkmsg interface {
-	Route() string
-	Type() string
-	GetSignBytes() []byte
-}
-
-func TestRoutes(t *testing.T) {
-	txs := []sdkmsg{
+func TestLegacyMsg(t *testing.T) {
+	txs := []legacytx.LegacyMsg{
 		types.NewMsgSupply(testAddr, token),
 		types.NewMsgWithdraw(testAddr, uToken),
 		types.NewMsgMaxWithdraw(testAddr, denom),
@@ -70,25 +64,14 @@ func TestRoutes(t *testing.T) {
 	}
 
 	for _, tx := range txs {
-		assert.Equal(t,
-			// example: "/umee.leverage.v1.MsgSupply"
-			// with %T returning "*types.MsgSupply"
-			addV1ToType(fmt.Sprintf("/umee.%T", tx)),
-			tx.Route(),
-		)
-		// check for non-empty returns for now
 		assert.Assert(t, len(tx.GetSignBytes()) != 0)
-		// exact match required
 		assert.Equal(t,
-			// example: "/umee.leverage.v1.MsgSupply"
-			// with %T returning "*types.MsgSupply"
 			addV1ToType(fmt.Sprintf("/umee.%T", tx)),
 			tx.Type(),
 		)
 	}
 }
 
-// addV1ToType replaces "*types" with "leverage.v1"
 func addV1ToType(s string) string {
 	return strings.Replace(s, "*types", "leverage.v1", 1)
 }

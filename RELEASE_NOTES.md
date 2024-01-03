@@ -6,17 +6,20 @@
 
 Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.2.0
+## v6.3.0
 
 Highlights:
 
-- Umee chain upgrades to the latest stable Cosmos SDK v0.47
-- The `gov` module in in Cosmos SDK v0.47 has been updated to support a minimum proposal deposit at submission time. It is determined by a new parameter called `MinInitialDepositRatio`. When multiplied by the existing `MinDeposit` parameter, it produces the necessary proportion of coins needed at the proposal submission time. The motivation for this change is to prevent proposal spamming.
-  We set `MinInitialDepositRatio` to 10%.`
+- Cosmos SDK v0.47.7 patch update.
+- New queries: `oracle/MissCounters`, `uibc/Inflows`, `uibc/QuotaExpires`, `leverage/RegisteredTokenMarkets`
+- Update `uibc/MsgGovUpdateQuota` Msg type to handle the new inflow parameters.
+- Update `uibc/QueryAllOutflowsResponse` to include denom symbol (token name) in every outflow.
+
+[CHANGELOG](CHANGELOG.md)
 
 ### Validators
 
-- Upgrade Price Feeder: TODO
+**Upgrade Title** (for Cosmovisor): **v6.3**.
 
 ### Upgrade instructions
 

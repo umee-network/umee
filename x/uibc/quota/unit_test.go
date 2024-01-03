@@ -1,4 +1,4 @@
-package keeper
+package quota
 
 import (
 	"testing"
@@ -48,7 +48,7 @@ func (k TestKeeper) checkOutflows(denom string, perToken, total int64) {
 	o := k.GetTokenOutflows(denom)
 	require.Equal(k.t, sdk.NewDec(perToken), o.Amount)
 
-	d := k.GetTotalOutflow()
+	d := k.GetOutflowSum()
 	require.Equal(k.t, sdk.NewDec(total), d)
 }
 

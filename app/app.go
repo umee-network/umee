@@ -147,7 +147,7 @@ import (
 	uibcmodule "github.com/umee-network/umee/v6/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
-	uibcquotakeeper "github.com/umee-network/umee/v6/x/uibc/quota/keeper"
+	"github.com/umee-network/umee/v6/x/uibc/uics20"
 
 	"github.com/umee-network/umee/v6/x/metoken"
 	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
@@ -275,7 +275,7 @@ type UmeeApp struct {
 	LeverageKeeper    leveragekeeper.Keeper
 	IncentiveKeeper   incentivekeeper.Keeper
 	OracleKeeper      oraclekeeper.Keeper
-	UIbcQuotaKeeperB  uibcquotakeeper.Builder
+	UIbcQuotaKeeperB  uibcquota.KeeperBuilder
 	UGovKeeperB       ugovkeeper.Builder
 	MetokenKeeperB    metokenkeeper.Builder
 
@@ -549,7 +549,7 @@ func New(
 	)
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
-	app.UIbcQuotaKeeperB = uibcquotakeeper.NewKeeperBuilder(
+	app.UIbcQuotaKeeperB = uibcquota.NewKeeperBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
@@ -566,7 +566,7 @@ func New(
 	  - IBC Rate Limit Middleware
 	 **********/
 
-	quotaICS4 := uibcquota.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
+	quotaICS4 := uics20.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
 
 	// Create Transfer Keeper and pass IBCFeeKeeper as expected Channel and PortKeeper
 	// since fee middleware will wrap the IBCKeeper for underlying application.
@@ -581,7 +581,9 @@ func New(
 	var transferStack ibcporttypes.IBCModule
 	transferStack = ibctransfer.NewIBCModule(app.IBCTransferKeeper)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
-	transferStack = uibcquota.NewICS20Module(transferStack, app.UIbcQuotaKeeperB, appCodec)
+	transferStack = uics20.NewICS20Module(transferStack, appCodec,
+		app.UIbcQuotaKeeperB,
+		leveragekeeper.NewMsgServerImpl(app.LeverageKeeper))
 
 	// Create Interchain Accounts Controller Stack
 	// SendPacket, since it is originating from the application to core IBC:
@@ -747,15 +749,16 @@ func New(
 		vestingtypes.ModuleName,
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
+		metoken.ModuleName,
 		oracletypes.ModuleName,
 		uibc.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
 	}
 	endBlockers := []string{
 		crisistypes.ModuleName,
+		metoken.ModuleName,     // must be before oracle
 		oracletypes.ModuleName, // must be before gov and staking
 		govtypes.ModuleName, stakingtypes.ModuleName,
 		ibcexported.ModuleName, ibctransfertypes.ModuleName,
@@ -770,7 +773,6 @@ func New(
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
-		metoken.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are

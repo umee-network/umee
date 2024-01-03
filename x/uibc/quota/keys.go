@@ -1,4 +1,4 @@
-package keeper
+package quota
 
 import (
 	"github.com/umee-network/umee/v6/util"
@@ -6,14 +6,14 @@ import (
 
 var (
 	keyPrefixDenomOutflows = []byte{0x01}
-	keyTotalOutflows       = []byte{0x02}
+	keyOutflowSum          = []byte{0x02}
 	keyParams              = []byte{0x03}
 	keyQuotaExpires        = []byte{0x04}
 	keyPrefixDenomInflows  = []byte{0x05}
-	keyTotalInflows        = []byte{0x06}
+	keyInflowSum           = []byte{0x06}
 )
 
-func keyTotalOutflow(ibcDenom string) []byte {
+func keyTokenOutflow(ibcDenom string) []byte {
 	//  keyPrefixDenomOutflows | denom
 	return util.ConcatBytes(0, keyPrefixDenomOutflows, []byte(ibcDenom))
 }

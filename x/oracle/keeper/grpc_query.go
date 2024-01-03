@@ -362,3 +362,34 @@ func (q querier) ExgRatesWithTimestamp(
 
 	return &types.QueryExgRatesWithTimestampResponse{ExgRates: exgRates}, nil
 }
+
+// MissCounters implements types.QueryServer.
+func (q querier) MissCounters(goCtx context.Context, req *types.QueryMissCounters) (*types.QueryMissCountersResponse,
+	error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+
+	var pfMissCounts []types.PriceMissCounter
+	if len(req.Validator) != 0 {
+		valAddr, err := sdk.ValAddressFromBech32(req.Validator)
+		if err != nil {
+			return nil, status.Error(codes.InvalidArgument, err.Error())
+		}
+		missCounter := q.GetMissCounter(ctx, valAddr)
+		pfMissCounts = append(pfMissCounts, types.PriceMissCounter{
+			Validator:   req.Validator,
+			MissCounter: missCounter,
+		})
+	} else {
+		q.IterateMissCounters(ctx, func(val sdk.ValAddress, u uint64) bool {
+			pfMissCounts = append(pfMissCounts, types.PriceMissCounter{
+				Validator:   val.String(),
+				MissCounter: u,
+			})
+			return false
+		})
+	}
+
+	return &types.QueryMissCountersResponse{
+		MissCounters: pfMissCounts,
+	}, nil
+}

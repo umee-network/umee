@@ -1,4 +1,4 @@
-package keeper
+package quota
 
 import (
 	"testing"
@@ -24,7 +24,7 @@ func TestUnitParams(t *testing.T) {
 	params.TotalQuota = sdk.MustNewDecFromStr("3.4321")
 	params.InflowOutflowQuotaBase = sdk.MustNewDecFromStr("3.4321")
 	params.InflowOutflowQuotaRate = sdk.MustNewDecFromStr("0.2")
-	params.InflowOutflowQuotaTokenBase = sdk.MustNewDecFromStr("0.2")
+	params.InflowOutflowTokenQuotaBase = sdk.MustNewDecFromStr("0.2")
 
 	err := k.SetParams(params)
 	require.NoError(err)
@@ -34,29 +34,35 @@ func TestUnitParams(t *testing.T) {
 }
 
 func TestValidateEmergencyQuotaParamsUpdate(t *testing.T) {
-	mkParams := func(total, token int64, duration time.Duration) uibc.Params {
+	mkParams := func(total, token, ioBase, ioTokenBase int64, duration time.Duration) uibc.Params {
 		return uibc.Params{
-			TotalQuota:    sdk.NewDec(total),
-			TokenQuota:    sdk.NewDec(token),
-			QuotaDuration: duration,
+			TotalQuota:                  sdk.NewDec(total),
+			TokenQuota:                  sdk.NewDec(token),
+			InflowOutflowQuotaBase:      sdk.NewDec(ioBase),
+			InflowOutflowTokenQuotaBase: sdk.NewDec(ioTokenBase),
+			InflowOutflowQuotaRate:      sdk.NewDecWithPrec(1, 1),
+			QuotaDuration:               duration,
 		}
 	}
 
-	p := mkParams(100, 10, 50)
+	p := mkParams(100, 10, 30, 40, 50)
 	tcs := []struct {
 		name   string
 		p      uibc.Params
 		errMsg string
 	}{
 		{"no change", p, ""},
-		{"valid total quota update", mkParams(99, 10, 50), ""},
-		{"valid update", mkParams(0, 0, 50), ""},
+		{"valid total quota update", mkParams(99, 10, 29, 1, 50), ""},
+		{"valid update", mkParams(0, 0, 0, 0, 50), ""},
+		{"valid update", mkParams(10, 10, 10, 10, 49), "can't change QuotaDuration"},
 
-		{"invalid update", mkParams(201, 11, 50), "can't increase"},
-		{"invalid total quota update", mkParams(101, 10, 50), "can't increase"},
-		{"invalid token quota update", mkParams(10, 12, 50), "can't increase"},
-		{"invalid quota duration update1", mkParams(100, 10, 51), "can't change QuotaDuration"},
-		{"invalid quota duration update2", mkParams(100, 10, 49), "can't change QuotaDuration"},
+		{"invalid update", mkParams(201, 9, 30, 40, 50), "can't increase"},
+		{"invalid total quota update", mkParams(100, 11, 30, 40, 50), "can't increase"},
+		{"invalid token quota update", mkParams(10, 12, 9, 9, 50), "can't increase"},
+		{"invalid token quota update", mkParams(10, 10, 31, 10, 50), "can't increase"},
+		{"invalid token quota update", mkParams(10, 10, 10, 41, 50), "can't increase"},
+		{"invalid quota duration update1", mkParams(10, 10, 10, 10, 51), "can't change QuotaDuration"},
+		{"invalid quota duration update2", mkParams(10, 10, 10, 10, 49), "can't change QuotaDuration"},
 	}
 
 	assert := assert.New(t)

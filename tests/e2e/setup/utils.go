@@ -294,7 +294,7 @@ func (s *E2ETestSuite) QueryIBCChannels(endpoint string) (bool, error) {
 func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) error {
 	var err error
 	// TODO: decrease it when possible
-	for retry := 0; retry < 10; retry++ {
+	for retry := 0; retry < 8; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
 		_, err = cli.Tx.BroadcastTx(0, msg)
 		if err == nil {
@@ -311,7 +311,8 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 		if err != nil {
 			return err
 		}
-		cli.WithAccSeq(uint64(n))
+		s.T().Log("expected sequence numbern", n)
+		cli.SetAccSeq(uint64(n))
 
 		time.Sleep(time.Millisecond * 300)
 	}

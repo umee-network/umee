@@ -6,6 +6,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
@@ -145,4 +146,63 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(umeeExponent))
 	expectedQuota := sdk.NewDec(umeeQuota.Int64()).Sub(sdk.NewDecFromInt(umeeToken.Amount).Quo(powerReduction).Mul(umeePrice))
 	assert.DeepEqual(t, o.Amount, expectedQuota)
+}
+
+func TestKeeper_RecordIBCInflow(t *testing.T) {
+	atomAmount := sdkmath.NewInt(100_000000)
+	atomPrice := sdk.MustNewDecFromStr("0.37")
+	// ibc incoming denom from packet is `port/path/base_denom`
+	atomToken := sdk.NewCoin("transfer/channel-10/uatom", atomAmount)
+	atomExponent := 6
+	inflowBaseDenom := "ibc/D6372674F0E9A3A7ADC2FEFD8B2708C5008C7ED04DA6566E279DC1321BDDCB6F"
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	leverageMock := mocks.NewMockLeverage(ctrl)
+	oracleMock := mocks.NewMockOracle(ctrl)
+
+	marshaller := codec.NewProtoCodec(nil)
+	ctx, k := initKeeper(t, marshaller, leverageMock, oracleMock)
+	err := k.ResetAllQuotas()
+	assert.NilError(t, err)
+
+	// ATOM, returns token settings and prices from mock leverage and oracle keepers, no errors expected
+	leverageMock.EXPECT().GetTokenSettings(ctx, inflowBaseDenom).Return(
+		lfixtures.Token(inflowBaseDenom, "ATOM", uint32(atomExponent)), nil,
+	).AnyTimes()
+	oracleMock.EXPECT().Price(ctx, "ATOM").Return(atomPrice, nil).AnyTimes()
+
+	packet := channeltypes.Packet{
+		Sequence:           10,
+		SourcePort:         "transfer",
+		DestinationPort:    "transfer",
+		SourceChannel:      "channel-10",
+		DestinationChannel: "channel-1",
+		Data:               nil,
+	}
+
+	ackErr := k.RecordIBCInflow(packet, atomToken.Denom, atomToken.Amount.String())
+	assert.Assert(t, nil, ackErr)
+
+	o := k.GetTokenInflow(inflowBaseDenom)
+	// expected inflow amount 37 =( atomPrice * atomAmount) / atomExponent
+	inflowAmount := sdkmath.LegacyMustNewDecFromStr("37")
+	assert.DeepEqual(t, o.Amount, inflowAmount)
+
+	ackErr = k.RecordIBCInflow(packet, atomToken.Denom, atomToken.Amount.String())
+	assert.Assert(t, nil, ackErr)
+
+	o = k.GetTokenInflow(inflowBaseDenom)
+	assert.DeepEqual(t, o.Amount, inflowAmount.Add(inflowAmount))
+
+	allInflows, err := k.GetAllInflows()
+	assert.NilError(t, err)
+	assert.DeepEqual(t, allInflows, sdk.DecCoins{o})
+
+	err = k.ResetAllQuotas()
+	assert.NilError(t, err)
+
+	o = k.GetTokenInflow(inflowBaseDenom)
+	assert.DeepEqual(t, o.Amount, sdk.ZeroDec())
 }

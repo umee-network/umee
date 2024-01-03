@@ -1,12 +1,13 @@
 // Simple mocks for unit tests
 
-package keeper
+package quota
 
 import (
 	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	"github.com/umee-network/umee/v6/util/genmap"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
@@ -20,6 +21,10 @@ func (k LeverageKeeper) GetTokenSettings(_ sdk.Context, baseDenom string) (ltype
 		return ts, errors.New("token settings not found")
 	}
 	return ts, nil
+}
+
+func (k LeverageKeeper) GetAllRegisteredTokens(_ sdk.Context) []ltypes.Token {
+	return genmap.MapValues(k.tokenSettings)
 }
 
 func (k LeverageKeeper) ToToken(_ sdk.Context, _ sdk.Coin) (sdk.Coin, error) {

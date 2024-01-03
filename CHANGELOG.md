@@ -46,14 +46,49 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+## v6.3.0 - 2024-01-03
+
+### Improvements
+
+- [2363](https://github.com/umee-network/umee/pull/2363) Upgrade Cosmos SDK to v0.47.7.
+- [2370](https://github.com/umee-network/umee/pull/2370) Add missing params to `uibc/MsgGovUpdateQuota`.
+- [2374](https://github.com/umee-network/umee/pull/2374) Add symbol name to the x/uibc QueryAllOutflowsResponse `outflows` entry.
+- [2377](https://github.com/umee-network/umee/pull/2377) Add symbol name to the x/uibc QueryInflowsResponse `inflows` entry.
+
+### Features
+
+- [2352](https://github.com/umee-network/umee/pull/2352) new `oracle/MissCounters` query
+- [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/Inflows` query.
+- [2349](https://github.com/umee-network/umee/pull/2349) UIBC: adding ICS 20 memo handler (disabled).
+- [2369](https://github.com/umee-network/umee/pull/2369) Add query `leverage/RegisteredTokensWithMarkets` to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
+
 ### Bug Fixes
 
-- [2315](https://github.com/umee-network/umee/pull/2215) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
+- [2358](https://github.com/umee-network/umee/pull/2358) metoken endblocker should be before oracle.
+- [2368](https://github.com/umee-network/umee/pull/2368) Fix inflow amount calculation. Previously, the inflow amount of the token was being overridden by the new inflow amount.
+- [2375](https://github.com/umee-network/umee/pull/2375) Ensure Umee and SDK account sequence setting changes the calling client.
+
+### API Breaking
+
+- [2375](https://github.com/umee-network/umee/pull/2375) Rename Umee and SDK client `WithAccSeq` to `SetAccSeq`.
+
+## v6.2.0 - 2023-12-01
+
+### Bug Fixes
+
+- [2315](https://github.com/umee-network/umee/pull/2315) Improve reliability of MaxBorrow, MaxWithdraw when special asset pairs present.
+- [2346](https://github.com/umee-network/umee/pull/2346) Fix an issue where metokens were not included in historic data.
+- [2365](https://github.com/umee-network/umee/pull/2365) Add fee to metoken price and balances query.
 
 ### Improvements
 
 - [2299](https://github.com/umee-network/umee/pull/2299) Upgrade Cosmos SDK to v0.47.
 - [2301](https://github.com/umee-network/umee/pull/2301) use gov/v1 MinInitialDepositRatio and set it to 0.1.
+- [2341](https://github.com/umee-network/umee/pull/2341) inspect query also returns a list of accounts whose positions could not be calculated
+
+### Breaking Changes
+
+- [2332](https://github.com/umee-network/umee/pull/2332) Rename: `TotalOutflowSum` to `OutflowSum`, `TotalInflowSum` to `InflowSum`.
 
 ## v6.1.0 - 2023-10-17
 

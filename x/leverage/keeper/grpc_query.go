@@ -31,7 +31,7 @@ func (q Querier) Params(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	params := q.Keeper.GetParams(ctx)
+	params := q.GetParams(ctx)
 
 	return &types.QueryParamsResponse{Params: params}, nil
 }
@@ -48,17 +48,46 @@ func (q Querier) RegisteredTokens(
 
 	var tokens []types.Token
 	if len(req.BaseDenom) != 0 {
-		token, err := q.Keeper.GetTokenSettings(ctx, req.BaseDenom)
+		token, err := q.GetTokenSettings(ctx, req.BaseDenom)
 		if err != nil {
 			return nil, err
 		}
 		tokens = append(tokens, token)
 	} else {
-		tokens = q.Keeper.GetAllRegisteredTokens(ctx)
+		tokens = q.GetAllRegisteredTokens(ctx)
 	}
 
 	return &types.QueryRegisteredTokensResponse{
 		Registry: tokens,
+	}, nil
+}
+
+func (q Querier) RegisteredTokensWithMarkets(
+	goCtx context.Context,
+	req *types.QueryRegisteredTokensWithMarkets,
+) (*types.QueryRegisteredTokensWithMarketsResponse, error) {
+	if req == nil {
+		return nil, status.Error(codes.InvalidArgument, "empty request")
+	}
+
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	tokens := q.Keeper.GetAllRegisteredTokens(ctx)
+	markets := []types.TokenMarket{}
+
+	for _, token := range tokens {
+		marketSumnmary, err := q.MarketSummary(goCtx, &types.QueryMarketSummary{Denom: token.BaseDenom})
+		if err != nil {
+			// absorb overall query error into struct, which may be empty, but proceed with this query
+			marketSumnmary.Errors += err.Error()
+		}
+		markets = append(markets, types.TokenMarket{
+			Token:  token,
+			Market: *marketSumnmary,
+		})
+	}
+
+	return &types.QueryRegisteredTokensWithMarketsResponse{
+		Markets: markets,
 	}, nil
 }
 
@@ -74,10 +103,10 @@ func (q Querier) SpecialAssets(
 	var pairs []types.SpecialAssetPair
 	if req.Denom == "" {
 		// all pairs
-		pairs = q.Keeper.GetAllSpecialAssetPairs(ctx)
+		pairs = q.GetAllSpecialAssetPairs(ctx)
 	} else {
 		// only pairs affecting one asset
-		pairs = q.Keeper.GetSpecialAssetPairs(ctx, req.Denom)
+		pairs = q.GetSpecialAssetPairs(ctx, req.Denom)
 	}
 
 	return &types.QuerySpecialAssetsResponse{
@@ -97,25 +126,24 @@ func (q Querier) MarketSummary(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	token, err := q.Keeper.GetTokenSettings(ctx, req.Denom)
+	token, err := q.GetTokenSettings(ctx, req.Denom)
 	if err != nil {
 		return nil, err
 	}
 
-	rate := q.Keeper.DeriveExchangeRate(ctx, req.Denom)
-	supplyAPY := q.Keeper.DeriveSupplyAPY(ctx, req.Denom)
-	borrowAPY := q.Keeper.DeriveBorrowAPY(ctx, req.Denom)
+	rate := q.DeriveExchangeRate(ctx, req.Denom)
+	supplyAPY := q.DeriveSupplyAPY(ctx, req.Denom)
+	borrowAPY := q.DeriveBorrowAPY(ctx, req.Denom)
 
-	supplied, _ := q.Keeper.GetTotalSupply(ctx, req.Denom)
-	balance := q.Keeper.ModuleBalance(ctx, req.Denom).Amount
-	reserved := q.Keeper.GetReserves(ctx, req.Denom).Amount
-	borrowed := q.Keeper.GetTotalBorrowed(ctx, req.Denom)
-	liquidity := q.Keeper.AvailableLiquidity(ctx, req.Denom)
+	supplied, _ := q.GetTotalSupply(ctx, req.Denom)
+	balance := q.ModuleBalance(ctx, req.Denom).Amount
+	reserved := q.GetReserves(ctx, req.Denom).Amount
+	borrowed := q.GetTotalBorrowed(ctx, req.Denom)
+	liquidity := q.AvailableLiquidity(ctx, req.Denom)
 
 	uDenom := coin.ToUTokenDenom(req.Denom)
-	uSupply := q.Keeper.GetUTokenSupply(ctx, uDenom)
-	uCollateral := q.Keeper.GetTotalCollateral(ctx, uDenom)
+	uSupply := q.GetUTokenSupply(ctx, uDenom)
+	uCollateral := q.GetTotalCollateral(ctx, uDenom)
 
 	// maxBorrow is based on MaxSupplyUtilization
 	maxBorrow := token.MaxSupplyUtilization.MulInt(supplied.Amount).TruncateInt()
@@ -135,7 +163,7 @@ func (q Querier) MarketSummary(
 	availableWithdraw = sdk.MaxInt(availableWithdraw, sdk.ZeroInt())
 
 	// availableCollateralize respects both MaxCollateralShare and MinCollateralLiquidity
-	maxCollateral, _ := q.Keeper.maxCollateralFromShare(ctx, uDenom)
+	maxCollateral, _ := q.maxCollateralFromShare(ctx, uDenom)
 	if token.MinCollateralLiquidity.IsPositive() {
 		maxCollateralFromLiquidity := toDec(liquidity).Quo(token.MinCollateralLiquidity).TruncateInt()
 		maxCollateral = sdk.MinInt(maxCollateral, maxCollateralFromLiquidity)
@@ -165,13 +193,13 @@ func (q Querier) MarketSummary(
 
 	// Oracle price in response will be nil if the oracle module has no price at all, but will instead
 	// show the most recent price if one existed.
-	oraclePrice, _, oracleErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeQuery)
+	oraclePrice, _, oracleErr := q.TokenPrice(ctx, req.Denom, types.PriceModeQuery)
 	if oracleErr == nil {
 		resp.OraclePrice = &oraclePrice
 	} else {
 		resp.Errors += oracleErr.Error()
 	}
-	historicPrice, _, historicErr := q.Keeper.TokenPrice(ctx, req.Denom, types.PriceModeHistoric)
+	historicPrice, _, historicErr := q.TokenPrice(ctx, req.Denom, types.PriceModeHistoric)
 	if historicErr == nil {
 		resp.OracleHistoricPrice = &historicPrice
 	} else {
@@ -199,12 +227,12 @@ func (q Querier) AccountBalances(
 		return nil, err
 	}
 
-	supplied, err := q.Keeper.GetAllSupplied(ctx, addr)
+	supplied, err := q.GetAllSupplied(ctx, addr)
 	if err != nil {
 		return nil, err
 	}
-	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
-	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
+	collateral := q.GetBorrowerCollateral(ctx, addr)
+	borrowed := q.GetBorrowerBorrows(ctx, addr)
 
 	return &types.QueryAccountBalancesResponse{
 		Supplied:   supplied,
@@ -231,38 +259,38 @@ func (q Querier) AccountSummary(
 		return nil, err
 	}
 
-	supplied, err := q.Keeper.GetAllSupplied(ctx, addr)
+	supplied, err := q.GetAllSupplied(ctx, addr)
 	if err != nil {
 		return nil, err
 	}
-	collateral := q.Keeper.GetBorrowerCollateral(ctx, addr)
-	borrowed := q.Keeper.GetBorrowerBorrows(ctx, addr)
+	collateral := q.GetBorrowerCollateral(ctx, addr)
+	borrowed := q.GetBorrowerBorrows(ctx, addr)
 
 	// the following price calculations use the most recent prices if spot prices are missing
-	lastSuppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeQuery)
+	lastSuppliedValue, err := q.VisibleTokenValue(ctx, supplied, types.PriceModeQuery)
 	if err != nil {
 		return nil, err
 	}
-	lastBorrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeQuery)
+	lastBorrowedValue, err := q.VisibleTokenValue(ctx, borrowed, types.PriceModeQuery)
 	if err != nil {
 		return nil, err
 	}
-	lastCollateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeQuery)
+	lastCollateralValue, err := q.VisibleCollateralValue(ctx, collateral, types.PriceModeQuery)
 	if err != nil {
 		return nil, err
 	}
 
 	// these use leverage-like prices: the lower of spot or historic price for supplied tokens and higher for borrowed.
 	// unlike transactions, this query will use expired prices instead of skipping them.
-	suppliedValue, err := q.Keeper.VisibleTokenValue(ctx, supplied, types.PriceModeQueryLow)
+	suppliedValue, err := q.VisibleTokenValue(ctx, supplied, types.PriceModeQueryLow)
 	if err != nil {
 		return nil, err
 	}
-	collateralValue, err := q.Keeper.VisibleCollateralValue(ctx, collateral, types.PriceModeQueryLow)
+	collateralValue, err := q.VisibleCollateralValue(ctx, collateral, types.PriceModeQueryLow)
 	if err != nil {
 		return nil, err
 	}
-	borrowedValue, err := q.Keeper.VisibleTokenValue(ctx, borrowed, types.PriceModeQueryHigh)
+	borrowedValue, err := q.VisibleTokenValue(ctx, borrowed, types.PriceModeQueryHigh)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +309,7 @@ func (q Querier) AccountSummary(
 	// and the higher of spot or historic prices for each borrowed token
 	// skips collateral tokens with missing prices, but errors on borrow tokens missing prices
 	// (for oracle errors only the relevant response fields will be left nil)
-	ap, err := q.Keeper.GetAccountPosition(ctx, addr, false)
+	ap, err := q.GetAccountPosition(ctx, addr, false)
 	if nonOracleError(err) {
 		return nil, err
 	}
@@ -294,7 +322,7 @@ func (q Querier) AccountSummary(
 	// liquidation threshold shown here as it is used in leverage logic: using spot prices.
 	// skips borrowed tokens with missing prices, but errors on collateral missing prices
 	// (for oracle errors only the relevant response fields will be left nil)
-	ap, err = q.Keeper.GetAccountPosition(ctx, addr, true)
+	ap, err = q.GetAccountPosition(ctx, addr, true)
 	if nonOracleError(err) {
 		return nil, err
 	}
@@ -315,13 +343,13 @@ func (q Querier) LiquidationTargets(
 		return nil, status.Error(codes.InvalidArgument, "empty request")
 	}
 
-	if !q.Keeper.liquidatorQueryEnabled {
+	if !q.liquidatorQueryEnabled {
 		return nil, types.ErrNotLiquidatorNode
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	targets, err := q.Keeper.GetEligibleLiquidationTargets(ctx)
+	targets, err := q.GetEligibleLiquidationTargets(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -343,7 +371,7 @@ func (q Querier) BadDebts(
 	}
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	targets := q.Keeper.getAllBadDebts(ctx)
+	targets := q.getAllBadDebts(ctx)
 
 	return &types.QueryBadDebtsResponse{Targets: targets}, nil
 }
@@ -373,7 +401,7 @@ func (q Querier) MaxWithdraw(
 		denoms = []string{req.Denom}
 	} else {
 		// Denom not specified
-		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
+		for _, t := range q.GetAllRegisteredTokens(ctx) {
 			if !t.Blacklist {
 				denoms = append(denoms, t.BaseDenom)
 			}
@@ -386,9 +414,9 @@ func (q Querier) MaxWithdraw(
 		// will be nil and the resulting value will be what
 		// can safely be withdrawn even with missing prices.
 		// On non-nil error here, max withdraw is zero.
-		uToken, _, err := q.Keeper.userMaxWithdraw(ctx, addr, denom)
+		uToken, _, err := q.userMaxWithdraw(ctx, addr, denom)
 		if err == nil && uToken.IsPositive() {
-			token, err := q.Keeper.ToToken(ctx, uToken)
+			token, err := q.ToToken(ctx, uToken)
 			if err != nil {
 				return nil, err
 			}
@@ -433,7 +461,7 @@ func (q Querier) MaxBorrow(
 		denoms = []string{req.Denom}
 	} else {
 		// Denom not specified
-		for _, t := range q.Keeper.GetAllRegisteredTokens(ctx) {
+		for _, t := range q.GetAllRegisteredTokens(ctx) {
 			if !t.Blacklist {
 				denoms = append(denoms, t.BaseDenom)
 			}
@@ -446,7 +474,7 @@ func (q Querier) MaxBorrow(
 		// will be nil and the resulting value will be what
 		// can safely be borrowed even with missing prices.
 		// On non-nil error here, max borrow is zero.
-		maxBorrow, err := q.Keeper.userMaxBorrow(ctx, addr, denom)
+		maxBorrow, err := q.userMaxBorrow(ctx, addr, denom)
 		if err == nil && maxBorrow.IsPositive() {
 			maxTokens = maxTokens.Add(maxBorrow)
 		}

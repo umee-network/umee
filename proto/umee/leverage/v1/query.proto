@@ -24,6 +24,12 @@ service Query {
     option (google.api.http).get = "/umee/leverage/v1/registered_tokens";
   }
 
+  // RegisteredTokensWithMarkets queries for all the registered tokens and their market summaries.
+  rpc RegisteredTokensWithMarkets(QueryRegisteredTokensWithMarkets)
+      returns (QueryRegisteredTokensWithMarketsResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/registered_tokens_with_markets";
+  }
+
   // SpecialAssets queries for all special asset pairs.
   rpc SpecialAssets(QuerySpecialAssets)
       returns (QuerySpecialAssetsResponse) {
@@ -110,6 +116,24 @@ message QueryRegisteredTokens {
 // RegisteredTokens gRPC service handler.
 message QueryRegisteredTokensResponse {
   repeated Token registry = 1 [(gogoproto.nullable) = false];
+}
+
+// QueryRegisteredTokensWithMarkets defines the request structure for the RegisteredTokenMarkets
+// gRPC service handler.
+message QueryRegisteredTokensWithMarkets {}
+
+// QueryRegisteredTokensWithMarketsResponse defines the response structure for the
+// RegisteredTokensWithMarkets gRPC service handler.
+message QueryRegisteredTokensWithMarketsResponse {
+  repeated TokenMarket markets = 1 [(gogoproto.nullable) = false];
+}
+
+// TokenMarket is a token and its market summary.
+message TokenMarket {
+  // Token is a registered token and its parameters.
+  Token token = 1 [(gogoproto.nullable) = false];
+  // Market is the market summary for the token.
+  QueryMarketSummaryResponse market = 2 [(gogoproto.nullable) = false];
 }
 
 // QuerySpecialAssets defines the request structure for the SpecialAssets
@@ -402,6 +426,8 @@ message QueryInspectResponse {
   repeated InspectAccount borrowers = 1 [
     (gogoproto.nullable) = false
   ];
+  // Failures is a list of addresses for which the position calculation failed.
+  repeated string failures = 2;
 }
 
 // QueryInspectAccountResponse defines the response structure for the InspectAccount gRPC service handler.
