@@ -56,10 +56,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
-- [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/MissCounters` query
+- [2352](https://github.com/umee-network/umee/pull/2352) new `oracle/MissCounters` query
 - [2352](https://github.com/umee-network/umee/pull/2352) new `uibc/Inflows` query.
 - [2349](https://github.com/umee-network/umee/pull/2349) UIBC: adding ICS 20 memo handler (disabled).
-- [2369](https://github.com/umee-network/umee/pull/2369) Add query `leverage/RegisteredTokenMarkets` to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
+- [2369](https://github.com/umee-network/umee/pull/2369) Add query `leverage/RegisteredTokensWithMarkets` to fetch Registered Tokens and their Market Summaries for frontend in fewer queries.
 
 ### Bug Fixes
 

@@ -12,7 +12,7 @@ Highlights:
 
 - Cosmos SDK v0.47.7 patch update.
 - New queries: `oracle/MissCounters`, `uibc/Inflows`, `leverage/RegisteredTokenMarkets`
-- Update `uic/MsgGovUpdateQuota` Msg type to handle the new inflow parameters.
+- Update `uibc/MsgGovUpdateQuota` Msg type to handle the new inflow parameters.
 - Update `uibc/QueryAllOutflowsResponse` to include denom symbol (token name) in every outflow.
 
 [CHANGELOG](CHANGELOG.md)
