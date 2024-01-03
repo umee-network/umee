@@ -231,8 +231,6 @@ func (app *UmeeApp) storeUpgrade(planName string, ui upgradetypes.Plan, stores s
 
 // registerUpgrade sets an upgrade handler which only runs module migrations
 // and adds new storages storages
-//
-//nolint:unused
 func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Plan, newStores ...string) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 
