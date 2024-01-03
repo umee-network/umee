@@ -11,7 +11,7 @@ Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-proce
 Highlights:
 
 - Cosmos SDK v0.47.7 patch update.
-- New queries: `uibc/MissCounters`, `uibc/Inflows`, `leverage/RegisteredTokenMarkets`
+- New queries: `oracle/MissCounters`, `uibc/Inflows`, `leverage/RegisteredTokenMarkets`
 - Update `uic/MsgGovUpdateQuota` Msg type to handle the new inflow parameters.
 - Update `uibc/QueryAllOutflowsResponse` to include denom symbol (token name) in every outflow.
 
