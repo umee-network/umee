@@ -12,13 +12,11 @@ const (
 
 	// BondDenom defines the native staking token denomination.
 	// NOTE: it is used by IBC, and must not change to avoid token migration in all IBC chains.
-	BondDenom = "uumee"
-
+	BondDenom      = "uumee"
 	BaseExtraDenom = "uux"
 
 	// DisplayDenom defines the name, symbol, and display value of the umee token.
 	DisplayDenom = "UX"
-
 	// Old display name. We renamed UMEE to UX.
 	LegacyDisplayDenom = "UMEE"
 
@@ -44,7 +42,7 @@ func init() {
 	}
 
 	sdk.SetCoinDenomRegex(func() string {
-		// allow "ux" token. Default regexp requires denom to be at least 3 characters long.
+		// allow "ux" token. Modify the default regexp to allow 2 character long denoms.
 		return `[a-zA-Z][a-zA-Z0-9/:._-]{1,127}`
 	})
 }

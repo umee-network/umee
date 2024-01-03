@@ -60,6 +60,19 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerUpgrade6_2(upgradeInfo)
 	app.registerUpgrade("v6.3", upgradeInfo)
+
+	app.registerUpgrade6_4(upgradeInfo)
+}
+
+func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
+	app.UpgradeKeeper.SetUpgradeHandler("v6.4",
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			printPlanName(plan.Name, ctx.Logger())
+			// Add UX denom aliases to metadata
+			app.BankKeeper.SetDenomMetaData(ctx, umeeTokenMetadata())
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 func (app *UmeeApp) registerUpgrade6_2(upgradeInfo upgradetypes.Plan) {
