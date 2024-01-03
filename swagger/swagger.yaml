@@ -3180,15 +3180,12 @@ paths:
                       type: string
                     amount:
                       type: string
+                    symbol:
+                      type: string
+                      title: token symbol name
                   description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                    DecCoinSymbol extends the Cosmos SDK DecCoin type and adds
+                    symbol name.
             title: QueryInflowsResponse defines response type of Query/Inflows
         default:
           description: An unexpected error response.
@@ -9249,11 +9246,12 @@ definitions:
               type: string
             amount:
               type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
-
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+            symbol:
+              type: string
+              title: token symbol name
+          description: >-
+            DecCoinSymbol extends the Cosmos SDK DecCoin type and adds symbol
+            name.
     title: QueryInflowsResponse defines response type of Query/Inflows
   umee.uibc.v1.QueryOutflowsResponse:
     type: object

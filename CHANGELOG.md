@@ -53,6 +53,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2363](https://github.com/umee-network/umee/pull/2363) Upgrade Cosmos SDK to v0.47.7.
 - [2370](https://github.com/umee-network/umee/pull/2370) Add missing params to `uibc/MsgGovUpdateQuota`.
 - [2374](https://github.com/umee-network/umee/pull/2374) Add symbol name to the x/uibc QueryAllOutflowsResponse `outflows` entry.
+- [2377](https://github.com/umee-network/umee/pull/2377) Add symbol name to the x/uibc QueryInflowsResponse `inflows` entry.
 
 ### Features
 
