@@ -52,3 +52,19 @@ func DecInZeroOne(a sdk.Dec, name string, oneInclusive bool) error {
 	}
 	return nil
 }
+
+// DecNotNegative checks if a is defined and a >= 0
+func DecNotNegative(a sdk.Dec, paramName string) error {
+	if a.IsNil() || a.IsNegative() {
+		return fmt.Errorf("%s can't be negative", paramName)
+	}
+	return nil
+}
+
+// DecPositive checks if a is defined and a > 0
+func DecPositive(a sdk.Dec, paramName string) error {
+	if a.IsNil() || !a.IsPositive() {
+		return fmt.Errorf("%s must be positive", paramName)
+	}
+	return nil
+}

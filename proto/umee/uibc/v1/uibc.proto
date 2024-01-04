@@ -10,7 +10,19 @@ option go_package = "github.com/umee-network/umee/v6/x/uibc";
 option (gogoproto.goproto_getters_all) = false;
 option (gogoproto.messagename_all)     = true;
 
+// ICS20Memo payload for IBC transfer memo field.
 message ICS20Memo {
   // messages is a list of `sdk.Msg`s that will be executed when handling ICS20 transfer.
   repeated google.protobuf.Any messages = 1;
+}
+
+// DecCoinSymbol extends the Cosmos SDK DecCoin type and adds symbol name.
+message DecCoinSymbol {
+  string denom  = 1;
+  string amount = 2
+      [(cosmos_proto.scalar)  = "cosmos.Dec",
+       (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+       (gogoproto.nullable)   = false];
+  // token symbol name
+  string symbol = 3;
 }

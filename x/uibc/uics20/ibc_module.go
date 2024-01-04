@@ -52,7 +52,8 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return ackResp
 	}
 
-	if ftData.Memo != "" {
+	// TODO: ignore Memo field handling for v6.3 release
+	if ftData.Memo != "" && false {
 		msgs, err := DeserializeMemoMsgs(im.cdc, []byte(ftData.Memo))
 		if err != nil {
 			// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf

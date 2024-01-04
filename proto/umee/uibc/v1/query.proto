@@ -1,12 +1,12 @@
 syntax = "proto3";
 package umee.uibc.v1;
 
-import "google/api/annotations.proto";
-import "gogoproto/gogo.proto";
 import "cosmos_proto/cosmos.proto";
-import "umee/uibc/v1/quota.proto";
+import "gogoproto/gogo.proto";
+import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
-import "cosmos/base/v1beta1/coin.proto";
+import "umee/uibc/v1/quota.proto";
+import "umee/uibc/v1/uibc.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/uibc";
 
@@ -67,10 +67,7 @@ message QueryInflowsResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
-  repeated cosmos.base.v1beta1.DecCoin inflows = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.DecCoin",
-    (gogoproto.nullable)   = false
-  ];
+  repeated DecCoinSymbol inflows = 2 [(gogoproto.nullable) = false];
 }
 
 // QueryParams defines the request structure for the Params gRPC service
@@ -102,8 +99,5 @@ message QueryAllOutflows {}
 
 // QueryOutflowResponse defines response type of Query/Outflow
 message QueryAllOutflowsResponse {
-  repeated cosmos.base.v1beta1.DecCoin outflows = 1 [
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins",
-    (gogoproto.nullable)     = false
-  ];
+  repeated DecCoinSymbol outflows = 1 [(gogoproto.nullable) = false];
 }

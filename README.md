@@ -61,10 +61,11 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 |    v6.0.x    |    ✓    | v0.46.14+  | v6.2.x |   ---   | umee/v2.1.6-1+ |            ---             |  v1.3.0   |
 |    v6.1.x    |    ✓    | v0.46.15+  | v6.2.x |   ---   |  umee/v2.1.7+  |            ---             |  v1.3.0   |
 |    v6.2.x    |    ✓    |  v0.47.6+  | v7.2.x |   ---   |  umee/v2.3.0   |            ---             |  v1.5.0   |
+|    v6.3.x    |    ✓    |  v0.47.7+  | v7.3.1 |   ---   |  umee/v2.3.0+  |            ---             |  v1.5.0   |
 
 #### Price Feeder
 
-Since `Price Feeder v2.1.0` the recommended oracle price feeder has been moved to this [repository](https://github.com/ojo-network/price-feeder/tree/umee) with the version prefix `umee/v.x`.
+Since `Price Feeder v2.1.0` the recommended oracle price feeder has been moved to this [repository](https://github.com/ojo-network/price-feeder/tree/umee) with the version prefix `umee/`.
 
 #### libwasmvm
 

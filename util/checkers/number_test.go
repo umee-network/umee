@@ -3,6 +3,7 @@ package checkers
 import (
 	"testing"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/umee-network/umee/v6/tests/tsdk"
 )
@@ -80,4 +81,12 @@ func TestDecInZeroOne(t *testing.T) {
 	assert.Error(t, DecInZeroOne(tsdk.DecF(2), "", true))
 	assert.Error(t, DecInZeroOne(tsdk.DecF(213812), "", true))
 	assert.Error(t, DecInZeroOne(tsdk.DecF(-1), "", true))
+}
+
+func TestDecNotNegative(t *testing.T) {
+	assert.NotNil(t, DecNotNegative(tsdk.DecF(-1), ""))
+	assert.NotNil(t, DecNotNegative(sdk.Dec{}, ""))
+
+	assert.Nil(t, DecNotNegative(sdk.ZeroDec(), ""))
+	assert.Nil(t, DecNotNegative(tsdk.DecF(5), ""))
 }

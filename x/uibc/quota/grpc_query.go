@@ -51,29 +51,33 @@ func (q Querier) AllOutflows(goCtx context.Context, _ *uibc.QueryAllOutflows) (
 	*uibc.QueryAllOutflowsResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	o, err := q.Keeper(&ctx).GetAllOutflows()
+	k := q.Keeper(&ctx)
+	o, err := k.GetAllOutflows()
 	if err != nil {
 		return nil, err
 	}
-	return &uibc.QueryAllOutflowsResponse{Outflows: o}, nil
+	outflows := k.coinsWithTokenSymbols(ctx, o)
+	return &uibc.QueryAllOutflowsResponse{Outflows: outflows}, nil
 }
 
 // Inflows returns sum of inflows and registered IBC denoms inflows in the current quota period.
 func (q Querier) Inflows(goCtx context.Context, req *uibc.QueryInflows) (*uibc.QueryInflowsResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	var (
-		inflows sdk.DecCoins
-		err     error
+		inflowCoins sdk.DecCoins
+		err         error
+		k           = q.Keeper(&ctx)
 	)
 
 	if len(req.Denom) != 0 {
-		inflows = append(inflows, q.Keeper(&ctx).GetTokenInflow(req.Denom))
+		inflowCoins = sdk.NewDecCoins(k.GetTokenInflow(req.Denom))
 	} else {
-		inflows, err = q.Keeper(&ctx).GetAllInflows()
+		inflowCoins, err = k.GetAllInflows()
 		if err != nil {
 			return nil, err
 		}
 	}
+	inflows := k.coinsWithTokenSymbols(ctx, inflowCoins)
 	return &uibc.QueryInflowsResponse{Sum: q.Keeper(&ctx).GetInflowSum(), Inflows: inflows}, nil
 }
 
