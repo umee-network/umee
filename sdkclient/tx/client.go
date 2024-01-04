@@ -140,6 +140,8 @@ func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) 
 
 func (c *Client) SetAccSeq(seq uint64) {
 	*c.txFactory = c.txFactory.WithSequence(seq)
+	// TODO: remove
+	// c.txFactory.WithSequence(seq)
 }
 
 func (c *Client) WithAsyncBlock() *Client {
