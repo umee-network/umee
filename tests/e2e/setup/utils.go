@@ -312,8 +312,7 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 			return err
 		}
 		s.T().Log("expected sequence numbern", n)
-		cli.SetAccSeq(uint64(n))
-
+		cli.Tx.SetAccSeq(uint64(n))
 		time.Sleep(time.Millisecond * 300)
 	}
 

@@ -21,7 +21,7 @@ func (c *Client) GovParamChange(title, description string, changes []proposal.Pa
 		return nil, err
 	}
 
-	return c.BroadcastTx(0, msg)
+	return c.BroadcastTxWithRetry(0, msg)
 }
 
 func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
@@ -40,7 +40,7 @@ func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit 
 		return nil, err
 	}
 
-	return c.BroadcastTx(0, msg)
+	return c.BroadcastTxWithRetry(0, msg)
 }
 
 func (c *Client) GovSubmitProposal(msgs []sdk.Msg) (*sdk.TxResponse, error) {
@@ -66,7 +66,7 @@ func (c *Client) GovSubmitProposal(msgs []sdk.Msg) (*sdk.TxResponse, error) {
 		return nil, err
 	}
 
-	return c.BroadcastTx(0, submitProposal)
+	return c.BroadcastTxWithRetry(0, submitProposal)
 }
 
 // GovVoteAllYes creates transactions (one for each account in the keyring) to approve a given proposal.
@@ -89,7 +89,7 @@ func (c *Client) GovVoteAllYes(proposalID uint64) error {
 		)
 		for retry := 0; retry < 3; retry++ {
 			// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-			if _, err = c.BroadcastTx(index, msg); err == nil {
+			if _, err = c.BroadcastTxWithRetry(index, msg); err == nil {
 				break
 			}
 			c.logger.Println("Tx broadcast failed. RETRYING. Err: ", err)

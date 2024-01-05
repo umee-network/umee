@@ -19,7 +19,7 @@ func (c *Client) WasmDeployContract(contractPath string) (*sdk.TxResponse, error
 		return nil, err
 	}
 
-	return c.BroadcastTx(fromIdx, &msg)
+	return c.BroadcastTxWithRetry(fromIdx, &msg)
 }
 
 func (c *Client) WasmInitContract(storeCode uint64, initMsg []byte) (*sdk.TxResponse, error) {
@@ -34,7 +34,7 @@ func (c *Client) WasmInitContract(storeCode uint64, initMsg []byte) (*sdk.TxResp
 		Admin:  "",
 	}
 
-	return c.BroadcastTx(fromIdx, &msg)
+	return c.BroadcastTxWithRetry(fromIdx, &msg)
 }
 
 func (c *Client) WasmExecContractWithAccSeq(contractAddr string, execMsg []byte, accSeq uint64,
@@ -50,7 +50,7 @@ func (c *Client) WasmExecContractWithAccSeq(contractAddr string, execMsg []byte,
 	if accSeq != 0 {
 		c.SetAccSeq(accSeq)
 	}
-	return c.BroadcastTx(fromIdx, &msg)
+	return c.BroadcastTxWithRetry(fromIdx, &msg)
 }
 
 func (c *Client) WasmExecuteContract(contractAddr string, execMsg []byte) (*sdk.TxResponse, error) {

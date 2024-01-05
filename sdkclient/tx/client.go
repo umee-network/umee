@@ -3,6 +3,10 @@ package tx
 import (
 	"log"
 	"os"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	tmjsonclient "github.com/cometbft/cometbft/rpc/jsonrpc/client"
@@ -138,10 +142,37 @@ func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) 
 	return BroadcastTx(cctx, f, msgs...)
 }
 
+func (c *Client) BroadcastTxWithRetry(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) {
+	var err error
+	// TODO: decrease it when possible
+	for retry := 0; retry < 8; retry++ {
+		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
+		resp, err := c.BroadcastTx(idx, msgs...)
+		if err == nil {
+			return resp, nil
+		}
+
+		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
+			return nil, err
+		}
+
+		// if we were told an expected account sequence, we should use it next time
+		re := regexp.MustCompile(`expected [\d]+`)
+		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(err.Error()), "expected "))
+		if err != nil {
+			return nil, err
+		}
+		c.logger.Println("expected sequence numbern", n)
+		c.SetAccSeq(uint64(n))
+		time.Sleep(time.Millisecond * 300)
+	}
+
+	return nil, err
+}
+
 func (c *Client) SetAccSeq(seq uint64) {
-	*c.txFactory = c.txFactory.WithSequence(seq)
-	// TODO: remove
-	// c.txFactory.WithSequence(seq)
+	f := c.txFactory.WithSequence(seq)
+	c.txFactory = &f
 }
 
 func (c *Client) WithAsyncBlock() *Client {
