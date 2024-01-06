@@ -101,6 +101,9 @@ import (
 	upgradekeeper "github.com/cosmos/cosmos-sdk/x/upgrade/keeper"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
+	packetforward "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward"
+	packetforwardkeeper "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/keeper"
+	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/types"
 	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
 	icahost "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host"
 	icahostkeeper "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/keeper"
@@ -203,6 +206,7 @@ func init() {
 		wasm.AppModuleBasic{},
 		incentivemodule.AppModuleBasic{},
 		metokenmodule.AppModuleBasic{},
+		packetforward.AppModuleBasic{},
 	}
 	// if Experimental {}
 
@@ -269,15 +273,16 @@ type UmeeApp struct {
 	NFTKeeper             nftkeeper.Keeper
 	WasmKeeper            wasmkeeper.Keeper
 
-	IBCTransferKeeper ibctransferkeeper.Keeper
-	IBCKeeper         *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
-	ICAHostKeeper     icahostkeeper.Keeper
-	LeverageKeeper    leveragekeeper.Keeper
-	IncentiveKeeper   incentivekeeper.Keeper
-	OracleKeeper      oraclekeeper.Keeper
-	UIbcQuotaKeeperB  uibcquota.KeeperBuilder
-	UGovKeeperB       ugovkeeper.Builder
-	MetokenKeeperB    metokenkeeper.Builder
+	IBCTransferKeeper   ibctransferkeeper.Keeper
+	IBCKeeper           *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
+	PacketForwardKeeper *packetforwardkeeper.Keeper
+	ICAHostKeeper       icahostkeeper.Keeper
+	LeverageKeeper      leveragekeeper.Keeper
+	IncentiveKeeper     incentivekeeper.Keeper
+	OracleKeeper        oraclekeeper.Keeper
+	UIbcQuotaKeeperB    uibcquota.KeeperBuilder
+	UGovKeeperB         ugovkeeper.Builder
+	MetokenKeeperB      metokenkeeper.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -338,7 +343,7 @@ func New(
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey,
+		leveragetypes.StoreKey, oracletypes.StoreKey, packetforwardtypes.StoreKey,
 		uibc.StoreKey, ugov.StoreKey,
 		wasmtypes.StoreKey,
 		incentive.StoreKey,
@@ -559,11 +564,14 @@ func New(
 	 * SendPacket, originates from the application to an IBC channel:
 	   transferKeeper.SendPacket -> uibcquota.SendPacket -> channel.SendPacket
 	 * RecvPacket, message that originates from an IBC channel and goes down to app, the flow is the other way
-	   channel.RecvPacket -> uibcquota.OnRecvPacket -> transfer.OnRecvPacket
+	   channel.RecvPacket -> uibcquota.OnRecvPacket -> forward.OnRecvPacket -> transfer.OnRecvPacket
+
+	* Note that the forward middleware is only integrated on the "receive" direction. It can be safely skipped when sending.
 
 	* transfer stack contains (from top to bottom):
 	  - Umee IBC Transfer
 	  - IBC Rate Limit Middleware
+	  - Packet Forward Middleware
 	 **********/
 
 	quotaICS4 := uics20.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
@@ -577,10 +585,30 @@ func New(
 		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
 	)
 
+	// Packet Forward Middleware
+	// Initialize packet forward middleware router
+	app.PacketForwardKeeper = packetforwardkeeper.NewKeeper(
+		appCodec,
+		keys[packetforwardtypes.StoreKey],
+		app.IBCTransferKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		app.DistrKeeper,
+		app.BankKeeper,
+		quotaICS4, // ISC4 Wrapper: fee IBC middleware
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
 	// create IBC module from bottom to top of stack
 	var transferStack ibcporttypes.IBCModule
 	transferStack = ibctransfer.NewIBCModule(app.IBCTransferKeeper)
 	// transferStack = ibcfee.NewIBCMiddleware(transferStack, app.IBCFeeKeeper)
+	transferStack = packetforward.NewIBCMiddleware(
+		transferStack,
+		app.PacketForwardKeeper,
+		0, // retries on timeout
+		packetforwardkeeper.DefaultForwardTransferPacketTimeoutTimestamp, // forward timeout
+		packetforwardkeeper.DefaultRefundTransferPacketTimeoutTimestamp,  // refund timeout
+	)
 	transferStack = uics20.NewICS20Module(transferStack, appCodec,
 		app.UIbcQuotaKeeperB,
 		leveragekeeper.NewMsgServerImpl(app.LeverageKeeper))
@@ -712,6 +740,7 @@ func New(
 		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
 		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
+		packetforward.NewAppModule(app.PacketForwardKeeper, app.GetSubspace(packetforwardtypes.ModuleName)),
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)), //nolint: lll
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
@@ -752,6 +781,7 @@ func New(
 		metoken.ModuleName,
 		oracletypes.ModuleName,
 		uibc.ModuleName,
+		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
@@ -770,6 +800,7 @@ func New(
 		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
 		leveragetypes.ModuleName,
 		uibc.ModuleName,
+		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
@@ -793,6 +824,7 @@ func New(
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
 		uibc.ModuleName,
+		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
@@ -1138,6 +1170,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
+	paramsKeeper.Subspace(packetforwardtypes.ModuleName).WithKeyTable(packetforwardtypes.ParamKeyTable())
 	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
