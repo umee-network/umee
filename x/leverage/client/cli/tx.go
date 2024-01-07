@@ -142,9 +142,6 @@ func Collateralize() *cobra.Command {
 				return err
 			}
 			msg := types.NewMsgCollateralize(clientCtx.GetFromAddress(), coin)
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -173,9 +170,6 @@ func Decollateralize() *cobra.Command {
 				return err
 			}
 			msg := types.NewMsgDecollateralize(clientCtx.GetFromAddress(), coin)
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -304,9 +298,6 @@ $ umeed tx leverage liquidate %s  50000000uumee u/uumee --from mykey`,
 			rewardDenom := args[2]
 
 			msg := types.NewMsgLiquidate(clientCtx.GetFromAddress(), borrowerAddr, asset, rewardDenom)
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
@@ -364,9 +355,6 @@ $ umeed tx leverage lev-liquidate %s uumee uumee 123.4 --from mykey`,
 			}
 
 			msg := types.NewMsgLeveragedLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom, maxRepay)
-			if err = msg.ValidateBasic(); err != nil {
-				return err
-			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},

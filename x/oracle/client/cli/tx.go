@@ -55,10 +55,6 @@ func DelegateFeedConsent() *cobra.Command {
 
 			msg := types.NewMsgDelegateFeedConsent(sdk.ValAddress(clientCtx.GetFromAddress()), feederAddr)
 
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
@@ -104,10 +100,6 @@ func AggregateExchangeRatePrevote() *cobra.Command {
 				valAddress,
 			)
 
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
-
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
@@ -150,10 +142,6 @@ func AggregateExchangeRateVote() *cobra.Command {
 				clientCtx.GetFromAddress(),
 				valAddress,
 			)
-
-			if err := msg.ValidateBasic(); err != nil {
-				return err
-			}
 
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
