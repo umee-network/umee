@@ -311,7 +311,7 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 		if err != nil {
 			return err
 		}
-		s.T().Log("expected sequence numbern", n)
+		s.T().Log("expected sequence number", n)
 		cli.SetAccSeq(uint64(n))
 
 		time.Sleep(time.Millisecond * 300)

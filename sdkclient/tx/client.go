@@ -125,6 +125,7 @@ func (c *Client) initTxFactory() {
 	c.txFactory = &f
 }
 
+// Broadcasts transaction. On success, increments the client sequence number.
 func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 	var err error
 	r := c.keyringRecord[idx]
@@ -135,13 +136,20 @@ func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) 
 		c.logger.Fatalln("can't get keyring record, idx=", idx, err)
 	}
 	f := c.txFactory.WithFromName(r.Name)
-	return BroadcastTx(cctx, f, msgs...)
+	resp, err := BroadcastTx(cctx, f, msgs...)
+	if err == nil {
+		c.SetAccSeq(0)
+		// c.IncAccSeq()
+	}
+	return resp, err
+}
+
+func (c *Client) IncAccSeq() {
+	c.SetAccSeq(c.txFactory.Sequence() + 1)
 }
 
 func (c *Client) SetAccSeq(seq uint64) {
 	*c.txFactory = c.txFactory.WithSequence(seq)
-	// TODO: remove
-	// c.txFactory.WithSequence(seq)
 }
 
 func (c *Client) WithAsyncBlock() *Client {
