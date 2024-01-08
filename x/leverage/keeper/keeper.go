@@ -176,8 +176,12 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 		return sdk.Coin{}, isFromCollateral, err
 	}
 
-	// Ensure module account has sufficient unreserved tokens to withdraw
-	availableAmount := k.AvailableLiquidity(ctx, token.Denom)
+	// Ensure module account has sufficient unreserved tokens to withdraw.
+	// MeToken module supply is fully protected in order to guarantee its availability for redemption.
+	availableAmount, err := k.AvailableLiquiditySubMetokenSupply(ctx, token.Denom)
+	if err != nil {
+		return sdk.Coin{}, isFromCollateral, err
+	}
 	if token.Amount.GT(availableAmount) {
 		return sdk.Coin{}, isFromCollateral, types.ErrLendingPoolInsufficient.Wrap(token.String())
 	}
@@ -298,7 +302,11 @@ func (k Keeper) Borrow(ctx sdk.Context, borrowerAddr sdk.AccAddress, borrow sdk.
 	}
 
 	// Ensure module account has sufficient unreserved tokens to loan out
-	availableAmount := k.AvailableLiquidity(ctx, borrow.Denom)
+	// MeToken module supply is fully protected in order to guarantee its availability for redemption.
+	availableAmount, err := k.AvailableLiquiditySubMetokenSupply(ctx, borrow.Denom)
+	if err != nil {
+		return err
+	}
 	if borrow.Amount.GT(availableAmount) {
 		return types.ErrLendingPoolInsufficient.Wrap(borrow.String())
 	}

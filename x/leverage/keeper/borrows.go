@@ -89,6 +89,16 @@ func (k Keeper) AvailableLiquidity(ctx sdk.Context, denom string) sdkmath.Int {
 	return sdk.MaxInt(moduleBalance.Sub(reserveAmount), sdk.ZeroInt())
 }
 
+// AvailableLiquiditySubMetokenSupply gets the unreserved module balance of a given token, considering meToken supply.
+func (k Keeper) AvailableLiquiditySubMetokenSupply(ctx sdk.Context, denom string) (sdkmath.Int, error) {
+	meTokenSupply, err := k.GetSupplied(ctx, k.meTokenAddr, denom)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+
+	return sdk.MaxInt(k.AvailableLiquidity(ctx, denom).Sub(meTokenSupply.Amount), sdk.ZeroInt()), nil
+}
+
 // SupplyUtilization calculates the current supply utilization of a token denom.
 func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 	// Supply utilization is equal to total borrows divided by the token supply
