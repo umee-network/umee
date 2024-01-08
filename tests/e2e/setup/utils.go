@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
@@ -292,30 +290,7 @@ func (s *E2ETestSuite) QueryIBCChannels(endpoint string) (bool, error) {
 }
 
 func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) error {
-	var err error
-	// TODO: decrease it when possible
-	for retry := 0; retry < 8; retry++ {
-		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-		_, err = cli.Tx.BroadcastTx(0, msg)
-		if err == nil {
-			return nil
-		}
-
-		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
-			return err
-		}
-
-		// if we were told an expected account sequence, we should use it next time
-		re := regexp.MustCompile(`expected [\d]+`)
-		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(err.Error()), "expected "))
-		if err != nil {
-			return err
-		}
-		s.T().Log("expected sequence numbern", n)
-		cli.Tx.SetAccSeq(uint64(n))
-		time.Sleep(time.Millisecond * 300)
-	}
-
+	_, err := cli.Tx.BroadcastTxWithRetry(0, msg)
 	return err
 }
 

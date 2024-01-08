@@ -13,5 +13,5 @@ func (c *Client) BankSend(fromIdx int, toAddress string, amount sdk.Coins) (*sdk
 		ToAddress:   toAddress,
 		Amount:      amount,
 	}
-	return c.BroadcastTx(fromIdx, msg)
+	return c.BroadcastTxWithRetry(fromIdx, msg)
 }
