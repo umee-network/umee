@@ -35,9 +35,9 @@ func TestInterestClaiming(t *testing.T) {
 	// create and fund a user with 1000 USDT, 1000 USDC and 1000 IST
 	user := s.newAccount(
 		t,
-		coin.New(mocks.USDTBaseDenom, 1000_000000),
-		coin.New(mocks.USDCBaseDenom, 1000_000000),
-		coin.New(mocks.ISTBaseDenom, 1000_000000),
+		coin.New(mocks.USDTBaseDenom, 2000_000000),
+		coin.New(mocks.USDCBaseDenom, 2000_000000),
+		coin.New(mocks.ISTBaseDenom, 2000_000000),
 	)
 
 	// create a borrower with 10000 USDT
@@ -66,6 +66,13 @@ func TestInterestClaiming(t *testing.T) {
 		_, err := msgServer.Swap(ctx, swap)
 		require.NoError(t, err)
 	}
+
+	_, err = app.LeverageKeeper.Supply(ctx, user, sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(1000_000000)))
+	require.NoError(t, err)
+	_, err = app.LeverageKeeper.Supply(ctx, user, sdk.NewCoin(mocks.USDCBaseDenom, sdkmath.NewInt(1000_000000)))
+	require.NoError(t, err)
+	_, err = app.LeverageKeeper.Supply(ctx, user, sdk.NewCoin(mocks.ISTBaseDenom, sdkmath.NewInt(1000_000000)))
+	require.NoError(t, err)
 
 	// supply liquidity from borrower and collateralize
 	borrowerSupply := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(10000_000000))

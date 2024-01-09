@@ -3,8 +3,6 @@ package keeper_test
 import (
 	"fmt"
 
-	"github.com/umee-network/umee/v6/x/metoken"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -12,6 +10,7 @@ import (
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	"github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
 	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
@@ -511,7 +510,7 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 	s.forceBorrow(outageBorrower, coin.New(outageDenom, 20_000000))
 
 	// meToken supply limiting leverage user withdraw scenario:
-	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.fundModuleAccount(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	stableSupplier := s.newAccount(coin.New(newStableDenom, 100_000000))
 	s.supply(stableSupplier, coin.New(newStableDenom, 100_000000))
@@ -795,7 +794,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	s.forceBorrow(outageBorrower, coin.New(outageDenom, 10_000000))
 
 	// meToken supply limiting leverage user withdraw scenario:
-	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.fundModuleAccount(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	stableSupplier := s.newAccount(coin.New(newStableDenom, 100_000000))
 	s.supply(stableSupplier, coin.New(newStableDenom, 100_000000))
@@ -1602,7 +1601,7 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 	s.collateralize(atomOutageSupplier, coin.New("u/"+outageDenom, 50_000000), coin.New("u/"+atomDenom, 50_000000))
 
 	// meToken supply limiting leverage user borrow scenario:
-	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.fundModuleAccount(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	stableSupplier := s.newAccount(coin.New(newStableDenom, 10_000000))
 	s.supply(stableSupplier, coin.New(newStableDenom, 10_000000))
@@ -1821,7 +1820,7 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 	s.forceBorrow(outageBorrower, coin.New(outageDenom, 1_000000))
 
 	// meToken supply limiting leverage user borrow scenario:
-	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.fundModuleAccount(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
 	stableSupplier := s.newAccount(coin.New(newStableDenom, 300_000000))
 	s.supply(stableSupplier, coin.New(newStableDenom, 300_000000))

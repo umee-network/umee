@@ -6,9 +6,9 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/umee-network/umee/v6/x/ugov"
 
 	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/ugov"
 )
 
 // Builder constructs Keeper by preparing all related dependencies (notably the store).

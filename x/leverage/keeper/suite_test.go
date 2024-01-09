@@ -5,9 +5,6 @@ import (
 	"testing"
 	"time"
 
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/umee-network/umee/v6/x/metoken"
-
 	sdkmath "cosmossdk.io/math"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -168,17 +165,12 @@ func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 	return addr
 }
 
-// setupMeTokenAccount creates new meToken account for testing, and funds it with any input tokens.
-func (s *IntegrationTestSuite) setupMeTokenAccount(funds ...sdk.Coin) sdk.AccAddress {
+// fundModuleAccount mints and sends tokens to a module account for testing.
+func (s *IntegrationTestSuite) fundModuleAccount(moduleName string, funds ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
 
-	s.setupAccountCounter = s.setupAccountCounter.Add(sdk.OneInt())
-	meTokenAddr := authtypes.NewModuleAddress(metoken.ModuleName)
-
 	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, funds))
-	require.NoError(app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, metoken.ModuleName, funds))
-
-	return meTokenAddr
+	require.NoError(app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, moduleName, funds))
 }
 
 // fundAccount mints and sends tokens to an account for testing.
