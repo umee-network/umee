@@ -144,6 +144,10 @@ func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) 
 	return resp, err
 }
 
+func (c *Client) GetAccSeq() int64 {
+	c.txFactory.Sequence()
+}
+
 func (c *Client) IncAccSeq() {
 	c.SetAccSeq(c.txFactory.Sequence() + 1)
 }
