@@ -53,7 +53,7 @@ func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, coin sdk.Coin) (sdk.
 	return coin, true, nil
 }
 
-func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, coin sdk.Coin) (sdkmath.Int, error) {
+func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, coin sdk.Coin, _ sdk.AccAddress) (sdkmath.Int, error) {
 	if coin.Denom == mocks.ISTBaseDenom {
 		return sdk.MustNewDecFromStr("0.5").MulInt(coin.Amount).TruncateInt(), nil
 	}
