@@ -175,7 +175,10 @@ func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 // user's spendable tokens. The calculation first finds the maximum amount of non-collateral uTokens the user can
 // withdraw up to the amount in their wallet, then determines how much collateral can be withdrawn in addition to that.
 // The returned value is the sum of the two values.
-func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (sdkmath.Int, error) {
+func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin, withdrawalAddr sdk.AccAddress) (
+	sdkmath.Int,
+	error,
+) {
 	denom := coin.StripUTokenDenom(spendableUTokens.Denom)
 
 	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
@@ -201,7 +204,17 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 		return spendableUTokens.Amount.Add(totalTokenCollateral.AmountOf(denom)), nil
 	}
 
-	liquidity := k.AvailableLiquidity(ctx, denom)
+	// MeToken module supply is fully protected in order to guarantee its availability for redemption.
+	var liquidity sdkmath.Int
+	if withdrawalAddr.Equals(k.meTokenAddr) {
+		liquidity = k.AvailableLiquidity(ctx, denom)
+	} else {
+		liquidity, err = k.AvailableLiquiditySubMetokenSupply(ctx, denom)
+		if err != nil {
+			return sdk.ZeroInt(), err
+		}
+	}
+
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err

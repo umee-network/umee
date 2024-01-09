@@ -126,7 +126,7 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	// Get the total available for uToken to prevent withdraws above this limit.
-	uTokenTotalAvailable, err := s.keeper.ModuleMaxWithdraw(ctx, userSpendableUtokens)
+	uTokenTotalAvailable, err := s.keeper.ModuleMaxWithdraw(ctx, userSpendableUtokens, supplierAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -376,6 +376,14 @@ func (s msgServer) MaxBorrow(
 	if err != nil {
 		return nil, err
 	}
+
+	// MeToken module supply is fully protected in order to guarantee its availability for redemption.
+	meTokenSupply, err := s.keeper.GetSupplied(ctx, s.keeper.meTokenAddr, msg.Denom)
+	if err != nil {
+		return nil, err
+	}
+	moduleMaxBorrow = sdk.MaxInt(moduleMaxBorrow.Sub(meTokenSupply.Amount), sdk.ZeroInt())
+
 	if moduleMaxBorrow.IsZero() {
 		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
 	}

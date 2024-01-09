@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+
 	sdkmath "cosmossdk.io/math"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -22,14 +25,15 @@ import (
 )
 
 const (
-	umeeDenom   = appparams.BondDenom
-	atomDenom   = fixtures.AtomDenom
-	daiDenom    = fixtures.DaiDenom
-	pumpDenom   = "upump"
-	dumpDenom   = "udump"
-	stableDenom = "stable"
-	pairedDenom = "upaired"
-	outageDenom = "uoutage"
+	umeeDenom      = appparams.BondDenom
+	atomDenom      = fixtures.AtomDenom
+	daiDenom       = fixtures.DaiDenom
+	pumpDenom      = "upump"
+	dumpDenom      = "udump"
+	stableDenom    = "stable"
+	pairedDenom    = "upaired"
+	outageDenom    = "uoutage"
+	newStableDenom = "unewStableDenom"
 )
 
 var leverage_initial_registry_length = 0
@@ -96,12 +100,15 @@ func (s *IntegrationTestSuite) SetupTest() {
 	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
 	stable.LiquidationThreshold = sdk.MustNewDecFromStr("0.9")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, stable))
+	// additional token for withdraw and borrow limited by meToken testing
+	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(newStableDenom, "NEWSTABLE", 6)))
 
 	// set the initial token registry length used in update registry tests
 	leverage_initial_registry_length = len(app.LeverageKeeper.GetAllRegisteredTokens(ctx))
 
 	// override DefaultGenesis params with some special asset pairs
-	app.LeverageKeeper.SetSpecialAssetPair(ctx,
+	app.LeverageKeeper.SetSpecialAssetPair(
+		ctx,
 		types.SpecialAssetPair{
 			Collateral:           pairedDenom,
 			Borrow:               daiDenom,
@@ -161,6 +168,19 @@ func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 	return addr
 }
 
+// setupMeTokenAccount creates new meToken account for testing, and funds it with any input tokens.
+func (s *IntegrationTestSuite) setupMeTokenAccount(funds ...sdk.Coin) sdk.AccAddress {
+	app, ctx, require := s.app, s.ctx, s.Require()
+
+	s.setupAccountCounter = s.setupAccountCounter.Add(sdk.OneInt())
+	meTokenAddr := authtypes.NewModuleAddress(metoken.ModuleName)
+
+	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, funds))
+	require.NoError(app.BankKeeper.SendCoinsFromModuleToModule(ctx, minttypes.ModuleName, metoken.ModuleName, funds))
+
+	return meTokenAddr
+}
+
 // fundAccount mints and sends tokens to an account for testing.
 func (s *IntegrationTestSuite) fundAccount(addr sdk.AccAddress, funds ...sdk.Coin) {
 	app, ctx, require := s.app, s.ctx, s.Require()
@@ -184,6 +204,17 @@ func (s *IntegrationTestSuite) supply(addr sdk.AccAddress, coins ...sdk.Coin) {
 		}
 		_, err := srv.Supply(ctx, msg)
 		require.NoError(err, "supply")
+	}
+}
+
+// supplyFromModule tokens from a module account and require no errors.
+// Use when setting up leverage scenarios for meToken.
+func (s *IntegrationTestSuite) supplyFromModule(moduleName string, coins ...sdk.Coin) {
+	l, ctx, require := s.app.LeverageKeeper, s.ctx, s.Require()
+
+	for _, coin := range coins {
+		_, _, err := l.SupplyFromModule(ctx, moduleName, coin)
+		require.NoError(err, "supplyFromModule")
 	}
 }
 

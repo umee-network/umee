@@ -3,6 +3,8 @@ package keeper_test
 import (
 	"fmt"
 
+	"github.com/umee-network/umee/v6/x/metoken"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -508,6 +510,16 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 	s.collateralize(outageBorrower, coin.New("u/"+outageDenom, 50_000000))
 	s.forceBorrow(outageBorrower, coin.New(outageDenom, 20_000000))
 
+	// meToken supply limiting leverage user withdraw scenario:
+	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
+	stableSupplier := s.newAccount(coin.New(newStableDenom, 100_000000))
+	s.supply(stableSupplier, coin.New(newStableDenom, 100_000000))
+	umeeStableBorrower := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(umeeStableBorrower, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(umeeStableBorrower, coin.New("u/"+umeeDenom, 1000_000000))
+	s.borrow(umeeStableBorrower, coin.New(newStableDenom, 100_000000))
+
 	tcs := []struct {
 		msg                  string
 		addr                 sdk.AccAddress
@@ -541,6 +553,14 @@ func (s *IntegrationTestSuite) TestMsgWithdraw() {
 			nil,
 			sdk.Coin{},
 			types.ErrInsufficientBalance,
+		}, {
+			"withdraw limited by meToken supply",
+			stableSupplier,
+			coin.New("u/"+newStableDenom, 100_000000),
+			nil,
+			nil,
+			sdk.Coin{},
+			types.ErrLendingPoolInsufficient,
 		}, {
 			"withdraw from balance",
 			supplier,
@@ -774,6 +794,16 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 	s.collateralize(outageBorrower, coin.New("u/"+outageDenom, 50_000000))
 	s.forceBorrow(outageBorrower, coin.New(outageDenom, 10_000000))
 
+	// meToken supply limiting leverage user withdraw scenario:
+	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
+	stableSupplier := s.newAccount(coin.New(newStableDenom, 100_000000))
+	s.supply(stableSupplier, coin.New(newStableDenom, 100_000000))
+	umeeStableBorrower := s.newAccount(coin.New(umeeDenom, 1000_000000))
+	s.supply(umeeStableBorrower, coin.New(umeeDenom, 1000_000000))
+	s.collateralize(umeeStableBorrower, coin.New("u/"+umeeDenom, 1000_000000))
+	s.borrow(umeeStableBorrower, coin.New(newStableDenom, 100_000000))
+
 	zeroUmee := coin.Zero(umeeDenom)
 	zeroUUmee := coin.New("u/"+umeeDenom, 0)
 	tcs := []struct {
@@ -882,6 +912,15 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw() {
 			coin.New("u/"+outageDenom, 50_000000),
 			coin.Zero("u/" + outageDenom),
 			coin.New(outageDenom, 50_000000),
+			nil,
+		},
+		{
+			"max withdraw limited by meToken supply",
+			umeeStableBorrower,
+			newStableDenom,
+			coin.Zero("u/" + newStableDenom),
+			coin.Zero("u/" + newStableDenom),
+			coin.Zero(newStableDenom),
 			nil,
 		},
 	}
@@ -1562,6 +1601,15 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 	s.supply(atomOutageSupplier, coin.New(outageDenom, 100_000000), coin.New(atomDenom, 100_000000))
 	s.collateralize(atomOutageSupplier, coin.New("u/"+outageDenom, 50_000000), coin.New("u/"+atomDenom, 50_000000))
 
+	// meToken supply limiting leverage user borrow scenario:
+	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
+	stableSupplier := s.newAccount(coin.New(newStableDenom, 10_000000))
+	s.supply(stableSupplier, coin.New(newStableDenom, 10_000000))
+	umeeStableBorrower := s.newAccount(coin.New(umeeDenom, 10_000000))
+	s.supply(umeeStableBorrower, coin.New(umeeDenom, 10_000000))
+	s.collateralize(umeeStableBorrower, coin.New("u/"+umeeDenom, 10_000000))
+
 	tcs := []testCase{
 		{
 			"uToken",
@@ -1577,6 +1625,11 @@ func (s *IntegrationTestSuite) TestMsgBorrow() {
 			"lending pool insufficient",
 			borrower,
 			coin.New(umeeDenom, 200_000000),
+			types.ErrLendingPoolInsufficient,
+		}, {
+			"lending pool insufficient, limited by meToken supply",
+			umeeStableBorrower,
+			coin.New(newStableDenom, 20_000000),
 			types.ErrLendingPoolInsufficient,
 		}, {
 			"valid borrow",
@@ -1767,6 +1820,15 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 	s.collateralize(outageBorrower, coin.New("u/"+umeeDenom, 50_000000))
 	s.forceBorrow(outageBorrower, coin.New(outageDenom, 1_000000))
 
+	// meToken supply limiting leverage user borrow scenario:
+	_ = s.setupMeTokenAccount(coin.New(newStableDenom, 1000_000000))
+	s.supplyFromModule(metoken.ModuleName, coin.New(newStableDenom, 1000_000000))
+	stableSupplier := s.newAccount(coin.New(newStableDenom, 300_000000))
+	s.supply(stableSupplier, coin.New(newStableDenom, 300_000000))
+	umeeStableBorrower := s.newAccount(coin.New(umeeDenom, 200_000000))
+	s.supply(umeeStableBorrower, coin.New(umeeDenom, 200_000000))
+	s.collateralize(umeeStableBorrower, coin.New("u/"+umeeDenom, 200_000000))
+
 	tcs := []struct {
 		msg  string
 		addr sdk.AccAddress
@@ -1842,6 +1904,11 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow() {
 			"outage borrower tries to borrow outage asset",
 			outageBorrower,
 			coin.Zero(outageDenom),
+			nil,
+		}, {
+			"umeeStableBorrower tries to borrow newStableDenom",
+			umeeStableBorrower,
+			coin.New(newStableDenom, 170_000000),
 			nil,
 		},
 	}

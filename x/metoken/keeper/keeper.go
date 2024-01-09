@@ -5,6 +5,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -46,6 +47,7 @@ type Keeper struct {
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
 	ugov           ugov.EmergencyGroupBuilder
+	meTokenAddr    sdk.AccAddress
 
 	// TODO: ctx should be removed when we migrate leverageKeeper and oracleKeeper
 	ctx *sdk.Context
@@ -60,6 +62,7 @@ func (b Builder) Keeper(ctx *sdk.Context) Keeper {
 		leverageKeeper: b.leverageKeeper,
 		oracleKeeper:   b.oracleKeeper,
 		ugov:           b.ugov,
+		meTokenAddr:    authtypes.NewModuleAddress(metoken.ModuleName),
 		ctx:            ctx,
 	}
 }

@@ -158,7 +158,7 @@ func (k Keeper) withdrawFromLeverage(tokensToWithdraw sdk.Coin) (sdk.Coin, error
 		return sdk.Coin{}, errors.Wrap(err, true)
 	}
 
-	availableUTokensFromLeverage, err := k.leverageKeeper.ModuleMaxWithdraw(*k.ctx, uTokensFromLeverage)
+	availableUTokensFromLeverage, err := k.leverageKeeper.ModuleMaxWithdraw(*k.ctx, uTokensFromLeverage, k.meTokenAddr)
 	if err != nil {
 		return sdk.Coin{}, errors.Wrap(err, true)
 	}
