@@ -26,7 +26,7 @@ type LeverageKeeper interface {
 	ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
 	SupplyFromModule(ctx sdk.Context, fromModule string, coin sdk.Coin) (sdk.Coin, bool, error)
 	WithdrawToModule(ctx sdk.Context, toModule string, uToken sdk.Coin) (sdk.Coin, bool, error)
-	ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin, withdtawalAddr sdk.AccAddress) (sdkmath.Int, error)
+	ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin, withdrawalAddr sdk.AccAddress) (sdkmath.Int, error)
 	GetTotalSupply(ctx sdk.Context, denom string) (sdk.Coin, error)
 	GetAllSupplied(ctx sdk.Context, supplierAddr sdk.AccAddress) (sdk.Coins, error)
 }
