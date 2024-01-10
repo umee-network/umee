@@ -167,7 +167,8 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, err
 	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed
 	//						- total_borrowed
 	moduleMaxBorrow := sdk.MaxInt(
-		maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(sdk.NewDecFromInt(totalBorrowed)).TruncateInt(),
+		maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).
+			Sub(sdk.NewDecFromInt(totalBorrowed)).TruncateInt(),
 		sdk.ZeroInt(),
 	)
 
