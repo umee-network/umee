@@ -130,44 +130,60 @@ func (k Keeper) checkSupplyUtilization(ctx sdk.Context, denom string) error {
 	return nil
 }
 
-// moduleMaxBorrow calculates maximum amount of additional tokens which can be borrowed from the module.
-// The calculation first finds the maximum according to the min_collateral_liquidity parameter
-// and the required backing for the meToken module,
-// then determines the maximum according to the max_supply_utilization parameter.
-// The minimum between these two values is selected.
+// moduleMaxBorrow calculates maximum amount of Token to borrow from the module.
+// The calculation first finds the maximum amount of Token that can be borrowed from the module,
+// respecting the min_collateral_liquidity parameter, then determines the maximum amount of Token that can be borrowed
+// from the module, respecting the max_supply_utilization parameter. The minimum between these two values is
+// selected, given that the min_collateral_liquidity and max_supply_utilization are both limiting factors.
+// In order to fully protect meToken supply, it's subtracted from the obtained amount.
 func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, error) {
-	// moduleAvailableLiquidity is limited by token.MinCollateralLiquidity and by meToken supply.
+	// Get the module_available_liquidity
 	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
+
+	// If module_available_liquidity is zero, we cannot borrow anything
 	if !moduleAvailableLiquidity.IsPositive() {
 		return sdk.ZeroInt(), nil
 	}
 
-	// read required information
+	// Get max_supply_utilization for the denom
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
-	totalSupply, err := k.GetTotalSupply(ctx, denom)
+	maxSupplyUtilization := token.MaxSupplyUtilization
+
+	// Get total_borrowed from module for the denom
+	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount
+
+	// Get module liquidity for the denom
+	liquidity := k.AvailableLiquidity(ctx, denom)
+
+	// The formula to calculate max_borrow respecting the max_supply_utilization is as follows:
+	//
+	// max_supply_utilization = (total_borrowed +  module_max_borrow) / (module_liquidity + total_borrowed)
+	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed
+	//						- total_borrowed
+	moduleMaxBorrow := sdk.MaxInt(
+		maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).
+			Sub(sdk.NewDecFromInt(totalBorrowed)).TruncateInt(),
+		sdk.ZeroInt(),
+	)
+
+	// MeToken module supply is fully protected in order to guarantee its availability for redemption.
+	meTokenSupply, err := k.GetSupplied(ctx, k.meTokenAddr, denom)
 	if err != nil {
 		return sdk.ZeroInt(), err
 	}
-	maxSupplyUtilization := token.MaxSupplyUtilization
-	totalBorrowed := k.GetTotalBorrowed(ctx, denom).Amount // total tokens currently borrowed
 
-	// The formula to calculate max_borrow respecting the max_supply_utilization is as follows:
-	// 		where supply utilization === borrowed / supplied
-	// 		max_supply_utilization = (total_borrowed + max_additional_borrow) / total_supplied
-	// so
-	//		max_additional_borrow = (max_supply_utilization * total_supplied) - total_borrowed
-	maxAdditionalBorrow := maxSupplyUtilization.MulInt(totalSupply.Amount).TruncateInt().Sub(totalBorrowed)
-	maxAdditionalBorrow = sdk.MaxInt(maxAdditionalBorrow, sdk.ZeroInt())
-
-	// Use the minimum between max_additional_borrow and module_available_liquidity
-	return sdk.MinInt(
-		moduleAvailableLiquidity,
-		maxAdditionalBorrow,
+	// Use the minimum between module_max_borrow and module_available_liquidity
+	return sdk.MaxInt(
+		sdk.MinInt(
+			moduleAvailableLiquidity,
+			moduleMaxBorrow,
+		).Sub(meTokenSupply.Amount),
+		sdk.ZeroInt(),
 	), nil
 }
