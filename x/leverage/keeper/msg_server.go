@@ -377,13 +377,6 @@ func (s msgServer) MaxBorrow(
 		return nil, err
 	}
 
-	// MeToken module supply is fully protected in order to guarantee its availability for redemption.
-	meTokenSupply, err := s.keeper.GetSupplied(ctx, s.keeper.meTokenAddr, msg.Denom)
-	if err != nil {
-		return nil, err
-	}
-	moduleMaxBorrow = sdk.MaxInt(moduleMaxBorrow.Sub(meTokenSupply.Amount), sdk.ZeroInt())
-
 	if moduleMaxBorrow.IsZero() {
 		return &types.MsgMaxBorrowResponse{Borrowed: coin.Zero(msg.Denom)}, nil
 	}

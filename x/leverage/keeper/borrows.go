@@ -135,6 +135,7 @@ func (k Keeper) checkSupplyUtilization(ctx sdk.Context, denom string) error {
 // respecting the min_collateral_liquidity parameter, then determines the maximum amount of Token that can be borrowed
 // from the module, respecting the max_supply_utilization parameter. The minimum between these two values is
 // selected, given that the min_collateral_liquidity and max_supply_utilization are both limiting factors.
+// In order to fully protect meToken supply, it's subtracted from the obtained amount.
 func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	// Get the module_available_liquidity
 	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
@@ -165,15 +166,23 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, err
 	// max_supply_utilization = (total_borrowed +  module_max_borrow) / (module_liquidity + total_borrowed)
 	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed
 	//						- total_borrowed
-	moduleMaxBorrow := maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(
-		sdk.NewDecFromInt(totalBorrowed),
+	moduleMaxBorrow := sdk.MaxInt(
+		maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(sdk.NewDecFromInt(totalBorrowed)).TruncateInt(),
+		sdk.ZeroInt(),
 	)
 
-	// If module_max_borrow is zero, we cannot borrow anything
-	if !moduleMaxBorrow.IsPositive() {
-		return sdk.ZeroInt(), nil
+	// MeToken module supply is fully protected in order to guarantee its availability for redemption.
+	meTokenSupply, err := k.GetSupplied(ctx, k.meTokenAddr, denom)
+	if err != nil {
+		return sdk.ZeroInt(), err
 	}
 
 	// Use the minimum between module_max_borrow and module_available_liquidity
-	return sdk.MinInt(moduleAvailableLiquidity, moduleMaxBorrow.TruncateInt()), nil
+	return sdk.MaxInt(
+		sdk.MinInt(
+			moduleAvailableLiquidity,
+			moduleMaxBorrow,
+		).Sub(meTokenSupply.Amount),
+		sdk.ZeroInt(),
+	), nil
 }
