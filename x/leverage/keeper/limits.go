@@ -141,34 +141,35 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 }
 
 // ModuleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
-// respecting the MinCollateralLiquidity set for given Token.
+// respecting the Token's MinCollateralLiquidity as well as the tokens supplied from the meToken module.
 func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath.Int, error) {
-	// Get module liquidity for the Token
+	// Get unreserved module balance for the Token
 	liquidity := k.AvailableLiquidity(ctx, denom)
 
-	// Get module collateral for the associated uToken
-	totalCollateral := k.GetTotalCollateral(ctx, coin.ToUTokenDenom(denom))
-	totalTokenCollateral, err := k.ToTokens(ctx, sdk.NewCoins(totalCollateral))
-	if err != nil {
-		return sdkmath.Int{}, err
-	}
-
-	// Get min_collateral_liquidity for the denom
+	// Determine how much liquidity must be kept due to min_collateral_liquidity
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
-		return sdkmath.Int{}, err
+		return sdk.ZeroInt(), err
 	}
-	minCollateralLiquidity := token.MinCollateralLiquidity
+	totalCollateral, err := k.ToToken(ctx, k.GetTotalCollateral(ctx, coin.ToUTokenDenom(denom)))
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+	requiredLiquidityFromCollateral := token.MinCollateralLiquidity.MulInt(totalCollateral.Amount).TruncateInt()
 
-	// The formula to calculate the module_available_liquidity is as follows:
-	//
-	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
-	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	moduleAvailableLiquidity := sdk.NewDecFromInt(liquidity).Sub(
-		minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)),
-	)
+	// Determine how much liquidity must be kept for potential withdrawals by the meToken module
+	meTokenBacking, err := k.GetSupplied(ctx, k.meTokenAddr, denom)
+	if err != nil {
+		return sdk.ZeroInt(), err
+	}
+	requiredLiquidityFromMeTokens := meTokenBacking.Amount
 
-	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
+	// ModuleAvailableLiquidity is the unreserved module balance,
+	// minus additional tokens kept for collateral liquidity and metoken liquidity
+	return sdk.MaxInt(
+		sdk.ZeroInt(),
+		liquidity.Sub(requiredLiquidityFromCollateral).Sub(requiredLiquidityFromMeTokens),
+	), nil
 }
 
 // ModuleMaxWithdraw calculates the maximum available amount of uToken to withdraw from the module given the amount of
