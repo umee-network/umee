@@ -50,7 +50,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_4(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
 	planName := "v6.4"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
