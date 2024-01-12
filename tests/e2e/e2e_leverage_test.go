@@ -1,6 +1,8 @@
 package e2e
 
 import (
+	"time"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -110,16 +112,21 @@ func (s *E2ETest) TestLeverageBasics() {
 			s.leverageSupply(0, appparams.BondDenom, 100_000_000)
 		},
 	)
+	// TODO: check the blocks, rather than waiting arbitrary number of seconds
+	// next tests depnds on the previous one, and we need to wait for the block.
+	time.Sleep(time.Second * 2)
 	s.Run(
 		"initial leverage withdraw", func() {
 			s.leverageWithdraw(0, "u/"+appparams.BondDenom, 10_000_000)
 		},
 	)
+	time.Sleep(time.Second * 2)
 	s.Run(
 		"initial leverage collateralize", func() {
 			s.leverageCollateralize(0, "u/"+appparams.BondDenom, 80_000_000)
 		},
 	)
+	time.Sleep(time.Second * 2)
 	s.Run(
 		"initial leverage borrow", func() {
 			s.leverageBorrow(0, appparams.BondDenom, 12_000_000)
