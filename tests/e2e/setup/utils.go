@@ -56,8 +56,10 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error 
 }
 
 func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool, desc string) {
-	s.T().Logf("sending %s from %s to %s (exceed quota: %t) %s", token, srcChainID, dstChainID, failDueToQuota, desc)
-	// ibctransfertypes.NewMsgTransfer()
+	if failDueToQuota {
+		s.T().Logf("sending %s from %s to %s (exceed quota: %v) %s",
+			token, srcChainID, dstChainID, failDueToQuota, desc)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
@@ -301,15 +303,16 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 			return nil
 		}
 
-		if err != nil && !strings.Contains(err.Error(), "incorrect account sequence") {
+		errStr := err.Error()
+		if err != nil && !strings.Contains(errStr, "incorrect account sequence") {
 			return err
 		}
 
 		// if we were told an expected account sequence, we should use it next time
 		re := regexp.MustCompile(`expected [\d]+`)
-		n, err := strconv.Atoi(strings.TrimPrefix(re.FindString(err.Error()), "expected "))
-		if err != nil {
-			return err
+		n, errParse := strconv.Atoi(strings.TrimPrefix(re.FindString(errStr), "expected "))
+		if errParse != nil {
+			return fmt.Errorf("can't find expected acc number: %s [%w]", errParse, err)
 		}
 		s.T().Log("expected sequence number:", n, ", got:", cli.Tx.GetAccSeq())
 		cli.SetAccSeq(uint64(n))
