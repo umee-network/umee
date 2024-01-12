@@ -107,26 +107,28 @@ func (s *E2ETest) TestLeverageBasics() {
 	// valAddr, err := s.Chain.Validators[0].KeyInfo.GetAddress()
 	// s.Require().NoError(err)
 
+	// TODO: check the blocks, rather than waiting arbitrary number of seconds
+	// next tests depnds on the previous one, and we need to wait for the block.
+	sleepTime := time.Millisecond * 1100 // 1.1s
+	//
 	s.Run(
 		"initial leverage supply", func() {
 			s.leverageSupply(0, appparams.BondDenom, 100_000_000)
 		},
 	)
-	// TODO: check the blocks, rather than waiting arbitrary number of seconds
-	// next tests depnds on the previous one, and we need to wait for the block.
-	time.Sleep(time.Second * 2)
+	time.Sleep(sleepTime)
 	s.Run(
 		"initial leverage withdraw", func() {
 			s.leverageWithdraw(0, "u/"+appparams.BondDenom, 10_000_000)
 		},
 	)
-	time.Sleep(time.Second * 2)
+	time.Sleep(sleepTime)
 	s.Run(
 		"initial leverage collateralize", func() {
 			s.leverageCollateralize(0, "u/"+appparams.BondDenom, 80_000_000)
 		},
 	)
-	time.Sleep(time.Second * 2)
+	time.Sleep(sleepTime)
 	s.Run(
 		"initial leverage borrow", func() {
 			s.leverageBorrow(0, appparams.BondDenom, 12_000_000)
