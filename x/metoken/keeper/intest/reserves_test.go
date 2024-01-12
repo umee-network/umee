@@ -1,17 +1,14 @@
 package intest
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
-	tmrand "github.com/cometbft/cometbft/libs/rand"
+	sdkmath "cosmossdk.io/math"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/stretchr/testify/require"
-
-	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/app"
 	"github.com/umee-network/umee/v6/util/checkers"
@@ -151,8 +148,8 @@ func TestRebalanceReserves(t *testing.T) {
 	// move ctx to match rebalance time
 	futureCtx := app.NewContext(
 		false, tmproto.Header{
-			ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
-			Height:  9,
+			ChainID: ctx.ChainID(),
+			Height:  ctx.BlockHeight(),
 		},
 	).WithBlockTime(time.Now().Add(24 * time.Hour))
 
