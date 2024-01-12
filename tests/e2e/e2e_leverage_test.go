@@ -109,7 +109,7 @@ func (s *E2ETest) TestLeverageBasics() {
 
 	// TODO: check the blocks, rather than waiting arbitrary number of seconds
 	// next tests depnds on the previous one, and we need to wait for the block.
-	sleepTime := time.Millisecond * 1100 // 1.1s
+	sleepTime := time.Millisecond * 1000 // 1.1s
 	//
 	s.Run(
 		"initial leverage supply", func() {
