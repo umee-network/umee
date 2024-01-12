@@ -1130,8 +1130,8 @@ github.com/mbilski/exhaustivestruct v1.2.0 h1:wCBmUnSYufAHO6J4AVWY6ff+oxWxsVFrwg
 github.com/mbilski/exhaustivestruct v1.2.0/go.mod h1:OeTBVxQWoEmB2J2JCHmXWPJ0aksxSUOUy+nvtVEfzXc=
 github.com/mgechev/dots v0.0.0-20210922191527-e955255bf517 h1:zpIH83+oKzcpryru8ceC6BxnoG8TBrhgAvRg8obzup0=
 github.com/mgechev/dots v0.0.0-20210922191527-e955255bf517/go.mod h1:KQ7+USdGKfpPjXk4Ga+5XxQM4Lm4e3gAogrreFAYpOg=
-github.com/mgechev/revive v1.3.5 h1:YKiB7RAIx1/rHgwejgp4peZQTInNm0pxaT5OmDAo7JE=
-github.com/mgechev/revive v1.3.5/go.mod h1:R9M+iSw2EQMpmko54t0jOlS2uXSObNdlLkkUdv1/RCY=
+github.com/mgechev/revive v1.3.6 h1:ZNKZiHb/LciAqzwa/9HnwI8S/OJutYhMvaqgMT1Ylgo=
+github.com/mgechev/revive v1.3.6/go.mod h1:75Je+5jKBgdgADNzGhsq7H5J6CmyXSzEk9eLOU4i8Pg=
 github.com/miekg/dns v1.0.14/go.mod h1:W1PPwlIAgtquWBMBEV9nkV9Cazfe8ScdGz/Lj7v3Nrg=
 github.com/mimoo/StrobeGo v0.0.0-20181016162300-f8f6d4d2b643/go.mod h1:43+3pMjjKimDBf5Kr4ZFNGbLql1zKkbImw+fZbw3geM=
 github.com/mimoo/StrobeGo v0.0.0-20210601165009-122bf33a46e0 h1:QRUSJEgZn2Snx0EmT/QLXibWjSUDjKWvXIT19NBVp94=
