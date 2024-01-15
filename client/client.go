@@ -36,6 +36,10 @@ func NewClient(
 	}, nil
 }
 
+func (c Client) IncAccSeq() {
+	c.Client.Tx.IncAccSeq()
+}
+
 func (c Client) SetAccSeq(seq uint64) {
 	c.Client.Tx.SetAccSeq(seq)
 }

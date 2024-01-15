@@ -199,9 +199,9 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 					return false
 				}
 				if amount.IsZero() {
-					s.T().Logf("quota is reset : %s is 0", appparams.BondDenom)
 					return true
 				}
+				s.T().Logf("quota didn't reset yet, outflows: %s", amount)
 				return false
 			},
 			4*time.Minute,
@@ -219,7 +219,6 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 				s.AccountClient(0),
 				uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED,
 			)
-
 			if err == nil {
 				break
 			}
