@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -68,8 +69,8 @@ func (k Keeper) RepayBadDebt(ctx sdk.Context, borrowerAddr sdk.AccAddress, denom
 	borrower := borrowerAddr.String()
 	reserved := k.GetReserves(ctx, denom).Amount
 
-	amountToRepay := sdk.MinInt(borrowed.Amount, reserved)
-	amountToRepay = sdk.MinInt(amountToRepay, k.ModuleBalance(ctx, denom).Amount)
+	amountToRepay := sdkmath.MinInt(borrowed.Amount, reserved)
+	amountToRepay = sdkmath.MinInt(amountToRepay, k.ModuleBalance(ctx, denom).Amount)
 
 	newBorrowed := borrowed.SubAmount(amountToRepay)
 	newReserved := sdk.NewCoin(denom, reserved.Sub(amountToRepay))

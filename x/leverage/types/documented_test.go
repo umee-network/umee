@@ -3,9 +3,9 @@ package types_test
 import (
 	"testing"
 
-	"gotest.tools/v3/assert"
-
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/leverage/types"
@@ -54,11 +54,11 @@ func TestMaxBorrowScenarioA(t *testing.T) {
 		initialPosition.String(),
 	)
 	borrowLimit := initialPosition.Limit()
-	assert.DeepEqual(t, sdk.MustNewDecFromStr("74.00"), borrowLimit) // 40 + 30 + (20 - 16) borrow limit
+	assert.DeepEqual(t, sdkmath.LegacyMustNewDecFromStr("74.00"), borrowLimit) // 40 + 30 + (20 - 16) borrow limit
 
 	// maxBorrow is more efficient than borrow limit predicts due to special pairs
 	maxBorrow := initialPosition.MaxBorrow("BBBB")
-	assert.DeepEqual(t, sdk.MustNewDecFromStr("15.00"), maxBorrow) // $17.5 (optimal) >= maxB > $14 (no special pairs)
+	assert.DeepEqual(t, sdkmath.LegacyMustNewDecFromStr("15.00"), maxBorrow) // $17.5 (optimal) >= maxB > $14 (no special pairs)
 
 	// This borrow position reproduces the final table of "MaxBorrow Scenario A" from x/leverage/EXAMPLES.md
 	finalPosition, err := types.NewAccountPosition(

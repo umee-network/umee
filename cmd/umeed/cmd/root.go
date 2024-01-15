@@ -3,7 +3,6 @@ package cmd
 import (
 	"os"
 
-	rosettacmd "cosmossdk.io/tools/rosetta/cmd"
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -18,8 +17,10 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
+	"github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	rosettacmd "github.com/cosmos/rosetta/cmd"
 	"github.com/spf13/cobra"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
@@ -146,29 +147,30 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 
 	rootCmd.AddCommand(
 		genutilcli.InitCmd(a.moduleManager, umeeapp.DefaultNodeHome),
-		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome, umeeapp.GenTxValidator),
-		genutilcli.MigrateGenesisCmd(),
+		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome, umeeapp.GenTxValidator,
+			a.encCfg.TxConfig.SigningContext().ValidatorAddressCodec()),
+		genutilcli.MigrateGenesisCmd(cli.MigrationMap),
 		genutilcli.GenTxCmd(
 			a.moduleManager,
 			a.encCfg.TxConfig,
 			banktypes.GenesisBalancesIterator{},
 			umeeapp.DefaultNodeHome,
+			a.encCfg.TxConfig.SigningContext().ValidatorAddressCodec(),
 		),
 		genutilcli.ValidateGenesisCmd(a.moduleManager),
 		addGenesisAccountCmd(umeeapp.DefaultNodeHome),
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debugCmd(),
-		config.Cmd(),
 	)
 
 	server.AddCommands(rootCmd, umeeapp.DefaultNodeHome, a.newApp, a.appExport, addModuleInitFlags)
 
 	// add keybase, auxiliary RPC, query, and tx child commands
 	rootCmd.AddCommand(
-		rpc.StatusCommand(),
-		queryCommand(a),
-		txCommand(a),
-		keys.Commands(umeeapp.DefaultNodeHome),
+		server.StatusCommand(),
+		queryCommand(),
+		txCommand(),
+		keys.Commands(),
 	)
 
 	// add rosetta
@@ -180,7 +182,7 @@ func addModuleInitFlags(startCmd *cobra.Command) {
 	leverage.AddModuleInitFlags(startCmd)
 }
 
-func queryCommand(ac appCreator) *cobra.Command {
+func queryCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "query",
 		Aliases:                    []string{"q"},
@@ -191,20 +193,21 @@ func queryCommand(ac appCreator) *cobra.Command {
 	}
 
 	cmd.AddCommand(
-		authcmd.GetAccountCmd(),
 		rpc.ValidatorCommand(),
-		rpc.BlockCommand(),
+		rpc.QueryEventForTxCmd(),
+		server.QueryBlockCmd(),
 		authcmd.QueryTxsByEventsCmd(),
+		server.QueryBlocksCmd(),
 		authcmd.QueryTxCmd(),
+		server.QueryBlockResultsCmd(),
 	)
 
-	ac.moduleManager.AddQueryCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd
 }
 
-func txCommand(ac appCreator) *cobra.Command {
+func txCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                        "tx",
 		Short:                      "Transactions sub-commands",
@@ -222,10 +225,9 @@ func txCommand(ac appCreator) *cobra.Command {
 		authcmd.GetBroadcastCommand(),
 		authcmd.GetEncodeCommand(),
 		authcmd.GetDecodeCommand(),
-		authcmd.GetAuxToFeeCommand(),
+		authcmd.GetSimulateCmd(),
 	)
 
-	ac.moduleManager.AddTxCommands(cmd)
 	cmd.PersistentFlags().String(flags.FlagChainID, "", "The network chain ID")
 
 	return cmd

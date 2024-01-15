@@ -3,6 +3,7 @@ package simulation
 import (
 	"math/rand"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -50,37 +51,37 @@ func WeightedOperations(
 		weightMsgRepay           int
 		weightMsgLiquidate       int
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgSupply, &weightMsgSupply, nil,
+	appParams.GetOrGenerate(OperationWeightMsgSupply, &weightMsgSupply, nil,
 		func(*rand.Rand) {
 			weightMsgSupply = DefaultWeightMsgSupply
 		},
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgWithdraw, &weightMsgWithdraw, nil,
+	appParams.GetOrGenerate(OperationWeightMsgWithdraw, &weightMsgWithdraw, nil,
 		func(*rand.Rand) {
 			weightMsgWithdraw = DefaultWeightMsgWithdraw
 		},
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgBorrow, &weightMsgBorrow, nil,
+	appParams.GetOrGenerate(OperationWeightMsgBorrow, &weightMsgBorrow, nil,
 		func(*rand.Rand) {
 			weightMsgBorrow = DefaultWeightMsgBorrow
 		},
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgCollateralize, &weightMsgCollateralize, nil,
+	appParams.GetOrGenerate(OperationWeightMsgCollateralize, &weightMsgCollateralize, nil,
 		func(*rand.Rand) {
 			weightMsgCollateralize = DefaultWeightMsgCollateralize
 		},
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgDecollateralize, &weightMsgDecollateralize, nil,
+	appParams.GetOrGenerate(OperationWeightMsgDecollateralize, &weightMsgDecollateralize, nil,
 		func(*rand.Rand) {
 			weightMsgDecollateralize = DefaultWeightMsgDecollateralize
 		},
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgRepay, &weightMsgRepay, nil,
+	appParams.GetOrGenerate(OperationWeightMsgRepay, &weightMsgRepay, nil,
 		func(*rand.Rand) {
 			weightMsgRepay = DefaultWeightMsgRepay
 		},
 	)
-	appParams.GetOrGenerate(cdc, OperationWeightMsgLiquidate, &weightMsgLiquidate, nil,
+	appParams.GetOrGenerate(OperationWeightMsgLiquidate, &weightMsgLiquidate, nil,
 		func(*rand.Rand) {
 			weightMsgLiquidate = DefaultWeightMsgLiquidate
 		},
@@ -359,7 +360,7 @@ func randomBorrowFields(
 	}
 
 	registeredToken := allTokens[r.Int31n(int32(len(allTokens)))]
-	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdk.NewInt(1_000000)))
+	token = sdk.NewCoin(registeredToken.BaseDenom, simtypes.RandomAmount(r, sdkmath.NewInt(1_000000)))
 
 	return acc, token, false
 }
@@ -409,7 +410,6 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 		TxGen:           cfg.TxConfig,
 		Cdc:             cfg.Codec.(*codec.ProtoCodec),
 		Msg:             msg,
-		MsgType:         sdk.MsgTypeURL(msg),
 		Context:         ctx,
 		SimAccount:      from,
 		AccountKeeper:   ak,

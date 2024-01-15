@@ -1,9 +1,10 @@
 package ante
 
 import (
+	sdkmath "cosmossdk.io/math"
+	evidencetypes "cosmossdk.io/x/evidence/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
@@ -57,7 +58,7 @@ func checkFees(minGasPrices sdk.DecCoins, fees sdk.Coins, gasLimit uint64) error
 	// Determine the required fees by multiplying each required minimum gas
 	// price by the gas limit, where fee = ceil(minGasPrice * gasLimit).
 	// Zero fees are removed.
-	glDec := sdk.NewDec(int64(gasLimit))
+	glDec := sdkmath.LegacyNewDec(int64(gasLimit))
 	for _, gp := range minGasPrices {
 		if gasLimit == 0 || gp.IsZero() {
 			continue

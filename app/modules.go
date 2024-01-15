@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -85,7 +86,7 @@ type CrisisModule struct {
 // DefaultGenesis returns custom Umee x/crisis module genesis state.
 func (CrisisModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	return cdc.MustMarshalJSON(&crisistypes.GenesisState{
-		ConstantFee: sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1000)),
+		ConstantFee: sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(1000)),
 	})
 }
 
@@ -135,8 +136,7 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 
 func GenTxValidator(msgs []sdk.Msg) error {
 	if n := len(msgs); n != 1 {
-		return fmt.Errorf(
-			"contains invalid number of messages; expected: 2 or 1; got: %d", n)
+		return fmt.Errorf("messages are empty, expected: minimum 1; got: %d", n)
 	}
 
 	if err := assertMsgType[*stakingtypes.MsgCreateValidator](msgs[0], 0); err != nil {
@@ -144,8 +144,10 @@ func GenTxValidator(msgs []sdk.Msg) error {
 	}
 
 	for i := range msgs {
-		if err := msgs[i].ValidateBasic(); err != nil {
-			return fmt.Errorf("invalid GenTx msg[%d] '%s': %s", i, msgs[i], err)
+		if m, ok := msgs[i].(sdk.HasValidateBasic); ok {
+			if err := m.ValidateBasic(); err != nil {
+				return fmt.Errorf("invalid GenTx msg[%d] '%s': %s", i, msgs[i], err)
+			}
 		}
 	}
 	return nil

@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
@@ -16,10 +18,10 @@ func TestGetAndSetDec(t *testing.T) {
 	t.Parallel()
 	store := tsdk.KVStore(t)
 	key := []byte("decKey")
-	v1 := sdk.MustNewDecFromStr("1234.5679")
+	v1 := sdkmath.LegacyMustNewDecFromStr("1234.5679")
 	v2, ok := GetDec(store, key, "no error")
 	assert.Equal(t, false, ok)
-	assert.DeepEqual(t, sdk.ZeroDec(), v2)
+	assert.DeepEqual(t, sdkmath.LegacyZeroDec(), v2)
 
 	err := SetDec(store, key, v1, "no error")
 	assert.NilError(t, err)
@@ -35,9 +37,9 @@ func TestGetAndSetInt(t *testing.T) {
 	key := []byte("intKey")
 	v2, ok := GetInt(store, key, "no error")
 	assert.Equal(t, false, ok)
-	assert.DeepEqual(t, sdk.ZeroInt(), v2)
+	assert.DeepEqual(t, sdkmath.ZeroInt(), v2)
 
-	v1, ok := sdk.NewIntFromString("1234")
+	v1, ok := sdkmath.NewIntFromString("1234")
 	assert.Equal(t, true, ok)
 	err := SetInt(store, key, v1, "no error")
 	assert.NilError(t, err)
@@ -47,7 +49,7 @@ func TestGetAndSetInt(t *testing.T) {
 	assert.DeepEqual(t, v2, v1)
 }
 
-func checkStoreNumber[T Integer](name string, val T, store sdk.KVStore, key []byte, t *testing.T) {
+func checkStoreNumber[T Integer](name string, val T, store store.KVStore, key []byte, t *testing.T) {
 	SetInteger(store, key, val)
 	vOut, ok := GetInteger[T](store, key)
 	require.True(t, ok)

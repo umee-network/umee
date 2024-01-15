@@ -3,16 +3,18 @@ package keeper
 import (
 	"time"
 
+	sdkmath "cosmossdk.io/math"
+	"cosmossdk.io/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v6/util"
-	"github.com/umee-network/umee/v6/util/store"
+	utilstore "github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 type AvgKeeper struct {
-	store  sdk.KVStore
+	store  store.KVStore
 	period time.Duration
 	shift  time.Duration
 }
@@ -31,7 +33,7 @@ func (k AvgKeeper) newCounters(start time.Time) []types.AvgCounter {
 	acs := make([]types.AvgCounter, num)
 	for i := int64(0); i < num; i++ {
 		acs[i].Start = start
-		acs[i].Sum = sdk.ZeroDec()
+		acs[i].Sum = sdkmath.LegacyZeroDec()
 		start = start.Add(k.shift)
 	}
 	return acs
@@ -41,7 +43,7 @@ func (k AvgKeeper) newCounters(start time.Time) []types.AvgCounter {
 // into the aggregate
 func (k AvgKeeper) updateAvgCounter(
 	denom string,
-	exchangeRate sdk.Dec,
+	exchangeRate sdkmath.LegacyDec,
 	now time.Time,
 ) {
 	acs := k.getAllAvgCounters(denom)
@@ -109,7 +111,7 @@ func (k AvgKeeper) latestIdxKey(denom string) []byte {
 
 func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
 	prefix := util.ConcatBytes(0, types.KeyPrefixAvgCounter, []byte(denom))
-	return store.MustLoadAll[*types.AvgCounter](k.store, prefix)
+	return utilstore.MustLoadAll[*types.AvgCounter](k.store, prefix)
 }
 
 // setAvgCounters sets AllAvgCounter in the same order as in the slice.
@@ -117,29 +119,29 @@ func (k AvgKeeper) getAllAvgCounters(denom string) []types.AvgCounter {
 func (k AvgKeeper) setAvgCounters(denom string, acs []types.AvgCounter) {
 	for i := range acs {
 		key := types.KeyAvgCounter(denom, byte(i))
-		util.Panic(store.SetValue(k.store, key, &acs[i], "avgCounter"))
+		util.Panic(utilstore.SetValue(k.store, key, &acs[i], "avgCounter"))
 	}
 }
 
-func (k AvgKeeper) GetCurrentAvg(denom string) (sdk.Dec, error) {
+func (k AvgKeeper) GetCurrentAvg(denom string) (sdkmath.LegacyDec, error) {
 	latestIdx, err := k.getLatestIdx(denom)
 	if err == types.ErrNoLatestAvgPrice {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 	av, err := k.getCounter(denom, latestIdx)
 	if err != nil {
-		return sdk.Dec{}, nil
+		return sdkmath.LegacyDec{}, nil
 	}
 
-	return av.Sum.Quo(sdk.NewDec(int64(av.Num))), nil
+	return av.Sum.Quo(sdkmath.LegacyNewDec(int64(av.Num))), nil
 }
 
 func (k AvgKeeper) getCounter(denom string, idx byte) (types.AvgCounter, error) {
 	key := types.KeyAvgCounter(denom, idx)
-	av := store.GetValue[*types.AvgCounter](k.store, key, "avg counter")
+	av := utilstore.GetValue[*types.AvgCounter](k.store, key, "avg counter")
 	if av == nil {
 		return types.AvgCounter{}, sdkerrors.ErrNotFound.Wrap("avg counter")
 	}
@@ -149,11 +151,11 @@ func (k AvgKeeper) getCounter(denom string, idx byte) (types.AvgCounter, error) 
 // SetHistoricAvgCounterParams sets avg period and avg shift time duration
 func (k Keeper) SetHistoricAvgCounterParams(ctx sdk.Context, acp types.AvgCounterParams) error {
 	kvs := ctx.KVStore(k.storeKey)
-	return store.SetValue(kvs, types.KeyAvgCounterParams, &acp, "historic avg counter params")
+	return utilstore.SetValue(kvs, types.KeyAvgCounterParams, &acp, "historic avg counter params")
 }
 
 func (k Keeper) GetHistoricAvgCounterParams(ctx sdk.Context) types.AvgCounterParams {
 	kvs := ctx.KVStore(k.storeKey)
-	return *store.GetValue[*types.AvgCounterParams](kvs, types.KeyAvgCounterParams,
+	return *utilstore.GetValue[*types.AvgCounterParams](kvs, types.KeyAvgCounterParams,
 		"historic avg counter params")
 }

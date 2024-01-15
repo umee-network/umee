@@ -8,7 +8,6 @@ import (
 	gogotypes "github.com/cosmos/gogoproto/types"
 
 	"github.com/cosmos/cosmos-sdk/codec"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/kv"
 
 	"github.com/umee-network/umee/v6/x/leverage/types"
@@ -28,7 +27,7 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			return fmt.Sprintf("%v\n%v", registeredTokenA, registeredTokenB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixAdjustedBorrow):
-			var amountA, amountB sdk.Dec
+			var amountA, amountB sdkmath.LegacyDec
 			if err := amountA.Unmarshal(kvA.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}
@@ -67,7 +66,7 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			return fmt.Sprintf("%v\n%v", kvA, kvB) // it is bytes: []byte{0x01}
 
 		case bytes.Equal(prefixA, types.KeyPrefixInterestScalar):
-			var scalarA, scalarB sdk.Dec
+			var scalarA, scalarB sdkmath.LegacyDec
 			if err := scalarA.Unmarshal(kvA.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}
@@ -77,7 +76,7 @@ func NewDecodeStore(cdc codec.Codec) func(kvA, kvB kv.Pair) string {
 			return fmt.Sprintf("%v\n%v", scalarA, scalarB)
 
 		case bytes.Equal(prefixA, types.KeyPrefixAdjustedTotalBorrow):
-			var totalA, totalB sdk.Dec
+			var totalA, totalB sdkmath.LegacyDec
 			if err := totalA.Unmarshal(kvA.Value); err != nil {
 				panic(fmt.Sprintf("invalid unmarshal value %+v", err))
 			}

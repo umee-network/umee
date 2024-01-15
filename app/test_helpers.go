@@ -9,14 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
 	"cosmossdk.io/math"
-	dbm "github.com/cometbft/cometbft-db"
+	sdkmath "cosmossdk.io/math"
+	pruningtypes "cosmossdk.io/store/pruning/types"
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/cometbft/cometbft/libs/log"
-	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	cmttypes "github.com/cometbft/cometbft/types"
-	"gotest.tools/v3/assert"
-
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -24,9 +23,9 @@ import (
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -35,31 +34,13 @@ import (
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
-
-// DefaultConsensusParams defines the default Tendermint consensus params used
-// in UmeeApp testing.
-var DefaultConsensusParams = &tmproto.ConsensusParams{
-	Block: &tmproto.BlockParams{
-		MaxBytes: 200000,
-		MaxGas:   10000000,
-	},
-	Evidence: &tmproto.EvidenceParams{
-		MaxAgeNumBlocks: 302400,
-		MaxAgeDuration:  504 * time.Hour, // 3 weeks is the max duration
-		MaxBytes:        10000,
-	},
-	Validator: &tmproto.ValidatorParams{
-		PubKeyTypes: []string{
-			cmttypes.ABCIPubKeyTypeEd25519,
-		},
-	},
-}
 
 type EmptyAppOptions struct{}
 
@@ -81,7 +62,7 @@ func Setup(t *testing.T) *UmeeApp {
 	acc := authtypes.NewBaseAccount(senderPrivKey.PubKey().Address().Bytes(), senderPrivKey.PubKey(), 0, 0)
 	balance := banktypes.Balance{
 		Address: acc.GetAddress().String(),
-		Coins:   sdk.NewCoins(sdk.NewCoin(params.BondDenom, sdk.NewInt(10000000000000000))),
+		Coins:   sdk.NewCoins(sdk.NewCoin(params.BondDenom, sdkmath.NewInt(10000000000000000))),
 	}
 
 	app := SetupWithGenesisValSet(t, valSet, []authtypes.GenesisAccount{acc}, balance)
@@ -108,21 +89,20 @@ func SetupWithGenesisValSet(
 
 	// init chain will set the validator set and initialize the genesis accounts
 	app.InitChain(
-		abci.RequestInitChain{
+		&abci.RequestInitChain{
 			Validators:      []abci.ValidatorUpdate{},
-			ConsensusParams: DefaultConsensusParams,
+			ConsensusParams: simtestutil.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
 		},
 	)
 
-	// commit genesis changes
-	app.Commit()
-	app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{
+	assert.NilError(t, err)
+	_, err = app.FinalizeBlock(&abci.RequestFinalizeBlock{
 		Height:             app.LastBlockHeight() + 1,
-		AppHash:            app.LastCommitID().Hash,
-		ValidatorsHash:     valSet.Hash(),
+		Hash:               app.LastCommitID().Hash,
 		NextValidatorsHash: valSet.Hash(),
-	}})
+	})
+	assert.NilError(t, err)
 
 	return app
 }
@@ -158,15 +138,15 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 			Jailed:            false,
 			Status:            stakingtypes.Bonded,
 			Tokens:            bondAmt,
-			DelegatorShares:   sdk.OneDec(),
+			DelegatorShares:   sdkmath.LegacyOneDec(),
 			Description:       stakingtypes.Description{},
 			UnbondingHeight:   int64(0),
 			UnbondingTime:     time.Unix(0, 0).UTC(),
-			Commission:        stakingtypes.NewCommission(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()),
-			MinSelfDelegation: sdk.ZeroInt(),
+			Commission:        stakingtypes.NewCommission(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
+			MinSelfDelegation: sdkmath.ZeroInt(),
 		}
 		validators = append(validators, validator)
-		newDel := stakingtypes.NewDelegation(genAccs[0].GetAddress(), val.Address.Bytes(), sdk.OneDec())
+		newDel := stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), sdk.ValAddress(val.Address).String(), sdkmath.LegacyOneDec())
 		delegations = append(delegations, newDel)
 
 	}
@@ -228,7 +208,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		EmptyWasmOpts,
 	)
 	if withGenesis {
-		return app, NewDefaultGenesisState(app.appCodec)
+		return app, app.DefaultGenesis()
 	}
 
 	return app, GenesisState{}
@@ -269,13 +249,13 @@ func IntegrationTestNetworkConfig() network.Config {
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 1000
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewDenomExchangeRate(
-		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"), time.Now()))
+		params.DisplayDenom, sdkmath.LegacyMustNewDecFromStr("34.21"), time.Now()))
 	// Set mock historic medians to satisfy leverage module's 24 median requirement
 	for i := 1; i <= 24; i++ {
 		median := oracletypes.Price{
 			ExchangeRateTuple: oracletypes.NewExchangeRateTuple(
 				params.DisplayDenom,
-				sdk.MustNewDecFromStr("34.21"),
+				sdkmath.LegacyMustNewDecFromStr("34.21"),
 			),
 			BlockNum: uint64(i),
 		}
@@ -326,8 +306,12 @@ func addTestAddrs(
 	accAmt math.Int, strategy GenerateAccountStrategy,
 ) []sdk.AccAddress {
 	testAddrs := strategy(accNum)
+	bondDenom, err := app.StakingKeeper.BondDenom(ctx)
+	if err != nil {
+		panic(err)
+	}
 
-	initCoins := sdk.NewCoins(sdk.NewCoin(app.StakingKeeper.BondDenom(ctx), accAmt))
+	initCoins := sdk.NewCoins(sdk.NewCoin(bondDenom, accAmt))
 
 	for _, addr := range testAddrs {
 		initAccountWithCoins(app, ctx, addr, initCoins)

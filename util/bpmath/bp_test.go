@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,35 +25,35 @@ func TestBPToDec(t *testing.T) {
 	}
 }
 
-// Tests if it works both with sdk.Int and math.Int
+// Tests if it works both with math.Int and math.Int
 func TestInt(t *testing.T) {
 	t.Parallel()
 	require := require.New(t)
 
 	bp := BP(100)
-	si := sdk.NewInt(1234)
+	si := math.NewInt(1234)
 
-	var sresult sdk.Int = Mul(si, bp)
-	require.Equal(sresult, sdk.NewInt(12))
+	var sresult math.Int = Mul(si, bp)
+	require.Equal(sresult, math.NewInt(12))
 	var mresult math.Int = Mul(si, bp)
 	require.Equal(mresult, math.NewInt(12))
 
 	// now let's check math.Int
 	mi := math.NewInt(1234)
 	sresult = Mul(mi, bp)
-	require.Equal(sresult, sdk.NewInt(12))
+	require.Equal(sresult, math.NewInt(12))
 	mresult = Mul(mi, bp)
 	require.Equal(mresult, math.NewInt(12))
 
 	// test rounding
-	si = sdk.NewInt(1299)
-	require.Equal(bp.Mul(si), sdk.NewInt(12))
+	si = math.NewInt(1299)
+	require.Equal(bp.Mul(si), math.NewInt(12))
 
-	si = sdk.NewInt(-1299)
-	require.Equal(bp.Mul(si), sdk.NewInt(-12))
+	si = math.NewInt(-1299)
+	require.Equal(bp.Mul(si), math.NewInt(-12))
 
-	si = sdk.NewInt(-1201)
-	require.Equal(bp.Mul(si), sdk.NewInt(-12))
+	si = math.NewInt(-1201)
+	require.Equal(bp.Mul(si), math.NewInt(-12))
 }
 
 func TestBPMulDec(t *testing.T) {
@@ -65,17 +64,17 @@ func TestBPMulDec(t *testing.T) {
 	bp2 := BP(1)
 	bp3 := BP(5000)
 	bp4 := BP(20000)
-	d := sdk.MustNewDecFromStr("12.5002")
-	d2 := sdk.NewDec(10000)
-	d3 := sdk.NewDec(1000)
+	d := math.LegacyMustNewDecFromStr("12.5002")
+	d2 := math.LegacyNewDec(10000)
+	d3 := math.LegacyNewDec(1000)
 
 	require.Equal(d, MulDec(d, One))
-	require.Equal(sdk.ZeroDec(), MulDec(d, Zero))
-	require.Equal(sdk.OneDec(), bp2.MulDec(d2))
-	require.Equal(sdk.MustNewDecFromStr("0.1"), bp2.MulDec(d3))
+	require.Equal(math.LegacyZeroDec(), MulDec(d, Zero))
+	require.Equal(math.LegacyOneDec(), bp2.MulDec(d2))
+	require.Equal(math.LegacyMustNewDecFromStr("0.1"), bp2.MulDec(d3))
 
-	require.Equal(sdk.MustNewDecFromStr("1.25002"), bp.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("0.00125002"), bp2.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("6.2501"), bp3.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("25.0004"), bp4.MulDec(d))
+	require.Equal(math.LegacyMustNewDecFromStr("1.25002"), bp.MulDec(d))
+	require.Equal(math.LegacyMustNewDecFromStr("0.00125002"), bp2.MulDec(d))
+	require.Equal(math.LegacyMustNewDecFromStr("6.2501"), bp3.MulDec(d))
+	require.Equal(math.LegacyMustNewDecFromStr("25.0004"), bp4.MulDec(d))
 }

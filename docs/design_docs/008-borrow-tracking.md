@@ -24,7 +24,7 @@ This design proposal seeks to modify how borrows are stored, in order to achieve
 
 Chain state will now store an `InterestScalar` for each accepted asset denom, which starts at `1.0` and increases multiplicatively every time interest would accrue on borrows of that denom.
 
-Instead of directly storing `sdk.Int BorrowedAmount` for each of a user's borrowed denoms, state records their `sdk.Dec AdjustedBorrow`, respecting the following definition:
+Instead of directly storing `sdkmath.Int BorrowedAmount` for each of a user's borrowed denoms, state records their `sdkmath.LegacyDec AdjustedBorrow`, respecting the following definition:
 
 > `AdjustedBorrow(denom, address)` \* `InterestScalar(denom)` = `BorrowedAmount(denom, address)`
 
@@ -62,7 +62,7 @@ This decision mainly updates existing features, rather than adding new ones. The
 
 **Genesis:**
 
-- Rename the `Borrow` struct in genesis state to `AdjustedBorrow`, with `Amount` field changing to `sdk.Dec` from `sdk.Int`
+- Rename the `Borrow` struct in genesis state to `AdjustedBorrow`, with `Amount` field changing to `sdkmath.LegacyDec` from `sdkmath.Int`
 
 **Invariants:**
 

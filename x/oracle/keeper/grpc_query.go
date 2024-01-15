@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -65,7 +66,7 @@ func (q querier) ExchangeRates(
 
 		exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(req.Denom, exchangeRate.Rate))
 	} else {
-		q.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, _ time.Time) (stop bool) {
+		q.IterateExchangeRates(ctx, func(denom string, exgRate sdkmath.LegacyDec, _ time.Time) (stop bool) {
 			exchangeRates = exchangeRates.Add(sdk.NewDecCoinFromDec(denom, exgRate))
 			return false
 		})
@@ -86,7 +87,7 @@ func (q querier) ActiveExchangeRates(
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	denoms := []string{}
-	q.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec, _ time.Time) (stop bool) {
+	q.IterateExchangeRates(ctx, func(denom string, _ sdkmath.LegacyDec, _ time.Time) (stop bool) {
 		denoms = append(denoms, denom)
 		return false
 	})
@@ -354,7 +355,7 @@ func (q querier) ExgRatesWithTimestamp(
 		}
 		exgRates = append(exgRates, types.NewDenomExchangeRate(req.Denom, exchangeRate.Rate, exchangeRate.Timestamp))
 	} else {
-		q.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, t time.Time) (stop bool) {
+		q.IterateExchangeRates(ctx, func(denom string, exgRate sdkmath.LegacyDec, t time.Time) (stop bool) {
 			exgRates = append(exgRates, types.NewDenomExchangeRate(denom, exgRate, t))
 			return false
 		})

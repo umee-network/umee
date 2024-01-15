@@ -11,12 +11,12 @@ import (
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
-// getStoredDec retrieves an sdk.Dec from the KVStore, or zero if no value is stored.
+// getStoredDec retrieves an sdkmath.LegacyDec from the KVStore, or zero if no value is stored.
 // It panics if a stored value fails to unmarshal into a value higher than a specified minimum.
 // Accepts an additional string which should describe the field being retrieved in panic messages.
-func (k Keeper) getStoredDec(ctx sdk.Context, key []byte, minimum sdk.Dec, desc string) sdk.Dec {
+func (k Keeper) getStoredDec(ctx sdk.Context, key []byte, minimum sdkmath.LegacyDec, desc string) sdkmath.LegacyDec {
 	if bz := ctx.KVStore(k.storeKey).Get(key); bz != nil {
-		val := sdk.ZeroDec()
+		val := sdkmath.LegacyZeroDec()
 		util.Panic(val.Unmarshal(bz))
 		if val.LTE(minimum) {
 			panic(types.ErrGetAmount.Wrapf("%s is not above the minimum %s of %s", val, desc, minimum))
@@ -27,10 +27,10 @@ func (k Keeper) getStoredDec(ctx sdk.Context, key []byte, minimum sdk.Dec, desc 
 	return minimum
 }
 
-// setStoredDec stores an sdk.Dec in the KVStore, or clears if setting to zero.
+// setStoredDec stores an sdkmath.LegacyDec in the KVStore, or clears if setting to zero.
 // Returns an error on attempting to store value lower than a specified minimum or on failure to encode.
 // Accepts an additional string which should describe the field being set in custom error messages.
-func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val, minimum sdk.Dec, desc string) error {
+func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val, minimum sdkmath.LegacyDec, desc string) error {
 	store := ctx.KVStore(k.storeKey)
 	if val.LT(minimum) {
 		return types.ErrSetAmount.Wrapf("%s is below the minimum %s of %s", val, desc, minimum)
@@ -52,15 +52,15 @@ func (k Keeper) setStoredDec(ctx sdk.Context, key []byte, val, minimum sdk.Dec, 
 // Accepts an additional string which should describe the field being retrieved in custom error messages.
 func (k Keeper) getStoredInt(ctx sdk.Context, key []byte, desc string) sdkmath.Int {
 	if bz := ctx.KVStore(k.storeKey).Get(key); bz != nil {
-		val := sdk.ZeroInt()
+		val := sdkmath.ZeroInt()
 		util.Panic(val.Unmarshal(bz))
-		if val.LTE(sdk.ZeroInt()) {
+		if val.LTE(sdkmath.ZeroInt()) {
 			panic(types.ErrGetAmount.Wrapf("%s is not above the minimum %s of zero", val, desc))
 		}
 		return val
 	}
 	// No stored bytes at key
-	return sdk.ZeroInt()
+	return sdkmath.ZeroInt()
 }
 
 // setStoredInt stores an sdkmath.Int in the KVStore, or clears if setting to zero.
@@ -99,16 +99,16 @@ func (k Keeper) GetParams(ctx sdk.Context) types.Params {
 
 // getAdjustedBorrow gets the adjusted amount borrowed by an address in a given denom.
 // Returned value is non-negative.
-func (k Keeper) getAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) sdk.Dec {
+func (k Keeper) getAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, denom string) sdkmath.LegacyDec {
 	key := types.KeyAdjustedBorrow(addr, denom)
-	return k.getStoredDec(ctx, key, sdk.ZeroDec(), "adjusted borrow")
+	return k.getStoredDec(ctx, key, sdkmath.LegacyZeroDec(), "adjusted borrow")
 }
 
 // getAdjustedTotalBorrowed gets the total amount borrowed across all borrowers for a given denom.
 // Returned value is non-negative.
-func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) getAdjustedTotalBorrowed(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	key := types.KeyAdjustedTotalBorrow(denom)
-	return k.getStoredDec(ctx, key, sdk.ZeroDec(), "adjusted total borrow")
+	return k.getStoredDec(ctx, key, sdkmath.LegacyZeroDec(), "adjusted total borrow")
 }
 
 // setAdjustedBorrow sets the adjusted amount borrowed by an address in a given denom directly instead
@@ -129,14 +129,14 @@ func (k Keeper) setAdjustedBorrow(ctx sdk.Context, addr sdk.AccAddress, adjusted
 	// Update total adjusted borrow
 	key := types.KeyAdjustedTotalBorrow(adjustedBorrow.Denom)
 	newTotal := k.getAdjustedTotalBorrowed(ctx, adjustedBorrow.Denom).Add(delta)
-	err := k.setStoredDec(ctx, key, newTotal, sdk.ZeroDec(), "total adjusted borrow")
+	err := k.setStoredDec(ctx, key, newTotal, sdkmath.LegacyZeroDec(), "total adjusted borrow")
 	if err != nil {
 		return err
 	}
 
 	// Set new adjusted borrow
 	key = types.KeyAdjustedBorrow(addr, adjustedBorrow.Denom)
-	return k.setStoredDec(ctx, key, adjustedBorrow.Amount, sdk.ZeroDec(), "adjusted borrow")
+	return k.setStoredDec(ctx, key, adjustedBorrow.Amount, sdkmath.LegacyZeroDec(), "adjusted borrow")
 }
 
 // GetCollateral returns an sdk.Coin representing how much of a given denom the
@@ -238,18 +238,18 @@ func (k Keeper) setBadDebtAddress(ctx sdk.Context, addr sdk.AccAddress, denom st
 
 // getInterestScalar gets the interest scalar for a given base token
 // denom. Returns 1.0 if no value is stored.
-func (k Keeper) getInterestScalar(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) getInterestScalar(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	key := types.KeyInterestScalar(denom)
-	return k.getStoredDec(ctx, key, sdk.OneDec(), "interest scalar")
+	return k.getStoredDec(ctx, key, sdkmath.LegacyOneDec(), "interest scalar")
 }
 
 // setInterestScalar sets the interest scalar for a given base token denom.
-func (k Keeper) setInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec) error {
+func (k Keeper) setInterestScalar(ctx sdk.Context, denom string, scalar sdkmath.LegacyDec) error {
 	if err := types.ValidateBaseDenom(denom); err != nil {
 		return err
 	}
 	key := types.KeyInterestScalar(denom)
-	return k.setStoredDec(ctx, key, scalar, sdk.OneDec(), "interest scalar")
+	return k.setStoredDec(ctx, key, scalar, sdkmath.LegacyOneDec(), "interest scalar")
 }
 
 // GetUTokenSupply gets the total supply of a specified utoken, as tracked by

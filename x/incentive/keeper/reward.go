@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -8,7 +9,7 @@ import (
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
 
-var secondsPerYear = sdk.MustNewDecFromStr("31557600") // 365.25 * 3600 * 24
+var secondsPerYear = sdkmath.LegacyMustNewDecFromStr("31557600") // 365.25 * 3600 * 24
 
 // calculateReferenceAPY is used for APY queries. For a given bonded uToken denom, returns a reference amount
 // of that uToken (10^exponent from the uToken's reward accumulator) and the estimated rewards that bond
@@ -43,7 +44,7 @@ func (k Keeper) calculateReferenceAPY(ctx sdk.Context, denom string) (sdk.Coin, 
 	for _, p := range programs {
 		if p.UToken == denom {
 			// seconds per year / duration = programsPerYear (as this query assumes incentives will stay constant)
-			programsPerYear := secondsPerYear.Quo(sdk.NewDec(p.Duration))
+			programsPerYear := secondsPerYear.Quo(sdkmath.LegacyNewDec(p.Duration))
 
 			// annual rewards for reference amount for this specific program, assuming current rates continue
 			rewardCoin := sdk.NewCoin(
@@ -139,7 +140,7 @@ func (k Keeper) calculateSingleReward(ctx sdk.Context, addr sdk.AccAddress, bond
 		bonded := k.GetBonded(ctx, addr, bondDenom)
 
 		// reward = bonded * delta / 10^exponent
-		rewardDec := sdk.NewDecFromInt(bonded.Amount).Quo(
+		rewardDec := sdkmath.LegacyNewDecFromInt(bonded.Amount).Quo(
 			ten.Power(uint64(accumulator.Exponent)),
 		).Mul(coin.Amount)
 

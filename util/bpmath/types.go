@@ -2,7 +2,6 @@ package bpmath
 
 import (
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 type Rounding uint
@@ -20,5 +19,5 @@ const (
 
 var (
 	oneBigInt = math.NewIntFromUint64(One)
-	oneDec    = sdk.NewDec(One)
+	oneDec    = math.LegacyNewDec(One)
 )

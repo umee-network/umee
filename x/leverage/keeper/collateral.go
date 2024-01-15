@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -12,7 +13,7 @@ import (
 func (k Keeper) unbondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom string) sdk.Coin {
 	collateralAmount := k.GetBorrowerCollateral(ctx, addr).AmountOf(uDenom)
 	unavailable := k.bondedCollateral(ctx, addr, uDenom)
-	available := sdk.MaxInt(collateralAmount.Sub(unavailable.Amount), sdk.ZeroInt())
+	available := sdkmath.MaxInt(collateralAmount.Sub(unavailable.Amount), sdkmath.ZeroInt())
 	return sdk.NewCoin(uDenom, available)
 }
 
@@ -75,20 +76,20 @@ func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
 // CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by
 // collateral sdk.Coins, using each token's uToken exchange rate.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
-func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
-	total := sdk.ZeroDec()
+func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+	total := sdkmath.LegacyZeroDec()
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
 		baseAsset, err := k.ToToken(ctx, coin)
 		if err != nil {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 
 		// get USD value of base assets
 		v, err := k.TokenValue(ctx, baseAsset, mode)
 		if err != nil {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 
 		// add each collateral coin's value to borrow limit
@@ -102,14 +103,14 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, 
 // collateral sdk.Coins, using each token's uToken exchange rate.
 // Unlike CalculateCollateralValue, this function will not return an error if value calculation
 // fails on a token - instead, that token will contribute zero value to the total.
-func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
-	total := sdk.ZeroDec()
+func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+	total := sdkmath.LegacyZeroDec()
 
 	for _, coin := range collateral {
 		// convert uToken collateral to base assets
 		baseAsset, err := k.ToToken(ctx, coin)
 		if err != nil {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 
 		// get USD value of base assets
@@ -119,7 +120,7 @@ func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins, mo
 			total = total.Add(v)
 		}
 		if nonOracleError(err) {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 	}
 
@@ -141,7 +142,7 @@ func (k Keeper) GetAllTotalCollateral(ctx sdk.Context) sdk.Coins {
 // CollateralLiquidity calculates the current collateral liquidity of a token denom,
 // which is defined as the token's liquidity, divided by the base token equivalent
 // of associated uToken's total collateral. Ranges from 0 to 1.0
-func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	totalCollateral := k.GetTotalCollateral(ctx, coin.ToUTokenDenom(denom))
 	exchangeRate := k.DeriveExchangeRate(ctx, denom)
 	liquidity := k.AvailableLiquidity(ctx, denom)
@@ -151,37 +152,37 @@ func (k Keeper) CollateralLiquidity(ctx sdk.Context, denom string) sdk.Dec {
 	// - liquidity / collateral = x/0: No collateral but nonzero liquidity, also considered healthy
 	// In both cases, "all collateral is liquid" is technically true, given that there is no collateral.
 	if totalCollateral.IsZero() {
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
 
 	collateralLiquidity := toDec(liquidity).Quo(exchangeRate.MulInt(totalCollateral.Amount))
 
 	// Liquidity above 100% is ignored
-	return sdk.MinDec(collateralLiquidity, sdk.OneDec())
+	return sdkmath.LegacyMinDec(collateralLiquidity, sdkmath.LegacyOneDec())
 }
 
 // VisibleCollateralShare calculates the portion of overall collateral (measured in USD value) that a
 // given uToken denom represents. If an asset other than the denom requested is missing an oracle
 // price, it ignores that asset's contribution to the system's overall collateral, thus potentially
 // overestimating the requested denom's collateral share while improving availability.
-func (k *Keeper) VisibleCollateralShare(ctx sdk.Context, denom string) (sdk.Dec, error) {
+func (k *Keeper) VisibleCollateralShare(ctx sdk.Context, denom string) (sdkmath.LegacyDec, error) {
 	systemCollateral := k.GetAllTotalCollateral(ctx)
 	thisCollateral := sdk.NewCoins(sdk.NewCoin(denom, systemCollateral.AmountOf(denom)))
 
 	// get USD collateral value for all uTokens combined, except those experiencing price outages
 	totalValue, err := k.VisibleCollateralValue(ctx, systemCollateral, types.PriceModeSpot)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 
 	// get USD collateral value for this uToken only
 	thisValue, err := k.CalculateCollateralValue(ctx, thisCollateral, types.PriceModeSpot)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 
 	if !totalValue.IsPositive() {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 	return thisValue.Quo(totalValue), nil
 }
@@ -209,7 +210,7 @@ func (k *Keeper) checkCollateralShare(ctx sdk.Context, denom string) error {
 		return err
 	}
 
-	if token.MaxCollateralShare.Equal(sdk.OneDec()) {
+	if token.MaxCollateralShare.Equal(sdkmath.LegacyOneDec()) {
 		// skip computation when collateral share is unrestricted
 		return nil
 	}

@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -34,12 +35,12 @@ const (
 
 var (
 	acceptList = []string{types.UmeeSymbol, types.USDDenom}
-	umeePrice  = sdk.MustNewDecFromStr("25.71")
+	umeePrice  = sdkmath.LegacyMustNewDecFromStr("25.71")
 )
 
 // GenerateExchangeRatesString generates a canonical string representation of
 // the aggregated exchange rates.
-func GenerateExchangeRatesString(prices map[string]sdk.Dec) string {
+func GenerateExchangeRatesString(prices map[string]sdkmath.LegacyDec) string {
 	exchangeRates := make([]string, len(prices))
 	i := 0
 
@@ -69,19 +70,19 @@ func WeightedOperations(
 		voteHashMap                           = make(map[string]string)
 	)
 
-	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRatePrevote, &weightMsgAggregateExchangeRatePrevote, nil,
+	appParams.GetOrGenerate(OpWeightMsgAggregateExchangeRatePrevote, &weightMsgAggregateExchangeRatePrevote, nil,
 		func(*rand.Rand) {
 			weightMsgAggregateExchangeRatePrevote = banksim.DefaultWeightMsgSend * 2
 		},
 	)
 
-	appParams.GetOrGenerate(cdc, OpWeightMsgAggregateExchangeRateVote, &weightMsgAggregateExchangeRateVote, nil,
+	appParams.GetOrGenerate(OpWeightMsgAggregateExchangeRateVote, &weightMsgAggregateExchangeRateVote, nil,
 		func(*rand.Rand) {
 			weightMsgAggregateExchangeRateVote = banksim.DefaultWeightMsgSend * 2
 		},
 	)
 
-	appParams.GetOrGenerate(cdc, OpWeightMsgDelegateFeedConsent, &weightMsgDelegateFeedConsent, nil,
+	appParams.GetOrGenerate(OpWeightMsgDelegateFeedConsent, &weightMsgDelegateFeedConsent, nil,
 		func(*rand.Rand) {
 			weightMsgDelegateFeedConsent = distrsim.DefaultWeightMsgSetWithdrawAddress
 		},
@@ -120,20 +121,20 @@ func SimulateMsgAggregateExchangeRatePrevote(
 		}
 
 		// ensure the validator exists
-		val := k.StakingKeeper.Validator(ctx, address)
-		if val == nil || !val.IsBonded() {
+		val, err := k.StakingKeeper.Validator(ctx, address)
+		if err == nil || !val.IsBonded() {
 			return noop("unable to find validator"), nil, nil
 		}
 
 		// check for an existing prevote
-		_, err := k.GetAggregateExchangeRatePrevote(ctx, address)
+		_, err = k.GetAggregateExchangeRatePrevote(ctx, address)
 		if err == nil {
 			return noop("prevote already exists for this validator"), nil, nil
 		}
 
-		prices := make(map[string]sdk.Dec, len(acceptList))
+		prices := make(map[string]sdkmath.LegacyDec, len(acceptList))
 		for _, denom := range acceptList {
-			prices[denom] = umeePrice.Add(simtypes.RandomDecAmount(r, sdk.NewDec(1)))
+			prices[denom] = umeePrice.Add(simtypes.RandomDecAmount(r, sdkmath.LegacyNewDec(1)))
 		}
 
 		exchangeRatesStr := GenerateExchangeRatesString(prices)
@@ -164,8 +165,8 @@ func SimulateMsgAggregateExchangeRateVote(
 		}
 
 		// ensure the validator exists
-		val := k.StakingKeeper.Validator(ctx, address)
-		if val == nil || !val.IsBonded() {
+		val, err := k.StakingKeeper.Validator(ctx, address)
+		if err != nil || !val.IsBonded() {
 			return noop("unable to find validator"), nil, nil
 		}
 
@@ -208,14 +209,14 @@ func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk bankkeeper.Keeper
 		}
 
 		// ensure the validator exists
-		val := k.StakingKeeper.Validator(ctx, valAddress)
-		if val == nil {
+		_, err := k.StakingKeeper.Validator(ctx, valAddress)
+		if err != nil {
 			return noop("unable to find validator"), nil, nil
 		}
 
 		// ensure the target address is not a validator
-		val2 := k.StakingKeeper.Validator(ctx, delegateValAddress)
-		if val2 != nil {
+		_, err = k.StakingKeeper.Validator(ctx, delegateValAddress)
+		if err != nil {
 			return noop("unable to delegate to validator"), nil, nil
 		}
 
@@ -234,7 +235,6 @@ func deliver(r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, ak simulation.
 		TxGen:           cfg.TxConfig,
 		Cdc:             cfg.Codec.(*codec.ProtoCodec),
 		Msg:             msg,
-		MsgType:         sdk.MsgTypeURL(msg),
 		Context:         ctx,
 		SimAccount:      from,
 		AccountKeeper:   ak,

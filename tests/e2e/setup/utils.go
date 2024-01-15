@@ -21,7 +21,7 @@ import (
 	"github.com/cosmos/gogoproto/proto"
 	"github.com/ory/dockertest/v3/docker"
 
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/client"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
@@ -226,21 +226,21 @@ func (s *E2ETestSuite) QueryRegisteredTokens(endpoint string) ([]leveragetypes.T
 	return resp.Registry, nil
 }
 
-func (s *E2ETestSuite) QueryHistAvgPrice(endpoint, denom string) (sdk.Dec, error) {
+func (s *E2ETestSuite) QueryHistAvgPrice(endpoint, denom string) (sdkmath.LegacyDec, error) {
 	endpoint = fmt.Sprintf("%s/umee/historacle/v1/avg_price/%s", endpoint, strings.ToUpper(denom))
 	var resp oracletypes.QueryAvgPriceResponse
 	if err := s.QueryREST(endpoint, &resp); err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	return resp.Price, nil
 }
 
-func (s *E2ETestSuite) QueryOutflows(endpoint, denom string) (sdk.Dec, error) {
+func (s *E2ETestSuite) QueryOutflows(endpoint, denom string) (sdkmath.LegacyDec, error) {
 	endpoint = fmt.Sprintf("%s/umee/uibc/v1/outflows?denom=%s", endpoint, denom)
 	var resp uibc.QueryOutflowsResponse
 	if err := s.QueryREST(endpoint, &resp); err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	return resp.Amount, nil

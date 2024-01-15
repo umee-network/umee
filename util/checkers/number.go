@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/constraints"
 )
 
 var (
-	undefinedDec sdk.Dec
-	one          = sdk.OneDec()
+	undefinedDec sdkmath.LegacyDec
+	one          = sdkmath.LegacyOneDec()
 )
 
 func IntegerMaxDiff[T constraints.Integer](a, b, maxDiff T, note string) error {
@@ -27,7 +27,7 @@ func IntegerMaxDiff[T constraints.Integer](a, b, maxDiff T, note string) error {
 	return nil
 }
 
-func DecMaxDiff(a, b, maxDiff sdk.Dec, note string) error {
+func DecMaxDiff(a, b, maxDiff sdkmath.LegacyDec, note string) error {
 	diff := a.Sub(b).Abs()
 	if diff.GT(maxDiff) {
 		return fmt.Errorf("%s, diff (=%v) is too big", note, diff)
@@ -35,14 +35,14 @@ func DecMaxDiff(a, b, maxDiff sdk.Dec, note string) error {
 	return nil
 }
 
-func RequireDecMaxDiff(t *testing.T, a, b, maxDiff sdk.Dec, note string) {
+func RequireDecMaxDiff(t *testing.T, a, b, maxDiff sdkmath.LegacyDec, note string) {
 	err := DecMaxDiff(a, b, maxDiff, note)
 	require.NoError(t, err)
 }
 
 // DecInZeroOne asserts that 0 <= a <= 1 when oneInclusive=True, otherwise asserts
 // 0 <= a < 1
-func DecInZeroOne(a sdk.Dec, name string, oneInclusive bool) error {
+func DecInZeroOne(a sdkmath.LegacyDec, name string, oneInclusive bool) error {
 	maxCheck := a.GTE
 	if oneInclusive {
 		maxCheck = a.GT
@@ -54,7 +54,7 @@ func DecInZeroOne(a sdk.Dec, name string, oneInclusive bool) error {
 }
 
 // DecNotNegative checks if a is defined and a >= 0
-func DecNotNegative(a sdk.Dec, paramName string) error {
+func DecNotNegative(a sdkmath.LegacyDec, paramName string) error {
 	if a.IsNil() || a.IsNegative() {
 		return fmt.Errorf("%s can't be negative", paramName)
 	}
@@ -62,7 +62,7 @@ func DecNotNegative(a sdk.Dec, paramName string) error {
 }
 
 // DecPositive checks if a is defined and a > 0
-func DecPositive(a sdk.Dec, paramName string) error {
+func DecPositive(a sdkmath.LegacyDec, paramName string) error {
 	if a.IsNil() || !a.IsPositive() {
 		return fmt.Errorf("%s must be positive", paramName)
 	}

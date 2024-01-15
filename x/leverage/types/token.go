@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -12,8 +13,8 @@ import (
 )
 
 var (
-	halfDec = sdk.MustNewDecFromStr("0.5")
-	one     = sdk.OneDec()
+	halfDec = sdkmath.LegacyMustNewDecFromStr("0.5")
+	one     = sdkmath.LegacyOneDec()
 )
 
 // ValidateBaseDenom validates a denom and ensures it is not a uToken.
@@ -130,11 +131,11 @@ func (t Token) AssertNotBlacklisted() error {
 }
 
 // BorrowFactor returns the minimum of 2.0 or 1 / collateralWeight.
-func (t Token) BorrowFactor() sdk.Dec {
+func (t Token) BorrowFactor() sdkmath.LegacyDec {
 	if t.CollateralWeight.LTE(halfDec) {
-		return sdk.MustNewDecFromStr("2.0")
+		return sdkmath.LegacyMustNewDecFromStr("2.0")
 	}
-	return sdk.OneDec().Quo(t.CollateralWeight)
+	return sdkmath.LegacyOneDec().Quo(t.CollateralWeight)
 }
 
 func defaultUmeeToken() Token {
@@ -146,22 +147,22 @@ func defaultUmeeToken() Token {
 		EnableMsgBorrow: true,
 		Blacklist:       false,
 		// Reserves
-		ReserveFactor: sdk.MustNewDecFromStr("0.10"),
+		ReserveFactor: sdkmath.LegacyMustNewDecFromStr("0.10"),
 		// Interest rate model
-		BaseBorrowRate:  sdk.MustNewDecFromStr("0.05"),
-		KinkBorrowRate:  sdk.MustNewDecFromStr("0.10"),
-		MaxBorrowRate:   sdk.MustNewDecFromStr("0.80"),
-		KinkUtilization: sdk.MustNewDecFromStr("0.50"),
+		BaseBorrowRate:  sdkmath.LegacyMustNewDecFromStr("0.05"),
+		KinkBorrowRate:  sdkmath.LegacyMustNewDecFromStr("0.10"),
+		MaxBorrowRate:   sdkmath.LegacyMustNewDecFromStr("0.80"),
+		KinkUtilization: sdkmath.LegacyMustNewDecFromStr("0.50"),
 		// Collateral
-		CollateralWeight:     sdk.MustNewDecFromStr("0.35"),
-		LiquidationThreshold: sdk.MustNewDecFromStr("0.50"),
+		CollateralWeight:     sdkmath.LegacyMustNewDecFromStr("0.35"),
+		LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.50"),
 		// Liquidation
-		LiquidationIncentive: sdk.MustNewDecFromStr("0.10"),
+		LiquidationIncentive: sdkmath.LegacyMustNewDecFromStr("0.10"),
 		// Market limits
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1.00"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.90"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.3"),
-		MaxSupply:              sdk.NewInt(1000_000000_000000),
+		MaxCollateralShare:     sdkmath.LegacyMustNewDecFromStr("1.00"),
+		MaxSupplyUtilization:   sdkmath.LegacyMustNewDecFromStr("0.90"),
+		MinCollateralLiquidity: sdkmath.LegacyMustNewDecFromStr("0.3"),
+		MaxSupply:              sdkmath.NewInt(1000_000000_000000),
 	}
 }
 
@@ -183,12 +184,12 @@ func (p SpecialAssetPair) Validate() error {
 	}
 
 	// Collateral Weight is non-negative and less than 1.
-	if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdk.OneDec()) {
+	if p.CollateralWeight.IsNegative() || p.CollateralWeight.GTE(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("invalid collateral rate: %s", p.CollateralWeight)
 	}
 
 	// Liquidation Threshold ranges between collateral weight and 1.
-	if p.LiquidationThreshold.LT(p.CollateralWeight) || p.LiquidationThreshold.GTE(sdk.OneDec()) {
+	if p.LiquidationThreshold.LT(p.CollateralWeight) || p.LiquidationThreshold.GTE(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("invalid liquidation threshold: %s", p.LiquidationThreshold)
 	}
 
@@ -214,12 +215,12 @@ func (s SpecialAssetSet) Validate() error {
 	}
 
 	// Collateral Weight is non-negative and less than 1.
-	if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdk.OneDec()) {
+	if s.CollateralWeight.IsNegative() || s.CollateralWeight.GTE(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("invalid collateral rate: %s", s.CollateralWeight)
 	}
 
 	// Liquidation Threshold ranges between collateral weight and 1.
-	if s.LiquidationThreshold.LT(s.CollateralWeight) || s.LiquidationThreshold.GTE(sdk.OneDec()) {
+	if s.LiquidationThreshold.LT(s.CollateralWeight) || s.LiquidationThreshold.GTE(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("invalid liquidation threshold: %s", s.LiquidationThreshold)
 	}
 

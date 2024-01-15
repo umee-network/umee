@@ -7,6 +7,7 @@ package mocks
 import (
 	reflect "reflect"
 
+	math "cosmossdk.io/math"
 	types "github.com/cosmos/cosmos-sdk/types"
 	types0 "github.com/cosmos/cosmos-sdk/x/bank/types"
 	gomock "github.com/golang/mock/gomock"
@@ -99,10 +100,10 @@ func (m *MockLeverage) EXPECT() *MockLeverageMockRecorder {
 }
 
 // DeriveExchangeRate mocks base method.
-func (m *MockLeverage) DeriveExchangeRate(ctx types.Context, denom string) types.Dec {
+func (m *MockLeverage) DeriveExchangeRate(ctx types.Context, denom string) math.LegacyDec {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeriveExchangeRate", ctx, denom)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	return ret0
 }
 
@@ -180,10 +181,10 @@ func (m *MockOracle) EXPECT() *MockOracleMockRecorder {
 }
 
 // Price mocks base method.
-func (m *MockOracle) Price(ctx types.Context, denom string) (types.Dec, error) {
+func (m *MockOracle) Price(ctx types.Context, denom string) (math.LegacyDec, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Price", ctx, denom)
-	ret0, _ := ret[0].(types.Dec)
+	ret0, _ := ret[0].(math.LegacyDec)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

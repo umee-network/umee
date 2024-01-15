@@ -3,9 +3,10 @@ package intest
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/umee-network/umee/v6/x/uibc"
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
+
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 func TestGRPCQueryParams(t *testing.T) {
@@ -67,7 +68,7 @@ func TestGRPCQueryOutflows(t *testing.T) {
 			resp, err := client.Outflows(ctx, &tc.req)
 
 			assert.NilError(t, err)
-			assert.DeepEqual(t, sdk.NewDec(tc.outflowAmount), resp.Amount)
+			assert.DeepEqual(t, sdkmath.LegacyNewDec(tc.outflowAmount), resp.Amount)
 		})
 	}
 

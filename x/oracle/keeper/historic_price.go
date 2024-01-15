@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util"
@@ -57,7 +59,7 @@ func (k Keeper) SetHistoricMedian(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
-	median sdk.Dec,
+	median sdkmath.LegacyDec,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: median})
@@ -117,8 +119,8 @@ func (k Keeper) WithinHistoricMedianDeviation(
 func (k Keeper) calcAndSetHistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
-	median sdk.Dec,
-	prices []sdk.Dec,
+	median sdkmath.LegacyDec,
+	prices []sdkmath.LegacyDec,
 ) error {
 	medianDeviation, err := decmath.MedianDeviation(median, prices)
 	if err != nil {
@@ -134,7 +136,7 @@ func (k Keeper) SetHistoricMedianDeviation(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
-	medianDeviation sdk.Dec,
+	medianDeviation sdkmath.LegacyDec,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: medianDeviation})
@@ -148,14 +150,14 @@ func (k Keeper) MedianOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, uint32, error) {
+) (sdkmath.LegacyDec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
 	if len(medians) == 0 {
-		return sdk.ZeroDec(), 0, nil
+		return sdkmath.LegacyZeroDec(), 0, nil
 	}
 	median, err := decmath.Median(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return median, uint32(len(medians)), nil
@@ -168,14 +170,14 @@ func (k Keeper) AverageOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, uint32, error) {
+) (sdkmath.LegacyDec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
 	if len(medians) == 0 {
-		return sdk.ZeroDec(), 0, nil
+		return sdkmath.LegacyZeroDec(), 0, nil
 	}
 	average, err := decmath.Average(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return average, uint32(len(medians)), nil
@@ -188,14 +190,14 @@ func (k Keeper) MaxOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, uint32, error) {
+) (sdkmath.LegacyDec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
 	if len(medians) == 0 {
-		return sdk.ZeroDec(), 0, nil
+		return sdkmath.LegacyZeroDec(), 0, nil
 	}
 	max, err := decmath.Max(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return max, uint32(len(medians)), nil
@@ -208,14 +210,14 @@ func (k Keeper) MinOfHistoricMedians(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) (sdk.Dec, uint32, error) {
+) (sdkmath.LegacyDec, uint32, error) {
 	medians := k.HistoricMedians(ctx, denom, numStamps)
 	if len(medians) == 0 {
-		return sdk.ZeroDec(), 0, nil
+		return sdkmath.LegacyZeroDec(), 0, nil
 	}
 	min, err := decmath.Min(medians.Decs())
 	if err != nil {
-		return sdk.ZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
 	}
 
 	return min, uint32(len(medians)), nil
@@ -226,11 +228,11 @@ func (k Keeper) historicPrices(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint64,
-) []sdk.Dec {
+) []sdkmath.LegacyDec {
 	// calculate start block to iterate from
-	historicPrices := []sdk.Dec{}
+	historicPrices := []sdkmath.LegacyDec{}
 
-	k.IterateHistoricPrices(ctx, denom, uint(numStamps), func(exchangeRate sdk.Dec) bool {
+	k.IterateHistoricPrices(ctx, denom, uint(numStamps), func(exchangeRate sdkmath.LegacyDec) bool {
 		historicPrices = append(historicPrices, exchangeRate)
 		return false
 	})
@@ -245,13 +247,13 @@ func (k Keeper) IterateHistoricPrices(
 	ctx sdk.Context,
 	denom string,
 	numStamps uint,
-	handler func(sdk.Dec) bool,
+	handler func(sdkmath.LegacyDec) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixHistoricPrice, []byte(denom))
-	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
+	iter := storetypes.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -276,7 +278,7 @@ func (k Keeper) IterateHistoricMedians(
 
 	// make sure we have one zero byte to correctly separate denoms
 	prefix := util.ConcatBytes(1, types.KeyPrefixMedian, []byte(denom))
-	iter := sdk.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
+	iter := storetypes.KVStoreReversePrefixIteratorPaginated(store, prefix, 1, numStamps)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -294,14 +296,14 @@ func (k Keeper) IterateHistoricMedians(
 func (k Keeper) AddHistoricPrice(
 	ctx sdk.Context,
 	denom string,
-	exchangeRate sdk.Dec,
+	exchangeRate sdkmath.LegacyDec,
 ) {
 	block := uint64(ctx.BlockHeight())
 	k.SetHistoricPrice(ctx, denom, block, exchangeRate)
 	k.AvgKeeper(ctx).updateAvgCounter(denom, exchangeRate, ctx.BlockTime())
 }
 
-func (k Keeper) HistoricAvgPrice(ctx sdk.Context, denom string) (sdk.Dec, error) {
+func (k Keeper) HistoricAvgPrice(ctx sdk.Context, denom string) (sdkmath.LegacyDec, error) {
 	return k.AvgKeeper(ctx).GetCurrentAvg(denom)
 }
 
@@ -309,7 +311,7 @@ func (k Keeper) SetHistoricPrice(
 	ctx sdk.Context,
 	denom string,
 	blockNum uint64,
-	exchangeRate sdk.Dec,
+	exchangeRate sdkmath.LegacyDec,
 ) {
 	store := ctx.KVStore(k.storeKey)
 	bz := k.cdc.MustMarshal(&sdk.DecProto{Dec: exchangeRate})

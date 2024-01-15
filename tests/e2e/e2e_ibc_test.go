@@ -26,15 +26,15 @@ const (
 	umeeSymbol = "UMEE"
 )
 
-var powerReduction = sdk.MustNewDecFromStr("10").Power(6)
+var powerReduction = sdkmath.LegacyMustNewDecFromStr("10").Power(6)
 
 // mulCoin multiplies the amount of a coin by a dec (given as string)
 func mulCoin(c sdk.Coin, d string) sdk.Coin {
-	newAmount := sdk.MustNewDecFromStr(d).MulInt(c.Amount).RoundInt()
+	newAmount := sdkmath.LegacyMustNewDecFromStr(d).MulInt(c.Amount).RoundInt()
 	return sdk.NewCoin(c.Denom, newAmount)
 }
 
-func (s *E2ETest) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdk.Dec) {
+func (s *E2ETest) checkOutflowByPercentage(endpoint, excDenom string, outflow, amount, perDiff sdkmath.LegacyDec) {
 	// get historic average price for denom (SYMBOL_DENOM)
 	histoAvgPrice, err := s.QueryHistAvgPrice(endpoint, excDenom)
 	s.Require().NoError(err)
@@ -46,7 +46,7 @@ func (s *E2ETest) checkOutflowByPercentage(endpoint, excDenom string, outflow, a
 	s.Require().True(outflow.GTE(totalPrice.Sub(percentageDiff)) || totalPrice.GTE(outflow.Sub(percentageDiff)))
 }
 
-func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate bool, amount sdk.Dec, excDenom string) {
+func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate bool, amount sdkmath.LegacyDec, excDenom string) {
 	s.Require().Eventually(
 		func() bool {
 			a, err := s.QueryOutflows(umeeAPIEndpoint, denom)
@@ -54,7 +54,7 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 				return false
 			}
 			if checkWithExcRate {
-				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, a, amount, sdk.MustNewDecFromStr("0.01"))
+				s.checkOutflowByPercentage(umeeAPIEndpoint, excDenom, a, amount, sdkmath.LegacyMustNewDecFromStr("0.01"))
 			}
 			return true
 		},
@@ -93,7 +93,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false, "")
 		// Zero, since not a registered token
-		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, sdk.ZeroInt())
+		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, sdkmath.ZeroInt())
 	})
 
 	s.Run("ibc_transfer_quota", func() {
@@ -111,7 +111,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 			if err != nil {
 				return false
 			}
-			return atomPrice.GT(sdk.OneDec())
+			return atomPrice.GT(sdkmath.LegacyOneDec())
 		},
 			2*time.Minute,
 			1*time.Second,
@@ -119,7 +119,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		)
 
 		atomQuota := sdk.NewCoin(uatomIBCHash,
-			sdk.NewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
+			sdkmath.LegacyNewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
 		)
 
 		//<<<< INFLOW : gaia -> umee >>
@@ -133,10 +133,10 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// compute the amout of UMEE sent to gaia which would meet umee's token quota
 		umeePrice, err := s.QueryHistAvgPrice(umeeAPIEndpoint, umeeSymbol)
 		s.Require().NoError(err)
-		s.Require().True(umeePrice.GT(sdk.MustNewDecFromStr("0.001")),
+		s.Require().True(umeePrice.GT(sdkmath.LegacyMustNewDecFromStr("0.001")),
 			"umee price should be non zero, and expecting higher than 0.001, got: %s", umeePrice)
 		umeeQuota := sdk.NewCoin(appparams.BondDenom,
-			sdk.NewDecFromInt(tokenQuota).Quo(umeePrice).Mul(powerReduction).RoundInt(),
+			sdkmath.LegacyNewDecFromInt(tokenQuota).Quo(umeePrice).Mul(powerReduction).RoundInt(),
 		)
 
 		// << TOKEN QUOTA EXCCEED >>
@@ -159,7 +159,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		sendUmee := mulCoin(umeeQuota, "0.9")
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", sendUmee, false, fmt.Sprintf(
 			"sending %s (less than token quota) ", sendUmee.String()))
-		s.checkOutflows(umeeAPIEndpoint, appparams.BondDenom, true, sdk.NewDecFromInt(sendUmee.Amount), appparams.Name)
+		s.checkOutflows(umeeAPIEndpoint, appparams.BondDenom, true, sdkmath.LegacyNewDecFromInt(sendUmee.Amount), appparams.Name)
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sendUmee.Amount)
 
 		// << BELOW TOKEN QUOTA 40$ but ATOM_QUOTA (40$)+ UMEE_QUOTA(90$) >= TOTAL QUOTA (120$) >>
@@ -175,7 +175,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", sendAtom, false, "below both quotas")
 		// remaing supply decreased uatom on umee
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount.Sub(sendAtom.Amount))
-		s.checkOutflows(umeeAPIEndpoint, uatomIBCHash, true, sdk.NewDecFromInt(sendAtom.Amount), atomSymbol)
+		s.checkOutflows(umeeAPIEndpoint, uatomIBCHash, true, sdkmath.LegacyNewDecFromInt(sendAtom.Amount), atomSymbol)
 
 		// send $45 UMEE from gaia to umee
 		returnUmee := mulCoin(sendUmee, "0.5")
@@ -243,7 +243,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 				if err != nil {
 					return false
 				}
-				return a.Equal(sdk.ZeroDec())
+				return a.Equal(sdkmath.LegacyZeroDec())
 			},
 			30*time.Second,
 			1*time.Second,

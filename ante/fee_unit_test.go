@@ -3,9 +3,9 @@ package ante
 import (
 	"testing"
 
+	evidence "cosmossdk.io/x/evidence/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bank "github.com/cosmos/cosmos-sdk/x/bank/types"
-	evidence "github.com/cosmos/cosmos-sdk/x/evidence/types"
 	"gotest.tools/v3/assert"
 
 	leverage "github.com/umee-network/umee/v6/x/leverage/types"

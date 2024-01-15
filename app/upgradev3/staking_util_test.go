@@ -81,12 +81,12 @@ func GenerateRandomTestCase() ([]sdk.ValAddress, MockStakingKeeper) {
 
 	// adding 0.01 to first validator
 	val := mockValidators[0]
-	val.Commission.Rate = sdk.MustNewDecFromStr("0.01")
+	val.Commission.Rate = sdkmath.LegacyMustNewDecFromStr("0.01")
 	mockValidators[0] = val
 
 	// adding more then minimumCommissionRate to validator 2
 	val = mockValidators[1]
-	val.Commission.Rate = types.DefaultMinCommissionRate.Add(sdk.MustNewDecFromStr("1"))
+	val.Commission.Rate = types.DefaultMinCommissionRate.Add(sdkmath.LegacyMustNewDecFromStr("1"))
 	mockValidators[1] = val
 
 	valAddrs = []sdk.ValAddress{mockValidators[0].GetOperator(), mockValidators[1].GetOperator()}

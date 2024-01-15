@@ -4,7 +4,6 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -127,9 +126,9 @@ func (ms msgServer) DelegateFeedConsent(
 		return nil, err
 	}
 
-	val := ms.StakingKeeper.Validator(ctx, operatorAddr)
-	if val == nil {
-		return nil, stakingtypes.ErrNoValidatorFound.Wrap(msg.Operator)
+	_, err = ms.StakingKeeper.Validator(ctx, operatorAddr)
+	if err != nil {
+		return nil, err
 	}
 
 	ms.SetFeederDelegation(ctx, operatorAddr, delegateAddr)

@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -15,18 +16,18 @@ import (
 // TODO: parameterize this
 const MaxSpotPriceAge = 180 // 180 seconds = 3 minutes
 
-var ten = sdk.MustNewDecFromStr("10")
+var ten = sdkmath.LegacyMustNewDecFromStr("10")
 
 // TokenPrice returns the USD value of a token's symbol denom, e.g. `UMEE` (rather than `uumee`).
 // Note, the input denom must still be the base denomination, e.g. uumee. When error is nil, price is
 // guaranteed to be positive. Also returns the token's exponent to reduce redundant registry reads.
-func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMode) (sdk.Dec, uint32, error) {
+func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMode) (sdkmath.LegacyDec, uint32, error) {
 	t, err := k.GetTokenSettings(ctx, baseDenom)
 	if err != nil {
-		return sdk.ZeroDec(), 0, err
+		return sdkmath.LegacyZeroDec(), 0, err
 	}
 	if t.Blacklist {
-		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
+		return sdkmath.LegacyZeroDec(), t.Exponent, types.ErrBlacklisted
 	}
 
 	// if a token is exempt from historic pricing, all price modes ignore historic prices
@@ -35,13 +36,13 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		mode = mode.IgnoreHistoric()
 	}
 
-	var price, historicPrice sdk.Dec
+	var price, historicPrice sdkmath.LegacyDec
 	var spotPrice oracletypes.ExchangeRate
 	if mode != types.PriceModeHistoric {
 		// spot price is required for modes other than historic
 		spotPrice, err = k.oracleKeeper.GetExchangeRate(ctx, t.SymbolDenom)
 		if err != nil {
-			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
+			return sdkmath.LegacyZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
 		if !mode.AllowsExpired() {
 			// with the exception of account summary queries, require spot prices to be recent
@@ -49,7 +50,7 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 			priceTime := spotPrice.Timestamp.Unix()
 			priceAge := moduleTime - priceTime
 			if priceAge < 0 || priceAge > MaxSpotPriceAge {
-				return sdk.ZeroDec(), t.Exponent, types.ErrExpiredOraclePrice.Wrapf(
+				return sdkmath.LegacyZeroDec(), t.Exponent, types.ErrExpiredOraclePrice.Wrapf(
 					"price: %d, module: %d", priceTime, moduleTime)
 			}
 		}
@@ -61,10 +62,10 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 		historicPrice, numStamps, err = k.oracleKeeper.MedianOfHistoricMedians(
 			ctx, strings.ToUpper(t.SymbolDenom), uint64(t.HistoricMedians))
 		if err != nil {
-			return sdk.ZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
+			return sdkmath.LegacyZeroDec(), t.Exponent, errors.Wrap(err, "oracle")
 		}
 		if numStamps < t.HistoricMedians {
-			return sdk.ZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
+			return sdkmath.LegacyZeroDec(), t.Exponent, types.ErrNoHistoricMedians.Wrapf(
 				"requested %d, got %d",
 				t.HistoricMedians,
 				numStamps,
@@ -78,22 +79,22 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 	case types.PriceModeHistoric:
 		price = historicPrice
 	case types.PriceModeHigh, types.PriceModeQueryHigh:
-		price = sdk.MaxDec(spotPrice.Rate, historicPrice)
+		price = sdkmath.LegacyMaxDec(spotPrice.Rate, historicPrice)
 	case types.PriceModeLow, types.PriceModeQueryLow:
-		price = sdk.MinDec(spotPrice.Rate, historicPrice)
+		price = sdkmath.LegacyMinDec(spotPrice.Rate, historicPrice)
 	default:
-		return sdk.ZeroDec(), t.Exponent, types.ErrInvalidPriceMode.Wrapf("%d", mode)
+		return sdkmath.LegacyZeroDec(), t.Exponent, types.ErrInvalidPriceMode.Wrapf("%d", mode)
 	}
 
 	if price.IsNil() || !price.IsPositive() {
-		return sdk.ZeroDec(), t.Exponent, types.ErrInvalidOraclePrice.Wrap(baseDenom)
+		return sdkmath.LegacyZeroDec(), t.Exponent, types.ErrInvalidOraclePrice.Wrap(baseDenom)
 	}
 
 	return price, t.Exponent, nil
 }
 
-// exponent multiplies an sdk.Dec by 10^n. n can be negative.
-func exponent(input sdk.Dec, n int32) sdk.Dec {
+// exponent multiplies an sdkmath.LegacyDec by 10^n. n can be negative.
+func exponent(input sdkmath.LegacyDec, n int32) sdkmath.LegacyDec {
 	if n == 0 {
 		return input
 	}
@@ -108,10 +109,10 @@ func exponent(input sdk.Dec, n int32) sdk.Dec {
 // returned if we cannot get the token's price or if it's not an accepted token.
 // Computation uses price of token's default denom to avoid rounding errors
 // for exponent >= 18 tokens.
-func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin, mode types.PriceMode) (sdk.Dec, error) {
+func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin, mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	p, exp, err := k.TokenPrice(ctx, coin.Denom, mode)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 	return exponent(p.Mul(toDec(coin.Amount)), int32(exp)*-1), nil
 }
@@ -119,15 +120,15 @@ func (k Keeper) TokenValue(ctx sdk.Context, coin sdk.Coin, mode types.PriceMode)
 // TotalTokenValue returns the total value of all supplied tokens. It is
 // equivalent to the sum of TokenValue on each coin individually, except it
 // ignores unregistered and blacklisted tokens instead of returning an error.
-func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
-	total := sdk.ZeroDec()
+func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+	total := sdkmath.LegacyZeroDec()
 
 	accepted := k.filterAcceptedCoins(ctx, coins)
 
 	for _, c := range accepted {
 		v, err := k.TokenValue(ctx, c, mode)
 		if err != nil {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 
 		total = total.Add(v)
@@ -140,8 +141,8 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.Pri
 // by borrow factor (which is the minimum of 2.0 and 1/collateral weight). It
 // ignores unregistered and blacklisted tokens instead of returning an error, but
 // will error on unavailable prices.
-func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
-	total := sdk.ZeroDec()
+func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+	total := sdkmath.LegacyZeroDec()
 
 	for _, c := range coins {
 		token, err := k.GetTokenSettings(ctx, c.Denom)
@@ -150,7 +151,7 @@ func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins, mode typ
 		}
 		v, err := k.TokenValue(ctx, c, mode)
 		if err != nil {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 
 		total = total.Add(v.Mul(token.BorrowFactor()))
@@ -161,8 +162,8 @@ func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins, mode typ
 
 // VisibleTokenValue functions like TotalTokenValue, but interprets missing oracle prices
 // as zero value instead of returning an error.
-func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
-	total := sdk.ZeroDec()
+func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+	total := sdkmath.LegacyZeroDec()
 
 	accepted := k.filterAcceptedCoins(ctx, coins)
 
@@ -172,7 +173,7 @@ func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.P
 			total = total.Add(v)
 		}
 		if nonOracleError(err) {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 	}
 
@@ -180,13 +181,13 @@ func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.P
 }
 
 // VisibleUTokensValue converts uTokens to tokens and calls VisibleTokenValue. Errors on non-uTokens.
-func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode types.PriceMode) (sdk.Dec, error) {
+func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	tokens := sdk.NewCoins()
 
 	for _, u := range uTokens {
 		t, err := k.ToToken(ctx, u)
 		if err != nil {
-			return sdk.ZeroDec(), err
+			return sdkmath.LegacyZeroDec(), err
 		}
 		tokens = tokens.Add(t)
 	}
@@ -197,7 +198,7 @@ func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode typ
 // TokenWithValue creates a token of a given denom with an given USD value.
 // Returns an error on invalid price or denom. Rounds down, i.e. the
 // value of the token returned may be slightly less than the requested value.
-func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mode types.PriceMode) (sdk.Coin, error) {
+func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdkmath.LegacyDec, mode types.PriceMode) (sdk.Coin, error) {
 	// get token price (guaranteed positive if nil error) and exponent
 	price, exp, err := k.TokenPrice(ctx, denom, mode)
 	if err != nil {
@@ -212,7 +213,7 @@ func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mod
 // UTokenWithValue creates a uToken of a given denom with an given USD value.
 // Returns an error on invalid price or non-uToken denom. Rounds down, i.e. the
 // value of the uToken returned may be slightly less than the requested value.
-func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mode types.PriceMode) (sdk.Coin, error) {
+func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdkmath.LegacyDec, mode types.PriceMode) (sdk.Coin, error) {
 	base := coin.StripUTokenDenom(denom)
 	if base == "" {
 		return sdk.Coin{}, types.ErrNotUToken.Wrap(denom)
@@ -224,23 +225,23 @@ func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdk.Dec, mo
 	}
 
 	uTokenExchangeRate := k.DeriveExchangeRate(ctx, base)
-	uTokenAmount := sdk.NewDecFromInt(token.Amount).Quo(uTokenExchangeRate).TruncateInt()
+	uTokenAmount := sdkmath.LegacyNewDecFromInt(token.Amount).Quo(uTokenExchangeRate).TruncateInt()
 
 	return sdk.NewCoin(denom, uTokenAmount), nil
 }
 
-// PriceRatio computes the ratio of the USD prices of two base tokens, as sdk.Dec(fromPrice/toPrice).
+// PriceRatio computes the ratio of the USD prices of two base tokens, as sdkmath.LegacyDec(fromPrice/toPrice).
 // Will return an error if either token price is not positive, and guarantees a positive output.
 // Computation uses price of token's symbol denom to avoid rounding errors for exponent >= 18 tokens,
 // but returns in terms of base tokens. Uses the same price mode for both token denoms involved.
-func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode types.PriceMode) (sdk.Dec, error) {
+func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	p1, e1, err := k.TokenPrice(ctx, fromDenom, mode)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 	p2, e2, err := k.TokenPrice(ctx, toDenom, mode)
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 	// If tokens have different exponents, the symbol price ratio must be adjusted
 	// to obtain the base token price ratio. If fromDenom has a higher exponent, then
@@ -257,7 +258,7 @@ func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
 
 	// reduce rewards if they exceed unreserved module balance
 	for _, coin := range requested {
-		amountToTransfer := sdk.MinInt(coin.Amount, k.AvailableLiquidity(ctx, coin.Denom))
+		amountToTransfer := sdkmath.MinInt(coin.Amount, k.AvailableLiquidity(ctx, coin.Denom))
 
 		if amountToTransfer.IsPositive() {
 			rewards = rewards.Add(sdk.NewCoin(coin.Denom, amountToTransfer))

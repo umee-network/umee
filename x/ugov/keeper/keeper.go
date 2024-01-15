@@ -1,8 +1,9 @@
 package keeper
 
 import (
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 )
@@ -38,6 +39,6 @@ func (kb Builder) EmergencyGroup(ctx *sdk.Context) ugov.WithEmergencyGroup { ret
 
 // Keeper provides a light interface for module data access and transformation
 type Keeper struct {
-	store sdk.KVStore
+	store store.KVStore
 	cdc   codec.BinaryCodec
 }

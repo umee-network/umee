@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/x/leverage/types"
@@ -14,28 +14,28 @@ func validToken() types.Token {
 		BaseDenom:              "uumee",
 		SymbolDenom:            "umee",
 		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.51"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.05"),
+		ReserveFactor:          sdkmath.LegacyMustNewDecFromStr("0.25"),
+		CollateralWeight:       sdkmath.LegacyMustNewDecFromStr("0.5"),
+		LiquidationThreshold:   sdkmath.LegacyMustNewDecFromStr("0.51"),
+		BaseBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.01"),
+		KinkBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.05"),
+		MaxBorrowRate:          sdkmath.LegacyMustNewDecFromStr("1"),
+		KinkUtilization:        sdkmath.LegacyMustNewDecFromStr("0.75"),
+		LiquidationIncentive:   sdkmath.LegacyMustNewDecFromStr("0.05"),
 		EnableMsgSupply:        true,
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("1"),
-		MaxSupply:              sdk.NewInt(1000),
+		MaxCollateralShare:     sdkmath.LegacyMustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdkmath.LegacyMustNewDecFromStr("1"),
+		MinCollateralLiquidity: sdkmath.LegacyMustNewDecFromStr("1"),
+		MaxSupply:              sdkmath.NewInt(1000),
 		HistoricMedians:        24,
 	}
 }
 
 func TestUpdateRegistryProposalString(t *testing.T) {
 	token := validToken()
-	token.ReserveFactor = sdk.NewDec(40)
+	token.ReserveFactor = sdkmath.LegacyNewDec(40)
 	p := types.MsgGovUpdateRegistry{
 		Authority:   "authority",
 		Description: "test",
@@ -78,57 +78,57 @@ func TestTokenValidate(t *testing.T) {
 	invalidUToken.SymbolDenom = ""
 
 	invalidReserveFactor := validToken()
-	invalidReserveFactor.ReserveFactor = sdk.MustNewDecFromStr("-0.25")
+	invalidReserveFactor.ReserveFactor = sdkmath.LegacyMustNewDecFromStr("-0.25")
 
 	invalidCollateralWeight := validToken()
-	invalidCollateralWeight.CollateralWeight = sdk.MustNewDecFromStr("1.1")
+	invalidCollateralWeight.CollateralWeight = sdkmath.LegacyMustNewDecFromStr("1.1")
 
 	invalidCollateralWeight2 := validToken()
-	invalidCollateralWeight2.CollateralWeight = sdk.OneDec()
+	invalidCollateralWeight2.CollateralWeight = sdkmath.LegacyOneDec()
 
 	invalidLiquidationThreshold := validToken()
-	invalidLiquidationThreshold.LiquidationThreshold = sdk.MustNewDecFromStr("-0.25")
+	invalidLiquidationThreshold.LiquidationThreshold = sdkmath.LegacyMustNewDecFromStr("-0.25")
 
 	invalidLiquidationThreshold2 := validToken()
-	invalidLiquidationThreshold2.LiquidationThreshold = sdk.OneDec()
+	invalidLiquidationThreshold2.LiquidationThreshold = sdkmath.LegacyOneDec()
 
 	invalidBaseBorrowRate := validToken()
-	invalidBaseBorrowRate.BaseBorrowRate = sdk.MustNewDecFromStr("-0.01")
+	invalidBaseBorrowRate.BaseBorrowRate = sdkmath.LegacyMustNewDecFromStr("-0.01")
 
 	invalidKinkBorrowRate := validToken()
-	invalidKinkBorrowRate.KinkBorrowRate = sdk.MustNewDecFromStr("-0.05")
+	invalidKinkBorrowRate.KinkBorrowRate = sdkmath.LegacyMustNewDecFromStr("-0.05")
 
 	invalidMaxBorrowRate := validToken()
-	invalidMaxBorrowRate.MaxBorrowRate = sdk.MustNewDecFromStr("-1.0")
+	invalidMaxBorrowRate.MaxBorrowRate = sdkmath.LegacyMustNewDecFromStr("-1.0")
 
 	invalidKinkUtilization := validToken()
-	invalidKinkUtilization.KinkUtilization = sdk.ZeroDec()
+	invalidKinkUtilization.KinkUtilization = sdkmath.LegacyZeroDec()
 
 	invalidLiquidationIncentive := validToken()
-	invalidLiquidationIncentive.LiquidationIncentive = sdk.MustNewDecFromStr("-0.05")
+	invalidLiquidationIncentive.LiquidationIncentive = sdkmath.LegacyMustNewDecFromStr("-0.05")
 
 	invalidBlacklistedBorrow := validToken()
 	invalidBlacklistedBorrow.EnableMsgBorrow = false
 	invalidBlacklistedBorrow.Blacklist = true
 
 	invalidMaxCollateralShare := validToken()
-	invalidMaxCollateralShare.MaxCollateralShare = sdk.MustNewDecFromStr("1.05")
+	invalidMaxCollateralShare.MaxCollateralShare = sdkmath.LegacyMustNewDecFromStr("1.05")
 
 	invalidMaxSupplyUtilization := validToken()
-	invalidMaxSupplyUtilization.MaxSupplyUtilization = sdk.MustNewDecFromStr("1.05")
+	invalidMaxSupplyUtilization.MaxSupplyUtilization = sdkmath.LegacyMustNewDecFromStr("1.05")
 
 	invalidMinCollateralLiquidity := validToken()
-	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdk.MustNewDecFromStr("-0.05")
+	invalidMinCollateralLiquidity.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("-0.05")
 
 	invalidMaxSupply1 := validToken()
-	invalidMaxSupply1.MaxSupply = sdk.NewInt(-1)
+	invalidMaxSupply1.MaxSupply = sdkmath.NewInt(-1)
 
 	validMaxSupply1 := validToken()
-	validMaxSupply1.MaxSupply = sdk.NewInt(0)
+	validMaxSupply1.MaxSupply = sdkmath.NewInt(0)
 	validMaxSupply1.EnableMsgSupply = false
 
 	validMaxSupply2 := validToken()
-	validMaxSupply2.MaxSupply = sdk.NewInt(0)
+	validMaxSupply2.MaxSupply = sdkmath.NewInt(0)
 
 	testCases := map[string]struct {
 		input     types.Token

@@ -103,9 +103,9 @@ The control flow for vote-tallying, exchange rate updates, ballot rewards and sl
 
 ### ExchangeRate
 
-An `sdk.Dec` that stores an exchange rate against USD, which is used by the [Leverage](../leverage/README.md) module.
+An `sdkmath.LegacyDec` that stores an exchange rate against USD, which is used by the [Leverage](../leverage/README.md) module.
 
-- ExchangeRate: `0x01 | byte(denom) -> sdk.Dec`
+- ExchangeRate: `0x01 | byte(denom) -> sdkmath.LegacyDec`
 
 ### FeederDelegation
 
@@ -146,7 +146,7 @@ type AggregateExchangeRatePrevote struct {
 ```go
 type ExchangeRateTuple struct {
     Denom           string  `json:"denom"`
-    ExchangeRate    sdk.Dec `json:"exchange_rate"`
+    ExchangeRate    sdkmath.LegacyDec `json:"exchange_rate"`
 }
 
 type ExchangeRateTuples []ExchangeRateTuple

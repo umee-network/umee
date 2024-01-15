@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -65,15 +66,15 @@ func (s *IntegrationTestSuite) TestSetCollateralAmount() {
 	addr := s.newAccount()
 
 	// force invalid denom
-	err = s.tk.SetCollateral(ctx, addr, sdk.Coin{Denom: "", Amount: sdk.ZeroInt()})
+	err = s.tk.SetCollateral(ctx, addr, sdk.Coin{Denom: "", Amount: sdkmath.ZeroInt()})
 	require.ErrorContains(err, "invalid denom")
 
 	// base denom
-	err = s.tk.SetCollateral(ctx, addr, sdk.Coin{Denom: umeeDenom, Amount: sdk.ZeroInt()})
+	err = s.tk.SetCollateral(ctx, addr, sdk.Coin{Denom: umeeDenom, Amount: sdkmath.ZeroInt()})
 	require.ErrorIs(err, types.ErrNotUToken)
 
 	// negative amount
-	err = s.tk.SetCollateral(ctx, addr, sdk.Coin{Denom: uDenom, Amount: sdk.NewInt(-1)})
+	err = s.tk.SetCollateral(ctx, addr, sdk.Coin{Denom: uDenom, Amount: sdkmath.NewInt(-1)})
 	require.ErrorContains(err, "negative coin amount")
 
 	// set u/umee collateral amount

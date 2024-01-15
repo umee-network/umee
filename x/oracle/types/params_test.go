@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"gotest.tools/v3/assert"
-
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestValidateVotePeriod(t *testing.T) {
@@ -23,13 +21,13 @@ func TestValidateVoteThreshold(t *testing.T) {
 	err := validateVoteThreshold("invalidSdkType")
 	assert.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.31"))
+	err = validateVoteThreshold(sdkmath.LegacyMustNewDecFromStr("0.31"))
 	assert.ErrorContains(t, err, "threshold must be bigger than 0.330000000000000000 and <= 1: invalid request")
 
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("40.0"))
+	err = validateVoteThreshold(sdkmath.LegacyMustNewDecFromStr("40.0"))
 	assert.ErrorContains(t, err, "threshold must be bigger than 0.330000000000000000 and <= 1: invalid request")
 
-	err = validateVoteThreshold(sdk.MustNewDecFromStr("0.35"))
+	err = validateVoteThreshold(sdkmath.LegacyMustNewDecFromStr("0.35"))
 	assert.NilError(t, err)
 }
 
@@ -37,13 +35,13 @@ func TestValidateRewardBand(t *testing.T) {
 	err := validateRewardBand("invalidSdkType")
 	assert.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validateRewardBand(sdk.MustNewDecFromStr("-0.31"))
+	err = validateRewardBand(sdkmath.LegacyMustNewDecFromStr("-0.31"))
 	assert.ErrorContains(t, err, "reward band must be positive: -0.310000000000000000")
 
-	err = validateRewardBand(sdk.MustNewDecFromStr("40.0"))
+	err = validateRewardBand(sdkmath.LegacyMustNewDecFromStr("40.0"))
 	assert.ErrorContains(t, err, "reward band is too large: 40.000000000000000000")
 
-	err = validateRewardBand(sdk.OneDec())
+	err = validateRewardBand(sdkmath.LegacyOneDec())
 	assert.NilError(t, err)
 }
 
@@ -82,13 +80,13 @@ func TestValidateSlashFraction(t *testing.T) {
 	err := validateSlashFraction("invalidSdkType")
 	assert.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validateSlashFraction(sdk.MustNewDecFromStr("-0.31"))
+	err = validateSlashFraction(sdkmath.LegacyMustNewDecFromStr("-0.31"))
 	assert.ErrorContains(t, err, "slash fraction must be positive: -0.310000000000000000")
 
-	err = validateSlashFraction(sdk.MustNewDecFromStr("40.0"))
+	err = validateSlashFraction(sdkmath.LegacyMustNewDecFromStr("40.0"))
 	assert.ErrorContains(t, err, "slash fraction is too large: 40.000000000000000000")
 
-	err = validateSlashFraction(sdk.OneDec())
+	err = validateSlashFraction(sdkmath.LegacyOneDec())
 	assert.NilError(t, err)
 }
 
@@ -107,13 +105,13 @@ func TestValidateMinValidPerWindow(t *testing.T) {
 	err := validateMinValidPerWindow("invalidSdkType")
 	assert.ErrorContains(t, err, "invalid parameter type: string")
 
-	err = validateMinValidPerWindow(sdk.MustNewDecFromStr("-0.31"))
+	err = validateMinValidPerWindow(sdkmath.LegacyMustNewDecFromStr("-0.31"))
 	assert.ErrorContains(t, err, "min valid per window must be positive: -0.310000000000000000")
 
-	err = validateMinValidPerWindow(sdk.MustNewDecFromStr("40.0"))
+	err = validateMinValidPerWindow(sdkmath.LegacyMustNewDecFromStr("40.0"))
 	assert.ErrorContains(t, err, "min valid per window is too large: 40.000000000000000000")
 
-	err = validateMinValidPerWindow(sdk.OneDec())
+	err = validateMinValidPerWindow(sdkmath.LegacyOneDec())
 	assert.NilError(t, err)
 }
 
@@ -173,25 +171,25 @@ func TestParamsEqual(t *testing.T) {
 
 	// small vote threshold
 	p2 := DefaultParams()
-	p2.VoteThreshold = sdk.ZeroDec()
+	p2.VoteThreshold = sdkmath.LegacyZeroDec()
 	err = p2.Validate()
 	assert.ErrorContains(t, err, "oracle parameter VoteThreshold must be greater than 33 percent")
 
 	// negative reward band
 	p3 := DefaultParams()
-	p3.RewardBand = sdk.NewDecWithPrec(-1, 2)
+	p3.RewardBand = sdkmath.LegacyNewDecWithPrec(-1, 2)
 	err = p3.Validate()
 	assert.ErrorContains(t, err, "oracle parameter RewardBand must be between [0, 1]")
 
 	// negative slash fraction
 	p4 := DefaultParams()
-	p4.SlashFraction = sdk.NewDec(-1)
+	p4.SlashFraction = sdkmath.LegacyNewDec(-1)
 	err = p4.Validate()
 	assert.ErrorContains(t, err, "oracle parameter SlashFraction must be between [0, 1]")
 
 	// negative min valid per window
 	p5 := DefaultParams()
-	p5.MinValidPerWindow = sdk.NewDec(-1)
+	p5.MinValidPerWindow = sdkmath.LegacyNewDec(-1)
 	err = p5.Validate()
 	assert.ErrorContains(t, err, "oracle parameter MinValidPerWindow must be between [0, 1")
 
@@ -245,24 +243,24 @@ func TestParamsEqual(t *testing.T) {
 func TestValidateVotingThreshold(t *testing.T) {
 	tcs := []struct {
 		name   string
-		t      sdk.Dec
+		t      sdkmath.LegacyDec
 		errMsg string
 	}{
-		{"fail: negative", sdk.MustNewDecFromStr("-1"), "threshold must be"},
-		{"fail: zero", sdk.ZeroDec(), "threshold must be"},
-		{"fail: less than 0.33", sdk.MustNewDecFromStr("0.3"), "threshold must be"},
-		{"fail: equal 0.33", sdk.MustNewDecFromStr("0.33"), "threshold must be"},
-		{"fail: more than 1", sdk.MustNewDecFromStr("1.1"), "threshold must be"},
-		{"fail: more than 1", sdk.MustNewDecFromStr("10"), "threshold must be"},
-		{"fail: max precision 2", sdk.MustNewDecFromStr("0.333"), "maximum 2 decimals"},
-		{"fail: max precision 2", sdk.MustNewDecFromStr("0.401"), "maximum 2 decimals"},
-		{"fail: max precision 2", sdk.MustNewDecFromStr("0.409"), "maximum 2 decimals"},
-		{"fail: max precision 2", sdk.MustNewDecFromStr("0.4009"), "maximum 2 decimals"},
-		{"fail: max precision 2", sdk.MustNewDecFromStr("0.999"), "maximum 2 decimals"},
+		{"fail: negative", sdkmath.LegacyMustNewDecFromStr("-1"), "threshold must be"},
+		{"fail: zero", sdkmath.LegacyZeroDec(), "threshold must be"},
+		{"fail: less than 0.33", sdkmath.LegacyMustNewDecFromStr("0.3"), "threshold must be"},
+		{"fail: equal 0.33", sdkmath.LegacyMustNewDecFromStr("0.33"), "threshold must be"},
+		{"fail: more than 1", sdkmath.LegacyMustNewDecFromStr("1.1"), "threshold must be"},
+		{"fail: more than 1", sdkmath.LegacyMustNewDecFromStr("10"), "threshold must be"},
+		{"fail: max precision 2", sdkmath.LegacyMustNewDecFromStr("0.333"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdkmath.LegacyMustNewDecFromStr("0.401"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdkmath.LegacyMustNewDecFromStr("0.409"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdkmath.LegacyMustNewDecFromStr("0.4009"), "maximum 2 decimals"},
+		{"fail: max precision 2", sdkmath.LegacyMustNewDecFromStr("0.999"), "maximum 2 decimals"},
 
-		{"ok: 1", sdk.MustNewDecFromStr("1"), ""},
-		{"ok: 0.34", sdk.MustNewDecFromStr("0.34"), ""},
-		{"ok: 0.99", sdk.MustNewDecFromStr("0.99"), ""},
+		{"ok: 1", sdkmath.LegacyMustNewDecFromStr("1"), ""},
+		{"ok: 0.34", sdkmath.LegacyMustNewDecFromStr("0.34"), ""},
+		{"ok: 0.99", sdkmath.LegacyMustNewDecFromStr("0.99"), ""},
 	}
 
 	for _, tc := range tcs {

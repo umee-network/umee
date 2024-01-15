@@ -72,11 +72,11 @@ The ICS-20 quota mechanism is controlled by the `Params.IbcStatus`, which can ha
 In the state we store:
 
 - Module [parameters](../../proto/umee/uibc/v1/quota.proto#L11).
-- Running sum of total outflow values, serialized as `sdk.Dec`.
-- Running sum of per token outflow values, serialized as `sdk.Dec`.
+- Running sum of total outflow values, serialized as `sdkmath.LegacyDec`.
+- Running sum of per token outflow values, serialized as `sdkmath.LegacyDec`.
 - Next quota expire time (after which the quota reset happens).
-- Running sum of total inflow values, serialized as `sdk.Dec`.
-- Running sum of per token inflow values, serialized as `sdk.Dec`.
+- Running sum of total inflow values, serialized as `sdkmath.LegacyDec`.
+- Running sum of per token inflow values, serialized as `sdkmath.LegacyDec`.
 
 ### Messages
 

@@ -178,7 +178,8 @@ message MsgLeveragedLiquidate {
   string reward_denom = 4;
   // MaxRepay optionally limits the USD value to repay. If specified, this cannot be below $1.00
   string max_repay = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

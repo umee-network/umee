@@ -8,8 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"gotest.tools/v3/assert"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/mocks"
@@ -25,8 +23,8 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 		"", sdkmath.ZeroInt(), 6, metoken.Fee{},
 		[]metoken.AcceptedAsset{
 			metoken.NewAcceptedAsset(
-				"test", sdk.MustNewDecFromStr("0.2"),
-				sdk.MustNewDecFromStr("1.0"),
+				"test", sdkmath.LegacyMustNewDecFromStr("0.2"),
+				sdkmath.LegacyMustNewDecFromStr("1.0"),
 			),
 		},
 	)
@@ -35,8 +33,8 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 		"", sdkmath.ZeroInt(), 6, metoken.Fee{},
 		[]metoken.AcceptedAsset{
 			metoken.NewAcceptedAsset(
-				mocks.TestDenom1, sdk.MustNewDecFromStr("0.2"),
-				sdk.MustNewDecFromStr("1.0"),
+				mocks.TestDenom1, sdkmath.LegacyMustNewDecFromStr("0.2"),
+				sdkmath.LegacyMustNewDecFromStr("1.0"),
 			),
 		},
 	)
@@ -51,16 +49,16 @@ func TestIndex_AddAndUpdate(t *testing.T) {
 
 	egUpdateFailure := mocks.StableIndex(mocks.MeUSDDenom)
 	egUpdateFailure.Exponent--
-	egUpdateFailure.Fee.BalancedFee = sdk.MustNewDecFromStr("0.3")
+	egUpdateFailure.Fee.BalancedFee = sdkmath.LegacyMustNewDecFromStr("0.3")
 	egUpdateFailure.MaxSupply = egUpdateFailure.MaxSupply.Add(sdkmath.NewInt(1000))
 	egUpdateFailure.AcceptedAssets = append(
 		egUpdateFailure.AcceptedAssets, metoken.NewAcceptedAsset(
 			"new",
-			sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.2"),
+			sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.2"),
 		),
 	)
 	aa := egUpdateFailure.AcceptedAssets[0]
-	aa.ReservePortion = sdk.MustNewDecFromStr("0.5")
+	aa.ReservePortion = sdkmath.LegacyMustNewDecFromStr("0.5")
 	egUpdateFailure.SetAcceptedAsset(aa)
 
 	tcs := []struct {

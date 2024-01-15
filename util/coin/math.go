@@ -1,6 +1,7 @@
 package coin
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -24,7 +25,7 @@ func (d *DecBld) Scale(f int64) *DecBld {
 // Scale scales dec coin by given factor provided as string.
 // Panics if f is not a correct decimal number.
 func (d *DecBld) ScaleStr(f string) *DecBld {
-	d.D = sdk.DecCoin{Denom: d.D.Denom, Amount: d.D.Amount.Mul(sdk.MustNewDecFromStr(f))}
+	d.D = sdk.DecCoin{Denom: d.D.Denom, Amount: d.D.Amount.Mul(sdkmath.LegacyMustNewDecFromStr(f))}
 	return d
 }
 

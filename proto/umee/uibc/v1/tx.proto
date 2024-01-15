@@ -41,13 +41,13 @@ message MsgGovUpdateQuota {
   // total quota defines the total outflow of ibc-transfer in USD
   string total = 4 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // per_denom quota for outflows per denom. All denoms have the same quota size.
   string per_denom = 5 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // quota_duration defines quota expires per denom, All denoms have the same expire time.
@@ -60,19 +60,19 @@ message MsgGovUpdateQuota {
   // Params.inflow_outflow_quota_base
   string inflow_outflow_quota_base = 7 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // Params.inflow_outflow_quota_rate
   string inflow_outflow_quota_rate = 8 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // Params.inflow_outflow_token_quota_base
   string inflow_outflow_token_quota_base = 9 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

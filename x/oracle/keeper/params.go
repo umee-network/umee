@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -14,7 +15,7 @@ func (k Keeper) VotePeriod(ctx sdk.Context) (res uint64) {
 
 // VoteThreshold returns the minimum portion of combined validator power of votes
 // that must be received for a ballot to pass.
-func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdkmath.LegacyDec) {
 	k.paramSpace.Get(ctx, types.KeyVoteThreshold, &res)
 	return
 }
@@ -22,7 +23,7 @@ func (k Keeper) VoteThreshold(ctx sdk.Context) (res sdk.Dec) {
 // SetVoteThreshold sets min combined validator power voting on a denom to accept
 // it as valid.
 // TODO: this is used in tests, we should refactor the way how this is handled.
-func (k Keeper) SetVoteThreshold(ctx sdk.Context, threshold sdk.Dec) error {
+func (k Keeper) SetVoteThreshold(ctx sdk.Context, threshold sdkmath.LegacyDec) error {
 	if err := types.ValidateVoteThreshold(threshold); err != nil {
 		return err
 	}
@@ -32,7 +33,7 @@ func (k Keeper) SetVoteThreshold(ctx sdk.Context, threshold sdk.Dec) error {
 
 // RewardBand returns the ratio of allowable exchange rate error that a validator
 // can be rewarded.
-func (k Keeper) RewardBand(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) RewardBand(ctx sdk.Context) (res sdkmath.LegacyDec) {
 	k.paramSpace.Get(ctx, types.KeyRewardBand, &res)
 	return
 }
@@ -57,7 +58,7 @@ func (k Keeper) SetAcceptList(ctx sdk.Context, acceptList types.DenomList) {
 }
 
 // SlashFraction returns oracle voting penalty rate
-func (k Keeper) SlashFraction(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) SlashFraction(ctx sdk.Context) (res sdkmath.LegacyDec) {
 	k.paramSpace.Get(ctx, types.KeySlashFraction, &res)
 	return
 }
@@ -69,7 +70,7 @@ func (k Keeper) SlashWindow(ctx sdk.Context) (res uint64) {
 }
 
 // MinValidPerWindow returns oracle slashing threshold
-func (k Keeper) MinValidPerWindow(ctx sdk.Context) (res sdk.Dec) {
+func (k Keeper) MinValidPerWindow(ctx sdk.Context) (res sdkmath.LegacyDec) {
 	k.paramSpace.Get(ctx, types.KeyMinValidPerWindow, &res)
 	return
 }

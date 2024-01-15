@@ -375,11 +375,11 @@ func TestMsgServer_Swap_AfterAddingAssetToIndex(t *testing.T) {
 
 	// after initial swaps ETH is added to the index and target_allocation is recalculated
 	for i := 0; i < len(index.AcceptedAssets); i++ {
-		index.AcceptedAssets[i].TargetAllocation = sdk.MustNewDecFromStr("0.25")
+		index.AcceptedAssets[i].TargetAllocation = sdkmath.LegacyMustNewDecFromStr("0.25")
 	}
 	index.AcceptedAssets = append(
 		index.AcceptedAssets,
-		metoken.NewAcceptedAsset(mocks.ETHBaseDenom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.25")),
+		metoken.NewAcceptedAsset(mocks.ETHBaseDenom, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.25")),
 	)
 
 	_, err = msgServer.GovUpdateRegistry(
@@ -594,7 +594,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 		}, otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				mocks.ISTSymbolDenom,
-				sdk.MustNewDecFromStr("0.64"),
+				sdkmath.LegacyMustNewDecFromStr("0.64"),
 			),
 			BlockNum: uint64(1),
 		},
@@ -864,7 +864,7 @@ func verifySwap(
 
 	// current_allocation = asset_value / total_value
 	// swap_delta_allocation = (current_allocation - target_allocation) / target_allocation
-	currentAllocation, swapDeltaAllocation := sdk.ZeroDec(), sdk.ZeroDec()
+	currentAllocation, swapDeltaAllocation := sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()
 	aa, i := index.AcceptedAsset(denom)
 	assert.Check(t, i >= 0)
 	targetAllocation := aa.TargetAllocation
@@ -1321,7 +1321,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				mocks.USDTSymbolDenom,
-				sdk.MustNewDecFromStr("0.73"),
+				sdkmath.LegacyMustNewDecFromStr("0.73"),
 			),
 			BlockNum: uint64(1),
 		}, otypes.Price{
@@ -1681,7 +1681,7 @@ func verifyRedeem(
 
 	// current_allocation = asset_value / total_value
 	// redeem_delta_allocation = (target_allocation - current_allocation) / target_allocation
-	currentAllocation, redeemDeltaAllocation := sdk.ZeroDec(), sdk.ZeroDec()
+	currentAllocation, redeemDeltaAllocation := sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()
 	aa, i := index.AcceptedAsset(tc.denom)
 	assert.Check(t, i >= 0)
 	targetAllocation := aa.TargetAllocation
@@ -1845,18 +1845,18 @@ func TestMsgServer_GovUpdateRegistry(t *testing.T) {
 
 	indexWithNotRegisteredToken := metoken.NewIndex(
 		"me/NotRegistered",
-		sdk.NewInt(1_000_000_000_000),
+		sdkmath.NewInt(1_000_000_000_000),
 		6,
 		mocks.ValidFee(),
 		[]metoken.AcceptedAsset{
-			metoken.NewAcceptedAsset("notRegisteredDenom", sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("1.0")),
+			metoken.NewAcceptedAsset("notRegisteredDenom", sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("1.0")),
 		},
 	)
 
 	deletedAssetIndex := mocks.NonStableIndex(mocks.MeNonStableDenom)
 	aa := []metoken.AcceptedAsset{
-		metoken.NewAcceptedAsset(mocks.WBTCSymbolDenom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5")),
-		metoken.NewAcceptedAsset(mocks.ETHSymbolDenom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr("0.5")),
+		metoken.NewAcceptedAsset(mocks.WBTCSymbolDenom, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.5")),
+		metoken.NewAcceptedAsset(mocks.ETHSymbolDenom, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr("0.5")),
 	}
 	deletedAssetIndex.AcceptedAssets = aa
 

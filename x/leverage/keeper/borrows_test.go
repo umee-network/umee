@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -55,18 +56,18 @@ func (s *IntegrationTestSuite) TestSetBorrow() {
 	require.NoError(err)
 
 	// interest scalar test - ensure borrowing smallest possible amount doesn't round to zero at scalar = 1.0001
-	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("1.0001")))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdkmath.LegacyMustNewDecFromStr("1.0001")))
 	require.NoError(s.tk.SetBorrow(ctx, addr, coin.New(umeeDenom, 1)))
 	require.Equal(coin.New(umeeDenom, 1), s.tk.GetBorrow(ctx, addr, umeeDenom))
 
 	// interest scalar test - scalar changing after borrow (as it does when interest accrues)
-	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("1.0")))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdkmath.LegacyMustNewDecFromStr("1.0")))
 	require.NoError(s.tk.SetBorrow(ctx, addr, coin.New(umeeDenom, 200)))
-	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("2.33")))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdkmath.LegacyMustNewDecFromStr("2.33")))
 	require.Equal(coin.New(umeeDenom, 466), s.tk.GetBorrow(ctx, addr, umeeDenom))
 
 	// interest scalar extreme case - rounding up becomes apparent at high borrow amount
-	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("555444333222111")))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdkmath.LegacyMustNewDecFromStr("555444333222111")))
 	require.NoError(s.tk.SetBorrow(ctx, addr, coin.New(umeeDenom, 1)))
 	require.Equal(coin.New(umeeDenom, 1), s.tk.GetBorrow(ctx, addr, umeeDenom))
 	require.NoError(s.tk.SetBorrow(ctx, addr, coin.New(umeeDenom, 20000)))
@@ -101,7 +102,7 @@ func (s *IntegrationTestSuite) TestGetTotalBorrowed() {
 	require.Equal(coin.New(umeeDenom, 357), borrowed)
 
 	// interest scalar test - scalar changing after borrow (as it does when interest accrues)
-	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdk.MustNewDecFromStr("2.00")))
+	require.NoError(s.tk.SetInterestScalar(ctx, umeeDenom, sdkmath.LegacyMustNewDecFromStr("2.00")))
 	require.Equal(coin.New(umeeDenom, 714), s.tk.GetTotalBorrowed(ctx, umeeDenom))
 }
 
@@ -110,7 +111,7 @@ func (s *IntegrationTestSuite) TestLiquidity() {
 
 	// unregistered denom (zero)
 	available := s.tk.AvailableLiquidity(ctx, "abcd")
-	require.Equal(sdk.ZeroInt(), available)
+	require.Equal(sdkmath.ZeroInt(), available)
 
 	// creates account which has supplied and collateralized 1000 uumee
 	supplier := s.newAccount(coin.New(umeeDenom, 1000))
@@ -119,7 +120,7 @@ func (s *IntegrationTestSuite) TestLiquidity() {
 
 	// confirm lending pool is 1000 uumee
 	available = s.tk.AvailableLiquidity(ctx, umeeDenom)
-	require.Equal(sdk.NewInt(1000), available)
+	require.Equal(sdkmath.NewInt(1000), available)
 
 	// creates account which has supplied and collateralized 1000 uumee, and borrowed 123 uumee
 	borrower := s.newAccount(coin.New(umeeDenom, 1000))
@@ -129,12 +130,12 @@ func (s *IntegrationTestSuite) TestLiquidity() {
 
 	// confirm lending pool is 1877 uumee
 	available = s.tk.AvailableLiquidity(ctx, umeeDenom)
-	require.Equal(sdk.NewInt(1877), available)
+	require.Equal(sdkmath.NewInt(1877), available)
 
 	// artificially reserve 200 uumee, reducing available amount to 1677
 	s.setReserves(coin.New(umeeDenom, 200))
 	available = s.tk.AvailableLiquidity(ctx, umeeDenom)
-	require.Equal(sdk.NewInt(1677), available)
+	require.Equal(sdkmath.NewInt(1677), available)
 }
 
 func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
@@ -142,7 +143,7 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 
 	// unregistered denom (0 borrowed and 0 lending pool is considered 100%)
 	utilization := s.tk.SupplyUtilization(ctx, "abcd")
-	require.Equal(sdk.OneDec(), utilization)
+	require.Equal(sdkmath.LegacyOneDec(), utilization)
 
 	// creates account which has supplied and collateralized 1000 uumee
 	addr := s.newAccount(coin.New(umeeDenom, 1000))
@@ -154,47 +155,47 @@ func (s *IntegrationTestSuite) TestDeriveBorrowUtilization() {
 
 	// 0% utilization (0 / 0+1000-0)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
-	require.Equal(sdk.ZeroDec(), utilization)
+	require.Equal(sdkmath.LegacyZeroDec(), utilization)
 
 	// user borrows 200 uumee, reducing module account to 800 uumee
 	s.borrow(addr, coin.New(umeeDenom, 200))
 
 	// 20% utilization (200 / 200+800-0)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
-	require.Equal(sdk.MustNewDecFromStr("0.2"), utilization)
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("0.2"), utilization)
 
 	// artificially reserve 200 uumee
 	s.setReserves(coin.New(umeeDenom, 200))
 
 	// 25% utilization (200 / 200+800-200)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
-	require.Equal(sdk.MustNewDecFromStr("0.25"), utilization)
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("0.25"), utilization)
 
 	// user borrows 600 uumee (disregard borrow limit), reducing module account to 0 uumee
 	s.forceBorrow(addr, coin.New(umeeDenom, 600))
 
 	// 100% utilization (800 / 800+200-200))
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
-	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("1.0"), utilization)
 
 	// artificially set user borrow to 1200 umee
 	require.NoError(s.tk.SetBorrow(ctx, addr, coin.New(umeeDenom, 1200)))
 
 	// still 100% utilization (1200 / 1200+200-200)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
-	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 800 uumee
 	s.setReserves(coin.New(umeeDenom, 800))
 
 	// edge case interpreted as 100% utilization (1200 / 1200+200-800)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
-	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("1.0"), utilization)
 
 	// artificially set reserves to 4000 uumee
 	s.setReserves(coin.New(umeeDenom, 4000))
 
 	// impossible case interpreted as 100% utilization (1200 / 1200+200-4000)
 	utilization = s.tk.SupplyUtilization(ctx, umeeDenom)
-	require.Equal(sdk.MustNewDecFromStr("1.0"), utilization)
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("1.0"), utilization)
 }

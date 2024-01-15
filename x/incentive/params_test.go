@@ -3,8 +3,7 @@ package incentive
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
 )
 
@@ -19,6 +18,6 @@ func TestDefaultParams(t *testing.T) {
 	assert.ErrorContains(t, invalidUnbondingDuration.Validate(), "invalid unbonding duration")
 
 	invalidEmergencyUnbondFee := DefaultParams()
-	invalidEmergencyUnbondFee.EmergencyUnbondFee = sdk.OneDec()
+	invalidEmergencyUnbondFee.EmergencyUnbondFee = sdkmath.LegacyOneDec()
 	assert.ErrorContains(t, invalidEmergencyUnbondFee.Validate(), "invalid emergency unbonding fee")
 }

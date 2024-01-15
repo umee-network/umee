@@ -1,6 +1,7 @@
 package tests
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -71,7 +72,7 @@ func (s *IntegrationTests) TestInvalidQueries() {
 func (s *IntegrationTests) TestLeverageScenario() {
 	val := s.Network.Validators[0]
 
-	oracleSymbolPrice := sdk.MustNewDecFromStr("34.21")
+	oracleSymbolPrice := sdkmath.LegacyMustNewDecFromStr("34.21")
 
 	initialQueries := []itestsuite.TestQuery{
 		{
@@ -130,26 +131,26 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				Exponent:            6,
 				OraclePrice:         &oracleSymbolPrice,
 				OracleHistoricPrice: &oracleSymbolPrice,
-				UTokenExchangeRate:  sdk.OneDec(),
+				UTokenExchangeRate:  sdkmath.LegacyOneDec(),
 				// Borrow rate * (1.52 - ReserveFactor - OracleRewardFactor)
 				// 1.52 * (1 - 0.2 - 0.01) = 1.2008
-				Supply_APY: sdk.MustNewDecFromStr("1.2008"),
+				Supply_APY: sdkmath.LegacyMustNewDecFromStr("1.2008"),
 				// This is an edge case technically - when effective supply, meaning
 				// module balance + total borrows, is zero, utilization (0/0) is
 				// interpreted as 100% so max borrow rate (152% APY) is used.
-				Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
-				Supplied:               sdk.ZeroInt(),
-				Reserved:               sdk.ZeroInt(),
-				Collateral:             sdk.ZeroInt(),
-				Borrowed:               sdk.ZeroInt(),
-				Liquidity:              sdk.ZeroInt(),
-				MaximumBorrow:          sdk.ZeroInt(),
-				MaximumCollateral:      sdk.ZeroInt(),
-				MinimumLiquidity:       sdk.ZeroInt(),
-				UTokenSupply:           sdk.ZeroInt(),
-				AvailableBorrow:        sdk.ZeroInt(),
-				AvailableWithdraw:      sdk.ZeroInt(),
-				AvailableCollateralize: sdk.ZeroInt(),
+				Borrow_APY:             sdkmath.LegacyMustNewDecFromStr("1.52"),
+				Supplied:               sdkmath.ZeroInt(),
+				Reserved:               sdkmath.ZeroInt(),
+				Collateral:             sdkmath.ZeroInt(),
+				Borrowed:               sdkmath.ZeroInt(),
+				Liquidity:              sdkmath.ZeroInt(),
+				MaximumBorrow:          sdkmath.ZeroInt(),
+				MaximumCollateral:      sdkmath.ZeroInt(),
+				MinimumLiquidity:       sdkmath.ZeroInt(),
+				UTokenSupply:           sdkmath.ZeroInt(),
+				AvailableBorrow:        sdkmath.ZeroInt(),
+				AvailableWithdraw:      sdkmath.ZeroInt(),
+				AvailableCollateralize: sdkmath.ZeroInt(),
 			},
 		},
 		{
@@ -293,8 +294,8 @@ func (s *IntegrationTests) TestLeverageScenario() {
 		ExpectedErr: nil,
 	}
 
-	lt1 := sdk.MustNewDecFromStr("0.0089034946")
-	bl1 := sdk.MustNewDecFromStr("0.0085610525")
+	lt1 := sdkmath.LegacyMustNewDecFromStr("0.0089034946")
+	bl1 := sdkmath.LegacyMustNewDecFromStr("0.0085610525")
 
 	nonzeroQueries := []itestsuite.TestQuery{
 		{
@@ -329,14 +330,14 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				// app/test_helpers.go/IntegrationTestNetworkConfig
 				// times the amount of umee, and then times params
 				// (1001 / 1000000) * 34.21 = 0.03424421
-				SuppliedValue:     sdk.MustNewDecFromStr("0.03424421"),
-				SpotSuppliedValue: sdk.MustNewDecFromStr("0.03424421"),
+				SuppliedValue:     sdkmath.LegacyMustNewDecFromStr("0.03424421"),
+				SpotSuppliedValue: sdkmath.LegacyMustNewDecFromStr("0.03424421"),
 				// (1001 / 1000000) * 34.21 = 0.03424421
-				CollateralValue:     sdk.MustNewDecFromStr("0.03424421"),
-				SpotCollateralValue: sdk.MustNewDecFromStr("0.03424421"),
+				CollateralValue:     sdkmath.LegacyMustNewDecFromStr("0.03424421"),
+				SpotCollateralValue: sdkmath.LegacyMustNewDecFromStr("0.03424421"),
 				// (251 / 1000000) * 34.21 = 0.00858671
-				BorrowedValue:     sdk.MustNewDecFromStr("0.00858671"),
-				SpotBorrowedValue: sdk.MustNewDecFromStr("0.00858671"),
+				BorrowedValue:     sdkmath.LegacyMustNewDecFromStr("0.00858671"),
+				SpotBorrowedValue: sdkmath.LegacyMustNewDecFromStr("0.00858671"),
 				// (1001 / 1000000) * 34.21 * 0.25 = 0.0085610525
 				BorrowLimit: &bl1,
 				// (1001 / 1000000) * 0.26 * 34.21 = 0.008903494600000000
@@ -402,10 +403,10 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens: sdk.NewCoins(
-					sdk.NewCoin("uumee", sdk.NewInt(201)),
+					sdk.NewCoin("uumee", sdkmath.NewInt(201)),
 				),
 				UTokens: sdk.NewCoins(
-					sdk.NewCoin("u/uumee", sdk.NewInt(200)),
+					sdk.NewCoin("u/uumee", sdkmath.NewInt(200)),
 				),
 			},
 			ErrMsg: "",
@@ -420,7 +421,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryMaxBorrowResponse{},
 			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(
-					sdk.NewCoin("uumee", sdk.NewInt(25)),
+					sdk.NewCoin("uumee", sdkmath.NewInt(25)),
 				),
 			},
 			ErrMsg: "",
@@ -434,10 +435,10 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryMaxWithdrawResponse{},
 			ExpectedResponse: &types.QueryMaxWithdrawResponse{
 				Tokens: sdk.NewCoins(
-					sdk.NewCoin("uumee", sdk.NewInt(201)),
+					sdk.NewCoin("uumee", sdkmath.NewInt(201)),
 				),
 				UTokens: sdk.NewCoins(
-					sdk.NewCoin("u/uumee", sdk.NewInt(200)),
+					sdk.NewCoin("u/uumee", sdkmath.NewInt(200)),
 				),
 			},
 			ErrMsg: "",
@@ -451,7 +452,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryMaxBorrowResponse{},
 			ExpectedResponse: &types.QueryMaxBorrowResponse{
 				Tokens: sdk.NewCoins(
-					sdk.NewCoin("uumee", sdk.NewInt(25)),
+					sdk.NewCoin("uumee", sdkmath.NewInt(25)),
 				),
 			},
 			ErrMsg: "",

@@ -69,21 +69,21 @@ func TestRebalanceReserves(t *testing.T) {
 
 	// change index setting modifying the reserve_portion
 	// usdt_reserve_portion from 0.2 to 0.25
-	usdtReservePortion := sdk.MustNewDecFromStr("0.25")
+	usdtReservePortion := sdkmath.LegacyMustNewDecFromStr("0.25")
 	usdtSettings, i := index.AcceptedAsset(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)
 	usdtSettings.ReservePortion = usdtReservePortion
 	index.SetAcceptedAsset(usdtSettings)
 
 	// usdc_reserve_portion from 0.2 to 0.5
-	usdcReservePortion := sdk.MustNewDecFromStr("0.5")
+	usdcReservePortion := sdkmath.LegacyMustNewDecFromStr("0.5")
 	usdcSettings, i := index.AcceptedAsset(mocks.USDCBaseDenom)
 	require.True(t, i >= 0)
 	usdcSettings.ReservePortion = usdcReservePortion
 	index.SetAcceptedAsset(usdcSettings)
 
 	// ist_reserve_portion from 0.2 to 0.035
-	istReservePortion := sdk.MustNewDecFromStr("0.035")
+	istReservePortion := sdkmath.LegacyMustNewDecFromStr("0.035")
 	istSettings, i := index.AcceptedAsset(mocks.ISTBaseDenom)
 	require.True(t, i >= 0)
 	istSettings.ReservePortion = istReservePortion

@@ -3,7 +3,7 @@ package uibc
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
 )
 
@@ -22,8 +22,8 @@ func TestValidateQuotaDuration(t *testing.T) {
 }
 
 func TestValidateQuota(t *testing.T) {
-	err := validateQuota(sdk.NewDec(-1), "s")
+	err := validateQuota(sdkmath.LegacyNewDec(-1), "s")
 	assert.ErrorContains(t, err, "must be not negative")
-	err = validateQuota(sdk.NewDec(100), "s")
+	err = validateQuota(sdkmath.LegacyNewDec(100), "s")
 	assert.NilError(t, err)
 }

@@ -134,8 +134,8 @@ func (c *Client) BroadcastTx(idx int, msgs ...sdk.Msg) (*sdk.TxResponse, error) 
 	if err != nil {
 		c.logger.Fatalln("can't get keyring record, idx=", idx, err)
 	}
-	f := c.txFactory.WithFromName(r.Name)
-	return BroadcastTx(cctx, f, msgs...)
+	// f := c.txFactory.WithFromName(r.Name)
+	return BroadcastTx(cctx, *c.txFactory, msgs...)
 }
 
 func (c *Client) SetAccSeq(seq uint64) {

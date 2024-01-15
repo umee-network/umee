@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/sdkutil"
@@ -12,45 +13,45 @@ import (
 // DeriveBorrowAPY derives the current borrow interest rate on a token denom
 // using its supply utilization and token-specific params. Returns zero on
 // invalid asset.
-func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	if token.Blacklist {
 		// Regardless of params, AccrueAllInterest skips blacklisted denoms
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	utilization := k.SupplyUtilization(ctx, denom)
 
 	if utilization.GTE(token.KinkUtilization) {
 		return Interpolate(
-			utilization,           // x
-			token.KinkUtilization, // x1
-			token.KinkBorrowRate,  // y1
-			sdk.OneDec(),          // x2
-			token.MaxBorrowRate,   // y2
+			utilization,            // x
+			token.KinkUtilization,  // x1
+			token.KinkBorrowRate,   // y1
+			sdkmath.LegacyOneDec(), // x2
+			token.MaxBorrowRate,    // y2
 		)
 	}
 
 	// utilization is between 0% and kink value
 	return Interpolate(
-		utilization,           // x
-		sdk.ZeroDec(),         // x1
-		token.BaseBorrowRate,  // y1
-		token.KinkUtilization, // x2
-		token.KinkBorrowRate,  // y2
+		utilization,             // x
+		sdkmath.LegacyZeroDec(), // x1
+		token.BaseBorrowRate,    // y1
+		token.KinkUtilization,   // x2
+		token.KinkBorrowRate,    // y2
 	)
 }
 
 // DeriveSupplyAPY derives the current supply interest rate on a token denom
 // using its supply utilization and borrow APY. Returns zero on invalid asset.
-func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
@@ -58,7 +59,7 @@ func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
 	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
 
 	// supply APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
-	return borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reduction))
+	return borrowRate.Mul(utilization).Mul(sdkmath.LegacyOneDec().Sub(reduction))
 }
 
 // AccrueAllInterest is called by EndBlock to update borrow positions.
@@ -90,8 +91,8 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		return nil
 	}
 
-	yearsElapsed := sdk.NewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
-	if yearsElapsed.GTE(sdk.OneDec()) {
+	yearsElapsed := sdkmath.LegacyNewDec(currentTime - prevInterestTime).QuoInt64(types.SecondsPerYear)
+	if yearsElapsed.GTE(sdkmath.LegacyOneDec()) {
 		// this safeguards primarily against misbehaving block time or incorrectly modified genesis states
 		// which would accrue significant interest on borrows instantly. Chain will halt.
 		return types.ErrExcessiveTimeElapsed.Wrapf("BlockTime: %d, LastInterestTime: %d",
@@ -127,14 +128,14 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		prevTotalBorrowed := k.getAdjustedTotalBorrowed(ctx, token.BaseDenom).Mul(scalar)
 
 		// calculate total interest accrued for this denom
-		interestAccrued := prevTotalBorrowed.Mul(exponential.Sub(sdk.OneDec()))
+		interestAccrued := prevTotalBorrowed.Mul(exponential.Sub(sdkmath.LegacyOneDec()))
 		totalInterest = totalInterest.Add(sdk.NewCoin(
 			token.BaseDenom,
 			interestAccrued.TruncateInt(),
 		))
 
 		// if interest accrued on this denom is at least one base token
-		if interestAccrued.GT(sdk.OneDec()) {
+		if interestAccrued.GT(sdkmath.LegacyOneDec()) {
 			// calculate new reserves gained for this denom, rounding up
 			newReserves = newReserves.Add(sdk.NewCoin(
 				token.BaseDenom,

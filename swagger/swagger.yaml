@@ -4384,7 +4384,7 @@ paths:
         denomination
 
         if current incentive rewards continued for one year. The response is an
-        sdk.Dec
+        sdkmath.LegacyDec
 
         representing an oracle-adjusted APY.
       operationId: ActualRates
@@ -7969,7 +7969,7 @@ definitions:
         format: double
         description: Value is account's collateral value in USD.
     description: >-
-      RiskInfo defines a borrower's account health without requiring sdk.Dec
+      RiskInfo defines a borrower's account health without requiring sdkmath.LegacyDec
       formatting.
   umee.leverage.v1.SpecialAssetPair:
     type: object

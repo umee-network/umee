@@ -75,15 +75,15 @@ func TestKeeper_ExportGenesis(t *testing.T) {
 			Denom:     mocks.MeUSDDenom,
 			MaxSupply: sdkmath.ZeroInt(),
 			Fee: metoken.NewFee(
-				sdk.MustNewDecFromStr("0.001"),
-				sdk.MustNewDecFromStr("0.2"),
-				sdk.MustNewDecFromStr("0.5"),
+				sdkmath.LegacyMustNewDecFromStr("0.001"),
+				sdkmath.LegacyMustNewDecFromStr("0.2"),
+				sdkmath.LegacyMustNewDecFromStr("0.5"),
 			),
 			AcceptedAssets: []metoken.AcceptedAsset{
 				metoken.NewAcceptedAsset(
 					usdt,
-					sdk.MustNewDecFromStr("0.2"),
-					sdk.MustNewDecFromStr("1.0"),
+					sdkmath.LegacyMustNewDecFromStr("0.2"),
+					sdkmath.LegacyMustNewDecFromStr("1.0"),
 				),
 			},
 		},

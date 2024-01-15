@@ -57,8 +57,8 @@ The module will govern the lock durations of the tiers (in seconds) using parame
 LockDurationShort uint64
 LockDurationMedium uint64
 LockDurationLong uint64
-MiddleTierWeight sdk.Dec
-ShortTierWeight  sdk.Dec
+MiddleTierWeight sdkmath.LegacyDec
+ShortTierWeight  sdkmath.LegacyDec
 ```
 
 Valid tier weights range from 0 to 1.

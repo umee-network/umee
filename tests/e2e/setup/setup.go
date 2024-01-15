@@ -248,7 +248,7 @@ func (s *E2ETestSuite) initGenesis() {
 
 	votingPeriod := 5 * time.Second
 	govGenState.Params.VotingPeriod = &votingPeriod
-	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100)))
+	govGenState.Params.MinDeposit = sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(100)))
 
 	bz, err = s.cdc.MarshalJSON(&govGenState)
 	s.Require().NoError(err)
@@ -281,9 +281,9 @@ func (s *E2ETestSuite) initGenesis() {
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[uibc.ModuleName], &uibcGenState))
 
 	// 100$ for each token
-	uibcGenState.Params.TokenQuota = sdk.NewDec(100)
+	uibcGenState.Params.TokenQuota = sdkmath.LegacyNewDec(100)
 	// 120$ for all tokens on quota duration
-	uibcGenState.Params.TotalQuota = sdk.NewDec(120)
+	uibcGenState.Params.TotalQuota = sdkmath.LegacyNewDec(120)
 	// quotas will reset every 300 seconds
 	uibcGenState.Params.QuotaDuration = time.Second * 300
 

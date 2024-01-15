@@ -23,7 +23,7 @@ func TestAggregateExchangeRatePrevoteString(t *testing.T) {
 func TestAggregateExchangeRateVoteString(t *testing.T) {
 	aggregateExchangeRatePreVote := NewAggregateExchangeRateVote(
 		ExchangeRateTuples{
-			NewExchangeRateTuple(UmeeDenom, sdk.OneDec()),
+			NewExchangeRateTuple(UmeeDenom, sdkmath.LegacyOneDec()),
 		},
 		sdk.ValAddress(sdk.AccAddress([]byte("addr1_______________"))),
 	)
@@ -33,12 +33,12 @@ func TestAggregateExchangeRateVoteString(t *testing.T) {
 
 func TestExchangeRateTuplesString(t *testing.T) {
 	t.Parallel()
-	exchangeRateTuple := NewExchangeRateTuple(UmeeDenom, sdk.OneDec())
+	exchangeRateTuple := NewExchangeRateTuple(UmeeDenom, sdkmath.LegacyOneDec())
 	assert.Equal(t, exchangeRateTuple.String(), `{"denom":"uumee", "exchange_rate":"1"}`)
 
 	exchangeRateTuples := ExchangeRateTuples{
 		exchangeRateTuple,
-		NewExchangeRateTuple(IbcDenomAtom, sdk.SmallestDec()),
+		NewExchangeRateTuple(IbcDenomAtom, sdkmath.LegacySmallestDec()),
 	}
 	assert.Equal(t, `[{"denom":"uumee","exchange_rate":"1"},{"denom":"ibc/27394FB092D2ECCD56123C74F36E4C1F926001CEADA9CA97EA622B25F41E5EB2","exchange_rate":"0.000000000000000001"}]`, exchangeRateTuples.String())
 }
@@ -78,12 +78,12 @@ func TestParseExchangeRateTuples(t *testing.T) {
 
 func TestDenomExchangeRateString(t *testing.T) {
 	t1 := time.Date(2022, 9, 18, 15, 55, 0o1, 0, time.UTC)
-	er := DenomExchangeRate{Denom: "ABCD", Rate: sdk.MustNewDecFromStr("1.5"), Timestamp: t1}
+	er := DenomExchangeRate{Denom: "ABCD", Rate: sdkmath.LegacyMustNewDecFromStr("1.5"), Timestamp: t1}
 	assert.Equal(t, `{"denom":"ABCD","rate":"1.500000000000000000","timestamp":"2022-09-18T15:55:01Z"}`, er.String())
 }
 
 func TestExchangeRateString(t *testing.T) {
 	t1 := time.Date(2022, 9, 18, 15, 55, 0o1, 0, time.UTC)
-	er := ExchangeRate{Rate: sdk.MustNewDecFromStr("1.5"), Timestamp: t1}
+	er := ExchangeRate{Rate: sdkmath.LegacyMustNewDecFromStr("1.5"), Timestamp: t1}
 	assert.Equal(t, `{"rate":"1.500000000000000000","timestamp":"2022-09-18T15:55:01Z"}`, er.String())
 }

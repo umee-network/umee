@@ -36,7 +36,7 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 	t.Parallel()
 	isCheckTx := false
 	app := umeeapp.Setup(t)
-	ctx := app.NewContext(
+	ctx := app.NewContextLegacy(
 		isCheckTx, tmproto.Header{
 			ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 			Height:  9,
@@ -122,7 +122,7 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		queryClient:         metoken.NewQueryClient(queryHelper),
 		msgServer:           keeper.NewMsgServerImpl(app.MetokenKeeperB),
 		setupAccountCounter: sdkmath.ZeroInt(),
-		addrs:               umeeapp.AddTestAddrsIncremental(app, ctx, 1, sdk.NewInt(3000000)),
+		addrs:               umeeapp.AddTestAddrsIncremental(app, ctx, 1, sdkmath.NewInt(3000000)),
 	}
 }
 
@@ -131,7 +131,7 @@ func (s *KeeperTestSuite) newAccount(t *testing.T, funds ...sdk.Coin) sdk.AccAdd
 	app, ctx := s.app, s.ctx
 
 	// create a unique address
-	s.setupAccountCounter = s.setupAccountCounter.Add(sdk.OneInt())
+	s.setupAccountCounter = s.setupAccountCounter.Add(sdkmath.OneInt())
 	addrStr := fmt.Sprintf("%-20s", "addr"+s.setupAccountCounter.String()+"_______________")
 	addr := sdk.AccAddress([]byte(addrStr))
 

@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -26,7 +25,7 @@ func (k Keeper) Prices(index metoken.Index) (metoken.IndexPrices, error) {
 	allPrices := k.oracleKeeper.AllMedianPrices(*k.ctx)
 
 	// calculate the total assets value in the index balances
-	totalAssetsUSDValue := sdk.ZeroDec()
+	totalAssetsUSDValue := sdkmath.LegacyZeroDec()
 	for _, aa := range index.AcceptedAssets {
 		// get token settings from leverageKeeper to use the symbol_denom
 		tokenSettings, err := k.leverageKeeper.GetTokenSettings(*k.ctx, aa.Denom)
@@ -140,7 +139,7 @@ func (k Keeper) SetPricesToOracle() error {
 }
 
 // latestPrice from the list of medians, based on the block number.
-func latestPrice(prices otypes.Prices, symbolDenom string) (sdk.Dec, error) {
+func latestPrice(prices otypes.Prices, symbolDenom string) (sdkmath.LegacyDec, error) {
 	latestPrice := otypes.Price{}
 	for _, price := range prices {
 		if price.ExchangeRateTuple.Denom == symbolDenom && price.BlockNum > latestPrice.BlockNum {
@@ -149,26 +148,26 @@ func latestPrice(prices otypes.Prices, symbolDenom string) (sdk.Dec, error) {
 	}
 
 	if latestPrice.BlockNum == 0 {
-		return sdk.Dec{}, fmt.Errorf("price not found in oracle for denom %s", symbolDenom)
+		return sdkmath.LegacyDec{}, fmt.Errorf("price not found in oracle for denom %s", symbolDenom)
 	}
 
 	return latestPrice.ExchangeRateTuple.ExchangeRate, nil
 }
 
 // valueInUSD given a specific amount, price and exponent
-func valueInUSD(amount sdkmath.Int, assetPrice sdk.Dec, assetExponent uint32) (sdk.Dec, error) {
+func valueInUSD(amount sdkmath.Int, assetPrice sdkmath.LegacyDec, assetExponent uint32) (sdkmath.LegacyDec, error) {
 	exponentFactor, err := metoken.ExponentFactor(assetExponent, usdExponent)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 	return exponentFactor.MulInt(amount).Mul(assetPrice), nil
 }
 
 // priceInUSD given a specific amount, totalValue and exponent
-func priceInUSD(amount sdkmath.Int, totalValue sdk.Dec, assetExponent uint32) (sdk.Dec, error) {
+func priceInUSD(amount sdkmath.Int, totalValue sdkmath.LegacyDec, assetExponent uint32) (sdkmath.LegacyDec, error) {
 	exponentFactor, err := metoken.ExponentFactor(assetExponent, usdExponent)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	return totalValue.Quo(exponentFactor.MulInt(amount)), nil

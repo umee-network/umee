@@ -1,22 +1,22 @@
 package uibc
 
 import (
-	fmt "fmt"
+	"fmt"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // DefaultParams returns default genesis params
 func DefaultParams() Params {
 	return Params{
 		IbcStatus:                   IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_ENABLED,
-		TotalQuota:                  sdk.NewDec(1_600_000),      // $1.6M
-		TokenQuota:                  sdk.NewDec(1_200_000),      // $1.2M
-		QuotaDuration:               time.Second * 60 * 60 * 24, // 24h
-		InflowOutflowQuotaBase:      sdk.NewDec(1_000_000),      // 1M
-		InflowOutflowQuotaRate:      sdk.MustNewDecFromStr("0.25"),
-		InflowOutflowTokenQuotaBase: sdk.NewDec(900_000), // $0.9M
+		TotalQuota:                  sdkmath.LegacyNewDec(1_600_000), // $1.6M
+		TokenQuota:                  sdkmath.LegacyNewDec(1_200_000), // $1.2M
+		QuotaDuration:               time.Second * 60 * 60 * 24,      // 24h
+		InflowOutflowQuotaBase:      sdkmath.LegacyNewDec(1_000_000), // 1M
+		InflowOutflowQuotaRate:      sdkmath.LegacyMustNewDecFromStr("0.25"),
+		InflowOutflowTokenQuotaBase: sdkmath.LegacyNewDec(900_000), // $0.9M
 	}
 }
 
@@ -69,15 +69,15 @@ func validateQuotaDuration(d time.Duration) error {
 	return nil
 }
 
-func validateQuota(q sdk.Dec, typ string) error {
+func validateQuota(q sdkmath.LegacyDec, typ string) error {
 	if q.IsNil() || q.IsNegative() {
 		return fmt.Errorf("%s must be not negative: %s", typ, q)
 	}
 	return nil
 }
 
-func validateQuotaRate(q sdk.Dec, typ string) error {
-	if q.LT(sdk.ZeroDec()) || q.GT(sdk.NewDec(2)) {
+func validateQuotaRate(q sdkmath.LegacyDec, typ string) error {
+	if q.LT(sdkmath.LegacyZeroDec()) || q.GT(sdkmath.LegacyNewDec(2)) {
 		return fmt.Errorf("%s must be between 0 and 2: %s", typ, q)
 	}
 

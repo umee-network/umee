@@ -3,7 +3,7 @@ package keeper
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,7 +12,7 @@ func TestNeat(t *testing.T) {
 
 	cases := map[string]float64{
 		// example
-		"1000": 1000, // sdk.Dec created from "1000" is converted to float 1000.0
+		"1000": 1000, // sdkmath.LegacyDec created from "1000" is converted to float 1000.0
 		// tests
 		"123456789.55":      123456000,         // truncates >1M to thousand
 		"123456.55":         123456,            // truncates >100 to whole number
@@ -28,7 +28,7 @@ func TestNeat(t *testing.T) {
 	}
 
 	for s, f := range cases {
-		assert.Equal(f, neat(sdk.MustNewDecFromStr(s)))
+		assert.Equal(f, neat(sdkmath.LegacyMustNewDecFromStr(s)))
 	}
 
 	// edge case: >2^64 displays incorrectly
@@ -36,6 +36,6 @@ func TestNeat(t *testing.T) {
 	// which is used on dollar (not token) amounts
 	assert.NotEqual(
 		123456789123456789123456789.123456789,
-		neat(sdk.MustNewDecFromStr("123456789123456789123456789.123456789")),
+		neat(sdkmath.LegacyMustNewDecFromStr("123456789123456789123456789.123456789")),
 	)
 }

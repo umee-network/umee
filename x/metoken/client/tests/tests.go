@@ -94,18 +94,18 @@ func (s *IntegrationTests) TestValidQueries() {
 				Prices: []metoken.IndexPrices{
 					{
 						Denom:    mfixtures.MeBondDenom,
-						Price:    sdk.MustNewDecFromStr("34.21"),
+						Price:    sdkmath.LegacyMustNewDecFromStr("34.21"),
 						Exponent: 6,
 						Assets: []metoken.AssetPrice{
 							{
 								BaseDenom:   mfixtures.BondDenom,
 								SymbolDenom: "UMEE",
-								Price:       sdk.MustNewDecFromStr("34.21"),
+								Price:       sdkmath.LegacyMustNewDecFromStr("34.21"),
 								Exponent:    6,
-								SwapRate:    sdk.OneDec(),
-								SwapFee:     sdk.MustNewDecFromStr("0.01"),
-								RedeemRate:  sdk.OneDec(),
-								RedeemFee:   sdk.MustNewDecFromStr("0.4"),
+								SwapRate:    sdkmath.LegacyOneDec(),
+								SwapFee:     sdkmath.LegacyMustNewDecFromStr("0.01"),
+								RedeemRate:  sdkmath.LegacyOneDec(),
+								RedeemFee:   sdkmath.LegacyMustNewDecFromStr("0.4"),
 							},
 						},
 					},

@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	tassert "github.com/stretchr/testify/assert"
 	"gotest.tools/v3/assert"
 
@@ -29,11 +29,11 @@ func TestMsgGovSetParams(t *testing.T) {
 			types.MsgGovSetParams{
 				checkers.GovModuleAddr,
 				types.Params{
-					CompleteLiquidationThreshold: sdk.ZeroDec(),
-					SmallLiquidationSize:         sdk.ZeroDec(),
-					OracleRewardFactor:           sdk.ZeroDec(),
-					MinimumCloseFactor:           sdk.ZeroDec(),
-					DirectLiquidationFee:         sdk.ZeroDec(),
+					CompleteLiquidationThreshold: sdkmath.LegacyZeroDec(),
+					SmallLiquidationSize:         sdkmath.LegacyZeroDec(),
+					OracleRewardFactor:           sdkmath.LegacyZeroDec(),
+					MinimumCloseFactor:           sdkmath.LegacyZeroDec(),
+					DirectLiquidationFee:         sdkmath.LegacyZeroDec(),
 				},
 			},
 			"complete liquidation threshold must be positive",
@@ -64,21 +64,21 @@ func TestMsgGovUpdateRegistryValidateBasic(t *testing.T) {
 		BaseDenom:              "uumee",
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.2"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.5"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.1"),
+		ReserveFactor:          sdkmath.LegacyMustNewDecFromStr("0.2"),
+		CollateralWeight:       sdkmath.LegacyMustNewDecFromStr("0.25"),
+		LiquidationThreshold:   sdkmath.LegacyMustNewDecFromStr("0.5"),
+		BaseBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.02"),
+		KinkBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.22"),
+		MaxBorrowRate:          sdkmath.LegacyMustNewDecFromStr("1.52"),
+		KinkUtilization:        sdkmath.LegacyMustNewDecFromStr("0.8"),
+		LiquidationIncentive:   sdkmath.LegacyMustNewDecFromStr("0.1"),
 		EnableMsgSupply:        true,
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100_000_000000),
+		MaxCollateralShare:     sdkmath.LegacyMustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdkmath.LegacyMustNewDecFromStr("0.9"),
+		MinCollateralLiquidity: sdkmath.LegacyMustNewDecFromStr("0"),
+		MaxSupply:              sdkmath.NewInt(100_000_000000),
 		HistoricMedians:        24,
 	}
 	duplicateBaseDenom := validToken
@@ -158,21 +158,21 @@ func TestMsgGovUpdateRegistryOtherFunctionality(t *testing.T) {
 		BaseDenom:              "uumee",
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.2"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.25"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.1"),
+		ReserveFactor:          sdkmath.LegacyMustNewDecFromStr("0.2"),
+		CollateralWeight:       sdkmath.LegacyMustNewDecFromStr("0.25"),
+		LiquidationThreshold:   sdkmath.LegacyMustNewDecFromStr("0.25"),
+		BaseBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.02"),
+		KinkBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.22"),
+		MaxBorrowRate:          sdkmath.LegacyMustNewDecFromStr("1.52"),
+		KinkUtilization:        sdkmath.LegacyMustNewDecFromStr("0.8"),
+		LiquidationIncentive:   sdkmath.LegacyMustNewDecFromStr("0.1"),
 		EnableMsgSupply:        true,
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100_000_000000),
+		MaxCollateralShare:     sdkmath.LegacyMustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdkmath.LegacyMustNewDecFromStr("0.9"),
+		MinCollateralLiquidity: sdkmath.LegacyMustNewDecFromStr("0"),
+		MaxSupply:              sdkmath.NewInt(100_000_000000),
 		HistoricMedians:        24,
 	}
 	msg := types.NewMsgGovUpdateRegistry(

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	sdkmath "cosmossdk.io/math"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )

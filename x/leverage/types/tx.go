@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/checkers"
@@ -245,7 +246,7 @@ func (msg MsgLiquidate) GetSignBytes() []byte {
 func NewMsgLeveragedLiquidate(
 	liquidator, borrower sdk.AccAddress,
 	repayDenom, rewardDenom string,
-	maxRepay sdk.Dec,
+	maxRepay sdkmath.LegacyDec,
 ) *MsgLeveragedLiquidate {
 	return &MsgLeveragedLiquidate{
 		Liquidator:  liquidator.String(),
@@ -267,7 +268,7 @@ func (msg *MsgLeveragedLiquidate) ValidateBasic() error {
 			return err
 		}
 	}
-	if !msg.MaxRepay.IsZero() && msg.MaxRepay.LT(sdk.OneDec()) {
+	if !msg.MaxRepay.IsZero() && msg.MaxRepay.LT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("nonzero max repay %s is less than one", msg.MaxRepay)
 	}
 	_, err := sdk.AccAddressFromBech32(msg.Borrower)

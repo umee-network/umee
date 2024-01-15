@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -95,7 +96,7 @@ func (s *IntegrationTestSuite) TestAddTokensToRegistry() {
 func (s *IntegrationTestSuite) TestUpdateRegistry() {
 	govAccAddr := checkers.GovModuleAddr
 	modifiedUmee := fixtures.Token("uumee", "UMEE", 6)
-	modifiedUmee.ReserveFactor = sdk.MustNewDecFromStr("0.69")
+	modifiedUmee.ReserveFactor = sdkmath.LegacyMustNewDecFromStr("0.69")
 
 	testCases := []struct {
 		name      string
@@ -215,7 +216,7 @@ func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
 				Sets: []types.SpecialAssetSet{
 					{
 						Assets:           []string{"test1", "test2"},
-						CollateralWeight: sdk.MustNewDecFromStr("0.8"),
+						CollateralWeight: sdkmath.LegacyMustNewDecFromStr("0.8"),
 					},
 				},
 				Pairs: []types.SpecialAssetPair{},
@@ -231,8 +232,8 @@ func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
 				Sets: []types.SpecialAssetSet{
 					{
 						Assets:               []string{"test1", "test2"},
-						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
-						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+						CollateralWeight:     sdkmath.LegacyMustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.9"),
 					},
 				},
 				Pairs: []types.SpecialAssetPair{},
@@ -250,7 +251,7 @@ func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
 					{
 						Borrow:           "test1",
 						Collateral:       "test2",
-						CollateralWeight: sdk.MustNewDecFromStr("0.8"),
+						CollateralWeight: sdkmath.LegacyMustNewDecFromStr("0.8"),
 					},
 				},
 			},
@@ -267,8 +268,8 @@ func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
 					{
 						Borrow:               "test1",
 						Collateral:           "test2",
-						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
-						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+						CollateralWeight:     sdkmath.LegacyMustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.9"),
 					},
 				},
 			},
@@ -283,16 +284,16 @@ func (s *IntegrationTestSuite) TestUpdateSpecialAssets() {
 				Sets: []types.SpecialAssetSet{
 					{
 						Assets:               []string{"test1", "test2"},
-						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
-						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+						CollateralWeight:     sdkmath.LegacyMustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.9"),
 					},
 				},
 				Pairs: []types.SpecialAssetPair{
 					{
 						Borrow:               "test1",
 						Collateral:           "test2",
-						CollateralWeight:     sdk.MustNewDecFromStr("0.8"),
-						LiquidationThreshold: sdk.MustNewDecFromStr("0.9"),
+						CollateralWeight:     sdkmath.LegacyMustNewDecFromStr("0.8"),
+						LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.9"),
 					},
 				},
 			},
@@ -941,7 +942,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw_NoUsersSpendableUtokens() {
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
@@ -983,7 +984,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw_UsersSpendableUtokensGreaterAv
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
@@ -1026,7 +1027,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw_NoAvailableModuleLiquidity() {
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
@@ -1070,7 +1071,7 @@ func (s *IntegrationTestSuite) TestMsgMaxWithdraw_ChangingUtokenExchangeRate() {
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
@@ -1897,7 +1898,7 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow_NoAvailableModuleLiquidity() {
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 800 UMEE, then collateralize 800 of supplied UMEE
@@ -1941,7 +1942,7 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow_UserMaxBorrowGreaterModuleMaxBor
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 1000 UMEE, then collateralize 800 of supplied UMEE
@@ -1978,8 +1979,8 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow_DecreasingMaxSupplyUtilization()
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	// and MaxSupplyUtilization to 0.7
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
-	umeeToken.MaxSupplyUtilization = sdk.MustNewDecFromStr("0.7")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
+	umeeToken.MaxSupplyUtilization = sdkmath.LegacyMustNewDecFromStr("0.7")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 1000 UMEE, then collateralize 800 of supplied UMEE
@@ -2024,8 +2025,8 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow_ZeroAvailableBasedOnMaxSupplyUti
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
 	// and MaxSupplyUtilization to 0.5
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
-	umeeToken.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.2")
-	umeeToken.MaxSupplyUtilization = sdk.MustNewDecFromStr("0.5")
+	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
+	umeeToken.MaxSupplyUtilization = sdkmath.LegacyMustNewDecFromStr("0.5")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
 	// create and fund a supplier with 3000 UMEE, then collateralize 2500 of supplied UMEE
@@ -2487,7 +2488,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 		borrower       sdk.AccAddress
 		repayDenom     string
 		rewardDenom    string
-		maxRepay       sdk.Dec
+		maxRepay       sdkmath.LegacyDec
 		expectedRepay  sdk.Coin
 		expectedReward sdk.Coin
 		err            error
@@ -2498,7 +2499,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			healthyBorrower,
 			atomDenom,
 			atomDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationIneligible,
@@ -2508,7 +2509,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			"u/" + umeeDenom,
 			umeeDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
@@ -2518,7 +2519,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			umeeDenom,
 			"u/" + umeeDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrUToken,
@@ -2528,7 +2529,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			"foo",
 			umeeDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
@@ -2538,7 +2539,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			atomDenom,
 			"foo",
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrNotRegisteredToken,
@@ -2548,7 +2549,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			atomDenom,
 			atomDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			sdk.Coin{},
 			sdk.Coin{},
 			types.ErrLiquidationRepayZero,
@@ -2558,7 +2559,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			atomBorrower,
 			atomDenom,
 			atomDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			coin.New(atomDenom, 500_000000),
 			coin.New("u/"+atomDenom, 550_000000),
 			nil,
@@ -2568,7 +2569,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			umeeBorrower,
 			umeeDenom,
 			umeeDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			coin.New(umeeDenom, 100_000000),
 			coin.New("u/"+umeeDenom, 110_000000),
 			nil,
@@ -2578,7 +2579,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			complexBorrower,
 			umeeDenom,
 			atomDenom,
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			coin.New(umeeDenom, 30_000000),
 			coin.New("u/"+atomDenom, 3_527933),
 			nil,
@@ -2588,7 +2589,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			closeBorrower,
 			"",
 			"",
-			sdk.ZeroDec(),
+			sdkmath.LegacyZeroDec(),
 			coin.New(umeeDenom, 8_150541),
 			coin.New("u/"+umeeDenom, 8_965596),
 			nil,
@@ -2598,7 +2599,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			daiBorrower,
 			"",
 			"",
-			sdk.OneDec(),
+			sdkmath.LegacyOneDec(),
 			coin.New(pairedDenom, 1_000000),
 			coin.New("u/"+pairedDenom, 1_100000),
 			nil,
@@ -2608,7 +2609,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			daiBorrower,
 			"",
 			"",
-			sdk.MustNewDecFromStr("2.0"),
+			sdkmath.LegacyMustNewDecFromStr("2.0"),
 			coin.New(pairedDenom, 2_000000),
 			coin.New("u/"+pairedDenom, 2_200000),
 			nil,
@@ -2618,7 +2619,7 @@ func (s *IntegrationTestSuite) TestMsgLeveragedLiquidate() {
 			closeBorrower2,
 			"",
 			"",
-			sdk.MustNewDecFromStr("10.00"),
+			sdkmath.LegacyMustNewDecFromStr("10.00"),
 			coin.New(umeeDenom, 2_375296), // $10 of UMEE at price $4.21
 			coin.New("u/"+umeeDenom, 2_612826),
 			nil,
@@ -2727,7 +2728,7 @@ func (s *IntegrationTestSuite) TestMaxCollateralShare() {
 	// update initial ATOM to have a limited MaxCollateralShare
 	atom, err := app.LeverageKeeper.GetTokenSettings(ctx, atomDenom)
 	require.NoError(err)
-	atom.MaxCollateralShare = sdk.MustNewDecFromStr("0.1")
+	atom.MaxCollateralShare = sdkmath.LegacyMustNewDecFromStr("0.1")
 	s.registerToken(atom)
 
 	// Mock oracle prices:
@@ -2780,7 +2781,7 @@ func (s *IntegrationTestSuite) TestMinCollateralLiquidity() {
 	// update initial UMEE to have a limited MinCollateralLiquidity
 	umee, err := app.LeverageKeeper.GetTokenSettings(ctx, umeeDenom)
 	require.NoError(err)
-	umee.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.5")
+	umee.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.5")
 	s.registerToken(umee)
 
 	// create a supplier to collateralize 100 UMEE
@@ -2819,7 +2820,7 @@ func (s *IntegrationTestSuite) TestMinCollateralLiquidity_Collateralize() {
 	// update initial UMEE to have a limited MinCollateralLiquidity
 	umee, err := app.LeverageKeeper.GetTokenSettings(ctx, umeeDenom)
 	require.NoError(err)
-	umee.MinCollateralLiquidity = sdk.MustNewDecFromStr("0.5")
+	umee.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.5")
 	s.registerToken(umee)
 
 	// create a supplier to supply 200 UMEE, and collateralize 100 UMEE

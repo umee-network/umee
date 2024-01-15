@@ -3,6 +3,7 @@ package intest
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -169,8 +170,8 @@ func TestQuerier_SwapFee_meUSD(t *testing.T) {
 		},
 	)
 
-	totalValue := sdk.ZeroDec()
-	values := make(map[string]sdk.Dec)
+	totalValue := sdkmath.LegacyZeroDec()
+	values := make(map[string]sdkmath.LegacyDec)
 	for _, balance := range balances.AssetBalances {
 		// calculate total asset supply (leveraged + reserved)
 		assetSupply := balance.AvailableSupply()
@@ -367,10 +368,10 @@ func TestQuerier_IndexPrices(t *testing.T) {
 					assert.Check(t, tc.expPriceCount == len(resp.Prices))
 					for _, i := range resp.Prices {
 						for _, a := range i.Assets {
-							assert.Check(t, a.SwapRate.GT(sdk.ZeroDec()))
-							assert.Check(t, a.SwapFee.GT(sdk.ZeroDec()))
-							assert.Check(t, a.RedeemRate.GT(sdk.ZeroDec()))
-							assert.Check(t, a.RedeemFee.GT(sdk.ZeroDec()))
+							assert.Check(t, a.SwapRate.GT(sdkmath.LegacyZeroDec()))
+							assert.Check(t, a.SwapFee.GT(sdkmath.LegacyZeroDec()))
+							assert.Check(t, a.RedeemRate.GT(sdkmath.LegacyZeroDec()))
+							assert.Check(t, a.RedeemFee.GT(sdkmath.LegacyZeroDec()))
 						}
 					}
 				} else {

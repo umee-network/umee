@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/auth/migrations/legacytx"
 
@@ -142,7 +143,7 @@ func (msg MsgGovUpdateSpecialAssets) ValidateBasic() error {
 		return err
 	}
 
-	ascendingWeight := sdk.ZeroDec()
+	ascendingWeight := sdkmath.LegacyZeroDec()
 	for _, set := range msg.Sets {
 		// ensures sets are sorted from lowest to highest collateral weight
 		// to ensure overlapping sets cause the higher collateral weight to

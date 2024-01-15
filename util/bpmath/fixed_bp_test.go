@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 )
 
@@ -117,17 +117,17 @@ func TestFixedBPMulDec(t *testing.T) {
 	bp2 := FixedBP(1)
 	bp3 := FixedBP(5000)
 	bp4 := FixedBP(20000)
-	d := sdk.MustNewDecFromStr("12.5002")
-	d2 := sdk.NewDec(10000)
-	d3 := sdk.NewDec(1000)
+	d := sdkmath.LegacyMustNewDecFromStr("12.5002")
+	d2 := sdkmath.LegacyNewDec(10000)
+	d3 := sdkmath.LegacyNewDec(1000)
 
 	require.Equal(d, MulDec(d, One))
-	require.Equal(sdk.ZeroDec(), MulDec(d, Zero))
-	require.Equal(sdk.OneDec(), bp2.MulDec(d2))
-	require.Equal(sdk.MustNewDecFromStr("0.1"), bp2.MulDec(d3))
+	require.Equal(sdkmath.LegacyZeroDec(), MulDec(d, Zero))
+	require.Equal(sdkmath.LegacyOneDec(), bp2.MulDec(d2))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("0.1"), bp2.MulDec(d3))
 
-	require.Equal(sdk.MustNewDecFromStr("1.25002"), bp.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("0.00125002"), bp2.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("6.2501"), bp3.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("25.0004"), bp4.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("1.25002"), bp.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("0.00125002"), bp2.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("6.2501"), bp3.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("25.0004"), bp4.MulDec(d))
 }

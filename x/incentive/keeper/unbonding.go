@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/incentive"
 )
@@ -100,7 +101,7 @@ func (k Keeper) reduceBondTo(ctx sdk.Context, addr sdk.AccAddress, newCollateral
 	amountToUnbond := bonded.Amount.Add(unbonding.Amount).Sub(newCollateral.Amount)
 	for i, u := range unbondings {
 		// for ongoing unbondings, starting with the oldest
-		specificReduction := sdk.MinInt(amountToUnbond, u.UToken.Amount)
+		specificReduction := sdkmath.MinInt(amountToUnbond, u.UToken.Amount)
 		// reduce the in-progress unbonding amount, and the remaining instant unbond
 		unbondings[i].UToken.Amount = u.UToken.Amount.Sub(specificReduction)
 		amountToUnbond = amountToUnbond.Sub(specificReduction)

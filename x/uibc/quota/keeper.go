@@ -3,10 +3,10 @@ package quota
 import (
 	"time"
 
+	"cosmossdk.io/store"
+	prefixstore "cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/x/ugov"
@@ -52,7 +52,7 @@ type Keeper struct {
 	// Note: ideally we use a ligther interface here to directly use cosmos-db/DB
 	// however we will need to wait probably until Cosmos SDK 0.48
 	// We can have multiple stores if needed
-	store    sdk.KVStore
+	store    store.KVStore
 	leverage uibc.Leverage
 	oracle   uibc.Oracle
 	ugov     ugov.WithEmergencyGroup

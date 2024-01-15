@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
@@ -43,7 +44,7 @@ func ReserveAmountInvariant(k Keeper) sdk.Invariant {
 			// remove types.KeyPrefixReserveAmount and null-terminator
 			denom := types.DenomFromKey(key, types.KeyPrefixReserveAmount)
 
-			amount := sdk.ZeroInt()
+			amount := sdkmath.ZeroInt()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
 				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s: %+v\n", denom, val)
@@ -87,7 +88,7 @@ func InefficientCollateralAmountInvariant(k Keeper) sdk.Invariant {
 			// remove prefix | denom and null-terminator
 			address := types.AddressFromKey(key, types.KeyPrefixCollateralAmount)
 
-			amount := sdk.ZeroInt()
+			amount := sdkmath.ZeroInt()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
 				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s - %s: %+v\n", denom, address.String(), val)
@@ -133,7 +134,7 @@ func InefficientBorrowAmountInvariant(k Keeper) sdk.Invariant {
 			// remove prefix | denom and null-terminator
 			address := types.AddressFromKey(key, borrowPrefix)
 
-			amount := sdk.ZeroDec()
+			amount := sdkmath.LegacyZeroDec()
 			if err := amount.Unmarshal(val); err != nil {
 				count++
 				msg += fmt.Sprintf("\tfailed to unmarshal bytes for %s - %s: %+v\n", denom, address.String(), val)
@@ -248,7 +249,7 @@ func InterestScalarsInvariant(k Keeper) sdk.Invariant {
 
 			scalar := k.getInterestScalar(ctx, denom)
 
-			if scalar.LT(sdk.OneDec()) {
+			if scalar.LT(sdkmath.LegacyOneDec()) {
 				count++
 				msg += fmt.Sprintf("\t%s interest scalar %s is less than one\n", denom, scalar.String())
 			}
@@ -284,7 +285,7 @@ func ExchangeRatesInvariant(k Keeper) sdk.Invariant {
 
 			exchangeRate := k.DeriveExchangeRate(ctx, denom)
 
-			if exchangeRate.LT(sdk.OneDec()) {
+			if exchangeRate.LT(sdkmath.LegacyOneDec()) {
 				count++
 				msg += fmt.Sprintf("\t%s exchange rate %s is less than one\n", denom, exchangeRate.String())
 			}

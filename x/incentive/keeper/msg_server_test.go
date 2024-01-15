@@ -3,6 +3,7 @@ package keeper
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -357,7 +358,7 @@ func TestMsgGovSetParams(t *testing.T) {
 	newParams := incentive.Params{
 		MaxUnbondings:      defaultParams.MaxUnbondings + 1,
 		UnbondingDuration:  defaultParams.UnbondingDuration + 1,
-		EmergencyUnbondFee: sdk.MustNewDecFromStr("0.99"),
+		EmergencyUnbondFee: sdkmath.LegacyMustNewDecFromStr("0.99"),
 	}
 
 	// set params and expect no error

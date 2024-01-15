@@ -371,7 +371,7 @@ The `x/metoken` module keeps the following objects in state:
 
 The following serialization methods are used unless otherwise stated:
 
-- `sdk.Dec.Marshal()` and `sdk.Int.Marshal()` for numeric types
+- `sdkmath.LegacyDec.Marshal()` and `sdkmath.Int.Marshal()` for numeric types
 - `cdc.Marshal` and `cdc.Unmarshal` for `gogoproto/types.Int64Value` wrapper around int64
 
 ## Queries

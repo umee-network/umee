@@ -31,19 +31,19 @@ This timing of reserve increases, matches the behavior of the [Compound cToken s
 
 ## Detailed Design
 
-As noted in [design doc 003](./003-borrow-assets.md), open borrow positions are stored in the`x/leverage` module with the keys `borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom` and values of type `sdk.Int`.
+As noted in [design doc 003](./003-borrow-assets.md), open borrow positions are stored in the`x/leverage` module with the keys `borrowPrefix | lengthPrefixed(borrowerAddress) | tokenDenom` and values of type `sdkmath.Int`.
 
-When accruing interest, the borrowed amount (`sdk.Int`) must be increased for each open borrow position. The increase should be calculated as follows...
+When accruing interest, the borrowed amount (`sdkmath.Int`) must be increased for each open borrow position. The increase should be calculated as follows...
 
 ### Dynamic Borrow Interest Rates
 
 Borrow interest rates are dynamic. They are calculated using the lending pool's current supply utilization for each asset type, as well as multiple governance parameters that are decided on a per-token basis. The initial interest rate model, requires the following parameters per token:
 
 ```go
-BaseAPY = sdk.NewDec("0.02")
-KinkAPY = sdk.NewDec("0.2")
-MaxAPY = sdk.NewDec("1.0")
-KinkUtilization = sdk.NewDec("0.8")
+BaseAPY = sdkmath.LegacyNewDec("0.02")
+KinkAPY = sdkmath.LegacyNewDec("0.2")
+MaxAPY = sdkmath.LegacyNewDec("1.0")
+KinkUtilization = sdkmath.LegacyNewDec("0.8")
 ```
 
 Each token-specific parameter will be stored in the `Token` registry.
@@ -58,7 +58,7 @@ The initial interest rate model, based on [Compound's JumpRateModelV2](https://c
 The `x/leverage` module keeper will contain a function which derives the current interest rate of an asset type:
 
 ```go
-func (k Keeper) DeriveInterestRate(ctx sdk.Context, denom string) (sdk.Dec, error) {
+func (k Keeper) DeriveInterestRate(ctx sdk.Context, denom string) (sdkmath.LegacyDec, error) {
     // Implementation must calculate the denom's borrowing utilization
     // then calculate and return annual interest rate as a decimal.
 }
@@ -77,7 +77,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
     // unix times (int64 values, measured in seconds)
     secondsElapsed := ctx.BlockTime.Unix() - k.GetLastInterestTime()
     // derived interest is annual, so we must convert time to years for the math to work
-    yearsElapsed := sdk.OneDec().MulInt64(secondsElapsed).QuoInt64(31536000) // seconds per year
+    yearsElapsed := sdkmath.LegacyOneDec().MulInt64(secondsElapsed).QuoInt64(31536000) // seconds per year
 
     // for each borrow, expressed as an sdk.Coin(Denom, Amount) associated with an sdk.Address
     {
@@ -104,7 +104,7 @@ Reserve amount is stored for each denom using the following format:
 
 ```go
 // append 0 for null-termination
-KeyPrefixReserveAmount | denom | 0 -> sdk.Int
+KeyPrefixReserveAmount | denom | 0 -> sdkmath.Int
 ```
 
 Reserves are part of the module account's balance, but may not leave the module account as the result of `MsgBorrow` or `MsgWithdraw`. Only governance actions (outside the scope of this design doc) may release or transfer reserves.

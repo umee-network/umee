@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -20,11 +21,11 @@ func TestUnitParams(t *testing.T) {
 	require.Equal(zeroParams, params)
 	// update params
 	params.IbcStatus = uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED
-	params.TokenQuota = sdk.MustNewDecFromStr("12.23")
-	params.TotalQuota = sdk.MustNewDecFromStr("3.4321")
-	params.InflowOutflowQuotaBase = sdk.MustNewDecFromStr("3.4321")
-	params.InflowOutflowQuotaRate = sdk.MustNewDecFromStr("0.2")
-	params.InflowOutflowTokenQuotaBase = sdk.MustNewDecFromStr("0.2")
+	params.TokenQuota = sdkmath.LegacyMustNewDecFromStr("12.23")
+	params.TotalQuota = sdkmath.LegacyMustNewDecFromStr("3.4321")
+	params.InflowOutflowQuotaBase = sdkmath.LegacyMustNewDecFromStr("3.4321")
+	params.InflowOutflowQuotaRate = sdkmath.LegacyMustNewDecFromStr("0.2")
+	params.InflowOutflowTokenQuotaBase = sdkmath.LegacyMustNewDecFromStr("0.2")
 
 	err := k.SetParams(params)
 	require.NoError(err)
@@ -36,11 +37,11 @@ func TestUnitParams(t *testing.T) {
 func TestValidateEmergencyQuotaParamsUpdate(t *testing.T) {
 	mkParams := func(total, token, ioBase, ioTokenBase int64, duration time.Duration) uibc.Params {
 		return uibc.Params{
-			TotalQuota:                  sdk.NewDec(total),
-			TokenQuota:                  sdk.NewDec(token),
-			InflowOutflowQuotaBase:      sdk.NewDec(ioBase),
-			InflowOutflowTokenQuotaBase: sdk.NewDec(ioTokenBase),
-			InflowOutflowQuotaRate:      sdk.NewDecWithPrec(1, 1),
+			TotalQuota:                  sdkmath.LegacyNewDec(total),
+			TokenQuota:                  sdkmath.LegacyNewDec(token),
+			InflowOutflowQuotaBase:      sdkmath.LegacyNewDec(ioBase),
+			InflowOutflowTokenQuotaBase: sdkmath.LegacyNewDec(ioTokenBase),
+			InflowOutflowQuotaRate:      sdkmath.LegacyNewDecWithPrec(1, 1),
 			QuotaDuration:               duration,
 		}
 	}

@@ -3,9 +3,10 @@ package keeper
 import (
 	"fmt"
 
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -48,7 +49,8 @@ func NewKeeper(
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
-	return ctx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	return sdkCtx.Logger().With("module", fmt.Sprintf("x/%s", types.ModuleName))
 }
 
 // SetTokenHooks sets the module's token registry hooks. Token hooks can only be set once.
@@ -183,7 +185,7 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// Withdraw will first attempt to use any uTokens in the supplier's wallet
-	amountFromWallet := sdk.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uToken.Denom), uToken.Amount)
+	amountFromWallet := sdkmath.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uToken.Denom), uToken.Amount)
 	// Any additional uTokens must come from the supplier's collateral
 	amountFromCollateral := uToken.Amount.Sub(amountFromWallet)
 
@@ -335,7 +337,7 @@ func (k Keeper) Repay(ctx sdk.Context, borrowerAddr sdk.AccAddress, payment sdk.
 	}
 
 	// prevent overpaying
-	payment.Amount = sdk.MinInt(owed.Amount, payment.Amount)
+	payment.Amount = sdkmath.MinInt(owed.Amount, payment.Amount)
 
 	// send payment to leverage module account
 	if err := k.repayBorrow(ctx, borrowerAddr, borrowerAddr, payment); err != nil {
@@ -464,7 +466,7 @@ func (k Keeper) Liquidate(
 // LeveragedLiquidate
 func (k Keeper) LeveragedLiquidate(
 	ctx sdk.Context, liquidatorAddr, borrowerAddr sdk.AccAddress,
-	repayDenom, rewardDenom string, maxRepay sdk.Dec,
+	repayDenom, rewardDenom string, maxRepay sdkmath.LegacyDec,
 ) (repaid sdk.Coin, reward sdk.Coin, err error) {
 	// If the message did not specify repay or reward denoms, select one arbitrarily (first in
 	// denom alphabetical order) from borrower position. Then proceed normally with the transaction.

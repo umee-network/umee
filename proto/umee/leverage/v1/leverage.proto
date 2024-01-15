@@ -2,6 +2,7 @@ syntax = "proto3";
 package umee.leverage.v1;
 
 import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/leverage/types";
 
@@ -18,7 +19,8 @@ message Params {
   // See also `minimum_close_factor` for more information.
   // Valid values: 0-1.
   string complete_liquidation_threshold = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"complete_liquidation_threshold\""
   ];
@@ -41,7 +43,8 @@ message Params {
   //
   // Valid values: 0-1.
   string minimum_close_factor = 3 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"minimum_close_factor\""
   ];
@@ -49,7 +52,8 @@ message Params {
   // borrows that is sent to the oracle module to fund its reward pool.
   // Valid values: 0-1.
   string oracle_reward_factor = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"oracle_reward_factor\""
   ];
@@ -57,7 +61,8 @@ message Params {
   // considered small enough to be liquidated in a single transaction, bypassing
   // dynamic close factor.
   string small_liquidation_size = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"small_liquidation_size\""
   ];
@@ -66,7 +71,8 @@ message Params {
   // uTokens as liquidation rewards.
   // Valid values: 0-1.
   string direct_liquidation_fee = 6 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"direct_liquidation_fee\""
   ];
@@ -87,7 +93,8 @@ message Token {
   // when this token is borrowed.
   // Valid values: 0-1.
   string reserve_factor = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"reserve_factor\""
   ];
@@ -98,7 +105,8 @@ message Token {
   // Must be smaller than `liquidation_threshold`.
   // Valid values: 0-1.
   string collateral_weight = 3 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"collateral_weight\""
   ];
@@ -110,7 +118,8 @@ message Token {
   // Valid values: 0-1.
   // See also: min_close_factor.
   string liquidation_threshold = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"liquidation_threshold\""
   ];
@@ -119,7 +128,8 @@ message Token {
   // asset.
   // Valid values: 0-∞
   string base_borrow_rate = 5 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"base_borrow_rate\""
   ];
@@ -128,7 +138,8 @@ message Token {
   // asset when supply utilization is equal to 'kink_utilization'.
   // Valid values: 0-∞
   string kink_borrow_rate = 6 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"kink_borrow_rate\""
   ];
@@ -137,7 +148,8 @@ message Token {
   // asset when supply utilization is at its maximum.
   // Valid values: 0-∞
   string max_borrow_rate = 7 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"max_borrow_rate\""
   ];
@@ -146,7 +158,8 @@ message Token {
   // the kink in the borrow interest rate function occurs.
   // Valid values: 0-1.
   string kink_utilization = 8 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"kink_utilization\""
   ];
@@ -155,7 +168,8 @@ message Token {
   // a token type liquidators receive as a liquidation reward.
   // Valid values: 0-1.
   string liquidation_incentive = 9 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"liquidation_incentive\""
   ];
@@ -194,7 +208,8 @@ message Token {
   // 0.1 means maximum 10% of system's total collateral value can be provided by this token.
   // Valid values: 0-1.
   string max_collateral_share = 15 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"max_collateral_share\""
   ];
@@ -205,7 +220,8 @@ message Token {
   //    supply_utilization(token) = total_borrowed(token) / total_supply(token)
   // Valid values: 0-1.
   string max_supply_utilization = 16 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"max_supply_utilization\""
   ];
@@ -220,7 +236,8 @@ message Token {
   // withdraw uToken.
   // Valid values: 0 - inf
   string min_collateral_liquidity = 17 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"min_collateral_liquidity\""
   ];
@@ -230,7 +247,8 @@ message Token {
   // Must be a non negative value. 0 means that there is no limit.
   // To mark a token as not valid for supply, `msg_supply` must be set to false.
   string max_supply = 18 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
     (gogoproto.nullable)   = false,
     (gogoproto.moretags)   = "yaml:\"max_supply\""
   ];
@@ -264,7 +282,8 @@ message SpecialAssetPair {
   // also overrides the borrowed asset's collateral weight when evaluating borrow
   // factor. Valid values: 0-1.
   string collateral_weight = 3 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 
@@ -272,7 +291,8 @@ message SpecialAssetPair {
   // can contribute to a users liquidation threshold, when borrowing within the pair.
   // Valid values in range [collateral_weight,1]
   string liquidation_threshold = 4 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }
@@ -290,7 +310,8 @@ message SpecialAssetSet {
   // can contribute to a users borrowing power, when borrowing within the set.
   // Valid values: 0-1.
   string collateral_weight = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 
@@ -298,7 +319,8 @@ message SpecialAssetSet {
   // can contribute to a users liquidation threshold, when borrowing within the set.
   // Valid values in range [collateral_weight,1]
   string liquidation_threshold = 3 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

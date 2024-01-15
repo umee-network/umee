@@ -3,6 +3,7 @@ package incentive
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
@@ -21,7 +22,7 @@ func TestValidateGenesis(t *testing.T) {
 	assert.NilError(t, genesis.Validate())
 
 	invalidParams := DefaultGenesis()
-	invalidParams.Params.EmergencyUnbondFee = sdk.MustNewDecFromStr("-0.01")
+	invalidParams.Params.EmergencyUnbondFee = sdkmath.LegacyMustNewDecFromStr("-0.01")
 	assert.ErrorContains(t, invalidParams.Validate(), "invalid emergency unbonding fee")
 
 	zeroID := DefaultGenesis()
@@ -197,7 +198,7 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorIs(t, invalidBond.Validate(), leveragetypes.ErrNotUToken)
 
 	validTracker := NewRewardTracker(validAddr, coin.UumeeDenom, sdk.NewDecCoins(
-		sdk.NewDecCoin(uumee, sdk.OneInt()),
+		sdk.NewDecCoin(uumee, sdkmath.OneInt()),
 	))
 	assert.NilError(t, validTracker.Validate())
 
@@ -221,7 +222,7 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorIs(t, invalidTracker.Validate(), leveragetypes.ErrUToken)
 
 	validAccumulator := NewRewardAccumulator(coin.UumeeDenom, 6, sdk.NewDecCoins(
-		sdk.NewDecCoin(uumee, sdk.OneInt()),
+		sdk.NewDecCoin(uumee, sdkmath.OneInt()),
 	))
 	assert.NilError(t, validAccumulator.Validate())
 
@@ -252,7 +253,7 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorIs(t, invalidUnbonding.Validate(), leveragetypes.ErrNotUToken)
 
 	invalidUnbonding = validUnbonding
-	invalidUnbonding.UToken = sdk.Coin{Denom: coin.UumeeDenom, Amount: sdk.NewInt(-1)}
+	invalidUnbonding.UToken = sdk.Coin{Denom: coin.UumeeDenom, Amount: sdkmath.NewInt(-1)}
 	assert.ErrorContains(t, invalidUnbonding.Validate(), "negative coin amount")
 
 	validAccountUnbondings := NewAccountUnbondings(validAddr, coin.UumeeDenom, []Unbonding{validUnbonding})
@@ -280,6 +281,6 @@ func TestValidateStructs(t *testing.T) {
 	invalidAccountUnbondings.Unbondings[0] = validUnbonding // the value in validAccountUnbondings was modified
 
 	invalidAccountUnbondings = validAccountUnbondings
-	invalidAccountUnbondings.Unbondings[0].UToken = sdk.Coin{Denom: coin.UumeeDenom, Amount: sdk.NewInt(-1)}
+	invalidAccountUnbondings.Unbondings[0].UToken = sdk.Coin{Denom: coin.UumeeDenom, Amount: sdkmath.NewInt(-1)}
 	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "negative coin amount")
 }

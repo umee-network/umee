@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -63,7 +64,7 @@ func (k Keeper) ToTokens(ctx sdk.Context, uTokens sdk.Coins) (sdk.Coins, error) 
 }
 
 // DeriveExchangeRate calculated the token:uToken exchange rate of a base token denom.
-func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	// uToken exchange rate is equal to the token supply (including borrowed
 	// tokens yet to be repaid and excluding tokens reserved) divided by total
 	// uTokens in circulation.
@@ -79,7 +80,7 @@ func (k Keeper) DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec {
 
 	// Handle uToken supply == 0 case
 	if !uTokenSupply.IsPositive() {
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
 
 	// Derive exchange rate

@@ -7,18 +7,20 @@ import (
 	stdlog "log"
 	"path/filepath"
 
+	"cosmossdk.io/log"
+	"cosmossdk.io/store"
+	"cosmossdk.io/store/snapshots"
+	snapshottypes "cosmossdk.io/store/snapshots/types"
+	storetypes "cosmossdk.io/store/types"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
-	dbm "github.com/cometbft/cometbft-db"
-	"github.com/cometbft/cometbft/libs/log"
 	cmttypes "github.com/cometbft/cometbft/types"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/snapshots"
-	snapshottypes "github.com/cosmos/cosmos-sdk/snapshots/types"
-	"github.com/cosmos/cosmos-sdk/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/mempool"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/prometheus/client_golang/prometheus"
@@ -40,7 +42,10 @@ func (a appCreator) newApp(
 	traceStore io.Writer,
 	appOpts servertypes.AppOptions,
 ) servertypes.Application {
-	var cache sdk.MultiStorePersistentCache
+	fmt.Println("looger ", logger)
+	fmt.Println("looger info ")
+	logger.Info("hi from logger")
+	var cache storetypes.MultiStorePersistentCache
 
 	if cast.ToBool(appOpts.Get(server.FlagInterBlockCache)) {
 		cache = store.NewCommitKVStoreCacheManager()
@@ -91,6 +96,15 @@ func (a appCreator) newApp(
 		chainID = appGenesis.ChainID
 	}
 
+	defaultMempool := baseapp.SetMempool(mempool.NoOpMempool{})
+	if maxTxs := cast.ToInt(appOpts.Get(server.FlagMempoolMaxTxs)); maxTxs >= 0 {
+		defaultMempool = baseapp.SetMempool(
+			mempool.NewSenderNonceMempool(
+				mempool.SenderNonceMaxTxOpt(maxTxs),
+			),
+		)
+	}
+
 	return umeeapp.New(
 		logger, db, traceStore, true, skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
@@ -107,6 +121,10 @@ func (a appCreator) newApp(
 		baseapp.SetIndexEvents(cast.ToStringSlice(appOpts.Get(server.FlagIndexEvents))),
 		baseapp.SetSnapshot(snapshotStore, snapshotOptions),
 		baseapp.SetChainID(chainID),
+		baseapp.SetIAVLCacheSize(cast.ToInt(appOpts.Get(server.FlagIAVLCacheSize))),
+		baseapp.SetIAVLDisableFastNode(cast.ToBool(appOpts.Get(server.FlagDisableIAVLFastNode))),
+		defaultMempool,
+		baseapp.SetQueryGasLimit(cast.ToUint64(appOpts.Get(server.FlagQueryGasLimit))),
 	)
 }
 

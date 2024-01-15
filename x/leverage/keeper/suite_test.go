@@ -55,7 +55,7 @@ func TestKeeperTestSuite(t *testing.T) {
 func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
 	app := umeeapp.Setup(s.T())
-	ctx := app.NewContext(false, tmproto.Header{
+	ctx := app.NewContextLegacy(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  1,
 		Time:    time.Unix(0, 0),
@@ -83,7 +83,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(appparams.BondDenom, "UMEE", 6)))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(atomDenom, "ATOM", 6)))
 	daiToken := newToken(daiDenom, "DAI", 18) // high exponent token will need bigger maxSupply for testing
-	daiToken.MaxSupply = daiToken.MaxSupply.Mul(sdk.NewInt(1_000_000_000_000))
+	daiToken.MaxSupply = daiToken.MaxSupply.Mul(sdkmath.NewInt(1_000_000_000_000))
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, daiToken))
 	// additional tokens for historacle testing
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(dumpDenom, "DUMP", 6)))
@@ -93,8 +93,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, newToken(outageDenom, "OUTAGE", 6)))
 	// additional tokens for borrow factor testing
 	stable := newToken(stableDenom, "STABLE", 6)
-	stable.CollateralWeight = sdk.MustNewDecFromStr("0.8")
-	stable.LiquidationThreshold = sdk.MustNewDecFromStr("0.9")
+	stable.CollateralWeight = sdkmath.LegacyMustNewDecFromStr("0.8")
+	stable.LiquidationThreshold = sdkmath.LegacyMustNewDecFromStr("0.9")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, stable))
 
 	// set the initial token registry length used in update registry tests
@@ -105,8 +105,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 		types.SpecialAssetPair{
 			Collateral:           pairedDenom,
 			Borrow:               daiDenom,
-			CollateralWeight:     sdk.MustNewDecFromStr("0.5"),
-			LiquidationThreshold: sdk.MustNewDecFromStr("0.75"),
+			CollateralWeight:     sdkmath.LegacyMustNewDecFromStr("0.5"),
+			LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.75"),
 		},
 	)
 
@@ -120,7 +120,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	s.ctx = ctx
 	s.setupAccountCounter = sdkmath.ZeroInt()
 	s.queryClient = types.NewQueryClient(queryHelper)
-	s.addrs = umeeapp.AddTestAddrsIncremental(app, s.ctx, 1, sdk.NewInt(3000000))
+	s.addrs = umeeapp.AddTestAddrsIncremental(app, s.ctx, 1, sdkmath.NewInt(3000000))
 	s.msgSrvr = keeper.NewMsgServerImpl(s.app.LeverageKeeper)
 }
 
@@ -148,7 +148,7 @@ func (s *IntegrationTestSuite) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 	app, ctx := s.app, s.ctx
 
 	// create a unique address
-	s.setupAccountCounter = s.setupAccountCounter.Add(sdk.OneInt())
+	s.setupAccountCounter = s.setupAccountCounter.Add(sdkmath.OneInt())
 	addrStr := fmt.Sprintf("%-20s", "addr"+s.setupAccountCounter.String()+"_______________")
 	addr := sdk.AccAddress([]byte(addrStr))
 

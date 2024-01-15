@@ -14,13 +14,13 @@ message Params {
   // total_quota defines the total outflow limit of ibc-transfer in USD
   string total_quota = 2 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // token_quota defines the outflow limit per token in USD
   string token_quota = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // quota_duration defines quota expires for each ibc-transfer denom in seconds
@@ -33,19 +33,19 @@ message Params {
   // inflow_outflow_quota_base defines the inflow outflow quota base of ibc-transfer in USD
   string inflow_outflow_quota_base = 5 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // inflow_outflow_quota_rate defines the rate of total inflows
   string inflow_outflow_quota_rate = 6 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // inflow_outflow_token_quota_base defines the inflow outflow quota base for token
   string inflow_outflow_token_quota_base = 7 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

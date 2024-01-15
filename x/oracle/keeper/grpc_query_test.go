@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -13,18 +14,18 @@ import (
 )
 
 func (s *IntegrationTestSuite) TestQuerier_ActiveExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdkmath.LegacyOneDec())
 	res, err := s.queryClient.ActiveExchangeRates(s.ctx.Context(), &types.QueryActiveExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal([]string{displayDenom}, res.ActiveRates)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdkmath.LegacyOneDec())
 	res, err := s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
-		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
+		sdk.NewDecCoinFromDec(displayDenom, sdkmath.LegacyOneDec()),
 	}, res.ExchangeRates)
 
 	res, err = s.queryClient.ExchangeRates(s.ctx.Context(), &types.QueryExchangeRates{
@@ -32,7 +33,7 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRates() {
 	})
 	s.Require().NoError(err)
 	s.Require().Equal(sdk.DecCoins{
-		sdk.NewDecCoinFromDec(displayDenom, sdk.OneDec()),
+		sdk.NewDecCoinFromDec(displayDenom, sdkmath.LegacyOneDec()),
 	}, res.ExchangeRates)
 }
 
@@ -119,7 +120,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	var tuples types.ExchangeRateTuples
 	tuples = append(tuples, types.ExchangeRateTuple{
 		Denom:        appparams.DisplayDenom,
-		ExchangeRate: sdk.ZeroDec(),
+		ExchangeRate: sdkmath.LegacyZeroDec(),
 	})
 
 	vote := types.AggregateExchangeRateVote{
@@ -211,10 +212,10 @@ func (s *IntegrationTestSuite) TestQuerier_AggregateVotesAppendVotes() {
 func (s *IntegrationTestSuite) TestQuerier_Medians() {
 	app, ctx := s.app, s.ctx
 
-	atomMedian0 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("49.99")}
-	umeeMedian0 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6541.48")}
-	atomMedian1 := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("51.09")}
-	umeeMedian1 := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("6540.23")}
+	atomMedian0 := sdk.DecCoin{Denom: "atom", Amount: sdkmath.LegacyMustNewDecFromStr("49.99")}
+	umeeMedian0 := sdk.DecCoin{Denom: "umee", Amount: sdkmath.LegacyMustNewDecFromStr("6541.48")}
+	atomMedian1 := sdk.DecCoin{Denom: "atom", Amount: sdkmath.LegacyMustNewDecFromStr("51.09")}
+	umeeMedian1 := sdk.DecCoin{Denom: "umee", Amount: sdkmath.LegacyMustNewDecFromStr("6540.23")}
 
 	blockHeight0 := uint64(ctx.BlockHeight() - 4)
 	app.OracleKeeper.SetHistoricMedian(ctx, atomMedian0.Denom, blockHeight0, atomMedian0.Amount)
@@ -269,8 +270,8 @@ func (s *IntegrationTestSuite) TestQuerier_Medians() {
 func (s *IntegrationTestSuite) TestQuerier_MedianDeviations() {
 	app, ctx := s.app, s.ctx
 
-	atomMedianDeviation := sdk.DecCoin{Denom: "atom", Amount: sdk.MustNewDecFromStr("39.99")}
-	umeeMedianDeviation := sdk.DecCoin{Denom: "umee", Amount: sdk.MustNewDecFromStr("9541.48")}
+	atomMedianDeviation := sdk.DecCoin{Denom: "atom", Amount: sdkmath.LegacyMustNewDecFromStr("39.99")}
+	umeeMedianDeviation := sdk.DecCoin{Denom: "umee", Amount: sdkmath.LegacyMustNewDecFromStr("9541.48")}
 
 	app.OracleKeeper.SetMedianStampPeriod(ctx, 1)
 	blockHeight := uint64(ctx.BlockHeight() - 1)
@@ -361,7 +362,7 @@ func (s *IntegrationTestSuite) TestQuerier_AvgPrice() {
 	app, ctx := s.app, s.ctx
 
 	// Note: oracle will save avg price with Upper Case Denom
-	p := sdk.DecCoin{Denom: "ATOM", Amount: sdk.MustNewDecFromStr("12.1")}
+	p := sdk.DecCoin{Denom: "ATOM", Amount: sdkmath.LegacyMustNewDecFromStr("12.1")}
 	app.OracleKeeper.AddHistoricPrice(ctx, p.Denom, p.Amount)
 
 	res, err := s.queryClient.AvgPrice(ctx.Context(), &types.QueryAvgPrice{Denom: p.Denom})
@@ -377,13 +378,13 @@ func (s *IntegrationTestSuite) TestQuerier_AvgPrice() {
 
 func (s *IntegrationTestSuite) TestQuerier_ExchangeRatesWithTimestamp() {
 	s.ctx = s.ctx.WithBlockTime(time.Now())
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdkmath.LegacyOneDec())
 	res, err := s.queryClient.ExgRatesWithTimestamp(s.ctx.Context(), &types.QueryExgRatesWithTimestamp{})
 	s.Require().NoError(err)
 	s.Require().Equal([]types.DenomExchangeRate{
 		{
 			Denom:     displayDenom,
-			Rate:      sdk.OneDec(),
+			Rate:      sdkmath.LegacyOneDec(),
 			Timestamp: s.ctx.BlockTime(),
 		},
 	}, res.ExgRates)
@@ -394,7 +395,7 @@ func (s *IntegrationTestSuite) TestQuerier_ExchangeRatesWithTimestamp() {
 	s.Require().NoError(err)
 	s.Require().Equal(types.DenomExchangeRate{
 		Denom:     displayDenom,
-		Rate:      sdk.OneDec(),
+		Rate:      sdkmath.LegacyOneDec(),
 		Timestamp: s.ctx.BlockTime(),
 	}, res.ExgRates[0])
 }

@@ -3,12 +3,12 @@ package types
 import (
 	"sort"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 type Prices []Price
 
-func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) Price {
+func NewPrice(exchangeRate sdkmath.LegacyDec, denom string, blockNum uint64) Price {
 	return Price{
 		ExchangeRateTuple: ExchangeRateTuple{
 			ExchangeRate: exchangeRate,
@@ -18,8 +18,8 @@ func NewPrice(exchangeRate sdk.Dec, denom string, blockNum uint64) Price {
 	}
 }
 
-func (p Prices) Decs() []sdk.Dec {
-	decs := []sdk.Dec{}
+func (p Prices) Decs() []sdkmath.LegacyDec {
+	decs := []sdkmath.LegacyDec{}
 	for _, price := range p {
 		decs = append(decs, price.ExchangeRateTuple.ExchangeRate)
 	}

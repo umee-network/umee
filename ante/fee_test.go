@@ -29,7 +29,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 		if denom == "" {
 			denom = minGas.Denom
 		}
-		f := sdk.MustNewDecFromStr(factor)
+		f := sdkmath.LegacyMustNewDecFromStr(factor)
 		return sdk.DecCoins{sdk.NewDecCoinFromDec(denom, minGas.Amount.Mul(f))}
 	}
 	mkTx := func(fee sdk.Coins) signing.Tx {
@@ -66,7 +66,7 @@ func (suite *IntegrationTestSuite) TestFeeAndPriority() {
 	// suite.checkFeeFailed(tx, ctx.WithMinGasPrices(mkGas("other", "1")))
 
 	// should fail when some fee doesn't include all gas denoms
-	// ctx = ctx.WithMinGasPrices(sdk.DecCoins{minGas,sdk.NewDecCoinFromDec("other", sdk.NewDec(10))})
+	// ctx = ctx.WithMinGasPrices(sdk.DecCoins{minGas,sdk.NewDecCoinFromDec("other", sdkmath.LegacyNewDec(10))})
 	// suite.checkFeeFailed(tx, ctx)
 
 	//

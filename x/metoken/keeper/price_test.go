@@ -47,7 +47,7 @@ func TestIndexPrices_Prices(t *testing.T) {
 	// metoken_price = (supply1 * price1 + supply2 * price2 + supplyN * priceN) / metokens_minted
 	// metoken_price = (1200 * 0.998 + 760 * 1.0 + 3000 * 1.02) / 4960 = 1.011612903225806452
 	require.Equal(t, ip.Exponent, uint32(6))
-	require.True(t, ip.Price.Equal(sdk.MustNewDecFromStr("1.011612903225806452")))
+	require.True(t, ip.Price.Equal(sdkmath.LegacyMustNewDecFromStr("1.011612903225806452")))
 
 	// case with no meTokens minted
 	balance := mocks.EmptyUSDIndexBalances(mocks.MeUSDDenom)
@@ -60,7 +60,7 @@ func TestIndexPrices_Prices(t *testing.T) {
 	ip, err = k.Prices(index)
 	require.NoError(t, err)
 	require.Equal(t, ip.Exponent, uint32(6))
-	require.True(t, ip.Price.Equal(sdk.MustNewDecFromStr("1.006")))
+	require.True(t, ip.Price.Equal(sdkmath.LegacyMustNewDecFromStr("1.006")))
 }
 
 func TestIndexPrices_Convert(t *testing.T) {
@@ -74,7 +74,7 @@ func TestIndexPrices_Convert(t *testing.T) {
 	ip, err := k.Prices(index)
 	require.NoError(t, err)
 
-	require.NotEqual(t, sdk.ZeroDec(), ip.Price)
+	require.NotEqual(t, sdkmath.LegacyZeroDec(), ip.Price)
 
 	// convert 20 USDC to meUSD
 	usdcPrice, err := ip.PriceByBaseDenom(mocks.USDCBaseDenom)
@@ -133,8 +133,7 @@ func TestIndexPrices_Convert(t *testing.T) {
 	require.True(
 		t, result.Equal(
 			usdcPrice.Price.Quo(ip.Price).MulInt(coin.Amount).Mul(
-				sdk.
-					MustNewDecFromStr("0.01"),
+				sdkmath.LegacyMustNewDecFromStr("0.01"),
 			).TruncateInt(),
 		),
 	)

@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/telemetry"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -39,11 +40,19 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	powerReduction := k.StakingKeeper.PowerReduction(ctx)
 	// Calculate total validator power
 	var totalBondedPower int64
-	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+	validators, err := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	if err != nil {
+		return err
+	}
+	for _, v := range validators {
 		addr := v.GetOperator()
 		power := v.GetConsensusPower(powerReduction)
 		totalBondedPower += power
-		validatorClaimMap[addr.String()] = types.NewClaim(power, 0, 0, addr)
+		valAddr, err := sdk.ValAddressFromBech32(addr)
+		if err != nil {
+			return err
+		}
+		validatorClaimMap[addr] = types.NewClaim(power, 0, 0, valAddr)
 	}
 
 	// voteTargets defines the symbol (ticker) denoms that we require votes on
@@ -80,7 +89,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	}
 
 	if k.IsPeriodLastBlock(ctx, params.HistoricStampPeriod) {
-		k.IterateExchangeRates(ctx, func(denom string, exgRate sdk.Dec, _ time.Time) (stop bool) {
+		k.IterateExchangeRates(ctx, func(denom string, exgRate sdkmath.LegacyDec, _ time.Time) (stop bool) {
 			k.AddHistoricPrice(ctx, denom, exgRate)
 			return false
 		})
@@ -88,7 +97,7 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 	// Calculate and stamp median/median deviation if median stamp period has passed
 	if k.IsPeriodLastBlock(ctx, params.MedianStampPeriod) {
 		var err error
-		k.IterateExchangeRates(ctx, func(denom string, _ sdk.Dec, _ time.Time) (stop bool) {
+		k.IterateExchangeRates(ctx, func(denom string, _ sdkmath.LegacyDec, _ time.Time) (stop bool) {
 			err = k.CalcAndSetHistoricMedian(ctx, denom)
 			return err != nil
 		})
@@ -129,21 +138,21 @@ func CalcPrices(ctx sdk.Context, params types.Params, k keeper.Keeper) error {
 // the store. Note, the ballot is sorted by ExchangeRate.
 func Tally(
 	ballot types.ExchangeRateBallot,
-	rewardBand sdk.Dec,
+	rewardBand sdkmath.LegacyDec,
 	validatorClaimMap map[string]types.Claim,
-) (sdk.Dec, error) {
+) (sdkmath.LegacyDec, error) {
 	weightedMedian, err := ballot.WeightedMedian()
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 	standardDeviation, err := ballot.StandardDeviation()
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 
 	// rewardSpread is the MAX((weightedMedian * (rewardBand/2)), standardDeviation)
 	rewardSpread := weightedMedian.Mul(rewardBand.QuoInt64(2))
-	rewardSpread = sdk.MaxDec(rewardSpread, standardDeviation)
+	rewardSpread = sdkmath.LegacyMaxDec(rewardSpread, standardDeviation)
 
 	for _, tallyVote := range ballot {
 		// Filter ballot winners. For voters, we filter out the tally vote iff:

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -146,7 +147,7 @@ func (k Keeper) UpdateTokenRegistry(
 	return nil
 }
 
-var maxEmergencyActionNumericDiff = sdk.MustNewDecFromStr("0.2")
+var maxEmergencyActionNumericDiff = sdkmath.LegacyMustNewDecFromStr("0.2")
 
 func validateEmergencyTokenSettingsUpdate(regTokens map[string]types.Token, updates []types.Token) []error {
 	var errs []error

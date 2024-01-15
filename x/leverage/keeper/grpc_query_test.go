@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"context"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
@@ -73,28 +74,28 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 	resp, err := s.queryClient.MarketSummary(context.Background(), req)
 	require.NoError(err)
 
-	oracleSymbolPrice := sdk.MustNewDecFromStr("4.21")
+	oracleSymbolPrice := sdkmath.LegacyMustNewDecFromStr("4.21")
 
 	expected := types.QueryMarketSummaryResponse{
 		SymbolDenom:            "UMEE",
 		Exponent:               6,
 		OraclePrice:            &oracleSymbolPrice,
 		OracleHistoricPrice:    &oracleSymbolPrice,
-		UTokenExchangeRate:     sdk.OneDec(),
-		Supply_APY:             sdk.MustNewDecFromStr("1.2008"),
-		Borrow_APY:             sdk.MustNewDecFromStr("1.52"),
-		Supplied:               sdk.ZeroInt(),
-		Reserved:               sdk.ZeroInt(),
-		Collateral:             sdk.ZeroInt(),
-		Borrowed:               sdk.ZeroInt(),
-		Liquidity:              sdk.ZeroInt(),
-		MaximumBorrow:          sdk.ZeroInt(),
-		MaximumCollateral:      sdk.ZeroInt(),
-		MinimumLiquidity:       sdk.ZeroInt(),
-		UTokenSupply:           sdk.ZeroInt(),
-		AvailableBorrow:        sdk.ZeroInt(),
-		AvailableWithdraw:      sdk.ZeroInt(),
-		AvailableCollateralize: sdk.ZeroInt(),
+		UTokenExchangeRate:     sdkmath.LegacyOneDec(),
+		Supply_APY:             sdkmath.LegacyMustNewDecFromStr("1.2008"),
+		Borrow_APY:             sdkmath.LegacyMustNewDecFromStr("1.52"),
+		Supplied:               sdkmath.ZeroInt(),
+		Reserved:               sdkmath.ZeroInt(),
+		Collateral:             sdkmath.ZeroInt(),
+		Borrowed:               sdkmath.ZeroInt(),
+		Liquidity:              sdkmath.ZeroInt(),
+		MaximumBorrow:          sdkmath.ZeroInt(),
+		MaximumCollateral:      sdkmath.ZeroInt(),
+		MinimumLiquidity:       sdkmath.ZeroInt(),
+		UTokenSupply:           sdkmath.ZeroInt(),
+		AvailableBorrow:        sdkmath.ZeroInt(),
+		AvailableWithdraw:      sdkmath.ZeroInt(),
+		AvailableCollateralize: sdkmath.ZeroInt(),
 	}
 	require.Equal(expected, *resp)
 }
@@ -157,22 +158,22 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	resp, err := s.queryClient.AccountSummary(ctx, &types.QueryAccountSummary{Address: addr.String()})
 	require.NoError(err)
 
-	lt := sdk.MustNewDecFromStr("1094.6")
-	bl := sdk.MustNewDecFromStr("1052.5")
+	lt := sdkmath.LegacyMustNewDecFromStr("1094.6")
+	bl := sdkmath.LegacyMustNewDecFromStr("1052.5")
 	expected := types.QueryAccountSummaryResponse{
 		// This result is umee's oracle exchange rate from
 		// from .Reset() in x/leverage/keeper/oracle_test.go
 		// times the amount of umee, then sometimes times params
 		// from newToken in x/leverage/keeper/keeper_test.go
 		// (1000) * 4.21 = 4210
-		SuppliedValue:     sdk.MustNewDecFromStr("4210"),
-		SpotSuppliedValue: sdk.MustNewDecFromStr("4210"),
+		SuppliedValue:     sdkmath.LegacyMustNewDecFromStr("4210"),
+		SpotSuppliedValue: sdkmath.LegacyMustNewDecFromStr("4210"),
 		// (1000) * 4.21 = 4210
-		CollateralValue:     sdk.MustNewDecFromStr("4210"),
-		SpotCollateralValue: sdk.MustNewDecFromStr("4210"),
+		CollateralValue:     sdkmath.LegacyMustNewDecFromStr("4210"),
+		SpotCollateralValue: sdkmath.LegacyMustNewDecFromStr("4210"),
 		// Nothing borrowed
-		BorrowedValue:     sdk.ZeroDec(),
-		SpotBorrowedValue: sdk.ZeroDec(),
+		BorrowedValue:     sdkmath.LegacyZeroDec(),
+		SpotBorrowedValue: sdkmath.LegacyZeroDec(),
 		// (1000) * 4.21 * 0.25 = 1052.5
 		BorrowLimit: &bl,
 		// (1000) * 4.21 * 0.26 = 1094.6
@@ -187,16 +188,16 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 
 	resp, err = s.queryClient.AccountSummary(ctx, &types.QueryAccountSummary{Address: addr.String()})
 	require.NoError(err)
-	bl = sdk.MustNewDecFromStr("125")
+	bl = sdkmath.LegacyMustNewDecFromStr("125")
 	expected = types.QueryAccountSummaryResponse{
 		// Price outage should have no effect on value fields
-		SuppliedValue:       sdk.MustNewDecFromStr("1500"),
-		SpotSuppliedValue:   sdk.MustNewDecFromStr("1500"),
-		CollateralValue:     sdk.MustNewDecFromStr("1500"),
-		SpotCollateralValue: sdk.MustNewDecFromStr("1500"),
+		SuppliedValue:       sdkmath.LegacyMustNewDecFromStr("1500"),
+		SpotSuppliedValue:   sdkmath.LegacyMustNewDecFromStr("1500"),
+		CollateralValue:     sdkmath.LegacyMustNewDecFromStr("1500"),
+		SpotCollateralValue: sdkmath.LegacyMustNewDecFromStr("1500"),
 		// Nothing borrowed
-		BorrowedValue:        sdk.ZeroDec(),
-		SpotBorrowedValue:    sdk.ZeroDec(),
+		BorrowedValue:        sdkmath.LegacyZeroDec(),
+		SpotBorrowedValue:    sdkmath.LegacyZeroDec(),
 		BorrowLimit:          &bl,
 		LiquidationThreshold: nil, // missing collateral price: no threshold can be displayed
 	}
@@ -215,13 +216,13 @@ func (s *IntegrationTestSuite) TestQuerier_AccountSummary() {
 	require.NoError(err)
 	expected = types.QueryAccountSummaryResponse{
 		// Both prices should show up in spot fields and query fields.
-		SuppliedValue:       sdk.MustNewDecFromStr("1500"),
-		SpotSuppliedValue:   sdk.MustNewDecFromStr("1500"),
-		CollateralValue:     sdk.MustNewDecFromStr("1500"),
-		SpotCollateralValue: sdk.MustNewDecFromStr("1500"),
+		SuppliedValue:       sdkmath.LegacyMustNewDecFromStr("1500"),
+		SpotSuppliedValue:   sdkmath.LegacyMustNewDecFromStr("1500"),
+		CollateralValue:     sdkmath.LegacyMustNewDecFromStr("1500"),
+		SpotCollateralValue: sdkmath.LegacyMustNewDecFromStr("1500"),
 		// Borrowed 1/5 of collateral values
-		BorrowedValue:        sdk.MustNewDecFromStr("300"),
-		SpotBorrowedValue:    sdk.MustNewDecFromStr("300"),
+		BorrowedValue:        sdkmath.LegacyMustNewDecFromStr("300"),
+		SpotBorrowedValue:    sdkmath.LegacyMustNewDecFromStr("300"),
 		BorrowLimit:          nil, // missing borrow price: no borrow limit can be displayed
 		LiquidationThreshold: nil, // missing collateral price: no threshold can be displayed
 	}
@@ -332,8 +333,8 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.NoError(err)
 
 	expected := types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000))),
-		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000))),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(1000_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdkmath.NewInt(1000_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -344,8 +345,8 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.NoError(err)
 
 	expected = types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(1000_000000))),
-		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(1000_000000))),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(1000_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdkmath.NewInt(1000_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -359,8 +360,8 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.NoError(err)
 
 	expected = types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000))),
-		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000))),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(600_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdkmath.NewInt(600_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -371,8 +372,8 @@ func (s *IntegrationTestSuite) TestQuerier_MaxWithdraw() {
 	require.NoError(err)
 
 	expected = types.QueryMaxWithdrawResponse{
-		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(600_000000))),
-		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdk.NewInt(600_000000))),
+		Tokens:  sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(600_000000))),
+		UTokens: sdk.NewCoins(sdk.NewCoin("u/"+umeeDenom, sdkmath.NewInt(600_000000))),
 	}
 	require.Equal(expected, *resp)
 }
@@ -392,7 +393,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.NoError(err)
 
 	expected := types.QueryMaxBorrowResponse{
-		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(250_000000))),
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(250_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -403,7 +404,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.NoError(err)
 
 	expected = types.QueryMaxBorrowResponse{
-		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(250_000000))),
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(250_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -417,7 +418,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.NoError(err)
 
 	expected = types.QueryMaxBorrowResponse{
-		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(150_000000))),
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(150_000000))),
 	}
 	require.Equal(expected, *resp)
 
@@ -428,7 +429,7 @@ func (s *IntegrationTestSuite) TestQuerier_MaxBorrow() {
 	require.NoError(err)
 
 	expected = types.QueryMaxBorrowResponse{
-		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdk.NewInt(150_000000))),
+		Tokens: sdk.NewCoins(sdk.NewCoin(umeeDenom, sdkmath.NewInt(150_000000))),
 	}
 	require.Equal(expected, *resp)
 }

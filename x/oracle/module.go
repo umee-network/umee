@@ -104,6 +104,12 @@ type AppModule struct {
 	bankKeeper    bankkeeper.Keeper
 }
 
+// IsAppModule implements module.AppModule.
+func (AppModule) IsAppModule() {}
+
+// IsOnePerModuleType implements module.AppModule.
+func (AppModule) IsOnePerModuleType() {}
+
 func NewAppModule(
 	cdc codec.Codec,
 	keeper keeper.Keeper,
@@ -157,11 +163,11 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/oracle module.
-func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(sdk.Context) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/oracle module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx sdk.Context) []abci.ValidatorUpdate {
 	err := EndBlocker(ctx, am.keeper)
 	util.Panic(err)
 
@@ -185,7 +191,7 @@ func (AppModule) RandomizedParams(*rand.Rand) []simtypes.LegacyParamChange {
 	return simulation.ParamChanges()
 }
 
-// RegisterStoreDecoder registers a decoder for oracle module's types
-func (am AppModule) RegisterStoreDecoder(sdr sdk.StoreDecoderRegistry) {
+// RegisterStoreDecoder implements module.AppModuleSimulation.
+func (am AppModule) RegisterStoreDecoder(sdr simtypes.StoreDecoderRegistry) {
 	sdr[types.StoreKey] = simulation.NewDecodeStore(am.cdc)
 }

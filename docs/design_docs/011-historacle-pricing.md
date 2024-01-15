@@ -72,7 +72,7 @@ Averages are implemented using a list of records:
 
 ```go
 type AvgCounter struct {
-    Sum sdk.Dec   // sum of USD value of default denom (eg umee)
+    Sum sdkmath.LegacyDec   // sum of USD value of default denom (eg umee)
     Num uint32    // number of aggregated prices
     Starts uint64 // timestamp
 }
@@ -95,13 +95,13 @@ We will have `AvgPeriod / AvgShift` counters per denom. This is how this can wor
 
 Modules will have access to the following `keeper` functions from the `x/oracle` module:
 
-- `HistoricMedians(denom string, numStamps uint64) []sdk.Dec` returns list of last `numStamps` amount of median prices of an asset
+- `HistoricMedians(denom string, numStamps uint64) []sdkmath.LegacyDec` returns list of last `numStamps` amount of median prices of an asset
 - `WithinHistoricDeviation(denom string) (bool, error)` returns whether or not the current price of an asset is within the Standard Deviation around the Median.
-- `MedianOfHistoricMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Median of the all the Medians recorded within the past `numStamps` of medians.
-- `AverageOfHistoricMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Average of all the Medians recorded within the past `numStamps` of medians.
-- `MaxOfHistoricMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Maximum of all the Medians recorded within the past `numStamps` of medians.
-- `MinOfHistoricMedians(denom string, numStamps uint64) (sdk.Dec, error)` returns the Minimum of all the Medians recorded within the past `numStamps` of medians.
-- `HistoricAvgs(denom string) []sdk.Dec` returns the most complete of last avg prices for given asset.
+- `MedianOfHistoricMedians(denom string, numStamps uint64) (sdkmath.LegacyDec, error)` returns the Median of the all the Medians recorded within the past `numStamps` of medians.
+- `AverageOfHistoricMedians(denom string, numStamps uint64) (sdkmath.LegacyDec, error)` returns the Average of all the Medians recorded within the past `numStamps` of medians.
+- `MaxOfHistoricMedians(denom string, numStamps uint64) (sdkmath.LegacyDec, error)` returns the Maximum of all the Medians recorded within the past `numStamps` of medians.
+- `MinOfHistoricMedians(denom string, numStamps uint64) (sdkmath.LegacyDec, error)` returns the Minimum of all the Medians recorded within the past `numStamps` of medians.
+- `HistoricAvgs(denom string) []sdkmath.LegacyDec` returns the most complete of last avg prices for given asset.
 
 ### Outcomes
 

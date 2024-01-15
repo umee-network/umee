@@ -18,7 +18,7 @@ func (o Oracle) AllMedianPrices(_ sdk.Context) otypes.Prices {
 	return o.prices
 }
 
-func (o Oracle) SetExchangeRate(_ sdk.Context, _ string, _ sdk.Dec) {
+func (o Oracle) SetExchangeRate(_ sdk.Context, _ string, _ sdkmath.LegacyDec) {
 }
 
 func NewOracleMock() Oracle {
@@ -55,7 +55,7 @@ func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, coin sdk.Coin) (sdk.
 
 func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, coin sdk.Coin) (sdkmath.Int, error) {
 	if coin.Denom == mocks.ISTBaseDenom {
-		return sdk.MustNewDecFromStr("0.5").MulInt(coin.Amount).TruncateInt(), nil
+		return sdkmath.LegacyMustNewDecFromStr("0.5").MulInt(coin.Amount).TruncateInt(), nil
 	}
 	return coin.Amount, nil
 }

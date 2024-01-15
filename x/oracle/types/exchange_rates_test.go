@@ -4,12 +4,11 @@ import (
 	"testing"
 	time "time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 )
 
 func TestExchangeRateMarshalAndUnmarshal(t *testing.T) {
-	der := ExchangeRate{Rate: sdk.NewDec(1), Timestamp: time.Now()}
+	der := ExchangeRate{Rate: sdkmath.LegacyNewDec(1), Timestamp: time.Now()}
 
 	// Marshal the exchange rate
 	md, err := der.Marshal()
@@ -29,7 +28,7 @@ func TestExchangeRateMarshalAndUnmarshal(t *testing.T) {
 	assert.ErrorContains(t, err, "rate should not be nil")
 
 	// error expected
-	der = ExchangeRate{Rate: sdk.NewDec(1)}
+	der = ExchangeRate{Rate: sdkmath.LegacyNewDec(1)}
 
 	// Marshal the exchange rate
 	_, err = der.Marshal()

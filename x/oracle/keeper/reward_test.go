@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -27,19 +28,21 @@ func (s *IntegrationTestSuite) TestRewardBallotWinners() {
 		voteTargets = append(voteTargets, v.SymbolDenom)
 	}
 
-	votePeriodsPerWindow := sdk.NewDec((int64)(s.app.OracleKeeper.RewardDistributionWindow(s.ctx))).
+	votePeriodsPerWindow := sdkmath.LegacyNewDec((int64)(s.app.OracleKeeper.RewardDistributionWindow(s.ctx))).
 		QuoInt64((int64)(s.app.OracleKeeper.VotePeriod(s.ctx))).
 		TruncateInt64()
 	s.app.OracleKeeper.RewardBallotWinners(s.ctx, (int64)(s.app.OracleKeeper.VotePeriod(s.ctx)), (int64)(s.app.OracleKeeper.RewardDistributionWindow(s.ctx)), voteTargets, claims)
-	outstandingRewardsDec := s.app.DistrKeeper.GetValidatorOutstandingRewardsCoins(s.ctx, valAddr)
+	outstandingRewardsDec, err := s.app.DistrKeeper.GetValidatorOutstandingRewardsCoins(s.ctx, valAddr)
+	s.Require().NoError(err)
 	outstandingRewards, _ := outstandingRewardsDec.TruncateDecimal()
-	s.Require().Equal(sdk.NewDecFromInt(givingAmt.AmountOf(types.UmeeDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(3).TruncateInt(),
+	s.Require().Equal(sdkmath.LegacyNewDecFromInt(givingAmt.AmountOf(types.UmeeDenom)).QuoInt64(votePeriodsPerWindow).QuoInt64(3).TruncateInt(),
 		outstandingRewards.AmountOf(types.UmeeDenom))
 }
 
 func (s *IntegrationTestSuite) TestRewardBallotWinnersZeroPower() {
 	zeroClaim := types.NewClaim(0, 0, 0, valAddr)
 	s.app.OracleKeeper.RewardBallotWinners(s.ctx, 0, 0, []string{}, []types.Claim{zeroClaim})
-	outstandingRewardsDec := s.app.DistrKeeper.GetValidatorOutstandingRewardsCoins(s.ctx, valAddr)
+	outstandingRewardsDec, err := s.app.DistrKeeper.GetValidatorOutstandingRewardsCoins(s.ctx, valAddr)
+	s.Require().NoError(err)
 	s.Require().Equal("", outstandingRewardsDec.String())
 }

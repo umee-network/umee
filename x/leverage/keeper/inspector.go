@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -18,7 +19,7 @@ import (
 type tokenExchangeRate struct {
 	symbol       string
 	exponent     uint32
-	exchangeRate sdk.Dec
+	exchangeRate sdkmath.LegacyDec
 }
 
 // Separated from grpc_query.go
@@ -68,7 +69,7 @@ func (q Querier) Inspect(
 		}
 		checkedAddrs[addr.String()] = struct{}{}
 
-		borrowedValue, collateralValue, liquidationThreshold := sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()
+		borrowedValue, collateralValue, liquidationThreshold := sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()
 		position, err := k.GetAccountPosition(ctx, addr, true)
 		if err == nil {
 			borrowedValue = position.BorrowedValue()
@@ -194,7 +195,7 @@ func symbolDecCoins(
 	symbolCoins := sdk.NewDecCoins()
 
 	for _, c := range coins {
-		exchangeRate := sdk.OneDec()
+		exchangeRate := sdkmath.LegacyOneDec()
 		if coin.HasUTokenPrefix(c.Denom) {
 			// uTokens will be converted to base tokens
 			c.Denom = coin.StripUTokenDenom(c.Denom)
@@ -203,7 +204,7 @@ func symbolDecCoins(
 		t, ok := tokens[c.Denom]
 		if !ok {
 			// unregistered tokens cannot be converted, but can be returned as base denom
-			symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
+			symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdkmath.LegacyNewDecFromInt(c.Amount)))
 			continue
 		}
 		exponentMultiplier := ten.Power(uint64(t.exponent))
@@ -214,9 +215,9 @@ func symbolDecCoins(
 	return symbolCoins
 }
 
-// neat truncates an sdk.Dec to a common-sense precision based on its size and converts it to float.
+// neat truncates an sdkmath.LegacyDec to a common-sense precision based on its size and converts it to float.
 // This greatly improves readability when viewing balances.
-func neat(num sdk.Dec) float64 {
+func neat(num sdkmath.LegacyDec) float64 {
 	n := num.MustFloat64()
 	a := math.Abs(n)
 	precision := 2 // Round to cents if 0.01 <= n <= 100

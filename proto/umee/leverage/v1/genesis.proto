@@ -4,6 +4,7 @@ package umee.leverage.v1;
 import "cosmos/base/v1beta1/coin.proto";
 import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/leverage/types";
 
@@ -54,7 +55,8 @@ message BadDebt {
 message InterestScalar {
   string denom  = 1;
   string scalar = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

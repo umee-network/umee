@@ -64,7 +64,7 @@ message QueryInflows {
 message QueryInflowsResponse {
   string sum = 1 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   repeated DecCoinSymbol inflows = 2 [(gogoproto.nullable) = false];
@@ -89,7 +89,7 @@ message QueryOutflows {
 message QueryOutflowsResponse {
   string amount = 1 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"gotest.tools/v3/assert"
 
@@ -35,14 +35,14 @@ func TestMsgGovUpdateMinGasPrice(t *testing.T) {
 	assert.Equal(t, len(signers), 1)
 	assert.Equal(t, msg.Authority, signers[0].String())
 
-	msg.MinGasPrice.Amount = sdk.MustNewDecFromStr("0.0000123")
+	msg.MinGasPrice.Amount = sdkmath.LegacyMustNewDecFromStr("0.0000123")
 	assert.NilError(t, msg.ValidateBasic(), "fractional amount should be allowed")
 
-	msg.MinGasPrice.Amount = sdk.NewDec(0)
+	msg.MinGasPrice.Amount = sdkmath.LegacyNewDec(0)
 	assert.NilError(t, msg.ValidateBasic(), "zero amount should be allowed")
 
 	// error cases
-	msg.MinGasPrice.Amount = sdk.NewDec(-1)
+	msg.MinGasPrice.Amount = sdkmath.LegacyNewDec(-1)
 	assert.ErrorContains(t, msg.ValidateBasic(), "amount cannot be negative")
 
 	msg = validMsgGovUpdateMinGasPrice()

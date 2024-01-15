@@ -3,6 +3,7 @@ package keeper
 import (
 	"errors"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -172,7 +173,7 @@ func (m *mockLeverageKeeper) setCollateral(addr sdk.AccAddress, denom string, am
 		// overwrite existing collateral of this denom
 		for i := range collateral {
 			if collateral[i].Denom == denom {
-				collateral[i].Amount = sdk.NewInt(amount)
+				collateral[i].Amount = sdkmath.NewInt(amount)
 			}
 		}
 	}
@@ -194,12 +195,12 @@ func (m *mockLeverageKeeper) GetTokenSettings(_ sdk.Context, denom string) (leve
 }
 
 // TotalTokenValue implements the expected leverage keeper, with UMEE, ATOM, and DAI registered.
-func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ leveragetypes.PriceMode) (sdk.Dec, error) {
+func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ leveragetypes.PriceMode) (sdkmath.LegacyDec, error) {
 	var (
-		total     = sdk.ZeroDec()
-		umeePrice = sdk.MustNewDecFromStr("4.21")
-		atomPrice = sdk.MustNewDecFromStr("39.38")
-		daiPrice  = sdk.MustNewDecFromStr("1.00")
+		total     = sdkmath.LegacyZeroDec()
+		umeePrice = sdkmath.LegacyMustNewDecFromStr("4.21")
+		atomPrice = sdkmath.LegacyMustNewDecFromStr("39.38")
+		daiPrice  = sdkmath.LegacyMustNewDecFromStr("1.00")
 	)
 
 	for _, coin := range coins {

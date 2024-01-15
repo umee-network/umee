@@ -9,9 +9,12 @@ import (
 
 // StartMsg unpacks sdk.Context and validates msg.
 func StartMsg(ctx context.Context, msg sdk.Msg) (sdk.Context, error) {
-	if err := msg.ValidateBasic(); err != nil {
-		return sdk.Context{}, err
+	if m, ok := msg.(validateBasic); ok {
+		if err := m.ValidateBasic(); err != nil {
+			return sdk.Context{}, err
+		}
 	}
+
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	var err error
 	if fvmsg, ok := msg.(fullValidate); ok {

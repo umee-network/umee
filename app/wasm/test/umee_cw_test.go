@@ -258,7 +258,7 @@ func (s *IntegrationTestSuite) TestStargateQueries() {
 
 func (s *IntegrationTestSuite) TestLeverageTxs() {
 	accAddr := sdk.MustAccAddressFromBech32(s.contractAddr)
-	err := s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, accAddr, sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(100000))))
+	err := s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, accAddr, sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(100000))))
 	assert.NilError(s.T, err)
 	txTests := []struct {
 		Name string
@@ -269,7 +269,7 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 			Msg: s.genCustomTx(wm.UmeeMsg{
 				Supply: &lvtypes.MsgSupply{
 					Supplier: s.contractAddr,
-					Asset:    sdk.NewCoin(appparams.BondDenom, sdk.NewInt(700)),
+					Asset:    sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(700)),
 				},
 			}),
 		},
@@ -278,7 +278,7 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 			Msg: s.genCustomTx(wm.UmeeMsg{
 				Collateralize: &lvtypes.MsgCollateralize{
 					Borrower: s.contractAddr,
-					Asset:    sdk.NewCoin("u/uumee", sdk.NewInt(700)),
+					Asset:    sdk.NewCoin("u/uumee", sdkmath.NewInt(700)),
 				},
 			}),
 		},
@@ -287,7 +287,7 @@ func (s *IntegrationTestSuite) TestLeverageTxs() {
 		// 	Msg: s.genCustomTx(wm.UmeeMsg{
 		// 		Borrow: &lvtypes.MsgBorrow{
 		// 			Borrower: addr2.String(),
-		// 			Asset:    sdk.NewCoin(appparams.BondDenom, sdk.NewInt(150)),
+		// 			Asset:    sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(150)),
 		// 		},
 		// 	}),
 		// },

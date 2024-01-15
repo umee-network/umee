@@ -17,7 +17,7 @@ import (
 // MaxUsage sets the maximum percent of a user's borrow limit that can be in use: set to 1
 // to allow up to 100% borrow limit, or a lower value (e.g. 0.9) if a transaction should fail
 // if a safety margin is desired (e.g. <90% borrow limit).
-func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdk.Dec) error {
+func (k Keeper) assertBorrowerHealth(ctx sdk.Context, borrowerAddr sdk.AccAddress, maxUsage sdkmath.LegacyDec) error {
 	position, err := k.GetAccountPosition(ctx, borrowerAddr, false)
 	if err != nil {
 		return err
@@ -86,11 +86,11 @@ func (k Keeper) AvailableLiquidity(ctx sdk.Context, denom string) sdkmath.Int {
 	moduleBalance := k.ModuleBalance(ctx, denom).Amount
 	reserveAmount := k.GetReserves(ctx, denom).Amount
 
-	return sdk.MaxInt(moduleBalance.Sub(reserveAmount), sdk.ZeroInt())
+	return sdkmath.MaxInt(moduleBalance.Sub(reserveAmount), sdkmath.ZeroInt())
 }
 
 // SupplyUtilization calculates the current supply utilization of a token denom.
-func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
+func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdkmath.LegacyDec {
 	// Supply utilization is equal to total borrows divided by the token supply
 	// (including borrowed tokens yet to be repaid and excluding tokens reserved).
 	availableLiquidity := toDec(k.AvailableLiquidity(ctx, denom))
@@ -99,7 +99,7 @@ func (k Keeper) SupplyUtilization(ctx sdk.Context, denom string) sdk.Dec {
 
 	// This edge case can be safely interpreted as 100% utilization.
 	if totalBorrowed.GTE(tokenSupply) {
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
 
 	return totalBorrowed.Quo(tokenSupply)
@@ -129,18 +129,18 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, err
 	// Get the module_available_liquidity
 	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	// If module_available_liquidity is zero, we cannot borrow anything
 	if !moduleAvailableLiquidity.IsPositive() {
-		return sdk.ZeroInt(), nil
+		return sdkmath.ZeroInt(), nil
 	}
 
 	// Get max_supply_utilization for the denom
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 	maxSupplyUtilization := token.MaxSupplyUtilization
 
@@ -156,14 +156,14 @@ func (k Keeper) moduleMaxBorrow(ctx sdk.Context, denom string) (sdkmath.Int, err
 	// module_max_borrow = max_supply_utilization * module_liquidity + max_supply_utilization * total_borrowed
 	//						- total_borrowed
 	moduleMaxBorrow := maxSupplyUtilization.MulInt(liquidity).Add(maxSupplyUtilization.MulInt(totalBorrowed)).Sub(
-		sdk.NewDecFromInt(totalBorrowed),
+		sdkmath.LegacyNewDecFromInt(totalBorrowed),
 	)
 
 	// If module_max_borrow is zero, we cannot borrow anything
 	if !moduleMaxBorrow.IsPositive() {
-		return sdk.ZeroInt(), nil
+		return sdkmath.ZeroInt(), nil
 	}
 
 	// Use the minimum between module_max_borrow and module_available_liquidity
-	return sdk.MinInt(moduleAvailableLiquidity, moduleMaxBorrow.TruncateInt()), nil
+	return sdkmath.MinInt(moduleAvailableLiquidity, moduleMaxBorrow.TruncateInt()), nil
 }

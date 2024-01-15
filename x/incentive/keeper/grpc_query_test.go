@@ -3,6 +3,7 @@ package keeper
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -188,7 +189,7 @@ func TestAPYQuery(t *testing.T) {
 
 	req2 := incentive.QueryActualRates{UToken: uAtom}
 	expect2 := &incentive.QueryActualRatesResponse{
-		APY: sdk.ZeroDec(),
+		APY: sdkmath.LegacyZeroDec(),
 	}
 	resp2, err := q.ActualRates(k.ctx, &req2)
 	require.NoError(t, err)
@@ -207,7 +208,7 @@ func TestAPYQuery(t *testing.T) {
 
 	req4 := incentive.QueryActualRates{UToken: uUmee}
 	expect4 := &incentive.QueryActualRatesResponse{
-		APY: sdk.MustNewDecFromStr("0.2"),
+		APY: sdkmath.LegacyMustNewDecFromStr("0.2"),
 	}
 	resp4, err := q.ActualRates(k.ctx, &req4)
 	require.NoError(t, err)
@@ -229,7 +230,7 @@ func TestAPYQuery(t *testing.T) {
 
 	req6 := incentive.QueryActualRates{UToken: uUmee}
 	expect6 := &incentive.QueryActualRatesResponse{
-		APY: sdk.MustNewDecFromStr("0.8"),
+		APY: sdkmath.LegacyMustNewDecFromStr("0.8"),
 	}
 	resp6, err := q.ActualRates(k.ctx, &req6)
 	require.NoError(t, err)
@@ -253,7 +254,7 @@ func TestAPYQuery(t *testing.T) {
 
 	req8 := incentive.QueryActualRates{UToken: uUmee}
 	expect8 := &incentive.QueryActualRatesResponse{
-		APY: sdk.MustNewDecFromStr("2.670783847980997625"), // a large but complicated APY due to price ratio
+		APY: sdkmath.LegacyMustNewDecFromStr("2.670783847980997625"), // a large but complicated APY due to price ratio
 	}
 	resp8, err := q.ActualRates(k.ctx, &req8)
 	require.NoError(t, err)

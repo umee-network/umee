@@ -3,6 +3,7 @@ package params
 import (
 	"log"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -24,7 +25,7 @@ const (
 // ProtocolMinGasPrice is a consensus controlled gas price. Each validator must set his
 // `minimum-gas-prices` in app.toml config to value above ProtocolMinGasPrice.
 // Transactions with gas-price smaller than ProtocolMinGasPrice will fail during DeliverTx.
-var ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdk.MustNewDecFromStr("0.00"))
+var ProtocolMinGasPrice = sdk.NewDecCoinFromDec(BondDenom, sdkmath.LegacyMustNewDecFromStr("0.00"))
 
 func init() {
 	// XXX: If other upstream or external application's depend on any of Umee's

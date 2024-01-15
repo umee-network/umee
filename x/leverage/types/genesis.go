@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -98,7 +99,7 @@ func (gs GenesisState) Validate() error {
 			return err
 		}
 
-		if rate.Scalar.LT(sdk.OneDec()) {
+		if rate.Scalar.LT(sdkmath.LegacyOneDec()) {
 			return ErrInvalidExchangeRate.Wrap(rate.String())
 		}
 	}
@@ -147,7 +148,7 @@ func NewBadDebt(addr, denom string) BadDebt {
 }
 
 // NewInterestScalar creates the InterestScalar struct used in GenesisState
-func NewInterestScalar(denom string, scalar sdk.Dec) InterestScalar {
+func NewInterestScalar(denom string, scalar sdkmath.LegacyDec) InterestScalar {
 	return InterestScalar{
 		Denom:  denom,
 		Scalar: scalar,

@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/v6/x/metoken"
@@ -11,13 +12,13 @@ import (
 // The fee in fraction represents the percentage of the fee, while the fee amount is the actual
 // fee applied to the asset amount.
 func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
-	sdk.Dec,
+	sdkmath.LegacyDec,
 	sdk.Coin,
 	error,
 ) {
 	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
-		return sdk.Dec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
+		return sdkmath.LegacyDec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
 
 	// charge max fee if we don't want the token in the index.
@@ -27,7 +28,7 @@ func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, as
 
 	currentAllocation, err := k.currentAllocation(index, indexPrices, asset.Denom)
 	if err != nil {
-		return sdk.Dec{}, sdk.Coin{}, err
+		return sdkmath.LegacyDec{}, sdk.Coin{}, err
 	}
 
 	// when current_allocation is zero, we incentivize the swap by charging only min_fee
@@ -45,13 +46,13 @@ func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, as
 // The fee in fraction indicates the fee percentage, while the fee amount is the computed
 // fee based on the asset amount being redeemed.
 func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
-	sdk.Dec,
+	sdkmath.LegacyDec,
 	sdk.Coin,
 	error,
 ) {
 	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
-		return sdk.Dec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
+		return sdkmath.LegacyDec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
 
 	// charge min fee if we don't want the token in the index.
@@ -66,7 +67,7 @@ func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, 
 		assetSettings.TargetAllocation,
 	)
 	if err != nil {
-		return sdk.Dec{}, sdk.Coin{}, err
+		return sdkmath.LegacyDec{}, sdk.Coin{}, err
 	}
 
 	fee := index.Fee.CalculateFee(allocationDeviation)
@@ -78,39 +79,39 @@ func (k Keeper) currentAllocation(
 	index metoken.Index,
 	indexPrices metoken.IndexPrices,
 	assetDenom string,
-) (sdk.Dec, error) {
+) (sdkmath.LegacyDec, error) {
 	balances, err := k.IndexBalances(index.Denom)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	balance, i := balances.AssetBalance(assetDenom)
 	if i < 0 {
-		return sdk.Dec{}, sdkerrors.ErrNotFound.Wrapf("balance for denom %s not found", assetDenom)
+		return sdkmath.LegacyDec{}, sdkerrors.ErrNotFound.Wrapf("balance for denom %s not found", assetDenom)
 	}
 
 	// if asset wasn't supplied to the index yet, the allocation is zero
 	if balance.AvailableSupply().IsZero() {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 
 	// if no meToken in balance, the allocation is zero
 	if !balances.MetokenSupply.IsPositive() {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 
 	assetPrice, err := indexPrices.PriceByBaseDenom(assetDenom)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 	assetUSD, err := valueInUSD(balance.AvailableSupply(), assetPrice.Price, assetPrice.Exponent)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	meTokenUSD, err := valueInUSD(balances.MetokenSupply.Amount, indexPrices.Price, indexPrices.Exponent)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	return assetUSD.Quo(meTokenUSD), nil
@@ -122,11 +123,11 @@ func (k Keeper) redeemAllocationDeviation(
 	index metoken.Index,
 	indexPrices metoken.IndexPrices,
 	assetDenom string,
-	targetAllocation sdk.Dec,
-) (sdk.Dec, error) {
+	targetAllocation sdkmath.LegacyDec,
+) (sdkmath.LegacyDec, error) {
 	currentAllocation, err := k.currentAllocation(index, indexPrices, assetDenom)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	if currentAllocation.IsZero() {

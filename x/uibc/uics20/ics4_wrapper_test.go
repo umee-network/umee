@@ -3,14 +3,15 @@ package uics20_test
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	clienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
-	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+	capabilitytypes "github.com/cosmos/ibc-go/modules/capability/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	clienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
@@ -59,7 +60,7 @@ func TestSendPacket(t *testing.T) {
 
 	leverageMock.EXPECT().GetTokenSettings(ctx, "test").Return(lfixtures.Token("test", "TEST", 6), nil).AnyTimes()
 	leverageMock.EXPECT().GetTokenSettings(ctx, "umee").Return(ltypes.Token{}, ltypes.ErrNotRegisteredToken).AnyTimes()
-	oracleMock.EXPECT().Price(ctx, "TEST").Return(sdk.Dec{}, types.ErrMalformedLatestAvgPrice)
+	oracleMock.EXPECT().Price(ctx, "TEST").Return(sdkmath.LegacyDec{}, types.ErrMalformedLatestAvgPrice)
 
 	ics4 := uics20.NewICS4(mock, kb)
 

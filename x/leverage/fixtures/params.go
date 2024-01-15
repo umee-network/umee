@@ -1,7 +1,7 @@
 package fixtures
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
@@ -9,10 +9,10 @@ import (
 // Params returns leverage params used in testing.
 func Params() types.Params {
 	return types.Params{
-		CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.1"),
-		MinimumCloseFactor:           sdk.MustNewDecFromStr("0.01"),
-		OracleRewardFactor:           sdk.MustNewDecFromStr("0.01"),
-		SmallLiquidationSize:         sdk.MustNewDecFromStr("100.00"),
-		DirectLiquidationFee:         sdk.MustNewDecFromStr("0.1"),
+		CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.1"),
+		MinimumCloseFactor:           sdkmath.LegacyMustNewDecFromStr("0.01"),
+		OracleRewardFactor:           sdkmath.LegacyMustNewDecFromStr("0.01"),
+		SmallLiquidationSize:         sdkmath.LegacyMustNewDecFromStr("100.00"),
+		DirectLiquidationFee:         sdkmath.LegacyMustNewDecFromStr("0.1"),
 	}
 }

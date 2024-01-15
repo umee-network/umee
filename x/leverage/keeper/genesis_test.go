@@ -165,13 +165,13 @@ func (s *IntegrationTestSuite) TestKeeper_ExportGenesis() {
 	borrows := []types.AdjustedBorrow{
 		{
 			Address: testAddr,
-			Amount:  sdk.NewDecCoin(denom, sdk.NewInt(100)),
+			Amount:  sdk.NewDecCoin(denom, sdkmath.NewInt(100)),
 		},
 	}
 	collateral := []types.Collateral{
 		{
 			Address: testAddr,
-			Amount:  sdk.NewCoin(uDenom, sdk.NewInt(1000)),
+			Amount:  sdk.NewCoin(uDenom, sdkmath.NewInt(1000)),
 		},
 	}
 	reserves := sdk.Coins{
@@ -186,7 +186,7 @@ func (s *IntegrationTestSuite) TestKeeper_ExportGenesis() {
 	interestScalars := []types.InterestScalar{
 		{
 			Denom:  denom,
-			Scalar: sdk.NewDec(10),
+			Scalar: sdkmath.LegacyNewDec(10),
 		},
 	}
 	genesis := types.DefaultGenesis()

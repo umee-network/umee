@@ -3,12 +3,11 @@ package types
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 )
 
 func TestPrices(t *testing.T) {
-	zero := sdk.ZeroDec()
+	zero := sdkmath.LegacyZeroDec()
 	p1 := NewPrice(zero, "atom", 4)
 	p2 := NewPrice(zero, "atom", 3)
 	prices := Prices{p1, p2}

@@ -86,6 +86,12 @@ type AppModule struct {
 	kb quota.KeeperBuilder
 }
 
+// IsAppModule implements module.AppModule.
+func (AppModule) IsAppModule() {}
+
+// IsOnePerModuleType implements module.AppModule.
+func (AppModule) IsOnePerModuleType() {}
+
 func NewAppModule(cdc codec.Codec, kb quota.KeeperBuilder) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
@@ -123,12 +129,12 @@ func (am AppModule) RegisterServices(cfg module.Configurator) {
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/uibc module.
-func (am AppModule) BeginBlock(ctx sdk.Context, _ abci.RequestBeginBlock) {
+func (am AppModule) BeginBlock(ctx sdk.Context) {
 	BeginBlock(ctx, am.kb.Keeper(&ctx))
 }
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/uibc module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(_ sdk.Context) []abci.ValidatorUpdate {
 	return EndBlocker()
 }

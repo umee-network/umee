@@ -3,9 +3,10 @@ package quota
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -34,7 +35,7 @@ func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
 // prices for umee and atom
 func initKeeperSimpleMock(t *testing.T) TestKeeper {
 	lmock := NewLeverageKeeperMock(umee, atom)
-	omock := NewOracleMock(umee, sdk.NewDec(2))
+	omock := NewOracleMock(umee, sdkmath.LegacyNewDec(2))
 	return initKeeper(t, lmock, omock)
 }
 
@@ -46,16 +47,16 @@ type TestKeeper struct {
 
 func (k TestKeeper) checkOutflows(denom string, perToken, total int64) {
 	o := k.GetTokenOutflows(denom)
-	require.Equal(k.t, sdk.NewDec(perToken), o.Amount)
+	require.Equal(k.t, sdkmath.LegacyNewDec(perToken), o.Amount)
 
 	d := k.GetOutflowSum()
-	require.Equal(k.t, sdk.NewDec(total), d)
+	require.Equal(k.t, sdkmath.LegacyNewDec(total), d)
 }
 
 func (k TestKeeper) setQuotaParams(perToken, total int64) {
 	dp := uibc.DefaultParams()
-	dp.TokenQuota = sdk.NewDec(perToken)
-	dp.TotalQuota = sdk.NewDec(total)
+	dp.TokenQuota = sdkmath.LegacyNewDec(perToken)
+	dp.TotalQuota = sdkmath.LegacyNewDec(total)
 	err := k.SetParams(dp)
 	require.NoError(k.t, err)
 }

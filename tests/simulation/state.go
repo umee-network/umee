@@ -10,20 +10,20 @@ import (
 	"testing"
 	"time"
 
+	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 	dbm "github.com/cometbft/cometbft-db"
 	tmjson "github.com/cometbft/cometbft/libs/json"
-	"github.com/cometbft/cometbft/libs/log"
 	cmttypes "github.com/cometbft/cometbft/types"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"gotest.tools/v3/assert"
 
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/store"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -132,7 +132,7 @@ func appStateFn(cdc codec.JSONCodec, simManager *module.SimulationManager) simty
 		}
 
 		// compute not bonded balance
-		notBondedTokens := sdk.ZeroInt()
+		notBondedTokens := sdkmath.ZeroInt()
 		for _, val := range stakingState.Validators {
 			if val.Status != stakingtypes.Unbonded {
 				continue

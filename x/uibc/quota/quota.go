@@ -5,10 +5,11 @@ import (
 	"time"
 
 	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	"github.com/cosmos/ibc-go/v7/modules/core/exported"
+	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/coin"
@@ -17,11 +18,11 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
-var ten = sdk.MustNewDecFromStr("10")
+var ten = sdkmath.LegacyMustNewDecFromStr("10")
 
 // GetAllOutflows returns sum of outflows of all tokens in USD value.
 func (k Keeper) GetAllOutflows() (sdk.DecCoins, error) {
-	iter := sdk.KVStorePrefixIterator(k.store, keyPrefixDenomOutflows)
+	iter := storetypes.KVStorePrefixIterator(k.store, keyPrefixDenomOutflows)
 	return store.LoadAllDecCoins(iter, len(keyPrefixDenomOutflows))
 }
 
@@ -41,13 +42,13 @@ func (k Keeper) SetTokenOutflows(outflows sdk.DecCoins) {
 }
 
 // SetOutflowSum save the total outflow of ibc-transfer amount.
-func (k Keeper) SetOutflowSum(amount sdk.Dec) {
+func (k Keeper) SetOutflowSum(amount sdkmath.LegacyDec) {
 	err := store.SetDec(k.store, keyOutflowSum, amount, "total_outflow_sum")
 	util.Panic(err)
 }
 
 // GetOutflowSum returns the total outflow of ibc-transfer amount.
-func (k Keeper) GetOutflowSum() sdk.Dec {
+func (k Keeper) GetOutflowSum() sdkmath.LegacyDec {
 	// When total outflow is not stored in store it will return 0
 	amount, _ := store.GetDec(k.store, keyOutflowSum, "total_outflow")
 	return amount
@@ -62,7 +63,7 @@ func (k Keeper) SetTokenOutflow(outflow sdk.DecCoin) {
 
 // GetAllInflows returns inflows of all registered tokens in USD value.
 func (k Keeper) GetAllInflows() (sdk.DecCoins, error) {
-	iter := sdk.KVStorePrefixIterator(k.store, keyPrefixDenomInflows)
+	iter := storetypes.KVStorePrefixIterator(k.store, keyPrefixDenomInflows)
 	return store.LoadAllDecCoins(iter, len(keyPrefixDenomInflows))
 }
 
@@ -90,14 +91,14 @@ func (k Keeper) GetTokenInflow(denom string) sdk.DecCoin {
 }
 
 // GetInflowSum returns the total inflow of ibc-transfer amount.
-func (k Keeper) GetInflowSum() sdk.Dec {
+func (k Keeper) GetInflowSum() sdkmath.LegacyDec {
 	// When total inflow is not stored in store it will return 0
 	amount, _ := store.GetDec(k.store, keyInflowSum, "total_inflows")
 	return amount
 }
 
 // SetInflowSum save the total inflow of ibc-transfer amount.
-func (k Keeper) SetInflowSum(amount sdk.Dec) {
+func (k Keeper) SetInflowSum(amount sdkmath.LegacyDec) {
 	err := store.SetDec(k.store, keyInflowSum, amount, "total_inflows")
 	util.Panic(err)
 }
@@ -119,7 +120,7 @@ func (k Keeper) ResetAllQuotas() error {
 	if err := k.SetExpire(newExpires); err != nil {
 		return err
 	}
-	zero := sdk.NewDec(0)
+	zero := sdkmath.LegacyNewDec(0)
 	// outflows
 	k.SetOutflowSum(zero)
 	ps := k.PrefixStore(keyPrefixDenomOutflows)
@@ -172,11 +173,11 @@ func (k Keeper) CheckAndUpdateQuota(denom string, newOutflow sdkmath.Int) error 
 	return nil
 }
 
-func (k Keeper) getExchangePrice(denom string, amount sdkmath.Int) (sdk.Dec, error) {
+func (k Keeper) getExchangePrice(denom string, amount sdkmath.Int) (sdkmath.LegacyDec, error) {
 	transferCoin := sdk.NewCoin(denom, amount)
 	var (
 		err          error
-		exchangeRate sdk.Dec
+		exchangeRate sdkmath.LegacyDec
 	)
 
 	// convert to base asset if it is `uToken`
@@ -184,23 +185,23 @@ func (k Keeper) getExchangePrice(denom string, amount sdkmath.Int) (sdk.Dec, err
 		// NOTE: to avoid ctx, we can use similar approach: create a leverage keeper builder
 		transferCoin, err = k.leverage.ToToken(*k.ctx, transferCoin)
 		if err != nil {
-			return sdk.Dec{}, err
+			return sdkmath.LegacyDec{}, err
 		}
 	}
 
 	ts, err := k.leverage.GetTokenSettings(*k.ctx, transferCoin.Denom)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE` (uumee)
 	exchangeRate, err = k.oracle.Price(*k.ctx, strings.ToUpper(ts.SymbolDenom))
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 	// calculate total exchange rate
 	powerReduction := ten.Power(uint64(ts.Exponent))
-	return sdk.NewDecFromInt(transferCoin.Amount).Quo(powerReduction).Mul(exchangeRate), nil
+	return sdkmath.LegacyNewDecFromInt(transferCoin.Amount).Quo(powerReduction).Mul(exchangeRate), nil
 }
 
 // UndoUpdateQuota subtracts `amount` from quota metric of the ibc denom.
@@ -257,7 +258,7 @@ func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string
 		}
 		// calculate total exchange rate
 		powerReduction := ten.Power(uint64(ts.Exponent))
-		inflowInUSD := sdk.MustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
+		inflowInUSD := sdkmath.LegacyMustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
 
 		tokenInflow := k.GetTokenInflow(ibcDenom)
 		tokenInflow.Amount = tokenInflow.Amount.Add(inflowInUSD)

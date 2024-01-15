@@ -38,7 +38,7 @@ func TestRedeem_Valid(t *testing.T) {
 	// fee = balanced_fee + delta_allocation * balanced_fee
 	// fee = 0.2 + 0.238135222834629706 * 0.2 = 0.247627044566925941
 	// fee_amount = fee * amount
-	expectedFee := sdk.MustNewDecFromStr("0.247627044566925941").MulInt(coins).TruncateInt()
+	expectedFee := sdkmath.LegacyMustNewDecFromStr("0.247627044566925941").MulInt(coins).TruncateInt()
 	assert.Equal(t, resp.fee, sdk.NewCoin(mocks.USDTBaseDenom, expectedFee))
 	assert.Equal(t, coins, resp.fromLeverage.Amount.Add(resp.fromReserves.Amount))
 }

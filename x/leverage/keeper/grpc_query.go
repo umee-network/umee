@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -151,25 +152,25 @@ func (q Querier) MarketSummary(
 	// minimum liquidity respects both MaxSupplyUtilization and MinCollateralLiquidity
 	minLiquidityFromSupply := supplied.Amount.Sub(maxBorrow)
 	minLiquidityFromCollateral := token.MinCollateralLiquidity.Mul(rate.MulInt(uCollateral.Amount)).TruncateInt()
-	minLiquidity := sdk.MinInt(minLiquidityFromCollateral, minLiquidityFromSupply)
+	minLiquidity := sdkmath.MinInt(minLiquidityFromCollateral, minLiquidityFromSupply)
 
 	// availableBorrow respects both maxBorrow and minLiquidity
 	availableBorrow := liquidity.Sub(minLiquidity)
-	availableBorrow = sdk.MinInt(availableBorrow, maxBorrow.Sub(borrowed.Amount))
-	availableBorrow = sdk.MaxInt(availableBorrow, sdk.ZeroInt())
+	availableBorrow = sdkmath.MinInt(availableBorrow, maxBorrow.Sub(borrowed.Amount))
+	availableBorrow = sdkmath.MaxInt(availableBorrow, sdkmath.ZeroInt())
 
 	// availableWithdraw is based on minLiquidity
 	availableWithdraw := liquidity.Sub(minLiquidity)
-	availableWithdraw = sdk.MaxInt(availableWithdraw, sdk.ZeroInt())
+	availableWithdraw = sdkmath.MaxInt(availableWithdraw, sdkmath.ZeroInt())
 
 	// availableCollateralize respects both MaxCollateralShare and MinCollateralLiquidity
 	maxCollateral, _ := q.maxCollateralFromShare(ctx, uDenom)
 	if token.MinCollateralLiquidity.IsPositive() {
 		maxCollateralFromLiquidity := toDec(liquidity).Quo(token.MinCollateralLiquidity).TruncateInt()
-		maxCollateral = sdk.MinInt(maxCollateral, maxCollateralFromLiquidity)
+		maxCollateral = sdkmath.MinInt(maxCollateral, maxCollateralFromLiquidity)
 	}
 	availableCollateralize := maxCollateral.Sub(uCollateral.Amount)
-	availableCollateralize = sdk.MaxInt(availableCollateralize, sdk.ZeroInt())
+	availableCollateralize = sdkmath.MaxInt(availableCollateralize, sdkmath.ZeroInt())
 
 	resp := types.QueryMarketSummaryResponse{
 		SymbolDenom:            token.SymbolDenom,

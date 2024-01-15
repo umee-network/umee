@@ -6,6 +6,7 @@ import "gogoproto/gogo.proto";
 import "umee/incentive/v1/incentive.proto";
 import "umee/incentive/v1/genesis.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/incentive";
 
@@ -248,6 +249,7 @@ message QueryActualRatesResponse {
   // APY is the oracle price-adjusted APY of the bonded uToken.
   string APY = 1 [
     (gogoproto.nullable)   = false,
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec"
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec"
   ];
 }

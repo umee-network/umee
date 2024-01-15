@@ -86,7 +86,7 @@ func (k Keeper) getLiquidationAmounts(
 	// computations, as if the token itself had a smaller liquidation incentive.
 	liqudationIncentive := ts.LiquidationIncentive
 	if directLiquidation {
-		liqudationIncentive = liqudationIncentive.Mul(sdk.OneDec().Sub(params.DirectLiquidationFee))
+		liqudationIncentive = liqudationIncentive.Mul(sdkmath.LegacyOneDec().Sub(params.DirectLiquidationFee))
 	}
 
 	// max repayment amount is limited by a number of factors
@@ -94,11 +94,11 @@ func (k Keeper) getLiquidationAmounts(
 	if !leveragedLiquidate {
 		// for traditional liquidations, liquidator account balance limits repayment
 		availableRepay := k.bankKeeper.SpendableCoins(ctx, liquidatorAddr).AmountOf(repayDenom)
-		maxRepay = sdk.MinInt(maxRepay, availableRepay)
+		maxRepay = sdkmath.MinInt(maxRepay, availableRepay)
 	}
 	// maximum requested by liquidator
-	maxRepay = sdk.MinInt(maxRepay, requestedRepay.Amount)
-	maxRepay = sdk.MinInt(maxRepay, maxRepayAfterCloseFactor) // close factor
+	maxRepay = sdkmath.MinInt(maxRepay, requestedRepay.Amount)
+	maxRepay = sdkmath.MinInt(maxRepay, maxRepayAfterCloseFactor) // close factor
 
 	// compute final liquidation amounts
 	repay, burn, reward := ComputeLiquidation(
@@ -131,7 +131,7 @@ func ComputeLiquidation(
 	availableReward sdkmath.Int,
 	priceRatio,
 	uTokenExchangeRate,
-	liquidationIncentive sdk.Dec,
+	liquidationIncentive sdkmath.LegacyDec,
 	leverageLiquidate bool,
 ) (tokenRepay sdkmath.Int, collateralBurn sdkmath.Int, tokenReward sdkmath.Int) {
 	// Prevent division by zero
@@ -142,7 +142,7 @@ func ComputeLiquidation(
 	// Start with the maximum possible repayment amount, as a decimal
 	maxRepay := toDec(availableRepay)
 	// Determine the base maxReward amount that would result from maximum repayment
-	maxReward := maxRepay.Mul(priceRatio).Mul(sdk.OneDec().Add(liquidationIncentive))
+	maxReward := maxRepay.Mul(priceRatio).Mul(sdkmath.LegacyOneDec().Add(liquidationIncentive))
 	// Determine the maxCollateral burn amount that corresponds to base reward amount
 	maxCollateral := maxReward.Quo(uTokenExchangeRate)
 
@@ -150,26 +150,26 @@ func ComputeLiquidation(
 	if maxRepay.IsZero() ||
 		maxReward.IsZero() ||
 		maxCollateral.IsZero() {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
+		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt()
 	}
 
 	// We will track limiting factors by the ratio by which the max repayment would need to be reduced to comply
-	ratio := sdk.OneDec()
+	ratio := sdkmath.LegacyOneDec()
 
 	// Collateral burned cannot exceed borrower's collateral
-	ratio = sdk.MinDec(ratio,
+	ratio = sdkmath.LegacyMinDec(ratio,
 		toDec(availableCollateral).Quo(maxCollateral),
 	)
 	if !leverageLiquidate {
 		// Base token reward cannot exceed available unreserved module balance
-		ratio = sdk.MinDec(ratio,
+		ratio = sdkmath.LegacyMinDec(ratio,
 			toDec(availableReward).Quo(maxReward),
 		)
 	}
 
 	// Catch edge cases
-	if !ratio.IsPositive() || ratio.GT(sdk.OneDec()) {
-		return sdk.ZeroInt(), sdk.ZeroInt(), sdk.ZeroInt()
+	if !ratio.IsPositive() || ratio.GT(sdkmath.LegacyOneDec()) {
+		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt()
 	}
 
 	// Reduce repay and collateral limits by the most severe limiting factor encountered
@@ -224,39 +224,39 @@ func ComputeCloseFactor(
 	liquidationThreshold,
 	smallLiquidationSize,
 	minimumCloseFactor,
-	completeLiquidationThreshold sdk.Dec,
-) (closeFactor sdk.Dec) {
+	completeLiquidationThreshold sdkmath.LegacyDec,
+) (closeFactor sdkmath.LegacyDec) {
 	if borrowedValue.LT(liquidationThreshold) {
 		// Not eligible for liquidation
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	if borrowedValue.LTE(smallLiquidationSize) {
 		// Small enough borrows should be liquidated completely to reduce dust
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
 
 	if completeLiquidationThreshold.IsZero() {
 		// If close factor is set to unlimited
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
 
 	// Calculate the borrowed value at which close factor reaches 1.0
 	criticalValue := liquidationThreshold.Add(completeLiquidationThreshold.Mul(collateralValue.Sub(liquidationThreshold)))
 
 	closeFactor = Interpolate(
-		borrowedValue,        // x
-		liquidationThreshold, // xMin
-		minimumCloseFactor,   // yMin
-		criticalValue,        // xMax
-		sdk.OneDec(),         // yMax
+		borrowedValue,          // x
+		liquidationThreshold,   // xMin
+		minimumCloseFactor,     // yMin
+		criticalValue,          // xMax
+		sdkmath.LegacyOneDec(), // yMax
 	)
 
-	if closeFactor.GTE(sdk.OneDec()) {
-		closeFactor = sdk.OneDec()
+	if closeFactor.GTE(sdkmath.LegacyOneDec()) {
+		closeFactor = sdkmath.LegacyOneDec()
 	}
 	if closeFactor.IsNegative() {
-		closeFactor = sdk.ZeroDec()
+		closeFactor = sdkmath.LegacyZeroDec()
 	}
 
 	return closeFactor

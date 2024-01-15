@@ -145,7 +145,7 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	})
 
 	// mint and send coins to addrs
-	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewInt(10))))
+	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdkmath.NewInt(10))))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr, initCoins))
 	assert.NilError(t, app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins))
 	assert.NilError(t, app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
@@ -165,10 +165,10 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 
 // NewTestMsgCreateValidator test msg creator
 func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey, amt math.Int) *stakingtypes.MsgCreateValidator {
-	commission := stakingtypes.NewCommissionRates(sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec())
+	commission := stakingtypes.NewCommissionRates(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec())
 	msg, _ := stakingtypes.NewMsgCreateValidator(
 		address, pubKey, sdk.NewCoin(types.UmeeDenom, amt),
-		stakingtypes.Description{}, commission, sdk.OneInt(),
+		stakingtypes.Description{}, commission, sdkmath.OneInt(),
 	)
 
 	return msg

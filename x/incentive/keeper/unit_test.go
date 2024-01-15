@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/require"
 
 	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	disttypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 
@@ -34,9 +34,9 @@ func newTestKeeper(t *testing.T) testKeeper {
 	gen.LastRewardsTime = 1 // initializes last reward time
 	gen.Params.MaxUnbondings = 10
 	gen.Params.UnbondingDuration = 86400
-	gen.Params.EmergencyUnbondFee = sdk.MustNewDecFromStr("0.01")
+	gen.Params.EmergencyUnbondFee = sdkmath.LegacyMustNewDecFromStr("0.01")
 	k.InitGenesis(ctx, *gen)
-	return testKeeper{k, bk, lk, t, ctx, sdk.ZeroInt(), msrv}
+	return testKeeper{k, bk, lk, t, ctx, sdkmath.ZeroInt(), msrv}
 }
 
 type testKeeper struct {
@@ -52,7 +52,7 @@ type testKeeper struct {
 // newAccount creates a new account for testing, and funds it with any input tokens.
 func (k *testKeeper) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 	// create a unique address
-	k.setupAccountCounter = k.setupAccountCounter.Add(sdk.OneInt())
+	k.setupAccountCounter = k.setupAccountCounter.Add(sdkmath.OneInt())
 	addrStr := fmt.Sprintf("%-20s", "addr"+k.setupAccountCounter.String()+"_______________")
 	addr := sdk.AccAddress([]byte(addrStr))
 	// we skip accountKeeper SetAccount, because we are using mock bank keeper
@@ -65,7 +65,7 @@ func (k *testKeeper) newAccount(funds ...sdk.Coin) sdk.AccAddress {
 // A MsgBond is used for the bonding step.
 func (k *testKeeper) newBondedAccount(funds ...sdk.Coin) sdk.AccAddress {
 	// create a unique address
-	k.setupAccountCounter = k.setupAccountCounter.Add(sdk.OneInt())
+	k.setupAccountCounter = k.setupAccountCounter.Add(sdkmath.OneInt())
 	addrStr := fmt.Sprintf("%-20s", "addr"+k.setupAccountCounter.String()+"_______________")
 	addr := sdk.AccAddress([]byte(addrStr))
 	// we skip accountKeeper SetAccount, because we are using mock bank keeper
@@ -211,7 +211,7 @@ func (k *testKeeper) programFunded(programID uint32) bool {
 	program, _, err := k.getIncentiveProgram(k.ctx, programID)
 	require.NoError(k.t, err, "get program (programFunded)", programID)
 	if !program.Funded {
-		require.Equal(k.t, program.RemainingRewards.Amount, sdk.ZeroInt(),
+		require.Equal(k.t, program.RemainingRewards.Amount, sdkmath.ZeroInt(),
 			"non-funded must have zero remaining rewards. program id", programID)
 	}
 	return program.Funded

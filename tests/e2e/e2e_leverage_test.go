@@ -83,7 +83,7 @@ func (s *E2ETest) leverageLeveragedLiquidate(accountIndex, targetIndex int, repa
 	addr := s.AccountAddr(accountIndex)
 	target := s.AccountAddr(targetIndex)
 	s.mustSucceedTx(leveragetypes.NewMsgLeveragedLiquidate(
-		addr, target, repay, reward, sdk.ZeroDec()), s.AccountClient(accountIndex),
+		addr, target, repay, reward, sdkmath.LegacyZeroDec()), s.AccountClient(accountIndex),
 	)
 }
 
@@ -150,8 +150,8 @@ func (s *E2ETest) TestLeverageBasics() {
 					// a set allowing UMEE to borrow more of itself
 					Borrow:               appparams.BondDenom,
 					Collateral:           appparams.BondDenom,
-					CollateralWeight:     sdk.MustNewDecFromStr("0.75"),
-					LiquidationThreshold: sdk.MustNewDecFromStr("0.8"),
+					CollateralWeight:     sdkmath.LegacyMustNewDecFromStr("0.75"),
+					LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.8"),
 				},
 			}
 			s.Require().NoError(

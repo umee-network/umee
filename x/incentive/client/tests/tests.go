@@ -1,6 +1,7 @@
 package tests
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -153,7 +154,7 @@ func (s *IntegrationTests) TestIncentiveScenario() {
 			},
 			Response: &incentive.QueryActualRatesResponse{},
 			ExpectedResponse: &incentive.QueryActualRatesResponse{
-				APY: sdk.ZeroDec(),
+				APY: sdkmath.LegacyZeroDec(),
 			},
 			ErrMsg: "",
 		},

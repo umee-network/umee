@@ -4,15 +4,15 @@ import (
 	"fmt"
 	time "time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	"gopkg.in/yaml.v3"
 )
 
 var (
-	oneDec           = sdk.OneDec()
-	minVoteThreshold = sdk.NewDecWithPrec(33, 2) // 0.33
+	oneDec           = sdkmath.LegacyOneDec()
+	minVoteThreshold = sdkmath.LegacyNewDecWithPrec(33, 2) // 0.33
 )
 
 // maxium number of decimals allowed for VoteThreshold
@@ -52,18 +52,18 @@ func DefaultParams() Params {
 	}
 
 	return Params{
-		VotePeriod:               BlocksPerMinute / 2,       // 30 seconds
-		VoteThreshold:            sdk.NewDecWithPrec(50, 2), // 50%,
-		RewardBand:               sdk.NewDecWithPrec(2, 2),  // 2% (-1, 1)
+		VotePeriod:               BlocksPerMinute / 2,                 // 30 seconds
+		VoteThreshold:            sdkmath.LegacyNewDecWithPrec(50, 2), // 50%,
+		RewardBand:               sdkmath.LegacyNewDecWithPrec(2, 2),  // 2% (-1, 1)
 		RewardDistributionWindow: BlocksPerYear,
 		AcceptList:               acceptList,
-		SlashFraction:            sdk.NewDecWithPrec(1, 4), // 0.01%
+		SlashFraction:            sdkmath.LegacyNewDecWithPrec(1, 4), // 0.01%
 		SlashWindow:              BlocksPerWeek,
-		MinValidPerWindow:        sdk.NewDecWithPrec(5, 2), // 5%
-		HistoricStampPeriod:      BlocksPerMinute * 5,      // 5min
-		MedianStampPeriod:        BlocksPerHour * 3,        // 3h
-		MaximumPriceStamps:       36,                       // 3h
-		MaximumMedianStamps:      24,                       // 3 days
+		MinValidPerWindow:        sdkmath.LegacyNewDecWithPrec(5, 2), // 5%
+		HistoricStampPeriod:      BlocksPerMinute * 5,                // 5min
+		MedianStampPeriod:        BlocksPerHour * 3,                  // 3h
+		MaximumPriceStamps:       36,                                 // 3h
+		MaximumMedianStamps:      24,                                 // 3 days
 	}
 }
 
@@ -150,11 +150,11 @@ func (p Params) Validate() error {
 	if p.VotePeriod == 0 {
 		return fmt.Errorf("oracle parameter VotePeriod must be > 0, is %d", p.VotePeriod)
 	}
-	if p.VoteThreshold.LTE(sdk.NewDecWithPrec(33, 2)) {
+	if p.VoteThreshold.LTE(sdkmath.LegacyNewDecWithPrec(33, 2)) {
 		return fmt.Errorf("oracle parameter VoteThreshold must be greater than 33 percent")
 	}
 
-	if p.RewardBand.GT(sdk.OneDec()) || p.RewardBand.IsNegative() {
+	if p.RewardBand.GT(sdkmath.LegacyOneDec()) || p.RewardBand.IsNegative() {
 		return fmt.Errorf("oracle parameter RewardBand must be between [0, 1]")
 	}
 
@@ -162,7 +162,7 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter RewardDistributionWindow must be greater than or equal with VotePeriod")
 	}
 
-	if p.SlashFraction.GT(sdk.OneDec()) || p.SlashFraction.IsNegative() {
+	if p.SlashFraction.GT(sdkmath.LegacyOneDec()) || p.SlashFraction.IsNegative() {
 		return fmt.Errorf("oracle parameter SlashFraction must be between [0, 1]")
 	}
 
@@ -170,7 +170,7 @@ func (p Params) Validate() error {
 		return fmt.Errorf("oracle parameter SlashWindow must be greater than or equal with VotePeriod")
 	}
 
-	if p.MinValidPerWindow.GT(sdk.OneDec()) || p.MinValidPerWindow.IsNegative() {
+	if p.MinValidPerWindow.GT(sdkmath.LegacyOneDec()) || p.MinValidPerWindow.IsNegative() {
 		return fmt.Errorf("oracle parameter MinValidPerWindow must be between [0, 1]")
 	}
 
@@ -208,7 +208,7 @@ func validateVotePeriod(i interface{}) error {
 }
 
 func validateVoteThreshold(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -216,7 +216,7 @@ func validateVoteThreshold(i interface{}) error {
 }
 
 func validateRewardBand(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -225,7 +225,7 @@ func validateRewardBand(i interface{}) error {
 		return fmt.Errorf("reward band must be positive: %s", v)
 	}
 
-	if v.GT(sdk.OneDec()) {
+	if v.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("reward band is too large: %s", v)
 	}
 
@@ -264,7 +264,7 @@ func validateAcceptList(i interface{}) error {
 }
 
 func validateSlashFraction(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -273,7 +273,7 @@ func validateSlashFraction(i interface{}) error {
 		return fmt.Errorf("slash fraction must be positive: %s", v)
 	}
 
-	if v.GT(sdk.OneDec()) {
+	if v.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("slash fraction is too large: %s", v)
 	}
 
@@ -294,7 +294,7 @@ func validateSlashWindow(i interface{}) error {
 }
 
 func validateMinValidPerWindow(i interface{}) error {
-	v, ok := i.(sdk.Dec)
+	v, ok := i.(sdkmath.LegacyDec)
 	if !ok {
 		return fmt.Errorf("invalid parameter type: %T", i)
 	}
@@ -303,7 +303,7 @@ func validateMinValidPerWindow(i interface{}) error {
 		return fmt.Errorf("min valid per window must be positive: %s", v)
 	}
 
-	if v.GT(sdk.OneDec()) {
+	if v.GT(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("min valid per window is too large: %s", v)
 	}
 
@@ -366,12 +366,12 @@ func validateMaximumMedianStamps(i interface{}) error {
 // Must be
 // * a decimal value > 0.33 and <= 1.
 // * max precision is 2 (so 0.501 is not allowed)
-func ValidateVoteThreshold(x sdk.Dec) error {
+func ValidateVoteThreshold(x sdkmath.LegacyDec) error {
 	if x.LTE(minVoteThreshold) || x.GT(oneDec) {
 		return sdkerrors.ErrInvalidRequest.Wrapf("threshold must be bigger than %s and <= 1", minVoteThreshold)
 	}
 	i := x.MulInt64(100).TruncateInt64()
-	x2 := sdk.NewDecWithPrec(i, MaxVoteThresholdPrecision)
+	x2 := sdkmath.LegacyNewDecWithPrec(i, MaxVoteThresholdPrecision)
 	if !x2.Equal(x) {
 		return sdkerrors.ErrInvalidRequest.Wrap("threshold precision must be maximum 2 decimals")
 	}

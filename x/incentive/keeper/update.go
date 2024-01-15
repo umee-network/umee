@@ -1,12 +1,13 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/x/incentive"
 )
 
-var ten = sdk.MustNewDecFromStr("10")
+var ten = sdkmath.LegacyMustNewDecFromStr("10")
 
 // UpdateAccount finishes any unbondings associated with an account which have ended and claims any pending rewards.
 // It returns the amount of rewards claimed.
@@ -68,10 +69,10 @@ func (k Keeper) updateRewards(ctx sdk.Context, blockTime int64) error {
 		// ranging from 0 to 1, which will be distributed this
 		// block. The max value of 1 means 100% of remaining rewards
 		// will be used, as occurs when a program is ending.
-		programRewardsFraction := sdk.MinDec(
-			sdk.OneDec(),
-			sdk.NewDecFromInt(sdk.NewInt(timeElapsed)).
-				Quo(sdk.NewDec(prevRemainingTime)))
+		programRewardsFraction := sdkmath.LegacyMinDec(
+			sdkmath.LegacyOneDec(),
+			sdkmath.LegacyNewDecFromInt(sdkmath.NewInt(timeElapsed)).
+				Quo(sdkmath.LegacyNewDec(prevRemainingTime)))
 
 		// each incentive program has only one reward denom
 		rewardDenom := p.RemainingRewards.Denom
@@ -79,15 +80,15 @@ func (k Keeper) updateRewards(ctx sdk.Context, blockTime int64) error {
 		// get this block's rewards (as a token amount) for this incentive program only
 		thisBlockRewards := sdk.NewCoin(
 			rewardDenom,
-			sdk.NewDecFromInt(p.RemainingRewards.Amount).Mul(programRewardsFraction).TruncateInt())
+			sdkmath.LegacyNewDecFromInt(p.RemainingRewards.Amount).Mul(programRewardsFraction).TruncateInt())
 
 		// get expected increase of bondDenom's rewardAccumulator of reward denom,
 		// by dividing this block's rewards proportionally among bonded uTokens,
 		// and adjusting for the reward accumulator's exponent
 		accumulator := k.getRewardAccumulator(ctx, bondedDenom)
-		accumulatorIncrease := sdk.NewDecFromInt(thisBlockRewards.Amount).
+		accumulatorIncrease := sdkmath.LegacyNewDecFromInt(thisBlockRewards.Amount).
 			Mul(ten.Power(uint64(accumulator.Exponent))).
-			Quo(sdk.NewDecFromInt(bonded.Amount))
+			Quo(sdkmath.LegacyNewDecFromInt(bonded.Amount))
 
 		// if accumulator increase is so small it rounds to zero even after power adjustment,
 		// no rewards were distributed

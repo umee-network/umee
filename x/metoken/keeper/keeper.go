@@ -1,9 +1,10 @@
 package keeper
 
 import (
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 
@@ -41,7 +42,7 @@ func NewKeeperBuilder(
 
 type Keeper struct {
 	cdc            codec.Codec
-	store          sdk.KVStore
+	store          store.KVStore
 	bankKeeper     metoken.BankKeeper
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
@@ -64,7 +65,8 @@ func (b Builder) Keeper(ctx *sdk.Context) Keeper {
 	}
 }
 
-// Logger returns module Logger
+// Logger returns a module-specific logger.
 func (k Keeper) Logger() log.Logger {
-	return k.ctx.Logger().With("module", "x/"+metoken.ModuleName)
+	sdkCtx := sdk.UnwrapSDKContext(k.ctx)
+	return sdkCtx.Logger().With("module", "x/"+metoken.ModuleName)
 }

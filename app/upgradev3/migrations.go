@@ -4,10 +4,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-var minCommissionRate = sdk.MustNewDecFromStr("0.05")
+var minCommissionRate = sdkmath.LegacyMustNewDecFromStr("0.05")
 
 // UpdateMinimumCommissionRateParam is update the minimum commission rate param of staking.
-func UpdateMinimumCommissionRateParam(ctx sdk.Context, keeper StakingKeeper) (sdk.Dec, error) {
+func UpdateMinimumCommissionRateParam(ctx sdk.Context, keeper StakingKeeper) (sdkmath.LegacyDec, error) {
 	params := keeper.GetParams(ctx)
 	params.MinCommissionRate = minCommissionRate
 	keeper.SetParams(ctx, params)
@@ -17,7 +17,7 @@ func UpdateMinimumCommissionRateParam(ctx sdk.Context, keeper StakingKeeper) (sd
 
 // SetMinimumCommissionRateToValidators is update the minimum commission rate to the validators rate
 // whose commission rate is below the minimum commission rate.
-func SetMinimumCommissionRateToValidators(ctx sdk.Context, keeper StakingKeeper, minCommissionRate sdk.Dec) error {
+func SetMinimumCommissionRateToValidators(ctx sdk.Context, keeper StakingKeeper, minCommissionRate sdkmath.LegacyDec) error {
 	validators := keeper.GetAllValidators(ctx)
 
 	for _, validator := range validators {

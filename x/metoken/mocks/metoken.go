@@ -31,12 +31,12 @@ const (
 )
 
 var (
-	USDTPrice = sdk.MustNewDecFromStr("0.998")
-	USDCPrice = sdk.MustNewDecFromStr("1.0")
-	ISTPrice  = sdk.MustNewDecFromStr("1.02")
-	CMSTPrice = sdk.MustNewDecFromStr("0.998")
-	WBTCPrice = sdk.MustNewDecFromStr("27268.938478585498709550")
-	ETHPrice  = sdk.MustNewDecFromStr("1851.789229542837161069")
+	USDTPrice = sdkmath.LegacyMustNewDecFromStr("0.998")
+	USDCPrice = sdkmath.LegacyMustNewDecFromStr("1.0")
+	ISTPrice  = sdkmath.LegacyMustNewDecFromStr("1.02")
+	CMSTPrice = sdkmath.LegacyMustNewDecFromStr("0.998")
+	WBTCPrice = sdkmath.LegacyMustNewDecFromStr("27268.938478585498709550")
+	ETHPrice  = sdkmath.LegacyMustNewDecFromStr("1851.789229542837161069")
 )
 
 func StableIndex(denom string) metoken.Index {
@@ -70,13 +70,13 @@ func NonStableIndex(denom string) metoken.Index {
 func BondIndex() metoken.Index {
 	return metoken.Index{
 		Denom:     MeBondDenom,
-		MaxSupply: sdk.NewInt(1000000_00000),
+		MaxSupply: sdkmath.NewInt(1000000_00000),
 		Exponent:  6,
 		Fee:       ValidFee(),
 		AcceptedAssets: []metoken.AcceptedAsset{
 			metoken.NewAcceptedAsset(
-				BondDenom, sdk.MustNewDecFromStr("0.2"),
-				sdk.MustNewDecFromStr("1.0"),
+				BondDenom, sdkmath.LegacyMustNewDecFromStr("0.2"),
+				sdkmath.LegacyMustNewDecFromStr("1.0"),
 			),
 		},
 	}
@@ -98,14 +98,14 @@ func BondBalance() metoken.IndexBalances {
 }
 
 func acceptedAsset(denom, targetAllocation string) metoken.AcceptedAsset {
-	return metoken.NewAcceptedAsset(denom, sdk.MustNewDecFromStr("0.2"), sdk.MustNewDecFromStr(targetAllocation))
+	return metoken.NewAcceptedAsset(denom, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr(targetAllocation))
 }
 
 func ValidFee() metoken.Fee {
 	return metoken.NewFee(
-		sdk.MustNewDecFromStr("0.01"),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.5"),
+		sdkmath.LegacyMustNewDecFromStr("0.01"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.5"),
 	)
 }
 
@@ -163,17 +163,17 @@ func ValidUSDIndexBalances(denom string) metoken.IndexBalances {
 // ValidPrices return 24 medians, each one with different prices
 func ValidPrices() otypes.Prices {
 	prices := otypes.Prices{}
-	usdtPrice := USDTPrice.Sub(sdk.MustNewDecFromStr("0.24"))
-	usdcPrice := USDCPrice.Sub(sdk.MustNewDecFromStr("0.24"))
-	istPrice := ISTPrice.Sub(sdk.MustNewDecFromStr("0.24"))
-	cmstPrice := CMSTPrice.Sub(sdk.MustNewDecFromStr("0.24"))
-	wbtcPrice := WBTCPrice.Sub(sdk.MustNewDecFromStr("0.24"))
-	ethPrice := ETHPrice.Sub(sdk.MustNewDecFromStr("0.24"))
+	usdtPrice := USDTPrice.Sub(sdkmath.LegacyMustNewDecFromStr("0.24"))
+	usdcPrice := USDCPrice.Sub(sdkmath.LegacyMustNewDecFromStr("0.24"))
+	istPrice := ISTPrice.Sub(sdkmath.LegacyMustNewDecFromStr("0.24"))
+	cmstPrice := CMSTPrice.Sub(sdkmath.LegacyMustNewDecFromStr("0.24"))
+	wbtcPrice := WBTCPrice.Sub(sdkmath.LegacyMustNewDecFromStr("0.24"))
+	ethPrice := ETHPrice.Sub(sdkmath.LegacyMustNewDecFromStr("0.24"))
 	for i := 1; i <= 24; i++ {
 		median := otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				USDTSymbolDenom,
-				usdtPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
+				usdtPrice.Add(sdkmath.LegacyMustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
 			),
 			BlockNum: uint64(i),
 		}
@@ -181,7 +181,7 @@ func ValidPrices() otypes.Prices {
 		median = otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				USDCSymbolDenom,
-				usdcPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
+				usdcPrice.Add(sdkmath.LegacyMustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
 			),
 			BlockNum: uint64(i),
 		}
@@ -189,7 +189,7 @@ func ValidPrices() otypes.Prices {
 		median = otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				ISTSymbolDenom,
-				istPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
+				istPrice.Add(sdkmath.LegacyMustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
 			),
 			BlockNum: uint64(i),
 		}
@@ -197,7 +197,7 @@ func ValidPrices() otypes.Prices {
 		median = otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				CMSTSymbolDenom,
-				cmstPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
+				cmstPrice.Add(sdkmath.LegacyMustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
 			),
 			BlockNum: uint64(i),
 		}
@@ -205,7 +205,7 @@ func ValidPrices() otypes.Prices {
 		median = otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				WBTCSymbolDenom,
-				wbtcPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
+				wbtcPrice.Add(sdkmath.LegacyMustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
 			),
 			BlockNum: uint64(i),
 		}
@@ -213,7 +213,7 @@ func ValidPrices() otypes.Prices {
 		median = otypes.Price{
 			ExchangeRateTuple: otypes.NewExchangeRateTuple(
 				ETHSymbolDenom,
-				ethPrice.Add(sdk.MustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
+				ethPrice.Add(sdkmath.LegacyMustNewDecFromStr("0.01").MulInt(sdkmath.NewInt(int64(i)))),
 			),
 			BlockNum: uint64(i),
 		}
@@ -231,28 +231,28 @@ func ValidPricesFunc() func(ctx sdk.Context) otypes.Prices {
 }
 
 func ValidToken(baseDenom, symbolDenom string, exponent uint32) ltypes.Token {
-	maxSupply := sdk.NewInt(1000000_00000000)
+	maxSupply := sdkmath.NewInt(1000000_00000000)
 	if baseDenom == ETHBaseDenom {
-		maxSupply = sdk.ZeroInt()
+		maxSupply = sdkmath.ZeroInt()
 	}
 	return ltypes.Token{
 		BaseDenom:              baseDenom,
 		SymbolDenom:            symbolDenom,
 		Exponent:               exponent,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.25"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.5"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.51"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.01"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.05"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.75"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.05"),
+		ReserveFactor:          sdkmath.LegacyMustNewDecFromStr("0.25"),
+		CollateralWeight:       sdkmath.LegacyMustNewDecFromStr("0.5"),
+		LiquidationThreshold:   sdkmath.LegacyMustNewDecFromStr("0.51"),
+		BaseBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.01"),
+		KinkBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.05"),
+		MaxBorrowRate:          sdkmath.LegacyMustNewDecFromStr("1"),
+		KinkUtilization:        sdkmath.LegacyMustNewDecFromStr("0.75"),
+		LiquidationIncentive:   sdkmath.LegacyMustNewDecFromStr("0.05"),
 		EnableMsgSupply:        true,
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("1"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0.05"),
+		MaxCollateralShare:     sdkmath.LegacyMustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdkmath.LegacyMustNewDecFromStr("1"),
+		MinCollateralLiquidity: sdkmath.LegacyMustNewDecFromStr("0.05"),
 		MaxSupply:              maxSupply,
 		HistoricMedians:        24,
 	}

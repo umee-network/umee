@@ -1,6 +1,7 @@
 package keeper_test
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -10,11 +11,11 @@ func (s *IntegrationTestSuite) TestInt64Overflow() {
 	// set uumee max supply to unlimited
 	t, err := app.LeverageKeeper.GetTokenSettings(ctx, umeeDenom)
 	require.NoError(err)
-	t.MaxSupply = sdk.ZeroInt()
+	t.MaxSupply = sdkmath.ZeroInt()
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, t))
 
 	overflowCoin := sdk.NewInt64Coin(umeeDenom, 9223372036854775807) // max int64
-	overflowCoin.Amount = overflowCoin.Amount.Add(sdk.OneInt())
+	overflowCoin.Amount = overflowCoin.Amount.Add(sdkmath.OneInt())
 	supplier := s.newAccount(overflowCoin)
 	s.supply(supplier, overflowCoin)
 

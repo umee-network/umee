@@ -1,6 +1,7 @@
 syntax = "proto3";
 package umee.incentive.v1;
 
+import "cosmos_proto/cosmos.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 
@@ -20,7 +21,8 @@ message Params {
   // emergency_unbond_fee is the portion of a bond that is paid when it is instantly
   // released using MsgEmergencyUnbond. For example, 0.01 is a 1% fee. Ranges 0-1.
   string emergency_unbond_fee = 3 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

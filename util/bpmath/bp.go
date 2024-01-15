@@ -3,36 +3,35 @@ package bpmath
 import (
 	"math"
 
-	cmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // BP represents values in basis points. Maximum value is 2^32-1.
 // Note: BP operations should not be chained - this causes precision losses.
 type BP uint32
 
-func (bp BP) ToDec() sdk.Dec {
-	return sdk.NewDecWithPrec(int64(bp), 4)
+func (bp BP) ToDec() sdkmath.LegacyDec {
+	return sdkmath.LegacyNewDecWithPrec(int64(bp), 4)
 }
 
 // Mul return a*bp rounding towards zero.
-func (bp BP) Mul(a cmath.Int) cmath.Int {
+func (bp BP) Mul(a sdkmath.Int) sdkmath.Int {
 	return Mul(a, bp)
 }
 
 // MulDec return a*bp rounding towards zero.
-func (bp BP) MulDec(a sdk.Dec) sdk.Dec {
+func (bp BP) MulDec(a sdkmath.LegacyDec) sdkmath.LegacyDec {
 	return MulDec(a, bp)
 }
 
 // FromQuo returns a/b in basis points.
 // Contract: a>=0 and b > 0.
 // Panics if a/b >= MaxUint32/10'000 or if b==0.
-func FromQuo(dividend, divisor cmath.Int, rounding Rounding) BP {
+func FromQuo(dividend, divisor sdkmath.Int, rounding Rounding) BP {
 	return BP(quo(dividend, divisor, rounding, math.MaxUint32))
 }
 
-func quo(a, b cmath.Int, rounding Rounding, max uint64) uint64 {
+func quo(a, b sdkmath.Int, rounding Rounding, max uint64) uint64 {
 	if b.IsZero() {
 		panic("divider can't be zero")
 	}
@@ -49,9 +48,9 @@ func quo(a, b cmath.Int, rounding Rounding, max uint64) uint64 {
 
 // Mul returns a * b_basis_points rounding towards zero.
 // Contract: b in [0, MaxUint32]
-func Mul[T BP | FixedBP | int](a cmath.Int, b T) cmath.Int {
+func Mul[T BP | FixedBP | int](a sdkmath.Int, b T) sdkmath.Int {
 	if b == 0 {
-		return cmath.ZeroInt()
+		return sdkmath.ZeroInt()
 	}
 	if b == One {
 		return a
@@ -61,9 +60,9 @@ func Mul[T BP | FixedBP | int](a cmath.Int, b T) cmath.Int {
 
 // MulDec returns a * b_basis_points rounding towards zero.
 // Contract: b in [0, MaxUint32]
-func MulDec[T BP | FixedBP | int](a sdk.Dec, b T) sdk.Dec {
+func MulDec[T BP | FixedBP | int](a sdkmath.LegacyDec, b T) sdkmath.LegacyDec {
 	if b == 0 {
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 	if b == One {
 		return a

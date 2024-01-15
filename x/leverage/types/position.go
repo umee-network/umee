@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -31,7 +32,7 @@ type AccountPosition struct {
 	// caches retrieved token settings
 	tokens map[string]Token
 	// caches the minimum collateral weight or minimum liquidation threshold
-	minimumBorrowFactor sdk.Dec
+	minimumBorrowFactor sdkmath.LegacyDec
 }
 
 // NewAccountPosition creates an account position based on a user's borrowed and collateral
@@ -41,7 +42,7 @@ func NewAccountPosition(
 	pairs []SpecialAssetPair,
 	unsortedCollateralValue, unsortedBorrowValue sdk.DecCoins,
 	forLiquidation bool,
-	minimumBorrowFactor sdk.Dec,
+	minimumBorrowFactor sdkmath.LegacyDec,
 ) (AccountPosition, error) {
 	mapTokens := map[string]Token{}
 	weightedPairs := WeightedSpecialPairs{}
@@ -64,9 +65,9 @@ func NewAccountPosition(
 		if weight.LTE(
 			// pairs may not reduce collateral weight or liquidation threshold
 			// below what the tokens would produce without the special pair.
-			sdk.MinDec(
+			sdkmath.LegacyMinDec(
 				temp.tokenWeight(sp.Collateral),
-				sdk.MaxDec(temp.tokenWeight(sp.Borrow), minimumBorrowFactor),
+				sdkmath.LegacyMaxDec(temp.tokenWeight(sp.Borrow), minimumBorrowFactor),
 			),
 		) || weight.IsZero() {
 			// Such pairs as well as those with zero weight are omitted from the
@@ -74,8 +75,8 @@ func NewAccountPosition(
 			continue
 		}
 		wp := WeightedSpecialPair{
-			Collateral:    sdk.NewDecCoinFromDec(sp.Collateral, sdk.ZeroDec()),
-			Borrow:        sdk.NewDecCoinFromDec(sp.Borrow, sdk.ZeroDec()),
+			Collateral:    sdk.NewDecCoinFromDec(sp.Collateral, sdkmath.LegacyZeroDec()),
+			Borrow:        sdk.NewDecCoinFromDec(sp.Borrow, sdkmath.LegacyZeroDec()),
 			SpecialWeight: weight,
 		}
 		// sorting is performed by Add function
@@ -97,7 +98,7 @@ func newAccountPosition(
 	pairs []WeightedSpecialPair,
 	unsortedCollateralValue, unsortedBorrowValue sdk.DecCoins,
 	forLiquidation bool,
-	minimumBorrowFactor sdk.Dec,
+	minimumBorrowFactor sdkmath.LegacyDec,
 ) (AccountPosition, error) {
 	position := AccountPosition{
 		specialPairs:        WeightedSpecialPairs{},
@@ -112,8 +113,8 @@ func newAccountPosition(
 		// initialize all amounts to zero. Constructing each as a new struct ensures the original
 		// slice's contents cannot be modified if this position is mutated.
 		wp := WeightedSpecialPair{
-			Collateral:    sdk.NewDecCoinFromDec(sp.Collateral.Denom, sdk.ZeroDec()),
-			Borrow:        sdk.NewDecCoinFromDec(sp.Borrow.Denom, sdk.ZeroDec()),
+			Collateral:    sdk.NewDecCoinFromDec(sp.Collateral.Denom, sdkmath.LegacyZeroDec()),
+			Borrow:        sdk.NewDecCoinFromDec(sp.Borrow.Denom, sdkmath.LegacyZeroDec()),
 			SpecialWeight: sp.SpecialWeight,
 		}
 		// sorting is performed by Add function
@@ -135,8 +136,8 @@ func newAccountPosition(
 		c := unsortedCollateralValue.AmountOf(p.Collateral.Denom)
 		if b.IsPositive() && c.IsPositive() {
 			// some unpaired assets match the special pair
-			bCoin := sdk.NewDecCoinFromDec(p.Borrow.Denom, sdk.ZeroDec())
-			cCoin := sdk.NewDecCoinFromDec(p.Collateral.Denom, sdk.ZeroDec())
+			bCoin := sdk.NewDecCoinFromDec(p.Borrow.Denom, sdkmath.LegacyZeroDec())
+			cCoin := sdk.NewDecCoinFromDec(p.Collateral.Denom, sdkmath.LegacyZeroDec())
 			pairBorrowLimit := c.Mul(p.SpecialWeight)
 			if pairBorrowLimit.GTE(b) {
 				// all of the borrow is covered by collateral in this pair
@@ -204,35 +205,35 @@ func (ap *AccountPosition) Validate() error {
 // If the requested token denom did not exist or the borrower was already
 // at or over their borrow limit, returns zero.
 // Returns zero if a position was computed with liquidation in mind.
-func (ap *AccountPosition) MaxBorrow(denom string) sdk.Dec {
+func (ap *AccountPosition) MaxBorrow(denom string) sdkmath.LegacyDec {
 	if ap.isForLiquidation {
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	// Compute max borrow independently for borrow limit and borrow factor limitations
-	maxBorrow := sdk.MinDec(ap.maxBorrowFromBorrowLimit(denom), ap.maxBorrowFromBorrowFactor(denom))
+	maxBorrow := sdkmath.LegacyMinDec(ap.maxBorrowFromBorrowLimit(denom), ap.maxBorrowFromBorrowFactor(denom))
 	// Prevent over-limit accounts from returning negative max borrow
-	return sdk.MaxDec(sdk.ZeroDec(), maxBorrow)
+	return sdkmath.LegacyMaxDec(sdkmath.LegacyZeroDec(), maxBorrow)
 }
 
 // maxBorrowFromBorrowFactor is the subset of the max borrow calculation which considers
 // borrow factor (not collateral weight)
-func (ap *AccountPosition) maxBorrowFromBorrowFactor(denom string) sdk.Dec {
+func (ap *AccountPosition) maxBorrowFromBorrowFactor(denom string) sdkmath.LegacyDec {
 	borrowFactor := ap.borrowFactor(denom)
 	if !borrowFactor.IsPositive() {
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	usage := ap.totalCollateralUsage()
 	unusedCollateral := ap.CollateralValue().Sub(usage)
 	unpairedCollateral := ap.unpairedCollateral()
-	maxSpecialBorrow := sdk.ZeroDec()
+	maxSpecialBorrow := sdkmath.LegacyZeroDec()
 
 	// if restricted by borrow factor, each special pair frees up additional collateral
 	// for a given amount borrowed
 	for _, wsp := range ap.specialPairs {
 		if wsp.Borrow.Denom == denom && unusedCollateral.IsPositive() {
-			collateralToPair := sdk.MinDec(
+			collateralToPair := sdkmath.LegacyMinDec(
 				unusedCollateral,
 				unpairedCollateral.AmountOf(wsp.Collateral.Denom),
 			)
@@ -251,17 +252,17 @@ func (ap *AccountPosition) maxBorrowFromBorrowFactor(denom string) sdk.Dec {
 
 // maxBorrowFromBorrowLimit is the subset of the max borrow calculation which considers
 // collateral weight (not borrow factor)
-func (ap *AccountPosition) maxBorrowFromBorrowLimit(denom string) sdk.Dec {
+func (ap *AccountPosition) maxBorrowFromBorrowLimit(denom string) sdkmath.LegacyDec {
 	unpairedBorrows := ap.unpairedBorrows()
 	unpairedCollateral := ap.unpairedCollateral()
 	unusedLimit := ap.normalBorrowLimit(unpairedCollateral).Sub(ap.total(unpairedBorrows))
 
 	if !unusedLimit.IsPositive() {
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	// attempt to borrow using special pairs first
-	specialBorrowed := sdk.ZeroDec()
+	specialBorrowed := sdkmath.LegacyZeroDec()
 	for _, wsp := range ap.specialPairs {
 		if wsp.Borrow.Denom == denom && unusedLimit.IsPositive() {
 			cDenom := wsp.Collateral.Denom
@@ -270,7 +271,7 @@ func (ap *AccountPosition) maxBorrowFromBorrowLimit(denom string) sdk.Dec {
 			collateralToPair := unpairedCollateral.AmountOf(cDenom)
 			// limit to that collateral which is not being used by normal borrows
 			if cWeight.IsPositive() {
-				collateralToPair = sdk.MinDec(collateralToPair,
+				collateralToPair = sdkmath.LegacyMinDec(collateralToPair,
 					unusedLimit.Quo(cWeight),
 				)
 			}
@@ -298,14 +299,14 @@ func (ap *AccountPosition) maxBorrowFromBorrowLimit(denom string) sdk.Dec {
 // to prevent downstream rounding errors when converting back to tokens.
 // This function is fairly complex, but perfectly handles edge cases including
 // those with overlapping special asset pairs.
-func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, bool) {
+func (ap *AccountPosition) MaxWithdraw(denom string) (sdkmath.LegacyDec, bool) {
 	if ap.isForLiquidation {
 		// liquidation calculations should not support max withdraw
-		return sdk.ZeroDec(), false
+		return sdkmath.LegacyZeroDec(), false
 	}
 	if !ap.IsHealthy() {
 		// accounts over their borrow limit cannot withdraw any collateral
-		return sdk.ZeroDec(), false
+		return sdkmath.LegacyZeroDec(), false
 	}
 
 	// first try withdrawing everything
@@ -341,7 +342,7 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, bool) {
 					}
 					// when withdrawing exclusively from a single special pair, the borrowed assets from
 					// the pair are effectively borrowed against its normal collateral
-					borrowToDisplace := sdk.MinDec(
+					borrowToDisplace := sdkmath.LegacyMinDec(
 						sp.Borrow.Amount,
 						intermediatePosition.MaxBorrow(sp.Borrow.Denom),
 					)
@@ -361,20 +362,20 @@ func (ap *AccountPosition) MaxWithdraw(denom string) (sdk.Dec, bool) {
 	unusedLimit := ap.totalBorrowLimit().Sub(ap.BorrowedValue())            // unused borrow limit by collateral weight
 	unusedCollateral := ap.CollateralValue().Sub(ap.totalCollateralUsage()) // unused collateral by borrow factor
 	// - for borrow limit, withdraw subtracts [collat * weight] from borrow limit
-	max1 := sdk.ZeroDec()
+	max1 := sdkmath.LegacyZeroDec()
 	if ap.tokenWeight(denom).IsPositive() {
 		max1 = unusedLimit.Quo(ap.tokenWeight(denom))
 	}
 	// - for borrow factor, withdraw subtracts [collat] from TC
 	max2 := unusedCollateral
 	// replace maxWithdraw with the lower of borrow limit and borrow factor results
-	maxWithdraw = sdk.MinDec(max1, max2)
+	maxWithdraw = sdkmath.LegacyMinDec(max1, max2)
 	return maxWithdraw, false
 }
 
 // canHealthyWithdraw simulates an account position with a specified amount of
 // collateral withdrawn, and returns true if it is still at or below its borrow limit
-func (ap *AccountPosition) canHealthyWithdraw(denom string, amount sdk.Dec) bool {
+func (ap *AccountPosition) canHealthyWithdraw(denom string, amount sdkmath.LegacyDec) bool {
 	hypotheticalPosition, err := newAccountPosition(
 		ap.tokens,
 		ap.specialPairs,
@@ -394,10 +395,10 @@ func (ap *AccountPosition) HasCollateral(denom string) bool {
 
 // Limit calculates the borrow limit of an account position
 // (or liquidation threshold if ap.isForLiquidation is true).
-func (ap *AccountPosition) Limit() sdk.Dec {
+func (ap *AccountPosition) Limit() sdkmath.LegacyDec {
 	collateralValue := ap.CollateralValue()
 	if !collateralValue.IsPositive() {
-		return sdk.ZeroDec()
+		return sdkmath.LegacyZeroDec()
 	}
 
 	// compute limit due to collateral weights
@@ -413,7 +414,7 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 	usage := ap.totalCollateralUsage()
 	unusedCollateralValue := collateralValue.Sub(usage) // can be negative
 
-	var avgWeight sdk.Dec
+	var avgWeight sdkmath.LegacyDec
 	if unusedCollateralValue.IsNegative() {
 		// if user if above limit, overused collateral is being borrowed against at
 		// the borrow factor of the surplus borrows (which are by definition not paired)
@@ -423,17 +424,17 @@ func (ap *AccountPosition) Limit() sdk.Dec {
 		// average collateral weight of its unpaired collateral at most. But that is
 		// borrow limit logic. Borrow factor considers the maximum possible borrow factor,
 		// which if we are not specifying a borrow denom, is 1.0.
-		avgWeight = sdk.OneDec()
+		avgWeight = sdkmath.LegacyOneDec()
 	}
 	borrowFactorLimit := ap.BorrowedValue().Add(unusedCollateralValue.Mul(avgWeight))
 
 	// return the minimum of the two limits
-	return sdk.MinDec(limit, borrowFactorLimit)
+	return sdkmath.LegacyMinDec(limit, borrowFactorLimit)
 }
 
 // BorrowedValue sums the total borrowed value in a position.
-func (ap *AccountPosition) BorrowedValue() sdk.Dec {
-	sum := sdk.ZeroDec()
+func (ap *AccountPosition) BorrowedValue() sdkmath.LegacyDec {
+	sum := sdkmath.LegacyZeroDec()
 	for _, b := range ap.borrowedValue {
 		sum = sum.Add(b.Amount)
 	}
@@ -441,8 +442,8 @@ func (ap *AccountPosition) BorrowedValue() sdk.Dec {
 }
 
 // CollateralValue sums the total collateral value in a position.
-func (ap *AccountPosition) CollateralValue() sdk.Dec {
-	sum := sdk.ZeroDec()
+func (ap *AccountPosition) CollateralValue() sdkmath.LegacyDec {
+	sum := sdkmath.LegacyZeroDec()
 	for _, c := range ap.collateralValue {
 		sum = sum.Add(c.Amount)
 	}
@@ -456,14 +457,14 @@ func (ap *AccountPosition) IsHealthy() bool {
 }
 
 // tokenWeight gets a token's collateral weight or liquidation threshold if it is registered, else zero
-func (ap *AccountPosition) tokenWeight(denom string) sdk.Dec {
+func (ap *AccountPosition) tokenWeight(denom string) sdkmath.LegacyDec {
 	if t, ok := ap.tokens[denom]; ok {
 		if ap.isForLiquidation {
 			return t.LiquidationThreshold
 		}
 		return t.CollateralWeight
 	}
-	return sdk.ZeroDec()
+	return sdkmath.LegacyZeroDec()
 }
 
 // specialBorrows returns the sum of all borrowed value in an account's special asset pairs
@@ -499,12 +500,12 @@ func (ap *AccountPosition) unpairedCollateral() sdk.DecCoins {
 }
 
 // averageBorrowFactor gets the weighted average borrow factor of a set of tokens
-func (ap *AccountPosition) averageBorrowFactor(coins sdk.DecCoins) sdk.Dec {
+func (ap *AccountPosition) averageBorrowFactor(coins sdk.DecCoins) sdkmath.LegacyDec {
 	if coins.IsZero() {
-		return sdk.OneDec()
+		return sdkmath.LegacyOneDec()
 	}
-	amountSum := sdk.ZeroDec()
-	weightedSum := sdk.ZeroDec()
+	amountSum := sdkmath.LegacyZeroDec()
+	weightedSum := sdkmath.LegacyZeroDec()
 	for _, c := range coins {
 		weightedSum = weightedSum.Add(c.Amount.Mul(ap.borrowFactor(c.Denom)))
 		amountSum = amountSum.Add(c.Amount)
@@ -514,19 +515,19 @@ func (ap *AccountPosition) averageBorrowFactor(coins sdk.DecCoins) sdk.Dec {
 
 // borrowFactor gets a token's collateral weight or liquidation threshold (or minimumBorrowFactor if greater)
 // if the token is registered, else zero.
-func (ap *AccountPosition) borrowFactor(denom string) sdk.Dec {
+func (ap *AccountPosition) borrowFactor(denom string) sdkmath.LegacyDec {
 	if t, ok := ap.tokens[denom]; ok {
 		if ap.isForLiquidation {
-			return sdk.MaxDec(t.LiquidationThreshold, ap.minimumBorrowFactor)
+			return sdkmath.LegacyMaxDec(t.LiquidationThreshold, ap.minimumBorrowFactor)
 		}
-		return sdk.MaxDec(t.CollateralWeight, ap.minimumBorrowFactor)
+		return sdkmath.LegacyMaxDec(t.CollateralWeight, ap.minimumBorrowFactor)
 	}
-	return sdk.ZeroDec()
+	return sdkmath.LegacyZeroDec()
 }
 
 // totalCollateralUsage computes collateral usage of a position's unpaired borrows
 // and adds collateral value from special asset pairs.
-func (ap *AccountPosition) totalCollateralUsage() sdk.Dec {
+func (ap *AccountPosition) totalCollateralUsage() sdkmath.LegacyDec {
 	normal := ap.normalCollateralUsage(ap.unpairedBorrows())
 	special := ap.total(ap.specialCollateral())
 	return normal.Add(special)
@@ -535,11 +536,11 @@ func (ap *AccountPosition) totalCollateralUsage() sdk.Dec {
 // normalCollateralUsage calculated the minimum collateral value that can support borrowed sdk.DecCoins
 // based on the borrow factor of those coins, without any special asset pairs being applied.
 // Uses either collateral weight or liquidation threshold (if ap.isForLiquidation), or minimumBorrowFactor if greater.
-func (ap *AccountPosition) normalCollateralUsage(borrowed sdk.DecCoins) sdk.Dec {
-	sum := sdk.ZeroDec()
+func (ap *AccountPosition) normalCollateralUsage(borrowed sdk.DecCoins) sdkmath.LegacyDec {
+	sum := sdkmath.LegacyZeroDec()
 	for _, b := range borrowed {
 		sum = sum.Add(
-			b.Amount.Quo(sdk.MaxDec(
+			b.Amount.Quo(sdkmath.LegacyMaxDec(
 				ap.tokenWeight(b.Denom),
 				ap.minimumBorrowFactor,
 			)),
@@ -550,7 +551,7 @@ func (ap *AccountPosition) normalCollateralUsage(borrowed sdk.DecCoins) sdk.Dec 
 
 // totalBorrowLimit computes the borrow limit of a position's unpaired collateral
 // and then adds borrowed value from special asset pairs.
-func (ap *AccountPosition) totalBorrowLimit() sdk.Dec {
+func (ap *AccountPosition) totalBorrowLimit() sdkmath.LegacyDec {
 	normal := ap.normalBorrowLimit(ap.unpairedCollateral())
 	special := ap.total(ap.specialBorrows())
 	return normal.Add(special)
@@ -559,8 +560,8 @@ func (ap *AccountPosition) totalBorrowLimit() sdk.Dec {
 // normalBorrowLimit is the total borrowed value which could be supported by
 // collateral sdk.DecCoins, without any special asset pairs being applied.
 // Uses either collateral weight or liquidation threshold (if ap.isForLiquidation)
-func (ap *AccountPosition) normalBorrowLimit(collateral sdk.DecCoins) sdk.Dec {
-	sum := sdk.ZeroDec()
+func (ap *AccountPosition) normalBorrowLimit(collateral sdk.DecCoins) sdkmath.LegacyDec {
+	sum := sdkmath.LegacyZeroDec()
 	for _, b := range collateral {
 		sum = sum.Add(b.Amount.Mul(ap.tokenWeight(b.Denom)))
 	}
@@ -568,8 +569,8 @@ func (ap *AccountPosition) normalBorrowLimit(collateral sdk.DecCoins) sdk.Dec {
 }
 
 // total sums the amounts in an sdk.DecCoins, regardless of denom
-func (ap *AccountPosition) total(coins sdk.DecCoins) sdk.Dec {
-	total := sdk.ZeroDec()
+func (ap *AccountPosition) total(coins sdk.DecCoins) sdkmath.LegacyDec {
+	total := sdkmath.LegacyZeroDec()
 	for _, c := range coins {
 		total = total.Add(c.Amount)
 	}
