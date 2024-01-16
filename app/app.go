@@ -566,7 +566,8 @@ func New(
 	 * RecvPacket, message that originates from an IBC channel and goes down to app, the flow is the other way
 	   channel.RecvPacket -> uibcquota.OnRecvPacket -> forward.OnRecvPacket -> transfer.OnRecvPacket
 
-	* Note that the forward middleware is only integrated on the "receive" direction. It can be safely skipped when sending.
+	* Note that the forward middleware is only integrated on the "receive" direction.
+	  It can be safely skipped when sending.
 
 	* transfer stack contains (from top to bottom):
 	  - Umee IBC Transfer
