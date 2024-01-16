@@ -842,6 +842,7 @@ func New(
 		oracletypes.ModuleName,
 		leveragetypes.ModuleName,
 		uibc.ModuleName,
+		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
