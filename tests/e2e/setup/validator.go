@@ -1,17 +1,23 @@
 package setup
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 
+	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
+	sdkmath "cosmossdk.io/math"
+	txsigning "cosmossdk.io/x/tx/signing"
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	p2p "github.com/cometbft/cometbft/p2p"
 	"github.com/cometbft/cometbft/privval"
+	cmttime "github.com/cometbft/cometbft/types/time"
 	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdkcrypto "github.com/cosmos/cosmos-sdk/crypto"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/hd"
@@ -20,10 +26,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdktx "github.com/cosmos/cosmos-sdk/types/tx"
-	txsigning "github.com/cosmos/cosmos-sdk/types/tx/signing"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authsigning "github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"google.golang.org/protobuf/types/known/anypb"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -85,7 +92,13 @@ func (v *validator) init(cdc codec.Codec) error {
 	genDoc.Validators = nil
 	genDoc.AppState = appState
 
-	if err = genutil.ExportGenesisFile(genDoc, config.GenesisFile()); err != nil {
+	// if err = genutil.ExportGenesisFile(genDoc, config.GenesisFile()); err != nil {
+	// 	return fmt.Errorf("failed to export app genesis state: %w", err)
+	// }
+
+	genTime := cmttime.Now()
+
+	if err = genutil.ExportGenesisFileWithTime(config.GenesisFile(), v.chain.ID, nil, appState, genTime); err != nil {
 		return fmt.Errorf("failed to export app genesis state: %w", err)
 	}
 
@@ -184,9 +197,9 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	}
 
 	// get the initial validator min self delegation
-	minSelfDelegation, _ := sdk.NewIntFromString("1")
+	minSelfDelegation, _ := sdkmath.NewIntFromString("1")
 
-	valPubKey, err := cryptocodec.FromTmPubKeyInterface(v.consensusKey.PubKey)
+	valPubKey, err := cryptocodec.FromCmtPubKeyInterface(v.consensusKey.PubKey)
 	if err != nil {
 		return nil, err
 	}
@@ -196,7 +209,7 @@ func (v *validator) buildCreateValidatorMsg(amount sdk.Coin) (sdk.Msg, error) {
 	}
 
 	return stakingtypes.NewMsgCreateValidator(
-		sdk.ValAddress(valAddr),
+		sdk.ValAddress(valAddr).String(),
 		valPubKey,
 		amount,
 		description,
@@ -234,10 +247,10 @@ func (v *validator) signMsg(cdc codec.Codec, msgs ...sdk.Msg) (*sdktx.Tx, error)
 	if err != nil {
 		return nil, err
 	}
-	sig := txsigning.SignatureV2{
+	sig := signing.SignatureV2{
 		PubKey: pubKey,
-		Data: &txsigning.SingleSignatureData{
-			SignMode:  txsigning.SignMode_SIGN_MODE_DIRECT,
+		Data: &signing.SingleSignatureData{
+			SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
 			Signature: nil,
 		},
 		Sequence: 0,
@@ -247,24 +260,56 @@ func (v *validator) signMsg(cdc codec.Codec, msgs ...sdk.Msg) (*sdktx.Tx, error)
 		return nil, err
 	}
 
+	tx := txBuilder.GetTx()
+
+	adaptableTx, ok := tx.(authsigning.V2AdaptableTx)
+	if !ok {
+		return nil, fmt.Errorf("expected tx to be V2AdaptableTx, got %T", tx)
+	}
+
+	anyPk, err := codectypes.NewAnyWithValue(signerData.PubKey)
+	if err != nil {
+		return nil, err
+	}
+
+	signerData2 := txsigning.SignerData{
+		ChainID:       signerData.ChainID,
+		AccountNumber: signerData.AccountNumber,
+		Sequence:      signerData.Sequence,
+		Address:       signerData.Address,
+		PubKey: &anypb.Any{
+			TypeUrl: anyPk.TypeUrl,
+			Value:   anyPk.Value,
+		},
+	}
 	bytesToSign, err := encodingConfig.TxConfig.SignModeHandler().GetSignBytes(
-		txsigning.SignMode_SIGN_MODE_DIRECT,
-		signerData,
-		txBuilder.GetTx(),
+		context.Background(),
+		signingv1beta1.SignMode_SIGN_MODE_DIRECT,
+		signerData2,
+		adaptableTx.GetSigningTxData(),
 	)
 	if err != nil {
 		return nil, err
 	}
+
+	// bytesToSign2, err := authsigning.GetSignBytesAdapter(
+	// 	ctx,
+	// 	encodingConfig.TxConfig.SignModeHandler(),
+	// 	txsigning.SignMode_SIGN_MODE_DIRECT,
+	// 	signerData, txBuilder.GetTx())
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	sigBytes, err := v.privateKey.Sign(bytesToSign)
 	if err != nil {
 		return nil, err
 	}
 
-	sig = txsigning.SignatureV2{
+	sig = signing.SignatureV2{
 		PubKey: pubKey,
-		Data: &txsigning.SingleSignatureData{
-			SignMode:  txsigning.SignMode_SIGN_MODE_DIRECT,
+		Data: &signing.SingleSignatureData{
+			SignMode:  signing.SignMode_SIGN_MODE_DIRECT,
 			Signature: sigBytes,
 		},
 		Sequence: 0,

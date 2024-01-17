@@ -21,7 +21,7 @@ func (c Client) QueryAuthSeq(accAddr string) (uint64, error) {
 		return 0, err
 	}
 
-	var baseAccount authtypes.AccountI
+	var baseAccount sdk.AccountI
 	err = c.codec.UnpackAny(queryResponse.Account, &baseAccount)
 	if err != nil {
 		return 0, err

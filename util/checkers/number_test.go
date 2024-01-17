@@ -3,8 +3,9 @@ package checkers
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/umee-network/umee/v6/tests/tsdk"
 )
 

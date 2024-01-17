@@ -17,7 +17,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	"github.com/cosmos/cosmos-sdk/x/genutil"
-	"github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	rosettacmd "github.com/cosmos/rosetta/cmd"
@@ -149,7 +148,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 		genutilcli.InitCmd(a.moduleManager, umeeapp.DefaultNodeHome),
 		genutilcli.CollectGenTxsCmd(banktypes.GenesisBalancesIterator{}, umeeapp.DefaultNodeHome, umeeapp.GenTxValidator,
 			a.encCfg.TxConfig.SigningContext().ValidatorAddressCodec()),
-		genutilcli.MigrateGenesisCmd(cli.MigrationMap),
+		genutilcli.MigrateGenesisCmd(genutilcli.MigrationMap),
 		genutilcli.GenTxCmd(
 			a.moduleManager,
 			a.encCfg.TxConfig,

@@ -3,7 +3,6 @@ package keeper_test
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -27,7 +26,8 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	// Case 1, no slash
 	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(votePeriodsPerWindow-minValidVotes))
 	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
-	staking.EndBlocker(s.ctx, s.app.StakingKeeper)
+
+	s.app.StakingKeeper.EndBlocker(s.ctx)
 
 	validator, _ := s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
 	s.Require().Equal(amt, validator.GetBondedTokens())

@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -88,18 +90,18 @@ func NewBankMock() Bank {
 	return Bank{}
 }
 
-func (b Bank) MintCoins(_ sdk.Context, _ string, _ sdk.Coins) error {
+func (b Bank) MintCoins(_ context.Context, _ string, _ sdk.Coins) error {
 	return nil
 }
 
-func (b Bank) BurnCoins(_ sdk.Context, _ string, _ sdk.Coins) error {
+func (b Bank) BurnCoins(_ context.Context, _ string, _ sdk.Coins) error {
 	return nil
 }
 
-func (b Bank) SendCoinsFromModuleToAccount(_ sdk.Context, _ string, _ sdk.AccAddress, _ sdk.Coins) error {
+func (b Bank) SendCoinsFromModuleToAccount(_ context.Context, _ string, _ sdk.AccAddress, _ sdk.Coins) error {
 	return nil
 }
 
-func (b Bank) SendCoinsFromAccountToModule(_ sdk.Context, _ sdk.AccAddress, _ string, _ sdk.Coins) error {
+func (b Bank) SendCoinsFromAccountToModule(_ context.Context, _ sdk.AccAddress, _ string, _ sdk.Coins) error {
 	return nil
 }

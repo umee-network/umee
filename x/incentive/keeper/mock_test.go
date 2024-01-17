@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"context"
 	"errors"
 
 	sdkmath "cosmossdk.io/math"
@@ -27,7 +28,7 @@ func newMockBankKeeper() mockBankKeeper {
 // SendCoinsFromModuleToAccount sends coins from a module balance to an account's spendable coins.
 // Error on insufficient module balance.
 func (m *mockBankKeeper) SendCoinsFromModuleToAccount(
-	_ sdk.Context, fromModule string, toAddr sdk.AccAddress, coins sdk.Coins,
+	_ context.Context, fromModule string, toAddr sdk.AccAddress, coins sdk.Coins,
 ) error {
 	moduleAddr := authtypes.NewModuleAddress(fromModule)
 	spendable, ok := m.spendableCoins[toAddr.String()]
@@ -49,7 +50,7 @@ func (m *mockBankKeeper) SendCoinsFromModuleToAccount(
 // SendCoinsFromAccountToModule sends coins from an account's spendable balance to a module balance.
 // Error on insufficient spendable coins.
 func (m *mockBankKeeper) SendCoinsFromAccountToModule(
-	_ sdk.Context, fromAddr sdk.AccAddress, toModule string, coins sdk.Coins,
+	_ context.Context, fromAddr sdk.AccAddress, toModule string, coins sdk.Coins,
 ) error {
 	moduleAddr := authtypes.NewModuleAddress(toModule)
 	spendable, ok := m.spendableCoins[fromAddr.String()]
@@ -70,7 +71,7 @@ func (m *mockBankKeeper) SendCoinsFromAccountToModule(
 
 // SendCoinsFromModuleToModule sends coins from one module balance to another.
 // Error on insufficient module balance.
-func (m *mockBankKeeper) SendCoinsFromModuleToModule(_ sdk.Context, fromModule, toModule string, coins sdk.Coins) error {
+func (m *mockBankKeeper) SendCoinsFromModuleToModule(_ context.Context, fromModule, toModule string, coins sdk.Coins) error {
 	fromAddr := authtypes.NewModuleAddress(fromModule)
 	fromBalance, ok := m.spendableCoins[fromAddr.String()]
 	if !ok {
@@ -90,7 +91,7 @@ func (m *mockBankKeeper) SendCoinsFromModuleToModule(_ sdk.Context, fromModule, 
 }
 
 // SpendableCoins returns an account's spendable coins, without validating the address
-func (m *mockBankKeeper) SpendableCoins(_ sdk.Context, addr sdk.AccAddress) sdk.Coins {
+func (m *mockBankKeeper) SpendableCoins(_ context.Context, addr sdk.AccAddress) sdk.Coins {
 	spendable, ok := m.spendableCoins[addr.String()]
 	if !ok {
 		return sdk.NewCoins()

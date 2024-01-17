@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"cosmossdk.io/math"
-
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -63,8 +62,8 @@ func (s *E2ETest) checkOutflows(umeeAPIEndpoint, denom string, checkWithExcRate 
 	)
 }
 
-func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
-	actualSupply := math.ZeroInt()
+func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount sdkmath.Int) {
+	actualSupply := sdkmath.ZeroInt()
 	var err error
 	s.Require().Eventually(
 		func() bool {
@@ -100,10 +99,10 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		gaiaAPIEndpoint := s.GaiaREST()
 		umeeAPIEndpoint := s.UmeeREST()
-		// totalQuota := math.NewInt(120)
-		tokenQuota := math.NewInt(100)
+		// totalQuota := sdkmath.NewInt(120)
+		tokenQuota := sdkmath.NewInt(100)
 
-		var atomPrice math.LegacyDec
+		var atomPrice sdkmath.LegacyDec
 		// compute the amount of ATOM sent from umee to gaia which would meet atom's token quota
 		s.Require().Eventually(func() bool {
 			var err error
@@ -145,7 +144,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, true, "")
 		// check the ibc (umee) quota after ibc txs - this one should have failed
 		// supply don't change
-		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdkmath.ZeroInt())
 
 		// send $110 ATOM from umee to gaia
 		exceedAtom := mulCoin(atomQuota, "1.1")
@@ -188,7 +187,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 
 		// sending back remaining amount
 		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewCoin(umeeIBCHash, remainingTokens), false, "send back remaining umee")
-		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdkmath.ZeroInt())
 
 		// reset the outflows
 		s.T().Logf("waiting until quota reset, basically it will take around 300 seconds to do quota reset")

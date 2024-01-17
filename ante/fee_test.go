@@ -1,6 +1,7 @@
 package ante_test
 
 import (
+	sdkmath "cosmossdk.io/math"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/testutil/testdata"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -119,6 +120,6 @@ func (suite *IntegrationTestSuite) checkFeeAnte(tx sdk.Tx, feeExpected sdk.Coins
 	if len(feeExpected) == 0 {
 		require.True(fee.IsZero(), "fee should be zero, got: %s", fee)
 	} else {
-		require.True(fee.IsEqual(feeExpected), "Fee expected %s, got: %s", feeExpected, fee)
+		require.True(fee.Equal(feeExpected), "Fee expected %s, got: %s", feeExpected, fee)
 	}
 }

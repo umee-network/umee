@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/unknownproto"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -50,8 +51,8 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error 
 	}
 	valOperAddr := sdk.ValAddress(valAddr)
 
-	asset := sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(amount))
-	msg := stakingtypes.NewMsgDelegate(addr, valOperAddr, asset)
+	asset := sdk.NewCoin(appparams.BondDenom, sdkmath.NewIntFromUint64(amount))
+	msg := stakingtypes.NewMsgDelegate(addr.String(), valOperAddr.String(), asset)
 	return s.BroadcastTxWithRetry(msg, s.AccountClient(testAccount))
 }
 

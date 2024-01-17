@@ -1,7 +1,6 @@
 package bpmath
 
 import (
-	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 )
 
@@ -12,7 +11,7 @@ type FixedBP uint32
 // FixedFromQuo returns a/b in basis points. Returns 10'000 if a >= b;
 // Contract: a>=0 and b > 0.
 // Panics if b==0.
-func FixedFromQuo(dividend, divisor math.Int, rounding Rounding) FixedBP {
+func FixedFromQuo(dividend, divisor sdkmath.Int, rounding Rounding) FixedBP {
 	return FixedBP(quo(dividend, divisor, rounding, One))
 }
 
@@ -21,7 +20,7 @@ func (bp FixedBP) ToDec() sdkmath.LegacyDec {
 }
 
 // Mul return a*bp rounding towards zero.
-func (bp FixedBP) Mul(a math.Int) math.Int {
+func (bp FixedBP) Mul(a sdkmath.Int) sdkmath.Int {
 	return Mul(a, bp)
 }
 

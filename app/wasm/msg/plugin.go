@@ -39,28 +39,27 @@ func (plugin *Plugin) DispatchCustomMsg(ctx sdk.Context, contractAddr sdk.AccAdd
 
 	sender := contractAddr.String()
 	var err error
-	sdkCtx := sdk.WrapSDKContext(ctx)
 	switch {
 	case smartcontractMessage.Supply != nil:
-		_, err = smartcontractMessage.HandleSupply(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleSupply(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Withdraw != nil:
-		_, err = smartcontractMessage.HandleWithdraw(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleWithdraw(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.MaxWithdraw != nil:
-		_, err = smartcontractMessage.HandleMaxWithdraw(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleMaxWithdraw(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Collateralize != nil:
-		_, err = smartcontractMessage.HandleCollateralize(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleCollateralize(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Decollateralize != nil:
-		_, err = smartcontractMessage.HandleDecollateralize(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleDecollateralize(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Borrow != nil:
-		_, err = smartcontractMessage.HandleBorrow(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleBorrow(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.MaxBorrow != nil:
-		_, err = smartcontractMessage.HandleMaxBorrow(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleMaxBorrow(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Repay != nil:
-		_, err = smartcontractMessage.HandleRepay(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleRepay(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.Liquidate != nil:
-		_, err = smartcontractMessage.HandleLiquidate(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleLiquidate(ctx, sender, plugin.lvMsgServer)
 	case smartcontractMessage.SupplyCollateral != nil:
-		_, err = smartcontractMessage.HandleSupplyCollateral(sdkCtx, sender, plugin.lvMsgServer)
+		_, err = smartcontractMessage.HandleSupplyCollateral(ctx, sender, plugin.lvMsgServer)
 	default:
 		err = wasmvmtypes.UnsupportedRequest{Kind: "invalid assigned umee msg"}
 	}

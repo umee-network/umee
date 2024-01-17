@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"cosmossdk.io/log"
-	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	pruningtypes "cosmossdk.io/store/pruning/types"
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -51,6 +50,7 @@ func Setup(t *testing.T) *UmeeApp {
 
 	privVal := mock.NewPV()
 	pubKey, err := privVal.GetPubKey()
+	fmt.Println("pub err ", err)
 	assert.NilError(t, err)
 
 	// create validator set with single validator
@@ -83,25 +83,28 @@ func SetupWithGenesisValSet(
 
 	app, genesisState := setup(true, 5)
 	genesisState, err := GenesisStateWithValSet(app.AppCodec(), genesisState, valSet, genAccs, balances...)
+	fmt.Println("GenesisStateWithValSet err ", err)
 	assert.NilError(t, err)
 	stateBytes, err := json.MarshalIndent(genesisState, "", " ")
+	fmt.Println("stateBytes err ", err)
 	assert.NilError(t, err)
 
 	// init chain will set the validator set and initialize the genesis accounts
-	app.InitChain(
+	_, err = app.InitChain(
 		&abci.RequestInitChain{
 			Validators:      []abci.ValidatorUpdate{},
 			ConsensusParams: simtestutil.DefaultConsensusParams,
 			AppStateBytes:   stateBytes,
 		},
 	)
-
+	fmt.Println("NilError err ", err)
 	assert.NilError(t, err)
 	_, err = app.FinalizeBlock(&abci.RequestFinalizeBlock{
 		Height:             app.LastBlockHeight() + 1,
 		Hash:               app.LastCommitID().Hash,
 		NextValidatorsHash: valSet.Hash(),
 	})
+	fmt.Println("FinalizeBlock err ", err)
 	assert.NilError(t, err)
 
 	return app
@@ -122,7 +125,7 @@ func GenesisStateWithValSet(codec codec.Codec, genesisState map[string]json.RawM
 	bondAmt := sdk.DefaultPowerReduction
 
 	for _, val := range valSet.Validators {
-		pk, err := cryptocodec.FromTmPubKeyInterface(val.PubKey)
+		pk, err := cryptocodec.FromCmtPubKeyInterface(val.PubKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert pubkey: %w", err)
 		}
@@ -297,13 +300,13 @@ type GenerateAccountStrategy func(int) []sdk.AccAddress
 
 // AddTestAddrsIncremental constructs and returns accNum amount of accounts with an
 // initial balance of accAmt in random order
-func AddTestAddrsIncremental(app *UmeeApp, ctx sdk.Context, accNum int, accAmt math.Int) []sdk.AccAddress {
+func AddTestAddrsIncremental(app *UmeeApp, ctx sdk.Context, accNum int, accAmt sdkmath.Int) []sdk.AccAddress {
 	return addTestAddrs(app, ctx, accNum, accAmt, createIncrementalAccounts)
 }
 
 func addTestAddrs(
 	app *UmeeApp, ctx sdk.Context, accNum int,
-	accAmt math.Int, strategy GenerateAccountStrategy,
+	accAmt sdkmath.Int, strategy GenerateAccountStrategy,
 ) []sdk.AccAddress {
 	testAddrs := strategy(accNum)
 	bondDenom, err := app.StakingKeeper.BondDenom(ctx)

@@ -4,6 +4,7 @@ import (
 	"testing"
 	time "time"
 
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
 )
 

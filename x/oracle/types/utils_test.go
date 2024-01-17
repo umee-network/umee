@@ -1,10 +1,12 @@
 package types
 
 import (
+	context "context"
 	"crypto/rand"
 	"math/big"
 
 	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	tmprotocrypto "github.com/cometbft/cometbft/proto/tendermint/crypto"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
@@ -109,7 +111,7 @@ func (sk MockStakingKeeper) Validators() []MockValidator {
 	return sk.validators
 }
 
-func (sk MockStakingKeeper) Validator(_ sdk.Context, address sdk.ValAddress) stakingtypes.ValidatorI {
+func (sk MockStakingKeeper) Validator(_ context.Context, address sdk.ValAddress) stakingtypes.Validator {
 	for _, validator := range sk.validators {
 		if validator.GetOperator().Equals(address) {
 			return validator
@@ -127,27 +129,27 @@ func (MockStakingKeeper) GetBondedValidatorsByPower(sdk.Context) []stakingtypes.
 	return nil
 }
 
-func (MockStakingKeeper) ValidatorsPowerStoreIterator(sdk.Context) sdk.Iterator {
-	return sdk.KVStoreReversePrefixIterator(nil, nil)
+func (MockStakingKeeper) ValidatorsPowerStoreIterator(context.Context) sdk.Iterator {
+	return storetypes.KVStoreReversePrefixIterator(nil, nil)
 }
 
-func (sk MockStakingKeeper) GetLastValidatorPower(ctx sdk.Context, operator sdk.ValAddress) (power int64) {
+func (sk MockStakingKeeper) GetLastValidatorPower(ctx context.Context, operator sdk.ValAddress) (power int64) {
 	return sk.Validator(ctx, operator).GetConsensusPower(sdk.DefaultPowerReduction)
 }
 
-func (MockStakingKeeper) MaxValidators(sdk.Context) uint32 {
+func (MockStakingKeeper) MaxValidators(context.Context) uint32 {
 	return 100
 }
 
-func (MockStakingKeeper) PowerReduction(sdk.Context) (res sdkmath.Int) {
+func (MockStakingKeeper) PowerReduction(context.Context) (res sdkmath.Int) {
 	return sdk.DefaultPowerReduction
 }
 
-func (MockStakingKeeper) Slash(sdk.Context, sdk.ConsAddress, int64, int64, sdkmath.LegacyDec) sdkmath.Int {
+func (MockStakingKeeper) Slash(context.Context, sdk.ConsAddress, int64, int64, sdkmath.LegacyDec) sdkmath.Int {
 	return sdkmath.ZeroInt()
 }
 
-func (MockStakingKeeper) Jail(sdk.Context, sdk.ConsAddress) {}
+func (MockStakingKeeper) Jail(context.Context, sdk.ConsAddress) {}
 
 // MockValidator implements the ValidatorI interface.
 type MockValidator struct {

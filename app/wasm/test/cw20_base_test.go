@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"cosmossdk.io/math"
+	sdkmath "cosmossdk.io/math"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
@@ -138,7 +138,7 @@ type IntegrationTestSuite struct {
 
 func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	app := umeeapp.Setup(t)
-	ctx := app.BaseApp.NewContext(false, tmproto.Header{
+	ctx := app.BaseApp.NewContextLegacy(false, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Height:  9,
 		Time:    time.Date(2022, 4, 20, 10, 20, 15, 1, time.UTC),
@@ -164,10 +164,10 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 }
 
 // NewTestMsgCreateValidator test msg creator
-func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey, amt math.Int) *stakingtypes.MsgCreateValidator {
+func NewTestMsgCreateValidator(address sdk.ValAddress, pubKey cryptotypes.PubKey, amt sdkmath.Int) *stakingtypes.MsgCreateValidator {
 	commission := stakingtypes.NewCommissionRates(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec())
 	msg, _ := stakingtypes.NewMsgCreateValidator(
-		address, pubKey, sdk.NewCoin(types.UmeeDenom, amt),
+		address.String(), pubKey, sdk.NewCoin(types.UmeeDenom, amt),
 		stakingtypes.Description{}, commission, sdkmath.OneInt(),
 	)
 
@@ -270,7 +270,7 @@ func (s *IntegrationTestSuite) cw20InitiateCode(sender sdk.AccAddress, init inte
 		Sender: sender.String(),
 		CodeID: s.codeID,
 		Label:  cw20Label,
-		Funds:  sdk.Coins{sdk.NewCoin(appparams.BondDenom, sdk.NewIntFromUint64(10))},
+		Funds:  sdk.Coins{sdk.NewCoin(appparams.BondDenom, sdkmath.NewIntFromUint64(10))},
 		Msg:    initBz,
 		Admin:  sender.String(),
 	}

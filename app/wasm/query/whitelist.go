@@ -5,13 +5,13 @@ import (
 	"sync"
 
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
-	"github.com/cosmos/cosmos-sdk/codec"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	distributiontypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	"github.com/cosmos/gogoproto/proto"
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 
 	"github.com/umee-network/umee/v6/x/incentive"
@@ -150,19 +150,19 @@ func init() {
 
 // GetWhitelistedQuery returns the whitelisted query at the provided path.
 // If the query does not exist, or it was setup wrong by the chain, this returns an error.
-func GetWhitelistedQuery(queryPath string) (codec.ProtoMarshaler, error) {
+func GetWhitelistedQuery(queryPath string) (proto.Message, error) {
 	protoResponseAny, isWhitelisted := stargateWhitelist.Load(queryPath)
 	if !isWhitelisted {
 		return nil, wasmvmtypes.UnsupportedRequest{Kind: fmt.Sprintf("'%s' path is not allowed from the contract", queryPath)}
 	}
-	protoResponseType, ok := protoResponseAny.(codec.ProtoMarshaler)
+	protoResponseType, ok := protoResponseAny.(proto.Message)
 	if !ok {
 		return nil, wasmvmtypes.Unknown{}
 	}
 	return protoResponseType, nil
 }
 
-func setWhitelistedQuery(queryPath string, protoType codec.ProtoMarshaler) {
+func setWhitelistedQuery(queryPath string, protoType proto.Message) {
 	stargateWhitelist.Store(queryPath, protoType)
 }
 

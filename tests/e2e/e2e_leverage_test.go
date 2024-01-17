@@ -3,6 +3,7 @@ package e2e
 import (
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -14,14 +15,14 @@ import (
 // sends a msgSupply from one of the suite's test accounts
 func (s *E2ETest) leverageSupply(accountIndex int, denom string, amount uint64) {
 	addr := s.AccountAddr(accountIndex)
-	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(denom, sdkmath.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgSupply(addr, asset), s.AccountClient(accountIndex))
 }
 
 // sends a msgWithdraw from one of the suite's test accounts
 func (s *E2ETest) leverageWithdraw(accountIndex int, denom string, amount uint64) {
 	addr := s.AccountAddr(accountIndex)
-	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(denom, sdkmath.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgWithdraw(addr, asset), s.AccountClient(accountIndex))
 }
 
@@ -34,28 +35,28 @@ func (s *E2ETest) leverageMaxWithdraw(accountIndex int, denom string) {
 // sends a msgCollateralize from one of the suite's test accounts
 func (s *E2ETest) leverageCollateralize(accountIndex int, denom string, amount uint64) {
 	addr := s.AccountAddr(accountIndex)
-	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(denom, sdkmath.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgCollateralize(addr, asset), s.AccountClient(accountIndex))
 }
 
 // sends a msgDecollateralize from one of the suite's test accounts
 func (s *E2ETest) leverageDecollateralize(accountIndex int, denom string, amount uint64) {
 	addr := s.AccountAddr(accountIndex)
-	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(denom, sdkmath.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgDecollateralize(addr, asset), s.AccountClient(accountIndex))
 }
 
 // sends a msgSupplyCollateral from one of the suite's test accounts
 func (s *E2ETest) leverageSupplyCollateral(accountIndex int, denom string, amount uint64) {
 	addr := s.AccountAddr(accountIndex)
-	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(denom, sdkmath.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgSupplyCollateral(addr, asset), s.AccountClient(accountIndex))
 }
 
 // sends a msgBorrow from one of the suite's test accounts
 func (s *E2ETest) leverageBorrow(accountIndex int, denom string, amount uint64) {
 	addr := s.AccountAddr(accountIndex)
-	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(denom, sdkmath.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgBorrow(addr, asset), s.AccountClient(accountIndex))
 }
 
@@ -68,7 +69,7 @@ func (s *E2ETest) leverageMaxBorrow(accountIndex int, denom string) {
 // sends a msgRepay from one of the suite's test accounts
 func (s *E2ETest) leverageRepay(accountIndex int, denom string, amount uint64) {
 	addr := s.AccountAddr(accountIndex)
-	asset := sdk.NewCoin(denom, sdk.NewIntFromUint64(amount))
+	asset := sdk.NewCoin(denom, sdkmath.NewIntFromUint64(amount))
 	s.mustSucceedTx(leveragetypes.NewMsgRepay(addr, asset), s.AccountClient(accountIndex))
 }
 
@@ -76,7 +77,7 @@ func (s *E2ETest) leverageRepay(accountIndex int, denom string, amount uint64) {
 func (s *E2ETest) leverageLiquidate(accountIndex, targetIndex int, repayDenom string, repayAmount uint64, reward string) {
 	addr := s.AccountAddr(accountIndex)
 	target := s.AccountAddr(targetIndex)
-	repay := sdk.NewCoin(repayDenom, sdk.NewIntFromUint64(repayAmount))
+	repay := sdk.NewCoin(repayDenom, sdkmath.NewIntFromUint64(repayAmount))
 	s.mustSucceedTx(leveragetypes.NewMsgLiquidate(addr, target, repay, reward), s.AccountClient(accountIndex))
 }
 
@@ -143,7 +144,7 @@ func (s *E2ETest) TestLeverageBasics() {
 		"too high leverage borrow", func() {
 			asset := sdk.NewCoin(
 				appparams.BondDenom,
-				sdk.NewIntFromUint64(30_000_000),
+				sdkmath.NewIntFromUint64(30_000_000),
 			)
 			s.mustFailTx(
 				leveragetypes.NewMsgBorrow(s.AccountAddr(0), asset),

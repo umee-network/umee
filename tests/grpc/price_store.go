@@ -3,7 +3,8 @@ package grpc
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/umee-network/umee/v6/util/decmath"
 )
 

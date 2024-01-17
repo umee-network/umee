@@ -12,9 +12,9 @@ import (
 
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
-	dbm "github.com/cometbft/cometbft-db"
 	tmjson "github.com/cometbft/cometbft/libs/json"
 	cmttypes "github.com/cometbft/cometbft/types"
+	dbm "github.com/cosmos/cosmos-db"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"gotest.tools/v3/assert"
 
@@ -201,14 +201,12 @@ func appStateRandomizedFn(
 	var numInitiallyBonded int64
 	var initialStake sdkmath.Int
 	appParams.GetOrGenerate(
-		cdc,
 		simtestutil.StakePerAccount,
 		&initialStake,
 		r,
 		func(r *rand.Rand) { initialStake = sdkmath.NewIntFromUint64(uint64(r.Int63n(1e12))) },
 	)
 	appParams.GetOrGenerate(
-		cdc,
 		simtestutil.InitiallyBondedValidators,
 		&numInitiallyBonded,
 		r,

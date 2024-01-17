@@ -1,6 +1,7 @@
 package upgradev3
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -22,7 +23,7 @@ func SetMinimumCommissionRateToValidators(ctx sdk.Context, keeper StakingKeeper,
 
 	for _, validator := range validators {
 		if validator.Commission.Rate.IsNil() || validator.Commission.Rate.LT(minCommissionRate) {
-			if err := keeper.BeforeValidatorModified(ctx, validator.GetOperator()); err != nil {
+			if err := keeper.BeforeValidatorModified(ctx, sdk.ValAddress(validator.GetOperator())); err != nil {
 				return err
 			}
 

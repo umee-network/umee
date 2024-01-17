@@ -111,21 +111,21 @@ func TestRebalanceReserves(t *testing.T) {
 
 	// change index setting modifying the reserve_portion
 	// usdt_reserve_portion from 0.25 to 1.0
-	usdtReservePortion = sdk.MustNewDecFromStr("1.0")
+	usdtReservePortion = sdkmath.LegacyMustNewDecFromStr("1.0")
 	usdtSettings, i = index.AcceptedAsset(mocks.USDTBaseDenom)
 	require.True(t, i >= 0)
 	usdtSettings.ReservePortion = usdtReservePortion
 	index.SetAcceptedAsset(usdtSettings)
 
 	// usdc_reserve_portion from 0.5 to 1.0
-	usdcReservePortion = sdk.MustNewDecFromStr("1.0")
+	usdcReservePortion = sdkmath.LegacyMustNewDecFromStr("1.0")
 	usdcSettings, i = index.AcceptedAsset(mocks.USDCBaseDenom)
 	require.True(t, i >= 0)
 	usdcSettings.ReservePortion = usdcReservePortion
 	index.SetAcceptedAsset(usdcSettings)
 
 	// ist_reserve_portion from 0.035 to 1.0
-	istReservePortion = sdk.MustNewDecFromStr("1.0")
+	istReservePortion = sdkmath.LegacyMustNewDecFromStr("1.0")
 	istSettings, i = index.AcceptedAsset(mocks.ISTBaseDenom)
 	require.True(t, i >= 0)
 	istSettings.ReservePortion = istReservePortion
@@ -145,7 +145,7 @@ func TestRebalanceReserves(t *testing.T) {
 	checkBalances(t, ctx, app, k, index.Denom, false, true)
 
 	// move ctx to match rebalance time
-	futureCtx := app.NewContext(
+	futureCtx := app.NewContextLegacy(
 		false, tmproto.Header{
 			ChainID: ctx.ChainID(),
 			Height:  ctx.BlockHeight(),

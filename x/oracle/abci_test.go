@@ -14,7 +14,6 @@ import (
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/staking/testutil"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
@@ -61,7 +60,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.Denom = bondDenom
 
 	// mint and send coins to validators
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewIntFromUint64(3))))
+	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdkmath.NewIntFromUint64(3))))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr1, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr3, initCoins))
@@ -71,7 +70,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 398, true)
 	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 2, true)
 
-	staking.EndBlocker(ctx, app.StakingKeeper)
+	app.StakingKeeper.EndBlocker(ctx)
 
 	err = app.OracleKeeper.SetVoteThreshold(ctx, sdkmath.LegacyMustNewDecFromStr("0.4"))
 	s.Require().NoError(err)

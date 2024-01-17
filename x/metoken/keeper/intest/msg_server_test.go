@@ -1734,7 +1734,7 @@ func verifyRedeem(
 
 	// verify meToken balance decreased and asset balance increased by the expected amounts
 	require.True(
-		iUserBalance.Sub(tc.asset).Add(expectedAssets).IsEqual(fUserBalance),
+		iUserBalance.Sub(tc.asset).Add(expectedAssets).Equal(fUserBalance),
 		tc.name,
 		"token balance",
 	)
@@ -1745,7 +1745,7 @@ func verifyRedeem(
 				"u/"+expectedFromLeverage.Denom,
 				expectedFromLeverage.Amount,
 			),
-		).IsEqual(fUTokenSupply),
+		).Equal(fUTokenSupply),
 		tc.name,
 		"uToken assetSupply",
 	)
