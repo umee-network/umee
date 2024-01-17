@@ -98,7 +98,8 @@ func BondBalance() metoken.IndexBalances {
 }
 
 func acceptedAsset(denom, targetAllocation string) metoken.AcceptedAsset {
-	return metoken.NewAcceptedAsset(denom, sdkmath.LegacyMustNewDecFromStr("0.2"), sdkmath.LegacyMustNewDecFromStr(targetAllocation))
+	return metoken.NewAcceptedAsset(denom, sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr(targetAllocation))
 }
 
 func ValidFee() metoken.Fee {

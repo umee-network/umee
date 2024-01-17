@@ -18,7 +18,8 @@ func (k Keeper) swapFee(index metoken.Index, indexPrices metoken.IndexPrices, as
 ) {
 	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
-		return sdkmath.LegacyDec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
+		return sdkmath.LegacyDec{}, sdk.Coin{}, sdkerrors.ErrNotFound.
+			Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
 
 	// charge max fee if we don't want the token in the index.
@@ -52,7 +53,8 @@ func (k Keeper) redeemFee(index metoken.Index, indexPrices metoken.IndexPrices, 
 ) {
 	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
-		return sdkmath.LegacyDec{}, sdk.Coin{}, sdkerrors.ErrNotFound.Wrapf("asset %s is not accepted in the index", asset.Denom)
+		return sdkmath.LegacyDec{}, sdk.Coin{}, sdkerrors.ErrNotFound.
+			Wrapf("asset %s is not accepted in the index", asset.Denom)
 	}
 
 	// charge min fee if we don't want the token in the index.

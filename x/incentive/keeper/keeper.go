@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/cosmos/gogoproto/proto"
 
 	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/incentive"
@@ -54,10 +55,10 @@ func (k Keeper) prefixStore(ctx sdk.Context, prefix []byte) sdkstore.KVStore {
 	return prefixstore.NewStore(ctx.KVStore(k.storeKey), prefix)
 }
 
-func (k Keeper) setObject(ctx *sdk.Context, key []byte, object codec.ProtoMarshaler, errField string) error {
+func (k Keeper) setObject(ctx *sdk.Context, key []byte, object proto.Message, errField string) error {
 	return store.SetValueCdc(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
 }
 
-func (k Keeper) getObject(ctx *sdk.Context, key []byte, object codec.ProtoMarshaler, errField string) bool {
+func (k Keeper) getObject(ctx *sdk.Context, key []byte, object proto.Message, errField string) bool {
 	return store.GetValueCdc(ctx.KVStore(k.storeKey), k.cdc, key, object, errField)
 }

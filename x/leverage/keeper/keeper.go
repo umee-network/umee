@@ -185,7 +185,8 @@ func (k Keeper) Withdraw(ctx sdk.Context, supplierAddr sdk.AccAddress, uToken sd
 	}
 
 	// Withdraw will first attempt to use any uTokens in the supplier's wallet
-	amountFromWallet := sdkmath.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).AmountOf(uToken.Denom), uToken.Amount)
+	amountFromWallet := sdkmath.MinInt(k.bankKeeper.SpendableCoins(ctx, supplierAddr).
+		AmountOf(uToken.Denom), uToken.Amount)
 	// Any additional uTokens must come from the supplier's collateral
 	amountFromCollateral := uToken.Amount.Sub(amountFromWallet)
 

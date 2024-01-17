@@ -69,7 +69,8 @@ func (q Querier) Inspect(
 		}
 		checkedAddrs[addr.String()] = struct{}{}
 
-		borrowedValue, collateralValue, liquidationThreshold := sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()
+		borrowedValue, collateralValue, liquidationThreshold := sdkmath.LegacyZeroDec(),
+			sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()
 		position, err := k.GetAccountPosition(ctx, addr, true)
 		if err == nil {
 			borrowedValue = position.BorrowedValue()

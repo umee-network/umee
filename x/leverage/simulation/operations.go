@@ -39,7 +39,7 @@ const (
 
 // WeightedOperations returns all the operations from the leverage module with their respective weights
 func WeightedOperations(
-	appParams simtypes.AppParams, cdc codec.JSONCodec, ak types.AccountKeeper, bk bankkeeper.Keeper,
+	appParams simtypes.AppParams, ak types.AccountKeeper, bk bankkeeper.Keeper,
 	lk keeper.Keeper,
 ) simulation.WeightedOperations {
 	var (

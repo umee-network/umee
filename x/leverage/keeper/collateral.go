@@ -76,7 +76,8 @@ func (k Keeper) GetTotalCollateral(ctx sdk.Context, denom string) sdk.Coin {
 // CalculateCollateralValue uses the price oracle to determine the value (in USD) provided by
 // collateral sdk.Coins, using each token's uToken exchange rate.
 // An error is returned if any input coins are not uTokens or if value calculation fails.
-func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins,
+	mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	total := sdkmath.LegacyZeroDec()
 
 	for _, coin := range collateral {
@@ -103,7 +104,8 @@ func (k Keeper) CalculateCollateralValue(ctx sdk.Context, collateral sdk.Coins, 
 // collateral sdk.Coins, using each token's uToken exchange rate.
 // Unlike CalculateCollateralValue, this function will not return an error if value calculation
 // fails on a token - instead, that token will contribute zero value to the total.
-func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+func (k Keeper) VisibleCollateralValue(ctx sdk.Context, collateral sdk.Coins,
+	mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	total := sdkmath.LegacyZeroDec()
 
 	for _, coin := range collateral {

@@ -167,7 +167,7 @@ func (am AppModule) EndBlock(ctx sdk.Context) []abci.ValidatorUpdate {
 // WeightedOperations returns the all the leverage module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	return simulation.WeightedOperations(
-		simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper,
+		simState.AppParams, am.accountKeeper, am.bankKeeper, am.keeper,
 	)
 }
 

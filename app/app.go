@@ -366,7 +366,9 @@ func New(
 	)
 
 	// set the BaseApp's parameter store
-	app.ConsensusParamsKeeper = consensusparamskeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[consensusparamstypes.StoreKey]), authtypes.NewModuleAddress(govtypes.ModuleName).String(), runtime.EventService{})
+	app.ConsensusParamsKeeper = consensusparamskeeper.NewKeeper(appCodec,
+		runtime.NewKVStoreService(keys[consensusparamstypes.StoreKey]),
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(), runtime.EventService{})
 	bApp.SetParamStore(app.ConsensusParamsKeeper.ParamsStore)
 
 	app.CapabilityKeeper = capabilitykeeper.NewKeeper(
@@ -433,7 +435,9 @@ func New(
 		authtypes.FeeCollectorName, govModuleAddr, app.AccountKeeper.AddressCodec(),
 	)
 
-	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, runtime.NewKVStoreService(keys[feegrant.StoreKey]), app.AccountKeeper)
+	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec,
+		runtime.NewKVStoreService(keys[feegrant.StoreKey]),
+		app.AccountKeeper)
 
 	app.AuthzKeeper = authzkeeper.NewKeeper(
 		runtime.NewKVStoreService(keys[authzkeeper.StoreKey]),
@@ -462,7 +466,8 @@ func New(
 		govModuleAddr,
 	)
 
-	app.NFTKeeper = nftkeeper.NewKeeper(runtime.NewKVStoreService(keys[nftkeeper.StoreKey]), appCodec, app.AccountKeeper, app.BankKeeper)
+	app.NFTKeeper = nftkeeper.NewKeeper(runtime.NewKVStoreService(keys[nftkeeper.StoreKey]),
+		appCodec, app.AccountKeeper, app.BankKeeper)
 
 	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
 
@@ -970,7 +975,10 @@ func (app *UmeeApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*a
 	if err := json.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(fmt.Sprintf("failed to unmarshal genesis state: %v", err))
 	}
-	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
+	err := app.UpgradeKeeper.SetModuleVersionMap(ctx, app.mm.GetVersionMap())
+	if err != nil {
+		panic(fmt.Sprintf("failed to set the moule version map: %v", err))
+	}
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
 

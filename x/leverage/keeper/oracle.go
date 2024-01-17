@@ -141,7 +141,8 @@ func (k Keeper) TotalTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.Pri
 // by borrow factor (which is the minimum of 2.0 and 1/collateral weight). It
 // ignores unregistered and blacklisted tokens instead of returning an error, but
 // will error on unavailable prices.
-func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+func (k Keeper) ValueWithBorrowFactor(ctx sdk.Context, coins sdk.Coins,
+	mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	total := sdkmath.LegacyZeroDec()
 
 	for _, c := range coins {
@@ -181,7 +182,8 @@ func (k Keeper) VisibleTokenValue(ctx sdk.Context, coins sdk.Coins, mode types.P
 }
 
 // VisibleUTokensValue converts uTokens to tokens and calls VisibleTokenValue. Errors on non-uTokens.
-func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins,
+	mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	tokens := sdk.NewCoins()
 
 	for _, u := range uTokens {
@@ -198,7 +200,8 @@ func (k Keeper) VisibleUTokensValue(ctx sdk.Context, uTokens sdk.Coins, mode typ
 // TokenWithValue creates a token of a given denom with an given USD value.
 // Returns an error on invalid price or denom. Rounds down, i.e. the
 // value of the token returned may be slightly less than the requested value.
-func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdkmath.LegacyDec, mode types.PriceMode) (sdk.Coin, error) {
+func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdkmath.LegacyDec,
+	mode types.PriceMode) (sdk.Coin, error) {
 	// get token price (guaranteed positive if nil error) and exponent
 	price, exp, err := k.TokenPrice(ctx, denom, mode)
 	if err != nil {
@@ -213,7 +216,8 @@ func (k Keeper) TokenWithValue(ctx sdk.Context, denom string, value sdkmath.Lega
 // UTokenWithValue creates a uToken of a given denom with an given USD value.
 // Returns an error on invalid price or non-uToken denom. Rounds down, i.e. the
 // value of the uToken returned may be slightly less than the requested value.
-func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdkmath.LegacyDec, mode types.PriceMode) (sdk.Coin, error) {
+func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdkmath.LegacyDec,
+	mode types.PriceMode) (sdk.Coin, error) {
 	base := coin.StripUTokenDenom(denom)
 	if base == "" {
 		return sdk.Coin{}, types.ErrNotUToken.Wrap(denom)
@@ -234,7 +238,8 @@ func (k Keeper) UTokenWithValue(ctx sdk.Context, denom string, value sdkmath.Leg
 // Will return an error if either token price is not positive, and guarantees a positive output.
 // Computation uses price of token's symbol denom to avoid rounding errors for exponent >= 18 tokens,
 // but returns in terms of base tokens. Uses the same price mode for both token denoms involved.
-func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode types.PriceMode) (sdkmath.LegacyDec, error) {
+func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string,
+	mode types.PriceMode) (sdkmath.LegacyDec, error) {
 	p1, e1, err := k.TokenPrice(ctx, fromDenom, mode)
 	if err != nil {
 		return sdkmath.LegacyZeroDec(), err

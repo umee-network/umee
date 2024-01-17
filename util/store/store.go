@@ -19,6 +19,7 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/gogoproto/proto"
 )
 
 // GetValue loads value from the store using default Unmarshaler. Panics on failure to decode.
@@ -76,7 +77,7 @@ func SetBinValue[T BinMarshalable](store store.KVStore, key []byte, value T, err
 // instead of GetValue.
 // Returns a boolean indicating whether any data was found. If the return is false, the object
 // is not changed by this function.
-func GetValueCdc(store store.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
+func GetValueCdc(store store.KVStore, cdc codec.Codec, key []byte, object proto.Message, errField string) bool {
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)
 		if err != nil {
@@ -90,7 +91,7 @@ func GetValueCdc(store store.KVStore, cdc codec.Codec, key []byte, object codec.
 // SetValueCdc is similar to the SetValue, but uses codec for marshaling. For Protobuf objects the
 // result is the same, unless codec.Any is used. In the latter case this function MUST be used,
 // instead of SetValue.
-func SetValueCdc(store store.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
+func SetValueCdc(store store.KVStore, cdc codec.Codec, key []byte, object proto.Message, errField string) error {
 	bz, err := cdc.Marshal(object)
 	if err != nil {
 		return fmt.Errorf("failed to encode %s, %s", errField, err.Error())
