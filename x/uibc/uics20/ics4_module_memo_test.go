@@ -1,5 +1,3 @@
-//nolint:nilnil
-
 package uics20
 
 import (

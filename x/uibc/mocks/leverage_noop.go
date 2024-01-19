@@ -24,11 +24,13 @@ func (l lvgNoop) MaxWithdraw(context.Context, *ltypes.MsgMaxWithdraw) (*ltypes.M
 	return nil, nil
 }
 
-func (l lvgNoop) Collateralize(context.Context, *ltypes.MsgCollateralize) (*ltypes.MsgCollateralizeResponse, error) {
+func (l lvgNoop) Collateralize(context.Context, *ltypes.MsgCollateralize,
+) (*ltypes.MsgCollateralizeResponse, error) {
 	return nil, nil
 }
 
-func (l lvgNoop) Decollateralize(context.Context, *ltypes.MsgDecollateralize) (*ltypes.MsgDecollateralizeResponse, error) {
+func (l lvgNoop) Decollateralize(context.Context, *ltypes.MsgDecollateralize,
+) (*ltypes.MsgDecollateralizeResponse, error) {
 	return nil, nil
 }
 
@@ -48,22 +50,27 @@ func (l lvgNoop) Liquidate(context.Context, *ltypes.MsgLiquidate) (*ltypes.MsgLi
 	return nil, nil
 }
 
-func (l lvgNoop) LeveragedLiquidate(context.Context, *ltypes.MsgLeveragedLiquidate) (*ltypes.MsgLeveragedLiquidateResponse, error) {
+func (l lvgNoop) LeveragedLiquidate(context.Context, *ltypes.MsgLeveragedLiquidate,
+) (*ltypes.MsgLeveragedLiquidateResponse, error) {
 	return nil, nil
 }
 
-func (l lvgNoop) SupplyCollateral(context.Context, *ltypes.MsgSupplyCollateral) (*ltypes.MsgSupplyCollateralResponse, error) {
+func (l lvgNoop) SupplyCollateral(context.Context, *ltypes.MsgSupplyCollateral,
+) (*ltypes.MsgSupplyCollateralResponse, error) {
 	return nil, nil
 }
 
-func (l lvgNoop) GovUpdateRegistry(context.Context, *ltypes.MsgGovUpdateRegistry) (*ltypes.MsgGovUpdateRegistryResponse, error) {
+func (l lvgNoop) GovUpdateRegistry(context.Context, *ltypes.MsgGovUpdateRegistry,
+) (*ltypes.MsgGovUpdateRegistryResponse, error) {
 	return nil, nil
 }
 
-func (l lvgNoop) GovUpdateSpecialAssets(context.Context, *ltypes.MsgGovUpdateSpecialAssets) (*ltypes.MsgGovUpdateSpecialAssetsResponse, error) {
+func (l lvgNoop) GovUpdateSpecialAssets(context.Context, *ltypes.MsgGovUpdateSpecialAssets,
+) (*ltypes.MsgGovUpdateSpecialAssetsResponse, error) {
 	return nil, nil
 }
 
-func (l lvgNoop) GovSetParams(context.Context, *ltypes.MsgGovSetParams) (*ltypes.MsgGovSetParamsResponse, error) {
+func (l lvgNoop) GovSetParams(context.Context, *ltypes.MsgGovSetParams,
+) (*ltypes.MsgGovSetParamsResponse, error) {
 	return nil, nil
 }
