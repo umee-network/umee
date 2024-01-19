@@ -30,7 +30,6 @@ func SubmitAndPassParamProp(umee client.Client, changes []proposal.ParamChange) 
 	if err != nil {
 		return err
 	}
-
 	resp, err = GetTxResponse(umee, resp.TxHash, 1)
 	if err != nil {
 		return err
@@ -69,22 +68,7 @@ func UIBCIBCTransferStatusUpdate(umeeClient client.Client, status uibc.IBCTransf
 		Description: "",
 		IbcStatus:   status,
 	}
-
-	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
-	if err != nil {
-		return err
-	}
-
-	resp, err = GetTxResponse(umeeClient, resp.TxHash, 1)
-	if err != nil {
-		return err
-	}
-
-	if len(resp.Events) == 0 {
-		return fmt.Errorf("no events in response")
-	}
-
-	return MakeVoteAndCheckProposal(umeeClient, *resp)
+	return govSubmitAndVote(umeeClient, &msg)
 }
 
 // LeverageRegistryUpdate submits a gov transaction to update leverage registry, votes, and waits for proposal to pass.
@@ -95,18 +79,7 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 		AddTokens:    addTokens,
 		UpdateTokens: updateTokens,
 	}
-
-	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
-	if err != nil {
-		return err
-	}
-
-	fullResp, err := GetTxResponse(umeeClient, resp.TxHash, 1)
-	if err != nil {
-		return err
-	}
-
-	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
+	return govSubmitAndVote(umeeClient, &msg)
 }
 
 // LeverageSpecialPairsUpdate submits a gov transaction to update leverage special assets,
@@ -122,18 +95,7 @@ func LeverageSpecialPairsUpdate(
 		Sets:        sets,
 		Pairs:       pairs,
 	}
-
-	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
-	if err != nil {
-		return err
-	}
-
-	fullResp, err := GetTxResponse(umeeClient, resp.TxHash, 1)
-	if err != nil {
-		return err
-	}
-
-	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
+	return govSubmitAndVote(umeeClient, &msg)
 }
 
 // MetokenRegistryUpdate submits a gov transaction to update metoken registry, votes, and waits for proposal to pass.
@@ -143,18 +105,7 @@ func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes [
 		AddIndex:    addIndexes,
 		UpdateIndex: updateIndexes,
 	}
-
-	resp, err := umeeClient.Tx.GovSubmitProposal([]sdk.Msg{&msg})
-	if err != nil {
-		return err
-	}
-
-	fullResp, err := GetTxResponse(umeeClient, resp.TxHash, 1)
-	if err != nil {
-		return err
-	}
-
-	return MakeVoteAndCheckProposal(umeeClient, *fullResp)
+	return govSubmitAndVote(umeeClient, &msg)
 }
 
 func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) error {
@@ -208,4 +159,18 @@ func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) err
 	}
 
 	return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
+}
+
+func govSubmitAndVote(c client.Client, msg sdk.Msg) error {
+	resp, err := c.Tx.GovSubmitProposal([]sdk.Msg{msg})
+	if err != nil {
+		return err
+	}
+
+	resp, err = GetTxResponse(c, resp.TxHash, 1)
+	if err != nil {
+		return err
+	}
+
+	return MakeVoteAndCheckProposal(c, *resp)
 }
