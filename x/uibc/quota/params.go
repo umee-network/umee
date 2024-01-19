@@ -30,7 +30,6 @@ func (k Keeper) GetParams() (params uibc.Params) {
 
 // UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
 func (k Keeper) UpdateQuotaParams(msg *uibc.MsgGovUpdateQuota, byEmergencyGroup bool) error {
-
 	pOld := k.GetParams()
 	pNew := pOld
 	pNew.TotalQuota = msg.Total
