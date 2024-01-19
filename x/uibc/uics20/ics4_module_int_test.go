@@ -11,6 +11,7 @@ import (
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/uics20"
 )
 
 func TestMsgMarshalling(t *testing.T) {
