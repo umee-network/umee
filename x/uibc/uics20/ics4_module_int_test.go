@@ -18,13 +18,15 @@ func TestMsgMarshalling(t *testing.T) {
 	assert := assert.New(t)
 	cdc := tsdk.NewCodec(uibc.RegisterInterfaces, ltypes.RegisterInterfaces)
 	msgs := []sdk.Msg{
-		&uibc.MsgGovSetIBCStatus{Authority: "auth1", Description: "d1",
-			IbcStatus: uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED},
+		&uibc.MsgGovSetIBCStatus{
+			Authority: "auth1", Description: "d1",
+			IbcStatus: uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED,
+		},
 		ltypes.NewMsgCollateralize(accs.Alice, sdk.NewCoin("ATOM", sdk.NewInt(1020))),
 	}
 	anyMsg, err := tx.SetMsgs(msgs)
 	assert.NoError(err)
-	var memo = uibc.ICS20Memo{Messages: anyMsg}
+	memo := uibc.ICS20Memo{Messages: anyMsg}
 
 	bz, err := cdc.MarshalJSON(&memo)
 	assert.NoError(err)
