@@ -8,7 +8,8 @@ import (
 	"github.com/umee-network/umee/v6/client"
 )
 
-func GetTxResponse(umeeClient client.Client, txHash string) (resp *sdk.TxResponse, err error) {
+// GetTxResponse waits for tx response and checks if the receipt contains at least `minExpectedLogs`.
+func GetTxResponse(umeeClient client.Client, txHash string, minExpectedLogs int) (resp *sdk.TxResponse, err error) {
 	for i := 0; i < 5; i++ {
 		resp, err = umeeClient.QueryTxHash(txHash)
 		if err == nil {
@@ -18,18 +19,9 @@ func GetTxResponse(umeeClient client.Client, txHash string) (resp *sdk.TxRespons
 		time.Sleep(1 * time.Second)
 	}
 
+	if n := len(resp.Logs); n < minExpectedLogs {
+		return nil, fmt.Errorf("expecting at least %d logs in response, got: %d", minExpectedLogs, n)
+	}
+
 	return resp, err
-}
-
-func GetTxResponseAndCheckLogs(umeeClient client.Client, txHash string) (*sdk.TxResponse, error) {
-	fullResp, err := GetTxResponse(umeeClient, txHash)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(fullResp.Logs) == 0 {
-		return nil, fmt.Errorf("no logs in response")
-	}
-
-	return fullResp, nil
 }

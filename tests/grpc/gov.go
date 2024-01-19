@@ -25,13 +25,13 @@ func init() {
 	}
 }
 
-func SubmitAndPassProposal(umee client.Client, changes []proposal.ParamChange) error {
+func SubmitAndPassParamProp(umee client.Client, changes []proposal.ParamChange) error {
 	resp, err := umee.Tx.GovSubmitParamProposal(changes, govDeposit)
 	if err != nil {
 		return err
 	}
 
-	resp, err = GetTxResponse(umee, resp.TxHash)
+	resp, err = GetTxResponse(umee, resp.TxHash, 1)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func UIBCIBCTransferStatusUpdate(umeeClient client.Client, status uibc.IBCTransf
 		return err
 	}
 
-	resp, err = GetTxResponse(umeeClient, resp.TxHash)
+	resp, err = GetTxResponse(umeeClient, resp.TxHash, 1)
 	if err != nil {
 		return err
 	}
@@ -101,7 +101,7 @@ func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []
 		return err
 	}
 
-	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
+	fullResp, err := GetTxResponse(umeeClient, resp.TxHash, 1)
 	if err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func LeverageSpecialPairsUpdate(
 		return err
 	}
 
-	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
+	fullResp, err := GetTxResponse(umeeClient, resp.TxHash, 1)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func MetokenRegistryUpdate(umeeClient client.Client, addIndexes, updateIndexes [
 		return err
 	}
 
-	fullResp, err := GetTxResponseAndCheckLogs(umeeClient, resp.TxHash)
+	fullResp, err := GetTxResponse(umeeClient, resp.TxHash, 1)
 	if err != nil {
 		return err
 	}
