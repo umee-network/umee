@@ -231,7 +231,6 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 // RecordIBCInflow will save the inflow amount if token is registered otherwise it will skip
 func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string,
 ) exported.Acknowledgement {
-
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
 	// check ibc_denom is exists in leverage token registry
 	if !ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
