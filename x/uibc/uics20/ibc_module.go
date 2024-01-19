@@ -67,6 +67,12 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 			// TODO: need to handle fees!
 			logger.Info("handling IBC transfer with memo", "sender", ftData.Sender,
 				"receiver", ftData.Receiver)
+
+			// TODO: we need to rework this if this is not a case, and check receiver!
+			if ftData.Sender != ftData.Receiver {
+				logger.Error("sender and receiver are not the same")
+			}
+
 			sender, err := sdk.AccAddressFromBech32(ftData.Sender)
 			if err != nil {
 				logger.Error("can't parse bech32 address", "err", err)
