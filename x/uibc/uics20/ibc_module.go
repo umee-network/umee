@@ -160,7 +160,6 @@ func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg
 
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
 ) (d ics20types.FungibleTokenPacketData, err error) {
-
 	if err = cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
 		err = errors.Wrap(err,
 			"cannot unmarshal ICS-20 transfer packet data")

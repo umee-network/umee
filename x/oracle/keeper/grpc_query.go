@@ -365,7 +365,8 @@ func (q querier) ExgRatesWithTimestamp(
 
 // MissCounters implements types.QueryServer.
 func (q querier) MissCounters(goCtx context.Context, req *types.QueryMissCounters) (*types.QueryMissCountersResponse,
-	error) {
+	error,
+) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	var pfMissCounts []types.PriceMissCounter

@@ -1,3 +1,5 @@
+//nolint:nilnil
+
 package uics20
 
 import (
@@ -31,8 +33,10 @@ func TestMemoSignerCheck(t *testing.T) {
 		{ltypes.NewMsgSupplyCollateral(sender, asset), ""},
 		{ltypes.NewMsgBorrow(sender, asset), ""},
 
-		{ltypes.NewMsgDecollateralize(sender, asset),
-			"unsupported type in the ICS20 memo"},
+		{
+			ltypes.NewMsgDecollateralize(sender, asset),
+			"unsupported type in the ICS20 memo",
+		},
 	}
 
 	for _, tc := range tcs {

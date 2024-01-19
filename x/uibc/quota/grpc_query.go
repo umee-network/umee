@@ -83,7 +83,8 @@ func (q Querier) Inflows(goCtx context.Context, req *uibc.QueryInflows) (*uibc.Q
 
 // QuotaExpires returns the current ibc quota expire time.
 func (q Querier) QuotaExpires(goCtx context.Context, _ *uibc.QueryQuotaExpires) (*uibc.QueryQuotaExpiresResponse,
-	error) {
+	error,
+) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
 	quotaExpireTime, err := q.Keeper(&ctx).GetExpire()
