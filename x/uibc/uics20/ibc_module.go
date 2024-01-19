@@ -52,19 +52,30 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return ackResp
 	}
 
+	ack := im.IBCModule.OnRecvPacket(ctx, packet, relayer)
+	if !ack.Success() {
+		return ack
+	}
 	if ftData.Memo != "" {
+		logger := ctx.Logger()
 		msgs, err := DeserializeMemoMsgs(im.cdc, []byte(ftData.Memo))
 		if err != nil {
 			// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf
 			//   -> same logic in dispatchMemoMsgs
-			ctx.Logger().Error("can't JSON deserialize ftData Memo, expecting list of Msg", "err", err)
+			logger.Error("can't JSON deserialize ftData Memo, expecting list of Msg", "err", err)
 		} else {
 			// TODO: need to handle fees!
-			im.dispatchMemoMsgs(&ctx, msgs)
+			logger.Info("handling IBC transfer with memo", "sender", ftData.Sender,
+				"receiver", ftData.Receiver)
+			sender, err := sdk.AccAddressFromBech32(ftData.Sender)
+			if err != nil {
+				logger.Error("can't parse bech32 address", "err", err)
+			}
+			im.dispatchMemoMsgs(&ctx, sender, msgs)
 		}
 	}
 
-	return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
+	return ack
 }
 
 // OnAcknowledgementPacket is called on the packet sender chain, once the receiver acknowledged
@@ -103,8 +114,7 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // runs messages encoded in the ICS20 memo.
 // NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
 // messages are supported. Otherwise the fork storage is discarded.
-func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, msgs []sdk.Msg) {
-
+func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, msgs []sdk.Msg) {
 	if len(msgs) > 2 {
 		ctx.Logger().Error("ics20 memo with more than 2 messages are not supported")
 		return
@@ -114,7 +124,7 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, msgs []sdk.Msg) {
 	cacheCtx, flush := ctx.CacheContext()
 	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
 	for _, m := range msgs {
-		if err := im.handleMemoMsg(&cacheCtx, m); err != nil {
+		if err := im.handleMemoMsg(&cacheCtx, sender, m); err != nil {
 			// ignore changes in cacheCtx and return
 			logger.Error("error dispatching", "msg: %v\t\t err: %v", m, err)
 			return
@@ -124,7 +134,11 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, msgs []sdk.Msg) {
 	flush()
 }
 
-func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
+func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg sdk.Msg) (err error) {
+	if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(sender) {
+		return sdkerrors.ErrInvalidRequest.Wrapf(
+			"msg signer doesn't match the sender, expected signer: %s", sender)
+	}
 	switch msg := msg.(type) {
 	case *ltypes.MsgSupply:
 		_, err = im.leverage.Supply(*ctx, msg)
