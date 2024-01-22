@@ -25,7 +25,7 @@ func TestMsgMarshalling(t *testing.T) {
 	}
 	anyMsg, err := tx.SetMsgs(msgs)
 	assert.NoError(err)
-	var memo = uibc.ICS20Memo{Messages: anyMsg}
+	memo := uibc.ICS20Memo{Messages: anyMsg}
 
 	bz, err := cdc.MarshalJSON(&memo)
 	assert.NoError(err)
