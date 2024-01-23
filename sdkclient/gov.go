@@ -6,8 +6,9 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
+	govv1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 )
 
@@ -18,7 +19,7 @@ func (c *Client) GovParamChange(title, description string, changes []proposal.Pa
 	if err != nil {
 		return nil, err
 	}
-	msg, err := govtypes.NewMsgSubmitProposal(content, deposit, fromAddr)
+	msg, err := govv1b1.NewMsgSubmitProposal(content, deposit, fromAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit 
 	if err != nil {
 		return nil, err
 	}
-	msg, err := govtypes.NewMsgSubmitProposal(content, deposit, fromAddr)
+	msg, err := govv1b1.NewMsgSubmitProposal(content, deposit, fromAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -101,8 +102,8 @@ func (c *Client) GovSubmitPropAndGetID(msgs []sdk.Msg) (uint64, error) {
 }
 
 // GovVote votes for a x/gov proposal. If `vote==nil` then vote yes.
-func (c *Client) GovVote(proposalID uint64, vote *govtypes.VoteOption) error {
-	voteOpt := govtypes.OptionYes
+func (c *Client) GovVote(proposalID uint64, vote *govv1b1.VoteOption) error {
+	voteOpt := govv1b1.OptionYes
 	if vote != nil {
 		voteOpt = *vote
 	}
@@ -110,7 +111,7 @@ func (c *Client) GovVote(proposalID uint64, vote *govtypes.VoteOption) error {
 	if err != nil {
 		return err
 	}
-	msg := govtypes.NewMsgVote(
+	msg := govv1b1.NewMsgVote(
 		voter,
 		proposalID,
 		voteOpt,
@@ -128,12 +129,12 @@ func (c *Client) GovVoteAllYes(proposalID uint64) error {
 			return err
 		}
 
-		voteType, err := govtypes.VoteOptionFromString("VOTE_OPTION_YES")
+		voteType, err := govv1b1.VoteOptionFromString("VOTE_OPTION_YES")
 		if err != nil {
 			return err
 		}
 
-		msg := govtypes.NewMsgVote(
+		msg := govv1b1.NewMsgVote(
 			voter,
 			proposalID,
 			voteType,
@@ -153,4 +154,24 @@ func (c *Client) GovVoteAllYes(proposalID uint64) error {
 	}
 
 	return nil
+}
+
+/*****************
+  QUERIES
+  **************** */
+
+func (c Client) GovQClient() govv1.QueryClient {
+	return govv1.NewQueryClient(c.GrpcConn)
+}
+
+// GovProposal queries a proposal by id
+func (c Client) GovProposal(proposalID uint64) (*govv1.Proposal, error) {
+	ctx, cancel := c.NewCtxWitTimeout()
+	defer cancel()
+
+	queryResponse, err := c.GovQClient().Proposal(ctx, &govv1.QueryProposalRequest{ProposalId: proposalID})
+	if err != nil {
+		return nil, err
+	}
+	return queryResponse.Proposal, nil
 }

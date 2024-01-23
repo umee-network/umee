@@ -5,11 +5,11 @@ import (
 )
 
 func (c Client) UIBCQueryClient() uibc.QueryClient {
-	return uibc.NewQueryClient(c.Query.GrpcConn)
+	return uibc.NewQueryClient(c.GrpcConn)
 }
 
 func (c Client) QueryUIBCParams() (uibc.Params, error) {
-	ctx, cancel := c.NewQCtx()
+	ctx, cancel := c.NewCtxWitTimeout()
 	defer cancel()
 
 	queryResponse, err := c.UIBCQueryClient().Params(ctx, &uibc.QueryParams{})

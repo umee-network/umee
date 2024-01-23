@@ -72,14 +72,14 @@ func UIBCIBCTransferStatusUpdate(umeeClient client.Client, status uibc.IBCTransf
 }
 
 // LeverageRegistryUpdate submits a gov transaction to update leverage registry, votes, and waits for proposal to pass.
-func LeverageRegistryUpdate(umeeClient client.Client, addTokens, updateTokens []ltypes.Token) error {
+func LeverageRegistryUpdate(c client.Client, addTokens, updateTokens []ltypes.Token) (uint64, error) {
 	msg := ltypes.MsgGovUpdateRegistry{
 		Authority:    checkers.GovModuleAddr,
 		Description:  "",
 		AddTokens:    addTokens,
 		UpdateTokens: updateTokens,
 	}
-	return govSubmitAndVote(umeeClient, &msg)
+	return govSubmitAndGetProp(c, &msg)
 }
 
 // LeverageSpecialPairsUpdate submits a gov transaction to update leverage special assets,
@@ -161,11 +161,23 @@ func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) err
 	return fmt.Errorf("proposal %d failed to pass with status: %s", proposalIDInt, propStatus)
 }
 
+// TODO: remove. Use GovVoteAndWait instead.
 func govSubmitAndVote(c client.Client, msg sdk.Msg) error {
-	resp, err := c.Tx.GovSubmitProposal([]sdk.Msg{msg})
+	resp, err := c.Tx.GovSubmitProp([]sdk.Msg{msg})
 	if err != nil {
 		return err
 	}
+
+	resp, err = GetTxResponse(c, resp.TxHash, 1)
+	if err != nil {
+		return err
+	}
+
+	return MakeVoteAndCheckProposal(c, *resp)
+}
+
+// GovVoteAndWait votes for a given proposal with provided list of clients and waits for a proposal to pass.
+func GovVoteAndWait(c []client.Client, propId int) error {
 
 	resp, err = GetTxResponse(c, resp.TxHash, 1)
 	if err != nil {

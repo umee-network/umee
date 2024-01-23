@@ -1,8 +1,6 @@
 package client
 
 import (
-	"context"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/umee-network/umee/v6/sdkclient"
@@ -17,6 +15,7 @@ type Client struct {
 // NewClient constructs Client object.
 // Accounts are generated using the list of mnemonics. Each string must be a sequence of words,
 // eg: `["w11 w12 w13", "w21 w22 w23"]`. Keyring names for created accounts will be: val1, val2....
+// TODO: mnemonics should be a single string (list of words)
 func NewClient(
 	chainDataDir,
 	chainID,
@@ -37,17 +36,9 @@ func NewClient(
 }
 
 func (c Client) IncAccSeq() {
-	c.Client.Tx.IncAccSeq()
+	c.Client.IncAccSeq()
 }
 
 func (c Client) SetAccSeq(seq uint64) {
-	c.Client.Tx.SetAccSeq(seq)
-}
-
-func (c Client) NewQCtx() (context.Context, context.CancelFunc) {
-	return c.Query.NewCtx()
-}
-
-func (c Client) NewQCtxWithCancel() (context.Context, context.CancelFunc) {
-	return c.Query.NewCtxWithCancel()
+	c.Client.SetAccSeq(seq)
 }

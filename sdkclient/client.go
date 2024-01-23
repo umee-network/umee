@@ -202,9 +202,14 @@ func (c Client) TmClient() rpcclient.Client {
 	return c.ClientContext.Client.(*rpchttp.HTTP)
 }
 
-// NewCtx creates a noop context
-func (c Client) NewCtx() (context.Context, context.CancelFunc) {
+// NewCtxWitTimeout creates a new empty noop context with the default query timeout.
+func (c Client) NewCtxWitTimeout() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), c.QueryTimeout)
+}
+
+// NewCtx creates a new noop empty context.
+func (c Client) NewCtx() (context.Context, context.CancelFunc) {
+	return context.WithCancel(context.Background())
 }
 
 func dialerFunc(_ context.Context, addr string) (net.Conn, error) {

@@ -7,11 +7,11 @@ import (
 )
 
 func (c Client) OracleQueryClient() oracletypes.QueryClient {
-	return oracletypes.NewQueryClient(c.Query.GrpcConn)
+	return oracletypes.NewQueryClient(c.GrpcConn)
 }
 
 func (c Client) QueryOracleParams() (oracletypes.Params, error) {
-	ctx, cancel := c.NewQCtx()
+	ctx, cancel := c.NewCtxWitTimeout()
 	defer cancel()
 
 	queryResponse, err := c.OracleQueryClient().Params(ctx, &oracletypes.QueryParams{})
@@ -19,7 +19,7 @@ func (c Client) QueryOracleParams() (oracletypes.Params, error) {
 }
 
 func (c Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
-	ctx, cancel := c.NewQCtx()
+	ctx, cancel := c.NewCtxWitTimeout()
 	defer cancel()
 
 	queryResponse, err := c.OracleQueryClient().ExchangeRates(ctx, &oracletypes.QueryExchangeRates{})
@@ -27,7 +27,7 @@ func (c Client) QueryExchangeRates() ([]sdk.DecCoin, error) {
 }
 
 func (c Client) QueryMedians() ([]oracletypes.Price, error) {
-	ctx, cancel := c.NewQCtx()
+	ctx, cancel := c.NewCtxWitTimeout()
 	defer cancel()
 
 	resp, err := c.OracleQueryClient().Medians(ctx, &oracletypes.QueryMedians{})
@@ -35,7 +35,7 @@ func (c Client) QueryMedians() ([]oracletypes.Price, error) {
 }
 
 func (c Client) QueryMedianDeviations() ([]oracletypes.Price, error) {
-	ctx, cancel := c.NewQCtx()
+	ctx, cancel := c.NewCtxWitTimeout()
 	defer cancel()
 
 	queryResponse, err := c.OracleQueryClient().MedianDeviations(ctx, &oracletypes.QueryMedianDeviations{})
