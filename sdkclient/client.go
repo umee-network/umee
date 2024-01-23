@@ -202,8 +202,8 @@ func (c Client) TmClient() rpcclient.Client {
 	return c.ClientContext.Client.(*rpchttp.HTTP)
 }
 
-// NewCtxWitTimeout creates a new empty noop context with the default query timeout.
-func (c Client) NewCtxWitTimeout() (context.Context, context.CancelFunc) {
+// NewCtxWithTimeout creates a new empty noop context with the default query timeout.
+func (c Client) NewCtxWithTimeout() (context.Context, context.CancelFunc) {
 	return context.WithTimeout(context.Background(), c.QueryTimeout)
 }
 

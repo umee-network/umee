@@ -14,7 +14,7 @@ import (
 // median/median deviation and then compares that to the data in the
 // median/median deviation gRPC query
 func MedianCheck(umee client.Client) error {
-	ctx, cancel := umee.NewCtxWitTimeout()
+	ctx, cancel := umee.NewCtxWithTimeout()
 	defer cancel()
 
 	params, err := umee.QueryOracleParams()

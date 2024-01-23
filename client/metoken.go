@@ -10,7 +10,7 @@ func (c Client) MetokenQClient() metoken.QueryClient {
 }
 
 func (c Client) QueryMetokenParams() (metoken.Params, error) {
-	ctx, cancel := c.NewCtxWitTimeout()
+	ctx, cancel := c.NewCtxWithTimeout()
 	defer cancel()
 
 	resp, err := c.MetokenQClient().Params(ctx, &metoken.QueryParams{})
@@ -21,7 +21,7 @@ func (c Client) QueryMetokenParams() (metoken.Params, error) {
 }
 
 func (c Client) QueryMetokenIndexBalances(denom string) (*metoken.QueryIndexBalancesResponse, error) {
-	ctx, cancel := c.NewCtxWitTimeout()
+	ctx, cancel := c.NewCtxWithTimeout()
 	defer cancel()
 
 	msg := &metoken.QueryIndexBalances{MetokenDenom: denom}
@@ -32,7 +32,7 @@ func (c Client) QueryMetokenIndexBalances(denom string) (*metoken.QueryIndexBala
 }
 
 func (c Client) QueryMetokenIndexes(denom string) (*metoken.QueryIndexesResponse, error) {
-	ctx, cancel := c.NewCtxWitTimeout()
+	ctx, cancel := c.NewCtxWithTimeout()
 	defer cancel()
 
 	msg := &metoken.QueryIndexes{MetokenDenom: denom}
@@ -43,7 +43,7 @@ func (c Client) QueryMetokenIndexes(denom string) (*metoken.QueryIndexesResponse
 }
 
 func (c Client) QueryMetokenIndexPrices(denom string) (*metoken.QueryIndexPricesResponse, error) {
-	ctx, cancel := c.NewCtxWitTimeout()
+	ctx, cancel := c.NewCtxWithTimeout()
 	defer cancel()
 
 	msg := &metoken.QueryIndexPrices{MetokenDenom: denom}

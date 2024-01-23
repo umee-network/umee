@@ -9,7 +9,7 @@ func (c Client) WasmClient() wasmtypes.QueryClient {
 }
 
 func (c Client) QueryContract(contractAddr string, query []byte) (*wasmtypes.QuerySmartContractStateResponse, error) {
-	ctx, cancel := c.NewCtxWitTimeout()
+	ctx, cancel := c.NewCtxWithTimeout()
 	defer cancel()
 
 	return c.WasmClient().SmartContractState(ctx, &wasmtypes.QuerySmartContractStateRequest{

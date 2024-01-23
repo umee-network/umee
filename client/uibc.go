@@ -9,7 +9,7 @@ func (c Client) UIBCQueryClient() uibc.QueryClient {
 }
 
 func (c Client) QueryUIBCParams() (uibc.Params, error) {
-	ctx, cancel := c.NewCtxWitTimeout()
+	ctx, cancel := c.NewCtxWithTimeout()
 	defer cancel()
 
 	queryResponse, err := c.UIBCQueryClient().Params(ctx, &uibc.QueryParams{})

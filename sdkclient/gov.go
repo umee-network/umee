@@ -166,7 +166,7 @@ func (c Client) GovQClient() govv1.QueryClient {
 
 // GovProposal queries a proposal by id
 func (c Client) GovProposal(proposalID uint64) (*govv1.Proposal, error) {
-	ctx, cancel := c.NewCtxWitTimeout()
+	ctx, cancel := c.NewCtxWithTimeout()
 	defer cancel()
 
 	queryResponse, err := c.GovQClient().Proposal(ctx, &govv1.QueryProposalRequest{ProposalId: proposalID})
