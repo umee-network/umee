@@ -7,7 +7,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
-	v1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1b1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	proposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
 )
@@ -59,7 +58,7 @@ func (c *Client) GovSubmitProp(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 		return nil, err
 	}
 
-	submitProposal, err := v1.NewMsgSubmitProposal(
+	submitProposal, err := govv1.NewMsgSubmitProposal(
 		msgs,
 		deposit,
 		fromAddr.String(),
