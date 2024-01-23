@@ -1,4 +1,4 @@
-package tx
+package sdkclient
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"

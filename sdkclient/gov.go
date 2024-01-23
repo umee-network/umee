@@ -1,6 +1,8 @@
-package tx
+package sdkclient
 
 import (
+	"fmt"
+	"strconv"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,6 +26,7 @@ func (c *Client) GovParamChange(title, description string, changes []proposal.Pa
 	return c.BroadcastTx(0, msg)
 }
 
+// TODO: update the content title and summary
 func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
 	content := proposal.NewParameterChangeProposal(
 		"update historic stamp period",
@@ -43,7 +46,8 @@ func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit 
 	return c.BroadcastTx(0, msg)
 }
 
-func (c *Client) GovSubmitProposal(msgs []sdk.Msg) (*sdk.TxResponse, error) {
+func (c *Client) GovSubmitProp(msgs []sdk.Msg) (*sdk.TxResponse, error) {
+	// TODO: deposit should be parsed form the msgs
 	deposit, err := sdk.ParseCoinsNormalized("1000uumee")
 	if err != nil {
 		return nil, err
@@ -69,7 +73,54 @@ func (c *Client) GovSubmitProposal(msgs []sdk.Msg) (*sdk.TxResponse, error) {
 	return c.BroadcastTx(0, submitProposal)
 }
 
+func (c *Client) GovSubmitPropAndGetID(msgs []sdk.Msg) (uint64, error) {
+	resp, err := c.GovSubmitProp(msgs)
+	if err != nil {
+		return 0, err
+	}
+	resp, err = c.GetTxResponse(resp.TxHash, 1)
+	if err != nil {
+		return 0, err
+	}
+
+	var proposalID string
+	for _, event := range resp.Events {
+		if event.Type == "submit_proposal" {
+			for _, attribute := range event.Attributes {
+				if attribute.Key == "proposal_id" {
+					proposalID = attribute.Value
+				}
+			}
+		}
+	}
+	if proposalID == "" {
+		return 0, fmt.Errorf("failed to parse proposalID from %s", resp)
+	}
+
+	return strconv.ParseUint(proposalID, 10, 64)
+}
+
+// GovVote votes for a x/gov proposal. If `vote==nil` then vote yes.
+func (c *Client) GovVote(proposalID uint64, vote *govtypes.VoteOption) error {
+	voteOpt := govtypes.OptionYes
+	if vote != nil {
+		voteOpt = *vote
+	}
+	voter, err := c.keyringRecord[0].GetAddress()
+	if err != nil {
+		return err
+	}
+	msg := govtypes.NewMsgVote(
+		voter,
+		proposalID,
+		voteOpt,
+	)
+	_, err = c.BroadcastTx(0, msg)
+	return err
+}
+
 // GovVoteAllYes creates transactions (one for each account in the keyring) to approve a given proposal.
+// Deprecated.
 func (c *Client) GovVoteAllYes(proposalID uint64) error {
 	for index := range c.keyringRecord {
 		voter, err := c.keyringRecord[index].GetAddress()
