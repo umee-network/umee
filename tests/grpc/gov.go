@@ -173,12 +173,3 @@ func govSubmitAndVote(c client.Client, msg sdk.Msg) error {
 	}
 	return MakeVoteAndCheckProposal(c, *resp)
 }
-
-// GovVoteAndWait votes for a given proposal with provided list of clients and waits for a proposal to pass.
-func GovVoteAndWait(c []client.Client, propId int) error {
-	// TODO
-
-	// return MakeVoteAndCheckProposal(c, *resp)
-
-	return nil
-}
