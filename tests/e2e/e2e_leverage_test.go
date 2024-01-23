@@ -98,9 +98,10 @@ func (s *E2ETest) TestLeverageBasics() {
 
 	s.Run(
 		"leverage update registry", func() {
-			s.Require().NoError(
-				grpc.LeverageRegistryUpdate(s.AccountClient(0), []leveragetypes.Token{}, updateTokens),
-			)
+			propID, err := grpc.LeverageRegistryUpdate(s.AccountClient(0), []leveragetypes.Token{}, updateTokens)
+			s.Require().NoError(err)
+			// TOOD: vote !
+			s.T().Log(propID)
 		},
 	)
 

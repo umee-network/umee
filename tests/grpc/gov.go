@@ -25,17 +25,17 @@ func init() {
 	}
 }
 
-func SubmitAndPassParamProp(umee client.Client, changes []proposal.ParamChange) error {
-	resp, err := umee.Tx.GovSubmitParamProposal(changes, govDeposit)
+func SubmitAndPassParamProp(c client.Client, changes []proposal.ParamChange) error {
+	resp, err := c.GovSubmitParamProp(changes, govDeposit)
 	if err != nil {
 		return err
 	}
-	resp, err = GetTxResponse(umee, resp.TxHash, 1)
+	resp, err = c.GetTxResponse(resp.TxHash, 1)
 	if err != nil {
 		return err
 	}
 
-	return MakeVoteAndCheckProposal(umee, *resp)
+	return MakeVoteAndCheckProposal(c, *resp)
 }
 
 func OracleParamChanges(
@@ -79,7 +79,7 @@ func LeverageRegistryUpdate(c client.Client, addTokens, updateTokens []ltypes.To
 		AddTokens:    addTokens,
 		UpdateTokens: updateTokens,
 	}
-	return govSubmitAndGetProp(c, &msg)
+	return c.GovSubmitPropAndGetID(&msg)
 }
 
 // LeverageSpecialPairsUpdate submits a gov transaction to update leverage special assets,
@@ -129,7 +129,7 @@ func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) err
 		return err
 	}
 
-	err = umeeClient.Tx.GovVoteAllYes(proposalIDInt)
+	err = umeeClient.GovVoteAllYes(proposalIDInt)
 	if err != nil {
 		return err
 	}
@@ -163,26 +163,22 @@ func MakeVoteAndCheckProposal(umeeClient client.Client, resp sdk.TxResponse) err
 
 // TODO: remove. Use GovVoteAndWait instead.
 func govSubmitAndVote(c client.Client, msg sdk.Msg) error {
-	resp, err := c.Tx.GovSubmitProp([]sdk.Msg{msg})
+	resp, err := c.GovSubmitProp(msg)
 	if err != nil {
 		return err
 	}
-
-	resp, err = GetTxResponse(c, resp.TxHash, 1)
+	resp, err = c.GetTxResponse(resp.TxHash, 1)
 	if err != nil {
 		return err
 	}
-
 	return MakeVoteAndCheckProposal(c, *resp)
 }
 
 // GovVoteAndWait votes for a given proposal with provided list of clients and waits for a proposal to pass.
 func GovVoteAndWait(c []client.Client, propId int) error {
+	// TODO
 
-	resp, err = GetTxResponse(c, resp.TxHash, 1)
-	if err != nil {
-		return err
-	}
+	// return MakeVoteAndCheckProposal(c, *resp)
 
-	return MakeVoteAndCheckProposal(c, *resp)
+	return nil
 }

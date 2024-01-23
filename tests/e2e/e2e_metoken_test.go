@@ -27,8 +27,11 @@ func (s *E2ETest) TestMetokenSwapAndRedeem() {
 				mocks.ValidToken(mocks.ISTBaseDenom, mocks.ISTSymbolDenom, 6),
 			}
 
-			err := grpc.LeverageRegistryUpdate(s.AccountClient(0), tokens, nil)
+			propID, err := grpc.LeverageRegistryUpdate(s.AccountClient(0), tokens, nil)
 			s.Require().NoError(err)
+
+			// TOOD: vote !
+			s.T().Log(propID)
 
 			meUSD := mocks.StableIndex(mocks.MeUSDDenom)
 			err = grpc.MetokenRegistryUpdate(s.AccountClient(0), []metoken.Index{meUSD}, nil)

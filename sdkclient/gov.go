@@ -28,7 +28,7 @@ func (c *Client) GovParamChange(title, description string, changes []proposal.Pa
 }
 
 // TODO: update the content title and summary
-func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
+func (c *Client) GovSubmitParamProp(changes []proposal.ParamChange, deposit sdk.Coins) (*sdk.TxResponse, error) {
 	content := proposal.NewParameterChangeProposal(
 		"update historic stamp period",
 		"auto grpc proposal",
@@ -47,7 +47,7 @@ func (c *Client) GovSubmitParamProposal(changes []proposal.ParamChange, deposit 
 	return c.BroadcastTx(0, msg)
 }
 
-func (c *Client) GovSubmitProp(msgs []sdk.Msg) (*sdk.TxResponse, error) {
+func (c *Client) GovSubmitProp(msgs ...sdk.Msg) (*sdk.TxResponse, error) {
 	// TODO: deposit should be parsed form the msgs
 	deposit, err := sdk.ParseCoinsNormalized("1000uumee")
 	if err != nil {
@@ -74,8 +74,8 @@ func (c *Client) GovSubmitProp(msgs []sdk.Msg) (*sdk.TxResponse, error) {
 	return c.BroadcastTx(0, submitProposal)
 }
 
-func (c *Client) GovSubmitPropAndGetID(msgs []sdk.Msg) (uint64, error) {
-	resp, err := c.GovSubmitProp(msgs)
+func (c *Client) GovSubmitPropAndGetID(msgs ...sdk.Msg) (uint64, error) {
+	resp, err := c.GovSubmitProp(msgs...)
 	if err != nil {
 		return 0, err
 	}

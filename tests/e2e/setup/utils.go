@@ -298,7 +298,7 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 	// TODO: decrease it when possible
 	for retry := 0; retry < 8; retry++ {
 		// retry if txs fails, because sometimes account sequence mismatch occurs due to txs pending
-		_, err = cli.Tx.BroadcastTx(0, msg)
+		_, err = cli.BroadcastTx(0, msg)
 		if err == nil {
 			return nil
 		}
@@ -314,7 +314,7 @@ func (s *E2ETestSuite) BroadcastTxWithRetry(msg sdk.Msg, cli client.Client) erro
 		if errParse != nil {
 			return fmt.Errorf("can't find expected acc number: %s [%w]", errParse, err)
 		}
-		s.T().Log("expected sequence number:", n, ", got:", cli.Tx.GetAccSeq())
+		s.T().Log("expected sequence number:", n, ", got:", cli.GetAccSeq())
 		cli.SetAccSeq(uint64(n))
 
 		time.Sleep(time.Millisecond * 300)
