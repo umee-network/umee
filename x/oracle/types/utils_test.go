@@ -111,45 +111,48 @@ func (sk MockStakingKeeper) Validators() []MockValidator {
 	return sk.validators
 }
 
-func (sk MockStakingKeeper) Validator(_ context.Context, address sdk.ValAddress) stakingtypes.Validator {
+func (sk MockStakingKeeper) Validator(_ context.Context, address sdk.ValAddress) (stakingtypes.ValidatorI, error) {
 	for _, validator := range sk.validators {
-		if validator.GetOperator().Equals(address) {
-			return validator
+		if validator.GetOperator() == address.String() {
+			return validator, nil
 		}
 	}
 
-	return nil
+	return nil, nil
 }
 
-func (MockStakingKeeper) TotalBondedTokens(sdk.Context) sdkmath.Int {
-	return sdkmath.ZeroInt()
+func (MockStakingKeeper) TotalBondedTokens(context.Context) (sdkmath.Int, error) {
+	return sdkmath.ZeroInt(), nil
 }
 
-func (MockStakingKeeper) GetBondedValidatorsByPower(sdk.Context) []stakingtypes.Validator {
-	return nil
+func (MockStakingKeeper) GetBondedValidatorsByPower(context.Context) ([]stakingtypes.Validator, error) {
+	return nil, nil
 }
 
-func (MockStakingKeeper) ValidatorsPowerStoreIterator(context.Context) sdk.Iterator {
-	return storetypes.KVStoreReversePrefixIterator(nil, nil)
+func (MockStakingKeeper) ValidatorsPowerStoreIterator(context.Context) (storetypes.Iterator, error) {
+	return storetypes.KVStoreReversePrefixIterator(nil, nil), nil
 }
 
-func (sk MockStakingKeeper) GetLastValidatorPower(ctx context.Context, operator sdk.ValAddress) (power int64) {
-	return sk.Validator(ctx, operator).GetConsensusPower(sdk.DefaultPowerReduction)
+func (sk MockStakingKeeper) GetLastValidatorPower(ctx context.Context, operator sdk.ValAddress) (power int64, err error) {
+	val, _ := sk.Validator(ctx, operator)
+	return val.GetConsensusPower(sdk.DefaultPowerReduction), nil
 }
 
-func (MockStakingKeeper) MaxValidators(context.Context) uint32 {
-	return 100
+func (MockStakingKeeper) MaxValidators(context.Context) (uint32, error) {
+	return 100, nil
 }
 
 func (MockStakingKeeper) PowerReduction(context.Context) (res sdkmath.Int) {
 	return sdk.DefaultPowerReduction
 }
 
-func (MockStakingKeeper) Slash(context.Context, sdk.ConsAddress, int64, int64, sdkmath.LegacyDec) sdkmath.Int {
-	return sdkmath.ZeroInt()
+func (MockStakingKeeper) Slash(context.Context, sdk.ConsAddress, int64, int64, sdkmath.LegacyDec) (sdkmath.Int, error) {
+	return sdkmath.ZeroInt(), nil
 }
 
-func (MockStakingKeeper) Jail(context.Context, sdk.ConsAddress) {}
+func (MockStakingKeeper) Jail(context.Context, sdk.ConsAddress) error {
+	return nil
+}
 
 // MockValidator implements the ValidatorI interface.
 type MockValidator struct {
@@ -188,8 +191,8 @@ func (MockValidator) IsUnbonding() bool {
 	return false
 }
 
-func (v MockValidator) GetOperator() sdk.ValAddress {
-	return v.operator
+func (v MockValidator) GetOperator() string {
+	return v.operator.String()
 }
 
 func (MockValidator) ConsPubKey() (cryptotypes.PubKey, error) {
@@ -200,7 +203,7 @@ func (MockValidator) TmConsPublicKey() (tmprotocrypto.PublicKey, error) {
 	return tmprotocrypto.PublicKey{}, nil
 }
 
-func (MockValidator) GetConsAddr() (sdk.ConsAddress, error) {
+func (MockValidator) GetConsAddr() ([]byte, error) {
 	return nil, nil
 }
 

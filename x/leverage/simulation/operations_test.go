@@ -92,10 +92,9 @@ func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAcc
 
 // TestWeightedOperations tests the weights of the operations.
 func (s *SimTestSuite) TestWeightedOperations() {
-	cdc := s.app.AppCodec()
 	appParams := make(simtypes.AppParams)
 
-	weightedOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	weightedOps := simulation.WeightedOperations(appParams, s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 
 	// setup 1 account, which will test all 7 operations in order. the order is designed such that each
 	// transaction with prerequisites (e.g. must collateralize before borrow) has a chance to succeed.

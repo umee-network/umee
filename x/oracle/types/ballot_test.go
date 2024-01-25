@@ -76,7 +76,9 @@ func TestPBPower(t *testing.T) {
 	ballotPower := int64(0)
 
 	for i := 0; i < len(sk.Validators()); i++ {
-		power := sk.Validator(ctx, valAccAddrs[i]).GetConsensusPower(sdk.DefaultPowerReduction)
+		val, err := sk.Validator(ctx, valAccAddrs[i])
+		assert.NilError(t, err)
+		power := val.GetConsensusPower(sdk.DefaultPowerReduction)
 		vote := NewVoteForTally(
 			sdkmath.LegacyZeroDec(),
 			UmeeDenom,
