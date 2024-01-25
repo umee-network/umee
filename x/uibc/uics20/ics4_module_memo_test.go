@@ -20,7 +20,7 @@ func TestMemoSignerCheck(t *testing.T) {
 	im := ICS20Module{leverage: mocks.NewLvgNoopMsgSrv()}
 	sdkCtx := sdk.Context{}
 	tcs := []struct {
-		msg    sdk.Msg
+		msg    sdk.LegacyMsg
 		errstr string
 	}{
 		{ltypes.NewMsgSupply(accs.Bob, asset), wrongSignerErr},

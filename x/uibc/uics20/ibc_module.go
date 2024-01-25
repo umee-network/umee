@@ -1,11 +1,13 @@
 package uics20
 
 import (
+	"fmt"
+
 	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
+	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/cosmos/cosmos-sdk/types/tx"
 	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
@@ -120,7 +122,7 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // runs messages encoded in the ICS20 memo.
 // NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
 // messages are supported. Otherwise the fork storage is discarded.
-func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, msgs []sdk.Msg) {
+func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, msgs []sdk.LegacyMsg) {
 	if len(msgs) > 2 {
 		ctx.Logger().Error("ics20 memo with more than 2 messages are not supported")
 		return
@@ -140,7 +142,7 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, 
 	flush()
 }
 
-func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg sdk.Msg) (err error) {
+func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg sdk.LegacyMsg) (err error) {
 	if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(sender) {
 		return sdkerrors.ErrInvalidRequest.Wrapf(
 			"msg signer doesn't match the sender, expected signer: %s", sender)
@@ -167,10 +169,23 @@ func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
 	return
 }
 
-func DeserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
+func DeserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.LegacyMsg, error) {
 	var m uibc.ICS20Memo
 	if err := cdc.UnmarshalJSON(data, &m); err != nil {
 		return nil, err
 	}
-	return tx.GetMsgs(m.Messages, "memo messages")
+	return GetMsgs(m.Messages, "memo messages")
+}
+
+// GetMsgs takes a slice of Any's and turn them into sdk.Msg's.
+func GetMsgs(anys []*types.Any, name string) ([]sdk.LegacyMsg, error) {
+	msgs := make([]sdk.LegacyMsg, len(anys))
+	for i, any := range anys {
+		cached := any.GetCachedValue()
+		if cached == nil {
+			return nil, fmt.Errorf("any cached value is nil, %s messages must be correctly packed any values", name)
+		}
+		msgs[i] = cached.(sdk.LegacyMsg)
+	}
+	return msgs, nil
 }
