@@ -47,6 +47,29 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
 	app.registerUpgrade("v6.3", upgradeInfo)
+	app.registerUpgrade6_4(upgradeInfo)
+}
+
+func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
+	planName := "v6.4"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			printPlanName(planName, ctx.Logger())
+			tokens := app.LeverageKeeper.GetAllRegisteredTokens(ctx)
+			for _, token := range tokens {
+				// this will allow existing interest rate curves to pass new Token validation
+				if token.KinkUtilization.GTE(token.MaxSupplyUtilization) {
+					token.KinkUtilization = token.MaxSupplyUtilization
+					token.KinkBorrowRate = token.MaxBorrowRate
+					if err := app.LeverageKeeper.SetTokenSettings(ctx, token); err != nil {
+						return fromVM, err
+					}
+				}
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 func (app *UmeeApp) registerUpgrade6_0(upgradeInfo upgradetypes.Plan) {

@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Improvements
+
+- [2388](https://github.com/umee-network/umee/pull/2388) Adjust interest rate algorithm and associated token parameter validation rules.
+
 ## v6.3.0 - 2024-01-03
 
 ### Improvements
