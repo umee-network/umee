@@ -20,6 +20,7 @@ import (
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
+	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v8/packetforward/types"
 	"github.com/umee-network/umee/v6/util"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
@@ -49,6 +50,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
 	app.registerUpgrade("v6.3", upgradeInfo)
+	app.registerUpgrade("v047-to-v050", upgradeInfo, packetforwardtypes.ModuleName)
 }
 
 func (app *UmeeApp) registerUpgrade6_0(upgradeInfo upgradetypes.Plan) {
