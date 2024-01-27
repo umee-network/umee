@@ -43,15 +43,9 @@ import (
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
-	"github.com/cosmos/cosmos-sdk/x/auth/vesting"
-	vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
-	"github.com/cosmos/cosmos-sdk/x/authz"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
-	authzmodule "github.com/cosmos/cosmos-sdk/x/authz/module"
-	"github.com/cosmos/cosmos-sdk/x/bank"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/cosmos/cosmos-sdk/x/capability"
 	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	consensusparamskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
@@ -59,18 +53,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/crisis"
 	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
 	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
-	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
-	"github.com/cosmos/cosmos-sdk/x/evidence"
 	evidencekeeper "github.com/cosmos/cosmos-sdk/x/evidence/keeper"
 	evidencetypes "github.com/cosmos/cosmos-sdk/x/evidence/types"
 	"github.com/cosmos/cosmos-sdk/x/feegrant"
 	feegrantkeeper "github.com/cosmos/cosmos-sdk/x/feegrant/keeper"
-	feegrantmodule "github.com/cosmos/cosmos-sdk/x/feegrant/module"
-	"github.com/cosmos/cosmos-sdk/x/genutil"
-	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/cosmos/cosmos-sdk/x/gov"
 	govclient "github.com/cosmos/cosmos-sdk/x/gov/client"
 	govkeeper "github.com/cosmos/cosmos-sdk/x/gov/keeper"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
@@ -78,22 +66,16 @@ import (
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	"github.com/cosmos/cosmos-sdk/x/group"
 	groupkeeper "github.com/cosmos/cosmos-sdk/x/group/keeper"
-	groupmodule "github.com/cosmos/cosmos-sdk/x/group/module"
-	"github.com/cosmos/cosmos-sdk/x/mint"
 	mintkeeper "github.com/cosmos/cosmos-sdk/x/mint/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/x/nft"
 	nftkeeper "github.com/cosmos/cosmos-sdk/x/nft/keeper"
-	nftmodule "github.com/cosmos/cosmos-sdk/x/nft/module"
 	"github.com/cosmos/cosmos-sdk/x/params"
 	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	paramproposal "github.com/cosmos/cosmos-sdk/x/params/types/proposal"
-	"github.com/cosmos/cosmos-sdk/x/slashing"
 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
@@ -104,22 +86,18 @@ import (
 	packetforward "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward"
 	packetforwardkeeper "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/keeper"
 	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/types"
-	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
 	icahost "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host"
 	icahostkeeper "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/keeper"
 	icahosttypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/types"
-	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
 	ibctransfer "github.com/cosmos/ibc-go/v7/modules/apps/transfer"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v7/modules/apps/transfer/keeper"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibc "github.com/cosmos/ibc-go/v7/modules/core"
 	ibcclient "github.com/cosmos/ibc-go/v7/modules/core/02-client"
 	ibcclientclient "github.com/cosmos/ibc-go/v7/modules/core/02-client/client"
 	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
 	ibcporttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
-	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 	ibctesting "github.com/cosmos/ibc-go/v7/testing/types"
 
 	// cosmwasm
@@ -133,28 +111,22 @@ import (
 	"github.com/umee-network/umee/v6/util/genmap"
 	"github.com/umee-network/umee/v6/x/incentive"
 	incentivekeeper "github.com/umee-network/umee/v6/x/incentive/keeper"
-	incentivemodule "github.com/umee-network/umee/v6/x/incentive/module"
-	"github.com/umee-network/umee/v6/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
-	"github.com/umee-network/umee/v6/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 	ugovkeeper "github.com/umee-network/umee/v6/x/ugov/keeper"
-	ugovmodule "github.com/umee-network/umee/v6/x/ugov/module"
 
 	// umee ibc-transfer and quota for ibc-transfer
 	uwasm "github.com/umee-network/umee/v6/app/wasm"
 	"github.com/umee-network/umee/v6/x/uibc"
-	uibcmodule "github.com/umee-network/umee/v6/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
 	"github.com/umee-network/umee/v6/x/uibc/uics20"
 
 	"github.com/umee-network/umee/v6/x/metoken"
 	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
-	metokenmodule "github.com/umee-network/umee/v6/x/metoken/module"
 )
 
 var (
@@ -163,78 +135,7 @@ var (
 
 	// DefaultNodeHome defines the default home directory for the application daemon.
 	DefaultNodeHome string
-
-	// ModuleBasics defines the module BasicManager is in charge of setting up basic,
-	// non-dependant module elements, such as codec registration
-	// and genesis verification.
-	ModuleBasics module.BasicManager
-
-	// module account permissions
-	maccPerms map[string][]string
 )
-
-func init() {
-	moduleBasics := []module.AppModuleBasic{
-		auth.AppModuleBasic{},
-		genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
-		BankModule{},
-		capability.AppModuleBasic{},
-		StakingModule{},
-		MintModule{},
-		distr.AppModuleBasic{},
-		gov.NewAppModuleBasic(getGovProposalHandlers()),
-		params.AppModuleBasic{},
-		CrisisModule{},
-		SlashingModule{},
-		feegrantmodule.AppModuleBasic{},
-		upgrade.AppModuleBasic{},
-		evidence.AppModuleBasic{},
-		authzmodule.AppModuleBasic{},
-		groupmodule.AppModuleBasic{},
-		vesting.AppModuleBasic{},
-		nftmodule.AppModuleBasic{},
-		ibc.AppModuleBasic{},
-		ibctm.AppModuleBasic{},
-		ibctransfer.AppModuleBasic{},
-		ica.AppModuleBasic{},
-		// intertx.AppModuleBasic{},
-		// ibcfee.AppModuleBasic{},
-		leverage.AppModuleBasic{},
-		oracle.AppModuleBasic{},
-		uibcmodule.AppModuleBasic{},
-		ugovmodule.AppModuleBasic{},
-		wasm.AppModuleBasic{},
-		incentivemodule.AppModuleBasic{},
-		metokenmodule.AppModuleBasic{},
-		packetforward.AppModuleBasic{},
-	}
-	// if Experimental {}
-
-	ModuleBasics = module.NewBasicManager(moduleBasics...)
-
-	maccPerms = map[string][]string{
-		authtypes.FeeCollectorName:     nil,
-		distrtypes.ModuleName:          nil,
-		minttypes.ModuleName:           {authtypes.Minter},
-		stakingtypes.BondedPoolName:    {authtypes.Burner, authtypes.Staking},
-		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
-		govtypes.ModuleName:            {authtypes.Burner},
-		nft.ModuleName:                 nil,
-
-		ibctransfertypes.ModuleName: {authtypes.Minter, authtypes.Burner},
-		icatypes.ModuleName:         nil,
-
-		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
-		wasmtypes.ModuleName:     {authtypes.Burner},
-
-		incentive.ModuleName:   nil,
-		oracletypes.ModuleName: nil,
-		uibc.ModuleName:        nil,
-		ugov.ModuleName:        nil,
-		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
-	}
-	// if Experimental {}
-}
 
 // UmeeApp defines the ABCI application for the Umee network as an extension of
 // the Cosmos SDK's BaseApp.
@@ -709,151 +610,14 @@ func New(
 		MintKeeper:  &app.MintKeeper,
 	}
 
-	// NOTE: Any module instantiated in the module manager that is later modified
-	// must be passed by reference here.
-	appModules := []module.AppModule{
-		genutil.NewAppModule(
-			app.AccountKeeper,
-			app.StakingKeeper,
-			app.DeliverTx,
-			txConfig,
-		),
-		auth.NewAppModule(appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
-		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
-		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
-		capability.NewAppModule(appCodec, *app.CapabilityKeeper, true),
-		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
-		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
-		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
-		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, inflationCalculator.InflationRate, app.GetSubspace(minttypes.ModuleName)),             //nolint: lll
-		slashing.NewAppModule(appCodec, app.SlashingKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.GetSubspace(slashingtypes.ModuleName)), //nolint: lll
-		distr.NewAppModule(appCodec, app.DistrKeeper, app.AccountKeeper, app.BankKeeper, app.StakingKeeper, app.GetSubspace(distrtypes.ModuleName)),          //nolint: lll
-		staking.NewAppModule(appCodec, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(stakingtypes.ModuleName)),                       //nolint: lll
-		upgrade.NewAppModule(app.UpgradeKeeper),
-		evidence.NewAppModule(app.EvidenceKeeper),
-		ibc.NewAppModule(app.IBCKeeper),
-		params.NewAppModule(app.ParamsKeeper),
-		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		groupmodule.NewAppModule(appCodec, app.GroupKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		nftmodule.NewAppModule(appCodec, app.NFTKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
-		ibctransfer.NewAppModule(app.IBCTransferKeeper),
-		ica.NewAppModule(nil, &app.ICAHostKeeper),
-		leverage.NewAppModule(appCodec, app.LeverageKeeper, app.AccountKeeper, app.BankKeeper),
-		oracle.NewAppModule(appCodec, app.OracleKeeper, app.AccountKeeper, app.BankKeeper),
-		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
-		packetforward.NewAppModule(app.PacketForwardKeeper, app.GetSubspace(packetforwardtypes.ModuleName)),
-		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
-		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)), //nolint: lll
-		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
-		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
-	}
+	app.mm = module.NewManager(appModules(app, appCodec, txConfig, skipGenesisInvariants, inflationCalculator)...)
+
 	// if Experimental {}
 
-	app.mm = module.NewManager(appModules...)
-
-	// During begin block slashing happens after distr.BeginBlocker so that
-	// there is nothing left over in the validator fee pool, so as to keep the
-	// CanWithdrawInvariant invariant.
-	// NOTE: staking module is required if HistoricalEntries param > 0
-	// NOTE: capability module's beginblocker must come before any modules using capabilities (e.g. IBC)
-	beginBlockers := []string{
-		upgradetypes.ModuleName,
-		capabilitytypes.ModuleName,
-		minttypes.ModuleName,
-		distrtypes.ModuleName,
-		slashingtypes.ModuleName,
-		evidencetypes.ModuleName,
-		stakingtypes.ModuleName,
-		ibcexported.ModuleName,
-		ibctransfertypes.ModuleName,
-		authtypes.ModuleName,
-		banktypes.ModuleName,
-		govtypes.ModuleName,
-		crisistypes.ModuleName,
-		genutiltypes.ModuleName,
-		authz.ModuleName,
-		feegrant.ModuleName,
-		nft.ModuleName,
-		group.ModuleName,
-		paramstypes.ModuleName,
-		vestingtypes.ModuleName,
-		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
-		leveragetypes.ModuleName,
-		metoken.ModuleName,
-		oracletypes.ModuleName,
-		uibc.ModuleName,
-		packetforwardtypes.ModuleName,
-		ugov.ModuleName,
-		wasmtypes.ModuleName,
-		incentive.ModuleName,
-	}
-	endBlockers := []string{
-		crisistypes.ModuleName,
-		metoken.ModuleName,     // must be before oracle
-		oracletypes.ModuleName, // must be before gov and staking
-		govtypes.ModuleName, stakingtypes.ModuleName,
-		ibcexported.ModuleName, ibctransfertypes.ModuleName,
-		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
-		slashingtypes.ModuleName, minttypes.ModuleName,
-		genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
-		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-		icatypes.ModuleName, //  ibcfeetypes.ModuleName,
-		leveragetypes.ModuleName,
-		uibc.ModuleName,
-		packetforwardtypes.ModuleName,
-		ugov.ModuleName,
-		wasmtypes.ModuleName,
-		incentive.ModuleName,
-	}
-
-	// NOTE: The genutils module must occur after staking so that pools are
-	// properly initialized with tokens from genesis accounts.
-	// NOTE: The genutils module must also occur after auth so that it can access the params from auth.
-	// NOTE: Capability module must occur first so that it can initialize any capabilities
-	// so that other modules that want to create or claim capabilities afterwards in InitChain
-	// can do so safely.
-	initGenesis := []string{
-		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
-		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-		crisistypes.ModuleName, ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
-		authz.ModuleName,
-		ibctransfertypes.ModuleName, icatypes.ModuleName, // ibcfeetypes.ModuleName
-		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-
-		oracletypes.ModuleName,
-		leveragetypes.ModuleName,
-		uibc.ModuleName,
-		packetforwardtypes.ModuleName,
-		ugov.ModuleName,
-		wasmtypes.ModuleName,
-		incentive.ModuleName,
-		metoken.ModuleName,
-	}
-	orderMigrations := []string{
-		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
-		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-		crisistypes.ModuleName, ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
-		authz.ModuleName, ibctransfertypes.ModuleName, icatypes.ModuleName, // ibcfeetypes.ModuleName
-		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
-		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
-
-		oracletypes.ModuleName,
-		leveragetypes.ModuleName,
-		uibc.ModuleName,
-		packetforwardtypes.ModuleName,
-		ugov.ModuleName,
-		wasmtypes.ModuleName,
-		incentive.ModuleName,
-		metoken.ModuleName,
-	}
-	// if Experimental {}
-
-	app.mm.SetOrderBeginBlockers(beginBlockers...)
-	app.mm.SetOrderEndBlockers(endBlockers...)
-	app.mm.SetOrderInitGenesis(initGenesis...)
-	app.mm.SetOrderMigrations(orderMigrations...)
+	app.mm.SetOrderBeginBlockers(orderBeginBlockers()...)
+	app.mm.SetOrderEndBlockers(orderEndBlockers()...)
+	app.mm.SetOrderInitGenesis(orderInitBlockers()...)
+	app.mm.SetOrderMigrations(orderMigrations()...)
 
 	app.mm.RegisterInvariants(app.CrisisKeeper)
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
