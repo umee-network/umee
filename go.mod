@@ -11,11 +11,12 @@ require (
 	github.com/CosmWasm/wasmvm v1.5.2
 	github.com/cometbft/cometbft v0.37.4
 	github.com/cometbft/cometbft-db v0.9.1
-	github.com/cosmos/cosmos-proto v1.0.0-beta.2 // NOTE: v1.0.0-beta.2+ is not compatible with sdk v0.47
+	github.com/cosmos/cosmos-proto v1.0.0-beta.3 // NOTE: v1.0.0-beta.2+ is not compatible with sdk v0.47
 	github.com/cosmos/cosmos-sdk v0.47.8
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.4.10 // NOTE: v1.4.11+ is not compatible with sdk v0.47
 	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7 v7.1.2
+	github.com/cosmos/ibc-apps/modules/ibc-hooks/v7 v7.0.0-20240124225747-f055ce5b405c
 	github.com/cosmos/ibc-go/v7 v7.3.1
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/mock v1.6.0
@@ -49,13 +50,13 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/iam v1.1.5 // indirect
 	cloud.google.com/go/storage v1.35.1 // indirect
-	cosmossdk.io/core v0.5.1 // indirect
+	cosmossdk.io/core v0.6.1 // indirect
 	cosmossdk.io/depinject v1.0.0-alpha.4 // indirect
 	cosmossdk.io/log v1.3.0 // indirect
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/4meepo/tagalign v1.3.3 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
-	github.com/99designs/keyring v1.2.1 // indirect
+	github.com/99designs/keyring v1.2.2 // indirect
 	github.com/Abirdcfly/dupword v0.0.13 // indirect
 	github.com/Antonboom/errname v0.1.12 // indirect
 	github.com/Antonboom/nilnil v0.1.7 // indirect

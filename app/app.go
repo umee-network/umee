@@ -104,6 +104,9 @@ import (
 	packetforward "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward"
 	packetforwardkeeper "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/keeper"
 	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/types"
+	ibchooks "github.com/cosmos/ibc-apps/modules/ibc-hooks/v7"
+	ibchookskeeper "github.com/cosmos/ibc-apps/modules/ibc-hooks/v7/keeper"
+	ibchookstypes "github.com/cosmos/ibc-apps/modules/ibc-hooks/v7/types"
 	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
 	icahost "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host"
 	icahostkeeper "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/keeper"
@@ -207,6 +210,7 @@ func init() {
 		incentivemodule.AppModuleBasic{},
 		metokenmodule.AppModuleBasic{},
 		packetforward.AppModuleBasic{},
+		ibchooks.AppModuleBasic{},
 	}
 	// if Experimental {}
 
@@ -271,7 +275,7 @@ type UmeeApp struct {
 	FeeGrantKeeper        feegrantkeeper.Keeper
 	GroupKeeper           groupkeeper.Keeper
 	NFTKeeper             nftkeeper.Keeper
-	WasmKeeper            wasmkeeper.Keeper
+	WasmKeeper            *wasmkeeper.Keeper
 
 	IBCTransferKeeper   ibctransferkeeper.Keeper
 	IBCKeeper           *ibckeeper.Keeper // IBC Keeper must be a pointer in the app, so we can SetRouter on it correctly
@@ -283,6 +287,12 @@ type UmeeApp struct {
 	UIbcQuotaKeeperB    uibcquota.KeeperBuilder
 	UGovKeeperB         ugovkeeper.Builder
 	MetokenKeeperB      metokenkeeper.Builder
+	IBCHooksKeeper      ibchookskeeper.Keeper
+
+	// IBC modules
+	// transfer module
+	Ics20WasmHooks   *ibchooks.WasmHooks
+	HooksICS4Wrapper ibchooks.ICS4Middleware
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -345,7 +355,7 @@ func New(
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		leveragetypes.StoreKey, oracletypes.StoreKey, packetforwardtypes.StoreKey,
 		uibc.StoreKey, ugov.StoreKey,
-		wasmtypes.StoreKey,
+		wasmtypes.StoreKey, ibchookstypes.StoreKey,
 		incentive.StoreKey,
 		metoken.StoreKey,
 		consensusparamstypes.StoreKey, crisistypes.StoreKey,
@@ -553,10 +563,59 @@ func New(
 		app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(),
 	)
 
+	app.IBCHooksKeeper = ibchookskeeper.NewKeeper(
+		app.keys[ibchookstypes.StoreKey],
+	)
+	wasmHooks := ibchooks.NewWasmHooks(
+		&app.IBCHooksKeeper, nil, appparams.AccountAddressPrefix,
+	) // The contract keeper needs to be set later
+	app.Ics20WasmHooks = &wasmHooks
+
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquota.NewKeeperBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
+	)
+
+	var err error
+	wasmDir := filepath.Join(homePath, "wasm")
+	app.wasmCfg, err = wasm.ReadWasmConfig(appOpts)
+	if err != nil {
+		panic(fmt.Sprintf("error while reading wasm config: %s", err))
+	}
+
+	// Register umee custom plugin to wasm
+	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper,
+		app.MetokenKeeperB), wasmOpts...)
+	// Register stargate queries
+	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
+	availableCapabilities := strings.Join(AllCapabilities(), ",")
+	wasmKeeper := wasmkeeper.NewKeeper(
+		appCodec,
+		keys[wasmtypes.StoreKey],
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.StakingKeeper,
+		distrkeeper.NewQuerier(app.DistrKeeper),
+		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.ScopedWasmKeeper,   // capabilities
+		&app.IBCTransferKeeper, // ICS20TransferPortSource
+		app.MsgServiceRouter(),
+		nil,
+		wasmDir,
+		app.wasmCfg,
+		availableCapabilities,
+		govModuleAddr,
+		wasmOpts...,
+	)
+	app.WasmKeeper = &wasmKeeper
+
+	app.Ics20WasmHooks.ContractKeeper = app.WasmKeeper
+	app.HooksICS4Wrapper = ibchooks.NewICS4Middleware(
+		app.IBCKeeper.ChannelKeeper,
+		app.Ics20WasmHooks,
 	)
 
 	/**********
@@ -574,6 +633,8 @@ func New(
 	  - IBC Rate Limit Middleware
 	  - Packet Forward Middleware
 	 **********/
+
+	// TODO: add WasmHook middleware to above packet flow once integration approved
 
 	quotaICS4 := uics20.NewICS4(app.IBCKeeper.ChannelKeeper, app.UIbcQuotaKeeperB)
 
@@ -610,6 +671,7 @@ func New(
 		packetforwardkeeper.DefaultForwardTransferPacketTimeoutTimestamp, // forward timeout
 		packetforwardkeeper.DefaultRefundTransferPacketTimeoutTimestamp,  // refund timeout
 	)
+	transferStack = ibchooks.NewIBCMiddleware(transferStack, &app.HooksICS4Wrapper)
 	transferStack = uics20.NewICS20Module(transferStack, appCodec,
 		app.UIbcQuotaKeeperB,
 		leveragekeeper.NewMsgServerImpl(app.LeverageKeeper))
@@ -664,40 +726,6 @@ func New(
 
 	app.GovKeeper.SetLegacyRouter(govRouter)
 
-	var err error
-	wasmDir := filepath.Join(homePath, "wasm")
-	app.wasmCfg, err = wasm.ReadWasmConfig(appOpts)
-	if err != nil {
-		panic(fmt.Sprintf("error while reading wasm config: %s", err))
-	}
-
-	// Register umee custom plugin to wasm
-	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper,
-		app.MetokenKeeperB), wasmOpts...)
-	// Register stargate queries
-	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
-	availableCapabilities := strings.Join(AllCapabilities(), ",")
-	app.WasmKeeper = wasmkeeper.NewKeeper(
-		appCodec,
-		keys[wasmtypes.StoreKey],
-		app.AccountKeeper,
-		app.BankKeeper,
-		app.StakingKeeper,
-		distrkeeper.NewQuerier(app.DistrKeeper),
-		app.IBCKeeper.ChannelKeeper,
-		app.IBCKeeper.ChannelKeeper,
-		&app.IBCKeeper.PortKeeper,
-		app.ScopedWasmKeeper,   // capabilities
-		&app.IBCTransferKeeper, // ICS20TransferPortSource
-		app.MsgServiceRouter(),
-		nil,
-		wasmDir,
-		app.wasmCfg,
-		availableCapabilities,
-		govModuleAddr,
-		wasmOpts...,
-	)
-
 	/****  Module Options ****/
 
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
@@ -743,7 +771,7 @@ func New(
 		uibcmodule.NewAppModule(appCodec, app.UIbcQuotaKeeperB),
 		packetforward.NewAppModule(app.PacketForwardKeeper, app.GetSubspace(packetforwardtypes.ModuleName)),
 		ugovmodule.NewAppModule(appCodec, app.UGovKeeperB),
-		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)), //nolint: lll
+		wasm.NewAppModule(app.appCodec, app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)), //nolint: lll
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
 	}
@@ -785,6 +813,7 @@ func New(
 		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
+		ibchookstypes.ModuleName,
 		incentive.ModuleName,
 	}
 	endBlockers := []string{
@@ -804,6 +833,7 @@ func New(
 		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
+		ibchookstypes.ModuleName,
 		incentive.ModuleName,
 	}
 
@@ -828,6 +858,7 @@ func New(
 		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
+		ibchookstypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
 	}
@@ -845,6 +876,7 @@ func New(
 		packetforwardtypes.ModuleName,
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
+		ibchookstypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
 	}
@@ -927,7 +959,7 @@ func New(
 
 	if manager := app.SnapshotManager(); manager != nil {
 		err := manager.RegisterExtensions(
-			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), &app.WasmKeeper),
+			wasmkeeper.NewWasmSnapshotter(app.CommitMultiStore(), app.WasmKeeper),
 		)
 		if err != nil {
 			panic(fmt.Errorf("failed to register snapshot extension: %s", err))
