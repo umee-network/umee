@@ -152,12 +152,12 @@ func (s *IntegrationTestSuite) SetupTest(t *testing.T) {
 	s.T = t
 	s.app = app
 	s.ctx = ctx
-	s.wasmMsgServer = wasmkeeper.NewMsgServerImpl(&app.WasmKeeper)
+	s.wasmMsgServer = wasmkeeper.NewMsgServerImpl(app.WasmKeeper)
 	querier := app.GRPCQueryRouter()
 	wasmtypes.RegisterMsgServer(querier, s.wasmMsgServer)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
-	grpc := wasmkeeper.Querier(&app.WasmKeeper)
+	grpc := wasmkeeper.Querier(app.WasmKeeper)
 	wasmtypes.RegisterQueryServer(queryHelper, grpc)
 	s.wasmQueryClient = wasmtypes.NewQueryClient(queryHelper)
 	s.encfg = umeeapp.MakeEncodingConfig()
