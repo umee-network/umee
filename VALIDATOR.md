@@ -71,6 +71,13 @@ Before joining the mainnet you should join a testnet!
 6. Once your validator is setup (and you did self delegation), ping again UX Team members and send your validator address. We will do a delegation.
 7. Make sure your Price Feeder is running correctly. If your [testnet window misses](https://canon.price-feeder.com/) are above 50% then something is wrong. Look for a help on Discord.
 
+
+Here are our testnet public endpoints:
+
+* [Explorer](https://explorer.network.umee.cc/canon-4)
+* [Web GRPC](https://canon-4.api.network.umee.cc)
+* [RPC](https://canon-4.rpc.network.umee.cc)
+
 ### Mainnet
 
 1. Make sure you firstly tested your setup on Testnet.
