@@ -34,7 +34,7 @@ We are using Ojo Price Feeder. Please follow the [instructions](https://github.c
 
 NOTE: for self building and configuration examples you MUST use the [umee branch](https://github.com/ojo-network/price-feeder/tree/umee).
 
-- Copy and the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/umee/price-feeder.example.toml).
+Copy the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/umee/price-feeder.example.toml).
 - For the provider config you can use our latest [umee-provider-config directory](https://github.com/ojo-network/price-feeder/tree/umee/umee-provider-config) as is.
 
 ## Running a node
@@ -52,7 +52,7 @@ Before joining the mainnet you should join a testnet!
 3. Follow the state sync [canon-4 instructions](https://mzonder.notion.site/UMEE-Start-from-STATE-SYNC-canon-4-f485563a089a436d9d1fe98f54af8737).
 4. You can use the following peers in your `config.toml`:
    ```toml
-   persistent_peers = "ee7d691781717cbd1bf6f965dc45aad19c7af05f@canon-4.network.umee.cc:10000,dfd1d83b668ff2e59dc1d601a4990d1bd95044ba@canon-4.network.umee.cc:10001`"
+   persistent_peers = "ee7d691781717cbd1bf6f965dc45aad19c7af05f@canon-4.network.umee.cc:10000,dfd1d83b668ff2e59dc1d601a4990d1bd95044ba@canon-4.network.umee.cc:10001"
    ```
 5. Using discord, ping one of the UX Team members to send you testnet `uumee`.
 6. Once your validator is setup (and you did self delegation), ping again UX Team members and send your validator address. We will do a delegation.
