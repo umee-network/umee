@@ -52,7 +52,7 @@ Copy the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/
    minimum-gas-prices = "0.1uumee"
    ```
 
-## Joining the network.
+## Joining the network
 
 Before joining the mainnet you should join a testnet!
 
@@ -60,7 +60,7 @@ Before joining the mainnet you should join a testnet!
 
 1. Make sure your are able to run `umeed` and price feeder locally.
 2. Join the [Discord server](https://discord.gg/4ZJAFvg9). Make sure you are in the Testnet group.
-3. Follow the state sync [canon-4 instructions](https://mzonder.notion.site/UMEE-Start-from-STATE-SYNC-canon-4-f485563a089a436d9d1fe98f54af8737).
+3. Follow the state sync [canon-4 instructions](https://mzonder.notion.site/UMEE-Start-from-STATE-SYNC-canon-4-f485563a089a436d9d1fe98f54af8737). Make sure you use the [latest](https://github.com/umee-network/umee/releases/) version.
 4. You can use the following peers in your `config.toml`:
 
    ```toml
