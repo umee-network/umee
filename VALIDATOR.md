@@ -31,16 +31,14 @@ You can get a binary by:
 
 3. Use our released docker [umeed container](https://github.com/umee-network/umee/pkgs/container/umeed).
 
-To test if the `libwasm` is correctly linked, run `umeed version`.
+To test if the `libwasm` is linked correctly, run `umeed version`.
 
 ### Price Feeder
 
 We are using Ojo Price Feeder. Please follow the [instructions](https://github.com/ojo-network/price-feeder/blob/umee/README.md). Make sure you use the latest release with the `umee/` prefix (eg: `umee/v2.4.0`).
-
 NOTE: for self building and configuration examples you MUST use the [umee branch](https://github.com/ojo-network/price-feeder/tree/umee).
 
-Copy the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/umee/price-feeder.example.toml).
-
+- Copy the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/umee/price-feeder.example.toml).
 - For the provider config you can use our latest [umee-provider-config directory](https://github.com/ojo-network/price-feeder/tree/umee/umee-provider-config) as is.
 
 ## Running a node
@@ -71,12 +69,11 @@ Before joining the mainnet you should join a testnet!
 6. Once your validator is setup (and you did self delegation), ping again UX Team members and send your validator address. We will do a delegation.
 7. Make sure your Price Feeder is running correctly. If your [testnet window misses](https://canon.price-feeder.com/) are above 50% then something is wrong. Look for a help on Discord.
 
-
 Here are our testnet public endpoints:
 
-* [Explorer](https://explorer.network.umee.cc/canon-4)
-* [Web GRPC](https://canon-4.api.network.umee.cc)
-* [RPC](https://canon-4.rpc.network.umee.cc)
+- [Explorer](https://explorer.network.umee.cc/canon-4)
+- [Web GRPC](https://canon-4.api.network.umee.cc)
+- [RPC](https://canon-4.rpc.network.umee.cc)
 
 ### Mainnet
 
