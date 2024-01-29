@@ -8,7 +8,7 @@ Full documentation is hosted at https://learning.ux.xyz/. However it may not be 
 
 ## Getting a Binary
 
-To run a validator you need 2 binaries: `umeed` and `price-feedere`.
+To run a validator you need 2 binaries: `umeed` and `price-feeder`.
 
 ### Umeed
 
@@ -19,7 +19,7 @@ You can get a binary by:
    ```sh
    scp $GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@<version>/internal/api/libwasmvm.$(uname -m).so running_os:/<lib/path>
    ```
-   NOTE: use the correct `wasmvm` version, according to the latest [Release Notes](./RELEASE_NOTES.md) or the [compatibility matrix](./README.md##release-compatibility-matrix).
+   NOTE: use the correct `wasmvm` version, according to the latest [Release Notes](./RELEASE_NOTES.md) or the [compatibility matrix](./README.md#release-compatibility-matrix).
 2. Download latest [binary build](https://github.com/umee-network/umee/releases). The build is compatible with the latest Ubuntu LTS x86-64. You MUST also copy the `libwasmvm` (see note in 1. about libwasmvm version):
    ```sh
    wget https://raw.githubusercontent.com/CosmWasm/wasmvm/<version>/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
@@ -39,7 +39,12 @@ Copy the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/
 
 ## Running a node
 
-1. Update the `app.toml` , `client.toml` and `config.toml` based on your preference. NOTE: you must set non zero min fees.
+1. Update the `app.toml` , `client.toml` and `config.toml` based on your preference. You MUST set non zero min gas prices in `app.toml`. Query `umeed q ugov min-gas-price` to see the what is the minimum acceptable value:
+
+   ```toml
+   # your app.toml file
+   minimum-gas-prices = "0.1uumee"
+   ```
 
 ## Joining the network.
 
