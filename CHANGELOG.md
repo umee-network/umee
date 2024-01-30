@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Features
+
+- [2408](https://github.com/umee-network/umee/pull/2408) New `converter` helper app.
+
 ### Improvements
 
 - [2388](https://github.com/umee-network/umee/pull/2388) Adjust interest rate algorithm and associated token parameter validation rules.
