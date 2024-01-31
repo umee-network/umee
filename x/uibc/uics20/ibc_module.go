@@ -1,9 +1,9 @@
 package uics20
 
 import (
-	stderrors "errors"
+	errors "errors"
 
-	"cosmossdk.io/errors"
+	sdkioerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -99,7 +99,7 @@ func (im ICS20Module) OnAcknowledgementPacket(
 ) error {
 	var ack channeltypes.Acknowledgement
 	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
-		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
+		return sdkioerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, isErr := ack.Response.(*channeltypes.Acknowledgement_Error); isErr {
 		// we don't return to propagate the ack error to the other layers
@@ -162,7 +162,7 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress
 func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
 	msgLen := len(msgs)
 	if msgLen > 2 {
-		return stderrors.New("ics20 memo with more than 2 messages are not supported")
+		return errors.New("ics20 memo with more than 2 messages are not supported")
 	}
 
 	for _, msg := range msgs {
@@ -182,7 +182,7 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 		asset = msg.Repayment
 		// TODO more asserts, will be handled in other PR
 	default:
-		return stderrors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+		return errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
 	}
 
 	if err := assertSubCoins(sent, asset); err != nil {
@@ -197,10 +197,10 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 	switch msg := msgs[1].(type) {
 	case *ltypes.MsgBorrow:
 		if assertSubCoins(asset, msg.Asset) != nil {
-			return stderrors.New("MsgBorrow must use MsgSupplyCollateral from messages[0]")
+			return errors.New("MsgBorrow must use MsgSupplyCollateral from messages[0]")
 		}
 	default:
-		return stderrors.New("only MsgBorrow is supported as messages[1]")
+		return errors.New("only MsgBorrow is supported as messages[1]")
 	}
 
 	return nil
@@ -208,7 +208,7 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 
 func assertSubCoins(sent, operated sdk.Coin) error {
 	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
-		return stderrors.New("message must use coins sent from the transfer")
+		return errors.New("message must use coins sent from the transfer")
 	}
 	return nil
 }
@@ -232,7 +232,7 @@ func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
 ) (d ics20types.FungibleTokenPacketData, err error) {
 	if err = cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
-		err = errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet data")
+		err = sdkioerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet data")
 	}
 	return
 }
