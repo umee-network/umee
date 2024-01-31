@@ -172,9 +172,11 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, msgs []sdk.Msg) e
 	}
 
 	if msgLen == 1 {
+		// early return - we don't need to do more checks
 		return nil
 	}
-	switch msg := msgs[0].(type) {
+
+	switch msg := msgs[1].(type) {
 	case *ltypes.MsgBorrow:
 		if msg.Asset.Denom != collateral.Denom || msg.Asset.Amount.LT(collateral.Amount) {
 			return stderrors.New("MsgBorrow must use MsgSupplyCollateral from messages[0]")
