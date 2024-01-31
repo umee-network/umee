@@ -104,7 +104,7 @@ message MsgGovSetParamsResponse {}
 
 // MsgGovCreatePrograms is used by governance to create one or more incentive programs.
 // There are two funding scenarios. 1) If from_community_fund is true, once the proposal passes,
-// the programs' total rewards will be automatically funded by withdrawning from the community
+// the programs' total rewards will be automatically funded by withdrawing from the community
 // fund to the incentive module account. Will fail if the community fund doesn't have enough coins.
 // 2) If from_community_fund is false, a transaction with MsgSponsor must be submitted to fund
 // all programs with full amount. It must be sent after this message passes and before the
