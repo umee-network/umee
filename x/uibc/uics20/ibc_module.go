@@ -172,7 +172,7 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 		}
 	}
 
-	asset := sdk.NewInt64Coin("", 0)
+	var asset sdk.Coin
 	switch msg := msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
 		asset = msg.Asset
