@@ -163,7 +163,7 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, msgs []sdk.Msg) e
 	collateral := sdk.NewInt64Coin("", 0)
 	switch msg := msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
-		collateral := msg.Asset
+		collateral = msg.Asset
 	case *ltypes.MsgSupply:
 	case *ltypes.MsgLiquidate:
 		// TODO add assert, will be handled in other PR
