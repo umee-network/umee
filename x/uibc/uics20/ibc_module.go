@@ -221,6 +221,8 @@ func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 		_, err = im.leverage.SupplyCollateral(*ctx, msg)
 	case *ltypes.MsgBorrow:
 		_, err = im.leverage.Borrow(*ctx, msg)
+	case *ltypes.MsgLiquidate:
+		_, err = im.leverage.Liquidate(*ctx, msg)
 	default:
 		err = sdkerrors.ErrInvalidRequest.Wrapf("unsupported type in the ICS20 memo: %T", msg)
 	}
@@ -230,8 +232,7 @@ func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
 ) (d ics20types.FungibleTokenPacketData, err error) {
 	if err = cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
-		err = errors.Wrap(err,
-			"cannot unmarshal ICS-20 transfer packet data")
+		err = errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet data")
 	}
 	return
 }
