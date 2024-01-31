@@ -38,7 +38,7 @@ func TestMemoSignerCheck(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		err := im.handleMemoMsg(&sdkCtx, sender, tc.msg)
+		err := im.handleMemoMsg(&sdkCtx, tc.msg)
 		if tc.errstr != "" {
 			assert.ErrorContains(err, tc.errstr)
 		} else {
