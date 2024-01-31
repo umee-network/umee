@@ -78,8 +78,14 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 			receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 			if err != nil {
 				logger.Error("can't parse bech32 address", "err", err)
+				return ack
 			}
-			im.dispatchMemoMsgs(&ctx, receiver, msgs)
+			amount, ok := sdk.NewIntFromString(ftData.Amount)
+			if !ok {
+				logger.Error("can't parse transfer amount", "amount", ftData.Amount)
+				return ack
+			}
+			im.dispatchMemoMsgs(&ctx, receiver, sdk.NewCoin(ftData.Denom, amount), msgs)
 		}
 	}
 
@@ -122,13 +128,13 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // runs messages encoded in the ICS20 memo.
 // NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
 // messages are supported. Otherwise the fork storage is discarded.
-func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, msgs []sdk.Msg) {
+func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) {
 	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
 	if len(msgs) == 0 {
 		return // nothing to do
 	}
 
-	if err := im.validateMemoMsg(receiver, msgs); err != nil {
+	if err := im.validateMemoMsg(receiver, sent, msgs); err != nil {
 		logger.Error("ics20 memo messages are not valid.", "err", err)
 		return
 	}
@@ -146,8 +152,14 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress
 	flush()
 }
 
-// assumes len(msgs) > 0
-func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, msgs []sdk.Msg) error {
+// We only support the following message combinations:
+// - [MsgSupply]
+// - [MsgSupplyCollateral]
+// - [MsgSupplyCollateral, MsgBorrow] -- here, borrow must use
+// - [MsgLiquidate]
+// Signer of each message (account under charged with coins), must be the receiver of the ICS20
+// transfer.
+func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
 	msgLen := len(msgs)
 	if msgLen > 2 {
 		return stderrors.New("ics20 memo with more than 2 messages are not supported")
@@ -160,15 +172,21 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, msgs []sdk.Msg) e
 		}
 	}
 
-	collateral := sdk.NewInt64Coin("", 0)
+	asset := sdk.NewInt64Coin("", 0)
 	switch msg := msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
-		collateral = msg.Asset
+		asset = msg.Asset
 	case *ltypes.MsgSupply:
+		asset = msg.Asset
 	case *ltypes.MsgLiquidate:
-		// TODO add assert, will be handled in other PR
+		asset = msg.Repayment
+		// TODO more asserts, will be handled in other PR
 	default:
 		return stderrors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+	}
+
+	if err := assertSubCoins(sent, asset); err != nil {
+		return err
 	}
 
 	if msgLen == 1 {
@@ -178,13 +196,20 @@ func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, msgs []sdk.Msg) e
 
 	switch msg := msgs[1].(type) {
 	case *ltypes.MsgBorrow:
-		if msg.Asset.Denom != collateral.Denom || msg.Asset.Amount.LT(collateral.Amount) {
+		if assertSubCoins(asset, msg.Asset) != nil {
 			return stderrors.New("MsgBorrow must use MsgSupplyCollateral from messages[0]")
 		}
 	default:
 		return stderrors.New("only MsgBorrow is supported as messages[1]")
 	}
 
+	return nil
+}
+
+func assertSubCoins(sent, operated sdk.Coin) error {
+	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
+		return stderrors.New("message must use coins sent from the transfer")
+	}
 	return nil
 }
 
