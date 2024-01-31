@@ -14,35 +14,39 @@ import (
 
 func TestMemoSignerCheck(t *testing.T) {
 	assert := assert.New(t)
-	sender := accs.Alice
-	wrongSignerErr := "signer doesn't match the sender"
+	receiver := accs.Alice
+	wrongSignerErr := "signer doesn't match the receiver"
 	asset := coin.New("atom", 10)
+	sent := coin.New("atom", 10)
 	im := ICS20Module{leverage: mocks.NewLvgNoopMsgSrv()}
-	sdkCtx := sdk.Context{}
+	// sdkCtx := sdk.Context{}
 	tcs := []struct {
-		msg    sdk.Msg
+		msgs   []sdk.Msg
 		errstr string
 	}{
-		{ltypes.NewMsgSupply(accs.Bob, asset), wrongSignerErr},
-		{ltypes.NewMsgSupplyCollateral(accs.Bob, asset), wrongSignerErr},
-		{ltypes.NewMsgBorrow(accs.Bob, asset), wrongSignerErr},
+		{[]sdk.Msg{ltypes.NewMsgSupply(accs.Bob, asset)}, wrongSignerErr},
+		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(accs.Bob, asset)}, wrongSignerErr},
 
-		{ltypes.NewMsgSupply(sender, asset), ""},
-		{ltypes.NewMsgSupplyCollateral(sender, asset), ""},
-		{ltypes.NewMsgBorrow(sender, asset), ""},
+		{[]sdk.Msg{ltypes.NewMsgSupply(receiver, asset)}, ""},
+		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(receiver, asset)}, ""},
+
+		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(receiver, asset),
+			ltypes.NewMsgBorrow(accs.Bob, asset)}, wrongSignerErr},
+		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(receiver, asset),
+			ltypes.NewMsgBorrow(receiver, asset)}, ""},
 
 		{
-			ltypes.NewMsgDecollateralize(sender, asset),
-			"unsupported type in the ICS20 memo",
+			[]sdk.Msg{ltypes.NewMsgDecollateralize(receiver, asset)},
+			"are supported as messages[0]",
 		},
 	}
 
-	for _, tc := range tcs {
-		err := im.handleMemoMsg(&sdkCtx, sender, tc.msg)
+	for i, tc := range tcs {
+		err := im.validateMemoMsg(receiver, sent, tc.msgs)
 		if tc.errstr != "" {
-			assert.ErrorContains(err, tc.errstr)
+			assert.ErrorContains(err, tc.errstr, "test: %d", i)
 		} else {
-			assert.NoError(err)
+			assert.NoError(err, "test: %d", i)
 		}
 	}
 }

@@ -1,7 +1,9 @@
 package uics20
 
 import (
-	"cosmossdk.io/errors"
+	errors "errors"
+
+	sdkioerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -73,11 +75,17 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 				logger.Error("sender and receiver are not the same")
 			}
 
-			sender, err := sdk.AccAddressFromBech32(ftData.Sender)
+			receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 			if err != nil {
 				logger.Error("can't parse bech32 address", "err", err)
+				return ack
 			}
-			im.dispatchMemoMsgs(&ctx, sender, msgs)
+			amount, ok := sdk.NewIntFromString(ftData.Amount)
+			if !ok {
+				logger.Error("can't parse transfer amount", "amount", ftData.Amount)
+				return ack
+			}
+			im.dispatchMemoMsgs(&ctx, receiver, sdk.NewCoin(ftData.Denom, amount), msgs)
 		}
 	}
 
@@ -91,7 +99,7 @@ func (im ICS20Module) OnAcknowledgementPacket(
 ) error {
 	var ack channeltypes.Acknowledgement
 	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
-		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
+		return sdkioerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, isErr := ack.Response.(*channeltypes.Acknowledgement_Error); isErr {
 		// we don't return to propagate the ack error to the other layers
@@ -120,17 +128,21 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // runs messages encoded in the ICS20 memo.
 // NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
 // messages are supported. Otherwise the fork storage is discarded.
-func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, msgs []sdk.Msg) {
-	if len(msgs) > 2 {
-		ctx.Logger().Error("ics20 memo with more than 2 messages are not supported")
+func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) {
+	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
+	if len(msgs) == 0 {
+		return // nothing to do
+	}
+
+	if err := im.validateMemoMsg(receiver, sent, msgs); err != nil {
+		logger.Error("ics20 memo messages are not valid.", "err", err)
 		return
 	}
 
 	// Caching context so that we don't update the store in case of failure.
 	cacheCtx, flush := ctx.CacheContext()
-	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
 	for _, m := range msgs {
-		if err := im.handleMemoMsg(&cacheCtx, sender, m); err != nil {
+		if err := im.handleMemoMsg(&cacheCtx, m); err != nil {
 			// ignore changes in cacheCtx and return
 			logger.Error("error dispatching", "msg: %v\t\t err: %v", m, err)
 			return
@@ -140,11 +152,68 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, 
 	flush()
 }
 
-func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg sdk.Msg) (err error) {
-	if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(sender) {
-		return sdkerrors.ErrInvalidRequest.Wrapf(
-			"msg signer doesn't match the sender, expected signer: %s", sender)
+// We only support the following message combinations:
+// - [MsgSupply]
+// - [MsgSupplyCollateral]
+// - [MsgSupplyCollateral, MsgBorrow] -- here, borrow must use
+// - [MsgLiquidate]
+// Signer of each message (account under charged with coins), must be the receiver of the ICS20
+// transfer.
+func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
+	msgLen := len(msgs)
+	if msgLen > 2 {
+		return errors.New("ics20 memo with more than 2 messages are not supported")
 	}
+
+	for _, msg := range msgs {
+		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
+			return sdkerrors.ErrInvalidRequest.Wrapf(
+				"msg signer doesn't match the receiver, expected signer: %s", receiver)
+		}
+	}
+
+	var asset sdk.Coin
+	switch msg := msgs[0].(type) {
+	case *ltypes.MsgSupplyCollateral:
+		asset = msg.Asset
+	case *ltypes.MsgSupply:
+		asset = msg.Asset
+	case *ltypes.MsgLiquidate:
+		asset = msg.Repayment
+		// TODO more asserts, will be handled in other PR
+	default:
+		return errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+	}
+
+	if err := assertSubCoins(sent, asset); err != nil {
+		return err
+	}
+
+	if msgLen == 1 {
+		// early return - we don't need to do more checks
+		return nil
+	}
+
+	switch msg := msgs[1].(type) {
+	case *ltypes.MsgBorrow:
+		if assertSubCoins(asset, msg.Asset) != nil {
+			return errors.New("MsgBorrow must use MsgSupplyCollateral from messages[0]")
+		}
+	default:
+		return errors.New("only MsgBorrow is supported as messages[1]")
+	}
+
+	return nil
+}
+
+func assertSubCoins(sent, operated sdk.Coin) error {
+	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
+		return errors.New("message must use coins sent from the transfer")
+	}
+	return nil
+}
+
+func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 	switch msg := msg.(type) {
 	case *ltypes.MsgSupply:
 		_, err = im.leverage.Supply(*ctx, msg)
@@ -152,6 +221,8 @@ func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg
 		_, err = im.leverage.SupplyCollateral(*ctx, msg)
 	case *ltypes.MsgBorrow:
 		_, err = im.leverage.Borrow(*ctx, msg)
+	case *ltypes.MsgLiquidate:
+		_, err = im.leverage.Liquidate(*ctx, msg)
 	default:
 		err = sdkerrors.ErrInvalidRequest.Wrapf("unsupported type in the ICS20 memo: %T", msg)
 	}
@@ -161,8 +232,7 @@ func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
 ) (d ics20types.FungibleTokenPacketData, err error) {
 	if err = cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
-		err = errors.Wrap(err,
-			"cannot unmarshal ICS-20 transfer packet data")
+		err = sdkioerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet data")
 	}
 	return
 }
