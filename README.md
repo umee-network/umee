@@ -33,6 +33,7 @@ Umee will allow a multitude of decentralized debt products.
   - [Recommended Database Backend](#recommended-database-backend)
   - [Swagger](#swagger)
   - [Cosmovisor](#cosmovisor)
+- [Validators](#validators)
 - [Liquidators](#liquidators)
 
 ## Releases
@@ -83,7 +84,7 @@ You don't need to do anything if you are using our Docker image.
 Public:
 
 - [umee-1](networks/umee-1) (mainnet)
-- canon-3 (testnet)
+- canon-4 (testnet)
 
 ## Build
 
@@ -191,6 +192,10 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.0/internal/api/lib
 ```
 
 - To use `cosmovisor` for starting `umeed` process, instead of calling `umeed start`, use `cosmovisor run start [umeed flags]`
+
+## Validators
+
+Please follow [Validator Instructions](./VALIDATOR.md) for setting up a validator node.
 
 ## Liquidators
 
