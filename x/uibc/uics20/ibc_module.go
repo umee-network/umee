@@ -73,11 +73,11 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 				logger.Error("sender and receiver are not the same")
 			}
 
-			sender, err := sdk.AccAddressFromBech32(ftData.Sender)
+			receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 			if err != nil {
 				logger.Error("can't parse bech32 address", "err", err)
 			}
-			im.dispatchMemoMsgs(&ctx, sender, msgs)
+			im.dispatchMemoMsgs(&ctx, receiver, msgs)
 		}
 	}
 
@@ -120,17 +120,24 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // runs messages encoded in the ICS20 memo.
 // NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
 // messages are supported. Otherwise the fork storage is discarded.
-func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, msgs []sdk.Msg) {
-	if len(msgs) > 2 {
-		ctx.Logger().Error("ics20 memo with more than 2 messages are not supported")
+func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, msgs []sdk.Msg) {
+	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
+	if l := len(msgs); l > 2 {
+		logger.Error("ics20 memo with more than 2 messages are not supported")
+		return
+	} else if l == 0 {
+		return // nothing to do
+	}
+
+	if err := im.validateMemoMsg(receiver, msgs); err != nil {
+		logger.Error("ics20 memo messages are not valid.", "err", err)
 		return
 	}
 
 	// Caching context so that we don't update the store in case of failure.
 	cacheCtx, flush := ctx.CacheContext()
-	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
 	for _, m := range msgs {
-		if err := im.handleMemoMsg(&cacheCtx, sender, m); err != nil {
+		if err := im.handleMemoMsg(&cacheCtx, m); err != nil {
 			// ignore changes in cacheCtx and return
 			logger.Error("error dispatching", "msg: %v\t\t err: %v", m, err)
 			return
@@ -140,11 +147,19 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, 
 	flush()
 }
 
-func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg sdk.Msg) (err error) {
-	if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(sender) {
-		return sdkerrors.ErrInvalidRequest.Wrapf(
-			"msg signer doesn't match the sender, expected signer: %s", sender)
+// assumes len(msgs) > 0
+func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, msgs []sdk.Msg) error {
+	for _, msg := range msgs {
+		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
+			return sdkerrors.ErrInvalidRequest.Wrapf(
+				"msg signer doesn't match the receiver, expected signer: %s", receiver)
+		}
+
 	}
+	return nil
+}
+
+func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 	switch msg := msg.(type) {
 	case *ltypes.MsgSupply:
 		_, err = im.leverage.Supply(*ctx, msg)
