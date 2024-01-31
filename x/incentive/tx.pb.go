@@ -563,13 +563,12 @@ func (m *MsgGovSetParamsResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_MsgGovSetParamsResponse proto.InternalMessageInfo
 
 // MsgGovCreatePrograms is used by governance to create one or more incentive programs.
-// There are two funding scenarios, depending on from_community_fund.
-// If it is true,the programs' total rewards will be automatically withdrawn from
-// the (parameter) community_fund_address to the incentive module account when this
-// message is passed. (Insufficient funds cause the parameter to be treated as false.)
-// If it is false, a MsgSponsor funding each program's full amount must be submitted
-// after this message passes, but before the program's start_time, or the program
-// will be cancelled when it would otherwise start.
+// There are two funding scenarios. 1) If from_community_fund is true, once the proposal passes,
+// the programs' total rewards will be automatically funded by withdrawning from the community
+// fund to the incentive module account. Will fail if the community fund doesn't have enough coins.
+// 2) If from_community_fund is false, a transaction with MsgSponsor must be submitted to fund
+// all programs with full amount. It must be sent after this message passes and before the
+// program's start_time. If it won't be funded on time, the program will be cancelled.
 type MsgGovCreatePrograms struct {
 	// authority must be the address of the governance account.
 	Authority string             `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
