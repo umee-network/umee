@@ -1,6 +1,8 @@
 package uics20
 
 import (
+	stderrors "errors"
+
 	"cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -122,10 +124,7 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 // messages are supported. Otherwise the fork storage is discarded.
 func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, msgs []sdk.Msg) {
 	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
-	if l := len(msgs); l > 2 {
-		logger.Error("ics20 memo with more than 2 messages are not supported")
-		return
-	} else if l == 0 {
+	if len(msgs) == 0 {
 		return // nothing to do
 	}
 
@@ -149,13 +148,41 @@ func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress
 
 // assumes len(msgs) > 0
 func (im ICS20Module) validateMemoMsg(receiver sdk.AccAddress, msgs []sdk.Msg) error {
+	msgLen := len(msgs)
+	if msgLen > 2 {
+		return stderrors.New("ics20 memo with more than 2 messages are not supported")
+	}
+
 	for _, msg := range msgs {
 		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
 			return sdkerrors.ErrInvalidRequest.Wrapf(
 				"msg signer doesn't match the receiver, expected signer: %s", receiver)
 		}
-
 	}
+
+	collateral := sdk.NewInt64Coin("", 0)
+	switch msg := msgs[0].(type) {
+	case *ltypes.MsgSupplyCollateral:
+		collateral := msg.Asset
+	case *ltypes.MsgSupply:
+	case *ltypes.MsgLiquidate:
+		// TODO add assert, will be handled in other PR
+	default:
+		return stderrors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+	}
+
+	if msgLen == 1 {
+		return nil
+	}
+	switch msg := msgs[0].(type) {
+	case *ltypes.MsgBorrow:
+		if msg.Asset.Denom != collateral.Denom || msg.Asset.Amount.LT(collateral.Amount) {
+			return stderrors.New("MsgBorrow must use MsgSupplyCollateral from messages[0]")
+		}
+	default:
+		return stderrors.New("only MsgBorrow is supported as messages[1]")
+	}
+
 	return nil
 }
 
