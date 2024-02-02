@@ -21,6 +21,8 @@ func TestValidateMemoMsg(t *testing.T) {
 	wrongSignerErr := "signer doesn't match the receiver"
 	asset := coin.New("atom", 10)
 	sent := coin.New("atom", 10)
+	goodMsgSupplyColl := ltypes.NewMsgSupplyCollateral(receiver, asset)
+	goodMsgBorrow := ltypes.NewMsgBorrow(receiver, asset)
 	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv()}
 	tcs := []struct {
 		msgs   []sdk.Msg
@@ -30,16 +32,20 @@ func TestValidateMemoMsg(t *testing.T) {
 		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(accs.Bob, asset)}, wrongSignerErr},
 
 		{[]sdk.Msg{ltypes.NewMsgSupply(receiver, asset)}, ""},
-		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(receiver, asset)}, ""},
+		{[]sdk.Msg{goodMsgSupplyColl}, ""},
 
-		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(receiver, asset),
+		{[]sdk.Msg{goodMsgSupplyColl,
 			ltypes.NewMsgBorrow(accs.Bob, asset)}, wrongSignerErr},
-		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(receiver, asset),
-			ltypes.NewMsgBorrow(receiver, asset)}, ""},
+		{[]sdk.Msg{goodMsgSupplyColl, goodMsgSupplyColl}, "only MsgBorrow is supported as "},
+		{[]sdk.Msg{goodMsgSupplyColl, goodMsgBorrow}, ""},
 
+		{[]sdk.Msg{goodMsgSupplyColl, goodMsgBorrow, goodMsgBorrow},
+			"memo with more than 2 messages are not supported"},
+
+		{[]sdk.Msg{goodMsgBorrow},
+			" are supported as messages[0]"},
 		{[]sdk.Msg{ltypes.NewMsgDecollateralize(receiver, asset)},
-			" are supported as messages[0]",
-		},
+			" are supported as messages[0]"},
 	}
 
 	for i, tc := range tcs {
