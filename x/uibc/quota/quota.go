@@ -233,7 +233,7 @@ func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string
 ) exported.Acknowledgement {
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
 	// check ibc_denom is exists in leverage token registry
-	if !ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
+	if ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
 		// since SendPacket did not prefix the denomination, we must prefix denomination here
 		sourcePrefix := ics20types.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
 		// NOTE: sourcePrefix contains the trailing "/"
