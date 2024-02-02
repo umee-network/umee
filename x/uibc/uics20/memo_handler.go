@@ -22,9 +22,8 @@ type MemoHandler struct {
 func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
 	msgs, err := deserializeMemoMsgs(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
-		// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf
-		//   -> same logic in dispatchMemoMsgs
-		return sdkerrors.Wrap(err, "can't JSON deserialize ftData Memo, expecting list of Msg [%w]")
+		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
+		return nil
 	}
 	// TODO: need to handle fees!
 	// TODO: verify correctly if receiver and sender are similar
