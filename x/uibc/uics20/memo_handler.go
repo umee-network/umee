@@ -111,7 +111,7 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 	switch msg := msgs[1].(type) {
 	case *ltypes.MsgBorrow:
 		if assertSubCoins(asset, msg.Asset) != nil {
-			return errors.New("MsgBorrow must use MsgSupplyCollateral from messages[0]")
+			return errors.New("the MsgBorrow must use MsgSupplyCollateral from messages[0]")
 		}
 	default:
 		return errors.New("only MsgBorrow is supported as messages[1]")
