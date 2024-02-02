@@ -86,19 +86,23 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 		}
 	}
 
-	var asset sdk.Coin
+	var (
+		asset      sdk.Coin
+		collateral sdk.Coin
+	)
 	switch msg := msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
 		asset = msg.Asset
+		collateral = asset
 	case *ltypes.MsgSupply:
 		asset = msg.Asset
 	case *ltypes.MsgLiquidate:
 		asset = msg.Repayment
-		// TODO more asserts, will be handled in other PR
 	default:
-		return errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+		return errors.New(msg0typeErr)
 	}
 
+	// TODO more asserts, will be handled in other PR
 	if err := assertSubCoins(sent, asset); err != nil {
 		return err
 	}
@@ -110,15 +114,20 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 
 	switch msg := msgs[1].(type) {
 	case *ltypes.MsgBorrow:
-		if assertSubCoins(asset, msg.Asset) != nil {
+		if assertSubCoins(collateral, msg.Asset) != nil {
 			return errors.New("the MsgBorrow must use MsgSupplyCollateral from messages[0]")
 		}
 	default:
-		return errors.New("only MsgBorrow is supported as messages[1]")
+		return errors.New(msg1typeErr)
 	}
 
 	return nil
 }
+
+const (
+	msg0typeErr = "only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]"
+	msg1typeErr = "only MsgBorrow is supported as messages[1]"
+)
 
 func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 	switch msg := msg.(type) {
@@ -138,7 +147,7 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 
 func assertSubCoins(sent, operated sdk.Coin) error {
 	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
-		return errors.New("message must use coins sent from the transfer")
+		return errors.New("message must use only coins sent from the transfer")
 	}
 	return nil
 }
