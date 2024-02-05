@@ -10,6 +10,7 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 
+	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/util/store"
@@ -232,38 +233,39 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string,
 ) exported.Acknowledgement {
 	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
-	// check ibc_denom is exists in leverage token registry
-	if ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
-		// since SendPacket did not prefix the denomination, we must prefix denomination here
+	// check ibc_denom is exists in leverage token registry.
+	if ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) &&
+		denom != appparams.BondDenom {
+		// SendPacket did not prefix the denom, so we must prefix denom here
+		// NOTE: sourcePrefix already contains the trailing "/"
 		sourcePrefix := ics20types.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
-		// NOTE: sourcePrefix contains the trailing "/"
 		prefixedDenom := sourcePrefix + denom
-		// construct the denomination trace from the full raw denomination and get the ibc_denom
-		ibcDenom := ics20types.ParseDenomTrace(prefixedDenom).IBCDenom()
-		ts, err := k.leverage.GetTokenSettings(*k.ctx, ibcDenom)
-		if err != nil {
-			if ltypes.ErrNotRegisteredToken.Is(err) {
-				return nil // skip recording inflow if the token is not registered
-			}
-			k.ctx.Logger().Error("can't get x/leverage token settings", "error", err)
-			return channeltypes.NewErrorAcknowledgement(err)
-		}
-
-		// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE`
-		exchangeRate, err := k.oracle.Price(*k.ctx, strings.ToUpper(ts.SymbolDenom))
-		if err != nil {
-			return channeltypes.NewErrorAcknowledgement(err)
-		}
-		// calculate total exchange rate
-		powerReduction := ten.Power(uint64(ts.Exponent))
-		inflowInUSD := sdk.MustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
-
-		tokenInflow := k.GetTokenInflow(ibcDenom)
-		tokenInflow.Amount = tokenInflow.Amount.Add(inflowInUSD)
-		k.SetTokenInflow(tokenInflow)
-		totalInflowSum := k.GetInflowSum()
-		k.SetInflowSum(totalInflowSum.Add(inflowInUSD))
+		denom = ics20types.ParseDenomTrace(prefixedDenom).IBCDenom()
 	}
+
+	ts, err := k.leverage.GetTokenSettings(*k.ctx, denom)
+	if err != nil {
+		if ltypes.ErrNotRegisteredToken.Is(err) {
+			return nil // skip recording inflow if the token is not registered
+		}
+		k.ctx.Logger().Error("can't get x/leverage token settings", "error", err)
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+
+	// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE`
+	exchangeRate, err := k.oracle.Price(*k.ctx, strings.ToUpper(ts.SymbolDenom))
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+	// calculate total exchange rate
+	powerReduction := ten.Power(uint64(ts.Exponent))
+	inflowInUSD := sdk.MustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
+
+	tokenInflow := k.GetTokenInflow(denom)
+	tokenInflow.Amount = tokenInflow.Amount.Add(inflowInUSD)
+	k.SetTokenInflow(tokenInflow)
+	totalInflowSum := k.GetInflowSum()
+	k.SetInflowSum(totalInflowSum.Add(inflowInUSD))
 
 	return nil
 }
