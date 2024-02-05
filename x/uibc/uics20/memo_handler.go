@@ -22,12 +22,11 @@ type MemoHandler struct {
 func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
 	msgs, err := deserializeMemoMsgs(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
-		// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf
-		//   -> same logic in dispatchMemoMsgs
-		return sdkerrors.Wrap(err, "can't JSON deserialize ftData Memo, expecting list of Msg [%w]")
+		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
+		return nil
 	}
 	// TODO: need to handle fees!
-	// TODO: verify correctly if receiver and sender are similar
+	// TODO: verify correctly if receiver and sender are the same (modulo hrp)
 
 	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 	if err != nil {
@@ -66,6 +65,12 @@ func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress
 	return nil
 }
 
+// error messages used in validateMemoMsg
+const (
+	msg0typeErr = "only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]"
+	msg1typeErr = "only MsgBorrow is supported as messages[1]"
+)
+
 // We only support the following message combinations:
 // - [MsgSupply]
 // - [MsgSupplyCollateral]
@@ -86,19 +91,23 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 		}
 	}
 
-	var asset sdk.Coin
+	var (
+		asset      sdk.Coin
+		collateral sdk.Coin
+	)
 	switch msg := msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
 		asset = msg.Asset
+		collateral = asset
 	case *ltypes.MsgSupply:
 		asset = msg.Asset
 	case *ltypes.MsgLiquidate:
 		asset = msg.Repayment
-		// TODO more asserts, will be handled in other PR
 	default:
-		return errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+		return errors.New(msg0typeErr)
 	}
 
+	// TODO more asserts, will be handled in other PR
 	if err := assertSubCoins(sent, asset); err != nil {
 		return err
 	}
@@ -110,11 +119,11 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 
 	switch msg := msgs[1].(type) {
 	case *ltypes.MsgBorrow:
-		if assertSubCoins(asset, msg.Asset) != nil {
+		if assertSubCoins(collateral, msg.Asset) != nil {
 			return errors.New("the MsgBorrow must use MsgSupplyCollateral from messages[0]")
 		}
 	default:
-		return errors.New("only MsgBorrow is supported as messages[1]")
+		return errors.New(msg1typeErr)
 	}
 
 	return nil
@@ -138,7 +147,7 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 
 func assertSubCoins(sent, operated sdk.Coin) error {
 	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
-		return errors.New("message must use coins sent from the transfer")
+		return errors.New("message must use only coins sent from the transfer")
 	}
 	return nil
 }
