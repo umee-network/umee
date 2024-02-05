@@ -151,10 +151,11 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 func TestKeeper_RecordIBCInflow(t *testing.T) {
 	atomAmount := sdkmath.NewInt(100_000000)
 	atomPrice := sdk.MustNewDecFromStr("0.37")
-	// ibc incoming denom from packet is `port/path/base_denom`
-	atomToken := sdk.NewCoin("transfer/channel-10/uatom", atomAmount)
+	// ibc denom = base_denom when sender chain is source chain
+	// ibc denom = ibc/XXX when sender chain is receiver chain
+	atomToken := sdk.NewCoin("uatom", atomAmount)
 	atomExponent := 6
-	inflowBaseDenom := "ibc/D6372674F0E9A3A7ADC2FEFD8B2708C5008C7ED04DA6566E279DC1321BDDCB6F"
+	inflowBaseDenom := "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
