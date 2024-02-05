@@ -26,7 +26,7 @@ func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleT
 		return nil
 	}
 	// TODO: need to handle fees!
-	// TODO: verify correctly if receiver and sender are similar
+	// TODO: verify correctly if receiver and sender are the same (modulo hrp)
 
 	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 	if err != nil {
@@ -64,6 +64,12 @@ func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress
 	flush()
 	return nil
 }
+
+// error messages used in validateMemoMsg
+const (
+	msg0typeErr = "only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]"
+	msg1typeErr = "only MsgBorrow is supported as messages[1]"
+)
 
 // We only support the following message combinations:
 // - [MsgSupply]
@@ -122,11 +128,6 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 
 	return nil
 }
-
-const (
-	msg0typeErr = "only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]"
-	msg1typeErr = "only MsgBorrow is supported as messages[1]"
-)
 
 func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 	switch msg := msg.(type) {
