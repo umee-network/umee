@@ -10,6 +10,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
+	appparams "github.com/umee-network/umee/v6/app/params"
 	lfixtures "github.com/umee-network/umee/v6/x/leverage/fixtures"
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/oracle/types"
@@ -149,13 +150,14 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 }
 
 func TestKeeper_RecordIBCInflow(t *testing.T) {
-	atomAmount := sdkmath.NewInt(100_000000)
-	atomPrice := sdk.MustNewDecFromStr("0.37")
+	tokenAmount := sdkmath.NewInt(100_000000)
+	tokenPrice := sdk.MustNewDecFromStr("0.37")
+	tokenExponent := 6
 	// ibc denom = base_denom when sender chain is source chain
-	// ibc denom = ibc/XXX when sender chain is receiver chain
-	atomToken := sdk.NewCoin("uatom", atomAmount)
-	atomExponent := 6
-	inflowBaseDenom := "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
+	atomToken := sdk.NewCoin("uatom", tokenAmount)
+	// ibc denom = (port/channel/base_denom) when we receive token back which is send from UMEE
+	umeeNativeToken := sdk.NewCoin("transfer/channel-10/uumee", tokenAmount)
+	atomIBCDenom := "ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9"
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -168,11 +170,16 @@ func TestKeeper_RecordIBCInflow(t *testing.T) {
 	err := k.ResetAllQuotas()
 	assert.NilError(t, err)
 
-	// ATOM, returns token settings and prices from mock leverage and oracle keepers, no errors expected
-	leverageMock.EXPECT().GetTokenSettings(ctx, inflowBaseDenom).Return(
-		lfixtures.Token(inflowBaseDenom, "ATOM", uint32(atomExponent)), nil,
+	// ATOM returns token settings and prices from mock leverage and oracle keepers, no errors expected
+	leverageMock.EXPECT().GetTokenSettings(ctx, atomIBCDenom).Return(
+		lfixtures.Token(atomIBCDenom, "ATOM", uint32(tokenExponent)), nil,
 	).AnyTimes()
-	oracleMock.EXPECT().Price(ctx, "ATOM").Return(atomPrice, nil).AnyTimes()
+	oracleMock.EXPECT().Price(ctx, "ATOM").Return(tokenPrice, nil).AnyTimes()
+	// UMEE
+	leverageMock.EXPECT().GetTokenSettings(ctx, appparams.BondDenom).Return(
+		lfixtures.Token(appparams.BondDenom, appparams.DisplayDenom, uint32(tokenExponent)), nil,
+	).AnyTimes()
+	oracleMock.EXPECT().Price(ctx, appparams.DisplayDenom).Return(tokenPrice, nil).AnyTimes()
 
 	packet := channeltypes.Packet{
 		Sequence:           10,
@@ -183,10 +190,14 @@ func TestKeeper_RecordIBCInflow(t *testing.T) {
 		Data:               nil,
 	}
 
+	// A -> B (record if B is receiver chain)
 	ackErr := k.RecordIBCInflow(packet, atomToken.Denom, atomToken.Amount.String())
 	assert.Assert(t, nil, ackErr)
+	// A -> B (record if B is source chain, we are receiving token back which is send from A chain)
+	ackErr = k.RecordIBCInflow(packet, umeeNativeToken.Denom, umeeNativeToken.Amount.String())
+	assert.Assert(t, nil, ackErr)
 
-	o := k.GetTokenInflow(inflowBaseDenom)
+	o := k.GetTokenInflow(atomIBCDenom)
 	// expected inflow amount 37 =( atomPrice * atomAmount) / atomExponent
 	inflowAmount := sdkmath.LegacyMustNewDecFromStr("37")
 	assert.DeepEqual(t, o.Amount, inflowAmount)
@@ -194,16 +205,19 @@ func TestKeeper_RecordIBCInflow(t *testing.T) {
 	ackErr = k.RecordIBCInflow(packet, atomToken.Denom, atomToken.Amount.String())
 	assert.Assert(t, nil, ackErr)
 
-	o = k.GetTokenInflow(inflowBaseDenom)
+	o = k.GetTokenInflow(atomIBCDenom)
 	assert.DeepEqual(t, o.Amount, inflowAmount.Add(inflowAmount))
+
+	p := k.GetTokenInflow(appparams.BondDenom)
+	assert.DeepEqual(t, p.Amount, inflowAmount)
 
 	allInflows, err := k.GetAllInflows()
 	assert.NilError(t, err)
-	assert.DeepEqual(t, allInflows, sdk.DecCoins{o})
+	assert.DeepEqual(t, allInflows, sdk.DecCoins{o, p})
 
 	err = k.ResetAllQuotas()
 	assert.NilError(t, err)
 
-	o = k.GetTokenInflow(inflowBaseDenom)
+	o = k.GetTokenInflow(atomIBCDenom)
 	assert.DeepEqual(t, o.Amount, sdk.ZeroDec())
 }
