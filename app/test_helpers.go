@@ -37,7 +37,6 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/umee-network/umee/v6/app/params"
-	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
@@ -250,7 +249,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	if err := cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState); err != nil {
 		panic(err)
 	}
-	um := appparams.UmeeTokenMetadata()
+	um := params.UmeeTokenMetadata()
 	leverageGenState.Registry = []leveragetypes.Token{
 		fixtures.Token(um.Base, um.Symbol, 6),
 	}
