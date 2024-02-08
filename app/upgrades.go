@@ -60,7 +60,7 @@ func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
 			// Add UX denom aliases to metadata
 			app.BankKeeper.SetDenomMetaData(ctx, umeeTokenMetadata())
 
-			// migrate leverage token seettings
+			// migrate leverage token settings
 			tokens := app.LeverageKeeper.GetAllRegisteredTokens(ctx)
 			for _, token := range tokens {
 				// this will allow existing interest rate curves to pass new Token validation
