@@ -63,7 +63,8 @@ func (s *E2ESuite) RunQuery(tq TestQuery) {
 
 		err = clientCtx.Codec.UnmarshalJSON(out.Bytes(), tq.Response)
 		assert.NilError(s.T, err, tq.Name)
-		assert.Equal(s.T, tq.ExpectedResponse.String(), tq.Response.String(), tq.Name)
+		s.T.Log("query test name: ", tq.Name)
+		assert.DeepEqual(s.T, tq.ExpectedResponse, tq.Response)
 	}
 }
 

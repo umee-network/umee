@@ -12,7 +12,7 @@ func (s *IntegrationTestSuite) TestHooks_AfterTokenRegistered() {
 	// require that an existing token does not change the accept list
 	h.AfterTokenRegistered(s.ctx, leveragetypes.Token{
 		BaseDenom:   appparams.BondDenom,
-		SymbolDenom: appparams.DisplayDenom,
+		SymbolDenom: appparams.LegacyDisplayDenom,
 		Exponent:    6,
 	})
 	s.Require().Len(s.app.OracleKeeper.AcceptList(s.ctx), 1)

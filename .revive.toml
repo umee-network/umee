@@ -29,7 +29,7 @@ confidence = 0
 [rule.time-naming]
 [rule.unexported-return]
 [rule.unreachable-code]
-[rule.unused-parameter]
+#[rule.unused-parameter]
 [rule.var-declaration]
 [rule.var-naming]
 

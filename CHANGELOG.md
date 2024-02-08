@@ -52,6 +52,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+- [2328](https://github.com/umee-network/umee/pull/2328) Add UX and `uux` denom aliases for UMEE.
 - [2388](https://github.com/umee-network/umee/pull/2388) Adjust interest rate algorithm and associated token parameter validation rules.
 
 ### Bug Fixes

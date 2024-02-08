@@ -5,6 +5,7 @@ import (
 )
 
 // AccountAddressPrefix defines the Umee network's Bech32 address prefix.
+// NOTE: this must not be changed.
 const AccountAddressPrefix = "umee"
 
 // Account specific Bech32 prefixes.
