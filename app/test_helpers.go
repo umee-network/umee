@@ -37,6 +37,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	"github.com/umee-network/umee/v6/app/params"
+	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
@@ -249,8 +250,9 @@ func IntegrationTestNetworkConfig() network.Config {
 	if err := cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState); err != nil {
 		panic(err)
 	}
+	um := appparams.UmeeTokenMetadata()
 	leverageGenState.Registry = []leveragetypes.Token{
-		fixtures.Token(params.BondDenom, params.DisplayDenom, 6),
+		fixtures.Token(um.Base, um.Symbol, 6),
 	}
 
 	bz, err := cdc.MarshalJSON(&leverageGenState)
@@ -269,12 +271,12 @@ func IntegrationTestNetworkConfig() network.Config {
 	// are not running a price-feeder.
 	oracleGenState.Params.VotePeriod = 1000
 	oracleGenState.ExchangeRates = append(oracleGenState.ExchangeRates, oracletypes.NewDenomExchangeRate(
-		params.DisplayDenom, sdk.MustNewDecFromStr("34.21"), time.Now()))
+		params.LegacyDisplayDenom, sdk.MustNewDecFromStr("34.21"), time.Now()))
 	// Set mock historic medians to satisfy leverage module's 24 median requirement
 	for i := 1; i <= 24; i++ {
 		median := oracletypes.Price{
 			ExchangeRateTuple: oracletypes.NewExchangeRateTuple(
-				params.DisplayDenom,
+				params.LegacyDisplayDenom,
 				sdk.MustNewDecFromStr("34.21"),
 			),
 			BlockNum: uint64(i),

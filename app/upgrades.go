@@ -18,6 +18,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
 
+	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
@@ -58,7 +59,7 @@ func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			printPlanName(planName, ctx.Logger())
 			// Add UX denom aliases to metadata
-			app.BankKeeper.SetDenomMetaData(ctx, umeeTokenMetadata())
+			app.BankKeeper.SetDenomMetaData(ctx, appparams.UmeeTokenMetadata())
 
 			// migrate leverage token settings
 			tokens := app.LeverageKeeper.GetAllRegisteredTokens(ctx)

@@ -4,6 +4,7 @@ import (
 	"log"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 const (
@@ -45,4 +46,28 @@ func init() {
 		// allow "ux" token. Modify the default regexp to allow 2 character long denoms.
 		return `[a-zA-Z][a-zA-Z0-9/:._-]{1,127}`
 	})
+}
+
+// UmeeTokenMetadata creates bank Metadata for the UX token
+func UmeeTokenMetadata() banktypes.Metadata {
+	return banktypes.Metadata{
+		Description: "The native staking token of the Umee network.",
+		Base:        BondDenom, // NOTE: must not change
+		Name:        DisplayDenom,
+		Display:     DisplayDenom,
+		Symbol:      LegacyDisplayDenom,
+		DenomUnits: []*banktypes.DenomUnit{
+			{
+				Denom:    BondDenom,
+				Exponent: 0,
+				Aliases: []string{
+					"microumee", BaseExtraDenom,
+				},
+			}, {
+				Denom:    DisplayDenom,
+				Exponent: 6,
+				Aliases:  []string{LegacyDisplayDenom},
+			},
+		},
+	}
 }

@@ -31,32 +31,9 @@ type BankModule struct {
 	bank.AppModuleBasic
 }
 
-func umeeTokenMetadata() banktypes.Metadata {
-	return banktypes.Metadata{
-		Description: "The native staking token of the Umee network.",
-		Base:        appparams.BondDenom, // NOTE: must not change
-		Name:        appparams.DisplayDenom,
-		Display:     appparams.DisplayDenom,
-		Symbol:      appparams.LegacyDisplayDenom,
-		DenomUnits: []*banktypes.DenomUnit{
-			{
-				Denom:    appparams.BondDenom,
-				Exponent: 0,
-				Aliases: []string{
-					"microumee", appparams.BaseExtraDenom,
-				},
-			}, {
-				Denom:    appparams.DisplayDenom,
-				Exponent: 6,
-				Aliases:  []string{appparams.LegacyDisplayDenom},
-			},
-		},
-	}
-}
-
 // DefaultGenesis returns custom Umee x/bank module genesis state.
 func (BankModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	umeeMetadata := umeeTokenMetadata()
+	umeeMetadata := appparams.UmeeTokenMetadata()
 	genState := banktypes.DefaultGenesisState()
 	genState.DenomMetadata = append(genState.DenomMetadata, umeeMetadata)
 
