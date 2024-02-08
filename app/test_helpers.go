@@ -27,6 +27,7 @@ import (
 	pruningtypes "github.com/cosmos/cosmos-sdk/store/pruning/types"
 	"github.com/cosmos/cosmos-sdk/testutil/mock"
 	"github.com/cosmos/cosmos-sdk/testutil/network"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -60,10 +61,6 @@ var DefaultConsensusParams = &tmproto.ConsensusParams{
 		},
 	},
 }
-
-type EmptyAppOptions struct{}
-
-func (EmptyAppOptions) Get(string) interface{} { return nil }
 
 func Setup(t *testing.T) *UmeeApp {
 	t.Helper()
@@ -224,7 +221,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		map[int64]bool{},
 		DefaultNodeHome,
 		invCheckPeriod,
-		EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		EmptyWasmOpts,
 	)
 	if withGenesis {
@@ -409,7 +406,7 @@ func NewTestNetworkFixture() network.TestFixture {
 			make(map[int64]bool),
 			val.GetCtx().Config.RootDir,
 			0,
-			EmptyAppOptions{},
+			simtestutil.EmptyAppOptions{},
 			EmptyWasmOpts,
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 			baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),

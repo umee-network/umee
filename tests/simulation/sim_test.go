@@ -68,7 +68,7 @@ func TestFullAppSimulation(t *testing.T) {
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
 		simcli.FlagPeriodValue,
-		umeeapp.EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)
@@ -135,7 +135,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				map[int64]bool{},
 				umeeapp.DefaultNodeHome,
 				simcli.FlagPeriodValue,
-				umeeapp.EmptyAppOptions{},
+				simtestutil.EmptyAppOptions{},
 				umeeapp.EmptyWasmOpts,
 				interBlockCacheOpt(),
 				baseapp.SetChainID(config.ChainID),
@@ -201,7 +201,7 @@ func BenchmarkFullAppSimulation(b *testing.B) {
 		map[int64]bool{},
 		umeeapp.DefaultNodeHome,
 		simcli.FlagPeriodValue,
-		umeeapp.EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		umeeapp.EmptyWasmOpts,
 		interBlockCacheOpt(),
 	)

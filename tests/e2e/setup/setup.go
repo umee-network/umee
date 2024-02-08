@@ -84,7 +84,7 @@ func (s *E2ETestSuite) SetupSuite() {
 		map[int64]bool{},
 		"",
 		0,
-		app.EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		app.EmptyWasmOpts,
 	)
 	encodingConfig = testutil.TestEncodingConfig{
