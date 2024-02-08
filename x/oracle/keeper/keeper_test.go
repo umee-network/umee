@@ -28,9 +28,9 @@ import (
 )
 
 const (
-	displayDenom string = appparams.LegacyDisplayDenom
-	bondDenom    string = appparams.BondDenom
-	initialPower        = int64(10000000000)
+	displayDenom = appparams.LegacyDisplayDenom
+	bondDenom    = appparams.BondDenom
+	initialPower = int64(10000000000)
 )
 
 // Test addresses
