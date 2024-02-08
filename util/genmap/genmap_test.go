@@ -42,5 +42,4 @@ func TestMapToSlice(t *testing.T) {
 	m = map[string]int{}
 	ls = MapValues(m)
 	assert.DeepEqual(t, []int{}, ls)
-
 }

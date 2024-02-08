@@ -231,40 +231,53 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 // RecordIBCInflow will save the inflow amount if token is registered otherwise it will skip
 func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string,
 ) exported.Acknowledgement {
-
-	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)) to
-	// check ibc_denom is exists in leverage token registry
-	if !ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
-		// since SendPacket did not prefix the denomination, we must prefix denomination here
+	// if chain is recevier and sender chain is source then we need create ibc_denom (ibc/hash(channel,denom)).
+	if ics20types.SenderChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
+		// SendPacket did not prefix the denom, so we must prefix denom here
+		// NOTE: sourcePrefix already contains the trailing "/"
 		sourcePrefix := ics20types.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
-		// NOTE: sourcePrefix contains the trailing "/"
 		prefixedDenom := sourcePrefix + denom
-		// construct the denomination trace from the full raw denomination and get the ibc_denom
-		ibcDenom := ics20types.ParseDenomTrace(prefixedDenom).IBCDenom()
-		ts, err := k.leverage.GetTokenSettings(*k.ctx, ibcDenom)
-		if err != nil {
-			if ltypes.ErrNotRegisteredToken.Is(err) {
-				return nil // skip recording inflow if the token is not registered
-			}
-			k.ctx.Logger().Error("can't get x/leverage token settings", "error", err)
-			return channeltypes.NewErrorAcknowledgement(err)
-		}
+		denom = ics20types.ParseDenomTrace(prefixedDenom).IBCDenom()
+	} else {
+		// if we receive back a token, that was originally sent from UMEE, then we need to fetch the native denom
+		// receive denom(port/channel/base_denom) to base_denom
 
-		// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE`
-		exchangeRate, err := k.oracle.Price(*k.ctx, strings.ToUpper(ts.SymbolDenom))
-		if err != nil {
-			return channeltypes.NewErrorAcknowledgement(err)
+		// remove prefix added by the sender chain
+		voucherPrefix := ics20types.GetDenomPrefix(packet.GetSourcePort(), packet.GetSourceChannel())
+		unprefixedDenom := denom[len(voucherPrefix):]
+		// coin denomination used in sending from the escrow address
+		denom = unprefixedDenom
+		// The denomination used to send the coins is either the native denom or the hash of the path
+		// if the denomination is not native.
+		denomTrace := ics20types.ParseDenomTrace(unprefixedDenom)
+		if !denomTrace.IsNativeDenom() {
+			denom = denomTrace.IBCDenom()
 		}
-		// calculate total exchange rate
-		powerReduction := ten.Power(uint64(ts.Exponent))
-		inflowInUSD := sdk.MustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
-
-		tokenInflow := k.GetTokenInflow(ibcDenom)
-		tokenInflow.Amount = tokenInflow.Amount.Add(inflowInUSD)
-		k.SetTokenInflow(tokenInflow)
-		totalInflowSum := k.GetInflowSum()
-		k.SetInflowSum(totalInflowSum.Add(inflowInUSD))
 	}
+
+	ts, err := k.leverage.GetTokenSettings(*k.ctx, denom)
+	if err != nil {
+		if ltypes.ErrNotRegisteredToken.Is(err) {
+			return nil // skip recording inflow if the token is not registered
+		}
+		k.ctx.Logger().Error("can't get x/leverage token settings", "error", err)
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+
+	// get the exchange price (eg: UMEE) in USD from oracle using SYMBOL Denom eg: `UMEE`
+	exchangeRate, err := k.oracle.Price(*k.ctx, strings.ToUpper(ts.SymbolDenom))
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+	// calculate total exchange rate
+	powerReduction := ten.Power(uint64(ts.Exponent))
+	inflowInUSD := sdk.MustNewDecFromStr(amount).Quo(powerReduction).Mul(exchangeRate)
+
+	tokenInflow := k.GetTokenInflow(denom)
+	tokenInflow.Amount = tokenInflow.Amount.Add(inflowInUSD)
+	k.SetTokenInflow(tokenInflow)
+	totalInflowSum := k.GetInflowSum()
+	k.SetInflowSum(totalInflowSum.Add(inflowInUSD))
 
 	return nil
 }
