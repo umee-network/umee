@@ -64,9 +64,9 @@ func UmeeTokenMetadata() banktypes.Metadata {
 					"microumee", BaseExtraDenom,
 				},
 			}, {
-				Denom:    LegacyDisplayDenom,
+				Denom:    DisplayDenom,
 				Exponent: 6,
-				Aliases:  []string{DisplayDenom},
+				Aliases:  []string{LegacyDisplayDenom},
 			},
 		},
 	}
