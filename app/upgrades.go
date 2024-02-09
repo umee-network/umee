@@ -21,6 +21,7 @@ import (
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 
 	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v8/packetforward/types"
+	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 )
@@ -51,6 +52,34 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
 	app.registerUpgrade("v6.3", upgradeInfo)
 	app.registerUpgrade("v047-to-v050", upgradeInfo, packetforwardtypes.ModuleName)
+
+	app.registerUpgrade6_4(upgradeInfo)
+}
+
+func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
+	planName := "v6.4"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			printPlanName(planName, ctx.Logger())
+			// Add UX denom aliases to metadata
+			app.BankKeeper.SetDenomMetaData(ctx, appparams.UmeeTokenMetadata())
+
+			// migrate leverage token settings
+			tokens := app.LeverageKeeper.GetAllRegisteredTokens(ctx)
+			for _, token := range tokens {
+				// this will allow existing interest rate curves to pass new Token validation
+				if token.KinkUtilization.GTE(token.MaxSupplyUtilization) {
+					token.KinkUtilization = token.MaxSupplyUtilization
+					token.KinkBorrowRate = token.MaxBorrowRate
+					if err := app.LeverageKeeper.SetTokenSettings(ctx, token); err != nil {
+						return fromVM, err
+					}
+				}
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 func (app *UmeeApp) registerUpgrade6_0(upgradeInfo upgradetypes.Plan) {
@@ -60,7 +89,7 @@ func (app *UmeeApp) registerUpgrade6_0(upgradeInfo upgradetypes.Plan) {
 	util.Panic(err)
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			printPlanName(planName, sdkCtx.Logger())
 			if err := app.LeverageKeeper.SetParams(sdkCtx, leveragetypes.DefaultParams()); err != nil {
@@ -82,7 +111,7 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 	const planName = "v4.3"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 			sdkCtx := sdk.UnwrapSDKContext(ctx)
 			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
@@ -128,7 +157,7 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 }
 
 func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
-	return func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+	return func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
 		sdkCtx := sdk.UnwrapSDKContext(ctx)
 		printPlanName(planName, sdkCtx.Logger())
 		sdkCtx.Logger().Info("-----------------------------\n-----------------------------")

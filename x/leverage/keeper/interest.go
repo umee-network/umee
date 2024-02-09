@@ -18,21 +18,27 @@ func (k Keeper) DeriveBorrowAPY(ctx sdk.Context, denom string) sdkmath.LegacyDec
 	if err != nil {
 		return sdkmath.LegacyZeroDec()
 	}
-
 	if token.Blacklist {
 		// Regardless of params, AccrueAllInterest skips blacklisted denoms
 		return sdkmath.LegacyZeroDec()
 	}
 
+	// Derive current supply utilization, which will always be between 0.0 and 1.0
 	utilization := k.SupplyUtilization(ctx, denom)
 
+	// Tokens which have reached or exceeded their max supply utilization always use max borrow APY
+	if utilization.GTE(token.MaxSupplyUtilization) {
+		return token.MaxBorrowRate
+	}
+
+	// Tokens which are past kink value but have not reached max supply utilization interpolate between the two
 	if utilization.GTE(token.KinkUtilization) {
 		return Interpolate(
-			utilization,            // x
-			token.KinkUtilization,  // x1
-			token.KinkBorrowRate,   // y1
-			sdkmath.LegacyOneDec(), // x2
-			token.MaxBorrowRate,    // y2
+			utilization,                // x
+			token.KinkUtilization,      // x1
+			token.KinkBorrowRate,       // y1
+			token.MaxSupplyUtilization, // x2
+			token.MaxBorrowRate,        // y2
 		)
 	}
 

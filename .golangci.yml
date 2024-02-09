@@ -95,6 +95,6 @@ linters-settings:
       - name: time-naming
       - name: unexported-return
       - name: unreachable-code
-      - name: unused-parameter
+      # - name: unused-parameter
       - name: var-declaration
       - name: var-naming

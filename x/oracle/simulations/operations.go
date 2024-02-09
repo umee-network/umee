@@ -111,7 +111,7 @@ func SimulateMsgAggregateExchangeRatePrevote(
 	voteHashMap map[string]string,
 ) simtypes.Operation {
 	return func(
-		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
+		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount := accs[1] // , _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
@@ -155,7 +155,7 @@ func SimulateMsgAggregateExchangeRateVote(
 	voteHashMap map[string]string,
 ) simtypes.Operation {
 	return func(
-		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
+		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		address := sdk.ValAddress(simAccount.Address)
@@ -197,7 +197,7 @@ func SimulateMsgAggregateExchangeRateVote(
 // SimulateMsgDelegateFeedConsent generates a MsgDelegateFeedConsent with random values.
 func SimulateMsgDelegateFeedConsent(ak types.AccountKeeper, bk bankkeeper.Keeper, k keeper.Keeper) simtypes.Operation {
 	return func(
-		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, chainID string,
+		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context, accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		simAccount, _ := simtypes.RandomAcc(r, accs)
 		delegateAccount, _ := simtypes.RandomAcc(r, accs)

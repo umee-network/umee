@@ -124,7 +124,7 @@ func WeightedOperations(
 func SimulateMsgSupply(ak simulation.AccountKeeper, bk bankkeeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
-		accs []simtypes.Account, chainID string,
+		accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, c, skip := randomSupplyFields(r, ctx, accs, bk)
 		if skip {
@@ -142,7 +142,7 @@ func SimulateMsgSupply(ak simulation.AccountKeeper, bk bankkeeper.Keeper) simtyp
 func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
-		accs []simtypes.Account, chainID string,
+		accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, withdrawUToken, skip := randomWithdrawFields(r, ctx, accs, bk, lk)
 		if skip {
@@ -160,7 +160,7 @@ func SimulateMsgWithdraw(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk k
 func SimulateMsgBorrow(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
-		accs []simtypes.Account, chainID string,
+		accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, token, skip := randomBorrowFields(r, ctx, accs, lk)
 		if skip {
@@ -181,7 +181,7 @@ func SimulateMsgCollateralize(
 ) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
-		accs []simtypes.Account, chainID string,
+		accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomCollateralizeFields(r, ctx, accs, bk)
 		if skip {
@@ -203,7 +203,7 @@ func SimulateMsgDecollateralize(
 ) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
-		accs []simtypes.Account, chainID string,
+		accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, collateral, skip := randomDecollateralizeFields(r, ctx, accs, lk)
 		if skip {
@@ -221,7 +221,7 @@ func SimulateMsgDecollateralize(
 func SimulateMsgRepay(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
-		accs []simtypes.Account, chainID string,
+		accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		from, repayToken, skip := randomRepayFields(r, ctx, accs, lk)
 		if skip {
@@ -239,7 +239,7 @@ func SimulateMsgRepay(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keep
 func SimulateMsgLiquidate(ak simulation.AccountKeeper, bk bankkeeper.Keeper, lk keeper.Keeper) simtypes.Operation {
 	return func(
 		r *rand.Rand, app *baseapp.BaseApp, ctx sdk.Context,
-		accs []simtypes.Account, chainID string,
+		accs []simtypes.Account, _ string,
 	) (simtypes.OperationMsg, []simtypes.FutureOperation, error) {
 		liquidator, borrower, repaymentToken, rewardDenom, skip := randomLiquidateFields(r, ctx, accs, lk)
 		if skip {

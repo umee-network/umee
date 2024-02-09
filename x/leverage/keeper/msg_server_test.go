@@ -1977,9 +1977,10 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow_DecreasingMaxSupplyUtilization()
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
-	// and MaxSupplyUtilization to 0.7
+	// and MaxSupplyUtilization to 0.7 (also adjusting kink for token validity)
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
 	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
+	umeeToken.KinkUtilization = sdkmath.LegacyMustNewDecFromStr("0.6")
 	umeeToken.MaxSupplyUtilization = sdkmath.LegacyMustNewDecFromStr("0.7")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 
@@ -2023,9 +2024,10 @@ func (s *IntegrationTestSuite) TestMsgMaxBorrow_ZeroAvailableBasedOnMaxSupplyUti
 	app, ctx, srv, require := s.app, s.ctx, s.msgSrvr, s.Require()
 
 	// overriding UMEE token settings, changing MinCollateralLiquidity to 0.2
-	// and MaxSupplyUtilization to 0.5
+	// and MaxSupplyUtilization to 0.5 (also adjusting kink for token validity)
 	umeeToken := newToken(umeeDenom, "UMEE", 6)
 	umeeToken.MinCollateralLiquidity = sdkmath.LegacyMustNewDecFromStr("0.2")
+	umeeToken.KinkUtilization = sdkmath.LegacyMustNewDecFromStr("0.45")
 	umeeToken.MaxSupplyUtilization = sdkmath.LegacyMustNewDecFromStr("0.5")
 	require.NoError(app.LeverageKeeper.SetTokenSettings(ctx, umeeToken))
 

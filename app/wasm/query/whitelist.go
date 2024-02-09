@@ -168,7 +168,7 @@ func setWhitelistedQuery(queryPath string, protoType proto.Message) {
 
 func GetStargateWhitelistedPaths() (keys []string) {
 	// Iterate over the map and collect the keys
-	stargateWhitelist.Range(func(key, value interface{}) bool {
+	stargateWhitelist.Range(func(key, _ interface{}) bool {
 		keyStr, ok := key.(string)
 		if !ok {
 			panic("key is not a string")

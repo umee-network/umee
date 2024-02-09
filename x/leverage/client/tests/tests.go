@@ -92,7 +92,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
-					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+					fixtures.Token(appparams.BondDenom, appparams.LegacyDisplayDenom, 6),
 				},
 			},
 			ErrMsg: "",
@@ -114,7 +114,7 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			Response: &types.QueryRegisteredTokensResponse{},
 			ExpectedResponse: &types.QueryRegisteredTokensResponse{
 				Registry: []types.Token{
-					fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+					fixtures.Token(appparams.BondDenom, appparams.LegacyDisplayDenom, 6),
 				},
 			},
 			ErrMsg: "",
@@ -127,12 +127,12 @@ func (s *IntegrationTests) TestLeverageScenario() {
 			},
 			Response: &types.QueryMarketSummaryResponse{},
 			ExpectedResponse: &types.QueryMarketSummaryResponse{
-				SymbolDenom:         "UMEE",
+				SymbolDenom:         appparams.LegacyDisplayDenom,
 				Exponent:            6,
 				OraclePrice:         &oracleSymbolPrice,
 				OracleHistoricPrice: &oracleSymbolPrice,
 				UTokenExchangeRate:  sdkmath.LegacyOneDec(),
-				// Borrow rate * (1.52 - ReserveFactor - OracleRewardFactor)
+				// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
 				// 1.52 * (1 - 0.2 - 0.01) = 1.2008
 				Supply_APY: sdkmath.LegacyMustNewDecFromStr("1.2008"),
 				// This is an edge case technically - when effective supply, meaning

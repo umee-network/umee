@@ -1,20 +1,17 @@
 package uics20
 
 import (
-	"fmt"
-
-	"cosmossdk.io/errors"
+	sdkerrors "cosmossdk.io/errors"
+	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
-	"github.com/umee-network/umee/v6/x/uibc"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
@@ -59,27 +56,10 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return ack
 	}
 	if ftData.Memo != "" {
-		logger := ctx.Logger()
-		msgs, err := DeserializeMemoMsgs(im.cdc, []byte(ftData.Memo))
-		if err != nil {
-			// TODO: need to verify if we want to stop the handle the error or revert the ibc transerf
-			//   -> same logic in dispatchMemoMsgs
-			logger.Error("can't JSON deserialize ftData Memo, expecting list of Msg", "err", err)
-		} else {
-			// TODO: need to handle fees!
-			logger.Info("handling IBC transfer with memo", "sender", ftData.Sender,
-				"receiver", ftData.Receiver)
-
-			// TODO: we need to rework this if this is not a case, and check receiver!
-			if ftData.Sender != ftData.Receiver {
-				logger.Error("sender and receiver are not the same")
-			}
-
-			sender, err := sdk.AccAddressFromBech32(ftData.Sender)
-			if err != nil {
-				logger.Error("can't parse bech32 address", "err", err)
-			}
-			im.dispatchMemoMsgs(&ctx, sender, msgs)
+		logger := recvPacketLogger(&ctx)
+		mh := MemoHandler{im.cdc, im.leverage}
+		if err := mh.onRecvPacket(&ctx, ftData); err != nil {
+			logger.Error("can't handle ICS20 memo", "err", err)
 		}
 	}
 
@@ -93,7 +73,7 @@ func (im ICS20Module) OnAcknowledgementPacket(
 ) error {
 	var ack channeltypes.Acknowledgement
 	if err := im.cdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
-		return errors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
+		return sdkerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet acknowledgement")
 	}
 	if _, isErr := ack.Response.(*channeltypes.Acknowledgement_Error); isErr {
 		// we don't return to propagate the ack error to the other layers
@@ -119,73 +99,14 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
 }
 
-// runs messages encoded in the ICS20 memo.
-// NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
-// messages are supported. Otherwise the fork storage is discarded.
-func (im ICS20Module) dispatchMemoMsgs(ctx *sdk.Context, sender sdk.AccAddress, msgs []sdk.LegacyMsg) {
-	if len(msgs) > 2 {
-		ctx.Logger().Error("ics20 memo with more than 2 messages are not supported")
-		return
-	}
-
-	// Caching context so that we don't update the store in case of failure.
-	cacheCtx, flush := ctx.CacheContext()
-	logger := ctx.Logger().With("scope", "ics20-OnRecvPacket")
-	for _, m := range msgs {
-		if err := im.handleMemoMsg(&cacheCtx, sender, m); err != nil {
-			// ignore changes in cacheCtx and return
-			logger.Error("error dispatching", "msg: %v\t\t err: %v", m, err)
-			return
-		}
-		logger.Debug("dispatching", "msg", m)
-	}
-	flush()
-}
-
-func (im ICS20Module) handleMemoMsg(ctx *sdk.Context, sender sdk.AccAddress, msg sdk.LegacyMsg) (err error) {
-	if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(sender) {
-		return sdkerrors.ErrInvalidRequest.Wrapf(
-			"msg signer doesn't match the sender, expected signer: %s", sender)
-	}
-	switch msg := msg.(type) {
-	case *ltypes.MsgSupply:
-		_, err = im.leverage.Supply(*ctx, msg)
-	case *ltypes.MsgSupplyCollateral:
-		_, err = im.leverage.SupplyCollateral(*ctx, msg)
-	case *ltypes.MsgBorrow:
-		_, err = im.leverage.Borrow(*ctx, msg)
-	default:
-		err = sdkerrors.ErrInvalidRequest.Wrapf("unsupported type in the ICS20 memo: %T", msg)
-	}
-	return err
-}
-
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
 ) (d ics20types.FungibleTokenPacketData, err error) {
 	if err = cdc.UnmarshalJSON(packet.GetData(), &d); err != nil {
-		err = errors.Wrap(err,
-			"cannot unmarshal ICS-20 transfer packet data")
+		err = sdkerrors.Wrap(err, "cannot unmarshal ICS-20 transfer packet data")
 	}
 	return
 }
 
-func DeserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.LegacyMsg, error) {
-	var m uibc.ICS20Memo
-	if err := cdc.UnmarshalJSON(data, &m); err != nil {
-		return nil, err
-	}
-	return GetMsgs(m.Messages, "memo messages")
-}
-
-// GetMsgs takes a slice of Any's and turn them into sdk.Msg's.
-func GetMsgs(anys []*types.Any, name string) ([]sdk.LegacyMsg, error) {
-	msgs := make([]sdk.LegacyMsg, len(anys))
-	for i, any := range anys {
-		cached := any.GetCachedValue()
-		if cached == nil {
-			return nil, fmt.Errorf("any cached value is nil, %s messages must be correctly packed any values", name)
-		}
-		msgs[i] = cached.(sdk.LegacyMsg)
-	}
-	return msgs, nil
+func recvPacketLogger(ctx *sdk.Context) log.Logger {
+	return ctx.Logger().With("scope", "ics20-OnRecvPacket")
 }

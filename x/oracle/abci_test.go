@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	displayDenom string = appparams.DisplayDenom
+	displayDenom string = appparams.LegacyDisplayDenom
 	bondDenom    string = appparams.BondDenom
 )
 

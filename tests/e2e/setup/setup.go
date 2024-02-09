@@ -215,8 +215,9 @@ func (s *E2ETestSuite) initGenesis() {
 	var leverageGenState leveragetypes.GenesisState
 	s.Require().NoError(s.cdc.UnmarshalJSON(appGenState[leveragetypes.ModuleName], &leverageGenState))
 
+	tm := appparams.UmeeTokenMetadata()
 	leverageGenState.Registry = append(leverageGenState.Registry,
-		fixtures.Token(appparams.BondDenom, appparams.DisplayDenom, 6),
+		fixtures.Token(tm.Base, tm.Symbol, 6),
 		fixtures.Token(ATOMBaseDenom, ATOM, uint32(ATOMExponent)),
 	)
 

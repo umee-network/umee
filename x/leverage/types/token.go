@@ -54,11 +54,32 @@ func (t Token) Validate() error {
 		)
 	}
 
-	// Kink utilization rate ranges between 0 and 1, exclusive. This prevents
-	// multiple interest rates being defined at exactly 0% or 100% utilization
-	// e.g. kink at 0%, 2% base borrow rate, 4% borrow rate at kink.
-	if !t.KinkUtilization.IsPositive() || t.KinkUtilization.GTE(one) {
+	// Kink utilization rate ranges between 0 and 1, inclusive.
+	if t.KinkUtilization.IsNegative() || t.KinkUtilization.GT(one) {
 		return fmt.Errorf("invalid kink utilization rate: %s", t.KinkUtilization)
+	}
+	// The following rules ensure the utilization:APY graph is continuous
+	if t.KinkUtilization.GT(t.MaxSupplyUtilization) {
+		return fmt.Errorf("kink utilization (%s) cannot be greater than than max supply utilization (%s)",
+			t.KinkUtilization, t.MaxSupplyUtilization)
+	}
+	if t.KinkUtilization.Equal(t.MaxSupplyUtilization) && !t.MaxBorrowRate.Equal(t.KinkBorrowRate) {
+		return fmt.Errorf(
+			"since kink utilization equals max supply utilization, kink borrow rate must equal max borrow rate (%s)",
+			t.MaxBorrowRate,
+		)
+	}
+	if t.KinkUtilization.IsZero() && !t.KinkBorrowRate.Equal(t.BaseBorrowRate) {
+		return fmt.Errorf(
+			"since kink utilization equals zero, kink borrow rate must equal base borrow rate (%s)",
+			t.BaseBorrowRate,
+		)
+	}
+	if t.MaxSupplyUtilization.IsZero() && !t.MaxBorrowRate.Equal(t.BaseBorrowRate) {
+		return fmt.Errorf(
+			"since max supply utilization equals zero, max borrow rate must equal base borrow rate (%s)",
+			t.BaseBorrowRate,
+		)
 	}
 
 	// interest rates are non-negative; they do not need to have a maximum value
@@ -139,9 +160,10 @@ func (t Token) BorrowFactor() sdkmath.LegacyDec {
 }
 
 func defaultUmeeToken() Token {
+	tm := appparams.UmeeTokenMetadata()
 	return Token{
-		BaseDenom:       appparams.BondDenom,
-		SymbolDenom:     "UMEE",
+		BaseDenom:       tm.Base,
+		SymbolDenom:     tm.Symbol, // SymbolDenom should not change
 		Exponent:        6,
 		EnableMsgSupply: true,
 		EnableMsgBorrow: true,

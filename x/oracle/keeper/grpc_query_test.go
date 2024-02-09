@@ -119,7 +119,7 @@ func (s *IntegrationTestSuite) TestQuerier_AggregatePrevotes() {
 func (s *IntegrationTestSuite) TestQuerier_AggregateVote() {
 	var tuples types.ExchangeRateTuples
 	tuples = append(tuples, types.ExchangeRateTuple{
-		Denom:        appparams.DisplayDenom,
+		Denom:        appparams.LegacyDisplayDenom,
 		ExchangeRate: sdkmath.LegacyZeroDec(),
 	})
 
