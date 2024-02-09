@@ -8,26 +8,24 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/spf13/cast"
+
 	dbm "github.com/cometbft/cometbft-db"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/libs/log"
 	tmos "github.com/cometbft/cometbft/libs/os"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	"github.com/spf13/cast"
-
-	appparams "github.com/umee-network/umee/v6/app/params"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
-
-	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	nodeservice "github.com/cosmos/cosmos-sdk/client/grpc/node"
 	"github.com/cosmos/cosmos-sdk/client/grpc/tmservice"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
+	runtimeservices "github.com/cosmos/cosmos-sdk/runtime/services"
 	"github.com/cosmos/cosmos-sdk/server/api"
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -120,7 +118,6 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
-	ibctesting "github.com/cosmos/ibc-go/v7/testing/types"
 
 	// cosmwasm
 	"github.com/CosmWasm/wasmd/x/wasm"
@@ -129,6 +126,8 @@ import (
 
 	customante "github.com/umee-network/umee/v6/ante"
 	"github.com/umee-network/umee/v6/app/inflation"
+	appparams "github.com/umee-network/umee/v6/app/params"
+	uwasm "github.com/umee-network/umee/v6/app/wasm"
 	"github.com/umee-network/umee/v6/swagger"
 	"github.com/umee-network/umee/v6/util/genmap"
 	"github.com/umee-network/umee/v6/x/incentive"
@@ -137,28 +136,24 @@ import (
 	"github.com/umee-network/umee/v6/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
+	metokenmodule "github.com/umee-network/umee/v6/x/metoken/module"
 	"github.com/umee-network/umee/v6/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 	ugovkeeper "github.com/umee-network/umee/v6/x/ugov/keeper"
 	ugovmodule "github.com/umee-network/umee/v6/x/ugov/module"
-
-	// umee ibc-transfer and quota for ibc-transfer
-	uwasm "github.com/umee-network/umee/v6/app/wasm"
 	"github.com/umee-network/umee/v6/x/uibc"
 	uibcmodule "github.com/umee-network/umee/v6/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
 	"github.com/umee-network/umee/v6/x/uibc/uics20"
-
-	"github.com/umee-network/umee/v6/x/metoken"
-	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
-	metokenmodule "github.com/umee-network/umee/v6/x/metoken/module"
 )
 
 var (
-	_ CosmosApp               = (*UmeeApp)(nil)
+	_ runtime.AppI            = (*UmeeApp)(nil)
 	_ servertypes.Application = (*UmeeApp)(nil)
 
 	// DefaultNodeHome defines the default home directory for the application daemon.
@@ -174,6 +169,12 @@ var (
 )
 
 func init() {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Sprintf("failed to get user home directory: %s", err))
+	}
+	DefaultNodeHome = filepath.Join(userHomeDir, "."+appparams.Name)
+
 	moduleBasics := []module.AppModuleBasic{
 		auth.AppModuleBasic{},
 		genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
@@ -304,15 +305,6 @@ type UmeeApp struct {
 	wasmCfg wasmtypes.WasmConfig
 }
 
-func init() {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(fmt.Sprintf("failed to get user home directory: %s", err))
-	}
-
-	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", appparams.Name))
-}
-
 func New(
 	logger log.Logger,
 	db dbm.DB,
@@ -376,12 +368,12 @@ func New(
 		tkeys[paramstypes.TStoreKey],
 	)
 
-	// set the BaseApp's parameter store
 	app.ConsensusParamsKeeper = consensusparamskeeper.NewKeeper(
 		appCodec,
 		keys[consensusparamstypes.StoreKey],
 		govModuleAddr,
 	)
+	// set the BaseApp's parameter store
 	bApp.SetParamStore(&app.ConsensusParamsKeeper)
 
 	app.CapabilityKeeper = capabilitykeeper.NewKeeper(
@@ -408,7 +400,6 @@ func New(
 		appparams.AccountAddressPrefix,
 		govModuleAddr,
 	)
-
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
 		keys[banktypes.StoreKey],
@@ -416,7 +407,6 @@ func New(
 		app.ModuleAccountAddrs(),
 		govModuleAddr,
 	)
-
 	app.StakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		keys[stakingtypes.StoreKey],
@@ -424,7 +414,6 @@ func New(
 		app.BankKeeper,
 		govModuleAddr,
 	)
-
 	app.MintKeeper = mintkeeper.NewKeeper(
 		appCodec, keys[minttypes.StoreKey], app.StakingKeeper,
 		app.AccountKeeper, app.BankKeeper, authtypes.FeeCollectorName,
@@ -439,21 +428,19 @@ func New(
 		appCodec, app.legacyAmino, keys[slashingtypes.StoreKey],
 		app.StakingKeeper, govModuleAddr,
 	)
-
 	app.CrisisKeeper = crisiskeeper.NewKeeper(
 		appCodec, keys[crisistypes.StoreKey], invCheckPeriod, app.BankKeeper,
 		authtypes.FeeCollectorName, govModuleAddr,
 	)
-
-	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec, keys[feegrant.StoreKey], app.AccountKeeper)
-
+	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(
+		appCodec, keys[feegrant.StoreKey], app.AccountKeeper,
+	)
 	app.AuthzKeeper = authzkeeper.NewKeeper(
 		keys[authzkeeper.StoreKey],
 		appCodec,
 		app.MsgServiceRouter(),
 		app.AccountKeeper,
 	)
-
 	groupConfig := group.DefaultConfig()
 	groupConfig.MaxMetadataLen = 600
 	app.GroupKeeper = groupkeeper.NewKeeper(
@@ -463,8 +450,6 @@ func New(
 		app.AccountKeeper,
 		groupConfig,
 	)
-
-	// set the governance module account as the authority for conducting upgrades
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(
 		skipUpgradeHeights,
 		keys[upgradetypes.StoreKey],
@@ -522,12 +507,11 @@ func New(
 	// NOTE: stakingKeeper above is passed by reference, so that it will contain these hooks
 	app.StakingKeeper.SetHooks(
 		stakingtypes.NewMultiStakingHooks(
-			app.DistrKeeper.Hooks(),
-			app.SlashingKeeper.Hooks(),
+			app.DistrKeeper.Hooks(), app.SlashingKeeper.Hooks(),
 		),
 	)
 
-	// Create evidence Keeper so we can register the IBC light client misbehavior
+	// Create evidence Keeper before IBC to register the IBC light client misbehavior
 	// evidence route.
 	evidenceKeeper := evidencekeeper.NewKeeper(
 		appCodec,
@@ -661,7 +645,6 @@ func New(
 		app.StakingKeeper, app.MsgServiceRouter(), govConfig,
 		govModuleAddr,
 	)
-
 	app.GovKeeper.SetLegacyRouter(govRouter)
 
 	var err error
@@ -698,7 +681,9 @@ func New(
 		wasmOpts...,
 	)
 
-	/****  Module Options ****/
+	/****************
+	 Module Options
+	/****************/
 
 	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
 	// we prefer to be more strict in what arguments the modules expect.
@@ -874,14 +859,15 @@ func New(
 	// add test gRPC service for testing gRPC queries in isolation
 	testdata.RegisterQueryServer(app.GRPCQueryRouter(), testdata.QueryImpl{})
 
+	//
 	// create the simulation manager and define the order of the modules for deterministic simulations
+	//
 	overrideModules := map[string]module.AppModuleSimulation{
 		authtypes.ModuleName: auth.NewAppModule(
 			app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts,
 			app.GetSubspace(authtypes.ModuleName),
 		),
 	}
-
 	simStateModules := genmap.Pick(
 		app.mm.Modules,
 		[]string{
@@ -896,8 +882,8 @@ func New(
 	)
 
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
-	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
 
+	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
 	app.sm.RegisterStoreDecoders()
 
 	// initialize stores
@@ -909,20 +895,7 @@ func New(
 	app.SetInitChainer(app.InitChainer)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.setAnteHandler(txConfig, &app.wasmCfg, keys[wasmtypes.StoreKey])
-	// In v0.46, the SDK introduces _postHandlers_. PostHandlers are like
-	// antehandlers, but are run _after_ the `runMsgs` execution. They are also
-	// defined as a chain, and have the same signature as antehandlers.
-	//
-	// In baseapp, postHandlers are run in the same store branch as `runMsgs`,
-	// meaning that both `runMsgs` and `postHandler` state will be committed if
-	// both are successful, and both will be reverted if any of the two fails.
-	//
-	// The SDK exposes a default empty postHandlers chain.
-	//
-	// Please note that changing any of the anteHandler or postHandler chain is
-	// likely to be a state-machine breaking change, which needs a coordinated
-	// upgrade.
+	app.setAnteHandler(txConfig, keys[wasmtypes.StoreKey])
 	app.setPostHandler()
 
 	if manager := app.SnapshotManager(); manager != nil {
@@ -949,10 +922,7 @@ func New(
 	return app
 }
 
-func (app *UmeeApp) setAnteHandler(
-	txConfig client.TxConfig,
-	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey,
-) {
+func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig, wasmStoreKey *storetypes.KVStoreKey) {
 	anteHandler, err := customante.NewAnteHandler(
 		customante.HandlerOptions{
 			AccountKeeper:     app.AccountKeeper,
@@ -962,7 +932,7 @@ func (app *UmeeApp) setAnteHandler(
 			SignModeHandler:   txConfig.SignModeHandler(),
 			FeegrantKeeper:    app.FeeGrantKeeper,
 			SigGasConsumer:    ante.DefaultSigVerificationGasConsumer,
-			WasmConfig:        wasmConfig,
+			WasmConfig:        &app.wasmCfg,
 			TXCounterStoreKey: wasmStoreKey,
 		},
 	)
@@ -1121,11 +1091,6 @@ func (app *UmeeApp) RegisterNodeService(clientCtx client.Context) {
 // GetBaseApp is used solely for testing purposes.
 func (app *UmeeApp) GetBaseApp() *baseapp.BaseApp {
 	return app.BaseApp
-}
-
-// GetStakingKeeper is used solely for testing purposes.
-func (app *UmeeApp) GetStakingKeeper() ibctesting.StakingKeeper {
-	return app.StakingKeeper
 }
 
 // GetIBCKeeper is used solely for testing purposes.
