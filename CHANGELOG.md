@@ -52,8 +52,13 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
+- [2328](https://github.com/umee-network/umee/pull/2328) Add UX and `uux` denom aliases for UMEE.
 - [2388](https://github.com/umee-network/umee/pull/2388) Adjust interest rate algorithm and associated token parameter validation rules.
 
+### Bug Fixes
+
+- [2417](https://github.com/umee-network/umee/pull/2417) Fix the ibc inflows storing of registered tokens when sender chain is source chain.
+  
 ## v6.3.0 - 2024-01-03
 
 ### Improvements
