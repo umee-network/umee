@@ -81,7 +81,7 @@ func (s *IntegrationTestSuite) TestDynamicInterest() {
 
 	// Max interest rate (90% utilization)
 	rate = app.LeverageKeeper.DeriveBorrowAPY(ctx, appparams.BondDenom)
-	require.Equal(sdk.MustNewDecFromStr("1.52"), rate)
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("1.52"), rate)
 
 	// user borrows 100 more umee (ignores collateral), utilization 1000/1000
 	s.forceBorrow(addr, coin.New(appparams.BondDenom, 100_000000))

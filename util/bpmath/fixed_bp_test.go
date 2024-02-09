@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"testing"
 
-	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 )
@@ -42,7 +41,7 @@ func TestFixedQuo(t *testing.T) {
 	}
 	require := require.New(t)
 	for _, tc := range tcs {
-		a, b := math.NewIntFromUint64(tc.a), math.NewIntFromUint64(tc.b)
+		a, b := sdkmath.NewIntFromUint64(tc.a), sdkmath.NewIntFromUint64(tc.b)
 		if tc.panics {
 			require.Panics(func() {
 				FixedFromQuo(a, b, tc.r)
@@ -75,7 +74,7 @@ func TestFixedMul(t *testing.T) {
 	}
 	require := require.New(t)
 	for _, tc := range tcs {
-		a := math.NewIntFromUint64(tc.a)
+		a := sdkmath.NewIntFromUint64(tc.a)
 		o := Mul(a, tc.b)
 		require.Equal(int64(tc.exp), o.Int64(), fmt.Sprint("test ", tc.name))
 
@@ -91,13 +90,13 @@ func TestFixedToDec(t *testing.T) {
 	tcs := []struct {
 		name string
 		a    FixedBP
-		exp  math.LegacyDec
+		exp  sdkmath.LegacyDec
 	}{
-		{"t1", 0, math.LegacyZeroDec()},
-		{"t2", 1, math.LegacyMustNewDecFromStr("0.0001")},
-		{"t3", 20, math.LegacyMustNewDecFromStr("0.002")},
-		{"t4", 9999, math.LegacyMustNewDecFromStr("0.9999")},
-		{"t5", One, math.LegacyNewDec(1)},
+		{"t1", 0, sdkmath.LegacyZeroDec()},
+		{"t2", 1, sdkmath.LegacyMustNewDecFromStr("0.0001")},
+		{"t3", 20, sdkmath.LegacyMustNewDecFromStr("0.002")},
+		{"t4", 9999, sdkmath.LegacyMustNewDecFromStr("0.9999")},
+		{"t5", One, sdkmath.LegacyNewDec(1)},
 	}
 	require := require.New(t)
 	for _, tc := range tcs {

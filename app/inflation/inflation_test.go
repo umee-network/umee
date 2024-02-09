@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	math "cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -25,16 +24,16 @@ func TestAdjustInflation(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		totalSupply    math.Int
-		maxSupply      math.Int
+		totalSupply    sdkmath.Int
+		maxSupply      sdkmath.Int
 		minter         minttypes.Minter
 		params         func(params minttypes.Params) minttypes.Params
 		expectedResult sdkmath.LegacyDec
 	}{
 		{
 			name:        "No inflation change => Newly Minted Coins + Total Supply is less than Max supply",
-			totalSupply: math.NewInt(1000000),
-			maxSupply:   math.NewInt(2000000),
+			totalSupply: sdkmath.NewInt(1000000),
+			maxSupply:   sdkmath.NewInt(2000000),
 			minter:      minttypes.Minter{Inflation: sdkmath.LegacyNewDecWithPrec(15, 2)},
 			params: func(params minttypes.Params) minttypes.Params {
 				/***
@@ -48,8 +47,8 @@ func TestAdjustInflation(t *testing.T) {
 		},
 		{
 			name:        "Inflation Rate Adjust => Newly Minted Coins + Total Supply is greater than Max supply",
-			totalSupply: math.NewInt(1900000),
-			maxSupply:   math.NewInt(2000000),
+			totalSupply: sdkmath.NewInt(1900000),
+			maxSupply:   sdkmath.NewInt(2000000),
 			minter:      minttypes.Minter{Inflation: sdkmath.LegacyMustNewDecFromStr("7.1231")},
 			params: func(params minttypes.Params) minttypes.Params {
 				/***
@@ -89,7 +88,7 @@ func TestInflationRate(t *testing.T) {
 
 	tests := []struct {
 		name            string
-		totalSupply     math.Int
+		totalSupply     sdkmath.Int
 		minter          minttypes.Minter
 		inflationParams func(ip ugov.InflationParams) ugov.InflationParams
 		bondedRatio     sdkmath.LegacyDec
@@ -100,7 +99,7 @@ func TestInflationRate(t *testing.T) {
 	}{
 		{
 			name:        "inflation rate change for min and max: new inflation cyle is started from this block time",
-			totalSupply: math.NewInt(900000),
+			totalSupply: sdkmath.NewInt(900000),
 			minter:      mockMinter,
 			mintParams: func(params minttypes.Params) minttypes.Params {
 				// AnnualProvisions = 900000 * 0.15 = 135000
@@ -127,7 +126,7 @@ func TestInflationRate(t *testing.T) {
 		},
 		{
 			name:        "zero inflation : total supply equals max supply",
-			totalSupply: math.NewInt(100000000),
+			totalSupply: sdkmath.NewInt(100000000),
 			minter:      mockMinter,
 			mintParams: func(params minttypes.Params) minttypes.Params {
 				return params
@@ -150,7 +149,7 @@ func TestInflationRate(t *testing.T) {
 		},
 		{
 			name:        "no inflation rate change for min and max: inflation cycle is already started",
-			totalSupply: math.NewInt(900000),
+			totalSupply: sdkmath.NewInt(900000),
 			minter:      mockMinter,
 			mintParams: func(params minttypes.Params) minttypes.Params {
 				mintParams.BlocksPerYear = 1
@@ -178,7 +177,7 @@ func TestInflationRate(t *testing.T) {
 		},
 		{
 			name:        "adjust inflation: when new mint + total supply more than max supply",
-			totalSupply: math.NewInt(999900),
+			totalSupply: sdkmath.NewInt(999900),
 			minter:      mockMinter,
 			mintParams: func(params minttypes.Params) minttypes.Params {
 				mintParams.BlocksPerYear = 1

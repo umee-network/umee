@@ -3,7 +3,6 @@ package quota
 import (
 	"testing"
 
-	"cosmossdk.io/math"
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
@@ -49,7 +48,7 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	k.SetTokenInflow(sdk.NewInt64DecCoin(umee, 6))
 	k.SetOutflowSum(sdkmath.LegacyNewDec(50))
 	k.SetInflowSum(sdkmath.LegacyNewDec(50))
-	k.SetTokenInflow(sdk.NewDecCoin(umee, math.NewInt(50)))
+	k.SetTokenInflow(sdk.NewDecCoin(umee, sdkmath.NewInt(50)))
 
 	err := k.CheckAndUpdateQuota(umee, sdkmath.NewInt(1))
 	assert.NilError(t, err)
@@ -111,8 +110,8 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	err = k.SetParams(dp)
 	assert.NilError(t, err)
 
-	k.SetTokenOutflow(sdk.NewDecCoin(umee, math.NewInt(80)))
-	k.SetTokenInflow(sdk.NewDecCoin(umee, math.NewInt(80)))
+	k.SetTokenOutflow(sdk.NewDecCoin(umee, sdkmath.NewInt(80)))
+	k.SetTokenInflow(sdk.NewDecCoin(umee, sdkmath.NewInt(80)))
 	// 80*2 (160) > InflowOutflowTokenQuotaBase(100) + 25% of Token Inflow (80) = 160 > 100+20
 	err = k.CheckAndUpdateQuota(umee, sdkmath.NewInt(80)) // exceeds token quota
 	assert.ErrorContains(t, err, "quota")
@@ -168,7 +167,7 @@ func TestSetAndGetIBCInflows(t *testing.T) {
 	assert.DeepEqual(t, inflowSum, rv)
 
 	// inflow of token
-	inflowOfToken := sdk.NewDecCoin("abcd", math.NewInt(1000000))
+	inflowOfToken := sdk.NewDecCoin("abcd", sdkmath.NewInt(1000000))
 	k.SetTokenInflow(inflowOfToken)
 
 	val := k.GetTokenInflow(inflowOfToken.Denom)
