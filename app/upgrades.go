@@ -60,19 +60,20 @@ func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
 	planName := "v6.4"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			printPlanName(planName, sdkCtx.Logger())
 			// Add UX denom aliases to metadata
 			app.BankKeeper.SetDenomMetaData(ctx, appparams.UmeeTokenMetadata())
 
 			// migrate leverage token settings
-			tokens := app.LeverageKeeper.GetAllRegisteredTokens(ctx)
+			tokens := app.LeverageKeeper.GetAllRegisteredTokens(sdkCtx)
 			for _, token := range tokens {
 				// this will allow existing interest rate curves to pass new Token validation
 				if token.KinkUtilization.GTE(token.MaxSupplyUtilization) {
 					token.KinkUtilization = token.MaxSupplyUtilization
 					token.KinkBorrowRate = token.MaxBorrowRate
-					if err := app.LeverageKeeper.SetTokenSettings(ctx, token); err != nil {
+					if err := app.LeverageKeeper.SetTokenSettings(sdkCtx, token); err != nil {
 						return fromVM, err
 					}
 				}

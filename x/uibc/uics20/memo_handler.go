@@ -5,10 +5,11 @@ import (
 	"fmt"
 
 	sdkerrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
-	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
@@ -32,7 +33,7 @@ func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleT
 	if err != nil {
 		return sdkerrors.Wrap(err, "can't parse bech32 address")
 	}
-	amount, ok := sdk.NewIntFromString(ftData.Amount)
+	amount, ok := sdkmath.NewIntFromString(ftData.Amount)
 	if !ok {
 		return fmt.Errorf("can't parse transfer amount: %s [%w]", ftData.Amount, err)
 	}
@@ -85,9 +86,11 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 	}
 
 	for _, msg := range msgs {
-		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
-			return errors.New(
-				"msg signer doesn't match the receiver, expected signer: " + receiver.String())
+		if m, ok := msg.(sdk.LegacyMsg); ok {
+			if signers := m.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
+				return errors.New(
+					"msg signer doesn't match the receiver, expected signer: " + receiver.String())
+			}
 		}
 	}
 
