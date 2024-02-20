@@ -11,7 +11,7 @@ require (
 	github.com/CosmWasm/wasmvm v1.5.2
 	github.com/cometbft/cometbft v0.37.4
 	github.com/cometbft/cometbft-db v0.11.0
-	github.com/cosmos/cosmos-proto v1.0.0-beta.2 // NOTE: v1.0.0-beta.2+ is not compatible with sdk v0.47
+	github.com/cosmos/cosmos-proto v1.0.0-beta.4 // NOTE: v1.0.0-beta.2+ is not compatible with sdk v0.47
 	github.com/cosmos/cosmos-sdk v0.47.8
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.4.10 // NOTE: v1.4.11+ is not compatible with sdk v0.47
@@ -351,7 +351,7 @@ require (
 	mvdan.cc/lint v0.0.0-20170908181259-adc824a0674b // indirect
 	mvdan.cc/unparam v0.0.0-20240104100049-c549a3470d14 // indirect
 	nhooyr.io/websocket v1.8.6 // indirect
-	pgregory.net/rapid v1.0.0 // indirect
+	pgregory.net/rapid v1.1.0 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
