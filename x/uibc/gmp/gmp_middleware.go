@@ -35,7 +35,9 @@ func (h Handler) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data 
 	switch msg.Type {
 	case TypeGeneralMessage:
 		err := h.HandleGeneralMessage(ctx, msg.SourceAddress, msg.SourceAddress, data.Receiver, msg.Payload)
-		logger.Error("err at HandleGeneralMessage", err)
+		if err != nil {
+			logger.Error("err at HandleGeneralMessage", err)
+		}
 	case TypeGeneralMessageWithToken:
 		// parse the transfer amount
 		amt, ok := sdk.NewIntFromString(data.Amount)
