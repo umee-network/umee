@@ -25,8 +25,9 @@ func (h Handler) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data 
 ) error {
 	logger := ctx.Logger().With("handler", "gmp_handler")
 	var msg Message
+	var err error
 
-	if err := json.Unmarshal([]byte(data.GetMemo()), &msg); err != nil {
+	if err = json.Unmarshal([]byte(data.GetMemo()), &msg); err != nil {
 		logger.With(err).Error("cannot unmarshal memo")
 		return err
 	}
@@ -39,13 +40,6 @@ func (h Handler) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data 
 		// parse the transfer amount
 		amt, ok := sdk.NewIntFromString(data.Amount)
 		if !ok {
-			// err := channeltypes.NewErrorAcknowledgement(
-			// 	errors.Wrapf(
-			// 		ics20types.ErrInvalidAmount,
-			// 		"unable to parse transfer amount (%s) into sdk.Int",
-			// 		data.Amount,
-			// 	),
-			// )
 			return errors.Wrapf(
 				ics20types.ErrInvalidAmount,
 				"unable to parse transfer amount (%s) into sdk.Int",
@@ -63,7 +57,7 @@ func (h Handler) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data 
 		logger.With(fmt.Errorf("unrecognized message type: %d", msg.Type)).Error("unrecognized gmp message")
 	}
 
-	return nil
+	return err
 }
 
 func (h Handler) HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress string, destAddress string,
