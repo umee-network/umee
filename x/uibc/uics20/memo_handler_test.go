@@ -19,7 +19,6 @@ import (
 func TestValidateMemoMsg(t *testing.T) {
 	assert := assert.New(t)
 	receiver := accs.Alice
-	// wrongSignerErr := "signer doesn't match the receiver"
 	asset := coin.New("atom", 10)
 	assetH := coin.New("atom", 5)
 	asset11 := coin.New("atom", 11)
@@ -37,7 +36,8 @@ func TestValidateMemoMsg(t *testing.T) {
 
 	errManyMsgs := "memo with more than 1 message is not supported"
 	errNoSubCoins := errNoSubCoins.Error()
-	msg0typeErr := errMsg0Type.Error()
+	errMsg0type := errMsg0Type.Error()
+	// errWrongSigner := "signer doesn't match the receiver"
 
 	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv()}
 	tcs := []struct {
@@ -45,10 +45,10 @@ func TestValidateMemoMsg(t *testing.T) {
 		errstr string
 	}{
 		/** we don't check signers in handlers v1
-		{[]sdk.Msg{ltypes.NewMsgSupply(accs.Bob, asset)}, wrongSignerErr},
-		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(accs.Bob, asset)}, wrongSignerErr},
+		{[]sdk.Msg{ltypes.NewMsgSupply(accs.Bob, asset)}, errWrongSigner},
+		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(accs.Bob, asset)}, errWrongSigner},
 		{[]sdk.Msg{goodMsgSupplyColl,
-			ltypes.NewMsgBorrow(accs.Bob, asset)}, wrongSignerErr},
+			ltypes.NewMsgBorrow(accs.Bob, asset)}, errWrongSigner},
 		*/
 
 		// good messages[0]
@@ -63,10 +63,10 @@ func TestValidateMemoMsg(t *testing.T) {
 		{[]sdk.Msg{goodMsgLiquidate11}, errNoSubCoins},
 
 		// wrong message types
-		{[]sdk.Msg{goodMsgBorrow}, msg0typeErr},
-		{[]sdk.Msg{msgSend}, msg0typeErr}, // bank msg
-		{[]sdk.Msg{ltypes.NewMsgDecollateralize(receiver, asset)}, msg0typeErr},
-		{[]sdk.Msg{&ltypes.MsgLeveragedLiquidate{Liquidator: receiver.String()}}, msg0typeErr},
+		{[]sdk.Msg{goodMsgBorrow}, errMsg0type},
+		{[]sdk.Msg{msgSend}, errMsg0type}, // bank msg
+		{[]sdk.Msg{ltypes.NewMsgDecollateralize(receiver, asset)}, errMsg0type},
+		{[]sdk.Msg{&ltypes.MsgLeveragedLiquidate{Liquidator: receiver.String()}}, errMsg0type},
 
 		{[]sdk.Msg{goodMsgBorrow, goodMsgBorrow}, errManyMsgs},
 		{[]sdk.Msg{goodMsgBorrow, goodMsgSupplyColl}, errManyMsgs},
