@@ -57,7 +57,7 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	if ftData.Memo != "" {
 		logger := recvPacketLogger(&ctx)
 		mh := MemoHandler{im.cdc, im.leverage}
-		if err := mh.onRecvPacket(&ctx, ftData); err != nil {
+		if err := mh.onRecvPacketPost(&ctx, ftData); err != nil {
 			logger.Error("can't handle ICS20 memo", "err", err)
 		}
 	}

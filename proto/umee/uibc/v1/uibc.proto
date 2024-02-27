@@ -14,6 +14,14 @@ option (gogoproto.messagename_all)     = true;
 message ICS20Memo {
   // messages is a list of `sdk.Msg`s that will be executed when handling ICS20 transfer.
   repeated google.protobuf.Any messages = 1;
+  // fallback_addr [optional] is an bech23 account address used to overwrite the original ICS20
+  // recipient when:
+  // 1. it is defined
+  // 2. and memo is can be properly deserialized into this structure
+  // 3. and `messages` processes failed.
+  // When memo can't be properly deserialized, then the ICS20 processing will continue to other
+  // middlewares.
+  string fallback_addr = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // DecCoinSymbol extends the Cosmos SDK DecCoin type and adds symbol name.

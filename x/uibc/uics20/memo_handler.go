@@ -7,7 +7,6 @@ import (
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/tx"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
@@ -19,8 +18,13 @@ type MemoHandler struct {
 	leverage ltypes.MsgServer
 }
 
-func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
-	msgs, err := deserializeMemoMsgs(mh.cdc, []byte(ftData.Memo))
+func (mh MemoHandler) onRecvPacketPost(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
+	memo, err := deserializeMemo(mh.cdc, []byte(ftData.Memo))
+	if err != nil {
+		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
+		return nil
+	}
+	msgs, err := memo.GetMsgs()
 	if err != nil {
 		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
 		return nil
@@ -30,7 +34,7 @@ func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleT
 
 	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 	if err != nil {
-		return sdkerrors.Wrap(err, "can't parse bech32 address")
+		return sdkerrors.Wrap(err, "can't parse bech32 address") // should not happen
 	}
 	amount, ok := sdk.NewIntFromString(ftData.Amount)
 	if !ok {
@@ -152,10 +156,6 @@ func assertSubCoins(sent, operated sdk.Coin) error {
 	return nil
 }
 
-func deserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
-	var m uibc.ICS20Memo
-	if err := cdc.UnmarshalJSON(data, &m); err != nil {
-		return nil, err
-	}
-	return tx.GetMsgs(m.Messages, "memo messages")
+func deserializeMemo(cdc codec.JSONCodec, data []byte) (m uibc.ICS20Memo, err error) {
+	return m, cdc.UnmarshalJSON(data, &m)
 }
