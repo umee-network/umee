@@ -25,8 +25,6 @@ func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleT
 		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
 		return nil
 	}
-	// TODO: need to handle fees!
-	// TODO: verify correctly if receiver and sender are the same (modulo hrp)
 
 	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 	if err != nil {
@@ -40,11 +38,11 @@ func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleT
 }
 
 // runs messages encoded in the ICS20 memo.
-// NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
-// messages are supported. Otherwise the fork storage is discarded.
+// NOTE: we fork the store and only commit if all messages pass. Otherwise the fork store
+// is discarded.
 func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
 	if len(msgs) == 0 {
-		return nil // nothing to do
+		return nil // quick return - we have nothing to handle
 	}
 
 	if err := mh.validateMemoMsg(receiver, sent, msgs); err != nil {
@@ -66,9 +64,10 @@ func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress
 }
 
 // error messages used in validateMemoMsg
-const (
-	msg0typeErr = "only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]"
-	msg1typeErr = "only MsgBorrow is supported as messages[1]"
+var (
+	errNoSubCoins = errors.New("message must use only coins sent from the transfer")
+	errMsg0Type   = errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+	// errMsg1Type = errors.New("only MsgBorrow is supported as messages[1]")
 )
 
 // We only support the following message combinations:
@@ -77,7 +76,7 @@ const (
 // - [MsgLiquidate]
 // Signer of each message (account under charged with coins), must be the receiver of the ICS20
 // transfer.
-func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
+func (mh MemoHandler) validateMemoMsg(_receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
 	msgLen := len(msgs)
 	// In this release we only support 1msg, and only messages that don't create or change
 	// a borrow position
@@ -98,7 +97,7 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 	case *ltypes.MsgLiquidate:
 		asset = msg.Repayment
 	default:
-		return errors.New(msg0typeErr)
+		return errMsg0Type
 	}
 
 	return assertSubCoins(sent, asset)
@@ -153,8 +152,6 @@ func assertSubCoins(sent, operated sdk.Coin) error {
 	}
 	return nil
 }
-
-var errNoSubCoins = errors.New("message must use only coins sent from the transfer")
 
 func deserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
 	var m uibc.ICS20Memo

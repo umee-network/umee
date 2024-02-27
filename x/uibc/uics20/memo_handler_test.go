@@ -37,6 +37,7 @@ func TestValidateMemoMsg(t *testing.T) {
 
 	errManyMsgs := "memo with more than 1 message is not supported"
 	errNoSubCoins := errNoSubCoins.Error()
+	msg0typeErr := errMsg0Type.Error()
 
 	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv()}
 	tcs := []struct {
