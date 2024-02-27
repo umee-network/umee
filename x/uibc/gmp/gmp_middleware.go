@@ -9,7 +9,7 @@ import (
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 
-	ibcutil "github.com/umee-network/umee/v6/util/ibc"
+	"github.com/umee-network/umee/v6/x/uibc"
 )
 
 type Handler struct {
@@ -48,7 +48,7 @@ func (h Handler) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data 
 				data.Amount,
 			)
 		}
-		denom := ibcutil.ParseDenom(packet, data.Denom)
+		denom := uibc.ExtractDenomFromPacketOnRecv(packet, data.Denom)
 		err := h.HandleGeneralMessageWithToken(ctx, msg.SourceAddress, msg.SourceAddress, data.Receiver,
 			msg.Payload, sdk.NewCoin(denom, amt))
 
