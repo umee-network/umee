@@ -12,8 +12,8 @@ func (m ICS20Memo) UnpackInterfaces(unpacker types.AnyUnpacker) error {
 	return tx.UnpackInterfaces(unpacker, m.Messages)
 }
 
-// ExtractDenomFromPacketOnRecv takes a packet with a valid ICS20 token data in the Data field and returns the
-// denom as represented in the local chain.
+// ExtractDenomFromPacketOnRecv takes a packet with a valid ICS20 token data in the Data field
+// and returns the denom as represented in the local chain.
 func ExtractDenomFromPacketOnRecv(packet ibcexported.PacketI, denom string) string {
 	if ics20types.ReceiverChainIsSource(packet.GetSourcePort(), packet.GetSourceChannel(), denom) {
 		// if we receive back a token, that was originally sent from UMEE, then we need to remove

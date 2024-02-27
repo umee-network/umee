@@ -20,7 +20,10 @@ type MemoHandler struct {
 	leverage ltypes.MsgServer
 }
 
-func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData) error {
+func (mh MemoHandler) onRecvPacket(
+	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
+) error {
+
 	msgs, err := deserializeMemoMsgs(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
 		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
