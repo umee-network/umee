@@ -74,31 +74,25 @@ const (
 // We only support the following message combinations:
 // - [MsgSupply]
 // - [MsgSupplyCollateral]
-// - [MsgSupplyCollateral, MsgBorrow] -- here, borrow must use
 // - [MsgLiquidate]
 // Signer of each message (account under charged with coins), must be the receiver of the ICS20
 // transfer.
 func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
 	msgLen := len(msgs)
-	if msgLen > 2 {
-		return errors.New("ics20 memo with more than 2 messages are not supported")
-	}
-
-	for _, msg := range msgs {
-		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
-			return errors.New(
-				"msg signer doesn't match the receiver, expected signer: " + receiver.String())
-		}
+	// In this release we only support 1msg, and only messages that don't create or change
+	// a borrow position
+	if msgLen > 1 {
+		return errors.New("ics20 memo with more than 1 message is not supported")
 	}
 
 	var (
-		asset      sdk.Coin
-		collateral sdk.Coin
+		asset sdk.Coin
+		// collateral sdk.Coin
 	)
 	switch msg := msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
 		asset = msg.Asset
-		collateral = asset
+		// collateral = asset
 	case *ltypes.MsgSupply:
 		asset = msg.Asset
 	case *ltypes.MsgLiquidate:
@@ -107,9 +101,16 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 		return errors.New(msg0typeErr)
 	}
 
-	// TODO more asserts, will be handled in other PR
-	if err := assertSubCoins(sent, asset); err != nil {
-		return err
+	return assertSubCoins(sent, asset)
+
+	/**
+	   TODO: handlers v2
+
+	for _, msg := range msgs {
+		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
+			return errors.New(
+				"msg signer doesn't match the receiver, expected signer: " + receiver.String())
+		}
 	}
 
 	if msgLen == 1 {
@@ -127,6 +128,7 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 	}
 
 	return nil
+	*/
 }
 
 func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
@@ -147,10 +149,12 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 
 func assertSubCoins(sent, operated sdk.Coin) error {
 	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
-		return errors.New("message must use only coins sent from the transfer")
+		return errNoSubCoins
 	}
 	return nil
 }
+
+var errNoSubCoins = errors.New("message must use only coins sent from the transfer")
 
 func deserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
 	var m uibc.ICS20Memo
