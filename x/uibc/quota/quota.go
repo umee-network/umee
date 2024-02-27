@@ -230,7 +230,7 @@ func (k Keeper) UndoUpdateQuota(denom string, amount sdkmath.Int) error {
 // RecordIBCInflow will save the inflow amount if token is registered otherwise it will skip
 func (k Keeper) RecordIBCInflow(packet channeltypes.Packet, denom, amount string,
 ) exported.Acknowledgement {
-	denom = uibc.MustExtractDenomFromPacketOnRecv(packet, denom)
+	denom = uibc.ExtractDenomFromPacketOnRecv(packet, denom)
 	ts, err := k.leverage.GetTokenSettings(*k.ctx, denom)
 	if err != nil {
 		if ltypes.ErrNotRegisteredToken.Is(err) {

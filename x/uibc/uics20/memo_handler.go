@@ -37,7 +37,7 @@ func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, packet ibcexported.PacketI,
 	if !ok {
 		return fmt.Errorf("can't parse transfer amount: %s [%w]", ftData.Amount, err)
 	}
-	ibcDenom := uibc.MustExtractDenomFromPacketOnRecv(packet, ftData.Denom)
+	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
 	return mh.dispatchMemoMsgs(ctx, receiver, sdk.NewCoin(ibcDenom, amount), msgs)
 }
 
