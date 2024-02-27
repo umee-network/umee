@@ -9,6 +9,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
@@ -19,7 +20,10 @@ type MemoHandler struct {
 	leverage ltypes.MsgServer
 }
 
-func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
+func (mh MemoHandler) onRecvPacket(
+	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
+) error {
+
 	msgs, err := deserializeMemoMsgs(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
 		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
@@ -36,7 +40,8 @@ func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleT
 	if !ok {
 		return fmt.Errorf("can't parse transfer amount: %s [%w]", ftData.Amount, err)
 	}
-	return mh.dispatchMemoMsgs(ctx, receiver, sdk.NewCoin(ftData.Denom, amount), msgs)
+	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
+	return mh.dispatchMemoMsgs(ctx, receiver, sdk.NewCoin(ibcDenom, amount), msgs)
 }
 
 // runs messages encoded in the ICS20 memo.
