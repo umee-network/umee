@@ -50,14 +50,21 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return ackResp
 	}
 
+	logger := recvPacketLogger(&ctx)
+	mh := MemoHandler{im.cdc, im.leverage}
+	var memo uibc.ICS20Memo
+	if ftData.Memo != "" {
+		if err := mh.onRecvPacketPre(&ctx, ftData); err != nil {
+			logger.Error("can't handle ICS20 memo", "err", err)
+		}
+	}
+
 	ack := im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	if !ack.Success() {
 		return ack
 	}
 	if ftData.Memo != "" {
-		logger := recvPacketLogger(&ctx)
-		mh := MemoHandler{im.cdc, im.leverage}
-		if err := mh.onRecvPacketPost(&ctx, ftData); err != nil {
+		if err := mh.onRecvPacketPre(&ctx, ftData); err != nil {
 			logger.Error("can't handle ICS20 memo", "err", err)
 		}
 	}

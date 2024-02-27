@@ -18,7 +18,7 @@ type MemoHandler struct {
 	leverage ltypes.MsgServer
 }
 
-func (mh MemoHandler) onRecvPacketPost(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
+func (mh MemoHandler) onRecvPacketPre(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
 	memo, err := deserializeMemo(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
 		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
@@ -29,9 +29,9 @@ func (mh MemoHandler) onRecvPacketPost(ctx *sdk.Context, ftData ics20types.Fungi
 		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
 		return nil
 	}
-	// TODO: need to handle fees!
-	// TODO: verify correctly if receiver and sender are the same (modulo hrp)
+}
 
+func (mh MemoHandler) onRecvPacketPost(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData, msgs []sdk.Msg) error {
 	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
 	if err != nil {
 		return sdkerrors.Wrap(err, "can't parse bech32 address") // should not happen
