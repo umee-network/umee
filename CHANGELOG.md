@@ -49,6 +49,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Features
 
 - [2408](https://github.com/umee-network/umee/pull/2408) New `converter` helper app.
+- [2349](https://github.com/umee-network/umee/pull/2349), [2437](https://github.com/umee-network/umee/pull/2437) IBC ICS20 memo handlers.
 
 ### Improvements
 
