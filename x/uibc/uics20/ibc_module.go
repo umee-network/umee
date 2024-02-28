@@ -7,7 +7,6 @@ import (
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/iavl/internal/logger"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
@@ -63,9 +62,8 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return ackResp
 	}
 
-	var events []string
 	mh := MemoHandler{im.cdc, im.leverage}
-	msgs, overwriteReceiver, err := mh.onRecvPacketPre(&ctx, packet, ftData)
+	msgs, overwriteReceiver, events, err := mh.onRecvPacketPre(&ctx, packet, ftData)
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
@@ -84,12 +82,10 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	}
 
 	if err := mh.dispatchMemoMsgs(&ctx, msgs); err != nil {
-		err := err.Error()
-		logger.Error("can't handle ICS20 memo", "err", err)
-		events = append(events, "can't handle ICS20 memo err = "+err)
+		events = append(events, "can't handle ICS20 memo err = "+err.Error())
 	}
 
-	// TODO handle errors
+	im.emitEvents(ctx.EventManager(), recvPacketLogger(&ctx), "ics20-memo-hook", events)
 
 	return ack
 }
@@ -121,10 +117,26 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 	ftData, err := deserializeFTData(im.cdc, packet)
 	if err != nil {
 		// we only log error, because we want to propagate the ack to other layers.
-		ctx.Logger().Error("can't revert quota update", "err", err)
+		ctx.Logger().With("scope", "ics20-OnAckErr").Error("can't revert quota update", "err", err)
 	}
 	qk := im.kb.Keeper(ctx)
 	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
+}
+
+func (im ICS20Module) emitEvents(em *sdk.EventManager, logger log.Logger, topic string, events []string) {
+	attributes := make([]sdk.Attribute, len(events))
+	key := topic + "-context"
+	for i, s := range events {
+		attributes[i] = sdk.NewAttribute(key, s)
+	}
+	logger.Debug("Handle ICS20 memo", "events", events)
+
+	em.EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			topic,
+			attributes...,
+		),
+	})
 }
 
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,
