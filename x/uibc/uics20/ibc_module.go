@@ -1,10 +1,13 @@
 package uics20
 
 import (
+	"encoding/json"
+
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/iavl/internal/logger"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
@@ -39,35 +42,54 @@ func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.Keeper
 }
 
 // OnRecvPacket is called when a receiver chain receives a packet from SendPacket.
+//  1. record IBC quota
+//  2. Try to unpack and prepare memo. If memo has a correct structure, and fallback addr is
+//     defined but malformed, we cancel the transfer (otherwise would not be able to use it
+//     correctly).
+//  3. If memo has a correct structure, but memo.messages can't be unpack or don't pass
+//     validation, then we continue with the transfer and overwrite the original receiver to
+//     fallback_addr if it's defined.
+//  4. Execute the downstream middleware and the transfer app.
+//  5. Execute hooks. If hook execution fails, we don't use the the fallback_addr nor ignore the
+//     transfer. This is because there could be other middlewares that are already executed.
 func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
 	ftData, err := deserializeFTData(im.cdc, packet)
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
-	qk := im.kb.Keeper(&ctx)
-	if ackResp := qk.IBCOnRecvPacket(ftData, packet); ackResp != nil && !ackResp.Success() {
+	quotaKeeper := im.kb.Keeper(&ctx)
+	if ackResp := quotaKeeper.IBCOnRecvPacket(ftData, packet); ackResp != nil && !ackResp.Success() {
 		return ackResp
 	}
 
-	logger := recvPacketLogger(&ctx)
+	var events []string
 	mh := MemoHandler{im.cdc, im.leverage}
-	var memo uibc.ICS20Memo
-	if ftData.Memo != "" {
-		if err := mh.onRecvPacketPre(&ctx, ftData); err != nil {
-			logger.Error("can't handle ICS20 memo", "err", err)
+	msgs, overwriteReceiver, err := mh.onRecvPacketPre(&ctx, packet, ftData)
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+	if overwriteReceiver != nil {
+		ftData.Receiver = overwriteReceiver.String()
+		events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
+		if packet.Data, err = json.Marshal(ftData); err != nil {
+			return channeltypes.NewErrorAcknowledgement(err)
 		}
 	}
 
+	// call inner middeware and the app
 	ack := im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	if !ack.Success() {
 		return ack
 	}
-	if ftData.Memo != "" {
-		if err := mh.onRecvPacketPost(&ctx, packet, ftData); err != nil {
-			logger.Error("can't handle ICS20 memo", "err", err)
-		}
+
+	if err := mh.dispatchMemoMsgs(&ctx, msgs); err != nil {
+		err := err.Error()
+		logger.Error("can't handle ICS20 memo", "err", err)
+		events = append(events, "can't handle ICS20 memo err = "+err)
 	}
+
+	// TODO handle errors
 
 	return ack
 }
