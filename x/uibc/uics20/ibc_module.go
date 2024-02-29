@@ -62,6 +62,11 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return ackResp
 	}
 
+	// NOTE: IBC hooks must be the last middleware - just the transfer app.
+	// MemoHandler may update amoount in the message, because the received token amount may be
+	// smaller than the amount originally sent (various fees). We need to be sure that there is
+	// no other middleware that can change packet data or amounts.
+
 	mh := MemoHandler{im.cdc, im.leverage}
 	msgs, overwriteReceiver, events, err := mh.onRecvPacketPre(&ctx, packet, ftData)
 	if err != nil {
@@ -69,13 +74,14 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	}
 	if overwriteReceiver != nil {
 		ftData.Receiver = overwriteReceiver.String()
+		msgs = nil // we don't want to execute hooks when we set fallback address.
 		events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
 		if packet.Data, err = json.Marshal(ftData); err != nil {
 			return channeltypes.NewErrorAcknowledgement(err)
 		}
 	}
 
-	// call inner middeware and the app
+	// call transfer module app
 	ack := im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	if !ack.Success() {
 		return ack

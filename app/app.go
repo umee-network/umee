@@ -594,6 +594,9 @@ func New(
 		packetforwardkeeper.DefaultForwardTransferPacketTimeoutTimestamp, // forward timeout
 		packetforwardkeeper.DefaultRefundTransferPacketTimeoutTimestamp,  // refund timeout
 	)
+	// NOTE: uics20 module must be the last middleware. We need to be sure there is no other code
+	// that will manipulate packet between the UICS20 middleware (which executes transfer hooks)
+	// and the transfer app.
 	transferStack = uics20.NewICS20Module(transferStack, appCodec,
 		app.UIbcQuotaKeeperB,
 		leveragekeeper.NewMsgServerImpl(app.LeverageKeeper))
