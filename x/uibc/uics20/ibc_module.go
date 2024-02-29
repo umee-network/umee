@@ -127,6 +127,7 @@ func (im ICS20Module) emitEvents(em *sdk.EventManager, logger log.Logger, topic 
 	attributes := make([]sdk.Attribute, len(events))
 	key := topic + "-context"
 	for i, s := range events {
+		// it's ok that all events have the same key. This is how ibc-apps are dealing with events.
 		attributes[i] = sdk.NewAttribute(key, s)
 	}
 	logger.Debug("Handle ICS20 memo", "events", events)

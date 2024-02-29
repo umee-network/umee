@@ -30,7 +30,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type ICS20Memo struct {
 	// messages is a list of `sdk.Msg`s that will be executed when handling ICS20 transfer.
 	Messages []*types.Any `protobuf:"bytes,1,rep,name=messages,proto3" json:"messages,omitempty"`
-	// fallback_addr [optional] is an bech23 account address used to overwrite the original ICS20
+	// fallback_addr [optional] is a bech23 account address used to overwrite the original ICS20
 	// recipient when:
 	// 1. it is defined
 	// 2. and memo is can be properly deserialized into this structure

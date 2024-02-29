@@ -14,7 +14,7 @@ option (gogoproto.messagename_all)     = true;
 message ICS20Memo {
   // messages is a list of `sdk.Msg`s that will be executed when handling ICS20 transfer.
   repeated google.protobuf.Any messages = 1;
-  // fallback_addr [optional] is an bech23 account address used to overwrite the original ICS20
+  // fallback_addr [optional] is a bech23 account address used to overwrite the original ICS20
   // recipient when:
   // 1. it is defined
   // 2. and memo is can be properly deserialized into this structure
