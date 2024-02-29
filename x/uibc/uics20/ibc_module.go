@@ -1,6 +1,8 @@
 package uics20
 
 import (
+	"strings"
+
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -11,6 +13,7 @@ import (
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/uibc/gmp"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
@@ -54,11 +57,20 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	if !ack.Success() {
 		return ack
 	}
+
 	if ftData.Memo != "" {
 		logger := recvPacketLogger(&ctx)
-		mh := MemoHandler{im.cdc, im.leverage}
-		if err := mh.onRecvPacket(&ctx, packet, ftData); err != nil {
-			logger.Error("can't handle ICS20 memo", "err", err)
+		if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
+			logger.Info("handle the memo with gmp")
+			gh := gmp.NewHandler()
+			if err := gh.OnRecvPacket(ctx, packet, ftData); err != nil {
+				logger.Error("can't handle ICS20 memo on GMP", "err", err)
+			}
+		} else {
+			mh := MemoHandler{im.cdc, im.leverage}
+			if err := mh.onRecvPacket(&ctx, packet, ftData); err != nil {
+				logger.Error("can't handle ICS20 memo", "err", err)
+			}
 		}
 	}
 
