@@ -37,6 +37,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
 ) (sdk.AccAddress, []string, error) {
 	var events []string
+	var err error
 	mh.memo = ftData.Memo
 	amount, ok := sdk.NewIntFromString(ftData.Amount)
 	if !ok { // must not happen
