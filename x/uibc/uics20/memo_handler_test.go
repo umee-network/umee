@@ -119,9 +119,21 @@ func TestMsgMarshalling(t *testing.T) {
 	bz, err := cdc.MarshalJSON(&memo)
 	assert.NoError(err)
 
-	msgs2, err := deserializeMemoMsgs(cdc, bz)
+	memo2, err := deserializeMemo(cdc, bz)
 	assert.NoError(err)
+	assert.Equal(memo2.FallbackAddr, "")
+	msgs2, err := memo2.GetMsgs()
 	for i := range msgs2 {
 		assert.Equal(msgs[i], msgs2[i], "idx=%d", i)
 	}
+
+	bz = []byte("{}")
+	memo2, err = deserializeMemo(cdc, bz)
+	assert.NoError(err)
+	assert.Equal(memo2, uibc.ICS20Memo{})
+
+	// we expect to fail deserialization if Any is not properly formatted
+	bz = []byte(`{"messages": ["any message"]}`)
+	memo2, err = deserializeMemo(cdc, bz)
+	assert.Error(err)
 }

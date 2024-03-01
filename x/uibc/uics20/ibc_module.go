@@ -1,7 +1,7 @@
 package uics20
 
 import (
-	"strings"
+	"encoding/json"
 
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
@@ -13,7 +13,6 @@ import (
 	"github.com/cosmos/ibc-go/v7/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
-	"github.com/umee-network/umee/v6/x/uibc/gmp"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
 )
 
@@ -42,37 +41,57 @@ func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.Keeper
 }
 
 // OnRecvPacket is called when a receiver chain receives a packet from SendPacket.
+//  1. record IBC quota
+//  2. Try to unpack and prepare memo. If memo has a correct structure, and fallback addr is
+//     defined but malformed, we cancel the transfer (otherwise would not be able to use it
+//     correctly).
+//  3. If memo has a correct structure, but memo.messages can't be unpack or don't pass
+//     validation, then we continue with the transfer and overwrite the original receiver to
+//     fallback_addr if it's defined.
+//  4. Execute the downstream middleware and the transfer app.
+//  5. Execute hooks. If hook execution fails, we don't use the the fallback_addr nor ignore the
+//     transfer. This is because there could be other middlewares that are already executed.
 func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
 	ftData, err := deserializeFTData(im.cdc, packet)
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
-	qk := im.kb.Keeper(&ctx)
-	if ackResp := qk.IBCOnRecvPacket(ftData, packet); ackResp != nil && !ackResp.Success() {
+	quotaKeeper := im.kb.Keeper(&ctx)
+	if ackResp := quotaKeeper.IBCOnRecvPacket(ftData, packet); ackResp != nil && !ackResp.Success() {
 		return ackResp
 	}
 
+	// NOTE: IBC hooks must be the last middleware - just the transfer app.
+	// MemoHandler may update amoount in the message, because the received token amount may be
+	// smaller than the amount originally sent (various fees). We need to be sure that there is
+	// no other middleware that can change packet data or amounts.
+
+	mh := MemoHandler{im.cdc, im.leverage}
+	msgs, overwriteReceiver, events, err := mh.onRecvPacketPre(&ctx, packet, ftData)
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(err)
+	}
+	if overwriteReceiver != nil {
+		ftData.Receiver = overwriteReceiver.String()
+		msgs = nil // we don't want to execute hooks when we set fallback address.
+		events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
+		if packet.Data, err = json.Marshal(ftData); err != nil {
+			return channeltypes.NewErrorAcknowledgement(err)
+		}
+	}
+
+	// call transfer module app
 	ack := im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	if !ack.Success() {
 		return ack
 	}
 
-	if ftData.Memo != "" {
-		logger := recvPacketLogger(&ctx)
-		if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
-			logger.Info("handle the memo with gmp")
-			gh := gmp.NewHandler()
-			if err := gh.OnRecvPacket(ctx, packet, ftData); err != nil {
-				logger.Error("can't handle ICS20 memo on GMP", "err", err)
-			}
-		} else {
-			mh := MemoHandler{im.cdc, im.leverage}
-			if err := mh.onRecvPacket(&ctx, packet, ftData); err != nil {
-				logger.Error("can't handle ICS20 memo", "err", err)
-			}
-		}
+	if err := mh.dispatchMemoMsgs(&ctx, msgs); err != nil {
+		events = append(events, "can't handle ICS20 memo err = "+err.Error())
 	}
+
+	im.emitEvents(ctx.EventManager(), recvPacketLogger(&ctx), "ics20-memo-hook", events)
 
 	return ack
 }
@@ -104,10 +123,27 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 	ftData, err := deserializeFTData(im.cdc, packet)
 	if err != nil {
 		// we only log error, because we want to propagate the ack to other layers.
-		ctx.Logger().Error("can't revert quota update", "err", err)
+		ctx.Logger().With("scope", "ics20-OnAckErr").Error("can't revert quota update", "err", err)
 	}
 	qk := im.kb.Keeper(ctx)
 	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
+}
+
+func (im ICS20Module) emitEvents(em *sdk.EventManager, logger log.Logger, topic string, events []string) {
+	attributes := make([]sdk.Attribute, len(events))
+	key := topic + "-context"
+	for i, s := range events {
+		// it's ok that all events have the same key. This is how ibc-apps are dealing with events.
+		attributes[i] = sdk.NewAttribute(key, s)
+	}
+	logger.Debug("Handle ICS20 memo", "events", events)
+
+	em.EmitEvents(sdk.Events{
+		sdk.NewEvent(
+			topic,
+			attributes...,
+		),
+	})
 }
 
 func deserializeFTData(cdc codec.JSONCodec, packet channeltypes.Packet,

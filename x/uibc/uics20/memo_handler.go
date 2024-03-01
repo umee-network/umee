@@ -7,7 +7,6 @@ import (
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/tx"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
 
@@ -20,38 +19,56 @@ type MemoHandler struct {
 	leverage ltypes.MsgServer
 }
 
-func (mh MemoHandler) onRecvPacket(
+// See ICS20Module.OnRecvPacket for the flow
+func (mh MemoHandler) onRecvPacketPre(
 	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
-) error {
-
-	msgs, err := deserializeMemoMsgs(mh.cdc, []byte(ftData.Memo))
+) ([]sdk.Msg, sdk.AccAddress, []string, error) {
+	var events []string
+	memo, err := deserializeMemo(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
-		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
-		return nil
+		recvPacketLogger(ctx).Debug("Not recognized ICS20 memo, ignoring hook execution", "err", err)
+		return nil, nil, nil, nil
+	}
+	var msgs []sdk.Msg
+	var fallbackReceiver sdk.AccAddress
+	if memo.FallbackAddr != "" {
+		if fallbackReceiver, err = sdk.AccAddressFromBech32(memo.FallbackAddr); err != nil {
+			return nil, nil, nil,
+				sdkerrors.Wrap(err, "ICS20 memo fallback_addr defined, but not formatted correctly")
+		}
+	}
+
+	msgs, err = memo.GetMsgs()
+	if err != nil {
+		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
+		events = append(events, e)
+		return nil, fallbackReceiver, events, nil
 	}
 
 	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
-	if err != nil {
-		return sdkerrors.Wrap(err, "can't parse bech32 address")
+	if err != nil { // must not happen
+		return nil, nil, nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
 	}
 	amount, ok := sdk.NewIntFromString(ftData.Amount)
-	if !ok {
-		return fmt.Errorf("can't parse transfer amount: %s [%w]", ftData.Amount, err)
+	if !ok { // must not happen
+		return nil, nil, nil, fmt.Errorf("can't parse transfer amount: %s [%w]", ftData.Amount, err)
 	}
 	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
-	return mh.dispatchMemoMsgs(ctx, receiver, sdk.NewCoin(ibcDenom, amount), msgs)
+	sentCoin := sdk.NewCoin(ibcDenom, amount)
+	if err := mh.validateMemoMsg(receiver, sentCoin, msgs); err != nil {
+		events = append(events, "memo.messages are not valid, err: "+err.Error())
+		return nil, fallbackReceiver, events, nil
+	}
+
+	return msgs, fallbackReceiver, events, nil
 }
 
 // runs messages encoded in the ICS20 memo.
 // NOTE: we fork the store and only commit if all messages pass. Otherwise the fork store
 // is discarded.
-func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
+func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, msgs []sdk.Msg) error {
 	if len(msgs) == 0 {
 		return nil // quick return - we have nothing to handle
-	}
-
-	if err := mh.validateMemoMsg(receiver, sent, msgs); err != nil {
-		return sdkerrors.Wrap(err, "ics20 memo messages are not valid.")
 	}
 
 	// Caching context so that we don't update the store in case of failure.
@@ -83,6 +100,9 @@ var (
 // transfer.
 func (mh MemoHandler) validateMemoMsg(_receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
 	msgLen := len(msgs)
+	if msgLen == 0 {
+		return nil
+	}
 	// In this release we only support 1msg, and only messages that don't create or change
 	// a borrow position
 	if msgLen > 1 {
@@ -158,10 +178,6 @@ func assertSubCoins(sent, operated sdk.Coin) error {
 	return nil
 }
 
-func deserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
-	var m uibc.ICS20Memo
-	if err := cdc.UnmarshalJSON(data, &m); err != nil {
-		return nil, err
-	}
-	return tx.GetMsgs(m.Messages, "memo messages")
+func deserializeMemo(cdc codec.JSONCodec, data []byte) (m uibc.ICS20Memo, err error) {
+	return m, cdc.UnmarshalJSON(data, &m)
 }
