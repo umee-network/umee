@@ -35,40 +35,39 @@ type MemoHandler struct {
 // See ICS20Module.OnRecvPacket for the flow
 func (mh *MemoHandler) onRecvPacketPrepare(
 	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
-) (sdk.AccAddress, []string, error) {
+) ([]string, error) {
 	var events []string
 	var err error
 	mh.memo = ftData.Memo
 	amount, ok := sdk.NewIntFromString(ftData.Amount)
 	if !ok { // must not happen
-		return nil, nil, fmt.Errorf("can't parse transfer amount: %s", ftData.Amount)
+		return nil, fmt.Errorf("can't parse transfer amount: %s", ftData.Amount)
 	}
 	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
 	mh.received = sdk.NewCoin(ibcDenom, amount)
 	mh.receiver, err = sdk.AccAddressFromBech32(ftData.Receiver)
 	if err != nil { // must not happen
-		return nil, nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
+		return nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
 	}
 
 	if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
 		events = append(events, "axelar GMP transaction")
 		mh.isGMP = true
-		return nil, events, nil
+		return events, nil
 	}
 
 	memo, err := deserializeMemo(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
 		recvPacketLogger(ctx).Debug("Not recognized ICS20 memo, ignoring hook execution", "err", err)
-		return nil, nil, nil
+		return nil, nil
 	}
-	var fallbackReceiver sdk.AccAddress
 	if memo.FallbackAddr != "" {
-		if fallbackReceiver, err = sdk.AccAddressFromBech32(memo.FallbackAddr); err != nil {
-			return nil, nil,
+		if mh.fallbackReceiver, err = sdk.AccAddressFromBech32(memo.FallbackAddr); err != nil {
+			return nil,
 				sdkerrors.Wrap(err, "ICS20 memo fallback_addr defined, but not formatted correctly")
 		}
-		if fallbackReceiver.Equals(mh.receiver) {
-			fallbackReceiver = nil
+		if mh.fallbackReceiver.Equals(mh.receiver) {
+			mh.fallbackReceiver = nil
 		}
 	}
 
@@ -76,15 +75,15 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	if err != nil {
 		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
 		events = append(events, e)
-		return fallbackReceiver, events, nil
+		return events, nil
 	}
 
 	if err := mh.validateMemoMsg(); err != nil {
 		events = append(events, "memo.messages are not valid, err: "+err.Error())
-		return fallbackReceiver, events, errMemoValidation
+		return events, errMemoValidation
 	}
 
-	return fallbackReceiver, events, nil
+	return events, nil
 }
 
 // runs messages encoded in the ICS20 memo.

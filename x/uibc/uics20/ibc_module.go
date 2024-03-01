@@ -68,15 +68,15 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	// no other middleware that can change packet data or amounts.
 
 	mh := MemoHandler{cdc: im.cdc, leverage: im.leverage}
-	fallbackReceiver, events, err := mh.onRecvPacketPrepare(&ctx, packet, ftData)
+	events, err := mh.onRecvPacketPrepare(&ctx, packet, ftData)
 	if err != nil && err != errMemoValidation {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
 	var transferCtx = ctx
 	var ctxFlush func()
-	if fallbackReceiver != nil {
+	if mh.fallbackReceiver != nil {
 		if err == errMemoValidation {
-			ftData.Receiver = fallbackReceiver.String()
+			ftData.Receiver = mh.fallbackReceiver.String()
 			events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
 			if packet.Data, err = json.Marshal(ftData); err != nil {
 				return channeltypes.NewErrorAcknowledgement(err)
@@ -99,8 +99,13 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		events = append(events, "can't handle ICS20 memo err = "+err.Error())
 		// if we created a new cache context, then we can discard it, and repeate the transfer to
 		// the fallback address
-		if ctxFlush != nil {
+		if mh.fallbackReceiver != nil {
 			ctxFlush = nil // discard the context
+			ftData.Receiver = mh.fallbackReceiver.String()
+			events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
+			if packet.Data, err = json.Marshal(ftData); err != nil {
+				return channeltypes.NewErrorAcknowledgement(err)
+			}
 			ack = im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 		}
 	} else {
