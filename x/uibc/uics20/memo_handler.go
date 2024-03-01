@@ -131,22 +131,22 @@ func (mh MemoHandler) validateMemoMsg() error {
 	}
 
 	var (
-		asset sdk.Coin
+		asset *sdk.Coin
 		// collateral sdk.Coin
 	)
 	switch msg := mh.msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
-		asset = msg.Asset
+		asset = &msg.Asset
 		// collateral = asset
 	case *ltypes.MsgSupply:
-		asset = msg.Asset
+		asset = &msg.Asset
 	case *ltypes.MsgLiquidate:
-		asset = msg.Repayment
+		asset = &msg.Repayment
 	default:
 		return errMsg0Type
 	}
 
-	return assertSubCoins(mh.received, asset)
+	return adjustOperatedCoin(mh.received, asset)
 
 	/**
 	   TODO: handlers v2
@@ -192,9 +192,14 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 	return err
 }
 
-func assertSubCoins(sent, operated sdk.Coin) error {
-	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
+// adjustOperatedCoin assures that received and operated are of the same denom. Returns error if
+// not. Moreover it updates operated amount if it is bigger than the received amount.
+func adjustOperatedCoin(received sdk.Coin, operated *sdk.Coin) error {
+	if received.Denom != operated.Denom {
 		return errNoSubCoins
+	}
+	if received.Amount.LT(operated.Amount) {
+		operated.Amount = received.Amount
 	}
 	return nil
 }

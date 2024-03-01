@@ -140,3 +140,23 @@ func TestMsgMarshalling(t *testing.T) {
 	memo2, err = deserializeMemo(cdc, bz)
 	assert.Error(err)
 }
+
+func TestAdjustOperatedCoin(t *testing.T) {
+	received := sdk.NewInt64Coin("atom", 10)
+	tcs := []struct {
+		operated       sdk.Coin
+		expectedAmount int64
+		err            error
+	}{
+		{sdk.NewInt64Coin("other", 1), 1, errNoSubCoins},
+		{sdk.NewInt64Coin("atom", 1), 1, nil},
+		{sdk.NewInt64Coin("atom", 10), 10, nil},
+		{sdk.NewInt64Coin("atom", 12), 10, nil},
+	}
+
+	for i, tc := range tcs {
+		err := adjustOperatedCoin(received, &tc.operated)
+		assert.ErrorIs(t, err, tc.err, "tc %d", i)
+		assert.Equal(t, tc.expectedAmount, tc.operated.Amount.Int64())
+	}
+}
