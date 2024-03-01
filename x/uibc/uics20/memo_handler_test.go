@@ -56,11 +56,13 @@ func TestValidateMemoMsg(t *testing.T) {
 		{[]sdk.Msg{goodMsgSupplyColl}, ""},
 		{[]sdk.Msg{goodMsgLiquidate}, ""}, // in handlers v2 this will be a good message
 
-		// messages[0] use more assets than the transfer
-		{[]sdk.Msg{goodMsgSupply11}, errNoSubCoins},
-		{[]sdk.Msg{goodMsgSupplyColl11}, errNoSubCoins},
-		{[]sdk.Msg{goodMsgSupplyColl11}, errNoSubCoins},
-		{[]sdk.Msg{goodMsgLiquidate11}, errNoSubCoins},
+		// messages[0] use more assets than the transfer -> OK
+		{[]sdk.Msg{goodMsgSupply11}, ""},
+		{[]sdk.Msg{goodMsgSupplyColl11}, ""},
+		{[]sdk.Msg{goodMsgSupplyColl11}, ""},
+		{[]sdk.Msg{goodMsgLiquidate11}, ""},
+
+		{[]sdk.Msg{ltypes.NewMsgSupply(receiver, coin.New("other", 1))}, errNoSubCoins},
 
 		// wrong message types
 		{[]sdk.Msg{goodMsgBorrow}, errMsg0type},
