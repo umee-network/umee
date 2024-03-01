@@ -1,13 +1,5 @@
 package gmp
 
-import sdk "github.com/cosmos/cosmos-sdk/types"
-
-type GeneralMessageHandler interface {
-	HandleGeneralMessage(ctx sdk.Context, srcChain, srcAddress string, destAddress string, payload []byte) error
-	HandleGeneralMessageWithToken(ctx sdk.Context, srcChain, srcAddress string, destAddress string,
-		payload []byte, coin sdk.Coin) error
-}
-
 const (
 	DefaultGMPAddress = "axelar1dv4u5k73pzqrxlzujxg3qp8kvc3pje7jtdvu72npnt5zhq05ejcsn5qme5"
 )

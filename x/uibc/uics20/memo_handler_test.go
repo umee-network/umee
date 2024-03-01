@@ -93,7 +93,10 @@ func TestValidateMemoMsg(t *testing.T) {
 	}
 
 	for i, tc := range tcs {
-		err := mh.validateMemoMsg(receiver, sent, tc.msgs)
+		mh.receiver = receiver
+		mh.received = sent
+		mh.msgs = tc.msgs
+		err := mh.validateMemoMsg()
 		if tc.errstr != "" {
 			assert.ErrorContains(err, tc.errstr, "test: %d", i)
 		} else {
