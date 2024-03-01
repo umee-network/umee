@@ -16,7 +16,7 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc/gmp"
 )
 
-var memoValidationErr = errors.New("ics20 memo validation error")
+var errMemoValidation = errors.New("ics20 memo validation error")
 
 type MemoHandler struct {
 	cdc      codec.JSONCodec
@@ -81,7 +81,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 
 	if err := mh.validateMemoMsg(); err != nil {
 		events = append(events, "memo.messages are not valid, err: "+err.Error())
-		return fallbackReceiver, events, memoValidationErr
+		return fallbackReceiver, events, errMemoValidation
 	}
 
 	return fallbackReceiver, events, nil

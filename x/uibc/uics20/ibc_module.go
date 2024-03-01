@@ -69,13 +69,13 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 
 	mh := MemoHandler{cdc: im.cdc, leverage: im.leverage}
 	fallbackReceiver, events, err := mh.onRecvPacketPrepare(&ctx, packet, ftData)
-	if err != nil && err != memoValidationErr {
+	if err != nil && err != errMemoValidation {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
 	var transferCtx = ctx
 	var ctxFlush func()
 	if fallbackReceiver != nil {
-		if err == memoValidationErr {
+		if err == errMemoValidation {
 			ftData.Receiver = fallbackReceiver.String()
 			events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
 			if packet.Data, err = json.Marshal(ftData); err != nil {
