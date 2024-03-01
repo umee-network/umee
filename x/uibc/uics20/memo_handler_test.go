@@ -56,11 +56,13 @@ func TestValidateMemoMsg(t *testing.T) {
 		{[]sdk.Msg{goodMsgSupplyColl}, ""},
 		{[]sdk.Msg{goodMsgLiquidate}, ""}, // in handlers v2 this will be a good message
 
-		// messages[0] use more assets than the transfer
-		{[]sdk.Msg{goodMsgSupply11}, errNoSubCoins},
-		{[]sdk.Msg{goodMsgSupplyColl11}, errNoSubCoins},
-		{[]sdk.Msg{goodMsgSupplyColl11}, errNoSubCoins},
-		{[]sdk.Msg{goodMsgLiquidate11}, errNoSubCoins},
+		// messages[0] use more assets than the transfer -> OK
+		{[]sdk.Msg{goodMsgSupply11}, ""},
+		{[]sdk.Msg{goodMsgSupplyColl11}, ""},
+		{[]sdk.Msg{goodMsgSupplyColl11}, ""},
+		{[]sdk.Msg{goodMsgLiquidate11}, ""},
+
+		{[]sdk.Msg{ltypes.NewMsgSupply(receiver, coin.New("other", 1))}, errNoSubCoins},
 
 		// wrong message types
 		{[]sdk.Msg{goodMsgBorrow}, errMsg0type},
@@ -93,7 +95,10 @@ func TestValidateMemoMsg(t *testing.T) {
 	}
 
 	for i, tc := range tcs {
-		err := mh.validateMemoMsg(receiver, sent, tc.msgs)
+		mh.receiver = receiver
+		mh.received = sent
+		mh.msgs = tc.msgs
+		err := mh.validateMemoMsg()
 		if tc.errstr != "" {
 			assert.ErrorContains(err, tc.errstr, "test: %d", i)
 		} else {
@@ -136,4 +141,24 @@ func TestMsgMarshalling(t *testing.T) {
 	bz = []byte(`{"messages": ["any message"]}`)
 	memo2, err = deserializeMemo(cdc, bz)
 	assert.Error(err)
+}
+
+func TestAdjustOperatedCoin(t *testing.T) {
+	received := sdk.NewInt64Coin("atom", 10)
+	tcs := []struct {
+		operated       sdk.Coin
+		expectedAmount int64
+		err            error
+	}{
+		{sdk.NewInt64Coin("other", 1), 1, errNoSubCoins},
+		{sdk.NewInt64Coin("atom", 1), 1, nil},
+		{sdk.NewInt64Coin("atom", 10), 10, nil},
+		{sdk.NewInt64Coin("atom", 12), 10, nil},
+	}
+
+	for i, tc := range tcs {
+		err := adjustOperatedCoin(received, &tc.operated)
+		assert.ErrorIs(t, err, tc.err, "tc %d", i)
+		assert.Equal(t, tc.expectedAmount, tc.operated.Amount.Int64())
+	}
 }

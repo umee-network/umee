@@ -3,6 +3,7 @@ package uics20
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -12,76 +13,99 @@ import (
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/gmp"
 )
+
+var errMemoValidation = errors.New("ics20 memo validation error")
 
 type MemoHandler struct {
 	cdc      codec.JSONCodec
 	leverage ltypes.MsgServer
+
+	isGMP    bool
+	msgs     []sdk.Msg
+	memo     string
+	received sdk.Coin
+
+	receiver         sdk.AccAddress
+	fallbackReceiver sdk.AccAddress
 }
 
+// onRecvPacketPre parses transfer Memo field and prepares the MemoHandler.
 // See ICS20Module.OnRecvPacket for the flow
-func (mh MemoHandler) onRecvPacketPre(
+func (mh *MemoHandler) onRecvPacketPrepare(
 	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
-) ([]sdk.Msg, sdk.AccAddress, []string, error) {
+) ([]string, error) {
 	var events []string
+	var err error
+	mh.memo = ftData.Memo
+	amount, ok := sdk.NewIntFromString(ftData.Amount)
+	if !ok { // must not happen
+		return nil, fmt.Errorf("can't parse transfer amount: %s", ftData.Amount)
+	}
+	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
+	mh.received = sdk.NewCoin(ibcDenom, amount)
+	mh.receiver, err = sdk.AccAddressFromBech32(ftData.Receiver)
+	if err != nil { // must not happen
+		return nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
+	}
+
+	if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
+		events = append(events, "axelar GMP transaction")
+		mh.isGMP = true
+		return events, nil
+	}
+
 	memo, err := deserializeMemo(mh.cdc, []byte(ftData.Memo))
 	if err != nil {
 		recvPacketLogger(ctx).Debug("Not recognized ICS20 memo, ignoring hook execution", "err", err)
-		return nil, nil, nil, nil
+		return nil, nil
 	}
-	var msgs []sdk.Msg
-	var fallbackReceiver sdk.AccAddress
 	if memo.FallbackAddr != "" {
-		if fallbackReceiver, err = sdk.AccAddressFromBech32(memo.FallbackAddr); err != nil {
-			return nil, nil, nil,
+		if mh.fallbackReceiver, err = sdk.AccAddressFromBech32(memo.FallbackAddr); err != nil {
+			return nil,
 				sdkerrors.Wrap(err, "ICS20 memo fallback_addr defined, but not formatted correctly")
+		}
+		if mh.fallbackReceiver.Equals(mh.receiver) {
+			mh.fallbackReceiver = nil
 		}
 	}
 
-	msgs, err = memo.GetMsgs()
+	mh.msgs, err = memo.GetMsgs()
 	if err != nil {
 		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
 		events = append(events, e)
-		return nil, fallbackReceiver, events, nil
+		return events, nil
 	}
 
-	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
-	if err != nil { // must not happen
-		return nil, nil, nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
-	}
-	amount, ok := sdk.NewIntFromString(ftData.Amount)
-	if !ok { // must not happen
-		return nil, nil, nil, fmt.Errorf("can't parse transfer amount: %s [%w]", ftData.Amount, err)
-	}
-	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
-	sentCoin := sdk.NewCoin(ibcDenom, amount)
-	if err := mh.validateMemoMsg(receiver, sentCoin, msgs); err != nil {
+	if err := mh.validateMemoMsg(); err != nil {
 		events = append(events, "memo.messages are not valid, err: "+err.Error())
-		return nil, fallbackReceiver, events, nil
+		return events, errMemoValidation
 	}
 
-	return msgs, fallbackReceiver, events, nil
+	return events, nil
 }
 
 // runs messages encoded in the ICS20 memo.
 // NOTE: we fork the store and only commit if all messages pass. Otherwise the fork store
 // is discarded.
-func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, msgs []sdk.Msg) error {
-	if len(msgs) == 0 {
+func (mh MemoHandler) execute(ctx *sdk.Context) error {
+	logger := recvPacketLogger(ctx)
+	if mh.isGMP {
+		gh := gmp.NewHandler()
+		return gh.OnRecvPacket(*ctx, mh.received, mh.memo, mh.receiver)
+	}
+
+	if len(mh.msgs) == 0 {
 		return nil // quick return - we have nothing to handle
 	}
 
-	// Caching context so that we don't update the store in case of failure.
-	cacheCtx, flush := ctx.CacheContext()
-	logger := recvPacketLogger(ctx)
-	for _, m := range msgs {
-		if err := mh.handleMemoMsg(&cacheCtx, m); err != nil {
-			// ignore changes in cacheCtx and return
+	for _, m := range mh.msgs {
+		if err := mh.handleMemoMsg(ctx, m); err != nil {
 			return sdkerrors.Wrapf(err, "error dispatching msg: %v", m)
 		}
 		logger.Debug("dispatching", "msg", m)
 	}
-	flush()
 	return nil
 }
 
@@ -98,8 +122,8 @@ var (
 // - [MsgLiquidate]
 // Signer of each message (account under charged with coins), must be the receiver of the ICS20
 // transfer.
-func (mh MemoHandler) validateMemoMsg(_receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
-	msgLen := len(msgs)
+func (mh MemoHandler) validateMemoMsg() error {
+	msgLen := len(mh.msgs)
 	if msgLen == 0 {
 		return nil
 	}
@@ -110,22 +134,22 @@ func (mh MemoHandler) validateMemoMsg(_receiver sdk.AccAddress, sent sdk.Coin, m
 	}
 
 	var (
-		asset sdk.Coin
+		asset *sdk.Coin
 		// collateral sdk.Coin
 	)
-	switch msg := msgs[0].(type) {
+	switch msg := mh.msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
-		asset = msg.Asset
+		asset = &msg.Asset
 		// collateral = asset
 	case *ltypes.MsgSupply:
-		asset = msg.Asset
+		asset = &msg.Asset
 	case *ltypes.MsgLiquidate:
-		asset = msg.Repayment
+		asset = &msg.Repayment
 	default:
 		return errMsg0Type
 	}
 
-	return assertSubCoins(sent, asset)
+	return adjustOperatedCoin(mh.received, asset)
 
 	/**
 	   TODO: handlers v2
@@ -171,9 +195,14 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 	return err
 }
 
-func assertSubCoins(sent, operated sdk.Coin) error {
-	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
+// adjustOperatedCoin assures that received and operated are of the same denom. Returns error if
+// not. Moreover it updates operated amount if it is bigger than the received amount.
+func adjustOperatedCoin(received sdk.Coin, operated *sdk.Coin) error {
+	if received.Denom != operated.Denom {
 		return errNoSubCoins
+	}
+	if received.Amount.LT(operated.Amount) {
+		operated.Amount = received.Amount
 	}
 	return nil
 }
