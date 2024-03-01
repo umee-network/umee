@@ -44,6 +44,10 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	}
 	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
 	mh.received = sdk.NewCoin(ibcDenom, amount)
+	mh.receiver, err = sdk.AccAddressFromBech32(ftData.Receiver)
+	if err != nil { // must not happen
+		return nil, nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
+	}
 
 	if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
 		events = append(events, "axelar GMP transaction")
@@ -62,6 +66,9 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 			return nil, nil,
 				sdkerrors.Wrap(err, "ICS20 memo fallback_addr defined, but not formatted correctly")
 		}
+		if fallbackReceiver.Equals(mh.receiver) {
+			fallbackReceiver = nil
+		}
 	}
 
 	mh.msgs, err = memo.GetMsgs()
@@ -71,10 +78,6 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 		return fallbackReceiver, events, nil
 	}
 
-	mh.receiver, err = sdk.AccAddressFromBech32(ftData.Receiver)
-	if err != nil { // must not happen
-		return nil, nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
-	}
 	if err := mh.validateMemoMsg(); err != nil {
 		events = append(events, "memo.messages are not valid, err: "+err.Error())
 		return fallbackReceiver, events, memoValidationErr
