@@ -153,13 +153,6 @@ func TestDeserializeFTData(t *testing.T) {
 		{
 			name: "valid packet data ",
 			packetData: func() []byte {
-				ftData := ics20types.FungibleTokenPacketData{
-					Denom:    atomCoin.Denom,
-					Amount:   atomCoin.Amount.String(),
-					Sender:   senderAddr,
-					Receiver: recvAddr,
-					Memo:     "",
-				}
 				mar, err := json.Marshal(ftData)
 				assert.NilError(t, err)
 				return mar
