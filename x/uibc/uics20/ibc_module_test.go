@@ -137,23 +137,47 @@ func TestIBCOnRecvPacket(t *testing.T) {
 
 func TestDeserializeFTData(t *testing.T) {
 	cdc := tsdk.NewCodec(uibc.RegisterInterfaces, ltypes.RegisterInterfaces)
-	invalidPacketData := []byte("asdasd")
-	packet.Data = invalidPacketData
-	_, err := deserializeFTData(cdc, packet)
-	assert.ErrorContains(t, err, "invalid character")
 
-	ftData := ics20types.FungibleTokenPacketData{
-		Denom:    atomCoin.Denom,
-		Amount:   atomCoin.Amount.String(),
-		Sender:   senderAddr,
-		Receiver: recvAddr,
-		Memo:     "",
+	tests := []struct {
+		name       string
+		packetData func() []byte
+		errMsg     string
+	}{
+		{
+			name: "invalid packet data",
+			packetData: func() []byte {
+				return []byte("invalid packet data")
+			},
+			errMsg: "invalid character",
+		},
+		{
+			name: "valid packet data ",
+			packetData: func() []byte {
+				ftData := ics20types.FungibleTokenPacketData{
+					Denom:    atomCoin.Denom,
+					Amount:   atomCoin.Amount.String(),
+					Sender:   senderAddr,
+					Receiver: recvAddr,
+					Memo:     "",
+				}
+				mar, err := json.Marshal(ftData)
+				assert.NilError(t, err)
+				return mar
+			},
+			errMsg: "",
+		},
 	}
 
-	mar, err := json.Marshal(ftData)
-	assert.NilError(t, err)
-	packet.Data = mar
-	recvFtData, err := deserializeFTData(cdc, packet)
-	assert.NilError(t, err)
-	assert.DeepEqual(t, recvFtData, ftData)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			packet.Data = tc.packetData()
+			recvFtData, err := deserializeFTData(cdc, packet)
+			if tc.errMsg != "" {
+				assert.ErrorContains(t, err, tc.errMsg)
+			} else {
+				assert.NilError(t, err)
+				assert.DeepEqual(t, recvFtData, ftData)
+			}
+		})
+	}
 }

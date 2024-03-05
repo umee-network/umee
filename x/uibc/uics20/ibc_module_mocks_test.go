@@ -11,6 +11,7 @@ import (
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
+// MOCKIBCModule provides a mock implementation of the IBCModule interface for testing purposes.
 type MOCKIBCModule struct {
 	porttypes.IBCModule
 }
@@ -27,6 +28,7 @@ func (m MOCKIBCModule) OnRecvPacket(
 	return channeltypes.NewResultAcknowledgement([]byte("true"))
 }
 
+// MockLeverageMsgServer provides a mock implementation of the MsgServer interface for leverage module.
 type MockLeverageMsgServer struct {
 	types.MsgServer
 }
