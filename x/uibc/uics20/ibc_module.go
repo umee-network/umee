@@ -2,6 +2,7 @@ package uics20
 
 import (
 	"encoding/json"
+	"errors"
 
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
@@ -69,13 +70,13 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 
 	mh := MemoHandler{cdc: im.cdc, leverage: im.leverage}
 	events, err := mh.onRecvPacketPrepare(&ctx, packet, ftData)
-	if err != nil && err != errMemoValidation {
+	if err != nil && !errors.Is(err, errMemoValidation{}) {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
 	var transferCtx = ctx
 	var ctxFlush func()
 	if mh.fallbackReceiver != nil {
-		if err == errMemoValidation {
+		if errors.Is(err, errMemoValidation{}) {
 			ftData.Receiver = mh.fallbackReceiver.String()
 			events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
 			if packet.Data, err = json.Marshal(ftData); err != nil {
