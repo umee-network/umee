@@ -2,6 +2,7 @@ package uics20
 
 import (
 	"encoding/json"
+	"errors"
 
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
@@ -69,23 +70,27 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 
 	mh := MemoHandler{cdc: im.cdc, leverage: im.leverage}
 	events, err := mh.onRecvPacketPrepare(&ctx, packet, ftData)
-	if err != nil && err != errMemoValidation {
-		return channeltypes.NewErrorAcknowledgement(err)
-	}
-	var transferCtx = ctx
-	var ctxFlush func()
-	if mh.fallbackReceiver != nil {
-		if err == errMemoValidation {
+	if err != nil {
+		if !errors.Is(err, errMemoValidation{}) {
+			return channeltypes.NewErrorAcknowledgement(err)
+		}
+		if mh.fallbackReceiver != nil {
 			ftData.Receiver = mh.fallbackReceiver.String()
 			events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
 			if packet.Data, err = json.Marshal(ftData); err != nil {
 				return channeltypes.NewErrorAcknowledgement(err)
 			}
-		} else {
-			// create a new cache context: we have a fallback receiver and memo is valid.
-			// we will discard it when the execution fails to move the funds to the fallbackAddress.
-			transferCtx, ctxFlush = ctx.CacheContext()
 		}
+		im.emitEvents(ctx.EventManager(), recvPacketLogger(&ctx), "ics20-memo-hook", events)
+		return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
+	}
+
+	var transferCtxFlush func()
+	var transferCtx = ctx
+	if mh.fallbackReceiver != nil {
+		// create a new cache context for the fallback receiver. We will discard it when
+		// the execution fails.
+		transferCtx, transferCtxFlush = ctx.CacheContext()
 	}
 	execCtx, execCtxFlush := transferCtx.CacheContext()
 
@@ -100,7 +105,7 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		// if we created a new cache context, then we can discard it, and repeate the transfer to
 		// the fallback address
 		if mh.fallbackReceiver != nil {
-			ctxFlush = nil // discard the context
+			transferCtxFlush = nil // discard the context
 			ftData.Receiver = mh.fallbackReceiver.String()
 			events = append(events, "overwrite receiver to fallback_addr="+ftData.Receiver)
 			if packet.Data, err = json.Marshal(ftData); err != nil {
@@ -113,8 +118,8 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	}
 
 end:
-	if ctxFlush != nil {
-		ctxFlush()
+	if transferCtxFlush != nil {
+		transferCtxFlush()
 	}
 	im.emitEvents(ctx.EventManager(), recvPacketLogger(&ctx), "ics20-memo-hook", events)
 	return ack
