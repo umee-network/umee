@@ -111,8 +111,9 @@ func (mh MemoHandler) execute(ctx *sdk.Context) error {
 
 // error messages used in validateMemoMsg
 var (
-	errNoSubCoins = errors.New("message must use only coins sent from the transfer")
-	errMsg0Type   = errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+	errWrongSigner = errors.New("msg signer doesn't match the ICS20 receiver")
+	errNoSubCoins  = errors.New("message must use only coins sent from the transfer")
+	errMsg0Type    = errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
 	// errMsg1Type = errors.New("only MsgBorrow is supported as messages[1]")
 )
 
@@ -122,15 +123,23 @@ var (
 // - [MsgLiquidate]
 // Signer of each message (account under charged with coins), must be the receiver of the ICS20
 // transfer.
+// Must be called after onRecvPacketPrepare.
 func (mh MemoHandler) validateMemoMsg() error {
 	msgLen := len(mh.msgs)
 	if msgLen == 0 {
 		return nil
 	}
+
 	// In this release we only support 1msg, and only messages that don't create or change
 	// a borrow position
 	if msgLen > 1 {
 		return errors.New("ics20 memo with more than 1 message is not supported")
+	}
+
+	for _, msg := range mh.msgs {
+		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(mh.receiver) {
+			return errWrongSigner
+		}
 	}
 
 	var (
@@ -154,12 +163,6 @@ func (mh MemoHandler) validateMemoMsg() error {
 	/**
 	   TODO: handlers v2
 
-	for _, msg := range msgs {
-		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
-			return errors.New(
-				"msg signer doesn't match the receiver, expected signer: " + receiver.String())
-		}
-	}
 
 	if msgLen == 1 {
 		// early return - we don't need to do more checks

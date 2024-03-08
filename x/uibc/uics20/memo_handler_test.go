@@ -37,19 +37,17 @@ func TestValidateMemoMsg(t *testing.T) {
 	errManyMsgs := "memo with more than 1 message is not supported"
 	errNoSubCoins := errNoSubCoins.Error()
 	errMsg0type := errMsg0Type.Error()
-	// errWrongSigner := "signer doesn't match the receiver"
+	errWrongSigner := errWrongSigner.Error()
 
 	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv()}
 	tcs := []struct {
 		msgs   []sdk.Msg
 		errstr string
 	}{
-		/** we don't check signers in handlers v1
 		{[]sdk.Msg{ltypes.NewMsgSupply(accs.Bob, asset)}, errWrongSigner},
 		{[]sdk.Msg{ltypes.NewMsgSupplyCollateral(accs.Bob, asset)}, errWrongSigner},
-		{[]sdk.Msg{goodMsgSupplyColl,
-			ltypes.NewMsgBorrow(accs.Bob, asset)}, errWrongSigner},
-		*/
+		// {[]sdk.Msg{goodMsgSupplyColl,
+		// 	ltypes.NewMsgBorrow(accs.Bob, asset)}, errWrongSigner},
 
 		// good messages[0]
 		{[]sdk.Msg{goodMsgSupply}, ""},
