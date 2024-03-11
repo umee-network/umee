@@ -10,11 +10,13 @@ Full documentation is hosted at [learning.ux.xyz](https://learning.ux.xyz). Howe
 
 You need 2 binaries to run a validator: `umeed` and `price-feeder`.
 
+Make sure you run the right binary for the testnet or the mainnet. Consult the chain upgrades on [mainnet](https://www.mintscan.io/umee/proposals) and [testnet](https://explorer.network.umee.cc/Canon-4/gov).
+
 ### Umeed
 
 You can get a binary by:
 
-1. [Build](./README.md#build) yourself and follow the latest [Release Notes](./RELEASE_NOTES.md). Make sure you run the right binary for the testnet or the mainnet. Consult the chain upgrades on [mainnet](https://www.mintscan.io/umee/proposals) and [testnet](https://explorer.network.umee.cc/Canon-4/gov).
+1. [Build](./README.md#build) yourself and follow the latest [Release Notes](./RELEASE_NOTES.md). 
 
 2. If you build the binary on a different OS than your validator OS, then you need to copy `libwasmvm`:
 
@@ -24,7 +26,7 @@ You can get a binary by:
 
    NOTE: use the correct `wasmvm` version, according to the latest [Release Notes](./RELEASE_NOTES.md) or the [compatibility matrix](./README.md#release-compatibility-matrix).
 
-3. Download the right [binary build](https://github.com/umee-network/umee/releases) or use a [container image](https://github.com/umee-network/umee/pkgs/container/umeed) (docker). The binary build is compatible with the latest Ubuntu LTS x86-64. You MUST also copy the `libwasmvm` (see note in 2. about libwasmvm version):
+3. Download the right [binary build](https://github.com/umee-network/umee/releases). The binary build is compatible with the latest Ubuntu LTS x86-64. You MUST also copy the `libwasmvm` (see note in 2. about libwasmvm version):
 
    ```sh
    wget https://raw.githubusercontent.com/CosmWasm/wasmvm/<version>/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
