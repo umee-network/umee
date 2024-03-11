@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/cometbft/cometbft/libs/log"
+	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/types"
 	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
 	icagenesis "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/genesis/types"
 	icahosttypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/types"
@@ -52,7 +53,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_4(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.4"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
@@ -76,6 +77,10 @@ func (app *UmeeApp) registerUpgrade6_4(_ upgradetypes.Plan) {
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
 	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{packetforwardtypes.ModuleName},
+	})
 }
 
 func (app *UmeeApp) registerUpgrade6_0(upgradeInfo upgradetypes.Plan) {
