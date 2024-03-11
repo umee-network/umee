@@ -54,7 +54,8 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 }
 
 func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
-	planName := "v6.4"
+	// planName will v6.4 once stable binary released
+	planName := "v6.4.0-beta1"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
