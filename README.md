@@ -73,7 +73,7 @@ Since `Price Feeder v2.1.0` the recommended oracle price feeder has been moved t
 
 When you build the binary from source on the server machine you probably don't need any change. Building from source automatically link the `libwasmvm.$(uname -m).so` created as a part of the build process.
 
-However when you download a binary from GitHub, or from another source, make sure you have required version of `libwasmvm.<cpu_arch>.so` (should be in your lib directory, e.g.: `/usr/local/lib/`). You can get it:
+However when you download a binary from GitHub, or from another source, make sure you have the required version of `libwasmvm.<cpu_arch>.so` (should be in your lib directory, e.g.: `/usr/local/lib/`). You can get it:
 
 - from your build machine: copy `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v<version>/internal/api/libwasmvm.$(uname -m).so`
 - or download from CosmWasm GitHub `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v<version>/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
