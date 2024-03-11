@@ -31,7 +31,7 @@ The operation can only use tokens as the part of the IBC transfer (after any int
 
 **Upgrade Title** (for Cosmovisor): **v6.4**.
 
-Update Price Feeder to `umee/2.4.2+`.
+Update Price Feeder to `umee/2.4.1+`.
 
 #### libwasmvm update
 
