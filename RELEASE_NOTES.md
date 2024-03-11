@@ -4,7 +4,7 @@
 
 # Release Notes
 
-Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
+The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
 ## v6.4.0
 
@@ -19,7 +19,7 @@ Highlights:
 
 ### IBC Hooks
 
-This release bring the first part of the seamless cross chain money market transactions. At UX we want to provide the best User Experience for handling lending and leverage. In this release we support the following `x/leverage` messages:
+This release brings the first part of the seamless cross-chain money market transactions. At UX, we want to provide the best User Experience for handling lending and leverage. In this release, we support the following `x/leverage` messages:
 
 - `MsgSupply`
 - `MsgSupplyCollateral`
@@ -35,7 +35,7 @@ Update Price Feeder to `umee/2.4.2+`.
 
 #### libwasmvm update
 
-Our dependencies have been updated. The binary requires `libwasmvm v1.5.2`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from other source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+Our dependencies have been updated. The binary requires `libwasmvm v1.5.2`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from another source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
 
 - copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.5.2/internal/api/libwasmvm.$(uname -m).so`
 - or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.2/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`

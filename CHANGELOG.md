@@ -136,7 +136,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [2256](https://github.com/umee-network/umee/pull/2256) unify and refactore `client` package.
+- [2256](https://github.com/umee-network/umee/pull/2256) unify and refactor `client` package.
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
 - [2267](https://github.com/umee-network/umee/pull/2267) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recent spot price when required.
 - [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary.
@@ -153,7 +153,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v6.0.2](https://github.com/umee-network/umee/releases/tag/v6.0.2) - 2023-09-20
 
-### BugFix
+### Bug Fixs
 
 - [2257](https://github.com/umee-network/umee/pull/2257) fix(oracle): missing avg params.
 

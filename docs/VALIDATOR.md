@@ -4,7 +4,7 @@ This document describes a process of joining a testnet or a mainnet as a validat
 
 ## Umeeversity
 
-Full documentation is hosted at [learning.ux.xyz](https://learning.ux.xyz). However, it may not be up to date.
+Full documentation is hosted at [learning.ux.xyz](https://learning.ux.xyz). However, it may not be up-to-date.
 
 ## Getting a Binary
 
@@ -26,7 +26,7 @@ You can get a binary by:
 
    NOTE: use the correct `wasmvm` version, according to the latest [Release Notes](./RELEASE_NOTES.md) or the [compatibility matrix](./README.md#release-compatibility-matrix).
 
-3. Download the right [binary build](https://github.com/umee-network/umee/releases). The binary build is compatible with the latest Ubuntu LTS x86-64. You MUST also copy the `libwasmvm` (see note in 2. about libwasmvm version):
+3. Download the right [binary build](https://github.com/umee-network/umee/releases). The binary build is compatible with the latest Ubuntu LTS x86-64. You MUST also copy the `libwasmvm` (See note in 2. about libwasmvm version):
 
    ```sh
    wget https://raw.githubusercontent.com/CosmWasm/wasmvm/<version>/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so
@@ -39,14 +39,14 @@ To test if the `libwasm` is linked correctly, run `umeed version`.
 ### Price Feeder
 
 We are using Ojo Price Feeder. Please follow the [instructions](https://github.com/ojo-network/price-feeder/blob/umee/README.md). Make sure you use the latest release with the `umee/` prefix (eg: `umee/v2.4.0`).
-NOTE: for self building and configuration examples you MUST use the [umee branch](https://github.com/ojo-network/price-feeder/tree/umee).
+NOTE: for self building and configuration examples, you MUST use the [umee branch](https://github.com/ojo-network/price-feeder/tree/umee).
 
 - Copy the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/umee/price-feeder.example.toml).
 - For the provider config you can use our latest [umee-provider-config directory](https://github.com/ojo-network/price-feeder/tree/umee/umee-provider-config) as is.
 
 ## Running a node
 
-1. Update the `app.toml`, `client.toml` and `config.toml` based on your preference. You MUST set non-zero min gas prices in `app.toml`. Query `umeed q ugov min-gas-price` to see the what is the minimum acceptable value:
+1. Update the `app.toml`, `client.toml` and `config.toml` based on your preference. You MUST set non-zero min gas prices in `app.toml`. Query `umeed q ugov min-gas-price` to see what is the minimum acceptable value:
 
    ```toml
    # your app.toml file
