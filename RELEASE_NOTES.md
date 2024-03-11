@@ -25,7 +25,7 @@ This release brings the first part of the seamless cross-chain money market tran
 - `MsgSupplyCollateral`
 - `MsgLiquidate`
 
-The operation can only use tokens as the part of the IBC transfer (after any intermediate deductions) and the supplier / liquidator must be the IBC recipient (we don't allow to act on someone else's behalf). Authz is not supported. The remaining tokens will be credited to the recipient.
+The operation can only use tokens as the part of the IBC transfer (after any intermediate deductions) and the supplier / liquidator must be the IBC recipient (acting on someone else's behalf is not allowed). Authz is not supported. The remaining tokens will be credited to the recipient.
 
 ### Validators
 
@@ -49,7 +49,7 @@ You don't need to do anything if you are using our Docker image.
   - Run the binary to make sure it works for you: `umeed version`
 - Wait for software upgrade proposal to pass and trigger the chain upgrade.
 - Swap binaries.
-- Ensure latest Price Feeder (see [compatibility matrix](https://github.com/umee-network/umee/#release-compatibility-matrix)) is running and check your price feeder config is up to date.
+- Ensure latest Price Feeder (see [compatibility matrix](https://github.com/umee-network/umee/#release-compatibility-matrix)) is running and ensure your price feeder configuration is up-to-date.
 - Restart the chain.
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
