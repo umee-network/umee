@@ -195,7 +195,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.0/internal/api/lib
 
 ## Validators
 
-Please follow [Validator Instructions](./VALIDATOR.md) for setting up a validator node.
+Please follow [Validator Instructions](./docs/VALIDATOR.md) for setting up a validator node.
 
 ## Liquidators
 
