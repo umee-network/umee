@@ -103,7 +103,7 @@ docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
 # start bash
 docker run -it --name umeed umee-network/umeed bash
 
-# or start the start the node if you already have a node directory setup
+# or start the node if you already have a node directory setup
 docker run -it --name umeed umee-network/umeed umeed start
 ```
 

@@ -16,7 +16,7 @@ Make sure you run the right binary for the testnet or the mainnet. Consult the c
 
 You can get a binary by:
 
-1. [Build](./README.md#build) yourself and follow the latest [Release Notes](./RELEASE_NOTES.md). 
+1. [Build](../README.md#build) yourself and follow the latest [Release Notes](../RELEASE_NOTES.md). 
 
 2. If you build the binary on a different OS than your validator OS, then you need to copy `libwasmvm`:
 
@@ -24,7 +24,7 @@ You can get a binary by:
    scp $GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@<version>/internal/api/libwasmvm.$(uname -m).so running_os:/<lib/path>
    ```
 
-   NOTE: use the correct `wasmvm` version, according to the latest [Release Notes](./RELEASE_NOTES.md) or the [compatibility matrix](./README.md#release-compatibility-matrix).
+   NOTE: use the correct `wasmvm` version, according to the latest [Release Notes](../RELEASE_NOTES.md) or the [compatibility matrix](../README.md#release-compatibility-matrix).
 
 3. Download the right [binary build](https://github.com/umee-network/umee/releases). The binary build is compatible with the latest Ubuntu LTS x86-64. You MUST also copy the `libwasmvm` (See note in 2. about libwasmvm version):
 
@@ -85,4 +85,4 @@ Here are our testnet public endpoints:
 3. Buy `uumee` to self delegate.
 4. Make sure your Price Feeder is running correctly. If your [mainnet window misses](https://price-feeder.com/) are above 50% then something is wrong. Look for a help on Discord.
 
-We recommend to use [Cosmovisor](./README.md#cosmovisor) for mainnet nodes.
+We recommend to use [Cosmovisor](../README.md#cosmovisor) for mainnet nodes.
