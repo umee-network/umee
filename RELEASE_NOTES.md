@@ -35,7 +35,7 @@ Update Price Feeder to `umee/2.4.2+`.
 
 #### libwasmvm update
 
-Our dependencies have been updated. The binary requires `libwasmvm v1.5.2`. When you build the binary from source on the server machine you probably don't need any change. However when you download a binary from GitHub, or from another source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+Our dependencies have been updated. The binary requires `libwasmvm v1.5.2`. When you build the binary from source on the server machine you probably don't need any change. However, when you download a binary from GitHub, or from another source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
 
 - copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.5.2/internal/api/libwasmvm.$(uname -m).so`
 - or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.2/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
