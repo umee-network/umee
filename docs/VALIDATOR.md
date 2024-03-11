@@ -16,7 +16,7 @@ Make sure you run the right binary for the testnet or the mainnet. Consult the c
 
 You can get a binary by:
 
-1. [Build](../README.md#build) yourself and follow the latest [Release Notes](../RELEASE_NOTES.md). 
+1. [Build](../README.md#build) yourself and follow the latest [Release Notes](../RELEASE_NOTES.md).
 
 2. If you build the binary on a different OS than your validator OS, then you need to copy `libwasmvm`:
 
