@@ -46,10 +46,14 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+## v6.4.0-beta1 - 2024-03-11
+
 ### Features
 
 - [2408](https://github.com/umee-network/umee/pull/2408) New `converter` helper app.
-- [2349](https://github.com/umee-network/umee/pull/2349), [2437](https://github.com/umee-network/umee/pull/2437) IBC ICS20 memo handlers.
+- [2349](https://github.com/umee-network/umee/pull/2349), [2437](https://github.com/umee-network/umee/pull/2437), [2411](https://github.com/umee-network/umee/pull/2411), [2442](https://github.com/umee-network/umee/pull/2442), [2443](https://github.com/umee-network/umee/pull/2443) IBC ICS20 memo handlers.
+- [2381](https://github.com/umee-network/umee/pull/2381) Integrated Packet Forward Middleware.
+- [2433](https://github.com/umee-network/umee/pull/2433) Noop Axelar GMP handler.
 
 ### Improvements
 
@@ -58,8 +62,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
+- [2384](https://github.com/umee-network/umee/pull/2384) Fix `sdkclient` acc sequence setting.
 - [2417](https://github.com/umee-network/umee/pull/2417) Fix the ibc inflows storing of registered tokens when sender chain is source chain.
-  
+
 ## v6.3.0 - 2024-01-03
 
 ### Improvements
@@ -131,7 +136,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [2256](https://github.com/umee-network/umee/pull/2256) unify and refactore `client` package.
+- [2256](https://github.com/umee-network/umee/pull/2256) unify and refactor `client` package.
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
 - [2267](https://github.com/umee-network/umee/pull/2267) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recent spot price when required.
 - [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary.
@@ -148,7 +153,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v6.0.2](https://github.com/umee-network/umee/releases/tag/v6.0.2) - 2023-09-20
 
-### BugFix
+### Bug Fixs
 
 - [2257](https://github.com/umee-network/umee/pull/2257) fix(oracle): missing avg params.
 
