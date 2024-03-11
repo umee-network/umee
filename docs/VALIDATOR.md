@@ -4,11 +4,11 @@ This document describes a process of joining a testnet or a mainnet as a validat
 
 ## Umeeversity
 
-Full documentation is hosted at [learning.ux.xyz](https://learning.ux.xyz). However it may not be up to date.
+Full documentation is hosted at [learning.ux.xyz](https://learning.ux.xyz). However, it may not be up to date.
 
 ## Getting a Binary
 
-To run a validator you need 2 binaries: `umeed` and `price-feeder`.
+You need 2 binaries to run a validator: `umeed` and `price-feeder`.
 
 ### Umeed
 
@@ -44,7 +44,7 @@ NOTE: for self building and configuration examples you MUST use the [umee branch
 
 ## Running a node
 
-1. Update the `app.toml` , `client.toml` and `config.toml` based on your preference. You MUST set non zero min gas prices in `app.toml`. Query `umeed q ugov min-gas-price` to see the what is the minimum acceptable value:
+1. Update the `app.toml`, `client.toml` and `config.toml` based on your preference. You MUST set non-zero min gas prices in `app.toml`. Query `umeed q ugov min-gas-price` to see the what is the minimum acceptable value:
 
    ```toml
    # your app.toml file
@@ -57,7 +57,7 @@ Before joining the mainnet you should join a testnet!
 
 ### Testnet
 
-1. Make sure your are able to run `umeed` and price feeder locally.
+1. Make sure you can run `umeed` and `price-feeder` locally.
 2. Join the [Discord server](https://discord.gg/4ZJAFvg9). Make sure you are in the Testnet group.
 3. Follow the state sync [canon-4 instructions](https://mzonder.notion.site/UMEE-Start-from-STATE-SYNC-canon-4-f485563a089a436d9d1fe98f54af8737). Make sure you use the [latest](https://github.com/umee-network/umee/releases/) version.
 4. You can use the following peers in your `config.toml`:
@@ -67,7 +67,7 @@ Before joining the mainnet you should join a testnet!
    ```
 
 5. Using discord, ping one of the UX Team members to send you testnet `uumee`.
-6. Once your validator is setup (and you did self delegation), ping again UX Team members and send your validator address. We will do a delegation.
+6. Once your node validator is set up (and you did self delegation), ping again UX Team members and send your validator address. We will do a delegation.
 7. Make sure your Price Feeder is running correctly. If your [testnet window misses](https://canon.price-feeder.com/) are above 50% then something is wrong. Look for a help on Discord.
 
 Here are our testnet public endpoints:
