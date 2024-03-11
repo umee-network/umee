@@ -25,7 +25,7 @@ This release brings the first part of the seamless cross-chain money market tran
 - `MsgSupplyCollateral`
 - `MsgLiquidate`
 
-The operation can only use tokens as the part of the IBC transfer (after any intermediate deductions) and the supplier / liquidator must be the IBC recipient (we don't acting on someone else behalf). Authz is not supported. The remaining tokens will be credited to the recipient.
+The operation can only use tokens as the part of the IBC transfer (after any intermediate deductions) and the supplier / liquidator must be the IBC recipient (we don't allow to act on someone else's behalf). Authz is not supported. The remaining tokens will be credited to the recipient.
 
 ### Validators
 
