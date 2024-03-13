@@ -55,7 +55,8 @@ func (s *E2ETestSuite) Delegate(testAccount, valIndex int, amount uint64) error 
 	return s.BroadcastTxWithRetry(msg, s.AccountClient(testAccount))
 }
 
-func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool, desc string) {
+func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token sdk.Coin, failDueToQuota bool,
+	desc, memo string) {
 	if failDueToQuota {
 		s.T().Logf("sending %s from %s to %s (exceed quota: %v) %s",
 			token, srcChainID, dstChainID, failDueToQuota, desc)
@@ -90,7 +91,11 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 		if len(recipient) != 0 {
 			cmd = append(cmd, fmt.Sprintf("--receiver=%s", recipient))
 		}
+		if len(memo) != 0 {
+			cmd = append(cmd, fmt.Sprintf("--memo=%s", memo))
+		}
 
+		s.T().Logf("exec cmd on hermes : %s", strings.Join(cmd, " "))
 		exec, err := s.DkrPool.Client.CreateExec(docker.CreateExecOptions{
 			Context:      ctx,
 			AttachStdout: true,
@@ -196,6 +201,16 @@ func (s *E2ETestSuite) QueryUmeeAllBalances(endpoint, addr string) (sdk.Coins, e
 	}
 
 	return balancesResp.Balances, nil
+}
+
+func (s *E2ETestSuite) QueryLeverageAccountBalances(endpoint, addr string) (leveragetypes.QueryAccountBalancesResponse,
+	error) {
+	endpoint = fmt.Sprintf("%s//umee/leverage/v1/account_balances?address=%s", endpoint, addr)
+	var resp leveragetypes.QueryAccountBalancesResponse
+	if err := s.QueryREST(endpoint, &resp); err != nil {
+		return leveragetypes.QueryAccountBalancesResponse{}, err
+	}
+	return resp, nil
 }
 
 func (s *E2ETestSuite) QueryTotalSupply(endpoint string) (sdk.Coins, error) {
