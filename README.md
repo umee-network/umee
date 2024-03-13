@@ -63,6 +63,7 @@ See [Release procedure](CONTRIBUTING.md#release-procedure) for more information 
 |    v6.1.x    |    ✓    | v0.46.15+  | v6.2.x |   ---   |  umee/v2.1.7+  |            ---             |  v1.3.0   |
 |    v6.2.x    |    ✓    |  v0.47.6+  | v7.2.x |   ---   |  umee/v2.3.0   |            ---             |  v1.5.0   |
 |    v6.3.x    |    ✓    |  v0.47.7+  | v7.3.1 |   ---   |  umee/v2.3.0+  |            ---             |  v1.5.0   |
+|    v6.4.x    |    x    | v0.47.10+  | v7.3.2 |   ---   |  umee/v2.4.1+  |            ---             |  v1.5.2   |
 
 #### Price Feeder
 
@@ -72,9 +73,9 @@ Since `Price Feeder v2.1.0` the recommended oracle price feeder has been moved t
 
 When you build the binary from source on the server machine you probably don't need any change. Building from source automatically link the `libwasmvm.$(uname -m).so` created as a part of the build process.
 
-However when you download a binary from GitHub, or from other source, make sure you have required version of `libwasmvm.<cpu_arch>.so` (should be in your lib directory, e.g.: `/usr/local/lib/`). You can get it:
+However when you download a binary from GitHub, or from another source, make sure you have the required version of `libwasmvm.<cpu_arch>.so` (should be in your lib directory, e.g.: `/usr/local/lib/`). You can get it:
 
-- from you build machine: copy `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v<version>/internal/api/libwasmvm.$(uname -m).so`
+- from your build machine: copy `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v<version>/internal/api/libwasmvm.$(uname -m).so`
 - or download from CosmWasm GitHub `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v<version>/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
 
 You don't need to do anything if you are using our Docker image.
@@ -102,7 +103,7 @@ docker build -t umee-network/umeed -f contrib/images/umeed.dockerfile .
 # start bash
 docker run -it --name umeed umee-network/umeed bash
 
-# or start the start the node if you already have a node directory setup
+# or start the node if you already have a node directory setup
 docker run -it --name umeed umee-network/umeed umeed start
 ```
 
@@ -195,7 +196,7 @@ $ wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.0/internal/api/lib
 
 ## Validators
 
-Please follow [Validator Instructions](./VALIDATOR.md) for setting up a validator node.
+Please follow [Validator Instructions](./docs/VALIDATOR.md) for setting up a validator node.
 
 ## Liquidators
 

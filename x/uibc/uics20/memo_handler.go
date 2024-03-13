@@ -186,8 +186,6 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 		_, err = mh.leverage.Supply(*ctx, msg)
 	case *ltypes.MsgSupplyCollateral:
 		_, err = mh.leverage.SupplyCollateral(*ctx, msg)
-	case *ltypes.MsgBorrow:
-		_, err = mh.leverage.Borrow(*ctx, msg)
 	case *ltypes.MsgLiquidate:
 		_, err = mh.leverage.Liquidate(*ctx, msg)
 	default:
