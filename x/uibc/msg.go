@@ -11,6 +11,7 @@ import (
 var (
 	_ sdk.Msg = &MsgGovUpdateQuota{}
 	_ sdk.Msg = &MsgGovSetIBCStatus{}
+	_ sdk.Msg = &MsgGovToggleICS20Hooks{}
 )
 
 //
@@ -84,6 +85,34 @@ func (msg *MsgGovSetIBCStatus) GetSigners() []sdk.AccAddress {
 func (msg MsgGovSetIBCStatus) Route() string { return "" }
 func (msg MsgGovSetIBCStatus) Type() string  { return sdk.MsgTypeURL(&msg) }
 func (msg *MsgGovSetIBCStatus) GetSignBytes() []byte {
+	bz := ModuleCdc.MustMarshalJSON(msg)
+	return sdk.MustSortJSON(bz)
+}
+
+//
+// MsgGovToggleICS20Hooks
+//
+
+// String implements the Stringer interface.
+func (msg *MsgGovToggleICS20Hooks) String() string {
+	out, _ := json.Marshal(msg)
+	return string(out)
+}
+
+// ValidateBasic implements Msg
+func (msg *MsgGovToggleICS20Hooks) ValidateBasic() error {
+	return checkers.Proposal(msg.Authority, msg.Description)
+}
+
+// GetSigners implements Msg
+func (msg *MsgGovToggleICS20Hooks) GetSigners() []sdk.AccAddress {
+	return checkers.Signers(msg.Authority)
+}
+
+// LegacyMsg.Type implementations
+func (msg MsgGovToggleICS20Hooks) Route() string { return "" }
+func (msg MsgGovToggleICS20Hooks) Type() string  { return sdk.MsgTypeURL(&msg) }
+func (msg *MsgGovToggleICS20Hooks) GetSignBytes() []byte {
 	bz := ModuleCdc.MustMarshalJSON(msg)
 	return sdk.MustSortJSON(bz)
 }
