@@ -20,6 +20,9 @@ service Msg {
 
   // GovSetIBCStatus sets IBC ICS20 status. Must be called by x/gov.
   rpc GovSetIBCStatus(MsgGovSetIBCStatus) returns (MsgGovSetIBCStatusResponse);
+
+  // GovToggleICS20Hooks enables / disables ICS20 hooks support. Must be called by x/gov.
+  rpc GovToggleICS20Hooks(MsgGovToggleICS20Hooks) returns (MsgGovToggleICS20HooksResponse);
 }
 
 // MsgGovUpdateQuota defines the Msg/GovUpdateQuota request type.
@@ -102,3 +105,23 @@ message MsgGovSetIBCStatus {
 
 // MsgGovSetIBCStatusResponse define the response type for Msg/MsgGovSetIBCStatus with x/gov proposals.
 message MsgGovSetIBCStatusResponse {}
+
+// MsgGovToggleICS20Hooks is a request type for GovToggleICS20Hooks handler.
+message MsgGovToggleICS20Hooks {
+  option (gogoproto.goproto_getters)  = false;
+  option (gogoproto.goproto_stringer) = false;
+  option (cosmos.msg.v1.signer)       = "authority";
+
+  // authority is the address of the governance account or the Emergency Group.
+  string authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+
+  // description motivating the change. Should be used only when executing by the
+  // Emergency Group. Otherwise the x/gov Proposal metadata should be used.
+  string description = 2;
+
+  // status defines if the IBC transfer hooks should be enabled or disabled.
+  bool status = 3;
+}
+
+
+message MsgGovToggleICS20HooksResponse{}
