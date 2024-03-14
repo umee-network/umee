@@ -129,11 +129,11 @@ func TestMsgGovTMsgGovToggleICS20Hooks(t *testing.T) {
 	validMsg := MsgGovToggleICS20Hooks{
 		Authority:   checkers.GovModuleAddr,
 		Description: "",
-		Status:      true,
+		Enabled:     true,
 	}
 
 	validMsg2 := validMsg
-	validMsg2.Status = false
+	validMsg2.Enabled = false
 
 	validEmergencyGroup := validMsg
 	validEmergencyGroup.Authority = accs.Alice.String()

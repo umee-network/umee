@@ -79,9 +79,9 @@ func (m msgServer) GovToggleICS20Hooks(ctx context.Context, msg *uibc.MsgGovTogg
 		return nil, err
 	}
 
-	// if err := k.SetIBCStatus(msg.IbcStatus); err != nil {
-	// 	return &uibc.MsgGovSetIBCStatusResponse{}, err
-	// }
+	if err := k.SetICS20HooksStatus(msg.Enabled); err != nil {
+		return &uibc.MsgGovToggleICS20HooksResponse{}, err
+	}
 	// sdkutil.Emit(&sdkCtx, &uibc.EventIBCTransferStatus{
 	// 	Status: msg.IbcStatus,
 	// })

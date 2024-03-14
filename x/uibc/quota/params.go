@@ -68,6 +68,11 @@ func validateEmergencyQuotaParamsUpdate(pOld, pNew uibc.Params) error {
 func (k Keeper) SetIBCStatus(ibcStatus uibc.IBCTransferStatus) error {
 	params := k.GetParams()
 	params.IbcStatus = ibcStatus
+	return k.SetParams(params)
+}
 
+func (k Keeper) SetICS20HooksStatus(enabled bool) error {
+	params := k.GetParams()
+	params.Ics20Hooks = enabled
 	return k.SetParams(params)
 }

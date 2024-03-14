@@ -19,3 +19,8 @@ message EventBadRevert {
 message EventIBCTransferStatus {
   IBCTransferStatus status = 1;
 }
+
+// EventICS20Hooks is emitted on MsgGovToggleICS20Hooks.
+message EventICS20Hooks {
+  bool enabled = 1;
+}

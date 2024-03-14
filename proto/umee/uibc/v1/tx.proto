@@ -119,8 +119,8 @@ message MsgGovToggleICS20Hooks {
   // Emergency Group. Otherwise the x/gov Proposal metadata should be used.
   string description = 2;
 
-  // status defines if the IBC transfer hooks should be enabled or disabled.
-  bool status = 3;
+  // enabled defines if the IBC transfer hooks should be enabled or disabled.
+  bool enabled = 3;
 }
 
 
