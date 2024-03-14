@@ -4,9 +4,10 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v6/tests/accs"
+	"github.com/umee-network/umee/v6/tests/tcheckers"
 	"github.com/umee-network/umee/v6/util/checkers"
-	"gotest.tools/v3/assert"
 )
 
 func TestMsgGovUpdateQuota(t *testing.T) {
@@ -72,14 +73,7 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := tc.msg.ValidateBasic()
-			if tc.errMsg == "" {
-				assert.NilError(t, err)
-			} else {
-				assert.ErrorContains(t, err, tc.errMsg)
-			}
-		})
+		tcheckers.ErrorContains(t, tc.msg.ValidateBasic(), tc.errMsg, tc.name)
 	}
 }
 
@@ -126,13 +120,54 @@ func TestMsgGovSetIBCStatus(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := tc.msg.ValidateBasic()
-			if tc.errMsg == "" {
-				assert.NilError(t, err)
-			} else {
-				assert.ErrorContains(t, err, tc.errMsg)
-			}
-		})
+		tcheckers.ErrorContains(t, tc.msg.ValidateBasic(), tc.errMsg, tc.name)
 	}
+}
+
+func TestMsgGovTMsgGovToggleICS20Hooks(t *testing.T) {
+	t.Parallel()
+	validMsg := MsgGovToggleICS20Hooks{
+		Authority:   checkers.GovModuleAddr,
+		Description: "",
+		Status:      true,
+	}
+
+	validMsg2 := validMsg
+	validMsg2.Status = false
+
+	validEmergencyGroup := validMsg
+	validEmergencyGroup.Authority = accs.Alice.String()
+	validEmergencyGroup.Description = "not empty"
+
+	invalidAuthority := validMsg
+	invalidAuthority.Authority = "ABC"
+
+	tests := []struct {
+		name   string
+		msg    MsgGovToggleICS20Hooks
+		errMsg string
+	}{
+		{
+			name:   "valid msg",
+			msg:    validMsg,
+			errMsg: "",
+		}, {
+			name:   "valid msg2",
+			msg:    validMsg2,
+			errMsg: "",
+		}, {
+			name:   "valid msg with other authority",
+			msg:    validEmergencyGroup,
+			errMsg: "",
+		}, {
+			name:   "invalid authority address in msg",
+			msg:    invalidAuthority,
+			errMsg: "invalid bech32",
+		},
+	}
+
+	for _, tc := range tests {
+		tcheckers.ErrorContains(t, tc.msg.ValidateBasic(), tc.errMsg, tc.name)
+	}
+
 }
