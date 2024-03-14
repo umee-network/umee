@@ -58,9 +58,7 @@ func (m msgServer) GovSetIBCStatus(
 	if err := k.SetIBCStatus(msg.IbcStatus); err != nil {
 		return &uibc.MsgGovSetIBCStatusResponse{}, err
 	}
-	sdkutil.Emit(&sdkCtx, &uibc.EventIBCTransferStatus{
-		Status: msg.IbcStatus,
-	})
+	sdkutil.Emit(&sdkCtx, &uibc.EventIBCTransferStatus{Status: msg.IbcStatus})
 
 	return &uibc.MsgGovSetIBCStatusResponse{}, nil
 }
@@ -82,9 +80,7 @@ func (m msgServer) GovToggleICS20Hooks(ctx context.Context, msg *uibc.MsgGovTogg
 	if err := k.SetICS20HooksStatus(msg.Enabled); err != nil {
 		return &uibc.MsgGovToggleICS20HooksResponse{}, err
 	}
-	// sdkutil.Emit(&sdkCtx, &uibc.EventIBCTransferStatus{
-	// 	Status: msg.IbcStatus,
-	// })
+	sdkutil.Emit(&sdkCtx, &uibc.EventICS20Hooks{Enabled: msg.Enabled})
 
 	return &uibc.MsgGovToggleICS20HooksResponse{}, nil
 }
