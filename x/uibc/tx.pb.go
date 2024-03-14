@@ -180,7 +180,7 @@ func (*MsgGovSetIBCStatus) XXX_MessageName() string {
 	return "umee.uibc.v1.MsgGovSetIBCStatus"
 }
 
-// MsgGovSetIBCStatusResponse define the response type for Msg/MsgGovSetIBCStatus with x/gov proposals.
+// MsgGovSetIBCStatusResponse is a response type for Msg/GovSetIBCStatus.
 type MsgGovSetIBCStatusResponse struct {
 }
 
@@ -268,6 +268,7 @@ func (*MsgGovToggleICS20Hooks) XXX_MessageName() string {
 	return "umee.uibc.v1.MsgGovToggleICS20Hooks"
 }
 
+// MsgGovToggleICS20HooksResponse is a response type for Msg/GovToggleICS20Hooks.
 type MsgGovToggleICS20HooksResponse struct {
 }
 
