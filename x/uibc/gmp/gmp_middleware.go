@@ -15,6 +15,10 @@ func NewHandler() *Handler {
 
 func (h Handler) OnRecvPacket(ctx sdk.Context, coinReceived sdk.Coin, memo string, receiver sdk.AccAddress,
 ) error {
+	if len(memo) == 0 {
+		return nil
+	}
+
 	logger := ctx.Logger().With("handler", "gmp_handler")
 	var msg Message
 	var err error

@@ -3,6 +3,7 @@ package uics20
 import (
 	"testing"
 
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -159,4 +160,33 @@ func TestAdjustOperatedCoin(t *testing.T) {
 		assert.ErrorIs(t, err, tc.err, "tc %d", i)
 		assert.Equal(t, tc.expectedAmount, tc.operated.Amount.Int64())
 	}
+}
+
+func TestMemoExecute(t *testing.T) {
+	lvg := mocks.NewLvgNoopMsgSrv()
+	mh := MemoHandler{leverage: lvg}
+	ctx, _ := tsdk.NewCtxOneStore(t, storetypes.NewMemoryStoreKey("quota"))
+	msgs := []sdk.Msg{&ltypes.MsgSupply{}}
+
+	tcs := []struct {
+		enabled bool
+		gmp     bool
+		msgs    []sdk.Msg
+		err     error
+	}{
+		{true, true, msgs, nil},
+		{true, false, msgs, nil},
+		{true, false, nil, nil},
+
+		{false, true, nil, errHooksDisabled},
+		{false, false, msgs, errHooksDisabled},
+		{false, true, msgs, errHooksDisabled},
+	}
+	for i, tc := range tcs {
+		mh.executeEnabled = tc.enabled
+		mh.isGMP = tc.gmp
+		err := mh.execute(&ctx)
+		assert.ErrorIs(t, err, tc.err, i)
+	}
+
 }

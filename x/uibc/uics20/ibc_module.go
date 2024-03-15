@@ -63,12 +63,14 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 		return ackResp
 	}
 
+	params := quotaKeeper.GetParams()
+
 	// NOTE: IBC hooks must be the last middleware - just the transfer app.
 	// MemoHandler may update amoount in the message, because the received token amount may be
 	// smaller than the amount originally sent (various fees). We need to be sure that there is
 	// no other middleware that can change packet data or amounts.
 
-	mh := MemoHandler{cdc: im.cdc, leverage: im.leverage}
+	mh := MemoHandler{executeEnabled: params.Ics20Hooks, cdc: im.cdc, leverage: im.leverage}
 	events, err := mh.onRecvPacketPrepare(&ctx, packet, ftData)
 	if err != nil {
 		if !errors.Is(err, errMemoValidation{}) {
