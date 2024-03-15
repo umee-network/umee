@@ -51,26 +51,6 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade("v6.3", upgradeInfo)
 
 	app.registerUpgrade6_4(upgradeInfo)
-	app.registerUpgrade6_5(upgradeInfo)
-}
-
-func (app *UmeeApp) registerUpgrade6_5(upgradeInfo upgradetypes.Plan) {
-	planName := "v6.5"
-
-	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
-
-			k := app.UIbcQuotaKeeperB.Keeper(&ctx)
-			p := k.GetParams()
-			p.Ics20Hooks = true
-			if err := k.SetParams(p); err != nil {
-				return nil, err
-			}
-
-			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-		},
-	)
 }
 
 func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
