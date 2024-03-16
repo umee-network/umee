@@ -16,14 +16,24 @@ import (
 	"github.com/umee-network/umee/v6/x/uibc/gmp"
 )
 
+// error messages
+var (
+	errWrongSigner   = errors.New("msg signer doesn't match the ICS20 receiver")
+	errNoSubCoins    = errors.New("message must use only coins sent from the transfer")
+	errHooksDisabled = errors.New("ics20-hooks: execute is disabled but valid hook memo is set")
+	errMsg0Type      = errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+	// errMsg1Type = errors.New("only MsgBorrow is supported as messages[1]")
+)
+
 type MemoHandler struct {
 	cdc      codec.JSONCodec
 	leverage ltypes.MsgServer
 
-	isGMP    bool
-	msgs     []sdk.Msg
-	memo     string
-	received sdk.Coin
+	executeEnabled bool
+	isGMP          bool
+	msgs           []sdk.Msg
+	memo           string
+	received       sdk.Coin
 
 	receiver         sdk.AccAddress
 	fallbackReceiver sdk.AccAddress
@@ -85,9 +95,14 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 }
 
 // runs messages encoded in the ICS20 memo.
+// Returns list of
 // NOTE: we fork the store and only commit if all messages pass. Otherwise the fork store
 // is discarded.
 func (mh MemoHandler) execute(ctx *sdk.Context) error {
+	if !mh.executeEnabled && (mh.isGMP || len(mh.msgs) != 0) {
+		return errHooksDisabled
+	}
+
 	logger := recvPacketLogger(ctx)
 	if mh.isGMP {
 		gh := gmp.NewHandler()
@@ -106,14 +121,6 @@ func (mh MemoHandler) execute(ctx *sdk.Context) error {
 	}
 	return nil
 }
-
-// error messages used in validateMemoMsg
-var (
-	errWrongSigner = errors.New("msg signer doesn't match the ICS20 receiver")
-	errNoSubCoins  = errors.New("message must use only coins sent from the transfer")
-	errMsg0Type    = errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
-	// errMsg1Type = errors.New("only MsgBorrow is supported as messages[1]")
-)
 
 // We only support the following message combinations:
 // - [MsgSupply]
