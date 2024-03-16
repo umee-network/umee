@@ -3661,6 +3661,9 @@ paths:
                     title: >-
                       inflow_outflow_token_quota_base defines the inflow outflow
                       quota base for token
+                  ics20_hooks:
+                    type: boolean
+                    description: ics20_hooks enables or disables the ICS20 transfer hooks.
                 title: Params of x/uibc module
             description: >-
               QueryParamsResponse defines the response structure for the Params
@@ -9212,6 +9215,9 @@ definitions:
         title: >-
           inflow_outflow_token_quota_base defines the inflow outflow quota base
           for token
+      ics20_hooks:
+        type: boolean
+        description: ics20_hooks enables or disables the ICS20 transfer hooks.
     title: Params of x/uibc module
   umee.uibc.v1.QueryAllOutflowsResponse:
     type: object
@@ -9305,6 +9311,9 @@ definitions:
             title: >-
               inflow_outflow_token_quota_base defines the inflow outflow quota
               base for token
+          ics20_hooks:
+            type: boolean
+            description: ics20_hooks enables or disables the ICS20 transfer hooks.
         title: Params of x/uibc module
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC
