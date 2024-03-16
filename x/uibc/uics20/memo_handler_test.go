@@ -185,6 +185,7 @@ func TestMemoExecute(t *testing.T) {
 	for i, tc := range tcs {
 		mh.executeEnabled = tc.enabled
 		mh.isGMP = tc.gmp
+		mh.msgs = tc.msgs
 		err := mh.execute(&ctx)
 		assert.ErrorIs(t, err, tc.err, i)
 	}
