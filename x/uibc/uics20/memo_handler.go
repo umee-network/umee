@@ -99,7 +99,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 // NOTE: we fork the store and only commit if all messages pass. Otherwise the fork store
 // is discarded.
 func (mh MemoHandler) execute(ctx *sdk.Context) error {
-	if !mh.executeEnabled && (mh.isGMP || len(mh.msgs) == 0) {
+	if !mh.executeEnabled && (mh.isGMP || len(mh.msgs) != 0) {
 		return errHooksDisabled
 	}
 
