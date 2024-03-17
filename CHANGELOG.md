@@ -46,6 +46,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Features
+
+- [2459](https://github.com/umee-network/umee/pull/2459), [2461](https://github.com/umee-network/umee/pull/2461) uibc: handle `params.ics20_hooks` switch (enabled / disabled).
+
 ## v6.4.0-beta1 - 2024-03-11
 
 ### Features

@@ -48,6 +48,8 @@ message Params {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+  // ics20_hooks enables or disables the ICS20 transfer hooks.
+  bool ics20_hooks = 8;
 }
 
 // IBCTransferStatus status of ibc-transfer quota check for inflow and outflow
