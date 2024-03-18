@@ -419,18 +419,16 @@ func (q Querier) MaxWithdraw(
 		if err != nil {
 			if nonOracleError(err) {
 				return nil, err
-			} else {
-				continue
 			}
+			continue
 		}
 
 		moduleMaxWithdrawUToken, err := q.Keeper.ModuleMaxWithdraw(ctx, userMaxWithdrawUToken)
 		if err != nil {
 			if nonOracleError(err) {
 				return nil, err
-			} else {
-				continue
 			}
+			continue
 		}
 
 		uToken := sdk.NewCoin(userMaxWithdrawUToken.Denom, sdk.MinInt(userMaxWithdrawUToken.Amount, moduleMaxWithdrawUToken))
