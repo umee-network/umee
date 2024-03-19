@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	sdkmath "cosmossdk.io/math"
-	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -62,68 +61,50 @@ func TestIBCOnRecvPacket(t *testing.T) {
 	kb := quota.NewKeeperBuilder(cdc, storeKey, leverageMock, oracleMock, eg)
 	ics20Module := NewICS20Module(mockIBCModule, cdc, kb, mockLeverageMsgServer)
 
-	validMemoMsgs := func(noOfMsgs int) []*codectypes.Any {
+	validMemoMsgs := func(noOfMsgs int, fallbackAddr string) string {
 		msgs := make([]*codectypes.Any, 0)
 		msg, err := codectypes.NewAnyWithValue(ltypes.NewMsgSupply(relAddr, atomIBC))
 		assert.NilError(t, err)
 		for i := 0; i < noOfMsgs; i++ {
 			msgs = append(msgs, msg)
 		}
-		return msgs
+		validMemo := uibc.ICS20Memo{
+			Messages: msgs,
+		}
+		if fallbackAddr != "" {
+			validMemo.FallbackAddr = fallbackAddr
+		}
+		return string(cdc.MustMarshalJSON(&validMemo))
 	}
 
 	tests := []struct {
 		name string
-		memo func(cdc codec.Codec) string
+		memo string
 	}{
 		{
 			name: "fungible token packet data without memo",
-			memo: func(cdc codec.Codec) string {
-				return ""
-			},
+			memo: "",
 		},
 		{
 			name: "fungible token packet data with invalid memo message",
-			memo: func(cdc codec.Codec) string {
-				return "invalid_memo_message"
-			},
+			memo: "invalid_memo_message",
 		},
 		{
 			name: "valid memo without fallback_addr",
-			memo: func(cdc codec.Codec) string {
-				msgs := validMemoMsgs(1)
-				validMemo := uibc.ICS20Memo{
-					Messages: msgs,
-				}
-				return string(cdc.MustMarshalJSON(&validMemo))
-			},
+			memo: validMemoMsgs(1, ""),
 		},
 		{
 			name: "valid memo with valid fallback_addr",
-			memo: func(cdc codec.Codec) string {
-				msgs := validMemoMsgs(1)
-				validMemo := uibc.ICS20Memo{
-					Messages:     msgs,
-					FallbackAddr: fallbackAddr,
-				}
-				return string(cdc.MustMarshalJSON(&validMemo))
-			},
+			memo: validMemoMsgs(1, fallbackAddr),
 		},
 		{
 			name: "valid memo (more than one message) with valid fallback_addr",
-			memo: func(cdc codec.Codec) string {
-				msgs := validMemoMsgs(3)
-				validMemo := uibc.ICS20Memo{
-					Messages:     msgs,
-					FallbackAddr: fallbackAddr,
-				}
-				return string(cdc.MustMarshalJSON(&validMemo))
-			},
+			memo: validMemoMsgs(3, fallbackAddr),
 		},
 	}
 
 	for _, tt := range tests {
-		ftData.Memo = tt.memo(cdc)
+		ftData.Memo = tt.memo
 		mar, err := json.Marshal(ftData)
 		assert.NilError(t, err)
 		packet.Data = mar
