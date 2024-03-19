@@ -414,18 +414,31 @@ func (q Querier) MaxWithdraw(
 		// will be nil and the resulting value will be what
 		// can safely be withdrawn even with missing prices.
 		// On non-nil error here, max withdraw is zero.
-		uToken, _, err := q.userMaxWithdraw(ctx, addr, denom)
-		if err == nil && uToken.IsPositive() {
+
+		userMaxWithdrawUToken, _, err := q.Keeper.userMaxWithdraw(ctx, addr, denom)
+		if err != nil {
+			if nonOracleError(err) {
+				return nil, err
+			}
+			continue
+		}
+
+		moduleMaxWithdrawUToken, err := q.Keeper.ModuleMaxWithdraw(ctx, userMaxWithdrawUToken)
+		if err != nil {
+			if nonOracleError(err) {
+				return nil, err
+			}
+			continue
+		}
+
+		uToken := sdk.NewCoin(userMaxWithdrawUToken.Denom, sdk.MinInt(userMaxWithdrawUToken.Amount, moduleMaxWithdrawUToken))
+		if uToken.IsPositive() {
 			token, err := q.ToToken(ctx, uToken)
 			if err != nil {
 				return nil, err
 			}
 			maxUTokens = maxUTokens.Add(uToken)
 			maxTokens = maxTokens.Add(token)
-		}
-		// Non-price errors will cause the query itself to fail
-		if nonOracleError(err) {
-			return nil, err
 		}
 	}
 
