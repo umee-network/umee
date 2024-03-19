@@ -30,7 +30,6 @@ func TestGmpMemoHandler(t *testing.T) {
 		{
 			name: "valid memo",
 			memo: func() string {
-				// valid memo
 				validMemo := Message{
 					SourceChain:   "source_chain",
 					SourceAddress: "source_addr",
