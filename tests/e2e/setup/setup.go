@@ -288,6 +288,8 @@ func (s *E2ETestSuite) initGenesis() {
 	uibcGenState.Params.TotalQuota = sdk.NewDec(120)
 	// quotas will reset every 300 seconds
 	uibcGenState.Params.QuotaDuration = time.Second * 300
+	// enable ics20 hooks (memo handling)
+	uibcGenState.Params.Ics20Hooks = true
 
 	bz, err = s.cdc.MarshalJSON(&uibcGenState)
 	s.Require().NoError(err)

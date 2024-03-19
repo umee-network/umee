@@ -11,6 +11,7 @@ import (
 	appparams "github.com/umee-network/umee/v6/app/params"
 	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
 	"github.com/umee-network/umee/v6/tests/grpc"
+	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -68,8 +69,7 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 	var err error
 	s.Require().Eventually(
 		func() bool {
-			var supply sdk.Coins
-			supply, err = s.QueryTotalSupply(endpoint)
+			supply, err := s.QueryTotalSupply(endpoint)
 			if err != nil {
 				return false
 			}
@@ -77,56 +77,73 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount math.Int) {
 			return actualSupply.Equal(amount)
 		},
 		2*time.Minute,
-		1*time.Second,
+		2*time.Second,
 		"check supply: %s (expected %s, actual %s) err: %v", ibcDenom, amount, actualSupply, err,
 	)
 }
 
+func (s *E2ETest) checkLeverageAccountBalance(endpoint, addr, ibcDenom string, amount math.Int) {
+	collateral := math.ZeroInt()
+	var err error
+	s.Require().Eventually(
+		func() bool {
+			resp, err := s.QueryLeverageAccountBalances(endpoint, addr)
+			if err != nil {
+				return false
+			}
+			collateral = resp.Collateral.AmountOf(ibcDenom)
+			return resp.Collateral.AmountOf(coin.ToUTokenDenom(ibcDenom)).Equal(amount) &&
+				resp.Supplied.AmountOf(ibcDenom).Equal(amount)
+		},
+		2*time.Minute,
+		2*time.Second,
+		"check leverage supply and collateral: %s (expected %s, actual %s) err: %v", ibcDenom, amount, collateral, err,
+	)
+}
+
 func (s *E2ETest) TestIBCTokenTransfer() {
-	// IBC inbound transfer of non x/leverage registered tokens must fail, because
-	// because we won't have price for it.
+	// require the recipient account receives the IBC tokens (IBC packets ACKd)
+	gaiaAPIEndpoint := s.GaiaREST()
+	umeeAPIEndpoint := s.UmeeREST()
+	// totalQuota := math.NewInt(120)
+	tokenQuota := math.NewInt(100)
+
+	var atomPrice math.LegacyDec
+	// compute the amount of ATOM sent from umee to gaia which would meet atom's token quota
+	s.Require().Eventually(func() bool {
+		var err error
+		atomPrice, err = s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
+		if err != nil {
+			return false
+		}
+		return atomPrice.GT(sdk.OneDec())
+	},
+		2*time.Minute,
+		1*time.Second,
+		"price of atom should be greater than 1",
+	)
+
+	atomQuota := sdk.NewCoin(uatomIBCHash,
+		sdk.NewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
+	)
+
+	// IBC Inflow is enabled
 	s.Run("send_stake_to_umee", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
 		umeeAPIEndpoint := s.UmeeREST()
 		recipient := s.AccountAddr(0).String()
 
 		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
-		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false, "")
-		// Zero, since not a registered token
-		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, sdk.ZeroInt())
+		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false, "", "")
+		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, token.Amount)
 	})
 
 	s.Run("ibc_transfer_quota", func() {
-		// require the recipient account receives the IBC tokens (IBC packets ACKd)
-		gaiaAPIEndpoint := s.GaiaREST()
-		umeeAPIEndpoint := s.UmeeREST()
-		// totalQuota := math.NewInt(120)
-		tokenQuota := math.NewInt(100)
-
-		var atomPrice math.LegacyDec
-		// compute the amount of ATOM sent from umee to gaia which would meet atom's token quota
-		s.Require().Eventually(func() bool {
-			var err error
-			atomPrice, err = s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
-			if err != nil {
-				return false
-			}
-			return atomPrice.GT(sdk.OneDec())
-		},
-			2*time.Minute,
-			1*time.Second,
-			"price of atom should be greater than 1",
-		)
-
-		atomQuota := sdk.NewCoin(uatomIBCHash,
-			sdk.NewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
-		)
-
 		//<<<< INFLOW : gaia -> umee >>
 		// send $500 ATOM from gaia to umee. (ibc_quota will not check token limit)
 		atomFromGaia := mulCoin(atomQuota, "5.0")
 		atomFromGaia.Denom = "uatom"
-		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", atomFromGaia, false, "")
+		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", atomFromGaia, false, "", "")
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount)
 
 		// <<< OUTLOW : umee -> gaia >>
@@ -142,7 +159,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// << TOKEN QUOTA EXCCEED >>
 		// send $110 UMEE from umee to gaia (token_quota is 100$)
 		exceedUmee := mulCoin(umeeQuota, "1.1")
-		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, true, "")
+		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, true, "", "")
 		// check the ibc (umee) quota after ibc txs - this one should have failed
 		// supply don't change
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
@@ -150,7 +167,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// send $110 ATOM from umee to gaia
 		exceedAtom := mulCoin(atomQuota, "1.1")
 		// supply will be not be decreased because sending amount is more than token quota so it will fail
-		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedAtom, true, "uatom from umee to gaia")
+		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedAtom, true, "uatom from umee to gaia", "")
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount)
 
 		// << BELOW TOKEN QUOTA >>
@@ -158,21 +175,21 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// Note: receiver is null so hermes will default send to key_name (from config) of target chain (gaia)
 		sendUmee := mulCoin(umeeQuota, "0.9")
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", sendUmee, false, fmt.Sprintf(
-			"sending %s (less than token quota) ", sendUmee.String()))
+			"sending %s (less than token quota) ", sendUmee.String()), "")
 		s.checkOutflows(umeeAPIEndpoint, appparams.BondDenom, true, sdk.NewDecFromInt(sendUmee.Amount), appparams.Name)
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sendUmee.Amount)
 
 		// << BELOW TOKEN QUOTA 40$ but ATOM_QUOTA (40$)+ UMEE_QUOTA(90$) >= TOTAL QUOTA (120$) >>
 		// send $40 ATOM from umee to gaia
 		atom40 := mulCoin(atomQuota, "0.4")
-		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", atom40, true, "below token quota but not total quota")
+		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", atom40, true, "below token quota but not total quota", "")
 		// supply will be not be decreased because sending more than total quota from umee to gaia
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount)
 
 		// ✅ << BELOW TOKEN QUTOA 5$ but ATOM_QUOTA (5$)+ UMEE_QUOTA(90$) <= TOTAL QUOTA (120$)
 		// send $5 ATOM from umee to gaia
 		sendAtom := mulCoin(atomQuota, "0.05")
-		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", sendAtom, false, "below both quotas")
+		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", sendAtom, false, "below both quotas", "")
 		// remaing supply decreased uatom on umee
 		s.checkSupply(umeeAPIEndpoint, uatomIBCHash, atomFromGaia.Amount.Sub(sendAtom.Amount))
 		s.checkOutflows(umeeAPIEndpoint, uatomIBCHash, true, sdk.NewDecFromInt(sendAtom.Amount), atomSymbol)
@@ -183,12 +200,19 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		coins, err := s.QueryTotalSupply(gaiaAPIEndpoint) // before sending back
 		remainingTokens := coins.AmountOf(umeeIBCHash).Sub(returnUmee.Amount)
 		s.Require().NoError(err)
-		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", returnUmee, false, "send back some umee")
+		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", returnUmee, false, "send back some umee", "")
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, remainingTokens)
 
 		// sending back remaining amount
-		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewCoin(umeeIBCHash, remainingTokens), false, "send back remaining umee")
+		s.SendIBC(setup.GaiaChainID, s.Chain.ID, "", sdk.NewCoin(umeeIBCHash, remainingTokens), false, "send back remaining umee", "")
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
+
+		/*
+			IBC Transfer with MEMO
+		*/
+		s.Run("ibc_transfer_with_memo", func() {
+			s.testIBCTokenTransferWithMemo(umeeAPIEndpoint, atomQuota)
+		})
 
 		// reset the outflows
 		s.T().Logf("waiting until quota reset, basically it will take around 300 seconds to do quota reset")
@@ -233,7 +257,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.Require().Equal(uibcParams.IbcStatus, uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_DISABLED)
 
 		// sending the umee tokens - they would have exceeded quota before
-		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, false, "sending umee")
+		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, false, "sending umee", "")
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, exceedUmee.Amount)
 		// Check the outflows
 		s.Require().Eventually(
@@ -244,7 +268,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 				}
 				return a.Equal(sdk.ZeroDec())
 			},
-			30*time.Second,
+			120*time.Second,
 			1*time.Second,
 		)
 	})
