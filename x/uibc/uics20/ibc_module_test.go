@@ -26,7 +26,6 @@ var (
 	// sender sending from their native token to umee
 	// here umee is receiver
 	atomCoin     = sdk.NewCoin("uatom", tokenAmount)
-	atomIBC      = sdk.NewCoin("ibc/C4CFF46FD6DE35CA4CF4CE031E643C8FDC9BA4B99AE598E9B0ED98FE3A2319F9", tokenAmount)
 	senderAddr   = "umee1mjk79fjjgpplak5wq838w0yd982gzkyf3qjpef"
 	recvAddr     = "umee1y6xz2ggfc0pcsmyjlekh0j9pxh6hk87ymc9due"
 	fallbackAddr = "umee10h9stc5v6ntgeygf5xf945njqq5h32r5r2argu"
@@ -37,6 +36,8 @@ var (
 		Sender:   senderAddr,
 		Receiver: recvAddr,
 	}
+
+	// ftData.
 	packet = channeltypes.Packet{
 		Sequence:           10,
 		SourcePort:         "transfer",
@@ -44,6 +45,9 @@ var (
 		SourceChannel:      "channel-10",
 		DestinationChannel: "channel-1",
 	}
+
+	atomIBCDenom = uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
+	atomIBC      = sdk.NewCoin(atomIBCDenom, tokenAmount)
 )
 
 func TestIBCOnRecvPacket(t *testing.T) {
@@ -118,27 +122,27 @@ func TestIBCOnRecvPacket(t *testing.T) {
 
 func TestDeserializeFTData(t *testing.T) {
 	cdc := tsdk.NewCodec(uibc.RegisterInterfaces, ltypes.RegisterInterfaces)
-
+	serialize := func() []byte {
+		d, err := json.Marshal(ftData)
+		assert.NilError(t, err)
+		return d
+	}
 	tests := []struct {
 		name       string
 		packetData func() []byte
 		errMsg     string
 	}{
 		{
-			name: "invalid packet data",
+			name: "invalid json",
 			packetData: func() []byte {
 				return []byte("invalid packet data")
 			},
 			errMsg: "invalid character",
 		},
 		{
-			name: "valid packet data ",
-			packetData: func() []byte {
-				mar, err := json.Marshal(ftData)
-				assert.NilError(t, err)
-				return mar
-			},
-			errMsg: "",
+			name:       "valid packet data ",
+			packetData: serialize,
+			errMsg:     "",
 		},
 	}
 
