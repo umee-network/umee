@@ -17,7 +17,7 @@ The IBC ICS20 hooks are part of our [ICS20 middleware](https://github.com/umee-n
 
 ### Concepts
 
-Users can define ICS20 hook instructions in the ICS20 transfer Memo field, that will trigger procedure call once the transfer is successfully recorded in the UX Chain.
+Users can define ICS20 hook instructions in the ICS20 transfer Memo field, that will trigger a procedure call once the transfer is successfully recorded in the UX Chain.
 
 ### Design
 
@@ -26,7 +26,7 @@ The ICS20 packet data Memo field (introduced in [IBC v3.4.0](https://medium.com/
 - The packet data `memo` field can be JSON deserialized into the [`umee/uibc/v1/ICS20Memo`](https://github.com/umee-network/umee/blob/v6.4.0-beta1/proto/umee/uibc/v1/uibc.proto#L14). This means that the JSON serialized object into the memo string must extend the ICS20Memo struct.
 - `ICS20Memo.fallback_addr`, if defined, must be a correct bech32 Umee address.
 
-The fallback address is optional. It used when the memo is valid, but the hook execution (messages) fail. We strongly recommend to always use it. Otherwise, the funds can be stuck in the chain if the hook execution fails.
+The fallback address is optional. It is used when the memo is valid, but the hook execution (messages) fails. We strongly recommend to always use it. Otherwise, the funds can be stuck in the chain if the hook execution fails.
 If memo has a correct structure, and fallback addr is defined but malformed, we cancel the transfer (otherwise we would not be able to use it correctly).
 
 The hooks processing has the following flow:
@@ -63,7 +63,7 @@ Validation:
 - The operator (defined as the message signer) in each message, must be the same as the ICS20 transfer recipient,
 - messages must only use the subset of the transferred tokens.
 
-NOTE: because the received amount of tokens may be different than the amount originally sent (relayers or hop chains may charge transfer fees), if the amount of tokens in each message exceeds the amount received, we adjust the token amount in the messages.
+NOTE: because the received amount of tokens may be different from the amount originally sent (relayers or hop chains may charge transfer fees), if the amount of tokens in each message exceeds the amount received, we adjust the token amount in the messages.
 
 ### Example
 
@@ -117,7 +117,7 @@ $ umeed tx ibc-transfer transfer transfer channel-1 umee1y6xz2ggfc0pcsmyjlekh0j9
 
 ### Compatibility with IBC Apps Hooks
 
-The IBC Apps repo has [`ibc-hooks`](https://github.com/cosmos/ibc-apps/tree/main/modules/ibc-hooks) middleware, which has similar functionality and the Memo structure is compatible with the one defined here. IBC App hooks only support cosmwasm procedures: the instruction is defined in the `Memo.wasm` field, and fallback is fully handled by the CW contract. This implementation is compatible with IBC Apps: in the future we can support IBC Apps `wasm` hooks, without breaking our `Memo` struct.
+The IBC Apps repo has [`ibc-hooks`](https://github.com/cosmos/ibc-apps/tree/main/modules/ibc-hooks) middleware, which has similar functionality and the Memo structure is compatible with the one defined here. IBC App hooks support only CosmWasm procedures, with instructions defined in the `Memo.wasm` field and fallback fully managed by the CW contract. This implementation is compatible with IBC Apps: in the future we can support IBC Apps `wasm` hooks, without breaking our `Memo` struct.
 
 ### Limitations
 
