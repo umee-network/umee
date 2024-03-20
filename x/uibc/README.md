@@ -136,7 +136,7 @@ IBC Quota is an upper limit in USD amount.
 
 ### Design
 
-All inflows and outflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over 16h window.
+All inflows and outflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over a 16h window.
 
 We are tracking inflows and outflows for tokens which are registered in x/leverage Token Registry.
 NOTE: we measure per token as defined in the x/leverage, not the IBC Denom Path (there can be multiple paths). Since creating a channel is permission less, we want to use the same quota token.
@@ -166,7 +166,7 @@ Inflows and outflows metrics above are used to **limit ICS-20 transfers** of tok
 
 See `../../proto/umee/uibc/v1/quota.proto` for the list of all params.
 
-If a any `total_quota` or `token_quota` parameter is set to zero then we consider it as unlimited.
+If any `total_quota` or `token_quota` parameter is set to zero then we consider it as unlimited.
 
 Transfer is **reverted** whenever it breaks any quota.
 
@@ -193,11 +193,11 @@ In the state we store:
 
 ### Messages
 
-The RPC [Messages](https://github.com/umee-network/umee/blob/main/proto/umee/uibc/v1/tx.proto#L16) provide an access to the x/gov to change the module parameters.
+The [Messages](https://github.com/umee-network/umee/blob/main/proto/umee/uibc/v1/tx.proto#L16) RPC provides access to the x/gov to change the module parameters.
 
 ### Queries
 
-The RPC [Queries](https://github.com/umee-network/umee/blob/main/proto/umee/uibc/v1/query.proto#L15) allow to query module parameters and current outflow sums.
+The [Queries](https://github.com/umee-network/umee/blob/main/proto/umee/uibc/v1/query.proto#L15) RPC allows querying module parameters and current outflow sums.
 
 ### Events
 
