@@ -13,15 +13,15 @@ The `x/uibc` is a Cosmos Module providing:
 
 ## IBC ICS20 Hooks
 
-The IBC ICS20 hooks is part of our [ICS20 middleware](https://github.com/umee-network/umee/blob/main/x/uibc/uics20/ibc_module.go#L25) that enables ICS-20 token transfers to trigger message execution. This functionality allows cross-chain calls that involve token movement. IBC hooks are useful for a variety of use cases, including cross-chain swaps, which are an extremely powerful primitive.
+The IBC ICS20 hooks are part of our [ICS20 middleware](https://github.com/umee-network/umee/blob/main/x/uibc/uics20/ibc_module.go#L25) that enables ICS-20 token transfers to trigger message execution. This functionality allows cross-chain calls that involve token movement. IBC hooks are useful for a variety of use cases, including cross-chain swaps, which are an extremely powerful primitive.
 
 ### Concepts
 
-User can define a ICS20 hook instructions in ICS20 transfer Memo field, that will trigger procedure call once the transfer is successfully recorded in the UX Chain.
+Users can define ICS20 hook instructions in ICS20 transfer Memo field, that will trigger procedure call once the transfer is successfully recorded in the UX Chain.
 
 ### Design
 
-The ICS20 packet data Memo field (introduced in (IBC v3.4.0)[https://medium.com/the-interchain-foundation/moving-beyond-simple-token-transfers-d42b2b1dc29b]) allows to attach arbitrary data to a token transfer. The hook execution will be triggered if and only if:
+The ICS20 packet data Memo field (introduced in [IBC v3.4.0](https://medium.com/the-interchain-foundation/moving-beyond-simple-token-transfers-d42b2b1dc29b)) allows to attach arbitrary data to a token transfer. The hook execution will be triggered if and only if:
 
 - the packet data `memo` field can be JSON deserialized into the [`umee/uibc/v1/ICS20Memo`](https://github.com/umee-network/umee/blob/v6.4.0-beta1/proto/umee/uibc/v1/uibc.proto#L14). This means that the JSON serialized object into the memo string must extend the ICS20Memo struct.
 - `ICS20Memo.fallback_addr`, if defined, must be a correct bech32 Umee address.
@@ -91,7 +91,7 @@ umeed tx ibc-transfer transfer transfer channel-1 umee1y6xz2ggfc0pcsmyjlekh0j9px
   --memo '{"fallback_addr":"umee10h9stc5v6ntgeygf5xf945njqq5h32r5r2argu","messages":[{"@type":"/umee.leverage.v1.MsgSupplyCollateral","supplier":"umee1y6xz2ggfc0pcsmyjlekh0j9pxh6hk87ymc9due","asset":{"denom":"uumee","amount":"312"}}]}'
 ```
 
-Example 2: memo struct is correct, struct is correct, but it doesn't pass the validation. The procedure wants to use `uother` denom, but the transfer sends `uumee` coins. Since the `fallback_addr` is correctly defined, all coins will go to to the `fallback_addr`.
+Example 2: memo struct is correct, struct is correct, but it doesn't pass the validation. The procedure wants to use `uother` denom, but the transfer sends `uumee` coins. Since the `fallback_addr` is correctly defined, all coins will go to the `fallback_addr`.
 
 ```json
 {
