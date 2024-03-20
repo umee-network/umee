@@ -50,8 +50,9 @@ func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.Keeper
 //     validation, then we continue with the transfer and overwrite the original receiver to
 //     fallback_addr if it's defined.
 //  4. Execute the downstream middleware and the transfer app.
-//  5. Execute hooks. If hook execution fails, we don't use the the fallback_addr nor ignore the
-//     transfer. This is because there could be other middlewares that are already executed.
+//  5. Execute hooks. If hook execution fails, and the fallback_addr is defined, then we revert
+//     the transfer (and all related state changes and events) and use send the tokens to the
+//     `fallback_addr` instead.
 func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
 	ftData, err := deserializeFTData(im.cdc, packet)
