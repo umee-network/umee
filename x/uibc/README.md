@@ -63,7 +63,7 @@ Validation:
 - the operator (defined as the message signer) in each message, must be the same as the ICS20 transfer recipient,
 - messages must only use the subset of the transferred tokens.
 
-NOTE: because the received amount of tokens may be different than the amount originally sent (relayers or hoop chains may charge transfer fees), if the amount of tokens in each message exceeds the amount received, we adjust the token amount in the messages.
+NOTE: because the received amount of tokens may be different than the amount originally sent (relayers or hop chains may charge transfer fees), if the amount of tokens in each message exceeds the amount received, we adjust the token amount in the messages.
 
 ### Example
 
@@ -118,6 +118,10 @@ $ umeed tx ibc-transfer transfer transfer channel-1 umee1y6xz2ggfc0pcsmyjlekh0j9
 ### Compatibility with IBC Apps Hooks
 
 The IBC Apps repo has [`ibc-hooks`](https://github.com/cosmos/ibc-apps/tree/main/modules/ibc-hooks) middleware, which has similar functionality and the Memo structure is compatible with the one defined here. IBC App hooks only support cosmwasm procedures: the instruction is defined in the `Memo.wasm` field and fallback is fully handled by the CW contract. This implementation is compatible with IBC Apps: in the future we can support IBC Apps `wasm` hooks, without breaking our `Memo` struct.
+
+### Limitations
+
+- The current protocol requires that the IBC receiver is same as the "operator" (supplier, liquidator) in the `Memo.messages`.
 
 ## IBC ICS20 Quota
 
