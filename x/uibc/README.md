@@ -9,7 +9,7 @@ The `x/uibc` is a Cosmos Module providing:
 ## Content
 
 - [IBC ICS20 Hooks](#ibc-ics20-hooks)
-- [IBC ICS20 Quota](#ibc-isc20-quota)
+- [IBC ICS20 Quota](#ibc-ics20-quota)
 
 ## IBC ICS20 Hooks
 
