@@ -122,6 +122,7 @@ The IBC Apps repo has [`ibc-hooks`](https://github.com/cosmos/ibc-apps/tree/main
 ### Limitations
 
 The current protocol requires that the IBC receiver is the same as the "operator" (supplier, liquidator) in the `Memo.messages`.
+Authz is not supported in the hook execution context.
 
 ## IBC ICS20 Quota
 
