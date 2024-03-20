@@ -75,6 +75,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 				sdkerrors.Wrap(err, "ICS20 memo fallback_addr defined, but not formatted correctly")
 		}
 		if mh.fallbackReceiver.Equals(mh.receiver) {
+			// no need to specify fallback address if it's the same as the original receiver
 			mh.fallbackReceiver = nil
 		}
 	}
