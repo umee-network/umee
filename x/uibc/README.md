@@ -24,7 +24,7 @@ Users can define ICS20 hook instructions in the ICS20 transfer Memo field, that 
 The ICS20 packet data Memo field (introduced in [IBC v3.4.0](https://medium.com/the-interchain-foundation/moving-beyond-simple-token-transfers-d42b2b1dc29b)) allows attaching arbitrary data to a token transfer. The hook execution will be triggered if and only if:
 
 - The packet data `memo` field can be JSON deserialized into the [`umee/uibc/v1/ICS20Memo`](https://github.com/umee-network/umee/blob/v6.4.0-beta1/proto/umee/uibc/v1/uibc.proto#L14). This means that the JSON serialized object into the memo string must extend the ICS20Memo struct.
-- `ICS20Memo.fallback_addr`, if defined, must be a correct bech32 Umee address.
+- `ICS20Memo.fallback_addr` if defined, must be a correct bech32 Umee address.
 
 The fallback address is optional. It is used when the memo is valid, but the hook execution (messages) fails. We strongly recommend to always use it. Otherwise, the funds can be stuck in the chain if the hook execution fails.
 If memo has a correct structure, and fallback addr is defined but malformed, we cancel the transfer (otherwise we would not be able to use it correctly).
