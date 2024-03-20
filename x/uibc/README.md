@@ -15,11 +15,11 @@ The `x/uibc` is a Cosmos Module providing:
 
 The IBC ICS20 hooks are part of our [ICS20 middleware](https://github.com/umee-network/umee/blob/main/x/uibc/uics20/ibc_module.go#L25) that enables ICS-20 token transfers to trigger message execution. This functionality allows cross-chain calls that involve token movement. IBC hooks are useful for a variety of use cases, including cross-chain lending and leverage, which are an extremely powerful primitive.
 
-### Concepts
+### Hooks: Concepts
 
 Users can define ICS20 hook instructions in the ICS20 transfer Memo field, that will trigger a procedure call once the transfer is successfully recorded in the UX Chain.
 
-### Design
+### Hooks: Design
 
 The ICS20 packet data Memo field (introduced in [IBC v3.4.0](https://medium.com/the-interchain-foundation/moving-beyond-simple-token-transfers-d42b2b1dc29b)) allows attaching arbitrary data to a token transfer. The hook execution will be triggered if and only if:
 
@@ -127,14 +127,14 @@ The current protocol requires that the IBC receiver is the same as the "operator
 
 Hack or lending abuse is impossible to stop once the funds leave the chain. One mitigation is to limit the IBC inflows and outflows and be able to stop a chain and recover the funds with a migration.
 
-### Concepts
+### Quota: Concept
 
 Inflow is an ICS-20 transaction of sending tokens to the Umee chain.
 Outflow is an ICS-20 transaction sending tokens out of the Umee chain.
 
 IBC Quota is an upper limit in USD amount.
 
-### Design
+### Quota: Design
 
 All inflows and outflows are measured in token average USD value using our x/oracle `AvgKeeper`. The `AvgKeeper` aggregates TVWAP prices over a 16h window.
 
