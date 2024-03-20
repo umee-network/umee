@@ -13,7 +13,7 @@ The `x/uibc` is a Cosmos Module providing:
 
 ## IBC ICS20 Hooks
 
-The IBC ICS20 hooks are part of our [ICS20 middleware](https://github.com/umee-network/umee/blob/main/x/uibc/uics20/ibc_module.go#L25) that enables ICS-20 token transfers to trigger message execution. This functionality allows cross-chain calls that involve token movement. IBC hooks are useful for a variety of use cases, including cross-chain lending and leverage, which are an extremely powerful primitive.
+The IBC ICS20 hooks are part of our [ICS20 middleware](https://github.com/umee-network/umee/blob/main/x/uibc/uics20/ibc_module.go#L25) that enables ICS-20 token transfers to trigger message execution. This functionality allows cross-chain calls that involve token movement. IBC hooks enable powerful use cases such as cross-chain lending and leverage.
 
 ### Hooks: Concepts
 
