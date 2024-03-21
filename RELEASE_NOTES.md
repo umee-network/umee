@@ -12,6 +12,7 @@ Highlights:
 
 - Cosmos SDK v0.47.10 patch update.
 - IBC Hooks: we integrated ICS20 Memo handling.
+- Integrated Packet Forwarding Middleware.
 - Update `uibc/MsgGovUpdateQuota` Msg type to handle the new inflow parameters.
 - Update `uibc/QueryAllOutflowsResponse` to include denom symbol (token name) in every outflow.
 
@@ -25,13 +26,17 @@ This release brings the first part of the seamless cross-chain money market tran
 - `MsgSupplyCollateral`
 - `MsgLiquidate`
 
-The operation can only use tokens as the part of the IBC transfer (after any intermediate deductions) and the supplier / liquidator must be the IBC recipient (acting on someone else's behalf is not allowed). Authz is not supported. The remaining tokens will be credited to the recipient.
+The operation can only use tokens that are part of the IBC transfer (after any intermediate deductions) and the supplier / liquidator must be the IBC recipient (acting on someone else's behalf is not allowed). Authz is not supported. The remaining tokens will be credited to the recipient.
+
+Documentation: [x/uibc/README.md](https://github.com/umee-network/umee/blob/v6.4.0/x/uibc/README.md#ibc-ics20-hooks)
 
 ### Validators
 
 **Upgrade Title** (for Cosmovisor): **v6.4**.
 
 Update Price Feeder to `umee/2.4.1+`.
+
+NOTE: after the upgrade, you should restart your Price Feeder. We observed that Price Feeder doesn't correctly re-established a connection after the chain upgrade.
 
 #### libwasmvm update
 
@@ -51,6 +56,7 @@ You don't need to do anything if you are using our Docker image.
 - Swap binaries.
 - Ensure latest Price Feeder (see [compatibility matrix](https://github.com/umee-network/umee/#release-compatibility-matrix)) is running and ensure your price feeder configuration is up-to-date.
 - Restart the chain.
+- Restart Price Feeder.
 
 You can use Cosmovisor → see [instructions](https://github.com/umee-network/umee/#cosmovisor).
 
