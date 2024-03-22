@@ -13,12 +13,13 @@ option (gogoproto.goproto_getters_all) = false;
 // GenesisState defines the x/auction module's genesis state.
 message GenesisState {
   RewardsParams rewards_params = 1 [(gogoproto.nullable) = false];
-  // latest active (in bid phase) reward auction.
+  // Latest active (in bid phase) reward auction.
   uint32 reward_auction_id = 2;
-  // latest highest bid
-  string   highest_bidder                         = 3;
-  repeated cosmos.base.v1beta1.Coin reward_tokens = 4 [(gogoproto.nullable) = false];
-  // tokens collected for the next auction, while the current reward auction is still in the
+  // Latest highest bid.
+  string highest_bidder = 3;
+  // Tokens collected for the current auction.
+  repeated cosmos.base.v1beta1.Coin current_rewards = 4 [(gogoproto.nullable) = false];
+  // Tokens collected for the next auction, while the current reward auction is still in the
   // bid phase.
-  repeated cosmos.base.v1beta1.Coin next_reward_tokens = 5 [(gogoproto.nullable) = false];
+  repeated cosmos.base.v1beta1.Coin next_rewards = 5 [(gogoproto.nullable) = false];
 }

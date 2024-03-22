@@ -40,10 +40,10 @@ message MsgRewardsBid {
   option (cosmos.msg.v1.signer) = "sender";
 
   string sender = 1;
-  // amount of the bid in the base tokens
-  cosmos.base.v1beta1.Coin bid_amount = 2 [(gogoproto.nullable) = false];
   // the current auction ID being bid on. Fails if the ID is not an ID of the current auction.
-  uint32 id = 3;
+  uint32 id = 2;
+  // amount of the bid in the base tokens
+  cosmos.base.v1beta1.Coin bid_amount = 3 [(gogoproto.nullable) = false];
 }
 
 // MsgRewardsBidResponse response type for Msg/RewardsBid
