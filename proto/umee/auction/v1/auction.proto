@@ -1,0 +1,15 @@
+syntax = "proto3";
+package umee.auction.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package                      = "github.com/umee-network/umee/v6/x/auction";
+option (gogoproto.goproto_getters_all) = false;
+
+// RewardsParams defines parameters for the rewards auction.
+message RewardsParams {
+  // auction_duration is duration in seconds.
+  int64 auction_duration = 1;
+  // min_bid_increment (nominal) in the base denom for each consequitive bid.
+  int64 min_bid_increment = 2;
+}

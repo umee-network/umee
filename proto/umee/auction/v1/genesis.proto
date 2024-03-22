@@ -1,0 +1,19 @@
+syntax = "proto3";
+package umee.auction.v1;
+
+import "cosmos/base/v1beta1/coin.proto";
+import "gogoproto/gogo.proto";
+import "umee/auction/v1/auction.proto";
+
+option go_package = "github.com/umee-network/umee/v6/x/auction";
+
+option (gogoproto.goproto_getters_all) = false;
+// option (gogoproto.equal_all) = false;
+
+// GenesisState defines the x/auction module's genesis state.
+message GenesisState {
+  RewardsParams rewards_params                    = 1 [(gogoproto.nullable) = false];
+  uint64        reward_round                      = 2;
+  string        highest_bidder                    = 3;
+  repeated cosmos.base.v1beta1.Coin reward_tokens = 4 [(gogoproto.nullable) = false];
+}

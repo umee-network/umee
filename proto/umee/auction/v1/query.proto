@@ -1,0 +1,40 @@
+syntax = "proto3";
+package umee.auction.v1;
+
+import "google/api/annotations.proto";
+import "gogoproto/gogo.proto";
+import "umee/auction/v1/auction.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package = "github.com/umee-network/umee/v6/x/auction";
+
+// Query defines the gRPC querier service.
+service Query {
+  // RewardParams queries parameters for the reward auciton.
+  rpc RewardParams(QueryRewardParams) returns (QueryRewardParamsResp) {
+    option (google.api.http).get = "/umee/auction/v1/rewards/params";
+  }
+  // RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
+  // current reward auction params.
+  rpc RewardAuction(QueryRewardAuction) returns (QueryRewardAuctionResp) {
+    option (google.api.http).get = "/umee/auction/v1/rewards/{id}";
+  }
+}
+
+message QueryRewardParams {}
+
+message QueryRewardParamsResp {
+  RewardsParams params = 1 [(gogoproto.nullable) = false];
+}
+
+message QueryRewardAuction {
+  // If zero or not present, the current auction is returned
+  uint32 id = 1;
+}
+
+message QueryRewardAuctionResp {
+  uint32 id = 1;
+  // highest bidder
+  string   bidder                           = 2;
+  repeated cosmos.base.v1beta1.Coin rewards = 3 [(gogoproto.nullable) = false];
+}
