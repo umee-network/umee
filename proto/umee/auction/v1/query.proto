@@ -39,6 +39,7 @@ message QueryRewardAuction {
 message QueryRewardAuctionResponse {
   uint32 id = 1;
   // highest bidder
-  string   bidder                           = 2;
-  repeated cosmos.base.v1beta1.Coin rewards = 3 [(gogoproto.nullable) = false];
+  string   bidder                               = 2;
+  repeated cosmos.base.v1beta1.Coin rewards     = 3 [(gogoproto.nullable) = false];
+  cosmos.base.v1beta1.Coin          usd_rewards = 4 [(gogoproto.nullable) = false];
 }
