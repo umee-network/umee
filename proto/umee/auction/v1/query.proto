@@ -1,6 +1,7 @@
 syntax = "proto3";
 package umee.auction.v1;
 
+import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 import "gogoproto/gogo.proto";
 import "umee/auction/v1/auction.proto";
@@ -42,4 +43,5 @@ message QueryRewardAuctionResponse {
   string   bidder                               = 2;
   repeated cosmos.base.v1beta1.Coin rewards     = 3 [(gogoproto.nullable) = false];
   cosmos.base.v1beta1.Coin          usd_rewards = 4 [(gogoproto.nullable) = false];
+  google.protobuf.Timestamp         ends_at     = 5 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }

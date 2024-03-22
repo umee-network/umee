@@ -22,9 +22,6 @@ message GenesisState {
   repeated cosmos.base.v1beta1.Coin current_rewards = 4 [(gogoproto.nullable) = false];
   // Tokens collected for the next auction, while the current reward auction is still in the
   // bid phase.
-  repeated cosmos.base.v1beta1.Coin next_rewards                  = 5 [(gogoproto.nullable) = false];
-  google.protobuf.Timestamp         current_rewards_auction_start = 6 [
-    (gogoproto.nullable) = false,
-    (gogoproto.stdtime)  = true
-  ];
+  repeated cosmos.base.v1beta1.Coin next_rewards                = 5 [(gogoproto.nullable) = false];
+  google.protobuf.Timestamp         current_rewards_auction_end = 6 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 }
