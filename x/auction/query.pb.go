@@ -30,6 +30,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+// Query type for Query/RewardParams
 type QueryRewardParams struct {
 }
 
@@ -66,22 +67,23 @@ func (m *QueryRewardParams) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_QueryRewardParams proto.InternalMessageInfo
 
-type QueryRewardParamsResp struct {
+// Response type for Query/RewardParams
+type QueryRewardParamsResponse struct {
 	Params RewardsParams `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
 }
 
-func (m *QueryRewardParamsResp) Reset()         { *m = QueryRewardParamsResp{} }
-func (m *QueryRewardParamsResp) String() string { return proto.CompactTextString(m) }
-func (*QueryRewardParamsResp) ProtoMessage()    {}
-func (*QueryRewardParamsResp) Descriptor() ([]byte, []int) {
+func (m *QueryRewardParamsResponse) Reset()         { *m = QueryRewardParamsResponse{} }
+func (m *QueryRewardParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryRewardParamsResponse) ProtoMessage()    {}
+func (*QueryRewardParamsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e1df854d377e58e5, []int{1}
 }
-func (m *QueryRewardParamsResp) XXX_Unmarshal(b []byte) error {
+func (m *QueryRewardParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryRewardParamsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryRewardParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryRewardParamsResp.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryRewardParamsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -91,25 +93,26 @@ func (m *QueryRewardParamsResp) XXX_Marshal(b []byte, deterministic bool) ([]byt
 		return b[:n], nil
 	}
 }
-func (m *QueryRewardParamsResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryRewardParamsResp.Merge(m, src)
+func (m *QueryRewardParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRewardParamsResponse.Merge(m, src)
 }
-func (m *QueryRewardParamsResp) XXX_Size() int {
+func (m *QueryRewardParamsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryRewardParamsResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryRewardParamsResp.DiscardUnknown(m)
+func (m *QueryRewardParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRewardParamsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryRewardParamsResp proto.InternalMessageInfo
+var xxx_messageInfo_QueryRewardParamsResponse proto.InternalMessageInfo
 
-func (m *QueryRewardParamsResp) GetParams() RewardsParams {
+func (m *QueryRewardParamsResponse) GetParams() RewardsParams {
 	if m != nil {
 		return m.Params
 	}
 	return RewardsParams{}
 }
 
+// Query type for QueryRewardAuction
 type QueryRewardAuction struct {
 	// If zero or not present, the current auction is returned
 	Id uint32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -155,25 +158,26 @@ func (m *QueryRewardAuction) GetId() uint32 {
 	return 0
 }
 
-type QueryRewardAuctionResp struct {
+// Response type for Query/RewardAuctionResponse
+type QueryRewardAuctionResponse struct {
 	Id uint32 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	// highest bidder
 	Bidder  string       `protobuf:"bytes,2,opt,name=bidder,proto3" json:"bidder,omitempty"`
 	Rewards []types.Coin `protobuf:"bytes,3,rep,name=rewards,proto3" json:"rewards"`
 }
 
-func (m *QueryRewardAuctionResp) Reset()         { *m = QueryRewardAuctionResp{} }
-func (m *QueryRewardAuctionResp) String() string { return proto.CompactTextString(m) }
-func (*QueryRewardAuctionResp) ProtoMessage()    {}
-func (*QueryRewardAuctionResp) Descriptor() ([]byte, []int) {
+func (m *QueryRewardAuctionResponse) Reset()         { *m = QueryRewardAuctionResponse{} }
+func (m *QueryRewardAuctionResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryRewardAuctionResponse) ProtoMessage()    {}
+func (*QueryRewardAuctionResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_e1df854d377e58e5, []int{3}
 }
-func (m *QueryRewardAuctionResp) XXX_Unmarshal(b []byte) error {
+func (m *QueryRewardAuctionResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryRewardAuctionResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryRewardAuctionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryRewardAuctionResp.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryRewardAuctionResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -183,33 +187,33 @@ func (m *QueryRewardAuctionResp) XXX_Marshal(b []byte, deterministic bool) ([]by
 		return b[:n], nil
 	}
 }
-func (m *QueryRewardAuctionResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryRewardAuctionResp.Merge(m, src)
+func (m *QueryRewardAuctionResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryRewardAuctionResponse.Merge(m, src)
 }
-func (m *QueryRewardAuctionResp) XXX_Size() int {
+func (m *QueryRewardAuctionResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryRewardAuctionResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryRewardAuctionResp.DiscardUnknown(m)
+func (m *QueryRewardAuctionResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryRewardAuctionResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryRewardAuctionResp proto.InternalMessageInfo
+var xxx_messageInfo_QueryRewardAuctionResponse proto.InternalMessageInfo
 
-func (m *QueryRewardAuctionResp) GetId() uint32 {
+func (m *QueryRewardAuctionResponse) GetId() uint32 {
 	if m != nil {
 		return m.Id
 	}
 	return 0
 }
 
-func (m *QueryRewardAuctionResp) GetBidder() string {
+func (m *QueryRewardAuctionResponse) GetBidder() string {
 	if m != nil {
 		return m.Bidder
 	}
 	return ""
 }
 
-func (m *QueryRewardAuctionResp) GetRewards() []types.Coin {
+func (m *QueryRewardAuctionResponse) GetRewards() []types.Coin {
 	if m != nil {
 		return m.Rewards
 	}
@@ -218,42 +222,42 @@ func (m *QueryRewardAuctionResp) GetRewards() []types.Coin {
 
 func init() {
 	proto.RegisterType((*QueryRewardParams)(nil), "umee.auction.v1.QueryRewardParams")
-	proto.RegisterType((*QueryRewardParamsResp)(nil), "umee.auction.v1.QueryRewardParamsResp")
+	proto.RegisterType((*QueryRewardParamsResponse)(nil), "umee.auction.v1.QueryRewardParamsResponse")
 	proto.RegisterType((*QueryRewardAuction)(nil), "umee.auction.v1.QueryRewardAuction")
-	proto.RegisterType((*QueryRewardAuctionResp)(nil), "umee.auction.v1.QueryRewardAuctionResp")
+	proto.RegisterType((*QueryRewardAuctionResponse)(nil), "umee.auction.v1.QueryRewardAuctionResponse")
 }
 
 func init() { proto.RegisterFile("umee/auction/v1/query.proto", fileDescriptor_e1df854d377e58e5) }
 
 var fileDescriptor_e1df854d377e58e5 = []byte{
-	// 417 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x52, 0xcb, 0xae, 0xd3, 0x30,
-	0x14, 0x8c, 0x73, 0xa1, 0x08, 0x5f, 0x2e, 0x08, 0x03, 0x55, 0x09, 0xd4, 0x2d, 0xe1, 0xd1, 0xb2,
-	0xc0, 0x56, 0x8a, 0x84, 0x84, 0xc4, 0x86, 0xf6, 0x07, 0x20, 0x12, 0x1b, 0x76, 0x4e, 0x62, 0x05,
-	0x0b, 0x12, 0x87, 0xbc, 0x0a, 0xaa, 0xd8, 0x00, 0x1f, 0x80, 0x04, 0x1f, 0xd5, 0x65, 0x25, 0x36,
-	0xac, 0x10, 0x6a, 0xf9, 0x10, 0x14, 0xdb, 0x95, 0x4a, 0x22, 0x1e, 0x3b, 0xdb, 0x33, 0x67, 0xce,
-	0xcc, 0x24, 0xf0, 0x5a, 0x95, 0x70, 0x4e, 0x59, 0x15, 0x96, 0x42, 0xa6, 0xb4, 0xf6, 0xe8, 0xeb,
-	0x8a, 0xe7, 0x6f, 0x49, 0x96, 0xcb, 0x52, 0xa2, 0x0b, 0x0d, 0x48, 0x0c, 0x48, 0x6a, 0xcf, 0xb9,
-	0x1e, 0x4b, 0x19, 0xbf, 0xe2, 0x94, 0x65, 0x82, 0xb2, 0x34, 0x95, 0x25, 0x6b, 0x90, 0x42, 0xd3,
-	0x9d, 0xcb, 0xb1, 0x8c, 0xa5, 0x3a, 0xd2, 0xe6, 0x64, 0x5e, 0x87, 0xed, 0x0d, 0x7b, 0x3d, 0x0d,
-	0xe3, 0x50, 0x16, 0x89, 0x2c, 0x68, 0xc0, 0x0a, 0x4e, 0x6b, 0x2f, 0xe0, 0x25, 0xf3, 0x68, 0x28,
-	0x85, 0xc1, 0xdd, 0x4b, 0xf0, 0xe2, 0xd3, 0xc6, 0x92, 0xcf, 0x97, 0x2c, 0x8f, 0x9e, 0xb0, 0x9c,
-	0x25, 0x85, 0xfb, 0x0c, 0x5e, 0xe9, 0x3c, 0xfa, 0xbc, 0xc8, 0xd0, 0x23, 0xd8, 0xcb, 0xd4, 0x6d,
-	0x00, 0xc6, 0x60, 0x7a, 0x3c, 0xc3, 0xa4, 0x15, 0x81, 0xe8, 0x91, 0x42, 0xcf, 0xcc, 0x4f, 0xad,
-	0xbf, 0x8f, 0x2c, 0xdf, 0xcc, 0xb8, 0xb7, 0x20, 0x3a, 0x90, 0x7d, 0xac, 0x87, 0xd0, 0x79, 0x68,
-	0x8b, 0x48, 0xe9, 0x9d, 0xf8, 0xb6, 0x88, 0xdc, 0x15, 0xec, 0x77, 0x59, 0x6a, 0x7b, 0x8b, 0x89,
-	0xfa, 0xb0, 0x17, 0x88, 0x28, 0xe2, 0xf9, 0xc0, 0x1e, 0x83, 0xe9, 0x59, 0xdf, 0xdc, 0xd0, 0x43,
-	0x78, 0x26, 0xd7, 0x36, 0x06, 0x47, 0xe3, 0xa3, 0xe9, 0xf1, 0xec, 0x2a, 0xd1, 0x2d, 0x90, 0xa6,
-	0x05, 0x62, 0x5a, 0x20, 0x0b, 0x29, 0x52, 0xe3, 0x70, 0xcf, 0x9f, 0x7d, 0xb1, 0xe1, 0x69, 0xb5,
-	0x1d, 0x7d, 0x00, 0xf0, 0xdc, 0x61, 0x7e, 0xe4, 0x76, 0xb2, 0x76, 0x3a, 0x72, 0xee, 0xfc, 0x9b,
-	0xd3, 0x24, 0x71, 0x27, 0xef, 0xbf, 0xfe, 0xfc, 0x6c, 0xdf, 0x40, 0x23, 0xda, 0xfe, 0x7a, 0xc6,
-	0x08, 0xd5, 0x95, 0xa1, 0x8f, 0x00, 0x9e, 0xfc, 0x5e, 0xd7, 0xcd, 0xbf, 0xad, 0x30, 0x24, 0x67,
-	0xf2, 0x1f, 0x24, 0x65, 0xe4, 0xb6, 0x32, 0x32, 0x42, 0xc3, 0x3f, 0x1a, 0x59, 0x89, 0xe8, 0xdd,
-	0x7c, 0xb1, 0xde, 0x62, 0xb0, 0xd9, 0x62, 0xf0, 0x63, 0x8b, 0xc1, 0xa7, 0x1d, 0xb6, 0x36, 0x3b,
-	0x6c, 0x7d, 0xdb, 0x61, 0xeb, 0xf9, 0xdd, 0x58, 0x94, 0x2f, 0xaa, 0x80, 0x84, 0x32, 0x51, 0x12,
-	0xf7, 0x52, 0x5e, 0x2e, 0x65, 0xfe, 0x52, 0xeb, 0xd5, 0x0f, 0xe8, 0x9b, 0xbd, 0x68, 0xd0, 0x53,
-	0x7f, 0xdc, 0xfd, 0x5f, 0x01, 0x00, 0x00, 0xff, 0xff, 0x08, 0xd2, 0x5d, 0x38, 0x14, 0x03, 0x00,
-	0x00,
+	// 423 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0xc1, 0xaa, 0xd4, 0x30,
+	0x14, 0x86, 0x9b, 0x5e, 0x1d, 0x31, 0xd7, 0xab, 0x18, 0x45, 0xe6, 0x56, 0x6f, 0x66, 0xac, 0x8a,
+	0xa3, 0x62, 0x42, 0x47, 0x10, 0x04, 0x37, 0xce, 0xbc, 0x80, 0x76, 0xa7, 0xbb, 0xb4, 0x0d, 0x35,
+	0x68, 0x9b, 0xda, 0xb4, 0x1d, 0x45, 0x44, 0x70, 0xa3, 0x4b, 0xc1, 0xad, 0x0f, 0x34, 0xcb, 0x01,
+	0x37, 0xae, 0x44, 0x66, 0x7c, 0x10, 0x69, 0x93, 0x0e, 0x63, 0x8b, 0x7a, 0x77, 0xe9, 0x39, 0xff,
+	0xf9, 0xf3, 0x9d, 0xbf, 0x81, 0x97, 0xcb, 0x84, 0x73, 0xca, 0xca, 0xb0, 0x10, 0x32, 0xa5, 0x95,
+	0x47, 0x5f, 0x95, 0x3c, 0x7f, 0x43, 0xb2, 0x5c, 0x16, 0x12, 0x9d, 0xab, 0x9b, 0xc4, 0x34, 0x49,
+	0xe5, 0x39, 0x57, 0x62, 0x29, 0xe3, 0x97, 0x9c, 0xb2, 0x4c, 0x50, 0x96, 0xa6, 0xb2, 0x60, 0x75,
+	0x47, 0x69, 0xb9, 0x73, 0x31, 0x96, 0xb1, 0x6c, 0x8e, 0xb4, 0x3e, 0x99, 0xea, 0x51, 0xf7, 0x86,
+	0xd6, 0x4f, 0xb7, 0x71, 0x28, 0x55, 0x22, 0x15, 0x0d, 0x98, 0xe2, 0xb4, 0xf2, 0x02, 0x5e, 0x30,
+	0x8f, 0x86, 0x52, 0x98, 0xbe, 0x7b, 0x01, 0x9e, 0x7f, 0x52, 0x23, 0xf9, 0x7c, 0xc1, 0xf2, 0xe8,
+	0x31, 0xcb, 0x59, 0xa2, 0xdc, 0xa7, 0xf0, 0xb0, 0x57, 0xf4, 0xb9, 0xca, 0x64, 0xaa, 0x38, 0x7a,
+	0x08, 0x07, 0x59, 0x53, 0x19, 0x82, 0x31, 0x98, 0xec, 0x4f, 0x31, 0xe9, 0xac, 0x41, 0xf4, 0x98,
+	0xd2, 0x73, 0xb3, 0x13, 0xcb, 0x1f, 0x23, 0xcb, 0x37, 0x33, 0xee, 0x75, 0x88, 0x76, 0xac, 0x1f,
+	0xe9, 0x21, 0x74, 0x16, 0xda, 0x22, 0x6a, 0xfc, 0x0e, 0x7c, 0x5b, 0x44, 0xee, 0x7b, 0xe8, 0xf4,
+	0x55, 0x5b, 0x82, 0x8e, 0x1a, 0x5d, 0x82, 0x83, 0x40, 0x44, 0x11, 0xcf, 0x87, 0xf6, 0x18, 0x4c,
+	0x4e, 0xfb, 0xe6, 0x0b, 0x3d, 0x80, 0xa7, 0x72, 0x8d, 0x32, 0xdc, 0x1b, 0xef, 0x4d, 0xf6, 0xa7,
+	0x87, 0x44, 0xa7, 0x41, 0xea, 0x34, 0x88, 0x49, 0x83, 0xcc, 0xa5, 0x48, 0x0d, 0x65, 0xab, 0x9f,
+	0x7e, 0xb5, 0xe1, 0xc9, 0x86, 0x00, 0x7d, 0x04, 0xf0, 0xcc, 0x6e, 0x0e, 0xc8, 0xed, 0xed, 0xdb,
+	0xcb, 0xca, 0xb9, 0xfd, 0x7f, 0x4d, 0xbb, 0x8d, 0x7b, 0xf3, 0xc3, 0xb7, 0x5f, 0x5f, 0xec, 0xab,
+	0x68, 0x44, 0xbb, 0x7f, 0xd2, 0xc0, 0x50, 0x1d, 0x1d, 0xfa, 0x04, 0xe0, 0xc1, 0x9f, 0xb1, 0x5d,
+	0xfb, 0xd7, 0x35, 0x46, 0xe4, 0xdc, 0x39, 0x86, 0x68, 0x0b, 0x73, 0xa3, 0x81, 0x19, 0xa1, 0xa3,
+	0xbf, 0xc2, 0xbc, 0x15, 0xd1, 0xbb, 0xd9, 0x7c, 0xb9, 0xc6, 0x60, 0xb5, 0xc6, 0xe0, 0xe7, 0x1a,
+	0x83, 0xcf, 0x1b, 0x6c, 0xad, 0x36, 0xd8, 0xfa, 0xbe, 0xc1, 0xd6, 0xb3, 0x5b, 0xb1, 0x28, 0x9e,
+	0x97, 0x01, 0x09, 0x65, 0xd2, 0x58, 0xdc, 0x4d, 0x79, 0xb1, 0x90, 0xf9, 0x0b, 0xed, 0x57, 0xdd,
+	0xa7, 0xaf, 0x5b, 0xd3, 0x60, 0xd0, 0xbc, 0xc0, 0x7b, 0xbf, 0x03, 0x00, 0x00, 0xff, 0xff, 0x19,
+	0xe2, 0xc6, 0x95, 0x24, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -268,11 +272,11 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type QueryClient interface {
-	// RewardParams queries parameters for the reward auciton.
-	RewardParams(ctx context.Context, in *QueryRewardParams, opts ...grpc.CallOption) (*QueryRewardParamsResp, error)
+	// QueryRewardParams queries parameters for the reward auciton.
+	RewardParams(ctx context.Context, in *QueryRewardParams, opts ...grpc.CallOption) (*QueryRewardParamsResponse, error)
 	// RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
 	// current reward auction params.
-	RewardAuction(ctx context.Context, in *QueryRewardAuction, opts ...grpc.CallOption) (*QueryRewardAuctionResp, error)
+	RewardAuction(ctx context.Context, in *QueryRewardAuction, opts ...grpc.CallOption) (*QueryRewardAuctionResponse, error)
 }
 
 type queryClient struct {
@@ -283,8 +287,8 @@ func NewQueryClient(cc grpc1.ClientConn) QueryClient {
 	return &queryClient{cc}
 }
 
-func (c *queryClient) RewardParams(ctx context.Context, in *QueryRewardParams, opts ...grpc.CallOption) (*QueryRewardParamsResp, error) {
-	out := new(QueryRewardParamsResp)
+func (c *queryClient) RewardParams(ctx context.Context, in *QueryRewardParams, opts ...grpc.CallOption) (*QueryRewardParamsResponse, error) {
+	out := new(QueryRewardParamsResponse)
 	err := c.cc.Invoke(ctx, "/umee.auction.v1.Query/RewardParams", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -292,8 +296,8 @@ func (c *queryClient) RewardParams(ctx context.Context, in *QueryRewardParams, o
 	return out, nil
 }
 
-func (c *queryClient) RewardAuction(ctx context.Context, in *QueryRewardAuction, opts ...grpc.CallOption) (*QueryRewardAuctionResp, error) {
-	out := new(QueryRewardAuctionResp)
+func (c *queryClient) RewardAuction(ctx context.Context, in *QueryRewardAuction, opts ...grpc.CallOption) (*QueryRewardAuctionResponse, error) {
+	out := new(QueryRewardAuctionResponse)
 	err := c.cc.Invoke(ctx, "/umee.auction.v1.Query/RewardAuction", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -303,21 +307,21 @@ func (c *queryClient) RewardAuction(ctx context.Context, in *QueryRewardAuction,
 
 // QueryServer is the server API for Query service.
 type QueryServer interface {
-	// RewardParams queries parameters for the reward auciton.
-	RewardParams(context.Context, *QueryRewardParams) (*QueryRewardParamsResp, error)
+	// QueryRewardParams queries parameters for the reward auciton.
+	RewardParams(context.Context, *QueryRewardParams) (*QueryRewardParamsResponse, error)
 	// RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
 	// current reward auction params.
-	RewardAuction(context.Context, *QueryRewardAuction) (*QueryRewardAuctionResp, error)
+	RewardAuction(context.Context, *QueryRewardAuction) (*QueryRewardAuctionResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
 type UnimplementedQueryServer struct {
 }
 
-func (*UnimplementedQueryServer) RewardParams(ctx context.Context, req *QueryRewardParams) (*QueryRewardParamsResp, error) {
+func (*UnimplementedQueryServer) RewardParams(ctx context.Context, req *QueryRewardParams) (*QueryRewardParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RewardParams not implemented")
 }
-func (*UnimplementedQueryServer) RewardAuction(ctx context.Context, req *QueryRewardAuction) (*QueryRewardAuctionResp, error) {
+func (*UnimplementedQueryServer) RewardAuction(ctx context.Context, req *QueryRewardAuction) (*QueryRewardAuctionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RewardAuction not implemented")
 }
 
@@ -401,7 +405,7 @@ func (m *QueryRewardParams) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryRewardParamsResp) Marshal() (dAtA []byte, err error) {
+func (m *QueryRewardParamsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -411,12 +415,12 @@ func (m *QueryRewardParamsResp) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryRewardParamsResp) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryRewardParamsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryRewardParamsResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryRewardParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -462,7 +466,7 @@ func (m *QueryRewardAuction) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *QueryRewardAuctionResp) Marshal() (dAtA []byte, err error) {
+func (m *QueryRewardAuctionResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -472,12 +476,12 @@ func (m *QueryRewardAuctionResp) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryRewardAuctionResp) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryRewardAuctionResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryRewardAuctionResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryRewardAuctionResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -531,7 +535,7 @@ func (m *QueryRewardParams) Size() (n int) {
 	return n
 }
 
-func (m *QueryRewardParamsResp) Size() (n int) {
+func (m *QueryRewardParamsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -554,7 +558,7 @@ func (m *QueryRewardAuction) Size() (n int) {
 	return n
 }
 
-func (m *QueryRewardAuctionResp) Size() (n int) {
+func (m *QueryRewardAuctionResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -632,7 +636,7 @@ func (m *QueryRewardParams) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryRewardParamsResp) Unmarshal(dAtA []byte) error {
+func (m *QueryRewardParamsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -655,10 +659,10 @@ func (m *QueryRewardParamsResp) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryRewardParamsResp: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryRewardParamsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryRewardParamsResp: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryRewardParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -784,7 +788,7 @@ func (m *QueryRewardAuction) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *QueryRewardAuctionResp) Unmarshal(dAtA []byte) error {
+func (m *QueryRewardAuctionResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -807,10 +811,10 @@ func (m *QueryRewardAuctionResp) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryRewardAuctionResp: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryRewardAuctionResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryRewardAuctionResp: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryRewardAuctionResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:

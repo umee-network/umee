@@ -10,29 +10,33 @@ option go_package = "github.com/umee-network/umee/v6/x/auction";
 
 // Query defines the gRPC querier service.
 service Query {
-  // RewardParams queries parameters for the reward auciton.
-  rpc RewardParams(QueryRewardParams) returns (QueryRewardParamsResp) {
+  // QueryRewardParams queries parameters for the reward auciton.
+  rpc RewardParams(QueryRewardParams) returns (QueryRewardParamsResponse) {
     option (google.api.http).get = "/umee/auction/v1/rewards/params";
   }
   // RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
   // current reward auction params.
-  rpc RewardAuction(QueryRewardAuction) returns (QueryRewardAuctionResp) {
+  rpc RewardAuction(QueryRewardAuction) returns (QueryRewardAuctionResponse) {
     option (google.api.http).get = "/umee/auction/v1/rewards/{id}";
   }
 }
 
+// Query type for Query/RewardParams
 message QueryRewardParams {}
 
-message QueryRewardParamsResp {
+// Response type for Query/RewardParams
+message QueryRewardParamsResponse {
   RewardsParams params = 1 [(gogoproto.nullable) = false];
 }
 
+// Query type for QueryRewardAuction
 message QueryRewardAuction {
   // If zero or not present, the current auction is returned
   uint32 id = 1;
 }
 
-message QueryRewardAuctionResp {
+// Response type for Query/RewardAuctionResponse
+message QueryRewardAuctionResponse {
   uint32 id = 1;
   // highest bidder
   string   bidder                           = 2;

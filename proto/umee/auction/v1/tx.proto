@@ -16,11 +16,14 @@ service Msg {
   // Rewards auction: bid umee for protocol rewards
   //
 
-  rpc GovSetRewardsParams(MsgGovSetRewardsParams) returns (MsgGovSetRewardsParamsResp);
-  rpc RewardsBid(MsgRewardsBid) returns (MsgRewardsBidResp);
+  // Allows x/gov to update rewards auction parameters.
+  rpc GovSetRewardsParams(MsgGovSetRewardsParams) returns (MsgGovSetRewardsParamsResponse);
+  // Places a bid for a reword auction. Must be higher than the previous bid by at least
+  // RewardParams.RewardsParams.
+  rpc RewardsBid(MsgRewardsBid) returns (MsgRewardsBidResponse);
 }
 
-// MsgGovSetRewardsParams updates rewards parameters.
+// MsgGovSetRewardsParams updates rewards auction parameters.
 message MsgGovSetRewardsParams {
   option (gogoproto.equal)           = true;
   option (gogoproto.goproto_getters) = false;
@@ -31,8 +34,8 @@ message MsgGovSetRewardsParams {
   RewardsParams params    = 2 [(gogoproto.nullable) = false];
 }
 
-// MsgGovSetRewardsParamsResp defines the Msg/GovSetRewardsParams response type.
-message MsgGovSetRewardsParamsResp {}
+// MsgGovSetRewardsParamsResponse defines the Msg/GovSetRewardsParams response type.
+message MsgGovSetRewardsParamsResponse {}
 
 // MsgRewardsBid places a bid for a reword auction.
 message MsgRewardsBid {
@@ -45,5 +48,5 @@ message MsgRewardsBid {
   uint32 id = 3;
 }
 
-// MsgRewardsBidResp response type for Msg/RewardsBid
-message MsgRewardsBidResp {}
+// MsgRewardsBidResponse response type for Msg/RewardsBid
+message MsgRewardsBidResponse {}

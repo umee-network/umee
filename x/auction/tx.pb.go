@@ -31,7 +31,7 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// MsgGovSetRewardsParams updates rewards parameters.
+// MsgGovSetRewardsParams updates rewards auction parameters.
 type MsgGovSetRewardsParams struct {
 	// authority must be the address of the governance account.
 	Authority string        `protobuf:"bytes,1,opt,name=authority,proto3" json:"authority,omitempty"`
@@ -71,22 +71,22 @@ func (m *MsgGovSetRewardsParams) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgGovSetRewardsParams proto.InternalMessageInfo
 
-// MsgGovSetRewardsParamsResp defines the Msg/GovSetRewardsParams response type.
-type MsgGovSetRewardsParamsResp struct {
+// MsgGovSetRewardsParamsResponse defines the Msg/GovSetRewardsParams response type.
+type MsgGovSetRewardsParamsResponse struct {
 }
 
-func (m *MsgGovSetRewardsParamsResp) Reset()         { *m = MsgGovSetRewardsParamsResp{} }
-func (m *MsgGovSetRewardsParamsResp) String() string { return proto.CompactTextString(m) }
-func (*MsgGovSetRewardsParamsResp) ProtoMessage()    {}
-func (*MsgGovSetRewardsParamsResp) Descriptor() ([]byte, []int) {
+func (m *MsgGovSetRewardsParamsResponse) Reset()         { *m = MsgGovSetRewardsParamsResponse{} }
+func (m *MsgGovSetRewardsParamsResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgGovSetRewardsParamsResponse) ProtoMessage()    {}
+func (*MsgGovSetRewardsParamsResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_44a5dea2889d94ea, []int{1}
 }
-func (m *MsgGovSetRewardsParamsResp) XXX_Unmarshal(b []byte) error {
+func (m *MsgGovSetRewardsParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgGovSetRewardsParamsResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgGovSetRewardsParamsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgGovSetRewardsParamsResp.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgGovSetRewardsParamsResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -96,17 +96,17 @@ func (m *MsgGovSetRewardsParamsResp) XXX_Marshal(b []byte, deterministic bool) (
 		return b[:n], nil
 	}
 }
-func (m *MsgGovSetRewardsParamsResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgGovSetRewardsParamsResp.Merge(m, src)
+func (m *MsgGovSetRewardsParamsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgGovSetRewardsParamsResponse.Merge(m, src)
 }
-func (m *MsgGovSetRewardsParamsResp) XXX_Size() int {
+func (m *MsgGovSetRewardsParamsResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgGovSetRewardsParamsResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgGovSetRewardsParamsResp.DiscardUnknown(m)
+func (m *MsgGovSetRewardsParamsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgGovSetRewardsParamsResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgGovSetRewardsParamsResp proto.InternalMessageInfo
+var xxx_messageInfo_MsgGovSetRewardsParamsResponse proto.InternalMessageInfo
 
 // MsgRewardsBid places a bid for a reword auction.
 type MsgRewardsBid struct {
@@ -150,22 +150,22 @@ func (m *MsgRewardsBid) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_MsgRewardsBid proto.InternalMessageInfo
 
-// MsgRewardsBidResp response type for Msg/RewardsBid
-type MsgRewardsBidResp struct {
+// MsgRewardsBidResponse response type for Msg/RewardsBid
+type MsgRewardsBidResponse struct {
 }
 
-func (m *MsgRewardsBidResp) Reset()         { *m = MsgRewardsBidResp{} }
-func (m *MsgRewardsBidResp) String() string { return proto.CompactTextString(m) }
-func (*MsgRewardsBidResp) ProtoMessage()    {}
-func (*MsgRewardsBidResp) Descriptor() ([]byte, []int) {
+func (m *MsgRewardsBidResponse) Reset()         { *m = MsgRewardsBidResponse{} }
+func (m *MsgRewardsBidResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgRewardsBidResponse) ProtoMessage()    {}
+func (*MsgRewardsBidResponse) Descriptor() ([]byte, []int) {
 	return fileDescriptor_44a5dea2889d94ea, []int{3}
 }
-func (m *MsgRewardsBidResp) XXX_Unmarshal(b []byte) error {
+func (m *MsgRewardsBidResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *MsgRewardsBidResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *MsgRewardsBidResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_MsgRewardsBidResp.Marshal(b, m, deterministic)
+		return xxx_messageInfo_MsgRewardsBidResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -175,58 +175,59 @@ func (m *MsgRewardsBidResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, e
 		return b[:n], nil
 	}
 }
-func (m *MsgRewardsBidResp) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_MsgRewardsBidResp.Merge(m, src)
+func (m *MsgRewardsBidResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgRewardsBidResponse.Merge(m, src)
 }
-func (m *MsgRewardsBidResp) XXX_Size() int {
+func (m *MsgRewardsBidResponse) XXX_Size() int {
 	return m.Size()
 }
-func (m *MsgRewardsBidResp) XXX_DiscardUnknown() {
-	xxx_messageInfo_MsgRewardsBidResp.DiscardUnknown(m)
+func (m *MsgRewardsBidResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgRewardsBidResponse.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_MsgRewardsBidResp proto.InternalMessageInfo
+var xxx_messageInfo_MsgRewardsBidResponse proto.InternalMessageInfo
 
 func init() {
 	proto.RegisterType((*MsgGovSetRewardsParams)(nil), "umee.auction.v1.MsgGovSetRewardsParams")
-	proto.RegisterType((*MsgGovSetRewardsParamsResp)(nil), "umee.auction.v1.MsgGovSetRewardsParamsResp")
+	proto.RegisterType((*MsgGovSetRewardsParamsResponse)(nil), "umee.auction.v1.MsgGovSetRewardsParamsResponse")
 	proto.RegisterType((*MsgRewardsBid)(nil), "umee.auction.v1.MsgRewardsBid")
-	proto.RegisterType((*MsgRewardsBidResp)(nil), "umee.auction.v1.MsgRewardsBidResp")
+	proto.RegisterType((*MsgRewardsBidResponse)(nil), "umee.auction.v1.MsgRewardsBidResponse")
 }
 
 func init() { proto.RegisterFile("umee/auction/v1/tx.proto", fileDescriptor_44a5dea2889d94ea) }
 
 var fileDescriptor_44a5dea2889d94ea = []byte{
-	// 463 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0x31, 0x6f, 0x13, 0x31,
-	0x14, 0xc7, 0xcf, 0x29, 0x8a, 0x88, 0x51, 0x41, 0x5c, 0xab, 0x70, 0x3d, 0x81, 0x13, 0xdd, 0x42,
-	0x00, 0xd5, 0x56, 0x8a, 0xd4, 0xa1, 0x42, 0x48, 0x0d, 0x43, 0xa7, 0x48, 0xd5, 0x75, 0x63, 0xa9,
-	0xee, 0x62, 0xcb, 0xb5, 0xaa, 0x3b, 0x47, 0xb6, 0xef, 0x5a, 0x46, 0x98, 0x18, 0xf9, 0x08, 0x9d,
-	0x98, 0x19, 0xf8, 0x08, 0x0c, 0x19, 0x2b, 0x26, 0x26, 0x04, 0xc9, 0x00, 0x1f, 0x03, 0xf9, 0xce,
-	0x55, 0x68, 0x38, 0xa1, 0x6e, 0xf7, 0xee, 0xef, 0xff, 0xff, 0xfd, 0xde, 0xb3, 0x61, 0x50, 0x64,
-	0x8c, 0x91, 0xa4, 0x98, 0x18, 0x21, 0x73, 0x52, 0x0e, 0x89, 0x39, 0xc7, 0x53, 0x25, 0x8d, 0xf4,
-	0xef, 0x59, 0x05, 0x3b, 0x05, 0x97, 0xc3, 0x10, 0x4d, 0xa4, 0xce, 0xa4, 0x26, 0x69, 0xa2, 0x19,
-	0x29, 0x87, 0x29, 0x33, 0xc9, 0x90, 0x4c, 0xa4, 0xc8, 0x6b, 0x43, 0xb8, 0x55, 0xeb, 0xc7, 0x55,
-	0x45, 0xea, 0xc2, 0x49, 0x0f, 0x9c, 0x35, 0xd3, 0xdc, 0xf6, 0xc8, 0x34, 0x77, 0xc2, 0x26, 0x97,
-	0x5c, 0xd6, 0x06, 0xfb, 0xe5, 0xfe, 0x3e, 0x5a, 0x85, 0xba, 0xa2, 0xa8, 0xe4, 0xe8, 0x23, 0x80,
-	0xdd, 0xb1, 0xe6, 0x07, 0xb2, 0x3c, 0x62, 0x26, 0x66, 0x67, 0x89, 0xa2, 0xfa, 0x30, 0x51, 0x49,
-	0xa6, 0xfd, 0x5d, 0xd8, 0x49, 0x0a, 0x73, 0x22, 0x95, 0x30, 0x6f, 0x02, 0xd0, 0x07, 0x83, 0xce,
-	0x28, 0xf8, 0xfa, 0x79, 0x7b, 0xd3, 0xd1, 0xec, 0x53, 0xaa, 0x98, 0xd6, 0x47, 0x46, 0x89, 0x9c,
-	0xc7, 0xcb, 0xa3, 0xfe, 0x0b, 0xd8, 0x9e, 0x56, 0x09, 0x41, 0xab, 0x0f, 0x06, 0x77, 0x76, 0x10,
-	0x5e, 0x99, 0x1e, 0x5f, 0xeb, 0x33, 0xba, 0x35, 0xfb, 0xde, 0xf3, 0x62, 0xe7, 0xd9, 0xeb, 0xbe,
-	0xbf, 0xe8, 0x79, 0xbf, 0x2f, 0x7a, 0xe0, 0xdd, 0xaf, 0x4f, 0x4f, 0x97, 0xa9, 0xd1, 0x43, 0x18,
-	0x36, 0x73, 0xc6, 0x4c, 0x4f, 0xa3, 0xb7, 0x00, 0xae, 0x8f, 0x35, 0x77, 0xc2, 0x48, 0x50, 0xbf,
-	0x0b, 0xdb, 0x9a, 0xe5, 0x94, 0xa9, 0x1a, 0x3d, 0x76, 0x95, 0xff, 0x12, 0xc2, 0x54, 0xd0, 0xe3,
-	0x24, 0x93, 0x45, 0x6e, 0x1c, 0xe1, 0x16, 0x76, 0x33, 0xd9, 0xeb, 0xc0, 0xee, 0x3a, 0xf0, 0x2b,
-	0x29, 0x72, 0x07, 0xd7, 0x49, 0x05, 0xdd, 0xaf, 0x1c, 0xfe, 0x5d, 0xd8, 0x12, 0x34, 0x58, 0xeb,
-	0x83, 0xc1, 0x7a, 0xdc, 0x12, 0x74, 0xef, 0xb6, 0xe3, 0xf5, 0xa2, 0x0d, 0x78, 0xff, 0x1a, 0x82,
-	0x05, 0xdb, 0xf9, 0x02, 0xe0, 0xda, 0x58, 0x73, 0xff, 0x14, 0x6e, 0x34, 0xed, 0xf8, 0xf1, 0x3f,
-	0xbb, 0x69, 0x1e, 0x32, 0x7c, 0x76, 0xc3, 0x83, 0xb6, 0xa9, 0x7f, 0x08, 0xe1, 0x5f, 0x9b, 0x40,
-	0x4d, 0xd6, 0xa5, 0x1e, 0x46, 0xff, 0xd7, 0x6d, 0xe2, 0xe8, 0x60, 0xf6, 0x13, 0x79, 0xb3, 0x39,
-	0x02, 0x97, 0x73, 0x04, 0x7e, 0xcc, 0x11, 0xf8, 0xb0, 0x40, 0xde, 0xe5, 0x02, 0x79, 0xdf, 0x16,
-	0xc8, 0x7b, 0xfd, 0x84, 0x0b, 0x73, 0x52, 0xa4, 0x78, 0x22, 0x33, 0x62, 0xb3, 0xb6, 0x73, 0x66,
-	0xce, 0xa4, 0x3a, 0xad, 0x0a, 0x52, 0xee, 0x92, 0xf3, 0xab, 0x57, 0x97, 0xb6, 0xab, 0x67, 0xf7,
-	0xfc, 0x4f, 0x00, 0x00, 0x00, 0xff, 0xff, 0x45, 0x2f, 0x2a, 0xec, 0x2c, 0x03, 0x00, 0x00,
+	// 465 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x92, 0x31, 0x6f, 0xd3, 0x40,
+	0x14, 0xc7, 0x7d, 0x29, 0x8a, 0xc8, 0xa1, 0x82, 0x64, 0x4a, 0xea, 0x46, 0xe2, 0x12, 0x65, 0x80,
+	0x80, 0xd4, 0x3b, 0xa5, 0x48, 0x1d, 0x2a, 0x84, 0xd4, 0x30, 0x74, 0x8a, 0x84, 0x5c, 0x26, 0x96,
+	0xca, 0xce, 0x9d, 0xae, 0x27, 0x64, 0xbf, 0xe8, 0xee, 0xec, 0x96, 0x11, 0x26, 0x46, 0x3e, 0x42,
+	0x27, 0x66, 0x06, 0x3e, 0x44, 0x06, 0x86, 0x8a, 0x89, 0x09, 0x41, 0x32, 0xc0, 0xc7, 0x40, 0xb6,
+	0xcf, 0x0a, 0x0d, 0x11, 0xea, 0xe6, 0xe7, 0xff, 0xfd, 0xff, 0xef, 0xf7, 0xde, 0x1d, 0x0e, 0xb2,
+	0x44, 0x08, 0x16, 0x65, 0x13, 0xab, 0x20, 0x65, 0xf9, 0x90, 0xd9, 0x73, 0x3a, 0xd5, 0x60, 0xc1,
+	0xbf, 0x53, 0x28, 0xd4, 0x29, 0x34, 0x1f, 0x76, 0xc8, 0x04, 0x4c, 0x02, 0x86, 0xc5, 0x91, 0x11,
+	0x2c, 0x1f, 0xc6, 0xc2, 0x46, 0x43, 0x36, 0x01, 0x95, 0x56, 0x86, 0xce, 0x4e, 0xa5, 0x9f, 0x94,
+	0x15, 0xab, 0x0a, 0x27, 0x6d, 0x3b, 0x6b, 0x62, 0x64, 0xd1, 0x23, 0x31, 0xd2, 0x09, 0x5b, 0x12,
+	0x24, 0x54, 0x86, 0xe2, 0xcb, 0xfd, 0xbd, 0xbf, 0x0a, 0x55, 0x53, 0x94, 0x72, 0xff, 0x23, 0xc2,
+	0xed, 0xb1, 0x91, 0x47, 0x90, 0x1f, 0x0b, 0x1b, 0x8a, 0xb3, 0x48, 0x73, 0xf3, 0x22, 0xd2, 0x51,
+	0x62, 0xfc, 0x7d, 0xdc, 0x8a, 0x32, 0x7b, 0x0a, 0x5a, 0xd9, 0x37, 0x01, 0xea, 0xa1, 0x41, 0x6b,
+	0x14, 0x7c, 0xfd, 0xbc, 0xbb, 0xe5, 0x68, 0x0e, 0x39, 0xd7, 0xc2, 0x98, 0x63, 0xab, 0x55, 0x2a,
+	0xc3, 0xe5, 0x51, 0xff, 0x29, 0x6e, 0x4e, 0xcb, 0x84, 0xa0, 0xd1, 0x43, 0x83, 0x5b, 0x7b, 0x84,
+	0xae, 0x4c, 0x4f, 0xaf, 0xf4, 0x19, 0xdd, 0x98, 0x7d, 0xef, 0x7a, 0xa1, 0xf3, 0x1c, 0xb4, 0xdf,
+	0x5f, 0x74, 0xbd, 0xdf, 0x17, 0x5d, 0xf4, 0xee, 0xd7, 0xa7, 0xc7, 0xcb, 0xd4, 0x7e, 0x0f, 0x93,
+	0xf5, 0x9c, 0xa1, 0x30, 0x53, 0x48, 0x8d, 0xe8, 0xbf, 0x45, 0x78, 0x73, 0x6c, 0xa4, 0x13, 0x47,
+	0x8a, 0xfb, 0x6d, 0xdc, 0x34, 0x22, 0xe5, 0x42, 0x57, 0xf8, 0xa1, 0xab, 0xfc, 0x67, 0x18, 0xc7,
+	0x8a, 0x9f, 0x44, 0x09, 0x64, 0xa9, 0x75, 0x94, 0x3b, 0xd4, 0xcd, 0x55, 0x5c, 0x09, 0x75, 0x57,
+	0x42, 0x9f, 0x83, 0x4a, 0x1d, 0x60, 0x2b, 0x56, 0xfc, 0xb0, 0x74, 0xf8, 0xb7, 0x71, 0x43, 0xf1,
+	0x60, 0xa3, 0x87, 0x06, 0x9b, 0x61, 0x43, 0xf1, 0x83, 0x9b, 0x8e, 0xd9, 0xeb, 0x6f, 0xe3, 0x7b,
+	0x57, 0x10, 0x6a, 0xb8, 0xbd, 0x2f, 0x08, 0x6f, 0x8c, 0x8d, 0xf4, 0x01, 0xdf, 0x5d, 0xb7, 0xeb,
+	0x87, 0xff, 0xec, 0x68, 0xfd, 0xb0, 0x1d, 0x76, 0xcd, 0x83, 0x75, 0x63, 0xff, 0x25, 0xc6, 0x7f,
+	0x6d, 0x84, 0xac, 0xb3, 0x2f, 0xf5, 0xce, 0x83, 0xff, 0xeb, 0x75, 0xea, 0xe8, 0x68, 0xf6, 0x93,
+	0x78, 0xb3, 0x39, 0x41, 0x97, 0x73, 0x82, 0x7e, 0xcc, 0x09, 0xfa, 0xb0, 0x20, 0xde, 0xe5, 0x82,
+	0x78, 0xdf, 0x16, 0xc4, 0x7b, 0xf5, 0x48, 0x2a, 0x7b, 0x9a, 0xc5, 0x74, 0x02, 0x09, 0x2b, 0xf2,
+	0x76, 0x53, 0x61, 0xcf, 0x40, 0xbf, 0x2e, 0x0b, 0x96, 0xef, 0xb3, 0xf3, 0xfa, 0x15, 0xc6, 0xcd,
+	0xf2, 0x19, 0x3e, 0xf9, 0x13, 0x00, 0x00, 0xff, 0xff, 0x85, 0x36, 0xa0, 0x54, 0x3c, 0x03, 0x00,
+	0x00,
 }
 
 func (this *MsgGovSetRewardsParams) Equal(that interface{}) bool {
@@ -269,8 +270,11 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MsgClient interface {
-	GovSetRewardsParams(ctx context.Context, in *MsgGovSetRewardsParams, opts ...grpc.CallOption) (*MsgGovSetRewardsParamsResp, error)
-	RewardsBid(ctx context.Context, in *MsgRewardsBid, opts ...grpc.CallOption) (*MsgRewardsBidResp, error)
+	// Allows x/gov to update rewards auction parameters.
+	GovSetRewardsParams(ctx context.Context, in *MsgGovSetRewardsParams, opts ...grpc.CallOption) (*MsgGovSetRewardsParamsResponse, error)
+	// Places a bid for a reword auction. Must be higher than the previous bid by at least
+	// RewardParams.RewardsParams.
+	RewardsBid(ctx context.Context, in *MsgRewardsBid, opts ...grpc.CallOption) (*MsgRewardsBidResponse, error)
 }
 
 type msgClient struct {
@@ -281,8 +285,8 @@ func NewMsgClient(cc grpc1.ClientConn) MsgClient {
 	return &msgClient{cc}
 }
 
-func (c *msgClient) GovSetRewardsParams(ctx context.Context, in *MsgGovSetRewardsParams, opts ...grpc.CallOption) (*MsgGovSetRewardsParamsResp, error) {
-	out := new(MsgGovSetRewardsParamsResp)
+func (c *msgClient) GovSetRewardsParams(ctx context.Context, in *MsgGovSetRewardsParams, opts ...grpc.CallOption) (*MsgGovSetRewardsParamsResponse, error) {
+	out := new(MsgGovSetRewardsParamsResponse)
 	err := c.cc.Invoke(ctx, "/umee.auction.v1.Msg/GovSetRewardsParams", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -290,8 +294,8 @@ func (c *msgClient) GovSetRewardsParams(ctx context.Context, in *MsgGovSetReward
 	return out, nil
 }
 
-func (c *msgClient) RewardsBid(ctx context.Context, in *MsgRewardsBid, opts ...grpc.CallOption) (*MsgRewardsBidResp, error) {
-	out := new(MsgRewardsBidResp)
+func (c *msgClient) RewardsBid(ctx context.Context, in *MsgRewardsBid, opts ...grpc.CallOption) (*MsgRewardsBidResponse, error) {
+	out := new(MsgRewardsBidResponse)
 	err := c.cc.Invoke(ctx, "/umee.auction.v1.Msg/RewardsBid", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -301,18 +305,21 @@ func (c *msgClient) RewardsBid(ctx context.Context, in *MsgRewardsBid, opts ...g
 
 // MsgServer is the server API for Msg service.
 type MsgServer interface {
-	GovSetRewardsParams(context.Context, *MsgGovSetRewardsParams) (*MsgGovSetRewardsParamsResp, error)
-	RewardsBid(context.Context, *MsgRewardsBid) (*MsgRewardsBidResp, error)
+	// Allows x/gov to update rewards auction parameters.
+	GovSetRewardsParams(context.Context, *MsgGovSetRewardsParams) (*MsgGovSetRewardsParamsResponse, error)
+	// Places a bid for a reword auction. Must be higher than the previous bid by at least
+	// RewardParams.RewardsParams.
+	RewardsBid(context.Context, *MsgRewardsBid) (*MsgRewardsBidResponse, error)
 }
 
 // UnimplementedMsgServer can be embedded to have forward compatible implementations.
 type UnimplementedMsgServer struct {
 }
 
-func (*UnimplementedMsgServer) GovSetRewardsParams(ctx context.Context, req *MsgGovSetRewardsParams) (*MsgGovSetRewardsParamsResp, error) {
+func (*UnimplementedMsgServer) GovSetRewardsParams(ctx context.Context, req *MsgGovSetRewardsParams) (*MsgGovSetRewardsParamsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GovSetRewardsParams not implemented")
 }
-func (*UnimplementedMsgServer) RewardsBid(ctx context.Context, req *MsgRewardsBid) (*MsgRewardsBidResp, error) {
+func (*UnimplementedMsgServer) RewardsBid(ctx context.Context, req *MsgRewardsBid) (*MsgRewardsBidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RewardsBid not implemented")
 }
 
@@ -413,7 +420,7 @@ func (m *MsgGovSetRewardsParams) MarshalToSizedBuffer(dAtA []byte) (int, error) 
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgGovSetRewardsParamsResp) Marshal() (dAtA []byte, err error) {
+func (m *MsgGovSetRewardsParamsResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -423,12 +430,12 @@ func (m *MsgGovSetRewardsParamsResp) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgGovSetRewardsParamsResp) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgGovSetRewardsParamsResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgGovSetRewardsParamsResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgGovSetRewardsParamsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -481,7 +488,7 @@ func (m *MsgRewardsBid) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *MsgRewardsBidResp) Marshal() (dAtA []byte, err error) {
+func (m *MsgRewardsBidResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -491,12 +498,12 @@ func (m *MsgRewardsBidResp) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *MsgRewardsBidResp) MarshalTo(dAtA []byte) (int, error) {
+func (m *MsgRewardsBidResponse) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *MsgRewardsBidResp) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *MsgRewardsBidResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -530,7 +537,7 @@ func (m *MsgGovSetRewardsParams) Size() (n int) {
 	return n
 }
 
-func (m *MsgGovSetRewardsParamsResp) Size() (n int) {
+func (m *MsgGovSetRewardsParamsResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -557,7 +564,7 @@ func (m *MsgRewardsBid) Size() (n int) {
 	return n
 }
 
-func (m *MsgRewardsBidResp) Size() (n int) {
+func (m *MsgRewardsBidResponse) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -687,7 +694,7 @@ func (m *MsgGovSetRewardsParams) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgGovSetRewardsParamsResp) Unmarshal(dAtA []byte) error {
+func (m *MsgGovSetRewardsParamsResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -710,10 +717,10 @@ func (m *MsgGovSetRewardsParamsResp) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgGovSetRewardsParamsResp: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgGovSetRewardsParamsResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgGovSetRewardsParamsResp: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgGovSetRewardsParamsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
@@ -871,7 +878,7 @@ func (m *MsgRewardsBid) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *MsgRewardsBidResp) Unmarshal(dAtA []byte) error {
+func (m *MsgRewardsBidResponse) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -894,10 +901,10 @@ func (m *MsgRewardsBidResp) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: MsgRewardsBidResp: wiretype end group for non-group")
+			return fmt.Errorf("proto: MsgRewardsBidResponse: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: MsgRewardsBidResp: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: MsgRewardsBidResponse: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		default:
