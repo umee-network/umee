@@ -12,8 +12,10 @@ option (gogoproto.goproto_getters_all) = false;
 
 // GenesisState defines the x/auction module's genesis state.
 message GenesisState {
-  RewardsParams rewards_params                    = 1 [(gogoproto.nullable) = false];
-  uint64        reward_round                      = 2;
-  string        highest_bidder                    = 3;
+  RewardsParams rewards_params = 1 [(gogoproto.nullable) = false];
+  // latest reward
+  uint32 reward_id = 2;
+  // latest highest bid
+  string   highest_bidder                         = 3;
   repeated cosmos.base.v1beta1.Coin reward_tokens = 4 [(gogoproto.nullable) = false];
 }
