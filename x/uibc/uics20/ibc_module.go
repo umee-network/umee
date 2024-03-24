@@ -24,14 +24,14 @@ var _ porttypes.IBCModule = ICS20Module{}
 // quota update on acknowledgement error or timeout.
 type ICS20Module struct {
 	porttypes.IBCModule
-	kb       quota.KeeperBuilder
+	kb       quota.Builder
 	leverage ltypes.MsgServer
 	cdc      codec.JSONCodec
 }
 
 // NewICS20Module is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.KeeperBuilder, l ltypes.MsgServer,
+func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.Builder, l ltypes.MsgServer,
 ) ICS20Module {
 	return ICS20Module{
 		IBCModule: app,

@@ -25,7 +25,7 @@ func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
 	ir := cdctypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(ir)
 	storeKey := storetypes.NewMemoryStoreKey("quota")
-	kb := NewKeeperBuilder(cdc, storeKey, l, o, eg)
+	kb := NewBuilder(cdc, storeKey, l, o, eg)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return TestKeeper{kb.Keeper(&ctx), t, &ctx}
 }

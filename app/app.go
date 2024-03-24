@@ -281,7 +281,7 @@ type UmeeApp struct {
 	LeverageKeeper      leveragekeeper.Keeper
 	IncentiveKeeper     incentivekeeper.Keeper
 	OracleKeeper        oraclekeeper.Keeper
-	UIbcQuotaKeeperB    uibcquota.KeeperBuilder
+	UIbcQuotaKeeperB    uibcquota.Builder
 	UGovKeeperB         ugovkeeper.Builder
 	MetokenKeeperB      metokenkeeper.Builder
 
@@ -461,7 +461,7 @@ func New(
 
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 
-	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
+	app.UGovKeeperB = ugovkeeper.NewBuilder(appCodec, keys[ugov.ModuleName])
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
@@ -494,7 +494,7 @@ func New(
 	)
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
-	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
+	app.MetokenKeeperB = metokenkeeper.NewBuilder(
 		appCodec,
 		keys[metoken.StoreKey],
 		app.BankKeeper,
@@ -538,7 +538,7 @@ func New(
 	)
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
-	app.UIbcQuotaKeeperB = uibcquota.NewKeeperBuilder(
+	app.UIbcQuotaKeeperB = uibcquota.NewBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
