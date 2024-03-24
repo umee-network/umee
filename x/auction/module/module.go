@@ -18,7 +18,7 @@ import (
 
 	"github.com/umee-network/umee/v6/x/auction"
 	// "github.com/umee-network/umee/v6/x/auction/client/cli"
-	"github.com/umee-network/umee/v6/x/auction/rewards"
+	"github.com/umee-network/umee/v6/x/auction/keeper"
 )
 
 var (
@@ -100,12 +100,12 @@ func (AppModuleBasic) GetQueryCmd() *cobra.Command {
 type AppModule struct {
 	AppModuleBasic
 
-	kb         rewards.KeeperBuilder
+	kb         keeper.Builder
 	bankKeeper auction.BankKeeper
 }
 
 func NewAppModule(
-	cdc codec.Codec, keeper rewards.KeeperBuilder, bk auction.BankKeeper,
+	cdc codec.Codec, keeper keeper.Builder, bk auction.BankKeeper,
 ) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),

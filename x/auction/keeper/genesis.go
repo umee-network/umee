@@ -1,4 +1,4 @@
-package rewards
+package keeper
 
 import (
 	"github.com/umee-network/umee/v6/x/auction"
@@ -9,6 +9,6 @@ func (k Keeper) ExportGenesis() *auction.GenesisState {
 	return &auction.GenesisState{}
 }
 
-func (k Keeper) InitGenesis(*auction.GenesisState)  {
+func (k Keeper) InitGenesis(*auction.GenesisState) {
 	// TODO
 }
