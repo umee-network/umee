@@ -14,10 +14,10 @@ import (
 type ICS4 struct {
 	porttypes.ICS4Wrapper
 
-	quotaKB quota.KeeperBuilder
+	quotaKB quota.Builder
 }
 
-func NewICS4(parent porttypes.ICS4Wrapper, kb quota.KeeperBuilder) ICS4 {
+func NewICS4(parent porttypes.ICS4Wrapper, kb quota.Builder) ICS4 {
 	return ICS4{parent, kb}
 }
 
