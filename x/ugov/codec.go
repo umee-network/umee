@@ -1,8 +1,6 @@
 package ugov
 
 import (
-	"github.com/cosmos/gogoproto/proto"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -30,7 +28,7 @@ func init() {
 // concrete types on the provided LegacyAmino codec. These types are used for
 // Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
-	cdc.RegisterConcrete(&MsgGovUpdateMinGasPrice{}, proto.MessageName(&MsgGovUpdateMinGasPrice{}), nil)
+	cdc.RegisterConcrete(&MsgGovUpdateMinGasPrice{}, "umee/ugov/MsgGovUpdateMinGasPrice", nil)
 	cdc.RegisterConcrete(&MsgGovSetEmergencyGroup{}, "umee/ugov/MsgGovSetEmergencyGroup", nil)
 	cdc.RegisterConcrete(&MsgGovUpdateInflationParams{}, "umee/ugov/MsgGovUpdateInflationParams", nil)
 }
