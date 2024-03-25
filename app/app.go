@@ -347,12 +347,13 @@ func New(
 		wasmtypes.StoreKey,
 		consensusparamstypes.StoreKey, crisistypes.StoreKey,
 
-		leveragetypes.StoreKey, oracletypes.StoreKey,
-		uibc.StoreKey, ugov.StoreKey,
+		auction.StoreKey,
 		incentive.StoreKey,
-		auction.StoreKey,
+		leveragetypes.StoreKey,
 		metoken.StoreKey,
-		auction.StoreKey,
+		oracletypes.StoreKey,
+		ugov.StoreKey,
+		uibc.StoreKey,
 	}
 	// if Experimental {}
 
@@ -517,7 +518,7 @@ func New(
 
 	app.AuctionKeeperB = auctionkeeper.NewBuilder(
 		appCodec,
-		keys[metoken.StoreKey],
+		keys[auction.StoreKey],
 	)
 
 	// register the staking hooks
