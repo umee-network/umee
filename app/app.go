@@ -838,7 +838,7 @@ func New(
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
-		auction.ModuleName
+		auction.ModuleName,
 	}
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
