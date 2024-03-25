@@ -24,7 +24,7 @@ func init() {
 	amino.Seal()
 }
 
-// RegisterLegacyAminoCodec registers the necessary x/uibc interfaces and
+// RegisterLegacyAminoCodec registers the necessary x/ugov interfaces and
 // concrete types on the provided LegacyAmino codec. These types are used for
 // Amino JSON serialization.
 func RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
