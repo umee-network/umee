@@ -54,7 +54,7 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		AnyTimes()
 	oracleMock.EXPECT().SetExchangeRate(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
-	kb := keeper.NewKeeperBuilder(
+	kb := keeper.NewBuilder(
 		app.AppCodec(),
 		app.GetKey(metoken.ModuleName),
 		app.BankKeeper,

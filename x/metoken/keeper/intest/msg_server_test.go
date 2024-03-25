@@ -607,7 +607,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 		Return(initialPrices).
 		AnyTimes()
 
-	kb := keeper.NewKeeperBuilder(
+	kb := keeper.NewBuilder(
 		app.AppCodec(),
 		app.GetKey(metoken.ModuleName),
 		app.BankKeeper,
@@ -704,7 +704,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 		Return(mocks.ValidPrices()).
 		AnyTimes()
 
-	kb = keeper.NewKeeperBuilder(
+	kb = keeper.NewBuilder(
 		app.AppCodec(),
 		app.GetKey(metoken.ModuleName),
 		app.BankKeeper,
@@ -1348,7 +1348,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		Return(initialPrices).
 		AnyTimes()
 
-	kb := keeper.NewKeeperBuilder(
+	kb := keeper.NewBuilder(
 		app.AppCodec(),
 		app.GetKey(metoken.ModuleName),
 		app.BankKeeper,
@@ -1445,7 +1445,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		Return(mocks.ValidPrices()).
 		AnyTimes()
 
-	kb = keeper.NewKeeperBuilder(
+	kb = keeper.NewBuilder(
 		app.AppCodec(),
 		app.GetKey(metoken.ModuleName),
 		app.BankKeeper,
