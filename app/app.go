@@ -182,7 +182,6 @@ func init() {
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(getGovProposalHandlers()),
 		params.AppModuleBasic{},
-		CrisisModule{},
 		SlashingModule{},
 		feegrantmodule.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
