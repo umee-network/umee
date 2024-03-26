@@ -54,9 +54,6 @@ import (
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	consensusparamskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	consensusparamstypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
-	"github.com/cosmos/cosmos-sdk/x/crisis"
-	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
-	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -188,7 +185,6 @@ func init() {
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(getGovProposalHandlers()),
 		params.AppModuleBasic{},
-		CrisisModule{},
 		SlashingModule{},
 		feegrantmodule.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
@@ -270,7 +266,6 @@ type UmeeApp struct {
 	MintKeeper            mintkeeper.Keeper
 	DistrKeeper           distrkeeper.Keeper
 	GovKeeper             *govkeeper.Keeper
-	CrisisKeeper          *crisiskeeper.Keeper
 	UpgradeKeeper         *upgradekeeper.Keeper
 	ParamsKeeper          paramskeeper.Keeper
 	AuthzKeeper           authzkeeper.Keeper
@@ -345,7 +340,7 @@ func New(
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		packetforwardtypes.StoreKey,
 		wasmtypes.StoreKey,
-		consensusparamstypes.StoreKey, crisistypes.StoreKey,
+		consensusparamstypes.StoreKey,
 
 		auction.StoreKey,
 		incentive.StoreKey,
@@ -440,10 +435,6 @@ func New(
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec, app.legacyAmino, keys[slashingtypes.StoreKey],
 		app.StakingKeeper, govModuleAddr,
-	)
-	app.CrisisKeeper = crisiskeeper.NewKeeper(
-		appCodec, keys[crisistypes.StoreKey], invCheckPeriod, app.BankKeeper,
-		authtypes.FeeCollectorName, govModuleAddr,
 	)
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(
 		appCodec, keys[feegrant.StoreKey], app.AccountKeeper,
@@ -706,10 +697,6 @@ func New(
 	 Module Options
 	/****************/
 
-	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
-	// we prefer to be more strict in what arguments the modules expect.
-	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
-
 	inflationCalculator := inflation.Calculator{
 		UgovKeeperB: app.UGovKeeperB.Params,
 		MintKeeper:  &app.MintKeeper,
@@ -728,7 +715,6 @@ func New(
 		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper, true),
-		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
 		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, inflationCalculator.InflationRate, app.GetSubspace(minttypes.ModuleName)),             //nolint: lll
@@ -776,7 +762,6 @@ func New(
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		govtypes.ModuleName,
-		crisistypes.ModuleName,
 		genutiltypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
@@ -796,7 +781,6 @@ func New(
 		auction.ModuleName,
 	}
 	endBlockers := []string{
-		crisistypes.ModuleName,
 		metoken.ModuleName,     // must be before oracle
 		oracletypes.ModuleName, // must be before gov and staking
 		govtypes.ModuleName, stakingtypes.ModuleName,
@@ -825,7 +809,7 @@ func New(
 	initGenesis := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-		crisistypes.ModuleName, ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
 		authz.ModuleName,
 		ibctransfertypes.ModuleName, icatypes.ModuleName, // ibcfeetypes.ModuleName
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
@@ -844,7 +828,7 @@ func New(
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-		crisistypes.ModuleName, ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
 		authz.ModuleName, ibctransfertypes.ModuleName, icatypes.ModuleName, // ibcfeetypes.ModuleName
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
@@ -866,7 +850,6 @@ func New(
 	app.mm.SetOrderInitGenesis(initGenesis...)
 	app.mm.SetOrderMigrations(orderMigrations...)
 
-	app.mm.RegisterInvariants(app.CrisisKeeper)
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 	app.mm.RegisterServices(app.configurator)
 
@@ -1159,7 +1142,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(distrtypes.ModuleName)
 	paramsKeeper.Subspace(slashingtypes.ModuleName)
 	paramsKeeper.Subspace(govtypes.ModuleName).WithKeyTable(govv1.ParamKeyTable()) //nolint: staticcheck
-	paramsKeeper.Subspace(crisistypes.ModuleName)
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)

@@ -9,8 +9,6 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/cosmos/cosmos-sdk/x/crisis"
-	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	"github.com/cosmos/cosmos-sdk/x/gov"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	"github.com/cosmos/cosmos-sdk/x/mint"
@@ -52,19 +50,6 @@ func (StakingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	p.BondDenom = appparams.BondDenom
 	return cdc.MustMarshalJSON(&stakingtypes.GenesisState{
 		Params: p,
-	})
-}
-
-// CrisisModule defines a custom wrapper around the x/crisis module's
-// AppModuleBasic implementation to provide custom default genesis state.
-type CrisisModule struct {
-	crisis.AppModuleBasic
-}
-
-// DefaultGenesis returns custom Umee x/crisis module genesis state.
-func (CrisisModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(&crisistypes.GenesisState{
-		ConstantFee: sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1000)),
 	})
 }
 

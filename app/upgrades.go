@@ -13,6 +13,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
@@ -48,9 +49,10 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_0(upgradeInfo)
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
-	app.registerUpgrade("v6.3", upgradeInfo)
+	app.registerUpgrade("v6.3", upgradeInfo, nil, nil, nil)
 
 	app.registerUpgrade6_4(upgradeInfo)
+	app.registerUpgrade("v6.5", upgradeInfo, nil, []string{crisistypes.ModuleName}, nil)
 }
 
 func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
@@ -175,14 +177,15 @@ func (app *UmeeApp) storeUpgrade(planName string, ui upgradetypes.Plan, stores s
 
 // registerUpgrade sets an upgrade handler which only runs module migrations
 // and adds new storages storages
-func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Plan, newStores ...string) {
+func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Plan, newStores []string,
+	deletedStores []string, renamedStores []storetypes.StoreRename) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 
-	if len(newStores) > 0 {
-		app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-			Added: newStores,
-		})
-	}
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added:   newStores,
+		Deleted: deletedStores,
+		Renamed: renamedStores,
+	})
 }
 
 // oldUpgradePlan is a noop, placeholder handler required for old (completed) upgrade plans.
