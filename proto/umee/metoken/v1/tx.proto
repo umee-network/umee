@@ -9,6 +9,7 @@ import "umee/metoken/v1/metoken.proto";
 
 option go_package                      = "github.com/umee-network/umee/v6/x/metoken";
 option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/metoken module's Msg service.
 service Msg {
