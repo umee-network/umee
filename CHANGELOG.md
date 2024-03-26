@@ -46,6 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Features
+
+### Bug Fixes
+
+- [2473](https://github.com/umee-network/umee/pull/2462) Correct x/ugov Amino registration for x/ugov messages (they don't have MessageName option).
+
 ## v6.4.0 - 2024-03-21
 
 ### Features
@@ -54,7 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
-- [2462](https://github.com/umee-network/umee/pull/2462) (x/leverage) Take `MaxModuleWithdraw` into account when computing user `MaxWithdraw`. 
+- [2462](https://github.com/umee-network/umee/pull/2462) (x/leverage) Take `MaxModuleWithdraw` into account when computing user `MaxWithdraw`.
 
 ## v6.4.0-beta1 - 2024-03-11
 
