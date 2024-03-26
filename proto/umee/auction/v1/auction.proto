@@ -1,0 +1,16 @@
+syntax = "proto3";
+package umee.auction.v1;
+
+import "gogoproto/gogo.proto";
+
+option go_package                      = "github.com/umee-network/umee/v6/x/auction";
+option (gogoproto.goproto_getters_all) = false;
+
+// RewardsParams defines parameters for the rewards auction.
+message RewardsParams {
+  // bid_duration is duration of the bid phase in seconds.
+  int64 bid_duration = 1;
+  // Duration (in seconds) at the end of each auction, when we start collecting revenues for
+  // the next auction.
+  int64 revenu_collection_shift = 2;
+}

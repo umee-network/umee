@@ -62,7 +62,7 @@ func TestIBCOnRecvPacket(t *testing.T) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
-	kb := quota.NewKeeperBuilder(cdc, storeKey, leverageMock, oracleMock, eg)
+	kb := quota.NewBuilder(cdc, storeKey, leverageMock, oracleMock, eg)
 	ics20Module := NewICS20Module(mockIBCModule, cdc, kb, mockLeverageMsgServer)
 
 	validMemoMsgs := func(noOfMsgs int, fallbackAddr string) string {

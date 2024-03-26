@@ -8,7 +8,7 @@ import (
 
 // InitGenesis initializes the x/uibc module's state from a provided genesis
 // state.
-func (kb KeeperBuilder) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
+func (kb Builder) InitGenesis(ctx sdk.Context, genState uibc.GenesisState) {
 	k := kb.Keeper(&ctx)
 	err := k.SetParams(genState.Params)
 	util.Panic(err)
@@ -23,7 +23,7 @@ func (kb KeeperBuilder) InitGenesis(ctx sdk.Context, genState uibc.GenesisState)
 }
 
 // ExportGenesis returns the x/uibc module's exported genesis state.
-func (kb KeeperBuilder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
+func (kb Builder) ExportGenesis(ctx sdk.Context) *uibc.GenesisState {
 	k := kb.Keeper(&ctx)
 	outflows, err := k.GetAllOutflows()
 	util.Panic(err)

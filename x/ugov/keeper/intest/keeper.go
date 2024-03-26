@@ -20,7 +20,7 @@ func MkKeeper(t *testing.T) (*sdk.Context, ugov.Keeper) {
 	ugov.RegisterInterfaces(ir)
 	cdc := codec.NewProtoCodec(ir)
 	storeKey := storetypes.NewMemoryStoreKey(ugov.StoreKey)
-	kb := keeper.NewKeeperBuilder(cdc, storeKey)
+	kb := keeper.NewBuilder(cdc, storeKey)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return &ctx, kb.Keeper(&ctx)
 }

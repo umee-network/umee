@@ -20,8 +20,8 @@ type Builder struct {
 	ugov           ugov.EmergencyGroupBuilder
 }
 
-// NewKeeperBuilder returns Builder object.
-func NewKeeperBuilder(
+// NewBuilder returns Builder object.
+func NewBuilder(
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
 	bankKeeper metoken.BankKeeper,

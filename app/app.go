@@ -127,6 +127,9 @@ import (
 	uwasm "github.com/umee-network/umee/v6/app/wasm"
 	"github.com/umee-network/umee/v6/swagger"
 	"github.com/umee-network/umee/v6/util/genmap"
+	"github.com/umee-network/umee/v6/x/auction"
+	auctionkeeper "github.com/umee-network/umee/v6/x/auction/keeper"
+	auctionmodule "github.com/umee-network/umee/v6/x/auction/module"
 	"github.com/umee-network/umee/v6/x/incentive"
 	incentivekeeper "github.com/umee-network/umee/v6/x/incentive/keeper"
 	incentivemodule "github.com/umee-network/umee/v6/x/incentive/module"
@@ -196,11 +199,13 @@ func init() {
 		ica.AppModuleBasic{},
 		// intertx.AppModuleBasic{},
 		// ibcfee.AppModuleBasic{},
+
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		uibcmodule.AppModuleBasic{},
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
+		auctionmodule.AppModuleBasic{},
 		incentivemodule.AppModuleBasic{},
 		metokenmodule.AppModuleBasic{},
 		packetforward.AppModuleBasic{},
@@ -224,11 +229,12 @@ func init() {
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasmtypes.ModuleName:     {authtypes.Burner},
 
+		auction.ModuleName:     nil,
 		incentive.ModuleName:   nil,
-		oracletypes.ModuleName: nil,
-		uibc.ModuleName:        nil,
-		ugov.ModuleName:        nil,
 		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
+		oracletypes.ModuleName: nil,
+		ugov.ModuleName:        nil,
+		uibc.ModuleName:        nil,
 	}
 	// if Experimental {}
 }
@@ -274,11 +280,13 @@ type UmeeApp struct {
 	PacketForwardKeeper *packetforwardkeeper.Keeper
 	ICAHostKeeper       icahostkeeper.Keeper
 	LeverageKeeper      leveragekeeper.Keeper
-	IncentiveKeeper     incentivekeeper.Keeper
-	OracleKeeper        oraclekeeper.Keeper
-	UIbcQuotaKeeperB    uibcquota.KeeperBuilder
-	UGovKeeperB         ugovkeeper.Builder
-	MetokenKeeperB      metokenkeeper.Builder
+
+	AuctionKeeperB   auctionkeeper.Builder
+	IncentiveKeeper  incentivekeeper.Keeper
+	MetokenKeeperB   metokenkeeper.Builder
+	OracleKeeper     oraclekeeper.Keeper
+	UGovKeeperB      ugovkeeper.Builder
+	UIbcQuotaKeeperB uibcquota.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -330,11 +338,17 @@ func New(
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, packetforwardtypes.StoreKey,
-		uibc.StoreKey, ugov.StoreKey,
+		packetforwardtypes.StoreKey,
 		wasmtypes.StoreKey,
+		consensusparamstypes.StoreKey,
+
+		auction.StoreKey,
 		incentive.StoreKey,
+		leveragetypes.StoreKey,
 		metoken.StoreKey,
+		oracletypes.StoreKey,
+		ugov.StoreKey,
+		uibc.StoreKey,
 		consensusparamstypes.StoreKey,
 	}
 	// if Experimental {}
@@ -452,7 +466,7 @@ func New(
 
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 
-	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
+	app.UGovKeeperB = ugovkeeper.NewBuilder(appCodec, keys[ugov.ModuleName])
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
@@ -485,13 +499,18 @@ func New(
 	)
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
-	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
+	app.MetokenKeeperB = metokenkeeper.NewBuilder(
 		appCodec,
 		keys[metoken.StoreKey],
 		app.BankKeeper,
 		app.LeverageKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
+	)
+
+	app.AuctionKeeperB = auctionkeeper.NewBuilder(
+		appCodec,
+		keys[auction.StoreKey],
 	)
 
 	// register the staking hooks
@@ -529,7 +548,7 @@ func New(
 	)
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
-	app.UIbcQuotaKeeperB = uibcquota.NewKeeperBuilder(
+	app.UIbcQuotaKeeperB = uibcquota.NewBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
@@ -720,6 +739,7 @@ func New(
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)), //nolint: lll
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
+		auctionmodule.NewAppModule(appCodec, app.AuctionKeeperB, app.BankKeeper),
 	}
 	// if Experimental {}
 
@@ -759,6 +779,7 @@ func New(
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
+		auction.ModuleName,
 	}
 	endBlockers := []string{
 		metoken.ModuleName,     // must be before oracle
@@ -777,6 +798,7 @@ func New(
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
+		auction.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -802,6 +824,7 @@ func New(
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
+		auction.ModuleName,
 	}
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
@@ -819,6 +842,7 @@ func New(
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
+		auction.ModuleName,
 	}
 	// if Experimental {}
 

@@ -11,11 +11,11 @@ var _ uibc.QueryServer = Querier{}
 
 // Querier implements a QueryServer for the x/uibc module.
 type Querier struct {
-	KeeperBuilder
+	Builder
 }
 
-func NewQuerier(kb KeeperBuilder) Querier {
-	return Querier{KeeperBuilder: kb}
+func NewQuerier(kb Builder) Querier {
+	return Querier{Builder: kb}
 }
 
 // Params returns params of the x/uibc module.
