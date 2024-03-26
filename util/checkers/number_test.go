@@ -9,6 +9,7 @@ import (
 )
 
 func TestNumberDiff(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	assert.NoError(IntegerMaxDiff(1, 1, 0, ""))
@@ -32,6 +33,7 @@ func TestNumberDiff(t *testing.T) {
 }
 
 func TestDecDiff(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 	decMaxDiff := func(a, b, maxDiff float64) error {
 		return DecMaxDiff(tsdk.DecF(a), tsdk.DecF(b), tsdk.DecF(maxDiff), "")
@@ -61,6 +63,7 @@ func TestDecDiff(t *testing.T) {
 }
 
 func TestDecInZeroOne(t *testing.T) {
+	t.Parallel()
 	assert.NoError(t, DecInZeroOne(tsdk.DecF(0), "", true))
 	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.01), "", true))
 	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.999), "", true))
@@ -84,6 +87,7 @@ func TestDecInZeroOne(t *testing.T) {
 }
 
 func TestDecNotNegative(t *testing.T) {
+	t.Parallel()
 	assert.NotNil(t, DecNotNegative(tsdk.DecF(-1), ""))
 	assert.NotNil(t, DecNotNegative(sdk.Dec{}, ""))
 
@@ -92,6 +96,7 @@ func TestDecNotNegative(t *testing.T) {
 }
 
 func TestNumPositive(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	assert.NoError(NumberPositive(1, ""))
@@ -122,6 +127,7 @@ func TestNumPositive(t *testing.T) {
 }
 
 func TestNumberMin(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	assert.NoError(NumberMin(-1, -10, ""))
