@@ -349,7 +349,6 @@ func New(
 		oracletypes.StoreKey,
 		ugov.StoreKey,
 		uibc.StoreKey,
-		consensusparamstypes.StoreKey,
 	}
 	// if Experimental {}
 
