@@ -12,6 +12,7 @@ const umee = appparams.BondDenom
 var (
 	// the uToken denom "u/uumee"
 	UumeeDenom = ToUTokenDenom(umee)
+	UmeeDenom  = umee
 	// 1uumee Coin
 	Umee1 = New(umee, 1)
 	// 10_000uumee Coin

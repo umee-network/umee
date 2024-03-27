@@ -8,6 +8,7 @@ import (
 	"github.com/umee-network/umee/v6/tests/accs"
 	"github.com/umee-network/umee/v6/tests/tcheckers"
 	"github.com/umee-network/umee/v6/util/checkers"
+	"github.com/umee-network/umee/v6/util/coin"
 )
 
 func TestMsgGovSetRewardsParams(t *testing.T) {
@@ -46,16 +47,19 @@ func TestMsgRewardsBid(t *testing.T) {
 	validMsg := MsgRewardsBid{
 		Sender: accs.Alice.String(),
 		Id:     12,
-		Amount: sdk.NewInt(123),
+		Amount: coin.Umee10k,
 	}
 
 	invalid := validMsg
 	invalid.Sender = "not a valid acc"
 	invalid.Id = 0
-	invalid.Amount = sdk.ZeroInt()
+	invalid.Amount.Amount = sdk.ZeroInt()
 
-	invalidAmount := validMsg
-	invalidAmount.Amount = sdk.NewInt(-100)
+	invalidAmount1 := validMsg
+	invalidAmount1.Amount.Amount = sdk.NewInt(-100)
+
+	invalidDenom := validMsg
+	invalidDenom.Amount.Denom = "other"
 
 	tcs := []struct {
 		name   string
@@ -66,7 +70,8 @@ func TestMsgRewardsBid(t *testing.T) {
 		{"invalid sender", invalid, "sender"},
 		{"invalid ID", invalid, "auction ID"},
 		{"amount zero", invalid, "bid_amount: must be positive"},
-		{"amount negative", invalidAmount, "bid_amount: must be positive"},
+		{"amount negative", invalidAmount1, "bid_amount: must be positive"},
+		{"wrong denom", invalidDenom, "bid amount must be in " + coin.UmeeDenom},
 	}
 	for _, tc := range tcs {
 		tcheckers.ErrorContains(t, tc.msg.ValidateBasic(), tc.errMsg, tc.name)

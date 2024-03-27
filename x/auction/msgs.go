@@ -4,6 +4,8 @@ import (
 	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util/checkers"
 )
 
@@ -43,7 +45,11 @@ func (msg *MsgGovSetRewardsParams) GetSignBytes() []byte {
 func (msg *MsgRewardsBid) ValidateBasic() error {
 	errs := checkers.ValidateAddr(msg.Sender, "sender")
 	errs = errors.Join(errs, checkers.NumberPositive(msg.Id, "auction ID"))
-	return errors.Join(errs, checkers.BigNumPositive(msg.Amount, "bid_amount"))
+	errs = errors.Join(errs, checkers.BigNumPositive(msg.Amount.Amount, "bid_amount"))
+	if msg.Amount.Denom != appparams.BondDenom {
+		errs = errors.Join(errs, errors.New("bid amount must be in "+appparams.BondDenom))
+	}
+	return errs
 }
 
 func (msg *MsgRewardsBid) GetSigners() []sdk.AccAddress {
