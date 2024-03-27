@@ -42,7 +42,7 @@ message MsgRewardsBid {
   string sender = 1;
   // the current auction ID being bid on. Fails if the ID is not an ID of the current auction.
   uint32 id = 2;
-  // amount of the bid in the base tokens
+  // amount of the bid in the bond base tokens (uumee)
   string amount = 3 [(gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 

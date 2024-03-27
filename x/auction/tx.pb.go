@@ -121,7 +121,7 @@ type MsgRewardsBid struct {
 	Sender string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
 	// the current auction ID being bid on. Fails if the ID is not an ID of the current auction.
 	Id uint32 `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
-	// amount of the bid in the base tokens
+	// amount of the bid in the bond base tokens (uumee)
 	Amount cosmossdk_io_math.Int `protobuf:"bytes,3,opt,name=amount,proto3,customtype=cosmossdk.io/math.Int" json:"amount"`
 }
 
