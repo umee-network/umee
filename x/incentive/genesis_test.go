@@ -38,7 +38,7 @@ func TestValidateGenesis(t *testing.T) {
 
 	rt := RewardTracker{
 		Account: validAddr,
-		UToken:  coin.UumeeDenom,
+		UToken:  coin.U_umee,
 		Rewards: sdk.NewDecCoins(),
 	}
 	duplicateRewardTracker := DefaultGenesis()
@@ -50,7 +50,7 @@ func TestValidateGenesis(t *testing.T) {
 	assert.ErrorContains(t, invalidRewardAccumulator.Validate(), "invalid denom")
 
 	ra := RewardAccumulator{
-		UToken:  coin.UumeeDenom,
+		UToken:  coin.U_umee,
 		Rewards: sdk.NewDecCoins(),
 	}
 	duplicateRewardAccumulator := DefaultGenesis()
@@ -58,7 +58,7 @@ func TestValidateGenesis(t *testing.T) {
 	assert.ErrorContains(t, duplicateRewardAccumulator.Validate(), "duplicate reward accumulators")
 
 	invalidProgram := IncentiveProgram{}
-	validProgram := NewIncentiveProgram(1, 1, 1, coin.UumeeDenom, coin.Umee1, coin.Zero(uumee), false)
+	validProgram := NewIncentiveProgram(1, 1, 1, coin.U_umee, coin.Umee1, coin.Zero(uumee), false)
 
 	invalidUpcomingProgram := DefaultGenesis()
 	invalidUpcomingProgram.UpcomingPrograms = []IncentiveProgram{invalidProgram}
@@ -92,7 +92,7 @@ func TestValidateGenesis(t *testing.T) {
 
 	b := Bond{
 		Account: validAddr,
-		UToken:  sdk.NewInt64Coin(coin.UumeeDenom, 1),
+		UToken:  sdk.NewInt64Coin(coin.U_umee, 1),
 	}
 
 	duplicateBond := DefaultGenesis()
@@ -105,7 +105,7 @@ func TestValidateGenesis(t *testing.T) {
 
 	au := AccountUnbondings{
 		Account:    validAddr,
-		UToken:     coin.UumeeDenom,
+		UToken:     coin.U_umee,
 		Unbondings: []Unbonding{},
 	}
 	duplicateAccountUnbonding := DefaultGenesis()
@@ -116,7 +116,7 @@ func TestValidateGenesis(t *testing.T) {
 func TestValidateIncentiveProgram(t *testing.T) {
 	t.Parallel()
 
-	validProgram := NewIncentiveProgram(1, 1, 1, coin.UumeeDenom, coin.Umee1, coin.Zero(uumee), false)
+	validProgram := NewIncentiveProgram(1, 1, 1, coin.U_umee, coin.Umee1, coin.Zero(uumee), false)
 	assert.NilError(t, validProgram.Validate())
 
 	invalidUToken := validProgram
@@ -130,7 +130,7 @@ func TestValidateIncentiveProgram(t *testing.T) {
 	invalidTotalRewards.TotalRewards = sdk.Coin{}
 	assert.ErrorContains(t, invalidTotalRewards.Validate(), "invalid denom")
 
-	invalidTotalRewards.TotalRewards = coin.New(coin.UumeeDenom, 100)
+	invalidTotalRewards.TotalRewards = coin.New(coin.U_umee, 100)
 	assert.ErrorIs(t, invalidTotalRewards.Validate(), leveragetypes.ErrUToken)
 
 	invalidTotalRewards.TotalRewards = coin.Zero(uumee)
@@ -181,7 +181,7 @@ func TestValidateIncentiveProgram(t *testing.T) {
 
 func TestValidateStructs(t *testing.T) {
 	validAddr := "umee1s84d29zk3k20xk9f0hvczkax90l9t94g72n6wm"
-	validBond := NewBond(validAddr, coin.New(coin.UumeeDenom, 1))
+	validBond := NewBond(validAddr, coin.New(coin.U_umee, 1))
 	assert.NilError(t, validBond.Validate())
 
 	invalidBond := validBond
@@ -196,7 +196,7 @@ func TestValidateStructs(t *testing.T) {
 	invalidBond.UToken.Denom = uumee
 	assert.ErrorIs(t, invalidBond.Validate(), leveragetypes.ErrNotUToken)
 
-	validTracker := NewRewardTracker(validAddr, coin.UumeeDenom, sdk.NewDecCoins(
+	validTracker := NewRewardTracker(validAddr, coin.U_umee, sdk.NewDecCoins(
 		sdk.NewDecCoin(uumee, sdk.OneInt()),
 	))
 	assert.NilError(t, validTracker.Validate())
@@ -217,10 +217,10 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorContains(t, invalidTracker.Validate(), "invalid denom")
 
 	invalidTracker = validTracker
-	invalidTracker.Rewards[0].Denom = coin.UumeeDenom
+	invalidTracker.Rewards[0].Denom = coin.U_umee
 	assert.ErrorIs(t, invalidTracker.Validate(), leveragetypes.ErrUToken)
 
-	validAccumulator := NewRewardAccumulator(coin.UumeeDenom, 6, sdk.NewDecCoins(
+	validAccumulator := NewRewardAccumulator(coin.U_umee, 6, sdk.NewDecCoins(
 		sdk.NewDecCoin(uumee, sdk.OneInt()),
 	))
 	assert.NilError(t, validAccumulator.Validate())
@@ -237,10 +237,10 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorContains(t, invalidAccumulator.Validate(), "invalid denom")
 
 	invalidAccumulator = validAccumulator
-	invalidAccumulator.Rewards[0].Denom = coin.UumeeDenom
+	invalidAccumulator.Rewards[0].Denom = coin.U_umee
 	assert.ErrorIs(t, invalidAccumulator.Validate(), leveragetypes.ErrUToken)
 
-	validUnbonding := NewUnbonding(1, 1, coin.New(coin.UumeeDenom, 1))
+	validUnbonding := NewUnbonding(1, 1, coin.New(coin.U_umee, 1))
 	assert.NilError(t, validUnbonding.Validate())
 
 	invalidUnbonding := validUnbonding
@@ -252,10 +252,10 @@ func TestValidateStructs(t *testing.T) {
 	assert.ErrorIs(t, invalidUnbonding.Validate(), leveragetypes.ErrNotUToken)
 
 	invalidUnbonding = validUnbonding
-	invalidUnbonding.UToken = sdk.Coin{Denom: coin.UumeeDenom, Amount: sdk.NewInt(-1)}
+	invalidUnbonding.UToken = sdk.Coin{Denom: coin.U_umee, Amount: sdk.NewInt(-1)}
 	assert.ErrorContains(t, invalidUnbonding.Validate(), "negative coin amount")
 
-	validAccountUnbondings := NewAccountUnbondings(validAddr, coin.UumeeDenom, []Unbonding{validUnbonding})
+	validAccountUnbondings := NewAccountUnbondings(validAddr, coin.U_umee, []Unbonding{validUnbonding})
 	assert.NilError(t, validAccountUnbondings.Validate())
 
 	invalidAccountUnbondings := validAccountUnbondings
@@ -280,6 +280,6 @@ func TestValidateStructs(t *testing.T) {
 	invalidAccountUnbondings.Unbondings[0] = validUnbonding // the value in validAccountUnbondings was modified
 
 	invalidAccountUnbondings = validAccountUnbondings
-	invalidAccountUnbondings.Unbondings[0].UToken = sdk.Coin{Denom: coin.UumeeDenom, Amount: sdk.NewInt(-1)}
+	invalidAccountUnbondings.Unbondings[0].UToken = sdk.Coin{Denom: coin.U_umee, Amount: sdk.NewInt(-1)}
 	assert.ErrorContains(t, invalidAccountUnbondings.Validate(), "negative coin amount")
 }

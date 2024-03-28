@@ -9,16 +9,18 @@ import (
 const umee = appparams.BondDenom
 
 // common coins used in tests
+//
+//revive:disable:var-naming
 var (
-	// the uToken denom "u/uumee"
-	UumeeDenom = ToUTokenDenom(umee)
 	UmeeDenom  = umee
+	// the uToken denom "u/uumee"
+	U_umee = ToUTokenDenom(umee) //nolint:stylecheck
 	// 1uumee Coin
 	Umee1 = New(umee, 1)
 	// 10_000uumee Coin
 	Umee10k = New(umee, 10_000)
 	// 1u/uumee Coin
-	UUmee1 = Utoken(umee, 1)
+	U_umee1 = Utoken(umee, 1) //nolint:stylecheck
 
 	// Xuumee DecCoin
 	Umee0dec = DecF(umee, 0)
@@ -37,6 +39,8 @@ var (
 	// a test denom
 	Dollar = "dollar"
 )
+
+//revive:enable:var-naming
 
 // UmeeCoins creates an Umee (uumee) sdk.Coins with given amount
 func UmeeCoins(amount int64) sdk.Coins {
