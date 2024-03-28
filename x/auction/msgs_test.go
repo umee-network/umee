@@ -71,7 +71,7 @@ func TestMsgRewardsBid(t *testing.T) {
 		{"invalid ID", invalid, "auction ID"},
 		{"amount zero", invalid, "bid_amount: must be positive"},
 		{"amount negative", invalidAmount1, "bid_amount: must be positive"},
-		{"wrong denom", invalidDenom, "bid amount must be in " + coin.UmeeDenom},
+		{"wrong denom", invalidDenom, "bid amount must be in " + validMsg.Amount.Denom},
 	}
 	for _, tc := range tcs {
 		tcheckers.ErrorContains(t, tc.msg.ValidateBasic(), tc.errMsg, tc.name)
