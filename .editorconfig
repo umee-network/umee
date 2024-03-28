@@ -1,0 +1,42 @@
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+# indent_style = space
+# indent_size = 4
+
+[*.css]
+indent_style = tab
+
+[*.{coffee,js,jsx,ts,tsx}]
+indent_style = tab
+indent_size = 4
+max_line_length = 96
+
+[*.json]
+indent_style = tab
+indent_size = 4
+
+[*.go]
+max_line_length = 96
+indent_style = tab
+
+[*.py]
+max_line_length = 80
+# tabs are allowed, but spaces is a pep8 convention... //indent_style = tab
+
+[*.sol]
+indent_style = space
+indent_size = 4
+
+[*.sql]
+indent_style = tab
+
+[*.{md,rst}]
+trim_trailing_whitespace = false
+
+[*.{html,mako,less,org}]
+indent_style = tab
