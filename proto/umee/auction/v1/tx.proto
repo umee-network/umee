@@ -1,8 +1,8 @@
 syntax = "proto3";
 package umee.auction.v1;
 
-import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
+import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/msg/v1/msg.proto";
 import "gogoproto/gogo.proto";
 import "umee/auction/v1/auction.proto";
@@ -10,7 +10,6 @@ import "umee/auction/v1/auction.proto";
 option go_package                      = "github.com/umee-network/umee/v6/x/auction";
 option (gogoproto.goproto_getters_all) = false;
 option (gogoproto.messagename_all)     = true;
-
 // Msg defines the x/auction module's Msg service.
 service Msg {
   //
@@ -43,8 +42,8 @@ message MsgRewardsBid {
   string sender = 1;
   // the current auction ID being bid on. Fails if the ID is not an ID of the current auction.
   uint32 id = 2;
-  // amount of the bid in the base tokens
-  cosmos.base.v1beta1.Coin bid_amount = 3 [(gogoproto.nullable) = false];
+  // amount of the bid in the bond base tokens (uumee)
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
 }
 
 // MsgRewardsBidResponse response type for Msg/RewardsBid

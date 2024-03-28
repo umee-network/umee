@@ -22,7 +22,28 @@ func IntegerMaxDiff[T constraints.Integer](a, b, maxDiff T, note string) error {
 		diff = b - a
 	}
 	if diff > maxDiff {
-		return fmt.Errorf("%s, diff (=%v) is too big", note, diff)
+		return fmt.Errorf("%s: diff (=%v) is too big", note, diff)
+	}
+	return nil
+}
+
+func NumberMin[T constraints.Integer](a, minVal T, note string) error {
+	if a < minVal {
+		return fmt.Errorf("%s: must be at least %v", note, minVal)
+	}
+	return nil
+}
+
+func NumberPositive[T constraints.Integer](a T, note string) error {
+	if a <= 0 {
+		return fmt.Errorf("%s: must be defined and must be positive", note)
+	}
+	return nil
+}
+
+func BigNumPositive[T interface{ IsPositive() bool }](a T, note string) error {
+	if !a.IsPositive() {
+		return fmt.Errorf("%s: must be positive", note)
 	}
 	return nil
 }
@@ -30,7 +51,7 @@ func IntegerMaxDiff[T constraints.Integer](a, b, maxDiff T, note string) error {
 func DecMaxDiff(a, b, maxDiff sdk.Dec, note string) error {
 	diff := a.Sub(b).Abs()
 	if diff.GT(maxDiff) {
-		return fmt.Errorf("%s, diff (=%v) is too big", note, diff)
+		return fmt.Errorf("%s: diff (=%v) is too big", note, diff)
 	}
 	return nil
 }

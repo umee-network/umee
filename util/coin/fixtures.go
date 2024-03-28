@@ -41,7 +41,12 @@ var (
 
 //revive:enable:var-naming
 
-// UmeeCoins creates an Umee (uumee) sdk.Coins with given amount
+// Umee creates a BondDenom sdk.Coin with the given amount
+func Umee(amount int64) sdk.Coin {
+	return sdk.NewInt64Coin(umee, amount)
+}
+
+// UmeeCoins creates an Umee (uumee) sdk.Coins with the given amount
 func UmeeCoins(amount int64) sdk.Coins {
 	return sdk.NewCoins(sdk.NewInt64Coin(umee, amount))
 }
