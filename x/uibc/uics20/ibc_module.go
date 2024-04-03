@@ -3,6 +3,7 @@ package uics20
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	sdkerrors "cosmossdk.io/errors"
 	"github.com/cometbft/cometbft/libs/log"
@@ -73,6 +74,7 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 
 	mh := MemoHandler{executeEnabled: params.Ics20Hooks, cdc: im.cdc, leverage: im.leverage}
 	events, err := mh.onRecvPacketPrepare(&ctx, packet, ftData)
+	fmt.Println("mh events, err ", events, err)
 	if err != nil {
 		if !errors.Is(err, errMemoValidation{}) {
 			return channeltypes.NewErrorAcknowledgement(err)

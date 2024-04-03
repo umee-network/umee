@@ -44,6 +44,11 @@ type MemoHandler struct {
 func (mh *MemoHandler) onRecvPacketPrepare(
 	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
 ) ([]string, error) {
+	fmt.Println("onRecvPacketPrepare ")
+	fmt.Println("onRecvPacketPrepare ")
+	fmt.Println("onRecvPacketPrepare ")
+	fmt.Println("onRecvPacketPrepare ")
+	fmt.Println("onRecvPacketPrepare ")
 	var events []string
 	var err error
 	mh.memo = ftData.Memo
@@ -53,6 +58,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	}
 	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
 	mh.received = sdk.NewCoin(ibcDenom, amount)
+	fmt.Println("recevied coin ", mh.received.String())
 	mh.receiver, err = sdk.AccAddressFromBech32(ftData.Receiver)
 	if err != nil { // must not happen
 		return nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
@@ -65,6 +71,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	}
 
 	memo, err := deserializeMemo(mh.cdc, []byte(ftData.Memo))
+	fmt.Println("deserializeMemo ", memo, " err ", err)
 	if err != nil {
 		recvPacketLogger(ctx).Debug("Not recognized ICS20 memo, ignoring hook execution", "err", err)
 		return nil, nil
@@ -81,6 +88,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	}
 
 	mh.msgs, err = memo.GetMsgs()
+	fmt.Println("memo msgs and err ", mh.msgs, err)
 	if err != nil {
 		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
 		events = append(events, e)
