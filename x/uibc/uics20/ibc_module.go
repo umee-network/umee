@@ -57,11 +57,13 @@ func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.Keeper
 func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, relayer sdk.AccAddress,
 ) exported.Acknowledgement {
 	ftData, err := deserializeFTData(im.cdc, packet)
+	fmt.Println("deserializeFTData ", ftData.String(), err)
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err)
 	}
 	quotaKeeper := im.kb.Keeper(&ctx)
 	if ackResp := quotaKeeper.IBCOnRecvPacket(ftData, packet); ackResp != nil && !ackResp.Success() {
+		fmt.Println("quotaKeeper.IBCOnRecvPacket ", ackResp.Success())
 		return ackResp
 	}
 
