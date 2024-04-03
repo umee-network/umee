@@ -21,6 +21,13 @@ func TestGmpMemoHandler(t *testing.T) {
 		errMsg string
 	}{
 		{
+			name: "empty memo",
+			memo: func() string {
+				return ""
+			},
+			errMsg: "",
+		},
+		{
 			name: "invalid memo",
 			memo: func() string {
 				return "invalid memo"
@@ -28,9 +35,24 @@ func TestGmpMemoHandler(t *testing.T) {
 			errMsg: "invalid character",
 		},
 		{
-			name: "not supporting the msg",
+			name: "unsupport msg",
 			memo: func() string {
-				validMemo := Message{
+				validMemo := GMPMemo{
+					SourceChain:   "source_chain",
+					SourceAddress: "source_addr",
+					Payload:       nil,
+					Type:          int64(4),
+				}
+				m, err := json.Marshal(validMemo)
+				assert.NilError(t, err)
+				return string(m)
+			},
+			errMsg: "unrecognized gmp message type",
+		},
+		{
+			name: "unsupport msg",
+			memo: func() string {
+				validMemo := GMPMemo{
 					SourceChain:   "source_chain",
 					SourceAddress: "source_addr",
 					Payload:       nil,
@@ -40,12 +62,12 @@ func TestGmpMemoHandler(t *testing.T) {
 				assert.NilError(t, err)
 				return string(m)
 			},
-			errMsg: "we are not supporting general message",
+			errMsg: "only msg.type=2 (TypeGeneralMessageWithToken) is supported",
 		},
 		{
 			name: "valid memo",
 			memo: func() string {
-				validMemo := Message{
+				validMemo := GMPMemo{
 					SourceChain:   "source_chain",
 					SourceAddress: "source_addr",
 					Payload:       nil,
@@ -61,7 +83,7 @@ func TestGmpMemoHandler(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := gmpHandler.OnRecvPacket(ctx, sdk.Coin{}, tc.memo(), nil)
+			_, err := gmpHandler.ParseMemo(ctx, sdk.Coin{}, tc.memo(), nil)
 			if len(tc.errMsg) != 0 {
 				assert.ErrorContains(t, err, tc.errMsg)
 			} else {

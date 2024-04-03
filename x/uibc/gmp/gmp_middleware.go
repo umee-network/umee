@@ -14,14 +14,14 @@ func NewHandler() *Handler {
 	return &Handler{}
 }
 
-func (h Handler) OnRecvPacket(ctx sdk.Context, coinReceived sdk.Coin, memoStr string, receiver sdk.AccAddress,
-) (Message, error) {
-	if len(memoStr) == 0 {
-		return Message{}, nil
+func (h Handler) ParseMemo(ctx sdk.Context, coinReceived sdk.Coin, memo string, receiver sdk.AccAddress,
+) (GMPMemo, error) {
+	if len(memo) == 0 {
+		return GMPMemo{}, nil
 	}
 
-	var msg Message
-	if err := json.Unmarshal([]byte(memoStr), &msg); err != nil {
+	var msg GMPMemo
+	if err := json.Unmarshal([]byte(memo), &msg); err != nil {
 		return msg, err
 	}
 
