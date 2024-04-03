@@ -7,15 +7,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-type Handler struct {
-}
-
-func NewHandler() *Handler {
-	return &Handler{}
-}
-
-func (h Handler) ParseMemo(ctx sdk.Context, coinReceived sdk.Coin, memo string, receiver sdk.AccAddress,
-) (GMPMemo, error) {
+// PaseMemo will parse the incoming gmp memo
+func ParseMemo(ctx sdk.Context, coinReceived sdk.Coin, memo string, receiver sdk.AccAddress) (GMPMemo, error) {
 	if len(memo) == 0 {
 		return GMPMemo{}, nil
 	}

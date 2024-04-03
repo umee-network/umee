@@ -63,8 +63,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
 		events = append(events, "Axelar GMP")
 		mh.isGMP = true
-		gh := gmp.NewHandler()
-		gmpMessage, err := gh.ParseMemo(*ctx, mh.received, mh.memo, mh.receiver)
+		gmpMessage, err := gmp.ParseMemo(*ctx, mh.received, mh.memo, mh.receiver)
 		if err != nil {
 			logger.Debug("Can't parse the gmp memo", "err", err)
 			return events, errMemoValidation{err}

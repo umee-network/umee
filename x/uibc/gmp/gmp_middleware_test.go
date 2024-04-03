@@ -11,7 +11,6 @@ import (
 )
 
 func TestGmpMemoHandler(t *testing.T) {
-	gmpHandler := NewHandler()
 	logger := log.NewNopLogger()
 	ctx := sdk.NewContext(nil, tmproto.Header{}, false, logger)
 
@@ -83,7 +82,7 @@ func TestGmpMemoHandler(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := gmpHandler.ParseMemo(ctx, sdk.Coin{}, tc.memo(), nil)
+			_, err := ParseMemo(ctx, sdk.Coin{}, tc.memo(), nil)
 			if len(tc.errMsg) != 0 {
 				assert.ErrorContains(t, err, tc.errMsg)
 			} else {
