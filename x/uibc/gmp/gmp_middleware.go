@@ -20,22 +20,18 @@ func (h Handler) OnRecvPacket(ctx sdk.Context, coinReceived sdk.Coin, memoStr st
 		return Message{}, nil
 	}
 
-	logger := ctx.Logger().With("handler", "gmp_handler")
 	var msg Message
-	var err error
-
-	if err = json.Unmarshal([]byte(memoStr), &msg); err != nil {
-		logger.Error("cannot unmarshal memo", "err", err)
-		return Message{}, err
+	if err := json.Unmarshal([]byte(memoStr), &msg); err != nil {
+		return msg, err
 	}
 
 	switch msg.Type {
 	case TypeGeneralMessage:
-		return msg, fmt.Errorf("we are not supporting general message: %d", msg.Type)
+		return msg, fmt.Errorf("only msg.type=%d (TypeGeneralMessageWithToken) is supported",
+			TypeGeneralMessageWithToken)
 	case TypeGeneralMessageWithToken:
 		return msg, nil
 	default:
-		logger.Error("unrecognized gmp message type: %d", msg.Type)
 		return msg, fmt.Errorf("unrecognized gmp message type: %d", msg.Type)
 	}
 }
