@@ -15,8 +15,8 @@ const (
 	TypeSendToken
 )
 
-// GMPMemo is attached in ICS20 packet memo field
-type GMPMemo struct {
+// Memo is attached in ICS20 packet memo field
+type Memo struct {
 	SourceChain   string `json:"source_chain"`
 	SourceAddress string `json:"source_address"`
 	Payload       []byte `json:"payload"`

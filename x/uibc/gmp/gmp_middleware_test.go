@@ -36,7 +36,7 @@ func TestGmpMemoHandler(t *testing.T) {
 		{
 			name: "unsupport msg",
 			memo: func() string {
-				validMemo := GMPMemo{
+				validMemo := Memo{
 					SourceChain:   "source_chain",
 					SourceAddress: "source_addr",
 					Payload:       nil,
@@ -51,7 +51,7 @@ func TestGmpMemoHandler(t *testing.T) {
 		{
 			name: "unsupport msg",
 			memo: func() string {
-				validMemo := GMPMemo{
+				validMemo := Memo{
 					SourceChain:   "source_chain",
 					SourceAddress: "source_addr",
 					Payload:       nil,
@@ -61,12 +61,12 @@ func TestGmpMemoHandler(t *testing.T) {
 				assert.NilError(t, err)
 				return string(m)
 			},
-			errMsg: "only msg.type=2 (TypeGeneralMessageWithToken) is supported",
+			errMsg: "msg.type=1 (TypeGeneralMessage) is not supported. Supported types include: 2",
 		},
 		{
 			name: "valid memo",
 			memo: func() string {
-				validMemo := GMPMemo{
+				validMemo := Memo{
 					SourceChain:   "source_chain",
 					SourceAddress: "source_addr",
 					Payload:       nil,
