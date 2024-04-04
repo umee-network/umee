@@ -46,6 +46,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 ) ([]string, error) {
 	var events []string
 	var err error
+	logger := recvPacketLogger(ctx)
 	mh.memo = ftData.Memo
 	amount, ok := sdk.NewIntFromString(ftData.Amount)
 	if !ok { // must not happen
@@ -58,15 +59,22 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 		return nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
 	}
 
+	var memoPayload []byte
 	if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
-		events = append(events, "axelar GMP transaction")
+		events = append(events, "Axelar GMP")
 		mh.isGMP = true
-		return events, nil
+		gmpMessage, err := gmp.ParseMemo(*ctx, mh.received, mh.memo, mh.receiver)
+		if err != nil {
+			logger.Debug("Can't parse the gmp memo", "err", err)
+			return events, errMemoValidation{err}
+		}
+		memoPayload = gmpMessage.Payload
+	} else {
+		memoPayload = []byte(ftData.Memo)
 	}
-
-	memo, err := deserializeMemo(mh.cdc, []byte(ftData.Memo))
+	memo, err := deserializeMemo(mh.cdc, memoPayload)
 	if err != nil {
-		recvPacketLogger(ctx).Debug("Not recognized ICS20 memo, ignoring hook execution", "err", err)
+		logger.Debug("Not recognized ICS20 memo, ignoring hook execution", "err", err)
 		return nil, nil
 	}
 	if memo.FallbackAddr != "" {
@@ -104,16 +112,11 @@ func (mh MemoHandler) execute(ctx *sdk.Context) error {
 		return errHooksDisabled
 	}
 
-	logger := recvPacketLogger(ctx)
-	if mh.isGMP {
-		gh := gmp.NewHandler()
-		return gh.OnRecvPacket(*ctx, mh.received, mh.memo, mh.receiver)
-	}
-
 	if len(mh.msgs) == 0 {
 		return nil // quick return - we have nothing to handle
 	}
 
+	logger := recvPacketLogger(ctx)
 	for _, m := range mh.msgs {
 		if err := mh.handleMemoMsg(ctx, m); err != nil {
 			return sdkerrors.Wrapf(err, "error dispatching msg: %v", m)
