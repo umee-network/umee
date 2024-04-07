@@ -297,7 +297,10 @@ test-app-benchmark-invariants
 ###                                Linting                                  ###
 ###############################################################################
 
-golangci_lint_cmd := go run github.com/golangci/golangci-lint/cmd/golangci-lint
+# TODO: need to add github.com/golangci/golangci-lint entry to go.mod and tools.go, but it
+# conflicts with golang.org/x/exp
+# go run github.com/golangci/golangci-lint/cmd/golangci-lint
+golangci_lint_cmd := golangci-lint
 revive_cmd := go run github.com/mgechev/revive
 
 # note: on new OSX, might require brew install diffutils
