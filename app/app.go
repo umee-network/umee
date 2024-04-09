@@ -511,6 +511,7 @@ func New(
 		appCodec,
 		keys[auction.StoreKey],
 		app.BankKeeper,
+		app.UGovKeeperB.EmergencyGroup,
 	)
 
 	// register the staking hooks
