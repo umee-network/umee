@@ -510,6 +510,7 @@ func New(
 	app.AuctionKeeperB = auctionkeeper.NewBuilder(
 		appCodec,
 		keys[auction.StoreKey],
+		app.BankKeeper,
 	)
 
 	// register the staking hooks
