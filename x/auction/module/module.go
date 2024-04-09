@@ -125,8 +125,8 @@ func (AppModule) ConsensusVersion() uint64 {
 
 // RegisterServices registers gRPC services.
 func (am AppModule) RegisterServices(cfg module.Configurator) {
-	// auction.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	// auction.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.keeper))
+	auction.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServer(am.kb))
+	auction.RegisterQueryServer(cfg.QueryServer(), keeper.NewQuerier(am.kb))
 }
 
 // RegisterInvariants registers the x/auction module's invariants.
