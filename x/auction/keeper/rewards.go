@@ -4,7 +4,10 @@ import (
 	"github.com/umee-network/umee/v6/x/auction"
 )
 
-// UpdateQuotaParams update the ibc-transfer quota params for ibc denoms
-func (k Keeper) RewardsBid(msg *auction.MsgRewardsBid) error {
+func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
+	panic("not implemented")
+}
+
+func (k Keeper) currentRewardsAuction() (*auction.QueryRewardsAuctionResponse, error) {
 	panic("not implemented")
 }

@@ -7,14 +7,12 @@ import (
 	"github.com/umee-network/umee/v6/x/auction"
 )
 
-var _ auction.QueryServer = Querier{}
-
 // Querier implements a QueryServer for the x/uibc module.
 type Querier struct {
 	Builder
 }
 
-func NewQuerier(kb Builder) Querier {
+func NewQuerier(kb Builder) auction.QueryServer {
 	return Querier{Builder: kb}
 }
 
@@ -32,8 +30,8 @@ func (q Querier) RewardsParams(goCtx context.Context, _ *auction.QueryRewardsPar
 func (q Querier) RewardsAuction(goCtx context.Context, _ *auction.QueryRewardsAuction) (
 	*auction.QueryRewardsAuctionResponse, error,
 ) {
-	// ctx := sdk.UnwrapSDKContext(goCtx)
-	// b := q.Keeper(&ctx).GetParams()
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	b := q.Keeper(&ctx)
+	return b.currentRewardsAuction()
 
-	return &auction.QueryRewardsAuctionResponse{Params: params}, nil
 }

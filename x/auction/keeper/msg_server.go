@@ -50,7 +50,7 @@ func (m msgServer) RewardsBid(ctx context.Context, msg *auction.MsgRewardsBid) (
 	}
 
 	k := m.kb.Keeper(&sdkCtx)
-	if err := k.RewardsBid(msg); err != nil {
+	if err := k.rewardsBid(msg); err != nil {
 		return nil, err
 	}
 	return &auction.MsgRewardsBidResponse{}, nil
