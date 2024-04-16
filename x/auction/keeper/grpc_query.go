@@ -4,6 +4,8 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/auction"
 )
 
@@ -32,9 +34,16 @@ func (q Querier) RewardsAuction(goCtx context.Context, msg *auction.QueryRewards
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	bid, id := q.Keeper(&ctx).getRewardsBid(msg.Id)
-	return &auction.QueryRewardsAuctionResponse{
-		Id:     id,
-		Bidder: bid.Bidder,
-		// TODO: add other fields
-	}, nil
+	r := &auction.QueryRewardsAuctionResponse{Id: id}
+	if bid != nil {
+		r.Bidder = bid.Bidder
+		r.Bid = coin.UmeeInt(bid.Amount)
+	}
+	rewards, _ := q.Keeper(&ctx).getRewards(msg.Id)
+	if rewards != nil {
+		r.Rewards = rewards.Rewards
+		r.EndsAt = rewards.EndsAt
+	}
+
+	return r, nil
 }
