@@ -2,8 +2,6 @@ package keeper
 
 import (
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/cosmos/cosmos-sdk/store"
-	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -53,12 +51,7 @@ type Keeper struct {
 	bank  auction.BankKeeper
 	ugov  ugov.WithEmergencyGroup
 
-	// TODO: ctx should be removed when we migrate leverage and oracle
 	ctx *sdk.Context
-}
-
-func (k Keeper) prefixStore(prefix []byte) store.KVStore {
-	return prefixstore.NewStore(k.store, prefix)
 }
 
 func (k Keeper) sendCoins(from, to sdk.AccAddress, amount sdk.Coins) error {
