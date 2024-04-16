@@ -55,8 +55,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2474](https://github.com/umee-network/umee/pull/2474) (proto) add `gogo.messagename_all` option to all messages.
 - [2494](https://github.com/umee-network/umee/pull/2494) Use go 1.22
 
-
-
 ### Bug Fixes
 
 - [2473](https://github.com/umee-network/umee/pull/2473) Correct x/ugov Amino registration for x/ugov messages (they don't have MessageName option).
