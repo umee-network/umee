@@ -511,6 +511,7 @@ func New(
 		appCodec,
 		keys[auction.StoreKey],
 		app.BankKeeper,
+		app.UGovKeeperB.EmergencyGroup,
 	)
 
 	// register the staking hooks
@@ -1147,7 +1148,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(packetforwardtypes.ModuleName).WithKeyTable(packetforwardtypes.ParamKeyTable())
-	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
 
