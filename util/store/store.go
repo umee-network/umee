@@ -76,6 +76,7 @@ func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errFi
 // false without modifying the object.
 func GetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler,
 	errField string) bool {
+
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)
 		if err != nil {

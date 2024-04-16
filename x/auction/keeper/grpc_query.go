@@ -27,10 +27,14 @@ func (q Querier) RewardsParams(goCtx context.Context, _ *auction.QueryRewardsPar
 }
 
 // RewardsAuction returns params of the x/auction module.
-func (q Querier) RewardsAuction(goCtx context.Context, _ *auction.QueryRewardsAuction) (
+func (q Querier) RewardsAuction(goCtx context.Context, msg *auction.QueryRewardsAuction) (
 	*auction.QueryRewardsAuctionResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	b := q.Keeper(&ctx)
-	return b.currentRewardsAuction()
+	bid, id := q.Keeper(&ctx).getRewardsBid(msg.Id)
+	return &auction.QueryRewardsAuctionResponse{
+		Id:     id,
+		Bidder: bid.Bidder,
+		// TODO: add other fields
+	}, nil
 }

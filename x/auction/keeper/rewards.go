@@ -23,8 +23,14 @@ func (k Keeper) currentRewardsAuction() uint32 {
 }
 
 func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
+	id := k.currentRewardsAuction()
+	if id != msg.Id {
+		return errors.New("bad auction ID, can only bid in the current auction = " + strconv.Itoa(int(id)))
+	}
+
 	keyMsg := "auction.rewards.highest_bid"
-	lastBid := store.GetValue[*auction.Bid](k.store, keyRewardsHighestBid, keyMsg)
+	key := k.keyRewardsBid(msg.Id)
+	lastBid := store.GetValue[*auction.Bid](k.store, key, keyMsg)
 	minBid := auction.MinRewardsBid
 	if lastBid != nil {
 		minBid = lastBid.Amount.Add(minBid)
@@ -38,10 +44,6 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	prevBidder, err := sdk.AccAddressFromBech32(lastBid.Bidder)
 	util.Panic(err)
 	vault := k.accs.RewardsBid
-	id := k.currentRewardsAuction()
-	if id != msg.Id {
-		return errors.New("bad auction ID, can only bid in the current auction = " + strconv.Itoa(int(id)))
-	}
 
 	if lastBid.Bidder != msg.Sender {
 		if err = k.sendCoins(vault, prevBidder, umeeCoins(lastBid.Amount)); err != nil {
@@ -58,11 +60,14 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	}
 
 	bid := auction.Bid{Bidder: msg.Sender, Amount: msg.Amount.Amount}
-	return store.SetValue(k.store, keyRewardsHighestBid, &bid, keyMsg)
+	return store.SetValue(k.store, key, &bid, keyMsg)
 }
 
-
-
-func (k Keeper) currentRewardsAuction() (*auction.QueryRewardsAuctionResponse, error) {
-	panic("not implemented")
+func (k Keeper) getRewardsBid(id uint32) (*auction.Bid, uint32) {
+	if id == 0 {
+		id = k.currentRewardsAuction()
+	}
+	keyMsg := "auction.rewards.bid"
+	key := k.keyRewardsBid(id)
+	return store.GetValue[*auction.Bid](k.store, key, keyMsg), id
 }
