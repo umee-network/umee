@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/address"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/umee-network/umee/v6/x/auction"
@@ -156,4 +157,20 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
+}
+
+// sub-module accounts
+var (
+	subaccRewards    = []byte{0x01}
+	subaccRewardsBid = []byte{0x02}
+)
+
+// RewardsAccount returns address of an account holding rewards for auction
+func (am AppModule) RewardsAccount() []byte {
+	return address.Module(am.Name(), subaccRewards)
+}
+
+// RewardsAccount returns address holding auction bid
+func (am AppModule) RewardsAccountBid() []byte {
+	return address.Module(am.Name(), subaccRewardsBid)
 }
