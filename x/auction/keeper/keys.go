@@ -1,5 +1,6 @@
 package keeper
 
 var (
-	keyRewardParams = []byte{0x01}
+	keyRewardsParams     = []byte{0x01}
+	keyRewardsHighestBid = []byte{0x02}
 )
