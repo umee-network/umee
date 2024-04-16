@@ -12,7 +12,7 @@ import (
 
 // Builder constructs Keeper by preparing all related dependencies (notably the store).
 type Builder struct {
-	cdc            codec.Codec
+	cdc            codec.BinaryCodec
 	storeKey       storetypes.StoreKey
 	bankKeeper     metoken.BankKeeper
 	leverageKeeper metoken.LeverageKeeper
@@ -22,7 +22,7 @@ type Builder struct {
 
 // NewBuilder returns Builder object.
 func NewBuilder(
-	cdc codec.Codec,
+	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	bankKeeper metoken.BankKeeper,
 	leverageKeeper metoken.LeverageKeeper,
@@ -40,7 +40,7 @@ func NewBuilder(
 }
 
 type Keeper struct {
-	cdc            codec.Codec
+	cdc            codec.BinaryCodec
 	store          sdk.KVStore
 	bankKeeper     metoken.BankKeeper
 	leverageKeeper metoken.LeverageKeeper
