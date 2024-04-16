@@ -29,13 +29,7 @@ var (
 
 // AppModuleBasic implements the AppModuleBasic interface for the x/leverage
 // module.
-type AppModuleBasic struct {
-	cdc codec.Codec
-}
-
-func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
-	return AppModuleBasic{cdc: cdc}
-}
+type AppModuleBasic struct{}
 
 // Name returns the x/auction module's name.
 func (AppModuleBasic) Name() string {
@@ -109,7 +103,7 @@ func NewAppModule(
 	cdc codec.Codec, keeper keeper.Builder, bk auction.BankKeeper,
 ) AppModule {
 	return AppModule{
-		AppModuleBasic: NewAppModuleBasic(cdc),
+		AppModuleBasic: AppModuleBasic{},
 		kb:             keeper,
 		bankKeeper:     bk,
 	}
@@ -165,12 +159,11 @@ var (
 	subaccRewardsBid = []byte{0x02}
 )
 
-// RewardsAccount returns address of an account holding rewards for auction
-func (am AppModule) RewardsAccount() []byte {
-	return address.Module(am.Name(), subaccRewards)
-}
-
-// RewardsAccount returns address holding auction bid
-func (am AppModule) RewardsAccountBid() []byte {
-	return address.Module(am.Name(), subaccRewardsBid)
+// SubAccounts for auction Keeper
+func SubAccounts() keeper.SubAccounts {
+	n := AppModuleBasic{}.Name()
+	return keeper.SubAccounts{
+		Rewards:    address.Module(n, subaccRewards),
+		RewardsBid: address.Module(n, subaccRewardsBid),
+	}
 }

@@ -510,6 +510,7 @@ func New(
 	app.AuctionKeeperB = auctionkeeper.NewBuilder(
 		appCodec,
 		keys[auction.StoreKey],
+		auctionmodule.SubAccounts(),
 		app.BankKeeper,
 		app.UGovKeeperB.EmergencyGroup,
 	)
