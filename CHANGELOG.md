@@ -53,6 +53,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Improvements
 
 - [2474](https://github.com/umee-network/umee/pull/2474) (proto) add `gogo.messagename_all` option to all messages.
+- [2494](https://github.com/umee-network/umee/pull/2494) Use go 1.22
 
 ### Bug Fixes
 
