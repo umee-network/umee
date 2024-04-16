@@ -74,7 +74,8 @@ func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errFi
 // instead of GetValue.
 // Returns true when the data was found and deserialized into the object. Otherwise returns
 // false without modifying the object.
-func GetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler, errField string) bool {
+func GetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler,
+	errField string) bool {
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)
 		if err != nil {
@@ -88,7 +89,9 @@ func GetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object co
 // SetValueCdc is similar to the SetValue, but uses codec for marshaling. For Protobuf objects the
 // result is the same, unless codec.Any is used. In the latter case this function MUST be used,
 // instead of SetValue.
-func SetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler, errField string) error {
+func SetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler,
+	errField string) error {
+
 	bz, err := cdc.Marshal(object)
 	if err != nil {
 		return fmt.Errorf("failed to encode %s, %s", errField, err.Error())
