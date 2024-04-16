@@ -36,3 +36,27 @@ func TestUintWithNullPrefix(t *testing.T) {
 	out := UintWithNullPrefix(math.MaxUint64)
 	assert.DeepEqual(t, expected, out)
 }
+
+func TestKeyWithUint(t *testing.T) {
+	prefix := []byte{1, 10}
+
+	out := KeyWithUint32(nil, 200)
+	assert.DeepEqual(t, out, []byte{0, 0, 0, 200})
+
+	out = KeyWithUint32(prefix, 200)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 0, 200})
+
+	out = KeyWithUint32(prefix, 256)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 1, 0})
+
+	// uint64 version
+
+	out = KeyWithUint64(nil, 200)
+	assert.DeepEqual(t, out, []byte{0, 0, 0, 0, 0, 0, 0, 200})
+
+	out = KeyWithUint64(prefix, 200)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 0, 0, 0, 0, 0, 200})
+
+	out = KeyWithUint64(prefix, 256)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 0, 0, 0, 0, 1, 0})
+}
