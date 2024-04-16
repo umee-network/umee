@@ -71,3 +71,12 @@ func (k Keeper) getRewardsBid(id uint32) (*auction.Bid, uint32) {
 	key := k.keyRewardsBid(id)
 	return store.GetValue[*auction.Bid](k.store, key, keyMsg), id
 }
+
+func (k Keeper) getRewards(id uint32) (*auction.Bid, uint32) {
+	if id == 0 {
+		id = k.currentRewardsAuction()
+	}
+	keyMsg := "auction.rewards.coins"
+	key := k.keyRewardsCoins(id)
+	return store.GetValue[*sdk.Coins](k.store, key, keyMsg), id
+}

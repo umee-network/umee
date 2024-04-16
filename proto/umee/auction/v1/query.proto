@@ -40,9 +40,9 @@ message QueryRewardsAuction {
 message QueryRewardsAuctionResponse {
   uint32 id = 1;
   // highest bidder
-  string   bidder                               = 2;
-  repeated cosmos.base.v1beta1.Coin rewards     = 3 [(gogoproto.nullable) = false];
-  google.protobuf.Timestamp         ends_at     = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+  string   bidder                           = 2;
+  repeated cosmos.base.v1beta1.Coin rewards = 3 [(gogoproto.nullable) = false];
+  google.protobuf.Timestamp         ends_at = 4 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
 
   // not sure if we will need it:
   // cosmos.base.v1beta1.Coin          usd_rewards = 5 [(gogoproto.nullable) = false];
