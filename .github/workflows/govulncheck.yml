@@ -26,5 +26,5 @@ jobs:
         id: govulncheck
         if: env.GIT_DIFF
         with:
-          go-version-input: 1.21
+          go-version-input: 1.22
           go-package: ./...
