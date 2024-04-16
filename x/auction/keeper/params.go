@@ -8,10 +8,10 @@ import (
 // GetRewardsParams gets the x/uibc module's parameters.
 func (k Keeper) GetRewardsParams() (params auction.RewardsParams) {
 	store.GetValueCdc(k.store, k.cdc, keyRewardParams, &params, "auction.rewards.params")
-	panic("not implemented")
+	return params
 }
 
 // SetRewardsParams sets params
-func (k Keeper) SetRewardsParams(msg *auction.MsgGovSetRewardsParams, byEmergencyGroup bool) error {
-	panic("not implemented")
+func (k Keeper) SetRewardsParams(p *auction.RewardsParams, byEmergencyGroup bool) error {
+	return store.SetValueCdc(k.store, k.cdc, keyRewardParams, p, "auction.rewards.params")
 }

@@ -72,8 +72,8 @@ func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errFi
 // GetValueCdc is similar to GetValue, but uses codec for marshaling. For Protobuf objects the
 // result is the same, unless codec.Any is used. In the latter case this function MUST be used,
 // instead of GetValue.
-// Returns a boolean indicating whether any data was found. If the return is false, the object
-// is not changed by this function.
+// Returns true when the data was found and deserialized into the object. Otherwise returns
+// false without modifying the object.
 func GetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler, errField string) bool {
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)

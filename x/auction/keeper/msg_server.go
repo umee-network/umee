@@ -34,7 +34,7 @@ func (m msgServer) GovSetRewardsParams(ctx context.Context, msg *auction.MsgGovS
 		return nil, err
 	}
 
-	if err := k.SetRewardsParams(msg, byEmergencyGroup); err != nil {
+	if err := k.SetRewardsParams(&msg.Params, byEmergencyGroup); err != nil {
 		return nil, err
 	}
 	return &auction.MsgGovSetRewardsParamsResponse{}, nil

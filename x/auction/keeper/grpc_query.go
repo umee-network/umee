@@ -33,5 +33,4 @@ func (q Querier) RewardsAuction(goCtx context.Context, _ *auction.QueryRewardsAu
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	b := q.Keeper(&ctx)
 	return b.currentRewardsAuction()
-
 }
