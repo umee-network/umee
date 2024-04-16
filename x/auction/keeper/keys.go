@@ -6,9 +6,9 @@ import (
 
 var (
 	keyRewardsParams      = []byte{0x01}
-	keyRwardsCurrentID    = []byte{0x02}
+	keyRewardsCurrentID   = []byte{0x02}
 	keyPrefixRewardsBid   = []byte{0x03}
-	keyPrefixRewardsCoins = []byte{0x03}
+	keyPrefixRewardsCoins = []byte{0x04}
 )
 
 func (k Keeper) keyRewardsBid(id uint32) []byte {

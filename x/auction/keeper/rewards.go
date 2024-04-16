@@ -18,7 +18,7 @@ func umeeCoins(amount sdkmath.Int) sdk.Coins {
 }
 
 func (k Keeper) currentRewardsAuction() uint32 {
-	id, _ := store.GetInteger[uint32](k.store, keyRwardsCurrentID)
+	id, _ := store.GetInteger[uint32](k.store, keyRewardsCurrentID)
 	return id
 }
 
@@ -35,7 +35,7 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	if lastBid != nil {
 		minBid = lastBid.Amount.Add(minBid)
 	}
-	if err := auction.ValidateMinRewarsdsBid(minBid, msg.Amount); err != nil {
+	if err := auction.ValidateMinRewardsBid(minBid, msg.Amount); err != nil {
 		return err
 	}
 

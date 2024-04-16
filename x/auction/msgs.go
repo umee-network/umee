@@ -50,7 +50,7 @@ func (msg *MsgGovSetRewardsParams) GetSignBytes() []byte {
 func (msg *MsgRewardsBid) ValidateBasic() error {
 	errs := checkers.ValidateAddr(msg.Sender, "sender")
 	errs = errors.Join(errs, checkers.NumberPositive(msg.Id, "auction ID"))
-	errs = errors.Join(errs, ValidateMinRewarsdsBid(MinRewardsBid, msg.Amount))
+	errs = errors.Join(errs, ValidateMinRewardsBid(MinRewardsBid, msg.Amount))
 	return errs
 }
 
@@ -65,7 +65,7 @@ func (msg *MsgRewardsBid) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
 }
 
-func ValidateMinRewarsdsBid(min sdkmath.Int, bid sdk.Coin) error {
+func ValidateMinRewardsBid(min sdkmath.Int, bid sdk.Coin) error {
 	if bid.Amount.LT(min) || bid.Denom != appparams.BondDenom {
 		return errors.New("bid amount must be at least " + min.String() + appparams.BondDenom)
 	}
