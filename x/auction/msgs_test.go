@@ -1,8 +1,10 @@
 package auction
 
 import (
+	"strconv"
 	"testing"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/tests/accs"
@@ -47,7 +49,7 @@ func TestMsgRewardsBid(t *testing.T) {
 	validMsg := MsgRewardsBid{
 		Sender: accs.Alice.String(),
 		Id:     12,
-		Amount: coin.Umee10k,
+		Amount: coin.Umee(MinRewardsBid.Int64()),
 	}
 
 	invalid := validMsg
@@ -61,6 +63,8 @@ func TestMsgRewardsBid(t *testing.T) {
 	invalidDenom := validMsg
 	invalidDenom.Amount.Denom = "other"
 
+	errAmount := "bid amount must be at least " + MinRewardsBid.String()
+
 	tcs := []struct {
 		name   string
 		msg    MsgRewardsBid
@@ -69,11 +73,37 @@ func TestMsgRewardsBid(t *testing.T) {
 		{"valid msg", validMsg, ""},
 		{"invalid sender", invalid, "sender"},
 		{"invalid ID", invalid, "auction ID"},
-		{"amount zero", invalid, "bid_amount: must be positive"},
-		{"amount negative", invalidAmount1, "bid_amount: must be positive"},
-		{"wrong denom", invalidDenom, "bid amount must be in " + validMsg.Amount.Denom},
+		{"amount zero", invalid, errAmount},
+		{"amount negative", invalidAmount1, errAmount},
+		{"wrong denom", invalidDenom, errAmount},
 	}
 	for _, tc := range tcs {
 		tcheckers.ErrorContains(t, tc.msg.ValidateBasic(), tc.errMsg, tc.name)
+	}
+}
+
+func TestValidateMin(t *testing.T) {
+	t.Parallel()
+	min := sdk.NewInt(123)
+	expectedErr := "bid amount must be at least 123uumee"
+	umeeNegative := coin.Umee(0)
+	umeeNegative.Amount = math.NewInt(-1)
+	tcs := []struct {
+		amount sdk.Coin
+		errMsg string
+	}{
+		{coin.Umee(123), ""},
+		{coin.Umee(124), ""},
+
+		{coin.Umee(122), expectedErr},
+		{coin.Umee(0), expectedErr},
+		{umeeNegative, expectedErr},
+		{coin.New(coin.Dollar, 1), expectedErr},
+		{coin.New(coin.Dollar, 124), expectedErr},
+	}
+
+	for i, tc := range tcs {
+		err := ValidateMinRewarsdsBid(min, tc.amount)
+		tcheckers.ErrorContains(t, err, tc.errMsg, strconv.Itoa(i))
 	}
 }

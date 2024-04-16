@@ -3,6 +3,7 @@ package auction
 import (
 	"errors"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -15,6 +16,10 @@ var (
 )
 
 const minBidDuration = 3600 // 1h in seconds
+
+// MinRewardsBid is the minimum increase of the previous bid or the minimum bid if it's the
+// first one. 10 UX = 10e6uumee
+var MinRewardsBid = sdk.NewInt(10_000_000)
 
 //
 // MsgGovSetRewardsParams
@@ -45,10 +50,7 @@ func (msg *MsgGovSetRewardsParams) GetSignBytes() []byte {
 func (msg *MsgRewardsBid) ValidateBasic() error {
 	errs := checkers.ValidateAddr(msg.Sender, "sender")
 	errs = errors.Join(errs, checkers.NumberPositive(msg.Id, "auction ID"))
-	errs = errors.Join(errs, checkers.BigNumPositive(msg.Amount.Amount, "bid_amount"))
-	if msg.Amount.Denom != appparams.BondDenom {
-		errs = errors.Join(errs, errors.New("bid amount must be in "+appparams.BondDenom))
-	}
+	errs = errors.Join(errs, ValidateMinRewarsdsBid(MinRewardsBid, msg.Amount))
 	return errs
 }
 
@@ -61,4 +63,11 @@ func (msg MsgRewardsBid) Route() string { return "" }
 func (msg MsgRewardsBid) Type() string  { return sdk.MsgTypeURL(&msg) }
 func (msg *MsgRewardsBid) GetSignBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+func ValidateMinRewarsdsBid(min sdkmath.Int, bid sdk.Coin) error {
+	if bid.Amount.LT(min) || bid.Denom != appparams.BondDenom {
+		return errors.New("bid amount must be at least " + min.String() + appparams.BondDenom)
+	}
+	return nil
 }
