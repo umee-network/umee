@@ -77,7 +77,7 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 			return err
 		}
 	} else {
-		diff := msg.Amount.SubAmount(minBid)
+		diff := msg.Amount.SubAmount(lastBid.Amount)
 		if err = k.sendToModule(sender, diff); err != nil {
 			return err
 		}
