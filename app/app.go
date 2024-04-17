@@ -669,9 +669,6 @@ func New(
 		panic(fmt.Sprintf("error while reading wasm config: %s", err))
 	}
 
-	// Register umee custom plugin to wasm
-	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper,
-		app.MetokenKeeperB), wasmOpts...)
 	// Register stargate queries
 	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
 	availableCapabilities := strings.Join(AllCapabilities(), ",")
