@@ -17,22 +17,26 @@ import (
 
 func (k Keeper) FinalizeRewardsAuction() error {
 	now := k.ctx.BlockTime()
-	auction, id := k.getRewardsAuction(0)
-	if !auction.EndsAt.After(now) {
+	a, id := k.getRewardsAuction(0)
+	if !a.EndsAt.After(now) {
 		return nil
 	}
 
 	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
 	bid, _ := k.getRewardsBid(id)
 	if len(bid.Bidder) == 0 {
-		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, auction.Rewards)
+		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, a.Rewards)
 		if err != nil {
 			return fmt.Errorf("Can't send coins to finalize the auction [%w]", err)
 		}
-		// TODO burn uumee
-	} else if len(auction.Rewards) != 0 {
+		err = k.bank.BurnCoins(*k.ctx, auction.ModuleName, sdk.Coins{coin.UmeeInt(bid.Amount)})
+		if err != nil {
+			return fmt.Errorf("Can't burn rewards auction bid [%w]", err)
+		}
+
+	} else if len(a.Rewards) != 0 {
 		// rollover the past rewards if there was no bidder
-		newCoins = newCoins.Add(auction.Rewards...)
+		newCoins = newCoins.Add(a.Rewards...)
 	}
 
 	id++
