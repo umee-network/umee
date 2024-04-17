@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/address"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/umee-network/umee/v6/x/auction"
@@ -28,13 +29,7 @@ var (
 
 // AppModuleBasic implements the AppModuleBasic interface for the x/leverage
 // module.
-type AppModuleBasic struct {
-	cdc codec.Codec
-}
-
-func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
-	return AppModuleBasic{cdc: cdc}
-}
+type AppModuleBasic struct{}
 
 // Name returns the x/auction module's name.
 func (AppModuleBasic) Name() string {
@@ -108,7 +103,7 @@ func NewAppModule(
 	cdc codec.Codec, keeper keeper.Builder, bk auction.BankKeeper,
 ) AppModule {
 	return AppModule{
-		AppModuleBasic: NewAppModuleBasic(cdc),
+		AppModuleBasic: AppModuleBasic{},
 		kb:             keeper,
 		bankKeeper:     bk,
 	}
@@ -156,4 +151,19 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
+}
+
+// sub-module accounts
+var (
+	subaccRewards    = []byte{0x01}
+	subaccRewardsBid = []byte{0x02}
+)
+
+// SubAccounts for auction Keeper
+func SubAccounts() keeper.SubAccounts {
+	n := AppModuleBasic{}.Name()
+	return keeper.SubAccounts{
+		Rewards:    address.Module(n, subaccRewards),
+		RewardsBid: address.Module(n, subaccRewardsBid),
+	}
 }
