@@ -103,7 +103,7 @@ func TestValidateMin(t *testing.T) {
 	}
 
 	for i, tc := range tcs {
-		err := ValidateMinRewarsdsBid(min, tc.amount)
+		err := ValidateMinRewardsBid(min, tc.amount)
 		tcheckers.ErrorContains(t, err, tc.errMsg, strconv.Itoa(i))
 	}
 }
