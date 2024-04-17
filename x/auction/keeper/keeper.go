@@ -10,8 +10,9 @@ import (
 )
 
 type SubAccounts struct {
-	Rewards    []byte
-	RewardsBid []byte
+	// Account used to collect rewards
+	RewardsCollect []byte
+	RewardsBid     []byte
 }
 
 type Builder struct {

@@ -2,7 +2,9 @@ package keeper
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
+	"time"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,6 +17,36 @@ import (
 
 func umeeCoins(amount sdkmath.Int) sdk.Coins {
 	return sdk.Coins{coin.UmeeInt(amount)}
+}
+
+func (k Keeper) FinalizeRewardsAuction() error {
+	now := k.ctx.BlockTime()
+	auction, id := k.getRewardsAuction(0)
+	if !auction.EndsAt.After(now) {
+		return nil
+	}
+
+	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
+	bid, _ := k.getRewardsBid(id)
+	if bid.Bidder != "" {
+		bidder, err := sdk.AccAddressFromBech32(bid.Bidder)
+		util.Panic(err)
+		err = k.sendCoins(k.accs.RewardsCollect, bidder, auction.Rewards)
+		if err != nil {
+			return fmt.Errorf("Can't send coins to finalize the auction [%w]", err)
+		}
+		// TODO burn uumee
+	} else if len(auction.Rewards) != 0 {
+		// rollover the past rewards if there was no bidder
+		newCoins = newCoins.Add(auction.Rewards...)
+	}
+
+	id++
+	store.SetInteger(k.store, keyRewardsCurrentID, id)
+	params := k.GetRewardsParams()
+	endsAt := now.Add(time.Duration(params.BidDuration) * time.Second)
+	k.storeNewRewardsAuction(id, endsAt, newCoins)
+	return nil
 }
 
 func (k Keeper) currentRewardsAuction() uint32 {
@@ -73,11 +105,18 @@ func (k Keeper) getRewardsBid(id uint32) (*auction.Bid, uint32) {
 }
 
 // returns nil if id is not found
-func (k Keeper) getRewards(id uint32) (*auction.Rewards, uint32) {
+func (k Keeper) getRewardsAuction(id uint32) (*auction.Rewards, uint32) {
 	if id == 0 {
 		id = k.currentRewardsAuction()
 	}
-	keyMsg := "auction.rewards.coins"
+	const keyMsg = "auction.rewards.coins"
 	key := k.keyRewardsCoins(id)
 	return store.GetValue[*auction.Rewards](k.store, key, keyMsg), id
+}
+
+func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins sdk.Coins) {
+	newRewards := auction.Rewards{EndsAt: endsAt, Rewards: coins}
+	const keyMsg = "auction.rewards.coins"
+	key := k.keyRewardsCoins(id)
+	store.SetValue(k.store, key, &newRewards, keyMsg)
 }

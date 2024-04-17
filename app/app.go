@@ -743,6 +743,7 @@ func New(
 		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
 		auctionmodule.NewAppModule(appCodec, app.AuctionKeeperB, app.BankKeeper),
 	}
+	app.BankKeeper.GetAccountsBalances()
 	// if Experimental {}
 
 	app.mm = module.NewManager(appModules...)
