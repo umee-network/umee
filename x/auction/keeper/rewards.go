@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util"
@@ -15,10 +14,6 @@ import (
 	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/auction"
 )
-
-func umeeCoins(amount sdkmath.Int) sdk.Coins {
-	return sdk.Coins{coin.UmeeInt(amount)}
-}
 
 func (k Keeper) FinalizeRewardsAuction() error {
 	now := k.ctx.BlockTime()
@@ -72,18 +67,18 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	util.Panic(err)
-	vault := k.accs.RewardsBid
 
 	if !bytes.Equal(sender, lastBid.Bidder) {
-		if err = k.sendCoins(vault, lastBid.Bidder, umeeCoins(lastBid.Amount)); err != nil {
+		returned := coin.UmeeInt(lastBid.Amount)
+		if err = k.sendFromModule(lastBid.Bidder, returned); err != nil {
 			return err
 		}
-		if err = k.sendCoins(sender, vault, sdk.Coins{msg.Amount}); err != nil {
+		if err = k.sendToModule(sender, msg.Amount); err != nil {
 			return err
 		}
 	} else {
 		diff := msg.Amount.SubAmount(minBid)
-		if err = k.sendCoins(sender, vault, sdk.Coins{diff}); err != nil {
+		if err = k.sendToModule(sender, diff); err != nil {
 			return err
 		}
 	}
