@@ -3,7 +3,7 @@ module github.com/umee-network/umee/v6
 go 1.22
 
 require (
-	cosmossdk.io/api v0.3.1
+	cosmossdk.io/api v0.6.1
 	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/math v1.3.0
 	cosmossdk.io/tools/rosetta v0.2.1
