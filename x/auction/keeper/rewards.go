@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strconv"
@@ -28,10 +29,8 @@ func (k Keeper) FinalizeRewardsAuction() error {
 
 	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
 	bid, _ := k.getRewardsBid(id)
-	if bid.Bidder != "" {
-		bidder, err := sdk.AccAddressFromBech32(bid.Bidder)
-		util.Panic(err)
-		err = k.sendCoins(k.accs.RewardsCollect, bidder, auction.Rewards)
+	if len(bid.Bidder) == 0 {
+		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, auction.Rewards)
 		if err != nil {
 			return fmt.Errorf("Can't send coins to finalize the auction [%w]", err)
 		}
@@ -73,12 +72,10 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	util.Panic(err)
-	prevBidder, err := sdk.AccAddressFromBech32(lastBid.Bidder)
-	util.Panic(err)
 	vault := k.accs.RewardsBid
 
-	if lastBid.Bidder != msg.Sender {
-		if err = k.sendCoins(vault, prevBidder, umeeCoins(lastBid.Amount)); err != nil {
+	if !bytes.Equal(sender, lastBid.Bidder) {
+		if err = k.sendCoins(vault, lastBid.Bidder, umeeCoins(lastBid.Amount)); err != nil {
 			return err
 		}
 		if err = k.sendCoins(sender, vault, sdk.Coins{msg.Amount}); err != nil {
@@ -91,7 +88,7 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 		}
 	}
 
-	bid := auction.Bid{Bidder: msg.Sender, Amount: msg.Amount.Amount}
+	bid := auction.Bid{Bidder: sender, Amount: msg.Amount.Amount}
 	return store.SetValue(k.store, key, &bid, keyMsg)
 }
 
