@@ -161,13 +161,13 @@ func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.Val
 
 // sub-module accounts
 var (
-	subaccRewards = []byte{0x01}
+	subAccRewards = []byte{0x01}
 )
 
 // SubAccounts for auction Keeper
 func SubAccounts() keeper.SubAccounts {
 	n := AppModuleBasic{}.Name()
 	return keeper.SubAccounts{
-		RewardsCollect: address.Module(n, subaccRewards),
+		RewardsCollect: address.Module(n, subAccRewards),
 	}
 }
