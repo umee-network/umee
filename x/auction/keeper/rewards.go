@@ -27,11 +27,11 @@ func (k Keeper) FinalizeRewardsAuction() error {
 	if len(bid.Bidder) == 0 {
 		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, a.Rewards)
 		if err != nil {
-			return fmt.Errorf("Can't send coins to finalize the auction [%w]", err)
+			return fmt.Errorf("can't send coins to finalize the auction [%w]", err)
 		}
 		err = k.bank.BurnCoins(*k.ctx, auction.ModuleName, sdk.Coins{coin.UmeeInt(bid.Amount)})
 		if err != nil {
-			return fmt.Errorf("Can't burn rewards auction bid [%w]", err)
+			return fmt.Errorf("can't burn rewards auction bid [%w]", err)
 		}
 
 	} else if len(a.Rewards) != 0 {
@@ -43,8 +43,7 @@ func (k Keeper) FinalizeRewardsAuction() error {
 	store.SetInteger(k.store, keyRewardsCurrentID, id)
 	params := k.GetRewardsParams()
 	endsAt := now.Add(time.Duration(params.BidDuration) * time.Second)
-	k.storeNewRewardsAuction(id, endsAt, newCoins)
-	return nil
+	return k.storeNewRewardsAuction(id, endsAt, newCoins)
 }
 
 func (k Keeper) currentRewardsAuction() uint32 {
@@ -110,9 +109,9 @@ func (k Keeper) getRewardsAuction(id uint32) (*auction.Rewards, uint32) {
 	return store.GetValue[*auction.Rewards](k.store, key, keyMsg), id
 }
 
-func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins sdk.Coins) {
+func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins sdk.Coins) error {
 	newRewards := auction.Rewards{EndsAt: endsAt, Rewards: coins}
 	const keyMsg = "auction.rewards.coins"
 	key := k.keyRewardsCoins(id)
-	store.SetValue(k.store, key, &newRewards, keyMsg)
+	return store.SetValue(k.store, key, &newRewards, keyMsg)
 }
