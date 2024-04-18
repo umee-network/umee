@@ -288,13 +288,16 @@ func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) erro
 		"to oracle", toOracleCheck,
 		"to auction", toAuctionCheck,
 	)
-	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: toOracleCheck})
-
+	send := k.bankKeeper.SendCoinsFromModuleToModule
 	if !toOracleCheck.IsZero() {
-		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, toOracleCheck)
+		sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: toOracleCheck})
+		if err := send(ctx, types.ModuleName, oracletypes.ModuleName, toOracleCheck); err != nil {
+			return err
+		}
 	}
-	if !toOracleCheck.IsZero() {
-		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, auction.ModuleName, toOracleCheck)
+	if !toAuctionCheck.IsZero() {
+		sdkutil.Emit(&ctx, &types.EventFundAuction{Assets: toOracleCheck})
+		return send(ctx, types.ModuleName, auction.ModuleName, toAuctionCheck)
 	}
 
 	return nil
