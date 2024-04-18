@@ -61,7 +61,8 @@ func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
 
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
 	utilization := k.SupplyUtilization(ctx, denom)
-	reduction := k.GetParams(ctx).OracleRewardFactor.Add(token.ReserveFactor)
+	params := k.GetParams(ctx)
+	reduction := params.OracleRewardFactor.Add(params.BurnAuctionFactor).Add(token.ReserveFactor)
 
 	// supply APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
 	return borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reduction))
@@ -106,10 +107,11 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 
 	// fetch required parameters
 	tokens := k.GetAllRegisteredTokens(ctx)
-	oracleRewardFactor := k.GetParams(ctx).OracleRewardFactor
+	params := k.GetParams(ctx)
 
 	// create sdk.Coins objects to track oracle rewards, new reserves, and total interest accrued
 	oracleRewards := sdk.NewCoins()
+	auctionRewards := sdk.NewCoins()
 	newReserves := sdk.NewCoins()
 	totalInterest := sdk.NewCoins()
 
@@ -148,10 +150,13 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 			))
 		}
 
-		// calculate oracle rewards accrued for this denom
 		oracleRewards = oracleRewards.Add(sdk.NewCoin(
 			token.BaseDenom,
-			interestAccrued.Mul(oracleRewardFactor).TruncateInt(),
+			interestAccrued.Mul(params.OracleRewardFactor).TruncateInt(),
+		))
+		auctionRewards = auctionRewards.Add(sdk.NewCoin(
+			token.BaseDenom,
+			interestAccrued.Mul(params.BurnAuctionFactor).TruncateInt(),
 		))
 	}
 
@@ -162,12 +167,10 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		}
 	}
 
-	// fund oracle reward pool
-	if err := k.FundOracle(ctx, oracleRewards); err != nil {
+	if err := k.FundOracleAndAuction(ctx, oracleRewards, auctionRewards); err != nil {
 		return err
 	}
 
-	// set LastInterestTime
 	err := k.setLastInterestTime(ctx, currentTime)
 	if err != nil {
 		return err

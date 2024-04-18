@@ -250,30 +250,29 @@ func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode type
 	return exponent(p1, powerDifference).Quo(p2), nil
 }
 
-// FundOracle transfers requested coins to the oracle module account, as
+// FundOracleAndAuciton transfers requested coins to the oracle module account, as
 // long as the leverage module account has sufficient unreserved assets.
-func (k Keeper) FundOracle(ctx sdk.Context, requested sdk.Coins) error {
-	rewards := sdk.Coins{}
+func (k Keeper) FundOracleAndAuciton(ctx sdk.Context, requested sdk.Coins) error {
+	toOracle := sdk.Coins{}
+	toAuction := sdk.Coins{}
 
 	// reduce rewards if they exceed unreserved module balance
 	for _, coin := range requested {
 		amountToTransfer := sdk.MinInt(coin.Amount, k.AvailableLiquidity(ctx, coin.Denom))
-
 		if amountToTransfer.IsPositive() {
-			rewards = rewards.Add(sdk.NewCoin(coin.Denom, amountToTransfer))
+			toOracle = toOracle.Add(sdk.NewCoin(coin.Denom, amountToTransfer))
 		}
 	}
 
 	// This action is not caused by a message so we need to make an event here
 	k.Logger(ctx).Debug(
 		"funded oracle",
-		"amount", rewards,
+		"amount", toOracle,
 	)
-	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: rewards})
+	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: toOracle})
 
-	// Send rewards
-	if !rewards.IsZero() {
-		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, rewards)
+	if !toOracle.IsZero() {
+		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, toOracle)
 	}
 
 	return nil
