@@ -229,7 +229,7 @@ func init() {
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasmtypes.ModuleName:     {authtypes.Burner},
 
-		auction.ModuleName:     nil,
+		auction.ModuleName:     {authtypes.Burner},
 		incentive.ModuleName:   nil,
 		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName: nil,
