@@ -1,15 +1,16 @@
 # GMP Handler
 
 Cross chain transfers using Axelar General Message Passing (GMP)
-More info about cosmos gmp find [here](https://docs.axelar.dev/dev/cosmos-gmp)
+More info about cosmos GMP find [here](https://docs.axelar.dev/dev/cosmos-gmp)
 
-## Example transfer from fantom evm to umee using Axelar GMP
+## Example transfer from fantom EVM to umee using Axelar GMP
 
 ```bash
 # clone the repo
 $ git clone https://github.com/axelarnetwork/evm-cosmos-gmp-sample.git
 $ cd evm-cosmos-gmp-sample/native-integration/multi-send/solidity
-## Build the contracts on this repo
+
+# Build the contracts on this repo
 $ npm run build
 
 > multisend-solidity@1.0.0 build
