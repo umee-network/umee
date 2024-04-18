@@ -4,10 +4,12 @@ import (
 	"strings"
 
 	"cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/auction"
 	"github.com/umee-network/umee/v6/x/leverage/types"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 )
@@ -250,29 +252,49 @@ func (k Keeper) PriceRatio(ctx sdk.Context, fromDenom, toDenom string, mode type
 	return exponent(p1, powerDifference).Quo(p2), nil
 }
 
-// FundOracleAndAuciton transfers requested coins to the oracle module account, as
+// fundModules transfers requested coins to other module account, as
 // long as the leverage module account has sufficient unreserved assets.
-func (k Keeper) FundOracleAndAuciton(ctx sdk.Context, requested sdk.Coins) error {
-	toOracle := sdk.Coins{}
-	toAuction := sdk.Coins{}
+func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) error {
+	toOracleCheck := sdk.Coins{}
+	toAuctionCheck := sdk.Coins{}
+	available := map[string]sdkmath.Int{}
 
 	// reduce rewards if they exceed unreserved module balance
-	for _, coin := range requested {
-		amountToTransfer := sdk.MinInt(coin.Amount, k.AvailableLiquidity(ctx, coin.Denom))
-		if amountToTransfer.IsPositive() {
-			toOracle = toOracle.Add(sdk.NewCoin(coin.Denom, amountToTransfer))
+	for _, o := range toOracle {
+		avl := k.AvailableLiquidity(ctx, o.Denom)
+		amt := sdk.MinInt(o.Amount, avl)
+		if amt.IsPositive() {
+			toOracleCheck = toOracleCheck.Add(sdk.NewCoin(o.Denom, amt))
+			avl.Sub(amt)
 		}
+		available[o.Denom] = avl
+	}
+	for _, o := range toAuction {
+		avl, ok := available[o.Denom]
+		if !ok {
+			avl = k.AvailableLiquidity(ctx, o.Denom)
+		}
+		amt := sdk.MinInt(o.Amount, avl)
+		if amt.IsPositive() {
+			toAuctionCheck = toAuctionCheck.Add(sdk.NewCoin(o.Denom, amt))
+			avl.Sub(amt)
+		}
+		available[o.Denom] = avl
 	}
 
-	// This action is not caused by a message so we need to make an event here
+	// This action is caused by end blocker, not a message handler, so we need to emit an event
 	k.Logger(ctx).Debug(
-		"funded oracle",
-		"amount", toOracle,
+		"funded ",
+		"to oracle", toOracleCheck,
+		"to auction", toAuctionCheck,
 	)
-	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: toOracle})
+	sdkutil.Emit(&ctx, &types.EventFundOracle{Assets: toOracleCheck})
 
-	if !toOracle.IsZero() {
-		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, toOracle)
+	if !toOracleCheck.IsZero() {
+		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, oracletypes.ModuleName, toOracleCheck)
+	}
+	if !toOracleCheck.IsZero() {
+		return k.bankKeeper.SendCoinsFromModuleToModule(ctx, types.ModuleName, auction.ModuleName, toOracleCheck)
 	}
 
 	return nil

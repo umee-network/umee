@@ -167,7 +167,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		}
 	}
 
-	if err := k.FundOracleAndAuction(ctx, oracleRewards, auctionRewards); err != nil {
+	if err := k.fundModules(ctx, oracleRewards, auctionRewards); err != nil {
 		return err
 	}
 
