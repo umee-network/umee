@@ -14,7 +14,7 @@ type Memo struct {
 }
 ```
 
-When user wants to execute leverage supply or supply collateral or liquidate transaction using Axelar GMP , user have to send `Payload=[]byte(Msg)` in `Memo` ,
+When user wants to execute leverage supply, supply collateral or liquidate transaction using Axelar GMP , user have to send `Payload=[]byte(Msg)` in `Memo` ,
 in below example contract change [payload](https://github.com/axelarnetwork/evm-cosmos-gmp-sample/blob/main/native-integration/multi-send/solidity/contracts/MultiSend.sol) feild and version ,for now we are supporting `uint32(2)` version.
 
 ## Supported Leverage Msgs through Axelar GMP
