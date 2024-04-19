@@ -36,10 +36,10 @@ func (q Querier) RewardsAuction(goCtx context.Context, msg *auction.QueryRewards
 	bid, id := q.Keeper(&ctx).getRewardsBid(msg.Id)
 	r := &auction.QueryRewardsAuctionResponse{Id: id}
 	if bid != nil {
-		r.Bidder = bid.Bidder
+		r.Bidder = sdk.AccAddress(bid.Bidder).String()
 		r.Bid = coin.UmeeInt(bid.Amount)
 	}
-	rewards, _ := q.Keeper(&ctx).getRewards(msg.Id)
+	rewards, _ := q.Keeper(&ctx).getRewardsAuction(msg.Id)
 	if rewards != nil {
 		r.Rewards = rewards.Rewards
 		r.EndsAt = rewards.EndsAt

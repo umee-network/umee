@@ -150,20 +150,25 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock executes all ABCI EndBlock logic respective to the x/auction module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	// TODO: enable end blocker
+	// k := am.kb.Keeper(&ctx)
+	// if err := k.FinalizeRewardsAuction(); err != nil {
+	// 	ctx.Logger().With("module", "x/auction").
+	// 		Error("can't finalize rewards auction", "error", err)
+	// }
+
 	return []abci.ValidatorUpdate{}
 }
 
 // sub-module accounts
 var (
-	subaccRewards    = []byte{0x01}
-	subaccRewardsBid = []byte{0x02}
+	subAccRewards = []byte{0x01}
 )
 
 // SubAccounts for auction Keeper
 func SubAccounts() keeper.SubAccounts {
 	n := AppModuleBasic{}.Name()
 	return keeper.SubAccounts{
-		Rewards:    address.Module(n, subaccRewards),
-		RewardsBid: address.Module(n, subaccRewardsBid),
+		RewardsCollect: address.Module(n, subAccRewards),
 	}
 }
