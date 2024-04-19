@@ -108,3 +108,8 @@ message EventFundOracle {
   // Assets sent to oracle module
   repeated cosmos.base.v1beta1.Coin assets = 1 [(gogoproto.nullable) = false];
 }
+
+// EventFundAuction is emitted when sending rewards to auction module
+message EventFundAuction {
+  repeated cosmos.base.v1beta1.Coin assets = 1 [(gogoproto.nullable) = false];
+}
