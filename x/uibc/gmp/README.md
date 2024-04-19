@@ -5,60 +5,18 @@ More info about cosmos GMP find [here](https://docs.axelar.dev/dev/cosmos-gmp)
 
 ## Axelar IBC Memo
 
-```go
-type Memo struct {
-    SourceChain   string `json:"source_chain"`
-    SourceAddress string `json:"source_address"`
-    Payload       []byte `json:"payload"`
-    Type          int64  `json:"type"`
-}
-```
+The memo structure is represented by the [Memo](https://github.com/umee-network/umee/blob/main/x/uibc/gmp/types.go)
 
-When user wants to execute leverage supply, supply collateral or liquidate transaction using Axelar GMP , user have to send `Payload=[]byte(Msg)` in `Memo` ,
-in below example contract change [payload](https://github.com/axelarnetwork/evm-cosmos-gmp-sample/blob/main/native-integration/multi-send/solidity/contracts/MultiSend.sol) feild and version ,for now we are supporting `uint32(2)` version.
+When a user wants to execute leverage supply, supply collateral or liquidate transaction using Axelar GMP , user have to set JSON serialized `Memo` into the GMP payload.
+In the example below, change the [payload](https://github.com/axelarnetwork/evm-cosmos-gmp-sample/blob/main/native-integration/multi-send/solidity/contracts/MultiSend.sol) field and version, for now we are supporting `uint32(2)` version.
 
 ## Supported Leverage Msgs through Axelar GMP
 
-### Supply the asset
+### Supported messages
 
-```go
-type MsgSupply struct {
-    // Supplier is the account address supplying assets and the signer of the message.
-    Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
-    Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
-}
-```
-
-### Supply and Collateral Msg
-
-```go
-type MsgSupplyCollateral struct {
-    // Supplier is the account address supplying assets and the signer of the message.
-    Supplier string     `protobuf:"bytes,1,opt,name=supplier,proto3" json:"supplier,omitempty"`
-    Asset    types.Coin `protobuf:"bytes,2,opt,name=asset,proto3" json:"asset"`
-}
-```
-
-### Liquidate Msg
-
-```go
-type MsgLiquidate struct {
-    // Liquidator is the account address performing a liquidation and the signer
-    // of the message.
-    Liquidator string `protobuf:"bytes,1,opt,name=liquidator,proto3" json:"liquidator,omitempty"`
-    // Borrower is the account whose borrow is being repaid, and collateral consumed,
-    // by the liquidation. It does not sign the message.
-    Borrower string `protobuf:"bytes,2,opt,name=borrower,proto3" json:"borrower,omitempty"`
-    // Repayment is the maximum amount of base tokens that the liquidator is willing
-    // to repay.
-    Repayment types.Coin `protobuf:"bytes,3,opt,name=repayment,proto3" json:"repayment"`
-    // RewardDenom is the denom that the liquidator will receive as a liquidation reward.
-    // If it is a uToken, the liquidator will receive uTokens from the borrower's
-    // collateral. If it is a base token, the uTokens will be redeemed directly at
-    // a reduced Liquidation Incentive, and the liquidator will receive base tokens.
-    RewardDenom string `protobuf:"bytes,4,opt,name=reward_denom,json=rewardDenom,proto3" json:"reward_denom,omitempty"`
-}
-```
+- [MsgSupply](https://github.com/umee-network/umee/blob/main/x/leverage/types/tx.pb.go#L36)
+- [MsgSupplyCollateral](https://github.com/umee-network/umee/blob/main/x/leverage/types/tx.pb.go#L508)
+- [MsgLiquidate](https://github.com/umee-network/umee/blob/main/x/leverage/types/tx.pb.go#L398)
 
 ## Example transfer from fantom EVM to umee using Axelar GMP
 
@@ -118,7 +76,7 @@ const MultiSend = require('./artifacts/contracts/MultiSend.sol/MultiSend.json');
 })();
 ```
 
-### Deploy the contract
+Deploy the contract
 
 ```bash
 $ node deploy-umee.js 
