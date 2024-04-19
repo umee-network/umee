@@ -1111,6 +1111,16 @@ paths:
                       uTokens as liquidation rewards.
 
                       Valid values: 0-1.
+                  rewards_auction_factor:
+                    type: string
+                    description: >-
+                      Rewards Auction Factor determines the portion of interest
+                      accrued on
+
+                      borrows that is sent to the auction module for the rewards
+                      auction.
+
+                      Valid values: 0-1.
                 description: Params defines the parameters for the leverage module.
             description: >-
               QueryParamsResponse defines the response structure for the Params
@@ -6576,6 +6586,12 @@ definitions:
           uTokens as liquidation rewards.
 
           Valid values: 0-1.
+      rewards_auction_factor:
+        type: string
+        description: |-
+          Rewards Auction Factor determines the portion of interest accrued on
+          borrows that is sent to the auction module for the rewards auction.
+          Valid values: 0-1.
     description: Params defines the parameters for the leverage module.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
@@ -7234,6 +7250,16 @@ definitions:
               instead of
 
               uTokens as liquidation rewards.
+
+              Valid values: 0-1.
+          rewards_auction_factor:
+            type: string
+            description: >-
+              Rewards Auction Factor determines the portion of interest accrued
+              on
+
+              borrows that is sent to the auction module for the rewards
+              auction.
 
               Valid values: 0-1.
         description: Params defines the parameters for the leverage module.
