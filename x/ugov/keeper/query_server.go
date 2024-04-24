@@ -52,28 +52,15 @@ func (q Querier) InflationCycleEnd(ctx context.Context, _ *ugov.QueryInflationCy
 	return &ugov.QueryInflationCycleEndResponse{End: &cycleEndTime}, nil
 }
 
-// TokenBalances implements ugov.QueryServer.
-func (q Querier) TokenBalances(ctx context.Context, req *ugov.QueryTokenBalances) (*ugov.QueryTokenBalancesResponse,
+// DenomOwners implements ugov.QueryServer.
+func (q Querier) DenomOwners(ctx context.Context, req *ugov.QueryDenomOwners) (*banktypes.QueryDenomOwnersResponse,
 	error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	if req.Height != 0 {
 		sdkCtx = sdkCtx.WithBlockHeight(req.Height)
 	}
-	resp, err := q.BankKeeper.DenomOwners(sdk.WrapSDKContext(sdkCtx), &banktypes.QueryDenomOwnersRequest{
+	return q.BankKeeper.DenomOwners(sdk.WrapSDKContext(sdkCtx), &banktypes.QueryDenomOwnersRequest{
 		Denom:      req.Denom,
 		Pagination: req.Pagination,
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	tb := make([]*ugov.TokenBalance, 0)
-	for _, v := range resp.DenomOwners {
-		tb = append(tb, &ugov.TokenBalance{
-			Address: v.Address,
-			Balance: v.Balance,
-		})
-	}
-
-	return &ugov.QueryTokenBalancesResponse{Pagination: resp.Pagination, TokenBalances: tb}, nil
 }

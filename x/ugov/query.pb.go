@@ -9,7 +9,7 @@ import (
 	_ "github.com/cosmos/cosmos-proto"
 	types "github.com/cosmos/cosmos-sdk/types"
 	query "github.com/cosmos/cosmos-sdk/types/query"
-	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
+	types1 "github.com/cosmos/cosmos-sdk/x/bank/types"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	grpc1 "github.com/cosmos/gogoproto/grpc"
 	proto "github.com/cosmos/gogoproto/proto"
@@ -37,9 +37,9 @@ var _ = time.Kitchen
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-// which queries for a paginated set of all account holders of a particular
+// QueryDenomOwners which queries for a paginated set of all account holders of a particular
 // denomination.
-type QueryTokenBalances struct {
+type QueryDenomOwners struct {
 	// denom defines the coin denomination to query all account holders for.
 	Denom  string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	Height int64  `protobuf:"varint,2,opt,name=height,proto3" json:"height,omitempty"`
@@ -47,18 +47,18 @@ type QueryTokenBalances struct {
 	Pagination *query.PageRequest `protobuf:"bytes,3,opt,name=pagination,proto3" json:"pagination,omitempty"`
 }
 
-func (m *QueryTokenBalances) Reset()         { *m = QueryTokenBalances{} }
-func (m *QueryTokenBalances) String() string { return proto.CompactTextString(m) }
-func (*QueryTokenBalances) ProtoMessage()    {}
-func (*QueryTokenBalances) Descriptor() ([]byte, []int) {
+func (m *QueryDenomOwners) Reset()         { *m = QueryDenomOwners{} }
+func (m *QueryDenomOwners) String() string { return proto.CompactTextString(m) }
+func (*QueryDenomOwners) ProtoMessage()    {}
+func (*QueryDenomOwners) Descriptor() ([]byte, []int) {
 	return fileDescriptor_25fa04679024a47d, []int{0}
 }
-func (m *QueryTokenBalances) XXX_Unmarshal(b []byte) error {
+func (m *QueryDenomOwners) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *QueryTokenBalances) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *QueryDenomOwners) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_QueryTokenBalances.Marshal(b, m, deterministic)
+		return xxx_messageInfo_QueryDenomOwners.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -68,100 +68,17 @@ func (m *QueryTokenBalances) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
-func (m *QueryTokenBalances) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryTokenBalances.Merge(m, src)
+func (m *QueryDenomOwners) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryDenomOwners.Merge(m, src)
 }
-func (m *QueryTokenBalances) XXX_Size() int {
+func (m *QueryDenomOwners) XXX_Size() int {
 	return m.Size()
 }
-func (m *QueryTokenBalances) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryTokenBalances.DiscardUnknown(m)
+func (m *QueryDenomOwners) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryDenomOwners.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_QueryTokenBalances proto.InternalMessageInfo
-
-// QueryDenomOwnersResponse defines the RPC response of a TokenBalances RPC query.
-type QueryTokenBalancesResponse struct {
-	TokenBalances []*TokenBalance `protobuf:"bytes,1,rep,name=token_balances,json=tokenBalances,proto3" json:"token_balances,omitempty"`
-	// pagination defines the pagination in the response.
-	Pagination *query.PageResponse `protobuf:"bytes,2,opt,name=pagination,proto3" json:"pagination,omitempty"`
-}
-
-func (m *QueryTokenBalancesResponse) Reset()         { *m = QueryTokenBalancesResponse{} }
-func (m *QueryTokenBalancesResponse) String() string { return proto.CompactTextString(m) }
-func (*QueryTokenBalancesResponse) ProtoMessage()    {}
-func (*QueryTokenBalancesResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{1}
-}
-func (m *QueryTokenBalancesResponse) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *QueryTokenBalancesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_QueryTokenBalancesResponse.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *QueryTokenBalancesResponse) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_QueryTokenBalancesResponse.Merge(m, src)
-}
-func (m *QueryTokenBalancesResponse) XXX_Size() int {
-	return m.Size()
-}
-func (m *QueryTokenBalancesResponse) XXX_DiscardUnknown() {
-	xxx_messageInfo_QueryTokenBalancesResponse.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_QueryTokenBalancesResponse proto.InternalMessageInfo
-
-// TokenBalance defines structure representing an account that owns or holds a
-// particular denominated token. It contains the account address and account
-// balance of the denominated token.
-type TokenBalance struct {
-	// address defines the address that owns a particular denomination.
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
-	// balance is the balance of the denominated coin for an account.
-	Balance types.Coin `protobuf:"bytes,2,opt,name=balance,proto3" json:"balance"`
-}
-
-func (m *TokenBalance) Reset()         { *m = TokenBalance{} }
-func (m *TokenBalance) String() string { return proto.CompactTextString(m) }
-func (*TokenBalance) ProtoMessage()    {}
-func (*TokenBalance) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{2}
-}
-func (m *TokenBalance) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *TokenBalance) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_TokenBalance.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *TokenBalance) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_TokenBalance.Merge(m, src)
-}
-func (m *TokenBalance) XXX_Size() int {
-	return m.Size()
-}
-func (m *TokenBalance) XXX_DiscardUnknown() {
-	xxx_messageInfo_TokenBalance.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_TokenBalance proto.InternalMessageInfo
+var xxx_messageInfo_QueryDenomOwners proto.InternalMessageInfo
 
 // QueryMinGasPrice is a request type.
 type QueryMinGasPrice struct {
@@ -171,7 +88,7 @@ func (m *QueryMinGasPrice) Reset()         { *m = QueryMinGasPrice{} }
 func (m *QueryMinGasPrice) String() string { return proto.CompactTextString(m) }
 func (*QueryMinGasPrice) ProtoMessage()    {}
 func (*QueryMinGasPrice) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{3}
+	return fileDescriptor_25fa04679024a47d, []int{1}
 }
 func (m *QueryMinGasPrice) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -209,7 +126,7 @@ func (m *QueryMinGasPriceResponse) Reset()         { *m = QueryMinGasPriceRespon
 func (m *QueryMinGasPriceResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryMinGasPriceResponse) ProtoMessage()    {}
 func (*QueryMinGasPriceResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{4}
+	return fileDescriptor_25fa04679024a47d, []int{2}
 }
 func (m *QueryMinGasPriceResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -246,7 +163,7 @@ func (m *QueryEmergencyGroup) Reset()         { *m = QueryEmergencyGroup{} }
 func (m *QueryEmergencyGroup) String() string { return proto.CompactTextString(m) }
 func (*QueryEmergencyGroup) ProtoMessage()    {}
 func (*QueryEmergencyGroup) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{5}
+	return fileDescriptor_25fa04679024a47d, []int{3}
 }
 func (m *QueryEmergencyGroup) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -284,7 +201,7 @@ func (m *QueryEmergencyGroupResponse) Reset()         { *m = QueryEmergencyGroup
 func (m *QueryEmergencyGroupResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryEmergencyGroupResponse) ProtoMessage()    {}
 func (*QueryEmergencyGroupResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{6}
+	return fileDescriptor_25fa04679024a47d, []int{4}
 }
 func (m *QueryEmergencyGroupResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -321,7 +238,7 @@ func (m *QueryInflationParams) Reset()         { *m = QueryInflationParams{} }
 func (m *QueryInflationParams) String() string { return proto.CompactTextString(m) }
 func (*QueryInflationParams) ProtoMessage()    {}
 func (*QueryInflationParams) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{7}
+	return fileDescriptor_25fa04679024a47d, []int{5}
 }
 func (m *QueryInflationParams) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -359,7 +276,7 @@ func (m *QueryInflationParamsResponse) Reset()         { *m = QueryInflationPara
 func (m *QueryInflationParamsResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryInflationParamsResponse) ProtoMessage()    {}
 func (*QueryInflationParamsResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{8}
+	return fileDescriptor_25fa04679024a47d, []int{6}
 }
 func (m *QueryInflationParamsResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -396,7 +313,7 @@ func (m *QueryInflationCycleEnd) Reset()         { *m = QueryInflationCycleEnd{}
 func (m *QueryInflationCycleEnd) String() string { return proto.CompactTextString(m) }
 func (*QueryInflationCycleEnd) ProtoMessage()    {}
 func (*QueryInflationCycleEnd) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{9}
+	return fileDescriptor_25fa04679024a47d, []int{7}
 }
 func (m *QueryInflationCycleEnd) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -434,7 +351,7 @@ func (m *QueryInflationCycleEndResponse) Reset()         { *m = QueryInflationCy
 func (m *QueryInflationCycleEndResponse) String() string { return proto.CompactTextString(m) }
 func (*QueryInflationCycleEndResponse) ProtoMessage()    {}
 func (*QueryInflationCycleEndResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_25fa04679024a47d, []int{10}
+	return fileDescriptor_25fa04679024a47d, []int{8}
 }
 func (m *QueryInflationCycleEndResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -464,9 +381,7 @@ func (m *QueryInflationCycleEndResponse) XXX_DiscardUnknown() {
 var xxx_messageInfo_QueryInflationCycleEndResponse proto.InternalMessageInfo
 
 func init() {
-	proto.RegisterType((*QueryTokenBalances)(nil), "umee.ugov.v1.QueryTokenBalances")
-	proto.RegisterType((*QueryTokenBalancesResponse)(nil), "umee.ugov.v1.QueryTokenBalancesResponse")
-	proto.RegisterType((*TokenBalance)(nil), "umee.ugov.v1.TokenBalance")
+	proto.RegisterType((*QueryDenomOwners)(nil), "umee.ugov.v1.QueryDenomOwners")
 	proto.RegisterType((*QueryMinGasPrice)(nil), "umee.ugov.v1.QueryMinGasPrice")
 	proto.RegisterType((*QueryMinGasPriceResponse)(nil), "umee.ugov.v1.QueryMinGasPriceResponse")
 	proto.RegisterType((*QueryEmergencyGroup)(nil), "umee.ugov.v1.QueryEmergencyGroup")
@@ -480,58 +395,53 @@ func init() {
 func init() { proto.RegisterFile("umee/ugov/v1/query.proto", fileDescriptor_25fa04679024a47d) }
 
 var fileDescriptor_25fa04679024a47d = []byte{
-	// 813 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x94, 0x4f, 0x4f, 0x3b, 0x45,
-	0x18, 0xc7, 0x3b, 0x54, 0xf8, 0xc9, 0x94, 0x3f, 0x32, 0x56, 0x5c, 0x96, 0xb2, 0x2d, 0x0b, 0xd6,
-	0x42, 0x64, 0x37, 0xad, 0x09, 0x17, 0x13, 0x13, 0xca, 0xbf, 0x78, 0x30, 0xc1, 0x95, 0x83, 0xd1,
-	0x43, 0x9d, 0x6e, 0x87, 0x65, 0x43, 0x77, 0xa6, 0xec, 0x6e, 0xab, 0x78, 0x93, 0xc4, 0x83, 0x9e,
-	0x88, 0xbe, 0x09, 0x8e, 0x1c, 0x7c, 0x11, 0x3d, 0x12, 0xbd, 0x78, 0x42, 0x05, 0x13, 0xdf, 0x86,
-	0xd9, 0xd9, 0xd9, 0x75, 0xa7, 0x54, 0xea, 0xa5, 0xe9, 0x3c, 0xcf, 0xf7, 0x79, 0xbe, 0x9f, 0x99,
-	0x67, 0x66, 0xa1, 0xd2, 0xf7, 0x08, 0x31, 0xfb, 0x0e, 0x1b, 0x98, 0x83, 0xba, 0x79, 0xd9, 0x27,
-	0xfe, 0x95, 0xd1, 0xf3, 0x59, 0xc8, 0xd0, 0x5c, 0x94, 0x31, 0xa2, 0x8c, 0x31, 0xa8, 0xab, 0x9a,
-	0xcd, 0x02, 0x8f, 0x05, 0x66, 0x1b, 0x07, 0xc4, 0x1c, 0xd4, 0xdb, 0x24, 0xc4, 0x75, 0xd3, 0x66,
-	0x2e, 0x8d, 0xd5, 0xea, 0x4a, 0x9c, 0x6f, 0xf1, 0x95, 0x19, 0x2f, 0x44, 0xaa, 0xe8, 0x30, 0x87,
-	0xc5, 0xf1, 0xe8, 0x9f, 0x88, 0x96, 0x1c, 0xc6, 0x9c, 0x2e, 0x31, 0x71, 0xcf, 0x35, 0x31, 0xa5,
-	0x2c, 0xc4, 0xa1, 0xcb, 0x68, 0x52, 0x53, 0x16, 0x59, 0xbe, 0x6a, 0xf7, 0xcf, 0xcc, 0xd0, 0xf5,
-	0x48, 0x10, 0x62, 0xaf, 0x27, 0x04, 0xdb, 0x59, 0x1e, 0x8e, 0x9d, 0x52, 0xf5, 0xb0, 0xe3, 0x52,
-	0xde, 0x4d, 0x68, 0x97, 0xb0, 0xe7, 0x52, 0x66, 0xf2, 0x5f, 0x11, 0x7a, 0x5b, 0xda, 0x36, 0xdf,
-	0x24, 0x4f, 0xe8, 0x3f, 0x00, 0x88, 0x3e, 0x89, 0xda, 0x9d, 0xb2, 0x0b, 0x42, 0x9b, 0xb8, 0x8b,
-	0xa9, 0x4d, 0x02, 0x54, 0x84, 0xd3, 0x1d, 0x42, 0x99, 0xa7, 0x80, 0x0a, 0xa8, 0xcd, 0x5a, 0xf1,
-	0x02, 0x2d, 0xc3, 0x99, 0x73, 0xe2, 0x3a, 0xe7, 0xa1, 0x32, 0x55, 0x01, 0xb5, 0xbc, 0x25, 0x56,
-	0xe8, 0x08, 0xc2, 0x7f, 0x21, 0x94, 0x7c, 0x05, 0xd4, 0x0a, 0x8d, 0xaa, 0x21, 0x0e, 0x25, 0x22,
-	0x36, 0xe2, 0x83, 0x16, 0xc4, 0xc6, 0x09, 0x76, 0x88, 0x45, 0x2e, 0xfb, 0x24, 0x08, 0xad, 0x4c,
-	0xa5, 0x7e, 0x0b, 0xa0, 0xfa, 0x1c, 0xc6, 0x22, 0x41, 0x8f, 0xd1, 0x80, 0xa0, 0x3d, 0xb8, 0x10,
-	0x46, 0x89, 0x56, 0x5b, 0x64, 0x14, 0x50, 0xc9, 0xd7, 0x0a, 0x0d, 0xd5, 0xc8, 0x8e, 0xce, 0xc8,
-	0x16, 0x5b, 0xf3, 0xa1, 0xb4, 0xaf, 0x63, 0x89, 0x74, 0x8a, 0x93, 0xbe, 0x3b, 0x91, 0x34, 0xf6,
-	0x97, 0x50, 0xaf, 0x01, 0x9c, 0xcb, 0x1a, 0xa1, 0x06, 0x7c, 0x85, 0x3b, 0x1d, 0x9f, 0x04, 0x41,
-	0x7c, 0x66, 0x4d, 0xe5, 0x97, 0x9f, 0x77, 0x8a, 0xa2, 0xf3, 0x5e, 0x9c, 0xf9, 0x34, 0xf4, 0x5d,
-	0xea, 0x58, 0x89, 0x10, 0x7d, 0x08, 0x5f, 0x89, 0xad, 0x08, 0x94, 0x15, 0x09, 0x25, 0x81, 0xd8,
-	0x67, 0x2e, 0x6d, 0xce, 0x0e, 0x1f, 0xca, 0xb9, 0xdb, 0xbf, 0xef, 0xb6, 0x81, 0x95, 0x14, 0xe9,
-	0x08, 0xbe, 0xc1, 0x8f, 0xeb, 0x63, 0x97, 0x1e, 0xe3, 0xe0, 0xc4, 0x77, 0x6d, 0xa2, 0xb7, 0xa1,
-	0x32, 0x1a, 0x4b, 0x0f, 0xf0, 0x08, 0xce, 0x7b, 0x2e, 0x6d, 0x39, 0x38, 0xba, 0xb7, 0xae, 0x4d,
-	0x38, 0x69, 0xa1, 0x51, 0x1a, 0xeb, 0x7a, 0x40, 0x6c, 0x6e, 0xfc, 0x5a, 0x64, 0x6c, 0x15, 0xbc,
-	0x8c, 0xc7, 0x5b, 0xf0, 0x4d, 0xee, 0x71, 0xe8, 0x11, 0xdf, 0x21, 0xd4, 0xbe, 0x3a, 0xf6, 0x59,
-	0xbf, 0xa7, 0x7f, 0x09, 0x57, 0xc7, 0x84, 0x33, 0xe3, 0x5b, 0x24, 0x49, 0xa6, 0xe5, 0x44, 0xa9,
-	0x89, 0x27, 0xb5, 0x40, 0x64, 0x87, 0x65, 0x58, 0xe4, 0x0e, 0x1f, 0xd1, 0xb3, 0x2e, 0x9f, 0xc3,
-	0x09, 0xf6, 0xb1, 0x17, 0xe8, 0x5f, 0xc0, 0xd2, 0xb8, 0x78, 0x6a, 0xfd, 0x01, 0x9c, 0xe9, 0xf1,
-	0x88, 0xd8, 0xf1, 0x9a, 0x7c, 0x63, 0x46, 0xca, 0xc4, 0x96, 0x45, 0x89, 0xae, 0xc0, 0x65, 0xb9,
-	0xf9, 0xfe, 0x95, 0xdd, 0x25, 0x87, 0xb4, 0xa3, 0x7f, 0x06, 0xb5, 0xf1, 0x99, 0xd4, 0x78, 0x17,
-	0xe6, 0x09, 0xed, 0x08, 0x57, 0xd5, 0x88, 0x5f, 0xb9, 0x91, 0xbc, 0x72, 0xe3, 0x34, 0x79, 0xe5,
-	0xcd, 0xd7, 0x87, 0x0f, 0x65, 0x70, 0xf3, 0x7b, 0x19, 0x58, 0x51, 0x41, 0xe3, 0x6e, 0x1a, 0x4e,
-	0xf3, 0xd6, 0xe8, 0x1b, 0x58, 0xc8, 0x8c, 0x12, 0x69, 0x32, 0xf9, 0xe8, 0xa8, 0xd5, 0xea, 0xcb,
-	0xf9, 0x04, 0x4c, 0xdf, 0xb8, 0xfe, 0xf5, 0xaf, 0x9f, 0xa6, 0xd6, 0xd0, 0xaa, 0x29, 0x7d, 0x19,
-	0xa4, 0xeb, 0x81, 0xbe, 0x03, 0x70, 0x41, 0x1e, 0x26, 0x5a, 0x1f, 0xd3, 0x5f, 0x96, 0xa8, 0x5b,
-	0x13, 0x25, 0x29, 0xc5, 0x3b, 0x9c, 0xa2, 0x8c, 0xd6, 0x64, 0x8a, 0x91, 0x6b, 0x82, 0xbe, 0x07,
-	0x70, 0x71, 0x64, 0x46, 0x48, 0x1f, 0xe3, 0x32, 0xa2, 0x51, 0xb7, 0x27, 0x6b, 0x52, 0x94, 0x2a,
-	0x47, 0xa9, 0x20, 0x4d, 0x46, 0x71, 0x13, 0x79, 0x2b, 0xbe, 0x0d, 0xe8, 0x47, 0x00, 0x97, 0x9e,
-	0xcd, 0x1b, 0x6d, 0xbe, 0xe4, 0x94, 0xa8, 0xd4, 0xf7, 0xfe, 0x8f, 0x2a, 0x25, 0xda, 0xe2, 0x44,
-	0x1b, 0x68, 0xfd, 0xbf, 0x88, 0xec, 0xa8, 0xa2, 0x45, 0x68, 0x07, 0x7d, 0x0b, 0xe0, 0xbc, 0xfc,
-	0x01, 0xaf, 0x8c, 0xb1, 0x92, 0x14, 0x6a, 0x6d, 0x92, 0x22, 0x05, 0xd9, 0xe4, 0x20, 0x1a, 0x2a,
-	0xc9, 0x20, 0xf2, 0xb7, 0xb8, 0x79, 0x30, 0xfc, 0x53, 0xcb, 0x0d, 0x1f, 0x35, 0x70, 0xff, 0xa8,
-	0x81, 0x3f, 0x1e, 0x35, 0x70, 0xf3, 0xa4, 0xe5, 0xee, 0x9f, 0xb4, 0xdc, 0x6f, 0x4f, 0x5a, 0xee,
-	0xf3, 0xaa, 0xe3, 0x86, 0xe7, 0xfd, 0xb6, 0x61, 0x33, 0x8f, 0x77, 0xd9, 0xa1, 0x24, 0xfc, 0x8a,
-	0xf9, 0x17, 0x71, 0xcb, 0xc1, 0xae, 0xf9, 0x35, 0xef, 0xdb, 0x9e, 0xe1, 0x6f, 0xe3, 0xfd, 0x7f,
-	0x02, 0x00, 0x00, 0xff, 0xff, 0x49, 0xd6, 0xa4, 0x28, 0xa8, 0x07, 0x00, 0x00,
+	// 731 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x8c, 0x94, 0x4d, 0x4f, 0x13, 0x5d,
+	0x14, 0xc7, 0x7b, 0xe1, 0x81, 0x3c, 0xcf, 0xed, 0x23, 0xe8, 0xb5, 0x62, 0x1d, 0xca, 0xb4, 0x0c,
+	0xda, 0x00, 0x91, 0x99, 0x14, 0x13, 0x36, 0xae, 0x28, 0x6f, 0x71, 0x61, 0xc4, 0xd1, 0x85, 0xd1,
+	0x45, 0x9d, 0x4e, 0x0f, 0xc3, 0x0d, 0xcc, 0xbd, 0x65, 0x5e, 0x8a, 0xb8, 0x32, 0x26, 0x26, 0xba,
+	0x23, 0xfa, 0x41, 0xdc, 0xf8, 0x21, 0xba, 0x24, 0xba, 0x71, 0x85, 0x0a, 0x7e, 0x10, 0x33, 0x77,
+	0x5e, 0x98, 0x19, 0x2b, 0xb8, 0xeb, 0x3d, 0xe7, 0x7f, 0xce, 0xff, 0x77, 0xef, 0x39, 0x53, 0x5c,
+	0xf6, 0x6d, 0x00, 0xcd, 0xb7, 0x78, 0x4f, 0xeb, 0x35, 0xb4, 0x3d, 0x1f, 0x9c, 0x03, 0xb5, 0xeb,
+	0x70, 0x8f, 0x93, 0xff, 0x83, 0x8c, 0x1a, 0x64, 0xd4, 0x5e, 0x43, 0x92, 0x4d, 0xee, 0xda, 0xdc,
+	0xd5, 0xda, 0x86, 0x0b, 0x5a, 0xaf, 0xd1, 0x06, 0xcf, 0x68, 0x68, 0x26, 0xa7, 0x2c, 0x54, 0x4b,
+	0x37, 0xc2, 0x7c, 0x4b, 0x9c, 0xb4, 0xf0, 0x10, 0xa5, 0x4a, 0x16, 0xb7, 0x78, 0x18, 0x0f, 0x7e,
+	0x45, 0xd1, 0x8a, 0xc5, 0xb9, 0xb5, 0x0b, 0x9a, 0xd1, 0xa5, 0x9a, 0xc1, 0x18, 0xf7, 0x0c, 0x8f,
+	0x72, 0x16, 0xd7, 0x54, 0xa3, 0xac, 0x38, 0xb5, 0xfd, 0x2d, 0xcd, 0xa3, 0x36, 0xb8, 0x9e, 0x61,
+	0x77, 0x23, 0xc1, 0x7c, 0x9a, 0x47, 0x60, 0x27, 0x54, 0x5d, 0xc3, 0xa2, 0x4c, 0x74, 0x8b, 0x9b,
+	0x25, 0x5a, 0xb6, 0x93, 0xa8, 0x52, 0x57, 0x95, 0xae, 0x67, 0x1e, 0x41, 0x5c, 0x59, 0x24, 0x94,
+	0xb7, 0x08, 0x5f, 0x7e, 0x18, 0x08, 0x57, 0x81, 0x71, 0xfb, 0xc1, 0x3e, 0x03, 0xc7, 0x25, 0x25,
+	0x3c, 0xd2, 0x09, 0x8e, 0x65, 0x54, 0x43, 0xb3, 0xff, 0xe9, 0xe1, 0x81, 0x4c, 0xe0, 0xd1, 0x6d,
+	0xa0, 0xd6, 0xb6, 0x57, 0x1e, 0xaa, 0xa1, 0xd9, 0x61, 0x3d, 0x3a, 0x91, 0x75, 0x8c, 0xcf, 0x80,
+	0xca, 0xc3, 0x35, 0x34, 0x5b, 0x5c, 0xac, 0xab, 0xd1, 0x03, 0x05, 0xf4, 0x6a, 0x48, 0x12, 0x71,
+	0xa9, 0x9b, 0x86, 0x05, 0x3a, 0xec, 0xf9, 0xe0, 0x7a, 0x7a, 0xaa, 0x52, 0x21, 0x11, 0xc9, 0x7d,
+	0xca, 0x36, 0x0c, 0x77, 0xd3, 0xa1, 0x26, 0x28, 0x6d, 0x5c, 0xce, 0xc7, 0x74, 0x70, 0xbb, 0x9c,
+	0xb9, 0x40, 0xd6, 0xf1, 0x25, 0x9b, 0xb2, 0x96, 0x65, 0x04, 0x33, 0xa1, 0x26, 0x08, 0xda, 0xe2,
+	0x62, 0x25, 0x63, 0x1d, 0x9b, 0xae, 0x82, 0xb9, 0xc2, 0x29, 0x6b, 0xfe, 0xd3, 0x3f, 0xae, 0x16,
+	0xf4, 0xa2, 0x9d, 0xf2, 0xb8, 0x86, 0xaf, 0x0a, 0x8f, 0x35, 0x1b, 0x1c, 0x0b, 0x98, 0x79, 0xb0,
+	0xe1, 0x70, 0xbf, 0xab, 0x3c, 0xc7, 0x93, 0x03, 0xc2, 0x89, 0xfb, 0x32, 0x1e, 0x87, 0x38, 0xd3,
+	0xb2, 0x82, 0x54, 0xf8, 0x5a, 0xcd, 0xf2, 0xe7, 0x4f, 0x0b, 0xa5, 0x08, 0x61, 0xb9, 0xd3, 0x71,
+	0xc0, 0x75, 0x1f, 0x79, 0x0e, 0x65, 0x96, 0x3e, 0x06, 0x59, 0x87, 0x09, 0x5c, 0x12, 0x0e, 0xf7,
+	0xd8, 0xd6, 0xae, 0x78, 0x82, 0x4d, 0xc3, 0x31, 0x6c, 0x57, 0x79, 0x86, 0x2b, 0x83, 0xe2, 0x89,
+	0xf5, 0x5d, 0x3c, 0xda, 0x15, 0x91, 0xe8, 0xc6, 0x53, 0x6a, 0x7a, 0x91, 0xd5, 0x5c, 0x59, 0x74,
+	0xe5, 0xa8, 0x44, 0x29, 0xe3, 0x89, 0x6c, 0xf3, 0x95, 0x03, 0x73, 0x17, 0xd6, 0x58, 0x47, 0x79,
+	0x82, 0xe5, 0xc1, 0x99, 0xc4, 0x78, 0x09, 0x0f, 0x03, 0xeb, 0x44, 0xae, 0x92, 0x1a, 0x6e, 0xb0,
+	0x1a, 0x6f, 0xb0, 0xfa, 0x38, 0xde, 0xe0, 0xe6, 0xbf, 0xfd, 0xe3, 0x2a, 0x3a, 0xfc, 0x56, 0x45,
+	0x7a, 0x50, 0xb0, 0xf8, 0x71, 0x04, 0x8f, 0x88, 0xd6, 0xe4, 0x25, 0x2e, 0xa6, 0x46, 0x49, 0xe4,
+	0x2c, 0x79, 0x7e, 0xd4, 0x52, 0xfd, 0xfc, 0x7c, 0x0c, 0xa6, 0xcc, 0xbc, 0xfe, 0xf2, 0xf3, 0xc3,
+	0xd0, 0x14, 0x99, 0xd4, 0x32, 0x7b, 0x9e, 0x59, 0x0f, 0xf2, 0x06, 0xe1, 0xb1, 0xec, 0x30, 0xc9,
+	0xf4, 0x80, 0xfe, 0x59, 0x89, 0x34, 0x77, 0xa1, 0x24, 0xa1, 0xb8, 0x25, 0x28, 0xaa, 0x64, 0x2a,
+	0x4b, 0x91, 0x5b, 0x13, 0xf2, 0x0e, 0xe1, 0xf1, 0xdc, 0x8c, 0x88, 0x32, 0xc0, 0x25, 0xa7, 0x91,
+	0xe6, 0x2f, 0xd6, 0x24, 0x28, 0x75, 0x81, 0x52, 0x23, 0x72, 0x16, 0x85, 0xc6, 0xf2, 0x56, 0xb8,
+	0x0d, 0xe4, 0x3d, 0xc2, 0x57, 0x7e, 0x9b, 0x37, 0xb9, 0x79, 0x9e, 0x53, 0xac, 0x92, 0x6e, 0xff,
+	0x8d, 0x2a, 0x21, 0x9a, 0x13, 0x44, 0x33, 0x64, 0xfa, 0x4f, 0x44, 0x66, 0x50, 0xd1, 0x02, 0xd6,
+	0x21, 0xaf, 0x10, 0x2e, 0xa6, 0xff, 0x8e, 0x06, 0x6d, 0x49, 0x2a, 0x2f, 0x2d, 0x9c, 0x7d, 0xf1,
+	0x6c, 0x27, 0xf9, 0xe2, 0xf3, 0xb2, 0x84, 0x44, 0x11, 0x24, 0x15, 0x22, 0x65, 0x49, 0xc4, 0x9f,
+	0x5c, 0x8b, 0x0b, 0x6d, 0x73, 0xb5, 0xff, 0x43, 0x2e, 0xf4, 0x4f, 0x64, 0x74, 0x74, 0x22, 0xa3,
+	0xef, 0x27, 0x32, 0x3a, 0x3c, 0x95, 0x0b, 0x47, 0xa7, 0x72, 0xe1, 0xeb, 0xa9, 0x5c, 0x78, 0x5a,
+	0xb7, 0xa8, 0xb7, 0xed, 0xb7, 0x55, 0x93, 0xdb, 0xa2, 0xc7, 0x02, 0x03, 0x6f, 0x9f, 0x3b, 0x3b,
+	0x61, 0xc3, 0xde, 0x92, 0xf6, 0x42, 0x74, 0x6d, 0x8f, 0x8a, 0x4f, 0xe3, 0xce, 0xaf, 0x00, 0x00,
+	0x00, 0xff, 0xff, 0x22, 0x6c, 0x4d, 0xc2, 0x83, 0x06, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -554,9 +464,9 @@ type QueryClient interface {
 	InflationParams(ctx context.Context, in *QueryInflationParams, opts ...grpc.CallOption) (*QueryInflationParamsResponse, error)
 	// InflationCycleEnd returns inflation cycle end time
 	InflationCycleEnd(ctx context.Context, in *QueryInflationCycleEnd, opts ...grpc.CallOption) (*QueryInflationCycleEndResponse, error)
-	// Token Balances queries for all account addresses that own a particular token
+	// DenomOwners queries for all account addresses that own a particular token
 	// denomination.
-	TokenBalances(ctx context.Context, in *QueryTokenBalances, opts ...grpc.CallOption) (*QueryTokenBalancesResponse, error)
+	DenomOwners(ctx context.Context, in *QueryDenomOwners, opts ...grpc.CallOption) (*types1.QueryDenomOwnersResponse, error)
 }
 
 type queryClient struct {
@@ -603,9 +513,9 @@ func (c *queryClient) InflationCycleEnd(ctx context.Context, in *QueryInflationC
 	return out, nil
 }
 
-func (c *queryClient) TokenBalances(ctx context.Context, in *QueryTokenBalances, opts ...grpc.CallOption) (*QueryTokenBalancesResponse, error) {
-	out := new(QueryTokenBalancesResponse)
-	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Query/TokenBalances", in, out, opts...)
+func (c *queryClient) DenomOwners(ctx context.Context, in *QueryDenomOwners, opts ...grpc.CallOption) (*types1.QueryDenomOwnersResponse, error) {
+	out := new(types1.QueryDenomOwnersResponse)
+	err := c.cc.Invoke(ctx, "/umee.ugov.v1.Query/DenomOwners", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -622,9 +532,9 @@ type QueryServer interface {
 	InflationParams(context.Context, *QueryInflationParams) (*QueryInflationParamsResponse, error)
 	// InflationCycleEnd returns inflation cycle end time
 	InflationCycleEnd(context.Context, *QueryInflationCycleEnd) (*QueryInflationCycleEndResponse, error)
-	// Token Balances queries for all account addresses that own a particular token
+	// DenomOwners queries for all account addresses that own a particular token
 	// denomination.
-	TokenBalances(context.Context, *QueryTokenBalances) (*QueryTokenBalancesResponse, error)
+	DenomOwners(context.Context, *QueryDenomOwners) (*types1.QueryDenomOwnersResponse, error)
 }
 
 // UnimplementedQueryServer can be embedded to have forward compatible implementations.
@@ -643,8 +553,8 @@ func (*UnimplementedQueryServer) InflationParams(ctx context.Context, req *Query
 func (*UnimplementedQueryServer) InflationCycleEnd(ctx context.Context, req *QueryInflationCycleEnd) (*QueryInflationCycleEndResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InflationCycleEnd not implemented")
 }
-func (*UnimplementedQueryServer) TokenBalances(ctx context.Context, req *QueryTokenBalances) (*QueryTokenBalancesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method TokenBalances not implemented")
+func (*UnimplementedQueryServer) DenomOwners(ctx context.Context, req *QueryDenomOwners) (*types1.QueryDenomOwnersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DenomOwners not implemented")
 }
 
 func RegisterQueryServer(s grpc1.Server, srv QueryServer) {
@@ -723,20 +633,20 @@ func _Query_InflationCycleEnd_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Query_TokenBalances_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(QueryTokenBalances)
+func _Query_DenomOwners_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryDenomOwners)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(QueryServer).TokenBalances(ctx, in)
+		return srv.(QueryServer).DenomOwners(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/umee.ugov.v1.Query/TokenBalances",
+		FullMethod: "/umee.ugov.v1.Query/DenomOwners",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(QueryServer).TokenBalances(ctx, req.(*QueryTokenBalances))
+		return srv.(QueryServer).DenomOwners(ctx, req.(*QueryDenomOwners))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -762,15 +672,15 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 			Handler:    _Query_InflationCycleEnd_Handler,
 		},
 		{
-			MethodName: "TokenBalances",
-			Handler:    _Query_TokenBalances_Handler,
+			MethodName: "DenomOwners",
+			Handler:    _Query_DenomOwners_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "umee/ugov/v1/query.proto",
 }
 
-func (m *QueryTokenBalances) Marshal() (dAtA []byte, err error) {
+func (m *QueryDenomOwners) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -780,12 +690,12 @@ func (m *QueryTokenBalances) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *QueryTokenBalances) MarshalTo(dAtA []byte) (int, error) {
+func (m *QueryDenomOwners) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *QueryTokenBalances) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *QueryDenomOwners) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
@@ -811,95 +721,6 @@ func (m *QueryTokenBalances) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i -= len(m.Denom)
 		copy(dAtA[i:], m.Denom)
 		i = encodeVarintQuery(dAtA, i, uint64(len(m.Denom)))
-		i--
-		dAtA[i] = 0xa
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *QueryTokenBalancesResponse) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *QueryTokenBalancesResponse) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *QueryTokenBalancesResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Pagination != nil {
-		{
-			size, err := m.Pagination.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintQuery(dAtA, i, uint64(size))
-		}
-		i--
-		dAtA[i] = 0x12
-	}
-	if len(m.TokenBalances) > 0 {
-		for iNdEx := len(m.TokenBalances) - 1; iNdEx >= 0; iNdEx-- {
-			{
-				size, err := m.TokenBalances[iNdEx].MarshalToSizedBuffer(dAtA[:i])
-				if err != nil {
-					return 0, err
-				}
-				i -= size
-				i = encodeVarintQuery(dAtA, i, uint64(size))
-			}
-			i--
-			dAtA[i] = 0xa
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *TokenBalance) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *TokenBalance) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *TokenBalance) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	{
-		size, err := m.Balance.MarshalToSizedBuffer(dAtA[:i])
-		if err != nil {
-			return 0, err
-		}
-		i -= size
-		i = encodeVarintQuery(dAtA, i, uint64(size))
-	}
-	i--
-	dAtA[i] = 0x12
-	if len(m.Address) > 0 {
-		i -= len(m.Address)
-		copy(dAtA[i:], m.Address)
-		i = encodeVarintQuery(dAtA, i, uint64(len(m.Address)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1115,12 +936,12 @@ func (m *QueryInflationCycleEndResponse) MarshalToSizedBuffer(dAtA []byte) (int,
 	var l int
 	_ = l
 	if m.End != nil {
-		n6, err6 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.End, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.End):])
-		if err6 != nil {
-			return 0, err6
+		n4, err4 := github_com_cosmos_gogoproto_types.StdTimeMarshalTo(*m.End, dAtA[i-github_com_cosmos_gogoproto_types.SizeOfStdTime(*m.End):])
+		if err4 != nil {
+			return 0, err4
 		}
-		i -= n6
-		i = encodeVarintQuery(dAtA, i, uint64(n6))
+		i -= n4
+		i = encodeVarintQuery(dAtA, i, uint64(n4))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -1138,7 +959,7 @@ func encodeVarintQuery(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *QueryTokenBalances) Size() (n int) {
+func (m *QueryDenomOwners) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -1155,40 +976,6 @@ func (m *QueryTokenBalances) Size() (n int) {
 		l = m.Pagination.Size()
 		n += 1 + l + sovQuery(uint64(l))
 	}
-	return n
-}
-
-func (m *QueryTokenBalancesResponse) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if len(m.TokenBalances) > 0 {
-		for _, e := range m.TokenBalances {
-			l = e.Size()
-			n += 1 + l + sovQuery(uint64(l))
-		}
-	}
-	if m.Pagination != nil {
-		l = m.Pagination.Size()
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	return n
-}
-
-func (m *TokenBalance) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Address)
-	if l > 0 {
-		n += 1 + l + sovQuery(uint64(l))
-	}
-	l = m.Balance.Size()
-	n += 1 + l + sovQuery(uint64(l))
 	return n
 }
 
@@ -1282,7 +1069,7 @@ func sovQuery(x uint64) (n int) {
 func sozQuery(x uint64) (n int) {
 	return sovQuery(uint64((x << 1) ^ uint64((int64(x) >> 63))))
 }
-func (m *QueryTokenBalances) Unmarshal(dAtA []byte) error {
+func (m *QueryDenomOwners) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1305,10 +1092,10 @@ func (m *QueryTokenBalances) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: QueryTokenBalances: wiretype end group for non-group")
+			return fmt.Errorf("proto: QueryDenomOwners: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryTokenBalances: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: QueryDenomOwners: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
@@ -1395,241 +1182,6 @@ func (m *QueryTokenBalances) Unmarshal(dAtA []byte) error {
 				m.Pagination = &query.PageRequest{}
 			}
 			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *QueryTokenBalancesResponse) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: QueryTokenBalancesResponse: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: QueryTokenBalancesResponse: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TokenBalances", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TokenBalances = append(m.TokenBalances, &TokenBalance{})
-			if err := m.TokenBalances[len(m.TokenBalances)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Pagination", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if m.Pagination == nil {
-				m.Pagination = &query.PageResponse{}
-			}
-			if err := m.Pagination.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
-			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipQuery(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *TokenBalance) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowQuery
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: TokenBalance: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: TokenBalance: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Address = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Balance", wireType)
-			}
-			var msglen int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowQuery
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				msglen |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			if msglen < 0 {
-				return ErrInvalidLengthQuery
-			}
-			postIndex := iNdEx + msglen
-			if postIndex < 0 {
-				return ErrInvalidLengthQuery
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			if err := m.Balance.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

@@ -25,7 +25,7 @@ func GetQueryCmd() *cobra.Command {
 		QueryInflationParams(),
 		QueryInflationCyleEnd(),
 		QueryEmergencyGroup(),
-		QueryTokenBalances(),
+		QueryDenomOwners(),
 	)
 
 	return cmd
@@ -123,10 +123,10 @@ func QueryInflationCyleEnd() *cobra.Command {
 	return cmd
 }
 
-// QueryTokenBalances creates the Query/TokenBalances CLI.
-func QueryTokenBalances() *cobra.Command {
+// QueryDenomOwners creates the Query/DenomOwners CLI.
+func QueryDenomOwners() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "token-balances [denom]",
+		Use:   "denom-owners [denom]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Queries for all account addresses that own a particular token denomination.",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -139,7 +139,7 @@ func QueryTokenBalances() *cobra.Command {
 				return err
 			}
 			queryClient := ugov.NewQueryClient(clientCtx)
-			resp, err := queryClient.TokenBalances(cmd.Context(), &ugov.QueryTokenBalances{
+			resp, err := queryClient.DenomOwners(cmd.Context(), &ugov.QueryDenomOwners{
 				Denom:      args[0],
 				Pagination: pageReq,
 			})
@@ -148,7 +148,7 @@ func QueryTokenBalances() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-	flags.AddPaginationFlagsToCmd(cmd, "token-balances")
+	flags.AddPaginationFlagsToCmd(cmd, "denom-owners")
 
 	return cmd
 }

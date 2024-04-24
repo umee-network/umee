@@ -7,7 +7,7 @@ import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
-import "amino/amino.proto";
+import "cosmos/bank/v1beta1/query.proto";
 
 import "umee/ugov/v1/ugov.proto";
 
@@ -37,40 +37,21 @@ service Query {
     option (google.api.http).get = "/umee/ugov/v1/inflation_cycle_end";
   }
 
-  // Token Balances queries for all account addresses that own a particular token
+  // DenomOwners queries for all account addresses that own a particular token
   // denomination.
-  rpc TokenBalances(QueryTokenBalances) returns (QueryTokenBalancesResponse){
-    option (google.api.http).get = "/umee/ugov/v1/token_balances";
+  rpc DenomOwners(QueryDenomOwners) returns (cosmos.bank.v1beta1.QueryDenomOwnersResponse){
+    option (google.api.http).get = "/umee/ugov/v1/denom_owners";
   }
 }
 
-// which queries for a paginated set of all account holders of a particular
+// QueryDenomOwners which queries for a paginated set of all account holders of a particular
 // denomination.
-message QueryTokenBalances{
+message QueryDenomOwners{
   // denom defines the coin denomination to query all account holders for.
   string denom = 1;
   int64 height = 2;
   // pagination defines an optional pagination for the request.
   cosmos.base.query.v1beta1.PageRequest pagination = 3;
-}
-
-// QueryDenomOwnersResponse defines the RPC response of a TokenBalances RPC query.
-message QueryTokenBalancesResponse {
-  repeated TokenBalance token_balances = 1;
-   // pagination defines the pagination in the response.
-   cosmos.base.query.v1beta1.PageResponse pagination = 2;
-}
-
-// TokenBalance defines structure representing an account that owns or holds a
-// particular denominated token. It contains the account address and account
-// balance of the denominated token.
-//
-message TokenBalance {
-  // address defines the address that owns a particular denomination.
-  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-
-  // balance is the balance of the denominated coin for an account.
-  cosmos.base.v1beta1.Coin balance = 2 [(gogoproto.nullable) = false, (amino.dont_omitempty) = true];
 }
 
 // QueryMinGasPrice is a request type.
