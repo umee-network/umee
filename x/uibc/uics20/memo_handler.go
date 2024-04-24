@@ -161,6 +161,8 @@ func (mh MemoHandler) validateMemoMsg() error {
 		// collateral = asset
 	case *ltypes.MsgSupply:
 		asset = &msg.Asset
+	case *ltypes.MsgRepay:
+		asset = &msg.Asset
 	case *ltypes.MsgLiquidate:
 		asset = &msg.Repayment
 	default:
@@ -197,6 +199,8 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 		_, err = mh.leverage.Supply(*ctx, msg)
 	case *ltypes.MsgSupplyCollateral:
 		_, err = mh.leverage.SupplyCollateral(*ctx, msg)
+	case *ltypes.MsgRepay:
+		_, err = mh.leverage.Repay(*ctx, msg)
 	case *ltypes.MsgLiquidate:
 		_, err = mh.leverage.Liquidate(*ctx, msg)
 	default:
