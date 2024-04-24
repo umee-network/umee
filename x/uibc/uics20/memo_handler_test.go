@@ -29,6 +29,7 @@ func TestValidateMemoMsg(t *testing.T) {
 	goodMsgSupplyColl := ltypes.NewMsgSupplyCollateral(receiver, asset)
 	// goodMsgSupplyCollH := ltypes.NewMsgSupplyCollateral(receiver, assetH)
 	goodMsgSupplyColl11 := ltypes.NewMsgSupplyCollateral(receiver, asset11)
+	goodMsgRepay := ltypes.NewMsgRepay(receiver, asset11)
 	goodMsgBorrow := ltypes.NewMsgBorrow(receiver, asset)
 	goodMsgBorrowH := ltypes.NewMsgBorrow(receiver, assetH)
 	goodMsgLiquidate := ltypes.NewMsgLiquidate(receiver, accs.Bob, assetH, "uumee")
@@ -53,9 +54,10 @@ func TestValidateMemoMsg(t *testing.T) {
 		// good messages[0]
 		{[]sdk.Msg{goodMsgSupply}, ""},
 		{[]sdk.Msg{goodMsgSupplyColl}, ""},
-		{[]sdk.Msg{goodMsgLiquidate}, ""}, // in handlers v2 this will be a good message
+		{[]sdk.Msg{goodMsgRepay}, ""},
+		{[]sdk.Msg{goodMsgLiquidate}, ""},
 
-		// messages[0] use more assets than the transfer -> OK
+		// messages[0] use more assets than the transfer -> OK: should be adjusted
 		{[]sdk.Msg{goodMsgSupply11}, ""},
 		{[]sdk.Msg{goodMsgSupplyColl11}, ""},
 		{[]sdk.Msg{goodMsgSupplyColl11}, ""},
@@ -167,6 +169,7 @@ func TestMemoExecute(t *testing.T) {
 	mh := MemoHandler{leverage: lvg}
 	ctx, _ := tsdk.NewCtxOneStore(t, storetypes.NewMemoryStoreKey("quota"))
 	msgs := []sdk.Msg{&ltypes.MsgSupply{}}
+	msgsRepay := []sdk.Msg{&ltypes.MsgRepay{}}
 
 	tcs := []struct {
 		enabled bool
@@ -176,6 +179,7 @@ func TestMemoExecute(t *testing.T) {
 	}{
 		{true, true, msgs, nil},
 		{true, false, msgs, nil},
+		{true, false, msgsRepay, nil},
 		{true, false, nil, nil},
 
 		{false, true, nil, errHooksDisabled},

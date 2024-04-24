@@ -50,6 +50,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [2472](https://github.com/umee-network/umee/pull/2472) un-wire the `crisis` module from umee app.
 - [2500](https://github.com/umee-network/umee/pull/2500) (x/leverage): add Rewards Auction fees and `params.rewards_auction_factor`.
+- [2506](https://github.com/umee-network/umee/pull/2506) (ics20): support leverage/MsgRepay in Memo
 
 ### Improvements
 
