@@ -14,6 +14,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/address"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/umee-network/umee/v6/x/auction"
@@ -28,13 +29,7 @@ var (
 
 // AppModuleBasic implements the AppModuleBasic interface for the x/leverage
 // module.
-type AppModuleBasic struct {
-	cdc codec.Codec
-}
-
-func NewAppModuleBasic(cdc codec.Codec) AppModuleBasic {
-	return AppModuleBasic{cdc: cdc}
-}
+type AppModuleBasic struct{}
 
 // Name returns the x/auction module's name.
 func (AppModuleBasic) Name() string {
@@ -108,7 +103,7 @@ func NewAppModule(
 	cdc codec.Codec, keeper keeper.Builder, bk auction.BankKeeper,
 ) AppModule {
 	return AppModule{
-		AppModuleBasic: NewAppModuleBasic(cdc),
+		AppModuleBasic: AppModuleBasic{},
 		kb:             keeper,
 		bankKeeper:     bk,
 	}
@@ -155,5 +150,25 @@ func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
 // EndBlock executes all ABCI EndBlock logic respective to the x/auction module.
 // It returns no validator updates.
 func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+	// TODO: enable end blocker
+	// k := am.kb.Keeper(&ctx)
+	// if err := k.FinalizeRewardsAuction(); err != nil {
+	// 	ctx.Logger().With("module", "x/auction").
+	// 		Error("can't finalize rewards auction", "error", err)
+	// }
+
 	return []abci.ValidatorUpdate{}
+}
+
+// sub-module accounts
+var (
+	subAccRewards = []byte{0x01}
+)
+
+// SubAccounts for auction Keeper
+func SubAccounts() keeper.SubAccounts {
+	n := AppModuleBasic{}.Name()
+	return keeper.SubAccounts{
+		RewardsCollect: address.Module(n, subAccRewards),
+	}
 }

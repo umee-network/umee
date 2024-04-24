@@ -229,7 +229,7 @@ func init() {
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasmtypes.ModuleName:     {authtypes.Burner},
 
-		auction.ModuleName:     nil,
+		auction.ModuleName:     {authtypes.Burner},
 		incentive.ModuleName:   nil,
 		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
 		oracletypes.ModuleName: nil,
@@ -510,6 +510,7 @@ func New(
 	app.AuctionKeeperB = auctionkeeper.NewBuilder(
 		appCodec,
 		keys[auction.StoreKey],
+		auctionmodule.SubAccounts(),
 		app.BankKeeper,
 		app.UGovKeeperB.EmergencyGroup,
 	)
@@ -668,9 +669,6 @@ func New(
 		panic(fmt.Sprintf("error while reading wasm config: %s", err))
 	}
 
-	// Register umee custom plugin to wasm
-	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper,
-		app.MetokenKeeperB), wasmOpts...)
 	// Register stargate queries
 	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
 	availableCapabilities := strings.Join(AllCapabilities(), ",")

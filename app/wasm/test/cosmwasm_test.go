@@ -18,12 +18,6 @@ func TestCosmwasm(t *testing.T) {
 
 	// testing the umee cosmwasm queries
 	its.InitiateUmeeCosmwasm()
-	its.TestLeverageQueries()
-	its.TestOracleQueries()
-	its.TestLeverageTxs()
-	its.TestIncentiveQueries()
-	its.TestMetokenQueries()
-
 	// stargate queries
 	its.TestStargateQueries()
 }

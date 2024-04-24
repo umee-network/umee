@@ -1,6 +1,7 @@
 package coin
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -44,6 +45,11 @@ var (
 // Umee creates a BondDenom sdk.Coin with the given amount
 func Umee(amount int64) sdk.Coin {
 	return sdk.NewInt64Coin(umee, amount)
+}
+
+// UmeeInt creates a BondDenom sdk.Coin with the given amount
+func UmeeInt(amount sdkmath.Int) sdk.Coin {
+	return sdk.NewCoin(umee, amount)
 }
 
 // UmeeCoins creates an Umee (uumee) sdk.Coins with the given amount
