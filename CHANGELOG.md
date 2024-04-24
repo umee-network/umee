@@ -52,7 +52,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2500](https://github.com/umee-network/umee/pull/2500) (x/leverage): add Rewards Auction fees and `params.rewards_auction_factor`.
 - [2506](https://github.com/umee-network/umee/pull/2506) (ics20): support leverage/MsgRepay in Memo
 
-
 ### Improvements
 
 - [2474](https://github.com/umee-network/umee/pull/2474) (proto) add `gogo.messagename_all` option to all messages.
