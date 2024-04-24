@@ -13,26 +13,27 @@ var _ ugov.Keeper = Keeper{}
 
 // Builder constructs Keeper by perparing all related dependencies (notably the store).
 type Builder struct {
-	storeKey   storetypes.StoreKey
-	Cdc        codec.BinaryCodec
-	BankKeeper keeper.BaseKeeper
+	storeKey              storetypes.StoreKey
+	Cdc                   codec.BinaryCodec
+	BankKeeper            keeper.BaseKeeper
+	enableLiquidatorQuery bool
 }
 
 func NewBuilder(
-	cdc codec.BinaryCodec, key storetypes.StoreKey, bk keeper.BaseKeeper,
+	cdc codec.BinaryCodec, key storetypes.StoreKey, bk keeper.BaseKeeper, enableLiquidatorQuery bool,
 ) Builder {
 	return Builder{
-		Cdc:        cdc,
-		storeKey:   key,
-		BankKeeper: bk,
+		Cdc:                   cdc,
+		storeKey:              key,
+		BankKeeper:            bk,
+		enableLiquidatorQuery: enableLiquidatorQuery,
 	}
 }
 
 func (kb Builder) Keeper(ctx *sdk.Context) ugov.Keeper {
 	return Keeper{
-		store:      ctx.KVStore(kb.storeKey),
-		cdc:        kb.Cdc,
-		BankKeeper: kb.BankKeeper,
+		store: ctx.KVStore(kb.storeKey),
+		cdc:   kb.Cdc,
 	}
 }
 
@@ -43,7 +44,6 @@ func (kb Builder) EmergencyGroup(ctx *sdk.Context) ugov.WithEmergencyGroup { ret
 
 // Keeper provides a light interface for module data access and transformation
 type Keeper struct {
-	store      sdk.KVStore
-	cdc        codec.BinaryCodec
-	BankKeeper keeper.BaseKeeper
+	store sdk.KVStore
+	cdc   codec.BinaryCodec
 }
