@@ -4,6 +4,8 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
 	"github.com/umee-network/umee/v6/x/ugov"
 )
 
@@ -48,4 +50,30 @@ func (q Querier) InflationCycleEnd(ctx context.Context, _ *ugov.QueryInflationCy
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	cycleEndTime := q.Keeper(&sdkCtx).InflationCycleEnd()
 	return &ugov.QueryInflationCycleEndResponse{End: &cycleEndTime}, nil
+}
+
+// TokenBalances implements ugov.QueryServer.
+func (q Querier) TokenBalances(ctx context.Context, req *ugov.QueryTokenBalances) (*ugov.QueryTokenBalancesResponse,
+	error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	if req.Height != 0 {
+		sdkCtx = sdkCtx.WithBlockHeight(req.Height)
+	}
+	resp, err := q.BankKeeper.DenomOwners(sdk.WrapSDKContext(sdkCtx), &banktypes.QueryDenomOwnersRequest{
+		Denom:      req.Denom,
+		Pagination: req.Pagination,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	denomsOwners := make([]*ugov.DenomOwner, 0)
+	for _, v := range resp.DenomOwners {
+		denomsOwners = append(denomsOwners, &ugov.DenomOwner{
+			Address: v.Address,
+			Balance: v.Balance,
+		})
+	}
+
+	return &ugov.QueryTokenBalancesResponse{Pagination: resp.Pagination, DenomOwners: denomsOwners}, nil
 }
