@@ -67,13 +67,13 @@ func (q Querier) TokenBalances(ctx context.Context, req *ugov.QueryTokenBalances
 		return nil, err
 	}
 
-	denomsOwners := make([]*ugov.DenomOwner, 0)
+	tb := make([]*ugov.TokenBalance, 0)
 	for _, v := range resp.DenomOwners {
-		denomsOwners = append(denomsOwners, &ugov.DenomOwner{
+		tb = append(tb, &ugov.TokenBalance{
 			Address: v.Address,
 			Balance: v.Balance,
 		})
 	}
 
-	return &ugov.QueryTokenBalancesResponse{Pagination: resp.Pagination, DenomOwners: denomsOwners}, nil
+	return &ugov.QueryTokenBalancesResponse{Pagination: resp.Pagination, TokenBalances: tb}, nil
 }
