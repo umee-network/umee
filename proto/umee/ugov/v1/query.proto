@@ -6,8 +6,6 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
-import "cosmos/bank/v1beta1/query.proto";
 
 import "umee/ugov/v1/ugov.proto";
 
@@ -36,22 +34,6 @@ service Query {
   rpc InflationCycleEnd(QueryInflationCycleEnd) returns (QueryInflationCycleEndResponse) {
     option (google.api.http).get = "/umee/ugov/v1/inflation_cycle_end";
   }
-
-  // DenomOwners queries for all account addresses that own a particular token
-  // denomination.
-  rpc DenomOwners(QueryDenomOwners) returns (cosmos.bank.v1beta1.QueryDenomOwnersResponse){
-    option (google.api.http).get = "/umee/ugov/v1/denom_owners";
-  }
-}
-
-// QueryDenomOwners which queries for a paginated set of all account holders of a particular
-// denomination.
-message QueryDenomOwners{
-  // denom defines the coin denomination to query all account holders for.
-  string denom = 1;
-  int64 height = 2;
-  // pagination defines an optional pagination for the request.
-  cosmos.base.query.v1beta1.PageRequest pagination = 3;
 }
 
 // QueryMinGasPrice is a request type.

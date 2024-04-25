@@ -4,20 +4,19 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
-
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	"gotest.tools/v3/assert"
-
 	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/codec"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	bkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/staking/testutil"
+	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -107,6 +106,6 @@ func initKeeper(
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
-	kb := quota.NewBuilder(cdc, storeKey, leverage, oracle, eg)
+	kb := quota.NewBuilder(cdc, storeKey, leverage, oracle, eg, bkeeper.BaseKeeper{})
 	return ctx, kb.Keeper(&ctx)
 }

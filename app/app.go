@@ -465,9 +465,7 @@ func New(
 
 	app.NFTKeeper = nftkeeper.NewKeeper(keys[nftkeeper.StoreKey], appCodec, app.AccountKeeper, app.BankKeeper)
 
-	app.UGovKeeperB = ugovkeeper.NewBuilder(appCodec, keys[ugov.ModuleName], app.BankKeeper,
-		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
-	)
+	app.UGovKeeperB = ugovkeeper.NewBuilder(appCodec, keys[ugov.ModuleName])
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
@@ -555,6 +553,7 @@ func New(
 	app.UIbcQuotaKeeperB = uibcquota.NewBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
+		app.BankKeeper,
 	)
 
 	/**********

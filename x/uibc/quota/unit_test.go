@@ -7,6 +7,7 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	bkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/stretchr/testify/require"
 
 	"github.com/umee-network/umee/v6/tests/tsdk"
@@ -25,7 +26,7 @@ func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
 	ir := cdctypes.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(ir)
 	storeKey := storetypes.NewMemoryStoreKey("quota")
-	kb := NewBuilder(cdc, storeKey, l, o, eg)
+	kb := NewBuilder(cdc, storeKey, l, o, eg, bkeeper.BaseKeeper{})
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return TestKeeper{kb.Keeper(&ctx), t, &ctx}
 }

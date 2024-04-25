@@ -4,7 +4,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/bank/keeper"
 
 	"github.com/umee-network/umee/v6/x/ugov"
 )
@@ -13,20 +12,16 @@ var _ ugov.Keeper = Keeper{}
 
 // Builder constructs Keeper by perparing all related dependencies (notably the store).
 type Builder struct {
-	storeKey              storetypes.StoreKey
-	Cdc                   codec.BinaryCodec
-	BankKeeper            keeper.BaseKeeper
-	enableLiquidatorQuery bool
+	storeKey storetypes.StoreKey
+	Cdc      codec.BinaryCodec
 }
 
 func NewBuilder(
-	cdc codec.BinaryCodec, key storetypes.StoreKey, bk keeper.BaseKeeper, enableLiquidatorQuery bool,
+	cdc codec.BinaryCodec, key storetypes.StoreKey,
 ) Builder {
 	return Builder{
-		Cdc:                   cdc,
-		storeKey:              key,
-		BankKeeper:            bk,
-		enableLiquidatorQuery: enableLiquidatorQuery,
+		Cdc:      cdc,
+		storeKey: key,
 	}
 }
 

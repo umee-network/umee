@@ -4,9 +4,7 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 
-	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 )
 
@@ -51,20 +49,4 @@ func (q Querier) InflationCycleEnd(ctx context.Context, _ *ugov.QueryInflationCy
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
 	cycleEndTime := q.Keeper(&sdkCtx).InflationCycleEnd()
 	return &ugov.QueryInflationCycleEndResponse{End: &cycleEndTime}, nil
-}
-
-// DenomOwners implements ugov.QueryServer.
-func (q Querier) DenomOwners(ctx context.Context, req *ugov.QueryDenomOwners) (*banktypes.QueryDenomOwnersResponse,
-	error) {
-	if q.enableLiquidatorQuery {
-		sdkCtx := sdk.UnwrapSDKContext(ctx)
-		if req.Height != 0 {
-			sdkCtx = sdkCtx.WithBlockHeight(req.Height)
-		}
-		return q.BankKeeper.DenomOwners(sdk.WrapSDKContext(sdkCtx), &banktypes.QueryDenomOwnersRequest{
-			Denom:      req.Denom,
-			Pagination: req.Pagination,
-		})
-	}
-	return nil, ltypes.ErrNotLiquidatorNode
 }
