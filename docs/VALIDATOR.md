@@ -43,6 +43,8 @@ NOTE: for self building and configuration examples, you MUST use the [umee branc
 
 - Copy the [`price-feeder.toml`](https://github.com/ojo-network/price-feeder/blob/umee/price-feeder.example.toml).
 - For the provider config you can use our latest [umee-provider-config directory](https://github.com/ojo-network/price-feeder/tree/umee/umee-provider-config) as is.
+  - Depending where you run your validator node, certain locations may block some endpoints. Make sure you read through the comments in the config files.
+- Make sure you follow our announcements and update in Discord: [canon-4 announcements](https://discord.com/channels/815699313581490196/1161391685595561984) for the testnet and [validator-announcements](https://discord.com/channels/815699313581490196/940268469285449809) for the mainnet.
 
 ## Running a node
 
