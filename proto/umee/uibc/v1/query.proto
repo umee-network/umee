@@ -45,6 +45,8 @@ service Query {
 
   // DenomOwners queries for all account addresses that own a particular token
   // denomination.
+  // For historical state data, height have to pass as a grpc headers request here
+  // check here: https://docs.cosmos.network/v0.50/user/run-node/interact-node#query-for-historical-state-using-grpcurl
   rpc DenomOwners(cosmos.bank.v1beta1.QueryDenomOwnersRequest) returns (cosmos.bank.v1beta1.QueryDenomOwnersResponse){
     option (google.api.http).get = "/umee/uibc/v1/denom_owners";
   }

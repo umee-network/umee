@@ -508,6 +508,8 @@ type QueryClient interface {
 	QuotaExpires(ctx context.Context, in *QueryQuotaExpires, opts ...grpc.CallOption) (*QueryQuotaExpiresResponse, error)
 	// DenomOwners queries for all account addresses that own a particular token
 	// denomination.
+	// For historical state data, height have to pass as a grpc headers request here
+	// check here: https://docs.cosmos.network/v0.50/user/run-node/interact-node#query-for-historical-state-using-grpcurl
 	DenomOwners(ctx context.Context, in *types.QueryDenomOwnersRequest, opts ...grpc.CallOption) (*types.QueryDenomOwnersResponse, error)
 }
 
@@ -589,6 +591,8 @@ type QueryServer interface {
 	QuotaExpires(context.Context, *QueryQuotaExpires) (*QueryQuotaExpiresResponse, error)
 	// DenomOwners queries for all account addresses that own a particular token
 	// denomination.
+	// For historical state data, height have to pass as a grpc headers request here
+	// check here: https://docs.cosmos.network/v0.50/user/run-node/interact-node#query-for-historical-state-using-grpcurl
 	DenomOwners(context.Context, *types.QueryDenomOwnersRequest) (*types.QueryDenomOwnersResponse, error)
 }
 
