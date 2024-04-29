@@ -4,6 +4,8 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -93,4 +95,14 @@ func (q Querier) QuotaExpires(goCtx context.Context, _ *uibc.QueryQuotaExpires) 
 	}
 
 	return &uibc.QueryQuotaExpiresResponse{EndTime: *quotaExpireTime}, nil
+}
+
+// DenomOwners implements uibc.QueryServer.
+func (q Querier) DenomOwners(ctx context.Context, req *banktypes.QueryDenomOwnersRequest) (
+	*banktypes.QueryDenomOwnersResponse,
+	error) {
+	return q.bank.DenomOwners(ctx, &banktypes.QueryDenomOwnersRequest{
+		Denom:      req.Denom,
+		Pagination: req.Pagination,
+	})
 }

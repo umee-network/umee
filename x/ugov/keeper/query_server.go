@@ -4,6 +4,7 @@ import (
 	context "context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v6/x/ugov"
 )
 

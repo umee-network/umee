@@ -6,6 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	bkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
@@ -52,7 +53,7 @@ func TestSendPacket(t *testing.T) {
 
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	kb := quota.NewBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock, eg)
+	kb := quota.NewBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock, eg, bkeeper.BaseKeeper{})
 	dp := uibc.DefaultParams()
 	keeper := kb.Keeper(&ctx)
 	keeper.SetParams(dp)
