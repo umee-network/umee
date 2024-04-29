@@ -541,6 +541,7 @@ func New(
 	app.UIbcQuotaKeeperB = uibcquota.NewKeeperBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
+		app.BankKeeper,
 	)
 
 	/**********
