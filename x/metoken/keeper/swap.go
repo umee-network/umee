@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/umee-network/umee/v6/x/auction"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/errors"
 )
@@ -19,7 +20,7 @@ type swapResponse struct {
 	leveraged sdk.Coin
 }
 
-func newSwapResponse(meTokens sdk.Coin, fee sdk.Coin, reserved sdk.Coin, leveraged sdk.Coin) swapResponse {
+func newSwapResponse(meTokens, fee, reserved, leveraged sdk.Coin) swapResponse {
 	return swapResponse{
 		meTokens:  meTokens,
 		fee:       fee,
@@ -102,6 +103,11 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 		return swapResponse{}, err
 	}
 
+	feeToAuction, feeToRevenue := k.breakFee(swapCarry.fee)
+	if err = k.fundAuction(asset.Denom, feeToAuction); err != nil {
+		return swapResponse{}, err
+	}
+
 	balances.MetokenSupply.Amount = balances.MetokenSupply.Amount.Add(swapCarry.meTokens)
 	balance, i := balances.AssetBalance(asset.Denom)
 	if i < 0 {
@@ -111,7 +117,7 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 
 	balance.Reserved = balance.Reserved.Add(swapCarry.toReserves)
 	balance.Leveraged = balance.Leveraged.Add(swapCarry.toLeverage)
-	balance.Fees = balance.Fees.Add(swapCarry.fee)
+	balance.Fees = balance.Fees.Add(feeToRevenue)
 	balances.SetAssetBalance(balance)
 
 	if err = k.setIndexBalances(balances); err != nil {
@@ -121,7 +127,7 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 	return newSwapResponse(
 		meTokens[0],
 		sdk.NewCoin(asset.Denom, swapCarry.fee),
-		sdk.NewCoin(asset.Denom, swapCarry.toReserves),
+		sdk.NewCoin(asset.Denom, feeToRevenue),
 		sdk.NewCoin(asset.Denom, swapCarry.toLeverage),
 	), nil
 }
@@ -176,6 +182,13 @@ func (k Keeper) availableToSupply(denom string) (bool, sdkmath.Int, error) {
 	return true, token.MaxSupply.Sub(total.Amount), nil
 }
 
+// breakFee calculates the protocol fee for the burn auction and the reminder
+func (k Keeper) breakFee(fee sdkmath.Int) (toAuction sdkmath.Int, revenue sdkmath.Int) {
+	p := k.GetParams()
+	toAuction = p.RewardsAuctionFactor.Mul(fee)
+	return toAuction, fee.Sub(toAuction)
+}
+
 // calculateSwap returns the amount of meToken to send to the user, the fee to be charged to him,
 // the amount of assets to send to x/metoken reserves and to x/leverage pools.
 // The formulas used for the calculations are:
@@ -185,8 +198,7 @@ func (k Keeper) availableToSupply(denom string) (bool, sdkmath.Int, error) {
 //	amount_to_reserves = assets_to_swap * reserve_portion
 //	amount_to_leverage = assets_to_swap - amount_to_reserves
 //
-// It returns meTokens to be minted, fee to be charged,
-// amount to transfer to x/metoken reserves and x/leverage liquidity pools
+// It returns calculated amount of tokens that need to be transferred as a result of a transfer.
 func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
 	swapCarry, error,
 ) {
@@ -213,6 +225,12 @@ func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPric
 	toLeverage := amountToSwap.Sub(toReserves)
 
 	return swapCarry{meTokens: meTokens, fee: fee.Amount, toReserves: toReserves, toLeverage: toLeverage}, nil
+}
+
+func (k Keeper) fundAuction(denom string, amount sdkmath.Int) error {
+	coins := sdk.Coins{sdk.NewCoin(denom, amount)}
+	// TODO: event
+	return k.bankKeeper.SendCoinsFromModuleToModule(*k.ctx, metoken.ModuleName, auction.ModuleName, coins)
 }
 
 type swapCarry struct {

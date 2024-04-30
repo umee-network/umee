@@ -105,13 +105,11 @@ func (ib IndexBalances) AssetBalance(denom string) (AssetBalance, int) {
 // SetAssetBalance overrides an asset balance if exists in the list, otherwise add it to the list.
 func (ib *IndexBalances) SetAssetBalance(balance AssetBalance) {
 	_, i := ib.AssetBalance(balance.Denom)
-
 	if i < 0 {
 		ib.AssetBalances = append(ib.AssetBalances, balance)
-		return
+	} else {
+		ib.AssetBalances[i] = balance
 	}
-
-	ib.AssetBalances[i] = balance
 }
 
 // NewZeroAssetBalance creates a new AssetBalance object with all balances in zero.
