@@ -34,8 +34,8 @@ type Params struct {
 	// Interest claiming frequency in seconds, determines how often metoken module will claim accrued interest from
 	// leverage module
 	ClaimingFrequency int64 `protobuf:"varint,2,opt,name=claiming_frequency,json=claimingFrequency,proto3" json:"claiming_frequency,omitempty"`
-	// Rewards Auction Factor determines the portion of interest accrued on
-	// borrows that is sent to the auction module for the rewards auction.
+	// Rewards Auction Factor determines the portion of swap and redeem fee that is sent to the
+	// auction module for the rewards auction.
 	// Valid values: 0-10000 (in basis points, 2000 = 20%).
 	RewardsAuctionFactor github_com_umee_network_umee_v6_util_bpmath.FixedBP `protobuf:"varint,3,opt,name=rewards_auction_factor,json=rewardsAuctionFactor,proto3,customtype=github.com/umee-network/umee/v6/util/bpmath.FixedBP" json:"rewards_auction_factor"`
 }
@@ -88,7 +88,8 @@ type Index struct {
 	// Valid value: must be the same as the oracle.Denom.exponent.
 	Exponent uint32 `protobuf:"varint,3,opt,name=exponent,proto3" json:"exponent,omitempty"`
 	// Fee contains fee parameters used for swap and redemption fee calculations for all underlying
-	// assets in this index.
+	// assets in this index. `Params.rewards_auction_factor` of the fee will go for the burn
+	// auction.
 	Fee Fee `protobuf:"bytes,4,opt,name=fee,proto3" json:"fee"`
 	// Accepted Assets is the list of underlying Tokens that can be swapped and redeemed for the Index's meToken,
 	// along with their token-specific parameters.
