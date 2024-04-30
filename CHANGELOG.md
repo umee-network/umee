@@ -46,6 +46,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+## v6.4.1 - 2024-04-30
+
+### Improvements
+
+- [daef10a](https://github.com/umee-network/umee/commit/daef10ad4f774aae915ad33f4ab1134695146785) Update dependencies.
+
 ## v6.4.0 - 2024-03-21
 
 ### Features
@@ -54,7 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
-- [2462](https://github.com/umee-network/umee/pull/2462) (x/leverage) Take `MaxModuleWithdraw` into account when computing user `MaxWithdraw`. 
+- [2462](https://github.com/umee-network/umee/pull/2462) (x/leverage) Take `MaxModuleWithdraw` into account when computing user `MaxWithdraw`.
 
 ## v6.4.0-beta1 - 2024-03-11
 
