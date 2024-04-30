@@ -5,9 +5,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
-	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/spf13/cobra"
-
 	"github.com/umee-network/umee/v6/util/cli"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
@@ -27,7 +25,6 @@ func GetQueryCmd() *cobra.Command {
 		GetOutflows(),
 		GetInflows(),
 		GetQuotaExpireTime(),
-		QueryDenomOwners(),
 	)
 
 	return cmd
@@ -131,35 +128,5 @@ func GetOutflows() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-	return cmd
-}
-
-// QueryDenomOwners creates the Query/DenomOwners CLI.
-func QueryDenomOwners() *cobra.Command {
-	cmd := &cobra.Command{
-		Use:   "denom-owners [denom]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Queries for all account addresses that own a particular token denomination.",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			clientCtx, err := client.GetClientQueryContext(cmd)
-			if err != nil {
-				return err
-			}
-			pageReq, err := client.ReadPageRequest(cmd.Flags())
-			if err != nil {
-				return err
-			}
-			queryClient := uibc.NewQueryClient(clientCtx)
-			resp, err := queryClient.DenomOwners(cmd.Context(), &banktypes.QueryDenomOwnersRequest{
-				Denom:      args[0],
-				Pagination: pageReq,
-			})
-			return cli.PrintOrErr(resp, err, clientCtx)
-		},
-	}
-
-	flags.AddQueryFlagsToCmd(cmd)
-	flags.AddPaginationFlagsToCmd(cmd, "denom-owners")
-
 	return cmd
 }

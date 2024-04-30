@@ -8,7 +8,6 @@ import (
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	bkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
 	"github.com/golang/mock/gomock"
@@ -63,7 +62,7 @@ func TestIBCOnRecvPacket(t *testing.T) {
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
-	kb := quota.NewBuilder(cdc, storeKey, leverageMock, oracleMock, eg, bkeeper.BaseKeeper{})
+	kb := quota.NewBuilder(cdc, storeKey, leverageMock, oracleMock, eg)
 	ics20Module := NewICS20Module(mockIBCModule, cdc, kb, mockLeverageMsgServer)
 
 	validMemoMsgs := func(noOfMsgs int, fallbackAddr string) string {

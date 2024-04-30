@@ -20,12 +20,11 @@ type Builder struct {
 	leverage uibc.Leverage
 	oracle   uibc.Oracle
 	ugov     ugov.EmergencyGroupBuilder
-	bank     uibc.BankKeeper
 }
 
 func NewBuilder(
 	cdc codec.BinaryCodec, key storetypes.StoreKey,
-	leverage uibc.Leverage, oracle uibc.Oracle, ugov ugov.EmergencyGroupBuilder, bk uibc.BankKeeper,
+	leverage uibc.Leverage, oracle uibc.Oracle, ugov ugov.EmergencyGroupBuilder,
 ) Builder {
 	return Builder{
 		cdc:      cdc,
@@ -33,7 +32,6 @@ func NewBuilder(
 		leverage: leverage,
 		oracle:   oracle,
 		ugov:     ugov,
-		bank:     bk,
 	}
 }
 
