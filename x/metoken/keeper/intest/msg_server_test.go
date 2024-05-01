@@ -1733,49 +1733,49 @@ func verifyRedeem(
 	require.Equal(expectedAssets, resp.Returned, tc.name, "expectedAssets")
 
 	// verify meToken balance decreased and asset balance increased by the expected amounts
-	require.True(
-		iUserBalance.Sub(tc.asset).Add(expectedAssets).IsEqual(fUserBalance),
+	require.Equal(
+		iUserBalance.Sub(tc.asset).Add(expectedAssets), fUserBalance,
 		tc.name,
 		"token balance",
 	)
 	// verify uToken assetSupply decreased by the expected amount
-	require.True(
+	require.Equal(
 		iUTokenSupply.Sub(
 			sdk.NewCoin(
 				"u/"+expectedFromLeverage.Denom,
 				expectedFromLeverage.Amount,
 			),
-		).IsEqual(fUTokenSupply),
+		), fUTokenSupply,
 		tc.name,
 		"uToken assetSupply",
 	)
 	// from_reserves + from_leverage must be = to total amount withdrawn from the modules
-	require.True(
-		expectedFromReserves.Amount.Add(expectedFromLeverage.Amount).Equal(amountToWithdraw),
+	require.Equal(
+		expectedFromReserves.Amount.Add(expectedFromLeverage.Amount), amountToWithdraw,
 		tc.name,
 		"total withdraw",
 	)
 
 	// meToken assetSupply is decreased by the expected amount
-	require.True(
-		iMeTokenBalance.MetokenSupply.Sub(tc.asset).IsEqual(fMeTokenBalance.MetokenSupply),
+	require.Equal(
+		iMeTokenBalance.MetokenSupply.Sub(tc.asset), fMeTokenBalance.MetokenSupply,
 		tc.name,
 		"meToken assetSupply",
 	)
 
 	fAssetBalance, i := fMeTokenBalance.AssetBalance(tc.denom)
 	assert.Check(t, i >= 0)
-	require.True(
-		iAssetBalance.Reserved.Sub(expectedFromReserves.Amount).Equal(fAssetBalance.Reserved),
+	require.Equal(
+		iAssetBalance.Reserved.Sub(expectedFromReserves.Amount), fAssetBalance.Reserved,
 		tc.name,
 		"reserved",
 	)
-	require.True(
-		iAssetBalance.Leveraged.Sub(expectedFromLeverage.Amount).Equal(fAssetBalance.Leveraged),
+	require.Equal(
+		iAssetBalance.Leveraged.Sub(expectedFromLeverage.Amount), fAssetBalance.Leveraged,
 		tc.name,
 		"leveraged",
 	)
-	require.True(iAssetBalance.Fees.Add(expectedFee.Amount).Equal(fAssetBalance.Fees), tc.name, "fees")
+	require.Equal(iAssetBalance.Fees.Add(expectedFee.Amount), fAssetBalance.Fees, tc.name)
 }
 
 func TestMsgServer_GovSetParams(t *testing.T) {

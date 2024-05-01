@@ -127,7 +127,7 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 	return newSwapResponse(
 		meTokens[0],
 		sdk.NewCoin(asset.Denom, swapCarry.fee),
-		sdk.NewCoin(asset.Denom, feeToRevenue),
+		sdk.NewCoin(asset.Denom, swapCarry.toReserves),
 		sdk.NewCoin(asset.Denom, swapCarry.toLeverage),
 	), nil
 }
