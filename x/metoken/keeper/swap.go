@@ -228,8 +228,11 @@ func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPric
 }
 
 func (k Keeper) fundAuction(denom string, amount sdkmath.Int) error {
+	if amount.IsZero() {
+		return nil
+	}
 	coins := sdk.Coins{sdk.NewCoin(denom, amount)}
-	// TODO: event
+	auction.EmitFundRewardsAuction(k.ctx, coins)
 	return k.bankKeeper.SendCoinsFromModuleToModule(*k.ctx, metoken.ModuleName, auction.ModuleName, coins)
 }
 

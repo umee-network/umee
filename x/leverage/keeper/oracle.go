@@ -296,7 +296,7 @@ func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) erro
 		}
 	}
 	if !toAuctionCheck.IsZero() {
-		sdkutil.Emit(&ctx, &types.EventFundAuction{Assets: toOracleCheck})
+		auction.EmitFundRewardsAuction(&ctx, toOracleCheck)
 		return send(ctx, types.ModuleName, auction.ModuleName, toAuctionCheck)
 	}
 
