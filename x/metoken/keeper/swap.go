@@ -183,9 +183,9 @@ func (k Keeper) availableToSupply(denom string) (bool, sdkmath.Int, error) {
 }
 
 // breakFee calculates the protocol fee for the burn auction and the reminder
-func (k Keeper) breakFee(fee sdkmath.Int) (toAuction sdkmath.Int, revenue sdkmath.Int) {
+func (k Keeper) breakFee(fee sdkmath.Int) (sdkmath.Int, sdkmath.Int) {
 	p := k.GetParams()
-	toAuction = p.RewardsAuctionFactor.Mul(fee)
+	toAuction := p.RewardsAuctionFactor.Mul(fee)
 	return toAuction, fee.Sub(toAuction)
 }
 
