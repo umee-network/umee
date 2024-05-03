@@ -1713,13 +1713,11 @@ func verifyRedeem(
 	amountToWithdraw := redeemExchangeRate.MulInt(tc.asset.Amount).Mul(assetExponentFactorVsMeToken).TruncateInt()
 
 	// totalfee = feeRate * amount_to_redeem
-	totalFee := sdk.NewCoin(tc.denom, feeRate.MulInt(tc.asset.Amount).TruncateInt())
+	totalFee := sdk.NewCoin(tc.denom, feeRate.MulInt(amountToWithdraw).TruncateInt())
 	feeToAuction := params.RewardsAuctionFactor.Mul(totalFee.Amount)
 	feeToReserve := totalFee.Amount.Sub(feeToAuction)
 
-	// amount_to_redeem = amountToWithdraw - expectedFee
 	amountToRedeem := amountToWithdraw.Sub(totalFee.Amount)
-
 	expectedAssets := sdk.NewCoin(
 		tc.denom,
 		amountToRedeem,
@@ -1734,8 +1732,8 @@ func verifyRedeem(
 
 	require := require.New(t)
 	// verify the outputs of swap function
-	require.Equal(totalFee, resp.Fee, tc.name)
-	require.Equal(expectedAssets, resp.Returned, tc.name)
+	require.Equal(totalFee, resp.Fee, tc.name, "expectedFee")
+	require.Equal(expectedAssets, resp.Returned, tc.name, "expectedAssets")
 
 	// verify meToken balance decreased and asset balance increased by the expected amounts
 	require.Equal(
