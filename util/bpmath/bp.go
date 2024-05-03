@@ -25,6 +25,11 @@ func (bp BP) MulDec(a sdk.Dec) sdk.Dec {
 	return MulDec(a, bp)
 }
 
+// Equal returns true if bp==a.
+func (bp BP) Equal(a BP) bool {
+	return bp == a
+}
+
 // FromQuo returns a/b in basis points.
 // Contract: a>=0 and b > 0.
 // Panics if a/b >= MaxUint32/10'000 or if b==0.

@@ -17,6 +17,9 @@ type BankKeeper interface {
 	SendCoinsFromAccountToModule(
 		ctx sdk.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins,
 	) error
+	SendCoinsFromModuleToModule(
+		ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins,
+	) error
 }
 
 // LeverageKeeper interface for interacting with x/leverage

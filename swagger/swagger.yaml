@@ -5709,7 +5709,10 @@ paths:
                         Fee contains fee parameters used for swap and redemption
                         fee calculations for all underlying
 
-                        assets in this index.
+                        assets in this index. `Params.rewards_auction_factor` of
+                        the fee will go for the burn
+
+                        auction.
                       type: object
                       properties:
                         min_fee:
@@ -5867,6 +5870,16 @@ paths:
                       often metoken module will claim accrued interest from
 
                       leverage module
+                  rewards_auction_factor:
+                    type: integer
+                    format: int64
+                    description: >-
+                      Rewards Auction Factor determines the portion of swap and
+                      redeem fee that is sent to the
+
+                      auction module for the rewards auction.
+
+                      Valid values: 0-10000 (in basis points, 2000 = 20%).
                 description: Params defines the parameters for the metoken module.
             description: >-
               QueryParamsResponse defines the response structure for the Params
@@ -10333,7 +10346,10 @@ definitions:
           Fee contains fee parameters used for swap and redemption fee
           calculations for all underlying
 
-          assets in this index.
+          assets in this index. `Params.rewards_auction_factor` of the fee will
+          go for the burn
+
+          auction.
         type: object
         properties:
           min_fee:
@@ -10532,6 +10548,16 @@ definitions:
           module will claim accrued interest from
 
           leverage module
+      rewards_auction_factor:
+        type: integer
+        format: int64
+        description: >-
+          Rewards Auction Factor determines the portion of swap and redeem fee
+          that is sent to the
+
+          auction module for the rewards auction.
+
+          Valid values: 0-10000 (in basis points, 2000 = 20%).
     description: Params defines the parameters for the metoken module.
   umee.metoken.v1.QueryIndexBalancesResponse:
     type: object
@@ -10752,7 +10778,10 @@ definitions:
                 Fee contains fee parameters used for swap and redemption fee
                 calculations for all underlying
 
-                assets in this index.
+                assets in this index. `Params.rewards_auction_factor` of the fee
+                will go for the burn
+
+                auction.
               type: object
               properties:
                 min_fee:
@@ -10866,6 +10895,16 @@ definitions:
               metoken module will claim accrued interest from
 
               leverage module
+          rewards_auction_factor:
+            type: integer
+            format: int64
+            description: >-
+              Rewards Auction Factor determines the portion of swap and redeem
+              fee that is sent to the
+
+              auction module for the rewards auction.
+
+              Valid values: 0-10000 (in basis points, 2000 = 20%).
         description: Params defines the parameters for the metoken module.
     description: |-
       QueryParamsResponse defines the response structure for the Params gRPC

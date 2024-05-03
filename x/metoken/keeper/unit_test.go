@@ -3,17 +3,14 @@ package keeper
 import (
 	"testing"
 
-	"github.com/umee-network/umee/v6/x/metoken/mocks"
-
-	"github.com/umee-network/umee/v6/x/metoken"
-
-	"github.com/stretchr/testify/require"
-
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/stretchr/testify/require"
 
 	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/x/metoken"
+	"github.com/umee-network/umee/v6/x/metoken/mocks"
 )
 
 // initSimpleKeeper creates a simple keeper without external dependencies.
@@ -25,7 +22,10 @@ func initSimpleKeeper(t *testing.T) Keeper {
 	kb := NewBuilder(cdc, storeKey, nil, nil, nil, nil)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 
-	return kb.Keeper(&ctx)
+	k := kb.Keeper(&ctx)
+	err := k.SetParams(metoken.DefaultParams())
+	require.NoError(t, err)
+	return k
 }
 
 // initMeUSDKeeper creates a keeper with external dependencies and with meUSD index and balance inserted.
@@ -48,4 +48,8 @@ func initMeUSDKeeper(
 	err = k.setIndexBalances(balance)
 
 	return k
+}
+
+func initMeUSDNoopKeper(t *testing.T) Keeper {
+	return initMeUSDKeeper(t, NewBankMock(), NewLeverageMock(), NewOracleMock())
 }

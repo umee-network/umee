@@ -29,3 +29,8 @@ func (bp FixedBP) Mul(a math.Int) math.Int {
 func (bp FixedBP) MulDec(a sdk.Dec) sdk.Dec {
 	return MulDec(a, bp)
 }
+
+// Equal returns true if bp==a.
+func (bp FixedBP) Equal(a FixedBP) bool {
+	return bp == a
+}

@@ -16,3 +16,8 @@ message EventRewardsAuctionResult {
   // Auctioned tokens.
   repeated cosmos.base.v1beta1.Coin rewards = 4 [(gogoproto.nullable) = false];
 }
+
+// EventFundRewardsAuction is emitted when sending rewards to auction module
+message EventFundRewardsAuction {
+  repeated cosmos.base.v1beta1.Coin assets = 1 [(gogoproto.nullable) = false];
+}
