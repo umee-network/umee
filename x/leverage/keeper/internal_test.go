@@ -4,10 +4,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
+	"github.com/umee-network/umee/v6/tests/accs"
 	"github.com/umee-network/umee/v6/x/leverage/types"
-	"github.com/umee-network/umee/v6/x/metoken"
 	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
@@ -34,7 +33,7 @@ func NewTestKeeper(
 		ok,
 		ugovmocks.NewSimpleEmergencyGroupBuilder(),
 		enableLiquidatorQuery,
-		authtypes.NewModuleAddress(metoken.ModuleName),
+		accs.GenerateAddr("auction.Rewards"),
 	)
 	return k, TestKeeper{&k}
 }
