@@ -8,6 +8,7 @@ import (
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	"github.com/stretchr/testify/require"
 
+	"github.com/umee-network/umee/v6/tests/accs"
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/mocks"
@@ -19,7 +20,7 @@ func initSimpleKeeper(t *testing.T) Keeper {
 	interfaceRegistry := types.NewInterfaceRegistry()
 	cdc := codec.NewProtoCodec(interfaceRegistry)
 	storeKey := storetypes.NewMemoryStoreKey("metoken")
-	kb := NewBuilder(cdc, storeKey, nil, nil, nil, nil)
+	kb := NewBuilder(cdc, storeKey, nil, nil, nil, nil, accs.GenerateAddr("auction.Rewards"))
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 
 	k := kb.Keeper(&ctx)

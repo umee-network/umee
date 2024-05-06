@@ -19,7 +19,8 @@ type Builder struct {
 	storeKey storetypes.StoreKey
 	bank     auction.BankKeeper
 	ugov     ugov.EmergencyGroupBuilder
-	accs     SubAccounts
+
+	Accs SubAccounts
 }
 
 func NewBuilder(cdc codec.BinaryCodec,
@@ -28,7 +29,7 @@ func NewBuilder(cdc codec.BinaryCodec,
 	b auction.BankKeeper,
 	ugov ugov.EmergencyGroupBuilder) Builder {
 
-	return Builder{cdc: cdc, storeKey: key, accs: accs,
+	return Builder{cdc: cdc, storeKey: key, Accs: accs,
 		bank: b, ugov: ugov}
 }
 
@@ -36,7 +37,7 @@ func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
 	return Keeper{
 		store: ctx.KVStore(kb.storeKey),
 		cdc:   kb.cdc,
-		accs:  kb.accs,
+		accs:  kb.Accs,
 		bank:  kb.bank,
 		ugov:  kb.ugov(ctx),
 

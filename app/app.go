@@ -514,7 +514,7 @@ func New(
 		app.LeverageKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
-		// rewardsAuctionAccs.RewardsCollect,
+		rewardsAuctionAccs.RewardsCollect,
 	)
 
 	// register the staking hooks
