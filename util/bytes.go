@@ -22,6 +22,8 @@ func ConcatBytes(margin int, bzs ...[]byte) []byte {
 
 // UintWithNullPrefix efficiently serializes uint using LittleEndian and
 // prepends zero byte (null prefix).
+// TODO: ideally we use BigEndian here (for prefix ordering), but it will require
+// data migration.
 func UintWithNullPrefix(n uint64) []byte {
 	bz := make([]byte, 9)
 	binary.LittleEndian.PutUint64(bz[1:], n)

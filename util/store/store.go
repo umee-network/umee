@@ -22,7 +22,7 @@ import (
 // GetValue loads value from the store using default Unmarshaler. Panics on failure to decode.
 // Returns nil if the key is not found in the store.
 // If the value contains codec.Any field, then SetObject MUST be used instead.
-func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errField string) TPtr {
+func GetValue[TPtr PtrUnmarshalable[T], T any](store sdk.KVStore, key []byte, errField string) TPtr {
 	if bz := store.Get(key); len(bz) > 0 {
 		var c TPtr = new(T)
 		if err := c.Unmarshal(bz); err != nil {
@@ -176,6 +176,7 @@ func SetTimeMs(store sdk.KVStore, key []byte, t time.Time) {
 	SetInteger(store, key, t.UnixMilli())
 }
 
+// SetInteger saves integre value to the state.
 func SetInteger[T Integer](store sdk.KVStore, key []byte, v T) {
 	var bz []byte
 	switch v := any(v).(type) {

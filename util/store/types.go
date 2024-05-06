@@ -1,9 +1,16 @@
 package store
 
+type Unmarshalable interface {
+	Unmarshal(data []byte) error
+}
+
+type PtrUnmarshalable[T any] interface {
+	Unmarshalable
+	*T
+}
+
 type Marshalable interface {
 	Marshal() ([]byte, error)
-	MarshalTo(data []byte) (n int, err error)
-	Unmarshal(data []byte) error
 }
 
 type PtrMarshalable[T any] interface {
@@ -23,4 +30,9 @@ type PtrBinMarshalable[T any] interface {
 
 type Integer interface {
 	~int32 | ~int64 | ~uint32 | ~uint64 | byte
+}
+
+type KV[K any, V any] struct {
+	Key K
+	Val V
 }
