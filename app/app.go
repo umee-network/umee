@@ -478,6 +478,15 @@ func New(
 		distrtypes.ModuleName,
 	)
 
+	rewardsAuctionAccs := auctionmodule.SubAccounts()
+	app.AuctionKeeperB = auctionkeeper.NewBuilder(
+		appCodec,
+		keys[auction.StoreKey],
+		rewardsAuctionAccs,
+		app.BankKeeper,
+		app.UGovKeeperB.EmergencyGroup,
+	)
+
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
@@ -485,7 +494,7 @@ func New(
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
-		authtypes.NewModuleAddress(metoken.ModuleName),
+		rewardsAuctionAccs.RewardsCollect,
 	)
 
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
@@ -505,14 +514,7 @@ func New(
 		app.LeverageKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
-	)
-
-	app.AuctionKeeperB = auctionkeeper.NewBuilder(
-		appCodec,
-		keys[auction.StoreKey],
-		auctionmodule.SubAccounts(),
-		app.BankKeeper,
-		app.UGovKeeperB.EmergencyGroup,
+		rewardsAuctionAccs.RewardsCollect,
 	)
 
 	// register the staking hooks

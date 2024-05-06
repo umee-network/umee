@@ -21,7 +21,7 @@ type Keeper struct {
 	oracleKeeper           types.OracleKeeper
 	ugov                   ugov.EmergencyGroupBuilder
 	liquidatorQueryEnabled bool
-	meTokenAddr            sdk.AccAddress
+	rewardsAuction         sdk.AccAddress
 
 	tokenHooks []types.TokenHooks
 	bondHooks  []types.BondHooks
@@ -34,7 +34,7 @@ func NewKeeper(
 	o types.OracleKeeper,
 	ugov ugov.EmergencyGroupBuilder,
 	enableLiquidatorQuery bool,
-	meTokenAddr sdk.AccAddress,
+	rewardsAuction sdk.AccAddress,
 ) Keeper {
 	return Keeper{
 		cdc:                    cdc,
@@ -43,7 +43,7 @@ func NewKeeper(
 		oracleKeeper:           o,
 		ugov:                   ugov,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
-		meTokenAddr:            meTokenAddr,
+		rewardsAuction:         rewardsAuction,
 	}
 }
 

@@ -616,6 +616,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 		app.LeverageKeeper,
 		oracleMock,
 		app.UGovKeeperB.EmergencyGroup,
+		app.AuctionKeeperB.Accs.RewardsCollect,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)
@@ -714,6 +715,7 @@ func TestMsgServer_Swap_Depegging(t *testing.T) {
 		app.LeverageKeeper,
 		oracleMock,
 		app.UGovKeeperB.EmergencyGroup,
+		app.AuctionKeeperB.Accs.RewardsCollect,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)
@@ -1357,6 +1359,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		app.LeverageKeeper,
 		oracleMock,
 		app.UGovKeeperB.EmergencyGroup,
+		app.AuctionKeeperB.Accs.RewardsCollect,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)
@@ -1456,6 +1459,7 @@ func TestMsgServer_Redeem_Depegging(t *testing.T) {
 		app.LeverageKeeper,
 		oracleMock,
 		app.UGovKeeperB.EmergencyGroup,
+		app.AuctionKeeperB.Accs.RewardsCollect,
 	)
 	app.MetokenKeeperB = kb
 	msgServer = keeper.NewMsgServerImpl(app.MetokenKeeperB)

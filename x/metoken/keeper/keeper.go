@@ -18,6 +18,7 @@ type Builder struct {
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
 	ugov           ugov.EmergencyGroupBuilder
+	rewardsAuction sdk.AccAddress
 }
 
 // NewBuilder returns Builder object.
@@ -28,6 +29,7 @@ func NewBuilder(
 	leverageKeeper metoken.LeverageKeeper,
 	oracleKeeper metoken.OracleKeeper,
 	ugov ugov.EmergencyGroupBuilder,
+	rewardsAuction sdk.AccAddress,
 ) Builder {
 	return Builder{
 		cdc:            cdc,
@@ -36,6 +38,7 @@ func NewBuilder(
 		leverageKeeper: leverageKeeper,
 		oracleKeeper:   oracleKeeper,
 		ugov:           ugov,
+		rewardsAuction: rewardsAuction,
 	}
 }
 
@@ -46,6 +49,7 @@ type Keeper struct {
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
 	ugov           ugov.EmergencyGroupBuilder
+	rewardsAuction sdk.AccAddress
 
 	// TODO: ctx should be removed when we migrate leverageKeeper and oracleKeeper
 	ctx *sdk.Context
@@ -60,6 +64,7 @@ func (b Builder) Keeper(ctx *sdk.Context) Keeper {
 		leverageKeeper: b.leverageKeeper,
 		oracleKeeper:   b.oracleKeeper,
 		ugov:           b.ugov,
+		rewardsAuction: b.rewardsAuction,
 		ctx:            ctx,
 	}
 }

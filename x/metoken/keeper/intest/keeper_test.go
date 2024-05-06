@@ -54,20 +54,20 @@ func initTestSuite(t *testing.T, registry []metoken.Index, balances []metoken.In
 		AnyTimes()
 	oracleMock.EXPECT().SetExchangeRate(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes()
 
-	kb := keeper.NewBuilder(
+	app.MetokenKeeperB = keeper.NewBuilder(
 		app.AppCodec(),
 		app.GetKey(metoken.ModuleName),
 		app.BankKeeper,
 		app.LeverageKeeper,
 		oracleMock,
 		app.UGovKeeperB.EmergencyGroup,
+		app.AuctionKeeperB.Accs.RewardsCollect,
 	)
-	app.MetokenKeeperB = kb
 
 	genState := metoken.DefaultGenesisState()
 	genState.Registry = registry
 	genState.Balances = balances
-	kb.Keeper(&ctx).InitGenesis(*genState)
+	app.MetokenKeeperB.Keeper(&ctx).InitGenesis(*genState)
 
 	queryHelper := baseapp.NewQueryServerTestHelper(ctx, app.InterfaceRegistry())
 	metoken.RegisterQueryServer(queryHelper, keeper.NewQuerier(app.MetokenKeeperB))
