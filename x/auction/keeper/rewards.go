@@ -46,13 +46,13 @@ func (k Keeper) FinalizeRewardsAuction() error {
 	return k.storeNewRewardsAuction(id, endsAt, newCoins)
 }
 
-func (k Keeper) currentRewardsAuction() uint32 {
+func (k Keeper) currentRewardsAuctionID() uint32 {
 	id, _ := store.GetInteger[uint32](k.store, keyRewardsCurrentID)
 	return id
 }
 
 func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
-	id := k.currentRewardsAuction()
+	id := k.currentRewardsAuctionID()
 	if id != msg.Id {
 		return errors.New("bad auction ID, can only bid in the current auction = " + strconv.Itoa(int(id)))
 	}
@@ -92,21 +92,61 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 
 func (k Keeper) getRewardsBid(id uint32) (*auction.Bid, uint32) {
 	if id == 0 {
-		id = k.currentRewardsAuction()
+		id = k.currentRewardsAuctionID()
 	}
 	keyMsg := "auction.rewards.bid"
 	key := k.keyRewardsBid(id)
 	return store.GetValue[*auction.Bid](k.store, key, keyMsg), id
 }
 
-// returns nil if id is not found
+func (k Keeper) getAllRewardsBids() ([]auction.BidKV, error) {
+	elems, err := store.LoadAllKV[*store.Uint32, store.Uint32, *auction.Bid](
+		k.store, keyPrefixRewardsBid)
+	if err != nil {
+		return nil, err
+	}
+	bids := make([]auction.BidKV, len(elems))
+	for i := range elems {
+		bids[i].Id = uint32(elems[i].Key)
+		bids[i].Bid = elems[i].Val
+	}
+	return bids, nil
+
+}
+
+func (k Keeper) storeAllRewardsBids(elems []auction.BidKV) error {
+	for _, e := range elems {
+		key := k.keyRewardsBid(e.Id)
+		if err := store.SetValue(k.store, key, &e.Bid, "auction.store_all_bids"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// Returns collected protocol rewards to auction.
+// Returns nil if id is not found.
 func (k Keeper) getRewardsAuction(id uint32) (*auction.Rewards, uint32) {
 	if id == 0 {
-		id = k.currentRewardsAuction()
+		id = k.currentRewardsAuctionID()
 	}
 	const keyMsg = "auction.rewards.coins"
 	key := k.keyRewardsCoins(id)
 	return store.GetValue[*auction.Rewards](k.store, key, keyMsg), id
+}
+
+func (k Keeper) getAllRewardsAuctions() ([]auction.RewardsKV, error) {
+	elems, err := store.LoadAllKV[*store.Uint32, store.Uint32, *auction.Rewards](
+		k.store, keyPrefixRewardsCoins)
+	if err != nil {
+		return nil, err
+	}
+	rewards := make([]auction.RewardsKV, len(elems))
+	for i := range elems {
+		rewards[i].Id = uint32(elems[i].Key)
+		rewards[i].Rewards = elems[i].Val
+	}
+	return rewards, nil
 }
 
 func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins sdk.Coins) error {
@@ -114,4 +154,14 @@ func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins sdk.Co
 	const keyMsg = "auction.rewards.coins"
 	key := k.keyRewardsCoins(id)
 	return store.SetValue(k.store, key, &newRewards, keyMsg)
+}
+
+func (k Keeper) storeAllRewardsAuctions(elems []auction.RewardsKV) error {
+	for _, e := range elems {
+		key := k.keyRewardsCoins(e.Id)
+		if err := store.SetValue(k.store, key, &e.Rewards, "auction.store_all_rewards"); err != nil {
+			return err
+		}
+	}
+	return nil
 }

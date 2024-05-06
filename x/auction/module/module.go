@@ -17,6 +17,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/address"
 	"github.com/cosmos/cosmos-sdk/types/module"
 
+	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/auction"
 	// "github.com/umee-network/umee/v6/x/auction/client/cli"
 	"github.com/umee-network/umee/v6/x/auction/keeper"
@@ -140,7 +141,8 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 // ExportGenesis returns the x/auction module's exported genesis state as raw
 // JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	genState := am.kb.Keeper(&ctx).ExportGenesis()
+	genState, err := am.kb.Keeper(&ctx).ExportGenesis()
+	util.Panic(err)
 	return cdc.MustMarshalJSON(genState)
 }
 
