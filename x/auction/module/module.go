@@ -6,21 +6,20 @@ import (
 	"fmt"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/gorilla/mux"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
 
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/auction"
-	// "github.com/umee-network/umee/v6/x/auction/client/cli"
 	"github.com/umee-network/umee/v6/x/auction/keeper"
+	// "github.com/umee-network/umee/v6/x/auction/client/cli"
 )
 
 var (
@@ -133,7 +132,8 @@ func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {}
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genState auction.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	am.kb.Keeper(&ctx).InitGenesis(&genState)
+	err := am.kb.Keeper(&ctx).InitGenesis(&genState)
+	util.Panic(err)
 
 	return []abci.ValidatorUpdate{}
 }

@@ -117,7 +117,7 @@ func (k Keeper) getAllRewardsBids() ([]auction.BidKV, error) {
 func (k Keeper) storeAllRewardsBids(elems []auction.BidKV) error {
 	for _, e := range elems {
 		key := k.keyRewardsBid(e.Id)
-		if err := store.SetValue(k.store, key, &e.Bid, "auction.store_all_bids"); err != nil {
+		if err := store.SetValue(k.store, key, &e.Bid, "auction.store_all_bids"); err != nil { //nolint: gosec
 			return err
 		}
 	}
@@ -159,7 +159,7 @@ func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins sdk.Co
 func (k Keeper) storeAllRewardsAuctions(elems []auction.RewardsKV) error {
 	for _, e := range elems {
 		key := k.keyRewardsCoins(e.Id)
-		if err := store.SetValue(k.store, key, &e.Rewards, "auction.store_all_rewards"); err != nil {
+		if err := store.SetValue(k.store, key, &e.Rewards, "auction.store_all_rewards"); err != nil { //nolint: gosec
 			return err
 		}
 	}
