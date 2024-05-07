@@ -9,6 +9,7 @@ import (
 	"github.com/umee-network/umee/v6/tests/accs"
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	"github.com/umee-network/umee/v6/x/auction"
+	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
 // creates keeper without external dependencies (app, leverage etc...)
@@ -18,7 +19,8 @@ func initKeeper(t *testing.T) TestKeeper {
 	subaccs := SubAccounts{
 		RewardsCollect: accs.GenerateAddr("x/auction/rewards"),
 	}
-	kb := NewBuilder(cdc, storeKey, subaccs, nil, nil)
+	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
+	kb := NewBuilder(cdc, storeKey, subaccs, nil, eg)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 
 	return TestKeeper{kb.Keeper(&ctx), t, &ctx}
