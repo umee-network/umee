@@ -3,8 +3,6 @@ package quota
 import (
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
@@ -21,9 +19,8 @@ const (
 
 // creates keeper without external dependencies (app, leverage etc...)
 func initKeeper(t *testing.T, l uibc.Leverage, o uibc.Oracle) TestKeeper {
+	cdc := tsdk.NewCodec()
 	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
-	ir := cdctypes.NewInterfaceRegistry()
-	cdc := codec.NewProtoCodec(ir)
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	kb := NewBuilder(cdc, storeKey, l, o, eg)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
