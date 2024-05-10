@@ -44,7 +44,7 @@ The leverage module depends directly on `x/oracle` for asset prices, and interac
 
 At the foundation of the `leverage` module is the _Token Registry_, which contains a list of accepted types.
 
-This list is controlled by governance. Assets that are not in the token registry are nor available for borrowing or supplying.
+This list is controlled by governance. Assets that are not in the token registry are not available for borrowing or supplying.
 
 Once added to the token registry, assets cannot be removed. In the rare case where an asset would need to be phased out, it can have supplying or borrowing disabled, or in extreme cases, be ignored by collateral and borrowed value calculations using a blacklist.
 
