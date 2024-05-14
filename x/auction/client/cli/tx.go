@@ -34,7 +34,7 @@ func RewardsBid() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "rewards-bid [auction-id] [uumee-amount]",
 		Args:    cobra.ExactArgs(2),
-		Short:   "Places a bid for a rewords auction, auction-id must be an ID of the current auction",
+		Short:   "Places a bid for a rewards auction, auction-id must be an ID of the current auction",
 		Example: "rewards-bid 12 10000uumee",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cctx, err := client.GetClientTxContext(cmd)
