@@ -18,8 +18,8 @@ import (
 
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/auction"
+	"github.com/umee-network/umee/v6/x/auction/client/cli"
 	"github.com/umee-network/umee/v6/x/auction/keeper"
-	// "github.com/umee-network/umee/v6/x/auction/client/cli"
 )
 
 var (
@@ -81,14 +81,12 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *r
 
 // GetTxCmd returns the x/auction module's root tx command.
 func (a AppModuleBasic) GetTxCmd() *cobra.Command {
-	// TODO return cli.GetTxCmd()
-	return nil
+	return cli.GetTxCmd()
 }
 
 // GetQueryCmd returns the x/auction module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	// TODO return cli.GetQueryCmd()
-	return nil
+	return cli.GetQueryCmd()
 }
 
 // AppModule implements the AppModule interface for the x/auction module.
