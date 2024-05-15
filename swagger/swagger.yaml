@@ -1111,14 +1111,17 @@ paths:
                       uTokens as liquidation rewards.
 
                       Valid values: 0-1.
-                  rewards_auction_factor:
+                  rewards_auction_fee:
                     type: string
                     description: >-
-                      Rewards Auction Factor determines the portion of interest
-                      accrued on
+                      Rewards Auction Fee determines the interest increase that
+                      will be accrued on
 
                       borrows that is sent to the auction module for the rewards
                       auction.
+
+                      So, 2% means, that there is additional 2% per year fee
+                      collected.
 
                       Valid values: 0-1.
                 description: Params defines the parameters for the leverage module.
@@ -5877,10 +5880,11 @@ paths:
                       Rewards Auction Fee Factor determines the portion of total
                       fees collected by the metoken
 
-                      module that will go for the rewards auction. Note: this is
-                      different than x/leverage
+                      module that will go for the rewards auction. 2% means that
+                      2% of collected fees will go to
 
-                      Params.rewards_auction_factor.
+                      the rewards auction. Note: this is different than
+                      x/leverage Params.rewards_auction_fee.
 
                       Valid values: 0-10000 (in basis points, 2000 = 20%).
                 description: Params defines the parameters for the metoken module.
@@ -6602,11 +6606,16 @@ definitions:
           uTokens as liquidation rewards.
 
           Valid values: 0-1.
-      rewards_auction_factor:
+      rewards_auction_fee:
         type: string
-        description: |-
-          Rewards Auction Factor determines the portion of interest accrued on
+        description: >-
+          Rewards Auction Fee determines the interest increase that will be
+          accrued on
+
           borrows that is sent to the auction module for the rewards auction.
+
+          So, 2% means, that there is additional 2% per year fee collected.
+
           Valid values: 0-1.
     description: Params defines the parameters for the leverage module.
   umee.leverage.v1.QueryAccountBalancesResponse:
@@ -7268,14 +7277,16 @@ definitions:
               uTokens as liquidation rewards.
 
               Valid values: 0-1.
-          rewards_auction_factor:
+          rewards_auction_fee:
             type: string
             description: >-
-              Rewards Auction Factor determines the portion of interest accrued
-              on
+              Rewards Auction Fee determines the interest increase that will be
+              accrued on
 
               borrows that is sent to the auction module for the rewards
               auction.
+
+              So, 2% means, that there is additional 2% per year fee collected.
 
               Valid values: 0-1.
         description: Params defines the parameters for the leverage module.
@@ -10558,10 +10569,11 @@ definitions:
           Rewards Auction Fee Factor determines the portion of total fees
           collected by the metoken
 
-          module that will go for the rewards auction. Note: this is different
-          than x/leverage
+          module that will go for the rewards auction. 2% means that 2% of
+          collected fees will go to
 
-          Params.rewards_auction_factor.
+          the rewards auction. Note: this is different than x/leverage
+          Params.rewards_auction_fee.
 
           Valid values: 0-10000 (in basis points, 2000 = 20%).
     description: Params defines the parameters for the metoken module.
@@ -10908,10 +10920,11 @@ definitions:
               Rewards Auction Fee Factor determines the portion of total fees
               collected by the metoken
 
-              module that will go for the rewards auction. Note: this is
-              different than x/leverage
+              module that will go for the rewards auction. 2% means that 2% of
+              collected fees will go to
 
-              Params.rewards_auction_factor.
+              the rewards auction. Note: this is different than x/leverage
+              Params.rewards_auction_fee.
 
               Valid values: 0-10000 (in basis points, 2000 = 20%).
         description: Params defines the parameters for the metoken module.

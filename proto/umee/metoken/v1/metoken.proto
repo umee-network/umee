@@ -20,8 +20,8 @@ message Params {
   int64 claiming_frequency = 2;
 
   // Rewards Auction Fee Factor determines the portion of total fees collected by the metoken
-  // module that will go for the rewards auction. Note: this is different than x/leverage
-  // Params.rewards_auction_factor.
+  // module that will go for the rewards auction. 2% means that 2% of collected fees will go to
+  // the rewards auction. Note: this is different than x/leverage Params.rewards_auction_fee.
   // Valid values: 0-10000 (in basis points, 2000 = 20%).
   uint32 rewards_auction_fee_factor = 3 [
     (gogoproto.customtype) = "github.com/umee-network/umee/v6/util/bpmath.FixedBP",

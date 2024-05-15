@@ -35,8 +35,8 @@ type Params struct {
 	// leverage module
 	ClaimingFrequency int64 `protobuf:"varint,2,opt,name=claiming_frequency,json=claimingFrequency,proto3" json:"claiming_frequency,omitempty"`
 	// Rewards Auction Fee Factor determines the portion of total fees collected by the metoken
-	// module that will go for the rewards auction. Note: this is different than x/leverage
-	// Params.rewards_auction_factor.
+	// module that will go for the rewards auction. 2% means that 2% of collected fees will go to
+	// the rewards auction. Note: this is different than x/leverage Params.rewards_auction_fee.
 	// Valid values: 0-10000 (in basis points, 2000 = 20%).
 	RewardsAuctionFeeFactor github_com_umee_network_umee_v6_util_bpmath.FixedBP `protobuf:"varint,3,opt,name=rewards_auction_fee_factor,json=rewardsAuctionFeeFactor,proto3,customtype=github.com/umee-network/umee/v6/util/bpmath.FixedBP" json:"rewards_auction_fee_factor"`
 }

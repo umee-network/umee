@@ -66,7 +66,7 @@ func (app *UmeeApp) registerUpgrade6_5(upgradeInfo upgradetypes.Plan) {
 
 			// update leverage and metoken params to include burn auction fee share.
 			lparams := app.LeverageKeeper.GetParams(ctx)
-			lparams.RewardsAuctionFactor = leveragetypes.DefaultParams().RewardsAuctionFactor
+			lparams.RewardsAuctionFee = leveragetypes.DefaultParams().RewardsAuctionFee
 			if err := app.LeverageKeeper.SetParams(ctx, lparams); err != nil {
 				return nil, err
 			}
