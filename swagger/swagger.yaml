@@ -5870,14 +5870,17 @@ paths:
                       often metoken module will claim accrued interest from
 
                       leverage module
-                  rewards_auction_factor:
+                  rewards_auction_fee_factor:
                     type: integer
                     format: int64
                     description: >-
-                      Rewards Auction Factor determines the portion of swap and
-                      redeem fee that is sent to the
+                      Rewards Auction Fee Factor determines the portion of total
+                      fees collected by the metoken
 
-                      auction module for the rewards auction.
+                      module that will go for the rewards auction. Note: this is
+                      different than x/leverage
+
+                      Params.rewards_auction_factor.
 
                       Valid values: 0-10000 (in basis points, 2000 = 20%).
                 description: Params defines the parameters for the metoken module.
@@ -10548,14 +10551,17 @@ definitions:
           module will claim accrued interest from
 
           leverage module
-      rewards_auction_factor:
+      rewards_auction_fee_factor:
         type: integer
         format: int64
         description: >-
-          Rewards Auction Factor determines the portion of swap and redeem fee
-          that is sent to the
+          Rewards Auction Fee Factor determines the portion of total fees
+          collected by the metoken
 
-          auction module for the rewards auction.
+          module that will go for the rewards auction. Note: this is different
+          than x/leverage
+
+          Params.rewards_auction_factor.
 
           Valid values: 0-10000 (in basis points, 2000 = 20%).
     description: Params defines the parameters for the metoken module.
@@ -10895,14 +10901,17 @@ definitions:
               metoken module will claim accrued interest from
 
               leverage module
-          rewards_auction_factor:
+          rewards_auction_fee_factor:
             type: integer
             format: int64
             description: >-
-              Rewards Auction Factor determines the portion of swap and redeem
-              fee that is sent to the
+              Rewards Auction Fee Factor determines the portion of total fees
+              collected by the metoken
 
-              auction module for the rewards auction.
+              module that will go for the rewards auction. Note: this is
+              different than x/leverage
+
+              Params.rewards_auction_factor.
 
               Valid values: 0-10000 (in basis points, 2000 = 20%).
         description: Params defines the parameters for the metoken module.

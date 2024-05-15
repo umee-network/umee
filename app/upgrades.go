@@ -73,7 +73,7 @@ func (app *UmeeApp) registerUpgrade6_5(upgradeInfo upgradetypes.Plan) {
 
 			mekeeper := app.MetokenKeeperB.Keeper(&ctx)
 			meparams := mekeeper.GetParams()
-			meparams.RewardsAuctionFactor = metoken.DefaultParams().RewardsAuctionFactor
+			meparams.RewardsAuctionFeeFactor = metoken.DefaultParams().RewardsAuctionFeeFactor
 			if err := mekeeper.SetParams(meparams); err != nil {
 				return nil, err
 			}
