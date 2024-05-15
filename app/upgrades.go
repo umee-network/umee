@@ -23,6 +23,7 @@ import (
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
@@ -50,9 +51,40 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
 	app.registerUpgrade("v6.3", upgradeInfo, nil, nil, nil)
-
 	app.registerUpgrade6_4(upgradeInfo)
-	app.registerUpgrade("v6.5", upgradeInfo, nil, []string{crisistypes.ModuleName}, nil)
+
+	app.registerUpgrade6_5(upgradeInfo)
+}
+
+func (app *UmeeApp) registerUpgrade6_5(upgradeInfo upgradetypes.Plan) {
+	planName := "v6.5"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			printPlanName(planName, ctx.Logger())
+
+			// update leverage and metoken params to include burn auction fee share.
+			lparams := app.LeverageKeeper.GetParams(ctx)
+			lparams.RewardsAuctionFactor = leveragetypes.DefaultParams().RewardsAuctionFactor
+			if err := app.LeverageKeeper.SetParams(ctx, lparams); err != nil {
+				return err
+			}
+
+			mekeeper := app.MetokenKeeperB.Keeper(&ctx)
+			meparams := mekeeper.GetParams()
+			meparams.RewardsAuctionFactor = metoken.DefaultParams().RewardsAuctionFactor
+			if err := mekeeper.SetParams(meparams); err != nil {
+				return err
+			}
+
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+
+	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
+		Added: []string{auction.ModuleName},
+		Deleted: []string{crisistypes.ModuleName}
+	})
 }
 
 func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
