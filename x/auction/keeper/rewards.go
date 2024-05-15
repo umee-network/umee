@@ -11,6 +11,7 @@ import (
 
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/auction"
 )
@@ -33,7 +34,10 @@ func (k Keeper) FinalizeRewardsAuction() error {
 		if err != nil {
 			return fmt.Errorf("can't burn rewards auction bid [%w]", err)
 		}
-
+		sdkutil.Emit(k.ctx, &auction.EventRewardsAuctionResult{
+			Id:     id,
+			Bidder: sdk.AccAddress(bid.Bidder).String(),
+		})
 	} else if len(a.Rewards) != 0 {
 		// rollover the past rewards if there was no bidder
 		newCoins = newCoins.Add(a.Rewards...)

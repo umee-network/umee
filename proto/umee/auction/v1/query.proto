@@ -18,7 +18,7 @@ service Query {
     option (google.api.http).get = "/umee/auction/v1/rewards/params";
   }
   // RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
-  // current reward auction params.
+  // current reward auction.
   rpc RewardsAuction(QueryRewardsAuction) returns (QueryRewardsAuctionResponse) {
     option (google.api.http).get = "/umee/auction/v1/rewards";
   }
