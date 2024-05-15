@@ -22,6 +22,7 @@ import (
 
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util"
+	"github.com/umee-network/umee/v6/x/auction"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
 )
@@ -67,14 +68,14 @@ func (app *UmeeApp) registerUpgrade6_5(upgradeInfo upgradetypes.Plan) {
 			lparams := app.LeverageKeeper.GetParams(ctx)
 			lparams.RewardsAuctionFactor = leveragetypes.DefaultParams().RewardsAuctionFactor
 			if err := app.LeverageKeeper.SetParams(ctx, lparams); err != nil {
-				return err
+				return nil, err
 			}
 
 			mekeeper := app.MetokenKeeperB.Keeper(&ctx)
 			meparams := mekeeper.GetParams()
 			meparams.RewardsAuctionFactor = metoken.DefaultParams().RewardsAuctionFactor
 			if err := mekeeper.SetParams(meparams); err != nil {
-				return err
+				return nil, err
 			}
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
@@ -82,8 +83,8 @@ func (app *UmeeApp) registerUpgrade6_5(upgradeInfo upgradetypes.Plan) {
 	)
 
 	app.storeUpgrade(planName, upgradeInfo, storetypes.StoreUpgrades{
-		Added: []string{auction.ModuleName},
-		Deleted: []string{crisistypes.ModuleName}
+		Added:   []string{auction.ModuleName},
+		Deleted: []string{crisistypes.ModuleName},
 	})
 }
 
