@@ -62,7 +62,7 @@ func (k Keeper) DeriveSupplyAPY(ctx sdk.Context, denom string) sdk.Dec {
 	borrowRate := k.DeriveBorrowAPY(ctx, denom)
 	utilization := k.SupplyUtilization(ctx, denom)
 	params := k.GetParams(ctx)
-	reduction := params.OracleRewardFactor.Add(params.RewardsAuctionFactor).Add(token.ReserveFactor)
+	reduction := params.OracleRewardFactor.Add(params.RewardsAuctionFee).Add(token.ReserveFactor)
 
 	// supply APY = borrow APY * utilization, reduced by reserve factor and oracle reward factor
 	return borrowRate.Mul(utilization).Mul(sdk.OneDec().Sub(reduction))
@@ -156,7 +156,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		))
 		auctionRewards = auctionRewards.Add(sdk.NewCoin(
 			token.BaseDenom,
-			interestAccrued.Mul(params.RewardsAuctionFactor).TruncateInt(),
+			interestAccrued.Mul(params.RewardsAuctionFee).TruncateInt(),
 		))
 	}
 
