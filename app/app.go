@@ -490,7 +490,9 @@ func New(
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
+		keys[authtypes.StoreKey],
 		app.BankKeeper,
+		app.AccountKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
