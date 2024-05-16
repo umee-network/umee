@@ -34,7 +34,7 @@ func GetQueryCmd() *cobra.Command {
 		QueryMarketSummary(),
 		QueryAccountBalances(),
 		QueryAccountSummary(),
-		QUeryAccountsSummary(),
+		QueryAccountsSummary(),
 		QueryLiquidationTargets(),
 		QueryBadDebts(),
 		QueryMaxWithdraw(),
@@ -209,7 +209,7 @@ func QueryAccountSummary() *cobra.Command {
 
 // QueryAccountsSummary creates a Cobra command to query the USD
 // values representing an all account's positions and borrowing limits.
-func QUeryAccountsSummary() *cobra.Command {
+func QueryAccountsSummary() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "accounts-summary",
 		Args:  cobra.NoArgs,
