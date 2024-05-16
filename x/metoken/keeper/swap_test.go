@@ -41,7 +41,7 @@ func TestSwap_Valid(t *testing.T) {
 	usdBal2, n := indexBal2.AssetBalance(tenUSDT.Denom)
 	assert.GreaterOrEqual(n, 0)
 	usdBal1, _ := indexBal1.AssetBalance(tenUSDT.Denom)
-	toAuction := params.RewardsAuctionFactor.Mul(resp.fee.Amount)
+	toAuction := params.RewardsAuctionFeeFactor.Mul(resp.fee.Amount)
 	assert.Equal(usdBal2.Fees.Sub(usdBal1.Fees), resp.fee.Amount.Sub(toAuction))
 
 	// exchange_rate = coin_price / metoken_price
@@ -88,7 +88,7 @@ func TestBreakFees(t *testing.T) {
 	assert := assert.New(t)
 	k := initMeUSDNoopKeper(t)
 	p := k.GetParams()
-	assert.EqualValues(p.RewardsAuctionFactor, 1000)
+	assert.EqualValues(p.RewardsAuctionFeeFactor, 1000)
 
 	amount := sdkmath.NewInt(2_000)
 	toAuction, toRevenue := k.breakFee(amount)

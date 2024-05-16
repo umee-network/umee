@@ -896,7 +896,7 @@ func verifySwap(
 
 	// totalfee = feeRate * amount
 	totalFee := sdk.NewCoin(denom, feeRate.MulInt(tc.asset.Amount).TruncateInt())
-	feeToAuction := params.RewardsAuctionFactor.Mul(totalFee.Amount)
+	feeToAuction := params.RewardsAuctionFeeFactor.Mul(totalFee.Amount)
 	feeToReserve := totalFee.Amount.Sub(feeToAuction)
 
 	// amount_to_swap = swap_amount - fee
@@ -1718,7 +1718,7 @@ func verifyRedeem(
 
 	// totalfee = feeRate * amount_to_redeem
 	totalFee := sdk.NewCoin(tc.denom, feeRate.MulInt(amountToWithdraw).TruncateInt())
-	feeToAuction := params.RewardsAuctionFactor.Mul(totalFee.Amount)
+	feeToAuction := params.RewardsAuctionFeeFactor.Mul(totalFee.Amount)
 	feeToReserve := totalFee.Amount.Sub(feeToAuction)
 
 	amountToRedeem := amountToWithdraw.Sub(totalFee.Amount)

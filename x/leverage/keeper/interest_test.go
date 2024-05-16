@@ -37,7 +37,7 @@ func (s *IntegrationTestSuite) TestAccrueZeroInterest() {
 	require.Equal(sdk.MustNewDecFromStr("0.03"), borrowAPY)
 
 	// supply APY when borrow APY is 3%
-	// and utilization is 4%, and reserve factor=20%, OracleRewardFactor=1% RewardsAuctionFactor=2%
+	// and utilization is 4%, and reserve factor=20%, OracleRewardFactor=1% RewardsAuctionFee=2%
 	// 0.03 * 0.04 * (1 - 0.2 - 0.01 - 0.02)
 	supplyAPY := app.LeverageKeeper.DeriveSupplyAPY(ctx, appparams.BondDenom)
 	require.Equal(sdk.MustNewDecFromStr("0.000924"), supplyAPY)
