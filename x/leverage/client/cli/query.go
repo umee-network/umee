@@ -34,7 +34,7 @@ func GetQueryCmd() *cobra.Command {
 		QueryMarketSummary(),
 		QueryAccountBalances(),
 		QueryAccountSummary(),
-		QueryAccountsSummary(),
+		QueryAccountSummaries(),
 		QueryLiquidationTargets(),
 		QueryBadDebts(),
 		QueryMaxWithdraw(),
@@ -207,11 +207,11 @@ func QueryAccountSummary() *cobra.Command {
 	return cmd
 }
 
-// QueryAccountsSummary creates a Cobra command to query the USD
+// QueryAccountSummaries creates a Cobra command to query the USD
 // values representing an all account's positions and borrowing limits.
-func QueryAccountsSummary() *cobra.Command {
+func QueryAccountSummaries() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "accounts-summary",
+		Use:   "account-summaries",
 		Args:  cobra.NoArgs,
 		Short: "Query the position USD values and borrowing limits for an all accounts.",
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -226,16 +226,16 @@ func QueryAccountsSummary() *cobra.Command {
 			}
 
 			queryClient := types.NewQueryClient(clientCtx)
-			req := &types.QueryAccountsSummary{
+			req := &types.QueryAccountSummaries{
 				Pagination: pageReq,
 			}
-			resp, err := queryClient.AccountsSummary(cmd.Context(), req)
+			resp, err := queryClient.AccountSummaries(cmd.Context(), req)
 			return cli.PrintOrErr(resp, err, clientCtx)
 		},
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
-	flags.AddPaginationFlagsToCmd(cmd, "accounts-summary")
+	flags.AddPaginationFlagsToCmd(cmd, "account-summaries")
 
 	return cmd
 }

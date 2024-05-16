@@ -89,9 +89,9 @@ func (q Querier) accountSummary(ctx sdk.Context, addr sdk.AccAddress) (*types.Qu
 	return resp, nil
 }
 
-// AccountsSummary implements types.QueryServer.
-func (q Querier) AccountsSummary(goCtx context.Context, req *types.QueryAccountsSummary) (
-	*types.QueryAccountsSummaryResponse, error,
+// AccountSummaries implements types.QueryServer.
+func (q Querier) AccountSummaries(goCtx context.Context, req *types.QueryAccountSummaries) (
+	*types.QueryAccountSummariesResponse, error,
 ) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "empty request")
@@ -118,7 +118,7 @@ func (q Querier) AccountsSummary(goCtx context.Context, req *types.QueryAccounts
 		return nil
 	})
 
-	return &types.QueryAccountsSummaryResponse{AccountsSummary: accounts, Pagination: pageRes}, err
+	return &types.QueryAccountSummariesResponse{AccountSummaries: accounts, Pagination: pageRes}, err
 }
 
 // AccountSummary implements types.QueryServer.
