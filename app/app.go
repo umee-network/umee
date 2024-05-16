@@ -551,6 +551,8 @@ func New(
 		app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(),
 	)
 
+	app.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
+
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquota.NewBuilder(
 		appCodec, keys[uibc.StoreKey],
