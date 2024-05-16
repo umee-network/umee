@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/leverage/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -107,14 +108,24 @@ func (q Querier) AccountSummaries(goCtx context.Context, req *types.QueryAccount
 		if err != nil {
 			return err
 		}
-		accSummary, err := q.accountSummary(ctx, acc.GetAddress())
-		if err != nil {
-			return err
+		balance := q.bankKeeper.GetAllBalances(ctx, acc.GetAddress())
+		hasUToken := false
+		for _, c := range balance {
+			if coin.HasUTokenPrefix(c.Denom) {
+				hasUToken = true
+				break
+			}
 		}
-		accounts = append(accounts, &types.AccountSummary{
-			Address:        acc.GetAddress().String(),
-			AccountSummary: accSummary,
-		})
+		if hasUToken {
+			accSummary, err := q.accountSummary(ctx, acc.GetAddress())
+			if err != nil {
+				return err
+			}
+			accounts = append(accounts, &types.AccountSummary{
+				Address:        acc.GetAddress().String(),
+				AccountSummary: accSummary,
+			})
+		}
 		return nil
 	})
 
