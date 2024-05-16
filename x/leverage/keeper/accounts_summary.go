@@ -86,7 +86,7 @@ func (q Querier) accountSummary(ctx sdk.Context, addr sdk.AccAddress) (*types.Qu
 		resp.LiquidationThreshold = &liquidationThreshold
 	}
 
-	return resp, err
+	return resp, nil
 }
 
 // AccountsSummary implements types.QueryServer.
