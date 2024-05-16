@@ -24,7 +24,6 @@ import (
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/auction"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
-	"github.com/umee-network/umee/v6/x/metoken"
 )
 
 // RegisterUpgradeHandlersregisters upgrade handlers.
