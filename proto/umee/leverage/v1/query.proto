@@ -6,6 +6,7 @@ import "umee/leverage/v1/genesis.proto";
 import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/leverage/types";
 
@@ -52,6 +53,12 @@ service Query {
   rpc AccountSummary(QueryAccountSummary)
       returns (QueryAccountSummaryResponse) {
     option (google.api.http).get = "/umee/leverage/v1/account_summary";
+  }
+
+  // AccountSummaries queries USD values representing an account's total positions and borrowing limits. It requires oracle prices to return successfully.
+  rpc AccountSummaries(QueryAccountSummaries)
+      returns (QueryAccountSummariesResponse) {
+    option (google.api.http).get = "/umee/leverage/v1/accounts_summary";
   }
 
   // LiquidationTargets queries a list of all borrower account addresses eligible for liquidation.
@@ -339,6 +346,25 @@ message QueryAccountSummaryResponse {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
     (gogoproto.nullable)   = false
   ];
+}
+
+// QueryAccountSummaries defines the request structure for the AccountSummaries gRPC service handler.
+message QueryAccountSummaries {
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// AccountSummary is holds account_summary with address.
+message AccountSummary {
+  string                      address         = 1;
+  QueryAccountSummaryResponse account_summary = 2;
+}
+
+// QueryAccountSummariesResponse defines the response structure for the AccountSummaries gRPC service handler.
+message QueryAccountSummariesResponse {
+  repeated AccountSummary account_summaries = 1;
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }
 
 // QueryLiquidationTargets defines the request structure for the LiquidationTargets gRPC service handler.
