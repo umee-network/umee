@@ -10,7 +10,7 @@ import (
 // DefaultGenesis creates a default genesis state
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
-		RewardsParams:   RewardsParams{BidDuration: 14 * 24 * 3600}, // 14 days
+		RewardsParams:   RewardsParams{BidDuration: 4 * 3600}, // 4 hours. NOTE: this is for testing!
 		RewardAuctionId: 0,
 		RewardsAuctions: []RewardsKV{},
 		RewardsBids:     []BidKV{},
