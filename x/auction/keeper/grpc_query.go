@@ -29,6 +29,7 @@ func (q Querier) RewardsParams(goCtx context.Context, _ *auction.QueryRewardsPar
 }
 
 // RewardsAuction returns params of the x/auction module.
+// Bidder and Bid are nul if there is no active auction.
 func (q Querier) RewardsAuction(goCtx context.Context, msg *auction.QueryRewardsAuction) (
 	*auction.QueryRewardsAuctionResponse, error,
 ) {

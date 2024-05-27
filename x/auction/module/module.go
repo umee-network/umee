@@ -6,19 +6,19 @@ import (
 	"fmt"
 
 	abci "github.com/cometbft/cometbft/abci/types"
-	"github.com/gorilla/mux"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/spf13/cobra"
-
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/codec"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/address"
 	"github.com/cosmos/cosmos-sdk/types/module"
+	"github.com/gorilla/mux"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	"github.com/spf13/cobra"
 
+	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/auction"
-	// "github.com/umee-network/umee/v6/x/auction/client/cli"
+	"github.com/umee-network/umee/v6/x/auction/client/cli"
 	"github.com/umee-network/umee/v6/x/auction/keeper"
 )
 
@@ -81,14 +81,12 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *r
 
 // GetTxCmd returns the x/auction module's root tx command.
 func (a AppModuleBasic) GetTxCmd() *cobra.Command {
-	// TODO return cli.GetTxCmd()
-	return nil
+	return cli.GetTxCmd()
 }
 
 // GetQueryCmd returns the x/auction module's root query command.
 func (AppModuleBasic) GetQueryCmd() *cobra.Command {
-	// TODO return cli.GetQueryCmd()
-	return nil
+	return cli.GetQueryCmd()
 }
 
 // AppModule implements the AppModule interface for the x/auction module.
@@ -132,7 +130,8 @@ func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {}
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genState auction.GenesisState
 	cdc.MustUnmarshalJSON(data, &genState)
-	am.kb.Keeper(&ctx).InitGenesis(&genState)
+	err := am.kb.Keeper(&ctx).InitGenesis(&genState)
+	util.Panic(err)
 
 	return []abci.ValidatorUpdate{}
 }
@@ -140,7 +139,8 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 // ExportGenesis returns the x/auction module's exported genesis state as raw
 // JSON bytes.
 func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
-	genState := am.kb.Keeper(&ctx).ExportGenesis()
+	genState, err := am.kb.Keeper(&ctx).ExportGenesis()
+	util.Panic(err)
 	return cdc.MustMarshalJSON(genState)
 }
 

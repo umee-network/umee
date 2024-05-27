@@ -131,3 +131,15 @@ func TestFixedBPMulDec(t *testing.T) {
 	require.Equal(sdk.MustNewDecFromStr("6.2501"), bp3.MulDec(d))
 	require.Equal(sdk.MustNewDecFromStr("25.0004"), bp4.MulDec(d))
 }
+
+func TestFixedBPEqual(t *testing.T) {
+	t.Parallel()
+	require := require.New(t)
+
+	var b1 FixedBP = 1
+	var b2 FixedBP = 1
+	var b3 FixedBP = 10
+	require.True(b1.Equal(b2))
+	require.True(b2.Equal(b2))
+	require.False(b1.Equal(b3))
+}

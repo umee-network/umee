@@ -250,7 +250,7 @@ type QueryClient interface {
 	// QueryRewardParams queries parameters for the reward auciton.
 	RewardsParams(ctx context.Context, in *QueryRewardsParams, opts ...grpc.CallOption) (*QueryRewardsParamsResponse, error)
 	// RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
-	// current reward auction params.
+	// current reward auction.
 	RewardsAuction(ctx context.Context, in *QueryRewardsAuction, opts ...grpc.CallOption) (*QueryRewardsAuctionResponse, error)
 }
 
@@ -285,7 +285,7 @@ type QueryServer interface {
 	// QueryRewardParams queries parameters for the reward auciton.
 	RewardsParams(context.Context, *QueryRewardsParams) (*QueryRewardsParamsResponse, error)
 	// RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
-	// current reward auction params.
+	// current reward auction.
 	RewardsAuction(context.Context, *QueryRewardsAuction) (*QueryRewardsAuctionResponse, error)
 }
 

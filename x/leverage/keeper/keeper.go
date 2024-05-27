@@ -7,6 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -17,11 +18,13 @@ import (
 type Keeper struct {
 	cdc                    codec.BinaryCodec
 	storeKey               storetypes.StoreKey
+	akStoreKey             storetypes.StoreKey
 	bankKeeper             types.BankKeeper
+	authKeeper             authkeeper.AccountKeeper
 	oracleKeeper           types.OracleKeeper
 	ugov                   ugov.EmergencyGroupBuilder
 	liquidatorQueryEnabled bool
-	meTokenAddr            sdk.AccAddress
+	rewardsAuction         sdk.AccAddress
 
 	tokenHooks []types.TokenHooks
 	bondHooks  []types.BondHooks
@@ -30,11 +33,13 @@ type Keeper struct {
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
+	akStoreKey storetypes.StoreKey,
 	b types.BankKeeper,
+	ak authkeeper.AccountKeeper,
 	o types.OracleKeeper,
 	ugov ugov.EmergencyGroupBuilder,
 	enableLiquidatorQuery bool,
-	meTokenAddr sdk.AccAddress,
+	rewardsAuction sdk.AccAddress,
 ) Keeper {
 	return Keeper{
 		cdc:                    cdc,
@@ -43,7 +48,9 @@ func NewKeeper(
 		oracleKeeper:           o,
 		ugov:                   ugov,
 		liquidatorQueryEnabled: enableLiquidatorQuery,
-		meTokenAddr:            meTokenAddr,
+		rewardsAuction:         rewardsAuction,
+		akStoreKey:             akStoreKey,
+		authKeeper:             ak,
 	}
 }
 

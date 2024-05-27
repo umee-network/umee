@@ -1,6 +1,8 @@
 package store
 
 import (
+	"fmt"
+
 	"github.com/umee-network/umee/v6/util"
 
 	db "github.com/cometbft/cometbft-db"
@@ -41,7 +43,7 @@ func iterate(iter db.Iterator, cb func(key, val []byte) error) error {
 }
 
 // LoadAll iterates over all records in the prefix store and unmarshals value into the list.
-func LoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []byte) ([]T, error) {
+func LoadAll[TPtr PtrUnmarshalable[T], T any](s storetypes.KVStore, prefix []byte) ([]T, error) {
 	iter := sdk.KVStorePrefixIterator(s, prefix)
 	defer iter.Close()
 	out := make([]T, 0)
@@ -57,10 +59,33 @@ func LoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []byte)
 }
 
 // MustLoadAll executes LoadAll and panics on error
-func MustLoadAll[TPtr PtrMarshalable[T], T any](s storetypes.KVStore, prefix []byte) []T {
+func MustLoadAll[TPtr PtrUnmarshalable[T], T any](s storetypes.KVStore, prefix []byte) []T {
 	ls, err := LoadAll[TPtr, T](s, prefix)
 	util.Panic(err)
 	return ls
+}
+
+// LoadAllKV iterates over all records in the prefix store and unmarshals value into the list.
+func LoadAllKV[KPtr PtrUnmarshalable[K], K any, TPtr PtrUnmarshalable[T], T any](
+	s storetypes.KVStore, prefix []byte) ([]KV[K, T], error) {
+
+	iter := sdk.KVStorePrefixIterator(s, prefix)
+	defer iter.Close()
+	out := make([]KV[K, T], 0)
+	for ; iter.Valid(); iter.Next() {
+		var o TPtr = new(T)
+		if err := o.Unmarshal(iter.Value()); err != nil {
+			return nil, fmt.Errorf("can not unmarshal value: %w", err)
+		}
+		var k KPtr = new(K)
+		bz := iter.Key()[len(prefix):]
+		if err := k.Unmarshal(bz); err != nil {
+			return nil, fmt.Errorf("can not unmarshal key: %w", err)
+		}
+		out = append(out, KV[K, T]{*k, *o})
+	}
+
+	return out, nil
 }
 
 // SumCoins aggregates all coins saved as (denom: Int) pairs in store. Use store/prefix.NewStore

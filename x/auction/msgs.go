@@ -18,8 +18,8 @@ var (
 const minBidDuration = 3600 // 1h in seconds
 
 // MinRewardsBid is the minimum increase of the previous bid or the minimum bid if it's the
-// first one. 10 UX = 10e6uumee
-var MinRewardsBid = sdk.NewInt(10_000_000)
+// first one. 50 UX = 50e6uumee
+var MinRewardsBid = sdk.NewInt(50_000_000)
 
 //
 // MsgGovSetRewardsParams

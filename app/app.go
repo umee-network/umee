@@ -478,14 +478,25 @@ func New(
 		distrtypes.ModuleName,
 	)
 
+	rewardsAuctionAccs := auctionmodule.SubAccounts()
+	app.AuctionKeeperB = auctionkeeper.NewBuilder(
+		appCodec,
+		keys[auction.StoreKey],
+		rewardsAuctionAccs,
+		app.BankKeeper,
+		app.UGovKeeperB.EmergencyGroup,
+	)
+
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
+		keys[authtypes.StoreKey],
 		app.BankKeeper,
+		app.AccountKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
-		authtypes.NewModuleAddress(metoken.ModuleName),
+		rewardsAuctionAccs.RewardsCollect,
 	)
 
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
@@ -505,14 +516,7 @@ func New(
 		app.LeverageKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
-	)
-
-	app.AuctionKeeperB = auctionkeeper.NewBuilder(
-		appCodec,
-		keys[auction.StoreKey],
-		auctionmodule.SubAccounts(),
-		app.BankKeeper,
-		app.UGovKeeperB.EmergencyGroup,
+		rewardsAuctionAccs.RewardsCollect,
 	)
 
 	// register the staking hooks
@@ -548,6 +552,8 @@ func New(
 		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(),
 	)
+
+	app.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquota.NewBuilder(
