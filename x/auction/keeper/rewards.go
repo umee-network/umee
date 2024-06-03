@@ -28,7 +28,7 @@ func (k Keeper) FinalizeRewardsAuction() error {
 
 	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
 	bid, _ := k.getRewardsBid(id)
-	if len(bid.Bidder) != 0 {
+	if bid != nil && len(bid.Bidder) != 0 {
 		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, a.Rewards)
 		if err != nil {
 			return fmt.Errorf("can't send coins to finalize the auction [%w]", err)
