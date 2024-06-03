@@ -19,13 +19,16 @@ import (
 func (k Keeper) FinalizeRewardsAuction() error {
 	now := k.ctx.BlockTime()
 	a, id := k.getRewardsAuction(0)
+	if a == nil {
+		return k.initNewAuction(id+1, []sdk.Coin{})
+	}
 	if !a.EndsAt.After(now) {
 		return nil
 	}
 
 	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
 	bid, _ := k.getRewardsBid(id)
-	if len(bid.Bidder) == 0 {
+	if bid != nil && len(bid.Bidder) != 0 {
 		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, a.Rewards)
 		if err != nil {
 			return fmt.Errorf("can't send coins to finalize the auction [%w]", err)
@@ -43,11 +46,14 @@ func (k Keeper) FinalizeRewardsAuction() error {
 		newCoins = newCoins.Add(a.Rewards...)
 	}
 
-	id++
+	return k.initNewAuction(id+1, newCoins)
+}
+
+func (k Keeper) initNewAuction(id uint32, rewards sdk.Coins) error {
 	store.SetInteger(k.store, keyRewardsCurrentID, id)
 	params := k.GetRewardsParams()
-	endsAt := now.Add(time.Duration(params.BidDuration) * time.Second)
-	return k.storeNewRewardsAuction(id, endsAt, newCoins)
+	endsAt := k.ctx.BlockTime().Add(time.Duration(params.BidDuration) * time.Second)
+	return k.storeNewRewardsAuction(id, endsAt, rewards)
 }
 
 func (k Keeper) currentRewardsAuctionID() uint32 {
@@ -153,7 +159,7 @@ func (k Keeper) getAllRewardsAuctions() ([]auction.RewardsKV, error) {
 	return rewards, nil
 }
 
-func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins sdk.Coins) error {
+func (k Keeper) storeNewRewardsAuction(id uint32, endsAt time.Time, coins []sdk.Coin) error {
 	newRewards := auction.Rewards{EndsAt: endsAt, Rewards: coins}
 	const keyMsg = "auction.rewards.coins"
 	key := k.keyRewardsCoins(id)
