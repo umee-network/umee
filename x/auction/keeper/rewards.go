@@ -22,7 +22,8 @@ func (k Keeper) FinalizeRewardsAuction() error {
 	if a == nil {
 		return k.initNewAuction(id+1, []sdk.Coin{})
 	}
-	if !a.EndsAt.After(now) {
+
+	if a.EndsAt.After(now) {
 		return nil
 	}
 
