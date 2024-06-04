@@ -52,7 +52,6 @@ func (k Keeper) FinalizeRewardsAuction() error {
 func (k Keeper) initNewAuction(id uint32, rewards sdk.Coins) error {
 	store.SetInteger(k.store, keyRewardsCurrentID, id)
 	params := k.GetRewardsParams()
-	fmt.Println("duration ", time.Duration(params.BidDuration)*time.Second)
 	endsAt := k.ctx.BlockTime().Add(time.Duration(params.BidDuration) * time.Second)
 	return k.storeNewRewardsAuction(id, endsAt, rewards)
 }
