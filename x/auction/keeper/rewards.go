@@ -18,10 +18,11 @@ import (
 
 func (k Keeper) FinalizeRewardsAuction() error {
 	now := k.ctx.BlockTime()
-	a, id := k.getRewardsAuction(k.currentRewardsAuctionID())
+	a, id := k.getRewardsAuction(0)
 	if a == nil {
 		return k.initNewAuction(id+1, []sdk.Coin{})
 	}
+
 	if a.EndsAt.After(now) {
 		return nil
 	}
