@@ -73,7 +73,7 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	lastBid := store.GetValue[*auction.Bid](k.store, key, keyMsg)
 	minBid := auction.MinRewardsBid
 	if lastBid != nil {
-		minBid = lastBid.Amount
+		minBid = lastBid.Amount.Add(minBid)
 	}
 	if err := auction.ValidateMinRewardsBid(minBid, msg.Amount); err != nil {
 		return err
