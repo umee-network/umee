@@ -73,7 +73,7 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	lastBid := store.GetValue[*auction.Bid](k.store, key, keyMsg)
 	minBid := auction.MinRewardsBid
 	if lastBid != nil {
-		minBid = lastBid.Amount.Add(minBid)
+		minBid = lastBid.Amount
 	}
 	if err := auction.ValidateMinRewardsBid(minBid, msg.Amount); err != nil {
 		return err
@@ -82,18 +82,24 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	util.Panic(err)
 
-	if !bytes.Equal(sender, lastBid.Bidder) {
-		returned := coin.UmeeInt(lastBid.Amount)
-		if err = k.sendFromModule(lastBid.Bidder, returned); err != nil {
-			return err
-		}
+	if lastBid == nil {
 		if err = k.sendToModule(sender, msg.Amount); err != nil {
 			return err
 		}
 	} else {
-		diff := msg.Amount.SubAmount(lastBid.Amount)
-		if err = k.sendToModule(sender, diff); err != nil {
-			return err
+		if !bytes.Equal(sender, lastBid.Bidder) {
+			returned := coin.UmeeInt(lastBid.Amount)
+			if err = k.sendFromModule(lastBid.Bidder, returned); err != nil {
+				return err
+			}
+			if err = k.sendToModule(sender, msg.Amount); err != nil {
+				return err
+			}
+		} else {
+			diff := msg.Amount.SubAmount(lastBid.Amount)
+			if err = k.sendToModule(sender, diff); err != nil {
+				return err
+			}
 		}
 	}
 
