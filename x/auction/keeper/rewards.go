@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strconv"
@@ -30,7 +29,11 @@ func (k Keeper) FinalizeRewardsAuction() error {
 	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
 	bid, _ := k.getRewardsBid(id)
 	if bid != nil && len(bid.Bidder) != 0 {
-		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, a.Rewards)
+		bidderAccAddr, err := sdk.AccAddressFromBech32(bid.Bidder)
+		if err != nil {
+			return err
+		}
+		err = k.sendCoins(k.accs.RewardsCollect, bidderAccAddr, a.Rewards)
 		if err != nil {
 			return fmt.Errorf("can't send coins to finalize the auction [%w]", err)
 		}
@@ -87,9 +90,13 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 			return err
 		}
 	} else {
-		if !bytes.Equal(sender, lastBid.Bidder) {
+		bidderAccAddr, err := sdk.AccAddressFromBech32(lastBid.Bidder)
+		if err != nil {
+			return err
+		}
+		if msg.Sender == lastBid.Bidder {
 			returned := coin.UmeeInt(lastBid.Amount)
-			if err = k.sendFromModule(lastBid.Bidder, returned); err != nil {
+			if err = k.sendFromModule(bidderAccAddr, returned); err != nil {
 				return err
 			}
 			if err = k.sendToModule(sender, msg.Amount); err != nil {
@@ -103,7 +110,7 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 		}
 	}
 
-	bid := auction.Bid{Bidder: sender, Amount: msg.Amount.Amount}
+	bid := auction.Bid{Bidder: msg.Sender, Amount: msg.Amount.Amount}
 	return store.SetValue(k.store, key, &bid, keyMsg)
 }
 
@@ -117,8 +124,7 @@ func (k Keeper) getRewardsBid(id uint32) (*auction.Bid, uint32) {
 }
 
 func (k Keeper) getAllRewardsBids() ([]auction.BidKV, error) {
-	elems, err := store.LoadAllKV[*store.Uint32, store.Uint32, *auction.Bid](
-		k.store, keyPrefixRewardsBid)
+	elems, err := store.LoadAllKV[*store.Uint32, store.Uint32, *auction.Bid](k.store, keyPrefixRewardsBid)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +134,6 @@ func (k Keeper) getAllRewardsBids() ([]auction.BidKV, error) {
 		bids[i].Bid = elems[i].Val
 	}
 	return bids, nil
-
 }
 
 func (k Keeper) storeAllRewardsBids(elems []auction.BidKV) error {
