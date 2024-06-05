@@ -152,7 +152,7 @@ go-mod-tidy:
 
 clean:
 	@echo "--> Cleaning..."
-	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
+	@rm -rf $(BUILDDIR)/**  $(DIST_DIR)/**
 
 .PHONY: build build-linux build-experimental build-no_cgo clean go-mod-tidy
 
@@ -237,7 +237,7 @@ test-e2e-clean:
 	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder || true
 	docker network prune -f
 
-test-qa: 
+test-qa:
 	@go test ./tests/qa/... -timeout 30m -v -tags='test_qa'
 
 $(MOCKS_DIR):
