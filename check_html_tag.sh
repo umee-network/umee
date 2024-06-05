@@ -1,0 +1,27 @@
+#!/bin/bash
+
+ag "<b/>"
+ag "<i/>"
+ag "<u/>"
+ag "<s/>"
+ag "<sup/>"
+ag "<sub/>"
+ag "<em/>"
+ag "<strong/>"
+ag "<font/>"
+ag "<hr/>"
+#ag "<br/>"
+ag "<img/>"
+ag "<input/>"
+ag "<meta/>"
+ag "<area/>"
+ag "<base/>"
+ag "<col/>"
+ag "<embed/>"
+ag "<link/>"
+ag "<param/>"
+ag "<source/>"
+ag "<track/>"
+ag "<wbr/>"
+
+
