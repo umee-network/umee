@@ -82,19 +82,20 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	sender, err := sdk.AccAddressFromBech32(msg.Sender)
 	util.Panic(err)
 
-	if !bytes.Equal(sender, lastBid.Bidder) {
-		returned := coin.UmeeInt(lastBid.Amount)
-		if err = k.sendFromModule(lastBid.Bidder, returned); err != nil {
-			return err
+	toAuction := msg.Amount
+	if lastBid != nil {
+		if bytes.Equal(sender, lastBid.Bidder) {
+			// bidder updates his last bid: send only diff
+			toAuction = msg.Amount.SubAmount(lastBid.Amount)
+		} else {
+			returned := coin.UmeeInt(lastBid.Amount)
+			if err = k.sendFromModule(lastBid.Bidder, returned); err != nil {
+				return err
+			}
 		}
-		if err = k.sendToModule(sender, msg.Amount); err != nil {
-			return err
-		}
-	} else {
-		diff := msg.Amount.SubAmount(lastBid.Amount)
-		if err = k.sendToModule(sender, diff); err != nil {
-			return err
-		}
+	}
+	if err = k.sendToModule(sender, toAuction); err != nil {
+		return err
 	}
 
 	bid := auction.Bid{Bidder: sender, Amount: msg.Amount.Amount}
