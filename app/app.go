@@ -150,6 +150,10 @@ import (
 	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
 	"github.com/umee-network/umee/v6/x/uibc/uics20"
+
+	feeabsmodule "github.com/osmosis-labs/fee-abstraction/v7/x/feeabs"
+	feeabskeeper "github.com/osmosis-labs/fee-abstraction/v7/x/feeabs/keeper"
+	feeabstypes "github.com/osmosis-labs/fee-abstraction/v7/x/feeabs/types"
 )
 
 var (
@@ -209,6 +213,7 @@ func init() {
 		incentivemodule.AppModuleBasic{},
 		metokenmodule.AppModuleBasic{},
 		packetforward.AppModuleBasic{},
+		feeabsmodule.AppModuleBasic{},
 	}
 	// if Experimental {}
 
@@ -235,6 +240,7 @@ func init() {
 		oracletypes.ModuleName: nil,
 		ugov.ModuleName:        nil,
 		uibc.ModuleName:        nil,
+		feeabstypes.ModuleName: nil,
 	}
 	// if Experimental {}
 }
@@ -280,6 +286,7 @@ type UmeeApp struct {
 	PacketForwardKeeper *packetforwardkeeper.Keeper
 	ICAHostKeeper       icahostkeeper.Keeper
 	LeverageKeeper      leveragekeeper.Keeper
+	FeeabsKeeper        feeabskeeper.Keeper
 
 	AuctionKeeperB   auctionkeeper.Builder
 	IncentiveKeeper  incentivekeeper.Keeper
@@ -292,6 +299,7 @@ type UmeeApp struct {
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
+	ScopedFeeabsKeeper   capabilitykeeper.ScopedKeeper
 
 	// the module manager
 	mm *module.Manager
@@ -395,6 +403,7 @@ func New(
 	app.ScopedTransferKeeper = app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
 	scopedICAHostKeeper := app.CapabilityKeeper.ScopeToModule(icahosttypes.SubModuleName)
 	app.ScopedWasmKeeper = app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
+	app.ScopedFeeabsKeeper = app.CapabilityKeeper.ScopeToModule(feeabstypes.ModuleName)
 
 	// Applications that wish to enforce statically created ScopedKeepers should call `Seal` after creating
 	// their scoped modules in `NewApp` with `ScopeToModule`
@@ -588,6 +597,19 @@ func New(
 		app.AccountKeeper, app.BankKeeper, app.ScopedTransferKeeper,
 	)
 
+	app.FeeabsKeeper = feeabskeeper.NewKeeper(
+		appCodec,
+		app.keys[feeabstypes.StoreKey],
+		app.GetSubspace(feeabstypes.ModuleName),
+		app.StakingKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.IBCTransferKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		app.ScopedFeeabsKeeper,
+	)
+
 	// Packet Forward Middleware
 	// Initialize packet forward middleware router
 	app.PacketForwardKeeper = packetforwardkeeper.NewKeeper(
@@ -638,7 +660,8 @@ func New(
 	// Create static IBC router, add app routes, then set and seal it
 	ibcRouter := ibcporttypes.NewRouter().
 		AddRoute(ibctransfertypes.ModuleName, transferStack).
-		AddRoute(icahosttypes.SubModuleName, icaHostStack)
+		AddRoute(icahosttypes.SubModuleName, icaHostStack).
+		AddRoute(feeabstypes.ModuleName, feeabsmodule.NewIBCModule(appCodec, app.FeeabsKeeper))
 	/*
 		// we will add cosmwasm IBC routing later
 		AddRoute(wasm.ModuleName, wasmStack).
@@ -745,6 +768,7 @@ func New(
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
 		auctionmodule.NewAppModule(appCodec, app.AuctionKeeperB, app.BankKeeper),
+		feeabsmodule.NewAppModule(appCodec, app.FeeabsKeeper),
 	}
 	// if Experimental {}
 
@@ -785,6 +809,7 @@ func New(
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		auction.ModuleName,
+		feeabstypes.ModuleName,
 	}
 	endBlockers := []string{
 		metoken.ModuleName,     // must be before oracle
@@ -804,6 +829,7 @@ func New(
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		auction.ModuleName,
+		feeabstypes.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -830,6 +856,7 @@ func New(
 		incentive.ModuleName,
 		metoken.ModuleName,
 		auction.ModuleName,
+		feeabstypes.ModuleName,
 	}
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
@@ -1003,6 +1030,8 @@ func (app *UmeeApp) ModuleAccountAddrs() map[string]bool {
 	for acc := range maccPerms {
 		modAccAddrs[authtypes.NewModuleAddress(acc).String()] = true
 	}
+	// allow feeabs module to receive tokens
+	delete(modAccAddrs, authtypes.NewModuleAddress(feeabstypes.ModuleName).String())
 
 	return modAccAddrs
 }
@@ -1154,6 +1183,7 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(packetforwardtypes.ModuleName).WithKeyTable(packetforwardtypes.ParamKeyTable())
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
+	paramsKeeper.Subspace(feeabstypes.ModuleName)
 
 	return paramsKeeper
 }
