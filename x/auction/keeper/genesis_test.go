@@ -44,8 +44,8 @@ func TestGenesis(t *testing.T) {
 		{4, auction.Rewards{newCoin(412313), randTime()}},
 	}
 	gs.RewardsBids = []auction.BidKV{
-		{1, auction.Bid{accs.Alice, sdkmath.NewInt(153252)}},
-		{2, auction.Bid{accs.Alice, sdkmath.NewInt(8521)}},
+		{1, auction.Bid{accs.Alice.String(), sdkmath.NewInt(153252)}},
+		{2, auction.Bid{accs.Alice.String(), sdkmath.NewInt(8521)}},
 	}
 	check(gs)
 }
