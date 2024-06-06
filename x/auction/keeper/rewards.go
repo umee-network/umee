@@ -25,7 +25,6 @@ func (k Keeper) FinalizeRewardsAuction() error {
 		return nil
 	}
 
-	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
 	bid, _ := k.getRewardsBid(id)
 	if bid != nil && len(bid.Bidder) != 0 {
 		bidderAccAddr, err := sdk.AccAddressFromBech32(bid.Bidder)
@@ -44,12 +43,10 @@ func (k Keeper) FinalizeRewardsAuction() error {
 			Id:     id,
 			Bidder: sdk.AccAddress(bid.Bidder).String(),
 		})
-	} else if len(a.Rewards) != 0 {
-		// rollover the past rewards if there was no bidder
-		newCoins = newCoins.Add(a.Rewards...)
 	}
 
-	return k.initNewAuction(id+1, newCoins)
+	remainingRewards := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
+	return k.initNewAuction(id+1, remainingRewards)
 }
 
 func (k Keeper) initNewAuction(id uint32, rewards sdk.Coins) error {
