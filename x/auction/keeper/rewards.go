@@ -8,7 +8,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/util/store"
@@ -82,32 +81,30 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 		return err
 	}
 
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	util.Panic(err)
-
-	if lastBid == nil {
-		if err = k.sendToModule(sender, msg.Amount); err != nil {
-			return err
-		}
-	} else {
-		bidderAccAddr, err := sdk.AccAddressFromBech32(lastBid.Bidder)
-		if err != nil {
-			return err
-		}
+	toAuction := msg.Amount
+	if lastBid != nil {
 		if msg.Sender == lastBid.Bidder {
+			// bidder updates his last bid: send only diff
+			toAuction = msg.Amount.SubAmount(lastBid.Amount)
+		} else {
 			returned := coin.UmeeInt(lastBid.Amount)
+			bidderAccAddr, err := sdk.AccAddressFromBech32(lastBid.Bidder)
+			if err != nil {
+				return err
+			}
 			if err = k.sendFromModule(bidderAccAddr, returned); err != nil {
 				return err
 			}
-			if err = k.sendToModule(sender, msg.Amount); err != nil {
-				return err
-			}
-		} else {
-			diff := msg.Amount.SubAmount(lastBid.Amount)
-			if err = k.sendToModule(sender, diff); err != nil {
-				return err
-			}
 		}
+	}
+
+	sender, err := sdk.AccAddressFromBech32(msg.Sender)
+	if err != nil {
+		return err
+	}
+
+	if err = k.sendToModule(sender, toAuction); err != nil {
+		return err
 	}
 
 	bid := auction.Bid{Bidder: msg.Sender, Amount: msg.Amount.Amount}
