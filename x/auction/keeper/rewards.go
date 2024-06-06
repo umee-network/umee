@@ -27,11 +27,8 @@ func (k Keeper) FinalizeRewardsAuction() error {
 
 	bid, _ := k.getRewardsBid(id)
 	if bid != nil && len(bid.Bidder) != 0 {
-		bidderAccAddr, err := sdk.AccAddressFromBech32(bid.Bidder)
-		if err != nil {
-			return err
-		}
-		err = k.sendCoins(k.accs.RewardsCollect, bidderAccAddr, a.Rewards)
+		bidderAccAddr := sdk.MustAccAddressFromBech32(bid.Bidder)
+		err := k.sendCoins(k.accs.RewardsCollect, bidderAccAddr, a.Rewards)
 		if err != nil {
 			return fmt.Errorf("can't send coins to finalize the auction [%w]", err)
 		}
@@ -85,22 +82,15 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 			toAuction = msg.Amount.SubAmount(lastBid.Amount)
 		} else {
 			returned := coin.UmeeInt(lastBid.Amount)
-			bidderAccAddr, err := sdk.AccAddressFromBech32(lastBid.Bidder)
-			if err != nil {
-				return err
-			}
-			if err = k.sendFromModule(bidderAccAddr, returned); err != nil {
+			bidderAccAddr := sdk.MustAccAddressFromBech32(lastBid.Bidder)
+			if err := k.sendFromModule(bidderAccAddr, returned); err != nil {
 				return err
 			}
 		}
 	}
 
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	if err != nil {
-		return err
-	}
-
-	if err = k.sendToModule(sender, toAuction); err != nil {
+	sender := sdk.MustAccAddressFromBech32(msg.Sender)
+	if err := k.sendToModule(sender, toAuction); err != nil {
 		return err
 	}
 
