@@ -25,7 +25,7 @@ func (k Keeper) FinalizeRewardsAuction() error {
 		return nil
 	}
 
-	bid, _ := k.getRewardsBid(id)
+	bid := k.getRewardsBid(id)
 	if bid != nil && len(bid.Bidder) != 0 {
 		bidderAccAddr := sdk.MustAccAddressFromBech32(bid.Bidder)
 		err := k.sendCoins(k.accs.RewardsCollect, bidderAccAddr, a.Rewards)
@@ -98,13 +98,13 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 	return store.SetValue(k.store, key, &bid, keyMsg)
 }
 
-func (k Keeper) getRewardsBid(id uint32) (*auction.Bid, uint32) {
+func (k Keeper) getRewardsBid(id uint32) *auction.Bid {
 	if id == 0 {
 		id = k.currentRewardsAuctionID()
 	}
 	keyMsg := "auction.rewards.bid"
 	key := k.keyRewardsBid(id)
-	return store.GetValue[*auction.Bid](k.store, key, keyMsg), id
+	return store.GetValue[*auction.Bid](k.store, key, keyMsg)
 }
 
 func (k Keeper) getAllRewardsBids() ([]auction.BidKV, error) {
