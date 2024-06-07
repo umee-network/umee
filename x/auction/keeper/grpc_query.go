@@ -45,7 +45,7 @@ func (q Querier) RewardsAuction(goCtx context.Context, msg *auction.QueryRewards
 	r.Rewards = rewards.Rewards
 	r.EndsAt = rewards.EndsAt
 
-	bid, _ := q.Keeper(&ctx).getRewardsBid(id)
+	bid := q.Keeper(&ctx).getRewardsBid(id)
 	if bid != nil {
 		r.Bidder = bid.Bidder
 		r.Bid = coin.UmeeInt(bid.Amount)
