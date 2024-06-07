@@ -1,7 +1,6 @@
 package keeper
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strconv"
@@ -9,7 +8,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/util/sdkutil"
 	"github.com/umee-network/umee/v6/util/store"
@@ -27,10 +25,10 @@ func (k Keeper) FinalizeRewardsAuction() error {
 		return nil
 	}
 
-	newCoins := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
 	bid, _ := k.getRewardsBid(id)
 	if bid != nil && len(bid.Bidder) != 0 {
-		err := k.sendCoins(k.accs.RewardsCollect, bid.Bidder, a.Rewards)
+		bidderAccAddr := sdk.MustAccAddressFromBech32(bid.Bidder)
+		err := k.sendCoins(k.accs.RewardsCollect, bidderAccAddr, a.Rewards)
 		if err != nil {
 			return fmt.Errorf("can't send coins to finalize the auction [%w]", err)
 		}
@@ -42,12 +40,10 @@ func (k Keeper) FinalizeRewardsAuction() error {
 			Id:     id,
 			Bidder: sdk.AccAddress(bid.Bidder).String(),
 		})
-	} else if len(a.Rewards) != 0 {
-		// rollover the past rewards if there was no bidder
-		newCoins = newCoins.Add(a.Rewards...)
 	}
 
-	return k.initNewAuction(id+1, newCoins)
+	remainingRewards := k.bank.GetAllBalances(*k.ctx, k.accs.RewardsCollect)
+	return k.initNewAuction(id+1, remainingRewards)
 }
 
 func (k Keeper) initNewAuction(id uint32, rewards sdk.Coins) error {
@@ -79,25 +75,26 @@ func (k Keeper) rewardsBid(msg *auction.MsgRewardsBid) error {
 		return err
 	}
 
-	sender, err := sdk.AccAddressFromBech32(msg.Sender)
-	util.Panic(err)
-
-	if !bytes.Equal(sender, lastBid.Bidder) {
-		returned := coin.UmeeInt(lastBid.Amount)
-		if err = k.sendFromModule(lastBid.Bidder, returned); err != nil {
-			return err
-		}
-		if err = k.sendToModule(sender, msg.Amount); err != nil {
-			return err
-		}
-	} else {
-		diff := msg.Amount.SubAmount(lastBid.Amount)
-		if err = k.sendToModule(sender, diff); err != nil {
-			return err
+	toAuction := msg.Amount
+	if lastBid != nil {
+		if msg.Sender == lastBid.Bidder {
+			// bidder updates his last bid: send only diff
+			toAuction = msg.Amount.SubAmount(lastBid.Amount)
+		} else {
+			returned := coin.UmeeInt(lastBid.Amount)
+			bidderAccAddr := sdk.MustAccAddressFromBech32(lastBid.Bidder)
+			if err := k.sendFromModule(bidderAccAddr, returned); err != nil {
+				return err
+			}
 		}
 	}
 
-	bid := auction.Bid{Bidder: sender, Amount: msg.Amount.Amount}
+	sender := sdk.MustAccAddressFromBech32(msg.Sender)
+	if err := k.sendToModule(sender, toAuction); err != nil {
+		return err
+	}
+
+	bid := auction.Bid{Bidder: msg.Sender, Amount: msg.Amount.Amount}
 	return store.SetValue(k.store, key, &bid, keyMsg)
 }
 
@@ -111,8 +108,7 @@ func (k Keeper) getRewardsBid(id uint32) (*auction.Bid, uint32) {
 }
 
 func (k Keeper) getAllRewardsBids() ([]auction.BidKV, error) {
-	elems, err := store.LoadAllKV[*store.Uint32, store.Uint32, *auction.Bid](
-		k.store, keyPrefixRewardsBid)
+	elems, err := store.LoadAllKV[*store.Uint32, store.Uint32, *auction.Bid](k.store, keyPrefixRewardsBid)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +118,6 @@ func (k Keeper) getAllRewardsBids() ([]auction.BidKV, error) {
 		bids[i].Bid = elems[i].Val
 	}
 	return bids, nil
-
 }
 
 func (k Keeper) storeAllRewardsBids(elems []auction.BidKV) error {
