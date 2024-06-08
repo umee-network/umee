@@ -4,6 +4,8 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/auction"
@@ -34,16 +36,19 @@ func (q Querier) RewardsAuction(goCtx context.Context, msg *auction.QueryRewards
 	*auction.QueryRewardsAuctionResponse, error,
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
-	bid, id := q.Keeper(&ctx).getRewardsBid(msg.Id)
-	r := &auction.QueryRewardsAuctionResponse{Id: id}
-	if bid != nil {
-		r.Bidder = sdk.AccAddress(bid.Bidder).String()
-		r.Bid = coin.UmeeInt(bid.Amount)
+	k := q.Keeper(&ctx)
+	rewards, id := k.getRewardsAuction(msg.Id)
+	if rewards == nil {
+		return nil, status.Error(codes.NotFound, "wrong ID")
 	}
-	rewards, _ := q.Keeper(&ctx).getRewardsAuction(msg.Id)
-	if rewards != nil {
-		r.Rewards = rewards.Rewards
-		r.EndsAt = rewards.EndsAt
+	r := &auction.QueryRewardsAuctionResponse{Id: id}
+	r.Rewards = rewards.Rewards
+	r.EndsAt = rewards.EndsAt
+
+	bid := q.Keeper(&ctx).getRewardsBid(id)
+	if bid != nil {
+		r.Bidder = bid.Bidder
+		r.Bid = coin.UmeeInt(bid.Amount)
 	}
 
 	return r, nil

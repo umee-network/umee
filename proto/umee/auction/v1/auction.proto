@@ -17,7 +17,7 @@ message RewardsParams {
 
 // Bid records a user bid
 message Bid {
-  bytes  bidder = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string bidder = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string amount = 2 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
 }
 

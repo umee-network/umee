@@ -297,7 +297,7 @@ func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) erro
 	}
 	if !toAuctionCheck.IsZero() {
 		auction.EmitFundRewardsAuction(&ctx, toOracleCheck)
-		return send(ctx, types.ModuleName, auction.ModuleName, toAuctionCheck)
+		return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, k.rewardsAuction, toAuctionCheck)
 	}
 
 	return nil
