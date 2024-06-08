@@ -1032,9 +1032,9 @@ func (app *UmeeApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
 		// Skip the feeabstypes.ModuleName to allow the feeabs module to receive tokens
-        if acc == feeabstypes.ModuleName {
-            continue
-        }
+		if acc == feeabstypes.ModuleName {
+			continue
+		}
 		modAccAddrs[authtypes.NewModuleAddress(acc).String()] = true
 	}
 
