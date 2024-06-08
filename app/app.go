@@ -1031,10 +1031,12 @@ func (app *UmeeApp) LoadHeight(height int64) error {
 func (app *UmeeApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
+		// Skip the feeabstypes.ModuleName to allow the feeabs module to receive tokens
+        if acc == feeabstypes.ModuleName {
+            continue
+        }
 		modAccAddrs[authtypes.NewModuleAddress(acc).String()] = true
 	}
-	// allow feeabs module to receive tokens
-	delete(modAccAddrs, authtypes.NewModuleAddress(feeabstypes.ModuleName).String())
 
 	return modAccAddrs
 }
