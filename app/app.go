@@ -357,6 +357,7 @@ func New(
 		oracletypes.StoreKey,
 		ugov.StoreKey,
 		uibc.StoreKey,
+		feeabstypes.StoreKey,
 	}
 	// if Experimental {}
 
@@ -680,7 +681,8 @@ func New(
 		AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
 		AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)).
 		AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
-		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
+		AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper)).
+		AddRoute(feeabstypes.RouterKey, feeabsmodule.NewHostZoneProposal(app.FeeabsKeeper))
 
 	govConfig := govtypes.DefaultConfig()
 	govConfig.MaxMetadataLen = 800
@@ -875,6 +877,7 @@ func New(
 		incentive.ModuleName,
 		metoken.ModuleName,
 		auction.ModuleName,
+		feeabstypes.ModuleName,
 	}
 	// if Experimental {}
 
