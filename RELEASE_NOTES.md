@@ -6,35 +6,29 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.4.0
+## v6.5.0
 
 Highlights:
 
-- Cosmos SDK v0.47.10 patch update.
-- IBC Hooks: we integrated ICS20 Memo handling.
-- Integrated Packet Forwarding Middleware.
-- Update `uibc/MsgGovUpdateQuota` Msg type to handle the new inflow parameters.
-- Update `uibc/QueryAllOutflowsResponse` to include denom symbol (token name) in every outflow.
+- Cosmos SDK v0.47.11 update.
+- Adding new `auction` module to our app.
+- Removing `crisis` module from our app.
 
 [CHANGELOG](CHANGELOG.md)
 
-### IBC Hooks
+### Auction module
 
-This release brings the first part of the seamless cross-chain money market transactions. At UX, we want to provide the best User Experience for handling lending and leverage. In this release, we support the following `x/leverage` messages:
+We propose a new Cosmos SDK module, that will provide mechanism for protocol owned auctions.
 
-- `MsgSupply`
-- `MsgSupplyCollateral`
-- `MsgLiquidate`
+UX Chain will now auction a portion of collected fees and introduce a token burning mechanism, unlocking a way to a potentially deflationary UX token.
 
-The operation can only use tokens that are part of the IBC transfer (after any intermediate deductions) and the supplier / liquidator must be the IBC recipient (acting on someone else's behalf is not allowed). Authz is not supported. The remaining tokens will be credited to the recipient.
-
-Documentation: [x/uibc/README.md](https://github.com/umee-network/umee/blob/v6.4.0/x/uibc/README.md#ibc-ics20-hooks)
+Documentation: [x/auction/README.md](https://github.com/umee-network/umee/blob/v6.5.0/x/auction/README.md)
 
 ### Validators
 
-**Upgrade Title** (for Cosmovisor): **v6.4**.
+**Upgrade Title** (for Cosmovisor): **v6.5**.
 
-Update Price Feeder to `umee/2.4.1+`.
+Update Price Feeder to `umee/2.4.3+`.
 
 NOTE: after the upgrade, you should restart your Price Feeder. We observed that Price Feeder doesn't correctly re-established a connection after the chain upgrade.
 
