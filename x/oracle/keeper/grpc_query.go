@@ -380,13 +380,7 @@ func (q querier) MissCounters(goCtx context.Context, req *types.QueryMissCounter
 			MissCounter: missCounter,
 		})
 	} else {
-		q.IterateMissCounters(ctx, func(val sdk.ValAddress, u uint64) bool {
-			pfMissCounts = append(pfMissCounts, types.PriceMissCounter{
-				Validator:   val.String(),
-				MissCounter: u,
-			})
-			return false
-		})
+		pfMissCounts = q.Keeper.GetAllMissCounters(ctx)
 	}
 
 	return &types.QueryMissCountersResponse{

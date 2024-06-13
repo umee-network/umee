@@ -251,6 +251,18 @@ func (k Keeper) IterateMissCounters(ctx sdk.Context, handler func(sdk.ValAddress
 	}
 }
 
+// GetAllMissCounters returns all bonded validators pf miss counter value
+func (k Keeper) GetAllMissCounters(ctx sdk.Context) []types.PriceMissCounter {
+	missCounters := make([]types.PriceMissCounter, 0)
+	for _, v := range k.StakingKeeper.GetBondedValidatorsByPower(ctx) {
+		missCounters = append(missCounters, types.PriceMissCounter{
+			Validator:   v.OperatorAddress,
+			MissCounter: k.GetMissCounter(ctx, v.GetOperator()),
+		})
+	}
+	return missCounters
+}
+
 // GetAggregateExchangeRatePrevote retrieves an oracle prevote from the store.
 func (k Keeper) GetAggregateExchangeRatePrevote(
 	ctx sdk.Context,
