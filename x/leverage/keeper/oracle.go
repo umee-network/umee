@@ -283,7 +283,7 @@ func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) erro
 	}
 
 	// This action is caused by end blocker, not a message handler, so we need to emit an event
-	k.Logger(ctx).Info(
+	k.Logger(ctx).Debug(
 		"funded ",
 		"to oracle", toOracleCheck.String(),
 		"to auction", toAuctionCheck.String(),

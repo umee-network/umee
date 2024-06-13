@@ -167,7 +167,7 @@ func (k Keeper) AccrueAllInterest(ctx sdk.Context) error {
 		}
 	}
 
-	k.Logger(ctx).Info("Rewards for oracle and auction", "oracleRewards", oracleRewards.String(),
+	k.Logger(ctx).Debug("Rewards for oracle and auction", "oracleRewards", oracleRewards.String(),
 		"auctionRewards", auctionRewards.String())
 	if err := k.fundModules(ctx, oracleRewards, auctionRewards); err != nil {
 		return err
