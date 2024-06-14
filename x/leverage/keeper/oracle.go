@@ -285,8 +285,8 @@ func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) erro
 	// This action is caused by end blocker, not a message handler, so we need to emit an event
 	k.Logger(ctx).Debug(
 		"funded ",
-		"to oracle", toOracleCheck,
-		"to auction", toAuctionCheck,
+		"to oracle", toOracleCheck.String(),
+		"to auction", toAuctionCheck.String(),
 	)
 	send := k.bankKeeper.SendCoinsFromModuleToModule
 	if !toOracleCheck.IsZero() {
