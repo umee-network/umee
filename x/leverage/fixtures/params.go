@@ -12,6 +12,7 @@ func Params() types.Params {
 		CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.1"),
 		MinimumCloseFactor:           sdk.MustNewDecFromStr("0.01"),
 		OracleRewardFactor:           sdk.MustNewDecFromStr("0.01"),
+		RewardsAuctionFee:            sdk.MustNewDecFromStr("0.02"),
 		SmallLiquidationSize:         sdk.MustNewDecFromStr("100.00"),
 		DirectLiquidationFee:         sdk.MustNewDecFromStr("0.1"),
 	}

@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/binary"
+	"math"
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -137,4 +139,14 @@ func TestParseDenomAndBlockFromMedianDeviationKey(t *testing.T) {
 	parsedDenom, parsedBlockNum := ParseDenomAndBlockFromKey(key, KeyPrefixMedianDeviation)
 	assert.Equal(t, denom, parsedDenom)
 	assert.Equal(t, blockNum, parsedBlockNum)
+}
+
+func TestUintWithNullPrefix(t *testing.T) {
+	expected := []byte{0}
+	num := make([]byte, 8)
+	binary.LittleEndian.PutUint64(num, math.MaxUint64)
+	expected = append(expected, num...)
+
+	out := uintWithNullPrefix(math.MaxUint64)
+	assert.Equal(t, expected, out)
 }

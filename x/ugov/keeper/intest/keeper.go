@@ -3,8 +3,6 @@ package intest
 import (
 	"testing"
 
-	"github.com/cosmos/cosmos-sdk/codec"
-	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -16,11 +14,9 @@ import (
 // MkKeeper initializes ugov.Keeper with no other dependencies.
 // Should be used only when no other module is required.
 func MkKeeper(t *testing.T) (*sdk.Context, ugov.Keeper) {
-	ir := cdctypes.NewInterfaceRegistry()
-	ugov.RegisterInterfaces(ir)
-	cdc := codec.NewProtoCodec(ir)
+	cdc := tsdk.NewCodec(ugov.RegisterInterfaces)
 	storeKey := storetypes.NewMemoryStoreKey(ugov.StoreKey)
-	kb := keeper.NewKeeperBuilder(cdc, storeKey)
+	kb := keeper.NewBuilder(cdc, storeKey)
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	return &ctx, kb.Keeper(&ctx)
 }

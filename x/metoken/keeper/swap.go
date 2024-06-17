@@ -7,6 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
+	"github.com/umee-network/umee/v6/x/auction"
 	"github.com/umee-network/umee/v6/x/metoken"
 	"github.com/umee-network/umee/v6/x/metoken/errors"
 )
@@ -19,7 +20,7 @@ type swapResponse struct {
 	leveraged sdk.Coin
 }
 
-func newSwapResponse(meTokens sdk.Coin, fee sdk.Coin, reserved sdk.Coin, leveraged sdk.Coin) swapResponse {
+func newSwapResponse(meTokens, fee, reserved, leveraged sdk.Coin) swapResponse {
 	return swapResponse{
 		meTokens:  meTokens,
 		fee:       fee,
@@ -50,12 +51,13 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 		return swapResponse{}, err
 	}
 
-	meTokenAmount, fee, amountToReserves, amountToLeverage, err := k.calculateSwap(index, indexPrices, asset)
+	// meTokenAmount, fee, amountToReserves, amountToLeverage, err :=
+	swapCarry, err := k.calculateSwap(index, indexPrices, asset)
 	if err != nil {
 		return swapResponse{}, err
 	}
 
-	if meTokenAmount.IsZero() {
+	if swapCarry.meTokens.IsZero() {
 		return swapResponse{}, fmt.Errorf("insufficient %s for swap", asset.Denom)
 	}
 
@@ -64,7 +66,7 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 		return swapResponse{}, err
 	}
 
-	if balances.MetokenSupply.Amount.Add(meTokenAmount).GT(index.MaxSupply) {
+	if balances.MetokenSupply.Amount.Add(swapCarry.meTokens).GT(index.MaxSupply) {
 		return swapResponse{}, fmt.Errorf(
 			"not possible to mint the desired amount of %s, reaching the max supply",
 			meTokenDenom,
@@ -80,39 +82,42 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 		return swapResponse{}, err
 	}
 
-	supplied, err := k.supplyToLeverage(sdk.NewCoin(asset.Denom, amountToLeverage))
+	supplied, err := k.supplyToLeverage(sdk.NewCoin(asset.Denom, swapCarry.toLeverage))
 	if err != nil {
 		return swapResponse{}, err
 	}
 
 	// adjust amount if supplied to x/leverage is less than the calculated amount
-	if supplied.LT(amountToLeverage) {
-		tokenDiff := amountToLeverage.Sub(supplied)
-		amountToReserves = amountToReserves.Add(tokenDiff)
-		amountToLeverage = amountToLeverage.Sub(tokenDiff)
+	if supplied.LT(swapCarry.toLeverage) {
+		tokenDiff := swapCarry.toLeverage.Sub(supplied)
+		swapCarry.toReserves = swapCarry.toReserves.Add(tokenDiff)
+		swapCarry.toLeverage = swapCarry.toLeverage.Sub(tokenDiff)
 	}
 
-	meTokens := sdk.NewCoins(sdk.NewCoin(meTokenDenom, meTokenAmount))
+	meTokens := sdk.NewCoins(sdk.NewCoin(meTokenDenom, swapCarry.meTokens))
 	if err = k.bankKeeper.MintCoins(*k.ctx, metoken.ModuleName, meTokens); err != nil {
 		return swapResponse{}, err
 	}
-
-	if err = k.bankKeeper.SendCoinsFromModuleToAccount(*k.ctx, metoken.ModuleName, userAddr, meTokens); err != nil {
+	err = k.bankKeeper.SendCoinsFromModuleToAccount(*k.ctx, metoken.ModuleName, userAddr, meTokens)
+	if err != nil {
 		return swapResponse{}, err
 	}
 
-	balances.MetokenSupply.Amount = balances.MetokenSupply.Amount.Add(meTokenAmount)
+	feeToAuction, feeToRevenue := k.breakFee(swapCarry.fee)
+	if err = k.fundAuction(asset.Denom, feeToAuction); err != nil {
+		return swapResponse{}, err
+	}
+
+	balances.MetokenSupply.Amount = balances.MetokenSupply.Amount.Add(swapCarry.meTokens)
 	balance, i := balances.AssetBalance(asset.Denom)
 	if i < 0 {
 		return swapResponse{}, sdkerrors.ErrNotFound.Wrapf(
-			"balance for denom %s not found",
-			asset.Denom,
-		)
+			"balance for denom %s not found", asset.Denom)
 	}
 
-	balance.Reserved = balance.Reserved.Add(amountToReserves)
-	balance.Leveraged = balance.Leveraged.Add(amountToLeverage)
-	balance.Fees = balance.Fees.Add(fee)
+	balance.Reserved = balance.Reserved.Add(swapCarry.toReserves)
+	balance.Leveraged = balance.Leveraged.Add(swapCarry.toLeverage)
+	balance.Fees = balance.Fees.Add(feeToRevenue)
 	balances.SetAssetBalance(balance)
 
 	if err = k.setIndexBalances(balances); err != nil {
@@ -120,10 +125,10 @@ func (k Keeper) swap(userAddr sdk.AccAddress, meTokenDenom string, asset sdk.Coi
 	}
 
 	return newSwapResponse(
-		sdk.NewCoin(meTokenDenom, meTokenAmount),
-		sdk.NewCoin(asset.Denom, fee),
-		sdk.NewCoin(asset.Denom, amountToReserves),
-		sdk.NewCoin(asset.Denom, amountToLeverage),
+		meTokens[0],
+		sdk.NewCoin(asset.Denom, swapCarry.fee),
+		sdk.NewCoin(asset.Denom, swapCarry.toReserves),
+		sdk.NewCoin(asset.Denom, swapCarry.toLeverage),
 	), nil
 }
 
@@ -177,6 +182,13 @@ func (k Keeper) availableToSupply(denom string) (bool, sdkmath.Int, error) {
 	return true, token.MaxSupply.Sub(total.Amount), nil
 }
 
+// breakFee calculates the protocol fee for the burn auction and the reminder
+func (k Keeper) breakFee(fee sdkmath.Int) (sdkmath.Int, sdkmath.Int) {
+	p := k.GetParams()
+	toAuction := p.RewardsAuctionFeeFactor.Mul(fee)
+	return toAuction, fee.Sub(toAuction)
+}
+
 // calculateSwap returns the amount of meToken to send to the user, the fee to be charged to him,
 // the amount of assets to send to x/metoken reserves and to x/leverage pools.
 // The formulas used for the calculations are:
@@ -186,37 +198,47 @@ func (k Keeper) availableToSupply(denom string) (bool, sdkmath.Int, error) {
 //	amount_to_reserves = assets_to_swap * reserve_portion
 //	amount_to_leverage = assets_to_swap - amount_to_reserves
 //
-// It returns meTokens to be minted, fee to be charged,
-// amount to transfer to x/metoken reserves and x/leverage liquidity pools
+// It returns calculated amount of tokens that need to be transferred as a result of a transfer.
 func (k Keeper) calculateSwap(index metoken.Index, indexPrices metoken.IndexPrices, asset sdk.Coin) (
-	sdkmath.Int,
-	sdkmath.Int,
-	sdkmath.Int,
-	sdkmath.Int,
-	error,
+	swapCarry, error,
 ) {
 	assetSettings, i := index.AcceptedAsset(asset.Denom)
 	if i < 0 {
-		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkerrors.ErrNotFound.Wrapf(
+		return swapCarry{}, sdkerrors.ErrNotFound.Wrapf(
 			"asset %s is not accepted in the index",
 			asset.Denom,
 		)
 	}
 
-	_, feeAmount, err := k.swapFee(index, indexPrices, asset)
+	_, fee, err := k.swapFee(index, indexPrices, asset)
 	if err != nil {
-		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), err
+		return swapCarry{}, err
 	}
 
-	amountToSwap := asset.Amount.Sub(feeAmount.Amount)
-
+	amountToSwap := asset.Amount.Sub(fee.Amount)
 	meTokens, err := indexPrices.SwapRate(sdk.NewCoin(asset.Denom, amountToSwap))
 	if err != nil {
-		return sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), sdkmath.ZeroInt(), err
+		return swapCarry{}, err
 	}
 
-	amountToReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
-	amountToLeverage := amountToSwap.Sub(amountToReserves)
+	toReserves := assetSettings.ReservePortion.MulInt(amountToSwap).TruncateInt()
+	toLeverage := amountToSwap.Sub(toReserves)
 
-	return meTokens, feeAmount.Amount, amountToReserves, amountToLeverage, nil
+	return swapCarry{meTokens: meTokens, fee: fee.Amount, toReserves: toReserves, toLeverage: toLeverage}, nil
+}
+
+func (k Keeper) fundAuction(denom string, amount sdkmath.Int) error {
+	if amount.IsZero() {
+		return nil
+	}
+	coins := sdk.Coins{sdk.NewCoin(denom, amount)}
+	auction.EmitFundRewardsAuction(k.ctx, coins)
+	return k.bankKeeper.SendCoinsFromModuleToModule(*k.ctx, metoken.ModuleName, auction.ModuleName, coins)
+}
+
+type swapCarry struct {
+	meTokens   sdkmath.Int
+	fee        sdkmath.Int
+	toReserves sdkmath.Int
+	toLeverage sdkmath.Int
 }

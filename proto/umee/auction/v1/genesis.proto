@@ -1,0 +1,33 @@
+syntax = "proto3";
+package umee.auction.v1;
+
+import "gogoproto/gogo.proto";
+import "umee/auction/v1/auction.proto";
+
+option go_package = "github.com/umee-network/umee/v6/x/auction";
+
+option (gogoproto.goproto_getters_all) = false;
+// option (gogoproto.equal_all) = false;
+
+// GenesisState defines the x/auction module's genesis state.
+message GenesisState {
+  RewardsParams rewards_params = 1 [(gogoproto.nullable) = false];
+  // Latest active (in bid phase) reward auction.
+  uint32 reward_auction_id = 2;
+  // All rewards auctions with ID.
+  repeated RewardsKV rewards_auctions = 3 [(gogoproto.nullable) = false];
+  // Highest bids for all rewards auctions with ID.
+  repeated BidKV rewards_bids = 4 [(gogoproto.nullable) = false];
+}
+
+// RewardsKV combines a storage key (id) an value (rewards)
+message RewardsKV {
+  uint32  id      = 1;
+  Rewards rewards = 2 [(gogoproto.nullable) = false];
+}
+
+// BidKV combines a storage key (id) an value (bid)
+message BidKV {
+  uint32 id  = 1;
+  Bid    bid = 2 [(gogoproto.nullable) = false];
+}

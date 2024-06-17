@@ -1,6 +1,6 @@
 # IBC Transfer and Rate Limits for IBC Denoms
 
-## Abstract
+## Summary
 
 The `x/uibc` is a Cosmos Module providing:
 

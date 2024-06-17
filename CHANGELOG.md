@@ -46,6 +46,26 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
+### Features
+
+- [2472](https://github.com/umee-network/umee/pull/2472) un-wire the `crisis` module from umee app.
+- [2500](https://github.com/umee-network/umee/pull/2500) (x/leverage): add Rewards Auction fees and `params.rewards_auction_factor`.
+- [2506](https://github.com/umee-network/umee/pull/2506) (ics20): support leverage/MsgRepay in Memo
+- [2527](https://github.com/umee-network/umee/pull/2527) (x/leverage):add `accounts_summary` grpc-web api and cli query to leverage module.
+- [2532](https://github.com/umee-network/umee/pull/2532) (x/oracle): add slashing event.
+
+### Improvements
+
+- [2474](https://github.com/umee-network/umee/pull/2474) (proto) add `gogo.messagename_all` option to all messages.
+- [2494](https://github.com/umee-network/umee/pull/2494) Use go 1.22
+- [2495](https://github.com/umee-network/umee/pull/2495) (util) `KeyWithUint64` and `KeyWithUint32` helper functions for db keys.
+- [2504](https://github.com/umee-network/umee/pull/2504) bump `wasmd` to v0.45.0.
+
+### Bug Fixes
+
+- [2473](https://github.com/umee-network/umee/pull/2473) Correct x/ugov Amino registration for x/ugov messages (they don't have MessageName option).
+- [2547](https://github.com/umee-network/umee/pull/2547) Fix the `MissCounters` grpc-web get api result.
+
 ## v6.4.1 - 2024-04-30
 
 ### Improvements

@@ -22,7 +22,7 @@ import (
 // GetValue loads value from the store using default Unmarshaler. Panics on failure to decode.
 // Returns nil if the key is not found in the store.
 // If the value contains codec.Any field, then SetObject MUST be used instead.
-func GetValue[TPtr PtrMarshalable[T], T any](store sdk.KVStore, key []byte, errField string) TPtr {
+func GetValue[TPtr PtrUnmarshalable[T], T any](store sdk.KVStore, key []byte, errField string) TPtr {
 	if bz := store.Get(key); len(bz) > 0 {
 		var c TPtr = new(T)
 		if err := c.Unmarshal(bz); err != nil {
@@ -72,9 +72,11 @@ func SetBinValue[T BinMarshalable](store sdk.KVStore, key []byte, value T, errFi
 // GetValueCdc is similar to GetValue, but uses codec for marshaling. For Protobuf objects the
 // result is the same, unless codec.Any is used. In the latter case this function MUST be used,
 // instead of GetValue.
-// Returns a boolean indicating whether any data was found. If the return is false, the object
-// is not changed by this function.
-func GetValueCdc(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) bool {
+// Returns true when the data was found and deserialized into the object. Otherwise returns
+// false without modifying the object.
+func GetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler,
+	errField string) bool {
+
 	if bz := store.Get(key); len(bz) > 0 {
 		err := cdc.Unmarshal(bz, object)
 		if err != nil {
@@ -88,7 +90,9 @@ func GetValueCdc(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.Pr
 // SetValueCdc is similar to the SetValue, but uses codec for marshaling. For Protobuf objects the
 // result is the same, unless codec.Any is used. In the latter case this function MUST be used,
 // instead of SetValue.
-func SetValueCdc(store sdk.KVStore, cdc codec.Codec, key []byte, object codec.ProtoMarshaler, errField string) error {
+func SetValueCdc(store sdk.KVStore, cdc codec.BinaryCodec, key []byte, object codec.ProtoMarshaler,
+	errField string) error {
+
 	bz, err := cdc.Marshal(object)
 	if err != nil {
 		return fmt.Errorf("failed to encode %s, %s", errField, err.Error())
@@ -172,6 +176,7 @@ func SetTimeMs(store sdk.KVStore, key []byte, t time.Time) {
 	SetInteger(store, key, t.UnixMilli())
 }
 
+// SetInteger saves integre value to the state.
 func SetInteger[T Integer](store sdk.KVStore, key []byte, v T) {
 	var bz []byte
 	switch v := any(v).(type) {

@@ -1,8 +1,6 @@
 package util
 
 import (
-	"encoding/binary"
-	"math"
 	"testing"
 
 	"gotest.tools/v3/assert"
@@ -27,12 +25,26 @@ func TestMergeBytes(t *testing.T) {
 	}
 }
 
-func TestUintWithNullPrefix(t *testing.T) {
-	expected := []byte{0}
-	num := make([]byte, 8)
-	binary.LittleEndian.PutUint64(num, math.MaxUint64)
-	expected = append(expected, num...)
+func TestKeyWithUint(t *testing.T) {
+	prefix := []byte{1, 10}
 
-	out := UintWithNullPrefix(math.MaxUint64)
-	assert.DeepEqual(t, expected, out)
+	out := KeyWithUint32(nil, 200)
+	assert.DeepEqual(t, out, []byte{0, 0, 0, 200})
+
+	out = KeyWithUint32(prefix, 200)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 0, 200})
+
+	out = KeyWithUint32(prefix, 256)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 1, 0})
+
+	// uint64 version
+
+	out = KeyWithUint64(nil, 200)
+	assert.DeepEqual(t, out, []byte{0, 0, 0, 0, 0, 0, 0, 200})
+
+	out = KeyWithUint64(prefix, 200)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 0, 0, 0, 0, 0, 200})
+
+	out = KeyWithUint64(prefix, 256)
+	assert.DeepEqual(t, out, []byte{1, 10, 0, 0, 0, 0, 0, 0, 1, 0})
 }

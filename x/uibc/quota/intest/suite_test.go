@@ -107,6 +107,6 @@ func initKeeper(
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
 	eg := ugovmocks.NewSimpleEmergencyGroupBuilder()
-	kb := quota.NewKeeperBuilder(cdc, storeKey, leverage, oracle, eg)
+	kb := quota.NewBuilder(cdc, storeKey, leverage, oracle, eg)
 	return ctx, kb.Keeper(&ctx)
 }

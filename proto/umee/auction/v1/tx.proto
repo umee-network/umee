@@ -1,0 +1,51 @@
+syntax = "proto3";
+package umee.auction.v1;
+
+import "cosmos_proto/cosmos.proto";
+import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+import "umee/auction/v1/auction.proto";
+
+option go_package                      = "github.com/umee-network/umee/v6/x/auction";
+option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.messagename_all)     = true;
+
+// Msg defines the x/auction module's Msg service.
+service Msg {
+  //
+  // Rewards auction: bid umee for protocol rewards
+  //
+
+  // Allows x/gov to update rewards auction parameters.
+  rpc GovSetRewardsParams(MsgGovSetRewardsParams) returns (MsgGovSetRewardsParamsResponse);
+  // Places a bid for a reword auction. Must be higher than the previous bid by at least
+  // RewardParams.RewardsParams.
+  rpc RewardsBid(MsgRewardsBid) returns (MsgRewardsBidResponse);
+}
+
+// MsgGovSetRewardsParams updates rewards auction parameters.
+message MsgGovSetRewardsParams {
+  option (cosmos.msg.v1.signer) = "authority";
+
+  // authority must be the address of the governance account.
+  string        authority = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  RewardsParams params    = 2 [(gogoproto.nullable) = false];
+}
+
+// MsgGovSetRewardsParamsResponse defines the Msg/GovSetRewardsParams response type.
+message MsgGovSetRewardsParamsResponse {}
+
+// MsgRewardsBid places a bid for a reword auction.
+message MsgRewardsBid {
+  option (cosmos.msg.v1.signer) = "sender";
+
+  string sender = 1;
+  // the current auction ID being bid on. Fails if the ID is not an ID of the current auction.
+  uint32 id = 2;
+  // amount of the bid in the bond base tokens (uumee)
+  cosmos.base.v1beta1.Coin amount = 3 [(gogoproto.nullable) = false];
+}
+
+// MsgRewardsBidResponse response type for Msg/RewardsBid
+message MsgRewardsBidResponse {}

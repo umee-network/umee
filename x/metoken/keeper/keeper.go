@@ -12,22 +12,24 @@ import (
 
 // Builder constructs Keeper by preparing all related dependencies (notably the store).
 type Builder struct {
-	cdc            codec.Codec
+	cdc            codec.BinaryCodec
 	storeKey       storetypes.StoreKey
 	bankKeeper     metoken.BankKeeper
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
 	ugov           ugov.EmergencyGroupBuilder
+	rewardsAuction sdk.AccAddress
 }
 
-// NewKeeperBuilder returns Builder object.
-func NewKeeperBuilder(
-	cdc codec.Codec,
+// NewBuilder returns Builder object.
+func NewBuilder(
+	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	bankKeeper metoken.BankKeeper,
 	leverageKeeper metoken.LeverageKeeper,
 	oracleKeeper metoken.OracleKeeper,
 	ugov ugov.EmergencyGroupBuilder,
+	rewardsAuction sdk.AccAddress,
 ) Builder {
 	return Builder{
 		cdc:            cdc,
@@ -36,16 +38,18 @@ func NewKeeperBuilder(
 		leverageKeeper: leverageKeeper,
 		oracleKeeper:   oracleKeeper,
 		ugov:           ugov,
+		rewardsAuction: rewardsAuction,
 	}
 }
 
 type Keeper struct {
-	cdc            codec.Codec
+	cdc            codec.BinaryCodec
 	store          sdk.KVStore
 	bankKeeper     metoken.BankKeeper
 	leverageKeeper metoken.LeverageKeeper
 	oracleKeeper   metoken.OracleKeeper
 	ugov           ugov.EmergencyGroupBuilder
+	rewardsAuction sdk.AccAddress
 
 	// TODO: ctx should be removed when we migrate leverageKeeper and oracleKeeper
 	ctx *sdk.Context
@@ -60,6 +64,7 @@ func (b Builder) Keeper(ctx *sdk.Context) Keeper {
 		leverageKeeper: b.leverageKeeper,
 		oracleKeeper:   b.oracleKeeper,
 		ugov:           b.ugov,
+		rewardsAuction: b.rewardsAuction,
 		ctx:            ctx,
 	}
 }
