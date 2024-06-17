@@ -37,7 +37,7 @@ func GenerateString(length uint) string {
 	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	bytes := make([]byte, length)
 	for i := range bytes {
-		bytes[i] = charset[rand.Intn(len(charset))]
+		bytes[i] = charset[rand.Intn(len(charset))] //nolint
 	}
 	return string(bytes)
 }

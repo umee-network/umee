@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	sdkmath "cosmossdk.io/math"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	ibcerrors "github.com/cosmos/ibc-go/v7/modules/core/errors"
 )
@@ -18,8 +17,7 @@ const (
 
 func ValidateRecvAddr(receiver string) error {
 	if len(receiver) > MaximumReceiverLength {
-		return sdkerrors.Wrapf(ibcerrors.ErrInvalidAddress,
-			"recipient address must not exceed %d bytes", MaximumReceiverLength)
+		return ibcerrors.ErrInvalidAddress.Wrapf("recipient address must not exceed %d bytes", MaximumReceiverLength)
 	}
 	return nil
 }
@@ -49,7 +47,7 @@ func GetFundsFromPacket(data []byte) (sdkmath.Int, string, error) {
 
 	amount, ok := sdkmath.NewIntFromString(packetData.Amount)
 	if !ok {
-		return sdkmath.Int{}, "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
+		return sdkmath.Int{}, "", ibcerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
 	}
 
 	return amount, GetLocalDenom(packetData.Denom), nil
