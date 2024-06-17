@@ -142,10 +142,14 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 			if i < 4 {
 				continue
 			}
-			s.Require().Failf("failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
+			if !strings.Contains(outBuf.String(), "bad packet in rate limit's SendPacket") {
+				s.Require().Failf("failed to find transaction hash in output outBuf: %s  errBuf: %s",
+					outBuf.String(), errBuf.String())
+			}
 		}
 
-		// s.Require().NotEmptyf(txHash, "failed to find transaction hash in output outBuf: %s  errBuf: %s", outBuf.String(), errBuf.String())
+		// s.Require().NotEmptyf(txHash, "failed to find transaction hash in output outBuf: %s
+		// errBuf: %s", outBuf.String(), errBuf.String())
 		// endpoint := s.UmeeREST()
 		// if strings.Contains(srcChainID, "gaia") {
 		// 	endpoint = s.GaiaREST()

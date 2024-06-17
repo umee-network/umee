@@ -66,6 +66,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2473](https://github.com/umee-network/umee/pull/2473) Correct x/ugov Amino registration for x/ugov messages (they don't have MessageName option).
 - [2547](https://github.com/umee-network/umee/pull/2547) Fix the `MissCounters` grpc-web get api result.
 
+## v6.4.1 - 2024-04-30
+
+### Improvements
+
+- [daef10a](https://github.com/umee-network/umee/commit/daef10ad4f774aae915ad33f4ab1134695146785) Update dependencies.
+
 ## v6.4.0 - 2024-03-21
 
 ### Features

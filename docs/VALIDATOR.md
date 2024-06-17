@@ -84,8 +84,8 @@ Here are our testnet public endpoints:
 
 1. Make sure you firstly tested your setup on Testnet.
 2. Use one of the community snapshots:
-    * [Polkachu](https://polkachu.com/tendermint_snapshots/umee).
-    * [Autostake](https://autostake.com/networks/umee/#services).
+    - [Polkachu](https://polkachu.com/tendermint_snapshots/umee).
+    - [Autostake](https://autostake.com/networks/umee/#services).
 3. Buy `uumee` to self delegate.
 4. Make sure your Price Feeder is running correctly. If your [mainnet window misses](https://price-feeder.com/) are above 50% then something is wrong. Look for a help on Discord.
 
