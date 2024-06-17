@@ -45,7 +45,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
-		return errors.Wrap(err, "denom: "+denom) //nolint: goconst
+		return errors.Wrap(err, "denom: "+denom)
 	}
 
 	block := uint64(ctx.BlockHeight())
