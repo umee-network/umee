@@ -6,6 +6,10 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
+## v6.5.0
+
+In this release we are adding validations to ibc-transfer msg receiver address and memo feilds. This release will resolve the latest incident of spam ibc-transfer transactions.
+
 ## v6.4.1
 
 This release updates our dependencies and applies latest patches to the v6.4.x line. All validators must update to this patch release.
