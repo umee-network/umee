@@ -44,7 +44,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## v6.5.0
+## Unreleased
 
 ### Bug Fixes
 
@@ -69,6 +69,12 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 - [2473](https://github.com/umee-network/umee/pull/2473) Correct x/ugov Amino registration for x/ugov messages (they don't have MessageName option).
 - [2547](https://github.com/umee-network/umee/pull/2547) Fix the `MissCounters` grpc-web get api result.
+
+## v6.5.0
+
+### Bug Fixes
+
+- [2551](https://github.com/umee-network/umee/pull/2551) Restrict length of IBC transfer memo and receiver fields.
 
 ## v6.4.1 - 2024-04-30
 
