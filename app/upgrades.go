@@ -50,14 +50,15 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_0(upgradeInfo)
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
-	app.registerUpgrade("v6.3", upgradeInfo, nil, nil, nil)
+	app.registerUpgrade("v6.3", upgradeInfo)
 	app.registerUpgrade6_4(upgradeInfo)
+	app.registerUpgrade("v6.5", upgradeInfo)
 
-	app.registerUpgrade6_5(upgradeInfo)
+	app.registerUpgrade6_6(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade6_5(upgradeInfo upgradetypes.Plan) {
-	planName := "v6.5"
+func (app *UmeeApp) registerUpgrade6_6(upgradeInfo upgradetypes.Plan) {
+	planName := "v6.6"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {

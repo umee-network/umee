@@ -44,7 +44,11 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## Unreleased
+## v6.5.0
+
+### Bug Fixes
+
+- [2551](https://github.com/umee-network/umee/pull/2551) Restrict length of IBC transfer memo and receiver fields.
 
 ### Features
 

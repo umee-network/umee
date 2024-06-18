@@ -6,7 +6,7 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.5.0
+## v6.6.0
 
 Highlights:
 
@@ -18,15 +18,12 @@ Highlights:
 
 ### Auction module
 
-We propose a new Cosmos SDK module, that will provide mechanism for protocol owned auctions.
-
-UX Chain will now auction a portion of collected fees and introduce a token burning mechanism, unlocking a way to a potentially deflationary UX token.
-
+We propose a new Cosmos SDK module, that will provide mechanism for protocol owned auctions. UX Chain will now auction a portion of collected fees and introduce a token burning mechanism, unlocking a way to a potentially deflationary UX token. 
 Documentation: [x/auction/README.md](https://github.com/umee-network/umee/blob/v6.5.0/x/auction/README.md)
 
 ### Validators
 
-**Upgrade Title** (for Cosmovisor): **v6.5**.
+**Upgrade Title** (for Cosmovisor): **v6.6**.
 
 Update Price Feeder to `umee/2.4.3+`.
 
