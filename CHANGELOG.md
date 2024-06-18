@@ -48,7 +48,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
-- [2551](https://github.com/umee-network/umee/pull/2551) Added validation to the ibc-transfer msg receiver.
+- [2551](https://github.com/umee-network/umee/pull/2551) Restrict length of IBC transfer memo and receiver fields.
 
 ## v6.4.1 - 2024-04-30
 

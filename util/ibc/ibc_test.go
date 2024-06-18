@@ -7,7 +7,7 @@ import (
 
 	"github.com/cometbft/cometbft/crypto"
 	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/tests/tsdk"
 	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -35,15 +35,21 @@ func TestGetFundsFromPacket(t *testing.T) {
 	assert.Equal(t, famount.String(), amount)
 
 	// invalid address
-	data.Receiver = sdkutil.GenerateString(MaximumReceiverLength + 1)
+	data.Receiver = tsdk.GenerateString(MaximumReceiverLength + 1)
 	_, _, err = GetFundsFromPacket(data.GetBytes())
 	assert.ErrorContains(t, err, "recipient address must not exceed")
 
 	// invalid memo
 	data.Receiver = AddressFromString("a4")
-	data.Memo = sdkutil.GenerateString(MaximumMemoLength + 1)
+	data.Memo = tsdk.GenerateString(MaximumMemoLength + 1)
 	_, _, err = GetFundsFromPacket(data.GetBytes())
 	assert.ErrorContains(t, err, "memo must not exceed")
+
+	// valid address and memo
+	data.Receiver = tsdk.GenerateString(MaximumReceiverLength)
+	data.Memo = tsdk.GenerateString(MaximumMemoLength)
+	_, _, err = GetFundsFromPacket(data.GetBytes())
+	assert.NilError(t, err, "Should handle valid inputs without error")
 }
 
 func TestGetLocalDenom(t *testing.T) {
