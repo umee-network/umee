@@ -14,7 +14,6 @@ In this release, we are introducing validations for the IBC transfer message rec
 - Maximum length for IBC transfer receiver address field: 2'048 characters
 - Bump `ibc-go` to v7.5.1.
 
-
 ### Validators
 
 **Upgrade Title** (for Cosmovisor): **v6.5**.
