@@ -11,7 +11,9 @@ import (
 	appparams "github.com/umee-network/umee/v6/app/params"
 	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
 	"github.com/umee-network/umee/v6/tests/grpc"
+	"github.com/umee-network/umee/v6/tests/tsdk"
 	"github.com/umee-network/umee/v6/util/coin"
+	ibcutil "github.com/umee-network/umee/v6/util/ibc"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -160,6 +162,14 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// send $110 UMEE from umee to gaia (token_quota is 100$)
 		exceedUmee := mulCoin(umeeQuota, "1.1")
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, "", exceedUmee, true, "", "")
+		// check the ibc (umee) quota after ibc txs - this one should have failed
+		// supply don't change
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
+
+		// << Receiver Addr = maximum length + 1
+		// send $110 UMEE from umee to gaia (token_quota is 100$)
+		recvAddr := tsdk.GenerateString(ibcutil.MaximumMemoLength + 1)
+		s.SendIBC(s.Chain.ID, setup.GaiaChainID, recvAddr, exceedUmee, true, "", "")
 		// check the ibc (umee) quota after ibc txs - this one should have failed
 		// supply don't change
 		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())

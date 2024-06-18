@@ -49,8 +49,9 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
 	app.registerUpgrade("v6.3", upgradeInfo)
-
 	app.registerUpgrade6_4(upgradeInfo)
+
+	app.registerUpgrade("v6.5", upgradeInfo)
 }
 
 func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
