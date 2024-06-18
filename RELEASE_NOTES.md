@@ -18,8 +18,8 @@ Highlights:
 
 ### Auction module
 
-We propose a new Cosmos SDK module, that will provide mechanism for protocol owned auctions. UX Chain will now auction a portion of collected fees and introduce a token burning mechanism, unlocking a way to a potentially deflationary UX token. 
-Documentation: [x/auction/README.md](https://github.com/umee-network/umee/blob/v6.5.0/x/auction/README.md)
+We propose a new Cosmos SDK module, that will provide mechanism for protocol owned auctions. UX Chain will now auction a portion of collected fees and introduce a token burning mechanism, unlocking a way to a potentially deflationary UX token.
+Documentation: [x/auction/README.md](https://github.com/umee-network/umee/blob/v6.6.0/x/auction/README.md)
 
 ### Validators
 
