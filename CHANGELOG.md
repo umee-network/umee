@@ -46,10 +46,6 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
-### Bug Fixes
-
-- [2551](https://github.com/umee-network/umee/pull/2551) Restrict length of IBC transfer memo and receiver fields.
-
 ### Features
 
 - [2472](https://github.com/umee-network/umee/pull/2472) un-wire the `crisis` module from umee app.

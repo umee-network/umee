@@ -27,7 +27,7 @@ Documentation: [x/auction/README.md](https://github.com/umee-network/umee/blob/v
 
 Update Price Feeder to `umee/2.4.3+`.
 
-NOTE: after the upgrade, you should restart your Price Feeder. We observed that Price Feeder doesn't correctly re-established a connection after the chain upgrade.
+NOTE: after the upgrade, you should restart your Price Feeder. We observed that Price Feeder doesn't correctly re-establish a connection after the chain upgrade.
 
 #### libwasmvm update
 
