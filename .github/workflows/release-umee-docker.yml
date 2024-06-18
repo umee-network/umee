@@ -53,7 +53,7 @@ jobs:
           make proto-update-swagger-docs
 
       - name: Build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           file: ./contrib/images/umeed.dockerfile
           platforms: linux/amd64
