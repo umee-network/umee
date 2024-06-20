@@ -142,7 +142,7 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 			if i < 4 {
 				continue
 			}
-			if !strings.Contains(outBuf.String(), "bad packet in rate limit's SendPacket") {
+			if !strings.Contains(outBuf.String(), "must not exceed") {
 				s.Require().Failf("failed to find transaction hash in output outBuf: %s  errBuf: %s",
 					outBuf.String(), errBuf.String())
 			}
