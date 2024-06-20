@@ -12,7 +12,7 @@ In this release, we are introducing validations for the IBC transfer message rec
 
 - Maximum length for IBC transfer memo field: 32'768 characters
 - Maximum length for IBC transfer receiver address field: 2'048 characters
-- Bump `ibc-go` to v7.5.1.
+- Bump `ibc-go` to v7.6.0
 
 ### Validators
 
