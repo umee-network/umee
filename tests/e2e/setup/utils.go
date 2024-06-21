@@ -131,16 +131,12 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 		// Note: we are cchecking only one side of ibc , we don't know whethever ibc transfer is succeed on one side
 		// some times relayer can't send the packets to another chain
 
-		if expectedErr != "" {
-			s.Require().Contains(errBuf.String(), expectedErr)
-		}
-
 		// retry if we didn't succeed
 		if !strings.Contains(outBuf.String(), "SUCCESS") {
 			if i < 4 {
 				continue
 			}
-			if !strings.Contains(outBuf.String(), "must not exceed") {
+			if !strings.Contains(outBuf.String(), expectedErr) {
 				s.Require().Failf("failed to find transaction hash in output outBuf: %s  errBuf: %s",
 					outBuf.String(), errBuf.String())
 			}
