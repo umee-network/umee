@@ -44,7 +44,7 @@ func (s *E2ETest) testIBCTokenTransferWithMemo(umeeAPIEndpoint string, atomQuota
 
 	invalidMemoBZ, err := cdc.MarshalJSON(&invalidMemo)
 	assert.Nil(err)
-	s.SendIBC(setup.GaiaChainID, s.Chain.ID, accs.Alice.String(), atomFromGaia, false, "", string(invalidMemoBZ))
+	s.SendIBC(setup.GaiaChainID, s.Chain.ID, accs.Alice.String(), atomFromGaia, "", string(invalidMemoBZ), "")
 	updatedIBCAtomBalance := atomFromGaia.Amount.Add(prevIBCAtomBalance)
 	s.checkSupply(umeeAPIEndpoint, uatomIBCHash, updatedIBCAtomBalance)
 	s.checkLeverageAccountBalance(umeeAPIEndpoint, fallbackAddr, uatomIBCHash, math.ZeroInt())
@@ -60,7 +60,7 @@ func (s *E2ETest) testIBCTokenTransferWithMemo(umeeAPIEndpoint string, atomQuota
 	invalidMemo = uibc.ICS20Memo{Messages: anyMsgOfCollateralize, FallbackAddr: ""}
 	invalidMemoBZ, err = cdc.MarshalJSON(&invalidMemo)
 	assert.Nil(err)
-	s.SendIBC(setup.GaiaChainID, s.Chain.ID, accs.Alice.String(), atomFromGaia, false, "", string(invalidMemoBZ))
+	s.SendIBC(setup.GaiaChainID, s.Chain.ID, accs.Alice.String(), atomFromGaia, "", string(invalidMemoBZ), "")
 	updatedIBCAtomBalance = updatedIBCAtomBalance.Add(atomFromGaia.Amount)
 	s.checkSupply(umeeAPIEndpoint, uatomIBCHash, updatedIBCAtomBalance)
 	s.checkLeverageAccountBalance(umeeAPIEndpoint, fallbackAddr, uatomIBCHash, math.ZeroInt())
@@ -82,7 +82,7 @@ func (s *E2ETest) testIBCTokenTransferWithMemo(umeeAPIEndpoint string, atomQuota
 
 	bz, err := cdc.MarshalJSON(&memo)
 	assert.Nil(err)
-	s.SendIBC(setup.GaiaChainID, s.Chain.ID, accs.Alice.String(), atomFromGaia, false, "", string(bz))
+	s.SendIBC(setup.GaiaChainID, s.Chain.ID, accs.Alice.String(), atomFromGaia, "", string(bz), "")
 	updatedIBCAtomBalance = updatedIBCAtomBalance.Add(atomFromGaia.Amount)
 	s.checkSupply(umeeAPIEndpoint, uatomIBCHash, updatedIBCAtomBalance)
 	s.checkLeverageAccountBalance(umeeAPIEndpoint, accs.Alice.String(), uatomIBCHash, atomFromGaia.Amount)
