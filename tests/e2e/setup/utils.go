@@ -132,7 +132,8 @@ func (s *E2ETestSuite) SendIBC(srcChainID, dstChainID, recipient string, token s
 		// some times relayer can't send the packets to another chain
 
 		if expectedErr != "" {
-			s.Require().Contains(errBuf.String(), expectedErr)
+			s.Require().Contains(outBuf.String(), expectedErr)
+			return
 		}
 
 		// retry if we didn't succeed
