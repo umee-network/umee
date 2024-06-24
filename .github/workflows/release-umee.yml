@@ -28,6 +28,11 @@ jobs:
       - name: Set Env
         run: echo "TM_VERSION=$(go list -m github.com/cometbft/cometbft | sed 's:.* ::')" >> $GITHUB_ENV
 
+      - name: Set Wasmvm Env
+        run: echo "COSMWASM_VERSION=$(go list -m github.com/CosmWasm/wasmvm | sed 's/.* //')" >> $GITHUB_ENV
+
+
+
       # useful to test builds. However will require to add "push" rule to the "on" section
       - name: generate and update swagger docs
         run: |
@@ -39,7 +44,7 @@ jobs:
         if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')
         with:
           version: latest
-          args: build --rm-dist --skip-validate # skip validate skips initial sanity checks in order to be able to fully run
+          args: build --clean --skip-validate # skip validate skips initial sanity checks in order to be able to fully run
         env:
           TM_VERSION: ${{ env.TM_VERSION }}
       - name: Release
@@ -47,7 +52,8 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
-          args: release --rm-dist --release-notes ./RELEASE_NOTES.md
+          args: release --clean --release-notes ./RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TM_VERSION: ${{ env.TM_VERSION }}
+          COSMWASM_VERSION: ${{ env.COSMWASM_VERSION}}
