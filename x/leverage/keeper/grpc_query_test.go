@@ -3,6 +3,7 @@ package keeper_test
 import (
 	"context"
 
+	"cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
@@ -249,6 +250,19 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 	resp, err := s.queryClient.Inspect(ctx, &types.QueryInspect{})
 	require.NoError(err)
 
+	positionBal := func(c sdk.DecCoins, baseAmount math.Int) []types.PositionBalance {
+		res := make([]types.PositionBalance, 0)
+		for _, c := range c {
+			res = append(res, types.PositionBalance{
+				Amount:     c.Amount,
+				Denom:      c.Denom,
+				BaseDenom:  umeeDenom,
+				BaseAmount: baseAmount,
+			})
+		}
+		return res
+	}
+
 	expected := types.QueryInspectResponse{
 		Borrowers: []types.InspectAccount{
 			{
@@ -259,8 +273,8 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 					Value:       2526,
 				},
 				Position: &types.DecBalances{
-					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "600")),
-					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "15")),
+					Collateral: positionBal(sdk.NewDecCoins(coin.Dec("UMEE", "600")), math.NewInt(600_000000)),
+					Borrowed:   positionBal(sdk.NewDecCoins(coin.Dec("UMEE", "15")), math.NewInt(15_000000)),
 				},
 			},
 			{
@@ -271,8 +285,8 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 					Value:       4210,
 				},
 				Position: &types.DecBalances{
-					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "1000")),
-					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "10.5")),
+					Collateral: positionBal(sdk.NewDecCoins(coin.Dec("UMEE", "1000")), math.NewInt(1000_000000)),
+					Borrowed:   positionBal(sdk.NewDecCoins(coin.Dec("UMEE", "10.5")), math.NewInt(10_500000)),
 				},
 			},
 			{
@@ -283,8 +297,8 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 					Value:       252,
 				},
 				Position: &types.DecBalances{
-					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "60")),
-					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "1.5")),
+					Collateral: positionBal(sdk.NewDecCoins(coin.Dec("UMEE", "60")), math.NewInt(60_000000)),
+					Borrowed:   positionBal(sdk.NewDecCoins(coin.Dec("UMEE", "1.5")), math.NewInt(1_500000)),
 				},
 			},
 		},

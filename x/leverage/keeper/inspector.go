@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,6 +17,7 @@ import (
 )
 
 type tokenExchangeRate struct {
+	baseDenom    string
 	symbol       string
 	exponent     uint32
 	exchangeRate sdk.Dec
@@ -43,6 +45,7 @@ func (q Querier) Inspect(
 	exchangeRates := map[string]tokenExchangeRate{}
 	for _, t := range tokens {
 		exchangeRates[t.BaseDenom] = tokenExchangeRate{
+			baseDenom:    t.BaseDenom,
 			symbol:       t.SymbolDenom,
 			exponent:     t.Exponent,
 			exchangeRate: k.DeriveExchangeRate(ctx, t.BaseDenom),
@@ -111,7 +114,21 @@ func (q Querier) Inspect(
 	sort.SliceStable(borrowers, func(i, j int) bool {
 		if req.Symbol != "" {
 			// for non-empty symbol denom, sorts by borrowed amount (descending) of that token
-			return borrowers[i].Position.Borrowed.AmountOf(req.Symbol).GTE(borrowers[j].Position.Borrowed.AmountOf(req.Symbol))
+			var a, b sdkmath.Int
+			for _, c := range borrowers[i].Position.Borrowed {
+				if c.Denom == req.Symbol {
+					a = c.BaseAmount
+					break
+				}
+			}
+
+			for _, c := range borrowers[j].Position.Borrowed {
+				if c.Denom == req.Symbol {
+					b = c.BaseAmount
+					break
+				}
+			}
+			return a.GTE(b)
 		}
 		// otherwise, sorts by borrowed value (descending)
 		return borrowers[i].Analysis.Borrowed > borrowers[j].Analysis.Borrowed
@@ -185,13 +202,13 @@ func (q Querier) InspectAccount(
 	return &types.QueryInspectAccountResponse{Borrower: account}, nil
 }
 
-// symbolDecCoins converts an sdk.Coins containing base tokens or uTokens into an sdk.DecCoins containing symbol denom
-// base tokens. for example, 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
+// symbolDecCoins converts an sdk.Coins containing base tokens or uTokens into an PositionBalance format containing symbol denom
+// , base_denom ,base token amount and exchange rate amount. for example, 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
 func symbolDecCoins(
 	coins sdk.Coins,
 	tokens map[string]tokenExchangeRate,
-) sdk.DecCoins {
-	symbolCoins := sdk.NewDecCoins()
+) []types.PositionBalance {
+	symbolCoins := make([]types.PositionBalance, 0)
 
 	for _, c := range coins {
 		exchangeRate := sdk.OneDec()
@@ -203,12 +220,23 @@ func symbolDecCoins(
 		t, ok := tokens[c.Denom]
 		if !ok {
 			// unregistered tokens cannot be converted, but can be returned as base denom
-			symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
+			// symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
+			symbolCoins = append(symbolCoins, types.PositionBalance{
+				Amount:     sdk.NewDecFromInt(c.Amount),
+				BaseDenom:  c.Denom,
+				BaseAmount: c.Amount,
+				Denom:      c.Denom,
+			})
 			continue
 		}
 		exponentMultiplier := ten.Power(uint64(t.exponent))
 		amount := exchangeRate.MulInt(c.Amount).Quo(exponentMultiplier)
-		symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(t.symbol, amount))
+		symbolCoins = append(symbolCoins, types.PositionBalance{
+			Denom:      t.symbol,
+			BaseDenom:  c.Denom,
+			Amount:     amount,
+			BaseAmount: c.Amount,
+		})
 	}
 
 	return symbolCoins

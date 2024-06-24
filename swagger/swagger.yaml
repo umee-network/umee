@@ -581,17 +581,28 @@ paths:
                             properties:
                               denom:
                                 type: string
+                                title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                              base_denom:
+                                type: string
+                                title: >-
+                                  base_denom will be ibc_denom or native base
+                                  denom of umee (Ex: uumee, ibc/XXXX)
                               amount:
                                 type: string
+                                title: >-
+                                  amount will be convert base tokens into symbol
+                                  tokens with exchange rates
+
+                                  Ex: 1000u/uumee becomes 0.0015UMEE at an
+                                  exponent of 6 and uToken exchange rate of 1.5
+                              base_amount:
+                                type: string
+                                title: >-
+                                  base_amount will base tokens without coverting
+                                  to symbol denoms
                             description: >-
-                              DecCoin defines a token with a denomination and a
-                              decimal amount.
-
-
-                              NOTE: The amount field is an Dec which implements
-                              the custom method
-
-                              signatures required by gogoproto.
+                              PositionBalance contains denom, amount with
+                              base_denom, base_amount for account position.
                           description: >-
                             Collateral contains all uTokens the account has
                             collateralized. It has been converted from uTokens
@@ -603,17 +614,28 @@ paths:
                             properties:
                               denom:
                                 type: string
+                                title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                              base_denom:
+                                type: string
+                                title: >-
+                                  base_denom will be ibc_denom or native base
+                                  denom of umee (Ex: uumee, ibc/XXXX)
                               amount:
                                 type: string
+                                title: >-
+                                  amount will be convert base tokens into symbol
+                                  tokens with exchange rates
+
+                                  Ex: 1000u/uumee becomes 0.0015UMEE at an
+                                  exponent of 6 and uToken exchange rate of 1.5
+                              base_amount:
+                                type: string
+                                title: >-
+                                  base_amount will base tokens without coverting
+                                  to symbol denoms
                             description: >-
-                              DecCoin defines a token with a denomination and a
-                              decimal amount.
-
-
-                              NOTE: The amount field is an Dec which implements
-                              the custom method
-
-                              signatures required by gogoproto.
+                              PositionBalance contains denom, amount with
+                              base_denom, base_amount for account position.
                           description: >-
                             Borrowed contains all tokens the account has
                             borrowed, including interest owed.
@@ -752,17 +774,28 @@ paths:
                           properties:
                             denom:
                               type: string
+                              title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                            base_denom:
+                              type: string
+                              title: >-
+                                base_denom will be ibc_denom or native base
+                                denom of umee (Ex: uumee, ibc/XXXX)
                             amount:
                               type: string
+                              title: >-
+                                amount will be convert base tokens into symbol
+                                tokens with exchange rates
+
+                                Ex: 1000u/uumee becomes 0.0015UMEE at an
+                                exponent of 6 and uToken exchange rate of 1.5
+                            base_amount:
+                              type: string
+                              title: >-
+                                base_amount will base tokens without coverting
+                                to symbol denoms
                           description: >-
-                            DecCoin defines a token with a denomination and a
-                            decimal amount.
-
-
-                            NOTE: The amount field is an Dec which implements
-                            the custom method
-
-                            signatures required by gogoproto.
+                            PositionBalance contains denom, amount with
+                            base_denom, base_amount for account position.
                         description: >-
                           Collateral contains all uTokens the account has
                           collateralized. It has been converted from uTokens to
@@ -774,17 +807,28 @@ paths:
                           properties:
                             denom:
                               type: string
+                              title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                            base_denom:
+                              type: string
+                              title: >-
+                                base_denom will be ibc_denom or native base
+                                denom of umee (Ex: uumee, ibc/XXXX)
                             amount:
                               type: string
+                              title: >-
+                                amount will be convert base tokens into symbol
+                                tokens with exchange rates
+
+                                Ex: 1000u/uumee becomes 0.0015UMEE at an
+                                exponent of 6 and uToken exchange rate of 1.5
+                            base_amount:
+                              type: string
+                              title: >-
+                                base_amount will base tokens without coverting
+                                to symbol denoms
                           description: >-
-                            DecCoin defines a token with a denomination and a
-                            decimal amount.
-
-
-                            NOTE: The amount field is an Dec which implements
-                            the custom method
-
-                            signatures required by gogoproto.
+                            PositionBalance contains denom, amount with
+                            base_denom, base_amount for account position.
                         description: >-
                           Borrowed contains all tokens the account has borrowed,
                           including interest owed.
@@ -6349,18 +6393,6 @@ definitions:
 
       NOTE: The amount field is an Int which implements the custom method
       signatures required by gogoproto.
-  cosmos.base.v1beta1.DecCoin:
-    type: object
-    properties:
-      denom:
-        type: string
-      amount:
-        type: string
-    description: |-
-      DecCoin defines a token with a denomination and a decimal amount.
-
-      NOTE: The amount field is an Dec which implements the custom method
-      signatures required by gogoproto.
   google.protobuf.Any:
     type: object
     properties:
@@ -6812,13 +6844,26 @@ definitions:
           properties:
             denom:
               type: string
+              title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+            base_denom:
+              type: string
+              title: >-
+                base_denom will be ibc_denom or native base denom of umee (Ex:
+                uumee, ibc/XXXX)
             amount:
               type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
+              title: >-
+                amount will be convert base tokens into symbol tokens with
+                exchange rates
 
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+                Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
+                uToken exchange rate of 1.5
+            base_amount:
+              type: string
+              title: base_amount will base tokens without coverting to symbol denoms
+          description: >-
+            PositionBalance contains denom, amount with base_denom, base_amount
+            for account position.
         description: >-
           Collateral contains all uTokens the account has collateralized. It has
           been converted from uTokens to tokens.
@@ -6829,13 +6874,26 @@ definitions:
           properties:
             denom:
               type: string
+              title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+            base_denom:
+              type: string
+              title: >-
+                base_denom will be ibc_denom or native base denom of umee (Ex:
+                uumee, ibc/XXXX)
             amount:
               type: string
-          description: |-
-            DecCoin defines a token with a denomination and a decimal amount.
+              title: >-
+                amount will be convert base tokens into symbol tokens with
+                exchange rates
 
-            NOTE: The amount field is an Dec which implements the custom method
-            signatures required by gogoproto.
+                Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
+                uToken exchange rate of 1.5
+            base_amount:
+              type: string
+              title: base_amount will base tokens without coverting to symbol denoms
+          description: >-
+            PositionBalance contains denom, amount with base_denom, base_amount
+            for account position.
         description: >-
           Borrowed contains all tokens the account has borrowed, including
           interest owed.
@@ -6875,17 +6933,28 @@ definitions:
               properties:
                 denom:
                   type: string
+                  title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                base_denom:
+                  type: string
+                  title: >-
+                    base_denom will be ibc_denom or native base denom of umee
+                    (Ex: uumee, ibc/XXXX)
                 amount:
                   type: string
+                  title: >-
+                    amount will be convert base tokens into symbol tokens with
+                    exchange rates
+
+                    Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
+                    uToken exchange rate of 1.5
+                base_amount:
+                  type: string
+                  title: >-
+                    base_amount will base tokens without coverting to symbol
+                    denoms
               description: >-
-                DecCoin defines a token with a denomination and a decimal
-                amount.
-
-
-                NOTE: The amount field is an Dec which implements the custom
-                method
-
-                signatures required by gogoproto.
+                PositionBalance contains denom, amount with base_denom,
+                base_amount for account position.
             description: >-
               Collateral contains all uTokens the account has collateralized. It
               has been converted from uTokens to tokens.
@@ -6896,17 +6965,28 @@ definitions:
               properties:
                 denom:
                   type: string
+                  title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                base_denom:
+                  type: string
+                  title: >-
+                    base_denom will be ibc_denom or native base denom of umee
+                    (Ex: uumee, ibc/XXXX)
                 amount:
                   type: string
+                  title: >-
+                    amount will be convert base tokens into symbol tokens with
+                    exchange rates
+
+                    Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
+                    uToken exchange rate of 1.5
+                base_amount:
+                  type: string
+                  title: >-
+                    base_amount will base tokens without coverting to symbol
+                    denoms
               description: >-
-                DecCoin defines a token with a denomination and a decimal
-                amount.
-
-
-                NOTE: The amount field is an Dec which implements the custom
-                method
-
-                signatures required by gogoproto.
+                PositionBalance contains denom, amount with base_denom,
+                base_amount for account position.
             description: >-
               Borrowed contains all tokens the account has borrowed, including
               interest owed.
@@ -7007,6 +7087,31 @@ definitions:
 
           Valid values: 0-1.
     description: Params defines the parameters for the leverage module.
+  umee.leverage.v1.PositionBalance:
+    type: object
+    properties:
+      denom:
+        type: string
+        title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+      base_denom:
+        type: string
+        title: >-
+          base_denom will be ibc_denom or native base denom of umee (Ex: uumee,
+          ibc/XXXX)
+      amount:
+        type: string
+        title: >-
+          amount will be convert base tokens into symbol tokens with exchange
+          rates
+
+          Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken
+          exchange rate of 1.5
+      base_amount:
+        type: string
+        title: base_amount will base tokens without coverting to symbol denoms
+    description: >-
+      PositionBalance contains denom, amount with base_denom, base_amount for
+      account position.
   umee.leverage.v1.QueryAccountBalancesResponse:
     type: object
     properties:
@@ -7336,17 +7441,28 @@ definitions:
                   properties:
                     denom:
                       type: string
+                      title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                    base_denom:
+                      type: string
+                      title: >-
+                        base_denom will be ibc_denom or native base denom of
+                        umee (Ex: uumee, ibc/XXXX)
                     amount:
                       type: string
+                      title: >-
+                        amount will be convert base tokens into symbol tokens
+                        with exchange rates
+
+                        Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
+                        and uToken exchange rate of 1.5
+                    base_amount:
+                      type: string
+                      title: >-
+                        base_amount will base tokens without coverting to symbol
+                        denoms
                   description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                    PositionBalance contains denom, amount with base_denom,
+                    base_amount for account position.
                 description: >-
                   Collateral contains all uTokens the account has
                   collateralized. It has been converted from uTokens to tokens.
@@ -7357,17 +7473,28 @@ definitions:
                   properties:
                     denom:
                       type: string
+                      title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                    base_denom:
+                      type: string
+                      title: >-
+                        base_denom will be ibc_denom or native base denom of
+                        umee (Ex: uumee, ibc/XXXX)
                     amount:
                       type: string
+                      title: >-
+                        amount will be convert base tokens into symbol tokens
+                        with exchange rates
+
+                        Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
+                        and uToken exchange rate of 1.5
+                    base_amount:
+                      type: string
+                      title: >-
+                        base_amount will base tokens without coverting to symbol
+                        denoms
                   description: >-
-                    DecCoin defines a token with a denomination and a decimal
-                    amount.
-
-
-                    NOTE: The amount field is an Dec which implements the custom
-                    method
-
-                    signatures required by gogoproto.
+                    PositionBalance contains denom, amount with base_denom,
+                    base_amount for account position.
                 description: >-
                   Borrowed contains all tokens the account has borrowed,
                   including interest owed.
@@ -7427,17 +7554,28 @@ definitions:
                     properties:
                       denom:
                         type: string
+                        title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                      base_denom:
+                        type: string
+                        title: >-
+                          base_denom will be ibc_denom or native base denom of
+                          umee (Ex: uumee, ibc/XXXX)
                       amount:
                         type: string
+                        title: >-
+                          amount will be convert base tokens into symbol tokens
+                          with exchange rates
+
+                          Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
+                          and uToken exchange rate of 1.5
+                      base_amount:
+                        type: string
+                        title: >-
+                          base_amount will base tokens without coverting to
+                          symbol denoms
                     description: >-
-                      DecCoin defines a token with a denomination and a decimal
-                      amount.
-
-
-                      NOTE: The amount field is an Dec which implements the
-                      custom method
-
-                      signatures required by gogoproto.
+                      PositionBalance contains denom, amount with base_denom,
+                      base_amount for account position.
                   description: >-
                     Collateral contains all uTokens the account has
                     collateralized. It has been converted from uTokens to
@@ -7449,17 +7587,28 @@ definitions:
                     properties:
                       denom:
                         type: string
+                        title: 'denom will SYMBOL Denom (Ex: AKT, USDT)'
+                      base_denom:
+                        type: string
+                        title: >-
+                          base_denom will be ibc_denom or native base denom of
+                          umee (Ex: uumee, ibc/XXXX)
                       amount:
                         type: string
+                        title: >-
+                          amount will be convert base tokens into symbol tokens
+                          with exchange rates
+
+                          Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
+                          and uToken exchange rate of 1.5
+                      base_amount:
+                        type: string
+                        title: >-
+                          base_amount will base tokens without coverting to
+                          symbol denoms
                     description: >-
-                      DecCoin defines a token with a denomination and a decimal
-                      amount.
-
-
-                      NOTE: The amount field is an Dec which implements the
-                      custom method
-
-                      signatures required by gogoproto.
+                      PositionBalance contains denom, amount with base_denom,
+                      base_amount for account position.
                   description: >-
                     Borrowed contains all tokens the account has borrowed,
                     including interest owed.
@@ -9187,6 +9336,18 @@ definitions:
           QueryMarketSummaryResponse defines the response structure for the
           MarketSummary gRPC service handler.
     description: TokenMarket is a token and its market summary.
+  cosmos.base.v1beta1.DecCoin:
+    type: object
+    properties:
+      denom:
+        type: string
+      amount:
+        type: string
+    description: |-
+      DecCoin defines a token with a denomination and a decimal amount.
+
+      NOTE: The amount field is an Dec which implements the custom method
+      signatures required by gogoproto.
   umee.oracle.v1.AggregateExchangeRatePrevote:
     type: object
     properties:
