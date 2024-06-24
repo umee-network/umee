@@ -202,8 +202,9 @@ func (q Querier) InspectAccount(
 	return &types.QueryInspectAccountResponse{Borrower: account}, nil
 }
 
-// symbolDecCoins converts an sdk.Coins containing base tokens or uTokens into an PositionBalance format containing symbol denom
-// , base_denom ,base token amount and exchange rate amount. for example, 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
+// symbolDecCoins converts an sdk.Coins containing base tokens or uTokens into an PositionBalance format containing
+// symbol denom, base_denom ,base token amount and exchange rate amount.
+// for example, 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
 func symbolDecCoins(
 	coins sdk.Coins,
 	tokens map[string]tokenExchangeRate,
