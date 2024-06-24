@@ -1424,10 +1424,10 @@ type PositionBalance struct {
 	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
 	// base_denom will be ibc_denom or native base denom of umee (Ex: uumee, ibc/XXXX)
 	BaseDenom string `protobuf:"bytes,2,opt,name=base_denom,json=baseDenom,proto3" json:"base_denom,omitempty"`
-	// amount will be convert base tokens into symbol tokens with exchange rates
+	// amount represents the converted base tokens into symbol tokens using exchange rates
 	// Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
 	Amount cosmossdk_io_math.LegacyDec `protobuf:"bytes,3,opt,name=amount,proto3,customtype=cosmossdk.io/math.LegacyDec" json:"amount"`
-	// base_amount will base tokens without coverting to symbol denoms
+	// base_amount will represent base tokens without converting to symbol denominations
 	BaseAmount cosmossdk_io_math.Int `protobuf:"bytes,4,opt,name=base_amount,json=baseAmount,proto3,customtype=cosmossdk.io/math.Int" json:"base_amount"`
 }
 

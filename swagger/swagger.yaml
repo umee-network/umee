@@ -590,16 +590,16 @@ paths:
                               amount:
                                 type: string
                                 title: >-
-                                  amount will be convert base tokens into symbol
-                                  tokens with exchange rates
+                                  amount represents the converted base tokens
+                                  into symbol tokens using exchange rates
 
                                   Ex: 1000u/uumee becomes 0.0015UMEE at an
                                   exponent of 6 and uToken exchange rate of 1.5
                               base_amount:
                                 type: string
                                 title: >-
-                                  base_amount will base tokens without coverting
-                                  to symbol denoms
+                                  base_amount will represent base tokens without
+                                  converting to symbol denominations
                             description: >-
                               PositionBalance contains denom, amount with
                               base_denom, base_amount for account position.
@@ -623,16 +623,16 @@ paths:
                               amount:
                                 type: string
                                 title: >-
-                                  amount will be convert base tokens into symbol
-                                  tokens with exchange rates
+                                  amount represents the converted base tokens
+                                  into symbol tokens using exchange rates
 
                                   Ex: 1000u/uumee becomes 0.0015UMEE at an
                                   exponent of 6 and uToken exchange rate of 1.5
                               base_amount:
                                 type: string
                                 title: >-
-                                  base_amount will base tokens without coverting
-                                  to symbol denoms
+                                  base_amount will represent base tokens without
+                                  converting to symbol denominations
                             description: >-
                               PositionBalance contains denom, amount with
                               base_denom, base_amount for account position.
@@ -783,16 +783,16 @@ paths:
                             amount:
                               type: string
                               title: >-
-                                amount will be convert base tokens into symbol
-                                tokens with exchange rates
+                                amount represents the converted base tokens into
+                                symbol tokens using exchange rates
 
                                 Ex: 1000u/uumee becomes 0.0015UMEE at an
                                 exponent of 6 and uToken exchange rate of 1.5
                             base_amount:
                               type: string
                               title: >-
-                                base_amount will base tokens without coverting
-                                to symbol denoms
+                                base_amount will represent base tokens without
+                                converting to symbol denominations
                           description: >-
                             PositionBalance contains denom, amount with
                             base_denom, base_amount for account position.
@@ -816,16 +816,16 @@ paths:
                             amount:
                               type: string
                               title: >-
-                                amount will be convert base tokens into symbol
-                                tokens with exchange rates
+                                amount represents the converted base tokens into
+                                symbol tokens using exchange rates
 
                                 Ex: 1000u/uumee becomes 0.0015UMEE at an
                                 exponent of 6 and uToken exchange rate of 1.5
                             base_amount:
                               type: string
                               title: >-
-                                base_amount will base tokens without coverting
-                                to symbol denoms
+                                base_amount will represent base tokens without
+                                converting to symbol denominations
                           description: >-
                             PositionBalance contains denom, amount with
                             base_denom, base_amount for account position.
@@ -6853,14 +6853,16 @@ definitions:
             amount:
               type: string
               title: >-
-                amount will be convert base tokens into symbol tokens with
-                exchange rates
+                amount represents the converted base tokens into symbol tokens
+                using exchange rates
 
                 Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
                 uToken exchange rate of 1.5
             base_amount:
               type: string
-              title: base_amount will base tokens without coverting to symbol denoms
+              title: >-
+                base_amount will represent base tokens without converting to
+                symbol denominations
           description: >-
             PositionBalance contains denom, amount with base_denom, base_amount
             for account position.
@@ -6883,14 +6885,16 @@ definitions:
             amount:
               type: string
               title: >-
-                amount will be convert base tokens into symbol tokens with
-                exchange rates
+                amount represents the converted base tokens into symbol tokens
+                using exchange rates
 
                 Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
                 uToken exchange rate of 1.5
             base_amount:
               type: string
-              title: base_amount will base tokens without coverting to symbol denoms
+              title: >-
+                base_amount will represent base tokens without converting to
+                symbol denominations
           description: >-
             PositionBalance contains denom, amount with base_denom, base_amount
             for account position.
@@ -6942,16 +6946,16 @@ definitions:
                 amount:
                   type: string
                   title: >-
-                    amount will be convert base tokens into symbol tokens with
-                    exchange rates
+                    amount represents the converted base tokens into symbol
+                    tokens using exchange rates
 
                     Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
                     uToken exchange rate of 1.5
                 base_amount:
                   type: string
                   title: >-
-                    base_amount will base tokens without coverting to symbol
-                    denoms
+                    base_amount will represent base tokens without converting to
+                    symbol denominations
               description: >-
                 PositionBalance contains denom, amount with base_denom,
                 base_amount for account position.
@@ -6974,16 +6978,16 @@ definitions:
                 amount:
                   type: string
                   title: >-
-                    amount will be convert base tokens into symbol tokens with
-                    exchange rates
+                    amount represents the converted base tokens into symbol
+                    tokens using exchange rates
 
                     Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and
                     uToken exchange rate of 1.5
                 base_amount:
                   type: string
                   title: >-
-                    base_amount will base tokens without coverting to symbol
-                    denoms
+                    base_amount will represent base tokens without converting to
+                    symbol denominations
               description: >-
                 PositionBalance contains denom, amount with base_denom,
                 base_amount for account position.
@@ -7101,14 +7105,16 @@ definitions:
       amount:
         type: string
         title: >-
-          amount will be convert base tokens into symbol tokens with exchange
-          rates
+          amount represents the converted base tokens into symbol tokens using
+          exchange rates
 
           Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken
           exchange rate of 1.5
       base_amount:
         type: string
-        title: base_amount will base tokens without coverting to symbol denoms
+        title: >-
+          base_amount will represent base tokens without converting to symbol
+          denominations
     description: >-
       PositionBalance contains denom, amount with base_denom, base_amount for
       account position.
@@ -7450,16 +7456,16 @@ definitions:
                     amount:
                       type: string
                       title: >-
-                        amount will be convert base tokens into symbol tokens
-                        with exchange rates
+                        amount represents the converted base tokens into symbol
+                        tokens using exchange rates
 
                         Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
                         and uToken exchange rate of 1.5
                     base_amount:
                       type: string
                       title: >-
-                        base_amount will base tokens without coverting to symbol
-                        denoms
+                        base_amount will represent base tokens without
+                        converting to symbol denominations
                   description: >-
                     PositionBalance contains denom, amount with base_denom,
                     base_amount for account position.
@@ -7482,16 +7488,16 @@ definitions:
                     amount:
                       type: string
                       title: >-
-                        amount will be convert base tokens into symbol tokens
-                        with exchange rates
+                        amount represents the converted base tokens into symbol
+                        tokens using exchange rates
 
                         Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
                         and uToken exchange rate of 1.5
                     base_amount:
                       type: string
                       title: >-
-                        base_amount will base tokens without coverting to symbol
-                        denoms
+                        base_amount will represent base tokens without
+                        converting to symbol denominations
                   description: >-
                     PositionBalance contains denom, amount with base_denom,
                     base_amount for account position.
@@ -7563,16 +7569,16 @@ definitions:
                       amount:
                         type: string
                         title: >-
-                          amount will be convert base tokens into symbol tokens
-                          with exchange rates
+                          amount represents the converted base tokens into
+                          symbol tokens using exchange rates
 
                           Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
                           and uToken exchange rate of 1.5
                       base_amount:
                         type: string
                         title: >-
-                          base_amount will base tokens without coverting to
-                          symbol denoms
+                          base_amount will represent base tokens without
+                          converting to symbol denominations
                     description: >-
                       PositionBalance contains denom, amount with base_denom,
                       base_amount for account position.
@@ -7596,16 +7602,16 @@ definitions:
                       amount:
                         type: string
                         title: >-
-                          amount will be convert base tokens into symbol tokens
-                          with exchange rates
+                          amount represents the converted base tokens into
+                          symbol tokens using exchange rates
 
                           Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6
                           and uToken exchange rate of 1.5
                       base_amount:
                         type: string
                         title: >-
-                          base_amount will base tokens without coverting to
-                          symbol denoms
+                          base_amount will represent base tokens without
+                          converting to symbol denominations
                     description: >-
                       PositionBalance contains denom, amount with base_denom,
                       base_amount for account position.
