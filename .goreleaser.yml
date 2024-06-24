@@ -38,7 +38,7 @@ archives:
 
 release:
   github:
-    owner: kaustubhkapatral
+    owner: umee-network
     name: umee
 
 snapshot:
