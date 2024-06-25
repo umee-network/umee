@@ -128,6 +128,10 @@ func (q Querier) Inspect(
 					break
 				}
 			}
+
+			if a.IsNil() || b.IsNil() {
+				return false
+			}
 			return a.GTE(b)
 		}
 		// otherwise, sorts by borrowed value (descending)

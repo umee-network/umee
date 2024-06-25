@@ -304,6 +304,12 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 		},
 	}
 	require.Equal(expected, *resp)
+
+	req := &types.QueryInspect{}
+	req.Symbol = "UMEE"
+	resp, err = s.queryClient.Inspect(ctx, req)
+	require.NoError(err)
+	require.Equal(expected, *resp)
 }
 
 func (s *IntegrationTestSuite) TestQuerier_LiquidationTargets() {

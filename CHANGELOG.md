@@ -60,7 +60,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 - [2494](https://github.com/umee-network/umee/pull/2494) Use go 1.22
 - [2495](https://github.com/umee-network/umee/pull/2495) (util) `KeyWithUint64` and `KeyWithUint32` helper functions for db keys.
 - [2504](https://github.com/umee-network/umee/pull/2504) bump `wasmd` to v0.45.0.
-- [2562](https://github.com/umee-network/umee/pull/2562) (x/leverage): Improved the existing inspect account response by adding `base_denom` and `base_amount`.
+- [2562](https://github.com/umee-network/umee/pull/2562) (x/leverage proto): Add `base_denom` and `base_amount` to `QueryInspectResponse`.
 
 ### Bug Fixes
 
