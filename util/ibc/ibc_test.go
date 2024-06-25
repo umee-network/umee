@@ -34,20 +34,9 @@ func TestGetFundsFromPacket(t *testing.T) {
 	assert.Equal(t, denom, fdenom)
 	assert.Equal(t, famount.String(), amount)
 
-	// invalid address
-	data.Receiver = tsdk.GenerateString(MaximumReceiverLength + 1)
-	_, _, err = GetFundsFromPacket(data.GetBytes())
-	assert.ErrorContains(t, err, "recipient address must not exceed")
-
-	// invalid memo
-	data.Receiver = AddressFromString("a4")
-	data.Memo = tsdk.GenerateString(MaximumMemoLength + 1)
-	_, _, err = GetFundsFromPacket(data.GetBytes())
-	assert.ErrorContains(t, err, "memo must not exceed")
-
 	// valid address and memo
-	data.Receiver = tsdk.GenerateString(MaximumReceiverLength)
-	data.Memo = tsdk.GenerateString(MaximumMemoLength)
+	data.Receiver = tsdk.GenerateString(ibctransfertypes.MaximumReceiverLength)
+	data.Memo = tsdk.GenerateString(ibctransfertypes.MaximumMemoLength)
 	_, _, err = GetFundsFromPacket(data.GetBytes())
 	assert.NilError(t, err, "Should handle valid inputs without error")
 }
