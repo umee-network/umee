@@ -8,12 +8,12 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
+	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
 	"github.com/umee-network/umee/v6/tests/grpc"
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	"github.com/umee-network/umee/v6/util/coin"
-	ibcutil "github.com/umee-network/umee/v6/util/ibc"
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -170,7 +170,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 
 		// << Receiver Addr = maximum length + 1
 		// send $110 UMEE from umee to gaia (token_quota is 100$)
-		recvAddr := tsdk.GenerateString(ibcutil.MaximumMemoLength + 1)
+		recvAddr := tsdk.GenerateString(ibctransfertypes.MaximumReceiverLength + 1)
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, recvAddr, exceedUmee, "", "",
 			"recipient address must not exceed 2048 bytes")
 		// supply should not change
