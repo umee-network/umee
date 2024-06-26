@@ -26,7 +26,6 @@ import (
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
-	wm "github.com/umee-network/umee/v6/app/wasm/msg"
 	wq "github.com/umee-network/umee/v6/app/wasm/query"
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
@@ -105,21 +104,9 @@ type StargateQuery struct {
 	} `json:"chain"`
 }
 
-type ExecuteMsg struct {
-	Umee struct {
-		Leverage wm.UmeeMsg `json:"leverage"`
-	} `json:"umee"`
-}
-
 func UmeeCwCustomQuery(umeeCWQuery wq.UmeeQuery) CustomQuery {
 	c := CustomQuery{}
 	c.Chain.Custom = umeeCWQuery
-	return c
-}
-
-func UmeeCwCustomTx(customMsg wm.UmeeMsg) ExecuteMsg {
-	c := ExecuteMsg{}
-	c.Umee.Leverage = customMsg
 	return c
 }
 
@@ -342,12 +329,6 @@ func (s *IntegrationTestSuite) InitiateUmeeCosmwasm() {
 
 func (s *IntegrationTestSuite) genCustomQuery(umeeQuery wq.UmeeQuery) []byte {
 	cq, err := json.Marshal(UmeeCwCustomQuery(umeeQuery))
-	assert.NilError(s.T, err)
-	return cq
-}
-
-func (s *IntegrationTestSuite) genCustomTx(msg wm.UmeeMsg) []byte {
-	cq, err := json.Marshal(UmeeCwCustomTx(msg))
 	assert.NilError(s.T, err)
 	return cq
 }

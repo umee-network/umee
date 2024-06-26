@@ -10,6 +10,7 @@ import (
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
 	"github.com/stretchr/testify/suite"
 
@@ -67,7 +68,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 	k, tk := keeper.NewTestKeeper(
 		app.AppCodec(),
 		app.GetKey(types.ModuleName),
+		app.GetKey(authtypes.StoreKey),
 		app.BankKeeper,
+		app.AccountKeeper,
 		s.mockOracle,
 		true,
 	)

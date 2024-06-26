@@ -3,117 +3,177 @@ package uics20
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	sdkerrors "cosmossdk.io/errors"
-	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/tx"
 	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
+	"github.com/umee-network/umee/v6/x/uibc/gmp"
+)
+
+// error messages
+var (
+	errWrongSigner   = errors.New("msg signer doesn't match the ICS20 receiver")
+	errNoSubCoins    = errors.New("message must use only coins sent from the transfer")
+	errHooksDisabled = errors.New("ics20-hooks: execute is disabled but valid hook memo is set")
+	errMsg0Type      = errors.New("only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]")
+	// errMsg1Type = errors.New("only MsgBorrow is supported as messages[1]")
 )
 
 type MemoHandler struct {
 	cdc      codec.JSONCodec
 	leverage ltypes.MsgServer
+
+	executeEnabled bool
+	isGMP          bool
+	msgs           []sdk.Msg
+	memo           string
+	received       sdk.Coin
+
+	receiver         sdk.AccAddress
+	fallbackReceiver sdk.AccAddress
 }
 
-func (mh MemoHandler) onRecvPacket(ctx *sdk.Context, ftData ics20types.FungibleTokenPacketData) error {
-	msgs, err := deserializeMemoMsgs(mh.cdc, []byte(ftData.Memo))
-	if err != nil {
-		recvPacketLogger(ctx).Debug("Can't deserialize ICS20 memo for hook execution", "err", err)
-		return nil
+// onRecvPacketPre parses transfer Memo field and prepares the MemoHandler.
+// See ICS20Module.OnRecvPacket for the flow
+func (mh *MemoHandler) onRecvPacketPrepare(
+	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
+) ([]string, error) {
+	var events []string
+	var err error
+	logger := recvPacketLogger(ctx)
+	mh.memo = ftData.Memo
+	amount, ok := sdk.NewIntFromString(ftData.Amount)
+	if !ok { // must not happen
+		return nil, fmt.Errorf("can't parse transfer amount: %s", ftData.Amount)
 	}
-	// TODO: need to handle fees!
-	// TODO: verify correctly if receiver and sender are the same (modulo hrp)
+	ibcDenom := uibc.ExtractDenomFromPacketOnRecv(packet, ftData.Denom)
+	mh.received = sdk.NewCoin(ibcDenom, amount)
+	mh.receiver, err = sdk.AccAddressFromBech32(ftData.Receiver)
+	if err != nil { // must not happen
+		return nil, sdkerrors.Wrap(err, "can't parse ftData.Receiver bech32 address")
+	}
 
-	receiver, err := sdk.AccAddressFromBech32(ftData.Receiver)
+	var memoPayload []byte
+	if strings.EqualFold(ftData.Sender, gmp.DefaultGMPAddress) {
+		events = append(events, "Axelar GMP")
+		mh.isGMP = true
+		gmpMessage, err := gmp.ParseMemo(*ctx, mh.received, mh.memo, mh.receiver)
+		if err != nil {
+			logger.Debug("Can't parse the gmp memo", "err", err)
+			return events, errMemoValidation{err}
+		}
+		memoPayload = gmpMessage.Payload
+	} else {
+		memoPayload = []byte(ftData.Memo)
+	}
+	memo, err := deserializeMemo(mh.cdc, memoPayload)
 	if err != nil {
-		return sdkerrors.Wrap(err, "can't parse bech32 address")
+		logger.Debug("Not recognized ICS20 memo, ignoring hook execution", "err", err)
+		return nil, nil
 	}
-	amount, ok := sdkmath.NewIntFromString(ftData.Amount)
-	if !ok {
-		return fmt.Errorf("can't parse transfer amount: %s [%w]", ftData.Amount, err)
+	if memo.FallbackAddr != "" {
+		if mh.fallbackReceiver, err = sdk.AccAddressFromBech32(memo.FallbackAddr); err != nil {
+			return nil,
+				sdkerrors.Wrap(err, "ICS20 memo fallback_addr defined, but not formatted correctly")
+		}
+		if mh.fallbackReceiver.Equals(mh.receiver) {
+			// no need to specify fallback address if it's the same as the original receiver
+			mh.fallbackReceiver = nil
+		}
 	}
-	return mh.dispatchMemoMsgs(ctx, receiver, sdk.NewCoin(ftData.Denom, amount), msgs)
+
+	mh.msgs, err = memo.GetMsgs()
+	if err != nil {
+		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
+		events = append(events, e)
+		return events, nil
+	}
+
+	if err := mh.validateMemoMsg(); err != nil {
+		events = append(events, "memo.messages are not valid, err: "+err.Error())
+		return events, errMemoValidation{err}
+	}
+
+	return events, nil
 }
 
 // runs messages encoded in the ICS20 memo.
-// NOTE: storage is forked, and only committed (flushed) if all messages pass and if all
-// messages are supported. Otherwise the fork storage is discarded.
-func (mh MemoHandler) dispatchMemoMsgs(ctx *sdk.Context, receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
-	if len(msgs) == 0 {
-		return nil // nothing to do
+// Returns list of
+// NOTE: we fork the store and only commit if all messages pass. Otherwise the fork store
+// is discarded.
+func (mh MemoHandler) execute(ctx *sdk.Context) error {
+	if !mh.executeEnabled && (mh.isGMP || len(mh.msgs) != 0) {
+		return errHooksDisabled
 	}
 
-	if err := mh.validateMemoMsg(receiver, sent, msgs); err != nil {
-		return sdkerrors.Wrap(err, "ics20 memo messages are not valid.")
+	if len(mh.msgs) == 0 {
+		return nil // quick return - we have nothing to handle
 	}
 
-	// Caching context so that we don't update the store in case of failure.
-	cacheCtx, flush := ctx.CacheContext()
 	logger := recvPacketLogger(ctx)
-	for _, m := range msgs {
-		if err := mh.handleMemoMsg(&cacheCtx, m); err != nil {
-			// ignore changes in cacheCtx and return
+	for _, m := range mh.msgs {
+		if err := mh.handleMemoMsg(ctx, m); err != nil {
 			return sdkerrors.Wrapf(err, "error dispatching msg: %v", m)
 		}
 		logger.Debug("dispatching", "msg", m)
 	}
-	flush()
 	return nil
 }
-
-// error messages used in validateMemoMsg
-const (
-	msg0typeErr = "only MsgSupply, MsgSupplyCollateral and MsgLiquidate are supported as messages[0]"
-	msg1typeErr = "only MsgBorrow is supported as messages[1]"
-)
 
 // We only support the following message combinations:
 // - [MsgSupply]
 // - [MsgSupplyCollateral]
-// - [MsgSupplyCollateral, MsgBorrow] -- here, borrow must use
 // - [MsgLiquidate]
 // Signer of each message (account under charged with coins), must be the receiver of the ICS20
 // transfer.
-func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, msgs []sdk.Msg) error {
-	msgLen := len(msgs)
-	if msgLen > 2 {
-		return errors.New("ics20 memo with more than 2 messages are not supported")
+// Must be called after onRecvPacketPrepare.
+func (mh MemoHandler) validateMemoMsg() error {
+	msgLen := len(mh.msgs)
+	if msgLen == 0 {
+		return nil
 	}
 
-	for _, msg := range msgs {
-		if m, ok := msg.(sdk.LegacyMsg); ok {
-			if signers := m.GetSigners(); len(signers) != 1 || !signers[0].Equals(receiver) {
-				return errors.New(
-					"msg signer doesn't match the receiver, expected signer: " + receiver.String())
-			}
+	// In this release we only support 1msg, and only messages that don't create or change
+	// a borrow position
+	if msgLen > 1 {
+		return errors.New("ics20 memo with more than 1 message is not supported")
+	}
+
+	for _, msg := range mh.msgs {
+		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(mh.receiver) {
+			return errWrongSigner
 		}
 	}
 
 	var (
-		asset      sdk.Coin
-		collateral sdk.Coin
+		asset *sdk.Coin
+		// collateral sdk.Coin
 	)
-	switch msg := msgs[0].(type) {
+	switch msg := mh.msgs[0].(type) {
 	case *ltypes.MsgSupplyCollateral:
-		asset = msg.Asset
-		collateral = asset
+		asset = &msg.Asset
+		// collateral = asset
 	case *ltypes.MsgSupply:
-		asset = msg.Asset
+		asset = &msg.Asset
+	case *ltypes.MsgRepay:
+		asset = &msg.Asset
 	case *ltypes.MsgLiquidate:
-		asset = msg.Repayment
+		asset = &msg.Repayment
 	default:
-		return errors.New(msg0typeErr)
+		return errMsg0Type
 	}
 
-	// TODO more asserts, will be handled in other PR
-	if err := assertSubCoins(sent, asset); err != nil {
-		return err
-	}
+	return adjustOperatedCoin(mh.received, asset)
+
+	/**
+	   TODO: handlers v2
+
 
 	if msgLen == 1 {
 		// early return - we don't need to do more checks
@@ -130,6 +190,7 @@ func (mh MemoHandler) validateMemoMsg(receiver sdk.AccAddress, sent sdk.Coin, ms
 	}
 
 	return nil
+	*/
 }
 
 func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
@@ -138,8 +199,8 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 		_, err = mh.leverage.Supply(*ctx, msg)
 	case *ltypes.MsgSupplyCollateral:
 		_, err = mh.leverage.SupplyCollateral(*ctx, msg)
-	case *ltypes.MsgBorrow:
-		_, err = mh.leverage.Borrow(*ctx, msg)
+	case *ltypes.MsgRepay:
+		_, err = mh.leverage.Repay(*ctx, msg)
 	case *ltypes.MsgLiquidate:
 		_, err = mh.leverage.Liquidate(*ctx, msg)
 	default:
@@ -148,17 +209,18 @@ func (mh MemoHandler) handleMemoMsg(ctx *sdk.Context, msg sdk.Msg) (err error) {
 	return err
 }
 
-func assertSubCoins(sent, operated sdk.Coin) error {
-	if sent.Denom != operated.Denom || sent.Amount.LT(operated.Amount) {
-		return errors.New("message must use only coins sent from the transfer")
+// adjustOperatedCoin assures that received and operated are of the same denom. Returns error if
+// not. Moreover it updates operated amount if it is bigger than the received amount.
+func adjustOperatedCoin(received sdk.Coin, operated *sdk.Coin) error {
+	if received.Denom != operated.Denom {
+		return errNoSubCoins
+	}
+	if received.Amount.LT(operated.Amount) {
+		operated.Amount = received.Amount
 	}
 	return nil
 }
 
-func deserializeMemoMsgs(cdc codec.JSONCodec, data []byte) ([]sdk.Msg, error) {
-	var m uibc.ICS20Memo
-	if err := cdc.UnmarshalJSON(data, &m); err != nil {
-		return nil, err
-	}
-	return tx.GetMsgs(m.Messages, "memo messages")
+func deserializeMemo(cdc codec.JSONCodec, data []byte) (m uibc.ICS20Memo, err error) {
+	return m, cdc.UnmarshalJSON(data, &m)
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module/testutil"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -85,7 +86,7 @@ func (s *E2ETestSuite) SetupSuite() {
 		map[int64]bool{},
 		"",
 		0,
-		app.EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		app.EmptyWasmOpts,
 	)
 	encodingConfig = testutil.TestEncodingConfig{
@@ -288,6 +289,8 @@ func (s *E2ETestSuite) initGenesis() {
 	uibcGenState.Params.TotalQuota = sdkmath.LegacyNewDec(120)
 	// quotas will reset every 300 seconds
 	uibcGenState.Params.QuotaDuration = time.Second * 300
+	// enable ics20 hooks (memo handling)
+	uibcGenState.Params.Ics20Hooks = true
 
 	bz, err = s.cdc.MarshalJSON(&uibcGenState)
 	s.Require().NoError(err)

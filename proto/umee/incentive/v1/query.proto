@@ -10,6 +10,8 @@ import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/incentive";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // Query defines the gRPC querier service.
 service Query {
   // Params queries the parameters of the x/incentive module.

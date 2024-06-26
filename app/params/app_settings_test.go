@@ -15,3 +15,11 @@ func TestDenoms(t *testing.T) {
 	assert.NoError(sdk.ValidateDenom(DisplayDenom))
 	assert.NoError(sdk.ValidateDenom(LegacyDisplayDenom))
 }
+
+func TestUXMetadata(t *testing.T) {
+	um := UmeeTokenMetadata()
+	assert := assert.New(t)
+	assert.Equal("uumee", um.Base, "Umee base denom must not change")
+	assert.Equal("UX", um.Name)
+	assert.Equal("UX", um.DenomUnits[1].Denom)
+}

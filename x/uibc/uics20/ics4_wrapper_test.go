@@ -53,7 +53,7 @@ func TestSendPacket(t *testing.T) {
 
 	storeKey := storetypes.NewMemoryStoreKey("quota")
 	ctx, _ := tsdk.NewCtxOneStore(t, storeKey)
-	kb := quota.NewKeeperBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock, eg)
+	kb := quota.NewBuilder(codec.NewProtoCodec(nil), storeKey, leverageMock, oracleMock, eg)
 	dp := uibc.DefaultParams()
 	keeper := kb.Keeper(&ctx)
 	keeper.SetParams(dp)

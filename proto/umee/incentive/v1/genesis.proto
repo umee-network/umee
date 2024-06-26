@@ -1,11 +1,13 @@
 syntax = "proto3";
 package umee.incentive.v1;
 
-option go_package = "github.com/umee-network/umee/v6/x/incentive";
-
 import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 import "umee/incentive/v1/incentive.proto";
+
+option go_package = "github.com/umee-network/umee/v6/x/incentive";
+
+option (gogoproto.goproto_getters_all) = false;
 
 // GenesisState defines the x/incentive module's genesis state.
 message GenesisState {

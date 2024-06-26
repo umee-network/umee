@@ -12,6 +12,12 @@ import (
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/tests/tsdk"
+	"github.com/umee-network/umee/v6/util"
+)
+
+var (
+	keyPrefixUint32 = []byte{0x01}
+	keyPrefixOther  = []byte{0x02}
 )
 
 func TestGetAndSetDec(t *testing.T) {
@@ -97,4 +103,50 @@ func TestGetAndSetTime(t *testing.T) {
 	assert.Equal(t, true, ok)
 	val = val.Truncate(time.Millisecond)
 	assert.Equal(t, val, val2)
+}
+
+func TestLoadAll(t *testing.T) {
+	t.Parallel()
+	store := tsdk.KVStore(t)
+
+	o1 := newCoin("umee", 1312)
+	o2 := newCoin("atom", 2)
+	o3 := newCoin("atom", 10)
+	o4 := newCoin("gg1", 6)
+	o150 := newCoin("aa2", 42)
+	assert.NilError(t, SetValue(store, uint32Key(150), &o150, ""))
+	assert.NilError(t, SetValue(store, uint32Key(1), &o1, ""))
+	assert.NilError(t, SetValue(store, uint32Key(2), &o2, ""))
+	assert.NilError(t, SetValue(store, uint32Key(3), &o3, ""))
+	assert.NilError(t, SetValue(store, uint32Key(4), &o4, ""))
+	// set other data with different prefix
+	store.Set(keyPrefixOther, []byte{1})
+	store.Set(append(keyPrefixOther, 1), []byte{1})
+
+	elems, err := LoadAllKV[*Uint32, Uint32, *sdk.Coin](store, keyPrefixUint32)
+	assert.NilError(t, err)
+
+	newKV := func(k uint32, v sdk.Coin) KV[Uint32, sdk.Coin] {
+		return KV[Uint32, sdk.Coin]{Uint32(k), v}
+	}
+
+	assert.DeepEqual(t, elems, []KV[Uint32, sdk.Coin]{
+		newKV(1, o1),
+		newKV(2, o2),
+		newKV(3, o3),
+		newKV(4, o4),
+		newKV(150, o150),
+	})
+
+	vals, err := LoadAll[*sdk.Coin](store, keyPrefixUint32)
+	assert.NilError(t, err)
+	assert.DeepEqual(t, vals, []sdk.Coin{o1, o2, o3, o4, o150})
+}
+
+func uint32Key(id uint32) []byte {
+	return util.KeyWithUint32(keyPrefixUint32, id)
+}
+
+func newCoin(denom string, amount int64) sdk.Coin {
+	return sdk.NewCoin(denom, sdk.NewInt(amount))
 }

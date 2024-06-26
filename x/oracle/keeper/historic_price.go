@@ -11,6 +11,10 @@ import (
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
+func wrapDenomError(err error, denom string) error {
+	return errors.Wrap(err, "denom: "+denom)
+}
+
 // HistoricMedians returns a list of a given denom's last numStamps medians.
 func (k Keeper) HistoricMedians(
 	ctx sdk.Context,
@@ -47,7 +51,7 @@ func (k Keeper) CalcAndSetHistoricMedian(
 
 	median, err := decmath.Median(historicPrices)
 	if err != nil {
-		return errors.Wrap(err, "denom: "+denom) //nolint: goconst
+		return wrapDenomError(err, denom)
 	}
 
 	block := uint64(ctx.BlockHeight())
@@ -77,7 +81,7 @@ func (k Keeper) HistoricMedianDeviation(
 	blockNum := uint64(ctx.BlockHeight()) - blockDiff
 	bz := store.Get(types.KeyMedianDeviation(denom, blockNum))
 	if bz == nil {
-		return types.Price{}, types.ErrNoMedianDeviation.Wrap("denom: " + denom)
+		return types.Price{}, wrapDenomError(types.ErrNoMedianDeviation, denom)
 	}
 
 	decProto := sdk.DecProto{}
@@ -95,14 +99,14 @@ func (k Keeper) WithinHistoricMedianDeviation(
 	// get latest median
 	medians := k.HistoricMedians(ctx, denom, 1)
 	if len(medians) == 0 {
-		return false, types.ErrNoMedian.Wrap("denom: " + denom)
+		return false, wrapDenomError(types.ErrNoMedian, denom)
 	}
 	median := medians[0].ExchangeRateTuple.ExchangeRate
 
 	// get latest historic price
 	prices := k.historicPrices(ctx, denom, 1)
 	if len(prices) == 0 {
-		return false, types.ErrNoHistoricPrice.Wrap("denom: " + denom)
+		return false, wrapDenomError(types.ErrNoHistoricPrice, denom)
 	}
 	price := prices[0]
 
@@ -124,7 +128,7 @@ func (k Keeper) calcAndSetHistoricMedianDeviation(
 ) error {
 	medianDeviation, err := decmath.MedianDeviation(median, prices)
 	if err != nil {
-		return errors.Wrap(err, "denom: "+denom)
+		return wrapDenomError(err, denom)
 	}
 
 	block := uint64(ctx.BlockHeight())
@@ -157,7 +161,7 @@ func (k Keeper) MedianOfHistoricMedians(
 	}
 	median, err := decmath.Median(medians.Decs())
 	if err != nil {
-		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, wrapDenomError(err, denom)
 	}
 
 	return median, uint32(len(medians)), nil
@@ -177,7 +181,7 @@ func (k Keeper) AverageOfHistoricMedians(
 	}
 	average, err := decmath.Average(medians.Decs())
 	if err != nil {
-		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, wrapDenomError(err, denom)
 	}
 
 	return average, uint32(len(medians)), nil
@@ -197,7 +201,7 @@ func (k Keeper) MaxOfHistoricMedians(
 	}
 	max, err := decmath.Max(medians.Decs())
 	if err != nil {
-		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, wrapDenomError(err, denom)
 	}
 
 	return max, uint32(len(medians)), nil
@@ -217,7 +221,7 @@ func (k Keeper) MinOfHistoricMedians(
 	}
 	min, err := decmath.Min(medians.Decs())
 	if err != nil {
-		return sdkmath.LegacyZeroDec(), 0, errors.Wrap(err, "denom: "+denom)
+		return sdkmath.LegacyZeroDec(), 0, wrapDenomError(err, denom)
 	}
 
 	return min, uint32(len(medians)), nil

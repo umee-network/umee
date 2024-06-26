@@ -16,7 +16,7 @@ type Builder struct {
 	Cdc      codec.BinaryCodec
 }
 
-func NewKeeperBuilder(
+func NewBuilder(
 	cdc codec.BinaryCodec, key storetypes.StoreKey,
 ) Builder {
 	return Builder{

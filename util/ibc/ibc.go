@@ -6,8 +6,7 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	ibcerrors "github.com/cosmos/ibc-go/v8/modules/core/errors"
 )
 
 // GetFundsFromPacket returns transfer amount and denom
@@ -20,7 +19,7 @@ func GetFundsFromPacket(data []byte) (sdkmath.Int, string, error) {
 
 	amount, ok := sdkmath.NewIntFromString(packetData.Amount)
 	if !ok {
-		return sdkmath.Int{}, "", sdkerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
+		return sdkmath.Int{}, "", ibcerrors.ErrInvalidRequest.Wrapf("invalid transfer amount %s", packetData.Amount)
 	}
 
 	return amount, GetLocalDenom(packetData.Denom), nil

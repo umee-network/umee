@@ -2,6 +2,7 @@ package sdkutil
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 
 	sdkmath "cosmossdk.io/math"
@@ -30,4 +31,14 @@ func FormatDec(d sdkmath.LegacyDec) string {
 // e.g. 4.000uumee -> 4 uumee and 3.500ibc/abcd -> 3.5 ibc/abcd
 func FormatDecCoin(c sdk.DecCoin) string {
 	return fmt.Sprintf("%s %s", FormatDec(c.Amount), c.Denom)
+}
+
+func GenerateString(length uint) string {
+	// character set used for generating a random string in GenerateString
+	charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	bytes := make([]byte, length)
+	for i := range bytes {
+		bytes[i] = charset[rand.Intn(len(charset))] //nolint
+	}
+	return string(bytes)
 }

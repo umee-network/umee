@@ -48,7 +48,54 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Features
 
+- [2472](https://github.com/umee-network/umee/pull/2472) un-wire the `crisis` module from umee app.
+- [2500](https://github.com/umee-network/umee/pull/2500) (x/leverage): add Rewards Auction fees and `params.rewards_auction_factor`.
+- [2506](https://github.com/umee-network/umee/pull/2506) (ics20): support leverage/MsgRepay in Memo
+- [2527](https://github.com/umee-network/umee/pull/2527) (x/leverage):add `accounts_summary` grpc-web api and cli query to leverage module.
+- [2532](https://github.com/umee-network/umee/pull/2532) (x/oracle): add slashing event.
+
+### Improvements
+
+- [2474](https://github.com/umee-network/umee/pull/2474) (proto) add `gogo.messagename_all` option to all messages.
+- [2494](https://github.com/umee-network/umee/pull/2494) Use go 1.22
+- [2495](https://github.com/umee-network/umee/pull/2495) (util) `KeyWithUint64` and `KeyWithUint32` helper functions for db keys.
+- [2504](https://github.com/umee-network/umee/pull/2504) bump `wasmd` to v0.45.0.
+
+### Bug Fixes
+
+- [2473](https://github.com/umee-network/umee/pull/2473) Correct x/ugov Amino registration for x/ugov messages (they don't have MessageName option).
+- [2547](https://github.com/umee-network/umee/pull/2547) Fix the `MissCounters` grpc-web get api result.
+
+## v6.5.0
+
+### Bug Fixes
+
+- [2551](https://github.com/umee-network/umee/pull/2551) Restrict length of IBC transfer memo and receiver fields.
+
+## v6.4.1 - 2024-04-30
+
+### Improvements
+
+- [daef10a](https://github.com/umee-network/umee/commit/daef10ad4f774aae915ad33f4ab1134695146785) Update dependencies.
+
+## v6.4.0 - 2024-03-21
+
+### Features
+
+- [2459](https://github.com/umee-network/umee/pull/2459), [2461](https://github.com/umee-network/umee/pull/2461) uibc: handle `params.ics20_hooks` switch (enabled / disabled).
+
+### Bug Fixes
+
+- [2462](https://github.com/umee-network/umee/pull/2462) (x/leverage) Take `MaxModuleWithdraw` into account when computing user `MaxWithdraw`.
+
+## v6.4.0-beta1 - 2024-03-11
+
+### Features
+
 - [2408](https://github.com/umee-network/umee/pull/2408) New `converter` helper app.
+- [2349](https://github.com/umee-network/umee/pull/2349), [2437](https://github.com/umee-network/umee/pull/2437), [2411](https://github.com/umee-network/umee/pull/2411), [2442](https://github.com/umee-network/umee/pull/2442), [2443](https://github.com/umee-network/umee/pull/2443) IBC ICS20 memo handlers.
+- [2381](https://github.com/umee-network/umee/pull/2381) Integrated Packet Forward Middleware.
+- [2433](https://github.com/umee-network/umee/pull/2433) Noop Axelar GMP handler.
 
 ### Improvements
 
@@ -57,8 +104,9 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
+- [2384](https://github.com/umee-network/umee/pull/2384) Fix `sdkclient` acc sequence setting.
 - [2417](https://github.com/umee-network/umee/pull/2417) Fix the ibc inflows storing of registered tokens when sender chain is source chain.
-  
+
 ## v6.3.0 - 2024-01-03
 
 ### Improvements
@@ -130,7 +178,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Improvements
 
-- [2256](https://github.com/umee-network/umee/pull/2256) unify and refactore `client` package.
+- [2256](https://github.com/umee-network/umee/pull/2256) unify and refactor `client` package.
 - [2261](https://github.com/umee-network/umee/pull/2261) Use go 1.21
 - [2267](https://github.com/umee-network/umee/pull/2267) Leverage transactions accept spot prices up to 3 minutes old, and leverage queries use most recent spot price when required.
 - [2263](https://github.com/umee-network/umee/pull/2263) Add spot price fields to account summary.
@@ -147,7 +195,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ## [v6.0.2](https://github.com/umee-network/umee/releases/tag/v6.0.2) - 2023-09-20
 
-### BugFix
+### Bug Fixs
 
 - [2257](https://github.com/umee-network/umee/pull/2257) fix(oracle): missing avg params.
 

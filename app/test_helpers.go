@@ -210,7 +210,7 @@ func setup(withGenesis bool, invCheckPeriod uint) (*UmeeApp, GenesisState) {
 		map[int64]bool{},
 		DefaultNodeHome,
 		invCheckPeriod,
-		EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		EmptyWasmOpts,
 	)
 	if withGenesis {
@@ -400,7 +400,7 @@ func NewTestNetworkFixture() network.TestFixture {
 			make(map[int64]bool),
 			val.GetCtx().Config.RootDir,
 			0,
-			EmptyAppOptions{},
+			simtestutil.EmptyAppOptions{},
 			EmptyWasmOpts,
 			baseapp.SetPruning(pruningtypes.NewPruningOptionsFromString(val.GetAppConfig().Pruning)),
 			baseapp.SetMinGasPrices(val.GetAppConfig().MinGasPrices),

@@ -7,9 +7,9 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "umee/ugov/v1/ugov.proto";
 
-option go_package = "github.com/umee-network/umee/v6/x/ugov";
-
+option go_package                      = "github.com/umee-network/umee/v6/x/ugov";
 option (gogoproto.goproto_getters_all) = false;
+option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/ugov module's Msg service.
 service Msg {

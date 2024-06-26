@@ -12,7 +12,7 @@ import (
 )
 
 func TestRedeem_Valid(t *testing.T) {
-	k := initMeUSDKeeper(t, NewBankMock(), NewLeverageMock(), NewOracleMock())
+	k := initMeUSDNoopKeper(t)
 
 	hundredUSDT := sdk.NewCoin(mocks.USDTBaseDenom, sdkmath.NewInt(100_000000))
 	_, err := k.swap(sdk.AccAddress{}, mocks.MeUSDDenom, hundredUSDT)
@@ -44,7 +44,7 @@ func TestRedeem_Valid(t *testing.T) {
 }
 
 func TestRedeem_LeverageUndersupplied(t *testing.T) {
-	k := initMeUSDKeeper(t, NewBankMock(), NewLeverageMock(), NewOracleMock())
+	k := initMeUSDNoopKeper(t)
 
 	hundredUSDT := sdk.NewCoin(mocks.ISTBaseDenom, sdkmath.NewInt(100_000000))
 	_, err := k.swap(sdk.AccAddress{}, mocks.MeUSDDenom, hundredUSDT)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/cometbft/cometbft/crypto"
 	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	"github.com/umee-network/umee/v6/tests/tsdk"
 	"gotest.tools/v3/assert"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -32,6 +33,12 @@ func TestGetFundsFromPacket(t *testing.T) {
 	assert.NilError(t, err)
 	assert.Equal(t, denom, fdenom)
 	assert.Equal(t, famount.String(), amount)
+
+	// valid address and memo
+	data.Receiver = tsdk.GenerateString(ibctransfertypes.MaximumReceiverLength)
+	data.Memo = tsdk.GenerateString(ibctransfertypes.MaximumMemoLength)
+	_, _, err = GetFundsFromPacket(data.GetBytes())
+	assert.NilError(t, err, "Should handle valid inputs without error")
 }
 
 func TestGetLocalDenom(t *testing.T) {

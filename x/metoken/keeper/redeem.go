@@ -93,7 +93,7 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 		return redeemResponse{}, fmt.Errorf("not enough %s liquidity for redemption", assetDenom)
 	}
 
-	_, feeAmount, err := k.redeemFee(
+	_, fees, err := k.redeemFee(
 		index,
 		indexPrices,
 		sdk.NewCoin(assetDenom, amountFromReserves.Add(amountFromLeverage)),
@@ -101,17 +101,17 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 	if err != nil {
 		return redeemResponse{}, err
 	}
-
-	if err = k.bankKeeper.SendCoinsFromAccountToModule(
-		*k.ctx,
-		userAddr,
-		metoken.ModuleName,
-		sdk.NewCoins(meToken),
-	); err != nil {
+	feeToAuction, feeToRevenue := k.breakFee(fees.Amount)
+	if err = k.fundAuction(fees.Denom, feeToAuction); err != nil {
 		return redeemResponse{}, err
 	}
 
-	toRedeem := sdk.NewCoin(assetDenom, amountFromReserves.Add(amountFromLeverage).Sub(feeAmount.Amount))
+	err = k.bankKeeper.SendCoinsFromAccountToModule(*k.ctx, userAddr, metoken.ModuleName, sdk.Coins{meToken})
+	if err != nil {
+		return redeemResponse{}, err
+	}
+
+	toRedeem := sdk.NewCoin(assetDenom, amountFromReserves.Add(amountFromLeverage).Sub(fees.Amount))
 	if err = k.bankKeeper.SendCoinsFromModuleToAccount(
 		*k.ctx,
 		metoken.ModuleName,
@@ -127,7 +127,7 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 	// update reserved, leveraged and fee balances
 	balance.Reserved = balance.Reserved.Sub(amountFromReserves)
 	balance.Leveraged = balance.Leveraged.Sub(amountFromLeverage)
-	balance.Fees = balance.Fees.Add(feeAmount.Amount)
+	balance.Fees = balance.Fees.Add(feeToRevenue)
 	balances.SetAssetBalance(balance)
 
 	// save index balance
@@ -141,7 +141,7 @@ func (k Keeper) redeem(userAddr sdk.AccAddress, meToken sdk.Coin, assetDenom str
 	}
 
 	return newRedeemResponse(
-		feeAmount,
+		fees,
 		sdk.NewCoin(assetDenom, amountFromReserves),
 		sdk.NewCoin(assetDenom, amountFromLeverage),
 	), nil

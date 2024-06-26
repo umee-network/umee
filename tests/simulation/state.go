@@ -319,7 +319,7 @@ func appExportAndImport(t *testing.T) (
 		map[int64]bool{},
 		dir,
 		simcli.FlagPeriodValue,
-		umeeapp.EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)
@@ -365,7 +365,7 @@ func appExportAndImport(t *testing.T) (
 		map[int64]bool{},
 		newDir,
 		simcli.FlagPeriodValue,
-		umeeapp.EmptyAppOptions{},
+		simtestutil.EmptyAppOptions{},
 		umeeapp.EmptyWasmOpts,
 		fauxMerkleModeOpt,
 	)

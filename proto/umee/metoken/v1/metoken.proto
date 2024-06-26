@@ -6,6 +6,8 @@ import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/metoken";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // Params defines the parameters for the metoken module.
 message Params {
   option (gogoproto.equal) = true;
@@ -17,6 +19,15 @@ message Params {
   // Interest claiming frequency in seconds, determines how often metoken module will claim accrued interest from
   // leverage module
   int64 claiming_frequency = 2;
+
+  // Rewards Auction Fee Factor determines the portion of total fees collected by the metoken
+  // module that will go for the rewards auction. 2% means that 2% of collected fees will go to
+  // the rewards auction. Note: this is different than x/leverage Params.rewards_auction_fee.
+  // Valid values: 0-10000 (in basis points, 2000 = 20%).
+  uint32 rewards_auction_fee_factor = 3 [
+    (gogoproto.customtype) = "github.com/umee-network/umee/v6/util/bpmath.FixedBP",
+    (gogoproto.nullable)   = false
+  ];
 }
 
 // Index defines an index of assets that are allowed to swap and redeem for the Index's meToken,
@@ -39,7 +50,8 @@ message Index {
   uint32 exponent = 3;
 
   // Fee contains fee parameters used for swap and redemption fee calculations for all underlying
-  // assets in this index.
+  // assets in this index. `Params.rewards_auction_factor` of the fee will go for the burn
+  // auction.
   Fee fee = 4 [(gogoproto.nullable) = false];
 
   // Accepted Assets is the list of underlying Tokens that can be swapped and redeemed for the Index's meToken,

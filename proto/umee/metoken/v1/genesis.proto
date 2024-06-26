@@ -8,6 +8,8 @@ import "umee/metoken/v1/metoken.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/metoken";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // GenesisState defines the x/metoken module's genesis state.
 message GenesisState {
   Params                    params                = 1 [(gogoproto.nullable) = false];

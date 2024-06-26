@@ -63,9 +63,6 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	consensusparamskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	consensusparamstypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
-	"github.com/cosmos/cosmos-sdk/x/crisis"
-	crisiskeeper "github.com/cosmos/cosmos-sdk/x/crisis/keeper"
-	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -128,34 +125,33 @@ import (
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/swagger"
 	"github.com/umee-network/umee/v6/util/genmap"
+	"github.com/umee-network/umee/v6/x/auction"
+	auctionkeeper "github.com/umee-network/umee/v6/x/auction/keeper"
+	auctionmodule "github.com/umee-network/umee/v6/x/auction/module"
 	"github.com/umee-network/umee/v6/x/incentive"
 	incentivekeeper "github.com/umee-network/umee/v6/x/incentive/keeper"
 	incentivemodule "github.com/umee-network/umee/v6/x/incentive/module"
 	"github.com/umee-network/umee/v6/x/leverage"
 	leveragekeeper "github.com/umee-network/umee/v6/x/leverage/keeper"
 	leveragetypes "github.com/umee-network/umee/v6/x/leverage/types"
+	"github.com/umee-network/umee/v6/x/metoken"
+	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
+	metokenmodule "github.com/umee-network/umee/v6/x/metoken/module"
 	"github.com/umee-network/umee/v6/x/oracle"
 	oraclekeeper "github.com/umee-network/umee/v6/x/oracle/keeper"
 	oracletypes "github.com/umee-network/umee/v6/x/oracle/types"
 	"github.com/umee-network/umee/v6/x/ugov"
 	ugovkeeper "github.com/umee-network/umee/v6/x/ugov/keeper"
 	ugovmodule "github.com/umee-network/umee/v6/x/ugov/module"
-
-	// umee ibc-transfer and quota for ibc-transfer
-	uwasm "github.com/umee-network/umee/v6/app/wasm"
 	"github.com/umee-network/umee/v6/x/uibc"
 	uibcmodule "github.com/umee-network/umee/v6/x/uibc/module"
 	uibcoracle "github.com/umee-network/umee/v6/x/uibc/oracle"
 	uibcquota "github.com/umee-network/umee/v6/x/uibc/quota"
 	"github.com/umee-network/umee/v6/x/uibc/uics20"
-
-	"github.com/umee-network/umee/v6/x/metoken"
-	metokenkeeper "github.com/umee-network/umee/v6/x/metoken/keeper"
-	metokenmodule "github.com/umee-network/umee/v6/x/metoken/module"
 )
 
 var (
-	_ CosmosApp               = (*UmeeApp)(nil)
+	_ runtime.AppI            = (*UmeeApp)(nil)
 	_ servertypes.Application = (*UmeeApp)(nil)
 
 	// DefaultNodeHome defines the default home directory for the application daemon.
@@ -170,6 +166,12 @@ var (
 )
 
 func init() {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		panic(fmt.Sprintf("failed to get user home directory: %s", err))
+	}
+	DefaultNodeHome = filepath.Join(userHomeDir, "."+appparams.Name)
+
 	moduleBasics := []module.AppModuleBasic{
 		auth.AppModuleBasic{},
 		genutil.NewAppModuleBasic(genutiltypes.DefaultMessageValidator),
@@ -180,7 +182,6 @@ func init() {
 		distr.AppModuleBasic{},
 		gov.NewAppModuleBasic(getGovProposalHandlers()),
 		params.AppModuleBasic{},
-		CrisisModule{},
 		SlashingModule{},
 		feegrantmodule.AppModuleBasic{},
 		upgrade.AppModuleBasic{},
@@ -195,11 +196,13 @@ func init() {
 		ica.AppModuleBasic{},
 		// intertx.AppModuleBasic{},
 		// ibcfee.AppModuleBasic{},
+
 		leverage.AppModuleBasic{},
 		oracle.AppModuleBasic{},
 		uibcmodule.AppModuleBasic{},
 		ugovmodule.AppModuleBasic{},
 		wasm.AppModuleBasic{},
+		auctionmodule.AppModuleBasic{},
 		incentivemodule.AppModuleBasic{},
 		metokenmodule.AppModuleBasic{},
 		packetforward.AppModuleBasic{},
@@ -223,11 +226,12 @@ func init() {
 		leveragetypes.ModuleName: {authtypes.Minter, authtypes.Burner},
 		wasmtypes.ModuleName:     {authtypes.Burner},
 
+		auction.ModuleName:     {authtypes.Burner},
 		incentive.ModuleName:   nil,
-		oracletypes.ModuleName: nil,
-		uibc.ModuleName:        nil,
-		ugov.ModuleName:        nil,
 		metoken.ModuleName:     {authtypes.Minter, authtypes.Burner},
+		oracletypes.ModuleName: nil,
+		ugov.ModuleName:        nil,
+		uibc.ModuleName:        nil,
 	}
 	// if Experimental {}
 }
@@ -259,7 +263,6 @@ type UmeeApp struct {
 	MintKeeper            mintkeeper.Keeper
 	DistrKeeper           distrkeeper.Keeper
 	GovKeeper             *govkeeper.Keeper
-	CrisisKeeper          *crisiskeeper.Keeper
 	UpgradeKeeper         *upgradekeeper.Keeper
 	ParamsKeeper          paramskeeper.Keeper
 	AuthzKeeper           authzkeeper.Keeper
@@ -274,11 +277,13 @@ type UmeeApp struct {
 	PacketForwardKeeper *packetforwardkeeper.Keeper
 	ICAHostKeeper       icahostkeeper.Keeper
 	LeverageKeeper      leveragekeeper.Keeper
-	IncentiveKeeper     incentivekeeper.Keeper
-	OracleKeeper        oraclekeeper.Keeper
-	UIbcQuotaKeeperB    uibcquota.KeeperBuilder
-	UGovKeeperB         ugovkeeper.Builder
-	MetokenKeeperB      metokenkeeper.Builder
+
+	AuctionKeeperB   auctionkeeper.Builder
+	IncentiveKeeper  incentivekeeper.Keeper
+	MetokenKeeperB   metokenkeeper.Builder
+	OracleKeeper     oraclekeeper.Keeper
+	UGovKeeperB      ugovkeeper.Builder
+	UIbcQuotaKeeperB uibcquota.Builder
 
 	// make scoped keepers public for testing purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -299,15 +304,6 @@ type UmeeApp struct {
 
 	// wasm
 	wasmCfg wasmtypes.WasmConfig
-}
-
-func init() {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		panic(fmt.Sprintf("failed to get user home directory: %s", err))
-	}
-
-	DefaultNodeHome = filepath.Join(userHomeDir, fmt.Sprintf(".%s", appparams.Name))
 }
 
 func New(
@@ -340,12 +336,17 @@ func New(
 		evidencetypes.StoreKey, capabilitytypes.StoreKey,
 		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
 		ibcexported.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
-		leveragetypes.StoreKey, oracletypes.StoreKey, packetforwardtypes.StoreKey,
-		uibc.StoreKey, ugov.StoreKey,
+		packetforwardtypes.StoreKey,
 		wasmtypes.StoreKey,
+		consensusparamstypes.StoreKey,
+
+		auction.StoreKey,
 		incentive.StoreKey,
+		leveragetypes.StoreKey,
 		metoken.StoreKey,
-		consensusparamstypes.StoreKey, crisistypes.StoreKey,
+		oracletypes.StoreKey,
+		ugov.StoreKey,
+		uibc.StoreKey,
 	}
 	// if Experimental {}
 
@@ -409,7 +410,6 @@ func New(
 		appparams.AccountAddressPrefix,
 		govModuleAddr,
 	)
-
 	app.BankKeeper = bankkeeper.NewBaseKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[banktypes.StoreKey]),
@@ -418,7 +418,6 @@ func New(
 		govModuleAddr,
 		logger,
 	)
-
 	app.StakingKeeper = stakingkeeper.NewKeeper(
 		appCodec,
 		runtime.NewKVStoreService(keys[stakingtypes.StoreKey]),
@@ -427,7 +426,6 @@ func New(
 		govModuleAddr,
 		authcodec.NewBech32Codec(appparams.ValidatorAddressPrefix), authcodec.NewBech32Codec(appparams.ConsNodeAddressPrefix),
 	)
-
 	app.MintKeeper = mintkeeper.NewKeeper(
 		appCodec, runtime.NewKVStoreService(keys[minttypes.StoreKey]), app.StakingKeeper,
 		app.AccountKeeper, app.BankKeeper, authtypes.FeeCollectorName,
@@ -464,7 +462,6 @@ func New(
 		app.MsgServiceRouter(),
 		app.AccountKeeper,
 	)
-
 	groupConfig := group.DefaultConfig()
 	groupConfig.MaxMetadataLen = 600
 	app.GroupKeeper = groupkeeper.NewKeeper(
@@ -474,8 +471,6 @@ func New(
 		app.AccountKeeper,
 		groupConfig,
 	)
-
-	// set the governance module account as the authority for conducting upgrades
 	app.UpgradeKeeper = upgradekeeper.NewKeeper(
 		skipUpgradeHeights,
 		runtime.NewKVStoreService(keys[upgradetypes.StoreKey]),
@@ -488,7 +483,7 @@ func New(
 	app.NFTKeeper = nftkeeper.NewKeeper(runtime.NewKVStoreService(keys[nftkeeper.StoreKey]),
 		appCodec, app.AccountKeeper, app.BankKeeper)
 
-	app.UGovKeeperB = ugovkeeper.NewKeeperBuilder(appCodec, keys[ugov.ModuleName])
+	app.UGovKeeperB = ugovkeeper.NewBuilder(appCodec, keys[ugov.ModuleName])
 
 	app.OracleKeeper = oraclekeeper.NewKeeper(
 		appCodec,
@@ -501,14 +496,25 @@ func New(
 		distrtypes.ModuleName,
 	)
 
+	rewardsAuctionAccs := auctionmodule.SubAccounts()
+	app.AuctionKeeperB = auctionkeeper.NewBuilder(
+		appCodec,
+		keys[auction.StoreKey],
+		rewardsAuctionAccs,
+		app.BankKeeper,
+		app.UGovKeeperB.EmergencyGroup,
+	)
+
 	app.LeverageKeeper = leveragekeeper.NewKeeper(
 		appCodec,
 		keys[leveragetypes.ModuleName],
+		keys[authtypes.StoreKey],
 		app.BankKeeper,
+		app.AccountKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
 		cast.ToBool(appOpts.Get(leveragetypes.FlagEnableLiquidatorQuery)),
-		authtypes.NewModuleAddress(metoken.ModuleName),
+		rewardsAuctionAccs.RewardsCollect,
 	)
 
 	app.LeverageKeeper.SetTokenHooks(app.OracleKeeper.Hooks())
@@ -521,16 +527,17 @@ func New(
 	)
 	app.LeverageKeeper.SetBondHooks(app.IncentiveKeeper.BondHooks())
 
-	app.MetokenKeeperB = metokenkeeper.NewKeeperBuilder(
+	app.MetokenKeeperB = metokenkeeper.NewBuilder(
 		appCodec,
 		keys[metoken.StoreKey],
 		app.BankKeeper,
 		app.LeverageKeeper,
 		app.OracleKeeper,
 		app.UGovKeeperB.EmergencyGroup,
+		rewardsAuctionAccs.RewardsCollect,
 	)
 
-	// Create evidence Keeper so we can register the IBC light client misbehavior
+	// Create evidence Keeper before IBC to register the IBC light client misbehavior
 	// evidence route.
 	evidenceKeeper := evidencekeeper.NewKeeper(
 		appCodec,
@@ -558,8 +565,10 @@ func New(
 		app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(), govModuleAddr,
 	)
 
+	app.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
+
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
-	app.UIbcQuotaKeeperB = uibcquota.NewKeeperBuilder(
+	app.UIbcQuotaKeeperB = uibcquota.NewBuilder(
 		appCodec, keys[uibc.StoreKey],
 		app.LeverageKeeper, uibcoracle.FromUmeeAvgPriceOracle(app.OracleKeeper), app.UGovKeeperB.EmergencyGroup,
 	)
@@ -628,6 +637,9 @@ func New(
 		packetforwardkeeper.DefaultForwardTransferPacketTimeoutTimestamp, // forward timeout
 		packetforwardkeeper.DefaultRefundTransferPacketTimeoutTimestamp,  // refund timeout
 	)
+	// NOTE: uics20 module must be the last middleware. We need to be sure there is no other code
+	// that will manipulate packet between the UICS20 middleware (which executes transfer hooks)
+	// and the transfer app.
 	transferStack = uics20.NewICS20Module(transferStack, appCodec,
 		app.UIbcQuotaKeeperB,
 		leveragekeeper.NewMsgServerImpl(app.LeverageKeeper))
@@ -677,7 +689,6 @@ func New(
 		app.StakingKeeper, app.DistrKeeper, app.MsgServiceRouter(), govConfig,
 		govModuleAddr,
 	)
-
 	app.GovKeeper.SetLegacyRouter(govRouter)
 
 	var err error
@@ -687,9 +698,6 @@ func New(
 		panic(fmt.Sprintf("error while reading wasm config: %s", err))
 	}
 
-	// Register umee custom plugin to wasm
-	wasmOpts = append(uwasm.RegisterCustomPlugins(app.LeverageKeeper, app.OracleKeeper, app.IncentiveKeeper,
-		app.MetokenKeeperB), wasmOpts...)
 	// Register stargate queries
 	wasmOpts = append(wasmOpts, uwasm.RegisterStargateQueries(*bApp.GRPCQueryRouter(), appCodec)...)
 	availableCapabilities := strings.Join(AllCapabilities(), ",")
@@ -714,11 +722,9 @@ func New(
 		wasmOpts...,
 	)
 
-	/****  Module Options ****/
-
-	// NOTE: we may consider parsing `appOpts` inside module constructors. For the moment
-	// we prefer to be more strict in what arguments the modules expect.
-	skipGenesisInvariants := cast.ToBool(appOpts.Get(crisis.FlagSkipGenesisInvariants))
+	/****************
+	 Module Options
+	/****************/
 
 	inflationCalculator := inflation.Calculator{
 		UgovKeeperB: app.UGovKeeperB.Params,
@@ -738,7 +744,6 @@ func New(
 		vesting.NewAppModule(app.AccountKeeper, app.BankKeeper),
 		bank.NewAppModule(appCodec, app.BankKeeper, app.AccountKeeper, app.GetSubspace(banktypes.ModuleName)),
 		capability.NewAppModule(appCodec, *app.CapabilityKeeper, true),
-		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)),
 		feegrantmodule.NewAppModule(appCodec, app.AccountKeeper, app.BankKeeper, app.FeeGrantKeeper, app.interfaceRegistry),
 		gov.NewAppModule(appCodec, app.GovKeeper, app.AccountKeeper, app.BankKeeper, app.GetSubspace(govtypes.ModuleName)),
 		mint.NewAppModule(appCodec, app.MintKeeper, app.AccountKeeper, inflationCalculator.InflationRate, app.GetSubspace(minttypes.ModuleName)),                                    //nolint: lll
@@ -762,6 +767,7 @@ func New(
 		wasm.NewAppModule(app.appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)), //nolint: lll
 		incentivemodule.NewAppModule(appCodec, app.IncentiveKeeper, app.BankKeeper, app.LeverageKeeper),
 		metokenmodule.NewAppModule(appCodec, app.MetokenKeeperB),
+		auctionmodule.NewAppModule(appCodec, app.AuctionKeeperB, app.BankKeeper),
 	}
 	// if Experimental {}
 
@@ -785,7 +791,6 @@ func New(
 		authtypes.ModuleName,
 		banktypes.ModuleName,
 		govtypes.ModuleName,
-		crisistypes.ModuleName,
 		genutiltypes.ModuleName,
 		authz.ModuleName,
 		feegrant.ModuleName,
@@ -802,9 +807,9 @@ func New(
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
+		auction.ModuleName,
 	}
 	endBlockers := []string{
-		crisistypes.ModuleName,
 		metoken.ModuleName,     // must be before oracle
 		oracletypes.ModuleName, // must be before gov and staking
 		govtypes.ModuleName, stakingtypes.ModuleName,
@@ -821,6 +826,7 @@ func New(
 		ugov.ModuleName,
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
+		auction.ModuleName,
 	}
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -832,7 +838,7 @@ func New(
 	initGenesis := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-		crisistypes.ModuleName, ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
 		authz.ModuleName,
 		ibctransfertypes.ModuleName, icatypes.ModuleName, // ibcfeetypes.ModuleName
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
@@ -846,11 +852,12 @@ func New(
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
+		auction.ModuleName,
 	}
 	orderMigrations := []string{
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName,
 		stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName,
-		crisistypes.ModuleName, ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
+		ibcexported.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName,
 		authz.ModuleName, ibctransfertypes.ModuleName, icatypes.ModuleName, // ibcfeetypes.ModuleName
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName,
 		paramstypes.ModuleName, upgradetypes.ModuleName, vestingtypes.ModuleName,
@@ -863,6 +870,7 @@ func New(
 		wasmtypes.ModuleName,
 		incentive.ModuleName,
 		metoken.ModuleName,
+		auction.ModuleName,
 	}
 	// if Experimental {}
 
@@ -871,7 +879,6 @@ func New(
 	app.mm.SetOrderInitGenesis(initGenesis...)
 	app.mm.SetOrderMigrations(orderMigrations...)
 
-	app.mm.RegisterInvariants(app.CrisisKeeper)
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
 	err = app.mm.RegisterServices(app.configurator)
 	if err != nil {
@@ -892,14 +899,15 @@ func New(
 	// add test gRPC service for testing gRPC queries in isolation
 	testdata.RegisterQueryServer(app.GRPCQueryRouter(), testdata.QueryImpl{})
 
+	//
 	// create the simulation manager and define the order of the modules for deterministic simulations
+	//
 	overrideModules := map[string]module.AppModuleSimulation{
 		authtypes.ModuleName: auth.NewAppModule(
 			app.appCodec, app.AccountKeeper, authsims.RandomGenesisAccounts,
 			app.GetSubspace(authtypes.ModuleName),
 		),
 	}
-
 	simStateModules := genmap.Pick(
 		app.mm.Modules,
 		[]string{
@@ -914,8 +922,8 @@ func New(
 	)
 
 	app.StateSimulationManager = module.NewSimulationManagerFromAppModules(simStateModules, overrideModules)
-	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
 
+	app.sm = module.NewSimulationManagerFromAppModules(simTestModules, nil)
 	app.sm.RegisterStoreDecoders()
 
 	// initialize stores
@@ -928,20 +936,7 @@ func New(
 	app.SetPreBlocker(app.PreBlocker)
 	app.SetBeginBlocker(app.BeginBlocker)
 	app.SetEndBlocker(app.EndBlocker)
-	app.setAnteHandler(txConfig, &app.wasmCfg, keys[wasmtypes.StoreKey])
-	// In v0.46, the SDK introduces _postHandlers_. PostHandlers are like
-	// antehandlers, but are run _after_ the `runMsgs` execution. They are also
-	// defined as a chain, and have the same signature as antehandlers.
-	//
-	// In baseapp, postHandlers are run in the same store branch as `runMsgs`,
-	// meaning that both `runMsgs` and `postHandler` state will be committed if
-	// both are successful, and both will be reverted if any of the two fails.
-	//
-	// The SDK exposes a default empty postHandlers chain.
-	//
-	// Please note that changing any of the anteHandler or postHandler chain is
-	// likely to be a state-machine breaking change, which needs a coordinated
-	// upgrade.
+	app.setAnteHandler(txConfig, keys[wasmtypes.StoreKey])
 	app.setPostHandler()
 
 	if manager := app.SnapshotManager(); manager != nil {
@@ -968,10 +963,7 @@ func New(
 	return app
 }
 
-func (app *UmeeApp) setAnteHandler(
-	txConfig client.TxConfig,
-	wasmConfig *wasmtypes.WasmConfig, wasmStoreKey *storetypes.KVStoreKey,
-) {
+func (app *UmeeApp) setAnteHandler(txConfig client.TxConfig, wasmStoreKey *storetypes.KVStoreKey) {
 	anteHandler, err := customante.NewAnteHandler(
 		customante.HandlerOptions{
 			AccountKeeper:     app.AccountKeeper,
@@ -981,7 +973,7 @@ func (app *UmeeApp) setAnteHandler(
 			SignModeHandler:   txConfig.SignModeHandler(),
 			FeegrantKeeper:    app.FeeGrantKeeper,
 			SigGasConsumer:    ante.DefaultSigVerificationGasConsumer,
-			WasmConfig:        wasmConfig,
+			WasmConfig:        &app.wasmCfg,
 			TXCounterStoreKey: wasmStoreKey,
 		},
 	)
@@ -1155,11 +1147,6 @@ func (app *UmeeApp) GetBaseApp() *baseapp.BaseApp {
 	return app.BaseApp
 }
 
-// GetStakingKeeper is used solely for testing purposes.
-func (app *UmeeApp) GetStakingKeeper() ibctesting.StakingKeeper {
-	return app.StakingKeeper
-}
-
 // GetIBCKeeper is used solely for testing purposes.
 func (app *UmeeApp) GetIBCKeeper() *ibckeeper.Keeper {
 	return app.IBCKeeper
@@ -1221,7 +1208,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibcexported.ModuleName).WithKeyTable(keyTable)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName).WithKeyTable(icahosttypes.ParamKeyTable())
 	paramsKeeper.Subspace(packetforwardtypes.ModuleName).WithKeyTable(packetforwardtypes.ParamKeyTable())
-	paramsKeeper.Subspace(leveragetypes.ModuleName)
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
 

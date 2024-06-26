@@ -12,6 +12,7 @@ func DefaultParams() Params {
 		CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
 		MinimumCloseFactor:           sdkmath.LegacyMustNewDecFromStr("0.05"),
 		OracleRewardFactor:           sdkmath.LegacyMustNewDecFromStr("0.01"),
+		RewardsAuctionFee:            sdkmath.LegacyMustNewDecFromStr("0.02"),
 		SmallLiquidationSize:         sdkmath.LegacyMustNewDecFromStr("500.00"),
 		DirectLiquidationFee:         sdkmath.LegacyMustNewDecFromStr("0.05"),
 	}

@@ -1,0 +1,28 @@
+syntax = "proto3";
+package umee.auction.v1;
+
+import "google/protobuf/timestamp.proto";
+import "gogoproto/gogo.proto";
+import "cosmos_proto/cosmos.proto";
+import "cosmos/base/v1beta1/coin.proto";
+
+option go_package                      = "github.com/umee-network/umee/v6/x/auction";
+option (gogoproto.goproto_getters_all) = false;
+
+// RewardsParams defines parameters for the rewards auction.
+message RewardsParams {
+  // bid_duration is duration of the bid phase in seconds.
+  int64 bid_duration = 1;
+}
+
+// Bid records a user bid
+message Bid {
+  string bidder = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string amount = 2 [(cosmos_proto.scalar) = "cosmos.Int", (gogoproto.customtype) = "cosmossdk.io/math.Int", (gogoproto.nullable) = false];
+}
+
+// Auction Rewards
+message Rewards {
+  repeated cosmos.base.v1beta1.Coin rewards = 1 [(gogoproto.nullable) = false];
+  google.protobuf.Timestamp         ends_at = 2 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+}

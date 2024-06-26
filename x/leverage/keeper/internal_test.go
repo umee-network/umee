@@ -5,10 +5,10 @@ import (
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 
+	"github.com/umee-network/umee/v6/tests/accs"
 	"github.com/umee-network/umee/v6/x/leverage/types"
-	"github.com/umee-network/umee/v6/x/metoken"
 	ugovmocks "github.com/umee-network/umee/v6/x/ugov/mocks"
 )
 
@@ -24,18 +24,22 @@ type TestKeeper struct {
 func NewTestKeeper(
 	cdc codec.Codec,
 	storeKey storetypes.StoreKey,
+	akStoreKey storetypes.StoreKey,
 	bk types.BankKeeper,
+	ak authkeeper.AccountKeeper,
 	ok types.OracleKeeper,
 	enableLiquidatorQuery bool,
 ) (Keeper, TestKeeper) {
 	k := NewKeeper(
 		cdc,
 		storeKey,
+		akStoreKey,
 		bk,
+		ak,
 		ok,
 		ugovmocks.NewSimpleEmergencyGroupBuilder(),
 		enableLiquidatorQuery,
-		authtypes.NewModuleAddress(metoken.ModuleName),
+		accs.GenerateAddr("auction.Rewards"),
 	)
 	return k, TestKeeper{&k}
 }

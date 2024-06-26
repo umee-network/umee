@@ -7,6 +7,8 @@ import "gogoproto/gogo.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/incentive";
 
+option (gogoproto.goproto_getters_all) = false;
+
 // Params defines the parameters for the incentive module.
 message Params {
   option (gogoproto.equal) = true;

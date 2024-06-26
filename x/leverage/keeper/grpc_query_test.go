@@ -77,12 +77,13 @@ func (s *IntegrationTestSuite) TestQuerier_MarketSummary() {
 	oracleSymbolPrice := sdkmath.LegacyMustNewDecFromStr("4.21")
 
 	expected := types.QueryMarketSummaryResponse{
-		SymbolDenom:            "UMEE",
-		Exponent:               6,
-		OraclePrice:            &oracleSymbolPrice,
-		OracleHistoricPrice:    &oracleSymbolPrice,
-		UTokenExchangeRate:     sdkmath.LegacyOneDec(),
-		Supply_APY:             sdkmath.LegacyMustNewDecFromStr("1.2008"),
+		SymbolDenom:         "UMEE",
+		Exponent:            6,
+		OraclePrice:         &oracleSymbolPrice,
+		OracleHistoricPrice: &oracleSymbolPrice,
+		UTokenExchangeRate:  sdkmath.LegacyOneDec(),
+		// see cli/tests "query market summary - zero supply"
+		Supply_APY:             sdkmath.LegacyMustNewDecFromStr("1.1704"),
 		Borrow_APY:             sdkmath.LegacyMustNewDecFromStr("1.52"),
 		Supplied:               sdkmath.ZeroInt(),
 		Reserved:               sdkmath.ZeroInt(),

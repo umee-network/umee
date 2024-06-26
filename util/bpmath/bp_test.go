@@ -78,3 +78,15 @@ func TestBPMulDec(t *testing.T) {
 	require.Equal(math.LegacyMustNewDecFromStr("6.2501"), bp3.MulDec(d))
 	require.Equal(math.LegacyMustNewDecFromStr("25.0004"), bp4.MulDec(d))
 }
+
+func TestBPEqual(t *testing.T) {
+	t.Parallel()
+	require := require.New(t)
+
+	var b1 BP = 1
+	var b2 BP = 1
+	var b3 BP = 10
+	require.True(b1.Equal(b2))
+	require.True(b2.Equal(b2))
+	require.False(b1.Equal(b3))
+}

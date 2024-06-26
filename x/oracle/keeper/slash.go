@@ -3,6 +3,9 @@ package keeper
 import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	"github.com/umee-network/umee/v6/util/sdkutil"
+	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 // SlashAndResetMissCounters iterates over all the current missed counters and
@@ -49,11 +52,17 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 				if err != nil {
 					panic(err)
 				}
-
 				err = k.StakingKeeper.Jail(ctx, consAddr)
 				if err != nil {
 					panic(err)
 				}
+
+				sdkutil.Emit(&ctx, &types.EventSlash{
+					Validator: consAddr.String(),
+					Factor:    slashFraction,
+					Reason:    "voting_rate",
+					Jailed:    true,
+				})
 			}
 		}
 

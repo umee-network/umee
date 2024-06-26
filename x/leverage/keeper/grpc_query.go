@@ -242,100 +242,6 @@ func (q Querier) AccountBalances(
 	}, nil
 }
 
-func (q Querier) AccountSummary(
-	goCtx context.Context,
-	req *types.QueryAccountSummary,
-) (*types.QueryAccountSummaryResponse, error) {
-	if req == nil {
-		return nil, status.Error(codes.InvalidArgument, "empty request")
-	}
-	if req.Address == "" {
-		return nil, status.Error(codes.InvalidArgument, "empty address")
-	}
-
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	addr, err := sdk.AccAddressFromBech32(req.Address)
-	if err != nil {
-		return nil, err
-	}
-
-	supplied, err := q.GetAllSupplied(ctx, addr)
-	if err != nil {
-		return nil, err
-	}
-	collateral := q.GetBorrowerCollateral(ctx, addr)
-	borrowed := q.GetBorrowerBorrows(ctx, addr)
-
-	// the following price calculations use the most recent prices if spot prices are missing
-	lastSuppliedValue, err := q.VisibleTokenValue(ctx, supplied, types.PriceModeQuery)
-	if err != nil {
-		return nil, err
-	}
-	lastBorrowedValue, err := q.VisibleTokenValue(ctx, borrowed, types.PriceModeQuery)
-	if err != nil {
-		return nil, err
-	}
-	lastCollateralValue, err := q.VisibleCollateralValue(ctx, collateral, types.PriceModeQuery)
-	if err != nil {
-		return nil, err
-	}
-
-	// these use leverage-like prices: the lower of spot or historic price for supplied tokens and higher for borrowed.
-	// unlike transactions, this query will use expired prices instead of skipping them.
-	suppliedValue, err := q.VisibleTokenValue(ctx, supplied, types.PriceModeQueryLow)
-	if err != nil {
-		return nil, err
-	}
-	collateralValue, err := q.VisibleCollateralValue(ctx, collateral, types.PriceModeQueryLow)
-	if err != nil {
-		return nil, err
-	}
-	borrowedValue, err := q.VisibleTokenValue(ctx, borrowed, types.PriceModeQueryHigh)
-	if err != nil {
-		return nil, err
-	}
-
-	resp := &types.QueryAccountSummaryResponse{
-		SuppliedValue:       suppliedValue,
-		CollateralValue:     collateralValue,
-		BorrowedValue:       borrowedValue,
-		SpotSuppliedValue:   lastSuppliedValue,
-		SpotCollateralValue: lastCollateralValue,
-		SpotBorrowedValue:   lastBorrowedValue,
-	}
-
-	// values computed from position use the same prices found in leverage logic:
-	// using the lower of spot or historic prices for each collateral token
-	// and the higher of spot or historic prices for each borrowed token
-	// skips collateral tokens with missing prices, but errors on borrow tokens missing prices
-	// (for oracle errors only the relevant response fields will be left nil)
-	ap, err := q.GetAccountPosition(ctx, addr, false)
-	if nonOracleError(err) {
-		return nil, err
-	}
-	if err == nil {
-		// on missing borrow price, borrow limit is nil
-		borrowLimit := ap.Limit()
-		resp.BorrowLimit = &borrowLimit
-	}
-
-	// liquidation threshold shown here as it is used in leverage logic: using spot prices.
-	// skips borrowed tokens with missing prices, but errors on collateral missing prices
-	// (for oracle errors only the relevant response fields will be left nil)
-	ap, err = q.GetAccountPosition(ctx, addr, true)
-	if nonOracleError(err) {
-		return nil, err
-	}
-	if err == nil {
-		// on missing collateral price, liquidation threshold is nil
-		liquidationThreshold := ap.Limit()
-		resp.LiquidationThreshold = &liquidationThreshold
-	}
-
-	return resp, nil
-}
-
 func (q Querier) LiquidationTargets(
 	goCtx context.Context,
 	req *types.QueryLiquidationTargets,
@@ -415,18 +321,31 @@ func (q Querier) MaxWithdraw(
 		// will be nil and the resulting value will be what
 		// can safely be withdrawn even with missing prices.
 		// On non-nil error here, max withdraw is zero.
-		uToken, _, err := q.userMaxWithdraw(ctx, addr, denom)
-		if err == nil && uToken.IsPositive() {
+
+		userMaxWithdrawUToken, _, err := q.Keeper.userMaxWithdraw(ctx, addr, denom)
+		if err != nil {
+			if nonOracleError(err) {
+				return nil, err
+			}
+			continue
+		}
+
+		moduleMaxWithdrawUToken, err := q.Keeper.ModuleMaxWithdraw(ctx, userMaxWithdrawUToken)
+		if err != nil {
+			if nonOracleError(err) {
+				return nil, err
+			}
+			continue
+		}
+
+		uToken := sdk.NewCoin(userMaxWithdrawUToken.Denom, sdk.MinInt(userMaxWithdrawUToken.Amount, moduleMaxWithdrawUToken))
+		if uToken.IsPositive() {
 			token, err := q.ToToken(ctx, uToken)
 			if err != nil {
 				return nil, err
 			}
 			maxUTokens = maxUTokens.Add(uToken)
 			maxTokens = maxTokens.Add(token)
-		}
-		// Non-price errors will cause the query itself to fail
-		if nonOracleError(err) {
-			return nil, err
 		}
 	}
 

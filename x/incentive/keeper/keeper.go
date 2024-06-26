@@ -15,14 +15,14 @@ import (
 )
 
 type Keeper struct {
-	cdc            codec.Codec
+	cdc            codec.BinaryCodec
 	storeKey       storetypes.StoreKey
 	bankKeeper     incentive.BankKeeper
 	leverageKeeper incentive.LeverageKeeper
 }
 
 func NewKeeper(
-	cdc codec.Codec,
+	cdc codec.BinaryCodec,
 	storeKey storetypes.StoreKey,
 	bk incentive.BankKeeper,
 	lk incentive.LeverageKeeper,

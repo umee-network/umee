@@ -2,7 +2,7 @@
 # Creates static binaries, by building from the latest version of:
 # umeed, price-feeder.
 
-FROM golang:1.21-alpine3.18 AS builder
+FROM golang:1.22-alpine3.19 AS builder
 ENV PACKAGES make git gcc linux-headers build-base curl
 RUN apk add --no-cache $PACKAGES
 
@@ -25,7 +25,7 @@ RUN LEDGER_ENABLED=false BUILD_TAGS=muslc LINK_STATICALLY=true make install && \
 
 
 ## Prepare the final clear binary
-FROM alpine:3.18
+FROM alpine:3.19
 EXPOSE 26656 26657 1317 9090 7171
 ENTRYPOINT ["umeed", "start"]
 

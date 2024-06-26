@@ -133,8 +133,8 @@ func (s *IntegrationTests) TestLeverageScenario() {
 				OracleHistoricPrice: &oracleSymbolPrice,
 				UTokenExchangeRate:  sdkmath.LegacyOneDec(),
 				// Borrow rate * (1 - ReserveFactor - OracleRewardFactor)
-				// 1.52 * (1 - 0.2 - 0.01) = 1.2008
-				Supply_APY: sdkmath.LegacyMustNewDecFromStr("1.2008"),
+				// 1.52 * (1 - 0.2 - 0.01 - 0.02)
+				Supply_APY: sdkmath.LegacyMustNewDecFromStr("1.1704"),
 				// This is an edge case technically - when effective supply, meaning
 				// module balance + total borrows, is zero, utilization (0/0) is
 				// interpreted as 100% so max borrow rate (152% APY) is used.

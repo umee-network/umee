@@ -1,6 +1,7 @@
 package coin
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -9,15 +10,17 @@ import (
 const umee = appparams.BondDenom
 
 // common coins used in tests
+//
+//revive:disable:var-naming
 var (
 	// the uToken denom "u/uumee"
-	UumeeDenom = ToUTokenDenom(umee)
+	U_umee = ToUTokenDenom(umee) //nolint:stylecheck
 	// 1uumee Coin
 	Umee1 = New(umee, 1)
 	// 10_000uumee Coin
 	Umee10k = New(umee, 10_000)
 	// 1u/uumee Coin
-	UUmee1 = Utoken(umee, 1)
+	U_umee1 = Utoken(umee, 1) //nolint:stylecheck
 
 	// Xuumee DecCoin
 	Umee0dec = DecF(umee, 0)
@@ -37,7 +40,19 @@ var (
 	Dollar = "dollar"
 )
 
-// UmeeCoins creates an Umee (uumee) sdk.Coins with given amount
+//revive:enable:var-naming
+
+// Umee creates a BondDenom sdk.Coin with the given amount
+func Umee(amount int64) sdk.Coin {
+	return sdk.NewInt64Coin(umee, amount)
+}
+
+// UmeeInt creates a BondDenom sdk.Coin with the given amount
+func UmeeInt(amount sdkmath.Int) sdk.Coin {
+	return sdk.NewCoin(umee, amount)
+}
+
+// UmeeCoins creates an Umee (uumee) sdk.Coins with the given amount
 func UmeeCoins(amount int64) sdk.Coins {
 	return sdk.NewCoins(sdk.NewInt64Coin(umee, amount))
 }

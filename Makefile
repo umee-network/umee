@@ -152,7 +152,7 @@ go-mod-tidy:
 
 clean:
 	@echo "--> Cleaning..."
-	@rm -rf $(BUILD_DIR)/**  $(DIST_DIR)/**
+	@rm -rf $(BUILDDIR)/**  $(DIST_DIR)/**
 
 .PHONY: build build-linux build-experimental build-no_cgo clean go-mod-tidy
 
@@ -237,7 +237,7 @@ test-e2e-clean:
 	docker rm umee0 umee1 umee2 umee-gaia-relayer gaiaval0 umee-price-feeder || true
 	docker network prune -f
 
-test-qa: 
+test-qa:
 	@go test ./tests/qa/... -timeout 30m -v -tags='test_qa'
 
 $(MOCKS_DIR):
@@ -297,7 +297,10 @@ test-app-benchmark-invariants
 ###                                Linting                                  ###
 ###############################################################################
 
-golangci_lint_cmd := go run github.com/golangci/golangci-lint/cmd/golangci-lint
+# TODO: need to add github.com/golangci/golangci-lint entry to go.mod and tools.go, but it
+# conflicts with golang.org/x/exp
+# go run github.com/golangci/golangci-lint/cmd/golangci-lint
+golangci_lint_cmd := golangci-lint
 revive_cmd := go run github.com/mgechev/revive
 
 # note: on new OSX, might require brew install diffutils

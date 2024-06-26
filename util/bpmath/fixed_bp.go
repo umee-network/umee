@@ -28,3 +28,8 @@ func (bp FixedBP) Mul(a sdkmath.Int) sdkmath.Int {
 func (bp FixedBP) MulDec(a sdkmath.LegacyDec) sdkmath.LegacyDec {
 	return MulDec(a, bp)
 }
+
+// Equal returns true if bp==a.
+func (bp FixedBP) Equal(a FixedBP) bool {
+	return bp == a
+}

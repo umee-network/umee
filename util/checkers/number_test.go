@@ -10,6 +10,7 @@ import (
 )
 
 func TestNumberDiff(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 
 	assert.NoError(IntegerMaxDiff(1, 1, 0, ""))
@@ -33,6 +34,7 @@ func TestNumberDiff(t *testing.T) {
 }
 
 func TestDecDiff(t *testing.T) {
+	t.Parallel()
 	assert := assert.New(t)
 	decMaxDiff := func(a, b, maxDiff float64) error {
 		return DecMaxDiff(tsdk.DecF(a), tsdk.DecF(b), tsdk.DecF(maxDiff), "")
@@ -62,6 +64,7 @@ func TestDecDiff(t *testing.T) {
 }
 
 func TestDecInZeroOne(t *testing.T) {
+	t.Parallel()
 	assert.NoError(t, DecInZeroOne(tsdk.DecF(0), "", true))
 	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.01), "", true))
 	assert.NoError(t, DecInZeroOne(tsdk.DecF(0.999), "", true))
@@ -85,9 +88,61 @@ func TestDecInZeroOne(t *testing.T) {
 }
 
 func TestDecNotNegative(t *testing.T) {
+	t.Parallel()
 	assert.NotNil(t, DecNotNegative(tsdk.DecF(-1), ""))
 	assert.NotNil(t, DecNotNegative(sdkmath.LegacyDec{}, ""))
 
 	assert.Nil(t, DecNotNegative(sdkmath.LegacyZeroDec(), ""))
 	assert.Nil(t, DecNotNegative(tsdk.DecF(5), ""))
+}
+
+func TestNumPositive(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	assert.NoError(NumberPositive(1, ""))
+	assert.NoError(NumberPositive(2, ""))
+	assert.NoError(NumberPositive(9999999999999, ""))
+
+	assert.Error(NumberPositive(0, ""))
+	assert.Error(NumberPositive(-1, ""))
+	assert.Error(NumberPositive(-2, ""))
+	assert.Error(NumberPositive(-999999999999, ""))
+
+	assert.NoError(BigNumPositive(tsdk.DecF(1.01), ""))
+	assert.NoError(BigNumPositive(tsdk.DecF(0.000001), ""))
+	assert.NoError(BigNumPositive(tsdk.DecF(0.123), ""))
+	assert.NoError(BigNumPositive(tsdk.DecF(9999999999999999999), ""))
+
+	assert.Error(BigNumPositive(tsdk.DecF(0), ""))
+	assert.Error(BigNumPositive(tsdk.DecF(-0.01), ""))
+	assert.Error(BigNumPositive(sdk.NewDec(0), ""))
+	assert.Error(BigNumPositive(sdk.NewDec(-99999999999999999), ""))
+
+	assert.NoError(BigNumPositive(sdk.NewInt(1), ""))
+	assert.NoError(BigNumPositive(sdk.NewInt(2), ""))
+	assert.NoError(BigNumPositive(sdk.NewInt(9), ""))
+	n, ok := sdk.NewIntFromString("111111119999999999999999999")
+	assert.True(ok)
+	assert.NoError(BigNumPositive(n, ""))
+}
+
+func TestNumberMin(t *testing.T) {
+	t.Parallel()
+	assert := assert.New(t)
+
+	assert.NoError(NumberMin(-1, -10, ""))
+	assert.NoError(NumberMin(1, 0, ""))
+	assert.NoError(NumberMin(10, 2, ""))
+	assert.NoError(NumberMin(999999999999999, 2, ""))
+	assert.NoError(NumberMin(999999999999999, 999999999999998, ""))
+	assert.NoError(NumberMin(0, 0, ""))
+	assert.NoError(NumberMin(-10, -10, ""))
+	assert.NoError(NumberMin(999999999999999, 999999999999999, ""))
+
+	assert.Error(NumberMin(-10, -1, ""))
+	assert.Error(NumberMin(-1, 10, ""))
+	assert.Error(NumberMin(-10, 0, ""))
+	assert.Error(NumberMin(-10, 10, ""))
+	assert.Error(NumberMin(10, 11, ""))
 }
