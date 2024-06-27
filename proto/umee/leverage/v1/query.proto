@@ -7,6 +7,7 @@ import "umee/leverage/v1/leverage.proto";
 import "gogoproto/gogo.proto";
 import "cosmos/base/v1beta1/coin.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/leverage/types";
 
@@ -489,13 +490,32 @@ message RiskInfo {
 // DecBalances contains an account's position denoted in symbol denom tokens.
 message DecBalances {
   // Collateral contains all uTokens the account has collateralized. It has been converted from uTokens to tokens.
-  repeated cosmos.base.v1beta1.DecCoin collateral = 1 [
-    (gogoproto.nullable)     = false,
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  repeated PositionBalance collateral = 1 [
+    (gogoproto.nullable) = false
   ];
   // Borrowed contains all tokens the account has borrowed, including interest owed.
-  repeated cosmos.base.v1beta1.DecCoin borrowed = 2 [
-    (gogoproto.nullable)     = false,
-    (gogoproto.castrepeated) = "github.com/cosmos/cosmos-sdk/types.DecCoins"
+  repeated PositionBalance borrowed = 2 [
+    (gogoproto.nullable) = false
+  ];
+}
+
+// PositionBalance contains denom, amount with base_denom, base_amount for account position.
+message PositionBalance {
+  // denom will SYMBOL Denom (Ex: AKT, USDT)
+  string denom = 1;
+  // base_denom will be ibc_denom or native base denom of umee (Ex: uumee, ibc/XXXX)
+  string base_denom = 2;
+  // amount represents the converted base tokens into symbol tokens using exchange rates
+  // Ex: 1000u/uumee becomes 0.0015UMEE at an exponent of 6 and uToken exchange rate of 1.5
+  string amount = 3 [
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
+    (gogoproto.nullable)   = false
+  ];
+  // base_amount will represent base tokens without converting to symbol denominations
+  string base_amount = 4 [
+    (cosmos_proto.scalar)  = "cosmos.Int",
+    (gogoproto.customtype) = "cosmossdk.io/math.Int",
+    (gogoproto.nullable)   = false
   ];
 }
