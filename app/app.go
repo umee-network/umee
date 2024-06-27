@@ -63,6 +63,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	consensusparamskeeper "github.com/cosmos/cosmos-sdk/x/consensus/keeper"
 	consensusparamstypes "github.com/cosmos/cosmos-sdk/x/consensus/types"
+	crisistypes "github.com/cosmos/cosmos-sdk/x/crisis/types"
 	distr "github.com/cosmos/cosmos-sdk/x/distribution"
 	distrkeeper "github.com/cosmos/cosmos-sdk/x/distribution/keeper"
 	distrtypes "github.com/cosmos/cosmos-sdk/x/distribution/types"
@@ -113,7 +114,6 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 	ibctm "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
-	ibctesting "github.com/cosmos/ibc-go/v8/testing/types"
 
 	// cosmwasm
 	"github.com/CosmWasm/wasmd/x/wasm"
@@ -439,11 +439,6 @@ func New(
 	app.SlashingKeeper = slashingkeeper.NewKeeper(
 		appCodec, app.legacyAmino, runtime.NewKVStoreService(keys[slashingtypes.StoreKey]),
 		app.StakingKeeper, govModuleAddr,
-	)
-
-	app.CrisisKeeper = crisiskeeper.NewKeeper(
-		appCodec, runtime.NewKVStoreService(keys[crisistypes.StoreKey]), invCheckPeriod, app.BankKeeper,
-		authtypes.FeeCollectorName, govModuleAddr, app.AccountKeeper.AddressCodec(),
 	)
 
 	app.FeeGrantKeeper = feegrantkeeper.NewKeeper(appCodec,

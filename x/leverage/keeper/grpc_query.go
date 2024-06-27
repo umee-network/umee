@@ -338,7 +338,8 @@ func (q Querier) MaxWithdraw(
 			continue
 		}
 
-		uToken := sdk.NewCoin(userMaxWithdrawUToken.Denom, sdk.MinInt(userMaxWithdrawUToken.Amount, moduleMaxWithdrawUToken))
+		uToken := sdk.NewCoin(userMaxWithdrawUToken.Denom, sdkmath.MinInt(userMaxWithdrawUToken.Amount,
+			moduleMaxWithdrawUToken))
 		if uToken.IsPositive() {
 			token, err := q.ToToken(ctx, uToken)
 			if err != nil {

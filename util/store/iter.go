@@ -70,7 +70,7 @@ func MustLoadAll[TPtr PtrUnmarshalable[T], T any](s storetypes.KVStore, prefix [
 func LoadAllKV[KPtr PtrUnmarshalable[K], K any, TPtr PtrUnmarshalable[T], T any](
 	s storetypes.KVStore, prefix []byte) ([]KV[K, T], error) {
 
-	iter := sdk.KVStorePrefixIterator(s, prefix)
+	iter := storetypes.KVStorePrefixIterator(s, prefix)
 	defer iter.Close()
 	out := make([]KV[K, T], 0)
 	for ; iter.Valid(); iter.Next() {

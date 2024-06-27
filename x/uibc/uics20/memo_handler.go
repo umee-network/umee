@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	sdkerrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
@@ -48,7 +49,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	var err error
 	logger := recvPacketLogger(ctx)
 	mh.memo = ftData.Memo
-	amount, ok := sdk.NewIntFromString(ftData.Amount)
+	amount, ok := sdkmath.NewIntFromString(ftData.Amount)
 	if !ok { // must not happen
 		return nil, fmt.Errorf("can't parse transfer amount: %s", ftData.Amount)
 	}

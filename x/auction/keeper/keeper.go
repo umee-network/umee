@@ -1,8 +1,8 @@
 package keeper
 
 import (
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/x/auction"
@@ -46,7 +46,7 @@ func (kb Builder) Keeper(ctx *sdk.Context) Keeper {
 }
 
 type Keeper struct {
-	store sdk.KVStore
+	store storetypes.KVStore
 	cdc   codec.BinaryCodec
 	accs  SubAccounts
 	bank  auction.BankKeeper

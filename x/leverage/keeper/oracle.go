@@ -267,7 +267,7 @@ func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) erro
 	// reduce rewards if they exceed unreserved module balance
 	for _, o := range toOracle {
 		avl := k.AvailableLiquidity(ctx, o.Denom)
-		amt := sdk.MinInt(o.Amount, avl)
+		amt := sdkmath.MinInt(o.Amount, avl)
 		if amt.IsPositive() {
 			toOracleCheck = toOracleCheck.Add(sdk.NewCoin(o.Denom, amt))
 			avl.Sub(amt)
@@ -279,7 +279,7 @@ func (k Keeper) fundModules(ctx sdk.Context, toOracle, toAuction sdk.Coins) erro
 		if !ok {
 			avl = k.AvailableLiquidity(ctx, o.Denom)
 		}
-		amt := sdk.MinInt(o.Amount, avl)
+		amt := sdkmath.MinInt(o.Amount, avl)
 		if amt.IsPositive() {
 			toAuctionCheck = toAuctionCheck.Add(sdk.NewCoin(o.Denom, amt))
 			avl.Sub(amt)

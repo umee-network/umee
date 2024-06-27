@@ -81,9 +81,10 @@ message Params {
   // So, 2% means, that there is additional 2% per year fee collected.
   // Valid values: 0-1.
   string rewards_auction_fee = 7 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false,
-    (gogoproto.moretags)   = "yaml:\"oracle_reward_factor\""
+    (gogoproto.moretags)   = "yaml:\"rewards_auction_fee\""
   ];
 }
 

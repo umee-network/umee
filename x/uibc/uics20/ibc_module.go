@@ -84,7 +84,7 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 				return channeltypes.NewErrorAcknowledgement(err)
 			}
 		}
-		im.emitEvents(ctx.EventManager(), recvPacketLogger(&ctx), "ics20-memo-hook", events)
+		im.emitEvents(ctx.EventManager, recvPacketLogger(&ctx), "ics20-memo-hook", events)
 		return im.IBCModule.OnRecvPacket(ctx, packet, relayer)
 	}
 
@@ -161,7 +161,7 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
 }
 
-func (im ICS20Module) emitEvents(em *sdk.EventManager, logger log.Logger, topic string, events []string) {
+func (im ICS20Module) emitEvents(em *sdk.EventManagerI, logger log.Logger, topic string, events []string) {
 	attributes := make([]sdk.Attribute, len(events))
 	key := topic + "-context"
 	for i, s := range events {

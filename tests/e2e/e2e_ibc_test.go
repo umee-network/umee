@@ -7,7 +7,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	appparams "github.com/umee-network/umee/v6/app/params"
 	setup "github.com/umee-network/umee/v6/tests/e2e/setup"
 	"github.com/umee-network/umee/v6/tests/grpc"
