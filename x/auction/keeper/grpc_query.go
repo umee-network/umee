@@ -66,25 +66,22 @@ func (q Querier) RewardsAuctions(goCtx context.Context, req *auction.QueryReward
 	auctions := make([]*auction.QueryRewardsAuctionResponse, 0)
 
 	pageRes, err := query.Paginate(rewardsStore, req.Pagination, func(key, value []byte) error {
-		var rewards *auction.Rewards
+		var rewards auction.Rewards
 		err := rewards.Unmarshal(value)
 		if err != nil {
 			return err
 		}
-
-		if rewards != nil {
-			var auctionID *store.Uint32
-			bz := key[len(keyPrefixRewardsCoins):]
-			err = auctionID.Unmarshal(bz)
-			if err != nil {
-				return err
-			}
-			auctions = append(auctions, &auction.QueryRewardsAuctionResponse{
-				Id:      uint32(*auctionID),
-				Rewards: rewards.Rewards,
-				EndsAt:  rewards.EndsAt,
-			})
+		var auctionID store.Uint32
+		err = auctionID.Unmarshal(key)
+		if err != nil {
+			return err
 		}
+		auction := &auction.QueryRewardsAuctionResponse{
+			Id: uint32(auctionID),
+		}
+		auction.Rewards = rewards.Rewards
+		auction.EndsAt = rewards.EndsAt
+		auctions = append(auctions, auction)
 		return nil
 	})
 
