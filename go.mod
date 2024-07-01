@@ -23,6 +23,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/mgechev/revive v1.3.7
 	github.com/ory/dockertest/v3 v3.10.0
+	github.com/osmosis-labs/fee-abstraction/v7 v7.0.1
 	github.com/prometheus/client_golang v1.18.0
 	github.com/rakyll/statik v0.1.7
 	github.com/rs/zerolog v1.33.0

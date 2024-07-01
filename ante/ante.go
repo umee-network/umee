@@ -11,6 +11,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
 	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+	feeabsante "github.com/osmosis-labs/fee-abstraction/v7/x/feeabs/ante"
+	feeabskeeper "github.com/osmosis-labs/fee-abstraction/v7/x/feeabs/keeper"
 )
 
 type HandlerOptions struct {
@@ -23,6 +25,7 @@ type HandlerOptions struct {
 	SigGasConsumer    cosmosante.SignatureVerificationGasConsumer
 	WasmConfig        *wasmTypes.WasmConfig
 	TXCounterStoreKey storetypes.StoreKey
+	FeeabsKeeper      feeabskeeper.Keeper
 }
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -65,5 +68,12 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		cosmosante.NewSigVerificationDecorator(options.AccountKeeper, options.SignModeHandler),
 		cosmosante.NewIncrementSequenceDecorator(options.AccountKeeper),
 		ibcante.NewRedundantRelayDecorator(options.IBCKeeper),
+		feeabsante.NewFeeAbstrationMempoolFeeDecorator(options.FeeabsKeeper),
+		feeabsante.NewFeeAbstractionDeductFeeDecorate(
+			options.AccountKeeper,
+			options.BankKeeper,
+			options.FeeabsKeeper,
+			options.FeegrantKeeper,
+		),
 	), nil
 }
