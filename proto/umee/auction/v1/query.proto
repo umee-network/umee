@@ -7,6 +7,7 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "umee/auction/v1/auction.proto";
 import "cosmos/base/v1beta1/coin.proto";
+import "cosmos/base/query/v1beta1/pagination.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/auction";
 
@@ -21,6 +22,10 @@ service Query {
   // RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
   // current reward auction.
   rpc RewardsAuction(QueryRewardsAuction) returns (QueryRewardsAuctionResponse) {
+    option (google.api.http).get = "/umee/auction/v1/rewards/{id}";
+  }
+  // RewardsAuctions returns all reward auctions.
+  rpc RewardsAuctions(QueryRewardsAuctions) returns (QueryRewardsAuctionsResponse) {
     option (google.api.http).get = "/umee/auction/v1/rewards";
   }
 }
@@ -47,4 +52,17 @@ message QueryRewardsAuctionResponse {
   cosmos.base.v1beta1.Coin bid              = 3 [(gogoproto.nullable) = false];
   repeated cosmos.base.v1beta1.Coin rewards = 4 [(gogoproto.nullable) = false];
   google.protobuf.Timestamp         ends_at = 5 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+}
+
+// Query type for QueryRewardsAuctions
+message QueryRewardsAuctions {
+  // pagination defines an optional pagination for the request.
+  cosmos.base.query.v1beta1.PageRequest pagination = 1;
+}
+
+// QueryRewardsAuctionsResponse is response type for Query/QueryRewardsAuctions
+message QueryRewardsAuctionsResponse {
+  repeated QueryRewardsAuctionResponse auctions = 1;
+  // pagination defines the pagination in the response.
+  cosmos.base.query.v1beta1.PageResponse pagination = 2;
 }

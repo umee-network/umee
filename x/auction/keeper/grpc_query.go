@@ -3,11 +3,14 @@ package keeper
 import (
 	"context"
 
+	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/cosmos-sdk/types/query"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/umee-network/umee/v6/util/coin"
+	"github.com/umee-network/umee/v6/util/store"
 	"github.com/umee-network/umee/v6/x/auction"
 )
 
@@ -52,4 +55,51 @@ func (q Querier) RewardsAuction(goCtx context.Context, msg *auction.QueryRewards
 	}
 
 	return r, nil
+}
+
+// RewardsAuctions returns all the auctions with bids and rewards
+func (q Querier) RewardsAuctions(goCtx context.Context, req *auction.QueryRewardsAuctions) (
+	*auction.QueryRewardsAuctionsResponse, error) {
+	ctx := sdk.UnwrapSDKContext(goCtx)
+	k := q.Keeper(&ctx)
+	rewardsStore := prefix.NewStore(k.store, keyPrefixRewardsCoins)
+	auctions := make([]*auction.QueryRewardsAuctionResponse, 0)
+
+	pageRes, err := query.Paginate(rewardsStore, req.Pagination, func(key, value []byte) error {
+		var rewards auction.Rewards
+		err := rewards.Unmarshal(value)
+		if err != nil {
+			return err
+		}
+		var auctionID store.Uint32
+		err = auctionID.Unmarshal(key)
+		if err != nil {
+			return err
+		}
+		auction := &auction.QueryRewardsAuctionResponse{
+			Id: uint32(auctionID),
+		}
+		auction.Rewards = rewards.Rewards
+		auction.EndsAt = rewards.EndsAt
+		auctions = append(auctions, auction)
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	for index, auction := range auctions {
+		// get the bids info
+		bid := k.getRewardsBid(auction.Id)
+		if bid != nil {
+			auctions[index].Bidder = bid.Bidder
+			auctions[index].Bid = coin.UmeeInt(bid.Amount)
+		}
+	}
+
+	return &auction.QueryRewardsAuctionsResponse{
+		Auctions:   auctions,
+		Pagination: pageRes,
+	}, nil
 }
