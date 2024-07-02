@@ -103,8 +103,8 @@ func (q Querier) AccountSummaries(goCtx context.Context, req *types.QueryAccount
 
 	var accounts []*types.AccountSummary
 	pageRes, err := query.Paginate(accountsStore, req.Pagination, func(key, value []byte) error {
-		acc, err := q.authKeeper.UnmarshalAccount(value)
-		if err != nil {
+		var acc sdk.AccountI
+		if err := q.cdc.UnmarshalInterface(value, &acc); err != nil {
 			return err
 		}
 		accSummary, err := q.accountSummary(ctx, acc.GetAddress())

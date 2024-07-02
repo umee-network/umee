@@ -228,7 +228,7 @@ func symbolDecCoins(
 			// unregistered tokens cannot be converted, but can be returned as base denom
 			// symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
 			symbolCoins = append(symbolCoins, types.PositionBalance{
-				Amount:     sdk.NewDecFromInt(c.Amount),
+				Amount:     sdkmath.LegacyNewDecFromInt(c.Amount),
 				BaseDenom:  c.Denom,
 				BaseAmount: c.Amount,
 				Denom:      c.Denom,

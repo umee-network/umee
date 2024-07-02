@@ -4,12 +4,7 @@ import (
 	"context"
 
 	"cosmossdk.io/log"
-	ica "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts"
-	icagenesis "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/genesis/types"
-	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
-	icatypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
-
+	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -20,8 +15,13 @@ import (
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-
 	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v8/packetforward/types"
+	ica "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts"
+	icagenesis "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/genesis/types"
+	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util"
 	"github.com/umee-network/umee/v6/x/auction"
@@ -52,7 +52,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_0(upgradeInfo)
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
-	app.registerUpgrade("v047-to-v050", upgradeInfo, packetforwardtypes.ModuleName)
+	app.registerUpgrade("v047-to-v050", upgradeInfo, []string{packetforwardtypes.ModuleName}, nil, nil)
 
 	app.registerUpgrade("v6.3", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade6_4(upgradeInfo)
@@ -65,17 +65,18 @@ func (app *UmeeApp) registerUpgrade6_6(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.6"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			printPlanName(planName, sdkCtx.Logger())
 
 			// update leverage and metoken params to include burn auction fee share.
-			lparams := app.LeverageKeeper.GetParams(ctx)
-			lparams.RewardsAuctionFee = sdk.MustNewDecFromStr("0.01")
-			if err := app.LeverageKeeper.SetParams(ctx, lparams); err != nil {
+			lparams := app.LeverageKeeper.GetParams(sdkCtx)
+			lparams.RewardsAuctionFee = sdkmath.LegacyMustNewDecFromStr("0.01")
+			if err := app.LeverageKeeper.SetParams(sdkCtx, lparams); err != nil {
 				return nil, err
 			}
 
-			mekeeper := app.MetokenKeeperB.Keeper(&ctx)
+			mekeeper := app.MetokenKeeperB.Keeper(&sdkCtx)
 			meparams := mekeeper.GetParams()
 			meparams.RewardsAuctionFeeFactor = 10000 // 100% of fees goes to rewards auction
 			if err := mekeeper.SetParams(meparams); err != nil {

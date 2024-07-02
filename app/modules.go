@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank"
@@ -51,19 +50,6 @@ func (StakingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 	p.BondDenom = appparams.BondDenom
 	return cdc.MustMarshalJSON(&stakingtypes.GenesisState{
 		Params: p,
-	})
-}
-
-// CrisisModule defines a custom wrapper around the x/crisis module's
-// AppModuleBasic implementation to provide custom default genesis state.
-type CrisisModule struct {
-	crisis.AppModuleBasic
-}
-
-// DefaultGenesis returns custom Umee x/crisis module genesis state.
-func (CrisisModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
-	return cdc.MustMarshalJSON(&crisistypes.GenesisState{
-		ConstantFee: sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(1000)),
 	})
 }
 

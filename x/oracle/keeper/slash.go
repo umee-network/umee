@@ -58,7 +58,7 @@ func (k Keeper) SlashAndResetMissCounters(ctx sdk.Context) {
 				}
 
 				sdkutil.Emit(&ctx, &types.EventSlash{
-					Validator: consAddr.String(),
+					Validator: sdk.ConsAddress(consAddr).String(),
 					Factor:    slashFraction,
 					Reason:    "voting_rate",
 					Jailed:    true,

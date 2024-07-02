@@ -20,7 +20,7 @@ type BankKeeper interface {
 		ctx context.Context, senderAddr sdk.AccAddress, recipientModule string, amt sdk.Coins,
 	) error
 	SendCoinsFromModuleToModule(
-		ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins,
+		ctx context.Context, senderModule, recipientModule string, amt sdk.Coins,
 	) error
 }
 

@@ -32,7 +32,7 @@ type MemoHandler struct {
 
 	executeEnabled bool
 	isGMP          bool
-	msgs           []sdk.Msg
+	msgs           []sdk.LegacyMsg
 	memo           string
 	received       sdk.Coin
 
@@ -89,7 +89,10 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 		}
 	}
 
-	mh.msgs, err = memo.GetMsgs()
+	msgs, err := memo.GetMsgs()
+	for _, msg := range msgs {
+		mh.msgs = append(mh.msgs, msg.(sdk.LegacyMsg))
+	}
 	if err != nil {
 		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
 		events = append(events, e)

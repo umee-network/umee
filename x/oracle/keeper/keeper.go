@@ -257,9 +257,10 @@ func (k Keeper) GetAllMissCounters(ctx sdk.Context) []types.PriceMissCounter {
 	missCounters := make([]types.PriceMissCounter, 0)
 	validators, _ := k.StakingKeeper.GetBondedValidatorsByPower(ctx)
 	for _, v := range validators {
+		valAddress, _ := k.StakingKeeper.ValidatorAddressCodec().StringToBytes(v.GetOperator())
 		missCounters = append(missCounters, types.PriceMissCounter{
 			Validator:   v.OperatorAddress,
-			MissCounter: k.GetMissCounter(ctx, v.GetOperator()),
+			MissCounter: k.GetMissCounter(ctx, valAddress),
 		})
 	}
 	return missCounters

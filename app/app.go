@@ -123,6 +123,7 @@ import (
 	customante "github.com/umee-network/umee/v6/ante"
 	"github.com/umee-network/umee/v6/app/inflation"
 	appparams "github.com/umee-network/umee/v6/app/params"
+	uwasm "github.com/umee-network/umee/v6/app/wasm"
 	"github.com/umee-network/umee/v6/swagger"
 	"github.com/umee-network/umee/v6/util/genmap"
 	"github.com/umee-network/umee/v6/x/auction"
@@ -559,8 +560,6 @@ func New(
 		app.IBCKeeper.ChannelKeeper, app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, scopedICAHostKeeper, app.MsgServiceRouter(), govModuleAddr,
 	)
-
-	app.ICAHostKeeper.WithQueryRouter(app.GRPCQueryRouter())
 
 	// UIbcQuotaKeeper implements ibcporttypes.ICS4Wrapper
 	app.UIbcQuotaKeeperB = uibcquota.NewBuilder(

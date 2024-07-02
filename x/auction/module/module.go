@@ -36,6 +36,9 @@ func (AppModuleBasic) Name() string {
 	return auction.ModuleName
 }
 
+// IsAppModule implements module.AppModule.
+func (AppModule) IsAppModule() {}
+
 // RegisterLegacyAminoCodec registers the x/auction module's types with a legacy
 // Amino codec.
 func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
@@ -95,6 +98,29 @@ type AppModule struct {
 
 	kb         keeper.Builder
 	bankKeeper auction.BankKeeper
+}
+
+// IsOnePerModuleType implements module.AppModule.
+func (am AppModule) IsOnePerModuleType() {
+	panic("unimplemented")
+}
+
+// RegisterGRPCGatewayRoutes implements module.AppModule.
+// Subtle: this method shadows the method (AppModuleBasic).RegisterGRPCGatewayRoutes of AppModule.AppModuleBasic.
+func (am AppModule) RegisterGRPCGatewayRoutes(client.Context, *runtime.ServeMux) {
+	panic("unimplemented")
+}
+
+// RegisterInterfaces implements module.AppModule.
+// Subtle: this method shadows the method (AppModuleBasic).RegisterInterfaces of AppModule.AppModuleBasic.
+func (am AppModule) RegisterInterfaces(cdctypes.InterfaceRegistry) {
+	panic("unimplemented")
+}
+
+// RegisterLegacyAminoCodec implements module.AppModule.
+// Subtle: this method shadows the method (AppModuleBasic).RegisterLegacyAminoCodec of AppModule.AppModuleBasic.
+func (am AppModule) RegisterLegacyAminoCodec(*codec.LegacyAmino) {
+	panic("unimplemented")
 }
 
 func NewAppModule(

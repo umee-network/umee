@@ -3,6 +3,7 @@ package types
 import (
 	context "context"
 
+	addresscodec "cosmossdk.io/core/address"
 	sdkmath "cosmossdk.io/math"
 	"cosmossdk.io/store"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -21,6 +22,7 @@ type StakingKeeper interface {
 	ValidatorsPowerStoreIterator(ctx context.Context) (store.Iterator, error)
 	MaxValidators(context.Context) (uint32, error)
 	PowerReduction(ctx context.Context) (res sdkmath.Int)
+	ValidatorAddressCodec() addresscodec.Codec
 }
 
 // DistributionKeeper defines the expected interface contract defined by the
