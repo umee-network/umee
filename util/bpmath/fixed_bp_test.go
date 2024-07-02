@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/require"
 )
 
@@ -42,7 +41,7 @@ func TestFixedQuo(t *testing.T) {
 	}
 	require := require.New(t)
 	for _, tc := range tcs {
-		a, b := math.NewIntFromUint64(tc.a), math.NewIntFromUint64(tc.b)
+		a, b := sdkmath.NewIntFromUint64(tc.a), sdkmath.NewIntFromUint64(tc.b)
 		if tc.panics {
 			require.Panics(func() {
 				FixedFromQuo(a, b, tc.r)
@@ -75,7 +74,7 @@ func TestFixedMul(t *testing.T) {
 	}
 	require := require.New(t)
 	for _, tc := range tcs {
-		a := math.NewIntFromUint64(tc.a)
+		a := sdkmath.NewIntFromUint64(tc.a)
 		o := Mul(a, tc.b)
 		require.Equal(int64(tc.exp), o.Int64(), fmt.Sprint("test ", tc.name))
 
@@ -91,13 +90,13 @@ func TestFixedToDec(t *testing.T) {
 	tcs := []struct {
 		name string
 		a    FixedBP
-		exp  math.LegacyDec
+		exp  sdkmath.LegacyDec
 	}{
-		{"t1", 0, math.LegacyZeroDec()},
-		{"t2", 1, math.LegacyMustNewDecFromStr("0.0001")},
-		{"t3", 20, math.LegacyMustNewDecFromStr("0.002")},
-		{"t4", 9999, math.LegacyMustNewDecFromStr("0.9999")},
-		{"t5", One, math.LegacyNewDec(1)},
+		{"t1", 0, sdkmath.LegacyZeroDec()},
+		{"t2", 1, sdkmath.LegacyMustNewDecFromStr("0.0001")},
+		{"t3", 20, sdkmath.LegacyMustNewDecFromStr("0.002")},
+		{"t4", 9999, sdkmath.LegacyMustNewDecFromStr("0.9999")},
+		{"t5", One, sdkmath.LegacyNewDec(1)},
 	}
 	require := require.New(t)
 	for _, tc := range tcs {
@@ -117,19 +116,19 @@ func TestFixedBPMulDec(t *testing.T) {
 	bp2 := FixedBP(1)
 	bp3 := FixedBP(5000)
 	bp4 := FixedBP(20000)
-	d := sdk.MustNewDecFromStr("12.5002")
-	d2 := sdk.NewDec(10000)
-	d3 := sdk.NewDec(1000)
+	d := sdkmath.LegacyMustNewDecFromStr("12.5002")
+	d2 := sdkmath.LegacyNewDec(10000)
+	d3 := sdkmath.LegacyNewDec(1000)
 
 	require.Equal(d, MulDec(d, One))
-	require.Equal(sdk.ZeroDec(), MulDec(d, Zero))
-	require.Equal(sdk.OneDec(), bp2.MulDec(d2))
-	require.Equal(sdk.MustNewDecFromStr("0.1"), bp2.MulDec(d3))
+	require.Equal(sdkmath.LegacyZeroDec(), MulDec(d, Zero))
+	require.Equal(sdkmath.LegacyOneDec(), bp2.MulDec(d2))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("0.1"), bp2.MulDec(d3))
 
-	require.Equal(sdk.MustNewDecFromStr("1.25002"), bp.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("0.00125002"), bp2.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("6.2501"), bp3.MulDec(d))
-	require.Equal(sdk.MustNewDecFromStr("25.0004"), bp4.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("1.25002"), bp.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("0.00125002"), bp2.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("6.2501"), bp3.MulDec(d))
+	require.Equal(sdkmath.LegacyMustNewDecFromStr("25.0004"), bp4.MulDec(d))
 }
 
 func TestFixedBPEqual(t *testing.T) {

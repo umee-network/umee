@@ -4,8 +4,8 @@ import (
 	"sort"
 
 	sdkmath "cosmossdk.io/math"
-	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	prefixstore "cosmossdk.io/store/prefix"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util"
@@ -73,7 +73,7 @@ func (k Keeper) GetBorrowerBorrows(ctx sdk.Context, borrowerAddr sdk.AccAddress)
 
 	iterator := func(key, val []byte) error {
 		borrowDenom := types.DenomFromKeyWithAddress(key, types.KeyPrefixAdjustedBorrow)
-		var adjustedAmount sdk.Dec
+		var adjustedAmount sdkmath.LegacyDec
 		if err := adjustedAmount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
 			return err

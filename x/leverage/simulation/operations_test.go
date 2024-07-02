@@ -5,14 +5,14 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	abci "github.com/cometbft/cometbft/abci/types"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
-	"github.com/cosmos/gogoproto/proto"
-	"github.com/stretchr/testify/suite"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+	"github.com/cosmos/gogoproto/proto"
+	"github.com/stretchr/testify/suite"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	appparams "github.com/umee-network/umee/v6/app/params"
@@ -35,18 +35,18 @@ func (s *SimTestSuite) SetupTest() {
 	checkTx := false
 	app := umeeapp.Setup(s.T())
 	t := time.Now()
-	ctx := app.NewContext(checkTx, tmproto.Header{Time: t})
+	ctx := app.NewContextLegacy(checkTx, tmproto.Header{Time: t})
 	genesis := *types.DefaultGenesis()
 	genesis.LastInterestTime = t.Unix()
 	leverage.InitGenesis(ctx, app.LeverageKeeper, genesis)
 
 	// Use default umee token for sim tests
 	s.Require().NoError(app.LeverageKeeper.SetTokenSettings(ctx, fixtures.Token("uumee", "UMEE", 6)))
-	app.OracleKeeper.SetExchangeRate(ctx, "UMEE", sdk.MustNewDecFromStr("100.0"))
+	app.OracleKeeper.SetExchangeRate(ctx, "UMEE", sdkmath.LegacyMustNewDecFromStr("100.0"))
 	for i := 1; i <= 24; i++ {
 		// set historic medians for UMEE on blocks 1-24 (without actually advancing block height)
 		// this is to accommodate leverage module's default 24 historic median requirement
-		app.OracleKeeper.SetHistoricMedian(ctx, "UMEE", uint64(i), sdk.MustNewDecFromStr("100.0"))
+		app.OracleKeeper.SetHistoricMedian(ctx, "UMEE", uint64(i), sdkmath.LegacyMustNewDecFromStr("100.0"))
 	}
 
 	s.app = app
@@ -67,7 +67,7 @@ func (s *SimTestSuite) unmarshal(op *simtypes.OperationMsg, msg proto.Message) {
 func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAccount simtypes.Account)) []simtypes.Account {
 	accounts := simtypes.RandomAccounts(r, n)
 
-	initAmt := sdk.NewInt(200_000000)
+	initAmt := sdkmath.NewInt(200_000000)
 	accCoins := sdk.NewCoins()
 
 	tokens := s.app.LeverageKeeper.GetAllRegisteredTokens(s.ctx)
@@ -92,10 +92,9 @@ func (s *SimTestSuite) getTestingAccounts(r *rand.Rand, n int, cb func(fundedAcc
 
 // TestWeightedOperations tests the weights of the operations.
 func (s *SimTestSuite) TestWeightedOperations() {
-	cdc := s.app.AppCodec()
 	appParams := make(simtypes.AppParams)
 
-	weightedOps := simulation.WeightedOperations(appParams, cdc, s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
+	weightedOps := simulation.WeightedOperations(appParams, s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 
 	// setup 1 account, which will test all 7 operations in order. the order is designed such that each
 	// transaction with prerequisites (e.g. must collateralize before borrow) has a chance to succeed.
@@ -127,7 +126,8 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 	r := rand.New(rand.NewSource(1))
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {})
 
-	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+	_, err := s.app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.app.LastBlockHeight() + 1, Hash: s.app.LastCommitID().Hash})
+	s.Require().NoError(err)
 
 	op := simulation.SimulateMsgSupply(s.app.AccountKeeper, s.app.BankKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
@@ -142,14 +142,15 @@ func (s *SimTestSuite) TestSimulateMsgSupply() {
 
 func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 	r := rand.New(rand.NewSource(1))
-	supplyToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(10_000000))
+	supplyToken := sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(10_000000))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		_, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
 		s.Require().NoError(err)
 	})
 
-	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+	_, err := s.app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.app.LastBlockHeight() + 1, Hash: s.app.LastCommitID().Hash})
+	s.Require().NoError(err)
 
 	op := simulation.SimulateMsgWithdraw(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
@@ -165,7 +166,7 @@ func (s *SimTestSuite) TestSimulateMsgWithdraw() {
 
 func (s *SimTestSuite) TestSimulateMsgBorrow() {
 	r := rand.New(rand.NewSource(8))
-	supplyToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(10_000000))
+	supplyToken := sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(10_000000))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		uToken, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
@@ -175,7 +176,8 @@ func (s *SimTestSuite) TestSimulateMsgBorrow() {
 		s.Require().NoError(s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken))
 	})
 
-	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+	_, err := s.app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.app.LastBlockHeight() + 1, Hash: s.app.LastCommitID().Hash})
+	s.Require().NoError(err)
 
 	op := simulation.SimulateMsgBorrow(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
@@ -197,7 +199,8 @@ func (s *SimTestSuite) TestSimulateMsgCollateralize() {
 		s.Require().NoError(err)
 	})
 
-	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+	_, err := s.app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.app.LastBlockHeight() + 1, Hash: s.app.LastCommitID().Hash})
+	s.Require().NoError(err)
 
 	op := simulation.SimulateMsgCollateralize(s.app.AccountKeeper, s.app.BankKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
@@ -220,7 +223,8 @@ func (s *SimTestSuite) TestSimulateMsgDecollateralize() {
 		s.Require().NoError(s.app.LeverageKeeper.Collateralize(s.ctx, fundedAccount.Address, uToken))
 	})
 
-	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+	_, err := s.app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.app.LastBlockHeight() + 1, Hash: s.app.LastCommitID().Hash})
+	s.Require().NoError(err)
 
 	op := simulation.SimulateMsgDecollateralize(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
@@ -245,7 +249,8 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 		s.Require().NoError(s.app.LeverageKeeper.Borrow(s.ctx, fundedAccount.Address, borrowToken))
 	})
 
-	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+	_, err := s.app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.app.LastBlockHeight() + 1, Hash: s.app.LastCommitID().Hash})
+	s.Require().NoError(err)
 
 	op := simulation.SimulateMsgRepay(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")
@@ -260,9 +265,9 @@ func (s *SimTestSuite) TestSimulateMsgRepay() {
 
 func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 	r := rand.New(rand.NewSource(1))
-	supplyToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(10_000000))
-	uToken := sdk.NewCoin("u/"+appparams.BondDenom, sdk.NewInt(10_000000))
-	borrowToken := sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1_000000))
+	supplyToken := sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(10_000000))
+	uToken := sdk.NewCoin("u/"+appparams.BondDenom, sdkmath.NewInt(10_000000))
+	borrowToken := sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(1_000000))
 
 	accs := s.getTestingAccounts(r, 3, func(fundedAccount simtypes.Account) {
 		_, err := s.app.LeverageKeeper.Supply(s.ctx, fundedAccount.Address, supplyToken)
@@ -271,7 +276,8 @@ func (s *SimTestSuite) TestSimulateMsgLiquidate() {
 		s.Require().NoError(s.app.LeverageKeeper.Borrow(s.ctx, fundedAccount.Address, borrowToken))
 	})
 
-	s.app.BeginBlock(abci.RequestBeginBlock{Header: tmproto.Header{Height: s.app.LastBlockHeight() + 1, AppHash: s.app.LastCommitID().Hash}})
+	_, err := s.app.FinalizeBlock(&abci.RequestFinalizeBlock{Height: s.app.LastBlockHeight() + 1, Hash: s.app.LastCommitID().Hash})
+	s.Require().NoError(err)
 
 	op := simulation.SimulateMsgLiquidate(s.app.AccountKeeper, s.app.BankKeeper, s.app.LeverageKeeper)
 	operationMsg, futureOperations, err := op(r, s.app.BaseApp, s.ctx, accs, "")

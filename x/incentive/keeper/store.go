@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
@@ -245,7 +246,7 @@ func (k Keeper) setUnbondings(ctx sdk.Context, unbondings incentive.AccountUnbon
 	unbondings.Unbondings = nonzeroUnbondings
 
 	// compute the new total unbonding specific to this account and denom.
-	newUnbonding := sdk.ZeroInt()
+	newUnbonding := sdkmath.ZeroInt()
 	for _, u := range unbondings.Unbondings {
 		newUnbonding = newUnbonding.Add(u.UToken.Amount)
 	}

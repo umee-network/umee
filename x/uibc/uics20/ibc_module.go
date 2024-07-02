@@ -5,13 +5,13 @@ import (
 	"errors"
 
 	sdkerrors "cosmossdk.io/errors"
-	"github.com/cometbft/cometbft/libs/log"
+	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
-	"github.com/cosmos/ibc-go/v7/modules/core/exported"
+	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
+	"github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc/quota"
@@ -161,7 +161,7 @@ func (im ICS20Module) onAckErr(ctx *sdk.Context, packet channeltypes.Packet) {
 	qk.IBCRevertQuotaUpdate(ftData.Amount, ftData.Denom)
 }
 
-func (im ICS20Module) emitEvents(em *sdk.EventManager, logger log.Logger, topic string, events []string) {
+func (im ICS20Module) emitEvents(em sdk.EventManagerI, logger log.Logger, topic string, events []string) {
 	attributes := make([]sdk.Attribute, len(events))
 	key := topic + "-context"
 	for i, s := range events {
@@ -169,7 +169,6 @@ func (im ICS20Module) emitEvents(em *sdk.EventManager, logger log.Logger, topic 
 		attributes[i] = sdk.NewAttribute(key, s)
 	}
 	logger.Debug("Handle ICS20 memo", "events", events)
-
 	em.EmitEvents(sdk.Events{
 		sdk.NewEvent(
 			topic,

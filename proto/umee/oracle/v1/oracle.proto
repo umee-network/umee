@@ -4,6 +4,7 @@ package umee.oracle.v1;
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
+import "cosmos_proto/cosmos.proto";
 
 option go_package = "github.com/umee-network/umee/v6/x/oracle/types";
 
@@ -17,12 +18,14 @@ message Params {
   uint64 vote_period    = 1 [(gogoproto.moretags) = "yaml:\"vote_period\""];
   string vote_threshold = 2 [
     (gogoproto.moretags)   = "yaml:\"vote_threshold\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   string reward_band = 3 [
     (gogoproto.moretags)   = "yaml:\"reward_band\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   uint64 reward_distribution_window = 4
@@ -34,13 +37,15 @@ message Params {
   ];
   string slash_fraction = 6 [
     (gogoproto.moretags)   = "yaml:\"slash_fraction\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   uint64 slash_window         = 7 [(gogoproto.moretags) = "yaml:\"slash_window\""];
   string min_valid_per_window = 8 [
     (gogoproto.moretags)   = "yaml:\"min_valid_per_window\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // Historic Stamp Period represents the amount of blocks the oracle
@@ -123,7 +128,8 @@ message ExchangeRateTuple {
   string denom         = 1 [(gogoproto.moretags) = "yaml:\"denom\""];
   string exchange_rate = 2 [
     (gogoproto.moretags)   = "yaml:\"exchange_rate\"",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }
@@ -136,7 +142,8 @@ message AvgCounter {
 
   // sum of prices in the counter
   string sum = 1 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // number of aggregated prices in the counter
@@ -151,7 +158,8 @@ message DenomExchangeRate {
   option (gogoproto.goproto_stringer) = false;
   string denom                        = 1 [(gogoproto.moretags) = "yaml:\"denom\""];
   string rate                         = 2 [
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (cosmos_proto.scalar)  = "cosmos.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   google.protobuf.Timestamp timestamp = 3 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];

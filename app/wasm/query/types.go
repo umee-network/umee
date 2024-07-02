@@ -86,7 +86,7 @@ type UmeeQuery struct {
 	// of base token rewards, per reference amount (usually 10^exponent of the uToken.)
 	CurrentRates *incentive.QueryCurrentRates `json:"current_rates,omitempty"`
 	// ActualRates queries the hypothetical return of a bonded uToken denomination
-	// if current incentive rewards continued for one year. The response is an sdk.Dec
+	// if current incentive rewards continued for one year. The response is an sdkmath.LegacyDec
 	// representing an oracle-adjusted APY.
 	ActualRates *incentive.QueryActualRates `json:"actual_rates,omitempty"`
 	// LastRewardTime queries the last block time at which incentive rewards were calculated.

@@ -5,13 +5,14 @@ import (
 	"math/rand"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// FormatDec formats a sdk.Dec as a string with no trailing zeroes after the decimal point,
+// FormatDec formats a sdkmath.LegacyDec as a string with no trailing zeroes after the decimal point,
 // omitting the decimal point as well for whole numbers.
 // e.g. 4.000 -> 4 and 3.500 -> 3.5
-func FormatDec(d sdk.Dec) string {
+func FormatDec(d sdkmath.LegacyDec) string {
 	dStr := d.String()
 	parts := strings.Split(dStr, ".")
 	if len(parts) != 2 {

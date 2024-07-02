@@ -61,6 +61,7 @@ func (c *Client) GovSubmitProposal(msgs []sdk.Msg) (*sdk.TxResponse, error) {
 		"metadata",
 		"sometitle",
 		"somesummary",
+		false,
 	)
 	if err != nil {
 		return nil, err

@@ -3,7 +3,7 @@ package incentive
 import (
 	fmt "fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // DefaultParams returns a default set of parameters.
@@ -11,7 +11,7 @@ func DefaultParams() Params {
 	return Params{
 		MaxUnbondings:      10,
 		UnbondingDuration:  0,
-		EmergencyUnbondFee: sdk.MustNewDecFromStr("0.01"),
+		EmergencyUnbondFee: sdkmath.LegacyMustNewDecFromStr("0.01"),
 	}
 }
 
@@ -34,8 +34,8 @@ func validateUnbondingDuration(v int64) error {
 	return nil
 }
 
-func validateEmergencyUnbondFee(v sdk.Dec) error {
-	if v.IsNil() || v.IsNegative() || v.GTE(sdk.OneDec()) {
+func validateEmergencyUnbondFee(v sdkmath.LegacyDec) error {
+	if v.IsNil() || v.IsNegative() || v.GTE(sdkmath.LegacyOneDec()) {
 		return fmt.Errorf("invalid emergency unbonding fee: %s, valid values: [0, 1)", v)
 	}
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/cometbft/cometbft/crypto"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	"github.com/umee-network/umee/v6/tests/tsdk"
 	"gotest.tools/v3/assert"
 

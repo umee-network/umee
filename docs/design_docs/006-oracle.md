@@ -40,7 +40,7 @@ We'd like to use the concepts introduced in [Terra's Oracle](https://classic-doc
 The `x/oracle` module will provide the following method on its keeper, to be used by `x/leverage`:
 
 ```go
-    GetExchangeRate(base string) (sdk.Dec, error) // get the USD value of an input base denomination
+    GetExchangeRate(base string) (sdkmath.LegacyDec, error) // get the USD value of an input base denomination
 ```
 
 ## Consequences

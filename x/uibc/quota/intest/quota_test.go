@@ -6,7 +6,7 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	channeltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
+	channeltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
 	"github.com/golang/mock/gomock"
 	"gotest.tools/v3/assert"
 
@@ -36,9 +36,9 @@ func TestResetQuota(t *testing.T) {
 
 	// check the quota after reset
 	q = k.GetTokenOutflows(umeeQuota.Denom)
-	assert.DeepEqual(t, q.Amount, sdk.NewDec(0))
+	assert.DeepEqual(t, q.Amount, sdkmath.LegacyNewDec(0))
 	i = k.GetTokenInflow(umeeQuota.Denom)
-	assert.DeepEqual(t, i.Amount, sdk.NewDec(0))
+	assert.DeepEqual(t, i.Amount, sdkmath.LegacyNewDec(0))
 }
 
 func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
@@ -81,7 +81,7 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	leverageMock.EXPECT().GetTokenSettings(ctx, "atom").Return(
 		lfixtures.Token("atom", "ATOM", 6), nil,
 	).AnyTimes()
-	oracleMock.EXPECT().Price(ctx, "ATOM").Return(sdk.Dec{}, types.ErrMalformedLatestAvgPrice)
+	oracleMock.EXPECT().Price(ctx, "ATOM").Return(sdkmath.LegacyDec{}, types.ErrMalformedLatestAvgPrice)
 
 	err = k.CheckAndUpdateQuota(atomToken.Denom, atomToken.Amount)
 	assert.ErrorIs(t, err, types.ErrMalformedLatestAvgPrice)
@@ -90,7 +90,7 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 	leverageMock.EXPECT().GetTokenSettings(ctx, "dai").Return(
 		lfixtures.Token("dai", "DAI", 6), nil,
 	).AnyTimes()
-	oracleMock.EXPECT().Price(ctx, "DAI").Return(sdk.MustNewDecFromStr("0.37"), nil)
+	oracleMock.EXPECT().Price(ctx, "DAI").Return(sdkmath.LegacyMustNewDecFromStr("0.37"), nil)
 
 	err = k.SetParams(uibc.DefaultParams())
 	assert.NilError(t, err)
@@ -104,7 +104,7 @@ func TestKeeper_CheckAndUpdateQuota(t *testing.T) {
 
 func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	umeeAmount := sdkmath.NewInt(100_000000)
-	umeePrice := sdk.MustNewDecFromStr("0.37")
+	umeePrice := sdkmath.LegacyMustNewDecFromStr("0.37")
 	umeeQuota := sdkmath.NewInt(10000)
 	umeeToken := sdk.NewCoin("umee", umeeAmount)
 	umeeExponent := 6
@@ -131,7 +131,7 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	assert.NilError(t, err)
 
 	o := k.GetTokenOutflows(umeeToken.Denom)
-	assert.DeepEqual(t, o.Amount, sdk.ZeroDec())
+	assert.DeepEqual(t, o.Amount, sdkmath.LegacyZeroDec())
 
 	setQuotas := sdk.DecCoins{sdk.NewInt64DecCoin("umee", umeeQuota.Int64())}
 	k.SetTokenOutflows(setQuotas)
@@ -144,14 +144,14 @@ func TestKeeper_UndoUpdateQuota(t *testing.T) {
 	// the expected quota is calculated as follows:
 	// umee_value = umee_amount * umee_price
 	// expected_quota = current_quota - umee_value
-	powerReduction := sdk.MustNewDecFromStr("10").Power(uint64(umeeExponent))
-	expectedQuota := sdk.NewDec(umeeQuota.Int64()).Sub(sdk.NewDecFromInt(umeeToken.Amount).Quo(powerReduction).Mul(umeePrice))
+	powerReduction := sdkmath.LegacyMustNewDecFromStr("10").Power(uint64(umeeExponent))
+	expectedQuota := sdkmath.LegacyNewDec(umeeQuota.Int64()).Sub(sdkmath.LegacyNewDecFromInt(umeeToken.Amount).Quo(powerReduction).Mul(umeePrice))
 	assert.DeepEqual(t, o.Amount, expectedQuota)
 }
 
 func TestKeeper_RecordIBCInflow(t *testing.T) {
 	tokenAmount := sdkmath.NewInt(100_000000)
-	tokenPrice := sdk.MustNewDecFromStr("0.37")
+	tokenPrice := sdkmath.LegacyMustNewDecFromStr("0.37")
 	tokenExponent := 6
 	// ibc denom = base_denom when sender chain is source chain
 	atomToken := sdk.NewCoin("uatom", tokenAmount)
@@ -219,5 +219,5 @@ func TestKeeper_RecordIBCInflow(t *testing.T) {
 	assert.NilError(t, err)
 
 	o = k.GetTokenInflow(atomIBCDenom)
-	assert.DeepEqual(t, o.Amount, sdk.ZeroDec())
+	assert.DeepEqual(t, o.Amount, sdkmath.LegacyZeroDec())
 }

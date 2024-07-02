@@ -3,11 +3,12 @@ package tests
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"gotest.tools/v3/assert"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
 	"github.com/umee-network/umee/v6/x/uibc"
-	"gotest.tools/v3/assert"
 )
 
 func TestIntegrationSuite(t *testing.T) {
@@ -22,7 +23,7 @@ func TestIntegrationSuite(t *testing.T) {
 	var uibcGenState uibc.GenesisState
 	assert.NilError(t, cfg.Codec.UnmarshalJSON(cfg.GenesisState[uibc.ModuleName], &uibcGenState))
 	uibcGenState.Outflows = sdk.DecCoins{sdk.NewInt64DecCoin("uumee", 0)}
-	uibcGenState.OutflowSum = sdk.NewDec(10)
+	uibcGenState.OutflowSum = sdkmath.LegacyNewDec(10)
 
 	bz, err := cfg.Codec.MarshalJSON(&uibcGenState)
 	assert.NilError(t, err)

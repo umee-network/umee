@@ -3,11 +3,12 @@ package uibc
 import (
 	fmt "fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 )
 
-func NewGenesisState(params Params, outflows sdk.DecCoins, outflowSum sdk.Dec) *GenesisState {
+func NewGenesisState(params Params, outflows sdk.DecCoins, outflowSum sdkmath.LegacyDec) *GenesisState {
 	return &GenesisState{
 		Params:     params,
 		Outflows:   outflows,
@@ -20,8 +21,8 @@ func DefaultGenesisState() *GenesisState {
 		Params:     DefaultParams(),
 		Inflows:    nil,
 		Outflows:   nil,
-		OutflowSum: sdk.NewDec(0),
-		InflowSum:  sdk.NewDec(0),
+		OutflowSum: sdkmath.LegacyNewDec(0),
+		InflowSum:  sdkmath.LegacyNewDec(0),
 	}
 }
 

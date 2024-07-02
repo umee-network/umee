@@ -5,16 +5,17 @@ import (
 
 	"github.com/umee-network/umee/v6/util"
 
+	"cosmossdk.io/store"
+	storetypes "cosmossdk.io/store/types"
 	db "github.com/cometbft/cometbft-db"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // Iterate through all keys in a kvStore that start with a given prefix
 // using a provided function. If the provided function returns an error,
 // iteration stops and the error is returned.
-func Iterate(store sdk.KVStore, prefix []byte, cb func(key, val []byte) error) error {
-	iter := sdk.KVStorePrefixIterator(store, prefix)
+func Iterate(store store.KVStore, prefix []byte, cb func(key, val []byte) error) error {
+	iter := storetypes.KVStorePrefixIterator(store, prefix)
 	defer iter.Close()
 	return iterate(iter, cb)
 }
@@ -26,8 +27,8 @@ func Iterate(store sdk.KVStore, prefix []byte, cb func(key, val []byte) error) e
 // indicates what page to skip to when iterating.
 // For example, page = 3 and limit = 10 will iterate over the 21st - 30th keys that
 // would be found by a non-paginated iterator.
-func IteratePaginated(store sdk.KVStore, prefix []byte, page, limit uint, cb func(key, val []byte) error) error {
-	iter := sdk.KVStorePrefixIteratorPaginated(store, prefix, page, limit)
+func IteratePaginated(store store.KVStore, prefix []byte, page, limit uint, cb func(key, val []byte) error) error {
+	iter := storetypes.KVStorePrefixIteratorPaginated(store, prefix, page, limit)
 	defer iter.Close()
 	return iterate(iter, cb)
 }
@@ -44,7 +45,7 @@ func iterate(iter db.Iterator, cb func(key, val []byte) error) error {
 
 // LoadAll iterates over all records in the prefix store and unmarshals value into the list.
 func LoadAll[TPtr PtrUnmarshalable[T], T any](s storetypes.KVStore, prefix []byte) ([]T, error) {
-	iter := sdk.KVStorePrefixIterator(s, prefix)
+	iter := storetypes.KVStorePrefixIterator(s, prefix)
 	defer iter.Close()
 	out := make([]T, 0)
 	for ; iter.Valid(); iter.Next() {
@@ -69,7 +70,7 @@ func MustLoadAll[TPtr PtrUnmarshalable[T], T any](s storetypes.KVStore, prefix [
 func LoadAllKV[KPtr PtrUnmarshalable[K], K any, TPtr PtrUnmarshalable[T], T any](
 	s storetypes.KVStore, prefix []byte) ([]KV[K, T], error) {
 
-	iter := sdk.KVStorePrefixIterator(s, prefix)
+	iter := storetypes.KVStorePrefixIterator(s, prefix)
 	defer iter.Close()
 	out := make([]KV[K, T], 0)
 	for ; iter.Valid(); iter.Next() {
@@ -92,7 +93,7 @@ func LoadAllKV[KPtr PtrUnmarshalable[K], K any, TPtr PtrUnmarshalable[T], T any]
 // to create a prefix store which will automatically look only at the given prefix.
 func SumCoins(s storetypes.KVStore, f StrExtractor) sdk.Coins {
 	total := sdk.NewCoins()
-	iter := sdk.KVStorePrefixIterator(s, nil)
+	iter := storetypes.KVStorePrefixIterator(s, nil)
 	defer iter.Close()
 	for ; iter.Valid(); iter.Next() {
 		denom := f(iter.Key())

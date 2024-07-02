@@ -75,7 +75,7 @@ func (k Keeper) getAllAdjustedBorrows(ctx sdk.Context) []types.AdjustedBorrow {
 		addr := types.AddressFromKey(key, prefix)
 		denom := types.DenomFromKeyWithAddress(key, prefix)
 
-		var amount sdk.Dec
+		var amount sdkmath.LegacyDec
 		if err := amount.Unmarshal(val); err != nil {
 			// improperly marshaled borrow amount should never happen
 			return err
@@ -124,7 +124,7 @@ func (k Keeper) getAllInterestScalars(ctx sdk.Context) []types.InterestScalar {
 	iterator := func(key, val []byte) error {
 		denom := types.DenomFromKey(key, prefix)
 
-		var scalar sdk.Dec
+		var scalar sdkmath.LegacyDec
 		if err := scalar.Unmarshal(val); err != nil {
 			// improperly marshaled interest scalar should never happen
 			return err

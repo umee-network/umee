@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/x/leverage/types"
@@ -33,9 +34,9 @@ func (k *Keeper) afterRegisteredTokenRemoved(ctx sdk.Context, t types.Token) {
 // e.g. If addr has 45 u/uumee bonded to incentive module and 23 u/uumee bonded to a mystery module,
 // bondedCollateral(addr,"u/uumee") returns 45.
 func (k *Keeper) bondedCollateral(ctx sdk.Context, addr sdk.AccAddress, uDenom string) sdk.Coin {
-	bondedAmount := sdk.ZeroInt()
+	bondedAmount := sdkmath.ZeroInt()
 	for _, h := range k.bondHooks {
-		bondedAmount = sdk.MaxInt(bondedAmount, h.GetBonded(ctx, addr, uDenom))
+		bondedAmount = sdkmath.MaxInt(bondedAmount, h.GetBonded(ctx, addr, uDenom))
 	}
 	return sdk.NewCoin(uDenom, bondedAmount)
 }

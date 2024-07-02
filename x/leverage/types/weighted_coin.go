@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -19,7 +20,7 @@ type WeightedSpecialPair struct {
 	// the borrowed asset and its value
 	Borrow sdk.DecCoin
 	// the collateral weight (or liquidation treshold) of the special pair
-	SpecialWeight sdk.Dec
+	SpecialWeight sdkmath.LegacyDec
 }
 
 func (wsp WeightedSpecialPair) Validate() error {

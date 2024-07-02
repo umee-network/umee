@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	sdkmath "cosmossdk.io/math"
-	transfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibcerrors "github.com/cosmos/ibc-go/v7/modules/core/errors"
+	transfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcerrors "github.com/cosmos/ibc-go/v8/modules/core/errors"
 )
 
 // GetFundsFromPacket returns transfer amount and denom

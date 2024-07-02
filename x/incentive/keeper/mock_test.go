@@ -1,8 +1,10 @@
 package keeper
 
 import (
+	"context"
 	"errors"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 
@@ -26,7 +28,7 @@ func newMockBankKeeper() mockBankKeeper {
 // SendCoinsFromModuleToAccount sends coins from a module balance to an account's spendable coins.
 // Error on insufficient module balance.
 func (m *mockBankKeeper) SendCoinsFromModuleToAccount(
-	_ sdk.Context, fromModule string, toAddr sdk.AccAddress, coins sdk.Coins,
+	_ context.Context, fromModule string, toAddr sdk.AccAddress, coins sdk.Coins,
 ) error {
 	moduleAddr := authtypes.NewModuleAddress(fromModule)
 	spendable, ok := m.spendableCoins[toAddr.String()]
@@ -48,7 +50,7 @@ func (m *mockBankKeeper) SendCoinsFromModuleToAccount(
 // SendCoinsFromAccountToModule sends coins from an account's spendable balance to a module balance.
 // Error on insufficient spendable coins.
 func (m *mockBankKeeper) SendCoinsFromAccountToModule(
-	_ sdk.Context, fromAddr sdk.AccAddress, toModule string, coins sdk.Coins,
+	_ context.Context, fromAddr sdk.AccAddress, toModule string, coins sdk.Coins,
 ) error {
 	moduleAddr := authtypes.NewModuleAddress(toModule)
 	spendable, ok := m.spendableCoins[fromAddr.String()]
@@ -69,7 +71,7 @@ func (m *mockBankKeeper) SendCoinsFromAccountToModule(
 
 // SendCoinsFromModuleToModule sends coins from one module balance to another.
 // Error on insufficient module balance.
-func (m *mockBankKeeper) SendCoinsFromModuleToModule(_ sdk.Context, fromModule, toModule string, coins sdk.Coins) error {
+func (m *mockBankKeeper) SendCoinsFromModuleToModule(_ context.Context, fromModule, toModule string, coins sdk.Coins) error {
 	fromAddr := authtypes.NewModuleAddress(fromModule)
 	fromBalance, ok := m.spendableCoins[fromAddr.String()]
 	if !ok {
@@ -89,7 +91,7 @@ func (m *mockBankKeeper) SendCoinsFromModuleToModule(_ sdk.Context, fromModule, 
 }
 
 // SpendableCoins returns an account's spendable coins, without validating the address
-func (m *mockBankKeeper) SpendableCoins(_ sdk.Context, addr sdk.AccAddress) sdk.Coins {
+func (m *mockBankKeeper) SpendableCoins(_ context.Context, addr sdk.AccAddress) sdk.Coins {
 	spendable, ok := m.spendableCoins[addr.String()]
 	if !ok {
 		return sdk.NewCoins()
@@ -172,7 +174,7 @@ func (m *mockLeverageKeeper) setCollateral(addr sdk.AccAddress, denom string, am
 		// overwrite existing collateral of this denom
 		for i := range collateral {
 			if collateral[i].Denom == denom {
-				collateral[i].Amount = sdk.NewInt(amount)
+				collateral[i].Amount = sdkmath.NewInt(amount)
 			}
 		}
 	}
@@ -194,12 +196,12 @@ func (m *mockLeverageKeeper) GetTokenSettings(_ sdk.Context, denom string) (leve
 }
 
 // TotalTokenValue implements the expected leverage keeper, with UMEE, ATOM, and DAI registered.
-func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ leveragetypes.PriceMode) (sdk.Dec, error) {
+func (m *mockLeverageKeeper) TotalTokenValue(_ sdk.Context, coins sdk.Coins, _ leveragetypes.PriceMode) (sdkmath.LegacyDec, error) {
 	var (
-		total     = sdk.ZeroDec()
-		umeePrice = sdk.MustNewDecFromStr("4.21")
-		atomPrice = sdk.MustNewDecFromStr("39.38")
-		daiPrice  = sdk.MustNewDecFromStr("1.00")
+		total     = sdkmath.LegacyZeroDec()
+		umeePrice = sdkmath.LegacyMustNewDecFromStr("4.21")
+		atomPrice = sdkmath.LegacyMustNewDecFromStr("39.38")
+		daiPrice  = sdkmath.LegacyMustNewDecFromStr("1.00")
 	)
 
 	for _, coin := range coins {

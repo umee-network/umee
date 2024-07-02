@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/checkers"
@@ -77,7 +78,7 @@ func (s msgServer) Withdraw(
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	if isFromCollateral {
-		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdk.OneDec())
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdkmath.LegacyOneDec())
 		if err != nil {
 			return nil, err
 		}
@@ -139,7 +140,7 @@ func (s msgServer) MaxWithdraw(
 	}
 
 	// Use the minimum of the user's max withdraw based on borrows and the module's max withdraw based on liquidity
-	uToken.Amount = sdk.MinInt(uToken.Amount, uTokenTotalAvailable)
+	uToken.Amount = sdkmath.MinInt(uToken.Amount, uTokenTotalAvailable)
 
 	// Proceed to withdraw.
 	received, isFromCollateral, err := s.keeper.Withdraw(ctx, supplierAddr, uToken)
@@ -150,7 +151,7 @@ func (s msgServer) MaxWithdraw(
 	// Fail here if supplier ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
 	if isFromCollateral {
-		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdk.OneDec())
+		err = s.keeper.assertBorrowerHealth(ctx, supplierAddr, sdkmath.LegacyOneDec())
 		if err != nil {
 			return nil, err
 		}
@@ -288,7 +289,7 @@ func (s msgServer) Decollateralize(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdkmath.LegacyOneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +322,7 @@ func (s msgServer) Borrow(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdkmath.LegacyOneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +382,7 @@ func (s msgServer) MaxBorrow(
 	}
 
 	// Select the minimum between user_max_borrow and module_max_borrow
-	userMaxBorrow.Amount = sdk.MinInt(userMaxBorrow.Amount, moduleMaxBorrow)
+	userMaxBorrow.Amount = sdkmath.MinInt(userMaxBorrow.Amount, moduleMaxBorrow)
 
 	// Proceed to borrow
 	if err := s.keeper.Borrow(ctx, borrowerAddr, userMaxBorrow); err != nil {
@@ -390,7 +391,7 @@ func (s msgServer) MaxBorrow(
 
 	// Fail here if borrower ends up over their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the borrower's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdk.OneDec())
+	err = s.keeper.assertBorrowerHealth(ctx, borrowerAddr, sdkmath.LegacyOneDec())
 	if err != nil {
 		return nil, err
 	}
@@ -511,7 +512,7 @@ func (s msgServer) LeveragedLiquidate(
 
 	// Fail here if liquidator ends up over 80% their borrow limit under current or historic prices
 	// Tolerates missing collateral prices if the rest of the liquidator's collateral can cover all borrows
-	err = s.keeper.assertBorrowerHealth(ctx, liquidator, sdk.MustNewDecFromStr("0.8"))
+	err = s.keeper.assertBorrowerHealth(ctx, liquidator, sdkmath.LegacyMustNewDecFromStr("0.8"))
 	if err != nil {
 		return nil, err
 	}

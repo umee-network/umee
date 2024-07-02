@@ -13,7 +13,7 @@ var (
 
 	// ModuleCdc references the global x/leverage module codec. Note, Amino
 	// is required for ledger signing of messages, and Kepler signing.
-	ModuleCdc = codec.NewAminoCodec(amino)
+	ModuleCdc = codec.NewAminoCodec(amino) //nolint
 )
 
 func init() {

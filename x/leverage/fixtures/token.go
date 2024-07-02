@@ -1,7 +1,7 @@
 package fixtures
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
@@ -20,21 +20,21 @@ func Token(base, symbol string, exponent uint32) types.Token {
 		BaseDenom:              base,
 		SymbolDenom:            symbol,
 		Exponent:               exponent,
-		ReserveFactor:          sdk.MustNewDecFromStr("0.2"),
-		CollateralWeight:       sdk.MustNewDecFromStr("0.25"),
-		LiquidationThreshold:   sdk.MustNewDecFromStr("0.26"),
-		BaseBorrowRate:         sdk.MustNewDecFromStr("0.02"),
-		KinkBorrowRate:         sdk.MustNewDecFromStr("0.22"),
-		MaxBorrowRate:          sdk.MustNewDecFromStr("1.52"),
-		KinkUtilization:        sdk.MustNewDecFromStr("0.8"),
-		LiquidationIncentive:   sdk.MustNewDecFromStr("0.1"),
+		ReserveFactor:          sdkmath.LegacyMustNewDecFromStr("0.2"),
+		CollateralWeight:       sdkmath.LegacyMustNewDecFromStr("0.25"),
+		LiquidationThreshold:   sdkmath.LegacyMustNewDecFromStr("0.26"),
+		BaseBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.02"),
+		KinkBorrowRate:         sdkmath.LegacyMustNewDecFromStr("0.22"),
+		MaxBorrowRate:          sdkmath.LegacyMustNewDecFromStr("1.52"),
+		KinkUtilization:        sdkmath.LegacyMustNewDecFromStr("0.8"),
+		LiquidationIncentive:   sdkmath.LegacyMustNewDecFromStr("0.1"),
 		EnableMsgSupply:        true,
 		EnableMsgBorrow:        true,
 		Blacklist:              false,
-		MaxCollateralShare:     sdk.MustNewDecFromStr("1"),
-		MaxSupplyUtilization:   sdk.MustNewDecFromStr("0.9"),
-		MinCollateralLiquidity: sdk.MustNewDecFromStr("0"),
-		MaxSupply:              sdk.NewInt(100_000_000000),
+		MaxCollateralShare:     sdkmath.LegacyMustNewDecFromStr("1"),
+		MaxSupplyUtilization:   sdkmath.LegacyMustNewDecFromStr("0.9"),
+		MinCollateralLiquidity: sdkmath.LegacyMustNewDecFromStr("0"),
+		MaxSupply:              sdkmath.NewInt(100_000_000000),
 		HistoricMedians:        24,
 	}
 }

@@ -38,7 +38,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	}
 	if err != nil {
 		// oracle errors cause max withdraw to only be wallet uTokens
-		withdrawAmount := sdk.MinInt(walletUtokens, availableUTokens.Amount)
+		withdrawAmount := sdkmath.MinInt(walletUtokens, availableUTokens.Amount)
 		return sdk.NewCoin(uDenom, withdrawAmount), sdk.NewCoin(uDenom, withdrawAmount), nil
 	}
 
@@ -50,7 +50,7 @@ func (k *Keeper) userMaxWithdraw(ctx sdk.Context, addr sdk.AccAddress, denom str
 	// add wallet uTokens to the unused amount from collateral
 	maxWithdraw.Amount = maxWithdraw.Amount.Add(walletUtokens)
 	// reduce amount to withdraw if it exceeds available liquidity
-	maxWithdraw.Amount = sdk.MinInt(maxWithdraw.Amount, availableUTokens.Amount)
+	maxWithdraw.Amount = sdkmath.MinInt(maxWithdraw.Amount, availableUTokens.Amount)
 	return maxWithdraw, sdk.NewCoin(uDenom, walletUtokens), nil
 }
 
@@ -71,7 +71,7 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 	}
 	if err != nil {
 		// oracle errors cause max borrow to be zero
-		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
+		return sdk.NewCoin(denom, sdkmath.ZeroInt()), nil
 	}
 
 	maxBorrowValue := position.MaxBorrow(denom)
@@ -82,11 +82,11 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 	}
 	if err != nil {
 		// oracle errors cause max borrow to be zero
-		return sdk.NewCoin(denom, sdk.ZeroInt()), nil
+		return sdk.NewCoin(denom, sdkmath.ZeroInt()), nil
 	}
 
 	// also cap borrow amount at available liquidity
-	maxBorrow.Amount = sdk.MinInt(maxBorrow.Amount, availableTokens)
+	maxBorrow.Amount = sdkmath.MinInt(maxBorrow.Amount, availableTokens)
 
 	return maxBorrow, nil
 }
@@ -98,16 +98,16 @@ func (k *Keeper) userMaxBorrow(ctx sdk.Context, addr sdk.AccAddress, denom strin
 func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.Int, error) {
 	token, err := k.GetTokenSettings(ctx, coin.StripUTokenDenom(denom))
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	// if a token's max collateral share is zero, max collateral is zero
-	if token.MaxCollateralShare.LTE(sdk.ZeroDec()) {
-		return sdk.ZeroInt(), nil
+	if token.MaxCollateralShare.LTE(sdkmath.LegacyZeroDec()) {
+		return sdkmath.ZeroInt(), nil
 	}
 
 	// if a token's max collateral share is 100%, max collateral is its uToken supply
-	if token.MaxCollateralShare.GTE(sdk.OneDec()) {
+	if token.MaxCollateralShare.GTE(sdkmath.LegacyOneDec()) {
 		return k.GetUTokenSupply(ctx, denom).Amount, nil
 	}
 
@@ -122,22 +122,22 @@ func (k *Keeper) maxCollateralFromShare(ctx sdk.Context, denom string) (sdkmath.
 		types.PriceModeSpot,
 	)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	// determine the max USD value this uToken's collateral is allowed to have by MaxCollateralShare
-	maxValue := otherDenomsValue.Quo(sdk.OneDec().Sub(token.MaxCollateralShare)).Mul(token.MaxCollateralShare)
+	maxValue := otherDenomsValue.Quo(sdkmath.LegacyOneDec().Sub(token.MaxCollateralShare)).Mul(token.MaxCollateralShare)
 
 	// determine the amount of base tokens which would be required to reach maxValue,
 	// using the higher of spot or historic prices
 	udenom := coin.ToUTokenDenom(denom)
 	maxUTokens, err := k.UTokenWithValue(ctx, udenom, maxValue, types.PriceModeHigh)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	// return the computed maximum or the current uToken supply, whichever is smaller
-	return sdk.MinInt(k.GetUTokenSupply(ctx, denom).Amount, maxUTokens.Amount), nil
+	return sdkmath.MinInt(k.GetUTokenSupply(ctx, denom).Amount, maxUTokens.Amount), nil
 }
 
 // ModuleAvailableLiquidity calculates the maximum available liquidity of a Token denom from the module can be used,
@@ -164,11 +164,11 @@ func (k Keeper) ModuleAvailableLiquidity(ctx sdk.Context, denom string) (sdkmath
 	//
 	// 	min_collateral_liquidity = (module_liquidity - module_available_liquidity) / module_collateral
 	// 	module_available_liquidity = module_liquidity - min_collateral_liquidity * module_collateral
-	moduleAvailableLiquidity := sdk.NewDecFromInt(liquidity).Sub(
+	moduleAvailableLiquidity := sdkmath.LegacyNewDecFromInt(liquidity).Sub(
 		minCollateralLiquidity.MulInt(totalTokenCollateral.AmountOf(denom)),
 	)
 
-	return sdk.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdk.ZeroInt()), nil
+	return sdkmath.MaxInt(moduleAvailableLiquidity.TruncateInt(), sdkmath.ZeroInt()), nil
 }
 
 // ModuleMaxWithdraw calculates the maximum available amount of uToken to withdraw from the module given the amount of
@@ -180,7 +180,7 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 
 	moduleAvailableLiquidity, err := k.ModuleAvailableLiquidity(ctx, denom)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	if spendableUTokens.Amount.GTE(moduleAvailableLiquidity) {
@@ -191,7 +191,7 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	totalCollateral := k.GetTotalCollateral(ctx, spendableUTokens.Denom)
 	totalTokenCollateral, err := k.ToTokens(ctx, sdk.NewCoins(totalCollateral))
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 
 	// If after subtracting all the user_spendable_utokens from the module_available_liquidity,
@@ -204,7 +204,7 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	liquidity := k.AvailableLiquidity(ctx, denom)
 	token, err := k.GetTokenSettings(ctx, denom)
 	if err != nil {
-		return sdk.ZeroInt(), err
+		return sdkmath.ZeroInt(), err
 	}
 	minCollateralLiquidity := token.MinCollateralLiquidity
 
@@ -216,11 +216,11 @@ func (k Keeper) ModuleMaxWithdraw(ctx sdk.Context, spendableUTokens sdk.Coin) (s
 	//
 	// module_available_collateral = (module_liquidity - user_spendable_utokens - min_collateral_liquidity
 	//									* module_collateral) / (1 - min_collateral_liquidity)
-	moduleAvailableCollateral := (sdk.NewDecFromInt(liquidity.Sub(spendableUTokens.Amount)).Sub(
+	moduleAvailableCollateral := (sdkmath.LegacyNewDecFromInt(liquidity.Sub(spendableUTokens.Amount)).Sub(
 		minCollateralLiquidity.MulInt(
 			totalTokenCollateral.AmountOf(denom),
 		),
-	)).Quo(sdk.NewDec(1).Sub(minCollateralLiquidity))
+	)).Quo(sdkmath.LegacyNewDec(1).Sub(minCollateralLiquidity))
 
 	// Adding (user_spendable_utokens + module_available_collateral) we obtain the max uTokens the account can
 	// withdraw from the module.

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"gotest.tools/v3/assert"
-
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/util/coin"
 	"github.com/umee-network/umee/v6/x/leverage/fixtures"
@@ -15,14 +15,14 @@ import (
 )
 
 var (
-	noMinimumBorrowFactor   = sdk.MustNewDecFromStr("0.01")
-	highMinimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
+	noMinimumBorrowFactor   = sdkmath.LegacyMustNewDecFromStr("0.01")
+	highMinimumBorrowFactor = sdkmath.LegacyMustNewDecFromStr("0.5")
 )
 
 func testToken(denom, cw, lt string) types.Token {
 	token := fixtures.Token(denom, denom, 6)
-	token.CollateralWeight = sdk.MustNewDecFromStr(cw)
-	token.LiquidationThreshold = sdk.MustNewDecFromStr(lt)
+	token.CollateralWeight = sdkmath.LegacyMustNewDecFromStr(cw)
+	token.LiquidationThreshold = sdkmath.LegacyMustNewDecFromStr(lt)
 	return token
 }
 
@@ -30,8 +30,8 @@ func testPair(collateral, borrow, cw, lt string) types.SpecialAssetPair {
 	return types.SpecialAssetPair{
 		Borrow:               borrow,
 		Collateral:           collateral,
-		CollateralWeight:     sdk.MustNewDecFromStr(cw),
-		LiquidationThreshold: sdk.MustNewDecFromStr(lt),
+		CollateralWeight:     sdkmath.LegacyMustNewDecFromStr(cw),
+		LiquidationThreshold: sdkmath.LegacyMustNewDecFromStr(lt),
 	}
 }
 
@@ -359,7 +359,7 @@ func TestBorrowLimit(t *testing.T) {
 		)
 		assert.NilError(t, err, tc.msg+" borrow limit\n\n"+borrowPosition.String())
 		assert.Equal(t,
-			sdk.MustNewDecFromStr(tc.borrowLimit).String(),
+			sdkmath.LegacyMustNewDecFromStr(tc.borrowLimit).String(),
 			borrowPosition.Limit().String(),
 			tc.msg+" borrow limit\n\n"+borrowPosition.String(),
 		)
@@ -373,7 +373,7 @@ func TestBorrowLimit(t *testing.T) {
 		)
 		assert.NilError(t, err, tc.msg+" liquidation threshold\n\n"+liquidationPosition.String())
 		assert.Equal(t,
-			sdk.MustNewDecFromStr(tc.liquidationthreshold).String(),
+			sdkmath.LegacyMustNewDecFromStr(tc.liquidationthreshold).String(),
 			liquidationPosition.Limit().String(),
 			tc.msg+" liquidation threshold\n\n"+liquidationPosition.String(),
 		)
@@ -584,7 +584,7 @@ func TestMaxBorrowNoSpecialPairs(t *testing.T) {
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
 		maxborrow := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
 		assert.Equal(t,
-			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
+			sdkmath.LegacyMustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
 			tc.msg+" max borrow",
 		)
@@ -653,12 +653,12 @@ func TestMaxBorrowWithSpecialPairs(t *testing.T) {
 			tc.collateral,
 			tc.borrow,
 			false,
-			sdk.MustNewDecFromStr(tc.minimumBorrowFactor),
+			sdkmath.LegacyMustNewDecFromStr(tc.minimumBorrowFactor),
 		)
 		assert.NilError(t, err, tc.msg+" max borrow\n\n"+borrowPosition.String())
 		maxborrow := borrowPosition.MaxBorrow(tc.maxBorrowDenom)
 		assert.Equal(t,
-			sdk.MustNewDecFromStr(tc.maxBorrow).String(),
+			sdkmath.LegacyMustNewDecFromStr(tc.maxBorrow).String(),
 			maxborrow.String(),
 			tc.msg+" max borrow",
 		)
@@ -669,7 +669,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 	type testCase struct {
 		collateral          sdk.DecCoins
 		borrow              sdk.DecCoins
-		minimumBorrowFactor sdk.Dec
+		minimumBorrowFactor sdkmath.LegacyDec
 		maxWithdrawDenom    string
 		maxWithdraw         string
 		msg                 string
@@ -807,7 +807,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 		maxWithdraw, full := borrowPosition.MaxWithdraw(tc.maxWithdrawDenom)
 		assert.Equal(t,
 			// Ensure max withdraw is expected value
-			sdk.MustNewDecFromStr(tc.maxWithdraw).String(),
+			sdkmath.LegacyMustNewDecFromStr(tc.maxWithdraw).String(),
 			maxWithdraw.String(),
 			tc.msg+" max withdraw",
 		)
@@ -823,7 +823,7 @@ func TestMaxWithdrawNoSpecialPairs(t *testing.T) {
 				orderedTokens,
 				orderedPairs,
 				tc.collateral.Sub(sdk.NewDecCoins(sdk.NewDecCoinFromDec(
-					tc.maxWithdrawDenom, sdk.MustNewDecFromStr(tc.maxWithdraw),
+					tc.maxWithdrawDenom, sdkmath.LegacyMustNewDecFromStr(tc.maxWithdraw),
 				))),
 				tc.borrow,
 				false,
@@ -840,7 +840,7 @@ func TestArbitraryCases(t *testing.T) {
 	type testCase struct {
 		collateral          sdk.DecCoins
 		borrow              sdk.DecCoins
-		minimumBorrowFactor sdk.Dec
+		minimumBorrowFactor sdkmath.LegacyDec
 		queryDenom          string
 		msg                 string
 	}
@@ -849,9 +849,9 @@ func TestArbitraryCases(t *testing.T) {
 	arbitraryDenoms := []string{"AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ"}
 	arbitraryCollateral := []string{"0", "30", "100"}
 	arbitraryBorrow := []string{"0", "5", "10"}
-	arbitraryMinimumFactor := []sdk.Dec{
-		sdk.MustNewDecFromStr("0.1"), sdk.MustNewDecFromStr("0.3"),
-		sdk.MustNewDecFromStr("0.5"), sdk.MustNewDecFromStr("0.7"),
+	arbitraryMinimumFactor := []sdkmath.LegacyDec{
+		sdkmath.LegacyMustNewDecFromStr("0.1"), sdkmath.LegacyMustNewDecFromStr("0.3"),
+		sdkmath.LegacyMustNewDecFromStr("0.5"), sdkmath.LegacyMustNewDecFromStr("0.7"),
 	}
 
 	testCases := []testCase{}
@@ -932,7 +932,8 @@ func TestArbitraryCases(t *testing.T) {
 			)
 		}
 		if maxWithdraw.IsPositive() {
-			dust := sdk.SmallestDec().Mul(sdk.MustNewDecFromStr("10"))
+			sdkmath.LegacySmallestDec()
+			dust := sdkmath.LegacySmallestDec().Mul(sdkmath.LegacyMustNewDecFromStr("10"))
 			// For partial maxwithdraw amounts which are not exact, reduce by a dust amount to prevent case failure.
 			// This is accurate because is mimics userMaxWithdraw rounding down from uTokenWithValue in practice.
 			if !full && !strings.HasSuffix(maxWithdraw.String(), "000") {
@@ -972,7 +973,7 @@ func TestArbitraryCases(t *testing.T) {
 		maxBorrow := initialPosition.MaxBorrow(tc.queryDenom)
 
 		if maxBorrow.IsPositive() {
-			dust := sdk.SmallestDec().Mul(sdk.MustNewDecFromStr("10"))
+			dust := sdkmath.LegacySmallestDec().Mul(sdkmath.LegacyMustNewDecFromStr("10"))
 			// Reduce by a dust amount to prevent case failure due to rounding.
 			// This is accurate because is mimics userMaxBorrow rounding down from tokenWithValue in practice.
 			if !strings.HasSuffix(maxBorrow.String(), "000") {
@@ -1000,7 +1001,7 @@ func TestArbitraryCases(t *testing.T) {
 			// (within an acceptable dust amount)
 			assert.Equal(t,
 				true,
-				bv.LTE(lim) && lim.Sub(bv).LTE(dust.Mul(sdk.MustNewDecFromStr("100"))),
+				bv.LTE(lim) && lim.Sub(bv).LTE(dust.Mul(sdkmath.LegacyMustNewDecFromStr("100"))),
 				fmt.Sprintf("%s limit %s: borrowed %s", tc.msg, lim, bv),
 			)
 		}

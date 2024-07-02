@@ -3,27 +3,28 @@ package grpc
 import (
 	"fmt"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
+
 	"github.com/umee-network/umee/v6/util/decmath"
 )
 
 type PriceStore struct {
-	historicStamps   map[string][]sdk.Dec
-	medians          map[string]sdk.Dec
-	medianDeviations map[string]sdk.Dec
+	historicStamps   map[string][]sdkmath.LegacyDec
+	medians          map[string]sdkmath.LegacyDec
+	medianDeviations map[string]sdkmath.LegacyDec
 }
 
 func NewPriceStore() *PriceStore {
 	return &PriceStore{
-		historicStamps:   map[string][]sdk.Dec{},
-		medians:          map[string]sdk.Dec{},
-		medianDeviations: map[string]sdk.Dec{},
+		historicStamps:   map[string][]sdkmath.LegacyDec{},
+		medians:          map[string]sdkmath.LegacyDec{},
+		medianDeviations: map[string]sdkmath.LegacyDec{},
 	}
 }
 
-func (ps *PriceStore) addStamp(denom string, stamp sdk.Dec) {
+func (ps *PriceStore) addStamp(denom string, stamp sdkmath.LegacyDec) {
 	if _, ok := ps.historicStamps[denom]; !ok {
-		ps.historicStamps[denom] = []sdk.Dec{}
+		ps.historicStamps[denom] = []sdkmath.LegacyDec{}
 	}
 	ps.historicStamps[denom] = append(ps.historicStamps[denom], stamp)
 }

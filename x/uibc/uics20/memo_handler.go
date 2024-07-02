@@ -6,10 +6,11 @@ import (
 	"strings"
 
 	sdkerrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
@@ -31,7 +32,7 @@ type MemoHandler struct {
 
 	executeEnabled bool
 	isGMP          bool
-	msgs           []sdk.Msg
+	msgs           []sdk.LegacyMsg
 	memo           string
 	received       sdk.Coin
 
@@ -48,7 +49,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	var err error
 	logger := recvPacketLogger(ctx)
 	mh.memo = ftData.Memo
-	amount, ok := sdk.NewIntFromString(ftData.Amount)
+	amount, ok := sdkmath.NewIntFromString(ftData.Amount)
 	if !ok { // must not happen
 		return nil, fmt.Errorf("can't parse transfer amount: %s", ftData.Amount)
 	}
@@ -88,7 +89,10 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 		}
 	}
 
-	mh.msgs, err = memo.GetMsgs()
+	msgs, err := memo.GetMsgs()
+	for _, msg := range msgs {
+		mh.msgs = append(mh.msgs, msg.(sdk.LegacyMsg))
+	}
 	if err != nil {
 		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
 		events = append(events, e)

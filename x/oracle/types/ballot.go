@@ -4,19 +4,20 @@ import (
 	"bytes"
 	"sort"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 // VoteForTally is a convenience wrapper to reduce redundant lookup cost.
 type VoteForTally struct {
 	Denom        string
-	ExchangeRate sdk.Dec
+	ExchangeRate sdkmath.LegacyDec
 	Voter        sdk.ValAddress
 	Power        int64
 }
 
 // NewVoteForTally returns a new VoteForTally instance.
-func NewVoteForTally(rate sdk.Dec, denom string, voter sdk.ValAddress, power int64) VoteForTally {
+func NewVoteForTally(rate sdkmath.LegacyDec, denom string, voter sdk.ValAddress, power int64) VoteForTally {
 	return VoteForTally{
 		ExchangeRate: rate,
 		Denom:        denom,
@@ -29,8 +30,8 @@ func NewVoteForTally(rate sdk.Dec, denom string, voter sdk.ValAddress, power int
 type ExchangeRateBallot []VoteForTally
 
 // ToMap return organized exchange rate map by validator.
-func (pb ExchangeRateBallot) ToMap() map[string]sdk.Dec {
-	exchangeRateMap := make(map[string]sdk.Dec)
+func (pb ExchangeRateBallot) ToMap() map[string]sdkmath.LegacyDec {
+	exchangeRateMap := make(map[string]sdkmath.LegacyDec)
 	for _, vote := range pb {
 		if vote.ExchangeRate.IsPositive() {
 			exchangeRateMap[vote.Voter.String()] = vote.ExchangeRate
@@ -52,9 +53,9 @@ func (pb ExchangeRateBallot) Power() int64 {
 
 // WeightedMedian returns the median weighted by the power of the ExchangeRateVote.
 // CONTRACT: The ballot must be sorted.
-func (pb ExchangeRateBallot) WeightedMedian() (sdk.Dec, error) {
+func (pb ExchangeRateBallot) WeightedMedian() (sdkmath.LegacyDec, error) {
 	if !sort.IsSorted(pb) {
-		return sdk.ZeroDec(), ErrBallotNotSorted
+		return sdkmath.LegacyZeroDec(), ErrBallotNotSorted
 	}
 
 	if pb.Len() > 0 {
@@ -68,21 +69,21 @@ func (pb ExchangeRateBallot) WeightedMedian() (sdk.Dec, error) {
 		}
 	}
 
-	return sdk.ZeroDec(), nil
+	return sdkmath.LegacyZeroDec(), nil
 }
 
 // StandardDeviation returns the standard deviation by the power of the ExchangeRateVote.
-func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
+func (pb ExchangeRateBallot) StandardDeviation() (sdkmath.LegacyDec, error) {
 	if len(pb) == 0 {
-		return sdk.ZeroDec(), nil
+		return sdkmath.LegacyZeroDec(), nil
 	}
 
 	median, err := pb.WeightedMedian()
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 
-	sum := sdk.ZeroDec()
+	sum := sdkmath.LegacyZeroDec()
 	ballotLength := int64(len(pb))
 	for _, v := range pb {
 		func() {
@@ -100,7 +101,7 @@ func (pb ExchangeRateBallot) StandardDeviation() (sdk.Dec, error) {
 
 	standardDeviation, err := variance.ApproxSqrt()
 	if err != nil {
-		return sdk.ZeroDec(), err
+		return sdkmath.LegacyZeroDec(), err
 	}
 
 	return standardDeviation, nil

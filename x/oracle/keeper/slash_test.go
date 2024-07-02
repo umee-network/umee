@@ -1,8 +1,8 @@
 package keeper_test
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 )
 
@@ -10,17 +10,24 @@ func (s *IntegrationTestSuite) TestSlashAndResetMissCounters() {
 	// initial setup
 	addr, addr2 := valAddr, valAddr2
 	amt := sdk.TokensFromConsensusPower(100, sdk.DefaultPowerReduction)
+	getValidator := func(addr sdk.ValAddress) stakingtypes.ValidatorI {
+		if val, err := s.app.StakingKeeper.Validator(s.ctx, addr); err == nil {
+			return val
+		}
+		return nil
+	}
 
-	s.Require().Equal(amt, s.app.StakingKeeper.Validator(s.ctx, addr).GetBondedTokens())
-	s.Require().Equal(amt, s.app.StakingKeeper.Validator(s.ctx, addr2).GetBondedTokens())
+	s.Require().Equal(amt, getValidator(addr).GetBondedTokens())
+	s.Require().Equal(amt, getValidator(addr2).GetBondedTokens())
 
-	votePeriodsPerWindow := sdk.NewDec(int64(s.app.OracleKeeper.SlashWindow(s.ctx))).QuoInt64(int64(s.app.OracleKeeper.VotePeriod(s.ctx))).TruncateInt64()
+	votePeriodsPerWindow := sdkmath.LegacyNewDec(int64(s.app.OracleKeeper.SlashWindow(s.ctx))).QuoInt64(int64(s.app.OracleKeeper.VotePeriod(s.ctx))).TruncateInt64()
 	slashFraction := s.app.OracleKeeper.SlashFraction(s.ctx)
 	minValidVotes := s.app.OracleKeeper.MinValidPerWindow(s.ctx).MulInt64(votePeriodsPerWindow).TruncateInt64()
 	// Case 1, no slash
 	s.app.OracleKeeper.SetMissCounter(s.ctx, valAddr, uint64(votePeriodsPerWindow-minValidVotes))
 	s.app.OracleKeeper.SlashAndResetMissCounters(s.ctx)
-	staking.EndBlocker(s.ctx, s.app.StakingKeeper)
+
+	s.app.StakingKeeper.EndBlocker(s.ctx)
 
 	validator, _ := s.app.StakingKeeper.GetValidator(s.ctx, valAddr)
 	s.Require().Equal(amt, validator.GetBondedTokens())

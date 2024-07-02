@@ -3,7 +3,9 @@ package uics20
 import (
 	"testing"
 
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -116,7 +118,7 @@ func TestMsgMarshalling(t *testing.T) {
 			Authority: "auth1", Description: "d1",
 			IbcStatus: uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED,
 		},
-		ltypes.NewMsgCollateralize(accs.Alice, sdk.NewCoin("ATOM", sdk.NewInt(1020))),
+		ltypes.NewMsgCollateralize(accs.Alice, sdk.NewCoin("ATOM", sdkmath.NewInt(1020))),
 	}
 	anyMsg, err := tx.SetMsgs(msgs)
 	assert.NoError(err)

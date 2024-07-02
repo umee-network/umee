@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"math/big"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/types"
@@ -25,7 +26,7 @@ func (m *MockStakingKeeper) GetValidator(_ sdk.Context, addr sdk.ValAddress) (ty
 	)
 
 	for _, v := range m.validators {
-		if v.GetOperator().Equals(addr) {
+		if v.GetOperator() == addr.String() {
 			found = true
 			validator = v
 			break
@@ -58,7 +59,7 @@ func (m *MockStakingKeeper) SetParams(_ sdk.Context, params types.Params) {
 // SetValidator implements StakingKeeper
 func (m *MockStakingKeeper) SetValidator(_ sdk.Context, validator types.Validator) {
 	for index, v := range m.validators {
-		if v.GetOperator().Equals(validator.GetOperator()) {
+		if v.GetOperator() == validator.GetOperator() {
 			m.validators[index] = validator
 			break
 		}
@@ -75,22 +76,24 @@ func GenerateRandomTestCase() ([]sdk.ValAddress, MockStakingKeeper) {
 	for i := 0; i < numInputs; i++ {
 		pubKey := secp256k1.GenPrivKey().PubKey()
 		valValAddr := sdk.ValAddress(pubKey.Address())
-		mockValidator, _ := types.NewValidator(valValAddr, pubKey, types.Description{})
+		mockValidator, _ := types.NewValidator(valValAddr.String(), pubKey, types.Description{})
 		mockValidators = append(mockValidators, mockValidator)
 	}
 
 	// adding 0.01 to first validator
 	val := mockValidators[0]
-	val.Commission.Rate = sdk.MustNewDecFromStr("0.01")
+	val.Commission.Rate = sdkmath.LegacyMustNewDecFromStr("0.01")
 	mockValidators[0] = val
 
 	// adding more then minimumCommissionRate to validator 2
 	val = mockValidators[1]
-	val.Commission.Rate = types.DefaultMinCommissionRate.Add(sdk.MustNewDecFromStr("1"))
+	val.Commission.Rate = types.DefaultMinCommissionRate.Add(sdkmath.LegacyMustNewDecFromStr("1"))
 	mockValidators[1] = val
 
-	valAddrs = []sdk.ValAddress{mockValidators[0].GetOperator(), mockValidators[1].GetOperator()}
-
+	for i := 0; i < 2; i++ {
+		valAddr, _ := sdk.ValAddressFromBech32(mockValidators[i].GetOperator())
+		valAddr = append(valAddr, valAddr...)
+	}
 	stakingKeeper := NewMockStakingKeeper(mockValidators)
 
 	return valAddrs, stakingKeeper

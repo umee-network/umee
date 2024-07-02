@@ -1,6 +1,7 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -10,7 +11,7 @@ import (
 // minimum borrow factor is the minimum collateral weight and minimum liquidation threshold
 // allowed when a borrowed token is limiting the efficiency of a pair of assets.
 // TODO: parameterize this in the leverage module
-var minimumBorrowFactor = sdk.MustNewDecFromStr("0.5")
+var minimumBorrowFactor = sdkmath.LegacyMustNewDecFromStr("0.5")
 
 // GetAccountPosition creates and sorts an accountPosition for an address, using information
 // from the keeper's special asset pairs and token collateral weights as well as oracle prices.
@@ -28,7 +29,7 @@ func (k Keeper) GetAccountPosition(ctx sdk.Context, addr sdk.AccAddress, isForLi
 	borrowedValue := sdk.NewDecCoins()
 
 	var (
-		v   sdk.Dec
+		v   sdkmath.LegacyDec
 		err error
 	)
 

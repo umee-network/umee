@@ -1,6 +1,8 @@
 package keeper
 
 import (
+	"context"
+
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
@@ -18,7 +20,7 @@ func (o Oracle) AllMedianPrices(_ sdk.Context) otypes.Prices {
 	return o.prices
 }
 
-func (o Oracle) SetExchangeRate(_ sdk.Context, _ string, _ sdk.Dec) {
+func (o Oracle) SetExchangeRate(_ sdk.Context, _ string, _ sdkmath.LegacyDec) {
 }
 
 func NewOracleMock() Oracle {
@@ -55,7 +57,7 @@ func (l Leverage) WithdrawToModule(_ sdk.Context, _ string, coin sdk.Coin) (sdk.
 
 func (l Leverage) ModuleMaxWithdraw(_ sdk.Context, coin sdk.Coin) (sdkmath.Int, error) {
 	if coin.Denom == mocks.ISTBaseDenom {
-		return sdk.MustNewDecFromStr("0.5").MulInt(coin.Amount).TruncateInt(), nil
+		return sdkmath.LegacyMustNewDecFromStr("0.5").MulInt(coin.Amount).TruncateInt(), nil
 	}
 	return coin.Amount, nil
 }
@@ -88,19 +90,19 @@ func NewBankMock() Bank {
 	return Bank{}
 }
 
-func (b Bank) MintCoins(_ sdk.Context, _ string, _ sdk.Coins) error {
+func (b Bank) MintCoins(_ context.Context, _ string, _ sdk.Coins) error {
 	return nil
 }
 
-func (b Bank) BurnCoins(_ sdk.Context, _ string, _ sdk.Coins) error {
+func (b Bank) BurnCoins(_ context.Context, _ string, _ sdk.Coins) error {
 	return nil
 }
 
-func (b Bank) SendCoinsFromModuleToAccount(_ sdk.Context, _ string, _ sdk.AccAddress, _ sdk.Coins) error {
+func (b Bank) SendCoinsFromModuleToAccount(_ context.Context, _ string, _ sdk.AccAddress, _ sdk.Coins) error {
 	return nil
 }
 
-func (b Bank) SendCoinsFromAccountToModule(_ sdk.Context, _ sdk.AccAddress, _ string, _ sdk.Coins) error {
+func (b Bank) SendCoinsFromAccountToModule(_ context.Context, _ sdk.AccAddress, _ string, _ sdk.Coins) error {
 	return nil
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/umee-network/umee/v6/util/sdkutil"
@@ -46,7 +47,7 @@ func (v AggregateExchangeRateVote) String() string {
 }
 
 // NewExchangeRateTuple creates a ExchangeRateTuple instance
-func NewExchangeRateTuple(denom string, exchangeRate sdk.Dec) ExchangeRateTuple {
+func NewExchangeRateTuple(denom string, exchangeRate sdkmath.LegacyDec) ExchangeRateTuple {
 	return ExchangeRateTuple{
 		denom,
 		exchangeRate,
@@ -86,7 +87,7 @@ func ParseExchangeRateTuples(tuplesStr string) (ExchangeRateTuples, error) {
 			return nil, fmt.Errorf("invalid exchange rate %s", tupleStr)
 		}
 
-		decCoin, err := sdk.NewDecFromStr(denomAmountStr[1])
+		decCoin, err := sdkmath.LegacyNewDecFromStr(denomAmountStr[1])
 		if err != nil {
 			return nil, err
 		}

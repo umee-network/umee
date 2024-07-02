@@ -14,7 +14,7 @@ var (
 	// ModuleCdc references the global x/metoken module codec. Note, the codec
 	// should ONLY be used in certain instances of tests and for JSON encoding as
 	// Amino is still used for that purpose.
-	ModuleCdc = codec.NewAminoCodec(amino)
+	ModuleCdc = codec.NewAminoCodec(amino) //nolint
 )
 
 func init() {

@@ -20,7 +20,7 @@ message GenesisState {
   // outflow_sum defines the total outflow sum of ibc-transfer in USD.
   string outflow_sum = 3 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
   // quota_expires defines quota expire time (as unix timestamp) for ibc-transfer denom.
@@ -38,7 +38,7 @@ message GenesisState {
   // inflow_sum defines tracks total sum of IBC inflow transfers (in USD) during quota period.
   string inflow_sum = 6 [
     (cosmos_proto.scalar)  = "cosmos.Dec",
-    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Dec",
+    (gogoproto.customtype) = "cosmossdk.io/math.LegacyDec",
     (gogoproto.nullable)   = false
   ];
 }

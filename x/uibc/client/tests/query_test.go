@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	itestsuite "github.com/umee-network/umee/v6/tests/cli"
 	"github.com/umee-network/umee/v6/x/uibc"
@@ -41,7 +41,7 @@ func (s *IntegrationTests) TestGetQuota(_ *testing.T) {
 			},
 			Response: &uibc.QueryOutflowsResponse{},
 			ExpectedResponse: &uibc.QueryOutflowsResponse{
-				Amount: sdk.NewDec(0),
+				Amount: sdkmath.LegacyNewDec(0),
 			},
 			ErrMsg: "",
 		},
@@ -54,7 +54,7 @@ func (s *IntegrationTests) TestGetQuota(_ *testing.T) {
 			},
 			Response: &uibc.QueryOutflowsResponse{},
 			ExpectedResponse: &uibc.QueryOutflowsResponse{
-				Amount: sdk.NewDec(0),
+				Amount: sdkmath.LegacyNewDec(0),
 			},
 			ErrMsg: "",
 		},

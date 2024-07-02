@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 	"github.com/spf13/cobra"
 )
 

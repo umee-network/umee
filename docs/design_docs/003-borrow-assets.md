@@ -101,7 +101,7 @@ Using the `sdk.Coins` built-in type, which combines multiple {Denom,Amount} pair
 collateralSettingPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = 0x01
 
 // and the amount of collateral deposited for each uToken:
-collateralAmountPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdk.Int
+collateralAmountPrefix | lengthPrefixed(borrowerAddress) | tokenDenom = sdkmath.Int
 
 // max token collateral utilization settings
 maxCollateralUtilizationPrefix | token = bigEndian(uint32)

@@ -63,7 +63,7 @@ Function inflationRate(ctx , minter, mintParams, bondedRatio):
     TOTAL_TOKENS_SUPPLY =  // TOTAL SUPPLY OF MINTING DENOM 
     If TOTAL_TOKENS_SUPPLY.GTE(MAX_SUPPLY) :
         // supply has already reached the maximum amount, so inflation should be zero
-        Return sdk.ZeroDec()
+        Return sdkmath.LegacyZeroDec()
 
     INFLATION_CYCLE_END_TIME = // CURRENT INFLATION CYCLE END TIME FROM UGOV STORE 
 

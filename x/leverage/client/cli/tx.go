@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -350,7 +351,7 @@ $ umeed tx leverage lev-liquidate %s uumee uumee 123.4 --from mykey`,
 			}
 
 			var repayDenom, rewardDenom string
-			maxRepay := sdk.ZeroDec()
+			maxRepay := sdkmath.LegacyZeroDec()
 			if len(args) > 1 {
 				repayDenom = args[1]
 			}
@@ -360,7 +361,7 @@ $ umeed tx leverage lev-liquidate %s uumee uumee 123.4 --from mykey`,
 			}
 
 			if len(args) > 3 {
-				maxRepay = sdk.MustNewDecFromStr(args[3])
+				maxRepay = sdkmath.LegacyMustNewDecFromStr(args[3])
 			}
 
 			msg := types.NewMsgLeveragedLiquidate(clientCtx.GetFromAddress(), borrowerAddr, repayDenom, rewardDenom, maxRepay)

@@ -6,7 +6,6 @@ import (
 	"gotest.tools/v3/assert"
 
 	sdkmath "cosmossdk.io/math"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func TestIndex_Validate(t *testing.T) {
@@ -15,16 +14,16 @@ func TestIndex_Validate(t *testing.T) {
 	invalidMaxSupply.MaxSupply = sdkmath.NewInt(-1)
 
 	invalidFee := validIndex()
-	invalidFee.Fee = NewFee(sdk.MustNewDecFromStr("-1.0"), sdk.Dec{}, sdk.Dec{})
+	invalidFee.Fee = NewFee(sdkmath.LegacyMustNewDecFromStr("-1.0"), sdkmath.LegacyDec{}, sdkmath.LegacyDec{})
 
 	invalidDenomAcceptedAsset := validIndex()
 	invalidDenomAcceptedAsset.AcceptedAssets = []AcceptedAsset{
-		NewAcceptedAsset("????", sdk.MustNewDecFromStr("-0.2"), sdk.MustNewDecFromStr("1.0")),
+		NewAcceptedAsset("????", sdkmath.LegacyMustNewDecFromStr("-0.2"), sdkmath.LegacyMustNewDecFromStr("1.0")),
 	}
 
 	invalidAcceptedAsset := validIndex()
 	invalidAcceptedAsset.AcceptedAssets = []AcceptedAsset{
-		NewAcceptedAsset("USDT", sdk.MustNewDecFromStr("-0.2"), sdk.MustNewDecFromStr("1.0")),
+		NewAcceptedAsset("USDT", sdkmath.LegacyMustNewDecFromStr("-0.2"), sdkmath.LegacyMustNewDecFromStr("1.0")),
 	}
 
 	invalidTargetAllocation := validIndex()
@@ -35,7 +34,7 @@ func TestIndex_Validate(t *testing.T) {
 
 	duplicatedAcceptedAsset := validIndex()
 	duplicate := validAcceptedAsset("USDT")
-	duplicate.TargetAllocation = sdk.MustNewDecFromStr("0.5")
+	duplicate.TargetAllocation = sdkmath.LegacyMustNewDecFromStr("0.5")
 	duplicatedAcceptedAsset.AcceptedAssets = []AcceptedAsset{
 		duplicate,
 		duplicate,
@@ -111,35 +110,35 @@ func TestIndex_Update(t *testing.T) {
 
 	assert.Check(t, index.HasAcceptedAsset(newAsset))
 
-	newAcceptedAsset.ReservePortion = sdk.MustNewDecFromStr("0.5")
+	newAcceptedAsset.ReservePortion = sdkmath.LegacyMustNewDecFromStr("0.5")
 	index.SetAcceptedAsset(newAcceptedAsset)
 
 	asset, i := index.AcceptedAsset(newAcceptedAsset.Denom)
 	assert.Check(t, i >= 0)
-	assert.Check(t, sdk.MustNewDecFromStr("0.5").Equal(asset.ReservePortion))
+	assert.Check(t, sdkmath.LegacyMustNewDecFromStr("0.5").Equal(asset.ReservePortion))
 }
 
 func TestFee_Validate(t *testing.T) {
 	invalidMinFee := validFee()
-	invalidMinFee.MinFee = sdk.MustNewDecFromStr("1.01")
+	invalidMinFee.MinFee = sdkmath.LegacyMustNewDecFromStr("1.01")
 
 	negativeBalancedFee := validFee()
-	negativeBalancedFee.BalancedFee = sdk.MustNewDecFromStr("-1.01")
+	negativeBalancedFee.BalancedFee = sdkmath.LegacyMustNewDecFromStr("-1.01")
 
 	greaterOneBalancedFee := validFee()
-	greaterOneBalancedFee.BalancedFee = sdk.MustNewDecFromStr("1.01")
+	greaterOneBalancedFee.BalancedFee = sdkmath.LegacyMustNewDecFromStr("1.01")
 
 	balancedFeeLowerMinFee := validFee()
-	balancedFeeLowerMinFee.BalancedFee = sdk.MustNewDecFromStr("0.0001")
+	balancedFeeLowerMinFee.BalancedFee = sdkmath.LegacyMustNewDecFromStr("0.0001")
 
 	negativeMaxFee := validFee()
-	negativeMaxFee.MaxFee = sdk.MustNewDecFromStr("-1.01")
+	negativeMaxFee.MaxFee = sdkmath.LegacyMustNewDecFromStr("-1.01")
 
 	greaterOneMaxFee := validFee()
-	greaterOneMaxFee.MaxFee = sdk.MustNewDecFromStr("1.01")
+	greaterOneMaxFee.MaxFee = sdkmath.LegacyMustNewDecFromStr("1.01")
 
 	maxFeeEqualBalancedFee := validFee()
-	maxFeeEqualBalancedFee.MaxFee = sdk.MustNewDecFromStr("0.2")
+	maxFeeEqualBalancedFee.MaxFee = sdkmath.LegacyMustNewDecFromStr("0.2")
 
 	tcs := []struct {
 		name   string
@@ -200,7 +199,7 @@ func TestFee_Validate(t *testing.T) {
 
 func TestAcceptedAsset_Validate(t *testing.T) {
 	invalidTargetAllocation := validAcceptedAsset("USDT")
-	invalidTargetAllocation.TargetAllocation = sdk.MustNewDecFromStr("1.1")
+	invalidTargetAllocation.TargetAllocation = sdkmath.LegacyMustNewDecFromStr("1.1")
 
 	tcs := []struct {
 		name   string
@@ -243,16 +242,16 @@ func validIndex() Index {
 
 func validFee() Fee {
 	return NewFee(
-		sdk.MustNewDecFromStr("0.001"),
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("0.5"),
+		sdkmath.LegacyMustNewDecFromStr("0.001"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("0.5"),
 	)
 }
 
 func validAcceptedAsset(denom string) AcceptedAsset {
 	return NewAcceptedAsset(
 		denom,
-		sdk.MustNewDecFromStr("0.2"),
-		sdk.MustNewDecFromStr("1.0"),
+		sdkmath.LegacyMustNewDecFromStr("0.2"),
+		sdkmath.LegacyMustNewDecFromStr("1.0"),
 	)
 }

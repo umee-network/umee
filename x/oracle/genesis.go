@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util"
@@ -93,7 +94,7 @@ func ExportGenesis(ctx sdk.Context, keeper keeper.Keeper) *types.GenesisState {
 	})
 
 	exchangeRates := []types.DenomExchangeRate{}
-	keeper.IterateExchangeRates(ctx, func(denom string, er sdk.Dec, t time.Time) (stop bool) {
+	keeper.IterateExchangeRates(ctx, func(denom string, er sdkmath.LegacyDec, t time.Time) (stop bool) {
 		exchangeRates = append(exchangeRates, types.NewDenomExchangeRate(denom, er, t))
 		return false
 	})
