@@ -76,7 +76,7 @@ func KeyCollateralAmountNoDenom(addr sdk.AccAddress) []byte {
 	return util.ConcatBytes(0, KeyPrefixCollateralAmount, address.MustLengthPrefix(addr))
 }
 
-// KeyReserveAmount returns a KVStore key for getting and setting the amount reserved of a a given token.
+// KeyReserveAmount returns a KVStore key for getting and setting the amount reserved of a given token.
 func KeyReserveAmount(tokenDenom string) []byte {
 	// reserveamountprefix | denom | 0x00 for null-termination
 	return util.ConcatBytes(1, KeyPrefixReserveAmount, []byte(tokenDenom))
