@@ -26,6 +26,7 @@ func GetQueryCmd() *cobra.Command {
 	cmd.AddCommand(
 		RewardsParams(),
 		RewardsAuction(),
+		RewardsAuctions(),
 	)
 
 	return cmd
@@ -78,6 +79,34 @@ func RewardsAuction() *cobra.Command {
 	}
 
 	flags.AddQueryFlagsToCmd(cmd)
+	return cmd
+}
+
+func RewardsAuctions() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "rewards-auctions",
+		Args:  cobra.NoArgs,
+		Short: "Query all rewards auctions",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cctx, q, err := prepareQueryCtx(cmd)
+			if err != nil {
+				return err
+			}
+
+			pageReq, err := client.ReadPageRequest(cmd.Flags())
+			if err != nil {
+				return err
+			}
+
+			req := auction.QueryRewardsAuctions{}
+			req.Pagination = pageReq
+			resp, err := q.RewardsAuctions(cmd.Context(), &req)
+			return cli.PrintOrErr(resp, err, cctx)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+	flags.AddPaginationFlagsToCmd(cmd, "rewards-auctions")
 	return cmd
 }
 

@@ -250,6 +250,19 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 	resp, err := s.queryClient.Inspect(ctx, &types.QueryInspect{})
 	require.NoError(err)
 
+	convertToPositionBalances := func(c sdk.DecCoins, baseAmount sdkmath.Int) []types.PositionBalance {
+		res := make([]types.PositionBalance, 0)
+		for _, c := range c {
+			res = append(res, types.PositionBalance{
+				Amount:     c.Amount,
+				Denom:      c.Denom,
+				BaseDenom:  umeeDenom,
+				BaseAmount: baseAmount,
+			})
+		}
+		return res
+	}
+
 	expected := types.QueryInspectResponse{
 		Borrowers: []types.InspectAccount{
 			{
@@ -260,8 +273,8 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 					Value:       2526,
 				},
 				Position: &types.DecBalances{
-					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "600")),
-					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "15")),
+					Collateral: convertToPositionBalances(sdk.NewDecCoins(coin.Dec("UMEE", "600")), sdkmath.NewInt(600_000000)),
+					Borrowed:   convertToPositionBalances(sdk.NewDecCoins(coin.Dec("UMEE", "15")), sdkmath.NewInt(15_000000)),
 				},
 			},
 			{
@@ -272,8 +285,8 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 					Value:       4210,
 				},
 				Position: &types.DecBalances{
-					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "1000")),
-					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "10.5")),
+					Collateral: convertToPositionBalances(sdk.NewDecCoins(coin.Dec("UMEE", "1000")), sdkmath.NewInt(1000_000000)),
+					Borrowed:   convertToPositionBalances(sdk.NewDecCoins(coin.Dec("UMEE", "10.5")), sdkmath.NewInt(10_500000)),
 				},
 			},
 			{
@@ -284,12 +297,18 @@ func (s *IntegrationTestSuite) TestQuerier_Inspect() {
 					Value:       252,
 				},
 				Position: &types.DecBalances{
-					Collateral: sdk.NewDecCoins(coin.Dec("UMEE", "60")),
-					Borrowed:   sdk.NewDecCoins(coin.Dec("UMEE", "1.5")),
+					Collateral: convertToPositionBalances(sdk.NewDecCoins(coin.Dec("UMEE", "60")), sdkmath.NewInt(60_000000)),
+					Borrowed:   convertToPositionBalances(sdk.NewDecCoins(coin.Dec("UMEE", "1.5")), sdkmath.NewInt(1_500000)),
 				},
 			},
 		},
 	}
+	require.Equal(expected, *resp)
+
+	req := &types.QueryInspect{}
+	req.Symbol = "UMEE"
+	resp, err = s.queryClient.Inspect(ctx, req)
+	require.NoError(err)
 	require.Equal(expected, *resp)
 }
 
