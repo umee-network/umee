@@ -148,5 +148,5 @@ func uint32Key(id uint32) []byte {
 }
 
 func newCoin(denom string, amount int64) sdk.Coin {
-	return sdk.NewCoin(denom, sdk.NewInt(amount))
+	return sdk.NewCoin(denom, sdkmath.NewInt(amount))
 }

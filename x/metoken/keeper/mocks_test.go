@@ -106,7 +106,7 @@ func (b Bank) SendCoinsFromAccountToModule(_ context.Context, _ sdk.AccAddress, 
 	return nil
 }
 
-func (b Bank) SendCoinsFromModuleToModule(ctx sdk.Context, senderModule, recipientModule string, amt sdk.Coins,
+func (b Bank) SendCoinsFromModuleToModule(ctx context.Context, senderModule, recipientModule string, amt sdk.Coins,
 ) error {
 	return nil
 }

@@ -85,8 +85,8 @@ func (s *E2ETest) checkSupply(endpoint, ibcDenom string, amount sdkmath.Int) {
 	)
 }
 
-func (s *E2ETest) checkLeverageAccountBalance(endpoint, addr, ibcDenom string, amount math.Int) {
-	collateral := math.ZeroInt()
+func (s *E2ETest) checkLeverageAccountBalance(endpoint, addr, ibcDenom string, amount sdkmath.Int) {
+	collateral := sdkmath.ZeroInt()
 	var err error
 	s.Require().Eventually(
 		func() bool {
@@ -105,45 +105,6 @@ func (s *E2ETest) checkLeverageAccountBalance(endpoint, addr, ibcDenom string, a
 }
 
 func (s *E2ETest) TestIBCTokenTransfer() {
-	// IBC inbound transfer of non x/leverage registered tokens must fail, because
-	// because we won't have price for it.
-	s.Run("send_stake_to_umee", func() {
-		// require the recipient account receives the IBC tokens (IBC packets ACKd)
-		umeeAPIEndpoint := s.UmeeREST()
-		recipient := s.AccountAddr(0).String()
-
-		token := sdk.NewInt64Coin("stake", 3300000000) // 3300stake
-		s.SendIBC(setup.GaiaChainID, s.Chain.ID, recipient, token, false, "")
-		// Zero, since not a registered token
-		s.checkSupply(umeeAPIEndpoint, stakeIBCHash, sdkmath.ZeroInt())
-	})
-
-	s.Run("ibc_transfer_quota", func() {
-		// require the recipient account receives the IBC tokens (IBC packets ACKd)
-		gaiaAPIEndpoint := s.GaiaREST()
-		umeeAPIEndpoint := s.UmeeREST()
-		// totalQuota := sdkmath.NewInt(120)
-		tokenQuota := sdkmath.NewInt(100)
-
-	var atomPrice sdkmath.LegacyDec
-	// compute the amount of ATOM sent from umee to gaia which would meet atom's token quota
-	s.Require().Eventually(func() bool {
-		var err error
-		atomPrice, err = s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
-		if err != nil {
-			return false
-		}
-		return atomPrice.GT(sdkmath.LegacyOneDec())
-	},
-		2*time.Minute,
-		1*time.Second,
-		"price of atom should be greater than 1",
-	)
-
-	atomQuota := sdk.NewCoin(uatomIBCHash,
-		sdkmath.LegacyNewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
-	)
-
 	// IBC Inflow is enabled
 	s.Run("send_stake_to_umee", func() {
 		// require the recipient account receives the IBC tokens (IBC packets ACKd)
@@ -156,6 +117,30 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 	})
 
 	s.Run("ibc_transfer_quota", func() {
+		// require the recipient account receives the IBC tokens (IBC packets ACKd)
+		gaiaAPIEndpoint := s.GaiaREST()
+		umeeAPIEndpoint := s.UmeeREST()
+		// totalQuota := sdkmath.NewInt(120)
+		tokenQuota := sdkmath.NewInt(100)
+
+		var atomPrice sdkmath.LegacyDec
+		// compute the amount of ATOM sent from umee to gaia which would meet atom's token quota
+		s.Require().Eventually(func() bool {
+			var err error
+			atomPrice, err = s.QueryHistAvgPrice(umeeAPIEndpoint, atomSymbol)
+			if err != nil {
+				return false
+			}
+			return atomPrice.GT(sdkmath.LegacyOneDec())
+		},
+			2*time.Minute,
+			1*time.Second,
+			"price of atom should be greater than 1",
+		)
+
+		atomQuota := sdk.NewCoin(uatomIBCHash,
+			sdkmath.LegacyNewDecFromInt(tokenQuota).Quo(atomPrice).Mul(powerReduction).RoundInt(),
+		)
 		//<<<< INFLOW : gaia -> umee >>
 		// send $500 ATOM from gaia to umee. (ibc_quota will not check token limit)
 		atomFromGaia := mulCoin(atomQuota, "5.0")
@@ -187,7 +172,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		s.SendIBC(s.Chain.ID, setup.GaiaChainID, recvAddr, exceedUmee, "", "",
 			"recipient address must not exceed 2048 bytes")
 		// supply should not change
-		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, math.ZeroInt())
+		s.checkSupply(gaiaAPIEndpoint, umeeIBCHash, sdkmath.ZeroInt())
 
 		// send $110 ATOM from umee to gaia
 		exceedAtom := mulCoin(atomQuota, "1.1")

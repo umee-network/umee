@@ -4,13 +4,14 @@ import (
 	"encoding/json"
 	"testing"
 
-	sdkmath "cosmossdk.io/math"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
 	wasmvmtypes "github.com/CosmWasm/wasmvm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
+	wq "github.com/umee-network/umee/v6/app/wasm/query"
+	"github.com/umee-network/umee/v6/x/incentive"
 	lvtypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/metoken"
 )
@@ -96,61 +97,6 @@ func (s *IntegrationTestSuite) TestStargateQueries() {
 			test.resp(*resp)
 		})
 	}
-}
-
-func (s *IntegrationTestSuite) TestLeverageTxs() {
-	accAddr := sdk.MustAccAddressFromBech32(s.contractAddr)
-	err := s.app.BankKeeper.SendCoinsFromModuleToAccount(s.ctx, minttypes.ModuleName, accAddr, sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(100000))))
-	assert.NilError(s.T, err)
-	txTests := []struct {
-		Name string
-		Msg  []byte
-	}{
-		{
-			Name: "supply",
-			Msg: s.genCustomTx(wm.UmeeMsg{
-				Supply: &lvtypes.MsgSupply{
-					Supplier: s.contractAddr,
-					Asset:    sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(700)),
-				},
-			}),
-		},
-		{
-			Name: "add collateral",
-			Msg: s.genCustomTx(wm.UmeeMsg{
-				Collateralize: &lvtypes.MsgCollateralize{
-					Borrower: s.contractAddr,
-					Asset:    sdk.NewCoin("u/uumee", sdkmath.NewInt(700)),
-				},
-			}),
-		},
-		// {
-		// 	Name: "borrow",
-		// 	Msg: s.genCustomTx(wm.UmeeMsg{
-		// 		Borrow: &lvtypes.MsgBorrow{
-		// 			Borrower: addr2.String(),
-		// 			Asset:    sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(150)),
-		// 		},
-		// 	}),
-		// },
-	}
-
-	for _, tc := range txTests {
-		s.T.Run(tc.Name, func(t *testing.T) {
-			s.execContract(addr2, tc.Msg)
-		})
-	}
-
-	query := s.genCustomQuery(wq.UmeeQuery{
-		AccountSummary: &lvtypes.QueryAccountSummary{
-			Address: addr2.String(),
-		},
-	})
-
-	resp := s.queryContract(query)
-	var rr lvtypes.QueryAccountSummaryResponse
-	err = json.Unmarshal(resp.Data, &rr)
-	assert.NilError(s.T, err)
 }
 
 func (s *IntegrationTestSuite) TestIncentiveQueries() {

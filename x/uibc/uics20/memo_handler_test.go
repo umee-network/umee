@@ -100,7 +100,10 @@ func TestValidateMemoMsg(t *testing.T) {
 	for i, tc := range tcs {
 		mh.receiver = receiver
 		mh.received = sent
-		mh.msgs = tc.msgs
+		// todo: needs to find way to get msg.signer info
+		for _, msg := range tc.msgs {
+			mh.msgs = append(mh.msgs, msg.(sdk.LegacyMsg))
+		}
 		err := mh.validateMemoMsg()
 		if tc.errstr != "" {
 			assert.ErrorContains(err, tc.errstr, "test: %d", i)
@@ -191,7 +194,10 @@ func TestMemoExecute(t *testing.T) {
 	for i, tc := range tcs {
 		mh.executeEnabled = tc.enabled
 		mh.isGMP = tc.gmp
-		mh.msgs = tc.msgs
+		// mh.msgs = tc.msgs
+		for _, msg := range tc.msgs {
+			mh.msgs = append(mh.msgs, msg.(sdk.LegacyMsg))
+		}
 		err := mh.execute(&ctx)
 		assert.ErrorIs(t, err, tc.err, i)
 	}

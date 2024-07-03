@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"math/big"
 
+	addresscodec "cosmossdk.io/core/address"
 	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
@@ -99,12 +100,17 @@ func GenerateRandomTestCase() (valValAddrs []sdk.ValAddress, stakingKeeper MockS
 // MockStakingKeeper implements the StakingKeeper interface.
 type MockStakingKeeper struct {
 	validators []MockValidator
+	addrcdc    addresscodec.Codec
 }
 
 func NewMockStakingKeeper(validators []MockValidator) MockStakingKeeper {
 	return MockStakingKeeper{
 		validators: validators,
 	}
+}
+
+func (sk MockStakingKeeper) ValidatorAddressCodec() addresscodec.Codec {
+	return sk.addrcdc
 }
 
 func (sk MockStakingKeeper) Validators() []MockValidator {
