@@ -13,6 +13,7 @@ option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/leverage module's Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // Supply moves tokens from user balance to the module for lending or collateral.
   // The user receives uTokens in return.
   rpc Supply(MsgSupply) returns (MsgSupplyResponse);
@@ -79,23 +80,26 @@ service Msg {
 
 // MsgSupply represents a user's request to supply assets to the module.
 message MsgSupply {
+  option (cosmos.msg.v1.signer) = "supplier";
   // Supplier is the account address supplying assets and the signer of the message.
-  string                   supplier = 1;
+  string                   supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgWithdraw represents a user's request to withdraw supplied assets.
 // Asset must be a uToken.
 message MsgWithdraw {
+  option (cosmos.msg.v1.signer) = "supplier";
   // Supplier is the account address withdrawing assets and the signer of the message.
-  string                   supplier = 1;
+  string                   supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgMaxWithdraw represents a user's request to withdraw the maximum valid amount of supplied assets.
 message MsgMaxWithdraw {
+  option (cosmos.msg.v1.signer) = "supplier";
   // Supplier is the account address withdrawing assets and the signer of the message.
-  string supplier = 1;
+  string supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Denom is base token denom to withdraw
   string denom = 2;
 }
@@ -103,51 +107,57 @@ message MsgMaxWithdraw {
 // MsgCollateralize represents a user's request to enable selected
 // uTokens as collateral.
 message MsgCollateralize {
+  option (cosmos.msg.v1.signer) = "borrower";
   // Borrower is the account address adding collateral and the signer of the message.
-  string                   borrower = 1;
+  string                   borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgDecollateralize represents a user's request to disable selected
 // uTokens as collateral.
 message MsgDecollateralize {
+  option (cosmos.msg.v1.signer) = "borrower";
   // Borrower is the account address removing collateral and the signer of the message.
-  string                   borrower = 1;
+  string                   borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgBorrow represents a user's request to borrow a base asset type
 // from the module.
 message MsgBorrow {
+  option (cosmos.msg.v1.signer) = "borrower";
   // Borrower is the account address taking a loan and the signer
   // of the message.
-  string                   borrower = 1;
+  string                   borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgMaxBorrow represents a user's request to borrow a base asset type
 // from the module, using the maximum available amount.
 message MsgMaxBorrow {
+  option (cosmos.msg.v1.signer) = "borrower";
   // Borrower is the account address taking a loan and the signer
   // of the message.
-  string borrower = 1;
+  string borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string denom    = 2;
 }
 
 // MsgRepay represents a user's request to repay a borrowed base asset
 // type to the module.
 message MsgRepay {
+  option (cosmos.msg.v1.signer) = "borrower";
   // Borrower is the account address repaying a loan and the signer
   // of the message.
-  string                   borrower = 1;
+  string                   borrower = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 
 // MsgLiquidate is the request structure for the Liquidate RPC.
 message MsgLiquidate {
+  option (cosmos.msg.v1.signer) = "liquidator";
   // Liquidator is the account address performing a liquidation and the signer
   // of the message.
-  string liquidator = 1;
+  string liquidator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   // Borrower is the account whose borrow is being repaid, and collateral consumed,
   // by the liquidation. It does not sign the message.
   string borrower = 2;
@@ -163,6 +173,7 @@ message MsgLiquidate {
 
 // MsgLeveragedLiquidate is the request structure for the LeveragedLiquidate RPC.
 message MsgLeveragedLiquidate {
+  option (cosmos.msg.v1.signer) = "liquidator";
   // Liquidator is the account address performing a liquidation and the signer
   // of the message.
   string liquidator = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
@@ -185,8 +196,9 @@ message MsgLeveragedLiquidate {
 
 // MsgSupplyCollateral represents a user's request to supply and collateralize assets to the module.
 message MsgSupplyCollateral {
+  option (cosmos.msg.v1.signer) = "supplier";
   // Supplier is the account address supplying assets and the signer of the message.
-  string                   supplier = 1;
+  string                   supplier = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin asset    = 2 [(gogoproto.nullable) = false];
 }
 

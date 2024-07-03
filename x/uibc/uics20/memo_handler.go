@@ -27,12 +27,12 @@ var (
 )
 
 type MemoHandler struct {
-	cdc      codec.JSONCodec
+	cdc      codec.Codec
 	leverage ltypes.MsgServer
 
 	executeEnabled bool
 	isGMP          bool
-	msgs           []sdk.LegacyMsg
+	msgs           []sdk.Msg
 	memo           string
 	received       sdk.Coin
 
@@ -89,10 +89,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 		}
 	}
 
-	msgs, err := memo.GetMsgs()
-	for _, msg := range msgs {
-		mh.msgs = append(mh.msgs, msg.(sdk.LegacyMsg))
-	}
+	mh.msgs, err = memo.GetMsgs()
 	if err != nil {
 		e := "ICS20 memo recognized, but can't unpack memo.messages: " + err.Error()
 		events = append(events, e)
@@ -150,7 +147,18 @@ func (mh MemoHandler) validateMemoMsg() error {
 	}
 
 	for _, msg := range mh.msgs {
-		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(mh.receiver) {
+		signers, _, err := mh.cdc.GetMsgV1Signers(msg)
+		if err != nil {
+			return errWrongSigner
+		}
+		checkSigner := func(signer []byte, receiver string) bool {
+			addrStr, err := mh.cdc.InterfaceRegistry().SigningContext().AddressCodec().BytesToString(signer)
+			if err != nil {
+				return false
+			}
+			return addrStr == receiver
+		}
+		if len(signers) != 1 || !checkSigner(signers[0], mh.receiver.String()) {
 			return errWrongSigner
 		}
 	}

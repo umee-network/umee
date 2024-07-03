@@ -3,16 +3,24 @@ package cmd
 import (
 	"os"
 
+	"cosmossdk.io/log"
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
+	dbm "github.com/cosmos/cosmos-db"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/config"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/keys"
 	"github.com/cosmos/cosmos-sdk/client/rpc"
+	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/server"
 	serverconfig "github.com/cosmos/cosmos-sdk/server/config"
+	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	mtestuti "github.com/cosmos/cosmos-sdk/types/module/testutil"
+	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	authcmd "github.com/cosmos/cosmos-sdk/x/auth/client/cli"
+	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+	authtxconfig "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/cosmos/cosmos-sdk/x/crisis"
@@ -29,7 +37,23 @@ import (
 
 // NewRootCmd returns the root command handler for the Umee daemon.
 func NewRootCmd() *cobra.Command {
-	encodingConfig := umeeapp.MakeEncodingConfig()
+	tempApp := umeeapp.New(
+		log.NewNopLogger(),
+		dbm.NewMemDB(),
+		nil,
+		true,
+		map[int64]bool{},
+		umeeapp.DefaultNodeHome,
+		5,
+		simtestutil.EmptyAppOptions{},
+		umeeapp.EmptyWasmOpts,
+	)
+	encodingConfig := mtestuti.TestEncodingConfig{
+		InterfaceRegistry: tempApp.InterfaceRegistry(),
+		Codec:             tempApp.AppCodec(),
+		TxConfig:          tempApp.GetTxConfig(),
+		Amino:             tempApp.LegacyAmino(),
+	}
 	moduleManager := umeeapp.ModuleBasics
 
 	initClientCtx := client.Context{}.
@@ -63,12 +87,32 @@ towards borrowing assets on another blockchain.`,
 				return err
 			}
 
+			// This needs to go after ReadFromClientConfig, as that function
+			// sets the RPC client needed for SIGN_MODE_TEXTUAL. This sign mode
+			// is only available if the client is online.
+			if !initClientCtx.Offline {
+				enabledSignModes := append(tx.DefaultSignModes, signing.SignMode_SIGN_MODE_TEXTUAL)
+				txConfigOpts := tx.ConfigOptions{
+					EnabledSignModes:           enabledSignModes,
+					TextualCoinMetadataQueryFn: authtxconfig.NewGRPCCoinMetadataQueryFn(initClientCtx),
+				}
+				txConfig, err := tx.NewTxConfigWithOptions(
+					initClientCtx.Codec,
+					txConfigOpts,
+				)
+				if err != nil {
+					return err
+				}
+
+				initClientCtx = initClientCtx.WithTxConfig(txConfig)
+			}
+
 			if err := client.SetCmdClientContextHandler(initClientCtx, cmd); err != nil {
 				return err
 			}
 
 			appTmpl, appCfg := initAppConfig()
-			tmCfg := initTendermintConfig()
+			tmCfg := initCometBFTConfig()
 			return server.InterceptConfigsPreRunHandler(cmd, appTmpl, appCfg, tmCfg)
 		},
 	}
@@ -80,12 +124,22 @@ towards borrowing assets on another blockchain.`,
 
 	initRootCmd(rootCmd, ac)
 
+	autoCliOpts := tempApp.AutoCliOpts()
+	initClientCtx, _ = config.ReadDefaultValuesFromDefaultClientConfig(initClientCtx)
+	// add keyring to autocli opts
+	autoCliOpts.Keyring, _ = keyring.NewAutoCLIKeyring(initClientCtx.Keyring)
+	autoCliOpts.ClientCtx = initClientCtx
+
+	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
+		panic(err)
+	}
+
 	return rootCmd
 }
 
-// initTendermintConfig helps to override default Tendermint Config values.
+// initCometBFTConfig helps to override default CometBFT Config values.
 // return tmcfg.DefaultConfig if no custom configuration is required for the application.
-func initTendermintConfig() *tmcfg.Config {
+func initCometBFTConfig() *tmcfg.Config {
 	cfg := tmcfg.DefaultConfig()
 
 	// these values put a higher strain on node memory

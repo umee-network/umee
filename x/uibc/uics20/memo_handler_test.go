@@ -5,7 +5,6 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	storetypes "cosmossdk.io/store/types"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -20,6 +19,7 @@ import (
 )
 
 func TestValidateMemoMsg(t *testing.T) {
+	cdc := tsdk.NewCodec(uibc.RegisterInterfaces, ltypes.RegisterInterfaces)
 	assert := assert.New(t)
 	receiver := accs.Alice
 	asset := coin.New("atom", 10)
@@ -43,7 +43,7 @@ func TestValidateMemoMsg(t *testing.T) {
 	errMsg0type := errMsg0Type.Error()
 	errWrongSigner := errWrongSigner.Error()
 
-	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv()}
+	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv(), cdc: cdc}
 	tcs := []struct {
 		msgs   []sdk.Msg
 		errstr string
@@ -100,10 +100,7 @@ func TestValidateMemoMsg(t *testing.T) {
 	for i, tc := range tcs {
 		mh.receiver = receiver
 		mh.received = sent
-		// todo: needs to find way to get msg.signer info
-		for _, msg := range tc.msgs {
-			mh.msgs = append(mh.msgs, msg.(sdk.LegacyMsg))
-		}
+		mh.msgs = tc.msgs
 		err := mh.validateMemoMsg()
 		if tc.errstr != "" {
 			assert.ErrorContains(err, tc.errstr, "test: %d", i)

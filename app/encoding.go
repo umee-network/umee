@@ -6,6 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/std"
 	mtestuti "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/auth/tx"
+
 	"github.com/umee-network/umee/v6/app/params"
 )
 

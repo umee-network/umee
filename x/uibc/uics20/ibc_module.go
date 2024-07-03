@@ -26,12 +26,12 @@ type ICS20Module struct {
 	porttypes.IBCModule
 	kb       quota.Builder
 	leverage ltypes.MsgServer
-	cdc      codec.JSONCodec
+	cdc      codec.Codec
 }
 
 // NewICS20Module is an IBCMiddlware constructor.
 // `app` must be an ICS20 app.
-func NewICS20Module(app porttypes.IBCModule, cdc codec.JSONCodec, k quota.Builder, l ltypes.MsgServer,
+func NewICS20Module(app porttypes.IBCModule, cdc codec.Codec, k quota.Builder, l ltypes.MsgServer,
 ) ICS20Module {
 	return ICS20Module{
 		IBCModule: app,

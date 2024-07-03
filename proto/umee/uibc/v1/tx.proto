@@ -13,6 +13,7 @@ option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/uibc module's Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // GovUpdateQuota adds new quota for ibc denoms or
   // updates the quota for existed ibc denoms.
   rpc GovUpdateQuota(MsgGovUpdateQuota) returns (MsgGovUpdateQuotaResponse);

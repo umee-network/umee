@@ -19,7 +19,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.7
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.4.12
-	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v8 v8.0.0
+	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v8 v8.0.2
 	github.com/cosmos/ibc-go/v8 v8.0.1
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/mock v1.6.0
@@ -45,6 +45,7 @@ require (
 )
 
 require (
+	cosmossdk.io/client/v2 v2.0.0-beta.1
 	cosmossdk.io/log v1.3.1
 	cosmossdk.io/store v1.1.0
 	cosmossdk.io/x/tx v0.13.3
