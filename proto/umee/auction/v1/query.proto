@@ -17,7 +17,7 @@ option (gogoproto.goproto_getters_all) = false;
 service Query {
   // QueryRewardParams queries parameters for the reward auciton.
   rpc RewardsParams(QueryRewardsParams) returns (QueryRewardsParamsResponse) {
-    option (google.api.http).get = "/umee/auction/v1/rewards/params";
+    option (google.api.http).get = "/umee/auction/v1/rewards_params";
   }
   // RewardAuction queries the information of the auction by ID. If ID is ommitted, returns
   // current reward auction.
