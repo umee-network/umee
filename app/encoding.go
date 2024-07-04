@@ -16,21 +16,21 @@ func MakeEncodingConfig() mtestuti.TestEncodingConfig {
 	interfaceRegistry := testutil.CodecOptions{
 		AccAddressPrefix: params.AccountAddressPrefix,
 		ValAddressPrefix: params.ValidatorAddressPrefix,
-	}.NewInterfaceRegistry()
+	}
 
-	appCodec := codec.NewProtoCodec(interfaceRegistry)
+	appCodec := interfaceRegistry.NewCodec()
 	aminoCodec := codec.NewLegacyAmino()
 
 	// cosmos-sdk module
 	std.RegisterLegacyAminoCodec(aminoCodec)
-	std.RegisterInterfaces(interfaceRegistry)
+	std.RegisterInterfaces(appCodec.InterfaceRegistry())
 
 	// umee app modules
 	ModuleBasics.RegisterLegacyAminoCodec(aminoCodec)
-	ModuleBasics.RegisterInterfaces(interfaceRegistry)
+	ModuleBasics.RegisterInterfaces(appCodec.InterfaceRegistry())
 
 	encCfg := mtestuti.TestEncodingConfig{
-		InterfaceRegistry: interfaceRegistry,
+		InterfaceRegistry: appCodec.InterfaceRegistry(),
 		Codec:             appCodec,
 		TxConfig:          tx.NewTxConfig(appCodec, tx.DefaultSignModes),
 		Amino:             aminoCodec,

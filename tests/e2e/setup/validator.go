@@ -247,6 +247,7 @@ func (v *validator) signMsg(cdc codec.Codec, msgs ...sdk.Msg) (*sdktx.Tx, error)
 	if err != nil {
 		return nil, err
 	}
+	signerData.PubKey = pubKey
 	sig := signing.SignatureV2{
 		PubKey: pubKey,
 		Data: &signing.SingleSignatureData{

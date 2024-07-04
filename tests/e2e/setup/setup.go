@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
 	tmconfig "github.com/cometbft/cometbft/config"
 	tmjson "github.com/cometbft/cometbft/libs/json"
@@ -79,7 +80,7 @@ func (s *E2ETestSuite) SetupSuite() {
 
 	db := dbm.NewMemDB()
 	app := app.New(
-		nil,
+		log.NewNopLogger(),
 		db,
 		nil,
 		true,
@@ -332,7 +333,8 @@ func (s *E2ETestSuite) initGenesis() {
 	// write the updated genesis file to each validator
 	s.T().Log("writing updated genesis file to each validator")
 	for _, val := range s.Chain.Validators {
-		writeFile(filepath.Join(val.configDir(), "config", "genesis.json"), bz)
+		err = writeFile(filepath.Join(val.configDir(), "config", "genesis.json"), bz)
+		s.Require().NoError(err)
 	}
 }
 

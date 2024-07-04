@@ -296,8 +296,7 @@ type UmeeApp struct {
 	ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
 
 	// the module manager
-	mm  *module.Manager
-	bmm module.BasicManager
+	mm *module.Manager
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -1074,7 +1073,7 @@ func (app *UmeeApp) InterfaceRegistry() types.InterfaceRegistry {
 
 // DefaultGenesis returns a default genesis from the registered AppModuleBasic's.
 func (app *UmeeApp) DefaultGenesis() map[string]json.RawMessage {
-	return app.bmm.DefaultGenesis(app.appCodec)
+	return ModuleBasics.DefaultGenesis(app.appCodec)
 }
 
 // GetKey returns the KVStoreKey for the provided store key.
@@ -1125,7 +1124,7 @@ func (app *UmeeApp) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APICo
 	nodeservice.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// Register grpc-gateway routes for all modules.
-	app.bmm.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
+	ModuleBasics.RegisterGRPCGatewayRoutes(clientCtx, apiSvr.GRPCGatewayRouter)
 
 	// register swagger API from root so that other applications can override easily
 	if apiConfig.Swagger {
