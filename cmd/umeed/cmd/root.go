@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"cosmossdk.io/log"
+	confixcmd "cosmossdk.io/tools/confix/cmd"
 	tmcfg "github.com/cometbft/cometbft/config"
 	tmcli "github.com/cometbft/cometbft/libs/cli"
 	dbm "github.com/cosmos/cosmos-db"
@@ -212,6 +213,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 		),
 		genutilcli.ValidateGenesisCmd(a.moduleManager),
 		addGenesisAccountCmd(umeeapp.DefaultNodeHome),
+
 		tmcli.NewCompletionCmd(rootCmd, true),
 		debugCmd(),
 	)
@@ -224,6 +226,7 @@ func initRootCmd(rootCmd *cobra.Command, a appCreator) {
 		queryCommand(),
 		txCommand(),
 		keys.Commands(),
+		confixcmd.ConfigCommand(),
 	)
 
 	// add rosetta
