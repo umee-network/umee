@@ -53,5 +53,12 @@ func (m msgServer) RewardsBid(ctx context.Context, msg *auction.MsgRewardsBid) (
 	if err := k.rewardsBid(msg); err != nil {
 		return nil, err
 	}
+
+	sdkutil.Emit(&sdkCtx, &auction.EventRewardsBid{
+		Sender: msg.Sender,
+		Id:     msg.Id,
+		Amount: msg.Amount,
+	})
+
 	return &auction.MsgRewardsBidResponse{}, nil
 }
