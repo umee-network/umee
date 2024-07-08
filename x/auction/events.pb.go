@@ -102,7 +102,7 @@ func (m *EventFundRewardsAuction) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_EventFundRewardsAuction proto.InternalMessageInfo
 
-// EventRewardsBid is emitted when the user bid the auction rewward.
+// EventRewardsBid is emitted when the user bid the auction reward.
 type EventRewardsBid struct {
 	Sender string     `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
 	Id     uint32     `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
