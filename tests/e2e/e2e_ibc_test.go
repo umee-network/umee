@@ -245,7 +245,7 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		)
 
 		/****
-			IBC_Status : disble (making ibc_transfer quota check disabled)
+			IBC_Status : disable (making ibc_transfer quota check disabled)
 			No Outflows will updated
 		***/
 		// Make gov proposal to disable the quota check on ibc-transfer
