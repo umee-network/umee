@@ -10,6 +10,7 @@ import (
 // DefaultGenesis creates a default genesis state
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
+		// check bid duration value for v6.6 upgrade
 		RewardsParams:   RewardsParams{BidDuration: 14 * 24 * 3600}, // 14 days
 		RewardAuctionId: 0,
 		RewardsAuctions: []RewardsKV{},
