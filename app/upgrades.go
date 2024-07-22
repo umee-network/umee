@@ -55,10 +55,10 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade("v6.5", upgradeInfo, nil, nil, nil)
 
 	// this upgrade is only for testnet (canon-4) network
-	app.registerUpgrade6_6_rc1(upgradeInfo)
+	app.registerUpgrade6_6RC1(upgradeInfo)
 }
 
-func (app *UmeeApp) registerUpgrade6_6_rc1(upgradeInfo upgradetypes.Plan) {
+func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.6-rc1"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
