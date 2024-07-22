@@ -11,7 +11,8 @@ import (
 func DefaultGenesis() *GenesisState {
 	return &GenesisState{
 		// check bid duration value for v6.6 upgrade
-		RewardsParams:   RewardsParams{BidDuration: 14 * 24 * 3600}, // 14 days
+		// RewardsParams:   RewardsParams{BidDuration: 14 * 24 * 3600}, // 14 days
+		RewardsParams:   RewardsParams{BidDuration: 4 * 3600}, //  4 hours for bid duration this is only for canon-4 network
 		RewardAuctionId: 0,
 		RewardsAuctions: []RewardsKV{},
 		RewardsBids:     []BidKV{},
