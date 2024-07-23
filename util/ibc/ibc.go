@@ -25,7 +25,7 @@ func GetFundsFromPacket(data []byte) (sdkmath.Int, string, error) {
 	return amount, GetLocalDenom(packetData.Denom), nil
 }
 
-// GetLocalDenom retruns ibc denom
+// GetLocalDenom returns ibc denom
 // Expected denoms in the following cases:
 //
 // send non-native: transfer/channel-0/denom -> ibc/xxx

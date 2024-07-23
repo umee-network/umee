@@ -50,7 +50,7 @@ func (qaTest *QATest) TestCWPlusGroup() {
 	cw := cwutil.NewCosmwasmTestSuite(qaTest.T(), umeeClient)
 	cw.DeployWasmContract(cwGroupPath)
 
-	// sender is intital account
+	// sender is initial account
 	admin := umeeClient.Tx.SenderAddr()
 	// instantiate Contract
 	initMsg := GroupInitMsg{
