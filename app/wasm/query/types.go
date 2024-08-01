@@ -26,7 +26,7 @@ type UmeeQuery struct {
 	AccountSummary *lvtypes.QueryAccountSummary `json:"account_summary,omitempty"`
 	// request to return a list of borrower addresses eligible for liquidation.
 	LiquidationTargets *lvtypes.QueryLiquidationTargets `json:"liquidation_targets,omitempty"`
-	// requet to returns list of bad debts
+	// request to returns list of bad debts
 	BadDebts *lvtypes.QueryBadDebts `json:"bad_debts_params,omitempty"`
 	// request to returns max withdraw
 	MaxWithdraw *lvtypes.QueryMaxWithdraw `json:"max_withdraw_params,omitempty"`

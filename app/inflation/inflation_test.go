@@ -270,7 +270,7 @@ func TestInflationRateChange(t *testing.T) {
 	}
 
 	checkers.RequireDecMaxDiff(t, minterStd.Inflation, minterFast.Inflation, sdkmath.LegacyNewDecWithPrec(1, 5),
-		"fast minter and standard minter should end up with similar inflation change after 5months and 10months repectively")
+		"fast minter and standard minter should end up with similar inflation change after 5months and 10months respectively")
 
 	// continue one more month
 	for i := 0; i <= month; i++ {
