@@ -3,10 +3,11 @@ package oracle_test
 import (
 	"time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
+	"gotest.tools/v3/assert"
+
 	"github.com/umee-network/umee/v6/x/oracle"
 	"github.com/umee-network/umee/v6/x/oracle/types"
-	"gotest.tools/v3/assert"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 	upperDenom      = "UMEE"
 )
 
-var exchangeRate = sdk.MustNewDecFromStr("1.2")
+var exchangeRate = sdkmath.LegacyMustNewDecFromStr("1.2")
 
 func (s *IntegrationTestSuite) TestGenesis_InitGenesis() {
 	keeper, ctx := s.app.OracleKeeper, s.ctx

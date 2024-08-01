@@ -14,6 +14,7 @@ option (gogoproto.goproto_getters_all) = false;
 
 // Msg defines the x/incentive module's Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // Claim defines a method for claiming any pending incentive rewards.
   rpc Claim(MsgClaim) returns (MsgClaimResponse);
 
@@ -41,7 +42,8 @@ service Msg {
 
 // MsgClaim represents a account's request to claim pending rewards.
 message MsgClaim {
-  string account = 1;
+  option (cosmos.msg.v1.signer) = "account";
+  string account                = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
 }
 
 // MsgClaimResponse defines the Msg/Claim response type.
@@ -54,7 +56,8 @@ message MsgClaimResponse {
 
 // MsgBond represents a account's request to bond uToken collateral.
 message MsgBond {
-  string                   account = 1;
+  option (cosmos.msg.v1.signer)    = "account";
+  string                   account = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin uToken  = 2 [(gogoproto.nullable) = false];
 }
 
@@ -63,7 +66,8 @@ message MsgBondResponse {}
 
 // MsgBeginUnbonding represents a account's request to begin unbonding uToken collateral.
 message MsgBeginUnbonding {
-  string                   account = 1;
+  option (cosmos.msg.v1.signer)    = "account";
+  string                   account = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin uToken  = 2 [(gogoproto.nullable) = false];
 }
 
@@ -72,7 +76,8 @@ message MsgBeginUnbondingResponse {}
 
 // MsgEmergencyUnbond represents a account's request to instantly unbond uToken collateral for a fee.
 message MsgEmergencyUnbond {
-  string                   account = 1;
+  option (cosmos.msg.v1.signer)    = "account";
+  string                   account = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   cosmos.base.v1beta1.Coin uToken  = 2 [(gogoproto.nullable) = false];
 }
 
@@ -83,6 +88,7 @@ message MsgEmergencyUnbondResponse {}
 // The program must have been passed by governance, not yet started, and not yet funded.
 // Funded assets must be the full amount required by the program.
 message MsgSponsor {
+  option (cosmos.msg.v1.signer) = "sponsor";
   // Sponsor bech32 account address
   string sponsor = 1;
   uint32 program = 2;

@@ -1,6 +1,7 @@
 package uibc
 
 import (
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/x/bank/types"
 
@@ -18,12 +19,12 @@ type Leverage interface {
 	GetTokenSettings(ctx sdk.Context, baseDenom string) (ltypes.Token, error)
 	GetAllRegisteredTokens(ctx sdk.Context) []ltypes.Token
 	ToToken(ctx sdk.Context, uToken sdk.Coin) (sdk.Coin, error)
-	DeriveExchangeRate(ctx sdk.Context, denom string) sdk.Dec
+	DeriveExchangeRate(ctx sdk.Context, denom string) sdkmath.LegacyDec
 }
 
 // Oracle interface for price feed.
 // The uibc design doesn't depend on any particular price metric (spot price, avg ...), so it's
 // up to the integration which price should be used.
 type Oracle interface {
-	Price(ctx sdk.Context, denom string) (sdk.Dec, error)
+	Price(ctx sdk.Context, denom string) (sdkmath.LegacyDec, error)
 }

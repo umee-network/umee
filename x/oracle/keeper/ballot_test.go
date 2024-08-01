@@ -1,14 +1,14 @@
 package keeper_test
 
 import (
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
 func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	require := s.Require()
-	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdk.OneDec())
+	s.app.OracleKeeper.SetExchangeRate(s.ctx, displayDenom, sdkmath.LegacyOneDec())
 	claimMap := make(map[string]types.Claim)
 
 	// Empty Map
@@ -20,7 +20,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 			ExchangeRateTuples: types.ExchangeRateTuples{
 				types.ExchangeRateTuple{
 					Denom:        "UMEE",
-					ExchangeRate: sdk.OneDec(),
+					ExchangeRate: sdkmath.LegacyOneDec(),
 				},
 			},
 			Voter: valAddr.String(),
@@ -36,7 +36,7 @@ func (s *IntegrationTestSuite) TestBallot_OrganizeBallotByDenom() {
 	res = s.app.OracleKeeper.OrganizeBallotByDenom(s.ctx, claimMap)
 	require.Equal([]types.BallotDenom{
 		{
-			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(sdk.OneDec(), "UMEE", valAddr, 1)},
+			Ballot: types.ExchangeRateBallot{types.NewVoteForTally(sdkmath.LegacyOneDec(), "UMEE", valAddr, 1)},
 			Denom:  "UMEE",
 		},
 	}, res)
@@ -56,7 +56,7 @@ func (s *IntegrationTestSuite) TestBallot_ClearBallots() {
 	var tuples types.ExchangeRateTuples
 	tuples = append(tuples, types.ExchangeRateTuple{
 		Denom:        "UMEE",
-		ExchangeRate: sdk.ZeroDec(),
+		ExchangeRate: sdkmath.LegacyZeroDec(),
 	})
 	vote := types.AggregateExchangeRateVote{
 		ExchangeRateTuples: tuples,

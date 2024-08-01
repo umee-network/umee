@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"math/rand"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
+
 	"github.com/umee-network/umee/v6/x/leverage/types"
 )
 
@@ -20,59 +22,59 @@ const (
 )
 
 // GenCompleteLiquidationThreshold produces a randomized CompleteLiquidationThreshold in the range of [0.050, 0.100]
-func GenCompleteLiquidationThreshold(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(50, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(950)), 3))
+func GenCompleteLiquidationThreshold(r *rand.Rand) sdkmath.LegacyDec {
+	return sdkmath.LegacyNewDecWithPrec(50, 3).Add(sdkmath.LegacyNewDecWithPrec(int64(r.Intn(950)), 3))
 }
 
 // GenMinimumCloseFactor produces a randomized MinimumCloseFactor in the range of [0.001, 0.047]
-func GenMinimumCloseFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(1, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(46)), 3))
+func GenMinimumCloseFactor(r *rand.Rand) sdkmath.LegacyDec {
+	return sdkmath.LegacyNewDecWithPrec(1, 3).Add(sdkmath.LegacyNewDecWithPrec(int64(r.Intn(46)), 3))
 }
 
 // GenOracleRewardFactor produces a randomized OracleRewardFactor in the range of [0.005, 0.100]
-func GenOracleRewardFactor(r *rand.Rand) sdk.Dec {
-	return sdk.NewDecWithPrec(5, 3).Add(sdk.NewDecWithPrec(int64(r.Intn(995)), 3))
+func GenOracleRewardFactor(r *rand.Rand) sdkmath.LegacyDec {
+	return sdkmath.LegacyNewDecWithPrec(5, 3).Add(sdkmath.LegacyNewDecWithPrec(int64(r.Intn(995)), 3))
 }
 
 // GenSmallLiquidationSize produces a randomized SmallLiquidationSize in the range of [0, 1000]
-func GenSmallLiquidationSize(r *rand.Rand) sdk.Dec {
-	return sdk.NewDec(int64(r.Intn(1000)))
+func GenSmallLiquidationSize(r *rand.Rand) sdkmath.LegacyDec {
+	return sdkmath.LegacyNewDec(int64(r.Intn(1000)))
 }
 
 // GenDirectLiquidationFee produces a randomized DirectLiquidationFee in the range of [0, 1000]
-func GenDirectLiquidationFee(r *rand.Rand) sdk.Dec {
-	return sdk.NewDec(int64(r.Intn(1000)))
+func GenDirectLiquidationFee(r *rand.Rand) sdkmath.LegacyDec {
+	return sdkmath.LegacyNewDec(int64(r.Intn(1000)))
 }
 
 // RandomizedGenState generates a random GenesisState for oracle
 func RandomizedGenState(simState *module.SimulationState) {
-	var completeLiquidationThreshold sdk.Dec
+	var completeLiquidationThreshold sdkmath.LegacyDec
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, completeLiquidationThresholdKey, &completeLiquidationThreshold, simState.Rand,
+		completeLiquidationThresholdKey, &completeLiquidationThreshold, simState.Rand,
 		func(r *rand.Rand) { completeLiquidationThreshold = GenCompleteLiquidationThreshold(r) },
 	)
 
-	var minimumCloseFactor sdk.Dec
+	var minimumCloseFactor sdkmath.LegacyDec
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, minimumCloseFactorKey, &minimumCloseFactor, simState.Rand,
+		minimumCloseFactorKey, &minimumCloseFactor, simState.Rand,
 		func(r *rand.Rand) { minimumCloseFactor = GenMinimumCloseFactor(r) },
 	)
 
-	var oracleRewardFactor sdk.Dec
+	var oracleRewardFactor sdkmath.LegacyDec
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, oracleRewardFactorKey, &oracleRewardFactor, simState.Rand,
+		oracleRewardFactorKey, &oracleRewardFactor, simState.Rand,
 		func(r *rand.Rand) { oracleRewardFactor = GenOracleRewardFactor(r) },
 	)
 
-	var smallLiquidationSize sdk.Dec
+	var smallLiquidationSize sdkmath.LegacyDec
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, smallLiquidationSizeKey, &smallLiquidationSize, simState.Rand,
+		smallLiquidationSizeKey, &smallLiquidationSize, simState.Rand,
 		func(r *rand.Rand) { smallLiquidationSize = GenSmallLiquidationSize(r) },
 	)
 
-	var directLiquidationFee sdk.Dec
+	var directLiquidationFee sdkmath.LegacyDec
 	simState.AppParams.GetOrGenerate(
-		simState.Cdc, directLiquidationFeeKey, &directLiquidationFee, simState.Rand,
+		directLiquidationFeeKey, &directLiquidationFee, simState.Rand,
 		func(r *rand.Rand) { smallLiquidationSize = GenDirectLiquidationFee(r) },
 	)
 

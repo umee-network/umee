@@ -20,7 +20,7 @@ type tokenExchangeRate struct {
 	baseDenom    string
 	symbol       string
 	exponent     uint32
-	exchangeRate sdk.Dec
+	exchangeRate sdkmath.LegacyDec
 }
 
 // Separated from grpc_query.go
@@ -71,7 +71,8 @@ func (q Querier) Inspect(
 		}
 		checkedAddrs[addr.String()] = struct{}{}
 
-		borrowedValue, collateralValue, liquidationThreshold := sdk.ZeroDec(), sdk.ZeroDec(), sdk.ZeroDec()
+		borrowedValue, collateralValue, liquidationThreshold := sdkmath.LegacyZeroDec(),
+			sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()
 		position, err := k.GetAccountPosition(ctx, addr, true)
 		if err == nil {
 			borrowedValue = position.BorrowedValue()
@@ -216,7 +217,7 @@ func symbolDecCoins(
 	symbolCoins := make([]types.PositionBalance, 0)
 
 	for _, c := range coins {
-		exchangeRate := sdk.OneDec()
+		exchangeRate := sdkmath.LegacyOneDec()
 		if coin.HasUTokenPrefix(c.Denom) {
 			// uTokens will be converted to base tokens
 			c.Denom = coin.StripUTokenDenom(c.Denom)
@@ -227,7 +228,7 @@ func symbolDecCoins(
 			// unregistered tokens cannot be converted, but can be returned as base denom
 			// symbolCoins = symbolCoins.Add(sdk.NewDecCoinFromDec(c.Denom, sdk.NewDecFromInt(c.Amount)))
 			symbolCoins = append(symbolCoins, types.PositionBalance{
-				Amount:     sdk.NewDecFromInt(c.Amount),
+				Amount:     sdkmath.LegacyNewDecFromInt(c.Amount),
 				BaseDenom:  c.Denom,
 				BaseAmount: c.Amount,
 				Denom:      c.Denom,
@@ -247,9 +248,9 @@ func symbolDecCoins(
 	return symbolCoins
 }
 
-// neat truncates an sdk.Dec to a common-sense precision based on its size and converts it to float.
+// neat truncates an sdkmath.LegacyDec to a common-sense precision based on its size and converts it to float.
 // This greatly improves readability when viewing balances.
-func neat(num sdk.Dec) float64 {
+func neat(num sdkmath.LegacyDec) float64 {
 	n := num.MustFloat64()
 	a := math.Abs(n)
 	precision := 2 // Round to cents if 0.01 <= n <= 100

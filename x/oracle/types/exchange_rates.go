@@ -5,11 +5,11 @@ import (
 	"fmt"
 	time "time"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 )
 
 // NewDenomExchangeRate creates a DenomExchangeRate instance
-func NewDenomExchangeRate(denom string, exchangeRate sdk.Dec, t time.Time) DenomExchangeRate {
+func NewDenomExchangeRate(denom string, exchangeRate sdkmath.LegacyDec, t time.Time) DenomExchangeRate {
 	return DenomExchangeRate{
 		Denom:     denom,
 		Rate:      exchangeRate,
@@ -24,8 +24,8 @@ func (v DenomExchangeRate) String() string {
 
 // ExchangeRate is type for storing rate and timestamp of denom into store without denom.
 type ExchangeRate struct {
-	Rate      sdk.Dec   `json:"rate"`
-	Timestamp time.Time `json:"timestamp"`
+	Rate      sdkmath.LegacyDec `json:"rate"`
+	Timestamp time.Time         `json:"timestamp"`
 }
 
 // Marshal implements store.Marshalable.

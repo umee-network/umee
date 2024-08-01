@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/CosmWasm/wasmd/x/wasm/ioutils"
 	"github.com/CosmWasm/wasmd/x/wasm/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -24,7 +25,7 @@ func (c *Client) WasmDeployContract(contractPath string) (*sdk.TxResponse, error
 
 func (c *Client) WasmInitContract(storeCode uint64, initMsg []byte) (*sdk.TxResponse, error) {
 	fromIdx := 0
-	amount := sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdk.NewInt(1)))
+	amount := sdk.NewCoins(sdk.NewCoin(appparams.BondDenom, sdkmath.NewInt(1)))
 	msg := types.MsgInstantiateContract{
 		Sender: c.KeyringAddress(fromIdx).String(),
 		CodeID: storeCode,

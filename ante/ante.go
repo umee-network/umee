@@ -1,16 +1,17 @@
 package ante
 
 import (
+	storetypes "cosmossdk.io/store/types"
+	txsigning "cosmossdk.io/x/tx/signing"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmTypes "github.com/CosmWasm/wasmd/x/wasm/types"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	cosmosante "github.com/cosmos/cosmos-sdk/x/auth/ante"
-	"github.com/cosmos/cosmos-sdk/x/auth/signing"
 	"github.com/cosmos/cosmos-sdk/x/auth/types"
-	ibcante "github.com/cosmos/ibc-go/v7/modules/core/ante"
-	ibckeeper "github.com/cosmos/ibc-go/v7/modules/core/keeper"
+	ibcante "github.com/cosmos/ibc-go/v8/modules/core/ante"
+	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
 )
 
 type HandlerOptions struct {
@@ -19,10 +20,10 @@ type HandlerOptions struct {
 	FeegrantKeeper    cosmosante.FeegrantKeeper
 	OracleKeeper      OracleKeeper
 	IBCKeeper         *ibckeeper.Keeper
-	SignModeHandler   signing.SignModeHandler
+	SignModeHandler   *txsigning.HandlerMap
 	SigGasConsumer    cosmosante.SignatureVerificationGasConsumer
 	WasmConfig        *wasmTypes.WasmConfig
-	TXCounterStoreKey storetypes.StoreKey
+	TXCounterStoreKey *storetypes.KVStoreKey
 }
 
 // NewAnteHandler returns an AnteHandler that checks and increments sequence
@@ -48,7 +49,7 @@ func NewAnteHandler(options HandlerOptions) (sdk.AnteHandler, error) {
 		wasmkeeper.NewLimitSimulationGasDecorator(
 			options.WasmConfig.SimulationGasLimit,
 		), // after setup context to enforce limits early
-		wasmkeeper.NewCountTXDecorator(options.TXCounterStoreKey),
+		wasmkeeper.NewCountTXDecorator(runtime.NewKVStoreService(options.TXCounterStoreKey)),
 		cosmosante.NewExtensionOptionsDecorator(nil),     // nil=reject extensions
 		NewSpamPreventionDecorator(options.OracleKeeper), // spam prevention
 		cosmosante.NewValidateBasicDecorator(),

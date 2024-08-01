@@ -3,7 +3,8 @@ package store
 import (
 	"testing"
 
-	prefixstore "github.com/cosmos/cosmos-sdk/store/prefix"
+	sdkmath "cosmossdk.io/math"
+	prefixstore "cosmossdk.io/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"gotest.tools/v3/assert"
 
@@ -70,7 +71,7 @@ func TestSumCoins(t *testing.T) {
 
 	db := tsdk.KVStore(t)
 	for i, p := range pairs {
-		err := SetInt(db, withPrefixAnNull(p.K), sdk.NewIntFromUint64(p.V), "amount")
+		err := SetInt(db, withPrefixAnNull(p.K), sdkmath.NewIntFromUint64(p.V), "amount")
 		assert.NilError(t, err, "pairs[%d]", i)
 	}
 

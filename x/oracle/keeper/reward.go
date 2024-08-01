@@ -3,6 +3,7 @@ package keeper
 import (
 	"fmt"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
 	"github.com/umee-network/umee/v6/util/genmap"
@@ -41,7 +42,7 @@ func (k Keeper) RewardBallotWinners(
 		return
 	}
 
-	distributionRatio := sdk.NewDec(votePeriod).QuoInt64(rewardDistributionWindow)
+	distributionRatio := sdkmath.LegacyNewDec(votePeriod).QuoInt64(rewardDistributionWindow)
 	var periodRewards sdk.DecCoins
 	rewardDenoms := prependUmeeIfUnique(voteTargets)
 	for _, denom := range rewardDenoms {
@@ -54,7 +55,7 @@ func (k Keeper) RewardBallotWinners(
 
 		periodRewards = periodRewards.Add(sdk.NewDecCoinFromDec(
 			denom,
-			sdk.NewDecFromInt(rewardPool.Amount).Mul(distributionRatio),
+			sdkmath.LegacyNewDecFromInt(rewardPool.Amount).Mul(distributionRatio),
 		))
 	}
 
@@ -62,19 +63,25 @@ func (k Keeper) RewardBallotWinners(
 	var distributedReward sdk.Coins
 
 	for _, winner := range ballotWinners {
-		receiverVal := k.StakingKeeper.Validator(ctx, winner.Validator)
+		receiverVal, err := k.StakingKeeper.Validator(ctx, winner.Validator)
+		if err != nil {
+			panic(fmt.Errorf("failed to get validator %s and error %w", winner.Validator.String(), err))
+		}
 		// in case absence of the validator, we just skip distribution
 		if receiverVal == nil {
 			continue
 		}
 
 		// reflects contribution
-		rewardCoins, _ := periodRewards.MulDec(sdk.NewDec(winner.Weight).QuoInt64(ballotPowerSum)).TruncateDecimal()
+		rewardCoins, _ := periodRewards.MulDec(sdkmath.LegacyNewDec(winner.Weight).QuoInt64(ballotPowerSum)).TruncateDecimal()
 		if rewardCoins.IsZero() {
 			continue
 		}
 
-		k.distrKeeper.AllocateTokensToValidator(ctx, receiverVal, sdk.NewDecCoinsFromCoins(rewardCoins...))
+		err = k.distrKeeper.AllocateTokensToValidator(ctx, receiverVal, sdk.NewDecCoinsFromCoins(rewardCoins...))
+		if err != nil {
+			panic(fmt.Errorf("failed to allocate tokens to validator %w", err))
+		}
 		distributedReward = distributedReward.Add(rewardCoins...)
 	}
 

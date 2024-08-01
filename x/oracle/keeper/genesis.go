@@ -1,7 +1,9 @@
 package keeper
 
 import (
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v6/x/oracle/types"
 )
 
@@ -12,7 +14,7 @@ func (k Keeper) IterateAllHistoricPrices(
 	handler func(types.Price) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixHistoricPrice)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -47,7 +49,7 @@ func (k Keeper) IterateAllMedianPrices(
 	handler func(types.Price) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedian)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixMedian)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {
@@ -83,7 +85,7 @@ func (k Keeper) IterateAllMedianDeviationPrices(
 	handler func(types.Price) bool,
 ) {
 	store := ctx.KVStore(k.storeKey)
-	iter := sdk.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
+	iter := storetypes.KVStorePrefixIterator(store, types.KeyPrefixMedianDeviation)
 	defer iter.Close()
 
 	for ; iter.Valid(); iter.Next() {

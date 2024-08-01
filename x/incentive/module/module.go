@@ -103,6 +103,16 @@ type AppModule struct {
 	leverageKeeper incentive.LeverageKeeper
 }
 
+// IsAppModule implements module.AppModule.
+func (AppModule) IsAppModule() {
+	panic("unimplemented")
+}
+
+// IsOnePerModuleType implements module.AppModule.
+func (AppModule) IsOnePerModuleType() {
+	panic("unimplemented")
+}
+
 func NewAppModule(
 	cdc codec.Codec, keeper keeper.Keeper, bk incentive.BankKeeper, lk incentive.LeverageKeeper,
 ) AppModule {
@@ -152,10 +162,10 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/incentive module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ sdk.Context) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/incentive module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx sdk.Context) []abci.ValidatorUpdate {
 	return EndBlocker(ctx, am.keeper)
 }

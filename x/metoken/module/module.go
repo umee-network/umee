@@ -87,6 +87,12 @@ type AppModule struct {
 	kb keeper.Builder
 }
 
+// IsAppModule implements module.AppModule.
+func (AppModule) IsAppModule() {}
+
+// IsOnePerModuleType implements module.AppModule.
+func (AppModule) IsOnePerModuleType() {}
+
 // InitGenesis implements module.AppModule
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genState metoken.GenesisState
@@ -117,11 +123,11 @@ func (am AppModule) ConsensusVersion() uint64 {
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/metoken module.
-func (am AppModule) BeginBlock(_ sdk.Context, _ abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(_ sdk.Context) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/metoken module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx sdk.Context) []abci.ValidatorUpdate {
 	return EndBlocker(am.kb.Keeper(&ctx))
 }
 

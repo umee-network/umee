@@ -51,7 +51,7 @@ func (i Index) Validate() error {
 		return err
 	}
 
-	totalAllocation := sdk.ZeroDec()
+	totalAllocation := sdkmath.LegacyZeroDec()
 	existingAssets := make(map[string]struct{})
 	for _, asset := range i.AcceptedAssets {
 		if _, present := existingAssets[asset.Denom]; present {
@@ -69,7 +69,7 @@ func (i Index) Validate() error {
 		totalAllocation = totalAllocation.Add(asset.TargetAllocation)
 	}
 
-	if !totalAllocation.Equal(sdk.OneDec()) {
+	if !totalAllocation.Equal(sdkmath.LegacyOneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrapf(
 			"total allocation %s of all the accepted assets should be 1.0",
 			totalAllocation.String(),
@@ -80,7 +80,7 @@ func (i Index) Validate() error {
 }
 
 // NewFee creates a new Fee object
-func NewFee(minFee, balancedFee, maxFee sdk.Dec) Fee {
+func NewFee(minFee, balancedFee, maxFee sdkmath.LegacyDec) Fee {
 	return Fee{
 		MinFee:      minFee,
 		BalancedFee: balancedFee,
@@ -90,11 +90,11 @@ func NewFee(minFee, balancedFee, maxFee sdk.Dec) Fee {
 
 // Validate perform basic validation of the Fee
 func (f Fee) Validate() error {
-	if f.MinFee.IsNegative() || f.MinFee.GT(sdk.OneDec()) {
+	if f.MinFee.IsNegative() || f.MinFee.GT(sdkmath.LegacyOneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrapf("min_fee %s should be between 0.0 and 1.0", f.MinFee.String())
 	}
 
-	if f.BalancedFee.IsNegative() || f.BalancedFee.GT(sdk.OneDec()) {
+	if f.BalancedFee.IsNegative() || f.BalancedFee.GT(sdkmath.LegacyOneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrapf(
 			"balanced_fee %s should be between 0.0 and 1.0",
 			f.BalancedFee.String(),
@@ -110,7 +110,7 @@ func (f Fee) Validate() error {
 		)
 	}
 
-	if f.MaxFee.IsNegative() || f.MaxFee.GT(sdk.OneDec()) {
+	if f.MaxFee.IsNegative() || f.MaxFee.GT(sdkmath.LegacyOneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrapf("max_fee %s should be between 0.0 and 1.0", f.MaxFee.String())
 	}
 
@@ -127,7 +127,7 @@ func (f Fee) Validate() error {
 }
 
 // CalculateFee based on its settings and allocation deviation.
-func (f Fee) CalculateFee(allocationDeviation sdk.Dec) sdk.Dec {
+func (f Fee) CalculateFee(allocationDeviation sdkmath.LegacyDec) sdkmath.LegacyDec {
 	fee := allocationDeviation.Mul(f.BalancedFee).Add(f.BalancedFee)
 
 	if fee.LT(f.MinFee) {
@@ -142,7 +142,7 @@ func (f Fee) CalculateFee(allocationDeviation sdk.Dec) sdk.Dec {
 }
 
 // NewAcceptedAsset creates a new AcceptedAsset object
-func NewAcceptedAsset(denom string, reservePortion, targetAllocation sdk.Dec) AcceptedAsset {
+func NewAcceptedAsset(denom string, reservePortion, targetAllocation sdkmath.LegacyDec) AcceptedAsset {
 	return AcceptedAsset{
 		Denom:            denom,
 		ReservePortion:   reservePortion,
@@ -152,14 +152,14 @@ func NewAcceptedAsset(denom string, reservePortion, targetAllocation sdk.Dec) Ac
 
 // Validate perform basic validation of the AcceptedAsset
 func (aa AcceptedAsset) Validate() error {
-	if aa.TargetAllocation.IsNegative() || aa.TargetAllocation.GT(sdk.OneDec()) {
+	if aa.TargetAllocation.IsNegative() || aa.TargetAllocation.GT(sdkmath.LegacyOneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrapf(
 			"target_allocation %s should be between 0.0 and 1.0",
 			aa.TargetAllocation.String(),
 		)
 	}
 
-	if aa.ReservePortion.IsNegative() || aa.ReservePortion.GT(sdk.OneDec()) {
+	if aa.ReservePortion.IsNegative() || aa.ReservePortion.GT(sdkmath.LegacyOneDec()) {
 		return sdkerrors.ErrInvalidRequest.Wrapf(
 			"reserve_portion %s should be between 0.0 and 1.0",
 			aa.ReservePortion.String(),

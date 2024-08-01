@@ -99,8 +99,7 @@ func (SlashingModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
 
 func GenTxValidator(msgs []sdk.Msg) error {
 	if n := len(msgs); n != 1 {
-		return fmt.Errorf(
-			"contains invalid number of messages; expected: 2 or 1; got: %d", n)
+		return fmt.Errorf("messages are empty, expected: minimum 1; got: %d", n)
 	}
 
 	if err := assertMsgType[*stakingtypes.MsgCreateValidator](msgs[0], 0); err != nil {
@@ -108,8 +107,10 @@ func GenTxValidator(msgs []sdk.Msg) error {
 	}
 
 	for i := range msgs {
-		if err := msgs[i].ValidateBasic(); err != nil {
-			return fmt.Errorf("invalid GenTx msg[%d] '%s': %s", i, msgs[i], err)
+		if m, ok := msgs[i].(sdk.HasValidateBasic); ok {
+			if err := m.ValidateBasic(); err != nil {
+				return fmt.Errorf("invalid GenTx msg[%d] '%s': %s", i, msgs[i], err)
+			}
 		}
 	}
 	return nil

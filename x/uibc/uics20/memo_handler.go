@@ -6,10 +6,11 @@ import (
 	"strings"
 
 	sdkerrors "cosmossdk.io/errors"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	ics20types "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
-	ibcexported "github.com/cosmos/ibc-go/v7/modules/core/exported"
+	ics20types "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
+	ibcexported "github.com/cosmos/ibc-go/v8/modules/core/exported"
 
 	ltypes "github.com/umee-network/umee/v6/x/leverage/types"
 	"github.com/umee-network/umee/v6/x/uibc"
@@ -26,7 +27,7 @@ var (
 )
 
 type MemoHandler struct {
-	cdc      codec.JSONCodec
+	cdc      codec.Codec
 	leverage ltypes.MsgServer
 
 	executeEnabled bool
@@ -48,7 +49,7 @@ func (mh *MemoHandler) onRecvPacketPrepare(
 	var err error
 	logger := recvPacketLogger(ctx)
 	mh.memo = ftData.Memo
-	amount, ok := sdk.NewIntFromString(ftData.Amount)
+	amount, ok := sdkmath.NewIntFromString(ftData.Amount)
 	if !ok { // must not happen
 		return nil, fmt.Errorf("can't parse transfer amount: %s", ftData.Amount)
 	}
@@ -146,7 +147,18 @@ func (mh MemoHandler) validateMemoMsg() error {
 	}
 
 	for _, msg := range mh.msgs {
-		if signers := msg.GetSigners(); len(signers) != 1 || !signers[0].Equals(mh.receiver) {
+		signers, _, err := mh.cdc.GetMsgV1Signers(msg)
+		if err != nil {
+			return errWrongSigner
+		}
+		checkSigner := func(signer []byte, receiver string) bool {
+			addrStr, err := mh.cdc.InterfaceRegistry().SigningContext().AddressCodec().BytesToString(signer)
+			if err != nil {
+				return false
+			}
+			return addrStr == receiver
+		}
+		if len(signers) != 1 || !checkSigner(signers[0], mh.receiver.String()) {
 			return errWrongSigner
 		}
 	}

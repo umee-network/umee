@@ -3,7 +3,8 @@ package uics20
 import (
 	"testing"
 
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -18,6 +19,7 @@ import (
 )
 
 func TestValidateMemoMsg(t *testing.T) {
+	cdc := tsdk.NewCodec(uibc.RegisterInterfaces, ltypes.RegisterInterfaces)
 	assert := assert.New(t)
 	receiver := accs.Alice
 	asset := coin.New("atom", 10)
@@ -41,7 +43,7 @@ func TestValidateMemoMsg(t *testing.T) {
 	errMsg0type := errMsg0Type.Error()
 	errWrongSigner := errWrongSigner.Error()
 
-	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv()}
+	mh := MemoHandler{leverage: mocks.NewLvgNoopMsgSrv(), cdc: cdc}
 	tcs := []struct {
 		msgs   []sdk.Msg
 		errstr string
@@ -116,7 +118,7 @@ func TestMsgMarshalling(t *testing.T) {
 			Authority: "auth1", Description: "d1",
 			IbcStatus: uibc.IBCTransferStatus_IBC_TRANSFER_STATUS_QUOTA_OUT_DISABLED,
 		},
-		ltypes.NewMsgCollateralize(accs.Alice, sdk.NewCoin("ATOM", sdk.NewInt(1020))),
+		ltypes.NewMsgCollateralize(accs.Alice, sdk.NewCoin("ATOM", sdkmath.NewInt(1020))),
 	}
 	anyMsg, err := tx.SetMsgs(msgs)
 	assert.NoError(err)
@@ -189,7 +191,10 @@ func TestMemoExecute(t *testing.T) {
 	for i, tc := range tcs {
 		mh.executeEnabled = tc.enabled
 		mh.isGMP = tc.gmp
-		mh.msgs = tc.msgs
+		// mh.msgs = tc.msgs
+		for _, msg := range tc.msgs {
+			mh.msgs = append(mh.msgs, msg.(sdk.LegacyMsg))
+		}
 		err := mh.execute(&ctx)
 		assert.ErrorIs(t, err, tc.err, i)
 	}

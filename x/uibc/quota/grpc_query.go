@@ -3,7 +3,9 @@ package quota
 import (
 	context "context"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/umee-network/umee/v6/x/uibc"
 )
 
@@ -35,7 +37,7 @@ func (q Querier) Outflows(goCtx context.Context, req *uibc.QueryOutflows) (
 ) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 	k := q.Keeper(&ctx)
-	var o sdk.Dec
+	var o sdkmath.LegacyDec
 	if len(req.Denom) == 0 {
 		o = k.GetOutflowSum()
 	} else {

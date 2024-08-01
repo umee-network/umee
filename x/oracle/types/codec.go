@@ -17,7 +17,8 @@ var (
 	//
 	// The actual codec used for serialization should be provided to x/staking and
 	// defined at the application level.
-	ModuleCdc = codec.NewAminoCodec(amino)
+	// TODO: we have to ModuleCdc from all modules because GetSignBytes() automate by cosmos-sdk v0.50
+	ModuleCdc = codec.NewAminoCodec(amino) //nolint
 )
 
 func init() {

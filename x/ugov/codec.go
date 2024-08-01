@@ -13,7 +13,7 @@ import (
 // encoding as Amino is still used for that purpose.
 var (
 	amino     = codec.NewLegacyAmino()
-	ModuleCdc = codec.NewAminoCodec(amino)
+	ModuleCdc = codec.NewAminoCodec(amino) //nolint
 )
 
 func init() {

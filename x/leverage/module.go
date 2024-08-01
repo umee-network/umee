@@ -103,6 +103,12 @@ type AppModule struct {
 	bankKeeper    bankkeeper.Keeper
 }
 
+// IsAppModule implements module.AppModule.
+func (AppModule) IsAppModule() {}
+
+// IsOnePerModuleType implements module.AppModule.
+func (AppModule) IsOnePerModuleType() {}
+
 func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper, bk bankkeeper.Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: NewAppModuleBasic(cdc),
@@ -150,18 +156,18 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 // BeginBlock executes all ABCI BeginBlock logic respective to the x/leverage module.
-func (am AppModule) BeginBlock(sdk.Context, abci.RequestBeginBlock) {}
+func (am AppModule) BeginBlock(sdk.Context) {}
 
 // EndBlock executes all ABCI EndBlock logic respective to the x/leverage module.
 // It returns no validator updates.
-func (am AppModule) EndBlock(ctx sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
+func (am AppModule) EndBlock(ctx sdk.Context) []abci.ValidatorUpdate {
 	return EndBlocker(ctx, am.keeper)
 }
 
 // WeightedOperations returns the all the leverage module operations with their respective weights.
 func (am AppModule) WeightedOperations(simState module.SimulationState) []simtypes.WeightedOperation {
 	return simulation.WeightedOperations(
-		simState.AppParams, simState.Cdc, am.accountKeeper, am.bankKeeper, am.keeper,
+		simState.AppParams, am.accountKeeper, am.bankKeeper, am.keeper,
 	)
 }
 

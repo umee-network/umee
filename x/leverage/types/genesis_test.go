@@ -3,8 +3,8 @@ package types
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-
 	"gotest.tools/v3/assert"
 )
 
@@ -23,7 +23,7 @@ func TestGenesisValidation(t *testing.T) {
 			"invalid params",
 			*NewGenesisState(
 				Params{
-					CompleteLiquidationThreshold: sdk.MustNewDecFromStr("-0.4"),
+					CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("-0.4"),
 				}, nil, nil, nil, nil, 0, nil, nil, nil, nil,
 			),
 			true,
@@ -124,7 +124,7 @@ func TestGenesisValidation(t *testing.T) {
 			GenesisState{
 				Params: DefaultParams(),
 				InterestScalars: []InterestScalar{
-					NewInterestScalar("", sdk.ZeroDec()),
+					NewInterestScalar("", sdkmath.LegacyZeroDec()),
 				},
 			},
 			true,
@@ -135,7 +135,7 @@ func TestGenesisValidation(t *testing.T) {
 			GenesisState{
 				Params: DefaultParams(),
 				InterestScalars: []InterestScalar{
-					NewInterestScalar(validDenom, sdk.ZeroDec()),
+					NewInterestScalar(validDenom, sdkmath.LegacyZeroDec()),
 				},
 			},
 			true,

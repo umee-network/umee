@@ -3,7 +3,7 @@ package uibc
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 
 	"github.com/umee-network/umee/v6/tests/accs"
 	"github.com/umee-network/umee/v6/tests/tcheckers"
@@ -15,11 +15,11 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 	validMsg := MsgGovUpdateQuota{
 		Authority:                   checkers.GovModuleAddr,
 		Description:                 "",
-		Total:                       sdk.MustNewDecFromStr("1000"),
-		PerDenom:                    sdk.MustNewDecFromStr("1000"),
-		InflowOutflowQuotaBase:      sdk.MustNewDecFromStr("500"),
-		InflowOutflowTokenQuotaBase: sdk.MustNewDecFromStr("500"),
-		InflowOutflowQuotaRate:      sdk.MustNewDecFromStr("5"),
+		Total:                       sdkmath.LegacyMustNewDecFromStr("1000"),
+		PerDenom:                    sdkmath.LegacyMustNewDecFromStr("1000"),
+		InflowOutflowQuotaBase:      sdkmath.LegacyMustNewDecFromStr("500"),
+		InflowOutflowTokenQuotaBase: sdkmath.LegacyMustNewDecFromStr("500"),
+		InflowOutflowQuotaRate:      sdkmath.LegacyMustNewDecFromStr("5"),
 		QuotaDuration:               100,
 	}
 
@@ -34,11 +34,11 @@ func TestMsgGovUpdateQuota(t *testing.T) {
 	invalidDesc2.Description = ""
 
 	invalidTotalQuota := validMsg
-	invalidTotalQuota.PerDenom = sdk.NewDec(10)
-	invalidTotalQuota.Total = sdk.NewDec(2)
+	invalidTotalQuota.PerDenom = sdkmath.LegacyNewDec(10)
+	invalidTotalQuota.Total = sdkmath.LegacyNewDec(2)
 
 	invalidInflowOutflow := validMsg
-	invalidInflowOutflow.InflowOutflowTokenQuotaBase = sdk.MustNewDecFromStr("501")
+	invalidInflowOutflow.InflowOutflowTokenQuotaBase = sdkmath.LegacyMustNewDecFromStr("501")
 
 	tests := []struct {
 		name   string

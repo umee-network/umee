@@ -332,19 +332,19 @@ The `TotalSupplied` of a token denom is the sum of all tokens supplied to the as
 The `x/leverage` module keeps the following objects in state:
 
 - Registered Token (Token settings)\*: `0x01 | denom -> Token`
-- Adjusted Borrowed Amount: `0x02 | borrowerAddress | denom -> sdk.Dec`
+- Adjusted Borrowed Amount: `0x02 | borrowerAddress | denom -> sdkmath.LegacyDec`
 - Collateral Setting: `0x03 | borrowerAddress | denom -> 0x01`
-- Collateral Amount: `0x04 | borrowerAddress | denom -> sdk.Int`
-- Reserved Amount: `0x05 | denom -> sdk.Int`
+- Collateral Amount: `0x04 | borrowerAddress | denom -> sdkmath.Int`
+- Reserved Amount: `0x05 | denom -> sdkmath.Int`
 - Last Interest Accrual (Unix Time): `0x06 -> int64`
 - Bad Debt Instance: `0x07 | borrowerAddress | denom -> 0x01`
-- Interest Scalar: `0x08 | denom -> sdk.Dec`
-- Total Borrowed: `0x09 | denom -> sdk.Dec`
-- Totak UToken Supply: `0x0A | denom -> sdk.Int`
+- Interest Scalar: `0x08 | denom -> sdkmath.LegacyDec`
+- Total Borrowed: `0x09 | denom -> sdkmath.LegacyDec`
+- Totak UToken Supply: `0x0A | denom -> sdkmath.Int`
 
 The following serialization methods are used unless otherwise stated:
 
-- `sdk.Dec.Marshal()` and `sdk.Int.Marshal()` for numeric types
+- `sdkmath.LegacyDec.Marshal()` and `sdkmath.Int.Marshal()` for numeric types
 - `[]byte(denom) | 0x00` for asset and uToken denominations (strings)
 - `address.MustLengthPrefix(sdk.Address)` for account addresses
 - `cdc.Marshal` and `cdc.Unmarshal` for `gogoproto/types.Int64Value` wrapper around int64

@@ -55,10 +55,10 @@ func TestMsgRewardsBid(t *testing.T) {
 	invalid := validMsg
 	invalid.Sender = "not a valid acc"
 	invalid.Id = 0
-	invalid.Amount.Amount = sdk.ZeroInt()
+	invalid.Amount.Amount = math.ZeroInt()
 
 	invalidAmount1 := validMsg
-	invalidAmount1.Amount.Amount = sdk.NewInt(-100)
+	invalidAmount1.Amount.Amount = math.NewInt(-100)
 
 	invalidDenom := validMsg
 	invalidDenom.Amount.Denom = "other"
@@ -84,7 +84,7 @@ func TestMsgRewardsBid(t *testing.T) {
 
 func TestValidateMin(t *testing.T) {
 	t.Parallel()
-	min := sdk.NewInt(123)
+	min := math.NewInt(123)
 	expectedErr := "bid amount must be at least 123uumee"
 	umeeNegative := coin.Umee(0)
 	umeeNegative.Amount = math.NewInt(-1)

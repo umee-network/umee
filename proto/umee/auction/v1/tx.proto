@@ -13,6 +13,7 @@ option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/auction module's Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   //
   // Rewards auction: bid umee for protocol rewards
   //

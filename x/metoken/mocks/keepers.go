@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	math "cosmossdk.io/math"
@@ -38,7 +39,7 @@ func (m *MockBankKeeper) EXPECT() *MockBankKeeperMockRecorder {
 }
 
 // BurnCoins mocks base method.
-func (m *MockBankKeeper) BurnCoins(ctx types.Context, moduleName string, amounts types.Coins) error {
+func (m *MockBankKeeper) BurnCoins(ctx context.Context, moduleName string, amounts types.Coins) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "BurnCoins", ctx, moduleName, amounts)
 	ret0, _ := ret[0].(error)
@@ -52,7 +53,7 @@ func (mr *MockBankKeeperMockRecorder) BurnCoins(ctx, moduleName, amounts interfa
 }
 
 // MintCoins mocks base method.
-func (m *MockBankKeeper) MintCoins(ctx types.Context, moduleName string, amounts types.Coins) error {
+func (m *MockBankKeeper) MintCoins(ctx context.Context, moduleName string, amounts types.Coins) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "MintCoins", ctx, moduleName, amounts)
 	ret0, _ := ret[0].(error)
@@ -66,7 +67,7 @@ func (mr *MockBankKeeperMockRecorder) MintCoins(ctx, moduleName, amounts interfa
 }
 
 // SendCoinsFromAccountToModule mocks base method.
-func (m *MockBankKeeper) SendCoinsFromAccountToModule(ctx types.Context, senderAddr types.AccAddress, recipientModule string, amt types.Coins) error {
+func (m *MockBankKeeper) SendCoinsFromAccountToModule(ctx context.Context, senderAddr types.AccAddress, recipientModule string, amt types.Coins) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendCoinsFromAccountToModule", ctx, senderAddr, recipientModule, amt)
 	ret0, _ := ret[0].(error)
@@ -80,7 +81,7 @@ func (mr *MockBankKeeperMockRecorder) SendCoinsFromAccountToModule(ctx, senderAd
 }
 
 // SendCoinsFromModuleToAccount mocks base method.
-func (m *MockBankKeeper) SendCoinsFromModuleToAccount(ctx types.Context, senderModule string, recipientAddr types.AccAddress, amt types.Coins) error {
+func (m *MockBankKeeper) SendCoinsFromModuleToAccount(ctx context.Context, senderModule string, recipientAddr types.AccAddress, amt types.Coins) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SendCoinsFromModuleToAccount", ctx, senderModule, recipientAddr, amt)
 	ret0, _ := ret[0].(error)
@@ -276,7 +277,7 @@ func (mr *MockOracleKeeperMockRecorder) AllMedianPrices(ctx interface{}) *gomock
 }
 
 // SetExchangeRate mocks base method.
-func (m *MockOracleKeeper) SetExchangeRate(ctx types.Context, denom string, rate types.Dec) {
+func (m *MockOracleKeeper) SetExchangeRate(ctx types.Context, denom string, rate math.LegacyDec) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetExchangeRate", ctx, denom, rate)
 }

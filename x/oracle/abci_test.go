@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/secp256k1"
 	tmrand "github.com/cometbft/cometbft/libs/rand"
 	tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
@@ -13,7 +14,6 @@ import (
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/staking/testutil"
 
 	umeeapp "github.com/umee-network/umee/v6/app"
@@ -43,7 +43,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	require := s.Require()
 	isCheckTx := false
 	app := umeeapp.Setup(s.T())
-	ctx := app.NewContext(isCheckTx, tmproto.Header{
+	ctx := app.NewContextLegacy(isCheckTx, tmproto.Header{
 		ChainID: fmt.Sprintf("test-chain-%s", tmrand.Str(4)),
 		Time:    time.Now(),
 	})
@@ -51,7 +51,8 @@ func (s *IntegrationTestSuite) SetupTest() {
 	oracle.InitGenesis(ctx, app.OracleKeeper, *types.DefaultGenesisState())
 
 	// validate setup... umeeapp.Setup creates one validator, with 1uumee self delegation
-	setupVals := app.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	setupVals, err := app.StakingKeeper.GetBondedValidatorsByPower(ctx)
+	require.NoError(err)
 	s.Require().Len(setupVals, 1)
 	s.Require().Equal(int64(1), setupVals[0].GetConsensusPower(app.StakingKeeper.PowerReduction(ctx)))
 
@@ -59,7 +60,7 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.Denom = bondDenom
 
 	// mint and send coins to validators
-	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdk.NewIntFromUint64(3))))
+	require.NoError(app.BankKeeper.MintCoins(ctx, minttypes.ModuleName, initCoins.MulInt(sdkmath.NewIntFromUint64(3))))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr1, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr2, initCoins))
 	require.NoError(app.BankKeeper.SendCoinsFromModuleToAccount(ctx, minttypes.ModuleName, addr3, initCoins))
@@ -69,9 +70,9 @@ func (s *IntegrationTestSuite) SetupTest() {
 	sh.CreateValidatorWithValPower(valAddr2, valPubKey2, 398, true)
 	sh.CreateValidatorWithValPower(valAddr3, valPubKey3, 2, true)
 
-	staking.EndBlocker(ctx, app.StakingKeeper)
+	app.StakingKeeper.EndBlocker(ctx)
 
-	err := app.OracleKeeper.SetVoteThreshold(ctx, sdk.MustNewDecFromStr("0.4"))
+	err = app.OracleKeeper.SetVoteThreshold(ctx, sdkmath.LegacyMustNewDecFromStr("0.4"))
 	s.Require().NoError(err)
 
 	s.app = app
@@ -122,15 +123,15 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		val1Tuples = append(val1Tuples, types.ExchangeRateTuple{
 			Denom:        denom.SymbolDenom,
-			ExchangeRate: sdk.MustNewDecFromStr("1.0"),
+			ExchangeRate: sdkmath.LegacyMustNewDecFromStr("1.0"),
 		})
 		val2Tuples = append(val2Tuples, types.ExchangeRateTuple{
 			Denom:        denom.SymbolDenom,
-			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
+			ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.5"),
 		})
 		val3Tuples = append(val3Tuples, types.ExchangeRateTuple{
 			Denom:        denom.SymbolDenom,
-			ExchangeRate: sdk.MustNewDecFromStr("0.6"),
+			ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.6"),
 		})
 	}
 
@@ -169,7 +170,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
 		s.Require().Equal(types.ExchangeRate{
-			Rate:      sdk.OneDec(),
+			Rate:      sdkmath.LegacyOneDec(),
 			Timestamp: ctx.BlockTime(),
 		}, rate)
 	}
@@ -197,7 +198,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 		// price must exist, but with old timestamp
 		s.Require().NoError(err)
 		s.Require().Equal(types.ExchangeRate{
-			Rate:      sdk.OneDec(),
+			Rate:      sdkmath.LegacyOneDec(),
 			Timestamp: expiredTime,
 		}, rate)
 	}
@@ -221,7 +222,7 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	for _, denom := range app.OracleKeeper.AcceptList(ctx) {
 		rate, err := app.OracleKeeper.GetExchangeRate(ctx, denom.SymbolDenom)
 		s.Require().NoError(err)
-		s.Require().Equal(types.ExchangeRate{Rate: sdk.NewDecWithPrec(5, 1), Timestamp: ctx.BlockTime()}, rate)
+		s.Require().Equal(types.ExchangeRate{Rate: sdkmath.LegacyNewDecWithPrec(5, 1), Timestamp: ctx.BlockTime()}, rate)
 	}
 
 	// TODO: check reward distribution
@@ -237,13 +238,13 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 	val1Votes.ExchangeRateTuples = types.ExchangeRateTuples{
 		types.ExchangeRateTuple{
 			Denom:        "umee",
-			ExchangeRate: sdk.MustNewDecFromStr("1.0"),
+			ExchangeRate: sdkmath.LegacyMustNewDecFromStr("1.0"),
 		},
 	}
 	val2Votes.ExchangeRateTuples = types.ExchangeRateTuples{
 		types.ExchangeRateTuple{
 			Denom:        "atom",
-			ExchangeRate: sdk.MustNewDecFromStr("0.5"),
+			ExchangeRate: sdkmath.LegacyMustNewDecFromStr("0.5"),
 		},
 	}
 
@@ -258,24 +259,24 @@ func (s *IntegrationTestSuite) TestEndBlockerVoteThreshold() {
 
 	rate, err := app.OracleKeeper.GetExchangeRate(ctx, "umee")
 	s.Require().NoError(err)
-	s.Require().Equal(types.ExchangeRate{Rate: sdk.OneDec(), Timestamp: ctx.BlockTime()}, rate)
+	s.Require().Equal(types.ExchangeRate{Rate: sdkmath.LegacyOneDec(), Timestamp: ctx.BlockTime()}, rate)
 	rate, err = app.OracleKeeper.GetExchangeRate(ctx, "ATOM")
 	s.Require().ErrorIs(err, types.ErrUnknownDenom.Wrap("ATOM"))
 	s.Require().Equal(types.ExchangeRate{}, rate)
 }
 
-var exchangeRates = map[string][]sdk.Dec{
+var exchangeRates = map[string][]sdkmath.LegacyDec{
 	"ATOM": {
-		sdk.MustNewDecFromStr("12.99"),
-		sdk.MustNewDecFromStr("12.22"),
-		sdk.MustNewDecFromStr("13.1"),
-		sdk.MustNewDecFromStr("11.6"),
+		sdkmath.LegacyMustNewDecFromStr("12.99"),
+		sdkmath.LegacyMustNewDecFromStr("12.22"),
+		sdkmath.LegacyMustNewDecFromStr("13.1"),
+		sdkmath.LegacyMustNewDecFromStr("11.6"),
 	},
 	"UMEE": {
-		sdk.MustNewDecFromStr("1.89"),
-		sdk.MustNewDecFromStr("2.05"),
-		sdk.MustNewDecFromStr("2.34"),
-		sdk.MustNewDecFromStr("1.71"),
+		sdkmath.LegacyMustNewDecFromStr("1.89"),
+		sdkmath.LegacyMustNewDecFromStr("2.05"),
+		sdkmath.LegacyMustNewDecFromStr("2.34"),
+		sdkmath.LegacyMustNewDecFromStr("1.71"),
 	},
 }
 

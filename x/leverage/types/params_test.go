@@ -3,14 +3,13 @@ package types
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
-
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
 )
 
 func TestParams_Validate(t *testing.T) {
-	negativeDec := sdk.MustNewDecFromStr("-0.4")
-	exceededDec := sdk.MustNewDecFromStr("1.4")
+	negativeDec := sdkmath.LegacyMustNewDecFromStr("-0.4")
+	exceededDec := sdkmath.LegacyMustNewDecFromStr("1.4")
 
 	tcs := []struct {
 		name string
@@ -35,7 +34,7 @@ func TestParams_Validate(t *testing.T) {
 		{
 			"negative minimum close factor",
 			Params{
-				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
+				CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
 				MinimumCloseFactor:           negativeDec,
 			},
 			"minimum close factor cannot be negative",
@@ -43,7 +42,7 @@ func TestParams_Validate(t *testing.T) {
 		{
 			"exceeded minimum close factor",
 			Params{
-				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
+				CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
 				MinimumCloseFactor:           exceededDec,
 			},
 			"minimum close factor cannot exceed 1",
@@ -51,8 +50,8 @@ func TestParams_Validate(t *testing.T) {
 		{
 			"negative oracle reward factor",
 			Params{
-				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
-				MinimumCloseFactor:           sdk.MustNewDecFromStr("0.05"),
+				CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
+				MinimumCloseFactor:           sdkmath.LegacyMustNewDecFromStr("0.05"),
 				OracleRewardFactor:           negativeDec,
 			},
 			"oracle reward factor cannot be negative",
@@ -60,8 +59,8 @@ func TestParams_Validate(t *testing.T) {
 		{
 			"exceeded oracle reward factor",
 			Params{
-				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
-				MinimumCloseFactor:           sdk.MustNewDecFromStr("0.05"),
+				CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
+				MinimumCloseFactor:           sdkmath.LegacyMustNewDecFromStr("0.05"),
 				OracleRewardFactor:           exceededDec,
 			},
 			"oracle reward factor cannot exceed 1",
@@ -69,9 +68,9 @@ func TestParams_Validate(t *testing.T) {
 		{
 			"negative small liquidation size",
 			Params{
-				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
-				MinimumCloseFactor:           sdk.MustNewDecFromStr("0.05"),
-				OracleRewardFactor:           sdk.MustNewDecFromStr("0.01"),
+				CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
+				MinimumCloseFactor:           sdkmath.LegacyMustNewDecFromStr("0.05"),
+				OracleRewardFactor:           sdkmath.LegacyMustNewDecFromStr("0.01"),
 				SmallLiquidationSize:         negativeDec,
 			},
 			"small liquidation size cannot be negative",
@@ -79,10 +78,10 @@ func TestParams_Validate(t *testing.T) {
 		{
 			"negative direct liquidation fee",
 			Params{
-				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
-				MinimumCloseFactor:           sdk.MustNewDecFromStr("0.05"),
-				OracleRewardFactor:           sdk.MustNewDecFromStr("0.01"),
-				SmallLiquidationSize:         sdk.MustNewDecFromStr("500.00"),
+				CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
+				MinimumCloseFactor:           sdkmath.LegacyMustNewDecFromStr("0.05"),
+				OracleRewardFactor:           sdkmath.LegacyMustNewDecFromStr("0.01"),
+				SmallLiquidationSize:         sdkmath.LegacyMustNewDecFromStr("500.00"),
 				DirectLiquidationFee:         negativeDec,
 			},
 			"direct liquidation fee cannot be negative",
@@ -90,10 +89,10 @@ func TestParams_Validate(t *testing.T) {
 		{
 			"exceeded direct liquidation fee",
 			Params{
-				CompleteLiquidationThreshold: sdk.MustNewDecFromStr("0.4"),
-				MinimumCloseFactor:           sdk.MustNewDecFromStr("0.05"),
-				OracleRewardFactor:           sdk.MustNewDecFromStr("0.01"),
-				SmallLiquidationSize:         sdk.MustNewDecFromStr("500.00"),
+				CompleteLiquidationThreshold: sdkmath.LegacyMustNewDecFromStr("0.4"),
+				MinimumCloseFactor:           sdkmath.LegacyMustNewDecFromStr("0.05"),
+				OracleRewardFactor:           sdkmath.LegacyMustNewDecFromStr("0.01"),
+				SmallLiquidationSize:         sdkmath.LegacyMustNewDecFromStr("500.00"),
 				DirectLiquidationFee:         exceededDec,
 			},
 			"direct liquidation fee must be less than 1",

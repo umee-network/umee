@@ -100,7 +100,10 @@ contain valid denominations. Accounts may optionally be supplied with vesting pa
 			baseAccount := authtypes.NewBaseAccount(addr, nil, 0, 0)
 
 			if !vestingAmt.IsZero() {
-				a := authvesting.NewBaseVestingAccount(baseAccount, vestingAmt.Sort(), vestingEnd)
+				a, err := authvesting.NewBaseVestingAccount(baseAccount, vestingAmt.Sort(), vestingEnd)
+				if err != nil {
+					return err
+				}
 				if (balances.Coins.IsZero() && !a.OriginalVesting.IsZero()) ||
 					a.OriginalVesting.IsAnyGT(balances.Coins) {
 					return errors.New("vesting amount cannot be greater than total amount")

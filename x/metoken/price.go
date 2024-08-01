@@ -14,7 +14,7 @@ import (
 func EmptyIndexPrices(index Index) IndexPrices {
 	return IndexPrices{
 		Denom:    index.Denom,
-		Price:    sdk.Dec{},
+		Price:    sdkmath.LegacyDec{},
 		Exponent: index.Exponent,
 		Assets:   make([]AssetPrice, 0),
 	}
@@ -62,12 +62,12 @@ func (ip IndexPrices) RedeemRate(from sdk.Coin, to string) (sdkmath.Int, error) 
 	return toPrice.RedeemRate.MulInt(from.Amount).TruncateInt(), nil
 }
 
-func Rate(fromPrice, toPrice sdk.Dec, fromExponent, toExponent uint32) (sdk.Dec, error) {
+func Rate(fromPrice, toPrice sdkmath.LegacyDec, fromExponent, toExponent uint32) (sdkmath.LegacyDec, error) {
 	exchangeRate := fromPrice.Quo(toPrice)
 
 	exponentFactor, err := ExponentFactor(fromExponent, toExponent)
 	if err != nil {
-		return sdk.Dec{}, err
+		return sdkmath.LegacyDec{}, err
 	}
 
 	return exchangeRate.Mul(exponentFactor), nil
@@ -75,11 +75,11 @@ func Rate(fromPrice, toPrice sdk.Dec, fromExponent, toExponent uint32) (sdk.Dec,
 
 // ExponentFactor calculates the factor to multiply by which the assets with different exponents.
 // If there is no such difference the result will be 1.
-func ExponentFactor(initialExponent, resultExponent uint32) (sdk.Dec, error) {
+func ExponentFactor(initialExponent, resultExponent uint32) (sdkmath.LegacyDec, error) {
 	exponentDiff := int(resultExponent) - int(initialExponent)
 	multiplier, ok := coin.Exponents[exponentDiff]
 	if !ok {
-		return sdk.Dec{}, fmt.Errorf("multiplier not found for exponentDiff %d", exponentDiff)
+		return sdkmath.LegacyDec{}, fmt.Errorf("multiplier not found for exponentDiff %d", exponentDiff)
 	}
 
 	return multiplier, nil

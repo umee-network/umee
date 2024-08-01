@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"gotest.tools/v3/assert"
 
 	"github.com/umee-network/umee/v6/util/coin"
@@ -17,7 +17,7 @@ func specialPair(collateral, borrow, weight string) WeightedSpecialPair {
 	return WeightedSpecialPair{
 		Collateral:    coin.Dec(c[1], c[0]),
 		Borrow:        coin.Dec(b[1], b[0]),
-		SpecialWeight: sdk.MustNewDecFromStr(weight),
+		SpecialWeight: sdkmath.LegacyMustNewDecFromStr(weight),
 	}
 }
 
@@ -133,17 +133,17 @@ func TestWeightedSpecialPairsCanCombine(t *testing.T) {
 				{
 					Collateral:    coin.ZeroDec("AAAA"),
 					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.7"),
 				},
 				{
 					Collateral:    coin.Dec("AAAA", "0.1"),
 					Borrow:        coin.Dec("BBBB", "100.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.6"),
 				},
 				{
 					Collateral:    coin.Dec("AAAA", "20.0"),
 					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.5"),
 				},
 			},
 			true,
@@ -154,17 +154,17 @@ func TestWeightedSpecialPairsCanCombine(t *testing.T) {
 				{
 					Collateral:    coin.ZeroDec("AAAA"),
 					Borrow:        coin.ZeroDec("AAAA"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.7"),
 				},
 				{
 					Collateral:    coin.Dec("AAAA", "0.1"),
 					Borrow:        coin.Dec("AAAA", "100.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.6"),
 				},
 				{
 					Collateral:    coin.Dec("AAAA", "20.0"),
 					Borrow:        coin.ZeroDec("AAAA"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.5"),
 				},
 			},
 			true,
@@ -175,22 +175,22 @@ func TestWeightedSpecialPairsCanCombine(t *testing.T) {
 				{
 					Collateral:    coin.ZeroDec("AAAA"),
 					Borrow:        coin.ZeroDec("AAAA"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.7"),
 				},
 				{
 					Collateral:    coin.Dec("AAAA", "0.1"),
 					Borrow:        coin.Dec("BBBB", "100.0"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.6"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.6"),
 				},
 				{
 					Collateral:    coin.Dec("BBBB", "20.0"),
 					Borrow:        coin.ZeroDec("AAAA"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.5"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.5"),
 				},
 				{
 					Collateral:    coin.ZeroDec("BBBB"),
 					Borrow:        coin.ZeroDec("BBBB"),
-					SpecialWeight: sdk.MustNewDecFromStr("0.7"),
+					SpecialWeight: sdkmath.LegacyMustNewDecFromStr("0.7"),
 				},
 			},
 			false,

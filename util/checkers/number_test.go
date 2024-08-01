@@ -3,8 +3,9 @@ package checkers
 import (
 	"testing"
 
-	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmath "cosmossdk.io/math"
 	"github.com/stretchr/testify/assert"
+
 	"github.com/umee-network/umee/v6/tests/tsdk"
 )
 
@@ -89,9 +90,9 @@ func TestDecInZeroOne(t *testing.T) {
 func TestDecNotNegative(t *testing.T) {
 	t.Parallel()
 	assert.NotNil(t, DecNotNegative(tsdk.DecF(-1), ""))
-	assert.NotNil(t, DecNotNegative(sdk.Dec{}, ""))
+	assert.NotNil(t, DecNotNegative(sdkmath.LegacyDec{}, ""))
 
-	assert.Nil(t, DecNotNegative(sdk.ZeroDec(), ""))
+	assert.Nil(t, DecNotNegative(sdkmath.LegacyZeroDec(), ""))
 	assert.Nil(t, DecNotNegative(tsdk.DecF(5), ""))
 }
 
@@ -115,13 +116,13 @@ func TestNumPositive(t *testing.T) {
 
 	assert.Error(BigNumPositive(tsdk.DecF(0), ""))
 	assert.Error(BigNumPositive(tsdk.DecF(-0.01), ""))
-	assert.Error(BigNumPositive(sdk.NewDec(0), ""))
-	assert.Error(BigNumPositive(sdk.NewDec(-99999999999999999), ""))
+	assert.Error(BigNumPositive(sdkmath.LegacyNewDec(0), ""))
+	assert.Error(BigNumPositive(sdkmath.LegacyNewDec(-99999999999999999), ""))
 
-	assert.NoError(BigNumPositive(sdk.NewInt(1), ""))
-	assert.NoError(BigNumPositive(sdk.NewInt(2), ""))
-	assert.NoError(BigNumPositive(sdk.NewInt(9), ""))
-	n, ok := sdk.NewIntFromString("111111119999999999999999999")
+	assert.NoError(BigNumPositive(sdkmath.NewInt(1), ""))
+	assert.NoError(BigNumPositive(sdkmath.NewInt(2), ""))
+	assert.NoError(BigNumPositive(sdkmath.NewInt(9), ""))
+	n, ok := sdkmath.NewIntFromString("111111119999999999999999999")
 	assert.True(ok)
 	assert.NoError(BigNumPositive(n, ""))
 }

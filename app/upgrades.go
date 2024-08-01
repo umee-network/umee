@@ -1,15 +1,12 @@
 package app
 
 import (
-	"github.com/cometbft/cometbft/libs/log"
-	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7/packetforward/types"
-	ica "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts"
-	icagenesis "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/genesis/types"
-	icahosttypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/host/types"
-	icatypes "github.com/cosmos/ibc-go/v7/modules/apps/27-interchain-accounts/types"
-	ibctransfertypes "github.com/cosmos/ibc-go/v7/modules/apps/transfer/types"
+	"context"
 
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
+	"cosmossdk.io/log"
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
+	upgradetypes "cosmossdk.io/x/upgrade/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -18,7 +15,12 @@ import (
 	govv1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1"
 	govv1beta1 "github.com/cosmos/cosmos-sdk/x/gov/types/v1beta1"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	upgradetypes "github.com/cosmos/cosmos-sdk/x/upgrade/types"
+	packetforwardtypes "github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v8/packetforward/types"
+	ica "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts"
+	icagenesis "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/genesis/types"
+	icahosttypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/host/types"
+	icatypes "github.com/cosmos/ibc-go/v8/modules/apps/27-interchain-accounts/types"
+	ibctransfertypes "github.com/cosmos/ibc-go/v8/modules/apps/transfer/types"
 
 	appparams "github.com/umee-network/umee/v6/app/params"
 	"github.com/umee-network/umee/v6/util"
@@ -50,6 +52,8 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_0(upgradeInfo)
 	app.registerOutdatedPlaceholderUpgrade("v6.1")
 	app.registerOutdatedPlaceholderUpgrade("v6.2")
+	app.registerUpgrade("v047-to-v050", upgradeInfo, []string{packetforwardtypes.ModuleName}, nil, nil)
+
 	app.registerUpgrade("v6.3", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade6_4(upgradeInfo)
 	app.registerUpgrade("v6.5", upgradeInfo, nil, nil, nil)
@@ -62,18 +66,19 @@ func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.6-rc1"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			printPlanName(planName, sdkCtx.Logger())
 
 			// update leverage and metoken params to include burn auction fee share.
-			lparams := app.LeverageKeeper.GetParams(ctx)
+			lparams := app.LeverageKeeper.GetParams(sdkCtx)
 			// TODO: need to check the reward auction fee params value for v6.6
-			lparams.RewardsAuctionFee = sdk.MustNewDecFromStr("0.01")
-			if err := app.LeverageKeeper.SetParams(ctx, lparams); err != nil {
+			lparams.RewardsAuctionFee = sdkmath.LegacyMustNewDecFromStr("0.01")
+			if err := app.LeverageKeeper.SetParams(sdkCtx, lparams); err != nil {
 				return nil, err
 			}
 
-			mekeeper := app.MetokenKeeperB.Keeper(&ctx)
+			mekeeper := app.MetokenKeeperB.Keeper(&sdkCtx)
 			meparams := mekeeper.GetParams()
 			// TODO: need to check the Rewards Auction Fee Factor params value for v6.6
 			meparams.RewardsAuctionFeeFactor = 10000 // 100% of fees goes to rewards auction
@@ -95,19 +100,20 @@ func (app *UmeeApp) registerUpgrade6_4(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.4"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			printPlanName(planName, sdkCtx.Logger())
 			// Add UX denom aliases to metadata
 			app.BankKeeper.SetDenomMetaData(ctx, appparams.UmeeTokenMetadata())
 
 			// migrate leverage token settings
-			tokens := app.LeverageKeeper.GetAllRegisteredTokens(ctx)
+			tokens := app.LeverageKeeper.GetAllRegisteredTokens(sdkCtx)
 			for _, token := range tokens {
 				// this will allow existing interest rate curves to pass new Token validation
 				if token.KinkUtilization.GTE(token.MaxSupplyUtilization) {
 					token.KinkUtilization = token.MaxSupplyUtilization
 					token.KinkBorrowRate = token.MaxBorrowRate
-					if err := app.LeverageKeeper.SetTokenSettings(ctx, token); err != nil {
+					if err := app.LeverageKeeper.SetTokenSettings(sdkCtx, token); err != nil {
 						return fromVM, err
 					}
 				}
@@ -128,12 +134,13 @@ func (app *UmeeApp) registerUpgrade6_0(upgradeInfo upgradetypes.Plan) {
 	util.Panic(err)
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
-			if err := app.LeverageKeeper.SetParams(ctx, leveragetypes.DefaultParams()); err != nil {
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			printPlanName(planName, sdkCtx.Logger())
+			if err := app.LeverageKeeper.SetParams(sdkCtx, leveragetypes.DefaultParams()); err != nil {
 				return fromVM, err
 			}
-			app.UGovKeeperB.Keeper(&ctx).SetEmergencyGroup(emergencyGroup)
+			app.UGovKeeperB.Keeper(&sdkCtx).SetEmergencyGroup(emergencyGroup)
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 		},
@@ -149,8 +156,9 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 	const planName = "v4.3"
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			ctx.Logger().Info("Upgrade handler execution", "name", planName)
+		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 
 			// set the ICS27 consensus version so InitGenesis is not run
 			oldIcaVersion := fromVM[icatypes.ModuleName]
@@ -179,7 +187,7 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 			}
 			// skip InitModule in upgrade tests after the upgrade has gone through.
 			if oldIcaVersion != fromVM[icatypes.ModuleName] {
-				icamodule.InitModule(ctx, g.ControllerGenesisState.Params, g.HostGenesisState.Params)
+				icamodule.InitModule(sdkCtx, g.ControllerGenesisState.Params, g.HostGenesisState.Params)
 			}
 
 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
@@ -194,10 +202,11 @@ func (app *UmeeApp) registerUpgrade4_3(upgradeInfo upgradetypes.Plan) {
 }
 
 func onlyModuleMigrations(app *UmeeApp, planName string) upgradetypes.UpgradeHandler {
-	return func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-		printPlanName(planName, ctx.Logger())
-		ctx.Logger().Info("-----------------------------\n-----------------------------")
-		ctx.Logger().Info("Upgrade handler execution", "name", planName)
+	return func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+		sdkCtx := sdk.UnwrapSDKContext(ctx)
+		printPlanName(planName, sdkCtx.Logger())
+		sdkCtx.Logger().Info("-----------------------------\n-----------------------------")
+		sdkCtx.Logger().Info("Upgrade handler execution", "name", planName)
 		return app.mm.RunMigrations(ctx, app.configurator, fromVM)
 	}
 }
@@ -228,7 +237,7 @@ func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Pl
 func (app *UmeeApp) registerOutdatedPlaceholderUpgrade(planName string) {
 	app.UpgradeKeeper.SetUpgradeHandler(
 		planName,
-		func(_ sdk.Context, _ upgradetypes.Plan, _ module.VersionMap) (module.VersionMap, error) {
+		func(_ context.Context, _ upgradetypes.Plan, _ module.VersionMap) (module.VersionMap, error) {
 			panic("Can't migrate state < 'head - 2' while running a logic with the 'head' version")
 		})
 }

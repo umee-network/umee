@@ -13,6 +13,7 @@ option (gogoproto.messagename_all)     = true;
 
 // Msg defines the x/ugov module's Msg service.
 service Msg {
+  option (cosmos.msg.v1.service) = true;
   // GovUpdateMinGasPrice sets protocol controlled tx min fees.
   rpc GovUpdateMinGasPrice(MsgGovUpdateMinGasPrice) returns (MsgGovUpdateMinGasPriceResponse);
 

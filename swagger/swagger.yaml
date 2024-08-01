@@ -8688,8 +8688,8 @@ definitions:
         format: double
         description: Value is account's collateral value in USD.
     description: >-
-      RiskInfo defines a borrower's account health without requiring sdk.Dec
-      formatting.
+      RiskInfo defines a borrower's account health without requiring
+      sdkmath.LegacyDec formatting.
   umee.leverage.v1.SpecialAssetPair:
     type: object
     properties:

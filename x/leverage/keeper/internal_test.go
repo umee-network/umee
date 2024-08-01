@@ -1,8 +1,9 @@
 package keeper
 
 import (
+	sdkmath "cosmossdk.io/math"
+	storetypes "cosmossdk.io/store/types"
 	"github.com/cosmos/cosmos-sdk/codec"
-	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 
@@ -55,7 +56,7 @@ func (tk *TestKeeper) SetCollateral(ctx sdk.Context, addr sdk.AccAddress, collat
 	return tk.setCollateral(ctx, addr, collateral)
 }
 
-func (tk *TestKeeper) SetInterestScalar(ctx sdk.Context, denom string, scalar sdk.Dec) error {
+func (tk *TestKeeper) SetInterestScalar(ctx sdk.Context, denom string, scalar sdkmath.LegacyDec) error {
 	return tk.setInterestScalar(ctx, denom, scalar)
 }
 

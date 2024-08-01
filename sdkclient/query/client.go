@@ -25,7 +25,7 @@ func NewClient(logger *log.Logger, grpcEndpoint string, queryTimeout time.Durati
 }
 
 func (c *Client) dialGrpcConn() (err error) {
-	c.GrpcConn, err = grpc.Dial( //nolint
+	c.GrpcConn, err = grpc.Dial(
 		c.grpcEndpoint,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithContextDialer(dialerFunc),

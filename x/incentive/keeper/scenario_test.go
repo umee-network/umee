@@ -3,6 +3,7 @@ package keeper
 import (
 	"testing"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/stretchr/testify/require"
 
@@ -103,7 +104,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	require.Equal(t, incentive.ProgramStatusUpcoming, k.programStatus(3), "program 3 status (time 101)")
 	// 9.9UMEE of the original 10 UMEE remain
 	program1 = k.getProgram(1)
-	require.Equal(t, sdk.NewInt(9_900000), program1.RemainingRewards.Amount, "99 percent of program 1 rewards remain")
+	require.Equal(t, sdkmath.NewInt(9_900000), program1.RemainingRewards.Amount, "99 percent of program 1 rewards remain")
 
 	// init a second supplier with bonded uTokens - but he was not present during updateRewards
 	bob := k.newBondedAccount(
@@ -139,7 +140,7 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	// 9.8UMEE of the original 10 UMEE remain.
 	// rewards actually distributed rounded down a bit, so remaining rewards have a little more left over.
 	program1 = k.getProgram(1)
-	require.Equal(t, sdk.NewInt(9_800001), program1.RemainingRewards.Amount, "98 percent of program 1 rewards remain")
+	require.Equal(t, sdkmath.NewInt(9_800001), program1.RemainingRewards.Amount, "98 percent of program 1 rewards remain")
 
 	// From 100000 rewards distributed this new block, 80% went to alice and 20% went to bob.
 	// since alice hasn't claimed rewards yet, these add to the previous block's rewards.
@@ -179,9 +180,9 @@ func TestBasicIncentivePrograms(t *testing.T) {
 	program1 = k.getProgram(1)
 	program2 := k.getProgram(2)
 	program3 := k.getProgram(3)
-	require.Equal(t, sdk.ZeroInt(), program1.RemainingRewards.Amount, "0 percent of program 1 rewards remain")
-	require.Equal(t, sdk.ZeroInt(), program2.RemainingRewards.Amount, "0 percent of program 2 rewards remain")
-	require.Equal(t, sdk.ZeroInt(), program3.RemainingRewards.Amount, "0 percent of program 3 rewards remain")
+	require.Equal(t, sdkmath.ZeroInt(), program1.RemainingRewards.Amount, "0 percent of program 1 rewards remain")
+	require.Equal(t, sdkmath.ZeroInt(), program2.RemainingRewards.Amount, "0 percent of program 2 rewards remain")
+	require.Equal(t, sdkmath.ZeroInt(), program3.RemainingRewards.Amount, "0 percent of program 3 rewards remain")
 
 	// verify all 3 programs ended
 	programs, err = k.getAllIncentivePrograms(k.ctx, incentive.ProgramStatusCompleted)
@@ -242,13 +243,13 @@ func TestZeroBonded(t *testing.T) {
 	k.advanceTimeTo(programStart + 75)
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 175)")
-	require.Equal(t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
+	require.Equal(t, sdkmath.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
 
 	// finish the program with user still bonded
 	k.advanceTimeTo(programStart + 100)
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status (time 200)")
-	require.Equal(t, sdk.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
+	require.Equal(t, sdkmath.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
 
 	// measure pending rewards (even though program has ended, user has not yet claimed)
 	rewards, err := k.calculateRewards(k.ctx, alice)
@@ -301,7 +302,7 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	k.advanceTimeTo(programStart + 50) // 50% duration
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status ongoing (time 150)")
-	require.Equal(t, sdk.NewInt(6_666667), program.RemainingRewards.Amount, "one third of program rewards distributed")
+	require.Equal(t, sdkmath.NewInt(6_666667), program.RemainingRewards.Amount, "one third of program rewards distributed")
 
 	// unbond half of the supply. Since Alice is is the only supplier, this should not change reward distribution
 	// also, alice claims rewards when unbonding
@@ -310,7 +311,7 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	k.advanceTimeTo(programStart + 75) // 75% duration
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status ongoing (time 175)")
-	require.Equal(t, sdk.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
+	require.Equal(t, sdkmath.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
 
 	// measure pending rewards
 	aliceReward := coin.UmeeCoins(3_333333)
@@ -330,7 +331,7 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	k.advanceTimeTo(programStart + 110) // a bit past 100% duration
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status completed (time 210)")
-	require.Equal(t, sdk.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
+	require.Equal(t, sdkmath.NewInt(3_333334), program.RemainingRewards.Amount, "two thirds of program rewards distributed")
 
 	// measure pending rewards (zero)
 	rewards, err = k.calculateRewards(k.ctx, alice)
@@ -364,7 +365,7 @@ func TestUserSupplyBeforeAndDuring(t *testing.T) {
 
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 175)")
-	require.Equal(t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
+	require.Equal(t, sdkmath.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
 
 	// now creates another supplier with bonded tokens, half way through the program.
 	bob := k.newBondedAccount(
@@ -375,7 +376,7 @@ func TestUserSupplyBeforeAndDuring(t *testing.T) {
 	k.advanceTimeTo(programStart + 100)
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status (time 200)")
-	require.Equal(t, sdk.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
+	require.Equal(t, sdkmath.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
 
 	// measure pending rewards (even though program has ended, user has not yet claimed)
 	rewards, err := k.calculateRewards(k.ctx, alice)
@@ -435,7 +436,7 @@ func TestPartialWithdraw(t *testing.T) {
 
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status (time 175)")
-	require.Equal(t, sdk.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
+	require.Equal(t, sdkmath.NewInt(5_000000), program.RemainingRewards.Amount, "half of program rewards distributed")
 
 	// now creates another supplier with bonded tokens, half way through the program.
 	bob := k.newBondedAccount(
@@ -457,7 +458,7 @@ func TestPartialWithdraw(t *testing.T) {
 	k.advanceTimeTo(programStart + 100)
 	program = k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status (time 200)")
-	require.Equal(t, sdk.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
+	require.Equal(t, sdkmath.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
 
 	// measure pending rewards (even though program has ended, user has not yet claimed)
 	rewards, err = k.calculateRewards(k.ctx, alice)
@@ -529,7 +530,7 @@ func TestRejoinScenario(t *testing.T) {
 	// confirm program ended
 	program := k.getProgram(1)
 	require.Equal(t, incentive.ProgramStatusCompleted, k.programStatus(1), "program 1 status (time 200)")
-	require.Equal(t, sdk.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
+	require.Equal(t, sdkmath.ZeroInt(), program.RemainingRewards.Amount, "all of program rewards distributed")
 
 	// measure pending rewards and wallet balance (alice claimed rewards, as part of the beginUnbonding transaction)
 	rewards, err = k.calculateRewards(k.ctx, alice)

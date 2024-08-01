@@ -5,6 +5,7 @@ import (
 
 	"gotest.tools/v3/assert"
 
+	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
@@ -48,7 +49,7 @@ func TestFormatDec(t *testing.T) {
 	for _, tc := range testCases {
 		assert.Equal(t,
 			tc.output,
-			FormatDec(sdk.MustNewDecFromStr(tc.input)),
+			FormatDec(sdkmath.LegacyMustNewDecFromStr(tc.input)),
 		)
 	}
 }
@@ -91,7 +92,7 @@ func TestFormatDecCoin(t *testing.T) {
 	for _, tc := range testCases {
 		assert.Equal(t,
 			tc.output,
-			FormatDecCoin(sdk.NewDecCoinFromDec(tc.denom, sdk.MustNewDecFromStr(tc.amount))),
+			FormatDecCoin(sdk.NewDecCoinFromDec(tc.denom, sdkmath.LegacyMustNewDecFromStr(tc.amount))),
 		)
 	}
 }
