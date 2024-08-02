@@ -303,7 +303,7 @@ func TestZeroBondedAtProgramEnd(t *testing.T) {
 	require.Equal(t, incentive.ProgramStatusOngoing, k.programStatus(1), "program 1 status ongoing (time 150)")
 	require.Equal(t, sdk.NewInt(6_666667), program.RemainingRewards.Amount, "one third of program rewards distributed")
 
-	// unbond half of the supply. Since Alice is is the only supplier, this should not change reward distribution
+	// unbond half of the supply. Since Alice is the only supplier, this should not change reward distribution
 	// also, alice claims rewards when unbonding
 	k.mustBeginUnbond(alice, coin.New(uUmee, 50_000000))
 
