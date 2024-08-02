@@ -59,7 +59,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 }
 
 func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {
-	planName := "v6.6-rc1"
+	planName := "v6.6"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx sdk.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
@@ -67,16 +67,14 @@ func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {
 
 			// update leverage and metoken params to include burn auction fee share.
 			lparams := app.LeverageKeeper.GetParams(ctx)
-			// TODO: need to check the reward auction fee params value for v6.6
-			lparams.RewardsAuctionFee = sdk.MustNewDecFromStr("0.01")
+			lparams.RewardsAuctionFee = sdk.MustNewDecFromStr("0.02")
 			if err := app.LeverageKeeper.SetParams(ctx, lparams); err != nil {
 				return nil, err
 			}
 
 			mekeeper := app.MetokenKeeperB.Keeper(&ctx)
 			meparams := mekeeper.GetParams()
-			// TODO: need to check the Rewards Auction Fee Factor params value for v6.6
-			meparams.RewardsAuctionFeeFactor = 10000 // 100% of fees goes to rewards auction
+			meparams.RewardsAuctionFeeFactor = 1000 // 10% of fees goes to rewards auction
 			if err := mekeeper.SetParams(meparams); err != nil {
 				return nil, err
 			}
