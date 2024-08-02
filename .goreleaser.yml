@@ -20,9 +20,10 @@ builds:
       - -s -w -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X github.com/cosmos/cosmos-sdk/version.Name=umee -X github.com/cosmos/cosmos-sdk/version.AppName=umeed -X github.com/cosmos/cosmos-sdk/version.Version={{ .Version }} -X github.com/cosmos/cosmos-sdk/version.Commit={{ .Commit }} -X github.com/cosmos/cosmos-sdk/version.BuildTags=netgo,ledger -X github.com/cometbft/cometbft/version.TMCoreSemVer={{ .Env.TM_VERSION }}
     goos:
       - linux
+      # - darwin
     goarch:
-      - amd64
-#      - arm64  # github only supports linux @ amd64
+      - amd64 # github only supports linux @ amd64
+    #  - arm64
 
 archives:
   - id: tarball
@@ -46,4 +47,4 @@ checksum:
   algorithm: sha256
 
 changelog:
-  skip: false
+  disable: true
