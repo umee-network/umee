@@ -39,7 +39,7 @@ jobs:
         if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'Enable:ReleaseBuild')
         with:
           version: latest
-          args: build --rm-dist --skip-validate # skip validate skips initial sanity checks in order to be able to fully run
+          args: build --clean --skip=before,validate # skip validate skips initial sanity checks in order to be able to fully run
         env:
           TM_VERSION: ${{ env.TM_VERSION }}
       - name: Release
@@ -47,7 +47,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         with:
           version: latest
-          args: release --rm-dist --release-notes ./RELEASE_NOTES.md
+          args: release --clean --release-notes ./RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TM_VERSION: ${{ env.TM_VERSION }}
