@@ -35,7 +35,7 @@ timeline
 
 ### Parameters
 
-1. `duration` : time duration when we collect bids for the current auction. Initial value: 7 days.
+1. `duration` : time duration when we collect bids for the current auction. Initial value: 14 days.
 2. `min_bid` is the minimum increase of the previous bid or the minimum bid if it's the
 3. `auction_account`: an account receiving protocol revenues and managing the burn auction. This will be a sub-module account, and used to share with x/leverage and x/metoken modules.
 

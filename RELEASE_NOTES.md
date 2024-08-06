@@ -10,7 +10,7 @@ The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-p
 
 Highlights:
 
-- Cosmos SDK v0.47.11 update.
+- Cosmos SDK v0.47.13 update.
 - Adding new `auction` module to our app.
 - Removing `crisis` module from our app.
 
