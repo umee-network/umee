@@ -59,7 +59,7 @@ func (t Token) Validate() error {
 	}
 	// The following rules ensure the utilization:APY graph is continuous
 	if t.KinkUtilization.GT(t.MaxSupplyUtilization) {
-		return fmt.Errorf("kink utilization (%s) cannot be greater than than max supply utilization (%s)",
+		return fmt.Errorf("kink utilization (%s) cannot be greater than max supply utilization (%s)",
 			t.KinkUtilization, t.MaxSupplyUtilization)
 	}
 	if t.KinkUtilization.Equal(t.MaxSupplyUtilization) && !t.MaxBorrowRate.Equal(t.KinkBorrowRate) {
