@@ -8,7 +8,7 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   umeed-docker:
@@ -46,8 +46,8 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Generate swagger docs 
+
+      - name: Generate swagger docs
         run: |
           make proto-swagger-gen
           make proto-update-swagger-docs
