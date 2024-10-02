@@ -22,7 +22,7 @@ jobs:
           FILES: |
             go.mod
             go.sum
-      - uses: golang/govulncheck-action@v1.0.3
+      - uses: golang/govulncheck-action@v1.0.4
         id: govulncheck
         if: env.GIT_DIFF
         with:
