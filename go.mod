@@ -1,7 +1,8 @@
 module github.com/umee-network/umee/v6
 
-go 1.22.2
-toolchain go1.22.8
+go 1.22.7
+
+toolchain go1.23.2
 
 require (
 	cosmossdk.io/api v0.3.1
