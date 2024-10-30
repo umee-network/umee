@@ -27,9 +27,6 @@ func (k Keeper) TokenPrice(ctx sdk.Context, baseDenom string, mode types.PriceMo
 	if err != nil {
 		return sdk.ZeroDec(), 0, err
 	}
-	if t.Blacklist {
-		return sdk.ZeroDec(), t.Exponent, types.ErrBlacklisted
-	}
 
 	// if a token is exempt from historic pricing, all price modes ignore historic prices
 	// and use spot prices instead, sometimes also allowing expired prices.
