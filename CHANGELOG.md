@@ -56,6 +56,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 ### Bug Fixes
 
 - [2615](https://github.com/umee-network/umee/pull/2615) Fix the token price is asset is blacklisted.
+- [2618](https://github.com/umee-network/umee/pull/2618) Downgrade the cometbft-db to v0.12.0 and upgrade the cometbft to 0.37.13
 
 ## v6.6.0-rc1
 
