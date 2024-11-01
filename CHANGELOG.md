@@ -44,6 +44,20 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v6.7.0-rc1
+
+### Improvements
+
+- [2572](https://github.com/umee-network/umee/pull/2572) Bump cosmos-sdk from 0.47.12 to 0.47.13.
+- [2599](https://github.com/umee-network/umee/pull/2599) Bump ibc-go from 7.7.0 to 7.8.0.
+- [2607](https://github.com/umee-network/umee/pull/2607) Bump wasmvm from 1.5.4 to 1.5.5
+- [2614](https://github.com/umee-network/umee/pull/2614) Bump cometbft from 0.37.10 to 0.37.12.
+
+### Bug Fixes
+
+- [2615](https://github.com/umee-network/umee/pull/2615) Fix the token price is asset is blacklisted.
+- [2618](https://github.com/umee-network/umee/pull/2618) Downgrade the cometbft-db to v0.12.0 and upgrade the cometbft to 0.37.13
+
 ## v6.6.0-rc1
 
 ### Features

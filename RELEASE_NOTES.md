@@ -6,35 +6,31 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.6.0
+## v6.7.0-rc1
 
 Highlights:
 
-- Cosmos SDK v0.47.13 update.
-- Adding new `auction` module to our app.
-- Removing `crisis` module from our app.
+- cosmos SDK v0.47.14 update.
+- cometbft v0.37.13 update.
+- wasmvm v1.5.5 update.
+- ibc-go v7.8.0 update.
 
 [CHANGELOG](CHANGELOG.md)
 
-### Auction module
-
-We propose a new Cosmos SDK module, that will provide mechanism for protocol owned auctions. UX Chain will now auction a portion of collected fees and introduce a token burning mechanism, unlocking a way to a potentially deflationary UX token.
-Documentation: [x/auction/README.md](https://github.com/umee-network/umee/blob/v6.6.0/x/auction/README.md)
-
 ### Validators
 
-**Upgrade Title** (for Cosmovisor): **v6.6**.
+**Upgrade Title** (for Cosmovisor): **v6.7-rc1**.
 
-Update Price Feeder to `umee/2.4.3+`.
+Update Price Feeder to `umee/2.4.4+`.
 
 NOTE: after the upgrade, you should restart your Price Feeder. We observed that Price Feeder doesn't correctly re-establish a connection after the chain upgrade.
 
 #### libwasmvm update
 
-Our dependencies have been updated. The binary requires `libwasmvm v1.5.2`. When you build the binary from source on the server machine you probably don't need any change. However, when you download a binary from GitHub, or from another source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+Our dependencies have been updated. The binary requires `libwasmvm v1.5.5`. When you build the binary from source on the server machine you probably don't need any change. However, when you download a binary from GitHub, or from another source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
 
-- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.5.2/internal/api/libwasmvm.$(uname -m).so`
-- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.2/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
+- copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.5.5/internal/api/libwasmvm.$(uname -m).so`
+- or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.5/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
 
 You don't need to do anything if you are using our Docker image.
 
