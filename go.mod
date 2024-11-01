@@ -11,8 +11,9 @@ require (
 	cosmossdk.io/tools/rosetta v0.2.1
 	github.com/CosmWasm/wasmd v0.45.0
 	github.com/CosmWasm/wasmvm v1.5.5
-	github.com/cometbft/cometbft v0.37.12
-	github.com/cometbft/cometbft-db v0.14.1
+	github.com/cometbft/cometbft v0.37.13
+	// rollback below v0.13.0 due to https://github.com/cometbft/cometbft/pull/4369
+	github.com/cometbft/cometbft-db v0.12.0
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.47.14
 	github.com/cosmos/go-bip39 v1.0.0
@@ -150,7 +151,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/lib/pq v1.10.9 // indirect
-	github.com/linxGnu/grocksdb v1.8.14 // indirect
+	github.com/linxGnu/grocksdb v1.9.3 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
