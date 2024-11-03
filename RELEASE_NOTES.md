@@ -19,7 +19,7 @@ Highlights:
 
 ### Validators
 
-**Upgrade Title** (for Cosmovisor): **v6.7-rc1**.
+**Upgrade Title** (for Cosmovisor): **v6.7.0-rc1**.
 
 Update Price Feeder to `umee/2.4.4+`.
 
