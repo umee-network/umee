@@ -6,7 +6,7 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.7.0-rc1
+## v6.7.0
 
 Highlights:
 
@@ -19,7 +19,7 @@ Highlights:
 
 ### Validators
 
-**Upgrade Title** (for Cosmovisor): **v6.7.0-rc1**.
+**Upgrade Title** (for Cosmovisor): **v6.7.0**.
 
 Update Price Feeder to `umee/2.4.4+`.
 

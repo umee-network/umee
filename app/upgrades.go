@@ -54,8 +54,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_4(upgradeInfo)
 	app.registerUpgrade("v6.5", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade6_6RC1(upgradeInfo)
-	// this upgrade is only for testnet (canon-4) network
-	app.registerUpgrade("v6.7.0-rc1", upgradeInfo, nil, nil, nil)
+	app.registerUpgrade("v6.7.0", upgradeInfo, nil, nil, nil)
 }
 
 func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {

@@ -44,7 +44,7 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
-## v6.7.0-rc1
+## v6.7.0
 
 ### Improvements
 
