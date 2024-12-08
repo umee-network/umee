@@ -1,7 +1,7 @@
 # Docker for e2e testing
 # Creates dynamic binaries, by building from the latest version of umeed
 
-FROM golang:1.22-bookworm AS builder
+FROM golang:1.23-bookworm AS builder
 ARG EXPERIMENTAL=true
 
 ## Download go module dependencies for umeed
@@ -18,7 +18,7 @@ RUN if [ "$EXPERIMENTAL" = "true" ] ; then echo "Installing experimental build";
 RUN make install
 
 ## Prepare the final clear binary
-FROM ubuntu:23.04
+FROM ubuntu:24.04
 EXPOSE 26656 26657 1317 9090 7171
 ENTRYPOINT ["umeed", "start"]
 
