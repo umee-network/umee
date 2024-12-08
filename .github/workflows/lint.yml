@@ -22,7 +22,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
 
       - name: golangci-lint main
