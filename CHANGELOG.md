@@ -44,6 +44,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v6.7.1
+
+### Improvements
+
+- deps upgrade
+
+### Bug Fixes
+
+- [2638](https://github.com/umee-network/umee/pull/2638) Fix the max_withdraw query
+
 ## v6.7.0
 
 ### Improvements
