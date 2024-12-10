@@ -6,20 +6,16 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.7.0
+## v6.7.1
 
 Highlights:
 
-- cosmos SDK v0.47.14 update.
-- cometbft v0.37.13 update.
-- wasmvm v1.5.5 update.
-- ibc-go v7.8.0 update.
+- fix the max_withdraw query
+- deps upgrade
 
 [CHANGELOG](CHANGELOG.md)
 
 ### Validators
-
-**Upgrade Title** (for Cosmovisor): **v6.7.0**.
 
 Update Price Feeder to `umee/2.4.4+`.
 
