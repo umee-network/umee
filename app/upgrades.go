@@ -54,6 +54,7 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade6_4(upgradeInfo)
 	app.registerUpgrade("v6.5", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade6_6RC1(upgradeInfo)
+	app.registerUpgrade("v6.7.0-rc1", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade("v6.7.0", upgradeInfo, nil, nil, nil)
 }
 
