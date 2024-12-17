@@ -52,9 +52,10 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 ### Bug Fixes
 
+- [2647](https://github.com/umee-network/umee/pull/2647) Quick fix for the Leveraged Liquidate Tx
 - [2643](https://github.com/umee-network/umee/pull/2643) Update cosmos-sdk from v0.47.14 to v0.47.15
 - [2638](https://github.com/umee-network/umee/pull/2638) Fix the max_withdraw query
-  
+
 ## v6.7.1
 
 ### Improvements
