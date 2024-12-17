@@ -44,6 +44,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v6.7.2
+
+### Improvements
+
+- deps upgrade
+
+### Bug Fixes
+
+- [2643](https://github.com/umee-network/umee/pull/2643) Update cosmos-sdk from v0.47.14 to v0.47.15
+- [2638](https://github.com/umee-network/umee/pull/2638) Fix the max_withdraw query
+  
 ## v6.7.1
 
 ### Improvements
