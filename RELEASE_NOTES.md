@@ -6,10 +6,11 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.7.1
+## v6.7.2
 
 Highlights:
 
+- cosmos-sdk update to v0.47.15
 - fix the max_withdraw query
 - deps upgrade
 
