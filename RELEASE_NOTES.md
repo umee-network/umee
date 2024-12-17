@@ -11,6 +11,7 @@ The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-p
 Highlights:
 
 - cosmos-sdk update to v0.47.15
+- quick fix for leveraged liquidate
 - fix the max_withdraw query
 - deps upgrade
 
