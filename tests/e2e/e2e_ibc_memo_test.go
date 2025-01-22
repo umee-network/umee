@@ -86,4 +86,11 @@ func (s *E2ETest) testIBCTokenTransferWithMemo(umeeAPIEndpoint string, atomQuota
 	updatedIBCAtomBalance = updatedIBCAtomBalance.Add(atomFromGaia.Amount)
 	s.checkSupply(umeeAPIEndpoint, uatomIBCHash, updatedIBCAtomBalance)
 	s.checkLeverageAccountBalance(umeeAPIEndpoint, accs.Alice.String(), uatomIBCHash, atomFromGaia.Amount)
+
+	// ignore ibc forward memo msgs
+	invalidM := "{\"forward\":{\"channel\":\"channel-123\",\"port\":\"transfer\",\"receiver\":\"secret1xs0xv4h9d2y2fpagyt99vpm3d3f8jxh9kywh6x\",\"retries\":2,\"timeout\":1733978966221063114}}"
+	s.SendIBC(setup.GaiaChainID, s.Chain.ID, accs.Alice.String(), atomFromGaia, "", invalidM, "")
+	updatedIBCAtomBalance = updatedIBCAtomBalance.Add(atomFromGaia.Amount)
+	s.checkSupply(umeeAPIEndpoint, uatomIBCHash, updatedIBCAtomBalance)
+	s.checkLeverageAccountBalance(umeeAPIEndpoint, accs.Alice.String(), uatomIBCHash, atomFromGaia.Amount)
 }
