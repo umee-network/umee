@@ -84,7 +84,7 @@ jobs:
         if: env.GIT_DIFF
         run: |
           EXPERIMENTAL=true make test-unit-cover
-      - uses: codecov/codecov-action@v5.1.2
+      - uses: codecov/codecov-action@v5.3.0
         if: env.GIT_DIFF
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
