@@ -91,8 +91,6 @@ func (s *IntegrationTestSuite) TestDelegateFeedConsent() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			clientCtx := val.ClientCtx
 
@@ -148,8 +146,6 @@ func (s *IntegrationTestSuite) TestQueryFeedDelegate() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			tc.args = append(tc.args, fmt.Sprintf("--%s=json", tmcli.OutputFlag))
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.QueryFeederDelegation(), tc.args)
@@ -219,8 +215,6 @@ func (s *IntegrationTestSuite) TestQueryExchangeRate() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.QueryExchangeRate(), tc.args)
 			if tc.expectErr {
@@ -272,8 +266,6 @@ func (s *IntegrationTestSuite) TestQueryExchangeRateWithTimestamp() {
 	}
 
 	for _, tc := range testCases {
-		tc := tc
-
 		s.Run(tc.name, func() {
 			out, err := clitestutil.ExecTestCLICmd(clientCtx, cli.QueryExchangeRatesWithTimestamp(), tc.args)
 			if tc.expectErr {
