@@ -6,7 +6,7 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.7.3-rc1
+## v6.7.3
 
 Highlights:
 

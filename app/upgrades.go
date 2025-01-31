@@ -59,6 +59,27 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade("v6.7.2-rc1", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade("v6.7.2", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade6_7_3RC1(upgradeInfo)
+	app.registerUpgrade6_7_3(upgradeInfo)
+}
+
+func (app *UmeeApp) registerUpgrade6_7_3(_ upgradetypes.Plan) {
+	planName := "v6.7.3"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			printPlanName(planName, ctx.Logger())
+			// Hackmd: https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx
+			denom := "ibc/3F972A6BFE64248AF19C9328FA59A1270CBC57D4545A099860E035C2BA4C79FD"
+			amount := sdk.NewInt(139771000000000000)
+			sfrxEthAmount := sdk.NewCoins(sdk.NewCoin(denom, amount))
+			toAddr := sdk.MustAccAddressFromBech32("umee1grppjc06d5p5enypk2vnl6v7n5sdpsp8adfytd")
+			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, leveragetypes.ModuleName,
+				toAddr, sfrxEthAmount); err != nil {
+				return nil, err
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 func (app *UmeeApp) registerUpgrade6_7_3RC1(_ upgradetypes.Plan) {
@@ -82,26 +103,6 @@ func (app *UmeeApp) registerUpgrade6_7_3RC1(_ upgradetypes.Plan) {
 		},
 	)
 }
-
-// func (app *UmeeApp) registerUpgrade6_7_3(_ upgradetypes.Plan) {
-// 	planName := "v6.7.3"
-
-// 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-// 		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-// 			printPlanName(planName, ctx.Logger())
-// 			// Hackmd: https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx
-// 			denom := "ibc/3F972A6BFE64248AF19C9328FA59A1270CBC57D4545A099860E035C2BA4C79FD"
-// 			amount := sdk.NewInt(139771000000000000)
-// 			sfrxEthAmount := sdk.NewCoins(sdk.NewCoin(denom, amount))
-// 			leverageModule := authtypes.NewModuleAddress(leveragetypes.ModuleName)
-// 			toAddr := sdk.MustAccAddressFromBech32("umee1grppjc06d5p5enypk2vnl6v7n5sdpsp8adfytd")
-// 			if err := app.BankKeeper.SendCoins(ctx, leverageModule, toAddr, sfrxEthAmount); err != nil {
-// 				return nil, err
-// 			}
-// 			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
-// 		},
-// 	)
-// }
 
 func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {
 	planName := "v6.6"
