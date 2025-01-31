@@ -44,6 +44,17 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v6.7.3
+
+### Improvements
+
+- deps upgrade
+- mint the sfrxeth to one user
+
+### Bug Fixes
+
+- [2662](https://github.com/umee-network/umee/pull/2662) check ack success if only ack is not async
+  
 ## v6.7.2
 
 ### Improvements

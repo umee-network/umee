@@ -6,14 +6,13 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.7.2
+## v6.7.3-rc1
 
 Highlights:
 
-- cosmos-sdk update to v0.47.15
-- quick fix for leveraged liquidate
-- fix the max_withdraw query
 - deps upgrade
+- mint the sfrxeth to user - <https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx>
+- fix the ibc-transfer -  checking acknowledgement only acknowledgement is when not asynchronous
 
 [CHANGELOG](CHANGELOG.md)
 
