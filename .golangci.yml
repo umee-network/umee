@@ -1,9 +1,5 @@
 run:
   tests: false
-  skip-dirs:
-    - tests/e2e
-    - tests/simulation
-
   govet:
     # Enable analyzers by name (in addition to default).
     # Run `go tool vet help` to see all analyzers.
@@ -24,7 +20,7 @@ linters:
     # - depguard
     - dogsled
     - errcheck
-    - exportloopref
+    - copyloopvar
     - goconst
     - gocritic
     - gofmt
@@ -49,6 +45,10 @@ linters:
     - usestdlibvars
 
 issues:
+  exclude-dirs:
+    - tests/e2e
+    - tests/simulation
+
   exclude-rules:
     - path: _test\.go
       linters:
