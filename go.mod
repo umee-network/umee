@@ -38,7 +38,7 @@ require (
 	google.golang.org/grpc v1.67.3
 	google.golang.org/protobuf v1.36.1
 	gopkg.in/yaml.v3 v3.0.1
-	gotest.tools/v3 v3.5.1
+	gotest.tools/v3 v3.5.2
 	mvdan.cc/gofumpt v0.7.0
 )
 
