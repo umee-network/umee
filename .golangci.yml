@@ -1,11 +1,5 @@
 run:
   tests: false
-  govet:
-    # Enable analyzers by name (in addition to default).
-    # Run `go tool vet help` to see all analyzers.
-    # Default: []
-    enable:
-      - fieldalignment
 
 linters:
   enable:
@@ -66,15 +60,9 @@ linters-settings:
     max-blank-identifiers: 3
   misspell:
     locale: US
-  nolintlint:
-    allow-unused: false
-    allow-leading-space: true
-    require-explanation: false
   revive:
     confidence: 0
     severity: error
-    error-code: 1
-    warning-code: 0
     # List of rules to enable explicitly should be a subset of .revive.toml
     # so only critical rules cause CI to fail instead of just generating annotations.
     rules:
