@@ -7,7 +7,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// PaseMemo will parse the incoming gmp memo
+// ParseMemo will parse the incoming gmp memo
 func ParseMemo(ctx sdk.Context, coinReceived sdk.Coin, memo string, receiver sdk.AccAddress) (Memo, error) {
 	if len(memo) == 0 {
 		return Memo{}, nil
