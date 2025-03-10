@@ -595,7 +595,6 @@ func New(
 		keys[packetforwardtypes.StoreKey],
 		app.IBCTransferKeeper,
 		app.IBCKeeper.ChannelKeeper,
-		app.DistrKeeper,
 		app.BankKeeper,
 		quotaICS4, // ISC4 Wrapper: fee IBC middleware
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
@@ -1151,7 +1150,6 @@ func initParamsKeeper(
 	paramsKeeper.Subspace(ibctransfertypes.ModuleName)
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
-	paramsKeeper.Subspace(packetforwardtypes.ModuleName).WithKeyTable(packetforwardtypes.ParamKeyTable())
 	paramsKeeper.Subspace(oracletypes.ModuleName)
 	paramsKeeper.Subspace(wasmtypes.ModuleName)
 
