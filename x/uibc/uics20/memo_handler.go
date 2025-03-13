@@ -39,7 +39,7 @@ type MemoHandler struct {
 	fallbackReceiver sdk.AccAddress
 }
 
-// onRecvPacketPre parses transfer Memo field and prepares the MemoHandler.
+// onRecvPacketPrepare parses transfer Memo field and prepares the MemoHandler.
 // See ICS20Module.OnRecvPacket for the flow
 func (mh *MemoHandler) onRecvPacketPrepare(
 	ctx *sdk.Context, packet ibcexported.PacketI, ftData ics20types.FungibleTokenPacketData,
