@@ -19,7 +19,7 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.7.0 // NOTE: v1.4.11+ is not compatible with sdk v0.47
 	github.com/cosmos/ibc-apps/middleware/packet-forward-middleware/v7 v7.3.0
-	github.com/cosmos/ibc-go/v7 v7.9.2
+	github.com/cosmos/ibc-go/v7 v7.10.0
 	github.com/golang/mock v1.6.0
 	github.com/golang/protobuf v1.5.4
 	github.com/gorilla/mux v1.8.1
