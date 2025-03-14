@@ -60,6 +60,9 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade("v6.7.2", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade6_7_3RC1(upgradeInfo)
 	app.registerUpgrade6_7_3(upgradeInfo)
+
+	// v6.7.4-rc1
+	app.registerUpgrade("v6.7.4-rc1", upgradeInfo, nil, nil, nil)
 }
 
 func (app *UmeeApp) registerUpgrade6_7_3(_ upgradetypes.Plan) {

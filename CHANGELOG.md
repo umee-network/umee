@@ -44,6 +44,16 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v6.7.4-rc1
+
+### Improvements
+
+- deps upgrade
+- cosmos-sdk v0.47.17
+- wasmvm v1.5.9
+- packet-forward-middleware v7.3.0
+- ibc-go v7.10.0
+  
 ## v6.7.3
 
 ### Improvements
