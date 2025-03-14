@@ -6,13 +6,15 @@
 
 The Release Procedure is defined in the [CONTRIBUTING](CONTRIBUTING.md#release-procedure) document.
 
-## v6.7.3
+## v6.7.4-rc1
 
 Highlights:
 
 - deps upgrade
-- mint the sfrxeth to user - <https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx>
-- fix the ibc-transfer -  checking acknowledgement only acknowledgement is when not asynchronous
+- cosmos-sdk to v0.47.17
+- wasmvm v1.5.9
+- packet-forward-middleware v7.3.0
+- ibc-go v7.10.0
 
 [CHANGELOG](CHANGELOG.md)
 
@@ -24,7 +26,7 @@ NOTE: after the upgrade, you should restart your Price Feeder. We observed that 
 
 #### libwasmvm update
 
-Our dependencies have been updated. The binary requires `libwasmvm v1.5.5`. When you build the binary from source on the server machine you probably don't need any change. However, when you download a binary from GitHub, or from another source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
+Our dependencies have been updated. The binary requires `libwasmvm v1.5.9`. When you build the binary from source on the server machine you probably don't need any change. However, when you download a binary from GitHub, or from another source, make sure you update the `/usr/lib/libwasmvm.<cpu_arch>.so`. For example:
 
 - copy from `$GOPATH/pkg/mod/github.com/!cosm!wasm/wasmvm@v1.5.5/internal/api/libwasmvm.$(uname -m).so`
 - or download from github `wget https://raw.githubusercontent.com/CosmWasm/wasmvm/v1.5.5/internal/api/libwasmvm.$(uname -m).so -O /lib/libwasmvm.$(uname -m).so`
