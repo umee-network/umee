@@ -149,7 +149,7 @@ func TestUnitGetExchangePrice(t *testing.T) {
 	assert.NilError(t, err)
 	assert.DeepEqual(t, sdk.NewDec(24), p)
 
-	// ATOM is leverage registered token but price is not avaiable
+	// ATOM is leverage registered token but price is not available
 	p, err = k.getExchangePrice(atom, sdk.NewInt(3))
 	assert.NilError(t, err)
 	assert.DeepEqual(t, sdk.ZeroDec(), p)
