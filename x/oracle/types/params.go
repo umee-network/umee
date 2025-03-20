@@ -15,7 +15,7 @@ var (
 	minVoteThreshold = sdk.NewDecWithPrec(33, 2) // 0.33
 )
 
-// maxium number of decimals allowed for VoteThreshold
+// maximum number of decimals allowed for VoteThreshold
 const (
 	MaxVoteThresholdPrecision  = 2
 	MaxVoteThresholdMultiplier = 100 // must be 10^MaxVoteThresholdPrecision

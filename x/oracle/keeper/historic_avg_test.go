@@ -92,7 +92,7 @@ func (s AvgKeeperSuite) testSetAvgCounters(t *testing.T) {
 	ret = k.getAllAvgCounters(s.denom2)
 	assert.DeepEqual(t, acs[1:], ret)
 
-	// check that s.denom1 was not ovewritten:
+	// check that s.denom1 was not overwritten:
 	ret = k.getAllAvgCounters(s.denom1)
 	assert.DeepEqual(t, acs, ret)
 }
