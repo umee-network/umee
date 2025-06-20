@@ -1,7 +1,7 @@
 # GMP Handler
 
 Cross chain transfers using Axelar General Message Passing (GMP)
-More info about cosmos GMP find [here](https://docs.axelar.dev/dev/cosmos-gmp)
+More info about cosmos GMP find [here](https://docs.axelar.dev/dev/general-message-passing/cosmos-gmp/overview/)
 
 ## Axelar IBC Memo
 
