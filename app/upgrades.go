@@ -57,13 +57,62 @@ func (app UmeeApp) RegisterUpgradeHandlers() {
 	app.registerUpgrade("v6.3", upgradeInfo, nil, nil, nil)
 	app.registerUpgrade6_4(upgradeInfo)
 	app.registerUpgrade("v6.5", upgradeInfo, nil, nil, nil)
-
-	// this upgrade is only for testnet (canon-4) network
 	app.registerUpgrade6_6RC1(upgradeInfo)
+	app.registerUpgrade("v6.7.0-rc1", upgradeInfo, nil, nil, nil)
+	app.registerUpgrade("v6.7.0", upgradeInfo, nil, nil, nil)
+	app.registerUpgrade("v6.7.2-rc1", upgradeInfo, nil, nil, nil)
+	app.registerUpgrade("v6.7.2", upgradeInfo, nil, nil, nil)
+	app.registerUpgrade6_7_3RC1(upgradeInfo)
+	app.registerUpgrade6_7_3(upgradeInfo)
+
+	// v6.7.4-rc1
+	app.registerUpgrade("v6.7.4-rc1", upgradeInfo, nil, nil, nil)
+}
+
+func (app *UmeeApp) registerUpgrade6_7_3(_ upgradetypes.Plan) {
+	planName := "v6.7.3"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			printPlanName(planName, ctx.Logger())
+			// Hackmd: https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx
+			denom := "ibc/3F972A6BFE64248AF19C9328FA59A1270CBC57D4545A099860E035C2BA4C79FD"
+			amount := sdk.NewInt(139771000000000000)
+			sfrxEthAmount := sdk.NewCoins(sdk.NewCoin(denom, amount))
+			toAddr := sdk.MustAccAddressFromBech32("umee1grppjc06d5p5enypk2vnl6v7n5sdpsp8adfytd")
+			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, leveragetypes.ModuleName,
+				toAddr, sfrxEthAmount); err != nil {
+				return nil, err
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
+}
+
+func (app *UmeeApp) registerUpgrade6_7_3RC1(_ upgradetypes.Plan) {
+	planName := "v6.7.3-rc1"
+
+	app.UpgradeKeeper.SetUpgradeHandler(planName,
+		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			printPlanName(planName, ctx.Logger())
+			// Hackmd: https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx
+			denom := "test37" // sfrxeth on canon-4
+			// leverage module account balances 10100000003 test37 and after the transfer it has to be 10099999003
+			amount := sdk.NewInt(1000)
+			sfrxEthAmount := sdk.NewCoins(sdk.NewCoin(denom, amount))
+			// new account for testing the leverage module transfer
+			toAddr := sdk.MustAccAddressFromBech32("umee1h5jqhu8n4nr9cnletkklxyajtzpv83r6emsgz9")
+			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, leveragetypes.ModuleName,
+				toAddr, sfrxEthAmount); err != nil {
+				return nil, err
+			}
+			return app.mm.RunMigrations(ctx, app.configurator, fromVM)
+		},
+	)
 }
 
 func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {
-	planName := "v6.6-rc1"
+	planName := "v6.6"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
 		func(ctx context.Context, _ upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
@@ -72,16 +121,14 @@ func (app *UmeeApp) registerUpgrade6_6RC1(upgradeInfo upgradetypes.Plan) {
 
 			// update leverage and metoken params to include burn auction fee share.
 			lparams := app.LeverageKeeper.GetParams(sdkCtx)
-			// TODO: need to check the reward auction fee params value for v6.6
-			lparams.RewardsAuctionFee = sdkmath.LegacyMustNewDecFromStr("0.01")
+			lparams.RewardsAuctionFee = sdkmath.LegacyMustNewDecFromStr("0.02")
 			if err := app.LeverageKeeper.SetParams(sdkCtx, lparams); err != nil {
 				return nil, err
 			}
 
 			mekeeper := app.MetokenKeeperB.Keeper(&sdkCtx)
 			meparams := mekeeper.GetParams()
-			// TODO: need to check the Rewards Auction Fee Factor params value for v6.6
-			meparams.RewardsAuctionFeeFactor = 10000 // 100% of fees goes to rewards auction
+			meparams.RewardsAuctionFeeFactor = 1000 // 10% of fees goes to rewards auction
 			if err := mekeeper.SetParams(meparams); err != nil {
 				return nil, err
 			}
@@ -222,6 +269,8 @@ func (app *UmeeApp) storeUpgrade(planName string, ui upgradetypes.Plan, stores s
 
 // registerUpgrade sets an upgrade handler which only runs module migrations
 // and adds new storages storages
+//
+//nolint:unparam
 func (app *UmeeApp) registerUpgrade(planName string, upgradeInfo upgradetypes.Plan, newStores []string,
 	deletedStores []string, renamedStores []storetypes.StoreRename) {
 	app.UpgradeKeeper.SetUpgradeHandler(planName, onlyModuleMigrations(app, planName))

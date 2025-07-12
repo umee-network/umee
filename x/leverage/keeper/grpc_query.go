@@ -309,9 +309,7 @@ func (q Querier) MaxWithdraw(
 	} else {
 		// Denom not specified
 		for _, t := range q.GetAllRegisteredTokens(ctx) {
-			if !t.Blacklist {
-				denoms = append(denoms, t.BaseDenom)
-			}
+			denoms = append(denoms, t.BaseDenom)
 		}
 	}
 

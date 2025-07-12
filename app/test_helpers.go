@@ -296,6 +296,7 @@ func IntegrationTestNetworkConfig() network.Config {
 	cfg.GenesisState = appGenState
 	cfg.BondDenom = params.BondDenom
 	cfg.MinGasPrices = params.ProtocolMinGasPrice.String()
+	cfg.TimeoutCommit = time.Second * 1
 
 	return cfg
 }

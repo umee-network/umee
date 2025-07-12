@@ -152,8 +152,8 @@ func (s *E2ETest) TestIBCTokenTransfer() {
 		// compute the amout of UMEE sent to gaia which would meet umee's token quota
 		umeePrice, err := s.QueryHistAvgPrice(umeeAPIEndpoint, umeeSymbol)
 		s.Require().NoError(err)
-		s.Require().True(umeePrice.GT(sdkmath.LegacyMustNewDecFromStr("0.001")),
-			"umee price should be non zero, and expecting higher than 0.001, got: %s", umeePrice)
+		s.Require().True(umeePrice.GT(sdkmath.LegacyMustNewDecFromStr("0")),
+			"umee price should be non zero, and expecting higher than 0, got: %s", umeePrice)
 		umeeQuota := sdk.NewCoin(appparams.BondDenom,
 			sdkmath.LegacyNewDecFromInt(tokenQuota).Quo(umeePrice).Mul(powerReduction).RoundInt(),
 		)

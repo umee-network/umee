@@ -59,7 +59,7 @@ func TestUnitCheckAndUpdateQuota(t *testing.T) {
 	assert.ErrorContains(t, err, "quota")
 	k.checkOutflows(umee, 8, 52)
 
-	// transferring 1 umee => 2USD, will will be still OK (8+2 <= 10)
+	// transferring 1 umee => 2USD, will be still OK (8+2 <= 10)
 	err = k.CheckAndUpdateQuota(umee, sdkmath.NewInt(1))
 	assert.NilError(t, err)
 	k.checkOutflows(umee, 10, 54)

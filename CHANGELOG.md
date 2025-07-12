@@ -44,6 +44,63 @@ Ref: https://keepachangelog.com/en/1.0.0/
 
 # Changelog
 
+## v6.7.4-rc1
+
+### Improvements
+
+- deps upgrade
+- cosmos-sdk v0.47.17
+- wasmvm v1.5.9
+- packet-forward-middleware v7.3.0
+- ibc-go v7.10.0
+  
+## v6.7.3
+
+### Improvements
+
+- deps upgrade
+- mint the sfrxeth to one user
+
+### Bug Fixes
+
+- [2662](https://github.com/umee-network/umee/pull/2662) check ack success if only ack is not async
+  
+## v6.7.2
+
+### Improvements
+
+- deps upgrade
+
+### Bug Fixes
+
+- [2647](https://github.com/umee-network/umee/pull/2647) Quick fix for the Leveraged Liquidate Tx
+- [2643](https://github.com/umee-network/umee/pull/2643) Update cosmos-sdk from v0.47.14 to v0.47.15
+- [2638](https://github.com/umee-network/umee/pull/2638) Fix the max_withdraw query
+
+## v6.7.1
+
+### Improvements
+
+- deps upgrade
+
+### Bug Fixes
+
+- [2638](https://github.com/umee-network/umee/pull/2638) Fix the max_withdraw query
+
+## v6.7.0
+
+### Improvements
+
+- [2572](https://github.com/umee-network/umee/pull/2572) Bump cosmos-sdk from 0.47.12 to 0.47.13.
+- [2599](https://github.com/umee-network/umee/pull/2599) Bump ibc-go from 7.7.0 to 7.8.0.
+- [2607](https://github.com/umee-network/umee/pull/2607) Bump wasmvm from 1.5.4 to 1.5.5
+- [2614](https://github.com/umee-network/umee/pull/2614) Bump cometbft from 0.37.10 to 0.37.12.
+
+### Bug Fixes
+
+- [2615](https://github.com/umee-network/umee/pull/2615) Fix the token price is asset is blacklisted.
+- [2618](https://github.com/umee-network/umee/pull/2618) Downgrade the cometbft-db to v0.12.0 and upgrade the cometbft to 0.37.13
+
 ## v6.6.0-rc1
 
 ### Features

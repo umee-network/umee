@@ -19,7 +19,6 @@ const minBidDuration = 3600 // 1h in seconds
 
 // MinRewardsBid is the minimum increase of the previous bid or the minimum bid if it's the
 // first one. 50 UX = 50e6uumee
-// TODO: need to check the value for v6.6 upgrade
 var MinRewardsBid = sdkmath.NewInt(50_000_000)
 
 //

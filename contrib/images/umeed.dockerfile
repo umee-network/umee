@@ -1,7 +1,7 @@
 # Stage-1: build
 # We use Debian Bullseye rather then Alpine because Alpine has problem building libwasmvm
 # - requires to download libwasmvm_muslc from external source. Build with glibc is straightforward.
-FROM golang:1.22-bookworm AS builder
+FROM golang:1.23-bookworm AS builder
 
 WORKDIR /src/
 # optimization: if go.sum didn't change, docker will use cached image
@@ -14,7 +14,7 @@ RUN LEDGER_ENABLED=false BUILD_TAGS=badgerdb make install
 
 # Stage-2: copy binary and required artifacts to a fresh image
 # we need to use debian compatible system.
-FROM ubuntu:23.04
+FROM ubuntu:24.04
 EXPOSE 26656 26657 1317 9090
 # Run umeed by default, omit entrypoint to ease using container with CLI
 CMD ["umeed"]

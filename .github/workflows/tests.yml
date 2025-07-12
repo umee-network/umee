@@ -7,7 +7,7 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   install-tparse:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.23"
       - uses: actions/cache@v4
         id: cache-go-tparse
         with:
@@ -52,7 +52,7 @@ jobs:
         if: steps.cache-binaries.outputs.cache-hit != 'true' && env.GIT_DIFF
         uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
         env:
           GOOS: ${{ matrix.targetos }}
@@ -78,13 +78,13 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
       - name: Test and Create Coverage Report
         if: env.GIT_DIFF
         run: |
           EXPERIMENTAL=true make test-unit-cover
-      - uses: codecov/codecov-action@v4.5.0
+      - uses: codecov/codecov-action@v5.4.3
         if: env.GIT_DIFF
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -110,7 +110,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
 
       - name: Test E2E

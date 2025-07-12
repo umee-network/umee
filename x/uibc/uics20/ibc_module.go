@@ -98,8 +98,9 @@ func (im ICS20Module) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, 
 	execCtx, execCtxFlush := transferCtx.CacheContext()
 
 	// call transfer module app
+	// ack is nil if acknowledgement is asynchronous
 	ack := im.IBCModule.OnRecvPacket(transferCtx, packet, relayer)
-	if !ack.Success() {
+	if ack != nil && !ack.Success() {
 		goto end
 	}
 

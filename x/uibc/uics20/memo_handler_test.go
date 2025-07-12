@@ -144,6 +144,10 @@ func TestMsgMarshalling(t *testing.T) {
 	bz = []byte(`{"messages": ["any message"]}`)
 	memo2, err = deserializeMemo(cdc, bz)
 	assert.Error(err)
+
+	bz = []byte(`"{\"forward\":{\"channel\":\"channel-123\",\"port\":\"transfer\",\"receiver\":\"secret1xs0xv4h9d2y2fpagyt99vpm3d3f8jxh9kywh6x\",\"retries\":2,\"timeout\":1733978966221063114}}"`)
+	memo2, err = deserializeMemo(cdc, bz)
+	assert.Error(err)
 }
 
 func TestAdjustOperatedCoin(t *testing.T) {

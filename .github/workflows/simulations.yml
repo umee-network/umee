@@ -7,7 +7,7 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   install-dependencies:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.22"
+          go-version: "1.23"
 
       - name: Install runsim
         run: export GO111MODULE="on" && go install github.com/cosmos/tools/cmd/runsim@v1.0.0
@@ -40,7 +40,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
       - name: Test application non-determinism
         if: env.GIT_DIFF
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
       - uses: actions/cache@v4
         if: env.GIT_DIFF
@@ -95,7 +95,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
       - uses: actions/cache@v4
         if: env.GIT_DIFF
@@ -124,7 +124,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
-          go-version: "1.22"
+          go-version: "1.23"
           cache: true
       - uses: actions/cache@v4
         if: env.GIT_DIFF

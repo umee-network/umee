@@ -1,15 +1,5 @@
 run:
   tests: false
-  skip-dirs:
-    - tests/e2e
-    - tests/simulation
-
-  govet:
-    # Enable analyzers by name (in addition to default).
-    # Run `go tool vet help` to see all analyzers.
-    # Default: []
-    enable:
-      - fieldalignment
 
 linters:
   enable:
@@ -24,7 +14,7 @@ linters:
     # - depguard
     - dogsled
     - errcheck
-    - exportloopref
+    - copyloopvar
     - goconst
     - gocritic
     - gofmt
@@ -49,6 +39,10 @@ linters:
     - usestdlibvars
 
 issues:
+  exclude-dirs:
+    - tests/e2e
+    - tests/simulation
+
   exclude-rules:
     - path: _test\.go
       linters:
@@ -59,19 +53,16 @@ issues:
   max-same-issues: 50
 
 linters-settings:
+  gosec:
+    excludes:
+      - G115 # FIXME temporarily suppress 'G115: integer overflow conversion': it produces many hits, some of which may be false positives, and need to be looked at;
   dogsled:
     max-blank-identifiers: 3
   misspell:
     locale: US
-  nolintlint:
-    allow-unused: false
-    allow-leading-space: true
-    require-explanation: false
   revive:
     confidence: 0
     severity: error
-    error-code: 1
-    warning-code: 0
     # List of rules to enable explicitly should be a subset of .revive.toml
     # so only critical rules cause CI to fail instead of just generating annotations.
     rules:

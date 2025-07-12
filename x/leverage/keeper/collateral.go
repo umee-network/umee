@@ -30,22 +30,32 @@ func (k Keeper) liquidateCollateral(ctx sdk.Context, borrower, liquidator sdk.Ac
 // burnCollateral removes some uTokens from an account's collateral and burns them. This occurs
 // during direct liquidations and during donateCollateral.
 func (k Keeper) burnCollateral(ctx sdk.Context, addr sdk.AccAddress, uToken sdk.Coin) error {
-	err := k.setCollateral(ctx, addr, k.GetCollateral(ctx, addr, uToken.Denom).Sub(uToken))
+	val, err := k.GetCollateral(ctx, addr, uToken.Denom).SafeSub(uToken)
 	if err != nil {
+		return err
+	}
+	if err = k.setCollateral(ctx, addr, val); err != nil {
 		return err
 	}
 	if err = k.bankKeeper.BurnCoins(ctx, types.ModuleName, sdk.NewCoins(uToken)); err != nil {
 		return err
 	}
-	return k.setUTokenSupply(ctx, k.GetUTokenSupply(ctx, uToken.Denom).Sub(uToken))
+	uTokenSupply, err := k.GetUTokenSupply(ctx, uToken.Denom).SafeSub(uToken)
+	if err != nil {
+		return err
+	}
+	return k.setUTokenSupply(ctx, uTokenSupply)
 }
 
 // decollateralize removes fromAddr's uTokens from the module and sends them to toAddr.
 // It occurs when decollateralizing uTokens (in which case fromAddr and toAddr are the
 // same) as well as during non-direct liquidations, where toAddr is the liquidator.
 func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, uToken sdk.Coin) error {
-	err := k.setCollateral(ctx, fromAddr, k.GetCollateral(ctx, fromAddr, uToken.Denom).Sub(uToken))
+	val, err := k.GetCollateral(ctx, fromAddr, uToken.Denom).SafeSub(uToken)
 	if err != nil {
+		return err
+	}
+	if err = k.setCollateral(ctx, fromAddr, val); err != nil {
 		return err
 	}
 	return k.bankKeeper.SendCoinsFromModuleToAccount(ctx, types.ModuleName, toAddr, sdk.NewCoins(uToken))
@@ -54,8 +64,11 @@ func (k Keeper) decollateralize(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress
 // moveCollateral moves collateral from one address to another while keeping the uTokens in the module.
 // It occurs during fast liquidations.
 func (k Keeper) moveCollateral(ctx sdk.Context, fromAddr, toAddr sdk.AccAddress, uToken sdk.Coin) error {
-	err := k.setCollateral(ctx, fromAddr, k.GetCollateral(ctx, fromAddr, uToken.Denom).Sub(uToken))
+	val, err := k.GetCollateral(ctx, fromAddr, uToken.Denom).SafeSub(uToken)
 	if err != nil {
+		return err
+	}
+	if err = k.setCollateral(ctx, fromAddr, val); err != nil {
 		return err
 	}
 	return k.setCollateral(ctx, toAddr, k.GetCollateral(ctx, toAddr, uToken.Denom).Add(uToken))
