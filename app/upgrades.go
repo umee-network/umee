@@ -73,11 +73,12 @@ func (app *UmeeApp) registerUpgrade6_7_3(_ upgradetypes.Plan) {
 	planName := "v6.7.3"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			printPlanName(planName, sdkCtx.Logger())
 			// Hackmd: https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx
 			denom := "ibc/3F972A6BFE64248AF19C9328FA59A1270CBC57D4545A099860E035C2BA4C79FD"
-			amount := sdk.NewInt(139771000000000000)
+			amount := sdkmath.NewInt(139771000000000000)
 			sfrxEthAmount := sdk.NewCoins(sdk.NewCoin(denom, amount))
 			toAddr := sdk.MustAccAddressFromBech32("umee1grppjc06d5p5enypk2vnl6v7n5sdpsp8adfytd")
 			if err := app.BankKeeper.SendCoinsFromModuleToAccount(ctx, leveragetypes.ModuleName,
@@ -93,12 +94,13 @@ func (app *UmeeApp) registerUpgrade6_7_3RC1(_ upgradetypes.Plan) {
 	planName := "v6.7.3-rc1"
 
 	app.UpgradeKeeper.SetUpgradeHandler(planName,
-		func(ctx sdk.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-			printPlanName(planName, ctx.Logger())
+		func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
+			sdkCtx := sdk.UnwrapSDKContext(ctx)
+			printPlanName(planName, sdkCtx.Logger())
 			// Hackmd: https://hackmd.io/@DCFJtA8FRayD6p1Q0XgZHQ/HkfelYUuJx
 			denom := "test37" // sfrxeth on canon-4
 			// leverage module account balances 10100000003 test37 and after the transfer it has to be 10099999003
-			amount := sdk.NewInt(1000)
+			amount := sdkmath.NewInt(1000)
 			sfrxEthAmount := sdk.NewCoins(sdk.NewCoin(denom, amount))
 			// new account for testing the leverage module transfer
 			toAddr := sdk.MustAccAddressFromBech32("umee1h5jqhu8n4nr9cnletkklxyajtzpv83r6emsgz9")
