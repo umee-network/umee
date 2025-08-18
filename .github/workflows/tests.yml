@@ -34,7 +34,7 @@ jobs:
         targetos: [darwin, linux]
     name: umeed ${{ matrix.targetos }}-${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Cache binaries
         id: cache-binaries
         uses: actions/cache@v4
@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: install-tparse
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
@@ -99,7 +99,7 @@ jobs:
     needs: install-tparse
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: technote-space/get-diff-action@v6.1.2
         id: git_diff
         with:
